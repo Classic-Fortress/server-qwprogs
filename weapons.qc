@@ -2420,11 +2420,6 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if ((self.impulse == 8) && (self.current_menu != MENU_CLASSHELP)) {
-        self.current_menu = MENU_CLASSHELP;
-        self.menu_count = 25;
-        self.menu_displaytime = 0;
-    }
     if ((self.impulse == 242) && (birthday == 0)) {
         st = infokey(world, "birthday");
         if (st != "off") {
@@ -2723,11 +2718,7 @@ void () W_WeaponFrame = {
         player_run();
     }
     if (self.button0 && !self.fire_held_down) {
-        if ((self.current_menu == 6) || (self.current_menu == 7)) {
-            self.current_menu = 8;
-            self.menu_count = 25;
-            Attack_Finished(0.2);
-        } else if (self.current_weapon == 32) {
+        if (self.current_weapon == 32) {
             if (self.tfstate & 2048) {
                 if (self.heat < 400) {
                     self.heat = self.heat + 3;
