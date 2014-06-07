@@ -2568,7 +2568,11 @@ void () DeadImpulses = {
         TeamFortress_DisplayLegalClasses();
     else if ((self.impulse > 100) && (self.impulse <= (100 + 10))) {
         TeamFortress_ChangeClass();
-    } else if ((self.playerclass != 0) && (self.impulse == 99)
+    } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
+               && (deathmatch == 3) && (cb_prematch_time < time)) {
+        self.current_menu = MENU_TEAM;
+        self.menu_count = 25;
+    } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
         self.current_menu = 20;
         self.menu_count = 25;

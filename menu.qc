@@ -145,7 +145,7 @@ void () Player_Menu = {
 
         Menu_Class();
 
-    } else if (((self.team_no == 0) && teamplay) && (self.lives != 0)) {
+    } else if (teamplay && (((self.team_no == 0) && (self.lives != 0)) || self.current_menu == MENU_TEAM)) {
 
         self.current_menu = MENU_TEAM;
         Menu_Team();

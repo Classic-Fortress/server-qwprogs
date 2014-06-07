@@ -339,6 +339,7 @@
 #define TF_STATUSBAR_RES_START	71
 #define TF_STATUSBAR_RES_END	81
 
+#define TF_CHANGETEAM           98
 #define TF_CHANGECLASS		99
 // Added to PC_??? to get impulse to use if this clashes with your
 // own impulses, just change this value, not the PC_??

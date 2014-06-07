@@ -128,7 +128,7 @@ float (float tno) TeamFortress_TeamSet = {
         sprint(self, PRINT_HIGH, st, " teams on this map.\nTry again\n");
         return (0);
     }
-    if (self.team_no > 0) {
+    if (self.team_no == tno) {
         sprint(self, PRINT_HIGH, "You're already in Team No ");
         st = ftos(self.team_no);
         sprint(self, PRINT_HIGH, st, ".\n");
@@ -171,6 +171,9 @@ float (float tno) TeamFortress_TeamSet = {
             }
         }
         return (1);
+    }
+    if (!self.deadflag) {
+        ClientKill();
     }
     bprint(PRINT_HIGH, self.netname, " has joined Team No ");
     st = ftos(tno);

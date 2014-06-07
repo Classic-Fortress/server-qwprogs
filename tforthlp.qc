@@ -41,6 +41,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("inv", TF_INVENTORY, 0);
         TeamFortress_Alias("showtf", TF_SHOWTF, 0);
         TeamFortress_Alias("autozoom", TF_AUTOZOOM, 0);
+        TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
         TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
         TeamFortress_Alias("scout", TF_CHANGEPC + PC_SCOUT, 0);
         TeamFortress_Alias("sniper", TF_CHANGEPC + PC_SNIPER, 0);
