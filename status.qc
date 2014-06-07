@@ -45,6 +45,9 @@ void (entity pl) RefreshStatusBar = {
     local string s1, s2, s3, s4, s5, s6, s7;
     local float win, sec;
 
+    s6 = "";
+    s7 = "";
+
     if (pl.StatusBarSize == 0) {
         pl.StatusRefreshTime = time + 60;
         return;

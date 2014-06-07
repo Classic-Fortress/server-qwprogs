@@ -560,6 +560,7 @@ void () weapon_touch = {
     local float old;
     local entity stemp;
     local float leave;
+    new = 0;
 
     if (!(other.flags & 8))
         return;
@@ -754,6 +755,7 @@ void () weapon_lightning = {
 
 void (entity pl, float typ) PrintGrenadeType = {
     local string st;
+    st = "";
 
     if (typ == 1) {
         st = "Normal";

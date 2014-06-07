@@ -4,6 +4,9 @@ void (entity Goal, entity AP) DoGroupWork;
 void () SUB_Null = {
 };
 
+void (entity et, float f) SUB_Null_pain = {
+};
+
 void () SUB_Remove = {
     dremove(self);
 };

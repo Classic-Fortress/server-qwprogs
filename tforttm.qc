@@ -365,6 +365,7 @@ float (float tno) TeamFortress_TeamGetLives = {
 float (float tno) TeamFortress_TeamGetNoPlayers = {
     local float size_team;
     local entity search;
+    size_team = 0;
 
     search = find(world, classname, "player");
     while (search != world) {
@@ -386,6 +387,7 @@ float (float tno) TeamFortress_TeamGetNoPlayers = {
 float () TeamFortress_GetNoPlayers = {
     local float nump;
     local entity search;
+    nump = 0;
 
     search = find(world, classname, "player");
     while (search != world) {
@@ -722,6 +724,7 @@ void () SetupTeamEqualiser = {
 float (entity targ, entity attacker, float damage) TeamEqualiseDamage = {
     local float adv;
     local float newdam;
+    adv = 0;
 
     if ((targ.classname != "player") || (attacker.classname != "player")) {
         return (damage);
@@ -835,6 +838,7 @@ float (float tno, float pc) ClassIsRestricted = {
     local float max;
     local entity te;
     local string st;
+    max = 0;
 
     if (tno == 0) {
         return (0);

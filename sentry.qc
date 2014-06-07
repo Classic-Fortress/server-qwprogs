@@ -9,7 +9,7 @@ void () Sentry_Rotate;
 float () Sentry_FindTarget;
 void () Sentry_FoundTarget;
 void () Sentry_HuntTarget;
-void () Sentry_Pain;
+void (entity, float) Sentry_Pain;
 void () Sentry_Die;
 float () Sentry_Fire;
 void () Sentry_MuzzleFlash;
@@ -149,6 +149,7 @@ float () Sentry_FindTarget = {
     local float r;
     local float gotone;
     local float loopc;
+    client = world;
 
     r = 0;
     loopc = 0;
@@ -227,7 +228,7 @@ void () Sentry_HuntTarget = {
     SUB_AttackFinished(1);
 };
 
-void () Sentry_Pain = {
+void (entity e, float f) Sentry_Pain = {
     self.real_owner.StatusRefreshTime = time + 0.2;
 };
 

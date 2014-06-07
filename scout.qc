@@ -370,6 +370,7 @@ void () TeamFortress_Scan = {
     local vector lightningvec;
     local float enemy_detected;
     local float any_detected;
+    list = world;
 
     scanrange = 100;
     self.owner.impulse = 0;

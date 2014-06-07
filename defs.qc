@@ -10,7 +10,7 @@ entity other;
 entity world;
 
 float time;
-float frametime;
+noref float frametime;
 entity newmis;                  // if this is set, the entity that just
                         // run created a new missile that should
                         // be simulated immediately
@@ -32,7 +32,7 @@ float found_secrets;
 float killed_monsters;
 
 // spawnparms are used to encode information about clients across server level changes
-float parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8, parm9,
+noref float parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8, parm9,
     parm10, parm11, parm12, parm13, parm14, parm15, parm16;
 
 //
@@ -41,12 +41,12 @@ float parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8, parm9,
 vector v_forward, v_up, v_right;        // set by makevectors()
 
 // set by traceline / tracebox
-float trace_allsolid;
-float trace_startsolid;
+noref float trace_allsolid;
+noref float trace_startsolid;
 float trace_fraction;
 vector trace_endpos;
 vector trace_plane_normal;
-float trace_plane_dist;
+noref float trace_plane_dist;
 entity trace_ent;
 float trace_inopen;
 float trace_inwater;
@@ -313,7 +313,7 @@ void (entity e, vector o) setorigin = #2;
 void (entity e, string m) setmodel = #3;     // set movetype and solid first
 void (entity e, vector min, vector max) setsize = #4;
 // #5 was removed
-void () break = #6;
+// #6 was removed (was: break)
 float () random = #7;        // returns 0 - 1
 void (entity e, float chan, string samp, float vol, float atten) sound = #8;
 vector(vector v) normalize = #9;
@@ -426,6 +426,7 @@ void (vector destangle, float tspeed, void ()func) SUB_CalcAngleMove;
 void () SUB_CalcMoveDone;
 void () SUB_CalcAngleMoveDone;
 void () SUB_Null;
+void (entity et, float f) SUB_Null_pain;
 void () SUB_UseTargets;
 void () SUB_Remove;
 

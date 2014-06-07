@@ -325,6 +325,9 @@ void (float objtobuild) TeamFortress_Build = {
     local float btime;
     local vector tmp1;
     local vector tmp2;
+    btime = 0;
+    tmp1 = '0 0 0';
+    tmp2 = '0 0 0';
 
     newmis = spawn();
     makevectors(self.v_angle);

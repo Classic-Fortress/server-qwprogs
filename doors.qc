@@ -445,7 +445,7 @@ void () fd_secret_use = {
     self.message = string_null;
     SUB_UseTargets();
     if (!(self.spawnflags & 8)) {
-        self.th_pain = SUB_Null;
+        self.th_pain = SUB_Null_pain;
         self.takedamage = 0;
     }
     self.velocity = '0 0 0';
@@ -471,6 +471,10 @@ void () fd_secret_use = {
     self.dest2 = self.dest1 + (v_forward * self.t_length);
     SUB_CalcMove(self.dest1, self.speed, fd_secret_move1);
     sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+};
+
+void (entity e, float f) fd_secret_pain = {
+    fd_secret_use();
 };
 
 void () fd_secret_move1 = {
@@ -512,7 +516,7 @@ void () fd_secret_done = {
     if (!self.targetname || (self.spawnflags & 16)) {
         self.health = 10000;
         self.takedamage = 1;
-        self.th_pain = fd_secret_use;
+        self.th_pain = fd_secret_pain;
         self.th_die = fd_secret_use;
     }
     sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
@@ -591,7 +595,7 @@ void () func_door_secret = {
     if (!self.targetname || (self.spawnflags & 16)) {
         self.health = 10000;
         self.takedamage = 1;
-        self.th_pain = fd_secret_use;
+        self.th_pain = fd_secret_pain;
     }
     self.oldorigin = self.origin;
     if (!self.wait)

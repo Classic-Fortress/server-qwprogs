@@ -467,6 +467,7 @@ void () TeamFortress_PrimeGrenade = {
     local string gs;
     local string ptime;
     local entity tGrenade;
+    gtype = 0;
 
     if ((self.tfstate & TFSTATE_GRENPRIMED) ||
         (self.tfstate & TFSTATE_GRENTHROWING))
@@ -768,6 +769,7 @@ void () TeamFortress_ThrowGrenade = {
 
 float (float pc) IsLegalClass = {
     local float bit;
+    bit = 0;
 
     if ((spy_off == TRUE) && (pc == PC_SPY))
         return (FALSE);
@@ -1976,6 +1978,7 @@ void () TeamFortress_CheckClassStats = {
 
 void (float type) TeamFortress_DropAmmo = {
     local float ammo;
+    ammo = 0;
 
     if (type == 1) {
         ammo = DROP_SHELLS;

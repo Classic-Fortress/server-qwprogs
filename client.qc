@@ -1,4 +1,4 @@
-void () player_pain;
+void (entity et, float f) player_pain;
 void () player_stand1;
 
 void (vector org) spawn_tfog;
@@ -1961,6 +1961,8 @@ void (entity targ, entity attacker) ClientObituary = {
     local float rnum;
     local string deathstring;
     local string deathstring2;
+    deathstring = "";
+    deathstring2 = "";
 
     rnum = random();
     if ((cb_prematch_time + 3) > time)

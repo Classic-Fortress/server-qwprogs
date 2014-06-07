@@ -299,6 +299,7 @@ void () Menu_Class = {
 void (float inp) Menu_Class_Input = {
     local float new_class;
     local string st;
+    new_class = 0;
 
     if ((inp > 10) || (inp < 1))
         return;

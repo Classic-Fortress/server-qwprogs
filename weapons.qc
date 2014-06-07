@@ -843,6 +843,7 @@ void () W_FireSniperRifle = {
     local vector f;
     local vector g;
     local vector h;
+    dir = '0 0 0';
 
     sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
@@ -2069,6 +2070,7 @@ void () W_ChangeWeapon = {
     local float wm;
     local float have_weapon;
     local float usable;
+    wm = 0;
 
     if (self.tfstate & TFSTATE_RELOADING)
         return;

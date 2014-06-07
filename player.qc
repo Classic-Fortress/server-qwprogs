@@ -17,6 +17,7 @@ void () player_touch = {
     local entity Bio;
     local entity te;
     local float found;
+    te = world;
 
     if ((invis_only == 0) &&
         ((self.playerclass == 8) || (other.playerclass == 8))) {
@@ -801,7 +802,7 @@ void () player_axpain5 =[33, player_axpain6] {
 void () player_axpain6 =[34, player_run] {
 };
 
-void () player_pain = {
+void (entity et, float f) player_pain = {
     if (self.weaponframe) {
         if (deathmsg == 37)
             PainSound();

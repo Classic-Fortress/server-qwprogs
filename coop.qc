@@ -68,6 +68,9 @@ float () DoorShouldOpen = {
     if (coop != 2)
         return (1);
 
+    plyr1 = world;
+    plyr2 = world;
+
     plyrcount = 0;
     ptr = find(world, classname, "player");
     while (ptr != world) {
