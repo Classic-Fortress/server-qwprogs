@@ -1059,9 +1059,9 @@
 // unused             				6
 // unused               			7
 #define MENU_REPEATHELP 			8
-#define MENU_PICKBINDS  			9
-#define MENU_SHOWBINDS1 			10
-#define MENU_SHOWBINDS2 			11
+// unused                                       9
+// unused                                       10
+// unused                                       11
 #define MENU_SPY				12
 #define MENU_SPY_SKIN				13
 #define MENU_SPY_COLOR				14
