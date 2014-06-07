@@ -4796,7 +4796,6 @@ string(entity pl) DisguiseToString =
 string(entity pl) RangeToString =
 {
     local entity te;
-    local string st;
     local float num;
 
     te = find(world, netname, "scanner");

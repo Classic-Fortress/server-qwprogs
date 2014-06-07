@@ -83,9 +83,6 @@ void () button_killed = {
 };
 
 void () func_button = {
-    local float gtemp;
-    local float ftemp;
-
     if (CheckExistence() == FALSE) {
         dremove(self);
         return;

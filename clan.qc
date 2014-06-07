@@ -83,7 +83,6 @@ void () PreMatch_Think = {
 
 void () DumpClanScores = {
     local float winners;
-    local float second;
     local float no_teams;
     local float printed;
     local float ti;

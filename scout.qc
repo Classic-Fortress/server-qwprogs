@@ -143,9 +143,7 @@ void () FlashTimer = {
 };
 
 void () FlashGrenadeExplode = {
-    local float expsize;
     local entity te;
-    local entity oldself;
     local string st;
 
     self.effects = self.effects | EF_BRIGHTLIGHT;
@@ -262,8 +260,6 @@ void () OldConcussionGrenadeTimer = {
 };
 
 void () ConcussionGrenadeTimer = {
-    local string st;
-    local string st2;
     local vector src;
     local float pos;
     local float concadjust;
@@ -365,7 +361,6 @@ void () ScannerSwitch = {
 };
 
 void () TeamFortress_Scan = {
-    local string power;
     local entity list;
     local float scancost;
     local float scanrange;
@@ -375,14 +370,6 @@ void () TeamFortress_Scan = {
     local vector lightningvec;
     local float enemy_detected;
     local float any_detected;
-    local vector vf;
-    local vector vr;
-    local vector e;
-    local float res1;
-    local float res2;
-    local float res3;
-    local float vf_e_angle;
-    local float vr_e_angle;
 
     scanrange = 100;
     self.owner.impulse = 0;
@@ -524,8 +511,6 @@ void (entity inflictor, entity attacker, float bounce,
     local entity head;
     local entity te;
     local vector org;
-    local string st;
-    local string st2;
 
     head = findradius(inflictor.origin, bounce + 40);
     while (head) {

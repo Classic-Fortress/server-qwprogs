@@ -206,7 +206,6 @@ void () TeamFortress_DetpackStop = {
 void () TeamFortress_DetpackSet = {
     local entity countd;
     local entity oldself;
-    local float skinno;
 
     self.is_detpacking = 0;
     self.owner.tfstate =
@@ -334,8 +333,6 @@ void () TeamFortress_DetpackExplode = {
 void () TeamFortress_DetpackTouch = {
     local entity disarm;
     local vector source;
-    local vector org;
-    local vector def;
 
     CheckBelowBuilding(self);
 

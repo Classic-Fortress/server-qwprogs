@@ -7,8 +7,6 @@ float (entity Goal, entity AP) Activated;
 float (entity targ, entity attacker, float damage) TeamEqualiseDamage;
 
 void () monster_death_use = {
-    local entity ent, otemp, stemp;
-
     if (self.flags & FL_FLY)
         self.flags = self.flags - FL_FLY;
 
@@ -54,7 +52,6 @@ float (entity targ, entity inflictor) CanDamage = {
 
 void (entity targ, entity attacker) Killed = {
     local entity oself;
-    local string db;
 
     oself = self;
     self = targ;
@@ -477,7 +474,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 void (entity inflictor, entity attacker, float damage,
       entity ignore) T_RadiusDamage = {
     local float points;
-    local entity head, te;
+    local entity head;
     local vector org;
 
     head = findradius(inflictor.origin, damage + 40);

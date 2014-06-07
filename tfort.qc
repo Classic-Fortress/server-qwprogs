@@ -73,8 +73,6 @@ void () UseSpecialSkill = {
 void () TeamFortress_ChangeClass = {
     local entity spot;
     local entity te;
-    local float tc;
-    local string st;
 
     if (self.playerclass != 0) {
         if ((deathmatch != 3) && (cb_prematch_time < time))
@@ -1262,7 +1260,6 @@ string(entity p) TeamFortress_GetSkin =
 
 void (entity p) TeamFortress_SetSkin = {
     local string st;
-    local float tn;
 
     p.immune_to_check = time + 10;
     if ((p.playerclass == PC_SPY) && (p.undercover_skin != 0))
@@ -1708,8 +1705,6 @@ float (entity Retriever, float WeaponType) TeamFortress_CanGetWeapon = {
 };
 
 void (entity Player, float Armorclass) TeamFortress_DescribeArmor = {
-    local string st;
-
     if (Armorclass == 0)
         return;
 
@@ -2236,8 +2231,6 @@ void (float tno) decrement_team_ammoboxes = {
 };
 
 void () TeamFortress_AssaultWeapon = {
-    local float it;
-
     self.impulse = 0;
     if (self.tfstate & TFSTATE_RELOADING)
         return;
@@ -2602,7 +2595,6 @@ void () TeamFortress_RegenerateCells = {
 void () TeamFortress_CheckforCheats = {
     local float tf;
     local float pf;
-    local string st;
     local vector vplf;
     local vector vf;
 
@@ -2770,6 +2762,5 @@ void (entity p) KickCheater = {
 };
 
 void (entity p) BanCheater = {
-    local string st;
     stuffcmd(p, "disconnect\n");
 };

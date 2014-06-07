@@ -184,10 +184,7 @@ void end_sys_fields;
 // globals
 //
 
-float movedist;
-
 string string_null;             // null string, nothing should be held here
-float empty_float;
 
 entity activator;               // the entity that activated a trigger or brush
 
