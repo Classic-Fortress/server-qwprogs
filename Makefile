@@ -1,21 +1,18 @@
 # OBJ order significant!
-OBJ =	defs.pqc qw.pqc debug.pqc status.pqc menu.pqc subs.pqc combat.pqc items.pqc \
-	weapons.pqc world.pqc client.pqc player.pqc doors.pqc buttons.pqc triggers.pqc \
-	tforttm.pqc plats.pqc misc.pqc monsters.pqc flare.pqc sentry.pqc boss.pqc admin.pqc \
-	scout.pqc sniper.pqc tsoldier.pqc demoman.pqc pyro.pqc spy.pqc engineer.pqc \
-	camera.pqc clan.pqc tfort.pqc tforthlp.pqc tfortmap.pqc hook.pqc ctf.pqc \
-	coop.pqc actions.pqc spect.pqc
+OBJ =	defs.qc qw.qc debug.qc status.qc menu.qc subs.qc combat.qc items.qc \
+	weapons.qc world.qc client.qc player.qc doors.qc buttons.qc triggers.qc \
+	tforttm.qc plats.qc misc.qc monsters.qc flare.qc sentry.qc boss.qc admin.qc \
+	scout.qc sniper.qc tsoldier.qc demoman.qc pyro.qc spy.qc engineer.qc \
+	camera.qc clan.qc tfort.qc tforthlp.qc tfortmap.qc hook.qc ctf.qc \
+	coop.qc actions.qc spect.qc
 
 TARGET= qwprogs.dat
 
-$(TARGET): $(OBJ)
+$(TARGET):
 	@echo $(TARGET) > progs.src
 	@echo >> progs.src
 	@for f in $(OBJ); do echo $$f >> progs.src; done
-	gmqcc -std=qcc
-
-%.pqc: %.qc defs.h
-	gcc -E -P -nostdinc -imacros defs.h -x c $< > $@
+	gmqcc -std=fteqcc
 
 clean:
-	rm -f $(TARGET) $(OBJ) progs.src files.dat progdefs.h
+	rm -f $(TARGET) qwprogs.lno progs.src files.dat progdefs.h
