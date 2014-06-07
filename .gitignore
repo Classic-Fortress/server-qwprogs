@@ -1,2 +1,4 @@
 *.pqc
 *.dat
+progdefs.h
+progs.src
