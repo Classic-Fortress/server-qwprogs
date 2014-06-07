@@ -1256,6 +1256,8 @@ string(entity p) TeamFortress_GetSkin =
             }
         }
     }
+
+    return ("base");
 };
 
 void (entity p) TeamFortress_SetSkin = {
@@ -1752,6 +1754,8 @@ string(float pc) TeamFortress_GetClassName =
         return "Observer";
     else if (pc == PC_RANDOM)
         return "Random Playerclass";
+
+    return "Unknown";
 };
 
 void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName = {

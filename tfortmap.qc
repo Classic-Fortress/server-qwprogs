@@ -545,6 +545,7 @@ entity(float ino) Finditem =
     st = ftos(ino);
     dprint(st);
     dprint(".\n");
+    return world;
 };
 
 entity(float gno) Findgoal =
@@ -562,6 +563,7 @@ entity(float gno) Findgoal =
     st = ftos(gno);
     dprint(st);
     dprint(".\n");
+    return world;
 };
 
 entity(float gno) Findteamspawn =
@@ -579,6 +581,7 @@ entity(float gno) Findteamspawn =
     st = ftos(gno);
     dprint(st);
     dprint(".\n");
+    return world;
 };
 
 void (entity Goal) InactivateGoal = {

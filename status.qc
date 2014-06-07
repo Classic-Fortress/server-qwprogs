@@ -54,7 +54,7 @@ void (entity pl) RefreshStatusBar = {
     if (pl.playerclass == PC_UNDEFINED)
         return;
 
-    s1 = GetStatusSize();
+    s1 = GetStatusSize(pl);
 
     win = TeamFortress_TeamGetWinner();
     sec = TeamFortress_TeamGetSecond();
@@ -481,6 +481,7 @@ string(float num) NumberToString100 =
         else
             return ("99");
     }
+    return ("");
 };
 
 string(float num) NumberToString1000 =
@@ -893,6 +894,7 @@ string(float num) NumberToString1000 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) BlueScoreToString100 =
@@ -1319,6 +1321,7 @@ string(float num) BlueScoreToString100 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) BlueScoreToString1000 =
@@ -1745,6 +1748,7 @@ string(float num) BlueScoreToString1000 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) RedScoreToString100 =
@@ -2171,6 +2175,7 @@ string(float num) RedScoreToString100 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) RedScoreToString1000 =
@@ -2597,6 +2602,7 @@ string(float num) RedScoreToString1000 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) YellowScoreToString100 =
@@ -3023,6 +3029,7 @@ string(float num) YellowScoreToString100 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) YellowScoreToString1000 =
@@ -3449,6 +3456,7 @@ string(float num) YellowScoreToString1000 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) GreenScoreToString100 =
@@ -3877,6 +3885,7 @@ string(float num) GreenScoreToString100 =
             }
         }
     }
+    return ("");
 };
 
 string(float num) GreenScoreToString1000 =
@@ -4303,6 +4312,7 @@ string(float num) GreenScoreToString1000 =
             }
         }
     }
+    return ("");
 };
 
 string(entity pl) ClipSizeToString100 =
@@ -4676,6 +4686,7 @@ string(entity pl) ClipSizeToString100 =
             }
         }
     }
+    return ("");
 };
 
 string(entity pl) DisguiseToString =
@@ -5133,6 +5144,7 @@ string(entity pl) RangeToString =
             }
         }
     }
+    return ("");
 };
 
 string(entity pl) ScannerToString =

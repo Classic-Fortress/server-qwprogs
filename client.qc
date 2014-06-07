@@ -449,6 +449,7 @@ entity()FindIntermission =
         return (spot);
     }
     objerror("FindIntermission: no spot");
+    return (world);
 };
 
 entity(entity start_point) FindNextIntermission =
