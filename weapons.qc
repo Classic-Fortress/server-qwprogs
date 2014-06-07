@@ -2700,6 +2700,8 @@ void () W_WeaponFrame = {
             }
         }
     }
+    if (intermission_running)
+        return;
     if (time < self.attack_finished) {
         return;
     }

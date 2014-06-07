@@ -383,6 +383,9 @@ float deathmsg;                 // Global, which is set before every T_Damage, t
 
 float birthday;
 
+float intermission_running;
+float intermission_exittime;
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {
