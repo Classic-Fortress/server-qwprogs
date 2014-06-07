@@ -12,7 +12,7 @@ $(TARGET): $(OBJ)
 	@echo $(TARGET) > progs.src
 	@echo >> progs.src
 	@for f in $(OBJ); do echo $$f >> progs.src; done
-	qcc
+	gmqcc -std=qcc
 
 %.pqc: %.qc defs.h
 	gcc -E -P -nostdinc -imacros defs.h -x c $< > $@

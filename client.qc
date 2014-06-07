@@ -1860,7 +1860,6 @@ void () ClientConnect = {
     if (intermission_running)
         GotoNextMap();
 
-    local string st2;
     st2 = infokey(world, "apw");
     if (st2 == string_null)
         st2 = infokey(world, "adminpwd");
