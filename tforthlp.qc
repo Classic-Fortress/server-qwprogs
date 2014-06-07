@@ -26,8 +26,7 @@ void () TeamFortress_MOTD = {
         if (self.got_aliases == FALSE)
             sprint(self, PRINT_HIGH, "\n\n\n");
 
-        sprint(self, PRINT_HIGH, "Type help for more info.\n");
-        sprint(self, PRINT_HIGH, "Classic Fortress QuakeWorld v2.9\n");
+        sprint(self, PRINT_HIGH, "==== Classic Fortress ====\n");
         sprint(self, PRINT_HIGH, "github.com/classic-fortress\n");
 
         self.menu_displaytime = 0;
