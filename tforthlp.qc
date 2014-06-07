@@ -27,8 +27,8 @@ void () TeamFortress_MOTD = {
             sprint(self, PRINT_HIGH, "\n\n\n");
 
         sprint(self, PRINT_HIGH, "Type help for more info.\n");
-        sprint(self, PRINT_HIGH, "TeamFortress QuakeWorld v2.9\n");
-        sprint(self, PRINT_HIGH, "www.planetquake.com/teamfortress/\n");
+        sprint(self, PRINT_HIGH, "Classic Fortress QuakeWorld v2.9\n");
+        sprint(self, PRINT_HIGH, "github.com/classic-fortress\n");
 
         self.menu_displaytime = 0;
         self.current_menu = MENU_INTRO;

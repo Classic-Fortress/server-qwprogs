@@ -216,7 +216,7 @@ void () Menu_Team = {
 
     if (CTF_Map == TRUE) {
         CenterPrint(self,
-                    "=== Choose Your Team ===\n\n“‘ Blue Team           \n”‘ Red Team            \n\n\n\n™‘ Bind my keys for me!\n\nFor full details on this patch:\nhttp://www.planetfortress.com/teamfortress/\n");
+                    "=== Choose Your Team ===\n\n“‘ Blue Team           \n”‘ Red Team            \n\n\n\n™‘ Bind my keys for me!\n");
     } else if (number_of_teams == 1) {
         CenterPrint(self, "=== Choose Your Team ===\n\n“‘ Team One  \n");
     } else if (number_of_teams == 2) {
@@ -430,7 +430,7 @@ void () Menu_Intro = {
         centerprint(self, st1, "\n", st2);
     } else {
         CenterPrint(self,
-                    "Welcome to TeamFortress v2.9\nby TeamFortress Software\n======================================\nwww.planetquake.com/teamfortress");
+                    "Welcome to Classic Fortress\nby hifi & Empezar\n======================================\ngithub.com/classic-fortress");
     }
 };
 
