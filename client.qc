@@ -2059,8 +2059,6 @@ void (entity targ, entity attacker) ClientObituary = {
                         " detonates an ammo box too close to him\n";
                 else if (deathmsg == DMSG_DETPACK)
                     deathstring = " set the detpack and forgot to run\n";
-                else if (deathmsg == DMSG_BIOWEAPON)
-                    deathstring = " died impossibly!\n";
                 else if (deathmsg == DMSG_ROCKETL) {
                     if (rnum)
                         deathstring = " becomes bored with life\n";
@@ -2189,10 +2187,7 @@ void (entity targ, entity attacker) ClientObituary = {
                 } else if (deathmsg == DMSG_DETPACK_DIS) {
                     deathstring = " cut the red wire of ";
                     deathstring2 = "'s detpack\n";
-                } else if (deathmsg == DMSG_BIOWEAPON) {
-                    deathstring = " dies from ";
-                    deathstring2 = "'s mysterious tropical disease\n";
-                } else if (deathmsg == DMSG_BIOWEAPON_ATT) {
+                } else if (deathmsg == DMSG_MEDIKIT_ATT) {
                     deathstring = " escapes infection from ";
                     deathstring2 = " by dying first\n";
                 } else if (deathmsg == DMSG_GRENADEL) {

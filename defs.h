@@ -514,7 +514,7 @@
 /*======================================================*/
 
 #define WEAP_HOOK			1
-#define WEAP_BIOWEAPON			2
+// unused                               2
 #define WEAP_MEDIKIT			4
 #define WEAP_SPANNER			8
 #define WEAP_AXE			16
@@ -755,7 +755,7 @@
 #define PC_MEDIC_INITARMORTYPE		0.3
 #define PC_MEDIC_ARMORCLASSES		11	// ALL except EXPLOSION
 #define PC_MEDIC_INITARMORCLASS		0
-#define PC_MEDIC_WEAPONS		WEAP_BIOWEAPON | WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
+#define PC_MEDIC_WEAPONS		WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
 #define PC_MEDIC_MAXAMMO_SHOT		75
 #define PC_MEDIC_MAXAMMO_NAIL		150
 #define PC_MEDIC_MAXAMMO_CELL		50
@@ -1019,8 +1019,8 @@
 #define DMSG_GREN_MIRV			10
 #define DMSG_GREN_PIPE			11
 #define DMSG_DETPACK			12
-#define DMSG_BIOWEAPON			13
-#define DMSG_BIOWEAPON_ATT		14
+// unused                               13
+#define DMSG_MEDIKIT_ATT                14
 #define DMSG_FLAME			15
 #define DMSG_DETPACK_DIS		16
 #define DMSG_AXE			17

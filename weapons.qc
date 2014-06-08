@@ -516,7 +516,7 @@ void () W_FireMedikit = {
                 // musn't be on their team, so we infect them
                 trace_ent.axhitme = 1;
                 SpawnBlood(org, 20);
-                deathmsg = DMSG_BIOWEAPON_ATT;
+                deathmsg = DMSG_MEDIKIT_ATT;
                 T_Damage(trace_ent, self, self, 10);
 
                 if (trace_ent.playerclass == PC_MEDIC)
@@ -538,77 +538,6 @@ void () W_FireMedikit = {
         }
     } else {
         // hit wall
-        sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
-        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-        WriteByte(MSG_MULTICAST, TE_GUNSHOT);
-        WriteByte(MSG_MULTICAST, 3);
-        WriteCoord(MSG_MULTICAST, org_x);
-        WriteCoord(MSG_MULTICAST, org_y);
-        WriteCoord(MSG_MULTICAST, org_z);
-        multicast(org, MULTICAST_PVS);
-    }
-};
-
-void () W_FireBioweapon = {
-    local vector source;
-    local vector org;
-    local entity BioInfection;
-
-    source = self.origin + '0 0 16';
-    traceline(source, source + v_forward * 64, 0, self);
-    if (trace_fraction == 1)
-        return;
-
-    org = trace_endpos - v_forward * 4;
-
-    if (trace_ent.takedamage) {
-        if (trace_ent.classname == "player") {
-            if (((trace_ent.team_no != self.team_no) && (self.team_no != 0)
-                 && teamplay)
-                || (teamplay == 0)) {
-
-                trace_ent.axhitme = 1;
-                SpawnBlood(org, 20);
-                deathmsg = DMSG_BIOWEAPON_ATT;
-                T_Damage(trace_ent, self, self, 10);
-
-                if (trace_ent.playerclass == PC_MEDIC)
-                    return;
-                if (cb_prematch_time > time)
-                    return;
-
-                trace_ent.tfstate = trace_ent.tfstate | TFSTATE_INFECTED;
-
-                BioInfection = spawn();
-                BioInfection.classname = "timer";
-                BioInfection.owner = trace_ent;
-                BioInfection.nextthink = time + 2;
-                BioInfection.think = BioInfection_Decay;
-                BioInfection.enemy = self;
-
-                trace_ent.infection_team_no = self.team_no;
-            }
-        } else if (trace_ent.flags & FL_MONSTER) {
-
-            if (trace_ent.classname == "monster_zombie")
-                T_Damage(trace_ent, self, self, 200);
-
-            trace_ent.axhitme = 1;
-            SpawnBlood(org, 20);
-            T_Damage(trace_ent, self, self, 10);
-
-            BioInfection = spawn();
-            BioInfection.classname = "timer";
-            BioInfection.nextthink = time + 2;
-            BioInfection.think = BioInfection_MonsterDecay;
-            BioInfection.owner = self;
-            BioInfection.enemy = trace_ent;
-        } else {
-            trace_ent.axhitme = 1;
-            SpawnBlood(org, 30);
-            T_Damage(trace_ent, self, self, 40);
-        }
-    } else {
         sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_GUNSHOT);
@@ -1656,10 +1585,6 @@ void () W_SetCurrentAmmo = {
         self.currentammo = self.ammo_medikit;
         self.weaponmodel = "progs/v_medi.mdl";
         self.weaponframe = 0;
-    } else if (self.current_weapon == 2) {
-        self.currentammo = 0;
-        self.weaponmodel = "progs/v_bio.mdl";
-        self.weaponframe = 0;
     } else if (self.current_weapon == 262144) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & 2)) {
@@ -1719,8 +1644,7 @@ float () W_BestWeapon = {
 float () W_CheckNoAmmo = {
     if ((self.current_weapon == WEAP_AXE)
         || (self.current_weapon == WEAP_SPANNER)
-        || (self.current_weapon == WEAP_MEDIKIT)
-        || (self.current_weapon == WEAP_BIOWEAPON))
+        || (self.current_weapon == WEAP_MEDIKIT))
         return (1);
     else if (self.current_weapon == WEAP_INCENDIARY) {
         if (self.currentammo >= 3)
@@ -1869,11 +1793,6 @@ void () player_medikitb1;
 void () player_medikitc1;
 void () player_medikitd1;
 
-void () player_bioweapon1;
-void () player_bioweaponb1;
-void () player_bioweaponc1;
-void () player_bioweapond1;
-
 void () W_Attack = {
     local float r;
 
@@ -1998,18 +1917,6 @@ void () W_Attack = {
         else
             player_medikitd1();
         Attack_Finished(0.5);
-    } else if (self.current_weapon == WEAP_BIOWEAPON) {
-        sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.25)
-            player_bioweapon1();
-        else if (r < 0.5)
-            player_bioweaponb1();
-        else if (r < 0.75)
-            player_bioweaponc1();
-        else
-            player_bioweapond1();
-        Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
         sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
         player_shot1();
@@ -2038,8 +1945,6 @@ void () W_PrintWeaponMessage = {
         sprint(self, PRINT_MEDIUM, "rifle on fully auto\n");
     else if (self.current_weapon == WEAP_TRANQ)
         sprint(self, PRINT_MEDIUM, "Tranquiliser gun selected\n");
-    else if (self.current_weapon == WEAP_BIOWEAPON)
-        sprint(self, PRINT_MEDIUM, "BioWeapon readied\n");
     else if (self.current_weapon == WEAP_MEDIKIT)
         sprint(self, PRINT_MEDIUM, "Medikit/Bioweapon readied\n");
 };
@@ -2065,8 +1970,7 @@ void () W_ChangeWeapon = {
     if (self.impulse == 1) {
         if (!
             (it &
-             (WEAP_BIOWEAPON | WEAP_MEDIKIT | WEAP_AXE |
-              WEAP_SPANNER)))
+             (WEAP_MEDIKIT | WEAP_AXE | WEAP_SPANNER)))
             have_weapon = FALSE;
 
         while (!usable && have_weapon) {
@@ -2359,8 +2263,6 @@ void () CycleWeaponCommand = {
             if (self.ammo_shells < 1)
                 am = 1;
         } else if (self.current_weapon == WEAP_ASSAULT_CANNON)
-            self.current_weapon = WEAP_MEDIKIT;
-        else if (self.current_weapon == WEAP_BIOWEAPON)
             self.current_weapon = WEAP_MEDIKIT;
         else if (self.current_weapon == WEAP_MEDIKIT)
             self.current_weapon = WEAP_AXE;
