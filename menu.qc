@@ -469,7 +469,7 @@ void () Menu_Engineer = {
     s_action = "Action:                           \n";
     s_nothing = "—‘ Nothing                      \n\n";
     if (self.has_dispenser) {
-        s_disp = "™‘ Remotely Detonate Dispenser  \n";
+        s_disp = "“‘ Remotely Detonate Dispenser  \n";
     } else {
         if (self.ammo_cells >= 100) {
             s_disp = "“‘ Build Ammo&Armor Dispenser   \n";
@@ -478,7 +478,7 @@ void () Menu_Engineer = {
         }
     }
     if (self.has_sentry) {
-        s_sentry = "š‘ Remotely Detonate Sentry Gun \n";
+        s_sentry = "”‘ Remotely Detonate Sentry Gun \n";
     } else {
         if (self.ammo_cells >= 130) {
             s_sentry = "”‘ Build Sentry Gun             \n";
@@ -490,37 +490,20 @@ void () Menu_Engineer = {
 };
 
 void (float inp) Menu_Engineer_Input = {
-
-    if (((inp == 1) && (self.ammo_cells >= 100)) &&
-        (self.has_dispenser != 1)) {
-        TeamFortress_Build(1);
-        ResetMenu();
-        self.impulse = 0;
-    } else {
-        if (((inp == 2) && (self.ammo_cells >= 130)) &&
-            (self.has_sentry != 1)) {
+    if (inp == 1) {
+        if (self.has_dispenser)
+            DestroyBuilding(self, "building_dispenser");
+        else if (self.ammo_cells >= 100)
+            TeamFortress_Build(1);
+    } else if (inp == 2) {
+        if (self.has_sentry)
+            DestroyBuilding(self, "building_sentrygun");
+        else if (self.ammo_cells >= 130)
             TeamFortress_Build(2);
-            ResetMenu();
-            self.impulse = 0;
-        } else {
-            if ((inp == 7) && (self.has_dispenser == 1)) {
-                DestroyBuilding(self, "building_dispenser");
-                ResetMenu();
-                self.impulse = 0;
-            } else {
-                if ((inp == 8) && (self.has_sentry == 1)) {
-                    DestroyBuilding(self, "building_sentrygun");
-                    ResetMenu();
-                    self.impulse = 0;
-                } else {
-                    if (inp == 5) {
-                        ResetMenu();
-                        self.impulse = 0;
-                    }
-                }
-            }
-        }
     }
+
+    ResetMenu();
+    self.impulse = 0;
 };
 
 void () Menu_EngineerFix_Dispenser = {
