@@ -1950,170 +1950,170 @@ void () W_PrintWeaponMessage = {
 };
 
 void () W_ChangeWeapon = {
-    local float it;
-    local float am;
-    local float fl;
-    local float wm;
+    local float weapons;
+    local float noammo;
+    local float changeweapon;
+    local float weapmode;
     local float have_weapon;
-    wm = 0;
+    weapmode = 0;
 
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    it = self.weapons_carried;
-    fl = self.current_weapon;
-    am = 0;
+    weapons = self.weapons_carried;
+    changeweapon = self.current_weapon;
+    noammo = 0;
     have_weapon = TRUE;
 
     if (self.impulse == 1) { 
-        if (it & WEAP_MEDIKIT)
-            fl = WEAP_MEDIKIT;
-        else if (it & WEAP_SPANNER)
-            fl = WEAP_SPANNER;
-        else if (it & WEAP_AXE)
-            fl = WEAP_AXE;
+        if (weapons & WEAP_MEDIKIT)
+            changeweapon = WEAP_MEDIKIT;
+        else if (weapons & WEAP_SPANNER)
+            changeweapon = WEAP_SPANNER;
+        else if (weapons & WEAP_AXE)
+            changeweapon = WEAP_AXE;
         else 
             have_weapon = FALSE;
     } else if (self.impulse == 2) {
-        if (it & WEAP_SNIPER_RIFLE) {
-            fl = WEAP_SNIPER_RIFLE;
+        if (weapons & WEAP_SNIPER_RIFLE) {
+            changeweapon = WEAP_SNIPER_RIFLE;
             if (self.ammo_shells < 1) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & WEAP_SHOTGUN) {
-            fl = WEAP_SHOTGUN;
+        } else if (weapons & WEAP_SHOTGUN) {
+            changeweapon = WEAP_SHOTGUN;
             if (self.ammo_shells < 1) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & 262144) {
-            fl = 262144;
+        } else if (weapons & WEAP_TRANQ) {
+            changeweapon = WEAP_TRANQ;
             if (self.ammo_shells < 1) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & WEAP_TRANQ) {
-            fl = WEAP_TRANQ;
+        } else if (weapons & WEAP_LASER) {
+            changeweapon = WEAP_LASER;
             if (self.ammo_nails < 1) {
-                am = 1;
+                noammo = 1;
             }
         } else {
-            have_weapon = 0;
+            have_weapon = FALSE;
         }
     } else if (self.impulse == 3) {
-        if (it & WEAP_AUTO_RIFLE) {
-            fl = WEAP_AUTO_RIFLE;
+        if (weapons & WEAP_AUTO_RIFLE) {
+            changeweapon = WEAP_AUTO_RIFLE;
             if (self.ammo_shells < 1) {
-                am = 1;
+                noammo = 1;
             }
         } else {
-            fl = WEAP_SUPER_SHOTGUN;
+            changeweapon = WEAP_SUPER_SHOTGUN;
             if (self.ammo_shells < 2) {
-                am = 1;
+                noammo = 1;
             }
         }
     } else if (self.impulse == 4) {
-        fl = WEAP_NAILGUN;
+        changeweapon = WEAP_NAILGUN;
         if (self.ammo_nails < 1) {
-            am = 1;
+            noammo = 1;
         }
     } else if (self.impulse == 5) {
-        fl = WEAP_SUPER_NAILGUN;
+        changeweapon = WEAP_SUPER_NAILGUN;
         if (self.ammo_nails < 2) {
-            am = 1;
+            noammo = 1;
         }
     } else if (self.impulse == 6) {
-        if (it & WEAP_FLAMETHROWER) {
-            fl = WEAP_FLAMETHROWER;
+        if (weapons & WEAP_FLAMETHROWER) {
+            changeweapon = WEAP_FLAMETHROWER;
             if (self.ammo_cells < 1) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & WEAP_GRENADE_LAUNCHER) {
-            fl = WEAP_GRENADE_LAUNCHER;
+        } else if (weapons & WEAP_GRENADE_LAUNCHER) {
+            changeweapon = WEAP_GRENADE_LAUNCHER;
             if (self.ammo_rockets < 1) {
-                am = 1;
+                noammo = 1;
             }
-            wm = 0;
+            weapmode = 0;
         } else {
-            have_weapon = 0;
+            have_weapon = FALSE;
         }
     } else if (self.impulse == 7) {
-        if (it & WEAP_INCENDIARY) {
-            fl = WEAP_INCENDIARY;
+        if (weapons & WEAP_INCENDIARY) {
+            changeweapon = WEAP_INCENDIARY;
             if (self.ammo_rockets < 3) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & WEAP_ROCKET_LAUNCHER) {
-            fl = WEAP_ROCKET_LAUNCHER;
+        } else if (weapons & WEAP_ROCKET_LAUNCHER) {
+            changeweapon = WEAP_ROCKET_LAUNCHER;
             if (self.ammo_rockets < 1) {
-                am = 1;
+                noammo = 1;
             }
-        } else if (it & 32768) {
-            fl = 32768;
+        } else if (weapons & WEAP_ASSAULT_CANNON) {
+            changeweapon = WEAP_ASSAULT_CANNON;
             if (self.ammo_shells < 1) {
-                am = 1;
+                noammo = 1;
             } else if (self.ammo_cells < 7) {
-                am = 2;
+                noammo = 2;
             }
-        } else if (it & WEAP_ASSAULT_CANNON) {
-            fl = WEAP_ASSAULT_CANNON;
-            wm = 1;
+        } else if (weapons & WEAP_ASSAULT_CANNON) {
+            changeweapon = WEAP_ASSAULT_CANNON;
+            weapmode = 1;
             if ((self.ammo_rockets < 1) || (self.ammo_cells < 7)) {
-                am = 1;
+                noammo = 1;
             }
         } else {
-            have_weapon = 0;
+            have_weapon = FALSE;
         }
     } else if (self.impulse == 176) {
-        fl = WEAP_SPANNER;
+        changeweapon = WEAP_SPANNER;
     } else if (self.impulse == TF_WEAPLAST) {
-        if (((fl & ( WEAP_SNIPER_RIFLE
+        if (((changeweapon & ( WEAP_SNIPER_RIFLE
                    | WEAP_AUTO_RIFLE
                    | WEAP_SHOTGUN
                    | WEAP_SUPER_SHOTGUN
                    | WEAP_ASSAULT_CANNON
                    | WEAP_TRANQ )) != 0) &&
                    (self.ammo_shells < 1)) {
-            am = 1;
-        } else if (((fl & ( WEAP_NAILGUN
+            noammo = 1;
+        } else if (((changeweapon & ( WEAP_NAILGUN
                           | WEAP_SUPER_NAILGUN
                           | WEAP_LASER )) != 0) &&
                           (self.ammo_nails < 1)) {
-            am = 1;
-        } else if (((fl & ( WEAP_GRENADE_LAUNCHER
+            noammo = 1;
+        } else if (((changeweapon & ( WEAP_GRENADE_LAUNCHER
                           | WEAP_ROCKET_LAUNCHER )) != 0) &&
                           (self.ammo_rockets < 1)) {
-            am = 1;
-        } else if (((fl & WEAP_FLAMETHROWER) != 0) &&
+            noammo = 1;
+        } else if (((changeweapon & WEAP_FLAMETHROWER) != 0) &&
                     (self.ammo_cells < 1)) {
-            am = 1;
-        } else if ((fl == WEAP_INCENDIARY) && (self.ammo_rockets < 3)) {
-            am = 1;
-        } else if ((fl == WEAP_ASSAULT_CANNON) && (self.ammo_cells < 7)) {
-            am = 2;
+            noammo = 1;
+        } else if ((changeweapon == WEAP_INCENDIARY) && (self.ammo_rockets < 3)) {
+            noammo = 1;
+        } else if ((changeweapon == WEAP_ASSAULT_CANNON) && (self.ammo_cells < 7)) {
+            noammo = 2;
         }
-        if (am == 0) {
-            fl = self.last_weapon;
-            wm = self.last_weaponmode;
+        if (noammo == 0) {
+            changeweapon = self.last_weapon;
+            weapmode = self.last_weaponmode;
         }
     }
 
     self.impulse = 0;
-    if (!have_weapon || !(it & fl)) {
+    if (!have_weapon || !(weapons & changeweapon)) {
         sprint(self, PRINT_HIGH, "no weapon.\n");
         return;
     }
-    if (am == 1) {
+    if (noammo == 1) {
         sprint(self, PRINT_HIGH, "not enough ammo.\n");
         return;
     }
-    if (am == 2) {
+    if (noammo == 2) {
         sprint(self, PRINT_HIGH,
                "not enough cells to power assault cannon.\n");
         return;
     }
     self.last_weaponmode = self.weaponmode;
     self.last_weapon = self.current_weapon;
-    self.current_weapon = fl;
-    self.weaponmode = wm;
+    self.current_weapon = changeweapon;
+    self.weaponmode = weapmode;
     W_SetCurrentAmmo();
     W_PrintWeaponMessage();
     self.StatusRefreshTime = time + 0.1;
