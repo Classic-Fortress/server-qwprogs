@@ -76,7 +76,6 @@ void () fadefromwhite;
 
 void (entity disp) Engineer_UseDispenser;
 void (entity gun) Engineer_UseSentryGun;
-void (entity mortar) Engineer_UseMortar;
 
 void () TeamFortress_MOTD;
 void () TeamFortress_HelpMap;

@@ -7,7 +7,6 @@ void () EMPExplode;
 void () EMPGrenadeTouch;
 void () EMPGrenadeExplode;
 void () TeamFortress_FinishedBuilding;
-void () T_Mortar;
 void () Dispenser_Die;
 void () CheckDistance;
 float (entity obj, entity builder) CheckArea;
@@ -556,10 +555,6 @@ void () TeamFortress_FinishedBuilding = {
     self = oldself;
 };
 
-void () T_Mortar = {
-    self.touch = T_Mortar;
-};
-
 void () T_Dispenser = {
     local entity dist_checker;
 
@@ -665,9 +660,6 @@ void (entity gun) Engineer_UseSentryGun = {
     dist_checker.enemy = gun;
     dist_checker.think = CheckDistance;
     dist_checker.nextthink = time + 0.3;
-};
-
-void (entity mortar) Engineer_UseMortar = {
 };
 
 void (entity gunhead) CheckSentry = {
