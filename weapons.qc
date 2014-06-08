@@ -1975,13 +1975,13 @@ void () W_ChangeWeapon = {
         else 
             have_weapon = FALSE;
     } else if (self.impulse == 2) {
-        if (it & 32) {
-            fl = 32;
+        if (it & WEAP_SNIPER_RIFLE) {
+            fl = WEAP_SNIPER_RIFLE;
             if (self.ammo_shells < 1) {
                 am = 1;
             }
-        } else if (it & 128) {
-            fl = 128;
+        } else if (it & WEAP_SHOTGUN) {
+            fl = WEAP_SHOTGUN;
             if (self.ammo_shells < 1) {
                 am = 1;
             }
@@ -1990,8 +1990,8 @@ void () W_ChangeWeapon = {
             if (self.ammo_shells < 1) {
                 am = 1;
             }
-        } else if (it & 524288) {
-            fl = 524288;
+        } else if (it & WEAP_TRANQ) {
+            fl = WEAP_TRANQ;
             if (self.ammo_nails < 1) {
                 am = 1;
             }
@@ -1999,35 +1999,35 @@ void () W_ChangeWeapon = {
             have_weapon = 0;
         }
     } else if (self.impulse == 3) {
-        if (it & 64) {
-            fl = 64;
+        if (it & WEAP_AUTO_RIFLE) {
+            fl = WEAP_AUTO_RIFLE;
             if (self.ammo_shells < 1) {
                 am = 1;
             }
         } else {
-            fl = 256;
+            fl = WEAP_SUPER_SHOTGUN;
             if (self.ammo_shells < 2) {
                 am = 1;
             }
         }
     } else if (self.impulse == 4) {
-        fl = 512;
+        fl = WEAP_NAILGUN;
         if (self.ammo_nails < 1) {
             am = 1;
         }
     } else if (self.impulse == 5) {
-        fl = 1024;
+        fl = WEAP_SUPER_NAILGUN;
         if (self.ammo_nails < 2) {
             am = 1;
         }
     } else if (self.impulse == 6) {
-        if (it & 4096) {
-            fl = 4096;
+        if (it & WEAP_FLAMETHROWER) {
+            fl = WEAP_FLAMETHROWER;
             if (self.ammo_cells < 1) {
                 am = 1;
             }
-        } else if (it & 2048) {
-            fl = 2048;
+        } else if (it & WEAP_GRENADE_LAUNCHER) {
+            fl = WEAP_GRENADE_LAUNCHER;
             if (self.ammo_rockets < 1) {
                 am = 1;
             }
@@ -2036,13 +2036,13 @@ void () W_ChangeWeapon = {
             have_weapon = 0;
         }
     } else if (self.impulse == 7) {
-        if (it & 16384) {
-            fl = 16384;
+        if (it & WEAP_INCENDIARY) {
+            fl = WEAP_INCENDIARY;
             if (self.ammo_rockets < 3) {
                 am = 1;
             }
-        } else if (it & 8192) {
-            fl = 8192;
+        } else if (it & WEAP_ROCKET_LAUNCHER) {
+            fl = WEAP_ROCKET_LAUNCHER;
             if (self.ammo_rockets < 1) {
                 am = 1;
             }
@@ -2053,41 +2053,45 @@ void () W_ChangeWeapon = {
             } else if (self.ammo_cells < 7) {
                 am = 2;
             }
-        } else if (it & 2048) {
-            fl = 2048;
+        } else if (it & WEAP_ASSAULT_CANNON) {
+            fl = WEAP_ASSAULT_CANNON;
             wm = 1;
-            if (self.ammo_rockets < 1) {
+            if ((self.ammo_rockets < 1) || (self.ammo_cells < 7)) {
                 am = 1;
             }
         } else {
             have_weapon = 0;
         }
-    } else if (self.impulse == 8) {
-        fl = 65536;
-        if (self.ammo_cells < 1) {
-            am = 1;
-        }
     } else if (self.impulse == 176) {
-        fl = 4;
+        fl = WEAP_SPANNER;
     } else if (self.impulse == TF_WEAPLAST) {
-        fl = self.last_weapon;
-
-        if (((fl & (32 | 64 | 128 | 256 | 32768 | 262144)) != 0) &&
-            (self.ammo_shells < 1)) {
+        if (((fl & ( WEAP_SNIPER_RIFLE
+                   | WEAP_AUTO_RIFLE
+                   | WEAP_SHOTGUN
+                   | WEAP_SUPER_SHOTGUN
+                   | WEAP_ASSAULT_CANNON
+                   | WEAP_TRANQ )) != 0) &&
+                   (self.ammo_shells < 1)) {
             am = 1;
-        } else if (((fl & (512 | 1024 | 524288)) != 0) &&
-                   (self.ammo_nails < 1)) {
+        } else if (((fl & ( WEAP_NAILGUN
+                          | WEAP_SUPER_NAILGUN
+                          | WEAP_LASER )) != 0) &&
+                          (self.ammo_nails < 1)) {
             am = 1;
-        } else if (((fl & (2048 | 8192)) != 0) && (self.ammo_rockets < 1)) {
+        } else if (((fl & ( WEAP_GRENADE_LAUNCHER
+                          | WEAP_ROCKET_LAUNCHER )) != 0) &&
+                          (self.ammo_rockets < 1)) {
             am = 1;
-        } else if (((fl & (4096 | 65536)) != 0) && (self.ammo_cells < 1)) {
+        } else if (((fl & WEAP_FLAMETHROWER) != 0) &&
+                    (self.ammo_cells < 1)) {
             am = 1;
-        } else if ((fl == 16384) && (self.ammo_rockets < 3)) {
+        } else if ((fl == WEAP_INCENDIARY) && (self.ammo_rockets < 3)) {
             am = 1;
-        } else if ((fl == 32768) && (self.ammo_cells < 7)) {
+        } else if ((fl == WEAP_ASSAULT_CANNON) && (self.ammo_cells < 7)) {
             am = 2;
         }
         if (am == 0) {
+            fl = self.last_weapon;
             wm = self.last_weaponmode;
         }
     }
