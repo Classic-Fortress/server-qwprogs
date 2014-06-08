@@ -1966,37 +1966,39 @@ void () W_ChangeWeapon = {
     have_weapon = TRUE;
 
     if (self.impulse == 1) { 
-        if (weapons & WEAP_MEDIKIT)
+        if (weapons & WEAP_MEDIKIT) {
             changeweapon = WEAP_MEDIKIT;
-        else if (weapons & WEAP_SPANNER)
+        }
+        else if (weapons & WEAP_SPANNER) {
             changeweapon = WEAP_SPANNER;
-        else if (weapons & WEAP_AXE)
+        }
+        else {
             changeweapon = WEAP_AXE;
-        else 
-            have_weapon = FALSE;
+        }
     } else if (self.impulse == 2) {
+        if (weapons & WEAP_SHOTGUN) {
+            changeweapon = WEAP_SHOTGUN;
+            if (self.ammo_shells < 1) {
+                noammo = 1;
+            }
+        }
         if (weapons & WEAP_SNIPER_RIFLE) {
             changeweapon = WEAP_SNIPER_RIFLE;
             if (self.ammo_shells < 1) {
                 noammo = 1;
             }
-        } else if (weapons & WEAP_SHOTGUN) {
-            changeweapon = WEAP_SHOTGUN;
-            if (self.ammo_shells < 1) {
-                noammo = 1;
-            }
-        } else if (weapons & WEAP_TRANQ) {
+        }
+        if (weapons & WEAP_TRANQ) {
             changeweapon = WEAP_TRANQ;
             if (self.ammo_shells < 1) {
                 noammo = 1;
             }
-        } else if (weapons & WEAP_LASER) {
+        }
+        if (weapons & WEAP_LASER) {
             changeweapon = WEAP_LASER;
             if (self.ammo_nails < 1) {
                 noammo = 1;
             }
-        } else {
-            have_weapon = FALSE;
         }
     } else if (self.impulse == 3) {
         if (weapons & WEAP_AUTO_RIFLE) {
@@ -2004,66 +2006,80 @@ void () W_ChangeWeapon = {
             if (self.ammo_shells < 1) {
                 noammo = 1;
             }
-        } else {
+        }
+        else if (weapons & WEAP_SUPER_SHOTGUN) {
             changeweapon = WEAP_SUPER_SHOTGUN;
             if (self.ammo_shells < 2) {
                 noammo = 1;
             }
         }
-    } else if (self.impulse == 4) {
-        changeweapon = WEAP_NAILGUN;
-        if (self.ammo_nails < 1) {
-            noammo = 1;
-        }
-    } else if (self.impulse == 5) {
-        changeweapon = WEAP_SUPER_NAILGUN;
-        if (self.ammo_nails < 2) {
-            noammo = 1;
-        }
-    } else if (self.impulse == 6) {
-        if (weapons & WEAP_FLAMETHROWER) {
+        else if (weapons & WEAP_FLAMETHROWER) {
             changeweapon = WEAP_FLAMETHROWER;
             if (self.ammo_cells < 1) {
                 noammo = 1;
             }
-        } else if (weapons & WEAP_GRENADE_LAUNCHER) {
+        }
+        else if (weapons & WEAP_GRENADE_LAUNCHER) {
             changeweapon = WEAP_GRENADE_LAUNCHER;
+            weapmode = 0;
             if (self.ammo_rockets < 1) {
                 noammo = 1;
             }
-            weapmode = 0;
-        } else {
-            have_weapon = FALSE;
         }
-    } else if (self.impulse == 7) {
-        if (weapons & WEAP_INCENDIARY) {
+        else {
+            changeweapon = WEAP_NAILGUN;
+            if (self.ammo_nails < 2) {
+                noammo = 1;
+            }
+        }
+    } else if (self.impulse == 4) {
+        if (self.playerclass == PC_SCOUT) {
+            have_weapon = 0; // scout nailgun is impulse 3
+        }
+        if (self.playerclass == PC_ENGINEER) {
+            TeamFortress_EngineerBuild ();
+        }
+        else if (weapons & WEAP_NAILGUN) {
+            changeweapon = WEAP_NAILGUN;
+            if (self.ammo_nails < 2) {
+                noammo = 1;
+            }
+        }
+        else if (weapons & WEAP_SUPER_NAILGUN) {
+            changeweapon = WEAP_SUPER_NAILGUN;
+            if (self.ammo_nails < 4) {
+                noammo = 1;
+            }
+        }
+        else if (weapons & WEAP_INCENDIARY) {
             changeweapon = WEAP_INCENDIARY;
             if (self.ammo_rockets < 3) {
                 noammo = 1;
             }
-        } else if (weapons & WEAP_ROCKET_LAUNCHER) {
-            changeweapon = WEAP_ROCKET_LAUNCHER;
-            if (self.ammo_rockets < 1) {
-                noammo = 1;
-            }
-        } else if (weapons & WEAP_ASSAULT_CANNON) {
+        }
+        else if (weapons & WEAP_ASSAULT_CANNON) {
             changeweapon = WEAP_ASSAULT_CANNON;
             if (self.ammo_shells < 1) {
                 noammo = 1;
-            } else if (self.ammo_cells < 7) {
+            }
+            else if (self.ammo_cells < 7) {
                 noammo = 2;
             }
-        } else if (weapons & WEAP_ASSAULT_CANNON) {
-            changeweapon = WEAP_ASSAULT_CANNON;
+        }
+        else if (weapons & WEAP_GRENADE_LAUNCHER) {
+            changeweapon = WEAP_GRENADE_LAUNCHER;
             weapmode = 1;
-            if ((self.ammo_rockets < 1) || (self.ammo_cells < 7)) {
+            if (self.ammo_rockets < 1) {
                 noammo = 1;
             }
-        } else {
-            have_weapon = FALSE;
         }
-    } else if (self.impulse == 176) {
-        changeweapon = WEAP_SPANNER;
+        else if (weapons & WEAP_ROCKET_LAUNCHER) {
+            changeweapon = WEAP_ROCKET_LAUNCHER;
+            weapmode = 1;
+            if (self.ammo_rockets < 1) {
+                noammo = 1;
+            }
+        }
     } else if (self.impulse == TF_WEAPLAST) {
         if (((changeweapon & ( WEAP_SNIPER_RIFLE
                    | WEAP_AUTO_RIFLE
