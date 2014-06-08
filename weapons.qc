@@ -1361,11 +1361,7 @@ void () W_FireGrenade = {
     newmis.avelocity = '300 300 300';
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = GrenadeExplode;
-    if ((birthday == 1) && (random() < 0.2)) {
-        setmodel(newmis, "progs/grenade3.mdl");
-    } else {
-        setmodel(newmis, "progs/grenade2.mdl");
-    }
+    setmodel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
 };
@@ -2414,21 +2410,9 @@ void () PreMatchImpulses;
 void () DeadImpulses;
 
 void () ImpulseCommands = {
-    local string st;
-
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if ((self.impulse == 242) && (birthday == 0)) {
-        st = infokey(world, "birthday");
-        if (st != "off") {
-            self.current_menu = 23;
-            self.menu_count = 25;
-            self.menu_displaytime = 0;
-            self.impulse = 0;
-            return;
-        }
-    }
     if ((cb_prematch_time > time) || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();

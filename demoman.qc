@@ -85,10 +85,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     newmis.velocity_z = zdir * 15;
     newmis.avelocity = '250 300 400';
 
-    if ((birthday == 1) && (random() < 0.3))
-        setmodel(newmis, "progs/grenade3.mdl");
-    else
-        setmodel(newmis, "progs/grenade2.mdl");
+    setmodel(newmis, "progs/grenade2.mdl");
 
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
@@ -122,10 +119,6 @@ void (float timer) TeamFortress_SetDetpack = {
         } else if (at_spot.mdl == "progs/disp.mdl") {
             sprint(self, PRINT_HIGH,
                    "You can't set a detpack on a dispenser!\n");
-            return;
-        } else if ((birthday == 1) &&
-                   (at_spot.mdl == "progs/detpack2.mdl")) {
-            sprint(self, PRINT_HIGH, "Detpacks can't be stacked!\n");
             return;
         } else if (at_spot.classname == "detpack") {
             sprint(self, PRINT_HIGH, "Detpacks can't be stacked!\n");
@@ -233,10 +226,7 @@ void () TeamFortress_DetpackSet = {
     newmis.weaponmode = 0;
     newmis.touch = TeamFortress_DetpackTouch;
 
-    if (birthday == 1)
-        setmodel(newmis, "progs/detpack2.mdl");
-    else
-        setmodel(newmis, "progs/detpack.mdl");
+    setmodel(newmis, "progs/detpack.mdl");
 
     setsize(newmis, '-16 -16 0', '16 16 8');
     setorigin(newmis, self.owner.origin);
@@ -271,10 +261,6 @@ void () TeamFortress_DetpackExplode = {
 
     bprint(PRINT_MEDIUM, "FIRE IN THE HOLE!\n");
     sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
-
-    if (birthday == 1)
-        bprint2(PRINT_MEDIUM, self.owner.netname,
-                " spreads good cheer!\n");
 
     pos = pointcontents(self.origin);
     if ((pos != CONTENT_SOLID) && (pos != CONTENT_SKY) &&
@@ -379,13 +365,8 @@ void () TeamFortress_DetpackDisarm = {
         dremove(self);
         return;
     }
-    if (birthday == 1) {
-        bprint(PRINT_MEDIUM, self.owner.netname, " stole ",
-               self.enemy.owner.netname, "'s birthday present!\n");
-    } else {
-        bprint(PRINT_MEDIUM, self.enemy.owner.netname,
-               "'s detpack was defused by ", self.owner.netname, "\n");
-    }
+    bprint(PRINT_MEDIUM, self.enemy.owner.netname,
+           "'s detpack was defused by ", self.owner.netname, "\n");
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 65536);
     TF_AddFrags(self.owner, 1);
     TeamFortress_SetSpeed(self.owner);

@@ -227,21 +227,6 @@ void () DecodeLevelParms = {
         local float autoteam_time;
         autoteam_time = 30;
 
-        st = infokey(world, "bd");
-        if (st == string_null)
-            st = infokey(world, "birthday");
-
-        if (st == "on") {
-
-            birthday = TRUE;
-            te = spawn();
-            te.weapon = 10;
-            te.nextthink = time + 60;
-            te.think = BirthdayTimer;
-
-        } else if (st == "off")
-            birthday = FALSE;
-
         st = infokey(world, "c");
         if (st == string_null)
             st = infokey(world, "clan");
@@ -2036,23 +2021,6 @@ void (entity targ, entity attacker) ClientObituary = {
                 // killed self
                 TF_AddFrags(attacker, -1);
 
-                if ((birthday == 1) && (random() < 0.3)) {
-                    if (random() < 0.1) {
-                        bprint(PRINT_MEDIUM, "It's ", targ.netname,
-                               "'s party and he'll cry if he wants to!\n");
-                        return;
-                    }
-
-                    bprint(PRINT_MEDIUM, targ.netname);
-                    if (random() < 0.5)
-                        bprint(PRINT_MEDIUM,
-                               " gets too selfish with his gifts\n");
-                    else
-                        bprint(PRINT_MEDIUM,
-                               " wasn't born so beautiful after all\n");
-                    return;
-                }
-
                 bprint(PRINT_MEDIUM, targ.netname);
 
                 if (deathmsg == DMSG_GREN_HAND) {
@@ -2142,16 +2110,6 @@ void (entity targ, entity attacker) ClientObituary = {
                 if (targ.undercover_team == 0)
                     attacker.teamkills = attacker.teamkills + 1;
 
-                if ((birthday == 1) && (random() < 0.3)) {
-                    if (random() < 0.3)
-                        bprint2(PRINT_MEDIUM, targ.netname,
-                                " is a party-pooper!\n");
-                    else
-                        bprint2(PRINT_MEDIUM, targ.netname,
-                                " gives gifts to his teammates!\n");
-                    return;
-                }
-
                 deathstring2 = "\n";
 
                 if (rnum < 0.25)
@@ -2178,117 +2136,6 @@ void (entity targ, entity attacker) ClientObituary = {
             } else {
                 TF_AddFrags(attacker, 1);
                 logfrag(attacker, targ);
-
-                if ((birthday == 1) && (random() < 0.5)) {
-
-                    if (deathmsg == DMSG_GREN_NAIL) {
-                        deathstring = " chews on ";
-                        deathstring2 = "'s nails!\n";
-                    } else if (deathmsg == DMSG_GREN_MIRV) {
-                        deathstring = " gathers the darling buds of ";
-                        deathstring2 = "'s Mirv grenade\n";
-                    } else if (deathmsg == DMSG_GREN_EMP) {
-                        deathstring = "'s presents go up in ";
-                        deathstring2 = "'s EMP presence.\n";
-                    } else if (deathmsg == DMSG_GREN_FLASH) {
-                        bprint(PRINT_MEDIUM, targ.netname, " goes POP!\n");
-                        return;
-                    } else if (deathmsg == DMSG_GREN_EMP_AMMO) {
-                        deathstring = " stands to near ";
-                        deathstring2 = "'s birthday surprise\n";
-                    } else if (deathmsg == DMSG_DETPACK) {
-                        deathstring = " eats ";
-                        deathstring2 = "'s good cheer!\n";
-                        if (random() < 0.1)
-                            bprint(PRINT_MEDIUM,
-                                   "Damn that jokey smurf!\n");
-                    } else if (deathmsg == DMSG_DETPACK_DIS) {
-                        deathstring = " cut the red ribbon of ";
-                        deathstring2 = "'s detpack\n";
-                    } else if (deathmsg == DMSG_GRENADEL) {
-                        deathstring = " recieves a gift from ";
-                        deathstring2 = "\n";
-                        if (targ.health < -40) {
-                            deathstring = " plays pass-the-parcel with ";
-                            deathstring2 = "\n";
-                        }
-                    } else if (deathmsg == DMSG_ROCKETL) {
-                        deathstring = " rides ";
-                        deathstring2 = "'s firecracker\n";
-                        if (targ.health < -40) {
-                            bprint(PRINT_MEDIUM, targ.netname,
-                                   " gets turned into little ",
-                                   targ.netname, "'s by ",
-                                   attacker.netname, deathstring2);
-                            return;
-                        }
-                    } else if (deathmsg == DMSG_FLAME) {
-                        if (rnum < 0.5) {
-                            deathstring = " gets too close to ";
-                            deathstring2 = "'s kitchen\n";
-                        } else {
-                            deathstring = " plays with ";
-                            deathstring2 = "'s fire\n";
-                        }
-                    } else if (deathmsg == DMSG_SNIPERRIFLE) {
-                        if (rnum <= 0.3) {
-                            deathstring = " blocks ";
-                            deathstring2 =
-                                "'s birthday bullet with his chest\n";
-                        } else {
-                            deathstring = " gets party popped by ";
-                            deathstring2 = "\n";
-                        }
-                    } else if (deathmsg == DMSG_SNIPERHEADSHOT) {
-                        if (rnum <= 0.5) {
-                            deathstring = " ALMOST catches ";
-                            deathstring2 =
-                                "'s bullet between his teeth!\n";
-                        } else {
-                            deathstring = " loves snipers like ";
-                            deathstring2 = "\n";
-                        }
-                    } else if (deathmsg == DMSG_SNIPERLEGSHOT) {
-                        deathstring = " won't run crying to ";
-                        deathstring2 = " anymore\n";
-                    } else if (deathmsg == DMSG_AUTORIFLE) {
-                        deathstring = " collects ";
-                        deathstring2 = "'s highspeed gifts.\n";
-                    } else if (deathmsg == DMSG_ASSAULTCANNON) {
-                        deathstring = " died. I blame ";
-                        deathstring2 = "\n";
-                    } else if (deathmsg == DMSG_BACKSTAB) {
-                        deathstring = " gets a gift in the back from ";
-                        deathstring2 = "\n";
-                    } else if (deathmsg == DMSG_SSHOTGUN) {
-                        deathstring = " gets a double of ";
-                        deathstring2 = "'s buck\n";
-                    } else if (deathmsg == DMSG_TRANQ) {
-                        deathstring = " is all partied out by ";
-                        deathstring2 = "\n";
-                    } else if (deathmsg == DMSG_LASERBOLT) {
-                        deathstring = " gets derailed by ";
-                        deathstring2 = "\n";
-                    } else if (deathmsg == DMSG_NAILGUN) {
-                        deathstring =
-                            " gets no say in it, no say in it at all! sings ";
-                        deathstring2 = "\n";
-                    } else if (deathmsg == DMSG_INCENDIARY) {
-                        deathstring = " gets all fired up by ";
-                        deathstring2 = "\n";
-                    } else {
-                        if (random() < 0.5)
-                            deathstring = " recieves a gift from ";
-                        else
-                            deathstring =
-                                " has a happy birthday, thanks to ";
-                        deathstring2 = "\n";
-                    }
-
-                    bprint(PRINT_MEDIUM, targ.netname, deathstring,
-                           attacker.netname, deathstring2);
-                    return;
-                }
 
                 if (deathmsg == DMSG_GREN_HAND) {
                     if (attacker.playerclass == PC_SNIPER) {
@@ -2586,12 +2433,7 @@ void (entity targ, entity attacker) ClientObituary = {
             bprint(PRINT_MEDIUM, targ.netname);
 
             if (rnum == -3) {
-                if (birthday == 1) {
-                    if (random() < 0.5)
-                        deathstring = " bobs for apples\n";
-                    else
-                        deathstring = " drowns in the punch\n";
-                } else if (random() < 0.5)
+                if (random() < 0.5)
                     deathstring = " sleeps with the fishes\n";
                 else
                     deathstring = " sucks it down\n";

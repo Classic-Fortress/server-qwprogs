@@ -922,12 +922,7 @@ void (string gibname, float dm) ThrowGib = {
     newmis = spawn();
     newmis.origin = self.origin;
 
-    if ((birthday == 1) && (random() < 0.3)) {
-        setmodel(newmis, "progs/grenade3.mdl");
-        newmis.skin = random() * 4;
-        newmis.skin = floor(newmis.skin);
-    } else
-        setmodel(newmis, gibname);
+    setmodel(newmis, gibname);
 
     setsize(newmis, '0 0 0', '0 0 0');
     newmis.velocity = VelocityForDamage(dm);

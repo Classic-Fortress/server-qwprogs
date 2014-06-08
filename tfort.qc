@@ -659,83 +659,51 @@ void () TeamFortress_GrenadePrimed = {
         newmis.think = NormalGrenadeExplode;
         newmis.skin = 0;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/hgren2.mdl");
-        }
+        setmodel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_CONCUSSION) {
         newmis.touch = ConcussionGrenadeTouch;
         newmis.think = ConcussionGrenadeExplode;
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/hgren2.mdl");
-        }
+        setmodel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
         newmis.skin = 1;
         newmis.avelocity = '0 300 0';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/biggren.mdl");
-        }
+        setmodel(newmis, "progs/biggren.mdl");
     } else if (self.weapon == GR_TYPE_MIRV) {
         newmis.touch = MirvGrenadeTouch;
         newmis.think = MirvGrenadeExplode;
         newmis.skin = 0;
         newmis.avelocity = '0 300 0';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/biggren.mdl");
-        }
+        setmodel(newmis, "progs/biggren.mdl");
     } else if (self.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
         newmis.think = NapalmGrenadeExplode;
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/biggren.mdl");
-        }
+        setmodel(newmis, "progs/biggren.mdl");
     } else if (self.weapon == GR_TYPE_FLARE) {
         newmis.touch = FlareGrenadeTouch;
         newmis.weapon = self.team_no;
         newmis.think = FlareGrenadeExplode;
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            newmis.mdl = "flare";
-        }
+        newmis.mdl = "flare";
         setmodel(newmis, "progs/flare.mdl");
     } else if (self.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
         newmis.think = GasGrenadeExplode;
         newmis.skin = 3;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/grenade2.mdl");
-        }
+        setmodel(newmis, "progs/grenade2.mdl");
     } else if (self.weapon == GR_TYPE_EMP) {
         newmis.touch = EMPGrenadeTouch;
         newmis.think = EMPGrenadeExplode;
         newmis.skin = 4;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/grenade2.mdl");
-        }
+        setmodel(newmis, "progs/grenade2.mdl");
     } else if (self.weapon == GR_TYPE_CALTROP) {
         newmis.touch = CanisterTouch;
         newmis.think = ScatterCaltrops;
@@ -746,11 +714,7 @@ void () TeamFortress_GrenadePrimed = {
         newmis.think = FlashGrenadeExplode;
         newmis.skin = 2;
         newmis.avelocity = '300 300 300';
-        if ((birthday == 1) && (random() < 0.6)) {
-            setmodel(newmis, "progs/grenade3.mdl");
-        } else {
-            setmodel(newmis, "progs/hgren2.mdl");
-        }
+        setmodel(newmis, "progs/hgren2.mdl");
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
@@ -2098,10 +2062,7 @@ void (float type) TeamFortress_DropAmmo = {
     newmis.touch = TeamFortress_AmmoboxTouch;
     newmis.skin = type - 1;
 
-    if ((birthday == 1) && (random() < 0.6))
-        setmodel(newmis, "progs/grenade3.mdl");
-    else
-        setmodel(newmis, "progs/ammobox.mdl");
+    setmodel(newmis, "progs/ammobox.mdl");
 };
 
 void () TeamFortress_AmmoboxTouch = {
@@ -2348,10 +2309,7 @@ void () TeamFortress_ExplodePerson = {
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
-    if (birthday == 1)
-        bprint2(PRINT_MEDIUM, self.owner.netname,
-                " wouldn't let go of his gifts!\n");
-    else if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
+    if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
         bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", swallowing the grenade isn't very effective!\n");
     else if (self.owner.playerclass == PC_SNIPER)

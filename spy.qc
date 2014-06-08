@@ -365,9 +365,6 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         while (at_spot != world) {
             if (at_spot.mdl == "progs/detpack.mdl") {
                 j = 1;
-            } else if ((birthday == 1) &&
-                       (at_spot.mdl == "progs/detpack2.mdl")) {
-                j = 1;
             } else if (at_spot.mdl == "progs/turrbase.mdl") {
                 j = 1;
             } else if (at_spot.mdl == "progs/turrgun.mdl") {
