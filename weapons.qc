@@ -1955,7 +1955,6 @@ void () W_ChangeWeapon = {
     local float fl;
     local float wm;
     local float have_weapon;
-    local float usable;
     wm = 0;
 
     if (self.tfstate & TFSTATE_RELOADING)
@@ -1964,69 +1963,17 @@ void () W_ChangeWeapon = {
     it = self.weapons_carried;
     fl = self.current_weapon;
     am = 0;
-    usable = 0;
     have_weapon = TRUE;
 
-    if (self.impulse == 1) {
-        if (!
-            (it &
-             (WEAP_MEDIKIT | WEAP_AXE | WEAP_SPANNER)))
+    if (self.impulse == 1) { 
+        if (it & WEAP_MEDIKIT)
+            fl = WEAP_MEDIKIT;
+        else if (it & WEAP_SPANNER)
+            fl = WEAP_SPANNER;
+        else if (it & WEAP_AXE)
+            fl = WEAP_AXE;
+        else 
             have_weapon = FALSE;
-
-        while (!usable && have_weapon) {
-            if (fl == 8) {
-                fl = 2;
-                if (it & 2)
-                    usable = 1;
-                usable = 0;
-            } else if (fl == 2) {
-                fl = 4;
-                if (it & 4)
-                    usable = 1;
-            } else if (fl == 4) {
-                fl = 1;
-                if (fl & 1)
-                    usable = 1;
-            } else if (fl == 1) {
-                fl = 16;
-                if (it & 16) {
-                    usable = 1;
-                }
-            } else {
-                fl = 8;
-                if (it & 8) {
-                    usable = 1;
-                }
-            }
-        }
-    } else if (self.impulse == 40) {
-        if (!(it & (((2 | 4) | 16) | 8))) {
-            have_weapon = 0;
-        }
-        while (!usable && have_weapon) {
-            if (fl == 8) {
-                fl = 2;
-                if (it & 2) {
-                    usable = 1;
-                }
-                usable = 0;
-            } else if (fl == 2) {
-                fl = 4;
-                if (it & 4) {
-                    usable = 1;
-                }
-            } else if (fl == 4) {
-                fl = 16;
-                if (it & 16) {
-                    usable = 1;
-                }
-            } else {
-                fl = 8;
-                if (it & 8) {
-                    usable = 1;
-                }
-            }
-        }
     } else if (self.impulse == 2) {
         if (it & 32) {
             fl = 32;
@@ -2122,13 +2069,8 @@ void () W_ChangeWeapon = {
         }
     } else if (self.impulse == 176) {
         fl = 4;
-        if (it & 4) {
-            usable = 1;
-        }
     } else if (self.impulse == 69) {
         fl = self.last_weapon;
-        if (it & self.last_weapon)
-            usable = 1;
 
         if (((fl & (32 | 64 | 128 | 256 | 32768 | 262144)) != 0) &&
             (self.ammo_shells < 1)) {
