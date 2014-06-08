@@ -2069,7 +2069,7 @@ void () W_ChangeWeapon = {
         }
     } else if (self.impulse == 176) {
         fl = 4;
-    } else if (self.impulse == 69) {
+    } else if (self.impulse == TF_WEAPLAST) {
         fl = self.last_weapon;
 
         if (((fl & (32 | 64 | 128 | 256 | 32768 | 262144)) != 0) &&
@@ -2365,7 +2365,7 @@ void () ImpulseCommands = {
             CycleWeaponNext();
         else if (self.impulse == TF_WEAPPREV)
             CycleWeaponPrev();
-        else if ((self.impulse == 69) && (self.last_weapon != 0))
+        else if ((self.impulse == TF_WEAPLAST) && (self.last_weapon != 0))
             W_ChangeWeapon();
         else if (self.impulse == TF_GRENADE_1)
             TeamFortress_PrimeGrenade();

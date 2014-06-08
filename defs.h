@@ -337,6 +337,8 @@
 #define TF_CAM_FADETOWHITE		61
 #define TF_CAM_FADEFROMWHITE		62
 
+#define TF_WEAPLAST                     69
+
 // Status Bar Resolution Settings.  Same as CTF to maintain ease of use.
 #define TF_STATUSBAR_RES_START	71
 #define TF_STATUSBAR_RES_END	81
