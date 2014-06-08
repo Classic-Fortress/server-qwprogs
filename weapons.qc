@@ -2227,6 +2227,118 @@ void () CycleWeaponNext = {
     }
 };
 
+void () CycleWeaponPrev = {
+    local float it;
+    local float am;
+    local float cont;
+    local float loopcount;
+    local float lw;
+
+    if ((self.weaponmodel == string_null) || (self.current_weapon == 0))
+        return;
+    if (self.tfstate & TFSTATE_RELOADING)
+        return;
+
+    it = self.weapons_carried;
+    self.impulse = 0;
+    loopcount = 0;
+    lw = self.current_weapon;
+
+    while (TRUE) {
+        am = 0;
+        cont = 0;
+
+        if (self.current_weapon == WEAP_AXE)
+            self.current_weapon = WEAP_MEDIKIT;
+        else if (self.current_weapon == WEAP_SPANNER) {
+            self.current_weapon = WEAP_AXE;
+        } else if (self.current_weapon == WEAP_SHOTGUN) {
+            self.current_weapon = WEAP_SPANNER;
+        } else if (self.current_weapon == WEAP_LASER) {
+            self.current_weapon = WEAP_SHOTGUN;
+            if (self.ammo_shells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_TRANQ) {
+            self.current_weapon = WEAP_LASER;
+            if (self.ammo_nails < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+            self.current_weapon = WEAP_TRANQ;
+            if (self.ammo_shells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
+            self.current_weapon = WEAP_SNIPER_RIFLE;
+            if (self.ammo_shells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
+            self.current_weapon = WEAP_AUTO_RIFLE;
+            if (self.ammo_shells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_NAILGUN) {
+            self.current_weapon = WEAP_SUPER_SHOTGUN;
+            if (self.ammo_shells < 2)
+                am = 1;
+        } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
+            self.current_weapon = WEAP_NAILGUN;
+            if (self.ammo_nails < 1)
+                am = 1;
+        } else if ((self.current_weapon == WEAP_GRENADE_LAUNCHER) &&
+                   (self.weaponmode == GL_NORMAL)) {
+            self.current_weapon = WEAP_SUPER_NAILGUN;
+            if (self.ammo_nails < 2)
+                am = 1;
+        } else if ((self.current_weapon == WEAP_GRENADE_LAUNCHER) &&
+                   (self.weaponmode == GL_PIPEBOMB)) {
+            self.current_weapon = WEAP_GRENADE_LAUNCHER;
+            self.weaponmode = 0;
+            if (self.ammo_rockets < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
+            self.current_weapon = WEAP_GRENADE_LAUNCHER;
+            self.weaponmode = GL_PIPEBOMB;
+            if (self.ammo_rockets < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_LIGHTNING) {
+            self.current_weapon = WEAP_ROCKET_LAUNCHER;
+            if (self.ammo_rockets < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_FLAMETHROWER) {
+            self.current_weapon = WEAP_LIGHTNING;
+            if (self.ammo_cells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_INCENDIARY) {
+            self.current_weapon = WEAP_FLAMETHROWER;
+            if (self.ammo_cells < 1)
+                am = 1;
+        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+            self.current_weapon = WEAP_INCENDIARY;
+            if (self.ammo_rockets < 3)
+                am = 1;
+        }
+        else if (self.current_weapon == WEAP_MEDIKIT) {
+            self.current_weapon = WEAP_ASSAULT_CANNON;
+            if (self.ammo_cells < 7)
+                am = 1;
+            if (self.ammo_shells < 1)
+                am = 1;
+        }
+
+        if (loopcount > 30)
+            return;
+
+        loopcount = loopcount + 1;
+        if ((self.weapons_carried & self.current_weapon) && (am == 0)) {
+            if (self.current_weapon != WEAP_GRENADE_LAUNCHER)
+                self.weaponmode = 0;
+            self.last_weapon = lw;
+            W_SetCurrentAmmo();
+            W_PrintWeaponMessage();
+            self.StatusRefreshTime = time + 0.1;
+            return;
+        }
+    }
+};
+
 void () PreMatchImpulses;
 void () DeadImpulses;
 
@@ -2251,6 +2363,8 @@ void () ImpulseCommands = {
             W_ChangeWeapon();
         else if (self.impulse == TF_WEAPNEXT)
             CycleWeaponNext();
+        else if (self.impulse == TF_WEAPPREV)
+            CycleWeaponPrev();
         else if ((self.impulse == 69) && (self.last_weapon != 0))
             W_ChangeWeapon();
         else if (self.impulse == TF_GRENADE_1)
@@ -2342,6 +2456,8 @@ void () PreMatchImpulses = {
         W_ChangeWeapon();
     else if (self.impulse == TF_WEAPNEXT)
         CycleWeaponNext();
+    else if (self.impulse == TF_WEAPPREV)
+        CycleWeaponPrev();
 
     if (self.impulse == TF_INVENTORY)
         TeamFortress_Inventory();
