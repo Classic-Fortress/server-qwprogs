@@ -2115,7 +2115,7 @@ void () W_ChangeWeapon = {
     self.StatusRefreshTime = time + 0.1;
 };
 
-void () CycleWeaponCommand = {
+void () CycleWeaponNext = {
     local float it;
     local float am;
     local float cont;
@@ -2204,10 +2204,12 @@ void () CycleWeaponCommand = {
                 am = 1;
             if (self.ammo_shells < 1)
                 am = 1;
-        } else if (self.current_weapon == WEAP_ASSAULT_CANNON)
+        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
             self.current_weapon = WEAP_MEDIKIT;
-        else if (self.current_weapon == WEAP_MEDIKIT)
+        }
+        else if (self.current_weapon == WEAP_MEDIKIT) {
             self.current_weapon = WEAP_AXE;
+        }
 
         if (loopcount > 30)
             return;
@@ -2247,8 +2249,8 @@ void () ImpulseCommands = {
             W_ChangeWeapon();
         else if (self.impulse == AXE_IMP)
             W_ChangeWeapon();
-        else if ((self.impulse == 10) || (self.impulse == 12))
-            CycleWeaponCommand();
+        else if (self.impulse == TF_WEAPNEXT)
+            CycleWeaponNext();
         else if ((self.impulse == 69) && (self.last_weapon != 0))
             W_ChangeWeapon();
         else if (self.impulse == TF_GRENADE_1)
@@ -2338,8 +2340,8 @@ void () PreMatchImpulses = {
         W_ChangeWeapon();
     else if (self.impulse == AXE_IMP)
         W_ChangeWeapon();
-    else if ((self.impulse == 10) || (self.impulse == 12))
-        CycleWeaponCommand();
+    else if (self.impulse == TF_WEAPNEXT)
+        CycleWeaponNext();
 
     if (self.impulse == TF_INVENTORY)
         TeamFortress_Inventory();

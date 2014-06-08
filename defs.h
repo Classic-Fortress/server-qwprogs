@@ -309,6 +309,7 @@
 /*======================================================*/
 /* Impulse Defines					*/
 /*======================================================*/
+#define TF_WEAPNEXT             10
 // Alias check to see whether they already have the aliases
 #define TF_ALIAS_CHECK		13
 
