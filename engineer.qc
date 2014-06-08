@@ -231,10 +231,6 @@ void () EMPGrenadeExplode = {
 void () TeamFortress_EngineerBuild = {
     local entity te;
 
-    if (!(self.flags & 512)) {
-        CenterPrint(self, "You can't build in the air!\n\n");
-        return;
-    }
     if (self.is_building == 0) {
         if (((self.ammo_cells < 100) && !self.has_dispenser) &&
             !self.has_sentry) {

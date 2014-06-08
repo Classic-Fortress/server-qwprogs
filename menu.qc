@@ -490,6 +490,9 @@ void () Menu_Engineer = {
 };
 
 void (float inp) Menu_Engineer_Input = {
+    ResetMenu();
+    self.impulse = 0;
+
     if (inp == 1) {
         if (self.has_dispenser)
             DestroyBuilding(self, "building_dispenser");
@@ -501,9 +504,6 @@ void (float inp) Menu_Engineer_Input = {
         else if (self.ammo_cells >= 130)
             TeamFortress_Build(2);
     }
-
-    ResetMenu();
-    self.impulse = 0;
 };
 
 void () Menu_EngineerFix_Dispenser = {
