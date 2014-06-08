@@ -36,8 +36,6 @@ void (entity p) SetTeamName;
 void () autokick_think;
 float (float tno, float pc) ClassIsRestricted;
 
-void () Service_Grapple;
-
 void (entity AD) ParseTFDetect;
 entity(float ino) Finditem;
 
@@ -145,14 +143,12 @@ void () DecodeLevelParms = {
 
         toggleflags = parm10;
         flagem_checked = 0;
-        allow_hook = 0;
         invis_only = 0;
 
         if (coop || !deathmatch)
             toggleflags = toggleflags | TFLAG_CLASS_PERSIST;
 
         nextmap = mapname;
-        allow_hook = TRUE;
 
         ent = find(world, classname, "info_tfdetect");
         if (ent != world) {
@@ -346,14 +342,6 @@ void () DecodeLevelParms = {
             st = infokey(world, "fullteamscore");
         if (st == "on")
             toggleflags = toggleflags | TFLAG_FULLTEAMSCORE;
-
-        st = infokey(world, "g");
-        if (st == string_null)
-            st = infokey(world, "grapple");
-        if (st == "off")
-            allow_hook = FALSE;
-        if (!(toggleflags & TFLAG_GRAPPLE) && (st != "on"))
-            allow_hook = FALSE;
 
         st = infokey(world, "og");
         if (st == string_null)
@@ -1054,8 +1042,6 @@ void () PutClientInServer = {
     self.reload_rocket_launcher = 0;
 
     self.immune_to_check = time + 10;
-    self.on_hook = 0;
-    self.hook_out = 0;
     self.fire_held_down = 0;
 
     DecodeLevelParms();
@@ -1578,9 +1564,6 @@ void () PlayerPreThink = {
         (self.weapon > 16)) {
         self.weapon = W_BestWeapon();
         W_SetCurrentAmmo();
-    }
-    if (self.on_hook) {
-        Service_Grapple();
     }
 };
 
@@ -2335,9 +2318,6 @@ void (entity targ, entity attacker) ClientObituary = {
                         deathstring2 = "'s discharge\n";
                     else
                         deathstring2 = "'s shaft\n";
-                } else if (deathmsg == DMSG_HOOK) {
-                    deathstring = " grappled with ";
-                    deathstring2 = "\n";
                 } else if (deathmsg == DMSG_SNIPERRIFLE) {
                     if (rnum <= 0.3) {
                         deathstring = " takes a bullet in the chest from ";

@@ -487,9 +487,6 @@ void (entity AD) ParseTFDetect = {
     if (team4lives == 0) {
         team4lives = -1;
     }
-    if (AD.hook_out == 1) {
-        allow_hook = 0;
-    }
     team1maxplayers = AD.ammo_medikit;
     team2maxplayers = AD.ammo_detpack;
     team3maxplayers = AD.maxammo_medikit;

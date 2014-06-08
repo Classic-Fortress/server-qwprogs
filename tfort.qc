@@ -449,11 +449,6 @@ void () TeamFortress_ShowTF = {
     else
         sprint(self, PRINT_HIGH, "TeamFrags Off.\n");
 
-    if (allow_hook)
-        sprint(self, PRINT_HIGH, "Grapple On.\n");
-    else
-        sprint(self, PRINT_HIGH, "Grapple Off.\n");
-
     if (toggleflags & TFLAG_FULLTEAMSCORE)
         sprint(self, PRINT_HIGH, "Full TeamScore On.\n");
     else
@@ -1639,9 +1634,6 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_ARMOR2;
     else if (self.armortype >= 0.3)
         self.items = self.items | IT_ARMOR1;
-
-    if (allow_hook && (self.playerclass != PC_UNDEFINED))
-        self.weapons_carried = self.weapons_carried | WEAP_HOOK;
 
     W_SetCurrentAmmo();
 };

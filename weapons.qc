@@ -5,8 +5,6 @@ float (vector veca, vector vecb) crossproduct;
 
 void (vector org, float damage) SpawnBlood;
 
-void (entity rhook) Reset_Grapple;
-
 void () SuperDamageSound;
 
 void () ConcussionGrenadeTimer;
@@ -1720,7 +1718,6 @@ float () W_BestWeapon = {
 
 float () W_CheckNoAmmo = {
     if ((self.current_weapon == WEAP_AXE)
-        || (self.current_weapon == WEAP_HOOK)
         || (self.current_weapon == WEAP_SPANNER)
         || (self.current_weapon == WEAP_MEDIKIT)
         || (self.current_weapon == WEAP_BIOWEAPON))
@@ -1877,12 +1874,6 @@ void () player_bioweaponb1;
 void () player_bioweaponc1;
 void () player_bioweapond1;
 
-void () player_chain1;
-void () player_chain2;
-void () player_chain3;
-void () player_chain4;
-void () player_chain5;
-
 void () W_Attack = {
     local float r;
 
@@ -2033,12 +2024,7 @@ void () W_Attack = {
 };
 
 void () W_PrintWeaponMessage = {
-    if ((self.current_weapon == WEAP_AXE) && allow_hook) {
-        if (self.playerclass != PC_SPY)
-            sprint(self, PRINT_MEDIUM, "Axe selected\n");
-    } else if (self.current_weapon == WEAP_HOOK)
-        sprint(self, PRINT_MEDIUM, "grappling hook selected\n");
-    else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
+    if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (self.weaponmode == GL_NORMAL)
             sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
         else if (cb_prematch_time > time)
@@ -2079,7 +2065,7 @@ void () W_ChangeWeapon = {
     if (self.impulse == 1) {
         if (!
             (it &
-             (WEAP_HOOK | WEAP_BIOWEAPON | WEAP_MEDIKIT | WEAP_AXE |
+             (WEAP_BIOWEAPON | WEAP_MEDIKIT | WEAP_AXE |
               WEAP_SPANNER)))
             have_weapon = FALSE;
 
@@ -2095,12 +2081,8 @@ void () W_ChangeWeapon = {
                     usable = 1;
             } else if (fl == 4) {
                 fl = 1;
-                if (allow_hook && (fl & 1)) {
+                if (fl & 1)
                     usable = 1;
-                }
-                if (self.hook_out) {
-                    Reset_Grapple(self.hook);
-                }
             } else if (fl == 1) {
                 fl = 16;
                 if (it & 16) {
@@ -2113,9 +2095,6 @@ void () W_ChangeWeapon = {
                 }
             }
         }
-    } else if (allow_hook &&
-               ((self.impulse == 22) || (self.impulse == 39))) {
-        fl = 1;
     } else if (self.impulse == 40) {
         if (!(it & (((2 | 4) | 16) | 8))) {
             have_weapon = 0;
@@ -2379,11 +2358,7 @@ void () CycleWeaponCommand = {
                 am = 1;
             if (self.ammo_shells < 1)
                 am = 1;
-        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-            self.current_weapon = WEAP_HOOK;
-            if (!allow_hook)
-                am = 1;
-        } else if (self.current_weapon == WEAP_HOOK)
+        } else if (self.current_weapon == WEAP_ASSAULT_CANNON)
             self.current_weapon = WEAP_MEDIKIT;
         else if (self.current_weapon == WEAP_BIOWEAPON)
             self.current_weapon = WEAP_MEDIKIT;
@@ -2425,10 +2400,6 @@ void () ImpulseCommands = {
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (((self.impulse >= 1) && (self.impulse < 8)) ||
             (self.impulse == TF_MEDIKIT))
-            W_ChangeWeapon();
-        else if (allow_hook &&
-                 ((self.impulse == HOOK_IMP1) ||
-                  (self.impulse == HOOK_IMP2)))
             W_ChangeWeapon();
         else if (self.impulse == AXE_IMP)
             W_ChangeWeapon();
@@ -2520,9 +2491,6 @@ void () ImpulseCommands = {
 void () PreMatchImpulses = {
     if (((self.impulse >= 1) && (self.impulse < 8)) ||
         (self.impulse == TF_MEDIKIT))
-        W_ChangeWeapon();
-    else if (allow_hook &&
-             ((self.impulse == HOOK_IMP1) || (self.impulse == HOOK_IMP2)))
         W_ChangeWeapon();
     else if (self.impulse == AXE_IMP)
         W_ChangeWeapon();

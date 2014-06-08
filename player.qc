@@ -9,7 +9,6 @@
 // };
 
 void () bubble_bob;
-void () Throw_Grapple;
 void () T_Dispenser;
 void () Headless_Think;
 
@@ -240,53 +239,6 @@ void () player_axed3 =[139, player_axed4] {
 
 void () player_axed4 =[140, player_run] {
     self.weaponframe = 8;
-};
-
-//=========================
-// QW Grappling hook frames
-void () player_chain1 =[137, player_chain1a] {
-    self.weaponframe = 1;
-    Throw_Grapple();
-};
-
-void () player_chain1a =[137, player_chain2] {
-    self.weaponframe = 2;
-};
-
-void () player_chain2 =[138, player_chain2a] {
-    self.weaponframe = 3;
-};
-
-void () player_chain2a =[138, player_chain3] {
-    self.weaponframe = 4;
-};
-
-void () player_chain3 =[139, player_chain3] {
-    self.weaponframe = 6;
-    if (!self.hook_out) {
-        player_chain5();
-        return;
-    }
-    if (vlen(self.velocity) >= 750) {
-        player_chain4();
-        return;
-    }
-};
-
-void () player_chain4 =[73, player_chain4] {
-    self.weaponframe = 6;
-    if (!self.hook_out) {
-        player_chain5();
-        return;
-    }
-    if (vlen(self.velocity) < 750) {
-        player_chain3();
-        return;
-    }
-};
-
-void () player_chain5 =[140, player_run] {
-    self.weaponframe = 0;
 };
 
 void () player_medikit1 =[119, player_medikit2] {
@@ -1016,11 +968,6 @@ void () PlayerDie = {
     local float i;
     local entity te;
 
-    if (self.hook_out) {
-        Reset_Grapple(self.hook);
-        Attack_Finished(0.75);
-        self.hook_out = 1;
-    }
     self.items = self.items - (self.items & 524288);
     self.invisible_finished = 0;
     self.invincible_finished = 0;

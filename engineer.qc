@@ -409,7 +409,7 @@ void (entity bld) CheckBelowBuilding = {
 
 void () DispenserThink = {
     CheckBelowBuilding(self);
-    if (self.hook_out > 3) {
+    if (self.disptimer > 3) {
         self.ammo_shells =
             self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS / 20);
         self.ammo_cells =
@@ -435,9 +435,9 @@ void () DispenserThink = {
         if (self.armorvalue > BUILD_DISPENSER_MAX_ARMOR) {
             self.armorvalue = BUILD_DISPENSER_MAX_ARMOR;
         }
-        self.hook_out = 0;
+        self.disptimer = 0;
     }
-    self.hook_out = self.hook_out + 1;
+    self.disptimer = self.disptimer + 1;
     self.nextthink = time + 3;
 };
 
@@ -468,7 +468,7 @@ void () TeamFortress_FinishedBuilding = {
         oldself.touch = T_Dispenser;
         oldself.max_health = 150;
         oldself.health = 150;
-        oldself.hook_out = 1;
+        oldself.disptimer = 1;
         oldself.think = DispenserThink;
         oldself.nextthink = time + 3;
         oldself.th_die = Dispenser_Die;

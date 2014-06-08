@@ -272,7 +272,6 @@ void () worldspawn = {
     precache_model2("progs/dgib3.mdl");
     precache_model2("progs/grenade2.mdl");
     precache_model2("progs/v_grap.mdl");
-    precache_model2("progs/hook.mdl");
     precache_model2("progs/caltrop.mdl");
     precache_sound("doors/baseuse.wav");
     precache_sound("doors/medtry.wav");

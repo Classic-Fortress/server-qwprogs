@@ -322,12 +322,8 @@ float live_camera;
 
 float already_chosen_map;
 
-// grappling hook variables
-.entity hook;
-.float on_hook;
-.float hook_out;
-.float fire_held_down;          // flag - TRUE if player is still holding down the
-                        // fire button after throwing a hook.
+.float disptimer;
+.float fire_held_down;
 
 // sniper location damage stuff
 .vector head_shot_vector;
@@ -364,7 +360,6 @@ float last_id;
 float spy_off;
 float old_grens;
 float invis_only;
-float allow_hook;
 float flagem_checked;
 float cease_fire;
 

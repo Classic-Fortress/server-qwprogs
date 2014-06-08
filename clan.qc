@@ -60,11 +60,6 @@ void () PreMatch_Think = {
             stuffcmd(self, "\n");
             sprint(self, PRINT_HIGH, "Your Battle ID is ", st, "\n");
         }
-        if (self.hook_out) {
-            Reset_Grapple(self.hook);
-            Attack_Finished(0.75);
-            self.hook_out = 1;
-        }
         TeamFortress_RemoveTimers();
         self.frags = 0;
         self.real_frags = 0;

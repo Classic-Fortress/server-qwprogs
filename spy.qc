@@ -417,11 +417,6 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             sprint(self, PRINT_HIGH, "You can't feign right now.\n");
             return;
         }
-        if (self.hook_out) {
-            sprint(self, PRINT_HIGH,
-                   "You can't feign with the hook out.\n");
-            return;
-        }
         if (!(self.flags & 512) && (self.waterlevel == 0)) {
             sprint(self, PRINT_HIGH, "You can't feign in the air.\n");
             return;
