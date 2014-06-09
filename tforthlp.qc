@@ -99,6 +99,14 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("flaginfo", FLAG_INFO, 0);
         TeamFortress_Alias("maphelp", TF_HELP_MAP, 0);
         TeamFortress_Alias("showids", TF_SHOW_IDS, 0);
+        stuffcmd(self, "bind 1 \"impulse 1\"\n");
+        stuffcmd(self, "bind 2 \"impulse 2\"\n");
+        stuffcmd(self, "bind 3 \"impulse 3\"\n");
+        stuffcmd(self, "bind 4 \"impulse 4\"\n");
+        stuffcmd(self, "bind 5 \"impulse 5\"\n");
+        stuffcmd(self, "bind 6 \"impulse 6\"\n");
+        stuffcmd(self, "bind 7 \"impulse 7\"\n");
+        stuffcmd(self, "bind 8 \"impulse 8\"\n");
         stuffcmd(self, "bind 9 \"impulse 9\"\n");
         stuffcmd(self, "bind 0 \"impulse 10\"\n");
         return;
