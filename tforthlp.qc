@@ -60,6 +60,9 @@ void () TeamFortress_MOTD = {
         self.motd = self.motd + 1;
 
     if (self.motd == 25) {
+        TeamFortress_Alias("weapnext", TF_WEAPNEXT, 0);
+        TeamFortress_Alias("weapprev", TF_WEAPPREV, 0);
+        TeamFortress_Alias("weaplast", TF_WEAPLAST, 0);
         TeamFortress_Alias("detpipe", TF_PB_DETONATE, 0);
         TeamFortress_Alias("reload", TF_RELOAD, 0);
         TeamFortress_Alias("autoscan", TF_SCAN, 0);
