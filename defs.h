@@ -230,6 +230,8 @@
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
+#define TFSTATE_ZOOM4X       131072  // set 2x autozoom
+#define TFSTATE_ZOOM2X       262144  // set 4x autozoom
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
@@ -361,10 +363,15 @@
 //PC_SPY		110
 //PC_ENGINEER		111
 
+// Sniper Zoom impulses
+#define TF_ZOOMTOGGLE       113
+#define TF_ZOOMOFF          114
+#define TF_ZOOM4X           115
+#define TF_ZOOM2X           116
+
 // Help impulses
 #define TF_DISPLAYLOCATION	118
 #define TF_STATUS_QUERY		119
-
 #define TF_HELP_MAP		131
 
 // Information impulses
@@ -408,9 +415,6 @@
 
 // Reload impulse
 #define TF_RELOAD		173
-
-// auto-zoom toggle
-#define TF_AUTOZOOM		174
 
 // drop/pass commands
 #define TF_DROPKEY		175

@@ -42,7 +42,10 @@ void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void () TeamFortress_ID;
 void () TeamFortress_ReloadCurrentWeapon;
-void () TeamFortress_AutoZoomToggle;
+void () TeamFortress_ZoomToggle;
+void () TeamFortress_SetZoomOff;
+void () TeamFortress_SetZoom4x;
+void () TeamFortress_SetZoom2x;
 void () TeamFortress_StatusQuery;
 void () TeamFortress_SpyGoUndercover;
 void () TeamFortress_EngineerBuild;
@@ -2495,8 +2498,14 @@ void () PreMatchImpulses = {
 void () DeadImpulses = {
     if (self.impulse == TF_SHOWTF)
         TeamFortress_ShowTF();
-    else if (self.impulse == TF_AUTOZOOM)
-        TeamFortress_AutoZoomToggle();
+    else if (self.impulse == TF_ZOOMTOGGLE)
+        TeamFortress_ZoomToggle();
+    else if (self.impulse == TF_ZOOMOFF)
+        TeamFortress_SetZoomOff();
+    else if (self.impulse == TF_ZOOM4X)
+        TeamFortress_SetZoom4x();
+    else if (self.impulse == TF_ZOOM2X)
+        TeamFortress_SetZoom2x();
     else if (self.impulse == TF_SHOWLEGALCLASSES)
         TeamFortress_DisplayLegalClasses();
     else if ((self.impulse > 100) && (self.impulse <= (100 + 10))) {
@@ -2605,12 +2614,34 @@ void () DeadImpulses = {
 
 void () W_WeaponFrame = {
     local vector tv;
+    local float zoom_level;
+    local float zoom4x;
+    local float zoom2x;
 
-    if (!(self.tfstate & 2048)) {
-        if ((self.height > 29) && (self.height < 90)) {
-            self.height = self.height + 8;
-            if (self.height > 90)
+    zoom4x = stof(infokey(self, "z4x"));
+    zoom2x = stof(infokey(self, "z2x"));
+
+    if (zoom4x < 10) {
+        zoom4x = 20;
+    }
+    if (zoom2x < 10) {
+        zoom2x = 40;
+    }
+
+    if (!(self.tfstate & TFSTATE_AIMING)) {
+        if (self.tfstate & TFSTATE_ZOOM4X) {
+            zoom_level = zoom4x;
+        }
+        else if (self.tfstate & TFSTATE_ZOOM2X) {
+            zoom_level = zoom2x;
+        } else if (self.tfstate & TFSTATE_ZOOMOFF) {
+            zoom_level = 90;
+        }
+        if ((self.height >= zoom_level) && (self.height < 90)) {
+            self.height = self.height + 10;
+            if (self.height >= 90) {
                 self.height = 90;
+            }
 
             TF_zoom(self.height);
         }
@@ -2659,15 +2690,30 @@ void () W_WeaponFrame = {
         player_run();
     }
     if (self.button0 && !self.fire_held_down) {
-        if (self.current_weapon == 32) {
-            if (self.tfstate & 2048) {
+        if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+            if (self.tfstate & TFSTATE_AIMING) {
+                if (self.tfstate & TFSTATE_ZOOM4X) {
+                    zoom_level = zoom4x;
+                }
+                else if (self.tfstate & TFSTATE_ZOOM2X) {
+                    zoom_level = zoom2x;
+                } else if (self.tfstate & TFSTATE_ZOOMOFF) {
+                    zoom_level = 90;
+                }
                 if (self.heat < 400) {
                     self.heat = self.heat + 3;
                 }
-                if (self.height > 30) {
-                    self.height = self.height - 5;
-                    TF_zoom(self.height);
+                if ((self.height == 90) && (zoom_level < 90)) {
+                    stuffcmd(self, "setinfo sens $sensitivity\n");
                 }
+                if (self.height > zoom_level) {
+                    self.height = self.height - 20;
+                }
+                if (self.height <= zoom_level) {
+                    self.height = zoom_level;
+                }
+
+                TF_zoom(self.height);
             } else {
                 tv = self.velocity;
                 tv_z = 0;

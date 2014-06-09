@@ -20,7 +20,7 @@ void () UseSpecialSkill = {
     if (self.playerclass == PC_SCOUT)
         self.impulse = TF_SCAN;
     else if (self.playerclass == PC_SNIPER)
-        self.impulse = TF_AUTOZOOM;
+        self.impulse = TF_ZOOMTOGGLE;
     else if (self.playerclass == PC_SOLDIER)
         self.impulse = TF_RELOAD;
     else if (self.playerclass == PC_DEMOMAN)

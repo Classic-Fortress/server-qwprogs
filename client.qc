@@ -1096,6 +1096,7 @@ void () PutClientInServer = {
     TeamFortress_SetSkin(self);
 
     stuffcmd(self, "v_idlescale 0\nfov 90\n");
+    stuffcmd(self, "setinfo sens $sensitivity\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
     W_SetCurrentAmmo();
