@@ -2661,10 +2661,6 @@ void () W_WeaponFrame = {
                     Menu_Class_Input(self.impulse);
                 }
             }
-        } else if (self.impulse > TF_ALIAS_CHECK) {
-            self.impulse = 0;
-            ResetMenu();
-            return;
         }
     }
     if (intermission_running)

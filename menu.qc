@@ -68,13 +68,14 @@ void (entity pl, string s1, string s2) CenterPrint2;
 
 void () ResetMenu =
 {
-    if (self.StatusBarSize == 0)
+    if (self.current_menu != MENU_DEFAULT) {
         CenterPrint(self, "\n");
-    else
-        self.StatusRefreshTime = time + 0.1;
+        if (self.StatusBarSize != 0)
+            RefreshStatusBar(self);
 
-    self.menu_count = MENU_REFRESH_RATE;
-    self.current_menu = MENU_DEFAULT;
+        self.menu_count = MENU_REFRESH_RATE;
+        self.current_menu = MENU_DEFAULT;
+    }
 };
 
 void () Player_Menu = {
