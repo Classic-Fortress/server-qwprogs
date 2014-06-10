@@ -4,15 +4,11 @@ float () TeamFortress_TeamGetSecond;
 string(float num) NumberToString1000;
 
 string(entity pl) GetStatusSize;
-string(float num) BlueScoreToString100;
-string(float num) BlueScoreToString1000;
-string(float num) RedScoreToString100;
-string(float num) RedScoreToString1000;
-string(float num) YellowScoreToString100;
-string(float num) YellowScoreToString1000;
-string(float num) GreenScoreToString100;
-string(float num) GreenScoreToString1000;
-string(entity pl) ClipSizeToString100;
+string(float num) BlueScoreToString;
+string(float num) RedScoreToString;
+string(float num) YellowScoreToString;
+string(float num) GreenScoreToString;
+string(entity pl) ClipSizeToString;
 string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
@@ -64,53 +60,53 @@ void (entity pl) RefreshStatusBar = {
         (TeamFortress_TeamGetScore(sec) > 100)) {
 
         if (win == 0)
-            s3 = BlueScoreToString1000(team1score);
+            s3 = BlueScoreToString(team1score);
         else if (win == 1)
-            s3 = BlueScoreToString1000(team1score);
+            s3 = BlueScoreToString(team1score);
         else if (win == 2)
-            s3 = RedScoreToString1000(team2score);
+            s3 = RedScoreToString(team2score);
         else if (win == 3)
-            s3 = YellowScoreToString1000(team3score);
+            s3 = YellowScoreToString(team3score);
         else
-            s3 = GreenScoreToString1000(team4score);
+            s3 = GreenScoreToString(team4score);
 
         if (sec == 0)
-            s4 = RedScoreToString1000(team2score);
+            s4 = RedScoreToString(team2score);
         else if (sec == 1)
-            s4 = BlueScoreToString1000(team1score);
+            s4 = BlueScoreToString(team1score);
         else if (sec == 2)
-            s4 = RedScoreToString1000(team2score);
+            s4 = RedScoreToString(team2score);
         else if (sec == 3)
-            s4 = YellowScoreToString1000(team3score);
+            s4 = YellowScoreToString(team3score);
         else
-            s4 = GreenScoreToString1000(team4score);
+            s4 = GreenScoreToString(team4score);
 
     } else {
 
         if (win == 0)
-            s3 = BlueScoreToString1000(team1score);
+            s3 = BlueScoreToString(team1score);
         else if (win == 1)
-            s3 = BlueScoreToString100(team1score);
+            s3 = BlueScoreToString(team1score);
         else if (win == 2)
-            s3 = RedScoreToString100(team2score);
+            s3 = RedScoreToString(team2score);
         else if (win == 3)
-            s3 = YellowScoreToString100(team3score);
+            s3 = YellowScoreToString(team3score);
         else
-            s3 = GreenScoreToString100(team4score);
+            s3 = GreenScoreToString(team4score);
 
         if (sec == 0)
-            s4 = RedScoreToString1000(team2score);
+            s4 = RedScoreToString(team2score);
         else if (sec == 1)
-            s4 = BlueScoreToString100(team1score);
+            s4 = BlueScoreToString(team1score);
         else if (sec == 2)
-            s4 = RedScoreToString100(team2score);
+            s4 = RedScoreToString(team2score);
         else if (sec == 3)
-            s4 = YellowScoreToString100(team3score);
+            s4 = YellowScoreToString(team3score);
         else
-            s4 = GreenScoreToString100(team4score);
+            s4 = GreenScoreToString(team4score);
     }
 
-    s5 = ClipSizeToString100(pl);
+    s5 = ClipSizeToString(pl);
     s2 = "\n";
     if (pl.playerclass == PC_SCOUT) {
 
@@ -239,12 +235,7 @@ string(float num) NumberToString1000 =
     return strpadl(ftos(floor(num)), 3);
 };
 
-string(float num) BlueScoreToString100 =
-{
-    return BlueScoreToString1000(num);
-};
-
-string(float num) BlueScoreToString1000 =
+string(float num) BlueScoreToString =
 {
     if (num > 999)
         num = 999;
@@ -252,12 +243,7 @@ string(float num) BlueScoreToString1000 =
     return strcat("  Blue:", strpadl(ftos(floor(num)), 3));
 };
 
-string(float num) RedScoreToString100 =
-{
-    return RedScoreToString1000(num);
-};
-
-string(float num) RedScoreToString1000 =
+string(float num) RedScoreToString =
 {
     if (num > 999)
         num = 999;
@@ -265,12 +251,7 @@ string(float num) RedScoreToString1000 =
     return strcat("  Red :", strpadl(ftos(floor(num)), 3));
 };
 
-string(float num) YellowScoreToString100 =
-{
-    return YellowScoreToString1000(num);
-};
-
-string(float num) YellowScoreToString1000 =
+string(float num) YellowScoreToString =
 {
     if (num > 999)
         num = 999;
@@ -278,12 +259,7 @@ string(float num) YellowScoreToString1000 =
     return strcat("  Yell:", strpadl(ftos(floor(num)), 3));
 };
 
-string(float num) GreenScoreToString100 =
-{
-    return GreenScoreToString1000(num);
-};
-
-string(float num) GreenScoreToString1000 =
+string(float num) GreenScoreToString =
 {
     if (num > 999)
         num = 999;
@@ -291,7 +267,7 @@ string(float num) GreenScoreToString1000 =
     return strcat("  Gren:", strpadl(ftos(floor(num)), 3));
 };
 
-string(entity pl) ClipSizeToString100 =
+string(entity pl) ClipSizeToString =
 {
     local float num;
 
