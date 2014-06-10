@@ -629,13 +629,30 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun = {
-    if ((self.building.weapon < 3) && (self.ammo_cells >= 130)) {
-        CenterPrint(self,
-                    "Action:                            \n“‘ Put Ammo into Sentry Gun    \n”‘ Upgrade Sentry Gun          \n•‘ Repair Sentry Gun           \n–‘ Dismantle Sentry Gun        \n—‘ Nothing                     \n\n˜‘ Rotate SentryGun            \n");
-    } else {
-        CenterPrint(self,
-                    "Action:                            \n“‘ Put Ammo into Sentry Gun    \n\n•‘ Repair Sentry Gun           \n–‘ Dismantle Sentry Gun        \n—‘ Nothing                     \n\n˜‘ Rotate SentryGun            \n");
-    }
+    local string action     = "Action:                            \n";
+    local string putammo;
+    local string upgrade;
+    local string repair;
+    local string rotate     = "–‘ Rotate Sentry Gun           \n";
+    local string nothing    = "\n—‘ Nothing                     ";
+
+    if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
+            || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
+        putammo = "“‘ Put Ammo into Sentry Gun    \n";
+    else
+        putammo = "\n";
+
+    if (self.building.weapon < 3 && self.ammo_cells >= 130)
+        upgrade = "”‘ Upgrade Sentry Gun          \n";
+    else
+        upgrade = "\n";
+
+    if (self.building.health < self.building.max_health)
+        repair = "•‘ Repair Sentry Gun           \n";
+    else
+        repair = "\n";
+
+    centerprint(self, action, putammo, upgrade, repair, rotate, nothing);
 };
 
 void (float inp) Menu_EngineerFix_SentryGun_Input = {
@@ -706,43 +723,23 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
             self.ammo_cells = self.ammo_cells - metalcost;
             self.building.health = self.building.health + metalcost * 5;
         } else if (inp == 4) {
-            sprint(self, PRINT_HIGH, "You dismantle the Sentry Gun.\n");
-            self.ammo_cells = (self.ammo_cells + (130 / 2));
-            if (self.building.real_owner != self) {
-                sprint2(self.building.real_owner, PRINT_HIGH, self.netname,
-                        " dismantled your Sentry Gun.\n");
-                teamsprint(self.building.real_owner.team_no,
-                           self.building.real_owner, self.netname);
-                teamsprint(self.building.real_owner.team_no,
-                           self.building.real_owner, " dismantled ");
-                teamsprint(self.building.real_owner.team_no,
-                           self.building.real_owner,
-                           self.building.real_owner.netname);
-                teamsprint(self.building.real_owner.team_no,
-                           self.building.real_owner, "'s Sentry Gun.\n");
-            }
-            dremove(self.building.trigger_field);
-            dremove(self.building);
-            self.building.real_owner.has_sentry = 0;
-        } else if (inp == 6) {
             sprint(self, PRINT_HIGH,
                    "Rotating 45 degrees to the left...\n");
             self.building.waitmin = anglemod(self.building.waitmin + 45);
             self.building.waitmax = anglemod(self.building.waitmax + 45);
         }
     }
-    if ((inp >= 1) && (inp <= 6)) {
-        ResetMenu();
-        self.impulse = 0;
-        bound_other_ammo(self);
-        if (self.armorvalue == 0) {
-            self.armortype = 0;
-            self.armorclass = 0;
-            self.items =
-                (self.items - (self.items & ((8192 | 16384) | 32768)));
-        }
-        W_SetCurrentAmmo();
+
+    ResetMenu();
+    self.impulse = 0;
+    bound_other_ammo(self);
+    if (self.armorvalue == 0) {
+        self.armortype = 0;
+        self.armorclass = 0;
+        self.items =
+            (self.items - (self.items & ((8192 | 16384) | 32768)));
     }
+    W_SetCurrentAmmo();
 };
 
 void () Menu_Dispenser = {
