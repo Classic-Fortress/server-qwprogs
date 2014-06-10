@@ -1011,7 +1011,6 @@ void () TeamFortress_SetEquipment;
 void () player_touch;
 
 void () PutClientInServer = {
-    local float iszoom;
     local float oldclass;
     local entity spot;
     local entity te;
@@ -1063,9 +1062,6 @@ void () PutClientInServer = {
             TeamFortress_ExecClassScript(self);
         }
     }
-    iszoom = 0;
-    if (self.tfstate & TFSTATE_ZOOMOFF)
-        iszoom = 1;
 
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
@@ -1079,9 +1075,6 @@ void () PutClientInServer = {
         TeamFortress_ExecClassScript(self);
     } else
         self.tfstate = 0;
-
-    if (iszoom == 1)
-        self.tfstate = self.tfstate | TFSTATE_ZOOMOFF;
 
     if (self.playerclass != PC_ENGINEER)
         Engineer_RemoveBuildings(self);
@@ -1097,6 +1090,7 @@ void () PutClientInServer = {
 
     stuffcmd(self, "v_idlescale 0\nfov 90\n");
     stuffcmd(self, "setinfo sens $sensitivity\n");
+    stuffcmd(self, "setinfo df $default_fov\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
     W_SetCurrentAmmo();
@@ -1105,6 +1099,9 @@ void () PutClientInServer = {
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
+    self.current_fov = 90;
+    self.zoom_in = 0;
+    self.zoom_out = 0;
 
     TF_zoom(90);
 

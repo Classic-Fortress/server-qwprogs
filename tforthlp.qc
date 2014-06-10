@@ -14,7 +14,7 @@ void () TeamFortress_MOTD = {
     }
 
     if (self.motd == 21) {
-        self.tfstate = self.tfstate | TFSTATE_ZOOMOFF;
+        self.zoom_mode = 0;
 
         if ((teamplay != 0) && (self.team_no == 0)) {
             stuffcmd(self, "color ");
