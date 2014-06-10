@@ -394,3 +394,23 @@ void () muzzleflash = {
     WriteEntity(MSG_MULTICAST, self);
     multicast(self.origin, MULTICAST_PVS);
 };
+
+string (string s, float width) strpadl =
+{
+    local float i;
+
+    for (i = strlen(s); i < width; i++)
+        s = strcat(" ", s);
+
+    return s;
+};
+
+string (string s, float width) strpadr =
+{
+    local float i;
+
+    for (i = strlen(s); i < width; i++)
+        s = strcat(s, " ");
+
+    return s;
+};
