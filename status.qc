@@ -320,8 +320,37 @@ string(entity pl) ClipSizeToString100 =
     return strcat("  ÃÌÉÐ:", strpadl(ftos(floor(num)), 2));
 };
 
+string(float num) TeamToString =
+{
+    if (num == 1) return "Blue";
+    if (num == 2) return "Red";
+    if (num == 3) return "Yellow";
+    if (num == 4) return "Green";
+    return " ";
+};
+
+string(float num) ClassToString =
+{
+    if (num == 1) return "Scout";
+    if (num == 2) return "Sniper";
+    if (num == 3) return "Soldier";
+    if (num == 4) return "Demoman";
+    if (num == 5) return "Medic";
+    if (num == 6) return "Hvy Wpns";
+    if (num == 7) return "Pyro";
+    if (num == 8) return "Spy";
+    if (num == 9) return "Engineer";
+    if (num == 11) return "Civilian";
+    if (num == 13) return "Sentry Gun";
+    if (num == 14) return "Goal Item";
+    return "";
+};
+
+
 string(entity pl) DisguiseToString =
 {
+    local string st;
+
     if (pl.is_undercover == 0)
         return ("\n");
     if (pl.is_undercover == 2)
@@ -329,110 +358,11 @@ string(entity pl) DisguiseToString =
     if (invis_only)
         return ("undercover                             \n");
 
-    if (pl.undercover_team == 1) {
-        if (!pl.undercover_skin) {
-            return ("Blue                                   \n");
-        } else if (pl.undercover_skin == 1) {
-            return ("Blue Scout                             \n");
-        } else if (pl.undercover_skin == 2) {
-            return ("Blue Sniper                            \n");
-        } else if (pl.undercover_skin == 3) {
-            return ("Blue Soldier                           \n");
-        } else if (pl.undercover_skin == 4) {
-            return ("Blue Demoman                           \n");
-        } else if (pl.undercover_skin == 5) {
-            return ("Blue Medic                             \n");
-        } else if (pl.undercover_skin == 6) {
-            return ("Blue Hvy Wpns                          \n");
-        } else if (pl.undercover_skin == 7) {
-            return ("Blue Pyro                              \n");
-        } else if (pl.undercover_skin == 8) {
-            return ("Blue Spy                               \n");
-        } else
-            return ("Blue Engineer                          \n");
-    } else if (pl.undercover_team == 2) {
-        if (!pl.undercover_skin) {
-            return ("Red                                    \n");
-        } else if (pl.undercover_skin == 1) {
-            return ("Red Scout                              \n");
-        } else if (pl.undercover_skin == 2) {
-            return ("Red Sniper                             \n");
-        } else if (pl.undercover_skin == 3) {
-            return ("Red Soldier                            \n");
-        } else if (pl.undercover_skin == 4) {
-            return ("Red Demoman                            \n");
-        } else if (pl.undercover_skin == 5) {
-            return ("Red Medic                              \n");
-        } else if (pl.undercover_skin == 6) {
-            return ("Red Hvy Wpns                           \n");
-        } else if (pl.undercover_skin == 7) {
-            return ("Red Pyro                               \n");
-        } else if (pl.undercover_skin == 8) {
-            return ("Red Spy                                \n");
-        } else
-            return ("Red Engineer                           \n");
-    } else if (pl.undercover_team == 3) {
-        if (!pl.undercover_skin) {
-            return ("Yellow                                 \n");
-        } else if (pl.undercover_skin == 1) {
-            return ("Yellow Scout                           \n");
-        } else if (pl.undercover_skin == 2) {
-            return ("Yellow Sniper                          \n");
-        } else if (pl.undercover_skin == 3) {
-            return ("Yellow Soldier                         \n");
-        } else if (pl.undercover_skin == 4) {
-            return ("Yellow Demoman                         \n");
-        } else if (pl.undercover_skin == 5) {
-            return ("Yellow Medic                           \n");
-        } else if (pl.undercover_skin == 6) {
-            return ("Yellow Hvy Wpns                        \n");
-        } else if (pl.undercover_skin == 7) {
-            return ("Yellow Pyro                            \n");
-        } else if (pl.undercover_skin == 8) {
-            return ("Yellow Spy                             \n");
-        } else
-            return ("Yellow Engineer                        \n");
-    } else if (pl.undercover_team == 4) {
-        if (!pl.undercover_skin) {
-            return ("Green                                  \n");
-        } else if (pl.undercover_skin == 1) {
-            return ("Green Scout                            \n");
-        } else if (pl.undercover_skin == 2) {
-            return ("Green Sniper                           \n");
-        } else if (pl.undercover_skin == 3) {
-            return ("Green Soldier                          \n");
-        } else if (pl.undercover_skin == 4) {
-            return ("Green Demoman                          \n");
-        } else if (pl.undercover_skin == 5) {
-            return ("Green Medic                            \n");
-        } else if (pl.undercover_skin == 6) {
-            return ("Green Hvy Wpns                         \n");
-        } else if (pl.undercover_skin == 7) {
-            return ("Green Pyro                             \n");
-        } else if (pl.undercover_skin == 8) {
-            return ("Green Spy                              \n");
-        } else
-            return ("Green Engineer                         \n");
-    } else {
-        if (pl.undercover_skin == 1) {
-            return ("  Scout                                \n");
-        } else if (pl.undercover_skin == 2) {
-            return ("  Sniper                               \n");
-        } else if (pl.undercover_skin == 3) {
-            return ("  Soldier                              \n");
-        } else if (pl.undercover_skin == 4) {
-            return ("  Demoman                              \n");
-        } else if (pl.undercover_skin == 5) {
-            return ("  Medic                                \n");
-        } else if (pl.undercover_skin == 6) {
-            return ("  Hvy Wpns                             \n");
-        } else if (pl.undercover_skin == 7) {
-            return ("  Pyro                                 \n");
-        } else if (pl.undercover_skin == 8) {
-            return ("  Spy                                  \n");
-        } else
-            return ("  Engineer                             \n");
-    }
+    st = TeamToString(pl.undercover_team);
+    st = strcat(st, " ");
+    st = strcat(st, ClassToString(pl.undercover_skin));
+    st = strpadr(st, 39);
+    return strcat(st, "\n");
 };
 
 string(entity pl) RangeToString =
@@ -461,6 +391,7 @@ string(entity pl) RangeToString =
 string(entity pl) ScannerToString =
 {
     local entity te;
+    local string st;
 
     te = find(world, netname, "scanner");
     while ((te != world) && (te.owner != pl))
@@ -470,153 +401,11 @@ string(entity pl) ScannerToString =
         return ("Scanner off");
 
     if (te.health > 0) {
-        if (te.team_no == 1) {
-            if (!te.playerclass) {
-                return ("Blue               Range: ");
-            } else if (te.playerclass == 1) {
-                return ("Blue Scout         Range: ");
-            } else if (te.playerclass == 2) {
-                return ("Blue Sniper        Range: ");
-            } else if (te.playerclass == 3) {
-                return ("Blue Soldier       Range: ");
-            } else if (te.playerclass == 4) {
-                return ("Blue Demoman       Range: ");
-            } else if (te.playerclass == 5) {
-                return ("Blue Medic         Range: ");
-            } else if (te.playerclass == 6) {
-                return ("Blue Hvy Wpns      Range: ");
-            } else if (te.playerclass == 7) {
-                return ("Blue Pyro          Range: ");
-            } else if (te.playerclass == 8) {
-                return ("Blue Spy           Range: ");
-            } else if (te.playerclass == 9) {
-                return ("Blue Engineer      Range: ");
-            } else if (te.playerclass == 11) {
-                return ("Blue Civilian      Range: ");
-            } else if (te.playerclass == 13) {
-                return ("Blue Sentry Gun    Range: ");
-            } else if (te.playerclass == 14) {
-                return ("Blue Goal Item     Range: ");
-            } else {
-                return ("                          ");
-            }
-        } else if (te.team_no == 2) {
-            if (!te.playerclass) {
-                return ("Red                Range: ");
-            } else if (te.playerclass == 1) {
-                return ("Red Scout          Range: ");
-            } else if (te.playerclass == 2) {
-                return ("Red Sniper         Range: ");
-            } else if (te.playerclass == 3) {
-                return ("Red Soldier        Range: ");
-            } else if (te.playerclass == 4) {
-                return ("Red Demoman        Range: ");
-            } else if (te.playerclass == 5) {
-                return ("Red Medic          Range: ");
-            } else if (te.playerclass == 6) {
-                return ("Red Hvy Wpns       Range: ");
-            } else if (te.playerclass == 7) {
-                return ("Red Pyro           Range: ");
-            } else if (te.playerclass == 8) {
-                return ("Red Spy            Range: ");
-            } else if (te.playerclass == 9) {
-                return ("Red Engineer       Range: ");
-            } else if (te.playerclass == 11) {
-                return ("Red Civilian       Range: ");
-            } else if (te.playerclass == 13) {
-                return ("Red Sentry Gun     Range: ");
-            } else if (te.playerclass == 14) {
-                return ("Red Goal Item      Range: ");
-            } else {
-                return ("                          ");
-            }
-        } else if (te.team_no == 3) {
-            if (!te.playerclass) {
-                return ("Yellow             Range: ");
-            } else if (te.playerclass == 1) {
-                return ("Yellow Scout       Range: ");
-            } else if (te.playerclass == 2) {
-                return ("Yellow Sniper      Range: ");
-            } else if (te.playerclass == 3) {
-                return ("Yellow Soldier     Range: ");
-            } else if (te.playerclass == 4) {
-                return ("Yellow Demoman     Range: ");
-            } else if (te.playerclass == 5) {
-                return ("Yellow Medic       Range: ");
-            } else if (te.playerclass == 6) {
-                return ("Yellow Hvy Wpns    Range: ");
-            } else if (te.playerclass == 7) {
-                return ("Yellow Pyro        Range: ");
-            } else if (te.playerclass == 8) {
-                return ("Yellow Spy         Range: ");
-            } else if (te.playerclass == 9) {
-                return ("Yellow Engineer    Range: ");
-            } else if (te.playerclass == 11) {
-                return ("Yellow Civilian    Range: ");
-            } else if (te.playerclass == 13) {
-                return ("Yellow Sentry Gun  Range: ");
-            } else if (te.playerclass == 14) {
-                return ("Yellow Goal Item   Range: ");
-            } else {
-                return ("                          ");
-            }
-        } else if (te.team_no == 4) {
-            if (!te.playerclass) {
-                return ("Green              Range: ");
-            } else if (te.playerclass == 1) {
-                return ("Green Scout        Range: ");
-            } else if (te.playerclass == 2) {
-                return ("Green Sniper       Range: ");
-            } else if (te.playerclass == 3) {
-                return ("Green Soldier      Range: ");
-            } else if (te.playerclass == 4) {
-                return ("Green Demoman      Range: ");
-            } else if (te.playerclass == 5) {
-                return ("Green Medic        Range: ");
-            } else if (te.playerclass == 6) {
-                return ("Green Hvy Wpns     Range: ");
-            } else if (te.playerclass == 7) {
-                return ("Green Pyro         Range: ");
-            } else if (te.playerclass == 8) {
-                return ("Green Spy          Range: ");
-            } else if (te.playerclass == 9) {
-                return ("Blue Engineer      Range: ");
-            } else if (te.playerclass == 11) {
-                return ("Green Civilian     Range: ");
-            } else if (te.playerclass == 13) {
-                return ("Green Sentry Gun   Range: ");
-            } else if (te.playerclass == 14) {
-                return ("Green Goal Item    Range: ");
-            } else {
-                return ("                          ");
-            }
-        } else if (te.playerclass == 1) {
-            return ("  Scout            Range: ");
-        } else if (te.playerclass == 2) {
-            return ("  Sniper           Range: ");
-        } else if (te.playerclass == 3) {
-            return ("  Soldier          Range: ");
-        } else if (te.playerclass == 4) {
-            return ("  Demoman          Range: ");
-        } else if (te.playerclass == 5) {
-            return ("  Medic            Range: ");
-        } else if (te.playerclass == 6) {
-            return ("  Hvy Wpns         Range: ");
-        } else if (te.playerclass == 7) {
-            return ("  Pyro             Range: ");
-        } else if (te.playerclass == 8) {
-            return ("  Spy              Range: ");
-        } else if (te.playerclass == 9) {
-            return ("  Engineer         Range: ");
-        } else if (te.playerclass == 11) {
-            return ("  Civilian         Range: ");
-        } else if (te.playerclass == 13) {
-            return ("  Sentry Gun       Range: ");
-        } else if (te.playerclass == 14) {
-            return ("  Goal Item        Range: ");
-        } else {
-            return ("                          ");
-        }
+        st = TeamToString(te.team_no);
+        st = strcat(st, " ");
+        st = strcat(st, ClassToString(te.playerclass));
+        st = strpadr(st, 18);
+        return strcat(st, " Range : ");
     } else
         return ("  No Blips.            ");
 };
