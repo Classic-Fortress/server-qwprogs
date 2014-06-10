@@ -2618,11 +2618,12 @@ void () W_WeaponFrame = {
     local float zoom_level;
     local float zoom4x;
     local float zoom2x;
-    local float default_fov;
+    local float zoomkey;
 
+    self.default_fov = stof(infokey(self, "df"));
     zoom4x = stof(infokey(self, "z4x"));
     zoom2x = stof(infokey(self, "z2x"));
-    default_fov = stof(infokey(self, "df"));
+    zoomkey = stof(infokey(self, "zk"));
 
     if (self.zoom_mode == 4) {
         if (zoom4x < 10)
@@ -2637,13 +2638,13 @@ void () W_WeaponFrame = {
             zoom_level = zoom2x;
     }
     else if (self.zoom_mode == 0) {
-        zoom_level = default_fov;
+        zoom_level = self.default_fov;
     }
 
     if (!(self.tfstate & TFSTATE_AIMING)) {
-        if (self.current_fov != default_fov) {
-            if ((self.current_fov + 20) >= default_fov)
-                self.current_fov = default_fov;
+        if ((self.current_fov != self.default_fov) && (zoomkey != 1)) {
+            if ((self.current_fov + 20) >= self.default_fov)
+                self.current_fov = self.default_fov;
             else
                 self.current_fov = self.current_fov + 20;
 
@@ -2696,11 +2697,11 @@ void () W_WeaponFrame = {
                     self.heat = self.heat + 3;
                 }
 
-                if ((self.current_fov == default_fov) && (zoom_level < default_fov)) {
+                if ((self.current_fov == self.default_fov) && (zoom_level < self.default_fov) && (zoomkey != 1)) {
                     stuffcmd(self, "setinfo sens $sensitivity\n");
                 }
 
-                if (self.current_fov != zoom_level) {
+                if ((self.current_fov != zoom_level) && (zoomkey != 1)) {
                     if (self.zoom_out == 1) {
                         if ((self.current_fov + 20) >= zoom_level) {
                             self.current_fov = zoom_level;
@@ -2726,7 +2727,7 @@ void () W_WeaponFrame = {
                 if (vlen(tv) <= 50) {
                     SniperSight_Create();
                     self.heat = 50;
-                    self.current_fov = default_fov;
+                    self.current_fov = self.default_fov;
                     self.tfstate = self.tfstate | 2048;
                     TeamFortress_SetSpeed(self);
                 }

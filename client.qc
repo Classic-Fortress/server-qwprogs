@@ -1100,6 +1100,8 @@ void () PutClientInServer = {
     self.th_die = PlayerDie;
     self.height = 0;
     self.current_fov = 90;
+    self.default_fov = 90;
+    self.zoom_mode = 0;
     self.zoom_in = 0;
     self.zoom_out = 0;
 

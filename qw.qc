@@ -26,6 +26,7 @@ void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float has_disconnected;        // TRUE if the player has disconnected
 .float current_fov;             // Player's current field of view
+.float default_fov;             // Player's default field of view
 .float zoom_mode;               // Autozoom: 0 (off), 2 (2x), 4 (4x)
 .float zoom_in;                 // TRUE if player is currently zooming in
 .float zoom_out;                // TRUE if player is currently zooming out
