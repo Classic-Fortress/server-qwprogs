@@ -462,48 +462,57 @@ void (float inp) Menu_Spy_Color_Input = {
 
 void () Menu_Engineer = {
     local string s_action;
-    local string s_disp;
     local string s_sentry;
+    local string s_disp;
+    local string s_dsentry;
+    local string s_ddisp;
     local string s_nothing;
 
     s_action = "Action:                           \n";
-    s_nothing = "—‘ Nothing                      \n\n";
-    if (self.has_dispenser) {
-        s_disp = "“‘ Remotely Detonate Dispenser  \n";
-    } else {
-        if (self.ammo_cells >= 100) {
-            s_disp = "“‘ Build Ammo&Armor Dispenser   \n";
-        } else {
-            s_disp = "\n";
-        }
-    }
+
     if (self.has_sentry) {
-        s_sentry = "”‘ Remotely Detonate Sentry Gun \n";
+        s_dsentry = "•‘ Destroy Sentry Gun           \n";
+        s_sentry = "\n";
     } else {
-        if (self.ammo_cells >= 130) {
-            s_sentry = "”‘ Build Sentry Gun             \n";
-        } else {
+        s_dsentry = "\n";
+
+        if (self.ammo_cells >= 130)
+            s_sentry = "“‘ Build Sentry Gun             \n";
+        else
             s_sentry = "\n";
-        }
     }
-    centerprint(self, s_action, s_disp, s_sentry, s_nothing);
+
+    if (self.has_dispenser) {
+        s_ddisp = "–‘ Destroy Dispenser            \n";
+        s_disp = "\n";
+    } else {
+        s_ddisp = "\n";
+        if (self.ammo_cells >= 100)
+            s_disp = "”‘ Build Dispenser              \n";
+        else
+            s_disp = "\n";
+    }
+
+    s_nothing = "\n—‘ Nothing                      \n\n";
+    centerprint(self, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
 };
 
 void (float inp) Menu_Engineer_Input = {
     ResetMenu();
     self.impulse = 0;
 
-    if (inp == 1) {
-        if (self.has_dispenser)
-            DestroyBuilding(self, "building_dispenser");
-        else if (self.ammo_cells >= 100)
-            TeamFortress_Build(1);
-    } else if (inp == 2) {
-        if (self.has_sentry)
-            DestroyBuilding(self, "building_sentrygun");
-        else if (self.ammo_cells >= 130)
-            TeamFortress_Build(2);
-    }
+    if (inp == 1 && !self.has_sentry && self.ammo_cells >= 130)
+        TeamFortress_Build(2);
+
+    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= 100)
+        TeamFortress_Build(1);
+
+    if (inp == 3 && self.has_sentry)
+        DestroyBuilding(self, "building_sentrygun");
+
+    if (inp == 4 && self.has_dispenser)
+        DestroyBuilding(self, "building_dispenser");
+
 };
 
 void () Menu_EngineerFix_Dispenser = {

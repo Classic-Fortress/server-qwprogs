@@ -2039,9 +2039,6 @@ void () W_ChangeWeapon = {
         if (self.playerclass == PC_SCOUT) {
             have_weapon = 0; // scout nailgun is impulse 3
         }
-        if (self.playerclass == PC_ENGINEER) {
-            TeamFortress_EngineerBuild ();
-        }
         else if (weapons & WEAP_NAILGUN) {
             changeweapon = WEAP_NAILGUN;
             if (self.ammo_nails < 2) {
@@ -2082,6 +2079,10 @@ void () W_ChangeWeapon = {
             if (self.ammo_rockets < 1) {
                 noammo = 1;
             }
+        }
+    } else if (self.impulse == 5) {
+        if (self.playerclass == PC_ENGINEER) {
+            TeamFortress_EngineerBuild ();
         }
     } else if (self.impulse == TF_WEAPLAST) {
         if (((changeweapon & ( WEAP_SNIPER_RIFLE
