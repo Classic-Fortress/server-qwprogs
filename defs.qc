@@ -415,6 +415,15 @@ float (string s) stof = #81; // convert string to float
 void (vector where, float set) multicast = #82;      // sends the temp message to a set
                                                 // of clients, possibly in PVS or PHS
 
+float (float a, float b, ...) min                                   = #94;
+float (float a, float b, ...) max                                   = #95;
+float (float min, float value, float max) bound                     = #96;
+float (float x, float y) pow                                        = #97;
+
+float (string s) strlen                                             = #114;
+string (string s1, string s2) strcat                                = #115;
+string (string s, float start, float count) substr                  = #116;
+
 //============================================================================
 
 //
