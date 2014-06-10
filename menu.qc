@@ -27,7 +27,6 @@ void () TeamFortress_ChangeClass;
 void (entity p) TeamFortress_SetSkin;
 
 void (float type) TeamFortress_DropAmmo;
-string(float num) NumberToString100;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage;
