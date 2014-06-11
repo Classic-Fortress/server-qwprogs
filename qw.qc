@@ -116,13 +116,17 @@ float coop;
 /*==============================================*/
 .float weapons_carried;         // the weapons the player is carrying
 .float current_weapon;          // the weapon the player is using
+.float current_weaponslot;      // the currently equipped weaponslot
 .float last_weapon;
 .float last_weaponmode;
+.float next_weapon;             // used by weapon slots to communicate which weapon to select
+.float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;
 .float ammo_detpack;            // Ammo used for the detpack
 .float maxammo_detpack;
+.float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
 .float reload_shotgun;
