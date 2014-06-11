@@ -46,10 +46,16 @@ void () PlayerObserverMode;
 void () Menu_RepeatHelp;
 void () Menu_Spy;
 void () Menu_Spy_Skin;
+void () Menu_Spy_Skin_1;
+void () Menu_Spy_Skin_2;
+void () Menu_Spy_Skin_3;
 void () Menu_Spy_Color;
 
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
+void (float inp) Menu_Spy_Skin_1_Input;
+void (float inp) Menu_Spy_Skin_2_Input;
+void (float inp) Menu_Spy_Skin_3_Input;
 void (float inp) Menu_Spy_Color_Input;
 
 void () Menu_Engineer;
@@ -104,6 +110,18 @@ void () Player_Menu = {
     } else if (self.current_menu == MENU_SPY_SKIN) {
 
         Menu_Spy_Skin();
+
+    } else if (self.current_menu == MENU_SPY_SKIN_1) {
+
+        Menu_Spy_Skin_1();
+
+    } else if (self.current_menu == MENU_SPY_SKIN_2) {
+
+        Menu_Spy_Skin_2();
+
+    } else if (self.current_menu == MENU_SPY_SKIN_3) {
+
+        Menu_Spy_Skin_3();
 
     } else if (self.current_menu == MENU_SPY_COLOR) {
 
@@ -288,6 +306,12 @@ void (float inp) Menu_Input = {
         Menu_Spy_Input(inp);
     } else if (self.current_menu == MENU_SPY_SKIN) {
         Menu_Spy_Skin_Input(inp);
+    } else if (self.current_menu == MENU_SPY_SKIN_1) {
+        Menu_Spy_Skin_1_Input(inp);
+    } else if (self.current_menu == MENU_SPY_SKIN_2) {
+        Menu_Spy_Skin_2_Input(inp);
+    } else if (self.current_menu == MENU_SPY_SKIN_3) {
+        Menu_Spy_Skin_3_Input(inp);
     } else if (self.current_menu == MENU_SPY_COLOR) {
         Menu_Spy_Color_Input(inp);
     } else if (self.current_menu == MENU_ENGINEER) {
@@ -316,47 +340,33 @@ void () Menu_Intro = {
 };
 
 void () Menu_Spy = {
-    if ((self.effects & (8 | 4)) || (self.is_unabletospy == 1)) {
+    local string s_action  = "Action:                         \n";
+    local string s_skin    = "“‘ Change skin                 \n";
+    local string s_color   = "”‘ Change color                \n";
+    local string s_nothing = "—‘ Nothing                     \n\n";
+    local string s_feign;
+    local string s_reset;
+
+    if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
         ResetMenu();
         return;
     }
-    if (self.is_feigning) {
-        if ((self.undercover_team != 0) && (self.undercover_skin != 0)) {
-            CenterPrint(self,
-                        "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Stop Feigning               \n–‘ Reset Skin and Color        \n—‘ Nothing                     \n\n");
-        } else {
-            if (self.undercover_team != 0) {
-                CenterPrint(self,
-                            "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Stop Feigning               \n–‘ Reset Color                 \n—‘ Nothing                     \n\n");
-            } else {
-                if (self.undercover_skin != 0) {
-                    CenterPrint(self,
-                                "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Stop Feigning               \n–‘ Reset Skin                  \n—‘ Nothing                     \n\n");
-                } else {
-                    CenterPrint(self,
-                                "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Stop Feigning               \n–‘ Nothing                     \n\n");
-                }
-            }
-        }
-    } else {
-        if ((self.undercover_team != 0) && (self.undercover_skin != 0)) {
-            CenterPrint(self,
-                        "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Start Feigning              \n–‘ Reset Skin and Color        \n—‘ Nothing                     \n\n");
-        } else {
-            if (self.undercover_team != 0) {
-                CenterPrint(self,
-                            "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Start Feigning              \n–‘ Reset Color                 \n—‘ Nothing                     \n\n");
-            } else {
-                if (self.undercover_skin != 0) {
-                    CenterPrint(self,
-                                "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Start Feigning              \n–‘ Reset Skin                  \n—‘ Nothing                     \n\n");
-                } else {
-                    CenterPrint(self,
-                                "Action:                           \n“‘ Change Skin                 \n”‘ Change Color                \n•‘ Start Feigning              \n–‘ Nothing                     \n\n");
-                }
-            }
-        }
-    }
+
+    if (self.is_feigning)
+        s_feign = "•‘ Stop feigning               \n";
+    else
+        s_feign = "•‘ Start feigning              \n";
+
+    if (self.undercover_team != 0 && self.undercover_skin != 0)
+        s_reset = "–‘ Reset skin and color        \n";
+    else if (self.undercover_team != 0)
+        s_reset = "–‘ Reset color                 \n";
+    else if (self.undercover_skin != 0)
+        s_reset = "–‘ Reset skin                  \n";
+    else
+        s_reset = "\n";
+
+    centerprint(self, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
 };
 
 void (float inp) Menu_Spy_Input = {
@@ -379,85 +389,188 @@ void (float inp) Menu_Spy_Input = {
     if (inp == 1) {
         Menu_Spy_Skin();
         self.menu_count = 25;
-        self.current_menu = 13;
+        self.current_menu = MENU_SPY_SKIN;
         self.menu_displaytime = 0;
         self.impulse = 0;
-    } else {
-        if (inp == 2) {
-            Menu_Spy_Color();
+    } else if (inp == 2) {
+        Menu_Spy_Color();
+        self.menu_count = 25;
+        self.current_menu = MENU_SPY_COLOR;
+        self.menu_displaytime = 0;
+        self.impulse = 0;
+    } else if (inp == 3) {
+        TeamFortress_SpyFeignDeath(0);
+        ResetMenu();
+        self.impulse = 0;
+        if (self.is_feigning) {
+            Menu_Spy();
             self.menu_count = 25;
-            self.current_menu = 14;
+            self.current_menu = MENU_SPY;
             self.menu_displaytime = 0;
             self.impulse = 0;
-        } else {
-            if (inp == 3) {
-                TeamFortress_SpyFeignDeath(0);
-                ResetMenu();
-                self.impulse = 0;
-            } else {
-                if (inp == 4) {
-                    Spy_RemoveDisguise(self);
-                    ResetMenu();
-                    self.impulse = 0;
-                } else {
-                    if ((inp == 5) &&
-                        ((self.undercover_team != 0) ||
-                         (self.undercover_skin != 0))) {
-                        ResetMenu();
-                        self.impulse = 0;
-                    }
-                }
-            }
         }
+    } else if (inp == 4) {
+        Spy_RemoveDisguise(self);
+        ResetMenu();
+        self.impulse = 0;
+    } else if (inp == 5) {
+        ResetMenu();
+        self.impulse = 0;
     }
 };
 
 void () Menu_Spy_Skin = {
-    CenterPrint(self,
-                "Change Skin to:\n“‘ Scout   \n”‘ Sniper  \n•‘ Soldier \n–‘ Demoman \n—‘ Medic   \n˜‘ Hvwep   \n™‘ Pyro    \nš‘ Spy     \n›‘ Engineer\n\n");
+    local string s_change  = "Disguise as:                \n";
+    local string s_scsnso  = "“‘ Scout / Sniper / Soldier\n";
+    local string s_demehw  = "”‘ Demoman / Medic / HWGuy \n";
+    local string s_pyspen  = "•‘ Pyro / Spy / Engineer   \n\n";
+    local string s_nothing = "—‘ Nothing                 \n\n";
+
+    centerprint(self, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
 };
 
 void (float inp) Menu_Spy_Skin_Input = {
-    if ((inp < 10) && (inp > 0)) {
-        TeamFortress_SpyChangeSkin(inp);
+    self.menu_count = 25;
+    self.menu_displaytime = 0;
+
+    if (inp == 1) {
+        Menu_Spy_Skin_1();
+        self.current_menu = MENU_SPY_SKIN_1;
+    } else if (inp == 2) {
+        Menu_Spy_Skin_2();
+        self.current_menu = MENU_SPY_SKIN_2;
+    } else if (inp == 3) {
+        Menu_Spy_Skin_3();
+        self.current_menu = MENU_SPY_SKIN_3;
+    } else
         ResetMenu();
-        self.impulse = 0;
-    }
+
+    self.impulse = 0;
 };
 
+void () Menu_Spy_Skin_1 = {
+    local string s_change  = "Disguise as:    \n";
+    local string s_scout   = "“‘ Scout       \n";
+    local string s_sniper  = "”‘ Sniper      \n";
+    local string s_soldier = "•‘ Soldier     \n\n";
+    local string s_nothing = "—‘ Nothing     \n\n";
+
+    centerprint(self, s_change, s_scout, s_sniper, s_soldier, s_nothing);
+}
+
+void (float inp) Menu_Spy_Skin_1_Input = {
+    if (inp > 0 && inp < 4)
+        TeamFortress_SpyChangeSkin(inp);
+
+    ResetMenu();
+    self.impulse = 0;
+}
+
+void () Menu_Spy_Skin_2 = {
+    local string s_change  = "Disguise as:    \n";
+    local string s_demoman = "“‘ Demoman     \n";
+    local string s_medic   = "”‘ Medic       \n";
+    local string s_hwguy   = "•‘ HWGuy       \n\n";
+    local string s_nothing = "—‘ Nothing     \n\n";
+
+    centerprint(self, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
+}
+
+void (float inp) Menu_Spy_Skin_2_Input = {
+    local float classnum;
+    classnum = inp + 3;
+
+    if (inp > 0 && inp < 4)
+        TeamFortress_SpyChangeSkin(classnum);
+
+    ResetMenu();
+    self.impulse = 0;
+}
+
+void () Menu_Spy_Skin_3 = {
+    local string s_change   = "Disguise as:        \n";
+    local string s_pyro     = "“‘ Pyro            \n";
+    local string s_spy      = "”‘ Spy (reset skin)\n";
+    local string s_engineer = "•‘ Engineer        \n\n";
+    local string s_nothing  = "—‘ Nothing         \n\n";
+
+    centerprint(self, s_change, s_pyro, s_spy, s_engineer, s_nothing);
+}
+
+void (float inp) Menu_Spy_Skin_3_Input = {
+    local float classnum;
+    classnum = inp + 6;
+
+    if (inp > 0 && inp < 4)
+        TeamFortress_SpyChangeSkin(classnum);
+
+    ResetMenu();
+    self.impulse = 0;
+}
+
 void () Menu_Spy_Color = {
+    local float players_blue   = TeamFortress_TeamGetNoPlayers(1);
+    local float players_red    = TeamFortress_TeamGetNoPlayers(2);
+    local float players_yellow = TeamFortress_TeamGetNoPlayers(3);
+    local float players_green  = TeamFortress_TeamGetNoPlayers(4);
+
+    local string s_disguise = "Disguise as:               \n";
+    local string s_nothing  = "\n—‘ Nothing                \n\n";
+    local string s_blue;
+    local string s_red;
+    local string s_yellow;
+    local string s_green;
+
+    if (stof(infokey(self, "topcolor")) != 13) {
+        s_blue   = "“‘ Blue team (";
+        s_blue   = strcat(s_blue, ftos(players_blue));
+        s_blue   = strcat(s_blue, " players)  \n");
+    }
+    else
+        s_blue = "\n";
+    if (stof(infokey(self, "topcolor")) != 4) {
+        s_red    = "”‘ Red team (";
+        s_red    = strcat(s_red, ftos(players_red));
+        s_red    = strcat(s_red, " players)   \n");
+    }
+    else
+        s_red = "\n";
+    if (stof(infokey(self, "topcolor")) != 12) {
+        s_yellow = "•‘ Yellow team (";
+        s_yellow = strcat(s_yellow, ftos(players_yellow));
+        s_yellow = strcat(s_yellow, " players)\n");
+    }
+    else
+        s_yellow = "\n";
+    if (stof(infokey(self, "topcolor")) != 3) {
+        s_green  = "–‘ Green team \n";
+        s_green  = strcat(s_green, ftos(players_green));
+        s_green  = strcat(s_green, " players) \n");
+    }
+    else
+        s_green = "\n";
+
     if (number_of_teams == 0) {
-        sprint(self, PRINT_HIGH,
-               "No Color changing allowed in deathmatch.\n");
+        sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
         ResetMenu();
         self.impulse = 0;
         return;
     }
-    if (number_of_teams == 1) {
-        CenterPrint(self,
-                    "=== Change Color to the Same Color as  ===\n\n“‘ Team One  \n\n");
-    } else {
-        if (number_of_teams == 2) {
-            CenterPrint(self,
-                        "=== Change Color to the Same Color as  ===\n\n“‘ Team One  \n”‘ Team Two  \n\n");
-        } else {
-            if (number_of_teams == 3) {
-                CenterPrint(self,
-                            "=== Change Color to the Same Color as  ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n\n");
-            } else {
-                CenterPrint(self,
-                            "=== Change Color to the Same Color as  ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n–‘ Team Four \n\n");
-            }
-        }
-    }
+    if (number_of_teams == 1)
+        sprint(self, PRINT_HIGH, "There is no other team.\n");
+    else if (number_of_teams == 2)
+        centerprint(self, s_disguise, s_blue, s_red, s_nothing);
+    else if (number_of_teams == 3)
+        centerprint(self, s_disguise, s_blue, s_red, s_yellow, s_nothing);
+    else
+        centerprint(self, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
 };
 
 void (float inp) Menu_Spy_Color_Input = {
-    if ((inp >= 1) && (inp <= number_of_teams)) {
+    if (inp > 0 && inp <= number_of_teams)
         TeamFortress_SpyChangeColor(inp);
-        ResetMenu();
-        self.impulse = 0;
-    }
+    ResetMenu();
+    self.impulse = 0;
 };
 
 void () Menu_Engineer = {
