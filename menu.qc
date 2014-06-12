@@ -516,8 +516,32 @@ void (float inp) Menu_Engineer_Input = {
 };
 
 void () Menu_EngineerFix_Dispenser = {
-    CenterPrint(self,
-                "Action:                            \n“‘ Put Ammo into Dispenser     \n”‘ Put Armor into Dispenser    \n•‘ Repair Dispenser            \n–‘ Dismantle Dispenser         \n—‘ Nothing                     \n\n");
+    local string s_action = "Action:                            \n";
+    local string s_ammo;
+    local string s_armor;
+    local string s_repair;
+    local string s_nothing = "\n—‘ Nothing                     \n";
+
+
+    if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
+            || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
+            || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
+            || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
+        s_ammo = "“‘ Put ammo into Dispenser     \n";
+    else
+        s_ammo = "\n";
+
+    if (self.armorvalue > 0 && self.building.armorvalue < 500)
+        s_armor = "”‘ Put armor into Dispenser    \n";
+    else
+        s_armor = "\n";
+
+    if (self.building.health < self.building.max_health)
+        s_repair  = "•‘ Repair Dispenser            \n";
+    else
+        s_repair = "\n";
+
+    centerprint(self, s_action, s_ammo, s_armor, s_repair, s_nothing);
 };
 
 void (float inp) Menu_EngineerFix_Dispenser_Input = {
@@ -564,68 +588,39 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
         }
         self.ammo_cells = (self.ammo_cells - am);
         self.building.ammo_cells = (self.building.ammo_cells + am);
-    } else {
-        if (inp == 2) {
-            am = (40 * 2);
-            if (am > self.armorvalue) {
-                am = self.armorvalue;
-            }
-            if (am > (500 - self.building.armorvalue)) {
-                am = (500 - self.building.armorvalue);
-            }
-            self.armorvalue = (self.armorvalue - am);
-            self.building.armorvalue = (self.building.armorvalue + am);
-        } else {
-            if (inp == 3) {
-                metalcost =
-                    ((self.building.max_health -
-                      self.building.health) / 5);
-                if (metalcost > self.ammo_cells) {
-                    metalcost = self.ammo_cells;
-                }
-                self.ammo_cells = (self.ammo_cells - metalcost);
-                self.building.health =
-                    (self.building.health + (metalcost * 5));
-            } else {
-                if (inp == 4) {
-                    sprint(self, PRINT_HIGH,
-                           "You dismantle the Dispenser.\n");
-                    self.ammo_cells = (self.ammo_cells + (100 / 2));
-                    if (self.building.real_owner != self) {
-                        sprint2(self.building.real_owner, PRINT_HIGH,
-                                self.netname,
-                                " dismantled your Dispenser.\n");
-                        teamsprint(self.building.real_owner.team_no,
-                                   self.building.real_owner, self.netname);
-                        teamsprint(self.building.real_owner.team_no,
-                                   self.building.real_owner,
-                                   " dismantled ");
-                        teamsprint(self.building.real_owner.team_no,
-                                   self.building.real_owner,
-                                   self.building.real_owner.netname);
-                        teamsprint(self.building.real_owner.team_no,
-                                   self.building.real_owner,
-                                   "'s Dispenser.\n");
-                    }
-                    dremove(self.building);
-                    self.building.real_owner.has_dispenser = 0;
-                }
-            }
+    } else if (inp == 2) {
+        am = (40 * 2);
+        if (am > self.armorvalue) {
+            am = self.armorvalue;
         }
-    }
-    if ((inp >= 1) && (inp <= 5)) {
-        ResetMenu();
-        self.impulse = 0;
-        self.building = world;
-        bound_other_ammo(self);
-        if (self.armorvalue == 0) {
-            self.armortype = 0;
-            self.armorclass = 0;
-            self.items =
-                (self.items - (self.items & ((8192 | 16384) | 32768)));
+        if (am > (500 - self.building.armorvalue)) {
+            am = (500 - self.building.armorvalue);
         }
-        W_SetCurrentAmmo();
+        self.armorvalue = (self.armorvalue - am);
+        self.building.armorvalue = (self.building.armorvalue + am);
+    } else if (inp == 3) {
+        metalcost =
+            ((self.building.max_health -
+              self.building.health) / 5);
+        if (metalcost > self.ammo_cells) {
+            metalcost = self.ammo_cells;
+        }
+        self.ammo_cells = (self.ammo_cells - metalcost);
+        self.building.health =
+            (self.building.health + (metalcost * 5));
     }
+
+    ResetMenu();
+    self.impulse = 0;
+    self.building = world;
+    bound_other_ammo(self);
+    if (self.armorvalue == 0) {
+        self.armortype = 0;
+        self.armorclass = 0;
+        self.items =
+            (self.items - (self.items & ((8192 | 16384) | 32768)));
+    }
+    W_SetCurrentAmmo();
 };
 
 void () Menu_EngineerFix_SentryGun = {
