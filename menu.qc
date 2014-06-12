@@ -738,8 +738,25 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
 };
 
 void () Menu_Dispenser = {
-    CenterPrint(self,
-                "Use Dispenser:                     \n“‘ Withdraw some ammo          \n”‘ Withdraw some Armor         \n•‘ Nothing                     \n\n");
+    local string s_action = "Use Dispenser:                     \n";
+    local string s_ammo;
+    local string s_armor;
+    local string s_nothing = "\n—‘ Nothing                     \n";
+
+    if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
+            || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
+            || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
+            || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
+        s_ammo = "“‘ Withdraw some ammo          \n";
+    else
+        s_ammo = "\n";
+
+    if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
+        s_armor = "”‘ Withdraw some armor         \n";
+    else
+        s_armor = "\n";
+
+    centerprint(self, s_action, s_ammo, s_armor, s_nothing);
 };
 
 void (float inp) Menu_Dispenser_Input = {
