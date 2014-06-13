@@ -1074,7 +1074,7 @@
 #define MENU_ENGINEER				15
 #define MENU_ENGINEER_FIX_DISPENSER		16
 #define MENU_ENGINEER_FIX_SENTRYGUN		17
-// unused                                       18
+#define MENU_SCOUT                  18
 #define MENU_DISPENSER				19
 
 #define MENU_REFRESH_RATE 			25

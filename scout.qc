@@ -347,6 +347,9 @@ void () ScannerSwitch = {
         te.netname = "scanner";
         sprint(self, PRINT_HIGH, "Scanner On.\n");
         self.ScannerOn = 1;
+
+        if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
+            self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     } else {
         te = find(world, netname, "scanner");
         while (te) {

@@ -2107,7 +2107,10 @@ void (float inp) W_ChangeWeapon = {
     else if (inp == 5) {
         if (self.playerclass == PC_ENGINEER)
             TeamFortress_EngineerBuild();
-        else if (self.playerclass == PC_SPY)
+        else if (self.playerclass == PC_SCOUT) {
+            Menu_Scout();
+            self.current_menu = MENU_SCOUT;
+        } else if (self.playerclass == PC_SPY)
             TeamFortress_SpyGoUndercover();
         else if (self.playerclass == PC_DEMOMAN)
             TeamFortress_DetpackMenu();

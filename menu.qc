@@ -47,6 +47,7 @@ void () Menu_Drop;
 void () Menu_Intro;
 void () PlayerObserverMode;
 void () Menu_RepeatHelp;
+void () Menu_Scout;
 void () Menu_Spy;
 void () Menu_Spy_Skin;
 void () Menu_Spy_Skin_1;
@@ -54,6 +55,7 @@ void () Menu_Spy_Skin_2;
 void () Menu_Spy_Skin_3;
 void () Menu_Spy_Color;
 
+void (float inp) Menu_Scout_Input;
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Skin_1_Input;
@@ -111,6 +113,10 @@ void () Player_Menu = {
     } else if (self.current_menu == MENU_DROP) {
 
         Menu_Drop();
+
+    } else if (self.current_menu == MENU_SCOUT) {
+
+        Menu_Scout();
 
     } else if (self.current_menu == MENU_SPY) {
 
@@ -321,6 +327,8 @@ void (float inp) Menu_Input = {
         Menu_Drop_Input(inp);
     } else if (self.current_menu == MENU_SPY) {
         Menu_Spy_Input(inp);
+    } else if (self.current_menu == MENU_SCOUT) {
+        Menu_Scout_Input(inp);
     } else if (self.current_menu == MENU_SPY_SKIN) {
         Menu_Spy_Skin_Input(inp);
     } else if (self.current_menu == MENU_SPY_SKIN_1) {
@@ -358,6 +366,56 @@ void () Menu_Intro = {
         CenterPrint(self,
                     "Welcome to Classic Fortress\nby hifi & Empezar\n======================================\ngithub.com/classic-fortress");
     }
+};
+
+void () Menu_Scout = {
+    local string s_action  = "Action:                       \n";
+    local string s_nothing;
+    local string s_scanner;
+    local string s_scanf;
+    local string s_scane;
+    local string s_scansound;
+
+    if (self.ScannerOn != 1) {
+        s_scanner = "“‘ Turn scanner on           \n\n";
+        s_nothing = "—‘ Nothing                   \n\n\n\n";
+    } else {
+        s_scanner = "“‘ Turn scanner off          \n";
+
+        if (self.tf_items_flags & NIT_SCANNER_ENEMY)
+            s_scane = "”‘ Do not scan for enemies   \n";
+        else
+            s_scane = "”‘ Scan for enemies          \n";
+
+
+        if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+            s_scanf = "•‘ Do not scan for friendlies\n";
+        else
+            s_scanf = "•‘ Scan for friendlies       \n";
+
+        if (self.tf_items_flags & 4)
+            s_scansound = "–‘ Turn off scan sound       \n";
+        else
+            s_scansound = "–‘ Turn on scan sound        \n";
+
+        s_nothing = "—‘ Nothing                   \n\n";
+    }
+
+    centerprint(self, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
+};
+
+void (float inp) Menu_Scout_Input = {
+    if (inp == 1)
+        self.impulse = TF_SCAN;
+    else if (inp == 2)
+        self.impulse = TF_SCAN_ENEMY;
+    else if (inp == 3)
+        self.impulse = TF_SCAN_FRIENDLY;
+    else if (inp == 4)
+        self.impulse = TF_SCAN_SOUND;
+    else if (inp > 4)
+        self.impulse = 0;
+    ResetMenu();
 };
 
 void () Menu_Spy = {
