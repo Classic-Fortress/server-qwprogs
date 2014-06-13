@@ -664,10 +664,10 @@
 #define PC_SCOUT_INITAMMO_NAIL		100	// Amount of nail ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_CELL		50 	// Amount of cell ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_ROCKET	0 	// Amount of rocket ammo this class has when respawned
-#define PC_SCOUT_GRENADE_TYPE_1		GR_TYPE_FLASH		//    <- 1st Type of Grenade this class has
-#define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_CONCUSSION	//    <- 2nd Type of Grenade this class has
-#define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
-#define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
+#define PC_SCOUT_GRENADE_TYPE_1		GR_TYPE_CONCUSSION		//    <- 1st Type of Grenade this class has
+#define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_FLASH	//    <- 2nd Type of Grenade this class has
+#define PC_SCOUT_GRENADE_INIT_1		3 	// Number of grenades of Type 1 this class has when respawned
+#define PC_SCOUT_GRENADE_INIT_2		2 	// Number of grenades of Type 2 this class has when respawned
 #define PC_SCOUT_TF_ITEMS		NIT_SCANNER  // <- TeamFortress Items this class has
 
 #define PC_SCOUT_MOTION_MIN_I		0.5 	// < Short range
