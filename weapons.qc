@@ -2089,21 +2089,21 @@ void () W_WeaponSlot4 = {
     self.current_weaponslot = 4;
 }
 
-void () W_ChangeWeapon = {
+void (float inp) W_ChangeWeapon = {
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
     self.noammo = 0;
 
-    if (self.impulse == 1)
+    if (inp == 1)
         W_WeaponSlot1();
-    else if (self.impulse == 2)
+    else if (inp == 2)
         W_WeaponSlot2();
-    else if (self.impulse == 3)
+    else if (inp == 3)
         W_WeaponSlot3();
-    else if (self.impulse == 4)
+    else if (inp == 4)
         W_WeaponSlot4();
-    else if (self.impulse == 5) {
+    else if (inp == 5) {
         if (self.playerclass == PC_ENGINEER)
             TeamFortress_EngineerBuild();
         else if (self.playerclass == PC_SPY)
@@ -2167,24 +2167,17 @@ void () CycleWeaponNext = {
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    if (self.current_weaponslot == 1) {
-        self.impulse = 2;
-        W_ChangeWeapon();
-    } else if (self.current_weaponslot == 2) {
-        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER) {
-            self.impulse = 4;
-            W_ChangeWeapon();
-        } else {
-            self.impulse = 3;
-            W_ChangeWeapon();
-        }
-    } else if (self.current_weaponslot == 3) {
-            self.impulse = 4;
-            W_ChangeWeapon();
-    } else if (self.current_weaponslot == 4) {
-            self.impulse = 1;
-            W_ChangeWeapon();
-    }
+    if (self.current_weaponslot == 1)
+        W_ChangeWeapon(2);
+    else if (self.current_weaponslot == 2) {
+        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
+            W_ChangeWeapon(4);
+        else
+            W_ChangeWeapon(3);
+    } else if (self.current_weaponslot == 3)
+            W_ChangeWeapon(4);
+    else if (self.current_weaponslot == 4)
+            W_ChangeWeapon(1);
 };
 
 void () CycleWeaponPrev = {
@@ -2193,23 +2186,17 @@ void () CycleWeaponPrev = {
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    if (self.current_weaponslot == 1) {
-            self.impulse = 4;
-            W_ChangeWeapon();
-    } else if (self.current_weaponslot == 2) {
-            self.impulse = 1;
-            W_ChangeWeapon();
-    } else if (self.current_weaponslot == 3) {
-            self.impulse = 2;
-            W_ChangeWeapon();
-    } else if (self.current_weaponslot == 4) {
-        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER) {
-            self.impulse = 2;
-            W_ChangeWeapon();
-        } else {
-            self.impulse = 3;
-            W_ChangeWeapon();
-        }
+    if (self.current_weaponslot == 1)
+            W_ChangeWeapon(4);
+    else if (self.current_weaponslot == 2)
+            W_ChangeWeapon(1);
+    else if (self.current_weaponslot == 3)
+            W_ChangeWeapon(2);
+    else if (self.current_weaponslot == 4) {
+        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
+            W_ChangeWeapon(2);
+        else
+            W_ChangeWeapon(3);
     }
 };
 
@@ -2232,15 +2219,15 @@ void () ImpulseCommands = {
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (((self.impulse >= 1) && (self.impulse < 8)) ||
             (self.impulse == TF_MEDIKIT))
-            W_ChangeWeapon();
+            W_ChangeWeapon(self.impulse);
         else if (self.impulse == AXE_IMP)
-            W_ChangeWeapon();
+            W_ChangeWeapon(self.impulse);
         else if (self.impulse == TF_WEAPNEXT)
             CycleWeaponNext();
         else if (self.impulse == TF_WEAPPREV)
             CycleWeaponPrev();
         else if ((self.impulse == TF_WEAPLAST) && (self.last_weapon != 0))
-            W_ChangeWeapon();
+            W_ChangeWeapon(self.impulse);
         else if (self.impulse == TF_GRENADE_1)
             TeamFortress_PrimeGrenade();
         else if (self.impulse == TF_GRENADE_2)
@@ -2325,9 +2312,9 @@ void () ImpulseCommands = {
 void () PreMatchImpulses = {
     if (((self.impulse >= 1) && (self.impulse < 8)) ||
         (self.impulse == TF_MEDIKIT))
-        W_ChangeWeapon();
+        W_ChangeWeapon(self.impulse);
     else if (self.impulse == AXE_IMP)
-        W_ChangeWeapon();
+        W_ChangeWeapon(self.impulse);
     else if (self.impulse == TF_WEAPNEXT)
         CycleWeaponNext();
     else if (self.impulse == TF_WEAPPREV)
