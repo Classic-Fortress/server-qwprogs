@@ -431,6 +431,9 @@
 #define TF_ENGINEER_DETDISP	187
 #define TF_ENGINEER_DETSENTRY	188
 
+// Demoman Impulses
+#define TF_DEMOMAN_DETPACK   189
+
 // Medic!!
 #define TF_MEDIC_HELPME		181
 
@@ -1059,8 +1062,8 @@
 #define MENU_CLASS 				3
 #define MENU_DROP  				4
 #define MENU_INTRO 				5
-// unused             				6
-// unused               			7
+#define MENU_DEMOMAN                6
+#define MENU_DEMOMAN_CANCEL         7
 #define MENU_REPEATHELP 			8
 #define MENU_SPY_SKIN_1             9
 #define MENU_SPY_SKIN_2             10

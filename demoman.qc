@@ -9,7 +9,10 @@ void () MirvGrenadeTouch;
 void () MirvGrenadeExplode;
 void (vector org, entity shooter) MirvGrenadeLaunch;
 
+void () TeamFortress_DetpackMenu;
+void () TeamFortress_DetpackStop;
 void () TeamFortress_DetpackSet;
+void () TeamFortress_DetpackExplode;
 void () TeamFortress_DetpackTouch;
 void () TeamFortress_DetpackDisarm;
 void () TeamFortress_DetpackCountDown;
@@ -91,6 +94,27 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     setorigin(newmis, org);
 };
 
+void () TeamFortress_DetpackMenu = {
+    local entity detpack;
+
+    if (self.ammo_detpack <= 0) {
+        sprint(self, PRINT_HIGH, "You don't have any detpacks left.\n");
+        return;
+    }
+
+    detpack = find(world, classname, "detpack");
+    while (detpack) {
+        if (detpack.owner == self) {
+            sprint(self, PRINT_HIGH, "You can only have 1 detpack active at a time.\n");
+            return;
+        }
+        detpack = find(detpack, classname, "detpack");
+    }
+
+    Menu_Demoman();
+    self.current_menu = MENU_DEMOMAN;
+};
+
 void (float timer) TeamFortress_SetDetpack = {
     local string stimer;
     local entity te;
@@ -147,7 +171,7 @@ void (float timer) TeamFortress_SetDetpack = {
         return;
     }
 
-    self.is_detpacking = TRUE;
+    self.is_detpacking = 1;
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
@@ -163,6 +187,8 @@ void (float timer) TeamFortress_SetDetpack = {
 
     sprint(self, PRINT_HIGH, "Setting detpack for ", stimer,
            " seconds...\n");
+    Menu_Demoman_Cancel();
+    self.current_menu = MENU_DEMOMAN_CANCEL;
 
     newmis = spawn();
     newmis.owner = self;
@@ -184,11 +210,13 @@ void () TeamFortress_DetpackStop = {
         return;
 
     sprint(self, PRINT_HIGH, "Detpack retrieved.\n");
+    self.current_menu = MENU_DEFAULT;
+    CenterPrint(self, "\n");
     self.ammo_detpack = self.ammo_detpack + 1;
     dremove(detpack_timer);
 
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-    self.is_detpacking = FALSE;
+    self.is_detpacking = 0;
     self.current_weapon = self.weapon;
 
     W_SetCurrentAmmo();
@@ -201,6 +229,8 @@ void () TeamFortress_DetpackSet = {
     local entity oldself;
 
     self.is_detpacking = 0;
+    self.owner.current_menu = MENU_DEFAULT;
+    CenterPrint(self.owner, "\n");
     self.owner.tfstate =
         (self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE));
     TeamFortress_SetSpeed(self.owner);

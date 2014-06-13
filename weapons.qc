@@ -48,6 +48,7 @@ void () TeamFortress_SetZoom4x;
 void () TeamFortress_SetZoom2x;
 void () TeamFortress_StatusQuery;
 void () TeamFortress_SpyGoUndercover;
+void () TeamFortress_DetpackMenu;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
@@ -2108,7 +2109,9 @@ void (float inp) W_ChangeWeapon = {
             TeamFortress_EngineerBuild();
         else if (self.playerclass == PC_SPY)
             TeamFortress_SpyGoUndercover();
-    } else if (self.impulse == TF_WEAPLAST) {
+        else if (self.playerclass == PC_DEMOMAN)
+            TeamFortress_DetpackMenu();
+    } else if (inp == TF_WEAPLAST) {
         if ((self.next_weapon == WEAP_SNIPER_RIFLE
                     || self.next_weapon == WEAP_AUTO_RIFLE
                     || self.next_weapon == WEAP_SHOTGUN
@@ -2290,6 +2293,9 @@ void () ImpulseCommands = {
     else if ((self.impulse == TF_SPY_SILENT_DIE) &&
              (self.playerclass == PC_SPY))
         TeamFortress_SpyFeignDeath(1);
+    else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
+             (self.playerclass == PC_DEMOMAN))
+        TeamFortress_DetpackMenu();
     else if ((self.impulse == TF_ENGINEER_BUILD) &&
              (self.playerclass == PC_ENGINEER))
         TeamFortress_EngineerBuild();

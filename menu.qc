@@ -26,6 +26,9 @@ float () TeamFortress_GetNoPlayers;
 void () TeamFortress_ChangeClass;
 void (entity p) TeamFortress_SetSkin;
 
+void (float timer) TeamFortress_SetDetpack;
+void () TeamFortress_DetpackStop;
+
 void (float type) TeamFortress_DropAmmo;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
@@ -57,6 +60,12 @@ void (float inp) Menu_Spy_Skin_1_Input;
 void (float inp) Menu_Spy_Skin_2_Input;
 void (float inp) Menu_Spy_Skin_3_Input;
 void (float inp) Menu_Spy_Color_Input;
+
+void () Menu_Demoman;
+void () Menu_Demoman_Cancel;
+
+void (float inp) Menu_Demoman_Input;
+void (float inp) Menu_Demoman_Cancel_Input;
 
 void () Menu_Engineer;
 void () Menu_EngineerFix_Dispenser;
@@ -126,6 +135,14 @@ void () Player_Menu = {
     } else if (self.current_menu == MENU_SPY_COLOR) {
 
         Menu_Spy_Color();
+
+    } else if (self.current_menu == MENU_DEMOMAN) {
+
+        Menu_Demoman();
+
+    } else if (self.current_menu == MENU_DEMOMAN_CANCEL) {
+
+        Menu_Demoman_Cancel();
 
     } else if (self.current_menu == MENU_ENGINEER) {
 
@@ -314,6 +331,10 @@ void (float inp) Menu_Input = {
         Menu_Spy_Skin_3_Input(inp);
     } else if (self.current_menu == MENU_SPY_COLOR) {
         Menu_Spy_Color_Input(inp);
+    } else if (self.current_menu == MENU_DEMOMAN) {
+        Menu_Demoman_Input(inp);
+    } else if (self.current_menu == MENU_DEMOMAN_CANCEL) {
+        Menu_Demoman_Cancel_Input(inp);
     } else if (self.current_menu == MENU_ENGINEER) {
         Menu_Engineer_Input(inp);
     } else if (self.current_menu == MENU_ENGINEER_FIX_DISPENSER) {
@@ -572,6 +593,46 @@ void (float inp) Menu_Spy_Color_Input = {
     ResetMenu();
     self.impulse = 0;
 };
+
+void () Menu_Demoman = {
+    local string s_detpack = "Set detpack for:  \n";
+    local string s_5       = "êìë 5 seconds     \n";
+    local string s_20      = "êîë 20 seconds    \n";
+    local string s_50      = "êïë 50 seconds    \n";
+    local string s_255     = "êñë 255 seconds   \n";
+    local string s_nothing = "êóë Nothing       \n\n";
+
+    centerprint(self, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
+}
+
+void (float inp) Menu_Demoman_Input = {
+    if (inp == 1)
+        TeamFortress_SetDetpack(5);
+    else if (inp == 2)
+        TeamFortress_SetDetpack(20);
+    else if (inp == 3)
+        TeamFortress_SetDetpack(50);
+    else if (inp == 4)
+        TeamFortress_SetDetpack(255);
+    if (inp > 4)
+        ResetMenu();
+    self.impulse = 0;
+};
+
+void () Menu_Demoman_Cancel = {
+    local string s_detpack = "Setting detpack...  \n";
+    local string s_cancel  = "êìë Cancel!         \n\n\n\n\n\n";
+
+    centerprint(self, s_detpack, s_cancel);
+}
+
+void (float inp) Menu_Demoman_Cancel_Input = {
+    if (inp == 1) {
+        TeamFortress_DetpackStop();
+        ResetMenu();
+    }
+    self.impulse = 0;
+}
 
 void () Menu_Engineer = {
     local string s_action;
