@@ -1094,12 +1094,12 @@ void () PutClientInServer = {
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
     W_SetCurrentAmmo();
+    W_ChangeWeapon(1);
 
     self.attack_finished = time + 0.3;
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
-    self.current_weaponslot = 1;
     self.current_fov = 90;
     self.default_fov = 90;
     self.zoom_mode = 0;
