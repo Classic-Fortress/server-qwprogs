@@ -241,23 +241,29 @@ void () TeamFortress_EngineerBuild = {
         self.current_menu = 15;
         self.menu_count = 25;
     } else if (self.is_building == 1) {
-        sprint(self, PRINT_HIGH, "You stop building.\n");
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
-        TeamFortress_SetSpeed(self);
-        te = find(world, netname, "build_timer");
-        while (te) {
-            if (te.owner == self) {
-                dremove(te);
-                te = world;
-            } else {
-                te = find(te, netname, "build_timer");
-            }
-        }
-        self.is_building = 0;
-        self.current_weapon = self.weapon;
-        W_SetCurrentAmmo();
+        TeamFortress_EngineerBuildStop();
     }
 };
+
+void () TeamFortress_EngineerBuildStop = {
+    local entity te;
+
+    sprint(self, PRINT_HIGH, "You stop building.\n");
+    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+    TeamFortress_SetSpeed(self);
+    te = find(world, netname, "build_timer");
+    while (te) {
+        if (te.owner == self) {
+            dremove(te);
+            te = world;
+        } else {
+            te = find(te, netname, "build_timer");
+        }
+    }
+    self.is_building = 0;
+    self.current_weapon = self.weapon;
+    W_SetCurrentAmmo();
+}
 
 float (entity obj, entity builder) CheckArea = {
     local vector src;

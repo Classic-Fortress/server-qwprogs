@@ -50,6 +50,7 @@ void () TeamFortress_StatusQuery;
 void () TeamFortress_SpyGoUndercover;
 void () TeamFortress_DetpackMenu;
 void () TeamFortress_EngineerBuild;
+void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_DetonatePipebombs;
@@ -2220,6 +2221,10 @@ void () ImpulseCommands = {
     }
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
+
+    if (self.impulse == TF_WEAPLAST
+                && self.playerclass == PC_ENGINEER && self.is_building == 1)
+        TeamFortress_EngineerBuildStop();
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (((self.impulse >= 1) && (self.impulse < 8)) ||
