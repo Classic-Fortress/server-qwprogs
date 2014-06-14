@@ -2079,13 +2079,12 @@ void () W_WeaponSlot3 = {
 void () W_WeaponSlot4 = {
     self.next_weaponmode = 0;
 
-    if (self.playerclass & (PC_SCOUT | PC_SNIPER | PC_SOLDIER
-                | PC_DEMOMAN | PC_HVYWEAP | PC_PYRO | PC_SPY))
-        self.next_weapon = WEAP_AXE;
-    else if (self.playerclass == PC_MEDIC)
+    if (self.weapons_carried & WEAP_MEDIKIT)
         self.next_weapon = WEAP_MEDIKIT;
-    else if (self.playerclass == PC_ENGINEER)
+    else if (self.weapons_carried & WEAP_SPANNER)
         self.next_weapon = WEAP_SPANNER;
+    else
+        self.next_weapon = WEAP_AXE;
 
     self.current_weaponslot = 4;
 }
