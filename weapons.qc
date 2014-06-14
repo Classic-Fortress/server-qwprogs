@@ -2222,9 +2222,12 @@ void () ImpulseCommands = {
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
 
-    if (self.impulse == TF_WEAPLAST
-                && self.playerclass == PC_ENGINEER && self.is_building == 1)
-        TeamFortress_EngineerBuildStop();
+    if (self.impulse == TF_WEAPLAST) {
+        if (self.playerclass == PC_ENGINEER && self.is_building == 1)
+            TeamFortress_EngineerBuildStop();
+        if (self.playerclass == PC_SPY && self.is_undercover == 2)
+            TeamFortress_SpyGoUndercover();
+    }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (((self.impulse >= 1) && (self.impulse < 8)) ||
