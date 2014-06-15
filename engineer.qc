@@ -375,6 +375,7 @@ void (float objtobuild) TeamFortress_Build = {
     self.weaponmodel = "";
     self.weaponframe = 0;
     TeamFortress_SetSpeed(self);
+    Status_Refresh(self);
 
     newmis.owner = self;
     newmis.classname = "timer";
@@ -456,7 +457,7 @@ void () TeamFortress_FinishedBuilding = {
     self.is_building = FALSE;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     self.current_weapon = self.weapon;
-    self.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self);
     TeamFortress_SetSpeed(self);
     if (oldself.weapon == 1) {
         self.has_dispenser = TRUE;
@@ -715,11 +716,7 @@ void (entity eng, string bld) DestroyBuilding = {
                 self = oldself;
             }
             if (te.real_owner.building == te) {
-                if (te.real_owner.StatusBarSize == 0) {
-                    CenterPrint(te.real_owner, "\n");
-                } else {
-                    te.real_owner.StatusRefreshTime = time + 0.1;
-                }
+                Status_Refresh(te.real_owner);
                 te.real_owner.menu_count = 25;
                 te.real_owner.current_menu = 1;
                 te.real_owner.building = world;

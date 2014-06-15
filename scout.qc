@@ -361,6 +361,8 @@ void () ScannerSwitch = {
         sprint(self, PRINT_HIGH, "Scanner Off.\n");
         self.ScannerOn = 0;
     }
+
+    Status_Refresh(self);
 };
 
 void () TeamFortress_Scan = {
@@ -495,12 +497,12 @@ void () TeamFortress_Scan = {
                     }
                 }
             }
-            self.owner.StatusRefreshTime = time + 0.2;
+            Status_Refresh(self.owner);
         }
     }
     if ((scen == 0) && (scfr == 0)) {
         self.health = 0;
-        self.owner.StatusRefreshTime = time + 0.2;
+        Status_Refresh(self.owner);
         self.nextthink = time + 2;
         return;
     }

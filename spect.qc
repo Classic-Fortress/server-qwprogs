@@ -57,30 +57,6 @@ void () SpectatorConnect = {
         stuffcmd(self, ".cfg\n");
     }
     self.motd = 0;
-    st = infokey(self, "sbar_res");
-    if (st == "768")
-        self.StatusBarRes = 8;
-    else if (st == "600")
-        self.StatusBarRes = 7;
-    else if (st == "480")
-        self.StatusBarRes = 6;
-    else if (st == "400")
-        self.StatusBarRes = 5;
-    else if (st == "384")
-        self.StatusBarRes = 4;
-    else if (st == "350")
-        self.StatusBarRes = 3;
-    else if (st == "300")
-        self.StatusBarRes = 2;
-    else if (st == "240")
-        self.StatusBarRes = 1;
-    else
-        self.StatusBarRes = 0;
-
-    st = infokey(self, "sbar_size");
-    self.StatusBarSize = stof(st);
-    if ((self.StatusBarSize > 2) || (self.StatusBarSize < 0))
-        self.StatusBarSize = 0;
 };
 
 void () SpectatorDisconnect = {
@@ -114,29 +90,6 @@ void () SpectatorImpulseCommand = {
 
         TeamFortress_TeamShowScores(0);
 
-    else if (self.impulse == TF_STATUSBAR_ON) {
-
-        self.StatusRefreshTime = time + 0.2;
-        self.StatusBarSize = self.StatusBarSize + 1;
-
-        if (self.StatusBarSize > 2)
-            self.StatusBarSize = 1;
-
-        if (self.StatusBarSize == 1)
-            stuffcmd(self, "setinfo sbar_size 1\n");
-        else
-            stuffcmd(self, "setinfo sbar_size 2\n");
-
-    } else if (self.impulse == TF_STATUSBAR_OFF) {
-
-        self.StatusRefreshTime = time + 60;
-        self.StatusBarSize = 0;
-        stuffcmd(self, "setinfo sbar_size 0\n");
-
-    } else if ((self.impulse >= 71) && (self.impulse <= 81)) {
-        StatusRes(self.impulse - 71);
-    }
-
     if (!self.is_admin) {
         self.impulse = 0;
         return;
@@ -166,7 +119,6 @@ void () SpectatorThink = {
 
     if (self.motd <= 95)
         TeamFortress_MOTD();
-
-    if ((time > self.StatusRefreshTime) && (self.StatusBarSize != 0))
+    else if (time >= self.StatusRefreshTime)
         RefreshStatusBar(self);
 };

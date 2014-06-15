@@ -339,10 +339,6 @@
 
 #define TF_WEAPLAST                     69
 
-// Status Bar Resolution Settings.  Same as CTF to maintain ease of use.
-#define TF_STATUSBAR_RES_START	71
-#define TF_STATUSBAR_RES_END	81
-
 #define TF_CHANGETEAM           98
 #define TF_CHANGECLASS		99
 // Added to PC_??? to get impulse to use if this clashes with your
@@ -436,10 +432,6 @@
 
 // Medic!!
 #define TF_MEDIC_HELPME		181
-
-// Status bar
-#define TF_STATUSBAR_ON		182
-#define TF_STATUSBAR_OFF	183
 
 // Discard impulse
 #define TF_DISCARD 		184

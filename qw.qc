@@ -345,11 +345,10 @@ float already_chosen_map;
 .float nailpos;
 
 // status bar stuff
-.float StatusBarSize;           // the size of the bar. 1 is default, 0 is off
-.float StatusBarRes;            // the gfx res the player's running in
-.float StatusRefreshTime;       // time to next refresh the status bar
-                                // any function that uses a CenterPrintnt
-                                // should reset this value
+.string StatusString;           // current centerprint text (strzone'd!)
+.float StatusStringLines;       // how many lines the centerprint is
+.float StatusStringTime;        // when text will time out
+.float StatusRefreshTime;       // when sbar is next printed
 
 .float ScannerOn;
 

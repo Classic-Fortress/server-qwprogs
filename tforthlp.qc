@@ -117,20 +117,6 @@ void () TeamFortress_MOTD = {
         stuffcmd(self, "bind 0 \"impulse 10\"\n");
         return;
     }
-    if (self.motd == 65) {
-        TeamFortress_Alias("sbar_on", TF_STATUSBAR_ON, 0);
-        TeamFortress_Alias("sbar_off", TF_STATUSBAR_OFF, 0);
-        TeamFortress_Alias("sbar_200", TF_STATUSBAR_RES_START, 0);
-        TeamFortress_Alias("sbar_240", TF_STATUSBAR_RES_START + 1, 0);
-        TeamFortress_Alias("sbar_300", TF_STATUSBAR_RES_START + 2, 0);
-        TeamFortress_Alias("sbar_350", TF_STATUSBAR_RES_START + 3, 0);
-        TeamFortress_Alias("sbar_384", TF_STATUSBAR_RES_START + 4, 0);
-        TeamFortress_Alias("sbar_400", TF_STATUSBAR_RES_START + 5, 0);
-        TeamFortress_Alias("sbar_480", TF_STATUSBAR_RES_START + 6, 0);
-        TeamFortress_Alias("sbar_600", TF_STATUSBAR_RES_START + 7, 0);
-        TeamFortress_Alias("sbar_768", TF_STATUSBAR_RES_START + 8, 0);
-        return;
-    }
     if (self.motd == 75) {
         TeamFortress_Alias("+det5", TF_DETPACK_5, 0);
         TeamFortress_Alias("-det5", TF_DETPACK_STOP, 0);

@@ -229,7 +229,7 @@ void () Sentry_HuntTarget = {
 };
 
 void (entity e, float f) Sentry_Pain = {
-    self.real_owner.StatusRefreshTime = time + 0.2;
+    Status_Refresh(self.real_owner);
 };
 
 void () Sentry_Explode = {

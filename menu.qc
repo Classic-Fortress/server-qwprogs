@@ -80,15 +80,10 @@ void (float inp) Menu_EngineerFix_SentryGun_Input;
 void () Menu_Dispenser;
 void (float inp) Menu_Dispenser_Input;
 
-void (entity pl, string s1) CenterPrint;
-void (entity pl, string s1, string s2) CenterPrint2;
-
 void () ResetMenu =
 {
     if (self.current_menu != MENU_DEFAULT) {
-        CenterPrint(self, "\n");
-        if (self.StatusBarSize != 0)
-            RefreshStatusBar(self);
+        Status_Print(self, "");
 
         self.menu_count = MENU_REFRESH_RATE;
         self.current_menu = MENU_DEFAULT;
@@ -195,23 +190,23 @@ void () Menu_Team = {
             return;
     }
     if (team_menu_string != string_null) {
-        CenterPrint(self, team_menu_string);
+        Status_Print(self, team_menu_string);
         return;
     }
 
     if (CTF_Map == TRUE) {
-        CenterPrint(self,
+        Status_Print(self,
                     "=== Choose Your Team ===\n\n“‘ Blue Team           \n”‘ Red Team            \n\n\n\n—‘ Auto Team \n");
     } else if (number_of_teams == 1) {
-        CenterPrint(self, "=== Choose Your Team ===\n\n“‘ Team One  \n");
+        Status_Print(self, "=== Choose Your Team ===\n\n“‘ Team One  \n");
     } else if (number_of_teams == 2) {
-        CenterPrint(self,
+        Status_Print(self,
                     "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n              \n              \n—‘ Auto Team \n");
     } else if (number_of_teams == 3) {
-        CenterPrint(self,
+        Status_Print(self,
                     "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n              \n—‘ Auto Team \n");
     } else {
-        CenterPrint(self,
+        Status_Print(self,
                     "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n–‘ Team Four \n—‘ Auto Team \n");
     }
 };
@@ -235,25 +230,25 @@ void () Menu_Class = {
     if (AD) {
         if (self.team_no == 1) {
             if (AD.noise1 != string_null) {
-                CenterPrint(self, AD.noise1);
+                Status_Print(self, AD.noise1);
                 return;
             }
         } else {
             if (self.team_no == 2) {
                 if (AD.noise2 != string_null) {
-                    CenterPrint(self, AD.noise2);
+                    Status_Print(self, AD.noise2);
                     return;
                 }
             } else {
                 if (self.team_no == 3) {
                     if (AD.noise3 != string_null) {
-                        CenterPrint(self, AD.noise3);
+                        Status_Print(self, AD.noise3);
                         return;
                     }
                 } else {
                     if (self.team_no == 4) {
                         if (AD.noise4 != string_null) {
-                            CenterPrint(self, AD.noise4);
+                            Status_Print(self, AD.noise4);
                             return;
                         }
                     }
@@ -262,13 +257,13 @@ void () Menu_Class = {
         }
     }
     if (TeamFortress_TeamIsCivilian(self.team_no)) {
-        CenterPrint(self, "Your team can only be Civilians.\n");
+        Status_Print(self, "Your team can only be Civilians.\n");
     } else {
         if (spy_off == 1) {
-            CenterPrint(self,
+            Status_Print(self,
                         "=== Choose Your Class ===\n\n“‘ Scout   \n”‘ Sniper  \n•‘ Soldier \n–‘ Demoman \n—‘ Medic   \n˜‘ HWGuy   \n™‘ Pyro    \n›‘ Engineer\n’‘ RandomPC\n");
         } else {
-            CenterPrint(self,
+            Status_Print(self,
                             "=== Choose Your Class ===\n\n“‘ Scout   \n”‘ Sniper  \n•‘ Soldier \n–‘ Demoman \n—‘ Medic   \n˜‘ HWGuy   \n™‘ Pyro    \nš‘ Spy     \n›‘ Engineer\n’‘ RandomPC\n");
         }
     }
@@ -295,16 +290,16 @@ void (float inp) Menu_Class_Input = {
 
 void () Menu_Drop = {
     if (self.playerclass == PC_ENGINEER) {
-        CenterPrint(self,
+        Status_Print(self,
                     "Drop or Make:                   \n“‘ Shells                      \n”‘ Nails                       \n•‘ Rockets                     \n–‘ Cells                       \n—‘ Nothing                     \n\n");
     } else {
-        CenterPrint(self,
+        Status_Print(self,
                     "Drop:                           \n“‘ Shells                      \n”‘ Nails                       \n•‘ Rockets                     \n–‘ Cells                       \n—‘ Nothing                     \n\n");
     }
 };
 
 void () Menu_RepeatHelp = {
-    CenterPrint(self, "Press š to see this help again\n");
+    Status_Print(self, "Press š to see this help again\n");
 };
 
 void (float inp) Menu_Drop_Input = {
@@ -361,9 +356,9 @@ void () Menu_Intro = {
     st1 = infokey(world, "motd1");
     if (st1 != string_null) {
         st2 = infokey(world, "motd2");
-        centerprint(self, st1, "\n", st2);
+        Status_Print(self, st1, "\n", st2);
     } else {
-        CenterPrint(self,
+        Status_Print(self,
                     "Welcome to Classic Fortress\nby hifi & Empezar\n======================================\ngithub.com/classic-fortress");
     }
 };
@@ -401,7 +396,7 @@ void () Menu_Scout = {
         s_nothing = "—‘ Nothing                   \n\n";
     }
 
-    centerprint(self, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
+    Status_Print(self, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
 };
 
 void (float inp) Menu_Scout_Input = {
@@ -445,7 +440,7 @@ void () Menu_Spy = {
     else
         s_reset = "\n";
 
-    centerprint(self, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
+    Status_Print(self, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
 };
 
 void (float inp) Menu_Spy_Input = {
@@ -505,7 +500,7 @@ void () Menu_Spy_Skin = {
     local string s_pyspen  = "•‘ Pyro / Spy / Engineer   \n\n";
     local string s_nothing = "—‘ Nothing                 \n\n";
 
-    centerprint(self, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
+    Status_Print(self, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
 };
 
 void (float inp) Menu_Spy_Skin_Input = {
@@ -534,7 +529,7 @@ void () Menu_Spy_Skin_1 = {
     local string s_soldier = "•‘ Soldier     \n\n";
     local string s_nothing = "—‘ Nothing     \n\n";
 
-    centerprint(self, s_change, s_scout, s_sniper, s_soldier, s_nothing);
+    Status_Print(self, s_change, s_scout, s_sniper, s_soldier, s_nothing);
 }
 
 void (float inp) Menu_Spy_Skin_1_Input = {
@@ -552,7 +547,7 @@ void () Menu_Spy_Skin_2 = {
     local string s_hwguy   = "•‘ HWGuy       \n\n";
     local string s_nothing = "—‘ Nothing     \n\n";
 
-    centerprint(self, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
+    Status_Print(self, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
 }
 
 void (float inp) Menu_Spy_Skin_2_Input = {
@@ -573,7 +568,7 @@ void () Menu_Spy_Skin_3 = {
     local string s_engineer = "•‘ Engineer        \n\n";
     local string s_nothing  = "—‘ Nothing         \n\n";
 
-    centerprint(self, s_change, s_pyro, s_spy, s_engineer, s_nothing);
+    Status_Print(self, s_change, s_pyro, s_spy, s_engineer, s_nothing);
 }
 
 void (float inp) Menu_Spy_Skin_3_Input = {
@@ -638,11 +633,11 @@ void () Menu_Spy_Color = {
     if (number_of_teams == 1)
         sprint(self, PRINT_HIGH, "There is no other team.\n");
     else if (number_of_teams == 2)
-        centerprint(self, s_disguise, s_blue, s_red, s_nothing);
+        Status_Print(self, s_disguise, s_blue, s_red, s_nothing);
     else if (number_of_teams == 3)
-        centerprint(self, s_disguise, s_blue, s_red, s_yellow, s_nothing);
+        Status_Print(self, s_disguise, s_blue, s_red, s_yellow, s_nothing);
     else
-        centerprint(self, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
+        Status_Print(self, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
 };
 
 void (float inp) Menu_Spy_Color_Input = {
@@ -660,7 +655,7 @@ void () Menu_Demoman = {
     local string s_255     = "–‘ 255 seconds   \n";
     local string s_nothing = "—‘ Nothing       \n\n";
 
-    centerprint(self, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
+    Status_Print(self, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
 }
 
 void (float inp) Menu_Demoman_Input = {
@@ -681,7 +676,7 @@ void () Menu_Demoman_Cancel = {
     local string s_detpack = "Setting detpack...  \n";
     local string s_cancel  = "“‘ Cancel!         \n\n\n\n\n\n";
 
-    centerprint(self, s_detpack, s_cancel);
+    Status_Print(self, s_detpack, s_cancel);
 }
 
 void (float inp) Menu_Demoman_Cancel_Input = {
@@ -726,7 +721,7 @@ void () Menu_Engineer = {
     }
 
     s_nothing = "\n—‘ Nothing                      \n\n";
-    centerprint(self, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
+    Status_Print(self, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
 };
 
 void (float inp) Menu_Engineer_Input = {
@@ -773,7 +768,7 @@ void () Menu_EngineerFix_Dispenser = {
     else
         s_repair = "\n";
 
-    centerprint(self, s_action, s_ammo, s_armor, s_repair, s_nothing);
+    Status_Print(self, s_action, s_ammo, s_armor, s_repair, s_nothing);
 };
 
 void (float inp) Menu_EngineerFix_Dispenser_Input = {
@@ -879,7 +874,7 @@ void () Menu_EngineerFix_SentryGun = {
     else
         repair = "\n";
 
-    centerprint(self, action, putammo, upgrade, repair, rotate, nothing);
+    Status_Print(self, action, putammo, upgrade, repair, rotate, nothing);
 };
 
 void (float inp) Menu_EngineerFix_SentryGun_Input = {
@@ -988,7 +983,7 @@ void () Menu_Dispenser = {
     else
         s_armor = "\n";
 
-    centerprint(self, s_action, s_ammo, s_armor, s_nothing);
+    Status_Print(self, s_action, s_ammo, s_armor, s_nothing);
 };
 
 void (float inp) Menu_Dispenser_Input = {

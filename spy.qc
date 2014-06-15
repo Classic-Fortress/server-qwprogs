@@ -523,7 +523,7 @@ void () TeamFortress_SpyGoUndercover = {
             te.think = TeamFortress_SpyUndercoverThink;
             te.nextthink = time + 4;
         }
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
     } else if (self.is_undercover != 2) {
         self.current_menu = MENU_SPY;
         self.menu_count = 25;
@@ -596,13 +596,11 @@ void () TeamFortress_SpyUndercoverThink = {
                 TeamFortress_SetSkin(self.owner);
             }
             TeamFortress_SpyCalcName(self.owner);
-            if (self.owner.StatusBarSize == 0) {
-                CenterPrint(self.owner, "You are now disguised.\n");
-            }
+            CenterPrint(self.owner, "You are now disguised.\n");
             self.owner.is_undercover = 1;
         }
     }
-    self.owner.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self.owner);
     dremove(self);
 };
 
@@ -1078,7 +1076,7 @@ void (entity spy) Spy_RemoveDisguise = {
                 spy.skin = 0;
             }
             spy.is_undercover = 0;
-            self.StatusRefreshTime = time + 0.1;
+            Status_Refresh(self);
             TeamFortress_SetSkin(spy);
             TeamFortress_SpyCalcName(spy);
         }
@@ -1090,6 +1088,6 @@ void (entity spy) Spy_RemoveDisguise = {
             spy.invisible_time = 0;
             spy.items = spy.items - 524288;
         }
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
     }
 };

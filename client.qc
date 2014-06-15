@@ -85,8 +85,8 @@ void () SetChangeParms = {
     parm10 = 0;
     parm11 = 0;
     parm12 = 0;
-    parm13 = self.StatusBarRes;
-    parm14 = self.StatusBarSize;
+    parm13 = 0;
+    parm14 = 0;
     parm15 = self.is_admin;
 };
 
@@ -387,10 +387,6 @@ void () DecodeLevelParms = {
         self.tfstate = parm11;
     if (self.playerclass == 0)
         self.playerclass = parm12;
-    if (parm13)
-        self.StatusBarRes = parm13;
-    if (parm14)
-        self.StatusBarSize = parm14;
     if (parm15)
         self.is_admin = parm15;
 };
@@ -1775,10 +1771,8 @@ void () PlayerPostThink = {
         if (self.cheat_check == 0) {
             self.cheat_check = time + 5;
         } else {
-            if ((time > self.StatusRefreshTime) &&
-                (self.StatusBarSize != 0)) {
+            if (time >= self.StatusRefreshTime)
                 RefreshStatusBar(self);
-            }
         }
     }
     if (self.cheat_check <= time) {
@@ -1789,6 +1783,7 @@ void () PlayerPostThink = {
 
 void () ClientConnect = {
     local entity te;
+    local string st;
     local string st2;
     local float got_one;
 
@@ -1801,38 +1796,6 @@ void () ClientConnect = {
         KickCheater(self);
 
     TeamFortress_Alias("id", TF_ID, 0);
-
-    local string st;
-    st = infokey(self, "sbr");
-    if (st == string_null)
-        st = infokey(self, "sbar_res");
-
-    if (st == "768")
-        self.StatusBarRes = 8;
-    else if (st == "600")
-        self.StatusBarRes = 7;
-    else if (st == "480")
-        self.StatusBarRes = 6;
-    else if (st == "400")
-        self.StatusBarRes = 5;
-    else if (st == "384")
-        self.StatusBarRes = 4;
-    else if (st == "350")
-        self.StatusBarRes = 3;
-    else if (st == "300")
-        self.StatusBarRes = 2;
-    else if (st == "240")
-        self.StatusBarRes = 1;
-    else
-        self.StatusBarRes = 0;
-
-    st = infokey(self, "sbs");
-    if (st == string_null)
-        st = infokey(self, "sbar_size");
-
-    self.StatusBarSize = stof(st);
-    if ((self.StatusBarSize > 2) || (self.StatusBarSize < 0))
-        self.StatusBarSize = 0;
 
     TeamFortress_ExecMapScript(self);
     self.has_disconnected = 0;
@@ -1955,6 +1918,9 @@ void () ClientDisconnect = {
     self.team_no = 0;
     self.solid = 0;
     setsize(self, '0 0 0', '0 0 0');
+    if (self.StatusString)
+        strunzone(self.StatusString);
+    self.StatusString = string_null;
 };
 
 void (entity targ, entity attacker) ClientObituary = {

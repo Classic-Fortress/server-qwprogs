@@ -3,7 +3,6 @@ float () TeamFortress_TeamGetWinner;
 float () TeamFortress_TeamGetSecond;
 string(float num) NumberToString1000;
 
-string(entity pl) GetStatusSize;
 string(float num) BlueScoreToString;
 string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
@@ -15,106 +14,115 @@ string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
 string(entity pl) SentryHealthToString;
 
-void (entity pl, string s1) CenterPrint =
+void (entity pl, string...count) Status_Print =
 {
-    centerprint(pl, s1);
-    pl.StatusRefreshTime = time + 1.5;
+    local float i, lines, len;
+    local string s;
+
+    s = "";
+    for (i = 0; i < count; i++) {
+        s = strcat(s, ...(i, string));
+    }
+
+    len = strlen(s);
+
+    if (pl.StatusString)
+        strunzone(pl.StatusString);
+    pl.StatusString = strzone(s);
+
+    lines = 0;
+    for (i = 0; i < len; i++)
+        if (substr(pl.StatusString, i, 1) == "\n")
+            lines++;
+
+    pl.StatusStringLines = lines;
+    pl.StatusStringTime = time + 1.5;
+    pl.StatusRefreshTime = time;
+};
+
+void (entity pl) Status_Refresh =
+{
+    if (pl.StatusRefreshTime == time)
+        return;
+    pl.StatusRefreshTime = time;
+};
+
+void (entity pl, string s1) CenterPrint = {
+    Status_Print(pl, s1);
 };
 
 void (entity pl, string s1, string s2) CenterPrint2 = {
-    centerprint(pl, s1, s2);
-    pl.StatusRefreshTime = time + 1.5;
+    Status_Print(pl, s1, s2);
 };
 
 void (entity pl, string s1, string s2, string s3) CenterPrint3 = {
-    centerprint(pl, s1, s2, s3);
-    pl.StatusRefreshTime = time + 1.5;
-};
-
-void (entity pl, float fTime, string s1) StatusPrint = {
-    centerprint(pl, s1);
-    pl.StatusRefreshTime = time + fTime;
+    Status_Print(pl, s1, s2, s3);
 };
 
 void (entity pl) RefreshStatusBar = {
-    local string s1, s2, s3, s4, s5, s6, s7;
+    local string pad;
+    local string s1; // will be used for grenade timers
+    local string s2; // class line
+    local string s3; // score & clip
+    local string sco1, sco2;
+    local float height;
+    local float i;
     local float win, sec;
 
-    s6 = "";
-    s7 = "";
+    pad = "";
+    s1 = "\n";
+    s2 = "\n";
+    s3 = "\n";
 
-    if (pl.StatusBarSize == 0) {
-        pl.StatusRefreshTime = time + 60;
+    if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time) {
+        if (pl.StatusString)
+            strunzone(pl.StatusString);
+        pl.StatusString = string_null;
+        pl.StatusStringLines = 0;
+    }
+
+    height = floor(stof(infokey(pl, "sb"))) - pl.StatusStringLines - 3;
+
+    // no sbar can be displayed
+    if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
+        centerprint(pl, pl.StatusString);
+        pl.StatusRefreshTime = time + 1.5;
         return;
     }
-    pl.StatusRefreshTime = time + 1.5;
 
-    if (pl.playerclass == PC_UNDEFINED)
-        return;
-
-    s1 = GetStatusSize(pl);
+    for (i = 0; i < height; i++)
+        pad = strcat(pad, "\n");
 
     win = TeamFortress_TeamGetWinner();
     sec = TeamFortress_TeamGetSecond();
-    if ((TeamFortress_TeamGetScore(win) > 100) ||
-        (TeamFortress_TeamGetScore(sec) > 100)) {
 
-        if (win == 0)
-            s3 = BlueScoreToString(team1score);
-        else if (win == 1)
-            s3 = BlueScoreToString(team1score);
-        else if (win == 2)
-            s3 = RedScoreToString(team2score);
-        else if (win == 3)
-            s3 = YellowScoreToString(team3score);
-        else
-            s3 = GreenScoreToString(team4score);
+    if (win == 0)
+        sco1 = BlueScoreToString(team1score);
+    else if (win == 1)
+        sco1 = BlueScoreToString(team1score);
+    else if (win == 2)
+        sco1 = RedScoreToString(team2score);
+    else if (win == 3)
+        sco1 = YellowScoreToString(team3score);
+    else
+        sco1 = GreenScoreToString(team4score);
 
-        if (sec == 0)
-            s4 = RedScoreToString(team2score);
-        else if (sec == 1)
-            s4 = BlueScoreToString(team1score);
-        else if (sec == 2)
-            s4 = RedScoreToString(team2score);
-        else if (sec == 3)
-            s4 = YellowScoreToString(team3score);
-        else
-            s4 = GreenScoreToString(team4score);
+    if (sec == 0)
+        sco2 = RedScoreToString(team2score);
+    else if (sec == 1)
+        sco2 = BlueScoreToString(team1score);
+    else if (sec == 2)
+        sco2 = RedScoreToString(team2score);
+    else if (sec == 3)
+        sco2 = YellowScoreToString(team3score);
+    else
+        sco2 = GreenScoreToString(team4score);
 
-    } else {
+    s3 = strcat(strcat(sco1, sco2), ClipSizeToString(pl));
 
-        if (win == 0)
-            s3 = BlueScoreToString(team1score);
-        else if (win == 1)
-            s3 = BlueScoreToString(team1score);
-        else if (win == 2)
-            s3 = RedScoreToString(team2score);
-        else if (win == 3)
-            s3 = YellowScoreToString(team3score);
-        else
-            s3 = GreenScoreToString(team4score);
-
-        if (sec == 0)
-            s4 = RedScoreToString(team2score);
-        else if (sec == 1)
-            s4 = BlueScoreToString(team1score);
-        else if (sec == 2)
-            s4 = RedScoreToString(team2score);
-        else if (sec == 3)
-            s4 = YellowScoreToString(team3score);
-        else
-            s4 = GreenScoreToString(team4score);
-    }
-
-    s5 = ClipSizeToString(pl);
-    s2 = "\n";
     if (pl.playerclass == PC_SCOUT) {
 
-        s2 = ScannerToString(pl);
-        s6 = RangeToString(pl);
-        s7 = "\n";
-        centerprint(pl, s1, s2, s6, s7, s3, s4, s5);
-        return;
+        s2 = strcat(strcat(ScannerToString(pl), RangeToString(pl)), "\n");
 
     } else if (pl.playerclass == PC_DEMOMAN) {
 
@@ -125,106 +133,17 @@ void (entity pl) RefreshStatusBar = {
     } else if (pl.playerclass == PC_SPY) {
 
         s2 = DisguiseToString(pl);
-        centerprint(pl, s1, s2, s3, s4, s5);
 
     } else if (pl.playerclass == PC_ENGINEER) {
 
-        if (self.has_sentry) {
-
-            s2 = SentryHealthToString(pl);
-            s6 = SentryDetailsToString(pl);
-            centerprint(pl, s1, s2, s6, s3, s4, s5, s7);
-            return;
-
-        } else if (self.is_building) {
+        if (self.has_sentry)
+            s2 = strcat(SentryHealthToString(pl), SentryDetailsToString(pl));
+        else if (self.is_building)
             s2 = "  building                             \n";
-        }
     }
-    centerprint(pl, s1, s2, s3, s4, s5, s6, s7);
-};
 
-string(entity pl) GetStatusSize =
-{
-    if (pl.StatusBarSize == 1) {
-
-        if (pl.StatusBarRes > 7)        // 768
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-
-        else if (pl.StatusBarRes == 7)  // 600
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 6)  // 480
-
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 5)  // 400
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 4)  // 384
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 3)  // 350
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 2)  // 300
-            return ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 1)  // 240
-            return ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        // 200
-        return ("\n\n\n\n\n\n\n\n\n\n\n");
-
-    } else {                    /* if (pl.StatusBarSize == 2) */
-
-
-        if (pl.StatusBarRes > 7)        // 768
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 7)  // 600
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 6)  // 480
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 5)  // 400
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 4)  // 384
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 3)  // 350
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 2)  // 300
-            return
-                ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        else if (pl.StatusBarRes == 1)  // 240
-            return ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-        // 200
-        return ("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    }
-};
-
-void (float res) StatusRes = {
-    self.StatusBarRes = res;
-    if (res > 7)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 1024x768.\n");
-    else if (res == 7)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 800x600.\n");
-    else if (res == 6)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 640x480.\n");
-    else if (res == 5)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 640x400.\n");
-    else if (res == 4)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 512x384.\n");
-    else if (res == 3)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 320x350.\n");
-    else if (res == 2)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 400x300.\n");
-    else if (res == 1)
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 320x240.\n");
-    else
-        sprint(self, PRINT_HIGH, "Status Bar Res set to 320x200.\n");
+    centerprint(pl, pl.StatusString, pad, s1, s2, s3);
+    pl.StatusRefreshTime = time + 1.5;
 };
 
 string(float num) NumberToString1000 =

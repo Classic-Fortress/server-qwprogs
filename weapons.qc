@@ -1668,7 +1668,7 @@ void () W_Reload_shotgun = {
     self.owner.weaponmodel = "progs/v_shot.mdl";
     sprint(self.owner, PRINT_LOW, "finished reloading\n");
     dremove(self);
-    self.owner.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self.owner);
 };
 
 void () W_Reload_super_shotgun = {
@@ -1676,7 +1676,7 @@ void () W_Reload_super_shotgun = {
     self.owner.weaponmodel = "progs/v_shot2.mdl";
     sprint(self.owner, PRINT_LOW, "finished reloading\n");
     dremove(self);
-    self.owner.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self.owner);
 };
 
 void () W_Reload_grenade_launcher = {
@@ -1684,7 +1684,7 @@ void () W_Reload_grenade_launcher = {
     self.owner.weaponmodel = "progs/v_rock.mdl";
     sprint(self.owner, PRINT_LOW, "finished reloading\n");
     dremove(self);
-    self.owner.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self.owner);
 };
 
 void () W_Reload_rocket_launcher = {
@@ -1692,7 +1692,7 @@ void () W_Reload_rocket_launcher = {
     self.owner.weaponmodel = "progs/v_rock2.mdl";
     sprint(self.owner, PRINT_LOW, "finished reloading\n");
     dremove(self);
-    self.owner.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self.owner);
 };
 
 float () CheckForReload = {
@@ -1839,7 +1839,7 @@ void () W_Attack = {
         player_shot1();
         W_FireShotgun();
         self.reload_shotgun = self.reload_shotgun + 1;
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
@@ -1848,7 +1848,7 @@ void () W_Attack = {
         player_shot1();
         W_FireSuperShotgun();
         self.reload_super_shotgun = self.reload_super_shotgun + 2;
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.7);
     } else if (self.current_weapon == WEAP_NAILGUN) {
@@ -1861,7 +1861,7 @@ void () W_Attack = {
         player_rocket1();
         W_FireGrenade();
         self.reload_grenade_launcher = self.reload_grenade_launcher + 1;
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.6);
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
@@ -1870,7 +1870,7 @@ void () W_Attack = {
         player_rocket1();
         W_FireRocket();
         self.reload_rocket_launcher = self.reload_rocket_launcher + 1;
-        self.StatusRefreshTime = time + 0.1;
+        Status_Refresh(self);
         CheckForReload();
         Attack_Finished(0.8);
     } else if (self.current_weapon == WEAP_LIGHTNING) {
@@ -2164,7 +2164,7 @@ void (float inp) W_ChangeWeapon = {
     self.weaponmode = self.next_weaponmode;
     W_SetCurrentAmmo();
     W_PrintWeaponMessage();
-    self.StatusRefreshTime = time + 0.1;
+    Status_Refresh(self);
 };
 
 void () CycleWeaponNext = {
@@ -2449,17 +2449,7 @@ void () DeadImpulses = {
             else
                 sprint(self, PRINT_HIGH, "Friendlies Only\n");
         }
-    } else if (self.impulse == TF_STATUSBAR_ON) {
-        self.StatusRefreshTime = time + 0.2;
-        self.StatusBarSize = self.StatusBarSize + 1;
-        if (self.StatusBarSize > 2)
-            self.StatusBarSize = 1;
-    } else if (self.impulse == TF_STATUSBAR_OFF) {
-        self.StatusRefreshTime = time + 60;
-        self.StatusBarSize = 0;
-    } else if ((self.impulse >= 71) && (self.impulse <= 81))
-        StatusRes(self.impulse - 71);
-    else if (self.impulse == TF_ALIAS_CHECK) {
+    } else if (self.impulse == TF_ALIAS_CHECK) {
         sprint(self, PRINT_HIGH, "Aliases checked.\n");
         self.got_aliases = 1;
         self.impulse = 0;
