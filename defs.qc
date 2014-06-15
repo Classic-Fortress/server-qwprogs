@@ -423,6 +423,8 @@ float (float x, float y) pow                                        = #97;
 float (string s) strlen                                             = #114;
 string (string s1, string s2) strcat                                = #115;
 string (string s, float start, float count) substr                  = #116;
+string (string s) strzone                                           = #118;
+void (string s) strunzone                                           = #119;
 
 //============================================================================
 
