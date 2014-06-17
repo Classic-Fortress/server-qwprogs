@@ -656,7 +656,6 @@ void (entity gun) Engineer_UseSentryGun = {
         sprint(self, PRINT_HIGH, ", ", st, " rockets");
     }
     sprint(self, PRINT_HIGH, "\n");
-    Menu_EngineerFix_SentryGun();
     self.building = gun;
     dist_checker = spawn();
     dist_checker.classname = "timer";
@@ -664,6 +663,7 @@ void (entity gun) Engineer_UseSentryGun = {
     dist_checker.enemy = gun;
     dist_checker.think = CheckDistance;
     dist_checker.nextthink = time + 0.3;
+    Menu_EngineerFix_SentryGun();
 };
 
 void (entity gunhead) CheckSentry = {
