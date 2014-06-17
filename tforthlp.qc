@@ -26,7 +26,7 @@ void () TeamFortress_MOTD = {
             st1 = "Welcome to Classic Fortress\nby hifi & Empezar\n==================================\ngithub.com/classic-fortress";
         }
 
-        sprint(self, PRINT_HIGH, strcat("\n", st1));
+        sprint(self, PRINT_HIGH, strcat(strcat("\n", st1), "\n\n"));
         Status_Menu(self, MOTD_Input, st1);
     }
 
@@ -46,7 +46,6 @@ void () TeamFortress_MOTD = {
             return;
         }
 
-        sprint(self, PRINT_HIGH, "binding aliases...\n");
         TeamFortress_Alias("inv", TF_INVENTORY, 0);
         TeamFortress_Alias("showtf", TF_SHOWTF, 0);
         TeamFortress_Alias("zoomtoggle", TF_ZOOMTOGGLE, 0);
