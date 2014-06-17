@@ -229,8 +229,6 @@ void () EMPGrenadeExplode = {
 };
 
 void () TeamFortress_EngineerBuild = {
-    local entity te;
-
     if (self.is_building == 0) {
         if (((self.ammo_cells < 100) && !self.has_dispenser) &&
             !self.has_sentry) {

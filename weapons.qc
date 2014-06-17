@@ -83,8 +83,6 @@ void (entity gun) Engineer_UseSentryGun;
 void () TeamFortress_MOTD;
 void () TeamFortress_HelpMap;
 
-void (float res) StatusRes;
-
 void () BioInfection_Decay;
 void () BioInfection_MonsterDecay;
 
@@ -2131,8 +2129,8 @@ void (float inp) W_ChangeWeapon = {
             self.noammo = 1;
         else if (self.next_weapon == WEAP_LASER && self.ammo_nails < 1)
             self.noammo = 1;
-        else if (self.next_weapon == WEAP_GRENADE_LAUNCHER
-                    || self.next_weapon == WEAP_ROCKET_LAUNCHER
+        else if ((self.next_weapon == WEAP_GRENADE_LAUNCHER
+                    || self.next_weapon == WEAP_ROCKET_LAUNCHER)
                     && self.ammo_rockets < 1)
             self.noammo = 1;
         else if (self.next_weapon == WEAP_FLAMETHROWER && self.ammo_cells < 1)
@@ -2461,6 +2459,7 @@ void () W_WeaponFrame = {
     local float zoomkey;
 
     self.default_fov = stof(infokey(self, "df"));
+    zoom_level = self.default_fov;
     zoom4x = stof(infokey(self, "z4x"));
     zoom2x = stof(infokey(self, "z2x"));
     zoomkey = stof(infokey(self, "zk"));
@@ -2476,9 +2475,6 @@ void () W_WeaponFrame = {
             zoom_level = 40;
         else
             zoom_level = zoom2x;
-    }
-    else if (self.zoom_mode == 0) {
-        zoom_level = self.default_fov;
     }
 
     if (!(self.tfstate & TFSTATE_AIMING)) {

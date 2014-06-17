@@ -103,7 +103,6 @@ void () TeamFortress_ZoomToggle = {
     local float zoom4x;
     local float zoom2x;
     local float zoomkey;
-    local float zoom_level;
 
     if (self.playerclass != PC_SNIPER)
         return;

@@ -44,7 +44,6 @@ void (float tno, entity ignore, string st) teamsprint;
 void () Menu_Team;
 void () Menu_Class;
 void () Menu_Drop;
-void () Menu_Intro;
 void () PlayerObserverMode;
 void () Menu_Scout;
 void () Menu_Spy;
