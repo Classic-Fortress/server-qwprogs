@@ -394,51 +394,28 @@ void () Menu_Spy_Skin_3 = {
 }
 
 void (float inp) Menu_Spy_Color_Input = {
-    if (inp > 0 && inp <= number_of_teams)
+    local float color = stof(infokey(self, "bottomcolor"));
+
+    if (inp == 1 && color == 13)
+        Menu_Spy_Color();
+    else if (inp == 2 && color == 4)
+        Menu_Spy_Color();
+    else if (inp == 3 && color == 12)
+        Menu_Spy_Color();
+    else if (inp == 4 && color == 3)
+        Menu_Spy_Color();
+    else if (inp > 0 && inp <= number_of_teams)
         TeamFortress_SpyChangeColor(inp);
 };
 
 void () Menu_Spy_Color = {
-    local float players_blue   = TeamFortress_TeamGetNoPlayers(1);
-    local float players_red    = TeamFortress_TeamGetNoPlayers(2);
-    local float players_yellow = TeamFortress_TeamGetNoPlayers(3);
-    local float players_green  = TeamFortress_TeamGetNoPlayers(4);
-
-    local string s_disguise = "Disguise as:               \n";
-    local string s_nothing  = "\n—‘ Nothing                \n\n";
-    local string s_blue;
-    local string s_red;
-    local string s_yellow;
-    local string s_green;
-
-    if (stof(infokey(self, "topcolor")) != 13) {
-        s_blue   = "“‘ Blue team (";
-        s_blue   = strcat(s_blue, ftos(players_blue));
-        s_blue   = strcat(s_blue, " players)  \n");
-    }
-    else
-        s_blue = "\n";
-    if (stof(infokey(self, "topcolor")) != 4) {
-        s_red    = "”‘ Red team (";
-        s_red    = strcat(s_red, ftos(players_red));
-        s_red    = strcat(s_red, " players)   \n");
-    }
-    else
-        s_red = "\n";
-    if (stof(infokey(self, "topcolor")) != 12) {
-        s_yellow = "•‘ Yellow team (";
-        s_yellow = strcat(s_yellow, ftos(players_yellow));
-        s_yellow = strcat(s_yellow, " players)\n");
-    }
-    else
-        s_yellow = "\n";
-    if (stof(infokey(self, "topcolor")) != 3) {
-        s_green  = "–‘ Green team \n";
-        s_green  = strcat(s_green, ftos(players_green));
-        s_green  = strcat(s_green, " players) \n");
-    }
-    else
-        s_green = "\n";
+    local float color       = stof(infokey(self, "bottomcolor"));
+    local string s_disguise = "Disguise as:                 \n";
+    local string s_nothing  = "\n—‘ Nothing                  ";
+    local string s_blue     = "“‘ Blue team                \n";
+    local string s_red      = "”‘ Red team                 \n";
+    local string s_yellow   = "•‘ Yellow team              \n";
+    local string s_green    = "–‘ Green team               \n";
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
@@ -447,12 +424,16 @@ void () Menu_Spy_Color = {
     self.menu_input = nil;
     if (number_of_teams == 1)
         sprint(self, PRINT_HIGH, "There is no other team.\n");
-    else if (number_of_teams == 2)
-        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_nothing);
+    else if (number_of_teams == 2) {
+        if (color == 4)
+            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, "\n", s_nothing, "\n\n\n");
+        else
+            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, "\n", s_red, s_nothing, "\n\n\n");
+    }
     else if (number_of_teams == 3)
-        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing);
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing, "\n\n");
     else
-        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing, "\n");
 };
 
 void (float inp) Menu_Demoman_Input = {
