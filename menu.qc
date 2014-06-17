@@ -94,12 +94,17 @@ void (float inp) Menu_Input =
 };
 
 void (float inp) Menu_Team_Input = {
-    if (inp == 5) {
+    if (inp == 0) {
+        return;
+    } if (inp == 5) {
         TeamFortress_TeamPutPlayerInTeam();
     } else if ((inp <= number_of_teams) && (inp > 0)) {
         TeamFortress_TeamSet(inp);
     } else if ((number_of_teams == 0) && (inp <= 4)) {
         TeamFortress_TeamSet(inp);
+    } else {
+        Menu_Team();
+        return;
     }
 
     if ((self.playerclass == 0) && (self.lives != 0)) {
