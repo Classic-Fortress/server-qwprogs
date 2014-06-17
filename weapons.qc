@@ -2026,6 +2026,7 @@ void () W_WeaponSlot2 = {
             self.noammo = 1;
     } else if (self.playerclass == PC_SOLDIER
                 || self.playerclass == PC_MEDIC
+                || self.playerclass == PC_HVYWEAP
                 || self.playerclass == PC_SPY
                 || self.playerclass == PC_ENGINEER) {
         if (self.ammo_shells > 1)
