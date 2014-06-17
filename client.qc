@@ -1153,7 +1153,7 @@ void () PutClientInServer = {
 
     if (self.playerclass == 0) {
         self.modelindex = modelindex_null;
-        self.current_menu = MENU_DEFAULT;
+        self.menu_input = nil;
     }
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
     self.view_ofs = '0 0 22';
@@ -1514,15 +1514,6 @@ void () PlayerPreThink = {
         return;
     }
     makevectors(self.v_angle);
-    if (self.playerclass == 0) {
-        if ((self.button2 && (self.current_menu == 2)) &&
-            (self.team_no == 0)) {
-            if (TeamFortress_TeamPutPlayerInTeam()) {
-                self.current_menu = 3;
-                self.menu_count = 25;
-            }
-        }
-    }
     if (self.view_ofs == '0 0 0') {
         return;
     }
@@ -1765,16 +1756,15 @@ void () PlayerPostThink = {
     self.jump_flag = self.velocity_z;
     CheckPowerups();
     W_WeaponFrame();
-    if (self.motd <= 95) {
+    if (self.motd <= 400) {
         TeamFortress_MOTD();
     } else {
         if (self.cheat_check == 0) {
             self.cheat_check = time + 5;
-        } else {
-            if (time >= self.StatusRefreshTime)
-                RefreshStatusBar(self);
         }
     }
+    if (time >= self.StatusRefreshTime)
+        RefreshStatusBar(self);
     if (self.cheat_check <= time) {
         TeamFortress_CheckTeamCheats();
         self.cheat_check = time + 3;

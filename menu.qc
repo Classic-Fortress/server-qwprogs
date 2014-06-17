@@ -46,7 +46,6 @@ void () Menu_Class;
 void () Menu_Drop;
 void () Menu_Intro;
 void () PlayerObserverMode;
-void () Menu_RepeatHelp;
 void () Menu_Scout;
 void () Menu_Spy;
 void () Menu_Spy_Skin;
@@ -80,135 +79,19 @@ void (float inp) Menu_EngineerFix_SentryGun_Input;
 void () Menu_Dispenser;
 void (float inp) Menu_Dispenser_Input;
 
-void () ResetMenu =
+void (entity pl) Menu_Close =
 {
-    if (self.current_menu != MENU_DEFAULT) {
-        Status_Print(self, "");
-
-        self.menu_count = MENU_REFRESH_RATE;
-        self.current_menu = MENU_DEFAULT;
-    }
+    pl.menu_input = nil;
+    Status_Print(pl, "");
 };
 
-void () Player_Menu = {
-    if (self.menu_count > MENU_REFRESH_RATE) {
-        self.menu_count = 0;
-    } else {
-        self.menu_count = self.menu_count + 1;
-        return;
-    }
-    if (self.current_menu == MENU_INTRO) {
-
-        Menu_Intro();
-        if (self.menu_displaytime > 4)
-            self.current_menu = MENU_DEFAULT;
-        else
-            self.menu_displaytime = self.menu_displaytime + 1;
-
-    } else if (self.current_menu == MENU_DROP) {
-
-        Menu_Drop();
-
-    } else if (self.current_menu == MENU_SCOUT) {
-
-        Menu_Scout();
-
-    } else if (self.current_menu == MENU_SPY) {
-
-        Menu_Spy();
-
-    } else if (self.current_menu == MENU_SPY_SKIN) {
-
-        Menu_Spy_Skin();
-
-    } else if (self.current_menu == MENU_SPY_SKIN_1) {
-
-        Menu_Spy_Skin_1();
-
-    } else if (self.current_menu == MENU_SPY_SKIN_2) {
-
-        Menu_Spy_Skin_2();
-
-    } else if (self.current_menu == MENU_SPY_SKIN_3) {
-
-        Menu_Spy_Skin_3();
-
-    } else if (self.current_menu == MENU_SPY_COLOR) {
-
-        Menu_Spy_Color();
-
-    } else if (self.current_menu == MENU_DEMOMAN) {
-
-        Menu_Demoman();
-
-    } else if (self.current_menu == MENU_DEMOMAN_CANCEL) {
-
-        Menu_Demoman_Cancel();
-
-    } else if (self.current_menu == MENU_ENGINEER) {
-
-        Menu_Engineer();
-
-    } else if (self.current_menu == MENU_ENGINEER_FIX_DISPENSER) {
-
-        Menu_EngineerFix_Dispenser();
-
-    } else if (self.current_menu == MENU_ENGINEER_FIX_SENTRYGUN) {
-
-        Menu_EngineerFix_SentryGun();
-
-    } else if (self.current_menu == MENU_DISPENSER) {
-
-        Menu_Dispenser();
-
-    } else if (self.current_menu == MENU_REPEATHELP) {
-
-        Menu_RepeatHelp();
-        self.current_menu = 1;
-
-    } else if (self.current_menu == 20) {
-
-        Menu_Class();
-
-    } else if (teamplay && (((self.team_no == 0) && (self.lives != 0)) || self.current_menu == MENU_TEAM)) {
-
-        self.current_menu = MENU_TEAM;
-        Menu_Team();
-
-    } else if ((self.playerclass == 0) && (self.lives != 0)) {
-
-        self.current_menu = MENU_CLASS;
-        Menu_Class();
-
-    } else
-        self.current_menu = 0;
-};
-
-void () Menu_Team = {
-    if ((toggleflags & TFLAG_AUTOTEAM) && teamplay) {
-        if (TeamFortress_TeamPutPlayerInTeam())
-            return;
-    }
-    if (team_menu_string != string_null) {
-        Status_Print(self, team_menu_string);
-        return;
-    }
-
-    if (CTF_Map == TRUE) {
-        Status_Print(self,
-                    "=== Choose Your Team ===\n\nêìë Blue Team           \nêîë Red Team            \n\n\n\nêóë Auto Team \n");
-    } else if (number_of_teams == 1) {
-        Status_Print(self, "=== Choose Your Team ===\n\nêìë Team One  \n");
-    } else if (number_of_teams == 2) {
-        Status_Print(self,
-                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \n              \n              \nêóë Auto Team \n");
-    } else if (number_of_teams == 3) {
-        Status_Print(self,
-                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \nêïë Team Three\n              \nêóë Auto Team \n");
-    } else {
-        Status_Print(self,
-                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \nêïë Team Three\nêñë Team Four \nêóë Auto Team \n");
-    }
+void (float inp) Menu_Input =
+{
+    local f_void_float tmp = self.menu_input;
+    self.menu_input = nil;
+    self.impulse = 0;
+    tmp(inp);
+    Status_Print(self, "");
 };
 
 void (float inp) Menu_Team_Input = {
@@ -219,12 +102,68 @@ void (float inp) Menu_Team_Input = {
     } else if ((number_of_teams == 0) && (inp <= 4)) {
         TeamFortress_TeamSet(inp);
     }
-    ResetMenu();
+
+    if ((self.playerclass == 0) && (self.lives != 0)) {
+        Menu_Class();
+    }
+};
+
+void () Menu_Team = {
+    if (self.menu_input == Menu_Team_Input) {
+        Menu_Input(0);
+        return;
+    }
+    if ((toggleflags & TFLAG_AUTOTEAM) && teamplay) {
+        if (TeamFortress_TeamPutPlayerInTeam())
+            return;
+    }
+    if (team_menu_string != string_null) {
+        Status_Print(self, team_menu_string);
+        return;
+    }
+
+    self.menu_input = nil;
+    if (CTF_Map == TRUE) {
+        Status_Menu(self, Menu_Team_Input,
+                    "=== Choose Your Team ===\n\nêìë Blue Team           \nêîë Red Team            \n\n\n\nêóë Auto Team \n");
+    } else if (number_of_teams == 1) {
+        Status_Menu(self, Menu_Team_Input,
+                    "=== Choose Your Team ===\n\nêìë Team One  \n");
+    } else if (number_of_teams == 2) {
+        Status_Menu(self, Menu_Team_Input,
+                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \n              \n              \nêóë Auto Team \n");
+    } else if (number_of_teams == 3) {
+        Status_Menu(self, Menu_Team_Input,
+                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \nêïë Team Three\n              \nêóë Auto Team \n");
+    } else {
+        Status_Menu(self, Menu_Team_Input,
+                    "=== Choose Your Team ===\n\nêìë Team One  \nêîë Team Two  \nêïë Team Three\nêñë Team Four \nêóë Auto Team \n");
+    }
+};
+
+void (float inp) Menu_Class_Input = {
+    local float new_class;
+    new_class = 0;
+
+    if ((inp > 10) || (inp < 1))
+        return;
+
+    self.impulse = inp + 100;
+
+    if (self.playerclass != 0)
+        new_class = 1;
+
+    TeamFortress_ChangeClass();
     self.impulse = 0;
 };
 
 void () Menu_Class = {
     local entity AD;
+    
+    if (self.menu_input == Menu_Class_Input) {
+        Menu_Input(0);
+        return;
+    }
 
     AD = find(world, classname, "info_tfdetect");
     if (AD) {
@@ -256,111 +195,47 @@ void () Menu_Class = {
             }
         }
     }
+    self.menu_input = nil;
     if (TeamFortress_TeamIsCivilian(self.team_no)) {
         Status_Print(self, "Your team can only be Civilians.\n");
     } else {
         if (spy_off == 1) {
-            Status_Print(self,
+            Status_Menu(self, Menu_Class_Input,
                         "=== Choose Your Class ===\n\nêìë Scout   \nêîë Sniper  \nêïë Soldier \nêñë Demoman \nêóë Medic   \nêòë HWGuy   \nêôë Pyro    \nêõë Engineer\nêíë RandomPC\n");
         } else {
-            Status_Print(self,
+            Status_Menu(self, Menu_Class_Input,
                             "=== Choose Your Class ===\n\nêìë Scout   \nêîë Sniper  \nêïë Soldier \nêñë Demoman \nêóë Medic   \nêòë HWGuy   \nêôë Pyro    \nêöë Spy     \nêõë Engineer\nêíë RandomPC\n");
         }
     }
 };
 
-void (float inp) Menu_Class_Input = {
-    local float new_class;
-    new_class = 0;
-
-    if ((inp > 10) || (inp < 1))
-        return;
-
-    self.impulse = inp + 100;
-
-    if (self.playerclass != 0)
-        new_class = 1;
-
-    TeamFortress_ChangeClass();
-    ResetMenu();
-
-    self.menu_displaytime = 0;
-    self.impulse = 0;
+void (float inp) Menu_Drop_Input = {
+    if ((inp > 0) && (inp < 5))
+        TeamFortress_DropAmmo(inp);
 };
 
 void () Menu_Drop = {
+    self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER) {
-        Status_Print(self,
+        Status_Menu(self, Menu_Drop_Input,
                     "Drop or Make:                   \nêìë Shells                      \nêîë Nails                       \nêïë Rockets                     \nêñë Cells                       \nêóë Nothing                     \n\n");
     } else {
-        Status_Print(self,
+        Status_Menu(self, Menu_Drop_Input,
                     "Drop:                           \nêìë Shells                      \nêîë Nails                       \nêïë Rockets                     \nêñë Cells                       \nêóë Nothing                     \n\n");
     }
 };
 
-void () Menu_RepeatHelp = {
-    Status_Print(self, "Press ö to see this help again\n");
-};
-
-void (float inp) Menu_Drop_Input = {
-    if ((inp > 0) && (inp < 5))
-        TeamFortress_DropAmmo(inp);
-
-    if ((inp > 0) && (inp < 6))
-        ResetMenu();
-
-    self.impulse = 0;
-};
-
-void (float inp) Menu_Input = {
-    if (self.current_menu == MENU_TEAM) {
-        Menu_Team_Input(inp);
-    } else if ((self.current_menu == MENU_CLASS) ||
-               (self.current_menu == 20)) {
-        Menu_Class_Input(inp);
-    } else if (self.current_menu == MENU_DROP) {
-        Menu_Drop_Input(inp);
-    } else if (self.current_menu == MENU_SPY) {
-        Menu_Spy_Input(inp);
-    } else if (self.current_menu == MENU_SCOUT) {
-        Menu_Scout_Input(inp);
-    } else if (self.current_menu == MENU_SPY_SKIN) {
-        Menu_Spy_Skin_Input(inp);
-    } else if (self.current_menu == MENU_SPY_SKIN_1) {
-        Menu_Spy_Skin_1_Input(inp);
-    } else if (self.current_menu == MENU_SPY_SKIN_2) {
-        Menu_Spy_Skin_2_Input(inp);
-    } else if (self.current_menu == MENU_SPY_SKIN_3) {
-        Menu_Spy_Skin_3_Input(inp);
-    } else if (self.current_menu == MENU_SPY_COLOR) {
-        Menu_Spy_Color_Input(inp);
-    } else if (self.current_menu == MENU_DEMOMAN) {
-        Menu_Demoman_Input(inp);
-    } else if (self.current_menu == MENU_DEMOMAN_CANCEL) {
-        Menu_Demoman_Cancel_Input(inp);
-    } else if (self.current_menu == MENU_ENGINEER) {
-        Menu_Engineer_Input(inp);
-    } else if (self.current_menu == MENU_ENGINEER_FIX_DISPENSER) {
-        Menu_EngineerFix_Dispenser_Input(inp);
-    } else if (self.current_menu == MENU_ENGINEER_FIX_SENTRYGUN) {
-        Menu_EngineerFix_SentryGun_Input(inp);
-    } else if (self.current_menu == MENU_DISPENSER) {
-        Menu_Dispenser_Input(inp);
-    }
-};
-
-void () Menu_Intro = {
-    local string st1;
-    local string st2;
-
-    st1 = infokey(world, "motd1");
-    if (st1 != string_null) {
-        st2 = infokey(world, "motd2");
-        Status_Print(self, st1, "\n", st2);
-    } else {
-        Status_Print(self,
-                    "Welcome to Classic Fortress\nby hifi & Empezar\n======================================\ngithub.com/classic-fortress");
-    }
+void (float inp) Menu_Scout_Input = {
+    if (inp == 1)
+        self.impulse = TF_SCAN;
+    else if (inp == 2)
+        self.impulse = TF_SCAN_ENEMY;
+    else if (inp == 3)
+        self.impulse = TF_SCAN_FRIENDLY;
+    else if (inp == 4)
+        self.impulse = TF_SCAN_SOUND;
+    else if (inp > 4)
+        self.impulse = 0;
 };
 
 void () Menu_Scout = {
@@ -396,21 +271,34 @@ void () Menu_Scout = {
         s_nothing = "êóë Nothing                   \n\n";
     }
 
-    Status_Print(self, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
+    Status_Menu(self, Menu_Scout_Input, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
 };
 
-void (float inp) Menu_Scout_Input = {
-    if (inp == 1)
-        self.impulse = TF_SCAN;
-    else if (inp == 2)
-        self.impulse = TF_SCAN_ENEMY;
-    else if (inp == 3)
-        self.impulse = TF_SCAN_FRIENDLY;
-    else if (inp == 4)
-        self.impulse = TF_SCAN_SOUND;
-    else if (inp > 4)
-        self.impulse = 0;
-    ResetMenu();
+void (float inp) Menu_Spy_Input = {
+    if ((inp == 1) || (inp == 2)) {
+        if (self.effects & (8 | 4)) {
+            sprint(self, PRINT_HIGH,
+                   "You can't go undercover while glowing.\n");
+            return;
+        }
+        if (self.is_unabletospy == 1) {
+            sprint(self, PRINT_HIGH,
+                   "You can't go undercover right now.\n");
+            return;
+        }
+    }
+    if (inp == 1) {
+        Menu_Spy_Skin();
+    } else if (inp == 2) {
+        Menu_Spy_Color();
+    } else if (inp == 3) {
+        TeamFortress_SpyFeignDeath(0);
+        if (self.is_feigning) {
+            Menu_Spy();
+        }
+    } else if (inp == 4) {
+        Spy_RemoveDisguise(self);
+    }
 };
 
 void () Menu_Spy = {
@@ -422,7 +310,6 @@ void () Menu_Spy = {
     local string s_reset;
 
     if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
-        ResetMenu();
         return;
     }
 
@@ -440,56 +327,16 @@ void () Menu_Spy = {
     else
         s_reset = "\n";
 
-    Status_Print(self, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
+    Status_Menu(self, Menu_Spy_Input, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
 };
 
-void (float inp) Menu_Spy_Input = {
-    if ((inp == 1) || (inp == 2)) {
-        if (self.effects & (8 | 4)) {
-            sprint(self, PRINT_HIGH,
-                   "You can't go undercover while glowing.\n");
-            ResetMenu();
-            self.impulse = 0;
-            return;
-        }
-        if (self.is_unabletospy == 1) {
-            sprint(self, PRINT_HIGH,
-                   "You can't go undercover right now.\n");
-            ResetMenu();
-            self.impulse = 0;
-            return;
-        }
-    }
+void (float inp) Menu_Spy_Skin_Input = {
     if (inp == 1) {
-        Menu_Spy_Skin();
-        self.menu_count = 25;
-        self.current_menu = MENU_SPY_SKIN;
-        self.menu_displaytime = 0;
-        self.impulse = 0;
+        Menu_Spy_Skin_1();
     } else if (inp == 2) {
-        Menu_Spy_Color();
-        self.menu_count = 25;
-        self.current_menu = MENU_SPY_COLOR;
-        self.menu_displaytime = 0;
-        self.impulse = 0;
+        Menu_Spy_Skin_2();
     } else if (inp == 3) {
-        TeamFortress_SpyFeignDeath(0);
-        ResetMenu();
-        self.impulse = 0;
-        if (self.is_feigning) {
-            Menu_Spy();
-            self.menu_count = 25;
-            self.current_menu = MENU_SPY;
-            self.menu_displaytime = 0;
-            self.impulse = 0;
-        }
-    } else if (inp == 4) {
-        Spy_RemoveDisguise(self);
-        ResetMenu();
-        self.impulse = 0;
-    } else if (inp == 5) {
-        ResetMenu();
-        self.impulse = 0;
+        Menu_Spy_Skin_3();
     }
 };
 
@@ -500,27 +347,13 @@ void () Menu_Spy_Skin = {
     local string s_pyspen  = "êïë Pyro / Spy / Engineer   \n\n";
     local string s_nothing = "êóë Nothing                 \n\n";
 
-    Status_Print(self, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_Input, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
 };
 
-void (float inp) Menu_Spy_Skin_Input = {
-    self.menu_count = 25;
-    self.menu_displaytime = 0;
-
-    if (inp == 1) {
-        Menu_Spy_Skin_1();
-        self.current_menu = MENU_SPY_SKIN_1;
-    } else if (inp == 2) {
-        Menu_Spy_Skin_2();
-        self.current_menu = MENU_SPY_SKIN_2;
-    } else if (inp == 3) {
-        Menu_Spy_Skin_3();
-        self.current_menu = MENU_SPY_SKIN_3;
-    } else
-        ResetMenu();
-
-    self.impulse = 0;
-};
+void (float inp) Menu_Spy_Skin_1_Input = {
+    if (inp > 0 && inp < 4)
+        TeamFortress_SpyChangeSkin(inp);
+}
 
 void () Menu_Spy_Skin_1 = {
     local string s_change  = "Disguise as:    \n";
@@ -529,15 +362,15 @@ void () Menu_Spy_Skin_1 = {
     local string s_soldier = "êïë Soldier     \n\n";
     local string s_nothing = "êóë Nothing     \n\n";
 
-    Status_Print(self, s_change, s_scout, s_sniper, s_soldier, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_1_Input, s_change, s_scout, s_sniper, s_soldier, s_nothing);
 }
 
-void (float inp) Menu_Spy_Skin_1_Input = {
-    if (inp > 0 && inp < 4)
-        TeamFortress_SpyChangeSkin(inp);
+void (float inp) Menu_Spy_Skin_2_Input = {
+    local float classnum;
+    classnum = inp + 3;
 
-    ResetMenu();
-    self.impulse = 0;
+    if (inp > 0 && inp < 4)
+        TeamFortress_SpyChangeSkin(classnum);
 }
 
 void () Menu_Spy_Skin_2 = {
@@ -547,18 +380,15 @@ void () Menu_Spy_Skin_2 = {
     local string s_hwguy   = "êïë HWGuy       \n\n";
     local string s_nothing = "êóë Nothing     \n\n";
 
-    Status_Print(self, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_2_Input, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
 }
 
-void (float inp) Menu_Spy_Skin_2_Input = {
+void (float inp) Menu_Spy_Skin_3_Input = {
     local float classnum;
-    classnum = inp + 3;
+    classnum = inp + 6;
 
     if (inp > 0 && inp < 4)
         TeamFortress_SpyChangeSkin(classnum);
-
-    ResetMenu();
-    self.impulse = 0;
 }
 
 void () Menu_Spy_Skin_3 = {
@@ -568,19 +398,13 @@ void () Menu_Spy_Skin_3 = {
     local string s_engineer = "êïë Engineer        \n\n";
     local string s_nothing  = "êóë Nothing         \n\n";
 
-    Status_Print(self, s_change, s_pyro, s_spy, s_engineer, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_3_Input, s_change, s_pyro, s_spy, s_engineer, s_nothing);
 }
 
-void (float inp) Menu_Spy_Skin_3_Input = {
-    local float classnum;
-    classnum = inp + 6;
-
-    if (inp > 0 && inp < 4)
-        TeamFortress_SpyChangeSkin(classnum);
-
-    ResetMenu();
-    self.impulse = 0;
-}
+void (float inp) Menu_Spy_Color_Input = {
+    if (inp > 0 && inp <= number_of_teams)
+        TeamFortress_SpyChangeColor(inp);
+};
 
 void () Menu_Spy_Color = {
     local float players_blue   = TeamFortress_TeamGetNoPlayers(1);
@@ -626,37 +450,18 @@ void () Menu_Spy_Color = {
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
-        ResetMenu();
-        self.impulse = 0;
         return;
     }
+    self.menu_input = nil;
     if (number_of_teams == 1)
         sprint(self, PRINT_HIGH, "There is no other team.\n");
     else if (number_of_teams == 2)
-        Status_Print(self, s_disguise, s_blue, s_red, s_nothing);
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_nothing);
     else if (number_of_teams == 3)
-        Status_Print(self, s_disguise, s_blue, s_red, s_yellow, s_nothing);
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing);
     else
-        Status_Print(self, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
 };
-
-void (float inp) Menu_Spy_Color_Input = {
-    if (inp > 0 && inp <= number_of_teams)
-        TeamFortress_SpyChangeColor(inp);
-    ResetMenu();
-    self.impulse = 0;
-};
-
-void () Menu_Demoman = {
-    local string s_detpack = "Set detpack for:  \n";
-    local string s_5       = "êìë 5 seconds     \n";
-    local string s_20      = "êîë 20 seconds    \n";
-    local string s_50      = "êïë 50 seconds    \n";
-    local string s_255     = "êñë 255 seconds   \n";
-    local string s_nothing = "êóë Nothing       \n\n";
-
-    Status_Print(self, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
-}
 
 void (float inp) Menu_Demoman_Input = {
     if (inp == 1)
@@ -667,25 +472,48 @@ void (float inp) Menu_Demoman_Input = {
         TeamFortress_SetDetpack(50);
     else if (inp == 4)
         TeamFortress_SetDetpack(255);
-    if (inp > 4)
-        ResetMenu();
-    self.impulse = 0;
 };
+
+void () Menu_Demoman = {
+    local string s_detpack = "Set detpack for:  \n";
+    local string s_5       = "êìë 5 seconds     \n";
+    local string s_20      = "êîë 20 seconds    \n";
+    local string s_50      = "êïë 50 seconds    \n";
+    local string s_255     = "êñë 255 seconds   \n";
+    local string s_nothing = "êóë Nothing       \n\n";
+
+    Status_Menu(self, Menu_Demoman_Input, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
+}
+
+void (float inp) Menu_Demoman_Cancel_Input = {
+    if (inp == 1)
+        TeamFortress_DetpackStop();
+    else
+        Menu_Demoman_Cancel();
+}
 
 void () Menu_Demoman_Cancel = {
     local string s_detpack = "Setting detpack...  \n";
     local string s_cancel  = "êìë Cancel!         \n\n\n\n\n\n";
 
-    Status_Print(self, s_detpack, s_cancel);
+    Status_Menu(self, Menu_Demoman_Cancel_Input, s_detpack, s_cancel);
 }
 
-void (float inp) Menu_Demoman_Cancel_Input = {
-    if (inp == 1) {
-        TeamFortress_DetpackStop();
-        ResetMenu();
-    }
-    self.impulse = 0;
-}
+void (float inp) Menu_Engineer_Input = {
+
+    if (inp == 1 && !self.has_sentry && self.ammo_cells >= 130)
+        TeamFortress_Build(2);
+
+    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= 100)
+        TeamFortress_Build(1);
+
+    if (inp == 3 && self.has_sentry)
+        DestroyBuilding(self, "building_sentrygun");
+
+    if (inp == 4 && self.has_dispenser)
+        DestroyBuilding(self, "building_dispenser");
+
+};
 
 void () Menu_Engineer = {
     local string s_action;
@@ -721,54 +549,7 @@ void () Menu_Engineer = {
     }
 
     s_nothing = "\nêóë Nothing                      \n\n";
-    Status_Print(self, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
-};
-
-void (float inp) Menu_Engineer_Input = {
-    ResetMenu();
-    self.impulse = 0;
-
-    if (inp == 1 && !self.has_sentry && self.ammo_cells >= 130)
-        TeamFortress_Build(2);
-
-    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= 100)
-        TeamFortress_Build(1);
-
-    if (inp == 3 && self.has_sentry)
-        DestroyBuilding(self, "building_sentrygun");
-
-    if (inp == 4 && self.has_dispenser)
-        DestroyBuilding(self, "building_dispenser");
-
-};
-
-void () Menu_EngineerFix_Dispenser = {
-    local string s_action = "Action:                            \n";
-    local string s_ammo;
-    local string s_armor;
-    local string s_repair;
-    local string s_nothing = "\nêóë Nothing                     \n";
-
-
-    if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
-            || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
-            || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
-            || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
-        s_ammo = "êìë Put ammo into Dispenser     \n";
-    else
-        s_ammo = "\n";
-
-    if (self.armorvalue > 0 && self.building.armorvalue < 500)
-        s_armor = "êîë Put armor into Dispenser    \n";
-    else
-        s_armor = "\n";
-
-    if (self.building.health < self.building.max_health)
-        s_repair  = "êïë Repair Dispenser            \n";
-    else
-        s_repair = "\n";
-
-    Status_Print(self, s_action, s_ammo, s_armor, s_repair, s_nothing);
+    Status_Menu(self, Menu_Engineer_Input, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
 };
 
 void (float inp) Menu_EngineerFix_Dispenser_Input = {
@@ -837,8 +618,6 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
             (self.building.health + (metalcost * 5));
     }
 
-    ResetMenu();
-    self.impulse = 0;
     self.building = world;
     bound_other_ammo(self);
     if (self.armorvalue == 0) {
@@ -850,31 +629,33 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
     W_SetCurrentAmmo();
 };
 
-void () Menu_EngineerFix_SentryGun = {
-    local string action     = "Action:                            \n";
-    local string putammo;
-    local string upgrade;
-    local string repair;
-    local string rotate     = "êñë Rotate Sentry Gun           \n";
-    local string nothing    = "\nêóë Nothing                     ";
+void () Menu_EngineerFix_Dispenser = {
+    local string s_action = "Action:                            \n";
+    local string s_ammo;
+    local string s_armor;
+    local string s_repair;
+    local string s_nothing = "\nêóë Nothing                     \n";
 
-    if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
-            || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
-        putammo = "êìë Put Ammo into Sentry Gun    \n";
-    else
-        putammo = "\n";
 
-    if (self.building.weapon < 3 && self.ammo_cells >= 130)
-        upgrade = "êîë Upgrade Sentry Gun          \n";
+    if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
+            || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
+            || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
+            || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
+        s_ammo = "êìë Put ammo into Dispenser     \n";
     else
-        upgrade = "\n";
+        s_ammo = "\n";
+
+    if (self.armorvalue > 0 && self.building.armorvalue < 500)
+        s_armor = "êîë Put armor into Dispenser    \n";
+    else
+        s_armor = "\n";
 
     if (self.building.health < self.building.max_health)
-        repair = "êïë Repair Sentry Gun           \n";
+        s_repair  = "êïë Repair Dispenser            \n";
     else
-        repair = "\n";
+        s_repair = "\n";
 
-    Status_Print(self, action, putammo, upgrade, repair, rotate, nothing);
+    Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_repair, s_nothing);
 };
 
 void (float inp) Menu_EngineerFix_SentryGun_Input = {
@@ -952,8 +733,6 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
         }
     }
 
-    ResetMenu();
-    self.impulse = 0;
     bound_other_ammo(self);
     if (self.armorvalue == 0) {
         self.armortype = 0;
@@ -964,26 +743,31 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
     W_SetCurrentAmmo();
 };
 
-void () Menu_Dispenser = {
-    local string s_action = "Use Dispenser:                     \n";
-    local string s_ammo;
-    local string s_armor;
-    local string s_nothing = "\nêóë Nothing                     \n";
+void () Menu_EngineerFix_SentryGun = {
+    local string action     = "Action:                            \n";
+    local string putammo;
+    local string upgrade;
+    local string repair;
+    local string rotate     = "êñë Rotate Sentry Gun           \n";
+    local string nothing    = "\nêóë Nothing                     ";
 
-    if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
-            || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
-            || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
-            || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
-        s_ammo = "êìë Withdraw some ammo          \n";
+    if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
+            || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
+        putammo = "êìë Put Ammo into Sentry Gun    \n";
     else
-        s_ammo = "\n";
+        putammo = "\n";
 
-    if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
-        s_armor = "êîë Withdraw some armor         \n";
+    if (self.building.weapon < 3 && self.ammo_cells >= 130)
+        upgrade = "êîë Upgrade Sentry Gun          \n";
     else
-        s_armor = "\n";
+        upgrade = "\n";
 
-    Status_Print(self, s_action, s_ammo, s_armor, s_nothing);
+    if (self.building.health < self.building.max_health)
+        repair = "êïë Repair Sentry Gun           \n";
+    else
+        repair = "\n";
+
+    Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, putammo, upgrade, repair, rotate, nothing);
 };
 
 void (float inp) Menu_Dispenser_Input = {
@@ -1042,8 +826,6 @@ void (float inp) Menu_Dispenser_Input = {
         if (empty)
             sprint(self, PRINT_HIGH, "The dispenser is empty.\n");
 
-        ResetMenu();
-        self.impulse = 0;
         self.building = world;
         self.building_wait = time + 0.5;
 
@@ -1057,4 +839,26 @@ void (float inp) Menu_Dispenser_Input = {
         }
         W_SetCurrentAmmo();
     }
+};
+
+void () Menu_Dispenser = {
+    local string s_action = "Use Dispenser:                     \n";
+    local string s_ammo;
+    local string s_armor;
+    local string s_nothing = "\nêóë Nothing                     \n";
+
+    if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
+            || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
+            || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
+            || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
+        s_ammo = "êìë Withdraw some ammo          \n";
+    else
+        s_ammo = "\n";
+
+    if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
+        s_armor = "êîë Withdraw some armor         \n";
+    else
+        s_armor = "\n";
+
+    Status_Menu(self, Menu_Dispenser_Input, s_action, s_ammo, s_armor, s_nothing);
 };

@@ -238,8 +238,7 @@ void () TeamFortress_EngineerBuild = {
                         "You don't have enough metal to \nbuild anything.\n\n");
             return;
         }
-        self.current_menu = 15;
-        self.menu_count = 25;
+        Menu_Engineer();
     } else if (self.is_building == 1) {
         TeamFortress_EngineerBuildStop();
     }
@@ -559,6 +558,7 @@ void () TeamFortress_FinishedBuilding = {
 };
 
 void () T_Dispenser = {
+    local entity oldself;
     local entity dist_checker;
 
     if (other.classname != "player") {
@@ -569,8 +569,6 @@ void () T_Dispenser = {
                     "Enemies are using your dispenser!\n");
     }
     if ((other.building == world) && (other.building_wait < time)) {
-        other.current_menu = 19;
-        other.menu_count = 25;
         other.building = self;
         dist_checker = spawn();
         dist_checker.classname = "timer";
@@ -578,6 +576,10 @@ void () T_Dispenser = {
         dist_checker.enemy = self;
         dist_checker.think = CheckDistance;
         dist_checker.nextthink = time + 0.3;
+        oldself = self;
+        self = other;
+        Menu_Dispenser();
+        self = oldself;
     }
 };
 
@@ -628,8 +630,7 @@ void (entity disp) Engineer_UseDispenser = {
     sprint(self, PRINT_HIGH, st, " cells, and ");
     st = ftos(disp.armorvalue);
     sprint(self, PRINT_HIGH, st, " armor\n");
-    self.current_menu = MENU_ENGINEER_FIX_DISPENSER;
-    self.menu_count = 25;
+    Menu_EngineerFix_Dispenser();
     self.building = disp;
     dist_checker = spawn();
     dist_checker.classname = "timer";
@@ -655,8 +656,7 @@ void (entity gun) Engineer_UseSentryGun = {
         sprint(self, PRINT_HIGH, ", ", st, " rockets");
     }
     sprint(self, PRINT_HIGH, "\n");
-    self.current_menu = MENU_ENGINEER_FIX_SENTRYGUN;
-    self.menu_count = 25;
+    Menu_EngineerFix_SentryGun();
     self.building = gun;
     dist_checker = spawn();
     dist_checker.classname = "timer";
@@ -688,9 +688,7 @@ void () CheckDistance = {
     }
     dist = self.enemy.origin - self.owner.origin;
     if (vlen(dist) > 64) {
-        CenterPrint(self.owner, "\n");
-        self.owner.menu_count = 25;
-        self.owner.current_menu = 1;
+        Menu_Close(self.owner);
         self.owner.building = world;
         dremove(self);
         return;
@@ -716,9 +714,7 @@ void (entity eng, string bld) DestroyBuilding = {
                 self = oldself;
             }
             if (te.real_owner.building == te) {
-                Status_Refresh(te.real_owner);
-                te.real_owner.menu_count = 25;
-                te.real_owner.current_menu = 1;
+                Menu_Close(te.real_owner);
                 te.real_owner.building = world;
             }
             TF_T_Damage(te, world, world, 500, 0, 0);

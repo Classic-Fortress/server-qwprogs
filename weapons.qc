@@ -2109,7 +2109,6 @@ void (float inp) W_ChangeWeapon = {
             TeamFortress_EngineerBuild();
         else if (self.playerclass == PC_SCOUT) {
             Menu_Scout();
-            self.current_menu = MENU_SCOUT;
         } else if (self.playerclass == PC_SPY)
             TeamFortress_SpyGoUndercover();
         else if (self.playerclass == PC_DEMOMAN)
@@ -2254,8 +2253,7 @@ void () ImpulseCommands = {
         else if (self.impulse == TF_DETPACK_50)
             TeamFortress_SetDetpack(50);
         else if (self.impulse == TF_DROP_AMMO) {
-            self.current_menu = MENU_DROP;
-            self.menu_count = 20;
+            Menu_Drop();
         } else if (self.impulse == TF_DISCARD)
             TeamFortress_Discard();
     }
@@ -2366,12 +2364,10 @@ void () DeadImpulses = {
         TeamFortress_ChangeClass();
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
-        self.current_menu = MENU_TEAM;
-        self.menu_count = 25;
+        Menu_Team();
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
-        self.current_menu = 20;
-        self.menu_count = 25;
+        Menu_Class();
     } else if (self.is_admin == 1) {
         if (self.impulse == 193)
             Admin_CeaseFire();
@@ -2494,21 +2490,18 @@ void () W_WeaponFrame = {
             TF_zoom(self.current_fov);
         }
     }
-    if (self.current_menu > 0) {
-        Player_Menu();
-        if ((self.impulse > 0) &&
-            (((self.current_menu == 23) || (self.current_menu == 24)) ||
-             (self.current_menu == 25))) {
+    if (self.impulse == TF_CHANGETEAM) {
+        Menu_Team();
+        return;
+    }
+    if (self.impulse == TF_CHANGECLASS) {
+        Menu_Class();
+        return;
+    }
+    if (self.menu_input) {
+        if (self.impulse > 0 && self.impulse <= 9) {
             Menu_Input(self.impulse);
-        } else if ((self.impulse > 0) && (self.impulse < 11)) {
-            Menu_Input(self.impulse);
-            if (self.impulse != 0) {
-                if (((self.team_no == 0) && teamplay) && (self.lives != 0)) {
-                    Menu_Team_Input(self.impulse);
-                } else if ((self.playerclass == 0) && (self.lives != 0)) {
-                    Menu_Class_Input(self.impulse);
-                }
-            }
+            return;
         }
     }
     if (intermission_running)

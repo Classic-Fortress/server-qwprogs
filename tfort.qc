@@ -1805,9 +1805,7 @@ void () TeamFortress_RemoveTimers = {
         self.FlashTime = 0;
     }
     self.item_list = 0;
-    CenterPrint(self, "\n");
-    self.menu_count = MENU_REFRESH_RATE;
-    self.current_menu = MENU_DEFAULT;
+    Menu_Close(self);
     self.impulse = 0;
 };
 
@@ -2594,7 +2592,7 @@ void () TeamFortress_CheckforCheats = {
 };
 
 void () PlayerObserverMode = {
-    self.current_menu = MENU_DEFAULT;
+    Menu_Close(self);
     self.impulse = 0;
     self.playerclass = PC_UNDEFINED;
     self.lives = 0;

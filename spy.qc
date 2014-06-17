@@ -525,8 +525,7 @@ void () TeamFortress_SpyGoUndercover = {
         }
         Status_Refresh(self);
     } else if (self.is_undercover != 2) {
-        self.current_menu = MENU_SPY;
-        self.menu_count = 25;
+        Menu_Spy();
     } else {
         sprint(self, PRINT_HIGH, "You stop going undercover.\n");
         self.is_undercover = 0;

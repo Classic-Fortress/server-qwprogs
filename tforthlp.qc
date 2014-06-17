@@ -1,19 +1,36 @@
 //========================================================
 // Functions handling all the help displaying for TeamFortress.
 //========================================================
+//
+
+// so you can select a team (blindly) while reading the MOTD
+void (float inp) MOTD_Input = {
+    Menu_Team_Input(inp);
+};
 
 void () TeamFortress_MOTD = {
+    local string st1;
+    local string st2;
     local string ya;
 
-    if (self.motd == 4)
+    if (self.motd == 5) {
         stuffcmd(self, "is_aliased\n");
 
-    if (self.motd <= 20) {
-        self.motd = self.motd + 1;
-        return;
+        st1 = infokey(world, "motd1");
+        if (st1 != string_null) {
+            st2 = infokey(world, "motd2");
+            if (st2 != string_null) {
+                st1 = strcat(strcat(st1, "\n"), st2);
+            }
+        } else {
+            st1 = "Welcome to Classic Fortress\nby hifi & Empezar\n==================================\ngithub.com/classic-fortress";
+        }
+
+        sprint(self, PRINT_HIGH, strcat("\n", st1));
+        Status_Menu(self, MOTD_Input, st1);
     }
 
-    if (self.motd == 21) {
+    if (self.motd == 20) {
         self.zoom_mode = 0;
 
         if ((teamplay != 0) && (self.team_no == 0)) {
@@ -23,19 +40,11 @@ void () TeamFortress_MOTD = {
             stuffcmd(self, "\n");
         }
 
-        if (self.got_aliases == FALSE)
-            sprint(self, PRINT_HIGH, "\n\n\n");
-
-        sprint(self, PRINT_HIGH, "==== Classic Fortress ====\n");
-        sprint(self, PRINT_HIGH, "github.com/classic-fortress\n");
-
-        self.menu_displaytime = 0;
-        self.current_menu = MENU_INTRO;
-        self.menu_count = MENU_REFRESH_RATE;
-        self.motd = 22;
-
-        if (self.got_aliases == TRUE)
+        // will also skip motd
+        if (self.got_aliases == TRUE) {
+            self.motd = 400;
             return;
+        }
 
         sprint(self, PRINT_HIGH, "binding aliases...\n");
         TeamFortress_Alias("inv", TF_INVENTORY, 0);
@@ -57,12 +66,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("engineer", TF_CHANGEPC + PC_ENGINEER, 0);
         TeamFortress_Alias("randompc", TF_CHANGEPC + PC_RANDOM, 0);
         TeamFortress_Alias("is_aliased", TF_ALIAS_CHECK, 0);
-        return;
-    }
-    if (self.motd <= 95)
-        self.motd = self.motd + 1;
-
-    if (self.motd == 25) {
+    } else if (self.motd == 25) {
         TeamFortress_Alias("weapnext", TF_WEAPNEXT, 0);
         TeamFortress_Alias("weapprev", TF_WEAPPREV, 0);
         TeamFortress_Alias("weaplast", TF_WEAPLAST, 0);
@@ -75,9 +79,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("scan100", TF_SCAN, 0);
         TeamFortress_Alias("scanf", TF_SCAN_FRIENDLY, 0);
         TeamFortress_Alias("scane", TF_SCAN_ENEMY, 0);
-        return;
-    }
-    if (self.motd == 35) {
+    } else if (self.motd == 35) {
         TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
         TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
         TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
@@ -88,9 +90,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("showscores", TF_TEAM_SCORES, 0);
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("query", TF_STATUS_QUERY, 0);
-        return;
-    }
-    if (self.motd == 45) {
+    } else if (self.motd == 45) {
         TeamFortress_Alias("dropkey", TF_DROPKEY, 0);
         TeamFortress_Alias("dropammo", TF_DROP_AMMO, 0);
         TeamFortress_Alias("dropitems", TF_DROPITEMS, 0);
@@ -99,9 +99,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
         TeamFortress_Alias("discard", TF_DISCARD, 0);
         TeamFortress_Alias("id", TF_ID, 0);
-        return;
-    }
-    if (self.motd == 55) {
+    } else if (self.motd == 55) {
         TeamFortress_Alias("flaginfo", FLAG_INFO, 0);
         TeamFortress_Alias("maphelp", TF_HELP_MAP, 0);
         TeamFortress_Alias("showids", TF_SHOW_IDS, 0);
@@ -115,33 +113,31 @@ void () TeamFortress_MOTD = {
         stuffcmd(self, "bind 8 \"impulse 8\"\n");
         stuffcmd(self, "bind 9 \"impulse 9\"\n");
         stuffcmd(self, "bind 0 \"impulse 10\"\n");
-        return;
-    }
-    if (self.motd == 75) {
+    } else if (self.motd == 75) {
         TeamFortress_Alias("+det5", TF_DETPACK_5, 0);
         TeamFortress_Alias("-det5", TF_DETPACK_STOP, 0);
         TeamFortress_Alias("+det20", TF_DETPACK_20, 0);
         TeamFortress_Alias("-det20", TF_DETPACK_STOP, 0);
         TeamFortress_Alias("+det50", TF_DETPACK_50, 0);
         TeamFortress_Alias("-det50", TF_DETPACK_STOP, 0);
-        return;
-    }
-    if (self.motd == 85) {
+    } else if (self.motd == 85) {
         TeamFortress_Alias("clan1", 82, 0);
         TeamFortress_Alias("clan2", 83, 0);
         TeamFortress_Alias("clan3", 84, 0);
         TeamFortress_Alias("clan4", 85, 0);
         TeamFortress_Alias("clan5", 86, 0);
-        return;
-    }
-    if (self.motd == 95) {
+    } else if (self.motd == 95) {
         TeamFortress_Alias("disguise", TF_SPY_SPY, 0);
         TeamFortress_Alias("feign", TF_SPY_DIE, 0);
         TeamFortress_Alias("sfeign", TF_SPY_SILENT_DIE, 0);
         TeamFortress_Alias("build", TF_ENGINEER_BUILD, 0);
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
+    } else if (self.motd == 400 && self.team_no == 0) {
+        Menu_Team();
     }
+
+    self.motd = self.motd + 1;
 };
 
 void () TeamFortress_HelpMap = {

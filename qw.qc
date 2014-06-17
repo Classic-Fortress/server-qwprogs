@@ -1,6 +1,7 @@
 #include "defs.h"
 
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
+typedef void (float) f_void_float;
 
 //===========================================================================
 // TEAMFORTRESS Defs
@@ -50,9 +51,7 @@ void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
 
 .float weaponmode;              // Used for multiple mode weapons
 .float motd;                    // Used to display MOTD
-.float current_menu;            // is set to the number of the current menu, is 0 if they are not in a menu
-.float menu_count;              // keeps track of display times for menus
-.float menu_displaytime;        // keep track of how many times this menu is refreshed
+.f_void_float menu_input;
 
 float toggleflags;              // toggleable flags
 

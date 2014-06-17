@@ -19,6 +19,10 @@ void (entity pl, string...count) Status_Print =
     local float i, lines, len;
     local string s;
 
+    // no printing while menu open
+    if (pl.menu_input)
+        return;
+
     s = "";
     for (i = 0; i < count; i++) {
         s = strcat(s, ...(i, string));
@@ -38,6 +42,34 @@ void (entity pl, string...count) Status_Print =
     pl.StatusStringLines = lines;
     pl.StatusStringTime = time + 1.5;
     pl.StatusRefreshTime = time;
+};
+
+void (entity pl, f_void_float func, string...count) Status_Menu =
+{
+    local float i, lines, len;
+    local string s;
+
+    s = "";
+    for (i = 0; i < count; i++) {
+        s = strcat(s, ...(i, string));
+    }
+
+    len = strlen(s);
+
+    if (pl.StatusString)
+        strunzone(pl.StatusString);
+    pl.StatusString = strzone(s);
+
+    lines = 0;
+    for (i = 0; i < len; i++)
+        if (substr(pl.StatusString, i, 1) == "\n")
+            lines++;
+
+    pl.StatusStringLines = lines;
+    pl.StatusStringTime = time + 1.5;
+    pl.StatusRefreshTime = time;
+    pl.menu_input = func;
+    pl.impulse = 0;
 };
 
 void (entity pl) Status_Refresh =
@@ -74,7 +106,7 @@ void (entity pl) RefreshStatusBar = {
     s2 = "\n";
     s3 = "\n";
 
-    if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time) {
+    if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
         if (pl.StatusString)
             strunzone(pl.StatusString);
         pl.StatusString = string_null;

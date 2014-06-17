@@ -112,7 +112,6 @@ void () TeamFortress_DetpackMenu = {
     }
 
     Menu_Demoman();
-    self.current_menu = MENU_DEMOMAN;
 };
 
 void (float timer) TeamFortress_SetDetpack = {
@@ -188,7 +187,6 @@ void (float timer) TeamFortress_SetDetpack = {
     sprint(self, PRINT_HIGH, "Setting detpack for ", stimer,
            " seconds...\n");
     Menu_Demoman_Cancel();
-    self.current_menu = MENU_DEMOMAN_CANCEL;
 
     newmis = spawn();
     newmis.owner = self;
@@ -210,8 +208,7 @@ void () TeamFortress_DetpackStop = {
         return;
 
     sprint(self, PRINT_HIGH, "Detpack retrieved.\n");
-    self.current_menu = MENU_DEFAULT;
-    CenterPrint(self, "\n");
+    Menu_Close(self);
     self.ammo_detpack = self.ammo_detpack + 1;
     dremove(detpack_timer);
 
@@ -229,8 +226,7 @@ void () TeamFortress_DetpackSet = {
     local entity oldself;
 
     self.is_detpacking = 0;
-    self.owner.current_menu = MENU_DEFAULT;
-    CenterPrint(self.owner, "\n");
+    Menu_Close(self.owner);
     self.owner.tfstate =
         (self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE));
     TeamFortress_SetSpeed(self.owner);
