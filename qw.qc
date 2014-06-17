@@ -348,6 +348,7 @@ float already_chosen_map;
 .float StatusStringLines;       // how many lines the centerprint is
 .float StatusStringTime;        // when text will time out
 .float StatusRefreshTime;       // when sbar is next printed
+.float StatusGrenTime;
 
 .float ScannerOn;
 

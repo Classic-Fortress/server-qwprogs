@@ -282,6 +282,7 @@ void () worldspawn = {
     precache_sound2("misc/b2.wav");
     precache_sound2("misc/b3.wav");
     precache_sound2("misc/b4.wav");
+    precache_sound("zombie/z_fall.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");

@@ -456,11 +456,25 @@ void () TeamFortress_ShowTF = {
 
 void () TeamFortress_GrenadePrimed;
 
+void () GrenadeTimer = {
+    self.heat = self.heat - 1;
+    self.owner.StatusGrenTime = self.heat;
+    Status_Refresh(self.owner);
+
+    if (self.heat > 0) {
+        sound(self.owner, CHAN_AUTO, "zombie/z_fall.wav", 1, ATTN_STATIC);
+        self.nextthink = time + 1.0;
+    } else {
+        dremove(self);
+    }
+};
+
 void () TeamFortress_PrimeGrenade = {
     local float gtype;
     local string gs;
     local string ptime;
     local entity tGrenade;
+    local entity timer;
     gtype = 0;
 
     if ((self.tfstate & TFSTATE_GRENPRIMED) ||
@@ -598,15 +612,32 @@ void () TeamFortress_PrimeGrenade = {
 
     if (gtype == GR_TYPE_CALTROP)
         tGrenade.heat = time + 0.5 + 0.5;
-    else
+    else {
         tGrenade.heat = time + 3 + 0.8;
+
+        timer = find(world, classname, "gtimer");
+        while (timer != world) {
+            if (timer.owner == self) {
+                dremove(timer);
+                timer = find(world, classname, "gtimer");
+            } else {
+                timer = find(timer, classname, "gtimer");
+            }
+        }
+
+        timer = spawn();
+        timer.nextthink = time + 0.8;
+        timer.think = GrenadeTimer;
+        timer.heat = 4;
+        timer.owner = self;
+        timer.classname = "gtimer";
+    }
 
     tGrenade.think = TeamFortress_GrenadePrimed;
 };
 
 void () TeamFortress_GrenadePrimed = {
     local entity user;
-    local entity oldself;
 
     user = self.owner;
     if (!(user.tfstate & 1024) && !user.deadflag) {
@@ -710,9 +741,6 @@ void () TeamFortress_GrenadePrimed = {
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
-    oldself = self;
-    self = self.owner;
-    self = oldself;
     dremove(self);
 };
 
