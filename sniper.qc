@@ -102,12 +102,10 @@ void () SniperSight_Create = {
 void () TeamFortress_ZoomToggle = {
     local float zoom4x;
     local float zoom2x;
-    local float zoomkey;
+    local float zoomkey = stof(infokey(self, "zk"));
 
     if (self.playerclass != PC_SNIPER)
         return;
-
-    zoomkey = stof(infokey(self, "zk"));
 
     if (self.zoom_mode == 0) {
         self.zoom_mode = 4;

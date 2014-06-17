@@ -2454,15 +2454,13 @@ void () DeadImpulses = {
 void () W_WeaponFrame = {
     local vector tv;
     local float zoom_level;
-    local float zoom4x;
-    local float zoom2x;
-    local float zoomkey;
+    local float zoom4x    = stof(infokey(self, "z4x"));
+    local float zoom2x    = stof(infokey(self, "z2x"));
+    local float zoomkey   = stof(infokey(self, "zk"));
+    local float instazoom = stof(infokey(self, "zi"));
 
     self.default_fov = stof(infokey(self, "df"));
     zoom_level = self.default_fov;
-    zoom4x = stof(infokey(self, "z4x"));
-    zoom2x = stof(infokey(self, "z2x"));
-    zoomkey = stof(infokey(self, "zk"));
 
     if (self.zoom_mode == 4) {
         if (zoom4x < 10)
@@ -2479,7 +2477,7 @@ void () W_WeaponFrame = {
 
     if (!(self.tfstate & TFSTATE_AIMING)) {
         if ((self.current_fov != self.default_fov) && (zoomkey != 1)) {
-            if ((self.current_fov + 20) >= self.default_fov)
+            if ((self.current_fov + 20) >= self.default_fov || instazoom == 1)
                 self.current_fov = self.default_fov;
             else
                 self.current_fov = self.current_fov + 20;
@@ -2536,7 +2534,7 @@ void () W_WeaponFrame = {
 
                 if ((self.current_fov != zoom_level) && (zoomkey != 1)) {
                     if (self.zoom_out == 1) {
-                        if ((self.current_fov + 20) >= zoom_level) {
+                        if ((self.current_fov + 20) >= zoom_level || instazoom == 1) {
                             self.current_fov = zoom_level;
                             self.zoom_out = 0;
                         }
@@ -2544,7 +2542,7 @@ void () W_WeaponFrame = {
                             self.current_fov = self.current_fov + 20;
                     }
                     else {
-                        if ((self.current_fov - 20) <= zoom_level) {
+                        if ((self.current_fov - 20) <= zoom_level || instazoom == 1) {
                             self.current_fov = zoom_level;
                             self.zoom_in = 0;
                         }
