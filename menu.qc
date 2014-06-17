@@ -227,51 +227,41 @@ void () Menu_Drop = {
 
 void (float inp) Menu_Scout_Input = {
     if (inp == 1)
-        self.impulse = TF_SCAN;
-    else if (inp == 2)
         self.impulse = TF_SCAN_ENEMY;
-    else if (inp == 3)
+    else if (inp == 2)
         self.impulse = TF_SCAN_FRIENDLY;
-    else if (inp == 4)
+    else if (inp == 3)
         self.impulse = TF_SCAN_SOUND;
-    else if (inp > 4)
+    else
         self.impulse = 0;
 };
 
 void () Menu_Scout = {
     local string s_action  = "Action:                       \n";
     local string s_nothing;
-    local string s_scanner;
     local string s_scanf;
     local string s_scane;
     local string s_scansound;
 
-    if (self.ScannerOn != 1) {
-        s_scanner = "êìë Turn scanner on           \n\n";
-        s_nothing = "êóë Nothing                   \n\n\n\n";
-    } else {
-        s_scanner = "êìë Turn scanner off          \n";
-
-        if (self.tf_items_flags & NIT_SCANNER_ENEMY)
-            s_scane = "êîë Do not scan for enemies   \n";
-        else
-            s_scane = "êîë Scan for enemies          \n";
+    if (self.tf_items_flags & NIT_SCANNER_ENEMY)
+        s_scane = "êìë Do not scan for enemies   \n";
+    else
+        s_scane = "êìë Scan for enemies          \n";
 
 
-        if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
-            s_scanf = "êïë Do not scan for friendlies\n";
-        else
-            s_scanf = "êïë Scan for friendlies       \n";
+    if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+        s_scanf = "êîë Do not scan for friendlies\n";
+    else
+        s_scanf = "êîë Scan for friendlies       \n";
 
-        if (self.tf_items_flags & 4)
-            s_scansound = "êñë Turn off scan sound       \n";
-        else
-            s_scansound = "êñë Turn on scan sound        \n";
+    if (self.tf_items_flags & 4)
+        s_scansound = "êïë Turn off scan sound       \n";
+    else
+        s_scansound = "êïë Turn on scan sound        \n";
 
-        s_nothing = "êóë Nothing                   \n\n";
-    }
+    s_nothing = "\nêóë Nothing                   \n\n";
 
-    Status_Menu(self, Menu_Scout_Input, s_action, s_scanner, s_scane, s_scanf, s_scansound, s_nothing);
+    Status_Menu(self, Menu_Scout_Input, s_action, s_scane, s_scanf, s_scansound, s_nothing);
 };
 
 void (float inp) Menu_Spy_Input = {
