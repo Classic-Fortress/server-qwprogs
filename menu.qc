@@ -121,13 +121,11 @@ void () Menu_Team = {
         if (TeamFortress_TeamPutPlayerInTeam())
             return;
     }
-    if (team_menu_string != string_null) {
-        Status_Print(self, team_menu_string);
-        return;
-    }
 
     self.menu_input = nil;
-    if (CTF_Map == TRUE) {
+    if (team_menu_string != string_null) {
+        Status_Menu(self, Menu_Team_Input, team_menu_string);
+    } else if (CTF_Map == TRUE) {
         Status_Menu(self, Menu_Team_Input,
                     "=== Choose Your Team ===\n\n“‘ Blue Team           \n”‘ Red Team            \n\n\n\n—‘ Auto Team \n");
     } else if (number_of_teams == 1) {
