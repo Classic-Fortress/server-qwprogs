@@ -32,7 +32,7 @@ void (float zoom_level) TF_zoom = {
 
     self.default_fov = stof(infokey(self, "df"));
 
-    if ((self.zoom_mode == 0) && (zoom_level < self.default_fov) && (self.zoom_out != 1))
+    if (self.zoom_mode == 0 && zoom_level < self.default_fov && self.zoom_out != 1)
         return;
 
     stuffcmd(self, "fov ");
@@ -102,63 +102,73 @@ void () SniperSight_Create = {
 void () TeamFortress_ZoomToggle = {
     local float zoom4x;
     local float zoom2x;
-    local float zoomkey = stof(infokey(self, "zk"));
+    local float zoomkey   = stof(infokey(self, "zk"));
+    local float instazoom = stof(infokey(self, "zi"));
 
     if (self.playerclass != PC_SNIPER)
         return;
 
+    zoom4x = stof(infokey(self, "z4x"));
+    if (zoom4x < 10)
+        zoom4x = 20;
+    zoom2x = stof(infokey(self, "z2x"));
+    if (zoom2x < 10)
+        zoom2x = 40;
+
     if (self.zoom_mode == 0) {
         self.zoom_mode = 4;
 
-        zoom4x = stof(infokey(self, "z4x"));
-        if (zoom4x < 10)
-            zoom4x = 20;
-
         if (zoomkey == 1) {
-            self.current_fov = zoom4x;
-            TF_zoom(self.current_fov);
+            if (instazoom == 1) {
+                self.current_fov = zoom4x;
+                TF_zoom(self.current_fov);
+            } else {
+                self.current_fov = self.default_fov;
+                self.zoom_in = 1;
+            }
             sprint(self, PRINT_HIGH, "4x zoom\n");
-        }
-        else {
-            if ((self.button0 && !self.fire_held_down)
-             && (self.current_weapon == WEAP_SNIPER_RIFLE)
-             && (self.tfstate & TFSTATE_AIMING))
+        } else {
+            if (self.button0 && !self.fire_held_down
+             && self.current_weapon == WEAP_SNIPER_RIFLE
+             && self.tfstate & TFSTATE_AIMING)
                 self.zoom_in = 1;
             sprint(self, PRINT_HIGH, "4x autozoom selected\n");
         }
-    }
-    else if (self.zoom_mode == 2) {
+    } else if (self.zoom_mode == 2) {
         self.zoom_mode = 0;
 
         if (zoomkey == 1) {
-            self.current_fov = self.default_fov;
-            TF_zoom(self.current_fov);
+            if (instazoom == 1) {
+                self.current_fov = self.default_fov;
+                TF_zoom(self.current_fov);
+            } else {
+                self.current_fov = zoom2x;
+                self.zoom_out = 1;
+            }
             sprint(self, PRINT_HIGH, "No zoom\n");
-        }
-        else {
-            if ((self.button0 && !self.fire_held_down)
-             && (self.current_weapon == WEAP_SNIPER_RIFLE)
-             && (self.tfstate & TFSTATE_AIMING))
+        } else {
+            if (self.button0 && !self.fire_held_down
+             && self.current_weapon == WEAP_SNIPER_RIFLE
+             && self.tfstate & TFSTATE_AIMING)
                 self.zoom_out = 1;
             sprint(self, PRINT_HIGH, "Autozoom off\n");
         }
-    }
-    else if (self.zoom_mode == 4) {
+    } else if (self.zoom_mode == 4) {
         self.zoom_mode = 2;
 
-        zoom2x = stof(infokey(self, "z2x"));
-        if (zoom2x < 10)
-            zoom2x = 40;
-
         if (zoomkey == 1) {
-            self.current_fov = zoom2x;
-            TF_zoom(self.current_fov);
+            if (instazoom == 1) {
+                self.current_fov = zoom2x;
+                TF_zoom(self.current_fov);
+            } else {
+                self.current_fov = zoom4x;
+                self.zoom_out = 1;
+            }
             sprint(self, PRINT_HIGH, "2x zoom\n");
-        }
-        else {
-            if ((self.button0 && !self.fire_held_down)
-             && (self.current_weapon == WEAP_SNIPER_RIFLE)
-             && (self.tfstate & TFSTATE_AIMING))
+        } else {
+            if (self.button0 && !self.fire_held_down
+             && self.current_weapon == WEAP_SNIPER_RIFLE
+             && self.tfstate & TFSTATE_AIMING)
                 self.zoom_out = 1;
             sprint(self, PRINT_HIGH, "2x autozoom selected\n");
         }

@@ -2459,32 +2459,6 @@ void () W_WeaponFrame = {
     local float zoomkey   = stof(infokey(self, "zk"));
     local float instazoom = stof(infokey(self, "zi"));
 
-    self.default_fov = stof(infokey(self, "df"));
-    zoom_level = self.default_fov;
-
-    if (self.zoom_mode == 4) {
-        if (zoom4x < 10)
-            zoom_level = 20;
-        else
-            zoom_level = zoom4x;
-    }
-    else if (self.zoom_mode == 2) {
-        if (zoom2x < 10)
-            zoom_level = 40;
-        else
-            zoom_level = zoom2x;
-    }
-
-    if (!(self.tfstate & TFSTATE_AIMING)) {
-        if ((self.current_fov != self.default_fov) && (zoomkey != 1)) {
-            if ((self.current_fov + 20) >= self.default_fov || instazoom == 1)
-                self.current_fov = self.default_fov;
-            else
-                self.current_fov = self.current_fov + 20;
-
-            TF_zoom(self.current_fov);
-        }
-    }
     if (self.impulse == TF_CHANGETEAM) {
         Menu_Team();
         return;
@@ -2501,19 +2475,68 @@ void () W_WeaponFrame = {
     }
     if (intermission_running)
         return;
-    if (time < self.attack_finished) {
-        return;
-    }
-    if ((self.impulse != 0) && (self.has_disconnected == 0)) {
+    if ((self.impulse != 0) && (self.has_disconnected == 0))
         ImpulseCommands();
-    }
-    if (cease_fire) {
+    if (cease_fire)
         return;
-    }
     if (((self.is_building != 0) || (self.is_detpacking != 0)) ||
-        (self.is_feigning != 0)) {
+        (self.is_feigning != 0))
         return;
+
+    self.default_fov = stof(infokey(self, "df"));
+    zoom_level = self.default_fov;
+
+    if (self.zoom_mode == 4) {
+        if (zoom4x < 10)
+            zoom_level = 20;
+        else
+            zoom_level = zoom4x;
     }
+    else if (self.zoom_mode == 2) {
+        if (zoom2x < 10)
+            zoom_level = 40;
+        else
+            zoom_level = zoom2x;
+    }
+
+    if (zoom_level == self.current_fov) {
+        self.zoom_in = 0;
+        self.zoom_out = 0;
+    } else if (zoom_level != self.current_fov && zoomkey == 1) {
+        if (self.zoom_out == 1) {
+            if ((self.current_fov + 20) >= self.default_fov)
+                self.current_fov = self.default_fov;
+            else
+                self.current_fov = self.current_fov + 20;
+
+            TF_zoom(self.current_fov);
+        } else if (self.zoom_in == 1) {
+            if (self.current_fov == self.default_fov)
+                stuffcmd(self, "setinfo sens $sensitivity\n");
+
+            if ((self.current_fov - 20) <= zoom_level)
+                self.current_fov = zoom_level;
+            else
+                self.current_fov = self.current_fov - 20;
+
+            TF_zoom(self.current_fov);
+        }
+    }
+
+    if (!(self.tfstate & TFSTATE_AIMING) && zoomkey != 1) {
+        if (self.current_fov != self.default_fov) {
+            if ((self.current_fov + 20) >= self.default_fov || instazoom == 1)
+                self.current_fov = self.default_fov;
+            else
+                self.current_fov = self.current_fov + 20;
+
+            TF_zoom(self.current_fov);
+        }
+    }
+
+    if (time < self.attack_finished)
+        return;
+
     if ((!self.button0 && self.fire_held_down) &&
         (self.current_weapon == 32768)) {
         self.fire_held_down = 0;
@@ -2528,11 +2551,10 @@ void () W_WeaponFrame = {
                     self.heat = self.heat + 3;
                 }
 
-                if ((self.current_fov == self.default_fov) && (zoom_level < self.default_fov) && (zoomkey != 1)) {
+                if (self.current_fov == self.default_fov && zoom_level < self.default_fov && zoomkey != 1)
                     stuffcmd(self, "setinfo sens $sensitivity\n");
-                }
 
-                if ((self.current_fov != zoom_level) && (zoomkey != 1)) {
+                if (self.current_fov != zoom_level && zoomkey != 1) {
                     if (self.zoom_out == 1) {
                         if ((self.current_fov + 20) >= zoom_level || instazoom == 1) {
                             self.current_fov = zoom_level;
