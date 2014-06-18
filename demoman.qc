@@ -170,7 +170,7 @@ void (float timer) TeamFortress_SetDetpack = {
         return;
     }
 
-    self.is_detpacking = 1;
+    self.is_detpacking = 3;
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
@@ -192,7 +192,7 @@ void (float timer) TeamFortress_SetDetpack = {
     newmis.owner = self;
     newmis.classname = "timer";
     newmis.netname = "detpack_timer";
-    newmis.nextthink = time + 3;
+    newmis.nextthink = time + 1;
     newmis.think = TeamFortress_DetpackSet;
     newmis.health = timer;
 };
@@ -224,6 +224,13 @@ void () TeamFortress_DetpackStop = {
 void () TeamFortress_DetpackSet = {
     local entity countd;
     local entity oldself;
+
+    if (self.owner.is_detpacking > 1) {
+        self.owner.is_detpacking = self.owner.is_detpacking - 1;
+        self.nextthink = time + 1.0;
+        Status_Refresh(self.owner);
+        return;
+    }
 
     self.is_detpacking = 0;
     Menu_Close(self.owner);

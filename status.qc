@@ -162,7 +162,7 @@ void (entity pl) RefreshStatusBar = {
     } else if (pl.playerclass == PC_DEMOMAN) {
 
         if (self.is_detpacking) {
-            s2 = "  setting detpack                      \n";
+            s2 = strcat(strpadr(strcat(strcat("  setting detpack in ", ftos(self.is_detpacking)), "..."), 39), "\n");
         }
 
     } else if (pl.playerclass == PC_SPY) {
