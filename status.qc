@@ -106,6 +106,13 @@ void (entity pl) RefreshStatusBar = {
     s2 = "\n";
     s3 = "\n";
 
+    if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
+        if (pl.StatusString)
+            strunzone(pl.StatusString);
+        pl.StatusString = string_null;
+        pl.StatusStringLines = 0;
+    }
+
     height = floor(stof(infokey(pl, "sb"))) - pl.StatusStringLines - 4;
 
     // no sbar can be displayed
@@ -120,13 +127,6 @@ void (entity pl) RefreshStatusBar = {
 
     if (pl.StatusGrenTime > 0)
         s1 = strcat("Explosion in ", strcat(ftos(pl.StatusGrenTime), "...\n\n"));
-
-    if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
-        if (pl.StatusString)
-            strunzone(pl.StatusString);
-        pl.StatusString = string_null;
-        pl.StatusStringLines = 0;
-    }
 
     win = TeamFortress_TeamGetWinner();
     sec = TeamFortress_TeamGetSecond();
