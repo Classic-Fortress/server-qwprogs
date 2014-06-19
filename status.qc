@@ -155,6 +155,11 @@ void (entity pl) RefreshStatusBar = {
 
     s3 = strcat(strcat(sco1, sco2), ClipSizeToString(pl));
 
+    s3 = strcat(s3, "  Ç: ");
+    s3 = strcat(s3, ftos(self.no_grenades_1));
+    s3 = strcat(s3, "/");
+    s3 = strcat(s3, ftos(self.no_grenades_2));
+
     if (pl.playerclass == PC_SCOUT) {
 
         s2 = strcat(strcat(ScannerToString(pl), RangeToString(pl)), "\n");
