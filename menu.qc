@@ -113,34 +113,83 @@ void (float inp) Menu_Team_Input = {
 };
 
 void () Menu_Team = {
+    local string ch = "=== Choose Your Team ===\n\n";
+    local string t1, t2, t3, t4;
+    local string ta = "—‘ Auto Team            \n";
+
+    local float t1_players  = TeamFortress_TeamGetNoPlayers(1);
+    local float t2_players  = TeamFortress_TeamGetNoPlayers(2);
+    local float t3_players  = TeamFortress_TeamGetNoPlayers(3);
+    local float t4_players  = TeamFortress_TeamGetNoPlayers(4);
+
+    // allow toggling team menu using any method to show it
     if (self.menu_input == Menu_Team_Input) {
         Menu_Input(0);
         return;
     }
+
     if ((toggleflags & TFLAG_AUTOTEAM) && teamplay) {
         if (TeamFortress_TeamPutPlayerInTeam())
             return;
     }
 
-    self.menu_input = nil;
+    // show maps own team menu text if present
     if (team_menu_string != string_null) {
         Status_Menu(self, Menu_Team_Input, team_menu_string);
-    } else if (CTF_Map == TRUE) {
-        Status_Menu(self, Menu_Team_Input,
-                    "=== Choose Your Team ===\n\n“‘ Blue Team           \n”‘ Red Team            \n\n\n\n—‘ Auto Team \n");
-    } else if (number_of_teams == 1) {
-        Status_Menu(self, Menu_Team_Input,
-                    "=== Choose Your Team ===\n\n“‘ Team One  \n");
-    } else if (number_of_teams == 2) {
-        Status_Menu(self, Menu_Team_Input,
-                    "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n              \n              \n—‘ Auto Team \n");
-    } else if (number_of_teams == 3) {
-        Status_Menu(self, Menu_Team_Input,
-                    "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n              \n—‘ Auto Team \n");
-    } else {
-        Status_Menu(self, Menu_Team_Input,
-                    "=== Choose Your Team ===\n\n“‘ Team One  \n”‘ Team Two  \n•‘ Team Three\n–‘ Team Four \n—‘ Auto Team \n");
+        return;
     }
+
+    t2 = "";
+    t3 = "";
+    t4 = "";
+
+    if (CTF_Map == TRUE) {
+        t1 = "“‘ Blue Team  ";
+        t2 = "”‘ Red Team   ";
+    } else {
+        t1 = "“‘ Team One   ";
+
+        if (number_of_teams > 1)
+            t2 = "”‘ Team Two   ";
+
+        if (number_of_teams > 2)
+            t3 = "•‘ Team Three ";
+
+        if (number_of_teams > 3)
+            t4 = "–‘ Team Four  ";
+    }
+
+    t1 = strcat(t1, strpadl(ftos(t1_players), 2));
+    if (t1_players == 1)
+        t1 = strcat(t1, " player ");
+    else
+        t1 = strcat(t1, " players");
+
+    if (strlen(t2) > 0) {
+        t2 = strcat(t2, strpadl(ftos(t2_players), 2));
+        if (t2_players == 1)
+            t2 = strcat(t2, " player ");
+        else
+            t2 = strcat(t2, " players");
+    }
+
+    if (strlen(t3) > 0) {
+        t3 = strcat(t3, strpadl(ftos(t3_players), 2));
+        if (t3_players == 1)
+            t3 = strcat(t3, " player ");
+        else
+            t3 = strcat(t3, " players");
+    }
+
+    if (strlen(t4) > 0) {
+        t4 = strcat(t4, strpadl(ftos(t4_players), 2));
+        if (t4_players == 1)
+            t4 = strcat(t4, " player ");
+        else
+            t4 = strcat(t4, " players");
+    }
+
+    Status_Menu(self, Menu_Team_Input, ch, t1, "\n", t2, "\n", t3, "\n", t4, "\n", ta);
 };
 
 void (float inp) Menu_Class_Input = {
