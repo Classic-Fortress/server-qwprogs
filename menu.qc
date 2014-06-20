@@ -631,6 +631,37 @@ void () Menu_EngineerFix_Dispenser = {
     Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_repair, s_nothing);
 };
 
+void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
+    if (inp == 1) {
+        sprint(self, PRINT_HIGH, "Rotating 90 degrees to the left...\n");
+        self.building.waitmin = anglemod(self.building.waitmin + 90);
+        self.building.waitmax = anglemod(self.building.waitmax + 90);
+    } else if (inp == 2) {
+        sprint(self, PRINT_HIGH, "Rotating 45 degrees to the left...\n");
+        self.building.waitmin = anglemod(self.building.waitmin + 45);
+        self.building.waitmax = anglemod(self.building.waitmax + 45);
+    } else if (inp == 3) {
+        sprint(self, PRINT_HIGH, "Rotating 45 degrees to the right...\n");
+        self.building.waitmin = anglemod(self.building.waitmin - 45);
+        self.building.waitmax = anglemod(self.building.waitmax - 45);
+    } else if (inp == 4) {
+        sprint(self, PRINT_HIGH, "Rotating 90 degrees to the right...\n");
+        self.building.waitmin = anglemod(self.building.waitmin - 90);
+        self.building.waitmax = anglemod(self.building.waitmax - 90);
+    }
+};
+
+void () Menu_EngineerFix_SentryGun_Rotate = {
+    local string action     = "Action:                            \n";
+    local string rot_90l    = "êìë Rotate 90 degrees left      \n";
+    local string rot_45l    = "êîë Rotate 45 degrees left      \n";
+    local string rot_45r    = "êïë Rotate 45 degrees right     \n";
+    local string rot_90r    = "êñë Rotate 90 degrees right     \n";
+    local string nothing    = "\nêóë Nothing                     ";
+
+    Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rot_90l, rot_45l, rot_45r, rot_90r, nothing);
+};
+
 void (float inp) Menu_EngineerFix_SentryGun_Input = {
     local float am;
     local float metalcost;
@@ -699,10 +730,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
             self.ammo_cells = self.ammo_cells - metalcost;
             self.building.health = self.building.health + metalcost * 5;
         } else if (inp == 4) {
-            sprint(self, PRINT_HIGH,
-                   "Rotating 45 degrees to the left...\n");
-            self.building.waitmin = anglemod(self.building.waitmin + 45);
-            self.building.waitmax = anglemod(self.building.waitmax + 45);
+            Menu_EngineerFix_SentryGun_Rotate();
         }
     }
 
