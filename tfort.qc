@@ -21,34 +21,12 @@ void () UseSpecialSkill = {
         self.impulse = TF_SCAN;
     else if (self.playerclass == PC_SNIPER)
         self.impulse = TF_ZOOMTOGGLE;
-    else if (self.playerclass == PC_SOLDIER)
-        self.impulse = TF_RELOAD;
     else if (self.playerclass == PC_DEMOMAN)
         self.impulse = TF_PB_DETONATE;
-    else if (self.playerclass == PC_MEDIC) {
-        if (self.current_weapon == WEAP_SUPER_NAILGUN)
-            self.impulse = TF_MEDIKIT;
-        else
-            self.impulse = 5;
-    } else if (self.playerclass == PC_HVYWEAP) {
-        if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-            if ((self.tfstate & TFSTATE_AIMING) ||
-                (self.tfstate & TFSTATE_CANT_MOVE))
-                sprint(self, PRINT_MEDIUM,
-                       "Cannot switch weapons while firing.\n");
-            else
-                self.impulse = 3;
-        } else
-            self.impulse = 7;
-    } else if (self.playerclass == PC_PYRO) {
-        if (self.current_weapon == WEAP_FLAMETHROWER)
-            self.impulse = 7;
-        else
-            self.impulse = 6;
-    } else if (self.playerclass == PC_SPY)
-        self.impulse = TF_SPY_SPY;
+    else if (self.playerclass == PC_SPY)
+        self.impulse = TF_SPY_SILENT_DIE;
     else if (self.playerclass == PC_ENGINEER)
-        self.impulse = TF_ENGINEER_BUILD;
+        self.impulse = TF_ENGINEER_DETDISP;
     else if (self.playerclass == PC_UNDEFINED) {
         if (self.enemy == world) {
             src = self.origin + v_forward * 10;
