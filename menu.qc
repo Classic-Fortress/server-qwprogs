@@ -296,7 +296,7 @@ void (float inp) Menu_Scout_Input = {
 };
 
 void () Menu_Scout = {
-    local string s_action  = "Scanner settings:             \n";
+    local string s_action  = "Scanner settings:\n\n";
     local string s_scane, s_scanf, s_scansound;
     local string s_nothing = "\nêóë Nothing                   \n\n";
 
