@@ -2460,10 +2460,9 @@ void () DeadImpulses = {
 
 void () W_WeaponFrame = {
     local vector tv;
-    local float zoom_level;
-    local float zoom4x    = stof(infokey(self, "z4x"));
-    local float zoom2x    = stof(infokey(self, "z2x"));
-    local float zoomkey   = stof(infokey(self, "zk"));
+    local float set_fov;
+    local float default_fov;
+    local float zoomkey = stof(infokey(self, "zk"));
     local float instazoom = stof(infokey(self, "zi"));
 
     if (self.impulse == TF_CHANGETEAM) {
@@ -2482,62 +2481,50 @@ void () W_WeaponFrame = {
     }
     if (intermission_running)
         return;
-    if ((self.impulse != 0) && (self.has_disconnected == 0))
+    if (self.impulse != 0 && self.has_disconnected == 0)
         ImpulseCommands();
     if (cease_fire)
         return;
-    if (((self.is_building != 0) || (self.is_detpacking != 0)) ||
-        (self.is_feigning != 0))
+    if ((self.is_building != 0 || self.is_detpacking != 0)
+                || self.is_feigning != 0)
         return;
 
-    self.default_fov = stof(infokey(self, "df"));
-    zoom_level = self.default_fov;
+    default_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
 
-    if (self.zoom_mode == 4) {
-        if (zoom4x < 10)
-            zoom_level = 20;
-        else
-            zoom_level = zoom4x;
-    }
-    else if (self.zoom_mode == 2) {
-        if (zoom2x < 10)
-            zoom_level = 40;
-        else
-            zoom_level = zoom2x;
-    }
-
-    if (zoom_level == self.current_fov) {
+    // zoom in/out with zoomkey enabled
+    if (self.zoom_level > 0 && self.zoom_level != self.current_fov && zoomkey == 1) {
+        if (self.zoom_in == 1) {
+            if ((self.current_fov - 20) <= self.zoom_level) {
+                set_fov = self.zoom_level;
+                self.zoom_in = 0;
+            }
+            else
+                set_fov = self.current_fov - 20;
+            TF_zoom(set_fov);
+        } else if (self.zoom_out == 1) {
+            if ((self.current_fov + 20) >= default_fov) {
+                set_fov = default_fov;
+                self.zoom_out = 0;
+            }
+            else
+                set_fov = self.current_fov + 20;
+            TF_zoom(set_fov);
+        } else
+            TF_zoom(self.zoom_level);
+    } else if (self.zoom_level == self.current_fov) {
         self.zoom_in = 0;
         self.zoom_out = 0;
-    } else if (zoom_level != self.current_fov && zoomkey == 1) {
-        if (self.zoom_out == 1) {
-            if ((self.current_fov + 20) >= self.default_fov)
-                self.current_fov = self.default_fov;
-            else
-                self.current_fov = self.current_fov + 20;
-
-            TF_zoom(self.current_fov);
-        } else if (self.zoom_in == 1) {
-            if (self.current_fov == self.default_fov)
-                stuffcmd(self, "setinfo sens $sensitivity\n");
-
-            if ((self.current_fov - 20) <= zoom_level)
-                self.current_fov = zoom_level;
-            else
-                self.current_fov = self.current_fov - 20;
-
-            TF_zoom(self.current_fov);
-        }
     }
 
+    // zoom out with zoomkey disabled
     if (!(self.tfstate & TFSTATE_AIMING) && zoomkey != 1) {
-        if (self.current_fov != self.default_fov) {
-            if ((self.current_fov + 20) >= self.default_fov || instazoom == 1)
-                self.current_fov = self.default_fov;
+        if (self.current_fov != default_fov) {
+            if ((self.current_fov + 20) >= default_fov || instazoom == 1)
+                set_fov = default_fov;
             else
-                self.current_fov = self.current_fov + 20;
+                set_fov = self.current_fov + 20;
 
-            TF_zoom(self.current_fov);
+            TF_zoom(set_fov);
         }
     }
 
@@ -2558,28 +2545,26 @@ void () W_WeaponFrame = {
                     self.heat = self.heat + 3;
                 }
 
-                if (self.current_fov == self.default_fov && zoom_level < self.default_fov && zoomkey != 1)
-                    stuffcmd(self, "setinfo sens $sensitivity\n");
-
-                if (self.current_fov != zoom_level && zoomkey != 1) {
+                // zoom in with zoomkey disabled
+                if (self.current_fov != self.zoom_level && zoomkey != 1) {
                     if (self.zoom_out == 1) {
-                        if ((self.current_fov + 20) >= zoom_level || instazoom == 1) {
-                            self.current_fov = zoom_level;
+                        if ((self.current_fov + 20) >= self.zoom_level || instazoom == 1) {
+                            set_fov = self.zoom_level;
                             self.zoom_out = 0;
                         }
                         else
-                            self.current_fov = self.current_fov + 20;
+                            set_fov = self.current_fov + 20;
                     }
                     else {
-                        if ((self.current_fov - 20) <= zoom_level || instazoom == 1) {
-                            self.current_fov = zoom_level;
+                        if ((self.current_fov - 20) <= self.zoom_level || instazoom == 1) {
+                            set_fov = self.zoom_level;
                             self.zoom_in = 0;
                         }
                         else
-                            self.current_fov = self.current_fov - 20;
+                            set_fov = self.current_fov - 20;
                     }
 
-                    TF_zoom(self.current_fov);
+                    TF_zoom(set_fov);
                 }
             } else {
                 tv = self.velocity;
@@ -2587,7 +2572,6 @@ void () W_WeaponFrame = {
                 if (vlen(tv) <= 50) {
                     SniperSight_Create();
                     self.heat = 50;
-                    self.current_fov = self.default_fov;
                     self.tfstate = self.tfstate | 2048;
                     TeamFortress_SetSpeed(self);
                 }
