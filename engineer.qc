@@ -628,8 +628,8 @@ void (entity disp) Engineer_UseDispenser = {
     sprint(self, PRINT_HIGH, st, " cells, and ");
     st = ftos(disp.armorvalue);
     sprint(self, PRINT_HIGH, st, " armor\n");
-    Menu_EngineerFix_Dispenser();
     self.building = disp;
+    Menu_EngineerFix_Dispenser();
     dist_checker = spawn();
     dist_checker.classname = "timer";
     dist_checker.owner = self;
