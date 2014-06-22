@@ -82,6 +82,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
         TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
         TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
+        TeamFortress_Alias("grenswitch", TF_GRENADE_SWITCH, 0);
         TeamFortress_Alias("+gren1", TF_GRENADE_1, 0);
         TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
         TeamFortress_Alias("-gren1", TF_GRENADE_T, 0);

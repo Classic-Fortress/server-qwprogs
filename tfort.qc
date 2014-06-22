@@ -481,7 +481,8 @@ void () TeamFortress_PrimeGrenade = {
         (self.tfstate & TFSTATE_GRENTHROWING))
         return;
 
-    if (self.impulse == TF_GRENADE_1) {
+    if (    (self.impulse == TF_GRENADE_1 && self.tp_grenade_switch != 1)
+         || (self.impulse == TF_GRENADE_2 && self.tp_grenade_switch == 1)) {
         gtype = self.tp_grenades_1;
 
         if (self.tp_grenades_1 == 2)
@@ -537,7 +538,8 @@ void () TeamFortress_PrimeGrenade = {
             return;
         }
     }
-    if (self.impulse == TF_GRENADE_2) {
+    if (    (self.impulse == TF_GRENADE_2 && self.tp_grenade_switch != 1)
+         || (self.impulse == TF_GRENADE_1 && self.tp_grenade_switch == 1)) {
         gtype = self.tp_grenades_2;
 
         if (self.tp_grenades_2 == 2)
@@ -749,6 +751,56 @@ void () TeamFortress_ThrowGrenade = {
         return;
 
     self.tfstate = self.tfstate | TFSTATE_GRENTHROWING;
+};
+
+void () TeamFortress_GrenadeSwitch = {
+    local string gs;
+
+    if (self.tp_grenade_switch == 1) {
+        self.tp_grenade_switch = 0;
+        if (self.tp_grenades_1 == 2)
+            gs = "Concussion grenade";
+        else if (self.tp_grenades_1 == 3)
+            gs = "Nail grenade";
+        else if (self.tp_grenades_1 == 4)
+            gs = "Mirv grenade";
+        else if (self.tp_grenades_1 == 5)
+            gs = "Napalm grenade";
+        else if (self.tp_grenades_1 == 6)
+            gs = "Flare";
+        else if (self.tp_grenades_1 == 7)
+            gs = "Gas grenade";
+        else if (self.tp_grenades_1 == 8)
+            gs = "EMP grenade";
+        else
+            gs = "Grenade";
+    } else {
+        self.tp_grenade_switch = 1;
+        if (self.tp_grenades_2 == 2)
+            gs = "Concussion grenade";
+        else if (self.tp_grenades_2 == 3)
+            gs = "Nail grenade";
+        else if (self.tp_grenades_2 == 4)
+            gs = "Mirv grenade";
+        else if (self.tp_grenades_2 == 5)
+            gs = "Napalm grenade";
+        else if (self.tp_grenades_2 == 6)
+            gs = "Flare";
+        else if (self.tp_grenades_2 == 7)
+            gs = "Gas grenade";
+        else if (self.tp_grenades_2 == 8)
+            gs = "EMP grenade";
+        else if (self.tp_grenades_2 == 9)
+            gs = "Flash grenade";
+        else if (self.tp_grenades_2 == 10)
+            gs = "Caltrop canister";
+        else
+            gs = "Grenade";
+    }
+    if (gs == "Caltrop canister" || gs == "Flare")
+        sprint(self, PRINT_HIGH, gs, " is now the primary throwable item\n");
+    else
+        sprint(self, PRINT_HIGH, gs, " is now the primary grenade\n");
 };
 
 float (float pc) IsLegalClass = {

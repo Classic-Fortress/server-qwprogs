@@ -31,6 +31,7 @@ void () TeamFortress_IncendiaryCannon;
 void () TeamFortress_FlameThrower;
 void () TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
+void () TeamFortress_GrenadeSwitch;
 
 void () PipebombTouch;
 
@@ -2273,6 +2274,8 @@ void () ImpulseCommands = {
         TeamFortress_Message(5);
     else if (self.impulse == TF_GRENADE_T)
         TeamFortress_ThrowGrenade();
+    else if (self.impulse == TF_GRENADE_SWITCH)
+        TeamFortress_GrenadeSwitch();
     else if (self.impulse == TF_ID)
         TeamFortress_ID();
     else if (self.impulse == TF_SHOW_IDS)
