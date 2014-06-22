@@ -500,12 +500,12 @@ void (float inp) Menu_Demoman_Input = {
 };
 
 void () Menu_Demoman = {
-    local string s_detpack = "Set detpack for:              \n";
-    local string s_5       = "“‘ 5 seconds                 \n";
-    local string s_20      = "”‘ 20 seconds                \n";
-    local string s_50      = "•‘ 50 seconds                \n";
-    local string s_255     = "–‘ 255 seconds               \n";
-    local string s_nothing = "\n—‘ Nothing                   \n";
+    local string s_detpack = "Set detpack for:\n\n";
+    local string s_5       = "“‘ 5 seconds  \n";
+    local string s_20      = "”‘ 20 seconds \n";
+    local string s_50      = "•‘ 50 seconds \n";
+    local string s_255     = "–‘ 255 seconds\n";
+    local string s_nothing = "\n—‘ Nothing    ";
 
     Status_Menu(self, Menu_Demoman_Input, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
 }
@@ -518,8 +518,8 @@ void (float inp) Menu_Demoman_Cancel_Input = {
 }
 
 void () Menu_Demoman_Cancel = {
-    local string s_detpack = "Setting detpack...            \n";
-    local string s_cancel  = "“‘ Cancel!                   \n\n\n\n\n\n";
+    local string s_detpack = "Setting detpack...\n\n";
+    local string s_cancel  = "“‘ Cancel!\n\n\n\n\n";
 
     Status_Menu(self, Menu_Demoman_Cancel_Input, s_detpack, s_cancel);
 }
