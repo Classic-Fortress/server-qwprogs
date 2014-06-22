@@ -113,10 +113,10 @@ void (float inp) Menu_Team_Input = {
 };
 
 void () Menu_Team = {
-    local string ch = "Select team:                  \n";
-    local string t1 = "“‘ Blue team       ";
+    local string ch = "Select team:\n\n";
+    local string t1 = "“‘ Blue team      ";
     local string t2, t3, t4;
-    local string ta = "\n—‘ Auto team                 \n";
+    local string ta = "\n—‘ Automatically assign team";
 
     local float t1_players  = TeamFortress_TeamGetNoPlayers(1);
     local float t2_players  = TeamFortress_TeamGetNoPlayers(2);
@@ -145,13 +145,13 @@ void () Menu_Team = {
     t4 = "";
 
     if (number_of_teams > 1)
-        t2 = "”‘ Red team        ";
+        t2 = "”‘ Red team       ";
 
     if (number_of_teams > 2)
-        t3 = "•‘ Yellow team     ";
+        t3 = "•‘ Yellow team    ";
 
     if (number_of_teams > 3)
-        t4 = "–‘ Green team      ";
+        t4 = "–‘ Green team     ";
 
     t1 = strcat(t1, strpadl(ftos(t1_players), 2));
     if (t1_players == 1)
@@ -207,17 +207,17 @@ void (float inp) Menu_Class_Input = {
 
 void () Menu_Class = {
     local entity AD;
-    local string s_select   = "Select class:                 \n";
-    local string s_scout    = "“‘ Scout                     \n";
-    local string s_sniper   = "”‘ Sniper                    \n";
-    local string s_soldier  = "•‘ Soldier                   \n";
-    local string s_demoman  = "–‘ Demoman                   \n";
-    local string s_medic    = "—‘ Medic                     \n";
-    local string s_hwguy    = "˜‘ HWGuy                     \n";
-    local string s_pyro     = "™‘ Pyro                      \n";
+    local string s_select   = "Select class:\n\n";
+    local string s_scout    = "“‘ Scout   \n";
+    local string s_sniper   = "”‘ Sniper  \n";
+    local string s_soldier  = "•‘ Soldier \n";
+    local string s_demoman  = "–‘ Demoman \n";
+    local string s_medic    = "—‘ Medic   \n";
+    local string s_hwguy    = "˜‘ HWGuy   \n";
+    local string s_pyro     = "™‘ Pyro    \n";
     local string s_spy;
-    local string s_engineer = "›‘ Engineer                  \n";
-    local string s_randompc = "’‘ Random class              \n";
+    local string s_engineer = "›‘ Engineer\n";
+    local string s_randompc = "’‘ RandomPC";
 
     if (self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
@@ -256,7 +256,7 @@ void () Menu_Class = {
         if (spy_off == 1)
             s_spy = "\n";
         else
-            s_spy = "š‘ Spy                       \n";
+            s_spy = "š‘ Spy     \n";
         Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
     }
 };
