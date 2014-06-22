@@ -2502,8 +2502,8 @@ void () W_WeaponFrame = {
                 set_fov = self.current_fov - 20;
             TF_zoom(set_fov);
         } else if (self.zoom_out == 1) {
-            if ((self.current_fov + 20) >= default_fov) {
-                set_fov = default_fov;
+            if ((self.current_fov + 20) >= self.zoom_level) {
+                set_fov = self.zoom_level;
                 self.zoom_out = 0;
             }
             else
