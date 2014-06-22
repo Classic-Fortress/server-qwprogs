@@ -1610,6 +1610,10 @@ void () W_SetCurrentAmmo = {
         self.weaponmodel = "";
         self.weaponframe = 0;
     }
+
+    // refresh engineer build menu when ammo updated
+    if (self.menu_input == Menu_Engineer_Input)
+        Menu_Engineer();
 };
 
 float () W_BestWeapon = {
