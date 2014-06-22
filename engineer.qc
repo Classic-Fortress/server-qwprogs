@@ -685,7 +685,7 @@ void () CheckDistance = {
         return;
     }
     dist = self.enemy.origin - self.owner.origin;
-    if (vlen(dist) > 64) {
+    if (vlen(dist) > 80) {
         Menu_Close(self.owner);
         self.owner.building = world;
         dremove(self);
