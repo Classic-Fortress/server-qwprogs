@@ -270,17 +270,17 @@ void (float inp) Menu_Drop_Input = {
 
 void () Menu_Drop = {
     local string s_drop;
-    local string s_shells  = "êìë Shells                    \n";
-    local string s_nails   = "êîë Nails                     \n";
-    local string s_rockets = "êïë Rockets                   \n";
-    local string s_cells   = "êñë Cells                     \n";
-    local string s_nothing = "\nêóë Nothing                   \n";
+    local string s_shells  = "êìë Shells \n";
+    local string s_nails   = "êîë Nails  \n";
+    local string s_rockets = "êïë Rockets\n";
+    local string s_cells   = "êñë Cells  \n";
+    local string s_nothing = "\nêóë Nothing";
 
     self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER)
-        s_drop = "Drop or make:                 \n";
+        s_drop = "Drop or make:\n\n";
     else
-        s_drop = "Drop:                         \n";
+        s_drop = "Drop:\n\n";
     Status_Menu(self, Menu_Drop_Input, s_drop, s_shells, s_nails, s_rockets, s_cells, s_nothing);
 };
 
