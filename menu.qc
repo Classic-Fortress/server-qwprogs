@@ -113,9 +113,10 @@ void (float inp) Menu_Team_Input = {
 };
 
 void () Menu_Team = {
-    local string ch = "=== Choose Your Team ===\n\n";
-    local string t1, t2, t3, t4;
-    local string ta = "êóë Auto Team            \n";
+    local string ch = "Select team:                  \n";
+    local string t1 = "êìë Blue team       ";
+    local string t2, t3, t4;
+    local string ta = "\nêóë Auto team                 \n";
 
     local float t1_players  = TeamFortress_TeamGetNoPlayers(1);
     local float t2_players  = TeamFortress_TeamGetNoPlayers(2);
@@ -143,53 +144,49 @@ void () Menu_Team = {
     t3 = "";
     t4 = "";
 
-    if (CTF_Map == TRUE) {
-        t1 = "êìë Blue Team  ";
-        t2 = "êîë Red Team   ";
-    } else {
-        t1 = "êìë Team One   ";
+    if (number_of_teams > 1)
+        t2 = "êîë Red team        ";
 
-        if (number_of_teams > 1)
-            t2 = "êîë Team Two   ";
+    if (number_of_teams > 2)
+        t3 = "êïë Yellow team     ";
 
-        if (number_of_teams > 2)
-            t3 = "êïë Team Three ";
-
-        if (number_of_teams > 3)
-            t4 = "êñë Team Four  ";
-    }
+    if (number_of_teams > 3)
+        t4 = "êñë Green team      ";
 
     t1 = strcat(t1, strpadl(ftos(t1_players), 2));
     if (t1_players == 1)
-        t1 = strcat(t1, " player ");
+        t1 = strcat(t1, " player \n");
     else
-        t1 = strcat(t1, " players");
+        t1 = strcat(t1, " players\n");
 
     if (strlen(t2) > 0) {
         t2 = strcat(t2, strpadl(ftos(t2_players), 2));
         if (t2_players == 1)
-            t2 = strcat(t2, " player ");
+            t2 = strcat(t2, " player \n");
         else
-            t2 = strcat(t2, " players");
-    }
+            t2 = strcat(t2, " players\n");
+    } else
+        ta = strcat(ta, "\n");
 
     if (strlen(t3) > 0) {
         t3 = strcat(t3, strpadl(ftos(t3_players), 2));
         if (t3_players == 1)
-            t3 = strcat(t3, " player ");
+            t3 = strcat(t3, " player \n");
         else
-            t3 = strcat(t3, " players");
-    }
+            t3 = strcat(t3, " players\n");
+    } else
+        ta = strcat(ta, "\n");
 
     if (strlen(t4) > 0) {
         t4 = strcat(t4, strpadl(ftos(t4_players), 2));
         if (t4_players == 1)
-            t4 = strcat(t4, " player ");
+            t4 = strcat(t4, " player \n");
         else
-            t4 = strcat(t4, " players");
-    }
+            t4 = strcat(t4, " players\n");
+    } else
+        ta = strcat(ta, "\n");
 
-    Status_Menu(self, Menu_Team_Input, ch, t1, "\n", t2, "\n", t3, "\n", t4, "\n", ta);
+    Status_Menu(self, Menu_Team_Input, ch, t1, t2, t3, t4, ta);
 };
 
 void (float inp) Menu_Class_Input = {
@@ -210,7 +207,18 @@ void (float inp) Menu_Class_Input = {
 
 void () Menu_Class = {
     local entity AD;
-    
+    local string s_select   = "Select class:                 \n";
+    local string s_scout    = "êìë Scout                     \n";
+    local string s_sniper   = "êîë Sniper                    \n";
+    local string s_soldier  = "êïë Soldier                   \n";
+    local string s_demoman  = "êñë Demoman                   \n";
+    local string s_medic    = "êóë Medic                     \n";
+    local string s_hwguy    = "êòë HWGuy                     \n";
+    local string s_pyro     = "êôë Pyro                      \n";
+    local string s_spy;
+    local string s_engineer = "êõë Engineer                  \n";
+    local string s_randompc = "êíë Random class              \n";
+
     if (self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
         return;
@@ -223,57 +231,57 @@ void () Menu_Class = {
                 Status_Print(self, AD.noise1);
                 return;
             }
-        } else {
-            if (self.team_no == 2) {
-                if (AD.noise2 != string_null) {
-                    Status_Print(self, AD.noise2);
-                    return;
-                }
-            } else {
-                if (self.team_no == 3) {
-                    if (AD.noise3 != string_null) {
-                        Status_Print(self, AD.noise3);
-                        return;
-                    }
-                } else {
-                    if (self.team_no == 4) {
-                        if (AD.noise4 != string_null) {
-                            Status_Print(self, AD.noise4);
-                            return;
-                        }
-                    }
-                }
+        } else if (self.team_no == 2) {
+            if (AD.noise2 != string_null) {
+                Status_Print(self, AD.noise2);
+                return;
+            }
+        } else if (self.team_no == 3) {
+            if (AD.noise3 != string_null) {
+                Status_Print(self, AD.noise3);
+                return;
+            }
+        } else if (self.team_no == 4) {
+            if (AD.noise4 != string_null) {
+                Status_Print(self, AD.noise4);
+                return;
             }
         }
     }
+
     self.menu_input = nil;
-    if (TeamFortress_TeamIsCivilian(self.team_no)) {
-        Status_Print(self, "Your team can only be Civilians.\n");
-    } else {
-        if (spy_off == 1) {
-            Status_Menu(self, Menu_Class_Input,
-                        "=== Choose Your Class ===\n\nêìë Scout   \nêîë Sniper  \nêïë Soldier \nêñë Demoman \nêóë Medic   \nêòë HWGuy   \nêôë Pyro    \nêõë Engineer\nêíë RandomPC\n");
-        } else {
-            Status_Menu(self, Menu_Class_Input,
-                            "=== Choose Your Class ===\n\nêìë Scout   \nêîë Sniper  \nêïë Soldier \nêñë Demoman \nêóë Medic   \nêòë HWGuy   \nêôë Pyro    \nêöë Spy     \nêõë Engineer\nêíë RandomPC\n");
-        }
+    if (TeamFortress_TeamIsCivilian(self.team_no))
+        Status_Print(self, "Your team can only be civilians.\n");
+    else {
+        if (spy_off == 1)
+            s_spy = "\n";
+        else
+            s_spy = "êöë Spy                       \n";
+        Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
     }
 };
 
 void (float inp) Menu_Drop_Input = {
-    if ((inp > 0) && (inp < 5))
+    if ((inp > 0) && (inp < 5)) {
         TeamFortress_DropAmmo(inp);
+        Menu_Drop();
+    }
 };
 
 void () Menu_Drop = {
+    local string s_drop;
+    local string s_shells  = "êìë Shells                    \n";
+    local string s_nails   = "êîë Nails                     \n";
+    local string s_rockets = "êïë Rockets                   \n";
+    local string s_cells   = "êñë Cells                     \n";
+    local string s_nothing = "\nêóë Nothing                   \n";
+
     self.menu_input = nil;
-    if (self.playerclass == PC_ENGINEER) {
-        Status_Menu(self, Menu_Drop_Input,
-                    "Drop or Make:                   \nêìë Shells                      \nêîë Nails                       \nêïë Rockets                     \nêñë Cells                       \nêóë Nothing                     \n\n");
-    } else {
-        Status_Menu(self, Menu_Drop_Input,
-                    "Drop:                           \nêìë Shells                      \nêîë Nails                       \nêïë Rockets                     \nêñë Cells                       \nêóë Nothing                     \n\n");
-    }
+    if (self.playerclass == PC_ENGINEER)
+        s_drop = "Drop or make:                 \n";
+    else
+        s_drop = "Drop:                         \n";
+    Status_Menu(self, Menu_Drop_Input, s_drop, s_shells, s_nails, s_rockets, s_cells, s_nothing);
 };
 
 void (float inp) Menu_Scout_Input = {
@@ -288,11 +296,9 @@ void (float inp) Menu_Scout_Input = {
 };
 
 void () Menu_Scout = {
-    local string s_action  = "Action:                       \n";
-    local string s_nothing;
-    local string s_scanf;
-    local string s_scane;
-    local string s_scansound;
+    local string s_action  = "Scanner settings:             \n";
+    local string s_scane, s_scanf, s_scansound;
+    local string s_nothing = "\nêóë Nothing                   \n\n";
 
     if (self.tf_items_flags & NIT_SCANNER_ENEMY)
         s_scane = "êìë Do not scan for enemies   \n";
@@ -310,8 +316,6 @@ void () Menu_Scout = {
     else
         s_scansound = "êïë Turn on scan sound        \n";
 
-    s_nothing = "\nêóë Nothing                   \n\n";
-
     Status_Menu(self, Menu_Scout_Input, s_action, s_scane, s_scanf, s_scansound, s_nothing);
 };
 
@@ -319,12 +323,12 @@ void (float inp) Menu_Spy_Input = {
     if ((inp == 1) || (inp == 2)) {
         if (self.effects & (8 | 4)) {
             sprint(self, PRINT_HIGH,
-                   "You can't go undercover while glowing.\n");
+                   "You cannot go undercover while glowing.\n");
             return;
         }
         if (self.is_unabletospy == 1) {
             sprint(self, PRINT_HIGH,
-                   "You can't go undercover right now.\n");
+                   "You cannot go undercover right now.\n");
             return;
         }
     }
@@ -343,28 +347,27 @@ void (float inp) Menu_Spy_Input = {
 };
 
 void () Menu_Spy = {
-    local string s_action  = "Action:                         \n";
-    local string s_skin    = "êìë Change skin                 \n";
-    local string s_color   = "êîë Change color                \n";
-    local string s_nothing = "êóë Nothing                     \n\n";
-    local string s_feign;
-    local string s_reset;
+    local string s_action  = "Action:                       \n";
+    local string s_skin    = "êìë Change skin               \n";
+    local string s_color   = "êîë Change color              \n";
+    local string s_feign, s_reset;
+    local string s_nothing = "\nêóë Nothing                   \n";
 
     if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
         return;
     }
 
     if (self.is_feigning)
-        s_feign = "êïë Stop feigning               \n";
+        s_feign = "êïë Stop feigning             \n";
     else
-        s_feign = "êïë Start feigning              \n";
+        s_feign = "êïë Start feigning            \n";
 
     if (self.undercover_team != 0 && self.undercover_skin != 0)
-        s_reset = "êñë Reset skin and color        \n";
+        s_reset = "êñë Reset skin and color      \n";
     else if (self.undercover_team != 0)
-        s_reset = "êñë Reset color                 \n";
+        s_reset = "êñë Reset color               \n";
     else if (self.undercover_skin != 0)
-        s_reset = "êñë Reset skin                  \n";
+        s_reset = "êñë Reset skin                \n";
     else
         s_reset = "\n";
 
@@ -382,11 +385,11 @@ void (float inp) Menu_Spy_Skin_Input = {
 };
 
 void () Menu_Spy_Skin = {
-    local string s_change  = "Disguise as:                \n";
-    local string s_scsnso  = "êìë Scout / Sniper / Soldier\n";
-    local string s_demehw  = "êîë Demoman / Medic / HWGuy \n";
-    local string s_pyspen  = "êïë Pyro / Spy / Engineer   \n\n";
-    local string s_nothing = "êóë Nothing                 \n\n";
+    local string s_change  = "Disguise as:                  \n";
+    local string s_scsnso  = "êìë Scout / Sniper / Soldier  \n";
+    local string s_demehw  = "êîë Demoman / Medic / HWGuy   \n";
+    local string s_pyspen  = "êïë Pyro / Spy / Engineer     \n";
+    local string s_nothing = "\nêóë Nothing                   \n\n";
 
     Status_Menu(self, Menu_Spy_Skin_Input, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
 };
@@ -397,11 +400,11 @@ void (float inp) Menu_Spy_Skin_1_Input = {
 }
 
 void () Menu_Spy_Skin_1 = {
-    local string s_change  = "Disguise as:    \n";
-    local string s_scout   = "êìë Scout       \n";
-    local string s_sniper  = "êîë Sniper      \n";
-    local string s_soldier = "êïë Soldier     \n\n";
-    local string s_nothing = "êóë Nothing     \n\n";
+    local string s_change  = "Disguise as:                  \n";
+    local string s_scout   = "êìë Scout                     \n";
+    local string s_sniper  = "êîë Sniper                    \n";
+    local string s_soldier = "êïë Soldier                   \n";
+    local string s_nothing = "\nêóë Nothing                   \n\n";
 
     Status_Menu(self, Menu_Spy_Skin_1_Input, s_change, s_scout, s_sniper, s_soldier, s_nothing);
 }
@@ -415,11 +418,11 @@ void (float inp) Menu_Spy_Skin_2_Input = {
 }
 
 void () Menu_Spy_Skin_2 = {
-    local string s_change  = "Disguise as:    \n";
-    local string s_demoman = "êìë Demoman     \n";
-    local string s_medic   = "êîë Medic       \n";
-    local string s_hwguy   = "êïë HWGuy       \n\n";
-    local string s_nothing = "êóë Nothing     \n\n";
+    local string s_change  = "Disguise as:                  \n";
+    local string s_demoman = "êìë Demoman                   \n";
+    local string s_medic   = "êîë Medic                     \n";
+    local string s_hwguy   = "êïë HWGuy                     \n";
+    local string s_nothing = "\nêóë Nothing                   \n\n";
 
     Status_Menu(self, Menu_Spy_Skin_2_Input, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
 }
@@ -433,11 +436,11 @@ void (float inp) Menu_Spy_Skin_3_Input = {
 }
 
 void () Menu_Spy_Skin_3 = {
-    local string s_change   = "Disguise as:        \n";
-    local string s_pyro     = "êìë Pyro            \n";
-    local string s_spy      = "êîë Spy (reset skin)\n";
-    local string s_engineer = "êïë Engineer        \n\n";
-    local string s_nothing  = "êóë Nothing         \n\n";
+    local string s_change   = "Disguise as:                  \n";
+    local string s_pyro     = "êìë Pyro                      \n";
+    local string s_spy      = "êîë Spy (reset skin)          \n";
+    local string s_engineer = "êïë Engineer                  \n";
+    local string s_nothing  = "\nêóë Nothing                   \n\n";
 
     Status_Menu(self, Menu_Spy_Skin_3_Input, s_change, s_pyro, s_spy, s_engineer, s_nothing);
 }
@@ -459,12 +462,12 @@ void (float inp) Menu_Spy_Color_Input = {
 
 void () Menu_Spy_Color = {
     local float color       = stof(infokey(self, "bottomcolor"));
-    local string s_disguise = "Disguise as:                 \n";
-    local string s_nothing  = "\nêóë Nothing                  ";
-    local string s_blue     = "êìë Blue team                \n";
-    local string s_red      = "êîë Red team                 \n";
-    local string s_yellow   = "êïë Yellow team              \n";
-    local string s_green    = "êñë Green team               \n";
+    local string s_disguise = "Disguise as:                  \n";
+    local string s_blue     = "êìë Blue team                 \n";
+    local string s_red      = "êîë Red team                  \n";
+    local string s_yellow   = "êïë Yellow team               \n";
+    local string s_green    = "êñë Green team                \n";
+    local string s_nothing  = "\nêóë Nothing                   \n";
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
@@ -475,14 +478,14 @@ void () Menu_Spy_Color = {
         sprint(self, PRINT_HIGH, "There is no other team.\n");
     else if (number_of_teams == 2) {
         if (color == 4)
-            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, "\n", s_nothing, "\n\n\n");
+            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, "\n", s_nothing, "\n\n");
         else
-            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, "\n", s_red, s_nothing, "\n\n\n");
+            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, "\n", s_red, s_nothing, "\n\n");
     }
     else if (number_of_teams == 3)
-        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing, "\n\n");
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing, "\n");
     else
-        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing, "\n");
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_green, s_nothing);
 };
 
 void (float inp) Menu_Demoman_Input = {
@@ -497,12 +500,12 @@ void (float inp) Menu_Demoman_Input = {
 };
 
 void () Menu_Demoman = {
-    local string s_detpack = "Set detpack for:  \n";
-    local string s_5       = "êìë 5 seconds     \n";
-    local string s_20      = "êîë 20 seconds    \n";
-    local string s_50      = "êïë 50 seconds    \n";
-    local string s_255     = "êñë 255 seconds   \n";
-    local string s_nothing = "êóë Nothing       \n\n";
+    local string s_detpack = "Set detpack for:              \n";
+    local string s_5       = "êìë 5 seconds                 \n";
+    local string s_20      = "êîë 20 seconds                \n";
+    local string s_50      = "êïë 50 seconds                \n";
+    local string s_255     = "êñë 255 seconds               \n";
+    local string s_nothing = "\nêóë Nothing                   \n";
 
     Status_Menu(self, Menu_Demoman_Input, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
 }
@@ -515,13 +518,19 @@ void (float inp) Menu_Demoman_Cancel_Input = {
 }
 
 void () Menu_Demoman_Cancel = {
-    local string s_detpack = "Setting detpack...  \n";
-    local string s_cancel  = "êìë Cancel!         \n\n\n\n\n\n";
+    local string s_detpack = "Setting detpack...            \n";
+    local string s_cancel  = "êìë Cancel!                   \n\n\n\n\n\n";
 
     Status_Menu(self, Menu_Demoman_Cancel_Input, s_detpack, s_cancel);
 }
 
 void (float inp) Menu_Engineer_Input = {
+    local float dismantle_sentrygun;
+    local float dismantle_dispenser;
+    local entity te;
+
+    dismantle_sentrygun = 0;
+    dismantle_dispenser = 0;
 
     if (inp == 1 && !self.has_sentry && self.ammo_cells >= 130)
         TeamFortress_Build(2);
@@ -529,48 +538,89 @@ void (float inp) Menu_Engineer_Input = {
     if (inp == 2 && !self.has_dispenser && self.ammo_cells >= 100)
         TeamFortress_Build(1);
 
-    if (inp == 3 && self.has_sentry)
-        DestroyBuilding(self, "building_sentrygun");
+    if (inp == 3 && self.has_sentry) {
+        te = findradius(self.origin, 70);
+        while (te) {
+            if (te.classname == "building_sentrygun") {
+                if (te.real_owner == self){
+                    sprint (self, PRINT_HIGH, "You dismantle the sentry gun.\n");
+                    self.ammo_cells = (self.ammo_cells + (130 / 2));
+                    dremove (te.trigger_field);
+                    dremove (te);
+                    self.has_sentry = 0;
+                    dismantle_sentrygun = 1;
+                }
+            }
+            te = te.chain;
+        }
+        if (dismantle_sentrygun == 0)
+            DestroyBuilding(self, "building_sentrygun");
+    }
 
-    if (inp == 4 && self.has_dispenser)
-        DestroyBuilding(self, "building_dispenser");
+    if (inp == 4 && self.has_dispenser) {
+        te = findradius(self.origin, 70);
+        while (te) {
+            if (te.classname == "building_dispenser") {
+                if (te.real_owner == self) {
+                    sprint (self, PRINT_HIGH, "You dismantle the dispenser.\n");
+                    self.ammo_cells = (self.ammo_cells + (100 / 2));
+                    dremove (te);
+                    self.has_dispenser = 0;
+                    dismantle_dispenser = 1;
+                }
+            }
+            te = te.chain;
+        }
+        if (dismantle_dispenser == 0)
+            DestroyBuilding(self, "building_dispenser");
+    }
 
 };
 
 void () Menu_Engineer = {
-    local string s_action;
-    local string s_sentry;
-    local string s_disp;
-    local string s_dsentry;
-    local string s_ddisp;
-    local string s_nothing;
-
-    s_action = "Action:                           \n";
+    local entity te;
+    local string s_action = "Action:                       \n";
+    local string s_sentry, s_disp, s_dsentry, s_ddisp;
+    local string s_nothing = "\nêóë Nothing                   \n";
 
     if (self.has_sentry) {
-        s_dsentry = "êïë Destroy Sentry Gun           \n";
         s_sentry = "\n";
+        s_dsentry = "êïë Destroy sentry gun        \n";
+        te = findradius(self.origin, 70);
+        while (te) {
+            if (te.classname == "building_sentrygun") {
+                if (te.real_owner == self)
+                    s_dsentry = "êïë Dismantle sentry gun      \n";
+            }
+            te = te.chain;
+        }
     } else {
-        s_dsentry = "\n";
-
         if (self.ammo_cells >= 130)
-            s_sentry = "êìë Build Sentry Gun             \n";
+            s_sentry = "êìë Build sentry gun          \n";
         else
             s_sentry = "\n";
+        s_dsentry = "\n";
     }
 
     if (self.has_dispenser) {
-        s_ddisp = "êñë Destroy Dispenser            \n";
         s_disp = "\n";
+        s_ddisp = "êñë Destroy dispenser         \n";
+        te = findradius(self.origin, 70);
+        while (te) {
+            if (te.classname == "building_dispenser") {
+                if (te.real_owner == self)
+                    s_ddisp = "êñë Dismantle dispenser       \n";
+            }
+            te = te.chain;
+        }
     } else {
-        s_ddisp = "\n";
         if (self.ammo_cells >= 100)
-            s_disp = "êîë Build Dispenser              \n";
+            s_disp = "êîë Build dispenser           \n";
         else
             s_disp = "\n";
+        s_ddisp = "\n";
     }
 
-    s_nothing = "\nêóë Nothing                      \n\n";
     Status_Menu(self, Menu_Engineer_Input, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
 };
 
@@ -652,28 +702,26 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 };
 
 void () Menu_EngineerFix_Dispenser = {
-    local string s_action = "Action:                            \n";
-    local string s_ammo;
-    local string s_armor;
-    local string s_repair;
-    local string s_nothing = "\nêóë Nothing                     \n";
+    local string s_action = "Dispenser maintenance:        \n";
+    local string s_ammo, s_armor, s_repair;
+    local string s_nothing = "\nêóë Nothing                   \n";
 
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
             || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
             || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
             || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
-        s_ammo = "êìë Put ammo into Dispenser     \n";
+        s_ammo = "êìë Put ammo into dispenser   \n";
     else
         s_ammo = "\n";
 
     if (self.armorvalue > 0 && self.building.armorvalue < 500)
-        s_armor = "êîë Put armor into Dispenser    \n";
+        s_armor = "êîë Put armor into dispenser  \n";
     else
         s_armor = "\n";
 
     if (self.building.health < self.building.max_health)
-        s_repair  = "êïë Repair Dispenser            \n";
+        s_repair  = "êïë Repair dispenser          \n";
     else
         s_repair = "\n";
 
@@ -701,12 +749,12 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun_Rotate = {
-    local string action     = "Action:                            \n";
-    local string rot_90l    = "êìë Rotate 90 degrees left      \n";
-    local string rot_45l    = "êîë Rotate 45 degrees left      \n";
-    local string rot_45r    = "êïë Rotate 45 degrees right     \n";
-    local string rot_90r    = "êñë Rotate 90 degrees right     \n";
-    local string nothing    = "\nêóë Nothing                     ";
+    local string action  = "Rotate sentry gun:            \n";
+    local string rot_90l = "êìë 90 degrees left           \n";
+    local string rot_45l = "êîë 45 degrees left           \n";
+    local string rot_45r = "êïë 45 degrees right          \n";
+    local string rot_90r = "êñë 90 degrees right          \n";
+    local string nothing = "\nêóë Nothing                   \n";
 
     Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rot_90l, rot_45l, rot_45r, rot_90r, nothing);
 };
@@ -794,26 +842,24 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun = {
-    local string action     = "Action:                            \n";
-    local string putammo;
-    local string upgrade;
-    local string repair;
-    local string rotate     = "êñë Rotate Sentry Gun           \n";
-    local string nothing    = "\nêóë Nothing                     ";
+    local string action  = "Sentry gun maintenance:       \n";
+    local string putammo, upgrade, repair;
+    local string rotate  = "êñë Rotate sentry gun         \n";
+    local string nothing = "\nêóë Nothing                   \n";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
             || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
-        putammo = "êìë Put Ammo into Sentry Gun    \n";
+        putammo = "êìë Put ammo into sentry sun  \n";
     else
         putammo = "\n";
 
     if (self.building.weapon < 3 && self.ammo_cells >= 130)
-        upgrade = "êîë Upgrade Sentry Gun          \n";
+        upgrade = "êîë Upgrade sentry gun        \n";
     else
         upgrade = "\n";
 
     if (self.building.health < self.building.max_health)
-        repair = "êïë Repair Sentry Gun           \n";
+        repair = "êïë Repair sentry gun         \n";
     else
         repair = "\n";
 
@@ -892,21 +938,20 @@ void (float inp) Menu_Dispenser_Input = {
 };
 
 void () Menu_Dispenser = {
-    local string s_action = "Use Dispenser:                     \n";
-    local string s_ammo;
-    local string s_armor;
-    local string s_nothing = "\nêóë Nothing                     \n";
+    local string s_action  = "Use dispenser:                \n";
+    local string s_ammo, s_armor;
+    local string s_nothing = "\nêóë Nothing                   \n\n\n";
 
     if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
             || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
             || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
             || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
-        s_ammo = "êìë Withdraw some ammo          \n";
+        s_ammo = "êìë Withdraw some ammo        \n";
     else
         s_ammo = "\n";
 
     if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
-        s_armor = "êîë Withdraw some armor         \n";
+        s_armor = "êîë Withdraw some armor       \n";
     else
         s_armor = "\n";
 
