@@ -347,27 +347,27 @@ void (float inp) Menu_Spy_Input = {
 };
 
 void () Menu_Spy = {
-    local string s_action  = "Action:                       \n";
-    local string s_skin    = "“‘ Change skin               \n";
-    local string s_color   = "”‘ Change color              \n";
+    local string s_action  = "Action:\n\n";
+    local string s_skin    = "“‘ Change skin   \n";
+    local string s_color   = "”‘ Change color  \n";
     local string s_feign, s_reset;
-    local string s_nothing = "\n—‘ Nothing                   \n";
+    local string s_nothing = "\n—‘ Nothing       ";
 
     if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
         return;
     }
 
     if (self.is_feigning)
-        s_feign = "•‘ Stop feigning             \n";
+        s_feign = "•‘ Stop feigning \n";
     else
-        s_feign = "•‘ Start feigning            \n";
+        s_feign = "•‘ Start feigning\n";
 
     if (self.undercover_team != 0 && self.undercover_skin != 0)
-        s_reset = "–‘ Reset skin and color      \n";
+        s_reset = "–‘ Reset disguise\n";
     else if (self.undercover_team != 0)
-        s_reset = "–‘ Reset color               \n";
+        s_reset = "–‘ Reset color   \n";
     else if (self.undercover_skin != 0)
-        s_reset = "–‘ Reset skin                \n";
+        s_reset = "–‘ Reset skin    \n";
     else
         s_reset = "\n";
 
@@ -385,13 +385,13 @@ void (float inp) Menu_Spy_Skin_Input = {
 };
 
 void () Menu_Spy_Skin = {
-    local string s_change  = "Disguise as:                  \n";
-    local string s_scsnso  = "“‘ Scout / Sniper / Soldier  \n";
-    local string s_demehw  = "”‘ Demoman / Medic / HWGuy   \n";
-    local string s_pyspen  = "•‘ Pyro / Spy / Engineer     \n";
-    local string s_nothing = "\n—‘ Nothing                   \n\n";
+    local string s_disguise = "Disguise as:\n\n";
+    local string s_scsnso   = "“‘ Scout / Sniper / Soldier\n";
+    local string s_demehw   = "”‘ Demoman / Medic / HWGuy \n";
+    local string s_pyspen   = "•‘ Pyro / Spy / Engineer   \n";
+    local string s_nothing  = "\n—‘ Nothing                 \n";
 
-    Status_Menu(self, Menu_Spy_Skin_Input, s_change, s_scsnso, s_demehw, s_pyspen, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scsnso, s_demehw, s_pyspen, s_nothing);
 };
 
 void (float inp) Menu_Spy_Skin_1_Input = {
@@ -400,13 +400,13 @@ void (float inp) Menu_Spy_Skin_1_Input = {
 }
 
 void () Menu_Spy_Skin_1 = {
-    local string s_change  = "Disguise as:                  \n";
-    local string s_scout   = "“‘ Scout                     \n";
-    local string s_sniper  = "”‘ Sniper                    \n";
-    local string s_soldier = "•‘ Soldier                   \n";
-    local string s_nothing = "\n—‘ Nothing                   \n\n";
+    local string s_disguise = "Disguise as:\n\n";
+    local string s_scout    = "“‘ Scout  \n";
+    local string s_sniper   = "”‘ Sniper \n";
+    local string s_soldier  = "•‘ Soldier\n";
+    local string s_nothing  = "\n—‘ Nothing\n";
 
-    Status_Menu(self, Menu_Spy_Skin_1_Input, s_change, s_scout, s_sniper, s_soldier, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_1_Input, s_disguise, s_scout, s_sniper, s_soldier, s_nothing);
 }
 
 void (float inp) Menu_Spy_Skin_2_Input = {
@@ -418,13 +418,13 @@ void (float inp) Menu_Spy_Skin_2_Input = {
 }
 
 void () Menu_Spy_Skin_2 = {
-    local string s_change  = "Disguise as:                  \n";
-    local string s_demoman = "“‘ Demoman                   \n";
-    local string s_medic   = "”‘ Medic                     \n";
-    local string s_hwguy   = "•‘ HWGuy                     \n";
-    local string s_nothing = "\n—‘ Nothing                   \n\n";
+    local string s_disguise = "Disguise as:\n\n";
+    local string s_demoman  = "“‘ Demoman\n";
+    local string s_medic    = "”‘ Medic  \n";
+    local string s_hwguy    = "•‘ HWGuy  \n";
+    local string s_nothing  = "\n—‘ Nothing\n";
 
-    Status_Menu(self, Menu_Spy_Skin_2_Input, s_change, s_demoman, s_medic, s_hwguy, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_2_Input, s_disguise, s_demoman, s_medic, s_hwguy, s_nothing);
 }
 
 void (float inp) Menu_Spy_Skin_3_Input = {
@@ -436,13 +436,13 @@ void (float inp) Menu_Spy_Skin_3_Input = {
 }
 
 void () Menu_Spy_Skin_3 = {
-    local string s_change   = "Disguise as:                  \n";
-    local string s_pyro     = "“‘ Pyro                      \n";
-    local string s_spy      = "”‘ Spy (reset skin)          \n";
-    local string s_engineer = "•‘ Engineer                  \n";
-    local string s_nothing  = "\n—‘ Nothing                   \n\n";
+    local string s_disguise = "Disguise as:\n\n";
+    local string s_pyro     = "“‘ Pyro    \n";
+    local string s_spy      = "”‘ Spy     \n";
+    local string s_engineer = "•‘ Engineer\n";
+    local string s_nothing  = "\n—‘ Nothing \n";
 
-    Status_Menu(self, Menu_Spy_Skin_3_Input, s_change, s_pyro, s_spy, s_engineer, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_3_Input, s_disguise, s_pyro, s_spy, s_engineer, s_nothing);
 }
 
 void (float inp) Menu_Spy_Color_Input = {
@@ -462,12 +462,12 @@ void (float inp) Menu_Spy_Color_Input = {
 
 void () Menu_Spy_Color = {
     local float color       = stof(infokey(self, "bottomcolor"));
-    local string s_disguise = "Disguise as:                  \n";
-    local string s_blue     = "“‘ Blue team                 \n";
-    local string s_red      = "”‘ Red team                  \n";
-    local string s_yellow   = "•‘ Yellow team               \n";
-    local string s_green    = "–‘ Green team                \n";
-    local string s_nothing  = "\n—‘ Nothing                   \n";
+    local string s_disguise = "Disguise as:\n\n";
+    local string s_blue     = "“‘ Blue team  \n";
+    local string s_red      = "”‘ Red team   \n";
+    local string s_yellow   = "•‘ Yellow team\n";
+    local string s_green    = "–‘ Green team \n";
+    local string s_nothing  = "\n—‘ Nothing    ";
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
