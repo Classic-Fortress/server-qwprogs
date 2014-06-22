@@ -579,24 +579,24 @@ void (float inp) Menu_Engineer_Input = {
 
 void () Menu_Engineer = {
     local entity te;
-    local string s_action = "Action:                       \n";
+    local string s_action = "Action:\n\n";
     local string s_sentry, s_disp, s_dsentry, s_ddisp;
-    local string s_nothing = "\nêóë Nothing                   \n";
+    local string s_nothing = "\nêóë Nothing             ";
 
     if (self.has_sentry) {
         s_sentry = "\n";
-        s_dsentry = "êïë Destroy sentry gun        \n";
+        s_dsentry = "êïë Destroy sentry gun  \n";
         te = findradius(self.origin, 70);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self)
-                    s_dsentry = "êïë Dismantle sentry gun      \n";
+                    s_dsentry = "êïë Dismantle sentry gun\n";
             }
             te = te.chain;
         }
     } else {
         if (self.ammo_cells >= 130)
-            s_sentry = "êìë Build sentry gun          \n";
+            s_sentry = "êìë Build sentry gun    \n";
         else
             s_sentry = "\n";
         s_dsentry = "\n";
@@ -604,18 +604,18 @@ void () Menu_Engineer = {
 
     if (self.has_dispenser) {
         s_disp = "\n";
-        s_ddisp = "êñë Destroy dispenser         \n";
+        s_ddisp = "êñë Destroy dispenser   \n";
         te = findradius(self.origin, 70);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self)
-                    s_ddisp = "êñë Dismantle dispenser       \n";
+                    s_ddisp = "êñë Dismantle dispenser \n";
             }
             te = te.chain;
         }
     } else {
         if (self.ammo_cells >= 100)
-            s_disp = "êîë Build dispenser           \n";
+            s_disp = "êîë Build dispenser     \n";
         else
             s_disp = "\n";
         s_ddisp = "\n";
@@ -702,26 +702,25 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 };
 
 void () Menu_EngineerFix_Dispenser = {
-    local string s_action = "Dispenser maintenance:        \n";
+    local string s_action = "Dispenser maintenance:\n\n";
     local string s_ammo, s_armor, s_repair;
-    local string s_nothing = "\nêóë Nothing                   \n";
-
+    local string s_nothing = "\nêóë Nothing     ";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
             || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
             || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
             || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
-        s_ammo = "êìë Put ammo into dispenser   \n";
+        s_ammo = "êìë Insert ammo \n";
     else
         s_ammo = "\n";
 
     if (self.armorvalue > 0 && self.building.armorvalue < 500)
-        s_armor = "êîë Put armor into dispenser  \n";
+        s_armor = "êîë Insert armor\n";
     else
         s_armor = "\n";
 
     if (self.building.health < self.building.max_health)
-        s_repair  = "êïë Repair dispenser          \n";
+        s_repair = "êïë Repair      \n";
     else
         s_repair = "\n";
 
@@ -749,12 +748,12 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun_Rotate = {
-    local string action  = "Rotate sentry gun:            \n";
-    local string rot_90l = "êìë 90 degrees left           \n";
-    local string rot_45l = "êîë 45 degrees left           \n";
-    local string rot_45r = "êïë 45 degrees right          \n";
-    local string rot_90r = "êñë 90 degrees right          \n";
-    local string nothing = "\nêóë Nothing                   \n";
+    local string action  = "Rotate sentry gun:\n\n";
+    local string rot_90l = "êìë 90 degrees left \n";
+    local string rot_45l = "êîë 45 degrees left \n";
+    local string rot_45r = "êïë 45 degrees right\n";
+    local string rot_90r = "êñë 90 degrees right\n";
+    local string nothing = "\nêóë Nothing         ";
 
     Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rot_90l, rot_45l, rot_45r, rot_90r, nothing);
 };
@@ -842,24 +841,24 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun = {
-    local string action  = "Sentry gun maintenance:       \n";
+    local string action  = "Sentry gun maintenance:\n\n";
     local string putammo, upgrade, repair;
-    local string rotate  = "êñë Rotate sentry gun         \n";
-    local string nothing = "\nêóë Nothing                   \n";
+    local string rotate  = "êñë Rotate     \n";
+    local string nothing = "\nêóë Nothing    ";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
             || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
-        putammo = "êìë Put ammo into sentry sun  \n";
+        putammo = "êìë Insert ammo\n";
     else
         putammo = "\n";
 
     if (self.building.weapon < 3 && self.ammo_cells >= 130)
-        upgrade = "êîë Upgrade sentry gun        \n";
+        upgrade = "êîë Upgrade    \n";
     else
         upgrade = "\n";
 
     if (self.building.health < self.building.max_health)
-        repair = "êïë Repair sentry gun         \n";
+        repair = "êïë Repair     \n";
     else
         repair = "\n";
 
@@ -938,20 +937,20 @@ void (float inp) Menu_Dispenser_Input = {
 };
 
 void () Menu_Dispenser = {
-    local string s_action  = "Use dispenser:                \n";
+    local string s_action  = "Use dispenser:\n\n";
     local string s_ammo, s_armor;
-    local string s_nothing = "\nêóë Nothing                   \n\n\n";
+    local string s_nothing = "\nêóë Nothing            \n\n";
 
     if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
             || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
             || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
             || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
-        s_ammo = "êìë Withdraw some ammo        \n";
+        s_ammo = "êìë Withdraw some ammo \n";
     else
         s_ammo = "\n";
 
     if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
-        s_armor = "êîë Withdraw some armor       \n";
+        s_armor = "êîë Withdraw some armor\n";
     else
         s_armor = "\n";
 
