@@ -2161,8 +2161,12 @@ void (float inp) W_ChangeWeapon = {
     self.last_weapon = self.current_weapon;
     self.current_weapon = self.next_weapon;
     self.weaponmode = self.next_weaponmode;
+
+    if (self.current_weapon != self.last_weapon
+                || self.weaponmode != self.last_weaponmode)
+        W_PrintWeaponMessage();
+
     W_SetCurrentAmmo();
-    W_PrintWeaponMessage();
     Status_Refresh(self);
 };
 
