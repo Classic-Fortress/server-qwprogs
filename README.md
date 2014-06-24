@@ -35,6 +35,7 @@ Classic Fortress v0.1 beta
 * Any non-valid impulse now closes the active menu.
 
 == Removed ===
+* Removed weapon messages for weapons without weapon modes.
 * Removed bioweapon (merged into medikit).
 * Removed grapple hook.
 * Removed birthday mode.
@@ -43,6 +44,7 @@ Classic Fortress v0.1 beta
 * Removed class help.
 
 === Fixed ===
+* Fixed the spamming weapon messages (e.g. Tranquiliser gun selected).
 * Fixed the sentry gun menu to not close prematurely.
 * Fixed broken ammo display.
 * Fixed endless intermission bug.
