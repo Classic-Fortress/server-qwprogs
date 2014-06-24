@@ -1944,17 +1944,13 @@ void () W_PrintWeaponMessage = {
             sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
         else if (cb_prematch_time > time)
             sprint(self, PRINT_MEDIUM,
-                   "Pipebomb mode not available in PreMatch\n");
+                   "Pipebomb mode not available in prematch\n");
         else if (self.weaponmode == GL_PIPEBOMB)
             sprint(self, PRINT_MEDIUM, "Pipebomb mode\n");
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE)
         sprint(self, PRINT_MEDIUM, "Sniper rifle ready\n");
     else if (self.current_weapon == WEAP_AUTO_RIFLE)
-        sprint(self, PRINT_MEDIUM, "rifle on fully auto\n");
-    else if (self.current_weapon == WEAP_TRANQ)
-        sprint(self, PRINT_MEDIUM, "Tranquiliser gun selected\n");
-    else if (self.current_weapon == WEAP_MEDIKIT)
-        sprint(self, PRINT_MEDIUM, "Medikit/Bioweapon readied\n");
+        sprint(self, PRINT_MEDIUM, "Rifle on fully auto\n");
 };
 
 void () W_WeaponSlot1 = {
