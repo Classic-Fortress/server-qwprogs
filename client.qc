@@ -1085,7 +1085,6 @@ void () PutClientInServer = {
     TeamFortress_SetSkin(self);
 
     stuffcmd(self, "v_idlescale 0\n");
-    stuffcmd(self, "fov 90\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
     W_SetCurrentAmmo();
@@ -1095,11 +1094,15 @@ void () PutClientInServer = {
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
-    self.current_fov = 90;
-    self.zoom_level = 90;
+    self.current_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
+    self.zoom_level = self.current_fov;
     self.zoom_mode = 0;
     self.zoom_in = 0;
     self.zoom_out = 0;
+
+    stuffcmd(self, "fov ");
+    stuffcmd(self, ftos(self.current_fov));
+    stuffcmd(self, "\n");
 
     self.deadflag = 0;
     self.pausetime = 0;

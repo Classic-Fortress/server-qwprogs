@@ -34,7 +34,7 @@ void (float zoom_to) TF_zoom = {
 
     default_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
     default_sensitivity = stof(infokey(self, "ds"));
-    if (zoom_to != self.current_fov && self.current_fov >= 90) {
+    if (zoom_to != self.current_fov && self.current_fov >= default_fov) {
         if (stof(infokey(self, "df")) == 0)
             sprint(self, PRINT_HIGH, "Warning! No default fov detected. Use setinfo df <fov> to set default fov. Using default fov 90.\n");
 
