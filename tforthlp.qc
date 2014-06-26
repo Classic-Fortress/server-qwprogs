@@ -15,6 +15,7 @@ void () TeamFortress_MOTD = {
 
     if (self.motd == 5) {
         stuffcmd(self, "is_aliased\n");
+        sprint(self, PRINT_HIGH, "\nClassic Fortress ", VER, "\n\n");
 
         st1 = infokey(world, "motd1");
         if (st1 != string_null) {
@@ -26,7 +27,8 @@ void () TeamFortress_MOTD = {
             st1 = "Welcome to Classic Fortress\nby hifi & Empezar\n==================================\ngithub.com/classic-fortress";
         }
 
-        sprint(self, PRINT_HIGH, strcat(strcat("\n", st1), "\n\n"));
+        sprint(self, PRINT_HIGH, st1);
+        sprint(self, PRINT_HIGH, "\n\n\n");
         Status_Menu(self, MOTD_Input, st1);
     }
 

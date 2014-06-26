@@ -153,9 +153,6 @@ void () DecodeLevelParms = {
         ent = find(world, classname, "info_tfdetect");
         if (ent != world) {
 
-            if (teamplay == 0)
-                cvar_set("teamplay", "1?ClassicFortress");
-
             ParseTFDetect(ent);
 
             if ((number_of_teams <= 0) || (number_of_teams >= 5))
@@ -167,8 +164,6 @@ void () DecodeLevelParms = {
             if ((ent != world) || (CTF_Map == 1)) {
 
                 CTF_Map = TRUE;
-                if (teamplay == 0)
-                    cvar_set("teamplay", "1?ClassicFortress");
 
                 ent = spawn();
                 ent.nextthink = time + 30;

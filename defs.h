@@ -2,6 +2,14 @@
 //			VARS NOT REFERENCED BY C CODE
 //============================================================================
 
+#ifndef VER
+#define VER "unknown"
+#endif
+
+#ifndef REV
+#define REV "unk"
+#endif
+
 //
 // constants
 //
