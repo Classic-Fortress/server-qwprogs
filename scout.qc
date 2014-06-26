@@ -64,17 +64,17 @@ void () CaltropScatterThink = {
             return;
         }
     }
+    self.heat = self.heat + 1;
+    if (self.heat > 10) {
+        remove(self);
+        return;
+    }
     traceline(self.movedir, self.origin, 1, self);
     if (trace_fraction == 1) {
         self.movedir = self.origin;
         return;
     }
     self.velocity = self.velocity * -1;
-    self.heat = self.heat + 1;
-    if (self.heat > 10) {
-        remove(self);
-        return;
-    }
 };
 
 void () ScatterCaltrops = {
