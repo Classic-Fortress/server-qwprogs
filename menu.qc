@@ -134,12 +134,6 @@ void () Menu_Team = {
             return;
     }
 
-    // show maps own team menu text if present
-    if (team_menu_string != string_null) {
-        Status_Menu(self, Menu_Team_Input, team_menu_string);
-        return;
-    }
-
     t2 = "";
     t3 = "";
     t4 = "";

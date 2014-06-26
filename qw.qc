@@ -235,8 +235,6 @@ float coop;
 .string netname_team_drop;      // same as above, prepended by AP netname and bprinted
 .string netname_non_team_drop;  // same as above, prepended by AP netname and bprinted
 
-string team_menu_string;
-
 .float all_active;
 
 .float item_list;               // Used to keep track of which goalitems are 

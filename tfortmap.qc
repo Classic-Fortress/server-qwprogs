@@ -466,9 +466,6 @@ void () item_tfgoal = {
 };
 
 void (entity AD) ParseTFDetect = {
-    if (AD.team_broadcast != string_null) {
-        team_menu_string = AD.team_broadcast;
-    }
     localcmd(AD.message);
     cvar_set("sv_maxspeed", "500");
     team1lives = AD.ammo_shells;
