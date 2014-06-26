@@ -2157,10 +2157,12 @@ void (float inp) W_ChangeWeapon = {
         return;
     }
 
-    self.last_weaponmode = self.weaponmode;
-    self.last_weapon = self.current_weapon;
-    self.current_weapon = self.next_weapon;
-    self.weaponmode = self.next_weaponmode;
+    if (inp != 5) {
+        self.last_weaponmode = self.weaponmode;
+        self.last_weapon = self.current_weapon;
+        self.current_weapon = self.next_weapon;
+        self.weaponmode = self.next_weaponmode;
+    }
 
     if (self.current_weapon != self.last_weapon
                 || self.weaponmode != self.last_weaponmode)
