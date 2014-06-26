@@ -2491,7 +2491,9 @@ void () W_WeaponFrame = {
                 || self.is_feigning != 0)
         return;
 
-    default_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
+    default_fov = stof(infokey(self, "df"));
+    if (self.zoom_level == 0)
+        self.zoom_level = default_fov;
 
     // zoom in/out with zoomkey enabled
     if (self.zoom_level > 0 && self.zoom_level != self.current_fov && zoomkey == 1) {
