@@ -42,6 +42,7 @@ entity(float ino) Finditem;
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer;
 
 void () CTF_FlagCheck;
+void (entity pl) TF_zoom_reset;
 
 string nextmap;
 
@@ -775,6 +776,8 @@ void () ClientKill = {
     if (self.playerclass == PC_UNDEFINED)
         return;
 
+    TF_zoom_reset(self);
+
     // players can't suicide again for 10 seconds
     self.suicide_time = time + 5 + random() * 5;
 
@@ -1089,15 +1092,7 @@ void () PutClientInServer = {
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
-    self.current_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
-    self.zoom_level = self.current_fov;
-    self.zoom_mode = 0;
-    self.zoom_in = 0;
-    self.zoom_out = 0;
-
-    stuffcmd(self, "fov ");
-    stuffcmd(self, ftos(self.current_fov));
-    stuffcmd(self, "\n");
+    TF_zoom_reset(self);
 
     self.deadflag = 0;
     self.pausetime = 0;
@@ -1914,6 +1909,8 @@ void (entity targ, entity attacker) ClientObituary = {
     local string deathstring2;
     deathstring = "";
     deathstring2 = "";
+
+    TF_zoom_reset(targ);
 
     rnum = random();
     if ((cb_prematch_time + 3) > time)

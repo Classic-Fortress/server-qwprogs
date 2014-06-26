@@ -28,19 +28,14 @@ void () TeamFortress_SniperWeapon = {
 };
 
 void (float zoom_to) TF_zoom = {
-    local float default_sensitivity;
     local float default_fov;
-    local float sensitivity;
+    local float default_sensitivity;
 
-    default_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
+    default_fov = stof(infokey(self, "df"));
     default_sensitivity = stof(infokey(self, "ds"));
-    if (zoom_to != self.current_fov && self.current_fov >= default_fov) {
-        if (stof(infokey(self, "df")) == 0)
-            sprint(self, PRINT_HIGH, "Warning! No default fov detected. Use setinfo df <fov> to set default fov. Using default fov 90.\n");
 
-        if (default_sensitivity == 0 && self.current_fov >= default_fov)
-            sprint(self, PRINT_HIGH, "Warning! No default sensitivity detected. Use setinfo ds <sensitivity> to set default sensitivity. Omitting sensitivity scaling.\n");
-    }
+    if (default_fov == 0)
+        return;
 
     if (zoom_to != self.current_fov) {
         self.current_fov = zoom_to;
@@ -49,11 +44,36 @@ void (float zoom_to) TF_zoom = {
         stuffcmd(self, "\n");
 
         if (default_sensitivity > 0) {
-            sensitivity = default_sensitivity * zoom_to / default_fov;
             stuffcmd(self, "sensitivity ");
-            stuffcmd(self, ftos(sensitivity));
+            stuffcmd(self, ftos(default_sensitivity * zoom_to / default_fov));
             stuffcmd(self, "\n");
         }
+    }
+};
+
+void (entity pl) TF_zoom_reset = {
+    local float default_sensitivity;
+    local float default_fov;
+
+    default_fov = stof(infokey(pl, "df"));
+    default_sensitivity = stof(infokey(pl, "ds"));
+
+    pl.current_fov = default_fov;
+    pl.zoom_level = default_fov;
+    pl.zoom_mode = 0;
+    pl.zoom_in = 0;
+    pl.zoom_out = 0;
+
+    if (default_fov > 0) {
+        stuffcmd(pl, "fov ");
+        stuffcmd(pl, ftos(pl.current_fov));
+        stuffcmd(pl, "\n");
+    }
+
+    if (default_sensitivity > 0) {
+        stuffcmd(pl, "sensitivity ");
+        stuffcmd(pl, ftos(default_sensitivity));
+        stuffcmd(pl, "\n");
     }
 };
 
@@ -122,7 +142,12 @@ void () TeamFortress_ZoomToggle = {
 
     zoom4x = (stof(infokey(self, "z4x")) > 0) ? stof(infokey(self, "z4x")) : 20;
     zoom2x = (stof(infokey(self, "z2x")) > 0) ? stof(infokey(self, "z2x")) : 40;
-    default_fov = (stof(infokey(self, "df")) > 0) ? stof(infokey(self, "df")) : 90;
+    default_fov = stof(infokey(self, "df"));
+
+    if (default_fov == 0) {
+        sprint(self, PRINT_HIGH, "Use \"setinfo df <fov>\" to set default fov to use sniper zoom. Use \"setinfo ds <sensitivity>\" to set default sensitivity for sensitivity scaling.\n");
+        return;
+    }
 
     if (    (self.zoom_mode == 0 && reversezoom == 0)
          || (self.zoom_mode == 2 && reversezoom == 1)) {
