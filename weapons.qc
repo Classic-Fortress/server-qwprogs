@@ -1066,130 +1066,6 @@ void () W_FireLightning = {
     LightningDamage(self.origin, trace_endpos + v_forward * 4, self, 30);
 };
 
-float (float tno) num_team_pipebombs = {
-    if (tno == 1)
-        return (num_team_pipebombs_1);
-    else if (tno == 2)
-        return (num_team_pipebombs_2);
-    else if (tno == 3)
-        return (num_team_pipebombs_3);
-    else if (tno == 4)
-        return (num_team_pipebombs_4);
-
-    return (0);
-};
-
-float (float tno) num_team_flares = {
-    if (tno == 1)
-        return (num_team_flares_1);
-    else if (tno == 2)
-        return (num_team_flares_2);
-    else if (tno == 3)
-        return (num_team_flares_3);
-    else if (tno == 4)
-        return (num_team_flares_4);
-
-    return (0);
-};
-
-void (float tno) RemoveOldFlare = {
-    local entity old;
-    local float index;
-
-    index = num_team_flares(tno);
-    index = index - 9 / number_of_teams;
-
-    old = find(world, mdl, "flare");
-    while (index > 0) {
-        if (old == world) {
-            num_world_flares = 0;
-            num_team_flares_1 = 0;
-            num_team_flares_2 = 0;
-            num_team_flares_3 = 0;
-            num_team_flares_4 = 0;
-            return;
-        }
-        if ((old.weapon == tno) || (tno == 0)) {
-            old.think = RemoveFlare;
-            old.nextthink = time + 0.1;
-            index = index - 1;
-        }
-        old = find(old, mdl, "flare");
-    }
-};
-
-void (float tno) ExplodeOldPipebomb = {
-    local entity old;
-    local float index;
-
-    if (tno != 0) {
-        index = num_team_pipebombs(tno);
-        index = index - 15 / number_of_teams;
-    } else
-        index = num_world_pipebombs - 15;
-
-    old = find(world, classname, "pipebomb");
-    while (index > 0) {
-        if (old == world) {
-            num_world_pipebombs = 0;
-            num_team_pipebombs_1 = 0;
-            num_team_pipebombs_2 = 0;
-            num_team_pipebombs_3 = 0;
-            num_team_pipebombs_4 = 0;
-            return;
-        }
-        if ((old.owner.team_no == tno) || (tno == 0)) {
-            old.nextthink = time + 0.5;
-            index = index - 1;
-        }
-        old = find(old, classname, "pipebomb");
-    }
-};
-
-void (float tno) increment_team_pipebombs = {
-    if (tno == 1)
-        num_team_pipebombs_1 = num_team_pipebombs_1 + 1;
-    else if (tno == 2)
-        num_team_pipebombs_2 = num_team_pipebombs_2 + 1;
-    else if (tno == 3)
-        num_team_pipebombs_3 = num_team_pipebombs_3 + 1;
-    else if (tno == 4)
-        num_team_pipebombs_4 = num_team_pipebombs_4 + 1;
-};
-
-void (float tno) increment_team_flares = {
-    if (tno == 1)
-        num_team_flares_1 = num_team_flares_1 + 1;
-    else if (tno == 2)
-        num_team_flares_2 = num_team_flares_2 + 1;
-    else if (tno == 3)
-        num_team_flares_3 = num_team_flares_3 + 1;
-    else if (tno == 4)
-        num_team_flares_4 = num_team_flares_4 + 1;
-};
-
-void (float tno) decrement_team_pipebombs = {
-    if (tno == 1)
-        num_team_pipebombs_1 = num_team_pipebombs_1 - 1;
-    else if (tno == 2)
-        num_team_pipebombs_2 = num_team_pipebombs_2 - 1;
-    else if (tno == 3)
-        num_team_pipebombs_3 = num_team_pipebombs_3 - 1;
-    else if (tno == 4)
-        num_team_pipebombs_4 = num_team_pipebombs_4 - 1;
-};
-
-void (float tno) decrement_team_flares = {
-    if (tno == 1)
-        num_team_flares_1 = num_team_flares_1 - 1;
-    else if (tno == 2)
-        num_team_flares_2 = num_team_flares_2 - 1;
-    else if (tno == 3)
-        num_team_flares_3 = num_team_flares_3 - 1;
-    else if (tno == 4)
-        num_team_flares_4 = num_team_flares_4 - 1;
-};
-
 void () GrenadeExplode = {
     local entity te;
 
@@ -1198,8 +1074,6 @@ void () GrenadeExplode = {
     self.voided = 1;
 
     if (self.classname == "pipebomb") {
-        num_world_pipebombs = num_world_pipebombs - 1;
-        decrement_team_pipebombs(self.team_no);
         if (!(self.flags & 512))
             self.weapon = 40;
     }
@@ -1244,6 +1118,29 @@ void () GrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
+void () ExplodeOldestPipebomb = {
+    local entity pipe;
+    local entity oldest;
+    local float numpipes;
+
+    numpipes = 0;
+    oldest = world;
+
+    pipe = find(world, classname, "pipebomb");
+    while (pipe != world) {
+        if (pipe.owner == self) {
+            numpipes = numpipes + 1;
+            if (oldest == world || oldest.nextthink > pipe.nextthink)
+                oldest = pipe;
+        }
+        pipe = find(pipe, classname, "pipebomb");
+    }
+
+    if (numpipes >= 6 && oldest != world) {
+        oldest.nextthink = time + 0.5;
+    }
+};
+
 void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
     self.currentammo = self.ammo_rockets;
@@ -1261,17 +1158,7 @@ void () W_FireGrenade = {
         newmis.touch = GrenadeTouch;
         newmis.nextthink = time + 2.5;
     } else {
-        if (self.team_no != 0) {
-            increment_team_pipebombs(self.team_no);
-            if (num_team_pipebombs(self.team_no) > (15 / number_of_teams)) {
-                ExplodeOldPipebomb(self.team_no);
-            }
-        } else {
-            num_world_pipebombs = num_world_pipebombs + 1;
-            if (num_world_pipebombs > 15) {
-                ExplodeOldPipebomb(0);
-            }
-        }
+        ExplodeOldestPipebomb();
         newmis.classname = "pipebomb";
         newmis.skin = 2;
         newmis.touch = PipebombTouch;

@@ -3,11 +3,6 @@ void () TeamFortress_CheckClassStats;
 void (entity Player, float Armorclass) TeamFortress_DescribeArmor;
 void () TeamFortress_AmmoboxTouch;
 
-float (float tno) num_team_ammoboxes;
-void (float tno) RemoveOldAmmobox;
-void (float tno) increment_team_ammoboxes;
-void (float tno) decrement_team_ammoboxes;
-
 void () TeamFortress_ExplodePerson;
 void () TeamFortress_Regenerate;
 void () TeamFortress_CheckforCheats;
@@ -2063,17 +2058,6 @@ void (float type) TeamFortress_DropAmmo = {
         self.ammo_cells = self.ammo_cells - ammo;
     }
     W_SetCurrentAmmo();
-    if (self.team_no != 0) {
-        increment_team_ammoboxes(self.team_no);
-        if (num_team_ammoboxes(self.team_no) > (20 / number_of_teams)) {
-            RemoveOldAmmobox(self.team_no);
-        }
-    } else {
-        num_world_ammoboxes = num_world_ammoboxes + 1;
-        if (num_world_ammoboxes > 20) {
-            RemoveOldAmmobox(0);
-        }
-    }
     newmis = spawn();
     newmis.aflag = ammo;
     newmis.weapon = type;
@@ -2124,8 +2108,6 @@ void () TeamFortress_AmmoboxTouch = {
     if (other.health <= 0)
         return;
 
-    num_world_ammoboxes = num_world_ammoboxes - 1;
-    decrement_team_ammoboxes(self.team_no);
     if (self.weapon == 0) {
         sprint(other, PRINT_HIGH, "You got ");
         if (self.ammo_shells > 0) {
@@ -2182,65 +2164,6 @@ void () TeamFortress_AmmoboxTouch = {
     dremove(self);
     self = other;
     W_SetCurrentAmmo();
-};
-
-float (float tno) num_team_ammoboxes = {
-    if (tno == 1)
-        return (num_team_ammoboxes_1);
-    else if (tno == 2)
-        return (num_team_ammoboxes_2);
-    else if (tno == 3)
-        return (num_team_ammoboxes_3);
-    else if (tno == 4)
-        return (num_team_ammoboxes_4);
-
-    return (0);
-};
-
-void (float tno) RemoveOldAmmobox = {
-    local float index;
-
-    if (tno != 0) {
-        index = num_team_ammoboxes(tno);
-        index = index - (20 / number_of_teams);
-    } else
-        index = num_world_ammoboxes - 20;
-
-    old = find(world, classname, "ammobox");
-    while (index > 0) {
-        if (old == world)
-            return;
-        if ((old.team_no == tno) || (tno == 0)) {
-            old.think = SUB_Remove;
-            old.nextthink = time + 0.1;
-            index = index - 1;
-            num_world_ammoboxes = num_world_ammoboxes - 1;
-            decrement_team_ammoboxes(old.team_no);
-        }
-        old = find(old, classname, "ammobox");
-    }
-};
-
-void (float tno) increment_team_ammoboxes = {
-    if (tno == 1)
-        num_team_ammoboxes_1 = num_team_ammoboxes_1 + 1;
-    else if (tno == 2)
-        num_team_ammoboxes_2 = num_team_ammoboxes_2 + 1;
-    else if (tno == 3)
-        num_team_ammoboxes_3 = num_team_ammoboxes_3 + 1;
-    else if (tno == 4)
-        num_team_ammoboxes_4 = num_team_ammoboxes_4 + 1;
-};
-
-void (float tno) decrement_team_ammoboxes = {
-    if (tno == 1)
-        num_team_ammoboxes_1 = num_team_ammoboxes_1 - 1;
-    else if (tno == 2)
-        num_team_ammoboxes_2 = num_team_ammoboxes_2 - 1;
-    else if (tno == 3)
-        num_team_ammoboxes_3 = num_team_ammoboxes_3 - 1;
-    else if (tno == 4)
-        num_team_ammoboxes_4 = num_team_ammoboxes_4 - 1;
 };
 
 void () TeamFortress_AssaultWeapon = {

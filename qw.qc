@@ -294,29 +294,6 @@ float num_world_flames;
 .float numflames;               // number of flames on entity
 .string flame_id;               // has to be string so that the C function find() can be used
 
-// pipebomb limits
-// when the limit is exceeded, older pipebombs explode
-float num_world_pipebombs;
-float num_team_pipebombs_1;
-float num_team_pipebombs_2;
-float num_team_pipebombs_3;
-float num_team_pipebombs_4;
-
-// flare limits
-float num_world_flares;
-float num_team_flares_1;
-float num_team_flares_2;
-float num_team_flares_3;
-float num_team_flares_4;
-
-// ammobox limits
-// when the limit is exceeded, older ammoboxes disappear
-float num_world_ammoboxes;
-float num_team_ammoboxes_1;
-float num_team_ammoboxes_2;
-float num_team_ammoboxes_3;
-float num_team_ammoboxes_4;
-
 // Spy variables
 .float undercover_team;
 .float undercover_skin;

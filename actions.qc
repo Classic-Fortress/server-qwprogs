@@ -43,17 +43,6 @@ void () TeamFortress_Discard = {
     }
     W_SetCurrentAmmo();
     sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
-    if (self.team_no != 0) {
-        increment_team_ammoboxes(self.team_no);
-        if (num_team_ammoboxes(self.team_no) > (20 / number_of_teams)) {
-            RemoveOldAmmobox(self.team_no);
-        }
-    } else {
-        num_world_ammoboxes = num_world_ammoboxes + 1;
-        if (num_world_ammoboxes > 20) {
-            RemoveOldAmmobox(0);
-        }
-    }
     newmis.enemy = self;
     newmis.health = time;
     newmis.weapon = 0;

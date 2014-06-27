@@ -1,4 +1,4 @@
-entity stemp, otemp, s, old;
+entity stemp, otemp, s;
 
 void () TeamFortress_DetpackExplode;
 

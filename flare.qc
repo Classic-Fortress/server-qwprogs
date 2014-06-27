@@ -60,18 +60,6 @@ void () FlareGrenadeThink = {
 };
 
 void () FlareGrenadeExplode = {
-    if (self.weapon != 0) {
-
-        increment_team_flares(self.weapon);
-        if (num_team_flares(self.weapon) > (9 / number_of_teams))
-            RemoveOldFlare(self.weapon);
-
-    } else {
-
-        num_world_flares = num_world_flares + 1;
-        if (num_world_flares > 9)
-            RemoveOldFlare(0);
-    }
     self.skin = 1;
     self.health = time + 40;
     self.nextthink = time + 0.05 + random() * 0.1;
@@ -81,6 +69,4 @@ void () FlareGrenadeExplode = {
 void () RemoveFlare = {
     self.effects = self.effects - (self.effects & EF_BRIGHTLIGHT);
     dremove(self);
-    num_world_flares = num_world_flares - 1;
-    decrement_team_flares(self.weapon);
 };
