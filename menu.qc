@@ -820,7 +820,8 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
             self.ammo_cells = self.ammo_cells - metalcost;
             self.building.health = self.building.health + metalcost * 5;
         } else if (inp == 4) {
-            Menu_EngineerFix_SentryGun_Rotate();
+            if (self.building.real_owner == self)
+                Menu_EngineerFix_SentryGun_Rotate();
         }
     }
 
@@ -836,8 +837,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
 
 void () Menu_EngineerFix_SentryGun = {
     local string action  = "Sentry gun maintenance:\n\n";
-    local string putammo, upgrade, repair;
-    local string rotate  = "–‘ Rotate     \n";
+    local string putammo, upgrade, repair, rotate;
     local string nothing = "\n—‘ Nothing    ";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
@@ -855,6 +855,11 @@ void () Menu_EngineerFix_SentryGun = {
         repair = "•‘ Repair     \n";
     else
         repair = "\n";
+
+    if (self.building.real_owner == self)
+        rotate  = "–‘ Rotate     \n";
+    else
+        rotate = "\n";
 
     Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, putammo, upgrade, repair, rotate, nothing);
 };
