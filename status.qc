@@ -113,7 +113,10 @@ void (entity pl) RefreshStatusBar = {
         pl.StatusStringLines = 0;
     }
 
-    height = floor(stof(infokey(pl, "sb"))) - pl.StatusStringLines - 4;
+    height = floor(stof(infokey(pl, "sb")));
+    if (height > 300)
+        height = 300;
+    height = height - pl.StatusStringLines - 4;
 
     // no sbar can be displayed
     if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
