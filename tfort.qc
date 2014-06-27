@@ -586,7 +586,7 @@ void () TeamFortress_PrimeGrenade = {
     tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
-    tGrenade.classname = "timer";
+    tGrenade.classname = "primetimer";
     tGrenade.impulse = self.impulse;
     tGrenade.nextthink = time + 0.8;
 
