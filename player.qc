@@ -499,6 +499,7 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
             self.last_weapon = self.current_weapon;
             self.last_weaponmode = self.weaponmode;
             self.current_weapon = W_BestWeapon();
+            self.current_weaponslot = W_GetSlot();
             W_SetCurrentAmmo();
             W_PrintWeaponMessage();
             return;

@@ -87,6 +87,7 @@ void () TeamFortress_HelpMap;
 void () BioInfection_Decay;
 void () BioInfection_MonsterDecay;
 
+float () W_GetSlot;
 void () W_FireFlame;
 void () W_FireIncendiaryCannon;
 void () W_FireTranq;
@@ -1028,6 +1029,7 @@ void () W_FireLightning = {
         self.last_weapon = self.current_weapon;
         self.last_weaponmode = self.weaponmode;
         self.current_weapon = W_BestWeapon();
+        self.current_weaponslot = W_GetSlot();
         W_SetCurrentAmmo();
         W_PrintWeaponMessage();
         return;
@@ -1236,6 +1238,7 @@ void (float ox) W_FireSpikes = {
         self.last_weapon = self.current_weapon;
         self.last_weaponmode = self.weaponmode;
         self.current_weapon = W_BestWeapon();
+        self.current_weaponslot = W_GetSlot();
         W_SetCurrentAmmo();
         W_PrintWeaponMessage();
         return;
@@ -1548,6 +1551,7 @@ float () W_CheckNoAmmo = {
         return (1);
 
     self.current_weapon = W_BestWeapon();
+    self.current_weaponslot = W_GetSlot();
     W_SetCurrentAmmo();
     W_PrintWeaponMessage();
     return (0);
@@ -1838,6 +1842,38 @@ void () W_PrintWeaponMessage = {
         sprint(self, PRINT_MEDIUM, "Sniper rifle ready\n");
     else if (self.current_weapon == WEAP_AUTO_RIFLE)
         sprint(self, PRINT_MEDIUM, "Rifle on fully auto\n");
+};
+
+float () W_GetSlot = {
+    if (self.current_weapon == WEAP_ROCKET_LAUNCHER
+                || self.current_weapon == WEAP_SUPER_NAILGUN
+                || self.current_weapon == WEAP_SNIPER_RIFLE
+                || self.current_weapon == WEAP_FLAMETHROWER
+                || self.current_weapon == WEAP_TRANQ
+                || self.current_weapon == WEAP_LASER
+                || self.current_weapon == WEAP_ASSAULT_CANNON) {
+        return 1;
+    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN
+                || self.current_weapon == WEAP_AUTO_RIFLE
+                || self.current_weapon == WEAP_INCENDIARY) {
+        return 2;
+    } else if (self.current_weapon == WEAP_SHOTGUN) {
+        if (self.playerclass == PC_SCOUT)
+            return 2;
+        else
+            return 3;
+    } else if (self.current_weapon == WEAP_NAILGUN) {
+        if (self.playerclass == PC_SCOUT)
+            return 1;
+        else
+            return 3;
+    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
+        if (self.weaponmode == 0)
+            return 1;
+        else
+            return 2;
+    }
+    return 0;
 };
 
 float (float inp) W_AmmoSlot = {
