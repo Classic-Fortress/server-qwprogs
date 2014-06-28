@@ -1840,101 +1840,123 @@ void () W_PrintWeaponMessage = {
         sprint(self, PRINT_MEDIUM, "Rifle on fully auto\n");
 };
 
+float (float inp) W_AmmoSlot = {
+    self.noammo = 0;
+
+    if (inp == 1) {
+        if (self.playerclass == PC_SCOUT && self.ammo_nails < 2)
+            self.noammo = 1;
+        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_SOLDIER && self.ammo_rockets < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_MEDIC && self.ammo_nails < 4)
+            self.noammo = 1;
+        else if (self.playerclass == PC_HVYWEAP) {
+            if (self.ammo_shells < 1)
+                self.noammo = 1;
+            else if (self.ammo_cells < 7)
+                self.noammo = 2;
+        } else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
+            self.noammo = 1;
+    } else if (inp == 2) {
+        if (self.playerclass == PC_SCOUT && self.ammo_shells < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
+            self.noammo = 1;
+        else if ((self.playerclass == PC_SOLDIER
+                    || self.playerclass == PC_MEDIC
+                    || self.playerclass == PC_HVYWEAP
+                    || self.playerclass == PC_SPY
+                    || self.playerclass == PC_ENGINEER)
+                    && self.ammo_shells < 2)
+            self.noammo = 1;
+        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
+            self.noammo = 1;
+    } else if (inp == 3) {
+        if (self.playerclass == PC_SCOUT
+                    || self.playerclass == PC_ENGINEER)
+            return 0;
+        if ((self.playerclass == PC_SNIPER
+                    || self.playerclass == PC_SPY)
+                    && self.ammo_nails < 2)
+            self.noammo = 1;
+        else if ((self.playerclass == PC_SOLDIER
+                    || self.playerclass == PC_DEMOMAN
+                    || self.playerclass == PC_MEDIC
+                    || self.playerclass == PC_HVYWEAP
+                    || self.playerclass == PC_PYRO)
+                    && self.ammo_shells < 1)
+            self.noammo = 1;
+    } else if (inp == 4)
+        return 1;
+
+    if (self.noammo > 0)
+        return 0;
+    else
+        return 1;
+};
+
 void () W_WeaponSlot1 = {
     self.next_weaponmode = 0;
 
-    if (self.playerclass == PC_SCOUT) {
-        if (self.ammo_nails > 1)
-            self.next_weapon = WEAP_NAILGUN;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SNIPER) {
-        if (self.ammo_shells > 0)
-            self.next_weapon = WEAP_SNIPER_RIFLE;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SOLDIER) {
-        if (self.ammo_rockets > 0)
-            self.next_weapon = WEAP_ROCKET_LAUNCHER;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_DEMOMAN) {
-        if (self.ammo_rockets > 0) {
-            self.next_weapon = WEAP_GRENADE_LAUNCHER;
-            self.next_weaponmode = 0;
-        }
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_MEDIC) {
-        if (self.ammo_nails > 3)
-            self.next_weapon = WEAP_SUPER_NAILGUN;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_HVYWEAP) {
-        if (self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.ammo_cells < 7)
-            self.noammo = 2;
-        else
-            self.next_weapon = WEAP_ASSAULT_CANNON;
-    } else if (self.playerclass == PC_PYRO) {
-        if (self.ammo_cells > 0)
-            self.next_weapon = WEAP_FLAMETHROWER;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SPY) {
-        if (self.ammo_shells > 0)
-            self.next_weapon = WEAP_TRANQ;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_ENGINEER) {
+    if (! W_AmmoSlot(1))
+        return;
+
+    if (self.playerclass == PC_SCOUT)
+        self.next_weapon = WEAP_NAILGUN;
+    else if (self.playerclass == PC_SNIPER)
+        self.next_weapon = WEAP_SNIPER_RIFLE;
+    else if (self.playerclass == PC_SOLDIER)
+        self.next_weapon = WEAP_ROCKET_LAUNCHER;
+    else if (self.playerclass == PC_DEMOMAN)
+        self.next_weapon = WEAP_GRENADE_LAUNCHER;
+    else if (self.playerclass == PC_MEDIC)
+        self.next_weapon = WEAP_SUPER_NAILGUN;
+    else if (self.playerclass == PC_HVYWEAP)
+        self.next_weapon = WEAP_ASSAULT_CANNON;
+    else if (self.playerclass == PC_PYRO)
+        self.next_weapon = WEAP_FLAMETHROWER;
+    else if (self.playerclass == PC_SPY)
+        self.next_weapon = WEAP_TRANQ;
+    else if (self.playerclass == PC_ENGINEER)
         self.next_weapon = WEAP_LASER;
-        if (self.ammo_nails < 1) {
-            self.noammo = 1;
-        }
-    }
-    if (self.noammo == 0)
-        self.current_weaponslot = 1;
-}
+
+    self.current_weaponslot = 1;
+};
 
 void () W_WeaponSlot2 = {
     self.next_weaponmode = 0;
 
-    if (self.playerclass == PC_SCOUT) {
-        if (self.ammo_shells > 0)
-            self.next_weapon = WEAP_SHOTGUN;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SNIPER) {
-        if (self.ammo_shells > 0)
-            self.next_weapon = WEAP_AUTO_RIFLE;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SOLDIER
+    if (! W_AmmoSlot(2))
+        return;
+
+    if (self.playerclass == PC_SCOUT)
+        self.next_weapon = WEAP_SHOTGUN;
+    else if (self.playerclass == PC_SNIPER)
+        self.next_weapon = WEAP_AUTO_RIFLE;
+    else if (self.playerclass == PC_SOLDIER
                 || self.playerclass == PC_MEDIC
                 || self.playerclass == PC_HVYWEAP
                 || self.playerclass == PC_SPY
-                || self.playerclass == PC_ENGINEER) {
-        if (self.ammo_shells > 1)
-            self.next_weapon = WEAP_SUPER_SHOTGUN;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_DEMOMAN) {
-        if (self.ammo_rockets > 0) {
-            self.next_weapon = WEAP_GRENADE_LAUNCHER;
-            self.next_weaponmode = 1;
-        } else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_PYRO) {
-        if (self.ammo_rockets > 2)
-            self.next_weapon = WEAP_INCENDIARY;
-        else
-            self.noammo = 1;
-    }
+                || self.playerclass == PC_ENGINEER)
+        self.next_weapon = WEAP_SUPER_SHOTGUN;
+    else if (self.playerclass == PC_DEMOMAN) {
+        self.next_weapon = WEAP_GRENADE_LAUNCHER;
+        self.next_weaponmode = 1;
+    } else if (self.playerclass == PC_PYRO)
+        self.next_weapon = WEAP_INCENDIARY;
 
-    if (self.noammo == 0)
-        self.current_weaponslot = 2;
-}
+    self.current_weaponslot = 2;
+};
 
 void () W_WeaponSlot3 = {
     self.next_weaponmode = 0;
@@ -1943,26 +1965,23 @@ void () W_WeaponSlot3 = {
                 || self.playerclass == PC_ENGINEER) {
         sprint(self, PRINT_HIGH, "No weapon.\n");
         return;
-    } else if (self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SPY) {
-        if (self.ammo_nails > 1)
-            self.next_weapon = WEAP_NAILGUN;
-        else
-            self.noammo = 1;
-    } else if (self.playerclass == PC_SOLDIER
+    }
+
+    if (! W_AmmoSlot(3))
+        return;
+
+    if (self.playerclass == PC_SNIPER
+                || self.playerclass == PC_SPY)
+        self.next_weapon = WEAP_NAILGUN;
+    else if (self.playerclass == PC_SOLDIER
                 || self.playerclass == PC_DEMOMAN
                 || self.playerclass == PC_MEDIC
                 || self.playerclass == PC_HVYWEAP
-                || self.playerclass == PC_PYRO) {
-        if (self.ammo_shells > 0)
-            self.next_weapon = WEAP_SHOTGUN;
-        else
-            self.noammo = 1;
-    }
+                || self.playerclass == PC_PYRO)
+        self.next_weapon = WEAP_SHOTGUN;
 
-    if (self.noammo == 0)
-        self.current_weaponslot = 3;
-}
+    self.current_weaponslot = 3;
+};
 
 void () W_WeaponSlot4 = {
     self.next_weaponmode = 0;
@@ -1975,13 +1994,45 @@ void () W_WeaponSlot4 = {
         self.next_weapon = WEAP_AXE;
 
     self.current_weaponslot = 4;
-}
+};
+
+float () W_AmmoLast = {
+    if ((self.next_weapon == WEAP_SNIPER_RIFLE
+                || self.next_weapon == WEAP_AUTO_RIFLE
+                || self.next_weapon == WEAP_SHOTGUN
+                || self.next_weapon == WEAP_SUPER_SHOTGUN
+                || self.next_weapon == WEAP_ASSAULT_CANNON
+                || self.next_weapon == WEAP_TRANQ)
+                && self.ammo_shells < 1)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_SUPER_SHOTGUN && self.ammo_shells < 2)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_NAILGUN && self.ammo_nails < 2)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_SUPER_NAILGUN && self.ammo_nails < 4)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_LASER && self.ammo_nails < 1)
+        self.noammo = 1;
+    else if ((self.next_weapon == WEAP_GRENADE_LAUNCHER
+                || self.next_weapon == WEAP_ROCKET_LAUNCHER)
+                && self.ammo_rockets < 1)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_FLAMETHROWER && self.ammo_cells < 1)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_INCENDIARY && self.ammo_rockets < 3)
+        self.noammo = 1;
+    else if (self.next_weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
+        self.noammo = 2;
+
+    if (self.noammo > 0)
+        return 0;
+    else
+        return 1;
+};
 
 void (float inp) W_ChangeWeapon = {
     if (self.tfstate & TFSTATE_RELOADING)
         return;
-
-    self.noammo = 0;
 
     if (inp == 1)
         W_WeaponSlot1();
@@ -2001,33 +2052,7 @@ void (float inp) W_ChangeWeapon = {
         else if (self.playerclass == PC_DEMOMAN)
             TeamFortress_DetpackMenu();
     } else if (inp == TF_WEAPLAST) {
-        if ((self.next_weapon == WEAP_SNIPER_RIFLE
-                    || self.next_weapon == WEAP_AUTO_RIFLE
-                    || self.next_weapon == WEAP_SHOTGUN
-                    || self.next_weapon == WEAP_SUPER_SHOTGUN
-                    || self.next_weapon == WEAP_ASSAULT_CANNON
-                    || self.next_weapon == WEAP_TRANQ)
-                    && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_SUPER_SHOTGUN && self.ammo_shells < 2)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_NAILGUN && self.ammo_nails < 2)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_SUPER_NAILGUN && self.ammo_nails < 4)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_LASER && self.ammo_nails < 1)
-            self.noammo = 1;
-        else if ((self.next_weapon == WEAP_GRENADE_LAUNCHER
-                    || self.next_weapon == WEAP_ROCKET_LAUNCHER)
-                    && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_FLAMETHROWER && self.ammo_cells < 1)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_INCENDIARY && self.ammo_rockets < 3)
-            self.noammo = 1;
-        else if (self.next_weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
-            self.noammo = 2;
-        if (self.noammo == 0) {
+        if (W_AmmoLast()) {
             self.next_weapon = self.last_weapon;
             self.next_weaponmode = self.last_weaponmode;
         }
@@ -2038,13 +2063,13 @@ void (float inp) W_ChangeWeapon = {
     if (self.noammo == 1) {
         sprint(self, PRINT_HIGH, "Not enough ammo.\n");
         return;
-    }
-    if (self.noammo == 2) {
+    } else if (self.noammo == 2) {
         sprint(self, PRINT_HIGH, "Not enough cells to power assault cannon.\n");
         return;
     }
 
-    if (self.current_weapon != self.next_weapon || self.weaponmode != self.next_weaponmode) {
+    if (self.current_weapon != self.next_weapon
+                || self.weaponmode != self.next_weaponmode) {
         self.last_weaponmode = self.weaponmode;
         self.last_weapon = self.current_weapon;
         self.current_weapon = self.next_weapon;
@@ -2060,42 +2085,43 @@ void (float inp) W_ChangeWeapon = {
 };
 
 void () CycleWeaponNext = {
+    local float slot, next;
+
     if (self.weaponmodel == string_null || self.current_weapon == 0)
         return;
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    if (self.current_weaponslot == 1)
-        W_ChangeWeapon(2);
-    else if (self.current_weaponslot == 2) {
-        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
-            W_ChangeWeapon(4);
-        else
-            W_ChangeWeapon(3);
-    } else if (self.current_weaponslot == 3)
-            W_ChangeWeapon(4);
-    else if (self.current_weaponslot == 4)
-            W_ChangeWeapon(1);
+    next = 0;
+    for (slot = 1; slot <= 4; slot++) {
+        next = (slot == 4) ? 1 : (slot + 1);
+        if (self.current_weaponslot == slot) {
+            while (! W_AmmoSlot(next))
+                next = (next == 4) ? 1 : (next + 1);
+            break;
+        }
+    }
+    W_ChangeWeapon(next);
 };
 
 void () CycleWeaponPrev = {
+    local float slot, next;
+
     if (self.weaponmodel == string_null || self.current_weapon == 0)
         return;
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    if (self.current_weaponslot == 1)
-            W_ChangeWeapon(4);
-    else if (self.current_weaponslot == 2)
-            W_ChangeWeapon(1);
-    else if (self.current_weaponslot == 3)
-            W_ChangeWeapon(2);
-    else if (self.current_weaponslot == 4) {
-        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
-            W_ChangeWeapon(2);
-        else
-            W_ChangeWeapon(3);
+    next = 0;
+    for (slot = 1; slot <= 4; slot++) {
+        next = (slot == 1) ? 4 : (slot - 1);
+        if (self.current_weaponslot == slot) {
+            while (! W_AmmoSlot(next))
+                next = (next == 1) ? 4 : (next - 1);
+            break;
+        }
     }
+    W_ChangeWeapon(next);
 };
 
 void () PreMatchImpulses;
