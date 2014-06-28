@@ -5,7 +5,7 @@ void () door_go_up;
 void () door_blocked = {
     if (other.classname == "detpack") {
 
-        sprint(other.owner, PRINT_HIGH, "Your detpack was squashed.\n");
+        sprint(other.owner, PRINT_HIGH, "Your detpack was squashed\n");
         if (other.weaponmode == 1) {
 
             TeamFortress_SetSpeed(other.enemy);

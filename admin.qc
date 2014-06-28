@@ -7,32 +7,32 @@ void () Admin_CountPlayers = {
 
     nump = TeamFortress_GetNoPlayers();
     st = ftos(nump);
-    sprint3(self, PRINT_HIGH, "Players In Game : ", st, "\n");
+    sprint3(self, PRINT_HIGH, "Players in game: ", st, "\n");
     if (number_of_teams > 0) {
         nump = TeamFortress_TeamGetNoPlayers(1);
         st = ftos(nump);
-        sprint3(self, PRINT_HIGH, "Players In Team1: ", st, "\n");
+        sprint3(self, PRINT_HIGH, "Players in blue team: ", st, "\n");
     }
     if (number_of_teams > 1) {
         nump = TeamFortress_TeamGetNoPlayers(2);
         st = ftos(nump);
-        sprint3(self, PRINT_HIGH, "Players In Team2: ", st, "\n");
+        sprint3(self, PRINT_HIGH, "Players in red team: ", st, "\n");
     }
     if (number_of_teams > 2) {
         nump = TeamFortress_TeamGetNoPlayers(3);
         st = ftos(nump);
-        sprint3(self, PRINT_HIGH, "Players In Team3: ", st, "\n");
+        sprint3(self, PRINT_HIGH, "Players in yellow team: ", st, "\n");
     }
     if (number_of_teams > 3) {
         nump = TeamFortress_TeamGetNoPlayers(4);
         st = ftos(nump);
-        sprint3(self, PRINT_HIGH, "Players In Team4: ", st, "\n");
+        sprint3(self, PRINT_HIGH, "Players in green team: ", st, "\n");
     }
 };
 
 void () Admin_ListIPs = {
     if (TeamFortress_GetNoPlayers() <= 1) {
-        sprint(self, PRINT_HIGH, "No other players in the game.\n");
+        sprint(self, PRINT_HIGH, "No other players in the game\n");
         self.admin_use = world;
         return;
     }
@@ -62,7 +62,7 @@ void () Admin_ListIPs = {
 
 void () Admin_CycleDeal = {
     if (TeamFortress_GetNoPlayers() <= 1) {
-        sprint(self, PRINT_HIGH, "No other players in the game.\n");
+        sprint(self, PRINT_HIGH, "No other players in the game\n");
         self.admin_use = world;
         self.admin_mode = 0;
         return;
@@ -97,9 +97,9 @@ void () Admin_CycleDeal = {
         sprint(self, PRINT_HIGH, self.admin_use.netname, " (",
                self.admin_use.ip, ")");
         if (self.admin_use.classname == "observer") {
-            sprint(self, PRINT_HIGH, " (SPECTATOR)");
+            sprint(self, PRINT_HIGH, " (spectator)");
         }
-        sprint(self, PRINT_HIGH, "\n   KICK/BAN/NEXT?\n");
+        sprint(self, PRINT_HIGH, "\n   kick/ban/next?\n");
     } else {
         self.admin_mode = 0;
         sprint(self, PRINT_HIGH, "End of player list\n");
@@ -128,10 +128,10 @@ void () CeaseFire_think = {
     if ((time > cb_ceasefire_time) && (self.weapon == 1) &&
         (cease_fire == 1)) {
         cease_fire = 0;
-        bprint(PRINT_HIGH, "RESUME FIRE\n");
+        bprint(PRINT_HIGH, "Resume fire\n");
         te = find(world, classname, "player");
         while (te) {
-            CenterPrint3(te, "RESUME FIRE\nCalled by: ",
+            CenterPrint3(te, "Resume fire\nCalled by: ",
                          self.owner.netname, "\n");
             te.immune_to_check = time + 10;
             te.tfstate = te.tfstate - (te.tfstate & 65536);
@@ -159,10 +159,10 @@ void () Admin_CeaseFire = {
 
     if (!cease_fire) {
         cease_fire = 1;
-        bprint(PRINT_HIGH, "CEASE FIRE\n");
+        bprint(PRINT_HIGH, "Cease fire\n");
         te = find(world, classname, "player");
         while (te) {
-            CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.netname,
+            CenterPrint3(te, "Cease fire\nCalled by: ", self.netname,
                          "\n");
             te.immune_to_check = time + 10;
             te.tfstate = te.tfstate | 65536;
@@ -180,10 +180,10 @@ void () Admin_CeaseFire = {
             dremove(te);
 
         cease_fire = 0;
-        bprint(PRINT_HIGH, "RESUME FIRE\n");
+        bprint(PRINT_HIGH, "Resume fire\n");
         te = find(world, classname, "player");
         while (te) {
-            CenterPrint3(te, "RESUME FIRE\nCalled by: ", self.netname,
+            CenterPrint3(te, "Resume fire\nCalled by: ", self.netname,
                          "\n");
             te.immune_to_check = time + 10;
             te.tfstate = te.tfstate - (te.tfstate & 65536);
@@ -199,13 +199,13 @@ void (entity p) CheckAutoKick = {
 
     if ((p.teamkills >= autokick_kills) && (autokick_kills != 0)) {
         bprint2(PRINT_HIGH, p.netname,
-                " was kicked for killing teammates.\n");
-        sprint(p, PRINT_HIGH, "You were kicked for killing teammates.\n");
+                " was kicked for killing teammates\n");
+        sprint(p, PRINT_HIGH, "You were kicked for killing teammates\n");
         KickCheater(p);
     } else if (autokick_kills != 0) {
         if (p.teamkills == (autokick_kills - 1)) {
             sprint(p, PRINT_HIGH,
-                   "Kill one more teammate, and you're outta here.\n");
+                   "Kill one more teammate, and you will get kicked out\n");
         }
         rnum = 0;
         te = find(world, classname, "ak_timer");

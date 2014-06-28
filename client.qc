@@ -275,11 +275,11 @@ void () DecodeLevelParms = {
 
                 }
                 cease_fire = 1;
-                bprint(PRINT_HIGH, "CEASE FIRE\n");
+                bprint(PRINT_HIGH, "Cease fire\n");
 
                 te = find(world, classname, "player");
                 while (te) {
-                    centerprint(te, "CEASE FIRE\n");
+                    centerprint(te, "Cease fire\n");
                     te.immune_to_check = time + 10;
                     te.tfstate = te.tfstate | TFSTATE_CANT_MOVE;
                     TeamFortress_SetSpeed(te);
@@ -519,7 +519,7 @@ void () GotoNextMap = {
 void () ExitIntermission = {
     dprint("Exiting intermission...\n");
     if (deathmatch) {
-        dprint("Exit Intermission in Deathmatch.\n");
+        dprint("Exit intermission in deathmatch\n");
         GotoNextMap();
         return;
     }
@@ -597,7 +597,7 @@ void () ExitIntermission = {
             return;
         }
     }
-    dprint("Exit Intermission.\n");
+    dprint("Exit intermission\n");
     GotoNextMap();
 };
 
@@ -613,7 +613,7 @@ void () IntermissionThink = {
     if ((!self.button0 && !self.button1) && !self.button2)
         return;
 
-    dprint("Intermission think.\n");
+    dprint("Intermission think\n");
     GotoNextMap();
 
     sl = infokey(world, "nmap");
@@ -1162,7 +1162,7 @@ void () PutClientInServer = {
         rj = 1;
 
     if (cease_fire) {
-        sprint(self, PRINT_HIGH, "\n\nCEASE FIRE MODE\n");
+        sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
@@ -1519,7 +1519,7 @@ void () PlayerPreThink = {
         self.is_undercover) {
         if (self.effects & (8 | 4)) {
             sprint(self, PRINT_MEDIUM,
-                   "The glowing removes your disguise.\n");
+                   "The glowing removes your disguise\n");
             Spy_RemoveDisguise(self);
         }
     }
@@ -1573,7 +1573,7 @@ void () CheckPowerups = {
                 if (self.invisible_finished < (time + 3)) {
                     if (self.invisible_time == 1) {
                         sprint(self, PRINT_HIGH,
-                               "Ring of Shadows magic is fading\n");
+                               "Ring of shadows magic is fading\n");
                         stuffcmd(self, "bf\n");
                         sound(self, 0, "items/inv2.wav", 1, 1);
                         self.invisible_time = time + 1;
@@ -1647,7 +1647,7 @@ void () CheckPowerups = {
         }
         if (self.super_damage_finished < (time + 3)) {
             if (self.super_time == 1) {
-                sprint(self, PRINT_HIGH, "Quad Damage is wearing off\n");
+                sprint(self, PRINT_HIGH, "Quad damage is wearing off\n");
                 stuffcmd(self, "bf\n");
                 sound(self, 0, "items/damage2.wav", 1, ATTN_NORM);
                 self.super_time = time + 1;
@@ -1691,7 +1691,7 @@ void () CheckPowerups = {
         if (self.radsuit_finished < (time + 3)) {
             if (self.rad_time == 1) {
                 sprint(self, PRINT_HIGH,
-                       "Air supply in Biosuit expiring\n");
+                       "Air supply in biosuit expiring\n");
                 stuffcmd(self, "bf\n");
                 sound(self, 0, "items/suit2.wav", 1, 1);
                 self.rad_time = time + 1;
@@ -1838,7 +1838,7 @@ void () ClientConnect = {
         if (!got_one) {
             if (game_locked && (cb_prematch_time < time)) {
                 sprint(self, PRINT_HIGH,
-                       "Closed Server. Clan Battle in progress.\n");
+                       "Closed server. Clan battle in progress.\n");
                 KickCheater(self);
                 return;
             }
@@ -1848,11 +1848,11 @@ void () ClientConnect = {
             stuffcmd(self, "setinfo tf_id ");
             stuffcmd(self, st);
             stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your Battle ID is ", st, "\n");
+            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
     if (cb_prematch_time > time)
-        sprint(self, PRINT_HIGH, "CURRENTLY IN PREMATCH TIME\n");
+        sprint(self, PRINT_HIGH, "Currently in prematch time\n");
 };
 
 void () ClientDisconnect = {
@@ -1937,7 +1937,7 @@ void (entity targ, entity attacker) ClientObituary = {
         }
         if (deathmsg == 37) {
             bprint(PRINT_MEDIUM, targ.netname,
-                   " shoots his teammate one too many times.\n");
+                   " shoots his teammate one too many times\n");
             return;
         }
         if ((attacker.classname == "info_tfgoal") ||
@@ -2023,13 +2023,13 @@ void (entity targ, entity attacker) ClientObituary = {
                     deathstring = " torches himself\n";
                 else if ((deathmsg == DMSG_LIGHTNING) &&
                          (targ.waterlevel > 1)) {
-                    bprint(PRINT_MEDIUM, " discharges into the water.\n");
+                    bprint(PRINT_MEDIUM, " discharges into the water\n");
                     return;
                 } else if (deathmsg == 38)
                     deathstring =
-                        " gets too friendly with his sentrygun.\n";
+                        " gets too friendly with his sentry gun\n";
                 else if (deathmsg == 39)
-                    deathstring = " dispenses with himself.\n";
+                    deathstring = " dispenses with himself\n";
 
                 bprint(PRINT_MEDIUM, deathstring);
                 return;

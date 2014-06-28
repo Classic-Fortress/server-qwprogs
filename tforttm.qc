@@ -116,41 +116,49 @@ void (entity p) SetTeamName = {
 float (float tno) TeamFortress_TeamSet = {
     local string st;
     local float tc;
+    local string team;
+
+    if (tno == 1)
+        team = "blue team";
+    else if (tno == 2)
+        team = "red team";
+    else if (tno == 3)
+        team = "yellow team";
+    else
+        team = "green team";
 
     if (teamplay < 1) {
         sprint(self, PRINT_HIGH,
-               "Teamplay is not On, so FortressTeams are inactive.\n");
+               "Teamplay is not on, so teams are inactive\n");
         return (0);
     }
     if ((tno > number_of_teams) && (number_of_teams != 0)) {
         sprint(self, PRINT_HIGH, "There can be only ");
         st = ftos(number_of_teams);
-        sprint(self, PRINT_HIGH, st, " teams on this map.\nTry again\n");
+        sprint(self, PRINT_HIGH, st, " teams on this map\n");
         return (0);
     }
     if (self.team_no == tno) {
-        sprint(self, PRINT_HIGH, "You're already in Team No ");
-        st = ftos(self.team_no);
-        sprint(self, PRINT_HIGH, st, ".\n");
+        sprint(self, PRINT_HIGH, "You're already in the ");
+        sprint(self, PRINT_HIGH, team, "\n");
         return (0);
     }
     tc = TeamFortress_TeamGetNoPlayers(tno);
     if (tc >= TeamFortress_TeamGetMaxPlayers(tno)) {
-        sprint(self, PRINT_HIGH, "That team is full. Pick another.\n");
+        sprint(self, PRINT_HIGH, "That team is full, pick another\n");
         return (0);
     }
     if (TeamFortress_TeamGetColor(tno) == 0) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
             sprint(self, PRINT_HIGH,
-                   "You can't start a new team with your color, since another ");
+                   "You cannot start a new team with your color, since another ");
             sprint(self, PRINT_HIGH,
                    "already using that color. Change your pants color, then try again.\n");
             return (0);
         }
-        bprint(PRINT_HIGH, self.netname, " has started Team No ");
-        st = ftos(tno);
-        bprint(PRINT_HIGH, st, ".\n");
+        bprint(PRINT_HIGH, self.netname, " has started the ");
+        bprint(PRINT_HIGH, team, "\n");
         self.immune_to_check = time + 10;
         if ((toggleflags & TFLAG_TEAMFRAGS) ||
             (toggleflags & TFLAG_FULLTEAMSCORE)) {
@@ -175,9 +183,8 @@ float (float tno) TeamFortress_TeamSet = {
     if (!self.deadflag) {
         ClientKill();
     }
-    bprint(PRINT_HIGH, self.netname, " has joined Team No ");
-    st = ftos(tno);
-    bprint(PRINT_HIGH, st, ".\n");
+    bprint(PRINT_HIGH, self.netname, " has joined the ");
+    bprint(PRINT_HIGH, team, "\n");
     stuffcmd(self, "color ");
     tc = TeamFortress_TeamGetColor(tno) - 1;
     st = ftos(tc);
@@ -231,9 +238,9 @@ void () TeamFortress_CheckTeamCheats = {
                 stuffcmd(self, st);
                 stuffcmd(self, "\n");
                 bprint2(PRINT_MEDIUM, self.netname,
-                        " has been kicked for changing color.\n");
+                        " has been kicked for changing color\n");
                 sprint(self, PRINT_HIGH,
-                       "You have been kicked for changing your pants color. Don't do it.\n");
+                       "You have been kicked for changing your pants color\n");
                 KickCheater(self);
                 return;
             }
@@ -245,9 +252,9 @@ void () TeamFortress_CheckTeamCheats = {
                 stuffcmd(self, st);
                 stuffcmd(self, "\n");
                 bprint2(PRINT_MEDIUM, self.netname,
-                        " has been kicked for changing color.\n");
+                        " has been kicked for changing color\n");
                 sprint(self, PRINT_HIGH,
-                       "You have been kicked for changing your pants color. Don't do it.\n");
+                       "You have been kicked for changing your pants color\n");
                 KickCheater(self);
                 return;
             }
@@ -259,9 +266,9 @@ void () TeamFortress_CheckTeamCheats = {
             if (st != sk) {
                 TeamFortress_SetSkin(self);
                 bprint2(PRINT_MEDIUM, self.netname,
-                        " has been kicked for changing skin.\n");
+                        " has been kicked for changing skin\n");
                 sprint(self, PRINT_HIGH,
-                       "You have been kicked for changing your skin. Don't do it.\n");
+                       "You have been kicked for changing your skin\n");
                 KickCheater(self);
             }
             if (tc == 8)
@@ -271,9 +278,9 @@ void () TeamFortress_CheckTeamCheats = {
         if (st != infokey(self, "team")) {
             SetTeamName(self);
             bprint2(PRINT_MEDIUM, self.netname,
-                    " has been kicked for changing team.\n");
+                    " has been kicked for changing team\n");
             sprint(self, PRINT_HIGH,
-                   "You have been kicked for changing your team. Don't do it.\n");
+                   "You have been kicked for changing your team\n");
             KickCheater(self);
             return;
         }
@@ -582,7 +589,7 @@ void (entity Player) TeamFortress_TeamShowMemberClasses = {
     }
     if (!found)
         sprint(Player, PRINT_HIGH,
-               "There are no other players on your team.\n");
+               "There are no other players on your team\n");
 };
 
 void () CalculateTeamEqualiser = {

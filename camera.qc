@@ -14,19 +14,19 @@ void () CamLock = {
             te = find(te, netname, self.netname);
         }
         if (self.enemy == world)
-            sprint2(self, PRINT_HIGH, te.netname, " not found.\n");
+            sprint2(self, PRINT_HIGH, te.netname, " not found\n");
     } else {
-        sprint(self, PRINT_HIGH, "Removed Lock\n");
+        sprint(self, PRINT_HIGH, "Removed lock\n");
         self.enemy = world;
     }
 };
 
 void () CamDistLock = {
     if (self.tfstate & 4096) {
-        sprint(self, PRINT_HIGH, "Distance Lock OFF.\n");
+        sprint(self, PRINT_HIGH, "Distance lock off\n");
         self.tfstate = self.tfstate - (self.tfstate & 4096);
     } else {
-        sprint(self, PRINT_HIGH, "Distance Lock ON.\n");
+        sprint(self, PRINT_HIGH, "Distance lock on\n");
         self.tfstate = self.tfstate | 4096;
         if (self.enemy) {
             self.camdist = vlen((self.enemy.origin - self.origin));
@@ -36,21 +36,21 @@ void () CamDistLock = {
 
 void () CamVecLock = {
     if (self.tfstate & 2048) {
-        sprint(self, PRINT_HIGH, "Vector Lock OFF.\n");
+        sprint(self, PRINT_HIGH, "Vector lock off\n");
         self.tfstate = self.tfstate - (self.tfstate & 2048);
     } else {
         if (self.tfstate & 32768) {
-            sprint(self, PRINT_HIGH, "Angle Lock OFF.\n");
+            sprint(self, PRINT_HIGH, "Angle lock off\n");
             self.tfstate = self.tfstate - (self.tfstate & 32768);
         }
         if (!(self.tfstate & 4096)) {
-            sprint(self, PRINT_HIGH, "Vector And Distance Lock ON.\n");
+            sprint(self, PRINT_HIGH, "Vector and distance lock on\n");
             self.tfstate = self.tfstate | 4096;
             if (self.enemy) {
                 self.camdist = vlen((self.enemy.origin - self.origin));
             }
         } else {
-            sprint(self, PRINT_HIGH, "Vector Lock ON.\n");
+            sprint(self, PRINT_HIGH, "Vector lock on\n");
         }
         self.tfstate = self.tfstate | 2048;
         if (self.enemy) {
@@ -65,21 +65,21 @@ void () CamAngleLock = {
     local vector enemyang;
 
     if (self.tfstate & 32768) {
-        sprint(self, PRINT_HIGH, "Angle Lock OFF.\n");
+        sprint(self, PRINT_HIGH, "Angle lock off\n");
         self.tfstate = self.tfstate - (self.tfstate & 32768);
     } else {
         if (self.tfstate & 2048) {
-            sprint(self, PRINT_HIGH, "Vector Lock OFF.\n");
+            sprint(self, PRINT_HIGH, "Vector lock off\n");
             self.tfstate = self.tfstate - (self.tfstate & 2048);
         }
         if (!(self.tfstate & 4096)) {
-            sprint(self, PRINT_HIGH, "Angle And Distance Lock ON.\n");
+            sprint(self, PRINT_HIGH, "Angle and distance lock on\n");
             self.tfstate = self.tfstate | 4096;
             if (self.enemy) {
                 self.camdist = vlen((self.enemy.origin - self.origin));
             }
         } else {
-            sprint(self, PRINT_HIGH, "Angle Lock ON.\n");
+            sprint(self, PRINT_HIGH, "Angle lock on\n");
         }
         self.tfstate = self.tfstate | 32768;
         if (self.enemy) {
@@ -97,26 +97,26 @@ void () CamRevAngleLock = {
     local vector enemyang;
 
     if (self.tfstate & 32) {
-        sprint(self, PRINT_HIGH, "Reverse Angle Lock OFF.\n");
+        sprint(self, PRINT_HIGH, "Reverse angle lock off\n");
         self.tfstate = self.tfstate - (self.tfstate & 32);
     } else {
         if (self.tfstate & 2048) {
-            sprint(self, PRINT_HIGH, "Vector Lock OFF.\n");
+            sprint(self, PRINT_HIGH, "Vector lock off\n");
             self.tfstate = self.tfstate - (self.tfstate & 2048);
         }
         if (self.tfstate & 32768) {
-            sprint(self, PRINT_HIGH, "Angle Lock OFF.\n");
+            sprint(self, PRINT_HIGH, "Angle lock off\n");
             self.tfstate = self.tfstate - (self.tfstate & 32768);
         }
         if (!(self.tfstate & 4096)) {
             sprint(self, PRINT_HIGH,
-                   "Reverse Angle And Distance Lock ON.\n");
+                   "Reverse angle and distance lock on\n");
             self.tfstate = self.tfstate | 4096;
             if (self.enemy) {
                 self.camdist = vlen((self.enemy.origin - self.origin));
             }
         } else {
-            sprint(self, PRINT_HIGH, "Reverse Angle Lock ON.\n");
+            sprint(self, PRINT_HIGH, "Reverse angle lock on\n");
         }
         self.tfstate = self.tfstate | 32;
         if (self.enemy) {
@@ -134,7 +134,7 @@ void () CamProjectileLock = {
     local entity te;
 
     if (self.tfstate & 512) {
-        sprint(self, PRINT_HIGH, "Projectile Lock OFF.\n");
+        sprint(self, PRINT_HIGH, "Projectile lock off\n");
         self.tfstate = self.tfstate - (self.tfstate & 512);
         live_camera = 0;
         te = find(world, classname, "player");
@@ -145,7 +145,7 @@ void () CamProjectileLock = {
             te = find(te, classname, "player");
         }
     } else {
-        sprint(self, PRINT_HIGH, "Projectile Lock ON.\n");
+        sprint(self, PRINT_HIGH, "Projectile lock on\n");
         self.tfstate = self.tfstate | 512;
         live_camera = 1;
     }
@@ -153,10 +153,10 @@ void () CamProjectileLock = {
 
 void () CamProjectileZoom = {
     if (self.tfstate & 256) {
-        sprint(self, PRINT_HIGH, "Projectile Zoom OFF.\n");
+        sprint(self, PRINT_HIGH, "Projectile zoom off\n");
         self.tfstate = self.tfstate - (self.tfstate & 256);
     } else {
-        sprint(self, PRINT_HIGH, "Projectile Zoom ON.\n");
+        sprint(self, PRINT_HIGH, "Projectile zoom on\n");
         self.tfstate = self.tfstate | 256;
     }
 };
@@ -180,7 +180,7 @@ void () CamProjectileLockOn = {
             }
             if (lockon) {
                 te.tfstate = te.tfstate - (te.tfstate & 512);
-                sprint(te, PRINT_HIGH, "Projectile Locked!\n");
+                sprint(te, PRINT_HIGH, "Projectile locked\n");
                 te.enemy = newmis;
                 newmis.enemy = te;
                 if (te.tfstate & 256) {
@@ -199,7 +199,7 @@ void () CamProjectileLockOn = {
 };
 
 void () CamProjectileLockOff = {
-    sprint(self.enemy, PRINT_HIGH, "Removed Lock\n");
+    sprint(self.enemy, PRINT_HIGH, "Removed lock\n");
     self.enemy.enemy = world;
 };
 
@@ -242,7 +242,7 @@ void () CamDrop = {
     }
     prevte.camera_list = cam;
     st = ftos(tf);
-    sprint3(self, PRINT_HIGH, "Camera ", st, " dropped.\n");
+    sprint3(self, PRINT_HIGH, "Camera ", st, " dropped\n");
 };
 
 void () fadetoblack = {

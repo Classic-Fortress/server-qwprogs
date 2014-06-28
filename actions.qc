@@ -264,15 +264,15 @@ void () TeamFortress_ReloadCurrentWeapon = {
     }
     if (self.current_weapon == 128) {
         if (self.ammo_shells == 0) {
-            sprint(self, PRINT_HIGH, "out of shells.\n");
+            sprint(self, PRINT_HIGH, "Out of shells\n");
             return;
         }
         if (self.reload_shotgun == 0) {
-            sprint(self, PRINT_HIGH, "clip full.\n");
+            sprint(self, PRINT_HIGH, "Clip full\n");
             return;
         }
         if ((8 - self.reload_shotgun) == self.ammo_shells) {
-            sprint(self, PRINT_HIGH, "all shells are in the clip.\n");
+            sprint(self, PRINT_HIGH, "All shells are in the clip\n");
             return;
         }
         if (self.reload_shotgun < self.ammo_shells) {
@@ -283,7 +283,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             if (self.ammo_shells < 8) {
                 self.reload_shotgun = 8 - self.ammo_shells;
             }
-            sprint(self, PRINT_HIGH, "reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading...\n");
             self.tfstate = self.tfstate | 2;
             tWeapon = spawn();
             tWeapon.owner = self;
@@ -293,20 +293,20 @@ void () TeamFortress_ReloadCurrentWeapon = {
             self.weaponmodel = "";
             self.weaponframe = 0;
         } else {
-            sprint(self, PRINT_HIGH, "not enough ammo to reload\n");
+            sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
     } else {
         if (self.current_weapon == 256) {
             if (self.ammo_shells == 0) {
-                sprint(self, PRINT_HIGH, "out of shells.\n");
+                sprint(self, PRINT_HIGH, "Out of shells\n");
                 return;
             }
             if (self.reload_super_shotgun == 0) {
-                sprint(self, PRINT_HIGH, "clip full.\n");
+                sprint(self, PRINT_HIGH, "Clip full\n");
                 return;
             }
             if ((16 - self.reload_super_shotgun) == self.ammo_shells) {
-                sprint(self, PRINT_HIGH, "all shells are in the clip.\n");
+                sprint(self, PRINT_HIGH, "All shells are in the clip\n");
                 return;
             }
             if (self.reload_super_shotgun < self.ammo_shells) {
@@ -317,7 +317,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                 if (self.ammo_shells < 16) {
                     self.reload_super_shotgun = 16 - self.ammo_shells;
                 }
-                sprint(self, PRINT_HIGH, "reloading...\n");
+                sprint(self, PRINT_HIGH, "Reloading...\n");
                 self.tfstate = self.tfstate | 2;
                 tWeapon = spawn();
                 tWeapon.owner = self;
@@ -327,22 +327,21 @@ void () TeamFortress_ReloadCurrentWeapon = {
                 self.weaponmodel = "";
                 self.weaponframe = 0;
             } else {
-                sprint(self, PRINT_HIGH, "not enough ammo to reload\n");
+                sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
             }
         } else {
             if (self.current_weapon == 2048) {
                 if (self.ammo_rockets == 0) {
-                    sprint(self, PRINT_HIGH, "out of grenades.\n");
+                    sprint(self, PRINT_HIGH, "Out of grenades\n");
                     return;
                 }
                 if (self.reload_grenade_launcher == 0) {
-                    sprint(self, PRINT_HIGH, "clip full.\n");
+                    sprint(self, PRINT_HIGH, "Clip full\n");
                     return;
                 }
                 if ((6 - self.reload_grenade_launcher) ==
                     self.ammo_rockets) {
-                    sprint(self, PRINT_HIGH,
-                           "all grenades are in the clip.\n");
+                    sprint(self, PRINT_HIGH, "All grenades are in the clip\n");
                     return;
                 }
                 if (self.reload_grenade_launcher < self.ammo_rockets) {
@@ -354,7 +353,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                         self.reload_grenade_launcher =
                             6 - self.ammo_rockets;
                     }
-                    sprint(self, PRINT_HIGH, "reloading...\n");
+                    sprint(self, PRINT_HIGH, "Reloading...\n");
                     self.tfstate = self.tfstate | 2;
                     tWeapon = spawn();
                     tWeapon.owner = self;
@@ -364,23 +363,21 @@ void () TeamFortress_ReloadCurrentWeapon = {
                     self.weaponmodel = "";
                     self.weaponframe = 0;
                 } else {
-                    sprint(self, PRINT_HIGH,
-                           "not enough ammo to reload\n");
+                    sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
                 }
             } else {
                 if (self.current_weapon == 8192) {
                     if (self.ammo_rockets == 0) {
-                        sprint(self, PRINT_HIGH, "out of rockets.\n");
+                        sprint(self, PRINT_HIGH, "Out of rockets\n");
                         return;
                     }
                     if (self.reload_rocket_launcher == 0) {
-                        sprint(self, PRINT_HIGH, "clip full.\n");
+                        sprint(self, PRINT_HIGH, "Clip full\n");
                         return;
                     }
                     if ((4 - self.reload_rocket_launcher) ==
                         self.ammo_rockets) {
-                        sprint(self, PRINT_HIGH,
-                               "all rockets are in the clip.\n");
+                        sprint(self, PRINT_HIGH, "All rockets are in the clip\n");
                         return;
                     }
                     if (self.reload_rocket_launcher < self.ammo_rockets) {
@@ -392,7 +389,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                             self.reload_rocket_launcher =
                                 4 - self.ammo_rockets;
                         }
-                        sprint(self, PRINT_HIGH, "reloading...\n");
+                        sprint(self, PRINT_HIGH, "Reloading...\n");
                         self.tfstate = self.tfstate | 2;
                         tWeapon = spawn();
                         tWeapon.owner = self;
@@ -402,8 +399,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                         self.weaponmodel = "";
                         self.weaponframe = 0;
                     } else {
-                        sprint(self, PRINT_HIGH,
-                               "not enough ammo to reload\n");
+                        sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
                     }
                 }
             }

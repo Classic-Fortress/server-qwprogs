@@ -33,7 +33,7 @@ void () CaltropTouch = {
         (self.owner.team_no != 0))
         return;
 
-    sprint(other, PRINT_HIGH, "Ow, Ow, Ow! Caltrops!\n");
+    sprint(other, PRINT_HIGH, "Ow, ow, ow! Caltrops!\n");
     other.leg_damage = other.leg_damage + 2;
     TeamFortress_SetSpeed(other);
     deathmsg = 41;
@@ -266,7 +266,7 @@ void () ConcussionGrenadeTimer = {
     local float stumble;
 
     if (self.owner.invincible_finished > time) {
-        sprint(self.owner, PRINT_HIGH, "Your head feels better now.\n");
+        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.fixangle = 0;
         dremove(self);
         return;
@@ -330,7 +330,7 @@ void () ConcussionGrenadeTimer = {
         }
     }
     if (self.health <= 0) {
-        sprint(self.owner, PRINT_HIGH, "Your head feels better now.\n");
+        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         dremove(self);
     }
 };
@@ -345,7 +345,7 @@ void () ScannerSwitch = {
         te.owner = self;
         te.classname = "timer";
         te.netname = "scanner";
-        sprint(self, PRINT_HIGH, "Scanner On.\n");
+        sprint(self, PRINT_HIGH, "Scanner on\n");
         self.ScannerOn = 1;
 
         if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
@@ -358,7 +358,7 @@ void () ScannerSwitch = {
 
             te = find(te, netname, "scanner");
         }
-        sprint(self, PRINT_HIGH, "Scanner Off.\n");
+        sprint(self, PRINT_HIGH, "Scanner off\n");
         self.ScannerOn = 0;
     }
 
@@ -387,7 +387,7 @@ void () TeamFortress_Scan = {
         scancost = 2;
         if (self.owner.ammo_cells <= 0) {
             sprint(self.owner, PRINT_HIGH,
-                   "Not enough cells to run scanner.\n");
+                   "Not enough cells to run scanner\n");
             self.owner.ammo_cells = 0;
             W_SetCurrentAmmo();
             self.owner.ScannerOn = 0;
@@ -408,7 +408,7 @@ void () TeamFortress_Scan = {
             scfr = 1;
         }
         if ((scen == 0) && (scfr == 0)) {
-            sprint(self.owner, PRINT_HIGH, "No target specified.\n");
+            sprint(self.owner, PRINT_HIGH, "No target specified\n");
             self.owner.ScannerOn = 0;
             dremove(self);
             return;

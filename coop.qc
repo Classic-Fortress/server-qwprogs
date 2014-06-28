@@ -56,7 +56,7 @@ void () DropKey = {
         newmis.think = DroppedKeyThink;
         newmis.nextthink = time + 1.5;
     } else
-        sprint(self, PRINT_HIGH, "You don't have a key\n");
+        sprint(self, PRINT_HIGH, "You do not have a key\n");
 };
 
 float () DoorShouldOpen = {

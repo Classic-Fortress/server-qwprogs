@@ -152,5 +152,5 @@ void () TeamFortress_HelpMap = {
             return;
         }
     }
-    sprint(self, PRINT_HIGH, "There is no help for this map.\n");
+    sprint(self, PRINT_HIGH, "There is no help for this map\n");
 };

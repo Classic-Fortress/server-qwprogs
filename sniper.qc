@@ -15,7 +15,7 @@ void () TeamFortress_SniperWeapon = {
         return;
 
     if (self.ammo_shells < 1) {
-        sprint(self, PRINT_HIGH, "not enough ammo.\n");
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
     }
 

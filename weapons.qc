@@ -1560,7 +1560,7 @@ float () W_CheckNoAmmo = {
 void () W_Reload_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
     self.owner.weaponmodel = "progs/v_shot.mdl";
-    sprint(self.owner, PRINT_LOW, "finished reloading\n");
+    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
     Status_Refresh(self.owner);
 };
@@ -1568,7 +1568,7 @@ void () W_Reload_shotgun = {
 void () W_Reload_super_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
     self.owner.weaponmodel = "progs/v_shot2.mdl";
-    sprint(self.owner, PRINT_LOW, "finished reloading\n");
+    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
     Status_Refresh(self.owner);
 };
@@ -1576,7 +1576,7 @@ void () W_Reload_super_shotgun = {
 void () W_Reload_grenade_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
     self.owner.weaponmodel = "progs/v_rock.mdl";
-    sprint(self.owner, PRINT_LOW, "finished reloading\n");
+    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
     Status_Refresh(self.owner);
 };
@@ -1584,7 +1584,7 @@ void () W_Reload_grenade_launcher = {
 void () W_Reload_rocket_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
     self.owner.weaponmodel = "progs/v_rock2.mdl";
-    sprint(self.owner, PRINT_LOW, "finished reloading\n");
+    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
     Status_Refresh(self.owner);
 };
@@ -1599,7 +1599,7 @@ float () CheckForReload = {
             if (self.ammo_shells < 8)
                 self.reload_shotgun = 8 - self.ammo_shells;
 
-            sprint(self, PRINT_HIGH, "reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             tWeapon = spawn();
             tWeapon.owner = self;
@@ -1621,7 +1621,7 @@ float () CheckForReload = {
             if (self.ammo_shells < 16)
                 self.reload_super_shotgun = 16 - self.ammo_shells;
 
-            sprint(self, PRINT_HIGH, "reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             tWeapon = spawn();
             tWeapon.owner = self;
@@ -1639,7 +1639,7 @@ float () CheckForReload = {
             if (self.ammo_rockets < 6)
                 self.reload_grenade_launcher = 6 - self.ammo_rockets;
 
-            sprint(self, PRINT_HIGH, "reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             tWeapon = spawn();
             tWeapon.owner = self;
@@ -1657,7 +1657,7 @@ float () CheckForReload = {
             if (self.ammo_rockets < 4)
                 self.reload_rocket_launcher = 4 - self.ammo_rockets;
 
-            sprint(self, PRINT_HIGH, "reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             tWeapon = spawn();
             tWeapon.owner = self;
@@ -1784,7 +1784,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         if (self.ammo_cells < 7)
             sprint(self, PRINT_MEDIUM,
-                   "Insufficient cells to power up the Assault Cannon.\n");
+                   "Insufficient cells to power up the assault cannon\n");
         else {
             self.ammo_cells = self.ammo_cells - 7;
             self.heat = 1;
@@ -1841,7 +1841,7 @@ void () W_PrintWeaponMessage = {
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE)
         sprint(self, PRINT_MEDIUM, "Sniper rifle ready\n");
     else if (self.current_weapon == WEAP_AUTO_RIFLE)
-        sprint(self, PRINT_MEDIUM, "Rifle on fully auto\n");
+        sprint(self, PRINT_MEDIUM, "Sniper rifle on fully automatic mode\n");
 };
 
 float () W_GetSlot = {
@@ -1999,7 +1999,7 @@ void () W_WeaponSlot3 = {
 
     if (self.playerclass == PC_SCOUT
                 || self.playerclass == PC_ENGINEER) {
-        sprint(self, PRINT_HIGH, "No weapon.\n");
+        sprint(self, PRINT_HIGH, "No weapon\n");
         return;
     }
 
@@ -2097,10 +2097,10 @@ void (float inp) W_ChangeWeapon = {
     self.impulse = 0;
 
     if (self.noammo == 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo.\n");
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
     } else if (self.noammo == 2) {
-        sprint(self, PRINT_HIGH, "Not enough cells to power assault cannon.\n");
+        sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
         return;
     }
 
@@ -2364,25 +2364,25 @@ void () DeadImpulses = {
         sprint(self, PRINT_HIGH, "Scanner sound: ");
         if (self.tf_items_flags & 4) {
             self.tf_items_flags = self.tf_items_flags - 4;
-            sprint(self, PRINT_HIGH, "Off\n");
+            sprint(self, PRINT_HIGH, "off\n");
         } else {
             self.tf_items_flags = self.tf_items_flags | 4;
-            sprint(self, PRINT_HIGH, "On\n");
+            sprint(self, PRINT_HIGH, "on\n");
         }
     } else if ((self.playerclass == 1) && (self.impulse == TF_SCAN_ENEMY)) {
         sprint(self, PRINT_HIGH, "Scanning for: ");
         if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
             self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_ENEMY;
             if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
-                sprint(self, PRINT_HIGH, "Friendlies Only.\n");
+                sprint(self, PRINT_HIGH, "Friendlies only\n");
             else
                 sprint(self, PRINT_HIGH, "Nothing\n");
         } else {
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
             if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
-                sprint(self, PRINT_HIGH, "Friendlies and Enemies\n");
+                sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
             else
-                sprint(self, PRINT_HIGH, "Enemies Only\n");
+                sprint(self, PRINT_HIGH, "Enemies only\n");
         }
     } else if ((self.playerclass == 1) &&
                (self.impulse == TF_SCAN_FRIENDLY)) {
@@ -2391,19 +2391,19 @@ void () DeadImpulses = {
             self.tf_items_flags =
                 self.tf_items_flags - NIT_SCANNER_FRIENDLY;
             if (self.tf_items_flags & NIT_SCANNER_ENEMY)
-                sprint(self, PRINT_HIGH, "Enemies Only.\n");
+                sprint(self, PRINT_HIGH, "Enemies only\n");
             else
                 sprint(self, PRINT_HIGH, "Nothing\n");
         } else {
             self.tf_items_flags =
                 self.tf_items_flags | NIT_SCANNER_FRIENDLY;
             if (self.tf_items_flags & NIT_SCANNER_ENEMY)
-                sprint(self, PRINT_HIGH, "Friendlies and Enemies\n");
+                sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
             else
-                sprint(self, PRINT_HIGH, "Friendlies Only\n");
+                sprint(self, PRINT_HIGH, "Friendlies only\n");
         }
     } else if (self.impulse == TF_ALIAS_CHECK) {
-        sprint(self, PRINT_HIGH, "Aliases checked.\n");
+        sprint(self, PRINT_HIGH, "Aliases checked\n");
         self.got_aliases = 1;
         self.impulse = 0;
     }

@@ -687,7 +687,7 @@ void () TeamFortress_IncendiaryCannon = {
         return;
     }
     if (self.ammo_rockets < 3) {
-        sprint(self, PRINT_HIGH, "not enough ammo.\n");
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
     }
     self.current_weapon = WEAP_INCENDIARY;
@@ -699,7 +699,7 @@ void () TeamFortress_FlameThrower = {
         return;
     }
     if (self.ammo_cells < 1) {
-        sprint(self, PRINT_HIGH, "not enough ammo.\n");
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
     }
     self.current_weapon = WEAP_FLAMETHROWER;

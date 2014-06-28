@@ -407,18 +407,18 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             }
         } else if (j == 1) {
             sprint(self, PRINT_HIGH,
-                   "You can't get up with something\non top of you.\n");
+                   "You cannot get up with something on top of you\n");
         } else {
             sprint(self, PRINT_HIGH,
-                   "You can't get up while someone\nis standing on you.\n");
+                   "You cannot get up while someone is standing on you\n");
         }
     } else {
         if (self.is_unabletospy == 1) {
-            sprint(self, PRINT_HIGH, "You can't feign right now.\n");
+            sprint(self, PRINT_HIGH, "You cannot feign right now\n");
             return;
         }
         if (!(self.flags & 512) && (self.waterlevel == 0)) {
-            sprint(self, PRINT_HIGH, "You can't feign in the air.\n");
+            sprint(self, PRINT_HIGH, "You cannot feign in the air\n");
             return;
         }
         at_spot = findradius(self.origin, 64);
@@ -426,7 +426,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             if (((at_spot.classname == "player") && (self != at_spot)) &&
                 (at_spot.is_feigning == 1)) {
                 sprint(self, PRINT_HIGH,
-                       "You can't feign on top of another spy!\n");
+                       "You cannot feign on top of another spy\n");
                 return;
             }
             at_spot = at_spot.chain;
@@ -497,11 +497,11 @@ void () TeamFortress_SpyGoUndercover = {
     local entity te;
 
     if (self.effects & (8 | 4)) {
-        sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing.\n");
+        sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing\n");
         return;
     }
     if (self.is_unabletospy == 1) {
-        sprint(self, PRINT_HIGH, "You can't go undercover right now.\n");
+        sprint(self, PRINT_HIGH, "You cannot go undercover right now\n");
         return;
     }
     if (invis_only == 1) {
@@ -512,7 +512,7 @@ void () TeamFortress_SpyGoUndercover = {
             self.is_undercover = 0;
             self.modelindex = modelindex_player;
         } else if (self.is_undercover == 2) {
-            sprint(self, PRINT_HIGH, "You stop going undercover.\n");
+            sprint(self, PRINT_HIGH, "You stop going undercover\n");
             self.is_undercover = 0;
         } else if (self.ammo_cells > 1) {
             sprint(self, PRINT_HIGH, "Going undercover...\n");
@@ -527,7 +527,7 @@ void () TeamFortress_SpyGoUndercover = {
     } else if (self.is_undercover != 2) {
         Menu_Spy();
     } else {
-        sprint(self, PRINT_HIGH, "You stop going undercover.\n");
+        sprint(self, PRINT_HIGH, "You stop going undercover\n");
         self.is_undercover = 0;
     }
 };
@@ -583,7 +583,7 @@ void () TeamFortress_SpyUndercoverThink = {
                 TeamFortress_SetSkin(self.owner);
             }
             if (self.team != 0) {
-                sprint(self.owner, PRINT_HIGH, "Colors set to Team ");
+                sprint(self.owner, PRINT_HIGH, "Colors set to team ");
                 st = ftos(self.team);
                 sprint(self.owner, PRINT_HIGH, st, "\n");
                 self.owner.undercover_team = self.team;
@@ -595,7 +595,7 @@ void () TeamFortress_SpyUndercoverThink = {
                 TeamFortress_SetSkin(self.owner);
             }
             TeamFortress_SpyCalcName(self.owner);
-            CenterPrint(self.owner, "You are now disguised.\n");
+            CenterPrint(self.owner, "You are now disguised\n");
             self.owner.is_undercover = 1;
         }
     }
@@ -607,7 +607,7 @@ void (float class) TeamFortress_SpyChangeSkin = {
     local entity te;
 
     if (class == 8) {
-        sprint(self, PRINT_HIGH, "Skin reset.\n");
+        sprint(self, PRINT_HIGH, "Skin reset\n");
         self.undercover_skin = 0;
         TeamFortress_SetSkin(self);
         if (self.undercover_team == 0) {
@@ -632,7 +632,7 @@ void (float teamno) TeamFortress_SpyChangeColor = {
     local float tc;
 
     if (teamno == self.team_no) {
-        sprint(self, PRINT_HIGH, "Colors reset.\n");
+        sprint(self, PRINT_HIGH, "Colors reset\n");
         self.immune_to_check = time + 10;
         self.undercover_team = 0;
         stuffcmd(self, "color ");
@@ -755,7 +755,7 @@ void () GasGrenadeMakeGas = {
                     sprint(te, PRINT_HIGH, "Far out man!\n");
                 } else {
                     sprint(te, PRINT_HIGH,
-                           "Run for cover! They're everywhere!\n");
+                           "Run for cover! They are everywhere!\n");
                 }
                 te.tfstate = te.tfstate | TFSTATE_HALLUCINATING;
                 timer = spawn();
@@ -825,7 +825,7 @@ void () HallucinationTimer = {
     if (!(self.owner.tfstate & 16384)) {
         if (old_grens == 1)
             stuffcmd(self.owner, "v_cshift; wait; bf\n");
-        sprint(self.owner, 2, "You feel a little better now.\n");
+        sprint(self.owner, 2, "You feel a little better now\n");
         dremove(self);
         return;
     }

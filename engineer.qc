@@ -245,7 +245,7 @@ void () TeamFortress_EngineerBuild = {
 void () TeamFortress_EngineerBuildStop = {
     local entity te;
 
-    sprint(self, PRINT_HIGH, "You stop building.\n");
+    sprint(self, PRINT_HIGH, "You stop building\n");
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     TeamFortress_SetSpeed(self);
     te = find(world, netname, "build_timer");
@@ -335,7 +335,7 @@ void (float objtobuild) TeamFortress_Build = {
     if (objtobuild == 1) {
         if (self.has_dispenser) {
             sprint(self, PRINT_HIGH,
-                   "You can only have one dispenser.\nTry dismantling your old one.\n");
+                   "You can only have one dispenser\n");
             return;
         }
         tmp1 = '-16 -16 0';
@@ -346,7 +346,7 @@ void (float objtobuild) TeamFortress_Build = {
     } else if (objtobuild == 2) {
         if (self.has_sentry) {
             sprint(self, PRINT_HIGH,
-                   "You can only have one sentry gun.\nTry dismantling your old one.\n");
+                   "You can only have one sentry gun\n");
             return;
         }
         tmp1 = '-16 -16 0';
@@ -361,7 +361,7 @@ void (float objtobuild) TeamFortress_Build = {
         return;
     }
     if (!(self.flags & 512)) {
-        CenterPrint(self, "You can't build in the air!\n\n");
+        CenterPrint(self, "You cannot build in the air\n\n");
         return;
     }
     self.is_building = 1;
@@ -458,9 +458,9 @@ void () TeamFortress_FinishedBuilding = {
     TeamFortress_SetSpeed(self);
     if (oldself.weapon == 1) {
         self.has_dispenser = TRUE;
-        sprint(self, PRINT_HIGH, "You finish building the dispenser.\n");
+        sprint(self, PRINT_HIGH, "You finish building the dispenser\n");
         teamsprint(self.team_no, self, self.netname);
-        teamsprint(self.team_no, self, " has built a Dispenser.\n");
+        teamsprint(self.team_no, self, " has built a dispenser\n");
         self.ammo_cells = self.ammo_cells - 100;
         oldself.classname = "building_dispenser";
         oldself.netname = "dispenser";
@@ -497,9 +497,9 @@ void () TeamFortress_FinishedBuilding = {
         setorigin(oldself, (oldself.origin + '0 0 8'));
     } else if (oldself.weapon == 2) {
         self.has_sentry = TRUE;
-        sprint(self, PRINT_HIGH, "You finish building the sentry gun.\n");
+        sprint(self, PRINT_HIGH, "You finish building the sentry gun\n");
         teamsprint(self.team_no, self, self.netname);
-        teamsprint(self.team_no, self, " has built a Sentry Gun.\n");
+        teamsprint(self.team_no, self, " has built a sentry gun\n");
         oldself.classname = "building_sentrygun_base";
         oldself.netname = "sentry gun";
         oldself.takedamage = DAMAGE_NO;
@@ -605,7 +605,7 @@ void () Dispenser_Explode = {
 };
 
 void () Dispenser_Die = {
-    sprint(self.real_owner, PRINT_HIGH, "Your dispenser was destroyed.\n");
+    sprint(self.real_owner, PRINT_HIGH, "Your dispenser was destroyed\n");
     self.real_owner.has_dispenser = 0;
     self.think = Dispenser_Explode;
     self.nextthink = time + 0.1;
@@ -644,7 +644,7 @@ void (entity gun) Engineer_UseSentryGun = {
 
     sprint(self, PRINT_HIGH, "Level ");
     st = ftos(gun.weapon);
-    sprint(self, PRINT_HIGH, st, " Sentry Gun has ");
+    sprint(self, PRINT_HIGH, st, " Sentry gun has ");
     st = ftos(floor(gun.health));
     sprint(self, PRINT_HIGH, st, " health, ");
     st = ftos(floor(gun.ammo_shells));

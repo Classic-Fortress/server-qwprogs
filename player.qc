@@ -71,9 +71,9 @@ void () player_touch = {
                         other.infection_team_no = self.infection_team_no;
                         sprint(other, PRINT_MEDIUM,
                                "You have been infected by ", self.netname,
-                               "!\n");
+                               "\n");
                         sprint(self, PRINT_MEDIUM, "You have infected ",
-                               other.netname, "!\n");
+                               other.netname, "\n");
                     }
                 }
             }

@@ -245,7 +245,7 @@ void () Menu_Class = {
 
     self.menu_input = nil;
     if (TeamFortress_TeamIsCivilian(self.team_no))
-        Status_Print(self, "Your team can only be civilians.\n");
+        Status_Print(self, "Your team can only be civilians\n");
     else {
         if (spy_off == 1)
             s_spy = "\n";
@@ -317,12 +317,12 @@ void (float inp) Menu_Spy_Input = {
     if ((inp == 1) || (inp == 2)) {
         if (self.effects & (8 | 4)) {
             sprint(self, PRINT_HIGH,
-                   "You cannot go undercover while glowing.\n");
+                   "You cannot go undercover while glowing\n");
             return;
         }
         if (self.is_unabletospy == 1) {
             sprint(self, PRINT_HIGH,
-                   "You cannot go undercover right now.\n");
+                   "You cannot go undercover right now\n");
             return;
         }
     }
@@ -464,12 +464,12 @@ void () Menu_Spy_Color = {
     local string s_nothing  = "\n—‘ Nothing    ";
 
     if (number_of_teams == 0) {
-        sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch.\n");
+        sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch\n");
         return;
     }
     self.menu_input = nil;
     if (number_of_teams == 1)
-        sprint(self, PRINT_HIGH, "There is no other team.\n");
+        sprint(self, PRINT_HIGH, "There is no other team\n");
     else if (number_of_teams == 2) {
         if (color == 4)
             Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, "\n", s_nothing, "\n\n");
@@ -537,7 +537,7 @@ void (float inp) Menu_Engineer_Input = {
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
-                    sprint (self, PRINT_HIGH, "You dismantle the sentry gun.\n");
+                    sprint (self, PRINT_HIGH, "You dismantle the sentry gun\n");
                     self.ammo_cells = (self.ammo_cells + (130 / 2));
                     dremove (te.trigger_field);
                     dremove (te);
@@ -556,7 +556,7 @@ void (float inp) Menu_Engineer_Input = {
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
-                    sprint (self, PRINT_HIGH, "You dismantle the dispenser.\n");
+                    sprint (self, PRINT_HIGH, "You dismantle the dispenser\n");
                     self.ammo_cells = (self.ammo_cells + (100 / 2));
                     dremove (te);
                     self.has_dispenser = 0;
@@ -808,7 +808,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
                 self.building.skin = 2;
             }
             sprint(self, PRINT_HIGH,
-                   "You upgrade the Sentry Gun to level ");
+                   "You upgrade the sentry gun to level ");
             st = ftos(self.building.weapon);
             sprint(self, PRINT_HIGH, st, "\n");
         } else if (inp == 3) {
@@ -918,7 +918,7 @@ void (float inp) Menu_Dispenser_Input = {
     }
     if ((inp >= 1) && (inp <= 3)) {
         if (empty)
-            sprint(self, PRINT_HIGH, "The dispenser is empty.\n");
+            sprint(self, PRINT_HIGH, "The dispenser is empty\n");
 
         self.building = world;
         self.building_wait = time + 0.5;

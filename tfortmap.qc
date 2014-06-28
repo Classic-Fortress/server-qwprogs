@@ -850,28 +850,28 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         if (te)
             DisplayItemStatus(Goal, Player, te);
         else
-            sprint(Player, PRINT_HIGH, "Item is missing.\n");
+            sprint(Player, PRINT_HIGH, "Item is missing\n");
     }
     if (Goal.display_item_status2 != 0) {
         te = Finditem(Goal.display_item_status2);
         if (te)
             DisplayItemStatus(Goal, Player, te);
         else
-            sprint(Player, PRINT_HIGH, "Item is missing.\n");
+            sprint(Player, PRINT_HIGH, "Item is missing\n");
     }
     if (Goal.display_item_status3 != 0) {
         te = Finditem(Goal.display_item_status3);
         if (te)
             DisplayItemStatus(Goal, Player, te);
         else
-            sprint(Player, PRINT_HIGH, "Item is missing.\n");
+            sprint(Player, PRINT_HIGH, "Item is missing\n");
     }
     if (Goal.display_item_status4 != 0) {
         te = Finditem(Goal.display_item_status4);
         if (te)
             DisplayItemStatus(Goal, Player, te);
         else
-            sprint(Player, PRINT_HIGH, "Item is missing.\n");
+            sprint(Player, PRINT_HIGH, "Item is missing\n");
     }
     if (Goal.goal_result & TFGR_FORCE_RESPAWN)
         ForceRespawn(Player);
@@ -2247,11 +2247,11 @@ void (entity Goal, entity Player, entity Item) DisplayItemStatus = {
             }
             sprint(Player, PRINT_HIGH, " ");
             if (Player == Item.owner) {
-                sprint(Player, PRINT_HIGH, "You");
+                sprint(Player, PRINT_HIGH, "you");
             } else {
                 sprint(Player, PRINT_HIGH, Item.owner.netname);
             }
-            sprint(Player, PRINT_HIGH, ".\n");
+            sprint(Player, PRINT_HIGH, "\n");
         }
     } else {
         if (Item.origin != Item.oldorigin) {

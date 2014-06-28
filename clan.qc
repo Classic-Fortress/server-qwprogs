@@ -9,7 +9,7 @@ void () PreMatch_Think = {
     time_left = rint(cb_prematch_time - time);
     if (time_left > 60) {
         st = ftos(time_left / 60);
-        bprint2(PRINT_HIGH, st, " minutes left till Match begins.\n");
+        bprint2(PRINT_HIGH, st, " minutes left till match begins\n");
         if (time_left < 120) {
             self.nextthink = time + time_left - 60;
         } else {
@@ -17,26 +17,26 @@ void () PreMatch_Think = {
         }
         return;
     } else if (time_left >= 59) {
-        bprint(PRINT_HIGH, "1 minute left till Match begins.\n");
+        bprint(PRINT_HIGH, "1 minute left till match begins\n");
         self.nextthink = time + 30;
         return;
     } else if (time_left >= 29) {
-        bprint(PRINT_HIGH, "30 seconds left till Match begins.\n");
+        bprint(PRINT_HIGH, "30 seconds left till match begins\n");
         self.nextthink = time + 20;
         return;
     } else if (time_left > 1) {
         st = ftos(time_left);
-        bprint2(PRINT_HIGH, st, " seconds.\n");
+        bprint2(PRINT_HIGH, st, " seconds\n");
         self.nextthink = time + 1;
         return;
     } else if (time_left > 0) {
-        bprint(PRINT_HIGH, "1 second.\n");
+        bprint(PRINT_HIGH, "1 second\n");
         self.nextthink = time + 1;
         return;
     }
-    bprint(PRINT_HIGH, "MATCH BEGINS NOW\n");
+    bprint(PRINT_HIGH, "Match begins now\n");
     if (game_locked)
-        bprint(PRINT_HIGH, "GAME IS NOW LOCKED\n");
+        bprint(PRINT_HIGH, "Game is now locked\n");
 
     team4score = 0;
     team3score = 0;
@@ -58,7 +58,7 @@ void () PreMatch_Think = {
             stuffcmd(self, "setinfo tf_id ");
             stuffcmd(self, st);
             stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your Battle ID is ", st, "\n");
+            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
         TeamFortress_RemoveTimers();
         self.frags = 0;
@@ -145,15 +145,15 @@ void () DumpClanScores = {
 
     winners = TeamFortress_TeamGetWinner();
 
-    bprint(PRINT_HIGH, "\n\n=------= MATCH RESULTS =------=\n");
+    bprint(PRINT_HIGH, "\n\n=------= Match results =------=\n");
     if ((no_teams == 2) && (((team1score == team2score) && teamfrags)
                             || ((team1frags == team2frags) && !teamfrags))) {
-        bprint(PRINT_HIGH, " DRAW ");
+        bprint(PRINT_HIGH, " draw ");
     } else if ((no_teams == 3) &&
                ((((team1score == team2score) == team3score) && teamfrags)
                 || (((team1frags == team2frags) == team3frags) &&
                     !teamfrags))) {
-        bprint(PRINT_HIGH, " DRAW ");
+        bprint(PRINT_HIGH, " draw ");
     } else if ((no_teams == 3)
                &&
                (((((team1score == team2score) == team3score) == team4score)
@@ -161,7 +161,7 @@ void () DumpClanScores = {
                 ||
                 ((((team1frags == team2frags) == team3frags) == team4frags)
                  && !teamfrags))) {
-        bprint(PRINT_HIGH, " DRAW ");
+        bprint(PRINT_HIGH, " draw ");
     } else {
         st = GetTeamName(winners);
         bprint(PRINT_HIGH, st, " defeated ");
@@ -359,52 +359,52 @@ void () DumpClanScores = {
         }
     }
     if (t1_pl > 0) {
-        bprint(PRINT_HIGH, "\n=------= TEAM1 RESULTS =------=\n");
+        bprint(PRINT_HIGH, "\n=------= Blue team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(1);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players.\n");
+        bprint2(PRINT_HIGH, st, " players\n");
         st = ftos(team1frags);
         bprint2(PRINT_HIGH, st, " frags, ");
         st = ftos(t1_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for.\n");
+        bprint2(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team1score);
-        bprint2(PRINT_HIGH, st, " team score.\n");
+        bprint2(PRINT_HIGH, st, " team score\n");
     }
     if (t2_pl > 0) {
-        bprint(PRINT_HIGH, "\n=------= TEAM2 RESULTS =------=\n");
+        bprint(PRINT_HIGH, "\n=------= Red team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(2);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players.\n");
+        bprint2(PRINT_HIGH, st, " players\n");
         st = ftos(team2frags);
         bprint2(PRINT_HIGH, st, " frags, ");
         st = ftos(t2_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for.\n");
+        bprint2(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team2score);
-        bprint2(PRINT_HIGH, st, " team score.\n");
+        bprint2(PRINT_HIGH, st, " team score\n");
     }
     if (t3_pl > 0) {
-        bprint(PRINT_HIGH, "\n=------= TEAM3 RESULTS =------=\n");
+        bprint(PRINT_HIGH, "\n=------= Yellow team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(3);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players.\n");
+        bprint2(PRINT_HIGH, st, " players\n");
         st = ftos(team3frags);
         bprint2(PRINT_HIGH, st, " frags, ");
         st = ftos(t3_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for.\n");
+        bprint2(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team3score);
-        bprint2(PRINT_HIGH, st, " team score.\n");
+        bprint2(PRINT_HIGH, st, " team score\n");
     }
     if (t4_pl > 0) {
-        bprint(PRINT_HIGH, "\n=------= TEAM4 RESULTS =------=\n");
+        bprint(PRINT_HIGH, "\n=------= Green team results =------=\n");
         tno = TeamFortress_TeamGetNoPlayers(4);
         st = ftos(tno);
-        bprint2(PRINT_HIGH, st, " players.\n");
+        bprint2(PRINT_HIGH, st, " players\n");
         st = ftos(team4frags);
         bprint2(PRINT_HIGH, st, " frags, ");
         st = ftos(t4_unacc);
-        bprint2(PRINT_HIGH, st, " unaccounted for.\n");
+        bprint2(PRINT_HIGH, st, " unaccounted for\n");
         st = ftos(team4score);
-        bprint2(PRINT_HIGH, st, " team score.\n");
+        bprint2(PRINT_HIGH, st, " team score\n");
     }
     te = find(world, classname, "player");
     while (te) {
@@ -422,11 +422,11 @@ void () TeamFortress_ShowIDs = {
     local string st;
 
     if (self.team_no == 0) {
-        sprint(self, PRINT_HIGH, "You aren't in a team.\n");
+        sprint(self, PRINT_HIGH, "You are not in a team\n");
         return;
     }
     got_one = 0;
-    sprint(self, PRINT_HIGH, "Existing Team Member IDs:\n");
+    sprint(self, PRINT_HIGH, "Existing team member IDs:\n");
 
     te = find(world, classname, "player");
     while (te) {
@@ -439,9 +439,9 @@ void () TeamFortress_ShowIDs = {
     }
 
     if (!got_one)
-        sprint(self, PRINT_HIGH, "NONE\n");
+        sprint(self, PRINT_HIGH, "None\n");
     got_one = 0;
-    sprint(self, PRINT_HIGH, "Disconnected Team Member IDs:\n");
+    sprint(self, PRINT_HIGH, "Disconnected team member IDs:\n");
 
     te = find(world, classname, "ghost");
     while (te) {
@@ -454,5 +454,5 @@ void () TeamFortress_ShowIDs = {
     }
 
     if (!got_one)
-        sprint(self, PRINT_HIGH, "NONE\n");
+        sprint(self, PRINT_HIGH, "None\n");
 };

@@ -271,7 +271,7 @@ void () health_touch = {
     }
     if ((other.tfstate & 16) && (self.healamount > 80)) {
         sprint(other, PRINT_MEDIUM,
-               "You have been healed of your infection!");
+               "You have been healed of your infection");
         other.tfstate = other.tfstate - (other.tfstate & 16);
     } else {
         s = ftos(self.healamount);

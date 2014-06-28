@@ -98,14 +98,14 @@ void () TeamFortress_DetpackMenu = {
     local entity detpack;
 
     if (self.ammo_detpack <= 0) {
-        sprint(self, PRINT_HIGH, "You don't have any detpacks left.\n");
+        sprint(self, PRINT_HIGH, "You do not have any detpacks left\n");
         return;
     }
 
     detpack = find(world, classname, "detpack");
     while (detpack) {
         if (detpack.owner == self) {
-            sprint(self, PRINT_HIGH, "You can only have 1 detpack active at a time.\n");
+            sprint(self, PRINT_HIGH, "You can only have one detpack active at a time\n");
             return;
         }
         detpack = find(detpack, classname, "detpack");
@@ -132,25 +132,25 @@ void (float timer) TeamFortress_SetDetpack = {
 
         if ((at_spot.classname == "player") && (self != at_spot)) {
             sprint(self, PRINT_HIGH,
-                   "You can't set a detpack on someone!\n");
+                   "You cannot set a detpack on someone\n");
             return;
         } else if ((at_spot.mdl == "progs/turrbase.mdl") ||
                    (at_spot.mdl == "progs/turrgun.mdl")) {
             sprint(self, PRINT_HIGH,
-                   "You can't set a detpack on a sentry gun!\n");
+                   "You cannot set a detpack on a sentry gun\n");
             return;
         } else if (at_spot.mdl == "progs/disp.mdl") {
             sprint(self, PRINT_HIGH,
-                   "You can't set a detpack on a dispenser!\n");
+                   "You cannot set a detpack on a dispenser\n");
             return;
         } else if (at_spot.classname == "detpack") {
-            sprint(self, PRINT_HIGH, "Detpacks can't be stacked!\n");
+            sprint(self, PRINT_HIGH, "Detpacks cannot be stacked\n");
             return;
         }
         at_spot = at_spot.chain;
     }
     if (!(self.flags & FL_ONGROUND)) {
-        sprint(self, PRINT_HIGH, "You can't set detpacks in the air!\n");
+        sprint(self, PRINT_HIGH, "You cannot set detpacks in the air\n");
         return;
     }
 
@@ -158,7 +158,7 @@ void (float timer) TeamFortress_SetDetpack = {
     while (te) {
         if (te.owner == self) {
             sprint(self, PRINT_HIGH,
-                   "You can only have 1 detpack active at a time.\n");
+                   "You can only have one detpack active at a time\n");
             return;
         }
         te = find(te, classname, "detpack");
@@ -166,7 +166,7 @@ void (float timer) TeamFortress_SetDetpack = {
 
     if (timer < 5) {
         sprint(self, PRINT_HIGH,
-               "You can't set detpacks for less that 5 seconds.\n");
+               "You cannot set detpacks for less that 5 seconds\n");
         return;
     }
 
@@ -207,7 +207,7 @@ void () TeamFortress_DetpackStop = {
     if (detpack_timer == world)
         return;
 
-    sprint(self, PRINT_HIGH, "Detpack retrieved.\n");
+    sprint(self, PRINT_HIGH, "Detpack retrieved\n");
     Menu_Close(self);
     self.ammo_detpack = self.ammo_detpack + 1;
     dremove(detpack_timer);
@@ -339,7 +339,7 @@ void () TeamFortress_DetpackExplode = {
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
     } else
-        sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out.\n");
+        sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out\n");
 
     if (self.weaponmode == 1) {
         TeamFortress_SetSpeed(self.enemy);
