@@ -537,8 +537,8 @@ void (float inp) Menu_Engineer_Input = {
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
-                    sprint (self, PRINT_HIGH, "You dismantle the sentry gun\n");
-                    self.ammo_cells = (self.ammo_cells + (130 / 2));
+                    sprint (self, PRINT_HIGH, "You dismantled the sentry gun and got 65 cells\n");
+                    self.ammo_cells = self.ammo_cells + 65;
                     dremove (te.trigger_field);
                     dremove (te);
                     self.has_sentry = 0;
@@ -556,8 +556,8 @@ void (float inp) Menu_Engineer_Input = {
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
-                    sprint (self, PRINT_HIGH, "You dismantle the dispenser\n");
-                    self.ammo_cells = (self.ammo_cells + (100 / 2));
+                    sprint (self, PRINT_HIGH, "You dismantled the dispenser and got 50 cells\n");
+                    self.ammo_cells = self.ammo_cells + 50;
                     dremove (te);
                     self.has_dispenser = 0;
                     dismantle_dispenser = 1;
