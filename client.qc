@@ -43,6 +43,7 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer;
 
 void () CTF_FlagCheck;
 void (entity pl) TF_zoom_reset;
+void (entity pl) TF_zoom_reset_death;
 
 string nextmap;
 
@@ -774,7 +775,7 @@ void () ClientKill = {
     if (self.playerclass == PC_UNDEFINED)
         return;
 
-    TF_zoom_reset(self);
+    TF_zoom_reset_death(self);
 
     // players can't suicide again for 10 seconds
     self.suicide_time = time + 5 + random() * 5;
@@ -1916,7 +1917,7 @@ void (entity targ, entity attacker) ClientObituary = {
     deathstring = "";
     deathstring2 = "";
 
-    TF_zoom_reset(targ);
+    TF_zoom_reset_death(targ);
 
     rnum = random();
     if ((cb_prematch_time + 3) > time)

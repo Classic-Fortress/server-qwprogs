@@ -52,15 +52,48 @@ void (float zoom_to) TF_zoom = {
 };
 
 void (entity pl) TF_zoom_reset = {
-    local float default_sensitivity;
-    local float default_fov;
+    local float default_sensitivity = stof(infokey(pl, "ds"));
+    local float default_fov = stof(infokey(pl, "df"));
+    local float zoomkey = stof(infokey(pl, "zk"));
+    local float reversezoom = stof(infokey(pl, "zr"));
+
+    pl.current_fov = default_fov;
+    if (zoomkey) {
+        pl.zoom_level = default_fov;
+        if (reversezoom) {
+            if (pl.zoom_mode == 2)
+                pl.zoom_mode = 0;
+            else if (pl.zoom_mode == 4)
+                pl.zoom_mode = 2;
+        } else if (pl.zoom_mode == 2)
+            pl.zoom_mode = 4;
+        else if (pl.zoom_mode == 4)
+            pl.zoom_mode = 0;
+    }
+    pl.zoom_in = 0;
+    pl.zoom_out = 0;
+
+    if (default_fov > 0) {
+        stuffcmd(pl, "fov ");
+        stuffcmd(pl, ftos(pl.current_fov));
+        stuffcmd(pl, "\n");
+    }
+
+    if (default_sensitivity > 0) {
+        stuffcmd(pl, "sensitivity ");
+        stuffcmd(pl, ftos(default_sensitivity));
+        stuffcmd(pl, "\n");
+    }
+};
+
+void (entity pl) TF_zoom_reset_death = {
+    local float default_sensitivity = stof(infokey(pl, "ds"));
+    local float default_fov = stof(infokey(pl, "df"));
 
     default_fov = stof(infokey(pl, "df"));
     default_sensitivity = stof(infokey(pl, "ds"));
 
     pl.current_fov = default_fov;
-    pl.zoom_level = default_fov;
-    pl.zoom_mode = 0;
     pl.zoom_in = 0;
     pl.zoom_out = 0;
 

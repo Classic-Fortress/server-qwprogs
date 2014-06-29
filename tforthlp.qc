@@ -33,8 +33,6 @@ void () TeamFortress_MOTD = {
     }
 
     if (self.motd == 20) {
-        self.zoom_mode = 0;
-
         if ((teamplay != 0) && (self.team_no == 0)) {
             stuffcmd(self, "color ");
             ya = ftos(0);
