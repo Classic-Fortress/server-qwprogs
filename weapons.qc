@@ -2033,7 +2033,7 @@ void () W_WeaponSlot4 = {
 };
 
 float () W_AmmoLast = {
-    if ((self.next_weapon == WEAP_SNIPER_RIFLE
+    if ((self.last_weapon == WEAP_SNIPER_RIFLE
                 || self.next_weapon == WEAP_AUTO_RIFLE
                 || self.next_weapon == WEAP_SHOTGUN
                 || self.next_weapon == WEAP_SUPER_SHOTGUN
@@ -2041,23 +2041,23 @@ float () W_AmmoLast = {
                 || self.next_weapon == WEAP_TRANQ)
                 && self.ammo_shells < 1)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_SUPER_SHOTGUN && self.ammo_shells < 2)
+    else if (self.last_weapon == WEAP_SUPER_SHOTGUN && self.ammo_shells < 2)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_NAILGUN && self.ammo_nails < 2)
+    else if (self.last_weapon == WEAP_NAILGUN && self.ammo_nails < 2)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_SUPER_NAILGUN && self.ammo_nails < 4)
+    else if (self.last_weapon == WEAP_SUPER_NAILGUN && self.ammo_nails < 4)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_LASER && self.ammo_nails < 1)
+    else if (self.last_weapon == WEAP_LASER && self.ammo_nails < 1)
         self.noammo = 1;
-    else if ((self.next_weapon == WEAP_GRENADE_LAUNCHER
-                || self.next_weapon == WEAP_ROCKET_LAUNCHER)
+    else if ((self.last_weapon == WEAP_GRENADE_LAUNCHER
+                || self.last_weapon == WEAP_ROCKET_LAUNCHER)
                 && self.ammo_rockets < 1)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_FLAMETHROWER && self.ammo_cells < 1)
+    else if (self.last_weapon == WEAP_FLAMETHROWER && self.ammo_cells < 1)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_INCENDIARY && self.ammo_rockets < 3)
+    else if (self.last_weapon == WEAP_INCENDIARY && self.ammo_rockets < 3)
         self.noammo = 1;
-    else if (self.next_weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
+    else if (self.last_weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
         self.noammo = 2;
 
     if (self.noammo > 0)
