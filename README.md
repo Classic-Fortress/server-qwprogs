@@ -16,6 +16,8 @@ Classic Fortress v0.1 beta
 * Stop building/disguising upon pressing "last weapon" bind.
 
 === Improved ===
+* Improved consistent grammar.
+* Remember current weapon and last weapon after dying.
 * Team player count in team selection menu.
 * Sniper smooth zooming is now a lot faster (disable smooth zooming with setinfo zi 1).
 * More responsive menus (rewritten menu code).
@@ -27,8 +29,12 @@ Classic Fortress v0.1 beta
 * Overall improved menus.
 * Allow engineer build menu to be opened even while in the air.
 * Engineers can now only dismantle their own buildings.
+* Engineer dismantle messages show how many cells you got back.
 
 === Changed ===
+* Max 6 active demoman pipes allowed (down from 7).
+* No limit to team pipes/flares/ammoboxes.
+* Engineer can only rotate own sentry.
 * Remove decimals from sentry gun status.
 * Class configs are now executed from /fortress/classes/ subdirectory.
 * Allow team changing.
