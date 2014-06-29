@@ -7,6 +7,7 @@ typedef void (float) f_void_float;
 // TEAMFORTRESS Defs
 //===========================================================================
 .float playerclass;
+.float last_playerclass;        // The playerclass you played as last life
 .float nextpc;                  // The playerclass you'll respawn as
 .float last_impulse;            // The previous impulse command from this player
 .float armorclass;              // Type of armor being worn

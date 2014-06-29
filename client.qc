@@ -137,7 +137,6 @@ void () DecodeLevelParms = {
     self.ammo_nails = parm5;
     self.ammo_rockets = parm6;
     self.ammo_cells = parm7;
-    self.current_weapon = parm8;
     self.armortype = parm9 * 0.01;
 
     if (!(toggleflags & TFLAG_FIRSTENTRY)) {
@@ -289,7 +288,6 @@ void () DecodeLevelParms = {
                 te.classname = "ceasefire";
                 te.think = CeaseFire_think;
                 te.nextthink = time + 5;
-                te.weapon = 1;
 
             }
             st = infokey(world, "lg");
@@ -1037,6 +1035,9 @@ void () PutClientInServer = {
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
 
+    if (! self.last_playerclass)
+        self.last_playerclass = self.playerclass;
+
     DecodeLevelParms();
 
     if (self.playerclass == 0) {
@@ -1086,7 +1087,11 @@ void () PutClientInServer = {
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
     W_SetCurrentAmmo();
-    W_ChangeWeapon(1);
+    if (self.current_weaponslot && self.last_playerclass == self.playerclass)
+        W_ChangeWeapon(self.current_weaponslot);
+    else
+        W_ChangeWeapon(1);
+    self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
     self.th_pain = player_pain;

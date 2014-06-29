@@ -1306,10 +1306,13 @@ void () TeamFortress_SetEquipment = {
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
 
     self.items = 0;
-    self.current_weapon = 0;
     self.weapons_carried = 0;
-    self.last_weapon = 0;
-    self.last_weaponmode = 0;
+    if (self.last_playerclass != self.playerclass) {
+        self.current_weapon = 0;
+        self.current_weaponslot = 1;
+        self.last_weapon = 0;
+        self.last_weaponmode = 0;
+    }
 
     self.tf_items = 0;
     if (self.playerclass != PC_SCOUT)
@@ -1381,7 +1384,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_SCOUT_INITARMOR;
         self.armor_allowed = PC_SCOUT_MAXARMORTYPE;
         self.maxarmor = PC_SCOUT_MAXARMOR;
-        self.current_weapon = WEAP_NAILGUN;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_NAILGUN;
 
         self.items_allowed = PC_SCOUT_WEAPONS;
 
@@ -1408,7 +1412,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_SNIPER_INITARMOR;
         self.armor_allowed = PC_SNIPER_MAXARMORTYPE;
         self.maxarmor = PC_SNIPER_MAXARMOR;
-        self.current_weapon = WEAP_SNIPER_RIFLE;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_SNIPER_RIFLE;
 
         self.items_allowed = PC_SNIPER_WEAPONS;
         self.items =
@@ -1435,7 +1440,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_SOLDIER_INITARMOR;
         self.armor_allowed = PC_SOLDIER_MAXARMORTYPE;
         self.maxarmor = PC_SOLDIER_MAXARMOR;
-        self.current_weapon = WEAP_ROCKET_LAUNCHER;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_ROCKET_LAUNCHER;
 
         self.items_allowed = PC_SOLDIER_WEAPONS;
         self.items =
@@ -1466,7 +1472,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_DEMOMAN_INITARMOR;
         self.armor_allowed = PC_DEMOMAN_MAXARMORTYPE;
         self.maxarmor = PC_DEMOMAN_MAXARMOR;
-        self.current_weapon = WEAP_GRENADE_LAUNCHER;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_GRENADE_LAUNCHER;
 
         self.items_allowed = PC_DEMOMAN_WEAPONS;
         self.items = self.items | IT_SHOTGUN | IT_GRENADE_LAUNCHER;
@@ -1492,7 +1499,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_MEDIC_INITARMOR;
         self.armor_allowed = PC_MEDIC_MAXARMORTYPE;
         self.maxarmor = PC_MEDIC_MAXARMOR;
-        self.current_weapon = WEAP_SUPER_NAILGUN;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_SUPER_NAILGUN;
 
         self.ammo_medikit = PC_MEDIC_INITAMMO_MEDIKIT;
         self.maxammo_medikit = PC_MEDIC_MAXAMMO_MEDIKIT;
@@ -1528,7 +1536,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_HVYWEAP_INITARMOR;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
         self.maxarmor = PC_HVYWEAP_MAXARMOR;
-        self.current_weapon = WEAP_SUPER_SHOTGUN;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_SUPER_SHOTGUN;
 
         self.items_allowed = PC_HVYWEAP_WEAPONS;
         self.items =
@@ -1556,7 +1565,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_PYRO_INITARMOR;
         self.armor_allowed = PC_PYRO_MAXARMORTYPE;
         self.maxarmor = PC_PYRO_MAXARMOR;
-        self.current_weapon = WEAP_FLAMETHROWER;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_FLAMETHROWER;
 
         self.items_allowed = PC_PYRO_WEAPONS;
         self.items =
@@ -1584,7 +1594,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_CIVILIAN_INITARMOR;
         self.armor_allowed = PC_CIVILIAN_MAXARMORTYPE;
         self.maxarmor = PC_CIVILIAN_MAXARMOR;
-        self.current_weapon = WEAP_AXE;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_AXE;
 
         self.items_allowed = PC_CIVILIAN_WEAPONS;
         self.items = 0;
@@ -1610,7 +1621,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_SPY_INITARMOR;
         self.armor_allowed = PC_SPY_MAXARMORTYPE;
         self.maxarmor = PC_SPY_MAXARMOR;
-        self.current_weapon = WEAP_TRANQ;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_TRANQ;
 
         self.items_allowed = PC_SPY_WEAPONS;
         self.items =
@@ -1645,7 +1657,8 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = PC_ENGINEER_INITARMOR;
         self.armor_allowed = PC_ENGINEER_MAXARMORTYPE;
         self.maxarmor = PC_ENGINEER_MAXARMOR;
-        self.current_weapon = WEAP_LASER;
+        if (self.last_playerclass != self.playerclass)
+            self.current_weapon = WEAP_LASER;
 
         self.items_allowed = PC_ENGINEER_WEAPONS;
         self.items = self.items | IT_SHOTGUN | IT_SUPER_SHOTGUN;
