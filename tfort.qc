@@ -465,21 +465,21 @@ void () TeamFortress_PrimeGrenade = {
         gtype = self.tp_grenades_1;
 
         if (self.tp_grenades_1 == 2)
-            gs = "concussion grenade";
+            gs = "Concussion grenade";
         else if (self.tp_grenades_1 == 3)
-            gs = "nail grenade";
+            gs = "Nail grenade";
         else if (self.tp_grenades_1 == 4)
-            gs = "mirv grenade";
+            gs = "Mirv grenade";
         else if (self.tp_grenades_1 == 5)
-            gs = "napalm grenade";
+            gs = "Napalm grenade";
         else if (self.tp_grenades_1 == 6)
-            gs = "flare";
+            gs = "Flare";
         else if (self.tp_grenades_1 == 7)
-            gs = "gas grenade";
+            gs = "Gas grenade";
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
         else
-            gs = "grenade";
+            gs = "Grenade";
 
         if (self.no_grenades_1 > 0) {
             self.no_grenades_1 = self.no_grenades_1 - 1;
@@ -522,25 +522,25 @@ void () TeamFortress_PrimeGrenade = {
         gtype = self.tp_grenades_2;
 
         if (self.tp_grenades_2 == 2)
-            gs = "concussion grenade";
+            gs = "Concussion grenade";
         else if (self.tp_grenades_2 == 3)
-            gs = "nail grenade";
+            gs = "Nail grenade";
         else if (self.tp_grenades_2 == 4)
-            gs = "mirv grenade";
+            gs = "Mirv grenade";
         else if (self.tp_grenades_2 == 5)
-            gs = "napalm grenade";
+            gs = "Napalm grenade";
         else if (self.tp_grenades_2 == 6)
-            gs = "flare";
+            gs = "Flare";
         else if (self.tp_grenades_2 == 7)
-            gs = "gas grenade";
+            gs = "Gas grenade";
         else if (self.tp_grenades_2 == 8)
             gs = "EMP grenade";
         else if (self.tp_grenades_2 == 9)
-            gs = "flash grenade";
+            gs = "Flash grenade";
         else if (self.tp_grenades_2 == 10)
-            gs = "caltrop canister";
+            gs = "Caltrop canister";
         else
-            gs = "grenade";
+            gs = "Grenade";
 
         if (self.no_grenades_2 > 0) {
             self.no_grenades_2 = self.no_grenades_2 - 1;
