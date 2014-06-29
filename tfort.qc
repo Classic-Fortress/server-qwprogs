@@ -1310,6 +1310,7 @@ void () TeamFortress_SetEquipment = {
     if (self.last_playerclass != self.playerclass) {
         self.current_weapon = 0;
         self.current_weaponslot = 1;
+        self.weaponmode = 0;
         self.last_weapon = 0;
         self.last_weaponmode = 0;
     }
@@ -1343,7 +1344,6 @@ void () TeamFortress_SetEquipment = {
     self.items_allowed = 0;
     self.armor_allowed = 0;
     self.maxarmor = 0;
-    self.weaponmode = 0;
     self.respawn_time = 0;
     self.heat = 0;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
