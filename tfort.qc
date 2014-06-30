@@ -448,7 +448,15 @@ void () GrenadeTimer = {
     }
 };
 
-void () TeamFortress_PrimeGrenade = {
+void (float inp) TeamFortress_PrimeThrowGrenade = {
+    if ((self.tfstate & TFSTATE_GRENPRIMED) ||
+        (self.tfstate & TFSTATE_GRENTHROWING))
+        TeamFortress_ThrowGrenade();
+    else
+        TeamFortress_PrimeGrenade(inp);
+};
+
+void (float inp) TeamFortress_PrimeGrenade = {
     local float gtype;
     local string gs;
     local string ptime;
@@ -460,8 +468,8 @@ void () TeamFortress_PrimeGrenade = {
         (self.tfstate & TFSTATE_GRENTHROWING))
         return;
 
-    if (    (self.impulse == TF_GRENADE_1 && self.tp_grenade_switch != 1)
-         || (self.impulse == TF_GRENADE_2 && self.tp_grenade_switch == 1)) {
+    if (    (inp == 1 && self.tp_grenade_switch != 1)
+         || (inp == 2 && self.tp_grenade_switch == 1)) {
         gtype = self.tp_grenades_1;
 
         if (self.tp_grenades_1 == 2)
@@ -517,8 +525,8 @@ void () TeamFortress_PrimeGrenade = {
             return;
         }
     }
-    if (    (self.impulse == TF_GRENADE_2 && self.tp_grenade_switch != 1)
-         || (self.impulse == TF_GRENADE_1 && self.tp_grenade_switch == 1)) {
+    if (    (inp == 2 && self.tp_grenade_switch != 1)
+         || (inp == 1 && self.tp_grenade_switch == 1)) {
         gtype = self.tp_grenades_2;
 
         if (self.tp_grenades_2 == 2)
@@ -588,7 +596,10 @@ void () TeamFortress_PrimeGrenade = {
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
     tGrenade.classname = "primetimer";
-    tGrenade.impulse = self.impulse;
+    if (inp == 1)
+        tGrenade.impulse = TF_GRENADE_1;
+    else if (inp == 2)
+        tGrenade.impulse = TF_GRENADE_2;
     tGrenade.nextthink = time + 0.8;
 
     if (gtype == GR_TYPE_CALTROP)

@@ -29,8 +29,9 @@ void () TeamFortress_SniperWeapon;
 void () TeamFortress_AssaultWeapon;
 void () TeamFortress_IncendiaryCannon;
 void () TeamFortress_FlameThrower;
-void () TeamFortress_PrimeGrenade;
+void (float inp) TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
+void (float inp) TeamFortress_PrimeThrowGrenade;
 void () TeamFortress_GrenadeSwitch;
 
 void () PipebombTouch;
@@ -2196,9 +2197,13 @@ void () ImpulseCommands = {
         else if ((self.impulse == TF_WEAPLAST) && (self.last_weapon != 0))
             W_ChangeWeapon(self.impulse);
         else if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade();
+            TeamFortress_PrimeGrenade(1);
         else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade();
+            TeamFortress_PrimeGrenade(2);
+        else if (self.impulse == TF_GRENADE_PT_1)
+            TeamFortress_PrimeThrowGrenade(1);
+        else if (self.impulse == TF_GRENADE_PT_2)
+            TeamFortress_PrimeThrowGrenade(2);
         else if (self.impulse == TF_RELOAD)
             TeamFortress_ReloadCurrentWeapon();
         else if (self.impulse == TF_DETPACK_5)

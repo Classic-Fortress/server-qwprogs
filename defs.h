@@ -395,6 +395,8 @@
 #define TF_GRENADE_2		151	// Prime grenade type 2
 #define TF_GRENADE_T		152	// Throw primed grenade
 #define TF_GRENADE_SWITCH   153 // Switch grenade mode 1/2
+#define TF_GRENADE_PT_1     154 // Prime and throw grenade type 1 (two clicks)
+#define TF_GRENADE_PT_2     155 // Prime and throw grenade type 2 (two clicks)
 
 // Impulses for new items
 #define TF_SCAN			159	// Scanner Pre-Impulse

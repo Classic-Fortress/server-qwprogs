@@ -87,6 +87,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
         TeamFortress_Alias("-gren1", TF_GRENADE_T, 0);
         TeamFortress_Alias("-gren2", TF_GRENADE_T, 0);
+        TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
+        TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
         TeamFortress_Alias("showscores", TF_TEAM_SCORES, 0);
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("query", TF_STATUS_QUERY, 0);
