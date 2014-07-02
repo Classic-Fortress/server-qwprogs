@@ -222,22 +222,22 @@ void () Menu_Class = {
     if (AD) {
         if (self.team_no == 1) {
             if (AD.noise1 != string_null) {
-                Status_Print(self, AD.noise1);
+                Status_Menu(self, Menu_Class_Input, AD.noise1);
                 return;
             }
         } else if (self.team_no == 2) {
             if (AD.noise2 != string_null) {
-                Status_Print(self, AD.noise2);
+                Status_Menu(self, Menu_Class_Input, AD.noise2);
                 return;
             }
         } else if (self.team_no == 3) {
             if (AD.noise3 != string_null) {
-                Status_Print(self, AD.noise3);
+                Status_Menu(self, Menu_Class_Input, AD.noise3);
                 return;
             }
         } else if (self.team_no == 4) {
             if (AD.noise4 != string_null) {
-                Status_Print(self, AD.noise4);
+                Status_Menu(self, Menu_Class_Input, AD.noise4);
                 return;
             }
         }
