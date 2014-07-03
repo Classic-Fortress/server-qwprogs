@@ -2097,28 +2097,30 @@ void (float inp) W_ChangeWeapon = {
 
     self.impulse = 0;
 
-    if (self.noammo == 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    } else if (self.noammo == 2) {
-        sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
-        return;
+    if (inp != 5) {
+        if (self.noammo == 1) {
+            sprint(self, PRINT_HIGH, "Not enough ammo\n");
+            return;
+        } else if (self.noammo == 2) {
+            sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
+            return;
+        }
+
+        if (self.current_weapon != self.next_weapon
+                    || self.weaponmode != self.next_weaponmode) {
+            self.last_weaponmode = self.weaponmode;
+            self.last_weapon = self.current_weapon;
+            self.current_weapon = self.next_weapon;
+            self.weaponmode = self.next_weaponmode;
+        }
+
+        if (self.current_weapon != self.last_weapon
+                    || self.weaponmode != self.last_weaponmode)
+            W_PrintWeaponMessage();
+
+        W_SetCurrentAmmo();
+        Status_Refresh(self);
     }
-
-    if (self.current_weapon != self.next_weapon
-                || self.weaponmode != self.next_weaponmode) {
-        self.last_weaponmode = self.weaponmode;
-        self.last_weapon = self.current_weapon;
-        self.current_weapon = self.next_weapon;
-        self.weaponmode = self.next_weaponmode;
-    }
-
-    if (self.current_weapon != self.last_weapon
-                || self.weaponmode != self.last_weaponmode)
-        W_PrintWeaponMessage();
-
-    W_SetCurrentAmmo();
-    Status_Refresh(self);
 };
 
 void () CycleWeaponNext = {
@@ -2185,10 +2187,7 @@ void () ImpulseCommands = {
     }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
-        if (((self.impulse >= 1) && (self.impulse < 8)) ||
-            (self.impulse == TF_MEDIKIT))
-            W_ChangeWeapon(self.impulse);
-        else if (self.impulse == AXE_IMP)
+        if (self.impulse >= 1 && self.impulse <= 5)
             W_ChangeWeapon(self.impulse);
         else if (self.impulse == TF_WEAPNEXT)
             CycleWeaponNext();
