@@ -452,8 +452,13 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
     if ((self.tfstate & TFSTATE_GRENPRIMED) ||
         (self.tfstate & TFSTATE_GRENTHROWING))
         TeamFortress_ThrowGrenade();
-    else
+    else {
         TeamFortress_PrimeGrenade(inp);
+
+    if ( ((inp == 2 && self.tp_grenade_switch != 1) || (inp == 1 && self.tp_grenade_switch == 1))
+                && self.tp_grenades_2 == 10)
+        TeamFortress_ThrowGrenade();
+    }
 };
 
 void (float inp) TeamFortress_PrimeGrenade = {
