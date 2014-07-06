@@ -839,7 +839,7 @@ void (entity p) TeamFortress_SetSpeed = {
     local entity te;
 
     stuffcmd(p, "cl_movespeedkey 1\n");
-    if (p.tfstate & TFSTATE_CANT_MOVE) {
+    if (p.tfstate & TFSTATE_CANT_MOVE || p.is_building == 1) {
 #ifdef STOP_MOUSE_MOVEMENT
         stuffcmd(p, "m_forward 0\n");
         stuffcmd(p, "m_side 0\n");
