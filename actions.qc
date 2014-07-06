@@ -256,13 +256,14 @@ void () TeamFortress_ID = {
 };
 
 void () TeamFortress_ReloadCurrentWeapon = {
-    local float rt;
+    local float reloadtime;
+    local float reloadamount;
     local entity tWeapon;
 
-    if (self.tfstate & 2) {
+    if (self.tfstate & TFSTATE_RELOADING) {
         return;
     }
-    if (self.current_weapon == 128) {
+    if (self.current_weapon == WEAP_SHOTGUN) {
         if (self.ammo_shells == 0) {
             sprint(self, PRINT_HIGH, "Out of shells\n");
             return;
@@ -275,134 +276,148 @@ void () TeamFortress_ReloadCurrentWeapon = {
             sprint(self, PRINT_HIGH, "All shells are in the clip\n");
             return;
         }
-        if (self.reload_shotgun < self.ammo_shells) {
+        if (self.ammo_shells >= 1) {
+            if (self.reload_shotgun >= self.ammo_shells)
+                reloadamount = self.ammo_shells;
+            else
+                reloadamount = self.reload_shotgun;
             Attack_Finished(0.4);
-            rt = (8 - self.reload_shotgun) / 8;
-            rt = 2 - 2 * rt;
+            reloadtime = (8 - reloadamount) / 8;
+            reloadtime = 2 - 2 * reloadtime;
             self.reload_shotgun = 0;
             if (self.ammo_shells < 8) {
                 self.reload_shotgun = 8 - self.ammo_shells;
             }
             sprint(self, PRINT_HIGH, "Reloading...\n");
-            self.tfstate = self.tfstate | 2;
+            self.tfstate = self.tfstate | TFSTATE_RELOADING;
+            Status_Refresh(self);
             tWeapon = spawn();
             tWeapon.owner = self;
             tWeapon.classname = "timer";
-            tWeapon.nextthink = time + rt;
+            tWeapon.nextthink = time + reloadtime;
             tWeapon.think = W_Reload_shotgun;
             self.weaponmodel = "";
             self.weaponframe = 0;
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
-    } else {
-        if (self.current_weapon == 256) {
-            if (self.ammo_shells == 0) {
-                sprint(self, PRINT_HIGH, "Out of shells\n");
-                return;
+    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
+        if (self.ammo_shells == 0) {
+            sprint(self, PRINT_HIGH, "Out of shells\n");
+            return;
+        }
+        if (self.reload_super_shotgun == 0) {
+            sprint(self, PRINT_HIGH, "Clip full\n");
+            return;
+        }
+        if ((16 - self.reload_super_shotgun) == self.ammo_shells) {
+            sprint(self, PRINT_HIGH, "All shells are in the clip\n");
+            return;
+        }
+        if (self.ammo_shells >= 2) {
+            if (self.reload_super_shotgun >= self.ammo_shells)
+                reloadamount = self.ammo_shells;
+            else
+                reloadamount = self.reload_super_shotgun;
+            Attack_Finished(0.7);
+            reloadtime = (16 - reloadamount) / 16;
+            reloadtime = 3 - (3 * reloadtime);
+            self.reload_super_shotgun = 0;
+            if (self.ammo_shells < 16) {
+                self.reload_super_shotgun = 16 - self.ammo_shells;
             }
-            if (self.reload_super_shotgun == 0) {
-                sprint(self, PRINT_HIGH, "Clip full\n");
-                return;
-            }
-            if ((16 - self.reload_super_shotgun) == self.ammo_shells) {
-                sprint(self, PRINT_HIGH, "All shells are in the clip\n");
-                return;
-            }
-            if (self.reload_super_shotgun < self.ammo_shells) {
-                Attack_Finished(0.7);
-                rt = (16 - self.reload_super_shotgun) / 16;
-                rt = 3 - (3 * rt);
-                self.reload_super_shotgun = 0;
-                if (self.ammo_shells < 16) {
-                    self.reload_super_shotgun = 16 - self.ammo_shells;
-                }
-                sprint(self, PRINT_HIGH, "Reloading...\n");
-                self.tfstate = self.tfstate | 2;
-                tWeapon = spawn();
-                tWeapon.owner = self;
-                tWeapon.classname = "timer";
-                tWeapon.nextthink = time + rt;
-                tWeapon.think = W_Reload_super_shotgun;
-                self.weaponmodel = "";
-                self.weaponframe = 0;
-            } else {
-                sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
-            }
+            sprint(self, PRINT_HIGH, "Reloading...\n");
+            self.tfstate = self.tfstate | TFSTATE_RELOADING;
+            Status_Refresh(self);
+            tWeapon = spawn();
+            tWeapon.owner = self;
+            tWeapon.classname = "timer";
+            tWeapon.nextthink = time + reloadtime;
+            tWeapon.think = W_Reload_super_shotgun;
+            self.weaponmodel = "";
+            self.weaponframe = 0;
         } else {
-            if (self.current_weapon == 2048) {
-                if (self.ammo_rockets == 0) {
-                    sprint(self, PRINT_HIGH, "Out of grenades\n");
-                    return;
-                }
-                if (self.reload_grenade_launcher == 0) {
-                    sprint(self, PRINT_HIGH, "Clip full\n");
-                    return;
-                }
-                if ((6 - self.reload_grenade_launcher) ==
-                    self.ammo_rockets) {
-                    sprint(self, PRINT_HIGH, "All grenades are in the clip\n");
-                    return;
-                }
-                if (self.reload_grenade_launcher < self.ammo_rockets) {
-                    Attack_Finished(0.6);
-                    rt = (6 - self.reload_grenade_launcher) / 6;
-                    rt = 4 - 4 * rt;
-                    self.reload_grenade_launcher = 0;
-                    if (self.ammo_rockets < 6) {
-                        self.reload_grenade_launcher =
-                            6 - self.ammo_rockets;
-                    }
-                    sprint(self, PRINT_HIGH, "Reloading...\n");
-                    self.tfstate = self.tfstate | 2;
-                    tWeapon = spawn();
-                    tWeapon.owner = self;
-                    tWeapon.classname = "timer";
-                    tWeapon.nextthink = time + rt;
-                    tWeapon.think = W_Reload_grenade_launcher;
-                    self.weaponmodel = "";
-                    self.weaponframe = 0;
-                } else {
-                    sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
-                }
-            } else {
-                if (self.current_weapon == 8192) {
-                    if (self.ammo_rockets == 0) {
-                        sprint(self, PRINT_HIGH, "Out of rockets\n");
-                        return;
-                    }
-                    if (self.reload_rocket_launcher == 0) {
-                        sprint(self, PRINT_HIGH, "Clip full\n");
-                        return;
-                    }
-                    if ((4 - self.reload_rocket_launcher) ==
-                        self.ammo_rockets) {
-                        sprint(self, PRINT_HIGH, "All rockets are in the clip\n");
-                        return;
-                    }
-                    if (self.reload_rocket_launcher < self.ammo_rockets) {
-                        Attack_Finished(0.8);
-                        rt = (4 - self.reload_rocket_launcher) / 4;
-                        rt = 5 - (5 * rt);
-                        self.reload_rocket_launcher = 0;
-                        if (self.ammo_rockets < 4) {
-                            self.reload_rocket_launcher =
-                                4 - self.ammo_rockets;
-                        }
-                        sprint(self, PRINT_HIGH, "Reloading...\n");
-                        self.tfstate = self.tfstate | 2;
-                        tWeapon = spawn();
-                        tWeapon.owner = self;
-                        tWeapon.classname = "timer";
-                        tWeapon.nextthink = time + rt;
-                        tWeapon.think = W_Reload_rocket_launcher;
-                        self.weaponmodel = "";
-                        self.weaponframe = 0;
-                    } else {
-                        sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
-                    }
-                }
+            sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
+        }
+    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
+        if (self.ammo_rockets == 0) {
+            sprint(self, PRINT_HIGH, "Out of grenades\n");
+            return;
+        }
+        if (self.reload_grenade_launcher == 0) {
+            sprint(self, PRINT_HIGH, "Clip full\n");
+            return;
+        }
+        if ((6 - self.reload_grenade_launcher) ==
+            self.ammo_rockets) {
+            sprint(self, PRINT_HIGH, "All grenades are in the clip\n");
+            return;
+        }
+        if (self.ammo_rockets >= 1) {
+            if (self.reload_grenade_launcher >= self.ammo_rockets)
+                reloadamount = self.ammo_rockets;
+            else
+                reloadamount = self.reload_grenade_launcher;
+            Attack_Finished(0.6);
+            reloadtime = (6 - reloadamount) / 6;
+            reloadtime = 4 - 4 * reloadtime;
+            self.reload_grenade_launcher = 0;
+            if (self.ammo_rockets < 6) {
+                self.reload_grenade_launcher =
+                    6 - self.ammo_rockets;
             }
+            sprint(self, PRINT_HIGH, "Reloading...\n");
+            self.tfstate = self.tfstate | TFSTATE_RELOADING;
+            Status_Refresh(self);
+            tWeapon = spawn();
+            tWeapon.owner = self;
+            tWeapon.classname = "timer";
+            tWeapon.nextthink = time + reloadtime;
+            tWeapon.think = W_Reload_grenade_launcher;
+            self.weaponmodel = "";
+            self.weaponframe = 0;
+        } else {
+            sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
+        }
+    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
+        if (self.ammo_rockets == 0) {
+            sprint(self, PRINT_HIGH, "Out of rockets\n");
+            return;
+        }
+        if (self.reload_rocket_launcher == 0) {
+            sprint(self, PRINT_HIGH, "Clip full\n");
+            return;
+        }
+        if ((4 - self.reload_rocket_launcher) ==
+            self.ammo_rockets) {
+            sprint(self, PRINT_HIGH, "All rockets are in the clip\n");
+            return;
+        }
+        if (self.ammo_rockets >= 1) {
+            if (self.reload_rocket_launcher >= self.ammo_rockets)
+                reloadamount = self.ammo_rockets;
+            else
+                reloadamount = self.reload_rocket_launcher;
+            Attack_Finished(0.8);
+            reloadtime = (4 - reloadamount) / 4;
+            reloadtime = 5 - (5 * reloadtime);
+            self.reload_rocket_launcher = 0;
+            if (self.ammo_rockets < 4) {
+                self.reload_rocket_launcher =
+                    4 - self.ammo_rockets;
+            }
+            sprint(self, PRINT_HIGH, "Reloading...\n");
+            self.tfstate = self.tfstate | TFSTATE_RELOADING;
+            Status_Refresh(self);
+            tWeapon = spawn();
+            tWeapon.owner = self;
+            tWeapon.classname = "timer";
+            tWeapon.nextthink = time + reloadtime;
+            tWeapon.think = W_Reload_rocket_launcher;
+            self.weaponmodel = "";
+            self.weaponframe = 0;
+        } else {
+            sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
     }
 };
