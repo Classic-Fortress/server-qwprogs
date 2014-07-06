@@ -441,7 +441,7 @@ void () GrenadeTimer = {
     Status_Refresh(self.owner);
 
     if (self.heat > 0) {
-        sound(self.owner, CHAN_AUTO, "zombie/z_fall.wav", 1, ATTN_STATIC);
+        stuffcmd(self.owner, "play zombie/z_fall.wav\n");
         self.nextthink = time + 1.0;
     } else {
         dremove(self);
