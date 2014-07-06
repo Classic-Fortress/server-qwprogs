@@ -2440,8 +2440,9 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // grenade impulses always possible
-    if (self.impulse >= 150 && self.impulse <= 155) {
+    // grenade impulses + sniper zoom always possible
+    if ((self.impulse >= 150 && self.impulse <= 155)
+                || (self.playerclass == PC_SNIPER && self.impulse == TF_SPECIAL_SKILL)) {
         ImpulseCommands();
         return;
     }
