@@ -469,6 +469,9 @@ void () GotoNextMap = {
 
     if (vote_result != string_null) {
         changelevel(vote_result);
+        localcmd("exec cfg/maps/");
+        localcmd(vote_result);
+        localcmd(".cfg\n");
         return;
     }
 
