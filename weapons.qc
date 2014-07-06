@@ -2179,8 +2179,6 @@ void () ImpulseCommands = {
         UseSpecialSkill();
 
     if (self.impulse == TF_WEAPLAST) {
-        if (self.playerclass == PC_ENGINEER && self.is_building == 1)
-            TeamFortress_EngineerBuildStop();
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
             TeamFortress_SpyGoUndercover();
     }
@@ -2194,6 +2192,17 @@ void () ImpulseCommands = {
             TeamFortress_PrimeThrowGrenade(1);
         else if (self.impulse == TF_GRENADE_PT_2)
             TeamFortress_PrimeThrowGrenade(2);
+    }
+
+    if (self.is_building == 1) {
+        if (self.impulse >= 1 && self.impulse <= 5) {
+            TeamFortress_EngineerBuildStop();
+        } else if (self.impulse == TF_WEAPNEXT
+                    || self.impulse == TF_WEAPPREV
+                    || self.impulse == TF_WEAPLAST) {
+            TeamFortress_EngineerBuildStop();
+            self.impulse = 0;
+        }
     }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
