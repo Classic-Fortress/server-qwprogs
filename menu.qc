@@ -94,6 +94,9 @@ void (float inp) Menu_Input =
 };
 
 void (float inp) Menu_Team_Input = {
+    if (self.classname == "observer")
+        return;
+
     if (inp == 0) {
         return;
     } if (inp == 5) {
@@ -117,6 +120,9 @@ void () Menu_Team = {
     local string t1 = "“‘ Blue team      ";
     local string t2, t3, t4;
     local string ta = "\n—‘ Automatically assign team";
+
+    if (self.classname == "observer")
+        Status_Menu(self, Menu_Team_Input, "");
 
     local float t1_players  = TeamFortress_TeamGetNoPlayers(1);
     local float t2_players  = TeamFortress_TeamGetNoPlayers(2);
