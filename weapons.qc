@@ -25,7 +25,6 @@ void (float messageno) TeamFortress_Message;
 void () TeamFortress_ShowIDs;
 void () TeamFortress_ShowTF;
 
-void () TeamFortress_SniperWeapon;
 void () TeamFortress_AssaultWeapon;
 void () TeamFortress_IncendiaryCannon;
 void () TeamFortress_FlameThrower;

@@ -2,31 +2,6 @@
 // Functions for the SNIPER class and associated weaponry
 //========================================================
 
-void () SniperSight_Update;
-
-void () TeamFortress_SniperWeapon = {
-    self.impulse = 0;
-    if (self.tfstate & TFSTATE_RELOADING)
-        return;
-
-    if (!
-        ((self.weapons_carried & WEAP_SNIPER_RIFLE) &&
-         (self.weapons_carried & WEAP_AUTO_RIFLE)))
-        return;
-
-    if (self.ammo_shells < 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-
-    if (self.current_weapon == WEAP_SNIPER_RIFLE)
-        self.current_weapon = WEAP_AUTO_RIFLE;
-    else
-        self.current_weapon = WEAP_SNIPER_RIFLE;
-
-    W_SetCurrentAmmo();
-};
-
 void (float zoom_to) TF_zoom = {
     local float default_fov;
     local float default_sensitivity;
