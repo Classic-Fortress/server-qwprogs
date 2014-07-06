@@ -1377,7 +1377,7 @@ void () W_SetCurrentAmmo = {
 
         self.currentammo = self.ammo_shells;
         self.items = self.items | 2048;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot.mdl";
             self.weaponframe = 0;
         }
@@ -1387,7 +1387,7 @@ void () W_SetCurrentAmmo = {
     } else if (self.current_weapon == 256) {
 
         self.currentammo = self.ammo_shells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot2.mdl";
             self.weaponframe = 0;
         }
@@ -1397,7 +1397,7 @@ void () W_SetCurrentAmmo = {
     } else if (self.current_weapon == 512) {
 
         self.currentammo = self.ammo_nails;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_nail.mdl";
             self.weaponframe = 0;
         }
@@ -1405,7 +1405,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 4;
     } else if (self.current_weapon == 1024) {
         self.currentammo = self.ammo_nails;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_nail2.mdl";
             self.weaponframe = 0;
         }
@@ -1413,7 +1413,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 8;
     } else if (self.current_weapon == 2048) {
         self.currentammo = self.ammo_rockets;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock.mdl";
             self.weaponframe = 0;
         }
@@ -1421,7 +1421,7 @@ void () W_SetCurrentAmmo = {
         self.items = self.items | 1024;
     } else if (self.current_weapon == 8192) {
         self.currentammo = self.ammo_rockets;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock2.mdl";
             self.weaponframe = 0;
         }
@@ -1429,7 +1429,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 32;
     } else if (self.current_weapon == 65536) {
         self.currentammo = self.ammo_cells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_light.mdl";
             self.weaponframe = 0;
         }
@@ -1437,7 +1437,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 64;
     } else if (self.current_weapon == 32) {
         self.currentammo = self.ammo_shells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_srifle.mdl";
             self.weaponframe = 0;
         }
@@ -1445,7 +1445,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 1;
     } else if (self.current_weapon == 64) {
         self.currentammo = self.ammo_shells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_srifle.mdl";
             self.weaponframe = 0;
         }
@@ -1453,7 +1453,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 2;
     } else if (self.current_weapon == 32768) {
         self.currentammo = self.ammo_shells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_asscan.mdl";
             self.weaponframe = 0;
         }
@@ -1461,7 +1461,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 32;
     } else if (self.current_weapon == 4096) {
         self.currentammo = self.ammo_cells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock.mdl";
             self.weaponframe = 0;
         }
@@ -1469,7 +1469,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 16;
     } else if (self.current_weapon == 16384) {
         self.currentammo = self.ammo_rockets;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock2.mdl";
             self.weaponframe = 0;
         }
@@ -1481,7 +1481,7 @@ void () W_SetCurrentAmmo = {
         self.weaponframe = 0;
     } else if (self.current_weapon == 262144) {
         self.currentammo = self.ammo_shells;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot.mdl";
             self.weaponframe = 0;
         }
@@ -1489,7 +1489,7 @@ void () W_SetCurrentAmmo = {
         self.weapon = 1;
     } else if (self.current_weapon == 524288) {
         self.currentammo = self.ammo_nails;
-        if (!(self.tfstate & 2)) {
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rail.mdl";
             self.weaponframe = 0;
         }
@@ -1558,7 +1558,7 @@ float () W_CheckNoAmmo = {
 };
 
 void () W_Reload_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot.mdl";
     sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
@@ -1566,7 +1566,7 @@ void () W_Reload_shotgun = {
 };
 
 void () W_Reload_super_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot2.mdl";
     sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
@@ -1574,7 +1574,7 @@ void () W_Reload_super_shotgun = {
 };
 
 void () W_Reload_grenade_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_rock.mdl";
     sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
@@ -1582,7 +1582,7 @@ void () W_Reload_grenade_launcher = {
 };
 
 void () W_Reload_rocket_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 2);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_rock2.mdl";
     sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
@@ -1590,86 +1590,28 @@ void () W_Reload_rocket_launcher = {
 };
 
 float () CheckForReload = {
-    local entity tWeapon;
-
     if (self.current_weapon == WEAP_SHOTGUN) {
-        if ((self.reload_shotgun >= 8) && (self.ammo_shells > 0)) {
-            self.reload_shotgun = 0;
-
-            if (self.ammo_shells < 8)
-                self.reload_shotgun = 8 - self.ammo_shells;
-
-            sprint(self, PRINT_HIGH, "Reloading...\n");
-            self.tfstate = self.tfstate | TFSTATE_RELOADING;
-            tWeapon = spawn();
-            tWeapon.owner = self;
-            tWeapon.classname = "timer";
-            tWeapon.nextthink = time + 2;
-            tWeapon.think = W_Reload_shotgun;
-            self.weaponmodel = "";
-            self.weaponframe = 0;
-            return (1);
+        if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
+            TeamFortress_ReloadCurrentWeapon();
+            return 1;
         }
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-
-        if (self.reload_super_shotgun > 16)
-            self.reload_super_shotgun = 16;
-
-        if ((self.reload_super_shotgun >= 16) && (self.ammo_shells > 0)) {
-            self.reload_super_shotgun = 0;
-
-            if (self.ammo_shells < 16)
-                self.reload_super_shotgun = 16 - self.ammo_shells;
-
-            sprint(self, PRINT_HIGH, "Reloading...\n");
-            self.tfstate = self.tfstate | TFSTATE_RELOADING;
-            tWeapon = spawn();
-            tWeapon.owner = self;
-            tWeapon.classname = "timer";
-            tWeapon.nextthink = time + 3;
-            tWeapon.think = W_Reload_super_shotgun;
-            self.weaponmodel = "";
-            self.weaponframe = 0;
-            return (1);
+        if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
+            TeamFortress_ReloadCurrentWeapon();
+            return 1;
         }
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0)) {
-            self.reload_grenade_launcher = 0;
-
-            if (self.ammo_rockets < 6)
-                self.reload_grenade_launcher = 6 - self.ammo_rockets;
-
-            sprint(self, PRINT_HIGH, "Reloading...\n");
-            self.tfstate = self.tfstate | TFSTATE_RELOADING;
-            tWeapon = spawn();
-            tWeapon.owner = self;
-            tWeapon.classname = "timer";
-            tWeapon.nextthink = time + 4;
-            tWeapon.think = W_Reload_grenade_launcher;
-            self.weaponmodel = "";
-            self.weaponframe = 0;
-            return (1);
+            TeamFortress_ReloadCurrentWeapon();
+            return 1;
         }
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0)) {
-            self.reload_rocket_launcher = 0;
-
-            if (self.ammo_rockets < 4)
-                self.reload_rocket_launcher = 4 - self.ammo_rockets;
-
-            sprint(self, PRINT_HIGH, "Reloading...\n");
-            self.tfstate = self.tfstate | TFSTATE_RELOADING;
-            tWeapon = spawn();
-            tWeapon.owner = self;
-            tWeapon.classname = "timer";
-            tWeapon.nextthink = time + 5;
-            tWeapon.think = W_Reload_rocket_launcher;
-            self.weaponmodel = "";
-            self.weaponframe = 0;
-            return (1);
+            TeamFortress_ReloadCurrentWeapon();
+            return 1;
         }
     }
-    return (0);
+    return 0;
 };
 
 void () player_axe1;
