@@ -2186,6 +2186,17 @@ void () ImpulseCommands = {
             TeamFortress_SpyGoUndercover();
     }
 
+    if (!self.is_feigning) {
+        if (self.impulse == TF_GRENADE_1)
+            TeamFortress_PrimeGrenade(1);
+        else if (self.impulse == TF_GRENADE_2)
+            TeamFortress_PrimeGrenade(2);
+        else if (self.impulse == TF_GRENADE_PT_1)
+            TeamFortress_PrimeThrowGrenade(1);
+        else if (self.impulse == TF_GRENADE_PT_2)
+            TeamFortress_PrimeThrowGrenade(2);
+    }
+
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (self.impulse >= 1 && self.impulse <= 5)
             W_ChangeWeapon(self.impulse);
@@ -2195,14 +2206,6 @@ void () ImpulseCommands = {
             CycleWeaponPrev();
         else if ((self.impulse == TF_WEAPLAST) && (self.last_weapon != 0))
             W_ChangeWeapon(self.impulse);
-        else if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
-        else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
-        else if (self.impulse == TF_GRENADE_PT_1)
-            TeamFortress_PrimeThrowGrenade(1);
-        else if (self.impulse == TF_GRENADE_PT_2)
-            TeamFortress_PrimeThrowGrenade(2);
         else if (self.impulse == TF_RELOAD)
             TeamFortress_ReloadCurrentWeapon();
         else if (self.impulse == TF_DETPACK_5)
@@ -2428,18 +2431,21 @@ void () W_WeaponFrame = {
         Menu_Class();
         return;
     }
+
+    // grenade impulses always possible
+    if (self.impulse >= 150 && self.impulse <= 155) {
+        ImpulseCommands();
+        return;
+    }
+
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 9) {
             Menu_Input(self.impulse);
             return;
         }
     }
-    if (intermission_running)
-        return;
-    if (cease_fire)
-        return;
-    if ((self.is_building != 0 || self.is_detpacking != 0)
-                || self.is_feigning != 0)
+
+    if (intermission_running || cease_fire)
         return;
 
     default_fov = stof(infokey(self, "df"));
