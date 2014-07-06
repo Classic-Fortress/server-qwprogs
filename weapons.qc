@@ -2436,8 +2436,6 @@ void () W_WeaponFrame = {
     }
     if (intermission_running)
         return;
-    if (self.impulse != 0 && self.has_disconnected == 0)
-        ImpulseCommands();
     if (cease_fire)
         return;
     if ((self.is_building != 0 || self.is_detpacking != 0)
@@ -2487,6 +2485,9 @@ void () W_WeaponFrame = {
 
     if (time < self.attack_finished)
         return;
+
+    if (self.impulse != 0 && self.has_disconnected == 0)
+        ImpulseCommands();
 
     if ((!self.button0 && self.fire_held_down) &&
         (self.current_weapon == 32768)) {
