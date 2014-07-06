@@ -1544,8 +1544,15 @@ float () W_CheckNoAmmo = {
         || (self.current_weapon == WEAP_SPANNER)
         || (self.current_weapon == WEAP_MEDIKIT))
         return (1);
-    else if (self.current_weapon == WEAP_INCENDIARY) {
+    else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
+        if (self.currentammo >= 4)
+            return (1);
+    } else if (self.current_weapon == WEAP_INCENDIARY) {
         if (self.currentammo >= 3)
+            return (1);
+    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN
+                || self.current_weapon == WEAP_NAILGUN) {
+        if (self.currentammo >= 2)
             return (1);
     } else if (self.currentammo > 0)
         return (1);
