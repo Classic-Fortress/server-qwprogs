@@ -160,6 +160,8 @@ void () worldspawn = {
         localcmd(".cfg\n");
     }
 
+    Vote_Reset();
+
     W_Precache();
     precache_sound("demon/dland2.wav");
     precache_sound("misc/h2ohit1.wav");
@@ -309,6 +311,7 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
+    Vote_Check();
 };
 
 entity bodyque_head;

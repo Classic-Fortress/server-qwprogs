@@ -2166,6 +2166,11 @@ void () PreMatchImpulses;
 void () DeadImpulses;
 
 void () ImpulseCommands = {
+    if (self.impulse == TF_VOTENEXT)
+        Vote_NextMap(self);
+    else if (self.impulse == TF_FORCENEXT)
+        Vote_ForceNext(self);
+
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 

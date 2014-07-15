@@ -252,6 +252,11 @@
 #define TF_TD_FIRE		16  // Fire damage
 #define TF_TD_NOSOUND		256 // Special damage. Makes no sound/painframe, etc
 
+// Classic Fortress stuff
+#define CF_MAPVOTE_FORCESHOW        5       // Seconds to force the mapvote menu to be open
+#define CF_MAPVOTE_DURATION         180     // Seconds to show map vote menu
+#define CF_MAPVOTE_DURATION_DECIDER 120     // Seconds to show map decider menu
+
 /*======================================================*/
 /* Toggleable Game Settings				*/
 /*======================================================*/
@@ -346,6 +351,10 @@
 #define TF_CAM_FADEFROMWHITE		62
 
 #define TF_WEAPLAST                     69
+
+// CF map voting
+#define TF_VOTENEXT                     70
+#define TF_FORCENEXT                    71
 
 #define TF_CHANGETEAM           98
 #define TF_CHANGECLASS		99

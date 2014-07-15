@@ -467,6 +467,11 @@ void () GotoNextMap = {
     local string sl;
     local string st;
 
+    if (vote_result != string_null) {
+        changelevel(vote_result);
+        return;
+    }
+
     if (nextmap != mapname) {
         changelevel(nextmap);
         already_chosen_map = time;
@@ -697,6 +702,8 @@ void () execute_changelevel = {
 
     other = find(world, classname, "player");
     while (other != world) {
+        if (vote_result != string_null)
+            sprint(other, PRINT_HIGH, "Next up: ", vote_result);
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
         other.movetype = MOVETYPE_NONE;
@@ -1027,6 +1034,7 @@ void () PutClientInServer = {
     self.invincible_finished = 0;
     self.effects = 0;
     self.invincible_time = 0;
+    self.spawn_time = time;
 
     self.reload_shotgun = 0;
     self.reload_super_shotgun = 0;

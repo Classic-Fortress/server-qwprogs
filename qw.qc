@@ -33,6 +33,11 @@ typedef void (float) f_void_float;
 .float zoom_mode;               // Autozoom: 0 (off), 2 (2x), 4 (4x)
 .float zoom_in;                 // TRUE if player is currently zooming in
 .float zoom_out;                // TRUE if player is currently zooming out
+.float has_voted_map;           // Map option that player voted for
+.float spawn_time;              // Time when player spawned
+.float menu_time;               // Time when vote map menu was first issued
+.float vote_next;               // TRUE if player has voted for a map vote
+.float force_next;              // TRUE if player has voted to force next map
 
 .float tfstate;                 // State flags for TeamFortress
 .entity linked_list;            // Used just like chain. Has to be separate so

@@ -5,6 +5,7 @@ qw.qc
 debug.qc
 status.qc
 menu.qc
+vote.qc
 subs.qc
 combat.qc
 items.qc
