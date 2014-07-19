@@ -149,7 +149,7 @@ void () DecodeLevelParms = {
         if (coop || !deathmatch)
             toggleflags = toggleflags | TFLAG_CLASS_PERSIST;
 
-        nextmap = mapname;
+        nextmap = strzone(mapname);
 
         ent = find(world, classname, "info_tfdetect");
         if (ent != world) {
@@ -463,64 +463,23 @@ void () TF_MovePlayer = {
 };
 
 void () GotoNextMap = {
-    local float nextlevel;
-    local string sl;
-    local string st;
+    if (vote_result != string_null)
+        nextmap = strzone(vote_result);
 
-    if (vote_result != string_null) {
-        changelevel(vote_result);
-        localcmd("exec cfg/maps/");
-        localcmd(vote_result);
-        localcmd(".cfg\n");
-        return;
-    }
-
-    if (nextmap != mapname) {
+    if (nextmap != mapname || vote_result != string_null) {
         changelevel(nextmap);
         already_chosen_map = time;
     }
 
-    sl = infokey(world, mapname);
-    if (sl != string_null) {
-        nextmap = sl;
-        already_chosen_map = time;
-        return;
-    }
-
-    if (!already_chosen_map) {
-
-        sl = infokey(world, "n");
-        nextlevel = stof(sl);
-        nextlevel = nextlevel + 1;
-        sl = ftos(nextlevel);
-
-        localcmd("serverinfo n ");
-        localcmd(sl);
-        localcmd("\n");
-
-        st = infokey(world, "cd");
-        if (st == string_null)
-            st = infokey(world, "cycledir");
-
-        if (st != string_null) {
-            localcmd("exec ");
-            localcmd(st);
-            localcmd("/map");
-        } else
-            localcmd("exec qwmcycle/map");
-
-        localcmd(sl);
-        localcmd(".cfg\n");
-        already_chosen_map = time;
-    }
-    if (infokey(world, "n") == "0")
-        already_chosen_map = 0;
+    strunzone(nextmap);
 
     // avoid endless intermission by restarting the current map
-    if (already_chosen_map + 15 < time) {
+    if ((already_chosen_map + 10) < time) {
         changelevel(mapname);
         already_chosen_map = time;
     }
+
+    intermission_running = 0;
 };
 
 void () ExitIntermission = {
@@ -532,89 +491,12 @@ void () ExitIntermission = {
     }
 
     intermission_exittime = time + 1;
-    intermission_running = intermission_running + 1;
 
-    if (intermission_running == 2) {
-
-        if (world.model == "maps/e1m7.bsp") {
-
-            WriteByte(MSG_ALL, SVC_CDTRACK);
-            WriteByte(MSG_ALL, 2);
-            WriteByte(MSG_ALL, 3);
-
-            if (!cvar("registered")) {
-
-                WriteByte(MSG_ALL, SVC_FINALE);
-                WriteString(MSG_ALL,
-                            "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed, \nrealm of Earth Magic, you are ready to\ncomplete your task in...");
-
-            } else {
-
-                WriteByte(MSG_ALL, SVC_FINALE);
-                WriteString(MSG_ALL,
-                            "As the corpse of the monstrous entity\nChthon sinks back into the lava whence\nit rose, you grip the Rune of Earth\nMagic tightly. Now that you have\nconquered the Dimension of the Doomed, \nrealm of Earth Magic, you are ready to\ncomplete your task. A...");
-
-            }
-            return;
-
-        } else if (world.model == "maps/e2m6.bsp") {
-
-            WriteByte(MSG_ALL, SVC_CDTRACK);
-            WriteByte(MSG_ALL, 2);
-            WriteByte(MSG_ALL, 3);
-
-            WriteByte(MSG_ALL, SVC_FINALE);
-            WriteString(MSG_ALL,
-                        "The Rune of Black Magic throbs evilly in\nyour hand and whispers dark thoughts\ninto your brain. You learn the inmost\nlore of the Hell-Mother; Shub-Niggurath!\nYou now know that she is behind all the\nterrible plotting which has led to so\nmuch death...");
-            return;
-
-        } else if (world.model == "maps/e3m6.bsp") {
-
-            WriteByte(MSG_ALL, SVC_CDTRACK);
-            WriteByte(MSG_ALL, 2);
-            WriteByte(MSG_ALL, 3);
-
-            WriteByte(MSG_ALL, SVC_FINALE);
-            WriteString(MSG_ALL,
-                        "The charred viscera of diabolic horrors\nbubble viscously as you seize the Rune\nof Hell Magic. Its heat scorches your\nhand, and its terrible secrets blight\nyour mind. Gathering the shreds of your\ncourage, you shake the devil's shackles\nfrom your ...");
-            return;
-
-        } else if (world.model == "maps/e4m7.bsp") {
-
-            WriteByte(MSG_ALL, SVC_CDTRACK);
-            WriteByte(MSG_ALL, 2);
-            WriteByte(MSG_ALL, 3);
-            WriteByte(MSG_ALL, SVC_FINALE);
-            WriteString(MSG_ALL,
-                        "Despite the awful might of the Elder\nWorld, you have achieved the Rune of\nElder Magic, capstone of all types of\narcane wisdom. Beyond good and evil, \nbeyond life and death, the Rune\npulsates, heavy with import. Patient and\npotent, the Elder Being...");
-            return;
-        }
-        GotoNextMap();
-    }
-    if (intermission_running == 3) {
-
-        if (!cvar("registered")) {
-            WriteByte(MSG_ALL, SVC_SELLSCREEN);
-            return;
-        }
-        if ((serverflags & 15) == 15) {
-            WriteByte(MSG_ALL, SVC_FINALE);
-            WriteString(MSG_ALL,
-                        "Now, you have all four Runes. You sense\ntremendous invisible forces moving to\nunseal ancient barriers. Shub-Niggurath\nhad hoped to use the Runes Herself to\nclear off the Earth, but now instead, \nyou will use them to enter her home and\nconfront he...");
-            return;
-        }
-    }
     dprint("Exit intermission\n");
     GotoNextMap();
 };
 
 void () IntermissionThink = {
-    local float minp;
-    local float maxp;
-    local float currp;
-    local string sl;
-    local string st;
-
     if (time < intermission_exittime)
         return;
     if ((!self.button0 && !self.button1) && !self.button2)
@@ -622,39 +504,6 @@ void () IntermissionThink = {
 
     dprint("Intermission think\n");
     GotoNextMap();
-
-    sl = infokey(world, "nmap");
-    if (sl != string_null) {
-        st = infokey(world, "minp");
-        minp = stof(st);
-        st = infokey(world, "maxp");
-        maxp = stof(st);
-
-        currp = TeamFortress_GetNoPlayers();
-        dprint("MAP CYCLING: Player Counting... ");
-        if ((currp >= minp) && (currp <= maxp)) {
-            dprint("within range. Changing maps...\n");
-
-            st = infokey(world, "cd");
-            if (st == string_null)
-                st = infokey(world, "cycledir");
-            if (st != string_null) {
-                localcmd("exec ");
-                localcmd(st);
-                localcmd("/");
-            } else
-                localcmd("exec qwmcycle/");
-
-            localcmd(sl);
-            localcmd(".cfg\n");
-        } else {
-            dprint("outside range. Next map.\n");
-            already_chosen_map = 0;
-        }
-        localcmd("localinfo minp \"\"\n");
-        localcmd("localinfo maxp \"\"\n");
-        localcmd("localinfo nmap \"\"\n");
-    }
 };
 
 void () PutClientInIntermission =
@@ -706,7 +555,7 @@ void () execute_changelevel = {
     other = find(world, classname, "player");
     while (other != world) {
         if (vote_result != string_null)
-            sprint(other, PRINT_HIGH, "Next up: ", vote_result);
+            sprint(other, PRINT_HIGH, "Next up: ", vote_result, "\n");
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
         other.movetype = MOVETYPE_NONE;
@@ -729,7 +578,7 @@ void () changelevel_touch = {
 
     bprint(PRINT_HIGH, other.netname, " exited the level\n");
 
-    nextmap = self.map;
+    nextmap = strzone(self.map);
     SUB_UseTargets();
 
     if ((self.spawnflags & 1) && (deathmatch == 0)) {

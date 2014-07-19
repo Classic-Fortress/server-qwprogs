@@ -6,6 +6,7 @@
 void (entity pe_player) Vote_NextMap;
 float () Vote_GetNextVotes;
 void (entity pe_player) Vote_ForceNext;
+void () GotoNextMap;
 float () Vote_GetForceNextVotes;
 void () Vote_Check;
 void (float pf_decider) Vote_SetupVote;
@@ -95,7 +96,7 @@ void (entity pe_player) Vote_ForceNext = {
         Vote_SetupVote(0);
         //dprint("[cf/mapvote/forcenext]: forcing next map: ", vote_result, "\n");
         bprint(PRINT_HIGH, "Changing level to ", vote_result, "\n");
-        changelevel(vote_result);
+        GotoNextMap();
     }
 };
 
