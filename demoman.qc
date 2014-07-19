@@ -232,10 +232,9 @@ void () TeamFortress_DetpackSet = {
         return;
     }
 
-    self.is_detpacking = 0;
+    self.owner.is_detpacking = 0;
     Menu_Close(self.owner);
-    self.owner.tfstate =
-        (self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE));
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
     TeamFortress_SetSpeed(self.owner);
     sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
