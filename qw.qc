@@ -19,6 +19,7 @@ typedef void (float) f_void_float;
 .float tp_grenades_2;           // 2nd type of grenades being carried
 .float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
 
+.float hook_out;                // Dummy field for hook to silence error messages
 .float got_aliases;             // TRUE if the player has TeamFortress aliases
 .float cheat_check;             // Time when we'll next check for team cheats
 .float is_removed;              // TRUE if the entity has been removed
