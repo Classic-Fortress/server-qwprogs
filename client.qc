@@ -622,52 +622,114 @@ void () respawn = {
         localcmd("restart\n");
 };
 
+float () CloseToSpawnPoint = {
+    local entity spot = nil;
+    local entity te = nil;
+    local float i;
+
+    if (self.team_no == 1) {
+        spot = find(world, team_str_home, "ts1");
+        for(i = 1; i < 30; i++) {
+            te = findradius(spot.origin, 85);
+            while (te != world) {
+                if (te == self)
+                    return 1;
+                te = te.chain;
+            }
+            spot = find(spot, team_str_home, "ts1");
+        }
+    } else if (self.team_no == 2) {
+        spot = find(world, team_str_home, "ts2");
+        for(i = 1; i < 30; i++) {
+            te = findradius(spot.origin, 85);
+            while (te != world) {
+                if (te == self)
+                    return 1;
+                te = te.chain;
+            }
+            spot = find(spot, team_str_home, "ts2");
+        }
+    } else if (self.team_no == 3) {
+        spot = find(world, team_str_home, "ts3");
+        for(i = 1; i < 30; i++) {
+            te = findradius(spot.origin, 85);
+            while (te != world) {
+                if (te == self)
+                    return 1;
+                te = te.chain;
+            }
+            spot = find(spot, team_str_home, "ts3");
+        }
+    } else if (self.team_no == 4) {
+        spot = find(world, team_str_home, "ts4");
+        for(i = 1; i < 30; i++) {
+            te = findradius(spot.origin, 85);
+            while (te != world) {
+                if (te == self)
+                    return 1;
+                te = te.chain;
+            }
+            spot = find(spot, team_str_home, "ts4");
+        }
+    }
+
+    return 0;
+};
+
 void () ClientKill = {
     local entity te;
+    local float timeleft;
 
     if (self.has_disconnected == 1)
-        return;
-    if (self.suicide_time > time)
         return;
     if (self.deadflag)
         return;
     if (self.playerclass == PC_UNDEFINED)
         return;
 
+    if (self.suicide_time > time) {
+        timeleft = self.suicide_time - time;
+        sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
+        return;
+    }
+
     TF_zoom_reset_death(self);
-
-    // players can't suicide again for 10 seconds
-    self.suicide_time = time + 5 + random() * 5;
-
-    bprint(PRINT_MEDIUM, self.netname, " suicides\n");
 
     set_suicide_frame();
     self.modelindex = modelindex_player;
 
-    // If infected, give the medic a frag
-    if (self.tfstate & TFSTATE_INFECTED) {
-        te = find(world, classname, "timer");
-        while (te) {
-            if ((te.owner == self) && (te.think == BioInfection_Decay)) {
-                logfrag(te, self);
-                TF_AddFrags(te.enemy, 1);
-            }
-            te = find(te, classname, "timer");
-        }
-    } else
-        logfrag(self, self);
-
-    TF_AddFrags(self, -1);
-
     self.weaponmodel = "";
     self.view_ofs = '0 0 -8';
     self.movetype = MOVETYPE_NONE;
-
     TeamFortress_RemoveTimers();
-    TeamFortress_SetupRespawn(TRUE);
+
+    // players can't suicide again for 10 seconds
+    self.suicide_time = time + 5 + random() * 5;
+
+    if (!(self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint())) {
+        bprint(PRINT_MEDIUM, self.netname, " suicides\n");
+
+        // If infected, give the medic a frag
+        if (self.tfstate & TFSTATE_INFECTED) {
+            te = find(world, classname, "timer");
+            while (te) {
+                if ((te.owner == self) && (te.think == BioInfection_Decay)) {
+                    logfrag(te, self);
+                    TF_AddFrags(te.enemy, 1);
+                }
+                te = find(te, classname, "timer");
+            }
+        } else
+            logfrag(self, self);
+
+        TF_AddFrags(self, -1);
+        TeamFortress_SetupRespawn(TRUE);
+        self.th_die();
+    } else {
+        TeamFortress_SetupRespawn(FALSE);
+    }
 
     self.health = -1;
-    self.th_die();
     self.deadflag = DEAD_RESPAWNABLE;
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.takedamage = 0;
