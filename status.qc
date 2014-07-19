@@ -156,7 +156,10 @@ void (entity pl) RefreshStatusBar = {
     else
         sco2 = GreenScoreToString(team4score);
 
-    s3 = strcat(strcat(sco1, sco2), ClipSizeToString(pl));
+    if ((self.tfstate & TFSTATE_RELOADING))
+        s3 = strcat(strcat(sco1, sco2), "  √Ã…–: 0");
+    else
+        s3 = strcat(strcat(sco1, sco2), ClipSizeToString(pl));
 
     s3 = strcat(s3, "  «: ");
     s3 = strcat(s3, ftos(self.no_grenades_1));
