@@ -501,6 +501,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Grenade";
 
         if (self.no_grenades_1 > 0) {
+            self.suicide_time = time + 10;
             self.no_grenades_1 = self.no_grenades_1 - 1;
             if (gtype == 6) {
                 newmis = spawn();
@@ -562,6 +563,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Grenade";
 
         if (self.no_grenades_2 > 0) {
+            self.suicide_time = time + 10;
             self.no_grenades_2 = self.no_grenades_2 - 1;
             if (gtype == 6) {
                 newmis = spawn();
