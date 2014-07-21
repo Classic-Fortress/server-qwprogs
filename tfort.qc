@@ -81,7 +81,7 @@ void (float inp) TeamFortress_ChangeClass = {
             ClientKill();
         } else {
             sprint(self, PRINT_HIGH, "After dying, you will return as a ");
-            TeamFortress_PrintClassName(self, self.nextpc, self.tfstate & 8);
+            TeamFortress_PrintClassName(self, self.nextpc, 0);
         }
         self.immune_to_check = time + 10;
         return;
