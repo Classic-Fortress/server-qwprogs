@@ -322,6 +322,7 @@
 /*======================================================*/
 /* Impulse Defines					*/
 /*======================================================*/
+#define TF_CLASSMENU            5
 #define TF_WEAPNEXT             10
 #define TF_WEAPPREV             12
 // Alias check to see whether they already have the aliases
