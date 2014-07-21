@@ -23,7 +23,7 @@ float (float tno) TeamFortress_TeamIsCivilian;
 float (float tno) TeamFortress_TeamGetNoPlayers;
 float () TeamFortress_GetNoPlayers;
 
-void () TeamFortress_ChangeClass;
+void (float inp) TeamFortress_ChangeClass;
 void (entity p) TeamFortress_SetSkin;
 
 void (float timer) TeamFortress_SetDetpack;
@@ -190,19 +190,8 @@ void () Menu_Team = {
 };
 
 void (float inp) Menu_Class_Input = {
-    local float new_class;
-    new_class = 0;
-
-    if ((inp > 10) || (inp < 1))
-        return;
-
-    self.impulse = inp + 100;
-
-    if (self.playerclass != 0)
-        new_class = 1;
-
-    TeamFortress_ChangeClass();
-    self.impulse = 0;
+    if (inp > 0 && inp <= 10)
+        TeamFortress_ChangeClass(inp);
 };
 
 void () Menu_Class = {

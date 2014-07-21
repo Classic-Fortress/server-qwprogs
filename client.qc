@@ -965,8 +965,7 @@ void () PutClientInServer = {
 
     if (self.playerclass == 0) {
         if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            self.impulse = 1;
-            TeamFortress_ChangeClass();
+            TeamFortress_ChangeClass(11);
         }
     }
     if ((deathmatch == 3) && (self.nextpc != 0)) {

@@ -177,8 +177,7 @@ float (float tno) TeamFortress_TeamSet = {
         SetTeamName(self);
         if (self.playerclass == 0) {
             if (TeamFortress_TeamIsCivilian(self.team_no)) {
-                self.impulse = 1;
-                TeamFortress_ChangeClass();
+                TeamFortress_ChangeClass(11);
             }
         }
         return (1);
@@ -204,8 +203,7 @@ float (float tno) TeamFortress_TeamSet = {
     SetTeamName(self);
     if (self.playerclass == 0) {
         if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            self.impulse = 1;
-            TeamFortress_ChangeClass();
+            TeamFortress_ChangeClass(11);
         }
     }
     return (1);

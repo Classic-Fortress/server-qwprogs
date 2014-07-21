@@ -45,7 +45,7 @@ void () UseSpecialSkill = {
     }
 };
 
-void () TeamFortress_ChangeClass = {
+void (float inp) TeamFortress_ChangeClass = {
     local entity spot;
     local entity te;
 
@@ -60,23 +60,23 @@ void () TeamFortress_ChangeClass = {
             sprint(self, PRINT_HIGH, "You cannot change class\n");
             return;
         }
-        if (!IsLegalClass(self.impulse - 100)) {
+        if (!IsLegalClass(inp)) {
             sprint(self, PRINT_HIGH,
                    "Your team cannot play that class\n");
             TeamFortress_DisplayLegalClasses();
             return;
         }
-        if ((spy_off == 1) && ((self.impulse - 100) == 8)) {
+        if ((spy_off == 1) && (inp == 8)) {
             sprint(self, PRINT_HIGH,
                    "The spy class has been disabled on the server by the administrator\n");
             return;
         }
-        if (ClassIsRestricted(self.team_no, (self.impulse - 100))) {
+        if (ClassIsRestricted(self.team_no, inp)) {
             sprint(self, PRINT_HIGH,
                    "Your team already has enough of that class\n");
             return;
         }
-        self.nextpc = self.impulse - 100;
+        self.nextpc = inp;
         if (self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint() && self.suicide_time <= time) {
             ClientKill();
         } else {
@@ -99,26 +99,23 @@ void () TeamFortress_ChangeClass = {
         sprint(self, PRINT_HIGH, "You have no lives left\n");
         return;
     }
-    if (!IsLegalClass((self.impulse - 100)) && (self.impulse != 1)) {
+    if (!IsLegalClass(inp) && (inp != 11)) {
         sprint(self, PRINT_HIGH,
                "You cannot play that class on this map\n");
         TeamFortress_DisplayLegalClasses();
         return;
     }
-    if ((spy_off == 1) && ((self.impulse - 100) == 8)) {
+    if ((spy_off == 1) && (inp == 8)) {
         sprint(self, PRINT_HIGH,
                "The spy class has been disabled on the server by the administrator\n");
         return;
     }
-    if (ClassIsRestricted(self.team_no, (self.impulse - 100))) {
+    if (ClassIsRestricted(self.team_no, inp)) {
         sprint(self, PRINT_HIGH, "Your team has enough of that class\n");
         return;
     }
     TeamFortress_ExecClassScript(self);
-    if (self.impulse != 1)
-        self.playerclass = self.impulse - 100;
-    else
-        self.playerclass = 11;
+    self.playerclass = inp;
 
     self.nextpc = 0;
     self.takedamage = 2;
