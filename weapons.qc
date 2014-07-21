@@ -2402,7 +2402,7 @@ void () W_WeaponFrame = {
     }
 
     if (self.menu_input) {
-        if (self.impulse > 0 && self.impulse <= 9) {
+        if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
             return;
         }
