@@ -66,6 +66,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("randompc", TF_CHANGEPC + PC_RANDOM, 0);
         TeamFortress_Alias("is_aliased", TF_ALIAS_CHECK, 0);
     } else if (self.motd == 25) {
+        TeamFortress_Alias("menu", TF_CLASSMENU, 0);
         TeamFortress_Alias("weapnext", TF_WEAPNEXT, 0);
         TeamFortress_Alias("weapprev", TF_WEAPPREV, 0);
         TeamFortress_Alias("weaplast", TF_WEAPLAST, 0);
