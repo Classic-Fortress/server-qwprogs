@@ -8,6 +8,8 @@ void () TeamFortress_Regenerate;
 void () TeamFortress_CheckforCheats;
 void () TeamFortress_RegenerateCells;
 
+float () CloseToSpawnPoint;
+
 void () UseSpecialSkill = {
     local vector src;
 
@@ -72,8 +74,12 @@ void () TeamFortress_ChangeClass = {
             return;
         }
         self.nextpc = self.impulse - 100;
-        sprint(self, PRINT_HIGH, "After dying, you will return as a ");
-        TeamFortress_PrintClassName(self, self.nextpc, self.tfstate & 8);
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint() && self.suicide_time <= time) {
+            ClientKill();
+        } else {
+            sprint(self, PRINT_HIGH, "After dying, you will return as a ");
+            TeamFortress_PrintClassName(self, self.nextpc, self.tfstate & 8);
+        }
         self.immune_to_check = time + 10;
         return;
     }
