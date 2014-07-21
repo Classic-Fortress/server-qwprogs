@@ -49,6 +49,9 @@ void () TeamFortress_ChangeClass = {
     local entity spot;
     local entity te;
 
+    if ((intermission_running != 0) || (intermission_exittime > time))
+        return;
+
     if (self.playerclass != 0) {
         if ((deathmatch != 3) && (cb_prematch_time < time))
             return;

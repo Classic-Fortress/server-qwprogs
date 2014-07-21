@@ -118,6 +118,9 @@ float (float tno) TeamFortress_TeamSet = {
     local float tc;
     local string team;
 
+    if ((intermission_running != 0) || (intermission_exittime > time))
+        return (0);
+
     if (tno == 1)
         team = "blue team";
     else if (tno == 2)
