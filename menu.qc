@@ -624,8 +624,6 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
         Engineer_Dispenser_InsertAmmo(self.building);
     } else if (inp == 2) {
         Engineer_Dispenser_InsertArmor(self.building);
-    } else if (inp == 3) {
-        Engineer_Dispenser_Repair(self.building);
     }
 
     self.building = world;
@@ -633,8 +631,8 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 
 void () Menu_EngineerFix_Dispenser = {
     local string s_action = "Dispenser maintenance:\n\n";
-    local string s_ammo, s_armor, s_repair;
-    local string s_nothing = "\n—‘ Nothing     ";
+    local string s_ammo, s_armor;
+    local string s_nothing = "\n—‘ Nothing     \n\n";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
             || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
@@ -649,12 +647,7 @@ void () Menu_EngineerFix_Dispenser = {
     else
         s_armor = "\n";
 
-    if (self.building.health < self.building.max_health)
-        s_repair = "•‘ Repair      \n";
-    else
-        s_repair = "\n";
-
-    Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_repair, s_nothing);
+    Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_nothing);
 };
 
 void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
