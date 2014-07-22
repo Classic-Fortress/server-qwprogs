@@ -617,6 +617,8 @@ void () Dispenser_Die = {
 void (entity disp) Engineer_UseDispenser = {
     local entity dist_checker;
 
+    Engineer_Dispenser_Repair(disp);
+
     sprint(self, PRINT_HIGH, "Dispenser has ", ftos(disp.health), " health and current stock:\n");
     sprint(self, PRINT_HIGH, ftos(disp.ammo_shells),  " shells, ");
     sprint(self, PRINT_HIGH, ftos(disp.ammo_nails),   " nails, ");
