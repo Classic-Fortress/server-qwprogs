@@ -30,6 +30,9 @@ void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 
 void (float type) TeamFortress_DropAmmo;
+void (entity disp) Engineer_Dispenser_InsertAmmo;
+void (entity disp) Engineer_Dispenser_InsertArmor;
+void (entity disp) Engineer_Dispenser_Repair;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage;
@@ -614,80 +617,18 @@ void () Menu_Engineer = {
 };
 
 void (float inp) Menu_EngineerFix_Dispenser_Input = {
-    local float metalcost;
-    local float am;
-
-    if ((self.classname != "player") || (self.building == world)) {
+    if (self.classname != "player" || self.building == world)
         return;
-    }
+
     if (inp == 1) {
-        am = (20 * 2);
-        if (am > self.ammo_shells) {
-            am = self.ammo_shells;
-        }
-        if (am > (400 - self.building.ammo_shells)) {
-            am = (400 - self.building.ammo_shells);
-        }
-        self.ammo_shells = (self.ammo_shells - am);
-        self.building.ammo_shells = (self.building.ammo_shells + am);
-        am = (20 * 2);
-        if (am > self.ammo_nails) {
-            am = self.ammo_nails;
-        }
-        if (am > (600 - self.building.ammo_nails)) {
-            am = (600 - self.building.ammo_nails);
-        }
-        self.ammo_nails = (self.ammo_nails - am);
-        self.building.ammo_nails = (self.building.ammo_nails + am);
-        am = (10 * 2);
-        if (am > self.ammo_rockets) {
-            am = self.ammo_rockets;
-        }
-        if (am > (300 - self.building.ammo_rockets)) {
-            am = (300 - self.building.ammo_rockets);
-        }
-        self.ammo_rockets = (self.ammo_rockets - am);
-        self.building.ammo_rockets = (self.building.ammo_rockets + am);
-        am = (10 * 2);
-        if (am > self.ammo_cells) {
-            am = self.ammo_cells;
-        }
-        if (am > (400 - self.building.ammo_cells)) {
-            am = (400 - self.building.ammo_cells);
-        }
-        self.ammo_cells = (self.ammo_cells - am);
-        self.building.ammo_cells = (self.building.ammo_cells + am);
+        Engineer_Dispenser_InsertAmmo(self.building);
     } else if (inp == 2) {
-        am = (40 * 2);
-        if (am > self.armorvalue) {
-            am = self.armorvalue;
-        }
-        if (am > (500 - self.building.armorvalue)) {
-            am = (500 - self.building.armorvalue);
-        }
-        self.armorvalue = (self.armorvalue - am);
-        self.building.armorvalue = (self.building.armorvalue + am);
+        Engineer_Dispenser_InsertArmor(self.building);
     } else if (inp == 3) {
-        metalcost =
-            ((self.building.max_health -
-              self.building.health) / 5);
-        if (metalcost > self.ammo_cells) {
-            metalcost = self.ammo_cells;
-        }
-        self.ammo_cells = (self.ammo_cells - metalcost);
-        self.building.health =
-            (self.building.health + (metalcost * 5));
+        Engineer_Dispenser_Repair(self.building);
     }
 
     self.building = world;
-    bound_other_ammo(self);
-    if (self.armorvalue == 0) {
-        self.armortype = 0;
-        self.armorclass = 0;
-        self.items =
-            (self.items - (self.items & ((8192 | 16384) | 32768)));
-    }
-    W_SetCurrentAmmo();
 };
 
 void () Menu_EngineerFix_Dispenser = {
