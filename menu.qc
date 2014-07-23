@@ -33,6 +33,9 @@ void (float type) TeamFortress_DropAmmo;
 void (entity disp) Engineer_Dispenser_InsertAmmo;
 void (entity disp) Engineer_Dispenser_InsertArmor;
 void (entity disp) Engineer_Dispenser_Repair;
+void (entity disp) Engineer_SentryGun_InsertAmmo;
+void (entity disp) Engineer_SentryGun_Upgrade;
+void (entity disp) Engineer_SentryGun_Repair;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage;
@@ -682,86 +685,19 @@ void () Menu_EngineerFix_SentryGun_Rotate = {
 };
 
 void (float inp) Menu_EngineerFix_SentryGun_Input = {
-    local float am;
-    local float metalcost;
-    local string st;
+    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
+                || self.classname != "player" || self.building == world)
+        return;
 
-    if (self.building.real_owner.has_sentry == 0) {
-        return;
-    }
-    if ((self.classname != "player") || (self.building == world)) {
-        return;
-    }
     if (inp == 1) {
-        am = (20 * 2);
-        if (am > self.ammo_shells) {
-            am = self.ammo_shells;
-        }
-        if (am >
-            (self.building.maxammo_shells - self.building.ammo_shells)) {
-            am = (self.building.maxammo_shells -
-                  self.building.ammo_shells);
-        }
-        self.ammo_shells = (self.ammo_shells - am);
-        self.building.ammo_shells = (self.building.ammo_shells + am);
-        if (self.building.weapon == 3) {
-            am = (10 * 2);
-            if (am > self.ammo_rockets) {
-                am = self.ammo_rockets;
-            }
-            if (am >
-                (self.building.maxammo_rockets -
-                 self.building.ammo_rockets)) {
-                am = (self.building.maxammo_rockets -
-                      self.building.ammo_rockets);
-            }
-            self.ammo_rockets = (self.ammo_rockets - am);
-            self.building.ammo_rockets = (self.building.ammo_rockets + am);
-        }
-    } else {
-        if (((self.building.weapon < 3) && (inp == 2)) &&
-            (self.ammo_cells >= 130)) {
-            self.ammo_cells = self.ammo_cells - 130;
-            self.building.weapon = self.building.weapon + 1;
-            self.building.max_health = self.building.max_health * 1.2;
-            self.building.health = self.building.max_health;
-            self.building.maxammo_shells =
-                self.building.maxammo_shells * 1.2;
-            if (self.building.weapon == 2) {
-                sound(self.building, 3, "weapons/turrset.wav", 1, 1);
-                self.building.think = lvl2_sentry_stand;
-                self.building.skin = 1;
-            } else {
-                sound(self.building, 3, "weapons/turrset.wav", 1, 1);
-                self.building.think = lvl3_sentry_stand;
-                self.building.skin = 2;
-            }
-            sprint(self, PRINT_HIGH,
-                   "You upgrade the sentry gun to level ");
-            st = ftos(self.building.weapon);
-            sprint(self, PRINT_HIGH, st, "\n");
-        } else if (inp == 3) {
-            metalcost =
-                ((self.building.max_health - self.building.health) / 5);
-            if (metalcost > self.ammo_cells) {
-                metalcost = self.ammo_cells;
-            }
-            self.ammo_cells = self.ammo_cells - metalcost;
-            self.building.health = self.building.health + metalcost * 5;
-        } else if (inp == 4) {
-            if (self.building.real_owner == self)
-                Menu_EngineerFix_SentryGun_Rotate();
-        }
+        Engineer_SentryGun_InsertAmmo(self.building);
+    } else if (inp == 2 && self.building.weapon < 3 && self.ammo_cells >= 130) {
+        Engineer_SentryGun_Upgrade(self.building);
+    } else if (inp == 3) {
+        Engineer_SentryGun_Repair(self.building);
+    } else if (inp == 4) {
+        Menu_EngineerFix_SentryGun_Rotate();
     }
-
-    bound_other_ammo(self);
-    if (self.armorvalue == 0) {
-        self.armortype = 0;
-        self.armorclass = 0;
-        self.items =
-            (self.items - (self.items & ((8192 | 16384) | 32768)));
-    }
-    W_SetCurrentAmmo();
 };
 
 void () Menu_EngineerFix_SentryGun = {

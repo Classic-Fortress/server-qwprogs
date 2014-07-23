@@ -12,6 +12,10 @@ void () CheckDistance;
 void (entity disp) Engineer_Dispenser_InsertAmmo;
 void (entity disp) Engineer_Dispenser_InsertArmor;
 void (entity disp) Engineer_Dispenser_Repair;
+void (entity disp) Engineer_SentryGun_ShowMenu;
+void (entity disp) Engineer_SentryGun_InsertAmmo;
+void (entity disp) Engineer_SentryGun_Upgrade;
+void (entity disp) Engineer_SentryGun_Repair;
 float (entity obj, entity builder) CheckArea;
 
 void () LaserBolt_Think = {
@@ -753,22 +757,38 @@ void (entity disp) Engineer_Dispenser_Repair = {
 };
 
 void (entity gun) Engineer_UseSentryGun = {
-    local entity dist_checker;
-    local string st;
-
     sprint(self, PRINT_HIGH, "Level ");
-    st = ftos(gun.weapon);
-    sprint(self, PRINT_HIGH, st, " Sentry gun has ");
-    st = ftos(floor(gun.health));
-    sprint(self, PRINT_HIGH, st, " health, ");
-    st = ftos(floor(gun.ammo_shells));
-    sprint(self, PRINT_HIGH, st, " shells");
+    sprint(self, PRINT_HIGH, ftos(gun.weapon), " sentry gun has ");
+
+    if (gun.health == gun.max_health)
+        sprint(self, PRINT_HIGH, "max health");
+    else
+        sprint(self, PRINT_HIGH, ftos(floor(gun.health)), " health");
+
+    if (gun.weapon < 3)
+        sprint(self, PRINT_HIGH, " and ");
+    else
+        sprint(self, PRINT_HIGH, ", ");
+
+    if (gun.ammo_shells == gun.maxammo_shells)
+        sprint(self, PRINT_HIGH, "max shells");
+    else
+        sprint(self, PRINT_HIGH, ftos(floor(gun.ammo_shells)), " shells");
+
     if (gun.weapon == 3) {
-        st = ftos(floor(gun.ammo_rockets));
-        sprint(self, PRINT_HIGH, ", ", st, " rockets");
+        if (gun.ammo_rockets == gun.maxammo_rockets)
+            sprint(self, PRINT_HIGH, " and max rockets");
+        else
+            sprint(self, PRINT_HIGH, " and ", ftos(floor(gun.ammo_rockets)), " rockets");
     }
     sprint(self, PRINT_HIGH, "\n");
-    self.building = gun;
+
+    Engineer_SentryGun_ShowMenu(self.building);
+};
+
+void (entity gun) Engineer_SentryGun_ShowMenu = {
+    local entity dist_checker;
+
     dist_checker = spawn();
     dist_checker.classname = "timer";
     dist_checker.owner = self;
@@ -776,6 +796,82 @@ void (entity gun) Engineer_UseSentryGun = {
     dist_checker.think = CheckDistance;
     dist_checker.nextthink = time + 0.3;
     Menu_EngineerFix_SentryGun();
+};
+
+void (entity gun) Engineer_SentryGun_InsertAmmo = {
+    local float shells = 0, rockets = 0;
+
+    shells = 40;
+    if (shells > self.ammo_shells)
+        shells = self.ammo_shells;
+    if (shells > (gun.maxammo_shells - gun.ammo_shells))
+        shells = gun.maxammo_shells - gun.ammo_shells;
+    self.ammo_shells = self.ammo_shells - shells;
+    gun.ammo_shells = gun.ammo_shells + shells;
+
+    if (gun.weapon == 3) {
+        rockets = 20;
+        if (rockets > self.ammo_rockets)
+            rockets = self.ammo_rockets;
+        if (rockets > (gun.maxammo_rockets - gun.ammo_rockets))
+            rockets = gun.maxammo_rockets - gun.ammo_rockets;
+        self.ammo_rockets = self.ammo_rockets - rockets;
+        gun.ammo_rockets = gun.ammo_rockets + rockets;
+    }
+
+    if ((shells + rockets) > 0) {
+        W_SetCurrentAmmo();
+        sprint(self, PRINT_HIGH, "You insert ");
+        if (shells > 0)
+            sprint(self, PRINT_HIGH, ftos(floor(shells)), " shells");
+        if (rockets > 0) {
+            if (shells > 0)
+                sprint(self, PRINT_HIGH, " and ");
+            sprint(self, PRINT_HIGH, ftos(floor(rockets)), " rockets");
+        }
+        sprint(self, PRINT_HIGH, " into sentry gun\n");
+    }
+};
+
+void (entity gun) Engineer_SentryGun_Upgrade = {
+    if (self.ammo_cells < 130)
+        return;
+
+    self.ammo_cells = self.ammo_cells - 130;
+    gun.weapon = gun.weapon + 1;
+    gun.max_health = gun.max_health * 1.2;
+    gun.health = gun.max_health;
+    gun.maxammo_shells = gun.maxammo_shells * 1.2;
+    if (gun.weapon == 2) {
+        sound(gun, 3, "weapons/turrset.wav", 1, 1);
+        gun.think = lvl2_sentry_stand;
+        gun.skin = 1;
+    } else {
+        sound(gun, 3, "weapons/turrset.wav", 1, 1);
+        gun.think = lvl3_sentry_stand;
+        gun.skin = 2;
+    }
+    sprint(self, PRINT_HIGH, "You upgrade the sentry gun to level ");
+    sprint(self, PRINT_HIGH, ftos(gun.weapon), "\n");
+};
+
+void (entity gun) Engineer_SentryGun_Repair = {
+    local float metalcost, healamount;
+
+    metalcost = ceil((gun.max_health - gun.health) / 5);
+    if (metalcost > self.ammo_cells)
+        metalcost = self.ammo_cells;
+    self.ammo_cells = self.ammo_cells - metalcost;
+
+    healamount = floor(metalcost * 5);
+    gun.health = gun.health + healamount;
+
+    if (gun.health > gun.max_health)
+        gun.health = gun.max_health;
+
+    if (metalcost > 0)
+        sprint(self, PRINT_HIGH, "Sentry Gun repaired for ", ftos(healamount),
+                " health using ", ftos(metalcost), " cells\n");
 };
 
 void (entity gunhead) CheckSentry = {
