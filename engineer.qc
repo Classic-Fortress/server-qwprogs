@@ -757,6 +757,24 @@ void (entity disp) Engineer_Dispenser_Repair = {
 };
 
 void (entity gun) Engineer_UseSentryGun = {
+    if (gun.weapon < 3 && self.ammo_cells >= 130) {
+        Engineer_SentryGun_Upgrade(gun);
+        return;
+    }
+
+    if (gun.health < gun.max_health && self.ammo_cells > 0) {
+        Engineer_SentryGun_Repair(gun);
+        return;
+    }
+
+    if (gun.ammo_shells < gun.maxammo_shells || (gun.weapon == 3
+                && gun.ammo_rockets < gun.maxammo_rockets)) {
+        if (self.ammo_shells > 0 || (gun.weapon == 3 && self.ammo_rockets > 0)) {
+            Engineer_SentryGun_InsertAmmo(gun);
+            return;
+        }
+    }
+
     sprint(self, PRINT_HIGH, "Level ");
     sprint(self, PRINT_HIGH, ftos(gun.weapon), " sentry gun has ");
 
