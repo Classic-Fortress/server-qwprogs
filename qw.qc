@@ -29,6 +29,7 @@ typedef void (float) f_void_float;
 .float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float has_disconnected;        // TRUE if the player has disconnected
+.float has_menutimer;           // TRUE if the player has an active menu timer
 .float current_fov;             // Player's current field of view
 .float zoom_level;              // Start zooming to this fov next frame
 .float zoom_mode;               // Autozoom: 0 (off), 2 (2x), 4 (4x)

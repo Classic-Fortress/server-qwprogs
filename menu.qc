@@ -73,7 +73,8 @@ void () Menu_Demoman_Cancel;
 void (float inp) Menu_Demoman_Input;
 void (float inp) Menu_Demoman_Cancel_Input;
 
-void () Menu_Engineer;
+void (entity player) Menu_Engineer;
+void () Menu_Engineer_Update;
 void () Menu_EngineerFix_Dispenser;
 void () Menu_EngineerFix_SentryGun;
 
@@ -572,51 +573,64 @@ void (float inp) Menu_Engineer_Input = {
 
 };
 
-void () Menu_Engineer = {
-    local entity te;
-    local string s_action = "Action:\n\n";
-    local string s_sentry, s_disp, s_dsentry, s_ddisp;
+void (entity player) Menu_Engineer = {
+    local entity te, dist_checker;
+    local string s_action  = "Action:\n\n";
+    local string s_sentry  = "\n";
+    local string s_disp    = "\n";
+    local string s_dsentry = "\n";
+    local string s_ddisp   = "\n";
     local string s_nothing = "\n—‘ Nothing             ";
 
-    if (self.has_sentry) {
+    if (player.has_sentry) {
         s_sentry = "\n";
         s_dsentry = "•‘ Destroy sentry gun  \n";
-        te = findradius(self.origin, 70);
+        te = findradius(player.origin, 70);
         while (te) {
             if (te.classname == "building_sentrygun") {
-                if (te.real_owner == self)
+                if (te.real_owner == player)
                     s_dsentry = "•‘ Dismantle sentry gun\n";
             }
             te = te.chain;
         }
-    } else {
-        if (self.ammo_cells >= 130)
-            s_sentry = "“‘ Build sentry gun    \n";
-        else
-            s_sentry = "\n";
-        s_dsentry = "\n";
+    } else if (player.ammo_cells >= 130) {
+        s_sentry = "“‘ Build sentry gun    \n";
     }
 
-    if (self.has_dispenser) {
-        s_disp = "\n";
+    if (player.has_dispenser) {
         s_ddisp = "–‘ Destroy dispenser   \n";
-        te = findradius(self.origin, 70);
+        te = findradius(player.origin, 70);
         while (te) {
             if (te.classname == "building_dispenser") {
-                if (te.real_owner == self)
+                if (te.real_owner == player)
                     s_ddisp = "–‘ Dismantle dispenser \n";
             }
             te = te.chain;
         }
-    } else {
-        if (self.ammo_cells >= 100)
+    } else if (player.ammo_cells >= 100) {
             s_disp = "”‘ Build dispenser     \n";
-        else
-            s_disp = "\n";
-        s_ddisp = "\n";
     }
 
-    Status_Menu(self, Menu_Engineer_Input, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
+    if ((player.has_dispenser || player.has_sentry) && !player.has_menutimer) {
+        player.has_menutimer = 1;
+        dist_checker = spawn();
+        dist_checker.classname = "menu_timer";
+        dist_checker.owner = player;
+        dist_checker.think = Menu_Engineer_Update;
+        dist_checker.nextthink = time + 0.3;
+    }
+
+    Status_Menu(player, Menu_Engineer_Input, s_action, s_sentry, s_disp, s_dsentry, s_ddisp, s_nothing);
+};
+
+void () Menu_Engineer_Update = {
+    if (self.owner.menu_input == Menu_Engineer_Input) {
+        Menu_Engineer(self.owner);
+        self.nextthink = time + 0.3;
+    } else {
+        self.owner.has_menutimer = 0;
+        dremove(self);
+    }
 };
 
 void (float inp) Menu_EngineerFix_Dispenser_Input = {
