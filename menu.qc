@@ -667,80 +667,34 @@ void () Menu_EngineerFix_Dispenser = {
     Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_nothing);
 };
 
-void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
+void (float inp) Menu_EngineerFix_SentryGun_Input = {
     if (inp == 1) {
-        sprint(self, PRINT_HIGH, "Rotating 90 degrees to the left...\n");
-        self.building.waitmin = anglemod(self.building.waitmin + 90);
-        self.building.waitmax = anglemod(self.building.waitmax + 90);
-    } else if (inp == 2) {
         sprint(self, PRINT_HIGH, "Rotating 45 degrees to the left...\n");
         self.building.waitmin = anglemod(self.building.waitmin + 45);
         self.building.waitmax = anglemod(self.building.waitmax + 45);
+    } else if (inp == 2) {
+        sprint(self, PRINT_HIGH, "Rotating 180 degrees...\n");
+        self.building.waitmin = anglemod(self.building.waitmin + 180);
+        self.building.waitmax = anglemod(self.building.waitmax + 180);
     } else if (inp == 3) {
         sprint(self, PRINT_HIGH, "Rotating 45 degrees to the right...\n");
         self.building.waitmin = anglemod(self.building.waitmin - 45);
         self.building.waitmax = anglemod(self.building.waitmax - 45);
-    } else if (inp == 4) {
-        sprint(self, PRINT_HIGH, "Rotating 90 degrees to the right...\n");
-        self.building.waitmin = anglemod(self.building.waitmin - 90);
-        self.building.waitmax = anglemod(self.building.waitmax - 90);
-    }
-};
-
-void () Menu_EngineerFix_SentryGun_Rotate = {
-    local string action  = "Rotate sentry gun:\n\n";
-    local string rot_90l = "êìë 90 degrees left \n";
-    local string rot_45l = "êîë 45 degrees left \n";
-    local string rot_45r = "êïë 45 degrees right\n";
-    local string rot_90r = "êñë 90 degrees right\n";
-    local string nothing = "\nêóë Nothing         ";
-
-    Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rot_90l, rot_45l, rot_45r, rot_90r, nothing);
-};
-
-void (float inp) Menu_EngineerFix_SentryGun_Input = {
-    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
-                || self.classname != "player" || self.building == world)
-        return;
-
-    if (inp == 1) {
-        Engineer_SentryGun_InsertAmmo(self.building);
-    } else if (inp == 2 && self.building.weapon < 3 && self.ammo_cells >= 130) {
-        Engineer_SentryGun_Upgrade(self.building);
-    } else if (inp == 3) {
-        Engineer_SentryGun_Repair(self.building);
-    } else if (inp == 4) {
-        Menu_EngineerFix_SentryGun_Rotate();
     }
 };
 
 void () Menu_EngineerFix_SentryGun = {
-    local string action  = "Sentry gun maintenance:\n\n";
-    local string putammo, upgrade, repair, rotate;
-    local string nothing = "\nêóë Nothing    ";
+    local string action  = "Rotate sentry gun:\n\n";
+    local string rotl    = "êìë 45 degrees left \n";
+    local string rot180  = "êîë 180 degrees     \n";
+    local string rotr    = "êïë 45 degrees right\n";
+    local string nothing = "\nêóë Nothing         \n";
 
-    if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
-            || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
-        putammo = "êìë Insert ammo\n";
-    else
-        putammo = "\n";
+    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
+                || self.classname != "player" || self.building == world)
+        return;
 
-    if (self.building.weapon < 3 && self.ammo_cells >= 130)
-        upgrade = "êîë Upgrade    \n";
-    else
-        upgrade = "\n";
-
-    if (self.building.health < self.building.max_health)
-        repair = "êïë Repair     \n";
-    else
-        repair = "\n";
-
-    if (self.building.real_owner == self)
-        rotate  = "êñë Rotate     \n";
-    else
-        rotate = "\n";
-
-    Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, putammo, upgrade, repair, rotate, nothing);
+    Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, rotl, rot180, rotr, nothing);
 };
 
 void (float inp) Menu_Dispenser_Input = {
