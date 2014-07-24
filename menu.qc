@@ -535,7 +535,7 @@ void (float inp) Menu_Engineer_Input = {
         TeamFortress_Build(1);
 
     if (inp == 3 && self.has_sentry) {
-        te = findradius(self.origin, 70);
+        te = findradius(self.origin, 100);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
@@ -554,7 +554,7 @@ void (float inp) Menu_Engineer_Input = {
     }
 
     if (inp == 4 && self.has_dispenser) {
-        te = findradius(self.origin, 70);
+        te = findradius(self.origin, 100);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
@@ -585,7 +585,7 @@ void (entity player) Menu_Engineer = {
     if (player.has_sentry) {
         s_sentry = "\n";
         s_dsentry = "•‘ Destroy sentry gun  \n";
-        te = findradius(player.origin, 70);
+        te = findradius(player.origin, 100);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == player)
@@ -599,7 +599,7 @@ void (entity player) Menu_Engineer = {
 
     if (player.has_dispenser) {
         s_ddisp = "–‘ Destroy dispenser   \n";
-        te = findradius(player.origin, 70);
+        te = findradius(player.origin, 100);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == player)
