@@ -1503,7 +1503,7 @@ void () W_SetCurrentAmmo = {
 
     // refresh engineer build menu when ammo updated
     if (self.menu_input == Menu_Engineer_Input)
-        Menu_Engineer();
+        Menu_Engineer(self);
 };
 
 float () W_BestWeapon = {

@@ -243,7 +243,7 @@ void () TeamFortress_EngineerBuild = {
                         "You don't have enough metal to \nbuild anything.\n\n");
             return;
         }
-        Menu_Engineer();
+        Menu_Engineer(self);
     } else if (self.is_building == 1) {
         TeamFortress_EngineerBuildStop();
     }
