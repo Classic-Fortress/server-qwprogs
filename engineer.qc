@@ -801,6 +801,7 @@ void (entity gun) Engineer_UseSentryGun = {
     }
     sprint(self, PRINT_HIGH, "\n");
 
+    self.building = gun;
     Engineer_SentryGun_ShowMenu(self.building);
 };
 
