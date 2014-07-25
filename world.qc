@@ -163,6 +163,7 @@ void () worldspawn = {
     Vote_Reset();
 
     W_Precache();
+    precache_sound("edge/backpack.wav");
     precache_sound("demon/dland2.wav");
     precache_sound("misc/h2ohit1.wav");
     precache_sound("items/itembk2.wav");
