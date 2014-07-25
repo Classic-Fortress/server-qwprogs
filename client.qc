@@ -1808,6 +1808,13 @@ void () ClientDisconnect = {
         }
         te = find(te, classname, "detpack");
     }
+    te = find(world, classname, "grenade");
+    while (te) {
+        if (te.owner == self) {
+            dremove(te);
+        }
+        te = find(te, classname, "grenade");
+    }
     if (clanbattle && (self.tf_id != 0)) {
         te = spawn();
         te.classname = "ghost";

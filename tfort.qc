@@ -645,7 +645,7 @@ void () TeamFortress_GrenadePrimed = {
     local entity user;
 
     user = self.owner;
-    if (!(user.tfstate & 1024) && !user.deadflag) {
+    if (!(user.tfstate & 1024) && !user.deadflag && !user.has_disconnected) {
         self.nextthink = time + 0.1;
         if (!self.think)
             dremove(self);
