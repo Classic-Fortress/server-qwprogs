@@ -595,7 +595,7 @@ void () TeamFortress_SpyUndercoverThink = {
                 TeamFortress_SetSkin(self.owner);
             }
             TeamFortress_SpyCalcName(self.owner);
-            CenterPrint(self.owner, "You are now disguised\n");
+            Status_Print(self.owner, "\n\n\n\n\n\n\n", "You are now disguised");
             self.owner.is_undercover = 1;
         }
     }
@@ -1057,6 +1057,7 @@ void () TranquiliserTimer = {
 void (entity spy) Spy_RemoveDisguise = {
     local string st;
     local float tc;
+    local float coverblown = 0;
 
     if (invis_only != 1) {
         if (spy.playerclass == 8) {
@@ -1068,11 +1069,13 @@ void (entity spy) Spy_RemoveDisguise = {
                 st = ftos(tc);
                 stuffcmd(spy, st);
                 stuffcmd(spy, "\n");
+                coverblown = 1;
             }
             if (spy.undercover_skin != 0) {
                 spy.immune_to_check = time + 10;
                 spy.undercover_skin = 0;
                 spy.skin = 0;
+                coverblown = 1;
             }
             spy.is_undercover = 0;
             Status_Refresh(self);
@@ -1080,6 +1083,7 @@ void (entity spy) Spy_RemoveDisguise = {
             TeamFortress_SpyCalcName(spy);
         }
     } else if (spy.is_undercover) {
+        coverblown = 1;
         spy.is_undercover = 0;
         spy.modelindex = modelindex_player;
         if (spy.items & 524288) {
@@ -1089,4 +1093,6 @@ void (entity spy) Spy_RemoveDisguise = {
         }
         Status_Refresh(self);
     }
+    if (coverblown)
+        Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
 };
