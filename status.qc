@@ -12,7 +12,6 @@ string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
-string(entity pl) SentryHealthToString;
 
 void (entity pl, string...count) Status_Print =
 {
@@ -357,34 +356,25 @@ string(entity pl) ScannerToString =
 string(entity pl) SentryDetailsToString =
 {
     local entity te;
+    local string ammo    = "";
+    local string shells  = "";
+    local string rockets = "";
+    local string hp      = "";
 
     te = find(world, classname, "building_sentrygun");
     while (te) {
         if (te.real_owner == self) {
-            if (te.ammo_shells == 0) {
-                if ((te.ammo_rockets == 0) && (te.weapon == 3))
-                    return (" no ammo                   \n");
-                else
-                    return (" no shells                 \n");
-            } else if ((te.ammo_rockets == 0) && (te.weapon == 3))
-                return (" no rockets                \n");
-            else
-                return ("                           \n");
+            hp = strcat(strpadl(ftos(floor(te.health)), 4), " hp");
+            shells = ftos(floor(te.ammo_shells));
+            if (te.weapon == 3) {
+                rockets = ftos(floor(te.ammo_rockets));
+                ammo = strcat("  Αννο: ", strcat(shells, strcat("/", rockets)));
+            } else {
+                ammo = strcat("  Αννο: ", shells);
+            }
+            return strcat("Σεξτςω:", strcat(hp, strcat(strpadr(ammo, 12), strcat("  Μεφεμ: ", ftos(te.weapon)))));
         }
         te = find(te, classname, "building_sentrygun");
     }
-    return ("                           \n");
-};
-
-string(entity pl) SentryHealthToString =
-{
-    local entity te;
-
-    te = find(world, classname, "building_sentrygun");
-    while (te) {
-        if (te.real_owner == self)
-            return strcat("SENTRY:", strpadl(ftos(floor(te.health)), 4));
-        te = find(te, classname, "building_sentrygun");
-    }
-    return ("SENTRY: 0 health");
+    return ("");
 };
