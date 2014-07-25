@@ -96,15 +96,12 @@ void (entity pl) RefreshStatusBar = {
     local string s1; // will be used for grenade timers
     local string s2; // class line
     local string s3; // score & clip
-    local string sco1, sco2;
+    local string st1, st2, st3, st4; // status bar columns 1-4
     local float height;
     local float i;
     local float win, sec;
 
     pad = "";
-    s1 = "\n\n";
-    s2 = "\n";
-    s3 = "\n";
 
     if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
         if (pl.StatusString)
@@ -127,69 +124,75 @@ void (entity pl) RefreshStatusBar = {
 
     for (i = 0; i < height; i++)
         pad = strcat(pad, "\n");
+    pad = strzone(pad);
 
+    // status line 1 column 1 - grenade timer
+    st1 = "";
     if (pl.StatusGrenTime > 0)
-        s1 = strcat("Explosion in ", strcat(ftos(pl.StatusGrenTime), "...\n\n"));
+        st1 = strcat("Explosion in ", strcat(ftos(pl.StatusGrenTime), "..."));
+    // status line 1
+    s1 = strcat(st1, "\n\n");
+    s1 = strzone(s1);
 
+    // status line 2 column 1 - class specific information
+    st1 = "";
+    if (pl.playerclass == PC_SCOUT)
+        st1 = strcat(ScannerToString(pl), RangeToString(pl));
+    else if (pl.playerclass == PC_DEMOMAN && self.is_detpacking)
+        st1 = strcat(strcat("Setting detpack in ", ftos(self.is_detpacking)), "...");
+    else if (pl.playerclass == PC_SPY)
+        st1 = DisguiseToString(pl);
+    else if (pl.playerclass == PC_ENGINEER && self.has_sentry)
+        st1 = SentryDetailsToString(pl);
+    if (pl.playerclass == PC_ENGINEER && self.is_building)
+        st1 = "Building...";
+    // status line 2
+    s2 = strpadr(st1, 42);
+    s2 = strcat(s2, "\n");
+    s2 = strzone(s2);
+
+    // status line 3 column 1 - team 1 score
     win = TeamFortress_TeamGetWinner();
     sec = TeamFortress_TeamGetSecond();
-
     if (win == 0)
-        sco1 = BlueScoreToString(team1score);
+        st1 = strcat(BlueScoreToString(team1score), "  ");
     else if (win == 1)
-        sco1 = BlueScoreToString(team1score);
+        st1 = strcat(BlueScoreToString(team1score), "  ");
     else if (win == 2)
-        sco1 = RedScoreToString(team2score);
+        st1 = strcat(RedScoreToString(team2score), "  ");
     else if (win == 3)
-        sco1 = YellowScoreToString(team3score);
+        st1 = strcat(YellowScoreToString(team3score), "  ");
     else
-        sco1 = GreenScoreToString(team4score);
-
+        st1 = GreenScoreToString(team4score);
+    // status line 3 column 2 - team 2 score
     if (sec == 0)
-        sco2 = RedScoreToString(team2score);
+        st2 = RedScoreToString(team2score);
     else if (sec == 1)
-        sco2 = BlueScoreToString(team1score);
+        st2 = BlueScoreToString(team1score);
     else if (sec == 2)
-        sco2 = RedScoreToString(team2score);
+        st2 = RedScoreToString(team2score);
     else if (sec == 3)
-        sco2 = YellowScoreToString(team3score);
+        st2 = YellowScoreToString(team3score);
     else
-        sco2 = GreenScoreToString(team4score);
-
-    if ((self.tfstate & TFSTATE_RELOADING))
-        s3 = strcat(strcat(sco1, sco2), "  ÃÌÉĞ: 0");
+        st2 = GreenScoreToString(team4score);
+    // status line 3 column 3 - clip size
+    if (self.tfstate & TFSTATE_RELOADING)
+        st3 = "  Ãìéğ: 0";
     else
-        s3 = strcat(strcat(sco1, sco2), ClipSizeToString(pl));
-
-    s3 = strcat(s3, "  Ç: ");
-    s3 = strcat(s3, ftos(self.no_grenades_1));
-    s3 = strcat(s3, "/");
-    s3 = strcat(s3, ftos(self.no_grenades_2));
-
-    if (pl.playerclass == PC_SCOUT) {
-
-        s2 = strcat(strcat(ScannerToString(pl), RangeToString(pl)), "\n");
-
-    } else if (pl.playerclass == PC_DEMOMAN) {
-
-        if (self.is_detpacking) {
-            s2 = strcat(strpadr(strcat(strcat("  setting detpack in ", ftos(self.is_detpacking)), "..."), 39), "\n");
-        }
-
-    } else if (pl.playerclass == PC_SPY) {
-
-        s2 = DisguiseToString(pl);
-
-    } else if (pl.playerclass == PC_ENGINEER) {
-
-        if (self.has_sentry)
-            s2 = strcat(SentryHealthToString(pl), SentryDetailsToString(pl));
-        else if (self.is_building)
-            s2 = "  building                             \n";
-    }
+        st3 = ClipSizeToString(pl);
+    // status line 3 column 4 - grenade count
+    st4 = strcat("  Çòåî: ", strcat(strcat(ftos(self.no_grenades_1), "/"), ftos(self.no_grenades_2)));
+    // status line 3
+    s3 = strcat(st1, st2);
+    s3 = strcat(s3, st3);
+    s3 = strcat(s3, st4);
+    s3 = strpadr(s3, 42);
+    s3 = strcat(s3, "\n");
+    s3 = strzone(s3);
 
     centerprint(pl, pl.StatusString, pad, s1, s2, s3);
     pl.StatusRefreshTime = time + 1.5;
+    strunzone(pad); strunzone(s1); strunzone(s2); strunzone(s3);
 };
 
 string(float num) NumberToString1000 =
@@ -205,7 +208,7 @@ string(float num) BlueScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("  Blue:", strpadl(ftos(floor(num)), 3));
+    return strcat("Âìõå:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) RedScoreToString =
@@ -213,7 +216,7 @@ string(float num) RedScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("  Red :", strpadl(ftos(floor(num)), 3));
+    return strcat("Òåä :", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) YellowScoreToString =
@@ -221,7 +224,7 @@ string(float num) YellowScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("  Yell:", strpadl(ftos(floor(num)), 3));
+    return strcat("Ùåìì:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) GreenScoreToString =
@@ -229,7 +232,7 @@ string(float num) GreenScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("  Gren:", strpadl(ftos(floor(num)), 3));
+    return strcat("Çòåî:", strpadl(ftos(floor(num)), 3));
 };
 
 string(entity pl) ClipSizeToString =
@@ -258,7 +261,7 @@ string(entity pl) ClipSizeToString =
     if (num > 99)
         num = 99;
 
-    return strcat("  ÃÌÉĞ:", strpadl(ftos(floor(num)), 2));
+    return strcat("  Ãìéğ:", strpadl(ftos(floor(num)), 2));
 };
 
 string(float num) TeamToString =
@@ -277,7 +280,7 @@ string(float num) ClassToString =
     if (num == 3) return "Soldier";
     if (num == 4) return "Demoman";
     if (num == 5) return "Medic";
-    if (num == 6) return "Hvy Wpns";
+    if (num == 6) return "HWGuy";
     if (num == 7) return "Pyro";
     if (num == 8) return "Spy";
     if (num == 9) return "Engineer";
