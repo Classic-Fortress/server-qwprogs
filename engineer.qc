@@ -749,8 +749,10 @@ void (entity disp) Engineer_Dispenser_Repair = {
     healamount = floor(metalcost * 5);
     disp.health = disp.health + healamount;
 
-    if (metalcost > 0)
+    if (metalcost > 0) {
         Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
+        sound(self, 3, "items/r_item2.wav", 1, 1);
+    }
 };
 
 void (entity gun) Engineer_UseSentryGun = {
@@ -848,6 +850,7 @@ void (entity gun) Engineer_SentryGun_InsertAmmo = {
         }
         ammo = strcat(ammo, " into sentry gun");
         Status_Print(self, "\n\n\n\n\n\n\n", ammo);
+        sound(self, 3, "edge/backpack.wav", 1, 1);
     }
 };
 
@@ -886,8 +889,10 @@ void (entity gun) Engineer_SentryGun_Repair = {
     if (gun.health > gun.max_health)
         gun.health = gun.max_health;
 
-    if (metalcost > 0)
+    if (metalcost > 0) {
         Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
+        sound(self, 3, "items/r_item2.wav", 1, 1);
+    }
 };
 
 void (entity gunhead) CheckSentry = {
