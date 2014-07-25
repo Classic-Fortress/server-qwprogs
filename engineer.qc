@@ -630,6 +630,14 @@ void (entity disp) Engineer_UseDispenser = {
     sprint(self, PRINT_HIGH, ftos(disp.ammo_cells),   " cells and ");
     sprint(self, PRINT_HIGH, ftos(disp.armorvalue),   " armor\n");
 
+    if ((!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)
+                || (disp.ammo_shells == BUILD_DISPENSER_MAX_SHELLS && disp.ammo_nails == BUILD_DISPENSER_MAX_NAILS
+                &&  disp.ammo_rockets == BUILD_DISPENSER_MAX_ROCKETS && disp.ammo_cells == BUILD_DISPENSER_MAX_CELLS))
+                && (!self.armorvalue || disp.armorvalue == BUILD_DISPENSER_MAX_ARMOR)) {
+        CenterPrint(self, "\n\nThere's nothing to do");
+        return;
+    }
+
     self.building = disp;
     Menu_EngineerFix_Dispenser();
     dist_checker = spawn();
@@ -641,52 +649,43 @@ void (entity disp) Engineer_UseDispenser = {
 };
 
 void (entity disp) Engineer_Dispenser_InsertAmmo = {
-    local float ammo, shells, nails, rockets, cells;
+    local float shells, nails, rockets, cells;
 
-    ammo = (20 * 2);
-    if (ammo > self.ammo_shells) {
-        ammo = self.ammo_shells;
-    }
-    if (ammo > (400 - disp.ammo_shells)) {
-        ammo = (400 - disp.ammo_shells);
-    }
-    self.ammo_shells = (self.ammo_shells - ammo);
-    disp.ammo_shells = (disp.ammo_shells + ammo);
-    shells = ammo;
-    ammo = (20 * 2);
-    if (ammo > self.ammo_nails) {
-        ammo = self.ammo_nails;
-    }
-    if (ammo > (600 - disp.ammo_nails)) {
-        ammo = (600 - disp.ammo_nails);
-    }
-    self.ammo_nails = (self.ammo_nails - ammo);
-    disp.ammo_nails = (disp.ammo_nails + ammo);
-    nails = ammo;
-    ammo = (10 * 2);
-    if (ammo > self.ammo_rockets) {
-        ammo = self.ammo_rockets;
-    }
-    if (ammo > (300 - disp.ammo_rockets)) {
-        ammo = (300 - disp.ammo_rockets);
-    }
-    self.ammo_rockets = (self.ammo_rockets - ammo);
-    disp.ammo_rockets = (disp.ammo_rockets + ammo);
-    rockets = ammo;
-    ammo = (10 * 2);
-    if (ammo > self.ammo_cells) {
-        ammo = self.ammo_cells;
-    }
-    if (ammo > (400 - disp.ammo_cells)) {
-        ammo = (400 - disp.ammo_cells);
-    }
-    self.ammo_cells = (self.ammo_cells - ammo);
-    disp.ammo_cells = (disp.ammo_cells + ammo);
-    cells = ammo;
+    shells = 40;
+    if (shells > self.ammo_shells)
+        shells = self.ammo_shells;
+    if (shells > (BUILD_DISPENSER_MAX_SHELLS - disp.ammo_shells))
+        shells = (BUILD_DISPENSER_MAX_SHELLS - disp.ammo_shells);
+    self.ammo_shells = (self.ammo_shells - shells);
+    disp.ammo_shells = (disp.ammo_shells + shells);
+
+    nails = 40;
+    if (nails > self.ammo_nails)
+        nails = self.ammo_nails;
+    if (nails > (BUILD_DISPENSER_MAX_NAILS - disp.ammo_nails))
+        nails = (BUILD_DISPENSER_MAX_NAILS - disp.ammo_nails);
+    self.ammo_nails = (self.ammo_nails - nails);
+    disp.ammo_nails = (disp.ammo_nails + nails);
+
+    rockets = 20;
+    if (rockets > self.ammo_rockets)
+        rockets = self.ammo_rockets;
+    if (rockets > (BUILD_DISPENSER_MAX_ROCKETS - disp.ammo_rockets))
+        rockets = (BUILD_DISPENSER_MAX_ROCKETS - disp.ammo_rockets);
+    self.ammo_rockets = (self.ammo_rockets - rockets);
+    disp.ammo_rockets = (disp.ammo_rockets + rockets);
+
+    cells = 20;
+    if (cells > self.ammo_cells)
+        cells = self.ammo_cells;
+    if (cells > (BUILD_DISPENSER_MAX_CELLS - disp.ammo_cells))
+        cells = (BUILD_DISPENSER_MAX_CELLS - disp.ammo_cells);
+    self.ammo_cells = (self.ammo_cells - cells);
+    disp.ammo_cells = (disp.ammo_cells + cells);
 
     if ((shells + nails + rockets + cells) > 0) {
         W_SetCurrentAmmo();
-        sprint(self, PRINT_HIGH, "You inserted ");
+        sprint(self, PRINT_HIGH, "You insert ");
         if (shells > 0)
             sprint(self, PRINT_HIGH, ftos(shells), " shells");
         if (nails > 0) {
@@ -708,19 +707,19 @@ void (entity disp) Engineer_Dispenser_InsertAmmo = {
                 sprint(self, PRINT_HIGH, " and ");
             sprint(self, PRINT_HIGH, ftos(cells), " cells");
         }
-        sprint(self, PRINT_HIGH, " into Dispenser\n");
+        sprint(self, PRINT_HIGH, " into dispenser\n");
     }
 };
 
 void (entity disp) Engineer_Dispenser_InsertArmor = {
     local float armor;
 
-    armor = (40 * 2);
+    armor = 80;
     if (armor > self.armorvalue) {
         armor = self.armorvalue;
     }
-    if (armor > (500 - disp.armorvalue)) {
-        armor = (500 - disp.armorvalue);
+    if (armor > (BUILD_DISPENSER_MAX_ARMOR - disp.armorvalue)) {
+        armor = (BUILD_DISPENSER_MAX_ARMOR - disp.armorvalue);
     }
     self.armorvalue = (self.armorvalue - armor);
     disp.armorvalue = (disp.armorvalue + armor);
@@ -732,9 +731,9 @@ void (entity disp) Engineer_Dispenser_InsertArmor = {
     }
 
     if (armor > 0)
-        sprint(self, PRINT_HIGH, "You inserted ", ftos(armor), " armor into Dispenser\n");
+        sprint(self, PRINT_HIGH, "You insert ", ftos(armor), " armor into dispenser\n");
     else if (disp.armorvalue == BUILD_DISPENSER_MAX_ARMOR)
-        sprint(self, PRINT_HIGH, "Your Dispenser cannot carry more armor\n");
+        sprint(self, PRINT_HIGH, "Dispenser cannot carry more armor\n");
 };
 
 void (entity disp) Engineer_Dispenser_Repair = {
@@ -752,8 +751,8 @@ void (entity disp) Engineer_Dispenser_Repair = {
     disp.health = disp.health + healamount;
 
     if (metalcost > 0)
-        sprint(self, PRINT_HIGH, "You repaired your Dispenser with ", ftos(healamount),
-                " health at the cost of ", ftos(metalcost), " cells\n");
+        sprint(self, PRINT_HIGH, "Dispenser repaired for ", ftos(healamount),
+                " health using ", ftos(metalcost), " cells\n");
 };
 
 void (entity gun) Engineer_UseSentryGun = {
