@@ -292,20 +292,23 @@ string(float num) ClassToString =
 
 string(entity pl) DisguiseToString =
 {
-    local string st;
+    local string st = "";
 
-    if (pl.is_undercover == 0)
-        return ("\n");
-    if (pl.is_undercover == 2)
-        return ("going undercover                       \n");
-    if (invis_only)
-        return ("undercover                             \n");
+    if (pl.is_undercover == 1) {
+        st = "ױמהועדןצוע: ";
+        if (pl.undercover_team) {
+            st = strcat(st, TeamToString(pl.undercover_team));
+            st = strcat(st, " ");
+        }
+        if (pl.undercover_skin)
+            st = strcat(st, ClassToString(pl.undercover_skin));
+    } else if (pl.is_undercover == 2) {
+        st = "Going undercover...";
+    } else if (invis_only) {
+        st = "ױמהועדןצוע";
+    }
 
-    st = TeamToString(pl.undercover_team);
-    st = strcat(st, " ");
-    st = strcat(st, ClassToString(pl.undercover_skin));
-    st = strpadr(st, 39);
-    return strcat(st, "\n");
+    return st;
 };
 
 string(entity pl) RangeToString =
