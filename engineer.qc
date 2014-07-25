@@ -239,8 +239,7 @@ void () TeamFortress_EngineerBuild = {
     if (self.is_building == 0) {
         if (((self.ammo_cells < 100) && !self.has_dispenser) &&
             !self.has_sentry) {
-            CenterPrint(self,
-                        "You don't have enough metal to \nbuild anything.\n\n");
+            Status_Print(self, "\n\n\n\n\n\n\n", "Not enough metal to build anything");
             return;
         }
         Menu_Engineer(self);
@@ -341,8 +340,7 @@ void (float objtobuild) TeamFortress_Build = {
     newmis.origin = self.origin + v_forward;
     if (objtobuild == 1) {
         if (self.has_dispenser) {
-            sprint(self, PRINT_HIGH,
-                   "You can only have one dispenser\n");
+            sprint(self, PRINT_HIGH, "You can only have one dispenser\n");
             return;
         }
         tmp1 = '-16 -16 0';
@@ -352,8 +350,7 @@ void (float objtobuild) TeamFortress_Build = {
         btime = time + 2;
     } else if (objtobuild == 2) {
         if (self.has_sentry) {
-            sprint(self, PRINT_HIGH,
-                   "You can only have one sentry gun\n");
+            sprint(self, PRINT_HIGH, "You can only have one sentry gun\n");
             return;
         }
         tmp1 = '-16 -16 0';
@@ -368,7 +365,7 @@ void (float objtobuild) TeamFortress_Build = {
         return;
     }
     if (!(self.flags & 512)) {
-        CenterPrint(self, "You cannot build in the air\n\n");
+        Status_Print(self, "\n\n\n\n\n\n\n", "You cannot build in the air");
         return;
     }
     self.is_building = 1;
@@ -570,8 +567,7 @@ void () T_Dispenser = {
         return;
     }
     if ((other.team_no != 0) && (other.team_no != self.team_no)) {
-        centerprint(self.real_owner,
-                    "Enemies are using your dispenser!\n");
+        Status_Print(self.real_owner, "\n\n\n\n\n\n\n", "Enemies are using your dispenser!");
     }
     if ((other.building == world) && (other.building_wait < time)) {
         other.building = self;
@@ -634,7 +630,7 @@ void (entity disp) Engineer_UseDispenser = {
                 || (disp.ammo_shells == BUILD_DISPENSER_MAX_SHELLS && disp.ammo_nails == BUILD_DISPENSER_MAX_NAILS
                 &&  disp.ammo_rockets == BUILD_DISPENSER_MAX_ROCKETS && disp.ammo_cells == BUILD_DISPENSER_MAX_CELLS))
                 && (!self.armorvalue || disp.armorvalue == BUILD_DISPENSER_MAX_ARMOR)) {
-        CenterPrint(self, "\n\nThere's nothing to do");
+        Status_Print(self, "\n\n\n\n\n\n\n", "There's nothing to do");
         return;
     }
 
@@ -751,8 +747,7 @@ void (entity disp) Engineer_Dispenser_Repair = {
     disp.health = disp.health + healamount;
 
     if (metalcost > 0)
-        sprint(self, PRINT_HIGH, "Dispenser repaired for ", ftos(healamount),
-                " health using ", ftos(metalcost), " cells\n");
+        Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
 };
 
 void (entity gun) Engineer_UseSentryGun = {
@@ -818,6 +813,7 @@ void (entity gun) Engineer_SentryGun_ShowMenu = {
 
 void (entity gun) Engineer_SentryGun_InsertAmmo = {
     local float shells = 0, rockets = 0;
+    local string ammo = "";
 
     shells = 40;
     if (shells > self.ammo_shells)
@@ -839,15 +835,16 @@ void (entity gun) Engineer_SentryGun_InsertAmmo = {
 
     if ((shells + rockets) > 0) {
         W_SetCurrentAmmo();
-        sprint(self, PRINT_HIGH, "You insert ");
+        ammo = "You insert ";
         if (shells > 0)
-            sprint(self, PRINT_HIGH, ftos(floor(shells)), " shells");
+            ammo = strcat(ammo, strcat(ftos(floor(shells)), " shells"));
         if (rockets > 0) {
             if (shells > 0)
-                sprint(self, PRINT_HIGH, " and ");
-            sprint(self, PRINT_HIGH, ftos(floor(rockets)), " rockets");
+                ammo = strcat(ammo, " and ");
+            ammo = strcat(ammo, strcat(ftos(floor(rockets)), " rockets"));
         }
-        sprint(self, PRINT_HIGH, " into sentry gun\n");
+        ammo = strcat(ammo, " into sentry gun");
+        Status_Print(self, "\n\n\n\n\n\n\n", ammo);
     }
 };
 
@@ -869,8 +866,7 @@ void (entity gun) Engineer_SentryGun_Upgrade = {
         gun.think = lvl3_sentry_stand;
         gun.skin = 2;
     }
-    sprint(self, PRINT_HIGH, "You upgrade the sentry gun to level ");
-    sprint(self, PRINT_HIGH, ftos(gun.weapon), "\n");
+    Status_Print(self, "\n\n\n\n\n\n\n", "Upgraded to level ", ftos(gun.weapon));
 };
 
 void (entity gun) Engineer_SentryGun_Repair = {
@@ -888,8 +884,7 @@ void (entity gun) Engineer_SentryGun_Repair = {
         gun.health = gun.max_health;
 
     if (metalcost > 0)
-        sprint(self, PRINT_HIGH, "Sentry Gun repaired for ", ftos(healamount),
-                " health using ", ftos(metalcost), " cells\n");
+        Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
 };
 
 void (entity gunhead) CheckSentry = {
@@ -899,8 +894,7 @@ void (entity gunhead) CheckSentry = {
     gunbase = gunhead.trigger_field;
     dist = gunbase.origin - gunhead.origin;
     if (vlen(dist) > 15) {
-        bprint(PRINT_MEDIUM, self.real_owner.netname,
-               "'s sentry gun malfunctioned\n");
+        bprint(PRINT_MEDIUM, self.real_owner.netname, "'s sentry gun malfunctioned\n");
         Sentry_Die();
     }
 };
