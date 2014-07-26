@@ -125,8 +125,10 @@ float coop;
 .float weapons_carried;         // the weapons the player is carrying
 .float current_weapon;          // the weapon the player is using
 .float current_weaponslot;      // the currently equipped weaponslot
-.float last_weapon;
-.float last_weaponmode;
+.float last_weaponslot;         // the last equipped weaponslot
+.float slast_weaponslot;        // the second last equipped weaponslot
+.float queue_weaponslot;        // the weaponslot to switch to when possible
+.float quick_weapon;            // TRUE if the player is using a quick weapon slot
 .float next_weapon;             // used by weapon slots to communicate which weapon to select
 .float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
 

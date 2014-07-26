@@ -90,6 +90,14 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-gren2", TF_GRENADE_T, 0);
         TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
         TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
+        TeamFortress_AliasString("+slot1", "impulse 31;+attack");
+        TeamFortress_AliasString("-slot1", "-attack;impulse 68");
+        TeamFortress_AliasString("+slot2", "impulse 32;+attack");
+        TeamFortress_AliasString("-slot2", "-attack;impulse 68");
+        TeamFortress_AliasString("+slot3", "impulse 33;+attack");
+        TeamFortress_AliasString("-slot3", "-attack;impulse 68");
+        TeamFortress_AliasString("+slot4", "impulse 34;+attack");
+        TeamFortress_AliasString("-slot4", "-attack;impulse 68");
         TeamFortress_Alias("showscores", TF_TEAM_SCORES, 0);
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("query", TF_STATUS_QUERY, 0);

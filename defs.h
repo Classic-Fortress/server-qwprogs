@@ -333,6 +333,12 @@
 #define FLAG_INFO		23
 #define HOOK_IMP2		39
 
+// Quick weapon impulses
+#define TF_QUICKSLOT1           31
+#define TF_QUICKSLOT2           32
+#define TF_QUICKSLOT3           33
+#define TF_QUICKSLOT4           34
+
 // Axe
 #define AXE_IMP			40
 
@@ -351,6 +357,7 @@
 #define TF_CAM_FADETOWHITE		61
 #define TF_CAM_FADEFROMWHITE		62
 
+#define TF_QUICKLAST                    68
 #define TF_WEAPLAST                     69
 
 // CF map voting
