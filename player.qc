@@ -496,8 +496,6 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
         self.tfstate = self.tfstate - (self.tfstate & 2048);
         TeamFortress_SetSpeed(self);
         if ((self.ammo_shells < 1) || (self.ammo_cells < 7)) {
-            self.last_weapon = self.current_weapon;
-            self.last_weaponmode = self.weaponmode;
             self.current_weapon = W_BestWeapon();
             self.current_weaponslot = W_GetSlot();
             W_SetCurrentAmmo();

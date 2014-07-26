@@ -1335,8 +1335,7 @@ void () TeamFortress_SetEquipment = {
         self.current_weapon = 0;
         self.current_weaponslot = 1;
         self.weaponmode = 0;
-        self.last_weapon = 0;
-        self.last_weaponmode = 0;
+        self.last_weaponslot = 1;
     }
 
     self.tf_items = 0;
@@ -2506,6 +2505,14 @@ void (string halias, float himpulse1, float himpulse2) TeamFortress_Alias = {
         imp = ftos(himpulse2);
         stuffcmd(self, imp);
     }
+    stuffcmd(self, "\"\n");
+};
+
+void (string halias, string commands) TeamFortress_AliasString = {
+    stuffcmd(self, "alias ");
+    stuffcmd(self, halias);
+    stuffcmd(self, " \"");
+    stuffcmd(self, commands);
     stuffcmd(self, "\"\n");
 };
 
