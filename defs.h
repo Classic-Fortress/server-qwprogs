@@ -328,6 +328,9 @@
 // Alias check to see whether they already have the aliases
 #define TF_ALIAS_CHECK		13
 
+// Class help alias
+#define TF_CLASSHELP            14
+
 // CTF Support Impulses
 #define HOOK_IMP1		22
 #define FLAG_INFO		23

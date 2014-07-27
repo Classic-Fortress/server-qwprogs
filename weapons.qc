@@ -39,6 +39,7 @@ void () SniperSight_Create;
 
 void (float zoom_level) TF_zoom;
 
+void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void () TeamFortress_ID;
@@ -2246,6 +2247,8 @@ void () PreMatchImpulses = {
 void () DeadImpulses = {
     if (self.impulse == TF_SHOWTF)
         TeamFortress_ShowTF();
+    else if (self.impulse == TF_CLASSHELP)
+        Help_Show();
     else if (self.impulse == TF_ZOOMTOGGLE)
         TeamFortress_ZoomToggle();
     else if (self.impulse == TF_ZOOMOFF)
