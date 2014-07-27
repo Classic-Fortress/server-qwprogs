@@ -2358,6 +2358,13 @@ void () W_WeaponFrame = {
     local float zoomkey = stof(infokey(self, "zk"));
     local float instazoom = stof(infokey(self, "zi"));
 
+    if (self.menu_input) {
+        if (self.impulse > 0 && self.impulse <= 10) {
+            Menu_Input(self.impulse);
+            return;
+        }
+    }
+
     if (self.impulse >= 1 && self.impulse <= 5) {
         self.quick_weapon = 0;
         W_ChangeWeapon(self.impulse);
@@ -2385,13 +2392,6 @@ void () W_WeaponFrame = {
                 || (self.playerclass == PC_SNIPER && self.impulse == TF_SPECIAL_SKILL)) {
         ImpulseCommands();
         return;
-    }
-
-    if (self.menu_input) {
-        if (self.impulse > 0 && self.impulse <= 10) {
-            Menu_Input(self.impulse);
-            return;
-        }
     }
 
     if (intermission_running || cease_fire)
