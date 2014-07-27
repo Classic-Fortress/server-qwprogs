@@ -129,6 +129,7 @@ float coop;
 .float slast_weaponslot;        // the second last equipped weaponslot
 .float queue_weaponslot;        // the weaponslot to switch to when possible
 .float quick_weapon;            // TRUE if the player is using a quick weapon slot
+.float quick_weaponchange;      // TRUE if attempting to change weapon (during quick fire) when not yet ready
 .float next_weapon;             // used by weapon slots to communicate which weapon to select
 .float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
 
