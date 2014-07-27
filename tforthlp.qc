@@ -64,6 +64,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("spy", TF_CHANGEPC + PC_SPY, 0);
         TeamFortress_Alias("engineer", TF_CHANGEPC + PC_ENGINEER, 0);
         TeamFortress_Alias("randompc", TF_CHANGEPC + PC_RANDOM, 0);
+        TeamFortress_Alias("classhelp", TF_CLASSHELP, 0);
         TeamFortress_Alias("is_aliased", TF_ALIAS_CHECK, 0);
     } else if (self.motd == 25) {
         TeamFortress_Alias("menu", TF_CLASSMENU, 0);
