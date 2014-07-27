@@ -133,6 +133,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-det20", TF_DETPACK_STOP, 0);
         TeamFortress_Alias("+det50", TF_DETPACK_50, 0);
         TeamFortress_Alias("-det50", TF_DETPACK_STOP, 0);
+        TeamFortress_Alias("+det255", TF_DETPACK, 255);
+        TeamFortress_Alias("-det255", TF_DETPACK_STOP, 0);
     } else if (self.motd == 85) {
         TeamFortress_Alias("clan1", 82, 0);
         TeamFortress_Alias("clan2", 83, 0);
