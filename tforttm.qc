@@ -563,7 +563,7 @@ string(float tno) TeamFortress_TeamGetColorString =
         return ("DarkGreen");
     if (col == YELLOW)
         return ("Yellow");
-    return ("DarkBlue");
+    return ("Blue");
 };
 
 void (entity Player) TeamFortress_TeamShowMemberClasses = {
