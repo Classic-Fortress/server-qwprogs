@@ -1991,6 +1991,14 @@ void (float inp) W_ChangeWeapon = {
     if (!self.queue_weaponslot)
         return;
 
+    // queue last weaponslot
+    if (self.queue_weaponslot == TF_WEAPLAST) {
+        self.queue_weaponslot = self.last_weaponslot;
+        // use second last weapon when switching back from quick fire
+        if (self.quick_weapon)
+            self.last_weaponslot = self.slast_weaponslot;
+    }
+
     // check for ammo
     if (! W_AmmoSlot(self.queue_weaponslot)) {
         if (self.noammo == 1) {
@@ -2002,14 +2010,6 @@ void (float inp) W_ChangeWeapon = {
             self.queue_weaponslot = 0;
             return;
         }
-    }
-
-    // queue last weaponslot
-    if (self.queue_weaponslot == TF_WEAPLAST) {
-        self.queue_weaponslot = self.last_weaponslot;
-        // use second last weapon when switching back from quick fire
-        if (self.quick_weapon)
-            self.last_weaponslot = self.slast_weaponslot;
     }
 
     self.next_weaponmode = 0;
