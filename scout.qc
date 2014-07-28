@@ -308,23 +308,20 @@ void () ConcussionGrenadeTimer = {
     pos = pointcontents(src);
 
     if ((self.owner.flags & 512) || (self.owner.flags & 16)) {
-        if (!((self.owner.tfstate & TFSTATE_CANT_MOVE)
-              && (self.owner.current_weapon == WEAP_ASSAULT_CANNON))) {
-            if (self.owner.is_feigning == 0) {
-                makevectors(self.owner.v_angle);
-                stumble = crandom() * self.health;
-                if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
-                    if ((crandom() < 0)) {
-                        self.owner.velocity_x =
-                            self.owner.velocity_y + stumble;
-                        self.owner.velocity_y =
-                            self.owner.velocity_x + stumble;
-                    } else {
-                        self.owner.velocity_x =
-                            -1 * self.owner.velocity_y + stumble;
-                        self.owner.velocity_y =
-                            -1 * self.owner.velocity_x + stumble;
-                    }
+        if (self.owner.is_feigning == 0) {
+            makevectors(self.owner.v_angle);
+            stumble = crandom() * self.health;
+            if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
+                if ((crandom() < 0)) {
+                    self.owner.velocity_x =
+                        self.owner.velocity_y + stumble;
+                    self.owner.velocity_y =
+                        self.owner.velocity_x + stumble;
+                } else {
+                    self.owner.velocity_x =
+                        -1 * self.owner.velocity_y + stumble;
+                    self.owner.velocity_y =
+                        -1 * self.owner.velocity_x + stumble;
                 }
             }
         }
