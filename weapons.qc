@@ -2103,8 +2103,14 @@ void () ImpulseCommands = {
         self.impulse = 0;
         return;
     }
-    if (self.impulse == TF_SPECIAL_SKILL)
+    if (self.impulse == TF_SPECIAL_SKILL) {
+        if (self.playerclass == PC_SNIPER) {
+            self.reversezoom = stof(infokey(self, "zr"));
+            self.zoomkey = stof(infokey(self, "zk"));
+            self.instazoom = stof(infokey(self, "zi"));
+        }
         UseSpecialSkill();
+    }
 
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
@@ -2355,9 +2361,6 @@ void () DeadImpulses = {
 void () W_WeaponFrame = {
     local vector tv;
     local float set_fov;
-    local float default_fov;
-    local float zoomkey = stof(infokey(self, "zk"));
-    local float instazoom = stof(infokey(self, "zi"));
 
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
@@ -2398,12 +2401,11 @@ void () W_WeaponFrame = {
     if (intermission_running || cease_fire)
         return;
 
-    default_fov = stof(infokey(self, "df"));
-    if (self.zoom_level == 0)
-        self.zoom_level = default_fov;
+    if (self.zoom_level == 0 || self.zoom_mode == 0)
+        self.zoom_level = self.default_fov;
 
     // zoom in/out with zoomkey enabled
-    if (self.zoom_level > 0 && self.zoom_level != self.current_fov && zoomkey == 1) {
+    if (self.zoom_level > 0 && self.zoom_level != self.current_fov && self.zoomkey == 1) {
         if (self.zoom_in == 1) {
             if ((self.current_fov - 20) <= self.zoom_level) {
                 set_fov = self.zoom_level;
@@ -2428,10 +2430,10 @@ void () W_WeaponFrame = {
     }
 
     // zoom out with zoomkey disabled
-    if (!(self.tfstate & TFSTATE_AIMING) && zoomkey != 1) {
-        if (self.current_fov != default_fov) {
-            if ((self.current_fov + 20) >= default_fov || instazoom == 1)
-                set_fov = default_fov;
+    if (!(self.tfstate & TFSTATE_AIMING) && self.zoomkey != 1) {
+        if (self.current_fov != self.default_fov) {
+            if ((self.current_fov + 20) >= self.default_fov || self.instazoom == 1)
+                set_fov = self.default_fov;
             else
                 set_fov = self.current_fov + 20;
 
@@ -2460,9 +2462,9 @@ void () W_WeaponFrame = {
                 }
 
                 // zoom in with zoomkey disabled
-                if (self.current_fov != self.zoom_level && zoomkey != 1) {
+                if (self.current_fov != self.zoom_level && self.zoomkey != 1) {
                     if (self.zoom_out == 1) {
-                        if ((self.current_fov + 20) >= self.zoom_level || instazoom == 1) {
+                        if ((self.current_fov + 20) >= self.zoom_level || self.instazoom == 1) {
                             set_fov = self.zoom_level;
                             self.zoom_out = 0;
                         }
@@ -2470,7 +2472,7 @@ void () W_WeaponFrame = {
                             set_fov = self.current_fov + 20;
                     }
                     else {
-                        if ((self.current_fov - 20) <= self.zoom_level || instazoom == 1) {
+                        if ((self.current_fov - 20) <= self.zoom_level || self.instazoom == 1) {
                             set_fov = self.zoom_level;
                             self.zoom_in = 0;
                         }
