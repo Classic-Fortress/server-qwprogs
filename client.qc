@@ -1295,8 +1295,10 @@ void () PlayerJump = {
 
     if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         stuffcmd(self, "v_idlescale 0\n");
-        sprint(self, PRINT_MEDIUM,
-               "You cannot fire the assault cannon without your feet on the ground...\n");
+        if (self.antispam_cannon_air < time) {
+            sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
+            self.antispam_cannon_air = time + 3;
+        }
         self.tfstate = self.tfstate | TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
