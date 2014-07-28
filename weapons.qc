@@ -2494,9 +2494,9 @@ void () W_WeaponFrame = {
             if (self.flags & FL_ONGROUND) {
                 SuperDamageSound();
                 W_Attack();
-            } else {
-                sprint(self, PRINT_MEDIUM,
-                       "You cannot fire the assault cannon without your feet on the ground...\n");
+            } else if (self.antispam_cannon_air < time) {
+                sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
+                self.antispam_cannon_air = time + 3;
             }
         } else {
             SuperDamageSound();

@@ -330,6 +330,9 @@ float already_chosen_map;
 .float FlashTime;
 .float nailpos;
 
+// anti spam
+.float antispam_cannon_air;     // message shown while trying to fire assault cannon while in the air
+
 // status bar stuff
 .string StatusString;           // current centerprint text (strzone'd!)
 .float StatusStringLines;       // how many lines the centerprint is
