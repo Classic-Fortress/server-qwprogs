@@ -1850,6 +1850,18 @@ void () TeamFortress_RemoveTimers = {
             te = find(te, classname, "timer");
     }
 
+    te = find(world, classname, "timer");
+    while (te != world) {
+        if (te.owner == self) {
+            dremove(te);
+            te = find(world, classname, "gtimer");
+        } else {
+            te = find(te, classname, "gtimer");
+        }
+    }
+    self.StatusGrenTime = 0;
+    Status_Refresh(self);
+
     te = find(world, classname, "grentimer");
     while (te != world) {
         if ((te.owner == self) && (te.no_active_napalm_grens <= 0)) {

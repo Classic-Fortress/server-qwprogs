@@ -1841,23 +1841,8 @@ void (entity targ, entity attacker) ClientObituary = {
     local float rnum;
     local string deathstring;
     local string deathstring2;
-    local entity timer;
     deathstring = "";
     deathstring2 = "";
-
-    if (self.StatusGrenTime > 0) {
-        timer = find(world, classname, "gtimer");
-        while (timer != world) {
-            if (timer.owner == self) {
-                dremove(timer);
-                timer = find(world, classname, "gtimer");
-            } else {
-                timer = find(timer, classname, "gtimer");
-            }
-        }
-        self.StatusGrenTime = 0;
-        Status_Refresh(self);
-    }
 
     TF_zoom_reset_death(targ);
 
