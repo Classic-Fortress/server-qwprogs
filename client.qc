@@ -1270,13 +1270,11 @@ void () PlayerJump = {
             else
                 sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
-        if (self.fire_held_down &&
-            (self.current_weapon == WEAP_ASSAULT_CANNON)) {
+        if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
             stuffcmd(self, "v_idlescale 0\n");
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
-            self.tfstate =
-                self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
             self.weaponframe = 0;
             self.heat = 0;
@@ -1295,8 +1293,7 @@ void () PlayerJump = {
 
     sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
-    if (self.fire_held_down &&
-        (self.current_weapon == WEAP_ASSAULT_CANNON)) {
+    if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         stuffcmd(self, "v_idlescale 0\n");
         sprint(self, PRINT_MEDIUM,
                "You cannot fire the assault cannon without your feet on the ground...\n");

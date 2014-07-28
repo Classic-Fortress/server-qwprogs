@@ -1338,7 +1338,8 @@ void () W_SetCurrentAmmo = {
     if ((self.health <= 0) || (self.current_weapon == 0))
         return;
 
-    if ((self.current_weapon == 32768) && (self.tfstate & 65536))
+    if ((self.current_weapon == WEAP_ASSAULT_CANNON)
+                && (self.tfstate & TFSTATE_CANT_MOVE))
         return;
 
     player_run();
@@ -1448,7 +1449,7 @@ void () W_SetCurrentAmmo = {
         }
         self.items = self.items | 256;
         self.weapon = 2;
-    } else if (self.current_weapon == 32768) {
+    } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_asscan.mdl";
@@ -1510,8 +1511,8 @@ float () W_BestWeapon = {
     if (((self.ammo_cells >= 1) && (it & 65536)) && (self.waterlevel <= 1))
         return (65536);
     else if (((self.ammo_cells >= 7) && (self.ammo_shells >= 1)) &&
-             (it & 32768))
-        return (32768);
+             (it & WEAP_ASSAULT_CANNON))
+        return (WEAP_ASSAULT_CANNON);
     else if ((self.ammo_cells >= 1) && (it & 4096))
         return (4096);
     else if ((self.ammo_nails >= 2) && (it & 1024))
@@ -2445,9 +2446,9 @@ void () W_WeaponFrame = {
         ImpulseCommands();
 
     if ((!self.button0 && self.fire_held_down) &&
-        (self.current_weapon == 32768)) {
+        (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         self.fire_held_down = 0;
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
         TeamFortress_SetSpeed(self);
         player_run();
     }
@@ -2489,8 +2490,8 @@ void () W_WeaponFrame = {
                     TeamFortress_SetSpeed(self);
                 }
             }
-        } else if (self.current_weapon == 32768) {
-            if (self.flags & 512) {
+        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+            if (self.flags & FL_ONGROUND) {
                 SuperDamageSound();
                 W_Attack();
             } else {
@@ -2503,15 +2504,15 @@ void () W_WeaponFrame = {
         }
     } else if (self.playerclass == 0) {
         self.weaponmode = 0;
-    } else if (self.tfstate & 2048) {
-        if (self.current_weapon != 32768) {
+    } else if (self.tfstate & TFSTATE_AIMING) {
+        if (self.current_weapon != WEAP_ASSAULT_CANNON) {
             W_Attack();
         }
-        self.tfstate = self.tfstate - 2048;
+        self.tfstate = self.tfstate - TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.heat = 0;
-    } else if (self.tfstate & 65536) {
-        self.tfstate = self.tfstate - 65536;
+    } else if (self.tfstate & TFSTATE_CANT_MOVE) {
+        self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
         self.heat = 0;
     }
