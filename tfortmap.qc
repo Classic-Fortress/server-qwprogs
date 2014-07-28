@@ -2302,7 +2302,7 @@ void () item_flag_team2 = {
     precache_sound("ogre/ogwake.wav");
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
-    self.netname = "Team 1 Flag";
+    self.netname = "Blue Flag";
     self.broadcast = " гот the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
@@ -2377,7 +2377,7 @@ void () item_flag_team1 = {
     precache_sound("ogre/ogwake.wav");
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
-    self.netname = "Team 2 Flag";
+    self.netname = "Red Flag";
     self.broadcast = " гот the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
