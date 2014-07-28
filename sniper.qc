@@ -3,13 +3,13 @@
 //========================================================
 
 void (float zoom_to) TF_zoom = {
-    local float default_fov;
-    local float default_sensitivity;
+    self.default_fov = stof(infokey(self, "df"));
+    self.default_sensitivity = stof(infokey(self, "ds"));
+    self.reversezoom = stof(infokey(self, "zr"));
+    self.zoomkey = stof(infokey(self, "zk"));
+    self.instazoom = stof(infokey(self, "zi"));
 
-    default_fov = stof(infokey(self, "df"));
-    default_sensitivity = stof(infokey(self, "ds"));
-
-    if (default_fov == 0)
+    if (self.default_fov == 0)
         return;
 
     if (zoom_to != self.current_fov) {
@@ -18,24 +18,25 @@ void (float zoom_to) TF_zoom = {
         stuffcmd(self, ftos(zoom_to));
         stuffcmd(self, "\n");
 
-        if (default_sensitivity > 0) {
+        if (self.default_sensitivity > 0) {
             stuffcmd(self, "sensitivity ");
-            stuffcmd(self, ftos(default_sensitivity * zoom_to / default_fov));
+            stuffcmd(self, ftos(self.default_sensitivity * zoom_to / self.default_fov));
             stuffcmd(self, "\n");
         }
     }
 };
 
 void (entity pl) TF_zoom_reset = {
-    local float default_sensitivity = stof(infokey(pl, "ds"));
-    local float default_fov = stof(infokey(pl, "df"));
-    local float zoomkey = stof(infokey(pl, "zk"));
-    local float reversezoom = stof(infokey(pl, "zr"));
+    pl.default_sensitivity = stof(infokey(pl, "ds"));
+    pl.default_fov = stof(infokey(pl, "df"));
+    pl.reversezoom = stof(infokey(self, "zr"));
+    pl.zoomkey = stof(infokey(self, "zk"));
+    pl.instazoom = stof(infokey(self, "zi"));
 
-    pl.current_fov = default_fov;
-    if (zoomkey) {
-        pl.zoom_level = default_fov;
-        if (reversezoom) {
+    pl.current_fov = pl.default_fov;
+    if (pl.zoomkey) {
+        pl.zoom_level = pl.default_fov;
+        if (pl.reversezoom) {
             if (pl.zoom_mode == 2)
                 pl.zoom_mode = 0;
             else if (pl.zoom_mode == 4)
@@ -48,39 +49,40 @@ void (entity pl) TF_zoom_reset = {
     pl.zoom_in = 0;
     pl.zoom_out = 0;
 
-    if (default_fov > 0) {
+    if (pl.default_fov > 0) {
         stuffcmd(pl, "fov ");
         stuffcmd(pl, ftos(pl.current_fov));
         stuffcmd(pl, "\n");
     }
 
-    if (default_sensitivity > 0) {
+    if (pl.default_sensitivity > 0) {
         stuffcmd(pl, "sensitivity ");
-        stuffcmd(pl, ftos(default_sensitivity));
+        stuffcmd(pl, ftos(pl.default_sensitivity));
         stuffcmd(pl, "\n");
     }
 };
 
 void (entity pl) TF_zoom_reset_death = {
-    local float default_sensitivity = stof(infokey(pl, "ds"));
-    local float default_fov = stof(infokey(pl, "df"));
+    pl.default_sensitivity = stof(infokey(pl, "ds"));
+    pl.default_fov = stof(infokey(pl, "df"));
+    pl.reversezoom = stof(infokey(self, "zr"));
+    pl.zoomkey = stof(infokey(self, "zk"));
+    pl.instazoom = stof(infokey(self, "zi"));
 
-    default_fov = stof(infokey(pl, "df"));
-    default_sensitivity = stof(infokey(pl, "ds"));
-
-    pl.current_fov = default_fov;
+    pl.zoom_level = pl.default_fov;
+    pl.current_fov = pl.default_fov;
     pl.zoom_in = 0;
     pl.zoom_out = 0;
 
-    if (default_fov > 0) {
+    if (pl.default_fov > 0) {
         stuffcmd(pl, "fov ");
         stuffcmd(pl, ftos(pl.current_fov));
         stuffcmd(pl, "\n");
     }
 
-    if (default_sensitivity > 0) {
+    if (pl.default_sensitivity > 0) {
         stuffcmd(pl, "sensitivity ");
-        stuffcmd(pl, ftos(default_sensitivity));
+        stuffcmd(pl, ftos(pl.default_sensitivity));
         stuffcmd(pl, "\n");
     }
 };
@@ -140,56 +142,52 @@ void () SniperSight_Create = {
 void () TeamFortress_ZoomToggle = {
     local float zoom4x;
     local float zoom2x;
-    local float default_fov;
-    local float zoomkey = stof(infokey(self, "zk"));
-    local float instazoom = stof(infokey(self, "zi"));
-    local float reversezoom = stof(infokey(self, "zr"));
 
     if (self.playerclass != PC_SNIPER)
         return;
 
     zoom4x = (stof(infokey(self, "z4x")) > 0) ? stof(infokey(self, "z4x")) : 20;
     zoom2x = (stof(infokey(self, "z2x")) > 0) ? stof(infokey(self, "z2x")) : 40;
-    default_fov = stof(infokey(self, "df"));
+    self.default_fov = stof(infokey(self, "df"));
 
-    if (default_fov == 0) {
+    if (self.default_fov == 0) {
         sprint(self, PRINT_HIGH, "Use \"setinfo df <fov>\" to set default fov to use sniper zoom. Use \"setinfo ds <sensitivity>\" to set default sensitivity for sensitivity scaling.\n");
         return;
     }
 
-    if (    (self.zoom_mode == 0 && reversezoom == 0)
-         || (self.zoom_mode == 2 && reversezoom == 1)) {
+    if (    (self.zoom_mode == 0 && self.reversezoom == 0)
+         || (self.zoom_mode == 2 && self.reversezoom == 1)) {
         self.zoom_mode = 4;
         self.zoom_level = zoom4x;
-        if (zoomkey == 1)
+        if (self.zoomkey == 1)
             sprint(self, PRINT_HIGH, "4x zoom\n");
         else
             sprint(self, PRINT_HIGH, "4x autozoom selected\n");
     }
-    else if (    (self.zoom_mode == 4 && reversezoom == 0)
-              || (self.zoom_mode == 0 && reversezoom == 1)) {
+    else if (    (self.zoom_mode == 4 && self.reversezoom == 0)
+              || (self.zoom_mode == 0 && self.reversezoom == 1)) {
         self.zoom_mode = 2;
         self.zoom_level = zoom2x;
-        if (zoomkey == 1)
+        if (self.zoomkey == 1)
             sprint(self, PRINT_HIGH, "2x zoom\n");
         else
             sprint(self, PRINT_HIGH, "2x autozoom selected\n");
     }
-    else if (    (self.zoom_mode == 2 && reversezoom == 0)
-              || (self.zoom_mode == 4 && reversezoom == 1)) {
+    else if (    (self.zoom_mode == 2 && self.reversezoom == 0)
+              || (self.zoom_mode == 4 && self.reversezoom == 1)) {
         self.zoom_mode = 0;
-        self.zoom_level = default_fov;
-        if (zoomkey == 1)
+        self.zoom_level = self.default_fov;
+        if (self.zoomkey == 1)
             sprint(self, PRINT_HIGH, "No zoom\n");
         else
             sprint(self, PRINT_HIGH, "Autozoom off\n");
     }
 
-    if (instazoom == 1 && zoomkey == 1)
+    if (self.instazoom == 1 && self.zoomkey == 1)
         TF_zoom(self.zoom_level);
-    else if (self.zoom_level < self.current_fov && instazoom != 1)
+    else if (self.zoom_level < self.current_fov && self.instazoom != 1)
         self.zoom_in = 1;
-    else if (self.zoom_level > self.current_fov && instazoom != 1)
+    else if (self.zoom_level > self.current_fov && self.instazoom != 1)
         self.zoom_out = 1;
 };
 
