@@ -888,7 +888,11 @@ void () W_FireAssaultCannon = {
     self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
-    FireBullets(5, dir, '0.1 0.1 0');
+
+    if (vlen(self.velocity) < 50)
+        FireBullets(5, dir, '0.1 0.1 0');
+    else
+        FireBullets(5, dir, '0.2 0.2 0');
 };
 
 void () s_explode1 =[0, s_explode2] {
@@ -1338,10 +1342,6 @@ void () W_SetCurrentAmmo = {
     if ((self.health <= 0) || (self.current_weapon == 0))
         return;
 
-    if ((self.current_weapon == WEAP_ASSAULT_CANNON)
-                && (self.tfstate & TFSTATE_CANT_MOVE))
-        return;
-
     player_run();
 
     self.items = self.items - (self.items & (256 | 512 | 1024 | 2048));
@@ -1736,7 +1736,7 @@ void () W_Attack = {
             self.ammo_cells = self.ammo_cells - 7;
             self.heat = 1;
             self.immune_to_check = time + 5;
-            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+            self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
             player_assaultcannonup1();
         }
@@ -2450,7 +2450,7 @@ void () W_WeaponFrame = {
     if ((!self.button0 && self.fire_held_down) &&
         (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         self.fire_held_down = 0;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
         TeamFortress_SetSpeed(self);
         player_run();
     }
@@ -2507,9 +2507,7 @@ void () W_WeaponFrame = {
     } else if (self.playerclass == 0) {
         self.weaponmode = 0;
     } else if (self.tfstate & TFSTATE_AIMING) {
-        if (self.current_weapon != WEAP_ASSAULT_CANNON) {
-            W_Attack();
-        }
+        W_Attack();
         self.tfstate = self.tfstate - TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.heat = 0;

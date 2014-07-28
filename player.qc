@@ -344,9 +344,7 @@ void () player_nail2 =[104, player_nail1] {
 
 void () player_assaultcannonup1 =[103, player_assaultcannonup2] {
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | 2048;
-        TeamFortress_SetSpeed(self);
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
+        self.tfstate = self.tfstate | TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.count = 1;
         self.heat = 0;
@@ -375,9 +373,7 @@ void () player_assaultcannonup1 =[103, player_assaultcannonup2] {
 
 void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | 2048;
-        TeamFortress_SetSpeed(self);
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
+        self.tfstate = self.tfstate | TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.count = 1;
         self.heat = 0;
@@ -407,7 +403,7 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
 void () player_assaultcannon1 =[103, player_assaultcannon2] {
     local string st;
 
-    if (vlen(self.velocity) < 50) {
+    if (vlen(self.velocity) <= 90) {
         muzzleflash();
         sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
 
@@ -420,10 +416,16 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 
         W_FireAssaultCannon();
         stuffcmd(self, "v_idlescale ");
-        if (self.heat < 5) {
-            st = ftos(self.heat * 4);
+        if (vlen(self.velocity) < 50) {
+            if (self.heat < 5)
+                st = ftos(self.heat * 4);
+            else
+                st = "20";
         } else {
-            st = "20";
+            if (self.heat < 5)
+                st = ftos(self.heat * 8);
+            else
+                st = "40";
         }
         stuffcmd(self, st);
         stuffcmd(self, "\n");
@@ -439,9 +441,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
     }
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
         stuffcmd(self, "v_idlescale 0\n");
-        self.tfstate = self.tfstate | 2048;
-        TeamFortress_SetSpeed(self);
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
+        self.tfstate = self.tfstate | TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.weaponframe = 0;
         self.count = 1;
@@ -472,9 +472,7 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
     }
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
         stuffcmd(self, "v_idlescale 0\n");
-        self.tfstate = self.tfstate | 2048;
-        TeamFortress_SetSpeed(self);
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
+        self.tfstate = self.tfstate | TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.weaponframe = 0;
         self.count = 1;
@@ -491,9 +489,7 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
     if (self.count >= 15) {
         self.heat = 0;
         self.fire_held_down = 0;
-        self.tfstate = self.tfstate - (self.tfstate & 65536);
-        TeamFortress_SetSpeed(self);
-        self.tfstate = self.tfstate - (self.tfstate & 2048);
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
         TeamFortress_SetSpeed(self);
         if ((self.ammo_shells < 1) || (self.ammo_cells < 7)) {
             self.current_weapon = W_BestWeapon();
