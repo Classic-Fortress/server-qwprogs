@@ -137,16 +137,16 @@ void (entity pl) RefreshStatusBar = {
     // status line 2 column 1 - class specific information
     st1 = "";
     if (pl.playerclass == PC_SCOUT)
-        st1 = strcat(ScannerToString(pl), RangeToString(pl));
-    else if (pl.playerclass == PC_DEMOMAN && self.is_detpacking)
+        st1 = ScannerToString(pl);
+    else if (pl.playerclass == PC_DEMOMAN && pl.is_detpacking)
         st1 = strcat(strcat("Setting detpack in ", ftos(self.is_detpacking)), "...");
     else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
         st1 = DetpackToString(pl);
     else if (pl.playerclass == PC_SPY)
         st1 = DisguiseToString(pl);
-    else if (pl.playerclass == PC_ENGINEER && self.has_sentry)
+    else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
         st1 = SentryDetailsToString(pl);
-    if (pl.playerclass == PC_ENGINEER && self.is_building)
+    if (pl.playerclass == PC_ENGINEER && pl.is_building)
         st1 = "Building...";
     // status line 2
     s2 = strpadr(st1, 42);
@@ -179,16 +179,15 @@ void (entity pl) RefreshStatusBar = {
         st2 = GreenScoreToString(team4score);
     // status line 3 column 3 - clip size
     if (self.tfstate & TFSTATE_RELOADING)
-        st3 = "  Ãלינ: 0";
+        st3 = "Ãלינ:  0";
     else
         st3 = ClipSizeToString(pl);
     // status line 3 column 4 - grenade count
     st4 = strcat("  Çעומ: ", strcat(strcat(ftos(self.no_grenades_1), "/"), ftos(self.no_grenades_2)));
     // status line 3
     s3 = strcat(st1, st2);
-    s3 = strcat(s3, st3);
-    s3 = strcat(s3, st4);
-    s3 = strpadr(s3, 42);
+    s3 = strpadr(s3, 21);
+    s3 = strcat(s3, strpadl(strcat(st3, st4), 19));
     s3 = strcat(s3, "\n");
     s3 = strzone(s3);
 
@@ -258,12 +257,12 @@ string(entity pl) ClipSizeToString =
             pl.reload_rocket_launcher = (4 - pl.ammo_rockets);
         num = (4 - pl.reload_rocket_launcher);
     } else
-        return ("         ");
+        return ("");
 
     if (num > 99)
         num = 99;
 
-    return strcat("  Ãלינ:", strpadl(ftos(floor(num)), 2));
+    return strcat("Ãלינ: ", strpadl(ftos(floor(num)), 2));
 };
 
 string(float num) TeamToString =
