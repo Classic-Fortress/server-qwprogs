@@ -472,7 +472,7 @@
 
 // other impulses
 #define TF_SHOW_IDS		186
-#define TF_DROPITEMS		194
+#define TF_DROPFLAG		194
 
 /*======================================================*/
 /*	Colors						*/

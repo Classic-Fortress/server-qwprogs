@@ -2182,7 +2182,7 @@ void () ImpulseCommands = {
         TeamFortress_ID();
     else if (self.impulse == TF_SHOW_IDS)
         TeamFortress_ShowIDs();
-    else if ((self.playerclass != 0) && (self.impulse == 194))
+    else if ((self.playerclass != 0) && (self.impulse == TF_DROPFLAG))
         DropGoalItems();
     else if (self.impulse == TF_PB_DETONATE)
         TeamFortress_DetonatePipebombs();

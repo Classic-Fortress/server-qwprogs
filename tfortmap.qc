@@ -2186,7 +2186,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         setmodel(Item, Item.mdl);
     }
     setsize(Item, Item.goal_min, Item.goal_max);
-    Item.owner = P;
+    Item.owner = world;
     if (PAlive == 1) {
         makevectors(P.v_angle);
         if (P.v_angle_x) {
@@ -2544,9 +2544,7 @@ void () DropGoalItems = {
     te = find(world, classname, "item_tfgoal");
     while (te) {
         if (te.owner == self)
-            if (te.goal_activation & 4096)
-                tfgoalitem_RemoveFromPlayer(te, self, 2);
-
+            tfgoalitem_drop(te, 1, self);
         te = find(te, classname, "item_tfgoal");
     }
     dremove(newmis);
