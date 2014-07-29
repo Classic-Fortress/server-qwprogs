@@ -301,11 +301,28 @@ string(entity pl) DisguiseToString =
         if (pl.undercover_team) {
             st = strcat(st, TeamToString(pl.undercover_team));
             st = strcat(st, " ");
+        } else {
+            st = strcat(st, TeamToString(pl.team_no));
+            st = strcat(st, " ");
         }
         if (pl.undercover_skin)
             st = strcat(st, ClassToString(pl.undercover_skin));
+        else
+            st = strcat(st, "Spy");
     } else if (pl.is_undercover == 2) {
-        st = "Going undercover...";
+        if (pl.undercover_team) {
+            st = "ױמהועדןצוע: ";
+            st = strcat(st, TeamToString(pl.undercover_team));
+            st = strcat(st, " (Spy)");
+        } else if (pl.undercover_skin) {
+            st = "ױמהועדןצוע: ";
+            st = strcat(st, "(");
+            st = strcat(st, TeamToString(pl.team_no));
+            st = strcat(st, ") ");
+            st = strcat(st, ClassToString(pl.undercover_skin));
+        } else {
+            st = strcat(st, "Going undercover...");
+        }
     } else if (invis_only) {
         st = "ױמהועדןצוע";
     }
