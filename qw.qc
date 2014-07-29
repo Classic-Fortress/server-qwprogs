@@ -45,6 +45,7 @@ typedef void (float) f_void_float;
 .float menu_time;               // Time when vote map menu was first issued
 .float vote_next;               // TRUE if player has voted for a map vote
 .float force_next;              // TRUE if player has voted to force next map
+.float detpack_left;            // Seconds left to detpack explosion
 
 .float tfstate;                 // State flags for TeamFortress
 .entity linked_list;            // Used just like chain. Has to be separate so

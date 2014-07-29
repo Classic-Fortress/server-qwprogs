@@ -402,6 +402,8 @@ void () TeamFortress_DetpackDisarm = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 65536);
     TF_AddFrags(self.owner, 1);
     TeamFortress_SetSpeed(self.owner);
+    self.enemy.owner.detpack_left = 0;
+    Status_Refresh(self.enemy.owner);
 
     dremove(self.enemy.oldenemy);
     dremove(self.enemy);
@@ -415,6 +417,8 @@ void () TeamFortress_DetpackCountDown = {
     CheckBelowBuilding(self.enemy);
     self.nextthink = time + 1;
     self.health = self.health - 1;
+    self.owner.detpack_left = self.health;
+    Status_Refresh(self.owner);
 
     if (self.health < 10) {
 

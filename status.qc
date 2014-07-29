@@ -8,6 +8,7 @@ string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
 string(entity pl) ClipSizeToString;
+string(entity pl) DetpackToString;
 string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
@@ -139,6 +140,8 @@ void (entity pl) RefreshStatusBar = {
         st1 = strcat(ScannerToString(pl), RangeToString(pl));
     else if (pl.playerclass == PC_DEMOMAN && self.is_detpacking)
         st1 = strcat(strcat("Setting detpack in ", ftos(self.is_detpacking)), "...");
+    else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
+        st1 = DetpackToString(pl);
     else if (pl.playerclass == PC_SPY)
         st1 = DisguiseToString(pl);
     else if (pl.playerclass == PC_ENGINEER && self.has_sentry)
@@ -306,6 +309,19 @@ string(entity pl) DisguiseToString =
         st = "Going undercover...";
     } else if (invis_only) {
         st = "Õמהועדןצוע";
+    }
+
+    return st;
+};
+
+string(entity pl) DetpackToString =
+{
+    local string st = "";
+
+    if (pl.detpack_left) {
+        st = "Äופנבדכ: ";
+        st = strcat(st, ftos(pl.detpack_left));
+        st = strcat(st, " seconds left");
     }
 
     return st;
