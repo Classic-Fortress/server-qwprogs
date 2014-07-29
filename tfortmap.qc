@@ -2237,7 +2237,7 @@ void (entity Item) tfgoalitem_checkgoalreturn = {
 };
 
 void (entity Goal, entity Player, entity Item) DisplayItemStatus = {
-    if (Item.goal_state == 1) {
+    if (Item.goal_state == 1 && Item.owner != world) {
         if ((Goal.team_str_carried != string_null) ||
             (Goal.non_team_str_carried != string_null)) {
             if (Player.team_no == Item.owned_by) {
