@@ -1,6 +1,8 @@
 Classic Fortress v0.9 beta
+==========================
 
-=== New features ===
+New features
+------
 * Map voting during last few minutes of each game (use /votenext and /forcenext to vote early).
 * Map specific configurations (/fortress/cfg/maps/<mapname>.cfg).
 * Grenade timers (disable with /cf\_notimers 1 or disable just sound with /cf\_notimersound 1).
@@ -22,10 +24,12 @@ Classic Fortress v0.9 beta
 * No more spamming weapon messages.
 * Major code cleanup and rewrites.
 
-=== Scout ===
+Scout
+------
 * New Scanner menu where Scanner settings can be changed.
 
-=== Sniper ===
+Sniper
+------
 * Sniper Rifle range increased.
 * Automatic sensitivity scaling while zoomed in.
 * Use the special button as a zoom button (cf_zoomkey 1).
@@ -34,21 +38,25 @@ Classic Fortress v0.9 beta
 * Reverse sniper zoom order with cf\_reversezoom 1.
 * Faster zooming (+/- 20 fov instead of 5 per frame).
 
-=== Demoman ===
+Demolitions Man
+------
 * New detpack menu containing 5, 20, 50 and 255 second detpacks.
 * Changed maximum detpipes allowed per team to 6 per demoman instead of 7 total.
 
-=== HWGuy ===
+Heavy Weapons Guy
+------
 * Assault Cannon can now be fired while moving.
 * Accuracy of Assault Cannon decreased while moving.
 * HWGuy can now be affected by concussion grenades while firing Assault Cannon.
 
-=== Spy ===
+Spy
+------
 * Improved disguise menu.
 * Changed class special to silent feign.
 * Stop disguising by pressing last weapon bind or the disguise menu bind.
 
-=== Engineer ===
+Engineer
+------
 * Sentry Gun status (health, ammo and level) shown in status bar.
 * New Sentry Gun maintenance menu containing simply rotation.
 * Upgrade/repair/restock Sentry Gun on spanner hit.
