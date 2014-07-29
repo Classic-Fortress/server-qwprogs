@@ -1958,18 +1958,6 @@ void (float inp) W_ChangeWeapon = {
     if (self.playerclass == 0)
         return;
 
-    if (inp == 5) {
-        if (self.playerclass == PC_ENGINEER)
-            TeamFortress_EngineerBuild();
-        else if (self.playerclass == PC_SCOUT)
-            Menu_Scout();
-        else if (self.playerclass == PC_SPY)
-            TeamFortress_SpyGoUndercover();
-        else if (self.playerclass == PC_DEMOMAN)
-            TeamFortress_DetpackMenu();
-        return;
-    }
-
     // queue next weapon (in case of attack/reload in progress)
     if (!self.queue_weaponslot || self.queue_weaponslot != inp) {
         // set quick_weaponchange when player tries to change weapon during quick weapon fire/reload
@@ -2369,7 +2357,18 @@ void () W_WeaponFrame = {
         }
     }
 
-    if (self.impulse >= 1 && self.impulse <= 5) {
+    if (self.impulse == 5) {
+        if (self.playerclass == PC_ENGINEER)
+            TeamFortress_EngineerBuild();
+        else if (self.playerclass == PC_SCOUT)
+            Menu_Scout();
+        else if (self.playerclass == PC_SPY)
+            TeamFortress_SpyGoUndercover();
+        else if (self.playerclass == PC_DEMOMAN)
+            TeamFortress_DetpackMenu();
+    }
+
+    if (self.impulse >= 1 && self.impulse <= 4) {
         self.quick_weapon = 0;
         W_ChangeWeapon(self.impulse);
     } else if (self.impulse >= 31 && self.impulse <= 34) {
