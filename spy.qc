@@ -586,15 +586,15 @@ void () TeamFortress_SpyUndercoverThink = {
         } else {
             self.owner.immune_to_check = time + 10;
             if (self.skin != 0) {
-                sprint(self.owner, PRINT_HIGH, "Skin set to ");
+                sprint(self.owner, PRINT_HIGH, "Disguised as ");
                 TeamFortress_PrintClassName(self.owner, self.skin, 0);
                 self.owner.undercover_skin = self.skin;
                 TeamFortress_SetSkin(self.owner);
             }
             if (self.team != 0) {
-                sprint(self.owner, PRINT_HIGH, "Colors set to team ");
-                st = ftos(self.team);
-                sprint(self.owner, PRINT_HIGH, st, "\n");
+                sprint(self.owner, PRINT_HIGH, "Disguised as ");
+                st = TeamFortress_TeamGetColorString(self.team);
+                sprint(self.owner, PRINT_HIGH, st, " Team\n");
                 self.owner.undercover_team = self.team;
                 stuffcmd(self.owner, "color ");
                 tc = TeamFortress_TeamGetColor(self.team) - 1;
