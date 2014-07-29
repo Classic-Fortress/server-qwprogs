@@ -414,11 +414,12 @@ string(entity pl) SentryDetailsToString =
     local string shells  = "";
     local string rockets = "";
     local string hp      = "";
+    local string st      = "";
 
     te = find(world, classname, "building_sentrygun");
     while (te) {
         if (te.real_owner == self) {
-            hp = strcat(strpadl(ftos(floor(te.health)), 4), " hp");
+            hp = strcat(strpadl(ftos(floor(te.health)), 3), " hp");
             shells = ftos(floor(te.ammo_shells));
             if (te.weapon == 3) {
                 rockets = ftos(floor(te.ammo_rockets));
@@ -426,7 +427,10 @@ string(entity pl) SentryDetailsToString =
             } else {
                 ammo = strcat("  Αννο: ", shells);
             }
-            return strcat("Σεξτςω:", strcat(hp, strcat(strpadr(ammo, 12), strcat("  Μεφεμ: ", ftos(te.weapon)))));
+            st = strcat("Σεξτςω: ", strcat(hp, ammo));
+            st = strpadr(st, 32);
+            st = strcat(st, strcat("Μεφεμ: ", ftos(te.weapon)));
+            return st;
         }
         te = find(te, classname, "building_sentrygun");
     }
