@@ -494,7 +494,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
 };
 
 void () TeamFortress_SpyGoUndercover = {
-    local entity te;
+    local entity te, timer;
 
     if (self.effects & (8 | 4)) {
         sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing\n");
@@ -518,7 +518,7 @@ void () TeamFortress_SpyGoUndercover = {
             sprint(self, PRINT_HIGH, "Going undercover...\n");
             self.is_undercover = 2;
             te = spawn();
-            te.classname = "timer";
+            te.classname = "spytimer";
             te.owner = self;
             te.think = TeamFortress_SpyUndercoverThink;
             te.nextthink = time + 4;
@@ -529,6 +529,15 @@ void () TeamFortress_SpyGoUndercover = {
     } else {
         sprint(self, PRINT_HIGH, "You stop going undercover\n");
         self.is_undercover = 0;
+        timer = find(world, classname, "spytimer");
+        while (timer != world) {
+            if (timer.owner == self) {
+                dremove(timer);
+                timer = find(world, classname, "spytimer");
+            } else {
+                timer = find(timer, classname, "spytimer");
+            }
+        }
     }
 };
 
@@ -618,7 +627,7 @@ void (float class) TeamFortress_SpyChangeSkin = {
     sprint(self, PRINT_HIGH, "Going undercover...\n");
     self.is_undercover = 2;
     te = spawn();
-    te.classname = "timer";
+    te.classname = "spytimer";
     te.owner = self;
     te.think = TeamFortress_SpyUndercoverThink;
     te.nextthink = time + 4;
@@ -649,7 +658,7 @@ void (float teamno) TeamFortress_SpyChangeColor = {
     sprint(self, PRINT_HIGH, "Going undercover...\n");
     self.is_undercover = 2;
     te = spawn();
-    te.classname = "timer";
+    te.classname = "spytimer";
     te.owner = self;
     te.think = TeamFortress_SpyUndercoverThink;
     te.nextthink = time + 4;
