@@ -360,32 +360,51 @@ string(entity pl) RangeToString =
     if (num <= 0)
         return ("");
 
-    if (num > 100)
-        return ("100+ M");
+    if (num > 99)
+        return ("99+ m");
 
-    return strcat(strpadr(ftos(floor(num)), 2), " M");
+    return strcat(strpadl(ftos(floor(num)), 3), " m");
 };
 
 string(entity pl) ScannerToString =
 {
     local entity te;
-    local string st;
+    local string st, scanfor = "", range = "";
+    local float pad;
 
     te = find(world, netname, "scanner");
     while ((te != world) && (te.owner != pl))
         te = find(te, netname, "scanner");
 
     if (pl.ScannerOn != 1)
-        return ("Scanner off");
+        return ("׃דבממוע: off");
 
     if (te.health > 0) {
-        st = TeamToString(te.team_no);
+        st = "׃דבממוע: ";
+        st = strcat(st, TeamToString(te.team_no));
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
-        st = strpadr(st, 18);
-        return strcat(st, " Range : ");
-    } else
-        return ("  No Blips.            ");
+        st = strpadr(st, 26);
+        range = "ׂבמחו: ";
+        range = strcat(range, RangeToString(pl));
+        pad = 40 - strlen(range);
+        st = strpadr(st, pad);
+        st = strcat(st, range);
+    } else {
+        st = "׃דבממוע: on";
+        st = strcat(st, "  ׃דבממימח: ");
+        if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+            scanfor = "team";
+        if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+                scanfor = strcat(scanfor, ", ");
+            scanfor = strcat(scanfor, "enemy");
+        }
+        if (!strlen(scanfor))
+            scanfor = "nothing";
+        st = strcat(st, scanfor);
+    }
+    return st;
 };
 
 string(entity pl) SentryDetailsToString =
