@@ -2119,11 +2119,12 @@ void () ImpulseCommands = {
     if (self.is_building == 1) {
         if (self.impulse >= 1 && self.impulse <= 5) {
             TeamFortress_EngineerBuildStop();
+            W_ChangeWeapon(self.impulse);
         } else if (self.impulse == TF_WEAPNEXT
                     || self.impulse == TF_WEAPPREV
                     || self.impulse == TF_WEAPLAST) {
             TeamFortress_EngineerBuildStop();
-            self.impulse = 0;
+            W_ChangeWeapon(self.impulse);
         }
     }
 
