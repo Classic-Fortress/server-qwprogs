@@ -1,58 +1,61 @@
-Classic Fortress v0.1 beta
+Classic Fortress v0.9 beta
 
 === New features ===
-* Grenade timers.
-* Grenade slot switching.
-* Weapon slots (1-4).
-* Next/previous weapon.
-* Last weapon.
-* Sensitivity scaling upon sniper zooming.
-* Sniper zoom key which zooms in regardless of sniper rifle status (setinfo zk 1).
-* Two sniper zoom modes (2x and 4x) which can be manually set with setinfo z2x and z4x.
-* Reverse sniper zoom order with setinfo zr 1.
-* New scout scanner menu.
-* New demoman detpack menu.
-* New sentry gun rotation menu.
-* Stop building/disguising upon pressing "last weapon" bind.
-
-=== Improved ===
-* Improved consistent grammar.
+* Map voting during last few minutes of each game (use /votenext and /forcenext to vote early).
+* Map specific configurations (/fortress/cfg/maps/<mapname>.cfg).
+* Grenade timers (disable with /cf\_notimers 1 or disable just sound with /cf\_notimersound 1).
+* Grenade slot switching (/grenswitch).
+* Prime/throw grenades with one button (/gren1 and /gren2).
+* Weapon slots (1-4) where 1 is always primary and 4 is always melee.
+* Quick attack aliases (+slot1-4).
+* Next/previous weapon (/weapprev and /weapnext).
+* Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.
-* Team player count in team selection menu.
-* Sniper smooth zooming is now a lot faster (disable smooth zooming with setinfo zi 1).
-* More responsive menus (rewritten menu code).
-* No more sbar blinking (rewritten sbar code).
-* Revised dispenser use menu.
-* Revised sentry gun menu.
-* Revised engineer build menu.
-* Revised spy disguise menu.
-* Overall improved menus.
-* Allow engineer build menu to be opened even while in the air.
-* Engineers can now only dismantle their own buildings.
-* Engineer dismantle messages show how many cells you got back.
-
-=== Changed ===
-* Max 6 active demoman pipes allowed (down from 7).
-* No limit to team pipes/flares/ammoboxes.
-* Engineer can only rotate own sentry.
-* Remove decimals from sentry gun status.
+* Free suicides (for class changing) during first 10 seconds after spawning.
+* Updated class help (bindings, aliases and settings) reachable with /classhelp.
+* Dropping flag now possible on all maps using /dropflag.
+* Responsive menus and status bar thanks to rewritten menu/sbar code.
+* Any non-valid impulse will close the active menu.
 * Class configs are now executed from /fortress/classes/ subdirectory.
-* Allow team changing.
-* Any non-valid impulse now closes the active menu.
-
-== Removed ===
-* Removed weapon messages for weapons without weapon modes.
-* Removed bioweapon (merged into medikit).
-* Removed grapple hook.
-* Removed birthday mode.
-* Removed engineer mortar (not used anymore).
-* Removed bindings menu.
-* Removed class help.
-
-=== Fixed ===
-* Fixed the spamming weapon messages (e.g. Tranquiliser gun selected).
-* Fixed the sentry gun menu to not close prematurely.
-* Fixed broken ammo display.
-* Fixed endless intermission bug.
-* Fixed bug where players got stuck in intermission mode upon map change and hence could not respawn.
+* Team player count in team selection menu.
+* Changing teams is now allowed.
+* No more spamming weapon messages.
 * Major code cleanup and rewrites.
+
+=== Scout ===
+* New Scanner menu where Scanner settings can be changed.
+
+=== Sniper ===
+* Sniper Rifle range increased.
+* Automatic sensitivity scaling while zoomed in.
+* Use the special button as a zoom button (cf_zoomkey 1).
+* Two sniper zoom modes (2x and 4x) instead of just one.
+* Manually adjust fov used in zoom modes with /cf\_fov2x and /cf\_fov4x.
+* Reverse sniper zoom order with cf\_reversezoom 1.
+* Faster zooming (+/- 20 fov instead of 5 per frame).
+
+=== Demoman ===
+* New detpack menu containing 5, 20, 50 and 255 second detpacks.
+* Changed maximum detpipes allowed per team to 6 per demoman instead of 7 total.
+
+=== HWGuy ===
+* Assault Cannon can now be fired while moving.
+* Accuracy of Assault Cannon decreased while moving.
+* HWGuy can now be affected by concussion grenades while firing Assault Cannon.
+
+=== Spy ===
+* Improved disguise menu.
+* Changed class special to silent feign.
+* Stop disguising by pressing last weapon bind or the disguise menu bind.
+
+=== Engineer ===
+* Sentry Gun status (health, ammo and level) shown in status bar.
+* New Sentry Gun maintenance menu containing simply rotation.
+* Upgrade/repair/restock Sentry Gun on spanner hit.
+* Repair Dispenser on spanner hit.
+* Dismantle Sentry Gun/Dispenser using build menu when standing close.
+* Stop building by pressing any weapon slot key or the last weapon key.
+* Added message when Dispenser is destroyed.
+* Added dismantle message to show how many cells were returned.
+* Changed class special to detonate dispenser.
+* Engineers can now only dismantle own buildings and rotate own Sentry Gun.
