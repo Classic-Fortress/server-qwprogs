@@ -33,6 +33,7 @@ void (entity Goal, entity Player) RemoveResults;
 
 void () tfgoal_timer_tick;
 void () tfgoalitem_remove;
+void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer;
 void (entity Item, float PAlive, entity P) tfgoalitem_drop;
 void (entity Item) tfgoalitem_checkgoalreturn;
 
@@ -1979,66 +1980,14 @@ void () ReturnItem = {
 
 void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     local entity te;
-    local float lighton;
-    local float slowon;
-    local float key1on;
-    local float key2on;
-    local float spyoff;
     local entity DelayReturn;
 
     if (Item == world) {
         objerror("error: tfgoalitem_RemoveFromPlayer(): Item == world");
         return;
     }
-    lighton = 0;
-    slowon = 0;
-    key1on = 0;
-    key2on = 0;
-    spyoff = 0;
 
-    te = find(world, classname, "item_tfgoal");
-    while (te) {
-        if ((te.owner == AP) && (te != Item)) {
-            if (te.goal_activation & 1)
-                lighton = 1;
-
-            if (te.goal_activation & 2)
-                slowon = 1;
-
-            if (te.items & 131072)
-                key1on = 1;
-
-            if (te.items & 262144)
-                key2on = 1;
-
-            if (te.goal_result & 16)
-                spyoff = 1;
-        }
-        te = find(te, classname, "item_tfgoal");
-    }
-    if (!lighton) {
-        if (AP.invincible_finished > (time + 3)) {
-            lighton = 1;
-        } else if (AP.super_damage_finished > (time + 3)) {
-            lighton = 1;
-        }
-    }
-    if (!lighton) {
-        AP.effects = AP.effects - (AP.effects & 8);
-        AP.effects = AP.effects - (AP.effects & 64);
-        AP.effects = AP.effects - (AP.effects & 128);
-    }
-    if (Item.goal_activation & 512)
-        Item.effects = Item.effects | 8;
-
-    if (!spyoff)
-        AP.is_unabletospy = 0;
-
-    if (!key1on)
-        AP.items = AP.items - (AP.items & 131072);
-
-    if (!key2on)
-        AP.items = AP.items - (AP.items & 262144);
+    tfgoalitem_RemoveEffectsFromPlayer(Item, AP);
 
     te = find(world, classname, "player");
     while (te != world) {
@@ -2118,6 +2067,59 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     objerror("Invalid method passed into tfgoalitem_RemoveFromPlayer\n");
 };
 
+void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
+    local entity te;
+    local float lighton = 0;
+    local float slowon = 0;
+    local float key1on = 0;
+    local float key2on = 0;
+    local float spyoff = 0;
+
+    te = find(world, classname, "item_tfgoal");
+    while (te) {
+        if ((te.owner == AP) && (te != Item)) {
+            if (te.goal_activation & 1)
+                lighton = 1;
+
+            if (te.goal_activation & 2)
+                slowon = 1;
+
+            if (te.items & 131072)
+                key1on = 1;
+
+            if (te.items & 262144)
+                key2on = 1;
+
+            if (te.goal_result & 16)
+                spyoff = 1;
+        }
+        te = find(te, classname, "item_tfgoal");
+    }
+    if (!lighton) {
+        if (AP.invincible_finished > (time + 3)) {
+            lighton = 1;
+        } else if (AP.super_damage_finished > (time + 3)) {
+            lighton = 1;
+        }
+    }
+    if (!lighton) {
+        AP.effects = AP.effects - (AP.effects & 8);
+        AP.effects = AP.effects - (AP.effects & 64);
+        AP.effects = AP.effects - (AP.effects & 128);
+    }
+    if (Item.goal_activation & 512)
+        Item.effects = Item.effects | 8;
+
+    if (!spyoff)
+        AP.is_unabletospy = 0;
+
+    if (!key1on)
+        AP.items = AP.items - (AP.items & 131072);
+
+    if (!key2on)
+        AP.items = AP.items - (AP.items & 262144);
+};
+
 void () tfgoalitem_dropthink = {
     local float pos;
 
@@ -2189,7 +2191,6 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         setmodel(Item, Item.mdl);
     }
     setsize(Item, Item.goal_min, Item.goal_max);
-    Item.owner = world;
     if (PAlive == 1) {
         makevectors(P.v_angle);
         if (P.v_angle_x) {
@@ -2207,6 +2208,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.nextthink = time + 5;
         Item.think = tfgoalitem_dropthink;
     }
+    Item.owner = world;
 };
 
 void () tfgoalitem_remove = {
@@ -2546,9 +2548,12 @@ void () DropGoalItems = {
     newmis.origin = self.origin + v_forward;
     te = find(world, classname, "item_tfgoal");
     while (te) {
-        if (te.owner == self)
+        if (te.owner == self) {
+            tfgoalitem_RemoveEffectsFromPlayer(te, self);
             tfgoalitem_drop(te, 1, self);
+        }
         te = find(te, classname, "item_tfgoal");
     }
     dremove(newmis);
+    TeamFortress_SetSpeed(self);
 };
