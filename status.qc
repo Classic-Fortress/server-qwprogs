@@ -8,6 +8,7 @@ string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
 string(entity pl) ClipSizeToString;
+float(entity pl) GetClipSize;
 string(entity pl) DetpackToString;
 string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
@@ -113,7 +114,7 @@ void (entity pl) RefreshStatusBar = {
     height = floor(stof(infokey(pl, "sb")));
     if (height > 300)
         height = 300;
-    height = height - pl.StatusStringLines - 4;
+    height = height - pl.StatusStringLines - 3;
 
     // no sbar can be displayed
     if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
@@ -127,11 +128,19 @@ void (entity pl) RefreshStatusBar = {
     pad = strzone(pad);
 
     // status line 1 column 1 - grenade timer
-    st1 = "";
     if (pl.StatusGrenTime > 0)
-        st1 = strcat("Explosion in ", strcat(ftos(pl.StatusGrenTime), "..."));
+        st1 = strcat("Çעומבהו: ", strcat(ftos(pl.StatusGrenTime), " seconds"));
+    else
+        st1 = "";
+    // flag carrier info
+    if (pl.items & IT_KEY1)
+        st2 = "Ãבעעשימח Æלבח";
+    else
+        st2 = "             ";
     // status line 1
-    s1 = strcat(st1, "\n\n");
+    s1 = strpadr(st1, 27);
+    s1 = strcat(s1, st2);
+    s1 = strcat(s1, "\n");
     s1 = strzone(s1);
 
     // status line 2 column 1 - class specific information
@@ -155,15 +164,16 @@ void (entity pl) RefreshStatusBar = {
     win = TeamFortress_TeamGetWinner();
     sec = TeamFortress_TeamGetSecond();
     if (win == 0)
-        st1 = strcat(BlueScoreToString(team1score), "  ");
+        st1 = BlueScoreToString(team1score);
     else if (win == 1)
-        st1 = strcat(BlueScoreToString(team1score), "  ");
+        st1 = BlueScoreToString(team1score);
     else if (win == 2)
-        st1 = strcat(RedScoreToString(team2score), "  ");
+        st1 = RedScoreToString(team2score);
     else if (win == 3)
-        st1 = strcat(YellowScoreToString(team3score), "  ");
+        st1 = YellowScoreToString(team3score);
     else
-        st1 = strcat(GreenScoreToString(team4score), "  ");
+        st1 = GreenScoreToString(team4score);
+    st1 = strcat(st1, " ");
     // status line 3 column 2 - team 2 score
     if (sec == 0)
         st2 = RedScoreToString(team2score);
@@ -176,16 +186,18 @@ void (entity pl) RefreshStatusBar = {
     else
         st2 = GreenScoreToString(team4score);
     // status line 3 column 3 - clip size
-    if (self.tfstate & TFSTATE_RELOADING)
-        st3 = "Ãלינ:  0";
-    else
+    if (self.tfstate & TFSTATE_RELOADING) {
+        st3 = "Ãלינ:  0/";
+        st3 = strcat(st3, strpadr(ftos(GetClipSize(pl)), 3));
+    } else {
         st3 = ClipSizeToString(pl);
+    }
     // status line 3 column 4 - grenade count
-    st4 = strcat("  Çעומ: ", strcat(strcat(ftos(self.no_grenades_1), "/"), ftos(self.no_grenades_2)));
+    st4 = strcat("Çעומ: ", strcat(strcat(ftos(self.no_grenades_1), "/"), ftos(self.no_grenades_2)));
     // status line 3
     s3 = strcat(st1, st2);
-    s3 = strpadr(s3, 21);
-    s3 = strcat(s3, strpadl(strcat(st3, st4), 19));
+    s3 = strpadr(s3, 19);
+    s3 = strcat(s3, strpadl(strcat(st3, st4), 21));
     s3 = strcat(s3, "\n");
     s3 = strzone(s3);
 
@@ -236,31 +248,52 @@ string(float num) GreenScoreToString =
 
 string(entity pl) ClipSizeToString =
 {
-    local float num;
+    local string st;
+    local float num, max;
 
+    max = GetClipSize(pl);
     if (pl.current_weapon == WEAP_SHOTGUN) {
-        if ((8 - pl.reload_shotgun) > pl.ammo_shells)
-            pl.reload_shotgun = 8 - pl.ammo_shells;
-        num = 8 - pl.reload_shotgun;
+        if ((max - pl.reload_shotgun) > pl.ammo_shells)
+            pl.reload_shotgun = max - pl.ammo_shells;
+        num = max - pl.reload_shotgun;
     } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if ((16 - pl.reload_super_shotgun) > pl.ammo_shells)
-            pl.reload_super_shotgun = 16 - pl.ammo_shells;
-        num = (16 - pl.reload_super_shotgun);
+        if ((max - pl.reload_super_shotgun) > pl.ammo_shells)
+            pl.reload_super_shotgun = max - pl.ammo_shells;
+        num = (max - pl.reload_super_shotgun);
     } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((6 - pl.reload_grenade_launcher) > pl.ammo_rockets)
-            pl.reload_grenade_launcher = (6 - pl.ammo_rockets);
-        num = (6 - pl.reload_grenade_launcher);
+        if ((max - pl.reload_grenade_launcher) > pl.ammo_rockets)
+            pl.reload_grenade_launcher = (max - pl.ammo_rockets);
+        num = (max - pl.reload_grenade_launcher);
     } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((4 - pl.reload_rocket_launcher) > pl.ammo_rockets)
-            pl.reload_rocket_launcher = (4 - pl.ammo_rockets);
-        num = (4 - pl.reload_rocket_launcher);
+        if ((max - pl.reload_rocket_launcher) > pl.ammo_rockets)
+            pl.reload_rocket_launcher = (max - pl.ammo_rockets);
+        num = (max - pl.reload_rocket_launcher);
     } else
         return ("");
 
     if (num > 99)
         num = 99;
 
-    return strcat("Ãלינ: ", strpadl(ftos(floor(num)), 2));
+    st = "Ãלינ: ";
+    st = strcat(st, strpadl(ftos(floor(num)), 2));
+    st = strcat(st, "/");
+    st = strcat(st, strpadr(ftos(max), 3));
+
+    return st;
+};
+
+float(entity pl) GetClipSize =
+{
+    if (pl.current_weapon == WEAP_SHOTGUN)
+        return 8;
+    else if (pl.current_weapon == WEAP_SUPER_SHOTGUN)
+        return 16;
+    else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER)
+        return 6;
+    else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER)
+        return 4;
+    else
+        return 0;
 };
 
 string(float num) TeamToString =
