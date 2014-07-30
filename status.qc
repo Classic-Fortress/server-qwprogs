@@ -156,7 +156,7 @@ void (entity pl) RefreshStatusBar = {
     if (pl.playerclass == PC_ENGINEER && pl.is_building)
         st1 = "Building...";
     // status line 2
-    s2 = strpadr(st1, 42);
+    s2 = strpadr(st1, 40);
     s2 = strcat(s2, "\n");
     s2 = strzone(s2);
 
