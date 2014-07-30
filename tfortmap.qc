@@ -1930,8 +1930,11 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
         }
     }
     if ((AP.playerclass == PC_SPY) &&
-        (Item.goal_result & TFGR_REMOVE_DISGUISE))
+        (Item.goal_result & TFGR_REMOVE_DISGUISE)) {
         AP.is_unabletospy = 1;
+        AP.disguise_skin = 0;
+        AP.disguise_team = 0;
+    }
 
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
