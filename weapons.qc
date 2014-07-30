@@ -1344,10 +1344,10 @@ void () W_SetCurrentAmmo = {
 
     player_run();
 
-    self.items = self.items - (self.items & (256 | 512 | 1024 | 2048));
+    self.items = self.items - (self.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
     self.weapon = 0;
 
-    if (self.current_weapon == 16) {
+    if (self.current_weapon == WEAP_AXE) {
         self.currentammo = 0;
         if (self.playerclass == 8) {
             if (self.weaponmode == 0)
@@ -1356,143 +1356,127 @@ void () W_SetCurrentAmmo = {
                 self.weaponmodel = "progs/v_knife2.mdl";
         } else
             self.weaponmodel = "progs/v_axe.mdl";
-
         self.weaponframe = 0;
-
-    } else if (self.current_weapon == 1) {
-
-        self.currentammo = 0;
-        self.weaponmodel = "progs/v_grap.mdl";
-        self.weaponframe = 0;
-
-    } else if (self.current_weapon == 8) {
-
+    } else if (self.current_weapon == WEAP_SPANNER) {
         self.currentammo = self.ammo_cells;
         self.weaponmodel = "progs/v_span.mdl";
         self.weaponframe = 0;
-
-    } else if (self.current_weapon == 128) {
-
+    } else if (self.current_weapon == WEAP_SHOTGUN) {
         self.currentammo = self.ammo_shells;
-        self.items = self.items | 2048;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 1;
-
-    } else if (self.current_weapon == 256) {
-
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_SHOTGUN;
+    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot2.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 2;
-
-    } else if (self.current_weapon == 512) {
-
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_SUPER_SHOTGUN;
+    } else if (self.current_weapon == WEAP_NAILGUN) {
         self.currentammo = self.ammo_nails;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_nail.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 512;
-        self.weapon = 4;
-    } else if (self.current_weapon == 1024) {
+        self.items = self.items | IT_NAILS;
+        self.weapon = IT_NAILGUN;
+    } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
         self.currentammo = self.ammo_nails;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_nail2.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 512;
-        self.weapon = 8;
-    } else if (self.current_weapon == 2048) {
+        self.items = self.items | IT_NAILS;
+        self.weapon = IT_SUPER_NAILGUN;
+    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         self.currentammo = self.ammo_rockets;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock.mdl";
             self.weaponframe = 0;
         }
-        self.weapon = 16;
-        self.items = self.items | 1024;
-    } else if (self.current_weapon == 8192) {
+        self.weapon = IT_GRENADE_LAUNCHER;
+        self.items = self.items | IT_ROCKETS;
+    } else if (self.current_weapon == WEAP_PIPEBOMB_LAUNCHER) {
+        self.currentammo = self.ammo_rockets;
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
+            self.weaponmodel = "progs/v_rock.mdl";
+            self.weaponframe = 0;
+        }
+        self.weapon = IT_GRENADE_LAUNCHER;
+        self.items = self.items | IT_ROCKETS;
+    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         self.currentammo = self.ammo_rockets;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock2.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 1024;
-        self.weapon = 32;
-    } else if (self.current_weapon == 65536) {
-        self.currentammo = self.ammo_cells;
-        if (!(self.tfstate & TFSTATE_RELOADING)) {
-            self.weaponmodel = "progs/v_light.mdl";
-            self.weaponframe = 0;
-        }
-        self.items = self.items | 2048;
-        self.weapon = 64;
-    } else if (self.current_weapon == 32) {
+        self.items = self.items | IT_ROCKETS;
+        self.weapon = IT_ROCKET_LAUNCHER;
+    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_srifle.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 1;
-    } else if (self.current_weapon == 64) {
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_SHOTGUN;
+    } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_srifle.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 2;
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_SUPER_SHOTGUN;
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_asscan.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 32;
-    } else if (self.current_weapon == 4096) {
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_ROCKET_LAUNCHER;
+    } else if (self.current_weapon == WEAP_FLAMETHROWER) {
         self.currentammo = self.ammo_cells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 2048;
-        self.weapon = 16;
-    } else if (self.current_weapon == 16384) {
+        self.items = self.items | IT_CELLS;
+        self.weapon = IT_GRENADE_LAUNCHER;
+    } else if (self.current_weapon == WEAP_INCENDIARY) {
         self.currentammo = self.ammo_rockets;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rock2.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 1024;
-        self.weapon = 32;
-    } else if (self.current_weapon == 4) {
+        self.items = self.items | IT_ROCKETS;
+        self.weapon = IT_ROCKET_LAUNCHER;
+    } else if (self.current_weapon == WEAP_MEDIKIT) {
         self.currentammo = self.ammo_medikit;
         self.weaponmodel = "progs/v_medi.mdl";
         self.weaponframe = 0;
-    } else if (self.current_weapon == 262144) {
+    } else if (self.current_weapon == WEAP_TRANQ) {
         self.currentammo = self.ammo_shells;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_shot.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 256;
-        self.weapon = 1;
-    } else if (self.current_weapon == 524288) {
+        self.items = self.items | IT_SHELLS;
+        self.weapon = IT_SHOTGUN;
+    } else if (self.current_weapon == WEAP_LASER) {
         self.currentammo = self.ammo_nails;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             self.weaponmodel = "progs/v_rail.mdl";
             self.weaponframe = 0;
         }
-        self.items = self.items | 512;
-        self.weapon = 1;
+        self.items = self.items | IT_NAILS;
+        self.weapon = IT_SHOTGUN;
     } else {
         self.currentammo = 0;
         self.weaponmodel = "";
