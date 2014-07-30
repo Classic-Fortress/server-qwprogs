@@ -293,34 +293,36 @@ string(float num) ClassToString =
 string(entity pl) DisguiseToString =
 {
     local string st = "";
+    local string skin = "";
+    local string team = "";
 
     if (pl.is_undercover == 1) {
         st = "ױמהועדןצוע: ";
         if (pl.undercover_team) {
             st = strcat(st, TeamToString(pl.undercover_team));
             st = strcat(st, " ");
-        } else {
-            st = strcat(st, TeamToString(pl.team_no));
-            st = strcat(st, " ");
         }
         if (pl.undercover_skin)
             st = strcat(st, ClassToString(pl.undercover_skin));
-        else
-            st = strcat(st, "Spy");
     } else if (pl.is_undercover == 2) {
-        if (pl.undercover_team) {
-            st = "ױמהועדןצוע: ";
-            st = strcat(st, TeamToString(pl.undercover_team));
-            st = strcat(st, " (Spy)");
-        } else if (pl.undercover_skin) {
-            st = "ױמהועדןצוע: ";
-            st = strcat(st, "(");
-            st = strcat(st, TeamToString(pl.team_no));
-            st = strcat(st, ") ");
-            st = strcat(st, ClassToString(pl.undercover_skin));
-        } else {
-            st = strcat(st, "Going undercover...");
+        if (pl.disguise_team) {
+            team = strcat(team, "(");
+            team = strcat(team, TeamToString(pl.disguise_team));
+            team = strcat(team, ") ");
+        } else if (pl.undercover_team) {
+            team = strcat(team, TeamToString(pl.undercover_team));
+            team = strcat(team, " ");
         }
+        if (pl.disguise_skin) {
+            skin = strcat(skin, "(");
+            skin = strcat(skin, ClassToString(pl.disguise_skin));
+            skin = strcat(skin, ")");
+        } else if (pl.undercover_skin) {
+            skin = strcat(skin, ClassToString(pl.undercover_skin));
+        }
+        st = "ױמהועדןצוע: ";
+        st = strcat(st, team);
+        st = strcat(st, skin);
     } else if (invis_only) {
         st = "ױמהועדןצוע";
     }

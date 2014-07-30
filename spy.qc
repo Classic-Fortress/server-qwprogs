@@ -529,6 +529,8 @@ void () TeamFortress_SpyGoUndercover = {
     } else {
         sprint(self, PRINT_HIGH, "You stop going undercover\n");
         self.is_undercover = 0;
+        self.disguise_skin = 0;
+        self.disguise_team = 0;
         timer = find(world, classname, "spytimer");
         while (timer != world) {
             if (timer.owner == self) {
@@ -589,6 +591,7 @@ void () TeamFortress_SpyUndercoverThink = {
                 sprint(self.owner, PRINT_HIGH, "Disguised as ");
                 TeamFortress_PrintClassName(self.owner, self.skin, 0);
                 self.owner.undercover_skin = self.skin;
+                self.owner.disguise_skin = 0;
                 TeamFortress_SetSkin(self.owner);
             }
             if (self.team != 0) {
@@ -618,6 +621,7 @@ void (float class) TeamFortress_SpyChangeSkin = {
     if (class == 8) {
         sprint(self, PRINT_HIGH, "Skin reset\n");
         self.undercover_skin = 0;
+        self.disguise_skin = 0;
         TeamFortress_SetSkin(self);
         if (self.undercover_team == 0) {
             self.is_undercover = 0;
@@ -626,6 +630,8 @@ void (float class) TeamFortress_SpyChangeSkin = {
     }
     sprint(self, PRINT_HIGH, "Going undercover...\n");
     self.is_undercover = 2;
+    self.disguise_skin = class;
+    self.disguise_team = 0;
     te = spawn();
     te.classname = "spytimer";
     te.owner = self;
@@ -644,6 +650,7 @@ void (float teamno) TeamFortress_SpyChangeColor = {
         sprint(self, PRINT_HIGH, "Colors reset\n");
         self.immune_to_check = time + 10;
         self.undercover_team = 0;
+        self.disguise_team = 0;
         stuffcmd(self, "color ");
         tc = TeamFortress_TeamGetColor(self.team_no) - 1;
         st = ftos(tc);
@@ -657,6 +664,8 @@ void (float teamno) TeamFortress_SpyChangeColor = {
     }
     sprint(self, PRINT_HIGH, "Going undercover...\n");
     self.is_undercover = 2;
+    self.disguise_skin = 0;
+    self.disguise_team = teamno;
     te = spawn();
     te.classname = "spytimer";
     te.owner = self;
@@ -1073,6 +1082,7 @@ void (entity spy) Spy_RemoveDisguise = {
             if (spy.undercover_team != 0) {
                 spy.immune_to_check = time + 10;
                 spy.undercover_team = 0;
+                spy.disguise_team = 0;
                 stuffcmd(spy, "color ");
                 tc = TeamFortress_TeamGetColor(spy.team_no) - 1;
                 st = ftos(tc);
@@ -1083,6 +1093,7 @@ void (entity spy) Spy_RemoveDisguise = {
             if (spy.undercover_skin != 0) {
                 spy.immune_to_check = time + 10;
                 spy.undercover_skin = 0;
+                spy.disguise_skin = 0;
                 spy.skin = 0;
                 coverblown = 1;
             }
