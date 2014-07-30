@@ -296,6 +296,7 @@ void () TeamFortress_DetpackExplode = {
     local entity te;
     local vector org;
 
+    self.owner.detpack_left = 0;
     bprint(PRINT_MEDIUM, "FIRE IN THE HOLE!\n");
     sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
 
