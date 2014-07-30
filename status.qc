@@ -175,8 +175,12 @@ void (entity pl) RefreshStatusBar = {
         st1 = GreenScoreToString(team4score);
     st1 = strcat(st1, " ");
     // status line 3 column 2 - team 2 score
-    if (sec == 0)
-        st2 = RedScoreToString(team2score);
+    if (sec == 0) {
+        if (win < 2)
+            st2 = RedScoreToString(team2score);
+        else
+            st2 = BlueScoreToString(team1score);
+    }
     else if (sec == 1)
         st2 = BlueScoreToString(team1score);
     else if (sec == 2)
