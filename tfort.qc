@@ -1362,6 +1362,7 @@ void () TeamFortress_SetEquipment = {
     self.is_undercover = 0;
     self.is_feigning = 0;
     self.is_unabletospy = 0;
+    self.detpack_left = 0;
 
     self.ammo_medikit = 0;
     self.maxammo_medikit = 0;

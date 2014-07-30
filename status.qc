@@ -138,8 +138,6 @@ void (entity pl) RefreshStatusBar = {
     st1 = "";
     if (pl.playerclass == PC_SCOUT)
         st1 = ScannerToString(pl);
-    else if (pl.playerclass == PC_DEMOMAN && pl.is_detpacking)
-        st1 = strcat(strcat("Setting detpack in ", ftos(self.is_detpacking)), "...");
     else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
         st1 = DetpackToString(pl);
     else if (pl.playerclass == PC_SPY)
@@ -334,7 +332,14 @@ string(entity pl) DetpackToString =
 {
     local string st = "";
 
-    if (pl.detpack_left) {
+    if (pl.is_detpacking) {
+        st = "Äופנבדכ: ";
+        st = strcat(st, ftos(pl.detpack_left));
+        st = strcat(st, " (");
+        st = strcat(st, ftos(pl.is_detpacking));
+        st = strcat(st, ")");
+        st = strcat(st, " seconds left");
+    } else if (pl.detpack_left) {
         st = "Äופנבדכ: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " seconds left");
