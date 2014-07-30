@@ -171,6 +171,7 @@ void (float timer) TeamFortress_SetDetpack = {
     }
 
     self.is_detpacking = 3;
+    self.detpack_left = timer;
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
@@ -179,6 +180,7 @@ void (float timer) TeamFortress_SetDetpack = {
     self.weaponmodel = "";
     self.weaponframe = 0;
 
+    Status_Refresh(self);
     TeamFortress_SetSpeed(self);
 
     self.pausetime = time + 3;
@@ -214,8 +216,10 @@ void () TeamFortress_DetpackStop = {
 
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     self.is_detpacking = 0;
+    self.detpack_left = 0;
     self.current_weapon = self.weapon;
 
+    Status_Refresh(self);
     W_SetCurrentAmmo();
     TeamFortress_SetSpeed(self);
     self.pausetime = time;
@@ -241,6 +245,7 @@ void () TeamFortress_DetpackSet = {
     self = self.owner;
     self.is_detpacking = 0;
     self.current_weapon = self.weapon;
+    Status_Refresh(self);
     W_SetCurrentAmmo();
     self = oldself;
 
@@ -416,8 +421,8 @@ void () TeamFortress_DetpackCountDown = {
     cd = ftos(self.health);
     CheckBelowBuilding(self.enemy);
     self.nextthink = time + 1;
-    self.health = self.health - 1;
     self.owner.detpack_left = self.health;
+    self.health = self.health - 1;
     Status_Refresh(self.owner);
 
     if (self.health < 10) {
