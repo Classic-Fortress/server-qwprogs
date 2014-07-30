@@ -1937,6 +1937,7 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
         AP.disguise_team = 0;
     }
 
+    Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
 };
@@ -2118,6 +2119,8 @@ void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
 
     if (!key2on)
         AP.items = AP.items - (AP.items & 262144);
+
+    Status_Refresh(AP);
 };
 
 void () tfgoalitem_dropthink = {
