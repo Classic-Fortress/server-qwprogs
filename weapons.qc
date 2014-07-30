@@ -1401,14 +1401,6 @@ void () W_SetCurrentAmmo = {
         }
         self.weapon = IT_GRENADE_LAUNCHER;
         self.items = self.items | IT_ROCKETS;
-    } else if (self.current_weapon == WEAP_PIPEBOMB_LAUNCHER) {
-        self.currentammo = self.ammo_rockets;
-        if (!(self.tfstate & TFSTATE_RELOADING)) {
-            self.weaponmodel = "progs/v_rock.mdl";
-            self.weaponframe = 0;
-        }
-        self.weapon = IT_GRENADE_LAUNCHER;
-        self.items = self.items | IT_ROCKETS;
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         self.currentammo = self.ammo_rockets;
         if (!(self.tfstate & TFSTATE_RELOADING)) {
