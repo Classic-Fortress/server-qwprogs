@@ -61,20 +61,18 @@ void () Help_ShowSniper = {
     sprint(self, PRINT_HIGH, "²          - Equip Sniper Rifle on Full Auto\n");
     sprint(self, PRINT_HIGH, "³          - Equip Nailgun\n");
     sprint(self, PRINT_HIGH, "΄          - Equip Axe\n");
-    sprint(self, PRINT_HIGH, "ε          - Set autozoom mode / zoom toggle\n");
+    sprint(self, PRINT_HIGH, "ε          - Toggle zoom mode\n");
+    sprint(self, PRINT_HIGH, "νχθεεμυπ   - Zoom in (while in zoom mode)\n");
+    sprint(self, PRINT_HIGH, "νχθεεμδοχξ - Zoom out (while in zoom mode)\n");
     sprint(self, PRINT_HIGH, "ζ          - Throw Flare\n");
     sprint(self, PRINT_HIGH, "νουσε²     - Prime/throw Hand Grenade\n");
     sprint(self, PRINT_HIGH, "\nClass aliases for Sniper:\n");
-    sprint(self, PRINT_HIGH, "ϊοοντοηημε - Change autozoom mode / zoom toggle\n");
-    sprint(self, PRINT_HIGH, "ϊοονσετ²ψ  - Set autozoom to 2x / zoom to 2x\n");
-    sprint(self, PRINT_HIGH, "ϊοονσετ΄ψ  - Set autozoom to 4x / zoom to 4x\n");
-    sprint(self, PRINT_HIGH, "ϊοονσετοζζ - Turn off autozoom / zoom out\n");
+    sprint(self, PRINT_HIGH, "ϊοοντοηημε - Toggle zoom mode\n");
+    sprint(self, PRINT_HIGH, "ϊοονιξ     - Zoom in (for adjusting zoom while in zoom mode)\n");
+    sprint(self, PRINT_HIGH, "ϊοονουτ    - Zoom out (for adjusting zoom while in zoom mode)\n");
     sprint(self, PRINT_HIGH, "\nSettings for Sniper:\n");
-    sprint(self, PRINT_HIGH, "ϊλ Ό±―°Ύ   - Toggle zoom upon pressing special key on/off\n");
-    sprint(self, PRINT_HIGH, "ϊι Ό±―°Ύ   - Zoom instantly (not smoothly) on/off\n");
-    sprint(self, PRINT_HIGH, "ϊς Ό±―°Ύ   - Reverse zoom order on/off\n");
-    sprint(self, PRINT_HIGH, "ϊ²ψ ΌζοφΎ  - Set fov used for 2x zoom mode (default 40)\n");
-    sprint(self, PRINT_HIGH, "ϊ΄ψ ΌζοφΎ  - Set fov used for 4x zoom mode (default 20)\n");
+    sprint(self, PRINT_HIGH, "ϊζ ΌζοφΎ  - The default zoom fov which zoomtoggle zooms to (default 30)\n");
+    sprint(self, PRINT_HIGH, "ϊσ ΌζοφΎ  - The fov increments/decrements used by zoomin/zoomout (default 20)\n");
     sprint(self, PRINT_HIGH, "Usage: setinfo <setting> <value>\n");
 };
 
