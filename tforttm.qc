@@ -395,6 +395,30 @@ float (float tno) TeamFortress_TeamGetNoPlayers = {
     return (size_team);
 };
 
+float (float pc, float tno) TeamFortress_ClassGetNoPlayers = {
+    local float class_count;
+    local entity search;
+    class_count = 0;
+
+    search = find(world, classname, "player");
+    while (search != world) {
+        if (search.playerclass == pc && search.team_no == tno)
+            class_count = class_count + 1;
+        search = find(search, classname, "player");
+    }
+    return (class_count);
+};
+
+string (float pc, float tno) TeamFortress_ClassGetNoPlayersString = {
+    local float class_count;
+
+    class_count = TeamFortress_ClassGetNoPlayers(pc, tno);
+    if (class_count == 1)
+        return "1 player ";
+
+    return strcat(ftos(class_count), " players");
+};
+
 float () TeamFortress_GetNoPlayers = {
     local float nump;
     local entity search;

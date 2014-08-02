@@ -49,6 +49,7 @@ void (float tno, entity ignore, string st) teamsprint;
 
 void () Menu_Team;
 void () Menu_Class;
+string (float pc, float tno) TeamFortress_ClassGetNoPlayersString;
 void () Menu_Drop;
 void () PlayerObserverMode;
 void () Menu_Scout;
@@ -204,21 +205,40 @@ void (float inp) Menu_Class_Input = {
 void () Menu_Class = {
     local entity AD;
     local string s_select   = "Select class:\n\n";
-    local string s_scout    = "êìë Scout   \n";
-    local string s_sniper   = "êîë Sniper  \n";
-    local string s_soldier  = "êïë Soldier \n";
-    local string s_demoman  = "êñë Demoman \n";
-    local string s_medic    = "êóë Medic   \n";
-    local string s_hwguy    = "êòë HWGuy   \n";
-    local string s_pyro     = "êôë Pyro    \n";
-    local string s_spy;
-    local string s_engineer = "êõë Engineer\n";
-    local string s_randompc = "êíë RandomPC";
+    local string s_scout    = "êìë Scout           ";
+    local string s_sniper   = "êîë Sniper          ";
+    local string s_soldier  = "êïë Soldier         ";
+    local string s_demoman  = "êñë Demoman         ";
+    local string s_medic    = "êóë Medic           ";
+    local string s_hwguy    = "êòë HWGuy           ";
+    local string s_pyro     = "êôë Pyro            ";
+    local string s_spy      = "êöë Spy             ";
+    local string s_engineer = "êõë Engineer        ";
+    local string s_randompc = "êíë RandomPC                 ";
 
     if (self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
         return;
     }
+
+    local string count_sc = TeamFortress_ClassGetNoPlayersString(PC_SCOUT, self.team_no);
+    local string count_sn = TeamFortress_ClassGetNoPlayersString(PC_SNIPER, self.team_no);
+    local string count_so = TeamFortress_ClassGetNoPlayersString(PC_SOLDIER, self.team_no);
+    local string count_de = TeamFortress_ClassGetNoPlayersString(PC_DEMOMAN, self.team_no);
+    local string count_me = TeamFortress_ClassGetNoPlayersString(PC_MEDIC, self.team_no);
+    local string count_hw = TeamFortress_ClassGetNoPlayersString(PC_HVYWEAP, self.team_no);
+    local string count_py = TeamFortress_ClassGetNoPlayersString(PC_PYRO, self.team_no);
+    local string count_sp = TeamFortress_ClassGetNoPlayersString(PC_SPY, self.team_no);
+    local string count_en = TeamFortress_ClassGetNoPlayersString(PC_ENGINEER, self.team_no);
+    s_scout = strcat(s_scout, strcat(count_sc, "\n"));
+    s_sniper = strcat(s_sniper, strcat(count_sn, "\n"));
+    s_soldier = strcat(s_soldier, strcat(count_so, "\n"));
+    s_demoman = strcat(s_demoman, strcat(count_de, "\n"));
+    s_medic = strcat(s_medic, strcat(count_me, "\n"));
+    s_hwguy = strcat(s_hwguy, strcat(count_hw, "\n"));
+    s_pyro = strcat(s_pyro, strcat(count_py, "\n"));
+    s_spy = strcat(s_spy, strcat(count_sp, "\n"));
+    s_engineer = strcat(s_engineer, strcat(count_en, "\n"));
 
     AD = find(world, classname, "info_tfdetect");
     if (AD) {
@@ -251,8 +271,6 @@ void () Menu_Class = {
     else {
         if (spy_off == 1)
             s_spy = "\n";
-        else
-            s_spy = "êöë Spy     \n";
         Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
     }
 };
