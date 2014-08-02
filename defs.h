@@ -387,9 +387,8 @@
 
 // Sniper Zoom impulses
 #define TF_ZOOMTOGGLE       113
-#define TF_ZOOMOFF          114
-#define TF_ZOOM4X           115
-#define TF_ZOOM2X           116
+#define TF_ZOOMIN           114
+#define TF_ZOOMOUT          115
 
 // Help impulses
 #define TF_DISPLAYLOCATION	118
