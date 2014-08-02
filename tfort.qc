@@ -653,7 +653,7 @@ void () TeamFortress_GrenadePrimed = {
         if (!self.think)
             dremove(self);
 
-        if (time > self.heat)
+        if (time > self.heat && self.weapon != GR_TYPE_CALTROP)
             TeamFortress_ExplodePerson();
 
         return;
