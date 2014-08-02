@@ -49,9 +49,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("inv", TF_INVENTORY, 0);
         TeamFortress_Alias("showtf", TF_SHOWTF, 0);
         TeamFortress_Alias("zoomtoggle", TF_ZOOMTOGGLE, 0);
-        TeamFortress_Alias("zoomsetoff", TF_ZOOMOFF, 0);
-        TeamFortress_Alias("zoomset4x", TF_ZOOM4X, 0);
-        TeamFortress_Alias("zoomset2x", TF_ZOOM2X, 0);
+        TeamFortress_Alias("zoomin", TF_ZOOMIN, 0);
+        TeamFortress_Alias("zoomout", TF_ZOOMOUT, 0);
         TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
         TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
         TeamFortress_Alias("scout", TF_CHANGEPC + PC_SCOUT, 0);

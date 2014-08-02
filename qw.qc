@@ -28,18 +28,15 @@ typedef void (float) f_void_float;
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
 .float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
+.float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
 .float default_sensitivity;     // Player's default (non-zoomed) sensitivity
 .float default_fov;             // Player's default (non-zoomed) fov
 .float current_fov;             // Player's current field of view
 .float zoom_level;              // Start zooming to this fov next frame
-.float zoom_mode;               // Autozoom: 0 (off), 2 (2x), 4 (4x)
-.float zoom_in;                 // TRUE if player is currently zooming in
-.float zoom_out;                // TRUE if player is currently zooming out
-.float reversezoom;             // Reverse zoom order
-.float instazoom;               // Zoom instantly without smoothness
-.float zoomkey;                 // Zoom using special key, not +attack
+.float zoom_fov;                // The default fov to zoom in to when pressing special button
+.float zoom_last;               // The last used zoom fov by the player - zoom to this when toggling zoom
 .float has_voted_map;           // Map option that player voted for
 .float spawn_time;              // Time when player spawned
 .float menu_time;               // Time when vote map menu was first issued

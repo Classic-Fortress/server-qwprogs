@@ -37,17 +37,15 @@ void () PipebombTouch;
 
 void () SniperSight_Create;
 
-void (float zoom_level) TF_zoom;
+void (float zoom_to) Sniper_Zoom;
 
 void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void () TeamFortress_ID;
 void () TeamFortress_ReloadCurrentWeapon;
-void () TeamFortress_ZoomToggle;
-void () TeamFortress_SetZoomOff;
-void () TeamFortress_SetZoom4x;
-void () TeamFortress_SetZoom2x;
+void () Sniper_ZoomToggle;
+void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
 void () TeamFortress_SpyGoUndercover;
 void () TeamFortress_DetpackMenu;
@@ -2067,14 +2065,8 @@ void () ImpulseCommands = {
         self.impulse = 0;
         return;
     }
-    if (self.impulse == TF_SPECIAL_SKILL) {
-        if (self.playerclass == PC_SNIPER) {
-            self.reversezoom = stof(infokey(self, "zr"));
-            self.zoomkey = stof(infokey(self, "zk"));
-            self.instazoom = stof(infokey(self, "zi"));
-        }
+    if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
-    }
 
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
@@ -2221,14 +2213,6 @@ void () DeadImpulses = {
         TeamFortress_ShowTF();
     else if (self.impulse == TF_CLASSHELP)
         Help_Show();
-    else if (self.impulse == TF_ZOOMTOGGLE)
-        TeamFortress_ZoomToggle();
-    else if (self.impulse == TF_ZOOMOFF)
-        TeamFortress_SetZoomOff();
-    else if (self.impulse == TF_ZOOM4X)
-        TeamFortress_SetZoom4x();
-    else if (self.impulse == TF_ZOOM2X)
-        TeamFortress_SetZoom2x();
     else if (self.impulse == TF_SHOWLEGALCLASSES)
         TeamFortress_DisplayLegalClasses();
     else if ((self.impulse > 100) && (self.impulse <= 110)) {
@@ -2324,9 +2308,6 @@ void () DeadImpulses = {
 };
 
 void () W_WeaponFrame = {
-    local vector tv;
-    local float set_fov;
-
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
@@ -2367,53 +2348,28 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // grenade impulses + sniper zoom always possible
-    if ((self.impulse >= 150 && self.impulse <= 155)
-                || (self.playerclass == PC_SNIPER && self.impulse == TF_SPECIAL_SKILL)) {
+    if (intermission_running || cease_fire)
+        return;
+
+    // grenade impulses always possible
+    if (self.impulse >= 150 && self.impulse <= 155) {
         ImpulseCommands();
         return;
     }
 
-    if (intermission_running || cease_fire)
-        return;
-
-    if (self.zoom_level == 0 || self.zoom_mode == 0)
-        self.zoom_level = self.default_fov;
-
-    // zoom in/out with zoomkey enabled
-    if (self.zoom_level > 0 && self.zoom_level != self.current_fov && self.zoomkey == 1) {
-        if (self.zoom_in == 1) {
-            if ((self.current_fov - 20) <= self.zoom_level) {
-                set_fov = self.zoom_level;
-                self.zoom_in = 0;
-            }
-            else
-                set_fov = self.current_fov - 20;
-            TF_zoom(set_fov);
-        } else if (self.zoom_out == 1) {
-            if ((self.current_fov + 20) >= self.zoom_level) {
-                set_fov = self.zoom_level;
-                self.zoom_out = 0;
-            }
-            else
-                set_fov = self.current_fov + 20;
-            TF_zoom(set_fov);
-        } else
-            TF_zoom(self.zoom_level);
-    } else if (self.zoom_level == self.current_fov) {
-        self.zoom_in = 0;
-        self.zoom_out = 0;
-    }
-
-    // zoom out with zoomkey disabled
-    if (!(self.tfstate & TFSTATE_AIMING) && self.zoomkey != 1) {
-        if (self.current_fov != self.default_fov) {
-            if ((self.current_fov + 20) >= self.default_fov || self.instazoom == 1)
-                set_fov = self.default_fov;
-            else
-                set_fov = self.current_fov + 20;
-
-            TF_zoom(set_fov);
+    if (self.playerclass == PC_SNIPER) {
+        if (self.impulse == TF_SPECIAL_SKILL) {
+            Sniper_ZoomToggle();
+            self.impulse = 0;
+            return;
+        } else if (self.impulse == TF_ZOOMIN || (self.is_zooming && self.impulse == TF_WEAPPREV)) {
+            Sniper_ZoomAdjust(1);
+            self.impulse = 0;
+            return;
+        } else if (self.impulse == TF_ZOOMOUT || (self.is_zooming && self.impulse == TF_WEAPNEXT)) {
+            Sniper_ZoomAdjust(0);
+            self.impulse = 0;
+            return;
         }
     }
 
@@ -2433,33 +2389,10 @@ void () W_WeaponFrame = {
     if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
-                if (self.heat < 400) {
+                if (self.heat < 400)
                     self.heat = self.heat + 3;
-                }
-
-                // zoom in with zoomkey disabled
-                if (self.current_fov != self.zoom_level && self.zoomkey != 1) {
-                    if (self.zoom_out == 1) {
-                        if ((self.current_fov + 20) >= self.zoom_level || self.instazoom == 1) {
-                            set_fov = self.zoom_level;
-                            self.zoom_out = 0;
-                        }
-                        else
-                            set_fov = self.current_fov + 20;
-                    }
-                    else {
-                        if ((self.current_fov - 20) <= self.zoom_level || self.instazoom == 1) {
-                            set_fov = self.zoom_level;
-                            self.zoom_in = 0;
-                        }
-                        else
-                            set_fov = self.current_fov - 20;
-                    }
-
-                    TF_zoom(set_fov);
-                }
             } else {
-                tv = self.velocity;
+                local vector tv = self.velocity;
                 tv_z = 0;
                 if (vlen(tv) <= 50) {
                     SniperSight_Create();
