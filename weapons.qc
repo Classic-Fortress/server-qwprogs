@@ -888,9 +888,9 @@ void () W_FireAssaultCannon = {
     deathmsg = DMSG_ASSAULTCANNON;
 
     if (vlen(self.velocity) < 50)
-        FireBullets(5, dir, '0.1 0.1 0');
+        FireBullets(5, dir, '0.075 0.075 0');
     else
-        FireBullets(5, dir, '0.2 0.2 0');
+        FireBullets(5, dir, '0.15 0.15 0');
 };
 
 void () s_explode1 =[0, s_explode2] {
