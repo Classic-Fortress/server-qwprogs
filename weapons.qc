@@ -2359,6 +2359,22 @@ void () W_WeaponFrame = {
         return;
     }
 
+    // hwguy assault cannon special
+    if (self.playerclass == PC_HVYWEAP) {
+        if ((self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_HALT) && !(self.tfstate & TFSTATE_HALT)) {
+            self.tfstate = self.tfstate | TFSTATE_HALT;
+            Status_Refresh(self);
+            self.impulse = 0;
+            return;
+        }
+        else if ((self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_UNHALT) && (self.tfstate & TFSTATE_HALT)) {
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_HALT);
+            Status_Refresh(self);
+            self.impulse = 0;
+            return;
+        }
+    }
+
     if (self.playerclass == PC_SNIPER) {
         if (self.impulse == TF_SPECIAL_SKILL) {
             Sniper_ZoomToggle();
