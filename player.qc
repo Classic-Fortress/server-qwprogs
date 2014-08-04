@@ -430,7 +430,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
         stuffcmd(self, st);
         stuffcmd(self, "\n");
     } else {
-        sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 1, ATTN_NORM);
+        sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
 
         if (self.weaponframe == 2)
             self.weaponframe = 0;
@@ -484,7 +484,7 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
 
 void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
     if (self.count == 1) {
-        sound(self, 1, "weapons/asscan3.wav", 1, 1);
+        sound(self, 1, "weapons/asscan3.wav", 0.8, 1);
     }
     if (self.count >= 15) {
         self.heat = 0;
