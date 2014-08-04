@@ -190,7 +190,7 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_ExecClassScript(self);
-    W_ChangeWeapon(1);
+    W_ChangeWeapon(1, 0);
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
@@ -1336,9 +1336,10 @@ void () TeamFortress_SetEquipment = {
     self.weapons_carried = 0;
     if (self.last_playerclass != self.playerclass) {
         self.current_weapon = 0;
-        self.current_weaponslot = 1;
         self.weaponmode = 0;
+        self.current_weaponslot = 1;
         self.last_weaponslot = 1;
+        self.real_weaponslot = 1;
     }
 
     self.tf_items = 0;

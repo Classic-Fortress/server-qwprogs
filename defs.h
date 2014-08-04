@@ -360,7 +360,7 @@
 #define TF_CAM_FADETOWHITE		61
 #define TF_CAM_FADEFROMWHITE		62
 
-#define TF_QUICKLAST                    68
+#define TF_QUICKSTOP                    68
 #define TF_WEAPLAST                     69
 
 // CF map voting

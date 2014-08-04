@@ -1009,9 +1009,9 @@ void () PutClientInServer = {
     SetTeamName(self);
     W_SetCurrentAmmo();
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
-        W_ChangeWeapon(self.current_weaponslot);
+        W_ChangeWeapon(self.current_weaponslot, 0);
     else
-        W_ChangeWeapon(1);
+        W_ChangeWeapon(1, 0);
     self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;

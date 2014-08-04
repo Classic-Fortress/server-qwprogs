@@ -29,6 +29,7 @@ typedef void (float) f_void_float;
 .float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
+.float is_quickfiring;          // TRUE for a player if they're using the quick slots
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
 .float default_sensitivity;     // Player's default (non-zoomed) sensitivity
@@ -130,11 +131,10 @@ float coop;
 .float weapons_carried;         // the weapons the player is carrying
 .float current_weapon;          // the weapon the player is using
 .float current_weaponslot;      // the currently equipped weaponslot
+.float real_weaponslot;         // the actual equipped weaponslot (during a quick slot attack)
 .float last_weaponslot;         // the last equipped weaponslot
-.float slast_weaponslot;        // the second last equipped weaponslot
 .float queue_weaponslot;        // the weaponslot to switch to when possible
-.float quick_weapon;            // TRUE if the player is using a quick weapon slot
-.float quick_weaponchange;      // TRUE if attempting to change weapon (during quick fire) when not yet ready
+.float queue_last_weaponslot;   // the weaponslot to set as last weaponslot when possible
 .float next_weapon;             // used by weapon slots to communicate which weapon to select
 .float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
 
