@@ -1928,38 +1928,44 @@ void () W_WeaponSlot4 = {
         self.next_weapon = WEAP_AXE;
 };
 
-void (float inp) W_ChangeWeapon = {
+void (float slot) W_WeaponSlot = {
+    self.next_weaponmode = 0;
+    if (slot == 1)
+        W_WeaponSlot1();
+    else if (slot == 2)
+        W_WeaponSlot2();
+    else if (slot == 3)
+        W_WeaponSlot3();
+    else if (slot == 4)
+        W_WeaponSlot4();
+};
+
+void (float inp, float quick) W_ChangeWeapon = {
     if (self.playerclass == 0)
         return;
 
     // queue next weapon (in case of attack/reload in progress)
     if (!self.queue_weaponslot || self.queue_weaponslot != inp) {
-        // set quick_weaponchange when player tries to change weapon during quick weapon fire/reload
-        if (((self.tfstate & TFSTATE_RELOADING) || time < self.attack_finished) && self.quick_weapon) {
-            if (inp == TF_WEAPLAST)
-                self.quick_weaponchange = 1;
-        }
-        if (inp == TF_WEAPLAST)
-            self.queue_weaponslot = TF_WEAPLAST;
-        else if (inp < 5 && !(self.quick_weapon && (self.tfstate & TFSTATE_RELOADING)))
+        if (inp == TF_WEAPLAST && !quick) {
+            self.queue_weaponslot = self.last_weaponslot;
+        } else if (inp == TF_WEAPLAST && quick && !self.is_quickfiring) {
+            if (!(self.tfstate & TFSTATE_RELOADING) && time >= self.attack_finished) {
+                self.queue_weaponslot = self.real_weaponslot;
+                self.current_weaponslot = self.queue_weaponslot;
+            }
+        } else if (inp < 5 && !quick) {
+            if (is_quickfiring)
+                self.queue_last_weaponslot = self.real_weaponslot;
             self.queue_weaponslot = inp;
+        } else if (inp < 5 && quick) {
+            if (!(self.tfstate & TFSTATE_RELOADING) && time >= self.attack_finished)
+                self.queue_weaponslot = inp;
+        }
     }
 
     // don't do anything yet if still reloading or attack in progress
-    if (self.tfstate & TFSTATE_RELOADING || time < self.attack_finished)
+    if ((self.tfstate & TFSTATE_RELOADING) || time < self.attack_finished)
         return;
-
-    // don't do anything without a weapon queue
-    if (!self.queue_weaponslot)
-        return;
-
-    // queue last weaponslot
-    if (self.queue_weaponslot == TF_WEAPLAST) {
-        self.queue_weaponslot = self.last_weaponslot;
-        // use second last weapon when switching back from quick fire
-        if (self.quick_weapon)
-            self.last_weaponslot = self.slast_weaponslot;
-    }
 
     // check for ammo
     if (! W_AmmoSlot(self.queue_weaponslot)) {
@@ -1974,37 +1980,31 @@ void (float inp) W_ChangeWeapon = {
         }
     }
 
-    self.next_weaponmode = 0;
-    if (self.queue_weaponslot == 1)
-        W_WeaponSlot1();
-    else if (self.queue_weaponslot == 2)
-        W_WeaponSlot2();
-    else if (self.queue_weaponslot == 3)
-        W_WeaponSlot3();
-    else if (self.queue_weaponslot == 4)
-        W_WeaponSlot4();
+    W_WeaponSlot(self.queue_weaponslot);
 
-    if (self.current_weapon != self.next_weapon || self.weaponmode != self.next_weaponmode || self.quick_weapon) {
-        // set last weapons when not using quick fire
-        if (!(self.quick_weapon && inp == TF_WEAPLAST)) {
-            self.slast_weaponslot = self.last_weaponslot;
+    // don't update current/last weapon information if next weapon is the same as current
+    if (self.current_weapon != self.next_weapon || self.weaponmode != self.next_weaponmode) {
+        if (quick) {
+            self.real_weaponslot = self.current_weaponslot;
+        } else {
+            self.real_weaponslot = self.queue_weaponslot;
             self.last_weaponslot = self.current_weaponslot;
         }
-        // set last weapon to second last when changing weapons during quick attack/reload
-        if (self.quick_weaponchange && !self.quick_weapon)
-            self.last_weaponslot = self.slast_weaponslot;
+        if (self.queue_last_weaponslot)
+            self.last_weaponslot = self.queue_last_weaponslot;
         self.current_weaponslot = self.queue_weaponslot;
         self.current_weapon = self.next_weapon;
         self.weaponmode = self.next_weaponmode;
-        if (!self.quick_weapon)
+
+        // only print out weapon messages for non-quick weapons
+        if (!quick)
             W_PrintWeaponMessage();
     }
 
     W_SetCurrentAmmo();
     Status_Refresh(self);
-    self.quick_weapon = 0;
-    self.quick_weaponchange = 0;
     self.queue_weaponslot = 0;
+    self.queue_last_weaponslot = 0;
 };
 
 void () CycleWeaponNext = {
@@ -2024,7 +2024,7 @@ void () CycleWeaponNext = {
             break;
         }
     }
-    W_ChangeWeapon(next);
+    W_ChangeWeapon(next, 0);
 };
 
 void () CycleWeaponPrev = {
@@ -2044,7 +2044,7 @@ void () CycleWeaponPrev = {
             break;
         }
     }
-    W_ChangeWeapon(next);
+    W_ChangeWeapon(next, 0);
 };
 
 void () PreMatchImpulses;
@@ -2087,12 +2087,12 @@ void () ImpulseCommands = {
     if (self.is_building == 1) {
         if (self.impulse >= 1 && self.impulse <= 5) {
             TeamFortress_EngineerBuildStop();
-            W_ChangeWeapon(self.impulse);
+            W_ChangeWeapon(self.impulse, 0);
         } else if (self.impulse == TF_WEAPNEXT
                     || self.impulse == TF_WEAPPREV
                     || self.impulse == TF_WEAPLAST) {
             TeamFortress_EngineerBuildStop();
-            W_ChangeWeapon(self.impulse);
+            W_ChangeWeapon(self.impulse, 0);
         }
     }
 
@@ -2102,7 +2102,7 @@ void () ImpulseCommands = {
         else if (self.impulse == TF_WEAPPREV)
             CycleWeaponPrev();
         else if (self.impulse == TF_WEAPLAST && self.last_weaponslot != 0)
-            W_ChangeWeapon(self.impulse);
+            W_ChangeWeapon(self.impulse, 0);
         else if (self.impulse == TF_RELOAD)
             TeamFortress_ReloadCurrentWeapon();
         else if (self.impulse == TF_DETPACK_5)
@@ -2187,9 +2187,9 @@ void () ImpulseCommands = {
 void () PreMatchImpulses = {
     if (((self.impulse >= 1) && (self.impulse < 8)) ||
         (self.impulse == TF_MEDIKIT))
-        W_ChangeWeapon(self.impulse);
+        W_ChangeWeapon(self.impulse, 0);
     else if (self.impulse == AXE_IMP)
-        W_ChangeWeapon(self.impulse);
+        W_ChangeWeapon(self.impulse, 0);
     else if (self.impulse == TF_WEAPNEXT)
         CycleWeaponNext();
     else if (self.impulse == TF_WEAPPREV)
@@ -2326,18 +2326,20 @@ void () W_WeaponFrame = {
             TeamFortress_DetpackMenu();
     }
 
+    if (self.impulse == TF_QUICKSTOP)
+        self.is_quickfiring = 0;
+
     if (self.impulse >= 1 && self.impulse <= 4) {
-        self.quick_weapon = 0;
-        W_ChangeWeapon(self.impulse);
-    } else if (self.impulse >= 31 && self.impulse <= 34) {
-        self.quick_weapon = 1;
-        W_ChangeWeapon((self.impulse - 30));
-    } else if (self.impulse == TF_QUICKLAST) {
-        self.quick_weapon = 1;
-        W_ChangeWeapon(TF_WEAPLAST);
-    }
-    if (self.queue_weaponslot)
-        W_ChangeWeapon(self.queue_weaponslot);
+        self.is_quickfiring = 0;
+        W_ChangeWeapon(self.impulse, 0);
+    } else if (self.impulse >= 31 && self.impulse <= 34 && !(self.tfstate & TFSTATE_RELOADING)) {
+        self.is_quickfiring = 1;
+        W_ChangeWeapon((self.impulse - 30), 1);
+    } else if (self.queue_weaponslot)
+        W_ChangeWeapon(self.queue_weaponslot, 0);
+    else if (self.real_weaponslot != self.current_weaponslot
+                && time >= self.attack_finished && !(self.tfstate & TFSTATE_RELOADING))
+        W_ChangeWeapon(TF_WEAPLAST, 1);
 
     if (self.impulse == TF_CHANGETEAM) {
         Menu_Team();
