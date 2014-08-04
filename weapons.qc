@@ -2403,14 +2403,6 @@ void () W_WeaponFrame = {
                     TeamFortress_SetSpeed(self);
                 }
             }
-        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-            if (self.flags & FL_ONGROUND) {
-                SuperDamageSound();
-                W_Attack();
-            } else if (self.antispam_cannon_air < time) {
-                sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
-                self.antispam_cannon_air = time + 3;
-            }
         } else {
             SuperDamageSound();
             W_Attack();
