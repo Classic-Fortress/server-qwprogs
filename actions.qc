@@ -2,6 +2,8 @@
 // Non Class-Specific Impulse Commands
 //========================================================
 
+void () TeamFortress_ClipTick;
+
 void () TeamFortress_Discard = {
     newmis = spawn();
     if ((self.playerclass == PC_SCOUT)
@@ -256,9 +258,9 @@ void () TeamFortress_ID = {
 };
 
 void () TeamFortress_ReloadCurrentWeapon = {
-    local float reloadtime;
-    local float reloadamount;
-    local entity tWeapon;
+    local float reloadtime = 0;
+    local float reloadamount = 0;
+    local entity tWeapon, tClip;
 
     if (self.tfstate & TFSTATE_RELOADING) {
         return;
@@ -282,6 +284,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             else
                 reloadamount = self.reload_shotgun;
             Attack_Finished(0.4);
+            self.reload_clipsize = (8 - reloadamount);
             reloadtime = (8 - reloadamount) / 8;
             reloadtime = 2 - 2 * reloadtime;
             self.reload_shotgun = 0;
@@ -320,6 +323,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             else
                 reloadamount = self.reload_super_shotgun;
             Attack_Finished(0.7);
+            self.reload_clipsize = (16 - reloadamount);
             reloadtime = (16 - reloadamount) / 16;
             reloadtime = 3 - (3 * reloadtime);
             self.reload_super_shotgun = 0;
@@ -359,6 +363,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             else
                 reloadamount = self.reload_grenade_launcher;
             Attack_Finished(0.6);
+            self.reload_clipsize = (6 - reloadamount);
             reloadtime = (6 - reloadamount) / 6;
             reloadtime = 4 - 4 * reloadtime;
             self.reload_grenade_launcher = 0;
@@ -399,6 +404,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             else
                 reloadamount = self.reload_rocket_launcher;
             Attack_Finished(0.8);
+            self.reload_clipsize = (4 - reloadamount);
             reloadtime = (4 - reloadamount) / 4;
             reloadtime = 5 - (5 * reloadtime);
             self.reload_rocket_launcher = 0;
@@ -419,6 +425,25 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
+    }
+    if (reloadamount && reloadtime) {
+        self.reload_time = time + reloadtime;
+        self.reload_tick = reloadtime / reloadamount;
+        tClip = spawn();
+        tClip.owner = self;
+        tClip.classname = "timer";
+        tClip.nextthink = time + self.reload_tick;
+        tClip.think = TeamFortress_ClipTick;
+    }
+};
+
+void () TeamFortress_ClipTick = {
+    if (time < self.owner.reload_time) {
+        self.owner.reload_clipsize = self.owner.reload_clipsize + 1;
+        Status_Refresh(self.owner);
+        self.nextthink = time + self.owner.reload_tick;
+    } else {
+        dremove(self);
     }
 };
 

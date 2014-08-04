@@ -149,6 +149,9 @@ float coop;
 .float reload_super_shotgun;
 .float reload_grenade_launcher;
 .float reload_rocket_launcher;
+.float reload_tick;             // how often the status bar should be refreshed during reload
+.float reload_time;             // when the reload will finish
+.float reload_clipsize;         // how much ammo is currently in the reloading clip
 
 // Assault Cannon
 .float heat;
