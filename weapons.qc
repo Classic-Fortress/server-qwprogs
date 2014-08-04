@@ -2397,14 +2397,16 @@ void () W_WeaponFrame = {
     if (self.impulse != 0 && self.has_disconnected == 0)
         ImpulseCommands();
 
-    if ((!self.button0 && self.fire_held_down) &&
+    if ((self.button0 && self.fire_held_down) &&
+        (self.current_weapon == WEAP_ASSAULT_CANNON)) {
+        player_assaultcannonup1();
+    } else if ((!self.button0 && self.fire_held_down) &&
         (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         self.fire_held_down = 0;
         self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
         TeamFortress_SetSpeed(self);
         player_run();
-    }
-    if (self.button0 && !self.fire_held_down) {
+    } else if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400)
