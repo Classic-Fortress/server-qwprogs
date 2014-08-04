@@ -416,7 +416,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 
         W_FireAssaultCannon();
         stuffcmd(self, "v_idlescale ");
-        if (vlen(self.velocity) < 50) {
+        if (vlen(self.velocity) < 30) {
             if (self.heat < 5)
                 st = ftos(self.heat * 4);
             else
