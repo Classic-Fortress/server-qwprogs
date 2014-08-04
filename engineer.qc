@@ -766,12 +766,11 @@ void (entity gun) Engineer_UseSentryGun = {
         return;
     }
 
-    if (gun.ammo_shells < gun.maxammo_shells || (gun.weapon == 3
-                && gun.ammo_rockets < gun.maxammo_rockets)) {
-        if (self.ammo_shells > 0 || (gun.weapon == 3 && self.ammo_rockets > 0)) {
-            Engineer_SentryGun_InsertAmmo(gun);
-            return;
-        }
+    if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
+                || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
+                && self.ammo_rockets > 0)) {
+        Engineer_SentryGun_InsertAmmo(gun);
+        return;
     }
 
     sprint(self, PRINT_HIGH, "Level ");
