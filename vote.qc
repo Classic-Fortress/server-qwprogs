@@ -11,7 +11,7 @@ float () Vote_GetForceNextVotes;
 void () Vote_Check;
 void (float pf_decider) Vote_SetupVote;
 void (float pf_input) Vote_Input;
-void () Vote_MenuOpen;
+void (float force) Vote_MenuOpen;
 void () Vote_MenuClose;
 void (entity pe_player) Vote_Menu;
 void (float pf_input) Vote_RemoveVote;
@@ -43,6 +43,9 @@ float vote_started, vote_update, vote_winnercount, vote_decider, vote_abort;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed;
 
+    if (!pe_player.team_no || !pe_player.playerclass)
+        return;
+
     if (vote_result != string_null) {
         sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
         return;
@@ -55,7 +58,7 @@ void (entity pe_player) Vote_NextMap = {
     f_votes_needed = floor(TeamFortress_GetNoPlayers() / 2);
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(0);
-        //dprint("[cf/mapvote/votenext]: forcing map vote.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/votenext]: forcing map vote.\n");
         bprint(PRINT_HIGH, "Commencing vote for next map\n");
     }
 };
@@ -68,7 +71,7 @@ float () Vote_GetNextVotes = {
 
     e_player = find(world, classname, "player");
     while (e_player != world) {
-        if (e_player.vote_next == 1)
+        if (e_player.vote_next == 1 && e_player.team_no && e_player.playerclass)
             f_count = f_count + 1;
         e_player = find(e_player, classname, "player");
     }
@@ -94,7 +97,7 @@ void (entity pe_player) Vote_ForceNext = {
     f_votes_needed = ceil(TeamFortress_GetNoPlayers() / 2);
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(0);
-        //dprint("[cf/mapvote/forcenext]: forcing next map: ", vote_result, "\n");
+        //dprint("[", ftos(time), "/cf/mapvote/forcenext]: forcing next map: ", vote_result, "\n");
         bprint(PRINT_HIGH, "Changing level to ", vote_result, "\n");
         GotoNextMap();
     }
@@ -119,32 +122,47 @@ float () Vote_GetForceNextVotes = {
 // check if voting should start each frame
 // called from world.qc:StartFrame()
 void () Vote_Check = {
+    local float closetime = timelimit - CF_MAPVOTE_FINISH;
+    local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
+    local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
+    local float votetime_force = decidertime - CF_MAPVOTE_FORCESHOW;
+    local float votetime = decidertime - CF_MAPVOTE_DURATION;
 
     // only run these checks once a second
     if (vote_started >= 0 && (time - vote_update) >= 1 && !vote_abort) {
         vote_update = time;
 
-        if ((time + CF_MAPVOTE_DURATION + CF_MAPVOTE_DURATION_DECIDER) > timelimit && vote_started == 0) {
-            //dprint("[cf/mapvote/check]: setting up map vote.\n");
+        if (time >= votetime && vote_started == 0) {
+            //dprint("[", ftos(time), "/cf/mapvote/check]: setting up map vote.\n");
             Vote_SetupVote(0);
-            if (!vote_abort) {
-                bprint(PRINT_HIGH, "Time to vote for what map comes next\n");
-                //dprint("[cf/mapvote/check]: opening map vote.\n");
-                Vote_MenuOpen();
-            }
+            bprint(PRINT_HIGH, "Time to vote for what map comes next\n");
+            //dprint("[", ftos(time), "/cf/mapvote/check]: opening map vote.\n");
+            Vote_MenuOpen(0);
             return;
         }
 
-        else if (vote_started > 0) {
+        // only try to force show vote menu if player is not newly spawned
+        if (vote_started > 0 && (time - self.spawn_time) > CF_MAPVOTE_FORCESHOW) {
+            if (time >= votetime_force && time < decidertime)
+                Vote_MenuOpen(1);
+            else if (time >= decidertime_force && time < closetime)
+                Vote_MenuOpen(2);
+        }
+
+        if (vote_started > 0) {
 
             // open/close menus for those eligible
-            Vote_MenuOpen();
+            Vote_MenuOpen(0);
             Vote_MenuClose();
 
-            // when voting has been going on for CF_MAPVOTE_DURATION seconds or
+            // when voting has been going on for CF_MAPVOTE_DURATION(_DECIDER) seconds or
             // if everyone's voted, decide winner or create decider vote
-            if (((time - vote_started) >= CF_MAPVOTE_DURATION || Vote_GetVoteCount() == TeamFortress_GetNoPlayers())
+            if ((((!vote_decider && time >= decidertime) || (vote_decider && time >= closetime))
+                        || Vote_GetVoteCount() == TeamFortress_GetNoPlayers())
                         && vote_result == string_null) {
+
+                //dprint("[", ftos(time), "/cf/mapvote/check]: dropping losers.\n");
+                Vote_DropLosers();
 
                 // get winners/tied winners count
                 if (!vote_winnercount)
@@ -152,12 +170,12 @@ void () Vote_Check = {
 
                 // create decider vote if there are more 2 or more winners
                 if (!vote_decider && vote_winnercount >= 2 && Vote_GetWinnerVoteCount() < TeamFortress_GetNoPlayers()) {
-                    //dprint("[cf/mapvote/check]: setting up decider map vote.\n");
+                    //dprint("[", ftos(time), "/cf/mapvote/check]: setting up decider map vote.\n");
                     Vote_SetupVote(1); // 1 = decider vote
                     if (!vote_abort) {
                         bprint(PRINT_HIGH, "A winner could not be decided. Vote options have been updated.\n");
-                        //dprint("[cf/mapvote/check]: opening decider map vote.\n");
-                        Vote_MenuOpen();
+                        //dprint("[", ftos(time), "/cf/mapvote/check]: opening decider map vote.\n");
+                        Vote_MenuOpen(0);
                     }
                     return;
                 }
@@ -166,8 +184,8 @@ void () Vote_Check = {
                 Vote_MenuClose(); // close all open map votes
 
                 // get the winner of the vote
-                vote_result = strzone(Vote_GetWinner());
-                //dprint("[cf/mapvote/check]: next map will be ", vote_result, "\n");
+                vote_result = Vote_GetWinner(); // returns a strzoned string
+                //dprint("[", ftos(time), "/cf/mapvote/check]: next map will be ", vote_result, "\n");
 
                 // release map names from memory
                 Vote_ResetMapNames();
@@ -188,9 +206,9 @@ void (float pf_decider) Vote_SetupVote = {
         s_maplist = Vote_GetMapList(); // returns a strzoned string
     } else {
         vote_decider = 1;
+        s_maplist = Vote_GetWinnerList(); // returns a strzoned string
         Vote_ResetVotes();
-        s_maplist = strzone(Vote_GetWinnerList());
-        //dprint("[cf/mapvote/setupvote]: decider votelist: ", s_maplist, "\n");
+        //dprint("[", ftos(time), "/cf/mapvote/setupvote]: decider votelist: ", s_maplist, "\n");
     }
     vote_started = time;
 
@@ -199,7 +217,7 @@ void (float pf_decider) Vote_SetupVote = {
     strunzone(s_maplist);
 
     if (vote1_map == string_null) {
-        //dprint("[cf/mapvote/setupvote]: no maps found. aborting.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/setupvote]: no maps found. aborting.\n");
         vote_result = mapname;
         vote_abort = 1;
         return;
@@ -253,29 +271,49 @@ void (float pf_input) Vote_Input = {
 
     // update menu for all players (with active menus) on input
     if (pf_input >= 1 && pf_input <= 5) {
-        //dprint("[cf/mapvote/voteinput]: ", self.netname, " voted for ", s_votedfor, ".\n");
+        //dprint("[", ftos(time), "/cf/mapvote/voteinput]: ", self.netname, " voted for ", s_votedfor, ".\n");
         sprint(self, PRINT_HIGH, "You voted for ", s_votedfor, "\n");
         self.has_voted_map = pf_input;
-        if ((time - self.spawn_time) <= CF_MAPVOTE_FORCESHOW)
+        if ((time - self.menu_time) <= CF_MAPVOTE_FORCESHOW)
             Vote_Menu(self);
-        Vote_MenuOpen(); // update
+        Vote_MenuOpen(0); // update
     } else
         Vote_Menu(self);
 };
 
 // opens map vote menu for newly spawned players who haven't voted yet
 // called from Vote_Input(), Vote_Check()
-void () Vote_MenuOpen = {
+void (float force) Vote_MenuOpen = {
+    local float closetime = timelimit - CF_MAPVOTE_FINISH;
+    local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
+    local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
+    local float votetime_force = decidertime - CF_MAPVOTE_FORCESHOW;
     local entity e_player = find(world, classname, "player");
 
     while (e_player != world) {
-        if (e_player.team_no != 0 && e_player.playerclass != 0) {
-            if (!e_player.has_voted_map) {
-                if ((time - e_player.spawn_time) <= CF_MAPVOTE_FORCESHOW) {
-                    if (!e_player.menu_time) {
-                        //dprint("[cf/mapvote/menuopen]: open vote menu for newly spawned ", e_player.netname, ".\n");
+        if (e_player.team_no && e_player.playerclass) {
+            if (!e_player.has_voted_map && e_player.health) {
+                if (((time - e_player.spawn_time) <= CF_MAPVOTE_FORCESHOW || (time - e_player.menu_time) <= CF_MAPVOTE_FORCESHOW)
+                            && !force) {
+                    //dprint("[", ftos(time), "/cf/mapvote/menuopen]: open vote menu for newly spawned ", e_player.netname, ".\n");
+                    if (e_player.menu_time < (time - CF_MAPVOTE_FORCESHOW))
                         e_player.menu_time = time;
+                    Vote_Menu(e_player);
+                } else if (force == 1) {
+                    if (e_player.menu_input != Vote_Input) {
+                        //dprint("[", ftos(time), "/cf/mapvote/menuopen]: forcing vote menu on ", e_player.netname, ".\n");
+                        sprint(e_player, PRINT_HIGH, "You haven't voted yet, please vote\n");
                     }
+                    if (e_player.menu_time < (time - CF_MAPVOTE_FORCESHOW) && e_player.menu_time < votetime_force)
+                        e_player.menu_time = time;
+                    Vote_Menu(e_player);
+                } else if (force == 2) {
+                    if (e_player.menu_input != Vote_Input) {
+                        //dprint("[", ftos(time), "/cf/mapvote/menuopen]: forcing decider vote menu on ", e_player.netname, ".\n");
+                        sprint(e_player, PRINT_HIGH, "You haven't voted yet, please vote\n");
+                    }
+                    if (e_player.menu_time < (time - CF_MAPVOTE_FORCESHOW) && e_player.menu_time < decidertime_force)
+                        e_player.menu_time = time;
                     Vote_Menu(e_player);
                 }
             } else if (e_player.menu_input == Vote_Input && (time - e_player.menu_time) <= CF_MAPVOTE_FORCESHOW)
@@ -285,19 +323,18 @@ void () Vote_MenuOpen = {
     }
 };
 
-// closes map vote menu for anyone who's been alive >CF_MAPVOTE_FORCESHOW seconds
+// closes map vote menu when vote is over or for anyone who's been alive >CF_MAPVOTE_FORCESHOW seconds
 // called from Vote_Check()
 void () Vote_MenuClose = {
     local entity e_player = find(world, classname, "player");
 
     while (e_player != world) {
         if (vote_started == -1 && e_player.menu_input == Vote_Input) {
-            //dprint("[cf/mapvote/menuclose]: vote over, closing vote menu for ", e_player.netname, ".\n");
+            //dprint("[", ftos(time), "/cf/mapvote/menuclose]: vote over, closing vote menu for ", e_player.netname, ".\n");
             Menu_Close(e_player);
-        }
-        else if (e_player.menu_input == Vote_Input && (time - e_player.spawn_time) > CF_MAPVOTE_FORCESHOW) {
+        } else if (e_player.menu_input == Vote_Input && (time - e_player.menu_time) > CF_MAPVOTE_FORCESHOW) {
             if ((time - e_player.menu_time) > CF_MAPVOTE_FORCESHOW) {
-                //dprint("[cf/mapvote/menuclose]: closing vote menu for ", e_player.netname, ".\n");
+                //dprint("[", ftos(time), "/cf/mapvote/menuclose]: closing vote menu for ", e_player.netname, ".\n");
                 e_player.menu_time = 0;
                 Menu_Close(e_player);
             }
@@ -310,77 +347,98 @@ void () Vote_MenuClose = {
 // called from Vote_Input(), Menu_Open()
 void (entity pe_player) Vote_Menu = {
     local string s_choose, s_vote1, s_vote2, s_vote3, s_vote4, s_vote5;
-    local float f_width, f_timeleft;
+    local string s_tmp1, s_tmp2, s_tmp3, s_tmp4, s_tmp5;
+    local float f_width = 0, f_timeleft = 0;
+    local float closetime = timelimit - CF_MAPVOTE_FINISH;
+    local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
+    local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
+    local float votetime_force = decidertime - CF_MAPVOTE_FORCESHOW;
+    local float votetime = decidertime - CF_MAPVOTE_DURATION;
 
-    f_timeleft = CF_MAPVOTE_FORCESHOW - (time - pe_player.spawn_time);
+    if ((time < closetime && (pe_player.menu_time + CF_MAPVOTE_FORCESHOW) >= decidertime_force)
+                || (time < decidertime_force && (pe_player.menu_time + CF_MAPVOTE_FORCESHOW) >= decidertime_force))
+        f_timeleft = closetime - time;
+    else if ((time < decidertime && (pe_player.menu_time + CF_MAPVOTE_FORCESHOW) >= decidertime)
+                || (time < votetime_force && (pe_player.menu_time + CF_MAPVOTE_FORCESHOW) >= votetime_force))
+        f_timeleft = decidertime - time;
+    else if ((time >= decidertime && time < closetime) || (time >= votetime && time < decidertime))
+        f_timeleft = CF_MAPVOTE_FORCESHOW - (time - pe_player.menu_time);
+    else if (time - pe_player.menu_time < CF_MAPVOTE_FORCESHOW)
+        f_timeleft = CF_MAPVOTE_FORCESHOW - (time - pe_player.menu_time);
 
-    s_choose = strcat("It's time to choose (closes in ", strcat(ftos(ceil(f_timeleft)), "s):\n\n"));
-    s_vote1 = "";
-    s_vote2 = "";
-    s_vote3 = "";
-    s_vote4 = "";
-    s_vote5 = "";
-    f_width = strlen(s_vote1);
+    s_choose = strzone(strcat("Vote for next map (closes in ", strcat(ftos(floor(f_timeleft - 0.1)), "s):\n\n")));
+    s_tmp1 = strzone("");
+    s_tmp2 = strzone("");
+    s_tmp3 = strzone("");
+    s_tmp4 = strzone("");
+    s_tmp5 = strzone("");
 
     if (vote1_map != string_null) {
-        s_vote1 = strcat("“‘ ", vote1_map);
+        strunzone(s_tmp1);
+        s_tmp1 = strcat("“‘ ", vote1_map);
         if (vote1_cnt)
-            s_vote1 = strcat(s_vote1, strcat(" (", strcat(ftos(vote1_cnt), " votes)")));
+            s_tmp1 = strzone(strcat(s_tmp1, strcat(" (", strcat(ftos(vote1_cnt), " votes)"))));
         else
-            s_vote1 = strcat(s_vote1, "          ");
+            s_tmp1 = strzone(strcat(s_tmp1, "          "));
 
-        if (strlen(s_vote1) > f_width) f_width = strlen(s_vote1);
+        if (strlen(s_tmp1) > f_width) f_width = strlen(s_tmp1);
     }
     if (vote2_map != string_null) {
-        s_vote2 = strcat("”‘ ", vote2_map);
+        strunzone(s_tmp2);
+        s_tmp2 = strcat("”‘ ", vote2_map);
         if (vote2_cnt)
-            s_vote2 = strcat(s_vote2, strcat(" (", strcat(ftos(vote2_cnt), " votes)")));
+            s_tmp2 = strzone(strcat(s_tmp2, strcat(" (", strcat(ftos(vote2_cnt), " votes)"))));
         else
-            s_vote2 = strcat(s_vote2, "          ");
+            s_tmp2 = strzone(strcat(s_tmp2, "          "));
 
-        if (strlen(s_vote2) > f_width) f_width = strlen(s_vote2);
+        if (strlen(s_tmp2) > f_width) f_width = strlen(s_tmp2);
     }
     if (vote3_map != string_null) {
+        strunzone(s_tmp3);
         if (!vote_decider || vote3_cnt)
-            s_vote3 = strcat("•‘ ", vote3_map);
+            s_tmp3 = strcat("•‘ ", vote3_map);
         if (vote3_cnt)
-            s_vote3 = strcat(s_vote3, strcat(" (", strcat(ftos(vote3_cnt), " votes)")));
+            s_tmp3 = strzone(strcat(s_tmp3, strcat(" (", strcat(ftos(vote3_cnt), " votes)"))));
         else
-            s_vote3 = strcat(s_vote3, "          ");
+            s_tmp3 = strzone(strcat(s_tmp3, "          "));
 
-        if (strlen(s_vote3) > f_width) f_width = strlen(s_vote3);
+        if (strlen(s_tmp3) > f_width) f_width = strlen(s_tmp3);
     }
     if (vote4_map != string_null) {
+        strunzone(s_tmp4);
         if (!vote_decider || vote4_cnt)
-            s_vote4 = strcat("–‘ ", vote4_map);
+            s_tmp4 = strcat("–‘ ", vote4_map);
         if (vote4_cnt)
-            s_vote4 = strcat(s_vote4, strcat(" (", strcat(ftos(vote4_cnt), " votes)")));
+            s_tmp4 = strzone(strcat(s_tmp4, strcat(" (", strcat(ftos(vote4_cnt), " votes)"))));
         else
-            s_vote4 = strcat(s_vote4, "          ");
+            s_tmp4 = strzone(strcat(s_tmp4, "          "));
 
-        if (strlen(s_vote4) > f_width) f_width = strlen(s_vote4);
+        if (strlen(s_tmp4) > f_width) f_width = strlen(s_tmp4);
     }
     if (vote5_map != string_null) {
+        strunzone(s_tmp5);
         if (!vote_decider || vote5_cnt)
-            s_vote5 = strcat("—‘ ", vote5_map);
+            s_tmp5 = strcat("—‘ ", vote5_map);
         if (vote5_cnt)
-            s_vote5 = strcat(s_vote5, strcat(" (", strcat(ftos(vote5_cnt), " votes)")));
+            s_tmp5 = strzone(strcat(s_tmp5, strcat(" (", strcat(ftos(vote5_cnt), " votes)"))));
         else
-            s_vote5 = strcat(s_vote5, "          ");
+            s_tmp5 = strzone(strcat(s_tmp5, "          "));
 
-        if (strlen(s_vote5) > f_width) f_width = strlen(s_vote5);
+        if (strlen(s_tmp5) > f_width) f_width = strlen(s_tmp5);
     }
 
-    s_vote1 = strpadr(s_vote1, f_width);
-    s_vote2 = strpadr(s_vote2, f_width);
-    s_vote3 = strpadr(s_vote3, f_width);
-    s_vote4 = strpadr(s_vote4, f_width);
-    s_vote5 = strpadr(s_vote5, f_width);
+    s_vote1 = strzone(strpadr(s_tmp1, f_width));
+    s_vote2 = strzone(strpadr(s_tmp2, f_width));
+    s_vote3 = strzone(strpadr(s_tmp3, f_width));
+    s_vote4 = strzone(strpadr(s_tmp4, f_width));
+    s_vote5 = strzone(strpadr(s_tmp5, f_width));
 
     Status_Menu(pe_player, Vote_Input, s_choose, s_vote1, "\n", s_vote2, "\n", s_vote3, "\n", s_vote4, "\n\n", s_vote5, "\n");
+    strunzone(s_choose); strunzone(s_vote1); strunzone(s_vote2); strunzone(s_vote3); strunzone(s_vote4); strunzone(s_vote5);
+    strunzone(s_tmp1); strunzone(s_tmp2); strunzone(s_tmp3); strunzone(s_tmp4); strunzone(s_tmp5);
 };
 
-// removes a vote (if a user changes his mind during first 3 seconds)
+// removes a vote (if a user changes his mind)
 // called from Vote_Input()
 void (float pf_input) Vote_RemoveVote = {
     local string s_map = "";
@@ -402,7 +460,7 @@ void (float pf_input) Vote_RemoveVote = {
         s_map = vote5_map;
     }
 
-    //dprint("[cf/mapvote/removevote]: removing vote from ", s_map, ".\n");
+    //dprint("[", ftos(time), "/cf/mapvote/removevote]: removing vote from ", s_map, ".\n");
 };
 
 // returns a list of maps from config
@@ -412,49 +470,49 @@ string () Vote_GetMapList = {
     local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
 
     if (f_players <= 2) {
-        //dprint("[cf/mapvote/getmaplist]: using tiny votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using tiny votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_tiny1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_tiny2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_tiny3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_tiny4"), " ");
     } else if (f_players <= 4) {
-        //dprint("[cf/mapvote/getmaplist]: using small votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using small votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_small1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_small2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_small3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_small4"), " ");
     } else if (f_players <= 6) {
-        //dprint("[cf/mapvote/getmaplist]: using medium votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using medium votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_medium1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_medium2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_medium3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_medium4"), " ");
     } else if (f_players <= 8) {
-        //dprint("[cf/mapvote/getmaplist]: using large votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using large votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_large1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_large2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_large3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_large4"), " ");
     } else if (f_players <= 12) {
-        //dprint("[cf/mapvote/getmaplist]: using xlarge votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xlarge votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_xlarge1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_xlarge2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_xlarge3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_xlarge4"), " ");
     } else if (f_players <= 14) {
-        //dprint("[cf/mapvote/getmaplist]: using xxl votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxl votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_xxl1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_xxl2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_xxl3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_xxl4"), " ");
     } else if (f_players <= 16) {
-        //dprint("[cf/mapvote/getmaplist]: using xxxl votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxxl votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_xxxl1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_xxxl2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_xxxl3"), " ");
         s_maplist4 = strcat(infokey(world, "votelist_xxxl4"), " ");
     } else {
-        //dprint("[cf/mapvote/getmaplist]: using xxxxl votelist.\n");
+        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxxxl votelist.\n");
         s_maplist1 = strcat(infokey(world, "votelist_xxxxl1"), " ");
         s_maplist2 = strcat(infokey(world, "votelist_xxxxl2"), " ");
         s_maplist3 = strcat(infokey(world, "votelist_xxxxl3"), " ");
@@ -463,7 +521,7 @@ string () Vote_GetMapList = {
 
     s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
 
-    //dprint("[cf/mapvote/getmaplist]: votelist: ", s_maplist, "\n");
+    //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: votelist: ", s_maplist, "\n");
     return s_maplist;
 };
 
@@ -473,32 +531,35 @@ void (string ps_maplist) Vote_PopulateVoteList = {
     local float f_count, i;
     local string s_maplist;
 
-    s_maplist = Vote_StripMap(mapname, ps_maplist); // strip current map from votelist
+    s_maplist = Vote_StripMap(mapname, ps_maplist); // strip current map from votelist, returns a strzoned string
     f_count = List_Count(s_maplist);
 
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 4; i++) {
         local float f_next = RandomRange(0, f_count - 1);
-        local string s_map = strzone(List_Index(s_maplist, f_next));
+        local string s_map = List_Index(s_maplist, f_next); // returns a strzoned string
 
         if (i == 0) {
             vote1_map = s_map;
-            //dprint("[cf/mapvote/populatevotelist]: adding map1: ", vote1_map, "\n");
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map1: ", vote1_map, "\n");
         } else if (i == 1) {
             vote2_map = s_map;
-            //dprint("[cf/mapvote/populatevotelist]: adding map2: ", vote2_map, "\n");
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map2: ", vote2_map, "\n");
         } else if (i == 2) {
             vote3_map = s_map;
-            //dprint("[cf/mapvote/populatevotelist]: adding map3: ", vote3_map, "\n");
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map3: ", vote3_map, "\n");
         } else if (i == 3) {
             vote4_map = s_map;
-            //dprint("[cf/mapvote/populatevotelist]: adding map4: ", vote4_map, "\n");
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map4: ", vote4_map, "\n");
         }
 
-        s_maplist = Vote_StripMap(s_map, s_maplist);
+        local string s_tmp = s_maplist;
+        s_maplist = Vote_StripMap(s_map, s_maplist); // returns a strzoned string
         f_count = List_Count(s_maplist);
+        strunzone(s_tmp);
     }
     vote5_map = strzone(mapname);
-    //dprint("[cf/mapvote/populatevotelist]: adding map5: ", vote5_map, "\n");
+    strunzone(s_maplist);
+    //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map5: ", vote5_map, "\n");
 };
 
 // strips a map from a given list of maps
@@ -513,12 +574,13 @@ string (string ps_map, string ps_maplist) Vote_StripMap = {
     // remove current map from list, strzone hack needed because limited string buffer
     s_tmp = strzone("");
     for (i = 0; i < f_count; i++) {
-        if (List_Index(s_maplist, i) != ps_map) {
+        local string map = List_Index(s_maplist, i); // returns a strzoned string
+        if (map != ps_map) {
             local string tmp_old = s_tmp;
-            local string map = List_Index(s_maplist, i);
             s_tmp = strzone(strcat(s_tmp, strcat(map, " ")));
             strunzone(tmp_old);
         }
+        strunzone(map);
     }
 
     return s_tmp;
@@ -554,7 +616,7 @@ void () Vote_ResetVotes = {
 // resets map names
 // called from Vote_Check(), Vote_Reset()
 void () Vote_ResetMapNames = {
-    //dprint("[cf/mapvote/resetmapnames]: resetting map names.\n");
+    //dprint("[", ftos(time), "/cf/mapvote/resetmapnames]: resetting map names.\n");
 
     if (vote1_map != string_null) { strunzone(vote1_map); vote1_map = string_null; }
     if (vote2_map != string_null) { strunzone(vote2_map); vote2_map = string_null; }
@@ -574,8 +636,6 @@ float () Vote_GetVoteCount = {
 float () Vote_GetWinnerCount = {
     local float f_count;
 
-    Vote_DropLosers();
-
     f_count = 0;
     if (vote1_cnt) f_count = f_count + 1;
     if (vote2_cnt) f_count = f_count + 1;
@@ -590,8 +650,6 @@ float () Vote_GetWinnerCount = {
 // called from Vote_Check()
 float () Vote_GetWinnerVoteCount = {
     local float f_count;
-
-    Vote_DropLosers();
 
     f_count = 0;
     if (vote1_cnt) f_count = f_count + vote1_cnt;
@@ -608,15 +666,12 @@ float () Vote_GetWinnerVoteCount = {
 string () Vote_GetWinner = {
     local string s_maplist, s_result;
 
-    //dprint("[cf/mapvote/getwinner]: dropping losers.\n");
-    Vote_DropLosers();
-
     s_maplist = Vote_GetWinnerList();
 
     if (s_maplist != string_null)
-        s_result = Vote_RandomWinner(s_maplist);
+        s_result = Vote_RandomWinner(s_maplist); // returns a strzoned string
     else
-        s_result = Vote_RandomMap();
+        s_result = Vote_RandomMap(); // returns a strzoned string
 
     return s_result;
 };
@@ -626,16 +681,34 @@ string () Vote_GetWinner = {
 string () Vote_GetWinnerList = {
     local string s_maplist;
 
-    Vote_DropLosers();
+    s_maplist = strzone("");
+    if (vote1_cnt) {
+        local string s_tmp = s_maplist;
+        s_maplist = strzone(strcat(s_maplist, strcat(vote1_map, " ")));
+        strunzone(s_tmp);
+    }
+    if (vote2_cnt) {
+        local string s_tmp = s_maplist;
+        s_maplist = strzone(strcat(s_maplist, strcat(vote2_map, " ")));
+        strunzone(s_tmp);
+    }
+    if (vote3_cnt) {
+        local string s_tmp = s_maplist;
+        s_maplist = strzone(strcat(s_maplist, strcat(vote3_map, " ")));
+        strunzone(s_tmp);
+    }
+    if (vote4_cnt) {
+        local string s_tmp = s_maplist;
+        s_maplist = strzone(strcat(s_maplist, strcat(vote4_map, " ")));
+        strunzone(s_tmp);
+    }
+    if (vote5_cnt) {
+        local string s_tmp = s_maplist;
+        s_maplist = strzone(strcat(s_maplist, vote5_map));
+        strunzone(s_tmp);
+    }
 
-    s_maplist = "";
-    if (vote1_cnt) s_maplist = strcat(s_maplist, strcat(vote1_map, " "));
-    if (vote2_cnt) s_maplist = strcat(s_maplist, strcat(vote2_map, " "));
-    if (vote3_cnt) s_maplist = strcat(s_maplist, strcat(vote3_map, " "));
-    if (vote4_cnt) s_maplist = strcat(s_maplist, strcat(vote4_map, " "));
-    if (vote5_cnt) s_maplist = strcat(s_maplist, vote5_map);
-
-    //dprint("[cf/mapvote/getwinnerlist]: winner list: ", s_maplist, "\n");
+    //dprint("[", ftos(time), "/cf/mapvote/getwinnerlist]: winner list: ", s_maplist, "\n");
     return s_maplist;
 };
 
@@ -647,9 +720,9 @@ string (string ps_maplist) Vote_RandomWinner = {
 
     f_count = List_Count(ps_maplist) - 1;
     f_idx = RandomRange(0, f_count);
-    s_winner = List_Index(ps_maplist, f_idx);
+    s_winner = List_Index(ps_maplist, f_idx); // returns a strzoned string
 
-    //dprint("[cf/mapvote/randomwinner]: random winner: ", s_winner, "\n");
+    //dprint("[", ftos(time), "/cf/mapvote/randomwinner]: random winner: ", s_winner, "\n");
     return s_winner;
 };
 
@@ -662,10 +735,10 @@ string () Vote_RandomMap = {
     s_maplist = Vote_GetMapList(); // returns a strzoned string
     f_count = List_Count(s_maplist) - 1;
     f_idx = RandomRange(0, f_count);
-    s_map = List_Index(s_maplist, f_idx);
+    s_map = List_Index(s_maplist, f_idx); // returns a strzoned string
     strunzone(s_maplist);
 
-    //dprint("[cf/mapvote/randommap]: drew random map: ", s_map, "\n");
+    //dprint("[", ftos(time), "/cf/mapvote/randommap]: drew random map: ", s_map, "\n");
     return s_map;
 };
 
@@ -733,16 +806,15 @@ string (string ps_list, float pf_idx) List_Index = {
         }
 
         // empty space => end of word
-        if (s_current == " " && f_start > -1) {
-            return substr(ps_list, f_start, i - f_start);
-        }
+        if (s_current == " " && f_start > -1)
+            return strzone(substr(ps_list, f_start, i - f_start));
 
         s_previous = s_current;
     }
 
     // if f_start is set it means a list item was found
     if (f_start > -1)
-        return substr(ps_list, f_start, i - f_start);
+        return strzone(substr(ps_list, f_start, i - f_start));
 
-    return string_null;
+    return strzone(string_null);
 };
