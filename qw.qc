@@ -46,6 +46,8 @@ typedef void (float) f_void_float;
 .float detpack_left;            // Seconds left to detpack explosion
 .float disguise_skin;           // The skin the spy is changing to
 .float disguise_team;           // The team the spy is changing to
+.float fragstreak;              // Frag streak
+.float caps;                    // Caps during this game
 
 .float tfstate;                 // State flags for TeamFortress
 .entity linked_list;            // Used just like chain. Has to be separate so

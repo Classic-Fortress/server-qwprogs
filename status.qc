@@ -128,17 +128,36 @@ void (entity pl) RefreshStatusBar = {
     pad = strzone(pad);
 
     // status line 1 column 1 - grenade timer
-    if (pl.StatusGrenTime > 0)
-        st1 = strcat("Çòåîáäå: ", strcat(ftos(pl.StatusGrenTime), " seconds"));
-    else
+    if (pl.StatusGrenTime > 0) {
+        st1 = strcat("Çòåîáäå: ", ftos(pl.StatusGrenTime));
+        if (pl.fragstreak > 1 && pl.caps)
+            st1 = strcat(st1, " sec");
+        else
+            st1 = strcat(st1, " seconds");
+    } else
         st1 = "";
-    // flag carrier info
-    if (pl.items & IT_KEY1)
-        st2 = "Ãáòòùéîç Æìáç";
-    else
-        st2 = "             ";
+    // status line 1 column 3 - kill streak & caps
+    if (pl.fragstreak > 1) {
+        st2 = "Ëéìì óôòåáë: ";
+        st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
+    } else
+        st2 = "";
+    if (pl.caps) {
+        if (pl.fragstreak > 1)
+            st2 = strcat(st2, "  ");
+        st3 = "Ãáğó: ";
+        st3 = strcat(st3, strpadl(ftos(pl.caps),2));
+    } else
+        st3 = "";
+    st2 = strcat(st2, st3);
     // status line 1
-    s1 = strpadr(st1, 27);
+    if (pl.fragstreak > 1 && pl.caps) {
+        st2 = strpadl(st2, 25);
+        s1 = strpadr(st1, 15);
+    } else {
+        st2 = strpadl(st2, 20);
+        s1 = strpadr(st1, 20);
+    }
     s1 = strcat(s1, st2);
     s1 = strcat(s1, "\n");
     s1 = strzone(s1);
