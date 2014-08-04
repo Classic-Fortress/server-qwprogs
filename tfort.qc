@@ -1366,6 +1366,7 @@ void () TeamFortress_SetEquipment = {
     self.disguise_skin = 0;
     self.disguise_team = 0;
     self.detpack_left = 0;
+    self.fragstreak = 0;
 
     self.ammo_medikit = 0;
     self.maxammo_medikit = 0;
@@ -2673,6 +2674,10 @@ void (entity pl, float fr) TF_AddFrags = {
         return;
 
     pl.real_frags = pl.real_frags + fr;
+    if (fr == 1) {
+        pl.fragstreak = pl.fragstreak + 1;
+        Status_Refresh(pl);
+    }
 
     if (!pl.team_no)
         return;

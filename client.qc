@@ -559,6 +559,7 @@ void () execute_changelevel = {
         other.solid = SOLID_NOT;
         other.movetype = MOVETYPE_NONE;
         other.modelindex = 0;
+        other.caps = 0;
         other = find(other, classname, "player");
     }
     if (!clan_scores_dumped) {
