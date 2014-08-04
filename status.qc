@@ -221,7 +221,7 @@ void (entity pl) RefreshStatusBar = {
         st3 = ClipSizeToString(pl);
     }
     // status line 3 column 4 - grenade count
-    st4 = strcat("«тео: ", strcat(strcat(ftos(self.no_grenades_1), "/"), ftos(self.no_grenades_2)));
+    st4 = strcat("«тео: ", strcat(strcat(ftos(pl.no_grenades_1), "+"), ftos(pl.no_grenades_2)));
     // status line 3
     s3 = strcat(st1, st2);
     s3 = strpadr(s3, 19);
