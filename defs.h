@@ -233,7 +233,7 @@
 #define TFSTATE_BURNING			512 // Is on fire
 #define TFSTATE_GRENTHROWING		1024  // is throwing a grenade
 #define TFSTATE_AIMING			2048  // is using the laser sight
-//unused                     	4096
+#define TFSTATE_HALT            4096 // this state will stop hwguy from shooting assault cannon
 #define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
@@ -418,6 +418,8 @@
 #define TF_GRENADE_PT_2     155 // Prime and throw grenade type 2 (two clicks)
 
 // Impulses for new items
+#define TF_HALT             157 // Stop firing Assault Cannon
+#define TF_UNHALT           158 // Resume firing Assault Cannon
 #define TF_SCAN			159	// Scanner Pre-Impulse
 #define TF_SCAN_ENEMY		160	// Impulses to toggle scanning of enemies
 #define TF_SCAN_FRIENDLY	161	// Impulses to toggle scanning of friendlies

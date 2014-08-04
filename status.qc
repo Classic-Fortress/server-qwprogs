@@ -10,6 +10,7 @@ string(float num) GreenScoreToString;
 string(entity pl) ClipSizeToString;
 float(entity pl) GetClipSize;
 string(entity pl) DetpackToString;
+string(entity pl) AssaultCannonToString;
 string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
@@ -168,6 +169,8 @@ void (entity pl) RefreshStatusBar = {
         st1 = ScannerToString(pl);
     else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
         st1 = DetpackToString(pl);
+    else if (pl.playerclass == PC_HVYWEAP)
+        st1 = AssaultCannonToString(pl);
     else if (pl.playerclass == PC_SPY)
         st1 = DisguiseToString(pl);
     else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
@@ -406,6 +409,14 @@ string(entity pl) DetpackToString =
     }
 
     return st;
+};
+
+string(entity pl) AssaultCannonToString =
+{
+    if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_HALT))
+        return "Ασσαυμτ Γαξξοξ Μογλεδ";
+    else
+        return "";
 };
 
 string(entity pl) RangeToString =
