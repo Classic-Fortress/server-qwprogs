@@ -190,8 +190,10 @@ void (entity pl) RefreshStatusBar = {
     else
         st2 = GreenScoreToString(team4score);
     // status line 3 column 3 - clip size
-    if (self.tfstate & TFSTATE_RELOADING) {
-        st3 = "Ãלינ:  0/";
+    if (pl.tfstate & TFSTATE_RELOADING) {
+        st3 = "Ãלינ: ";
+        st3 = strcat(st3, strpadl(ftos(pl.reload_clipsize), 2));
+        st3 = strcat(st3, "/");
         st3 = strcat(st3, strpadr(ftos(GetClipSize(pl)), 3));
     } else {
         st3 = ClipSizeToString(pl);
