@@ -1705,7 +1705,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         if (self.ammo_cells < 7)
             sprint(self, PRINT_MEDIUM,
-                   "Insufficient cells to power up the assault cannon\n");
+                   "Not enough cells to power up the Assault Cannon\n");
         else {
             self.ammo_cells = self.ammo_cells - 7;
             self.heat = 1;
