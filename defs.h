@@ -253,9 +253,10 @@
 #define TF_TD_NOSOUND		256 // Special damage. Makes no sound/painframe, etc
 
 // Classic Fortress stuff
-#define CF_MAPVOTE_FORCESHOW        5       // Seconds to force the mapvote menu to be open
+#define CF_MAPVOTE_FORCESHOW        10      // Seconds to force the mapvote menu to be open
+#define CF_MAPVOTE_FINISH           5       // Seconds before timelimit to close all voting
 #define CF_MAPVOTE_DURATION         180     // Seconds to show map vote menu
-#define CF_MAPVOTE_DURATION_DECIDER 120     // Seconds to show map decider menu
+#define CF_MAPVOTE_DURATION_DECIDER 90      // Seconds to show map decider menu
 
 /*======================================================*/
 /* Toggleable Game Settings				*/
