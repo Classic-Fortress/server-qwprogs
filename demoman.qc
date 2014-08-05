@@ -98,14 +98,20 @@ void () TeamFortress_DetpackMenu = {
     local entity detpack;
 
     if (self.ammo_detpack <= 0) {
-        sprint(self, PRINT_HIGH, "You do not have any detpacks left\n");
+        if (time >= self.antispam_detpack) {
+            sprint(self, PRINT_HIGH, "You do not have any detpacks left\n");
+            self.antispam_detpack = time + 3;
+        }
         return;
     }
 
     detpack = find(world, classname, "detpack");
     while (detpack) {
         if (detpack.owner == self) {
-            sprint(self, PRINT_HIGH, "You can only have one detpack active at a time\n");
+            if (time >= self.antispam_detpack) {
+                sprint(self, PRINT_HIGH, "You can only have one detpack active at a time\n");
+                self.antispam_detpack = time + 3;
+            }
             return;
         }
         detpack = find(detpack, classname, "detpack");
