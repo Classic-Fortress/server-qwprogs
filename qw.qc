@@ -341,7 +341,7 @@ float already_chosen_map;
 .float nailpos;
 
 // anti spam
-.float antispam_cannon_air;     // message shown while trying to fire assault cannon while in the air
+.float antispam_detpack;        // don't spam detpack messages
 
 // status bar stuff
 .string StatusString;           // current centerprint text (strzone'd!)
