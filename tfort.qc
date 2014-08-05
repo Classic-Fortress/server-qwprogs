@@ -1367,6 +1367,7 @@ void () TeamFortress_SetEquipment = {
     self.disguise_team = 0;
     self.detpack_left = 0;
     self.fragstreak = 0;
+    self.menu_time = 0;
 
     self.ammo_medikit = 0;
     self.maxammo_medikit = 0;
