@@ -2555,6 +2555,12 @@ void () DropGoalItems = {
         if (te.owner == self) {
             tfgoalitem_RemoveEffectsFromPlayer(te, self);
             tfgoalitem_drop(te, 1, self);
+            if (self.team_no == 1)
+                bprint(PRINT_HIGH, self.netname, " העןננוה עוה§ף זלבח®\n");
+            else if (self.team_no == 2)
+                bprint(PRINT_HIGH, self.netname, " העןננוה גלץו§ף זלבח®\n");
+            else
+                bprint(PRINT_HIGH, self.netname, " העןננוה פטו ומוםש§ף זלבח®\n");
         }
         te = find(te, classname, "item_tfgoal");
     }
