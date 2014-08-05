@@ -1407,6 +1407,15 @@ void () CheckWaterJump = {
 };
 
 void () PlayerPreThink = {
+    if (self.impulse == TF_VOTENEXT) {
+        Vote_NextMap(self);
+        self.impulse = 0;
+    }
+    else if (self.impulse == TF_FORCENEXT) {
+        Vote_ForceNext(self);
+        self.impulse = 0;
+    }
+
     if (self.is_feigning && (self.waterlevel == 1)) {
         self.watertype = -3;
         self.waterlevel = 3;
