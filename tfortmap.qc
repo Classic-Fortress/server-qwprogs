@@ -2544,7 +2544,7 @@ void (entity P) ForceRespawn = {
 };
 
 void () DropGoalItems = {
-    local entity te;
+    local entity te, search;
 
     newmis = spawn();
     makevectors(self.v_angle);
@@ -2561,6 +2561,18 @@ void () DropGoalItems = {
                 bprint(PRINT_HIGH, self.netname, " העןננוה גלץו§ף זלבח®\n");
             else
                 bprint(PRINT_HIGH, self.netname, " העןננוה פטו ומוםש§ף זלבח®\n");
+
+            Status_Print(self, "\n\n\n", "You dropped the flag!");
+            search = find(world, classname, "player");
+            while (search) {
+                if ((search.team_no == self.team_no) && (self.team_no != 0)) {
+                    if (search != self)
+                        Status_Print(search, "\n\n\n", self.netname, " dropped the enemy flag!");
+                } else {
+                    Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
+                }
+                search = find(search, classname, "player");
+            }
         }
         te = find(te, classname, "item_tfgoal");
     }
