@@ -343,6 +343,45 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
+    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+        if (self.ammo_shells == 0) {
+            sprint(self, PRINT_HIGH, "Out of shells\n");
+            return;
+        }
+        if (self.reload_sniper_rifle == 0) {
+            sprint(self, PRINT_HIGH, "Clip full\n");
+            return;
+        }
+        if ((16 - self.reload_sniper_rifle) == self.ammo_shells) {
+            sprint(self, PRINT_HIGH, "All shells are in the clip\n");
+            return;
+        }
+        if (self.ammo_shells >= 1) {
+            if (self.reload_super_shotgun >= self.ammo_shells)
+                reloadamount = self.ammo_shells;
+            else
+                reloadamount = self.reload_sniper_rifle;
+            Attack_Finished(1.5);
+            self.reload_clipsize = (1 - reloadamount);
+            reloadtime = (1 - reloadamount) / 1;
+            reloadtime = 4 - (4 * reloadtime);
+            self.reload_sniper_rifle = 0;
+            if (self.ammo_shells < 1) {
+                self.reload_sniper_rifle = 1 - self.ammo_shells;
+            }
+            sprint(self, PRINT_HIGH, "Reloading...\n");
+            self.tfstate = self.tfstate | TFSTATE_RELOADING;
+            Status_Refresh(self);
+            tWeapon = spawn();
+            tWeapon.owner = self;
+            tWeapon.classname = "timer";
+            tWeapon.nextthink = time + reloadtime;
+            tWeapon.think = W_Reload_sniper_rifle;
+            self.weaponmodel = "";
+            self.weaponframe = 0;
+        } else {
+            sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
+        }
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (self.ammo_rockets == 0) {
             sprint(self, PRINT_HIGH, "Out of grenades\n");

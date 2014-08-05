@@ -1552,6 +1552,14 @@ void () W_Reload_super_shotgun = {
     Status_Refresh(self.owner);
 };
 
+void () W_Reload_sniper_rifle = {
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
+    self.owner.weaponmodel = "progs/v_srifle.mdl";
+    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    dremove(self);
+    Status_Refresh(self.owner);
+};
+
 void () W_Reload_grenade_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_rock.mdl";
@@ -1576,6 +1584,11 @@ float () CheckForReload = {
         }
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
+            TeamFortress_ReloadCurrentWeapon();
+            return 1;
+        }
+    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && (toggleflags & TFLAG_SNIPERRELOAD)) {
             TeamFortress_ReloadCurrentWeapon();
             return 1;
         }
@@ -1694,8 +1707,15 @@ void () W_Attack = {
         sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         if (self.flags & FL_ONGROUND) {
+            if (CheckForReload() == TRUE)
+                return;
             player_shot1();
             W_FireSniperRifle();
+            if (toggleflags & TFLAG_SNIPERRELOAD) {
+                self.reload_sniper_rifle = self.reload_sniper_rifle + 1;
+                Status_Refresh(self);
+                CheckForReload();
+            }
             Attack_Finished(1.5);
         }
     } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
@@ -2402,7 +2422,7 @@ void () W_WeaponFrame = {
         TeamFortress_SetSpeed(self);
         player_run();
     } else if (self.button0 && !self.fire_held_down) {
-        if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+        if (self.current_weapon == WEAP_SNIPER_RIFLE && !(self.tfstate & TFSTATE_RELOADING)) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400)
                     self.heat = self.heat + 3;

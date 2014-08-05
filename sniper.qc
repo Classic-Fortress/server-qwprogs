@@ -147,7 +147,7 @@ void () SniperSight_Update = {
 void () SniperSight_Create = {
     local entity sight;
 
-    if (self.has_disconnected == TRUE)
+    if (self.has_disconnected == TRUE || (self.tfstate & TFSTATE_RELOADING))
         return;
 
     self.tfstate = self.tfstate | TFSTATE_AIMING;

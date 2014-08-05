@@ -358,6 +358,12 @@ void () DecodeLevelParms = {
         else if (st == "off")
             invis_only = FALSE;
 
+        st = infokey(world, "sr");
+        if (st == string_null)
+            st = infokey(world, "sniperreload");
+        if (st != "off")
+            toggleflags = toggleflags | TFLAG_SNIPERRELOAD;
+
         st = infokey(world, "rd");
         if (st == string_null)
             st = infokey(world, "respawn_delay");
