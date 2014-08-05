@@ -815,9 +815,13 @@ float () GetGrenadePossibility = {
         }
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
-            sprint(other, 2, "You found a ");
+            sprint(other, PRINT_HIGH, "You found a ");
             PrintGrenadeType(other, other.tp_grenades_2);
-            sprint(other, 2, " grenade\n");
+            if (other.tp_grenades_2 == GR_TYPE_CALTROP) {
+                sprint(other, PRINT_HIGH, " canister\n");
+            } else {
+                sprint(other, PRINT_HIGH, " grenade\n");
+            }
             return (1);
         }
     }
