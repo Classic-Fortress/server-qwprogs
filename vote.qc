@@ -3,6 +3,7 @@
 // Displays a vote menu during the last few minutes of gameplay on a map.
 
 // functions by order of appearance
+float () TeamFortress_GetNoActivePlayers;
 void (entity pe_player) Vote_NextMap;
 float () Vote_GetNextVotes;
 void (entity pe_player) Vote_ForceNext;
@@ -41,7 +42,7 @@ float vote_started, vote_update, vote_winnercount, vote_decider, vote_abort;
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_NextMap = {
-    local float f_votes, f_votes_needed;
+    local float f_votes, f_votes_needed, f_votes_left;
 
     if (!pe_player.team_no || !pe_player.playerclass)
         return;
@@ -55,11 +56,17 @@ void (entity pe_player) Vote_NextMap = {
     bprint(PRINT_HIGH, pe_player.netname, " wants to start voting for next map\n");
 
     f_votes = Vote_GetNextVotes();
-    f_votes_needed = floor(TeamFortress_GetNoPlayers() / 2);
+    f_votes_needed = ceil(TeamFortress_GetNoActivePlayers() / 2);
+    f_votes_left = f_votes_needed - f_votes;
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(0);
         //dprint("[", ftos(time), "/cf/mapvote/votenext]: forcing map vote.\n");
         bprint(PRINT_HIGH, "Commencing vote for next map\n");
+    } else {
+        if (f_votes_left == 1)
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed\n");
+        else
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed\n");
     }
 };
 
@@ -82,7 +89,10 @@ float () Vote_GetNextVotes = {
 // forces server to change map to next map
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ForceNext = {
-    local float f_votes, f_votes_needed;
+    local float f_votes, f_votes_needed, f_votes_left;
+
+    if (!pe_player.team_no || !pe_player.playerclass)
+        return;
 
     if (vote_result == string_null) {
         sprint(pe_player, PRINT_HIGH, "You can't force next map before voting for a new map. Use /votenext to issue a map vote.\n");
@@ -94,12 +104,18 @@ void (entity pe_player) Vote_ForceNext = {
     bprint(PRINT_HIGH, pe_player.netname, " wants to start playing ", vote_result, " now\n");
 
     f_votes = Vote_GetForceNextVotes();
-    f_votes_needed = ceil(TeamFortress_GetNoPlayers() / 2);
+    f_votes_needed = ceil(TeamFortress_GetNoActivePlayers() / 2);
+    f_votes_left = f_votes_needed - f_votes;
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(0);
         //dprint("[", ftos(time), "/cf/mapvote/forcenext]: forcing next map: ", vote_result, "\n");
         bprint(PRINT_HIGH, "Changing level to ", vote_result, "\n");
         GotoNextMap();
+    } else {
+        if (f_votes_left == 1)
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed\n");
+        else
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed\n");
     }
 };
 
@@ -158,7 +174,7 @@ void () Vote_Check = {
             // when voting has been going on for CF_MAPVOTE_DURATION(_DECIDER) seconds or
             // if everyone's voted, decide winner or create decider vote
             if ((((!vote_decider && time >= decidertime) || (vote_decider && time >= closetime))
-                        || Vote_GetVoteCount() == TeamFortress_GetNoPlayers())
+                        || Vote_GetVoteCount() == TeamFortress_GetNoActivePlayers())
                         && vote_result == string_null) {
 
                 //dprint("[", ftos(time), "/cf/mapvote/check]: dropping losers.\n");
@@ -169,7 +185,7 @@ void () Vote_Check = {
                     vote_winnercount = Vote_GetWinnerCount();
 
                 // create decider vote if there are more 2 or more winners
-                if (!vote_decider && vote_winnercount >= 2 && Vote_GetWinnerVoteCount() < TeamFortress_GetNoPlayers()) {
+                if (!vote_decider && vote_winnercount >= 2 && Vote_GetWinnerVoteCount() < TeamFortress_GetNoActivePlayers()) {
                     //dprint("[", ftos(time), "/cf/mapvote/check]: setting up decider map vote.\n");
                     Vote_SetupVote(1); // 1 = decider vote
                     if (!vote_abort) {

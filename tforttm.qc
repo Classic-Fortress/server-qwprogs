@@ -433,6 +433,22 @@ float () TeamFortress_GetNoPlayers = {
     return (nump);
 };
 
+float () TeamFortress_GetNoActivePlayers = {
+    local float nump;
+    local entity search;
+    nump = 0;
+
+    search = find(world, classname, "player");
+    while (search != world) {
+        if (search.netname != string_null) {
+            if (search.team_no && search.playerclass)
+                nump = nump + 1;
+        }
+        search = find(search, classname, "player");
+    }
+    return (nump);
+};
+
 float (float tno) TeamFortress_TeamGetMaxPlayers = {
     if (tno == 1)
         return (team1maxplayers);
