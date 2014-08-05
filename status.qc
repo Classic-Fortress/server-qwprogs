@@ -288,6 +288,12 @@ string(entity pl) ClipSizeToString =
         if ((max - pl.reload_super_shotgun) > pl.ammo_shells)
             pl.reload_super_shotgun = max - pl.ammo_shells;
         num = (max - pl.reload_super_shotgun);
+    } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
+        if (!(toggleflags & TFLAG_SNIPERRELOAD))
+            return ("");
+        if ((max - pl.reload_sniper_rifle) > pl.ammo_shells)
+            pl.reload_sniper_rifle = max - pl.ammo_shells;
+        num = (max - pl.reload_sniper_rifle);
     } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if ((max - pl.reload_grenade_launcher) > pl.ammo_rockets)
             pl.reload_grenade_launcher = (max - pl.ammo_rockets);
@@ -316,6 +322,8 @@ float(entity pl) GetClipSize =
         return 8;
     else if (pl.current_weapon == WEAP_SUPER_SHOTGUN)
         return 16;
+    else if (pl.current_weapon == WEAP_SNIPER_RIFLE)
+        return 1;
     else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER)
         return 6;
     else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER)

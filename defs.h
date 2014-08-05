@@ -279,6 +279,7 @@
 #define TFLAG_FULLTEAMSCORE	2048
 #define TFLAG_FLAGEMU		4096
 #define TFLAG_WARSTANDARD	8192
+#define TFLAG_SNIPERRELOAD  16384 // Sniper reload enabled
 
 #define TF_RESPAWNDELAY1	5 	// seconds of waiting before player can respawn
 #define TF_RESPAWNDELAY2	10 	// seconds of waiting before player can respawn

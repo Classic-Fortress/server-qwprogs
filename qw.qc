@@ -149,6 +149,7 @@ float coop;
 // variables used for reloading
 .float reload_shotgun;
 .float reload_super_shotgun;
+.float reload_sniper_rifle;
 .float reload_grenade_launcher;
 .float reload_rocket_launcher;
 .float reload_tick;             // how often the status bar should be refreshed during reload
