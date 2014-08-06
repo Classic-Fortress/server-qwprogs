@@ -147,15 +147,8 @@ void () worldspawn = {
 
     st = infokey(world, "exec_map_cfgs");
     if (st == "on") {
-
-        st = infokey(world, "cycledir");
-        if (st != string_null) {
-            localcmd("exec ");
-            localcmd(st);
-            localcmd("/");
-        } else
-            localcmd("exec qwmcycle/");
-
+        localcmd("exec fortress.cfg\n");
+        localcmd("exec cfg/maps/");
         localcmd(mapname);
         localcmd(".cfg\n");
     }
