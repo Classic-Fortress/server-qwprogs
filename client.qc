@@ -1471,7 +1471,7 @@ void () PlayerPreThink = {
     if (((time > self.attack_finished) && (self.currentammo == 0)) &&
         (self.weapon > 16)) {
         self.weapon = W_BestWeapon();
-        self.current_weaponslot = W_GetSlot();
+        self.current_weaponslot = W_BestWeaponSlot();
         W_SetCurrentAmmo();
     }
 };
