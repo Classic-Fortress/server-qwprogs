@@ -86,7 +86,8 @@ void () TeamFortress_HelpMap;
 void () BioInfection_Decay;
 void () BioInfection_MonsterDecay;
 
-float () W_GetSlot;
+float (float weap) W_GetSlot;
+float () W_BestWeaponSlot;
 void () W_FireFlame;
 void () W_FireIncendiaryCannon;
 void () W_FireTranq;
@@ -1030,7 +1031,7 @@ void () W_FireLightning = {
 
     if (self.ammo_cells < 1) {
         self.current_weapon = W_BestWeapon();
-        self.current_weaponslot = W_GetSlot();
+        self.current_weaponslot = W_BestWeaponSlot();
         W_SetCurrentAmmo();
         W_PrintWeaponMessage();
         return;
@@ -1237,7 +1238,7 @@ void (float ox) W_FireSpikes = {
     }
     if (self.ammo_nails < 1) {
         self.current_weapon = W_BestWeapon();
-        self.current_weaponslot = W_GetSlot();
+        self.current_weaponslot = W_BestWeaponSlot();
         W_SetCurrentAmmo();
         W_PrintWeaponMessage();
         return;
@@ -1511,6 +1512,14 @@ float () W_BestWeapon = {
     return (0);
 };
 
+float () W_BestWeaponSlot = {
+    local float weap;
+
+    weap = W_BestWeapon();
+
+    return W_GetSlot(weap);
+};
+
 float () W_CheckNoAmmo = {
     if ((self.current_weapon == WEAP_AXE)
         || (self.current_weapon == WEAP_SPANNER)
@@ -1530,7 +1539,7 @@ float () W_CheckNoAmmo = {
         return (1);
 
     self.current_weapon = W_BestWeapon();
-    self.current_weaponslot = W_GetSlot();
+    self.current_weaponslot = W_BestWeaponSlot();
     W_SetCurrentAmmo();
     W_PrintWeaponMessage();
     return (0);
@@ -1785,30 +1794,30 @@ void () W_PrintWeaponMessage = {
         sprint(self, PRINT_MEDIUM, "Sniper rifle on fully automatic mode\n");
 };
 
-float () W_GetSlot = {
-    if (self.current_weapon == WEAP_ROCKET_LAUNCHER
-                || self.current_weapon == WEAP_SUPER_NAILGUN
-                || self.current_weapon == WEAP_SNIPER_RIFLE
-                || self.current_weapon == WEAP_FLAMETHROWER
-                || self.current_weapon == WEAP_TRANQ
-                || self.current_weapon == WEAP_LASER
-                || self.current_weapon == WEAP_ASSAULT_CANNON) {
+float (float weap) W_GetSlot = {
+    if (weap == WEAP_ROCKET_LAUNCHER
+                || weap == WEAP_SUPER_NAILGUN
+                || weap == WEAP_SNIPER_RIFLE
+                || weap == WEAP_FLAMETHROWER
+                || weap == WEAP_TRANQ
+                || weap == WEAP_LASER
+                || weap == WEAP_ASSAULT_CANNON) {
         return 1;
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN
-                || self.current_weapon == WEAP_AUTO_RIFLE
-                || self.current_weapon == WEAP_INCENDIARY) {
+    } else if (weap == WEAP_SUPER_SHOTGUN
+                || weap == WEAP_AUTO_RIFLE
+                || weap == WEAP_INCENDIARY) {
         return 2;
-    } else if (self.current_weapon == WEAP_SHOTGUN) {
+    } else if (weap == WEAP_SHOTGUN) {
         if (self.playerclass == PC_SCOUT)
             return 2;
         else
             return 3;
-    } else if (self.current_weapon == WEAP_NAILGUN) {
+    } else if (weap == WEAP_NAILGUN) {
         if (self.playerclass == PC_SCOUT)
             return 1;
         else
             return 3;
-    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
+    } else if (weap == WEAP_GRENADE_LAUNCHER) {
         if (self.weaponmode == 0)
             return 1;
         else
