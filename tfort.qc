@@ -45,6 +45,24 @@ void () UseSpecialSkill = {
     }
 };
 
+void () RemoveGrenadeTimers = {
+    local entity te = find(world, classname, "gtimer");
+    while (te != world) {
+        if (te.owner == self)
+            dremove(te);
+        te = find(te, classname, "gtimer");
+    }
+};
+
+void () RemoveGrenades = {
+    local entity te = find(world, classname, "grenade");
+    while (te) {
+        if (te.owner == self)
+            dremove(te);
+        te = find(te, classname, "grenade");
+    }
+};
+
 void (float inp) TeamFortress_ChangeClass = {
     local entity spot;
     local entity te;
@@ -621,15 +639,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
     else {
         tGrenade.heat = time + 3 + 0.8;
 
-        timer = find(world, classname, "gtimer");
-        while (timer != world) {
-            if (timer.owner == self) {
-                dremove(timer);
-                timer = find(world, classname, "gtimer");
-            } else {
-                timer = find(timer, classname, "gtimer");
-            }
-        }
+        RemoveGrenadeTimers();
 
         if (!stof(infokey(self, "nt"))) {
             timer = spawn();
@@ -1856,15 +1866,7 @@ void () TeamFortress_RemoveTimers = {
             te = find(te, classname, "timer");
     }
 
-    te = find(world, classname, "timer");
-    while (te != world) {
-        if (te.owner == self) {
-            dremove(te);
-            te = find(world, classname, "gtimer");
-        } else {
-            te = find(te, classname, "gtimer");
-        }
-    }
+    RemoveGrenadeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);
 
