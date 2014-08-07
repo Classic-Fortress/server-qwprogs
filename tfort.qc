@@ -1397,10 +1397,23 @@ void () TeamFortress_SetEquipment = {
 
     if (self.playerclass == PC_SCOUT) {
         self.weapons_carried = self.weapons_carried | PC_SCOUT_WEAPONS;
-        self.ammo_rockets = PC_SCOUT_INITAMMO_ROCKET;
-        self.ammo_nails = PC_SCOUT_INITAMMO_NAIL;
-        self.ammo_shells = PC_SCOUT_INITAMMO_SHOT;
-        self.ammo_cells = PC_SCOUT_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_SCOUT_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_SCOUT_MAXAMMO_NAIL;
+            self.ammo_shells = PC_SCOUT_MAXAMMO_SHOT;
+            self.ammo_cells = PC_SCOUT_MAXAMMO_CELL;
+            self.armortype = PC_SCOUT_MAXARMORTYPE;
+            self.armorvalue = PC_SCOUT_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_SCOUT_INITAMMO_ROCKET;
+            self.ammo_nails = PC_SCOUT_INITAMMO_NAIL;
+            self.ammo_shells = PC_SCOUT_INITAMMO_SHOT;
+            self.ammo_cells = PC_SCOUT_INITAMMO_CELL;
+            self.armortype = PC_SCOUT_INITARMORTYPE;
+            self.armorvalue = PC_SCOUT_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_SCOUT_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SCOUT_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SCOUT_MAXAMMO_SHOT;
@@ -1422,8 +1435,6 @@ void () TeamFortress_SetEquipment = {
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
 
         self.armorclass = self.armorclass | 0;
-        self.armortype = PC_SCOUT_INITARMORTYPE;
-        self.armorvalue = PC_SCOUT_INITARMOR;
         self.armor_allowed = PC_SCOUT_MAXARMORTYPE;
         self.maxarmor = PC_SCOUT_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1434,10 +1445,23 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_SHOTGUN | IT_NAILGUN;
     } else if (self.playerclass == PC_SNIPER) {
         self.weapons_carried = self.weapons_carried | PC_SNIPER_WEAPONS;
-        self.ammo_rockets = PC_SNIPER_INITAMMO_ROCKET;
-        self.ammo_nails = PC_SNIPER_INITAMMO_NAIL;
-        self.ammo_shells = PC_SNIPER_INITAMMO_SHOT;
-        self.ammo_cells = PC_SNIPER_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_SNIPER_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_SNIPER_MAXAMMO_NAIL;
+            self.ammo_shells = PC_SNIPER_MAXAMMO_SHOT;
+            self.ammo_cells = PC_SNIPER_MAXAMMO_CELL;
+            self.armortype = PC_SNIPER_MAXARMORTYPE;
+            self.armorvalue = PC_SNIPER_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_SNIPER_INITAMMO_ROCKET;
+            self.ammo_nails = PC_SNIPER_INITAMMO_NAIL;
+            self.ammo_shells = PC_SNIPER_INITAMMO_SHOT;
+            self.ammo_cells = PC_SNIPER_INITAMMO_CELL;
+            self.armortype = PC_SNIPER_INITARMORTYPE;
+            self.armorvalue = PC_SNIPER_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_SNIPER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SNIPER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SNIPER_MAXAMMO_SHOT;
@@ -1450,8 +1474,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_SNIPER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SNIPER_INITARMORCLASS;
-        self.armortype = PC_SNIPER_INITARMORTYPE;
-        self.armorvalue = PC_SNIPER_INITARMOR;
         self.armor_allowed = PC_SNIPER_MAXARMORTYPE;
         self.maxarmor = PC_SNIPER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1462,10 +1484,23 @@ void () TeamFortress_SetEquipment = {
             self.items | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_NAILGUN;
     } else if (self.playerclass == PC_SOLDIER) {
         self.weapons_carried = self.weapons_carried | PC_SOLDIER_WEAPONS;
-        self.ammo_rockets = PC_SOLDIER_INITAMMO_ROCKET;
-        self.ammo_nails = PC_SOLDIER_INITAMMO_NAIL;
-        self.ammo_shells = PC_SOLDIER_INITAMMO_SHOT;
-        self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_SOLDIER_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
+            self.ammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
+            self.ammo_cells = PC_SOLDIER_MAXAMMO_CELL;
+            self.armortype = PC_SOLDIER_MAXARMORTYPE;
+            self.armorvalue = PC_SOLDIER_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_SOLDIER_INITAMMO_ROCKET;
+            self.ammo_nails = PC_SOLDIER_INITAMMO_NAIL;
+            self.ammo_shells = PC_SOLDIER_INITAMMO_SHOT;
+            self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
+            self.armortype = PC_SOLDIER_INITARMORTYPE;
+            self.armorvalue = PC_SOLDIER_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_SOLDIER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
@@ -1478,8 +1513,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_SOLDIER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SOLDIER_INITARMORCLASS;
-        self.armortype = PC_SOLDIER_INITARMORTYPE;
-        self.armorvalue = PC_SOLDIER_INITARMOR;
         self.armor_allowed = PC_SOLDIER_MAXARMORTYPE;
         self.maxarmor = PC_SOLDIER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1491,10 +1524,23 @@ void () TeamFortress_SetEquipment = {
             items | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_ROCKET_LAUNCHER;
     } else if (self.playerclass == PC_DEMOMAN) {
         self.weapons_carried = self.weapons_carried | PC_DEMOMAN_WEAPONS;
-        self.ammo_rockets = PC_DEMOMAN_INITAMMO_ROCKET;
-        self.ammo_nails = PC_DEMOMAN_INITAMMO_NAIL;
-        self.ammo_shells = PC_DEMOMAN_INITAMMO_SHOT;
-        self.ammo_cells = PC_DEMOMAN_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_DEMOMAN_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
+            self.ammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
+            self.ammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
+            self.armortype = PC_DEMOMAN_MAXARMORTYPE;
+            self.armorvalue = PC_DEMOMAN_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_DEMOMAN_INITAMMO_ROCKET;
+            self.ammo_nails = PC_DEMOMAN_INITAMMO_NAIL;
+            self.ammo_shells = PC_DEMOMAN_INITAMMO_SHOT;
+            self.ammo_cells = PC_DEMOMAN_INITAMMO_CELL;
+            self.armortype = PC_DEMOMAN_INITARMORTYPE;
+            self.armorvalue = PC_DEMOMAN_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_DEMOMAN_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
@@ -1510,8 +1556,6 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_detpack = PC_DEMOMAN_MAXAMMO_DETPACK;
 
         self.armorclass = self.armorclass | PC_DEMOMAN_INITARMORCLASS;
-        self.armortype = PC_DEMOMAN_INITARMORTYPE;
-        self.armorvalue = PC_DEMOMAN_INITARMOR;
         self.armor_allowed = PC_DEMOMAN_MAXARMORTYPE;
         self.maxarmor = PC_DEMOMAN_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1521,10 +1565,23 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_SHOTGUN | IT_GRENADE_LAUNCHER;
     } else if (self.playerclass == PC_MEDIC) {
         self.weapons_carried = self.weapons_carried | PC_MEDIC_WEAPONS;
-        self.ammo_rockets = PC_MEDIC_INITAMMO_ROCKET;
-        self.ammo_nails = PC_MEDIC_INITAMMO_NAIL;
-        self.ammo_shells = PC_MEDIC_INITAMMO_SHOT;
-        self.ammo_cells = PC_MEDIC_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_MEDIC_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_MEDIC_MAXAMMO_NAIL;
+            self.ammo_shells = PC_MEDIC_MAXAMMO_SHOT;
+            self.ammo_cells = PC_MEDIC_MAXAMMO_CELL;
+            self.armortype = PC_MEDIC_MAXARMORTYPE;
+            self.armorvalue = PC_MEDIC_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_MEDIC_INITAMMO_ROCKET;
+            self.ammo_nails = PC_MEDIC_INITAMMO_NAIL;
+            self.ammo_shells = PC_MEDIC_INITAMMO_SHOT;
+            self.ammo_cells = PC_MEDIC_INITAMMO_CELL;
+            self.armortype = PC_MEDIC_INITARMORTYPE;
+            self.armorvalue = PC_MEDIC_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_MEDIC_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_MEDIC_MAXAMMO_NAIL;
         self.maxammo_shells = PC_MEDIC_MAXAMMO_SHOT;
@@ -1537,8 +1594,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_MEDIC_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_MEDIC_INITARMORCLASS;
-        self.armortype = PC_MEDIC_INITARMORTYPE;
-        self.armorvalue = PC_MEDIC_INITARMOR;
         self.armor_allowed = PC_MEDIC_MAXARMORTYPE;
         self.maxarmor = PC_MEDIC_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1558,10 +1613,23 @@ void () TeamFortress_SetEquipment = {
             self.items | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_SUPER_NAILGUN;
     } else if (self.playerclass == PC_HVYWEAP) {
         self.weapons_carried = self.weapons_carried | PC_HVYWEAP_WEAPONS;
-        self.ammo_rockets = PC_HVYWEAP_INITAMMO_ROCKET;
-        self.ammo_nails = PC_HVYWEAP_INITAMMO_NAIL;
-        self.ammo_shells = PC_HVYWEAP_INITAMMO_SHOT;
-        self.ammo_cells = PC_HVYWEAP_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_HVYWEAP_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
+            self.ammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
+            self.ammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
+            self.armortype = PC_HVYWEAP_MAXARMORTYPE;
+            self.armorvalue = PC_HVYWEAP_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_HVYWEAP_INITAMMO_ROCKET;
+            self.ammo_nails = PC_HVYWEAP_INITAMMO_NAIL;
+            self.ammo_shells = PC_HVYWEAP_INITAMMO_SHOT;
+            self.ammo_cells = PC_HVYWEAP_INITAMMO_CELL;
+            self.armortype = PC_HVYWEAP_INITARMORTYPE;
+            self.armorvalue = PC_HVYWEAP_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_HVYWEAP_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
         self.maxammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
@@ -1574,8 +1642,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_HVYWEAP_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_HVYWEAP_INITARMORCLASS;
-        self.armortype = PC_HVYWEAP_INITARMORTYPE;
-        self.armorvalue = PC_HVYWEAP_INITARMOR;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
         self.maxarmor = PC_HVYWEAP_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1587,10 +1653,23 @@ void () TeamFortress_SetEquipment = {
             items | IT_SHOTGUN | IT_SUPER_SHOTGUN | IT_ROCKET_LAUNCHER;
     } else if (self.playerclass == PC_PYRO) {
         self.weapons_carried = self.weapons_carried | PC_PYRO_WEAPONS;
-        self.ammo_rockets = PC_PYRO_INITAMMO_ROCKET;
-        self.ammo_nails = PC_PYRO_INITAMMO_NAIL;
-        self.ammo_shells = PC_PYRO_INITAMMO_SHOT;
-        self.ammo_cells = PC_PYRO_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_PYRO_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_PYRO_MAXAMMO_NAIL;
+            self.ammo_shells = PC_PYRO_MAXAMMO_SHOT;
+            self.ammo_cells = PC_PYRO_MAXAMMO_CELL;
+            self.armortype = PC_PYRO_MAXARMORTYPE;
+            self.armorvalue = PC_PYRO_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_PYRO_INITAMMO_ROCKET;
+            self.ammo_nails = PC_PYRO_INITAMMO_NAIL;
+            self.ammo_shells = PC_PYRO_INITAMMO_SHOT;
+            self.ammo_cells = PC_PYRO_INITAMMO_CELL;
+            self.armortype = PC_PYRO_INITARMORTYPE;
+            self.armorvalue = PC_PYRO_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_PYRO_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_PYRO_MAXAMMO_NAIL;
         self.maxammo_shells = PC_PYRO_MAXAMMO_SHOT;
@@ -1603,8 +1682,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_PYRO_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_PYRO_INITARMORCLASS;
-        self.armortype = PC_PYRO_INITARMORTYPE;
-        self.armorvalue = PC_PYRO_INITARMOR;
         self.armor_allowed = PC_PYRO_MAXARMORTYPE;
         self.maxarmor = PC_PYRO_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1616,10 +1693,23 @@ void () TeamFortress_SetEquipment = {
             items | IT_SHOTGUN | IT_GRENADE_LAUNCHER | IT_ROCKET_LAUNCHER;
     } else if (self.playerclass == PC_CIVILIAN) {
         self.weapons_carried = self.weapons_carried | PC_CIVILIAN_WEAPONS;
-        self.ammo_rockets = PC_CIVILIAN_INITAMMO_ROCKET;
-        self.ammo_nails = PC_CIVILIAN_INITAMMO_NAIL;
-        self.ammo_shells = PC_CIVILIAN_INITAMMO_SHOT;
-        self.ammo_cells = PC_CIVILIAN_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_CIVILIAN_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
+            self.ammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
+            self.ammo_cells = PC_CIVILIAN_MAXAMMO_CELL;
+            self.armortype = PC_CIVILIAN_MAXARMORTYPE;
+            self.armorvalue = PC_CIVILIAN_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_CIVILIAN_INITAMMO_ROCKET;
+            self.ammo_nails = PC_CIVILIAN_INITAMMO_NAIL;
+            self.ammo_shells = PC_CIVILIAN_INITAMMO_SHOT;
+            self.ammo_cells = PC_CIVILIAN_INITAMMO_CELL;
+            self.armortype = PC_CIVILIAN_INITARMORTYPE;
+            self.armorvalue = PC_CIVILIAN_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_CIVILIAN_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
@@ -1632,8 +1722,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_CIVILIAN_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_CIVILIAN_INITARMORCLASS;
-        self.armortype = PC_CIVILIAN_INITARMORTYPE;
-        self.armorvalue = PC_CIVILIAN_INITARMOR;
         self.armor_allowed = PC_CIVILIAN_MAXARMORTYPE;
         self.maxarmor = PC_CIVILIAN_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1643,10 +1731,23 @@ void () TeamFortress_SetEquipment = {
         self.items = 0;
     } else if (self.playerclass == PC_SPY) {
         self.weapons_carried = self.weapons_carried | PC_SPY_WEAPONS;
-        self.ammo_rockets = PC_SPY_INITAMMO_ROCKET;
-        self.ammo_nails = PC_SPY_INITAMMO_NAIL;
-        self.ammo_shells = PC_SPY_INITAMMO_SHOT;
-        self.ammo_cells = PC_SPY_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_SPY_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_SPY_MAXAMMO_NAIL;
+            self.ammo_shells = PC_SPY_MAXAMMO_SHOT;
+            self.ammo_cells = PC_SPY_MAXAMMO_CELL;
+            self.armortype = PC_SPY_MAXARMORTYPE;
+            self.armorvalue = PC_SPY_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_SPY_INITAMMO_ROCKET;
+            self.ammo_nails = PC_SPY_INITAMMO_NAIL;
+            self.ammo_shells = PC_SPY_INITAMMO_SHOT;
+            self.ammo_cells = PC_SPY_INITAMMO_CELL;
+            self.armortype = PC_SPY_INITARMORTYPE;
+            self.armorvalue = PC_SPY_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_SPY_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SPY_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SPY_MAXAMMO_SHOT;
@@ -1659,8 +1760,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_SPY_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SPY_INITARMORCLASS;
-        self.armortype = PC_SPY_INITARMORTYPE;
-        self.armorvalue = PC_SPY_INITARMOR;
         self.armor_allowed = PC_SPY_MAXARMORTYPE;
         self.maxarmor = PC_SPY_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
@@ -1679,10 +1778,23 @@ void () TeamFortress_SetEquipment = {
         }
     } else if (self.playerclass == PC_ENGINEER) {
         self.weapons_carried = self.weapons_carried | PC_ENGINEER_WEAPONS;
-        self.ammo_rockets = PC_ENGINEER_INITAMMO_ROCKET;
-        self.ammo_nails = PC_ENGINEER_INITAMMO_NAIL;
-        self.ammo_shells = PC_ENGINEER_INITAMMO_SHOT;
-        self.ammo_cells = PC_ENGINEER_INITAMMO_CELL;
+
+        if ((toggleflags & TFLAG_SPAWNFULL)) {
+            self.ammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
+            self.ammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
+            self.ammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
+            self.ammo_cells = PC_ENGINEER_MAXAMMO_CELL;
+            self.armortype = PC_ENGINEER_MAXARMORTYPE;
+            self.armorvalue = PC_ENGINEER_MAXARMOR;
+        } else {
+            self.ammo_rockets = PC_ENGINEER_INITAMMO_ROCKET;
+            self.ammo_nails = PC_ENGINEER_INITAMMO_NAIL;
+            self.ammo_shells = PC_ENGINEER_INITAMMO_SHOT;
+            self.ammo_cells = PC_ENGINEER_INITAMMO_CELL;
+            self.armortype = PC_ENGINEER_INITARMORTYPE;
+            self.armorvalue = PC_ENGINEER_INITARMOR;
+        }
+
         self.maxammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
@@ -1695,8 +1807,6 @@ void () TeamFortress_SetEquipment = {
         self.tf_items = PC_ENGINEER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_ENGINEER_INITARMORCLASS;
-        self.armortype = PC_ENGINEER_INITARMORTYPE;
-        self.armorvalue = PC_ENGINEER_INITARMOR;
         self.armor_allowed = PC_ENGINEER_MAXARMORTYPE;
         self.maxarmor = PC_ENGINEER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)

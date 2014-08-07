@@ -367,6 +367,12 @@ void () DecodeLevelParms = {
         if (st != "off")
             toggleflags = toggleflags | TFLAG_SNIPERRELOAD;
 
+        st = infokey(world, "sf");
+        if (st == string_null)
+            st = infokey(world, "spawnfull");
+        if (st == "on")
+            toggleflags = toggleflags | TFLAG_SPAWNFULL;
+
         st = infokey(world, "rd");
         if (st == string_null)
             st = infokey(world, "respawn_delay");
