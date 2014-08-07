@@ -1969,6 +1969,13 @@ void (float slot) W_WeaponSlot = {
         W_WeaponSlot4();
 };
 
+void () W_AmmoError = {
+    if (self.noammo == 1)
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
+    else if (self.noammo == 2)
+        sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
+};
+
 void (float inp, float quick) W_ChangeWeapon = {
     if (self.playerclass == 0)
         return;
@@ -1998,15 +2005,9 @@ void (float inp, float quick) W_ChangeWeapon = {
 
     // check for ammo
     if (! W_AmmoSlot(self.queue_weaponslot)) {
-        if (self.noammo == 1) {
-            sprint(self, PRINT_HIGH, "Not enough ammo\n");
-            self.queue_weaponslot = 0;
-            return;
-        } else if (self.noammo == 2) {
-            sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
-            self.queue_weaponslot = 0;
-            return;
-        }
+        W_AmmoError();
+        self.queue_weaponslot = 0;
+        return;
     }
 
     W_WeaponSlot(self.queue_weaponslot);
@@ -2362,8 +2363,15 @@ void () W_WeaponFrame = {
     } else if (self.queue_weaponslot)
         W_ChangeWeapon(self.queue_weaponslot, 0);
     else if (self.real_weaponslot != self.current_weaponslot
-                && time >= self.attack_finished && !(self.tfstate & TFSTATE_RELOADING))
-        W_ChangeWeapon(TF_WEAPLAST, 1);
+                && time >= self.attack_finished && !(self.tfstate & TFSTATE_RELOADING)) {
+        if (W_AmmoSlot(self.real_weaponslot))
+            W_ChangeWeapon(TF_WEAPLAST, 1);
+        else {
+            W_AmmoError();
+            self.real_weaponslot = W_BestWeaponSlot();
+            W_ChangeWeapon(self.real_weaponslot, 0);
+        }
+    }
 
     if (self.impulse == TF_CHANGETEAM) {
         Menu_Team();
