@@ -2284,29 +2284,10 @@ void () TeamFortress_AmmoboxTouch = {
         return;
 
     if (self.weapon == 0) {
-        sprint(other, PRINT_HIGH, "You got ");
-        if (self.ammo_shells > 0) {
-            other.ammo_shells = other.ammo_shells + self.ammo_shells;
-            quantity = ftos(self.ammo_shells);
-            sprint2(other, PRINT_HIGH, quantity, " shells ");
-        }
-        if (self.ammo_nails > 0) {
-            other.ammo_nails = other.ammo_nails + self.ammo_nails;
-            quantity = ftos(self.ammo_nails);
-            sprint2(other, PRINT_HIGH, quantity, " nails ");
-        }
-        if (self.ammo_rockets > 0) {
-            other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
-            quantity = ftos(self.ammo_rockets);
-            sprint2(other, PRINT_HIGH, quantity, " rockets ");
-        }
-        if (self.ammo_cells > 0) {
-            other.ammo_cells = other.ammo_cells + self.ammo_cells;
-            quantity = ftos(self.ammo_cells);
-            sprint2(other, PRINT_HIGH, quantity, " cells ");
-        }
-        sprint3(other, PRINT_HIGH, " from ", self.enemy.netname,
-                "'s discarded pack\n");
+        other.ammo_shells = other.ammo_shells + self.ammo_shells;
+        other.ammo_nails = other.ammo_nails + self.ammo_nails;
+        other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
+        other.ammo_cells = other.ammo_cells + self.ammo_cells;
     } else if (self.weapon == 1) {
         if (other.ammo_shells >= TeamFortress_GetMaxAmmo(other, 256))
             return;
