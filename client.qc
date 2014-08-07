@@ -17,6 +17,9 @@ float (float pc) IsLegalClass;
 void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
+void () RemoveGrenadeTimers;
+void () RemoveGrenades;
+
 void (entity eng) Engineer_RemoveBuildings;
 
 void (string halias, float himpulse1, float himpulse2) TeamFortress_Alias;
@@ -1413,6 +1416,11 @@ void () CheckWaterJump = {
 };
 
 void () PlayerPreThink = {
+    if (time >= timelimit) {
+        RemoveGrenadeTimers();
+        RemoveGrenades();
+    }
+
     if (self.impulse == TF_VOTENEXT) {
         Vote_NextMap(self);
         self.impulse = 0;
@@ -1811,13 +1819,7 @@ void () ClientDisconnect = {
         }
         te = find(te, classname, "detpack");
     }
-    te = find(world, classname, "grenade");
-    while (te) {
-        if (te.owner == self) {
-            dremove(te);
-        }
-        te = find(te, classname, "grenade");
-    }
+    RemoveGrenades();
     if (clanbattle && (self.tf_id != 0)) {
         te = spawn();
         te.classname = "ghost";
