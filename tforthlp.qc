@@ -24,7 +24,7 @@ void () TeamFortress_MOTD = {
                 st1 = strcat(strcat(st1, "\n"), st2);
             }
         } else {
-            st1 = "Welcome to Classic Fortress\nby hifi & Empezar\n==================================\ngithub.com/classic-fortress";
+            st1 = "Welcome to Classic Fortress\nby Empezar & hifi\n==================================\ngithub.com/classic-fortress";
         }
 
         sprint(self, PRINT_HIGH, st1);
