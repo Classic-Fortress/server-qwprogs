@@ -412,12 +412,17 @@ void (entity bld) CheckBelowBuilding = {
 };
 
 void (entity disp) Dispenser_AmmoTick = {
+    local float rate;
+
+    // set restock rate (scales with players on team)
+    rate = 1.5 * (TeamFortress_TeamGetNoPlayers(disp.team_no) - 1);
+
     if (self.disptimer > 3) {
-        self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS / 150);
-        self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS / 150);
-        self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS / 150);
-        self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS / 150);
-        self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR / 150);
+        self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS * rate / 300);
+        self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS * rate / 300);
+        self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS * rate / 300);
+        self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS * rate / 300);
+        self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR * rate / 300);
 
         if (self.ammo_shells > BUILD_DISPENSER_MAX_SHELLS)
             self.ammo_shells = BUILD_DISPENSER_MAX_SHELLS;
