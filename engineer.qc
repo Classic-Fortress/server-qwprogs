@@ -411,38 +411,180 @@ void (entity bld) CheckBelowBuilding = {
     }
 };
 
-void () DispenserThink = {
-    CheckBelowBuilding(self);
+void (entity disp) Dispenser_AmmoTick = {
     if (self.disptimer > 3) {
-        self.ammo_shells =
-            self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS / 20);
-        self.ammo_cells =
-            self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS / 20);
-        self.ammo_nails =
-            self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS / 20);
-        self.ammo_rockets =
-            self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS / 20);
-        self.armorvalue =
-            self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR / 20);
-        if (self.ammo_shells > BUILD_DISPENSER_MAX_SHELLS) {
+        self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS / 150);
+        self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS / 150);
+        self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS / 150);
+        self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS / 150);
+        self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR / 150);
+
+        if (self.ammo_shells > BUILD_DISPENSER_MAX_SHELLS)
             self.ammo_shells = BUILD_DISPENSER_MAX_SHELLS;
-        }
-        if (self.ammo_nails > BUILD_DISPENSER_MAX_NAILS) {
+        if (self.ammo_nails > BUILD_DISPENSER_MAX_NAILS)
             self.ammo_nails = BUILD_DISPENSER_MAX_NAILS;
-        }
-        if (self.ammo_rockets > BUILD_DISPENSER_MAX_ROCKETS) {
+        if (self.ammo_rockets > BUILD_DISPENSER_MAX_ROCKETS)
             self.ammo_rockets = BUILD_DISPENSER_MAX_ROCKETS;
-        }
-        if (self.ammo_cells > BUILD_DISPENSER_MAX_CELLS) {
+        if (self.ammo_cells > BUILD_DISPENSER_MAX_CELLS)
             self.ammo_cells = BUILD_DISPENSER_MAX_CELLS;
-        }
-        if (self.armorvalue > BUILD_DISPENSER_MAX_ARMOR) {
+        if (self.armorvalue > BUILD_DISPENSER_MAX_ARMOR)
             self.armorvalue = BUILD_DISPENSER_MAX_ARMOR;
-        }
+
         self.disptimer = 0;
     }
+
     self.disptimer = self.disptimer + 1;
-    self.nextthink = time + 3;
+}
+
+float (entity disp, entity pl) Dispenser_GiveShells = {
+    local float ammo;
+
+    if (!pl.need_shells)
+        return 0;
+
+    ammo = (pl.maxammo_shells * pl.deff) / 7;
+
+    if (ammo > disp.ammo_shells)
+        ammo = disp.ammo_shells;
+
+    if ((ammo + pl.ammo_shells) > pl.maxammo_shells)
+        ammo = pl.maxammo_shells - pl.ammo_shells;
+
+    disp.ammo_shells = disp.ammo_shells - ammo;
+    pl.ammo_shells = pl.ammo_shells + ammo;
+
+    return ammo;
+}
+
+float (entity disp, entity pl) Dispenser_GiveNails = {
+    local float ammo;
+
+    if (!pl.need_nails)
+        return 0;
+
+    ammo = (pl.maxammo_nails * pl.deff) / 7;
+
+    if (ammo > disp.ammo_nails)
+        ammo = disp.ammo_nails;
+
+    if ((ammo + pl.ammo_nails) > pl.maxammo_nails)
+        ammo = pl.maxammo_nails - pl.ammo_nails;
+
+    disp.ammo_nails = disp.ammo_nails - ammo;
+    pl.ammo_nails = pl.ammo_nails + ammo;
+
+    return ammo;
+}
+
+float (entity disp, entity pl) Dispenser_GiveRockets = {
+    local float ammo;
+
+    if (!pl.need_rockets)
+        return 0;
+
+    ammo = (pl.maxammo_rockets * pl.deff) / 7;
+
+    if (ammo > disp.ammo_rockets)
+        ammo = disp.ammo_rockets;
+
+    if ((ammo + pl.ammo_rockets) > pl.maxammo_rockets)
+        ammo = pl.maxammo_rockets - pl.ammo_rockets;
+
+    disp.ammo_rockets = disp.ammo_rockets - ammo;
+    pl.ammo_rockets = pl.ammo_rockets + ammo;
+
+    return ammo;
+}
+
+float (entity disp, entity pl) Dispenser_GiveCells = {
+    local float ammo;
+
+    if (!pl.need_cells)
+        return 0;
+
+    ammo = (pl.maxammo_cells * pl.deff) / 7;
+
+    if (ammo > disp.ammo_cells)
+        ammo = disp.ammo_cells;
+
+    if ((ammo + pl.ammo_cells) > pl.maxammo_cells)
+        ammo = pl.maxammo_cells - pl.ammo_cells;
+
+    disp.ammo_cells = disp.ammo_cells - ammo;
+    pl.ammo_cells = pl.ammo_cells + ammo;
+
+    return ammo;
+}
+
+float (entity disp, entity pl) Dispenser_GiveArmor = {
+    local float armor;
+
+    armor = (pl.maxarmor * pl.deff) / 7;
+
+    pl.armortype = pl.armor_allowed;
+
+    if (armor > disp.armorvalue)
+        armor = disp.armorvalue;
+
+    if ((armor + pl.armorvalue) > pl.maxarmor)
+        armor = pl.maxarmor - pl.armorvalue;
+
+    disp.armorvalue = disp.armorvalue - armor;
+    pl.armorvalue = pl.armorvalue + armor;
+
+    return armor;
+}
+
+void (entity disp, entity pl) Dispenser_StockPlayer = {
+    local float shells, nails, rockets, cells, armor;
+
+    // 10 second cooldown for engineers who recently used the dispenser
+    if ((time - pl.dimmune) < 10)
+        return;
+
+    // reset dispenser efficiency if >1.2 second has passed since last dispenser use
+    if ((time - pl.duse) > 1.2)
+        pl.deff = 0;
+
+    // set dispenser efficiency (increase with time => just passing by gives less ammo/armor)
+    if (!pl.deff || pl.deff >= 4)
+        pl.deff = 1;
+    else
+        pl.deff = pl.deff * 2;
+
+    // give engineers full armor/ammo instantly
+    if (pl.playerclass == PC_ENGINEER) {
+        pl.dimmune = time;
+        pl.deff = 7;
+    }
+
+    shells = Dispenser_GiveShells(disp, pl);
+    nails = Dispenser_GiveNails(disp, pl);
+    rockets = Dispenser_GiveRockets(disp, pl);
+    cells = Dispenser_GiveCells(disp, pl);
+    armor = Dispenser_GiveArmor(disp, pl);
+
+    // only play dispenser restock sound if something was given
+    if ((shells + nails + rockets + cells + armor) > 0)
+        sound(pl, 3, "items/r_item1.wav", 0.7, 1);
+
+    pl.duse = time;
+};
+
+void (entity disp) Dispenser_FindPlayers = {
+    local entity te = findradius(disp.origin, 60);
+    while (te != world) {
+        if (te.classname == "player" && te.team_no == disp.team_no)
+            Dispenser_StockPlayer(disp, te);
+        te = te.chain;
+    }
+}
+
+void () DispenserThink = {
+    CheckBelowBuilding(self);
+    Dispenser_AmmoTick(self);
+    Dispenser_FindPlayers(self);
+    self.nextthink = time + 0.4;
 };
 
 void () TeamFortress_FinishedBuilding = {
@@ -474,7 +616,7 @@ void () TeamFortress_FinishedBuilding = {
         oldself.health = 150;
         oldself.disptimer = 1;
         oldself.think = DispenserThink;
-        oldself.nextthink = time + 3;
+        oldself.nextthink = time + 0.4;
         oldself.th_die = Dispenser_Die;
         oldself.mdl = "progs/disp.mdl";
         oldself.team_no = self.team_no;
@@ -563,12 +705,12 @@ void () T_Dispenser = {
     local entity oldself;
     local entity dist_checker;
 
-    if (other.classname != "player") {
+    // don't show menu to players of same team
+    if (other.classname != "player" || other.team_no == self.team_no || !other.team_no)
         return;
-    }
-    if ((other.team_no != 0) && (other.team_no != self.team_no)) {
-        Status_Print(self.real_owner, "\n\n\n\n\n\n\n", "Enemies are using your dispenser!");
-    }
+
+    Status_Print(self.real_owner, "\n\n\n", "Enemies are using your dispenser!");
+
     if ((other.building == world) && (other.building_wait < time)) {
         other.building = self;
         dist_checker = spawn();
@@ -623,11 +765,11 @@ void (entity disp) Engineer_UseDispenser = {
     }
 
     sprint(self, PRINT_HIGH, "Dispenser has ", ftos(disp.health), " health and current stock:\n");
-    sprint(self, PRINT_HIGH, ftos(disp.ammo_shells),  " shells, ");
-    sprint(self, PRINT_HIGH, ftos(disp.ammo_nails),   " nails, ");
-    sprint(self, PRINT_HIGH, ftos(disp.ammo_rockets), " rockets, ");
-    sprint(self, PRINT_HIGH, ftos(disp.ammo_cells),   " cells and ");
-    sprint(self, PRINT_HIGH, ftos(disp.armorvalue),   " armor\n");
+    sprint(self, PRINT_HIGH, ftos(disp.ammo_shells),      " shells, ");
+    sprint(self, PRINT_HIGH, ftos(disp.ammo_nails),       " nails, ");
+    sprint(self, PRINT_HIGH, ftos(disp.ammo_rockets),     " rockets, ");
+    sprint(self, PRINT_HIGH, ftos(disp.ammo_cells),       " cells and ");
+    sprint(self, PRINT_HIGH, ftos(floor(disp.armorvalue)), " armor\n");
 
     if ((!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)
                 || (disp.ammo_shells == BUILD_DISPENSER_MAX_SHELLS && disp.ammo_nails == BUILD_DISPENSER_MAX_NAILS
@@ -730,7 +872,7 @@ void (entity disp) Engineer_Dispenser_InsertArmor = {
     }
 
     if (armor > 0)
-        sprint(self, PRINT_HIGH, "You insert ", ftos(armor), " armor into dispenser\n");
+        sprint(self, PRINT_HIGH, "You insert ", ftos(floor(armor)), " armor into dispenser\n");
     else if (disp.armorvalue == BUILD_DISPENSER_MAX_ARMOR)
         sprint(self, PRINT_HIGH, "Dispenser cannot carry more armor\n");
 };

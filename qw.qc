@@ -60,6 +60,10 @@ typedef void (float) f_void_float;
 .float maxammo_nails;
 .float maxammo_cells;
 .float maxammo_rockets;
+.float need_shells;
+.float need_nails;
+.float need_rockets;
+.float need_cells;
 .float items_allowed;
 .float armor_allowed;
 .float maxarmor;
@@ -158,6 +162,11 @@ float coop;
 
 // Assault Cannon
 .float heat;
+
+// Dispenser
+.float deff;                    // Dispenser efficiency
+.float dimmune;                 // Immune to dispenser stocking
+.float duse;                    // Time of last dispenser usage
 
 // Team Color Cheat Checking
 .float immune_to_check;

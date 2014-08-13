@@ -1414,6 +1414,12 @@ void () TeamFortress_SetEquipment = {
             self.armorvalue = PC_SCOUT_INITARMOR;
         }
 
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 1;
+        self.need_rockets = 0;
+        self.need_cells = 0;
+
         self.maxammo_rockets = PC_SCOUT_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SCOUT_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SCOUT_MAXAMMO_SHOT;
@@ -1462,6 +1468,12 @@ void () TeamFortress_SetEquipment = {
             self.armorvalue = PC_SNIPER_INITARMOR;
         }
 
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 1;
+        self.need_rockets = 0;
+        self.need_cells = 0;
+
         self.maxammo_rockets = PC_SNIPER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SNIPER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SNIPER_MAXAMMO_SHOT;
@@ -1500,6 +1512,12 @@ void () TeamFortress_SetEquipment = {
             self.armortype = PC_SOLDIER_INITARMORTYPE;
             self.armorvalue = PC_SOLDIER_INITARMOR;
         }
+
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 0;
+        self.need_rockets = 1;
+        self.need_cells = 0;
 
         self.maxammo_rockets = PC_SOLDIER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
@@ -1541,6 +1559,12 @@ void () TeamFortress_SetEquipment = {
             self.armorvalue = PC_DEMOMAN_INITARMOR;
         }
 
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 0;
+        self.need_rockets = 1;
+        self.need_cells = 0;
+
         self.maxammo_rockets = PC_DEMOMAN_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
@@ -1581,6 +1605,12 @@ void () TeamFortress_SetEquipment = {
             self.armortype = PC_MEDIC_INITARMORTYPE;
             self.armorvalue = PC_MEDIC_INITARMOR;
         }
+
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 1;
+        self.need_rockets = 0;
+        self.need_cells = 0;
 
         self.maxammo_rockets = PC_MEDIC_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_MEDIC_MAXAMMO_NAIL;
@@ -1630,6 +1660,12 @@ void () TeamFortress_SetEquipment = {
             self.armorvalue = PC_HVYWEAP_INITARMOR;
         }
 
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 0;
+        self.need_rockets = 0;
+        self.need_cells = 1;
+
         self.maxammo_rockets = PC_HVYWEAP_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
         self.maxammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
@@ -1669,6 +1705,12 @@ void () TeamFortress_SetEquipment = {
             self.armortype = PC_PYRO_INITARMORTYPE;
             self.armorvalue = PC_PYRO_INITARMOR;
         }
+
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 0;
+        self.need_rockets = 1;
+        self.need_cells = 1;
 
         self.maxammo_rockets = PC_PYRO_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_PYRO_MAXAMMO_NAIL;
@@ -1710,6 +1752,12 @@ void () TeamFortress_SetEquipment = {
             self.armorvalue = PC_CIVILIAN_INITARMOR;
         }
 
+        // dispenser needs
+        self.need_shells = 0;
+        self.need_nails = 0;
+        self.need_rockets = 0;
+        self.need_cells = 0;
+
         self.maxammo_rockets = PC_CIVILIAN_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
@@ -1747,6 +1795,12 @@ void () TeamFortress_SetEquipment = {
             self.armortype = PC_SPY_INITARMORTYPE;
             self.armorvalue = PC_SPY_INITARMOR;
         }
+
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 1;
+        self.need_rockets = 0;
+        self.need_cells = 0;
 
         self.maxammo_rockets = PC_SPY_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_SPY_MAXAMMO_NAIL;
@@ -1794,6 +1848,12 @@ void () TeamFortress_SetEquipment = {
             self.armortype = PC_ENGINEER_INITARMORTYPE;
             self.armorvalue = PC_ENGINEER_INITARMOR;
         }
+
+        // dispenser needs
+        self.need_shells = 1;
+        self.need_nails = 1;
+        self.need_rockets = 0;
+        self.need_cells = 1;
 
         self.maxammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
         self.maxammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
