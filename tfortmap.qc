@@ -2197,7 +2197,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
     setsize(Item, Item.goal_min, Item.goal_max);
     if (PAlive == 1) {
         makevectors(P.v_angle);
-        if (P.v_angle_x) {
+        if (P.v_angle_x < 25) {
             Item.velocity = (v_forward * 400) + (v_up * 200);
         } else {
             Item.velocity = aim(P, 10000);
