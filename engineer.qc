@@ -415,7 +415,7 @@ void (entity disp) Dispenser_AmmoTick = {
     local float rate;
 
     // set restock rate (scales with players on team)
-    rate = 1.5 * (TeamFortress_TeamGetNoPlayers(disp.team_no) - 1);
+    rate = 1 + 0.5 * (TeamFortress_TeamGetNoPlayers(disp.team_no) - 1);
 
     if (self.disptimer > 3) {
         self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS * rate / 300);
