@@ -755,10 +755,27 @@ entity lastspawn_team2;
 entity lastspawn_team3;
 entity lastspawn_team4;
 
+float (vector orig) CheckSpawnPoint =
+{
+    local entity at_spot;
+
+    at_spot = findradius(orig, 60);
+    while (at_spot != world) {
+        if ((at_spot.classname == "player") && (at_spot.deadflag == 0)) {
+            if (at_spot.team_no == self.team_no)
+                return 0;
+            else
+                return 1;
+        }
+        at_spot = at_spot.chain;
+    }
+
+    return 1;
+};
+
 entity(float team_num) FindTeamSpawnPoint =
 {
     local entity spot;
-    local entity at_spot;
     local float spot_found;
     local float attempts;
 
@@ -774,14 +791,7 @@ entity(float team_num) FindTeamSpawnPoint =
             if (spot == world)
                 return (world);
 
-            at_spot = findradius(spot.origin, 40);
-            spot_found = 1;
-            while (at_spot != world) {
-                if ((at_spot.classname == "player") &&
-                    (at_spot.deadflag == 0))
-                    spot_found = 0;
-                at_spot = at_spot.chain;
-            }
+            spot_found = CheckSpawnPoint(spot.origin);
             if (!Activated(spot, self))
                 spot_found = 0;
             if (spot_found || (attempts >= 30)) {
@@ -799,14 +809,7 @@ entity(float team_num) FindTeamSpawnPoint =
                 spot = find(world, team_str_home, "ts2");
             if (spot == world)
                 return (world);
-            at_spot = findradius(spot.origin, 40);
-            spot_found = 1;
-            while (at_spot != world) {
-                if ((at_spot.classname == "player") &&
-                    (at_spot.deadflag == 0))
-                    spot_found = 0;
-                at_spot = at_spot.chain;
-            }
+            spot_found = CheckSpawnPoint(spot.origin);
             if (!Activated(spot, self))
                 spot_found = 0;
             if (spot_found || (attempts >= 30)) {
@@ -824,14 +827,7 @@ entity(float team_num) FindTeamSpawnPoint =
                 spot = find(world, team_str_home, "ts3");
             if (spot == world)
                 return (world);
-            at_spot = findradius(spot.origin, 40);
-            spot_found = 1;
-            while (at_spot != world) {
-                if ((at_spot.classname == "player") &&
-                    (at_spot.deadflag == 0))
-                    spot_found = 0;
-                at_spot = at_spot.chain;
-            }
+            spot_found = CheckSpawnPoint(spot.origin);
             if (!Activated(spot, self))
                 spot_found = 0;
             if (spot_found || (attempts >= 30)) {
@@ -849,14 +845,7 @@ entity(float team_num) FindTeamSpawnPoint =
                 spot = find(world, team_str_home, "ts4");
             if (spot == world)
                 return (world);
-            at_spot = findradius(spot.origin, 40);
-            spot_found = 1;
-            while (at_spot != world) {
-                if ((at_spot.classname == "player") &&
-                    (at_spot.deadflag == 0))
-                    spot_found = 0;
-                at_spot = at_spot.chain;
-            }
+            spot_found = CheckSpawnPoint(spot.origin);
             if (!Activated(spot, self))
                 spot_found = 0;
             if (spot_found || (attempts >= 30)) {
@@ -871,11 +860,9 @@ entity(float team_num) FindTeamSpawnPoint =
 void (entity e) ValidateUser = {
 };
 
-entity()SelectSpawnPoint =
+entity () SelectSpawnPoint =
 {
     local entity spot;
-    local entity at_spot;
-    local float spot_found;
     local float attempts;
 
     if (self.team_no != 0) {
@@ -900,16 +887,7 @@ entity()SelectSpawnPoint =
             attempts = 0;
             while ((spot != world) && (attempts < 100)) {
                 attempts = attempts + 1;
-                at_spot = findradius(spot.origin, 40);
-                spot_found = 1;
-                while (at_spot) {
-                    if ((at_spot.classname == "player") &&
-                        (at_spot.deadflag == 0)) {
-                        spot_found = 0;
-                    }
-                    at_spot = at_spot.chain;
-                }
-                if (spot_found || (attempts >= 10)) {
+                if (CheckSpawnPoint(spot.origin) || (attempts >= 10)) {
                     lastspawn = spot;
                     return (spot);
                 }
@@ -938,6 +916,24 @@ void () PlayerDie;
 void () TeamFortress_SetHealth;
 void () TeamFortress_SetEquipment;
 void () player_touch;
+
+// moves the client forward if spawn point is occupied
+void () CheckClientSpawn = {
+    local float attempts;
+    local vector orig = self.origin;
+    attempts = 0;
+
+    while (!CheckSpawnPoint(self.origin) && attempts < 30) {
+        makevectors(self.angles);
+        self.origin = self.origin + v_forward * 60;
+        attempts = attempts + 1;
+    }
+
+    if (attempts == 30) {
+        dprint("Warning: Could not find a safe spawn point for player!\n");
+        self.origin = orig;
+    }
+};
 
 void () PutClientInServer = {
     local float oldclass;
@@ -1040,13 +1036,15 @@ void () PutClientInServer = {
     self.pausetime = 0;
 
     spot = SelectSpawnPoint();
-    if (self.playerclass != 0)
-        spawn_tdeath(spot.origin, self);
 
     self.observer_list = spot;
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
+    CheckClientSpawn();
+
+    if (self.playerclass != 0)
+        spawn_tdeath(self.origin, self);
 
     if ((spot.classname == "info_player_teamspawn") &&
         (cb_prematch_time < time)) {

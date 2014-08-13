@@ -2497,13 +2497,13 @@ void (entity P) ForceRespawn = {
     oldself = self;
     self = P;
     spot = SelectSpawnPoint();
-    if (self.playerclass != 0) {
-        spawn_tdeath(spot.origin, self);
-    }
     self.observer_list = spot;
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
+    CheckClientSpawn();
+    if (self.playerclass != 0)
+        spawn_tdeath(self.origin, self);
     if ((spot.classname == "info_player_teamspawn") &&
         (cb_prematch_time < time)) {
         if (spot.items != 0) {
