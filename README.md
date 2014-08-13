@@ -4,7 +4,6 @@ Classic Fortress v0.9 beta
 New features
 ------
 * Map voting during last few minutes of each game (use /votenext and /forcenext to vote early).
-* Map specific configurations (/fortress/cfg/maps/<mapname>.cfg).
 * Grenade timers (disable with /cf\_notimers 1 or disable just sound with /cf\_notimersound 1).
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
@@ -13,30 +12,33 @@ New features
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.
-* Free suicides (for class changing) during first 10 seconds after spawning.
+* Don't telefrag teammates when spawning.
+* Free class switch during first 10 seconds after spawning.
 * Updated class help (bindings, aliases and settings) reachable with /classhelp.
 * Dropping flag now possible on all maps using /dropflag.
-* Responsive menus and status bar thanks to rewritten menu/sbar code.
-* Any non-valid impulse will close the active menu.
 * Class configs are now executed from /fortress/classes/ subdirectory.
 * Team player count in team selection menu.
+* Class player count in class selection menu.
 * Changing teams is now allowed.
-* No more spamming weapon messages.
+* Responsive menus and status bar thanks to rewritten menu/sbar code.
+* Clip ammo in status bar ticks up during reload.
+* Kill streak and personal cap count in status bar.
+* Option to spawn with full ammo and armor.
+* Map specific configurations (/fortress/cfg/maps/<mapname>.cfg).
 * Major code cleanup and rewrites.
 
 Scout
 ------
 * New Scanner menu where Scanner settings can be changed.
+* Caltrop Canisters no longer "explode" in your hands.
 
 Sniper
 ------
 * Sniper Rifle range increased.
 * Automatic sensitivity scaling while zoomed in.
-* Use the special button as a zoom button (cf_zoomkey 1).
-* Two sniper zoom modes (2x and 4x) instead of just one.
-* Manually adjust fov used in zoom modes with /cf\_fov2x and /cf\_fov4x.
-* Reverse sniper zoom order with cf\_reversezoom 1.
-* Faster zooming (+/- 20 fov instead of 5 per frame).
+* Use the special button as a zoom button.
+* Use mouse wheel to adjust zoom while zoomed in.
+* Sniper Rifle now needs to be reloaded between shots.
 
 Demolitions Man
 ------
@@ -45,9 +47,11 @@ Demolitions Man
 
 Heavy Weapons Guy
 ------
-* Assault Cannon can now be fired while moving.
+* Assault Cannon can now be fired while moving and while jumping.
 * Accuracy of Assault Cannon decreased while moving.
 * HWGuy can now be affected by concussion grenades while firing Assault Cannon.
+* New class special that stops the Assault Cannon from firing and just keeps it spinning.
+* Lowered volume for spinning Assault Cannon.
 
 Spy
 ------
