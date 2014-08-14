@@ -1055,8 +1055,8 @@
 #define DMSG_GREN_MIRV			10
 #define DMSG_GREN_PIPE			11
 #define DMSG_DETPACK			12
-// unused                               13
-#define DMSG_MEDIKIT_ATT                14
+#define DMSG_BIOWEAPON          13
+#define DMSG_BIOWEAPON_ATT      14
 #define DMSG_FLAME			15
 #define DMSG_DETPACK_DIS		16
 #define DMSG_AXE			17

@@ -2650,7 +2650,7 @@ void () BioInfection_Decay = {
         te = te.chain;
     }
     self.nextthink = time + 3;
-    deathmsg = 13;
+    deathmsg = DMSG_BIOWEAPON;
     TF_T_Damage(self.owner, self, self.enemy, 8, TF_TD_IGNOREARMOUR,
                 TF_TD_OTHER);
     SpawnBlood(self.owner.origin, 30);
