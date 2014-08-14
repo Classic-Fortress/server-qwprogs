@@ -64,9 +64,9 @@ void (entity pe_player) Vote_NextMap = {
         bprint(PRINT_HIGH, "Commencing vote for next map\n");
     } else {
         if (f_votes_left == 1)
-            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed\n");
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed (/votenext)\n");
         else
-            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed\n");
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed (/votenext)\n");
     }
 };
 
