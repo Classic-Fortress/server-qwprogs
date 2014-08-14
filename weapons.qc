@@ -521,7 +521,7 @@ void () W_FireMedikit = {
                 // musn't be on their team, so we infect them
                 trace_ent.axhitme = 1;
                 SpawnBlood(org, 20);
-                deathmsg = DMSG_MEDIKIT_ATT;
+                deathmsg = DMSG_BIOWEAPON_ATT;
                 T_Damage(trace_ent, self, self, 10);
 
                 if (trace_ent.playerclass == PC_MEDIC)
