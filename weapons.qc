@@ -2483,12 +2483,6 @@ void () W_WeaponFrame = {
     if (intermission_running || cease_fire)
         return;
 
-    // class specials and grenade impulses always possible
-    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= 150 && self.impulse <= 155)) {
-        ImpulseCommands();
-        return;
-    }
-
     // hwguy assault cannon special
     if (self.playerclass == PC_HVYWEAP) {
         if ((self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_HALT) && !(self.tfstate & TFSTATE_HALT)) {
@@ -2519,6 +2513,12 @@ void () W_WeaponFrame = {
             self.impulse = 0;
             return;
         }
+    }
+
+    // class specials and grenade impulses always possible
+    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= 150 && self.impulse <= 155)) {
+        ImpulseCommands();
+        return;
     }
 
     if (!WeaponReady())
