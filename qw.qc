@@ -30,6 +30,7 @@ typedef void (float) f_void_float;
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_quickfiring;          // TRUE for a player if they're using the quick slots
+.float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
 .float default_sensitivity;     // Player's default (non-zoomed) sensitivity
@@ -71,6 +72,7 @@ typedef void (float) f_void_float;
 .float maxstrafespeed;          // Maximum side speed
 
 .float weaponmode;              // Used for multiple mode weapons
+.float last_weaponmode;         // Last weapon's weapon mode
 .float motd;                    // Used to display MOTD
 .f_void_float menu_input;
 
@@ -136,13 +138,21 @@ float coop;
 /*==============================================*/
 .float weapons_carried;         // the weapons the player is carrying
 .float current_weapon;          // the weapon the player is using
+.float last_weapon;             // the last weapon the player was using
 .float current_weaponslot;      // the currently equipped weaponslot
-.float real_weaponslot;         // the actual equipped weaponslot (during a quick slot attack)
 .float last_weaponslot;         // the last equipped weaponslot
 .float queue_weaponslot;        // the weaponslot to switch to when possible
-.float queue_last_weaponslot;   // the weaponslot to set as last weaponslot when possible
+.float queue_weaponstate;       // the weaponstate to load when possible
 .float next_weapon;             // used by weapon slots to communicate which weapon to select
 .float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
+
+// weapon states
+.float weaponstate_current_weaponslot;
+.float weaponstate_last_weaponslot;
+.float weaponstate_current_weapon;
+.float weaponstate_last_weapon;
+.float weaponstate_weaponmode;
+.float weaponstate_last_weaponmode;
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;
