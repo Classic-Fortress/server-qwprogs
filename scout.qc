@@ -65,7 +65,7 @@ void () CaltropScatterThink = {
         }
     }
     self.heat = self.heat + 1;
-    if (self.heat > 10) {
+    if (self.heat > 50) {
         remove(self);
         return;
     }
