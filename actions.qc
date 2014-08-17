@@ -497,13 +497,15 @@ void (float slot) TeamFortress_ReloadSlot = {
 };
 
 void () TeamFortress_ReloadNext = {
-    local float slot, weap = 0;
+    local float slot, reload = 0, weap = 0;
 
     // reload current slot first
     slot = W_GetSlot(self.current_weapon);
     weap = W_WeaponSlot1();
-    if (CheckForAmmo(weap))
+    if (CheckForAmmo(weap)) {
         TeamFortress_ReloadWeapon(weap);
+        reload = 1;
+    }
 
     // then go through each slot
     for (slot = 1; slot < 4; slot++) {
@@ -514,9 +516,14 @@ void () TeamFortress_ReloadNext = {
         else if (slot == 3)
             weap = W_WeaponSlot3();
 
-        if (CheckForAmmo(weap))
+        if (CheckForAmmo(weap)) {
             TeamFortress_ReloadWeapon(weap);
+            reload = 1;
+        }
     }
+
+    if (!reload)
+        sprint(self, PRINT_HIGH, "All clips full\n");
 };
 
 void () TeamFortress_ClipTick = {
