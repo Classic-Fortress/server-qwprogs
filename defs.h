@@ -370,6 +370,13 @@
 #define TF_VOTENEXT                     70
 #define TF_FORCENEXT                    71
 
+// Reload impulses
+#define TF_RELOAD_SLOT1         73
+#define TF_RELOAD_SLOT2         74
+#define TF_RELOAD_SLOT3         75
+#define TF_RELOAD_NEXT          76
+#define TF_RELOAD               173
+
 #define TF_CHANGETEAM           98
 #define TF_CHANGECLASS		99
 // Added to PC_??? to get impulse to use if this clashes with your
@@ -441,9 +448,6 @@
 
 // Ammo Drop impulse
 #define TF_DROP_AMMO		172
-
-// Reload impulse
-#define TF_RELOAD		173
 
 // drop/pass commands
 #define TF_DROPKEY		175

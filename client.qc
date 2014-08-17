@@ -1019,7 +1019,7 @@ void () PutClientInServer = {
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
         W_ChangeWeapon(self.current_weaponslot);
     else
@@ -1484,7 +1484,7 @@ void () PlayerPreThink = {
         (self.weapon > 16)) {
         self.weapon = W_BestWeapon();
         self.current_weaponslot = W_BestWeaponSlot();
-        W_SetCurrentAmmo();
+        W_SetCurrentAmmo(self);
     }
 };
 

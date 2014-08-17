@@ -389,7 +389,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             self.movetype = 3;
             self.is_feigning = 0;
             self.current_weapon = self.weapon;
-            W_SetCurrentAmmo();
+            W_SetCurrentAmmo(self);
             self.tfstate = self.tfstate - (self.tfstate & 65536);
             TeamFortress_SetSpeed(self);
             if (self.weapon <= 16) {

@@ -215,7 +215,7 @@ void () EMPGrenadeExplode = {
                         }
                         oldself = self;
                         self = te;
-                        W_SetCurrentAmmo();
+                        W_SetCurrentAmmo(self);
                         self = oldself;
                     } else {
                         te.think = SUB_Remove;
@@ -265,7 +265,7 @@ void () TeamFortress_EngineerBuildStop = {
     }
     self.is_building = 0;
     self.current_weapon = self.weapon;
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 }
 
 float (entity obj, entity builder) CheckArea = {
@@ -702,7 +702,7 @@ void () TeamFortress_FinishedBuilding = {
         newmis.maxammo_shells = 100;
         newmis.maxammo_rockets = 20;
     }
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     self = oldself;
 };
 
@@ -830,7 +830,7 @@ void (entity disp) Engineer_Dispenser_InsertAmmo = {
     disp.ammo_cells = (disp.ammo_cells + cells);
 
     if ((shells + nails + rockets + cells) > 0) {
-        W_SetCurrentAmmo();
+        W_SetCurrentAmmo(self);
         sprint(self, PRINT_HIGH, "You insert ");
         if (shells > 0)
             sprint(self, PRINT_HIGH, ftos(shells), " shells");
@@ -985,7 +985,7 @@ void (entity gun) Engineer_SentryGun_InsertAmmo = {
     }
 
     if ((shells + rockets) > 0) {
-        W_SetCurrentAmmo();
+        W_SetCurrentAmmo(self);
         ammo = "You insert ";
         if (shells > 0)
             ammo = strcat(ammo, strcat(ftos(floor(shells)), " shells"));
@@ -1084,7 +1084,7 @@ void (entity eng, string bld) DestroyBuilding = {
                 self = eng;
                 self.ammo_cells = self.ammo_cells + 100;
                 bound_other_ammo(self);
-                W_SetCurrentAmmo();
+                W_SetCurrentAmmo(self);
                 self = oldself;
             }
             if (te.real_owner.building == te) {

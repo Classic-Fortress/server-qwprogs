@@ -817,7 +817,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         oldself = self;
         self = Player;
         TeamFortress_CheckClassStats();
-        W_SetCurrentAmmo();
+        W_SetCurrentAmmo(self);
         self = oldself;
     }
     if ((Player.playerclass == PC_SPY) &&
@@ -1013,7 +1013,7 @@ void (entity Goal, entity Player) RemoveResults = {
     oldself = self;
     self = Player;
     TeamFortress_CheckClassStats();
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     self = oldself;
 };
 
