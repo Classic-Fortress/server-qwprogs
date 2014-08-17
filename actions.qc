@@ -517,6 +517,7 @@ void () TeamFortress_ReloadNext = {
             weap = W_WeaponSlot3();
 
         if (CheckForAmmo(weap)) {
+            self.current_weapon = weap;
             TeamFortress_ReloadWeapon(weap);
             reload = 1;
         }
