@@ -45,6 +45,7 @@ typedef void (float) f_void_float;
 .float vote_next;               // TRUE if player has voted for a map vote
 .float force_next;              // TRUE if player has voted to force next map
 .float detpack_left;            // Seconds left to detpack explosion
+.float pipecooldown;            // Time when detpipe command can be issued
 .float disguise_skin;           // The skin the spy is changing to
 .float disguise_team;           // The team the spy is changing to
 .float fragstreak;              // Frag streak

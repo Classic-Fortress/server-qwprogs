@@ -20,6 +20,9 @@ void () TeamFortress_DetpackCountDown;
 void () TeamFortress_DetonatePipebombs = {
     local entity e;
 
+    if (time < self.pipecooldown)
+        return;
+
     e = find(world, classname, "pipebomb");
     while (e != world) {
         if (e.owner == self)
