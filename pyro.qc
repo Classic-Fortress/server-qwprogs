@@ -691,7 +691,7 @@ void () TeamFortress_IncendiaryCannon = {
         return;
     }
     self.current_weapon = WEAP_INCENDIARY;
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_FlameThrower = {
@@ -703,5 +703,5 @@ void () TeamFortress_FlameThrower = {
         return;
     }
     self.current_weapon = WEAP_FLAMETHROWER;
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 };

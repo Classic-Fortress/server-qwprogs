@@ -226,7 +226,7 @@ void () TeamFortress_DetpackStop = {
     self.current_weapon = self.weapon;
 
     Status_Refresh(self);
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     TeamFortress_SetSpeed(self);
     self.pausetime = time;
 };
@@ -252,7 +252,7 @@ void () TeamFortress_DetpackSet = {
     self.is_detpacking = 0;
     self.current_weapon = self.weapon;
     Status_Refresh(self);
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     self = oldself;
 
     newmis = spawn();

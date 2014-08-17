@@ -40,7 +40,7 @@ void (entity disp) Engineer_SentryGun_Repair;
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage;
 
-void () W_SetCurrentAmmo;
+void (entity pl) W_SetCurrentAmmo;
 
 void (entity p) bound_other_ammo;
 float (float v) anglemod;
@@ -782,7 +782,7 @@ void (float inp) Menu_Dispenser_Input = {
                 self.items -
                 (self.items & (IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3));
         }
-        W_SetCurrentAmmo();
+        W_SetCurrentAmmo(self);
     }
 };
 

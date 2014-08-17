@@ -43,7 +43,7 @@ void () TeamFortress_Discard = {
     if (newmis.ammo_cells) {
         self.ammo_cells = 0;
     }
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
     newmis.enemy = self;
     newmis.health = time;
@@ -257,7 +257,7 @@ void () TeamFortress_ID = {
     }
 };
 
-void () TeamFortress_ReloadCurrentWeapon = {
+void (float weap) TeamFortress_ReloadWeapon = {
     local float reloadtime = 0;
     local float reloadamount = 0;
     local entity tWeapon, tClip;
@@ -265,7 +265,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
     if (self.tfstate & TFSTATE_RELOADING) {
         return;
     }
-    if (self.current_weapon == WEAP_SHOTGUN) {
+    if (weap == WEAP_SHOTGUN) {
         if (self.ammo_shells == 0) {
             sprint(self, PRINT_HIGH, "Out of shells\n");
             return;
@@ -291,7 +291,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             if (self.ammo_shells < 8) {
                 self.reload_shotgun = 8 - self.ammo_shells;
             }
-            sprint(self, PRINT_HIGH, "Reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading Shotgun...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             Status_Refresh(self);
             tWeapon = spawn();
@@ -304,7 +304,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
+    } else if (weap == WEAP_SUPER_SHOTGUN) {
         if (self.ammo_shells == 0) {
             sprint(self, PRINT_HIGH, "Out of shells\n");
             return;
@@ -330,7 +330,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             if (self.ammo_shells < 16) {
                 self.reload_super_shotgun = 16 - self.ammo_shells;
             }
-            sprint(self, PRINT_HIGH, "Reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading Super Shotgun...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             Status_Refresh(self);
             tWeapon = spawn();
@@ -343,7 +343,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
-    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+    } else if (weap == WEAP_SNIPER_RIFLE) {
         if (self.ammo_shells == 0) {
             sprint(self, PRINT_HIGH, "Out of shells\n");
             return;
@@ -369,7 +369,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
             if (self.ammo_shells < 1) {
                 self.reload_sniper_rifle = 1 - self.ammo_shells;
             }
-            sprint(self, PRINT_HIGH, "Reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading Sniper Rifle...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             Status_Refresh(self);
             tWeapon = spawn();
@@ -382,7 +382,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
-    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
+    } else if (weap == WEAP_GRENADE_LAUNCHER) {
         if (self.ammo_rockets == 0) {
             sprint(self, PRINT_HIGH, "Out of grenades\n");
             return;
@@ -410,7 +410,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                 self.reload_grenade_launcher =
                     6 - self.ammo_rockets;
             }
-            sprint(self, PRINT_HIGH, "Reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading Grenade Launcher...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             Status_Refresh(self);
             tWeapon = spawn();
@@ -423,7 +423,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
-    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
+    } else if (weap == WEAP_ROCKET_LAUNCHER) {
         if (self.ammo_rockets == 0) {
             sprint(self, PRINT_HIGH, "Out of rockets\n");
             return;
@@ -451,7 +451,7 @@ void () TeamFortress_ReloadCurrentWeapon = {
                 self.reload_rocket_launcher =
                     4 - self.ammo_rockets;
             }
-            sprint(self, PRINT_HIGH, "Reloading...\n");
+            sprint(self, PRINT_HIGH, "Reloading Rocket Launcher...\n");
             self.tfstate = self.tfstate | TFSTATE_RELOADING;
             Status_Refresh(self);
             tWeapon = spawn();
@@ -473,6 +473,49 @@ void () TeamFortress_ReloadCurrentWeapon = {
         tClip.classname = "timer";
         tClip.nextthink = time + self.reload_tick;
         tClip.think = TeamFortress_ClipTick;
+    }
+};
+
+void () TeamFortress_ReloadCurrentWeapon = {
+    TeamFortress_ReloadWeapon(self.current_weapon);
+};
+
+void (float slot) TeamFortress_ReloadSlot = {
+    local float weap = 0;
+
+    if (slot < 1 || slot > 3)
+        return;
+
+    if (slot == 1)
+        weap = W_WeaponSlot1();
+    else if (slot == 2)
+        weap = W_WeaponSlot2();
+    else if (slot == 3)
+        weap = W_WeaponSlot3();
+
+    TeamFortress_ReloadWeapon(weap);
+};
+
+void () TeamFortress_ReloadNext = {
+    local float slot, weap = 0;
+
+    // reload current slot first
+    slot = W_GetSlot(self.current_weapon);
+    weap = W_WeaponSlot1();
+    if (CheckForAmmo(weap))
+        TeamFortress_ReloadWeapon(weap);
+
+    // then go through each slot
+    for (slot = 1; slot < 4; slot++) {
+        if (slot == 1)
+            weap = W_WeaponSlot1();
+        else if (slot == 2)
+            weap = W_WeaponSlot2();
+        else if (slot == 3)
+            weap = W_WeaponSlot3();
+
+        if (CheckForAmmo(weap))
+            TeamFortress_ReloadWeapon(weap);
     }
 };
 

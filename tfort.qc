@@ -1917,7 +1917,7 @@ void () TeamFortress_SetEquipment = {
     else if (self.armortype >= 0.3)
         self.items = self.items | IT_ARMOR1;
 
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 };
 
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo = {
@@ -2293,7 +2293,7 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_cells = self.ammo_cells - ammo;
     }
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
     newmis = spawn();
     newmis.aflag = ammo;
     newmis.weapon = type;
@@ -2380,7 +2380,7 @@ void () TeamFortress_AmmoboxTouch = {
     stuffcmd(other, "bf\n");
     dremove(self);
     self = other;
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_AssaultWeapon = {
@@ -2408,7 +2408,7 @@ void () TeamFortress_AssaultWeapon = {
         return;
     }
     self.current_weapon = WEAP_ASSAULT_CANNON;
-    W_SetCurrentAmmo();
+    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_ExplodePerson = {

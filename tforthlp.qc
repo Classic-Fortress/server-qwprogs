@@ -72,6 +72,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("weaplast", TF_WEAPLAST, 0);
         TeamFortress_Alias("detpipe", TF_PB_DETONATE, 0);
         TeamFortress_Alias("reload", TF_RELOAD, 0);
+        TeamFortress_Alias("reload1", TF_RELOAD_SLOT1, 0);
+        TeamFortress_Alias("reload2", TF_RELOAD_SLOT2, 0);
+        TeamFortress_Alias("reload3", TF_RELOAD_SLOT3, 0);
+        TeamFortress_Alias("reloadnext", TF_RELOAD_NEXT, 0);
         TeamFortress_Alias("autoscan", TF_SCAN, 0);
         TeamFortress_Alias("scansound", TF_SCAN_SOUND, 0);
         TeamFortress_Alias("scan10", TF_SCAN, 0);
