@@ -1353,8 +1353,10 @@ void () TeamFortress_SetEquipment = {
     }
 
     self.tf_items = 0;
-    if (self.playerclass != PC_SCOUT)
+    if (self.playerclass != PC_SCOUT) {
         self.tf_items_flags = 0;
+        self.ScannerOn = 0;
+    }
 
     self.armorclass = 0;
     self.impulse = 0;
@@ -1435,7 +1437,6 @@ void () TeamFortress_SetEquipment = {
             self.tp_grenades_2 = GR_TYPE_CALTROP;
 
         self.tf_items = PC_SCOUT_TF_ITEMS;
-        self.ScannerOn = 0;
 
         if (self.tf_items_flags <= 0)
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
