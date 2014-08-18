@@ -2876,6 +2876,7 @@ void (entity p) TeamFortress_ExecClassScript = {
         st = infokey(p, "exec_class");
 
     if (st == "on") {
+        stuffcmd(p, "exec classes/default.cfg\n");
         if (p.playerclass == PC_SCOUT)
             stuffcmd(p, "exec classes/scout.cfg\n");
         else if (p.playerclass == PC_SNIPER)
