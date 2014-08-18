@@ -490,8 +490,11 @@ void (float slot) TeamFortress_ReloadSlot = {
         weap = W_WeaponSlot1();
     else if (slot == 2)
         weap = W_WeaponSlot2();
-    else if (slot == 3)
+    else if (slot == 3) {
+        if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
+            return;
         weap = W_WeaponSlot3();
+    }
 
     TeamFortress_ReloadWeapon(weap);
 };
@@ -513,8 +516,11 @@ void () TeamFortress_ReloadNext = {
             weap = W_WeaponSlot1();
         else if (slot == 2)
             weap = W_WeaponSlot2();
-        else if (slot == 3)
+        else if (slot == 3) {
+            if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
+                break;
             weap = W_WeaponSlot3();
+        }
 
         if (CheckForAmmo(weap)) {
             self.current_weapon = weap;
