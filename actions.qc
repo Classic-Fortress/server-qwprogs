@@ -496,6 +496,7 @@ void (float slot) TeamFortress_ReloadSlot = {
         weap = W_WeaponSlot3();
     }
 
+    self.current_weapon = weap;
     TeamFortress_ReloadWeapon(weap);
 };
 
@@ -504,10 +505,10 @@ void () TeamFortress_ReloadNext = {
 
     // reload current slot first
     slot = W_GetSlot(self.current_weapon);
-    weap = W_WeaponSlot1();
-    if (CheckForAmmo(weap)) {
-        TeamFortress_ReloadWeapon(weap);
+    if (CheckForAmmo(self.current_weapon)) {
+        TeamFortress_ReloadWeapon(self.current_weapon);
         reload = 1;
+        return;
     }
 
     // then go through each slot
@@ -526,6 +527,7 @@ void () TeamFortress_ReloadNext = {
             self.current_weapon = weap;
             TeamFortress_ReloadWeapon(weap);
             reload = 1;
+            break;
         }
     }
 
