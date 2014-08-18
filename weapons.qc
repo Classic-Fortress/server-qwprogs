@@ -10,6 +10,9 @@ void () SuperDamageSound;
 void () ConcussionGrenadeTimer;
 void () OldConcussionGrenadeTimer;
 
+void () W_ChangeToBestWeapon;
+void (float slot) W_WeaponSlot;
+void (entity pl) W_WeaponState_Save;
 void () W_PrintWeaponMessage;
 
 void () button_fire;
@@ -1033,10 +1036,7 @@ void () W_FireLightning = {
     local float cells;
 
     if (self.ammo_cells < 1) {
-        self.current_weapon = W_BestWeapon();
-        self.current_weaponslot = W_BestWeaponSlot();
-        W_SetCurrentAmmo(self);
-        W_PrintWeaponMessage();
+        W_ChangeToBestWeapon();
         return;
     }
     if (self.waterlevel > 1) {
@@ -1241,10 +1241,7 @@ void (float ox) W_FireSpikes = {
         return;
     }
     if (self.ammo_nails < 1) {
-        self.current_weapon = W_BestWeapon();
-        self.current_weaponslot = W_BestWeaponSlot();
-        W_SetCurrentAmmo(self);
-        W_PrintWeaponMessage();
+        W_ChangeToBestWeapon();
         return;
     }
     sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
@@ -1487,33 +1484,32 @@ float () W_BestWeapon = {
     local float it;
 
     it = self.weapons_carried;
-    if (((self.ammo_cells >= 1) && (it & 65536)) && (self.waterlevel <= 1))
-        return (65536);
-    else if (((self.ammo_cells >= 7) && (self.ammo_shells >= 1)) &&
-             (it & WEAP_ASSAULT_CANNON))
-        return (WEAP_ASSAULT_CANNON);
-    else if ((self.ammo_cells >= 1) && (it & 4096))
-        return (4096);
-    else if ((self.ammo_nails >= 2) && (it & 1024))
-        return (1024);
-    else if ((self.ammo_shells >= 2) && (it & 256))
-        return (256);
-    else if ((self.ammo_nails >= 1) && (it & 524288))
-        return (524288);
-    else if ((self.ammo_nails >= 1) && (it & 512))
-        return (512);
-    else if ((self.ammo_shells >= 1) && (it & 128))
-        return (128);
-    else if ((self.ammo_shells >= 1) && (it & 262144))
-        return (262144);
-    else if (it & 4)
-        return (4);
-    else if (it & 8)
-        return (8);
-    else if (it & 16)
-        return (16);
+    if ((self.ammo_cells >= 1 && it & WEAP_LIGHTNING) && self.waterlevel <= 1)
+        return WEAP_LIGHTNING;
+    else if ((self.ammo_cells >= 7 && self.ammo_shells >= 1) && it & WEAP_ASSAULT_CANNON)
+        return WEAP_ASSAULT_CANNON;
+    else if (self.ammo_cells >= 1 && it & WEAP_FLAMETHROWER)
+        return WEAP_FLAMETHROWER;
+    else if (self.ammo_nails >= 2 && it & WEAP_SUPER_NAILGUN)
+        return WEAP_SUPER_NAILGUN;
+    else if (self.ammo_shells >= 2 && it & WEAP_SUPER_SHOTGUN)
+        return WEAP_SUPER_SHOTGUN;
+    else if (self.ammo_nails >= 1 && it & WEAP_LASER)
+        return WEAP_LASER;
+    else if (self.ammo_nails >= 1 && it & WEAP_NAILGUN)
+        return WEAP_NAILGUN;
+    else if (self.ammo_shells >= 1 && it & WEAP_SHOTGUN)
+        return WEAP_SHOTGUN;
+    else if (self.ammo_shells >= 1 && it & WEAP_TRANQ)
+        return WEAP_TRANQ;
+    else if (it & WEAP_MEDIKIT)
+        return WEAP_MEDIKIT;
+    else if (it & WEAP_SPANNER)
+        return WEAP_SPANNER;
+    else if (it & WEAP_AXE)
+        return WEAP_AXE;
 
-    return (0);
+    return 0;
 };
 
 float () W_BestWeaponSlot = {
@@ -1524,29 +1520,38 @@ float () W_BestWeaponSlot = {
     return W_GetSlot(weap);
 };
 
-float () W_CheckNoAmmo = {
-    if ((self.current_weapon == WEAP_AXE)
-        || (self.current_weapon == WEAP_SPANNER)
-        || (self.current_weapon == WEAP_MEDIKIT))
-        return (1);
-    else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
-        if (self.currentammo >= 4)
-            return (1);
-    } else if (self.current_weapon == WEAP_INCENDIARY) {
-        if (self.currentammo >= 3)
-            return (1);
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN
-                || self.current_weapon == WEAP_NAILGUN) {
-        if (self.currentammo >= 2)
-            return (1);
-    } else if (self.currentammo > 0)
-        return (1);
+void () W_ChangeToBestWeapon = {
+    local float slot = W_BestWeaponSlot();
 
-    self.current_weapon = W_BestWeapon();
-    self.current_weaponslot = W_BestWeaponSlot();
+    W_WeaponSlot(slot);
+
+    //self.last_weaponslot = self.current_weaponslot;
+    //self.last_weapon = self.current_weapon;
+    //self.last_weaponmode = self.weaponmode;
+    self.current_weaponslot = slot;
+    self.current_weapon = self.next_weapon;
+    self.weaponmode = self.next_weaponmode;
     W_SetCurrentAmmo(self);
+    W_WeaponState_Save(self);
     W_PrintWeaponMessage();
-    return (0);
+}
+
+float () W_CheckNoAmmo = {
+    if (self.current_weapon == WEAP_AXE || self.current_weapon == WEAP_SPANNER
+                || self.current_weapon == WEAP_MEDIKIT)
+        return 1;
+    else if (self.current_weapon == WEAP_SUPER_NAILGUN && self.currentammo >= 4)
+        return 1;
+    else if (self.current_weapon == WEAP_INCENDIARY && self.currentammo >= 3)
+        return 1;
+    else if ((self.current_weapon == WEAP_SUPER_SHOTGUN || self.current_weapon == WEAP_NAILGUN)
+                && self.currentammo >= 2)
+        return 1;
+    else if (self.currentammo > 0)
+        return 1;
+
+    W_ChangeToBestWeapon();
+    return 0;
 };
 
 void () W_Reload_shotgun = {
