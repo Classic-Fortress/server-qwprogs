@@ -1347,9 +1347,12 @@ void () TeamFortress_SetEquipment = {
     self.weapons_carried = 0;
     if (self.last_playerclass != self.playerclass) {
         self.current_weapon = 0;
+        self.last_weapon = 0;
         self.weaponmode = 0;
+        self.last_weaponmode = 0;
         self.current_weaponslot = 1;
         self.last_weaponslot = 1;
+        W_WeaponState_Save(self);
     }
 
     self.tf_items = 0;
