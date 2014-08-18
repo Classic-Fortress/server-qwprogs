@@ -24,11 +24,11 @@ void () CanisterTouch =
 };
 
 void () CaltropTouch = {
-    if ((other.classname != "player") || !(other.flags & 512) ||
+    if ((other.classname != "player") || !(other.flags & FL_ONGROUND) ||
         other.deadflag)
         return;
 
-    if ((teamplay & 16) && (other != self.owner)
+    if ((teamplay & TEAMPLAY_NOEXPLOSIVE) && (other != self.owner)
         && (other.team_no == self.owner.team_no) &&
         (self.owner.team_no != 0))
         return;
@@ -44,7 +44,7 @@ void () CaltropTouch = {
 void () CaltropScatterThink = {
     self.nextthink = time + 0.2;
     if (self.velocity == '0 0 0') {
-        if (self.flags & 512) {
+        if (self.flags & FL_ONGROUND) {
             self.nextthink = time + 10 + random() * 5;
             self.think = SUB_Remove;
             self.solid = SOLID_TRIGGER;
