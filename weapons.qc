@@ -1626,30 +1626,20 @@ float () CheckForReload = {
 
 float (float weap) CheckForAmmo = {
     if (weap == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 1 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+        if (self.reload_shotgun >= 1 && self.ammo_shells > self.reload_shotgun)
             return 1;
-        }
     } else if (weap == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 2 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+        if (self.reload_super_shotgun >= 2 && self.ammo_shells > self.reload_super_shotgun)
             return 1;
-        }
     } else if (weap == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && (toggleflags & TFLAG_SNIPERRELOAD)) {
-            TeamFortress_ReloadCurrentWeapon();
+        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > self.reload_sniper_rifle && (toggleflags & TFLAG_SNIPERRELOAD))
             return 1;
-        }
     } else if (weap == WEAP_GRENADE_LAUNCHER) {
-        if ((self.reload_grenade_launcher >= 1) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+        if (self.reload_grenade_launcher >= 1 && self.ammo_rockets > self.reload_grenade_launcher)
             return 1;
-        }
     } else if (weap == WEAP_ROCKET_LAUNCHER) {
-        if ((self.reload_rocket_launcher >= 1) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+        if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
             return 1;
-        }
     }
     return 0;
 };
