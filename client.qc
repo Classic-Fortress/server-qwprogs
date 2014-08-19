@@ -1428,8 +1428,13 @@ void () PlayerPreThink = {
     if (self.impulse == TF_VOTENEXT) {
         Vote_NextMap(self);
         self.impulse = 0;
-    }
-    else if (self.impulse == TF_FORCENEXT) {
+    } else if (self.impulse == TF_VOTETRICK) {
+        Vote_TrickMap(self);
+        self.impulse = 0;
+    } else if (self.impulse == TF_VOTERACE) {
+        Vote_RaceMap(self);
+        self.impulse = 0;
+    } else if (self.impulse == TF_FORCENEXT) {
         Vote_ForceNext(self);
         self.impulse = 0;
     }
