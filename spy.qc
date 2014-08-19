@@ -3,6 +3,7 @@ void (entity spy) TeamFortress_SpyCalcName;
 void () TeamFortress_SpyUndercoverThink;
 void () GasGrenadeMakeGas;
 void () T_TranqDartTouch;
+void () Spy_DropBackpack;
 
 void () spy_diea1 =[50, spy_diea2] {
 };
@@ -447,6 +448,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         self.movetype = 6;
         if (issilent == 0) {
             DeathSound();
+            Spy_DropBackpack();
         }
         self.angles_x = 0;
         self.angles_z = 0;
@@ -1115,4 +1117,33 @@ void (entity spy) Spy_RemoveDisguise = {
     }
     if (coverblown)
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
+};
+
+void () Spy_DropBackpack = {
+    if ((cb_prematch_time + 3) > time)
+        return;
+
+    newmis = spawn();
+    newmis.origin = self.origin - '0 0 24';
+
+    newmis.ammo_shells = 0;
+    newmis.ammo_nails = 0;
+    newmis.ammo_rockets = 0;
+    newmis.ammo_cells = 0;
+
+    newmis.armorvalue = 0;
+
+    newmis.velocity_z = 300;
+    newmis.velocity_x = -100 + random() * 200;
+    newmis.velocity_y = -100 + random() * 200;
+
+    newmis.flags = FL_ITEM;
+    newmis.solid = SOLID_TRIGGER;
+    newmis.movetype = MOVETYPE_TOSS;
+    setmodel(newmis, "progs/backpack.mdl");
+    setsize(newmis, '-16 -16 0', '16 16 56');
+    newmis.touch = BackpackTouch;
+
+    newmis.nextthink = time + 120;
+    newmis.think = SUB_Remove;
 };
