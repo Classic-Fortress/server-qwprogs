@@ -321,8 +321,6 @@ void () TeamFortress_Inventory = {
         sprint(self, PRINT_HIGH, "Grenade type 1: ");
         if (self.tp_grenades_1 == GR_TYPE_NORMAL)
             sprint(self, PRINT_HIGH, "Normal (");
-        else if (self.tp_grenades_1 == GR_TYPE_CONCUSSION)
-            sprint(self, PRINT_HIGH, "Concussion (");
         else if (self.tp_grenades_1 == GR_TYPE_NAIL)
             sprint(self, PRINT_HIGH, "Nail (");
         else if (self.tp_grenades_1 == GR_TYPE_MIRV)
@@ -335,6 +333,10 @@ void () TeamFortress_Inventory = {
             sprint(self, PRINT_HIGH, "Hallucinogenic (");
         else if (self.tp_grenades_1 == GR_TYPE_EMP)
             sprint(self, PRINT_HIGH, "EMP (");
+        else if (self.tp_grenades_2 == GR_TYPE_CALTROP)
+            sprint(self, PRINT_HIGH, "Caltrop (");
+        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
+            sprint(self, PRINT_HIGH, "Flash (");
         else
             sprint(self, PRINT_HIGH, "BUG (");
 
@@ -345,10 +347,8 @@ void () TeamFortress_Inventory = {
         sprint(self, PRINT_HIGH, "Grenade type 2: ");
         if (self.tp_grenades_2 == GR_TYPE_NORMAL)
             sprint(self, PRINT_HIGH, "Normal (");
-        else if (self.tp_grenades_2 == GR_TYPE_CALTROP)
-            sprint(self, PRINT_HIGH, "Caltrop (");
-        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
-            sprint(self, PRINT_HIGH, "Flash (");
+        else if (self.tp_grenades_1 == GR_TYPE_CONCUSSION)
+            sprint(self, PRINT_HIGH, "Concussion (");
         else if (self.tp_grenades_2 == GR_TYPE_NAIL)
             sprint(self, PRINT_HIGH, "Nail (");
         else if (self.tp_grenades_2 == GR_TYPE_MIRV)
@@ -481,8 +481,8 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
     else {
         TeamFortress_PrimeGrenade(inp);
 
-    if ( ((inp == 2 && self.tp_grenade_switch != 1) || (inp == 1 && self.tp_grenade_switch == 1))
-                && self.tp_grenades_2 == 10)
+    if ( ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1))
+                && self.tp_grenades_1 == GR_TYPE_CALTROP)
         TeamFortress_ThrowGrenade();
     }
 };
@@ -517,6 +517,10 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Gas grenade";
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
+        else if (self.tp_grenades_1 == 9)
+            gs = "Flash grenade";
+        else if (self.tp_grenades_1 == 10)
+            gs = "Caltrop canister";
         else
             gs = "Grenade";
 
@@ -577,8 +581,6 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "EMP grenade";
         else if (self.tp_grenades_2 == 9)
             gs = "Flash grenade";
-        else if (self.tp_grenades_2 == 10)
-            gs = "Caltrop canister";
         else
             gs = "Grenade";
 
@@ -1432,12 +1434,12 @@ void () TeamFortress_SetEquipment = {
         self.no_grenades_1 = PC_SCOUT_GRENADE_INIT_1;
         self.no_grenades_2 = PC_SCOUT_GRENADE_INIT_2;
 
-        self.tp_grenades_1 = GR_TYPE_CONCUSSION;
-
         if (old_grens == 1)
-            self.tp_grenades_2 = GR_TYPE_FLASH;
+            self.tp_grenades_1 = GR_TYPE_FLASH;
         else
-            self.tp_grenades_2 = GR_TYPE_CALTROP;
+            self.tp_grenades_1 = GR_TYPE_CALTROP;
+
+        self.tp_grenades_2 = GR_TYPE_CONCUSSION;
 
         self.tf_items = PC_SCOUT_TF_ITEMS;
 
