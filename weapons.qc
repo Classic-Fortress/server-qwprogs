@@ -2609,7 +2609,7 @@ void () W_WeaponFrame = {
         self.tfstate = self.tfstate - TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.heat = 0;
-    } else if (self.tfstate & TFSTATE_CANT_MOVE) {
+    } else if (self.tfstate & TFSTATE_CANT_MOVE && !self.is_feigning) {
         self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
         self.heat = 0;
