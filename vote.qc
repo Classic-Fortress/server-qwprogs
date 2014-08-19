@@ -113,9 +113,9 @@ void (entity pe_player) Vote_ForceNext = {
         GotoNextMap();
     } else {
         if (f_votes_left == 1)
-            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed\n");
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed (/forcenext)\n");
         else
-            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed\n");
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed (/forcenext)\n");
     }
 };
 
