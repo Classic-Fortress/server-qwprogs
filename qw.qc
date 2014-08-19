@@ -43,6 +43,8 @@ typedef void (float) f_void_float;
 .float spawn_time;              // Time when player spawned
 .float menu_time;               // Time when vote map menu was first issued
 .float vote_next;               // TRUE if player has voted for a map vote
+.float vote_trick;              // TRUE if player has voted for a trick map vote
+.float vote_race;               // TRUE if player has voted for a race map vote
 .float force_next;              // TRUE if player has voted to force next map
 .float detpack_left;            // Seconds left to detpack explosion
 .float pipecooldown;            // Time when detpipe command can be issued

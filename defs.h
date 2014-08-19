@@ -368,7 +368,9 @@
 
 // CF map voting
 #define TF_VOTENEXT                     70
-#define TF_FORCENEXT                    71
+#define TF_VOTETRICK                    71
+#define TF_VOTERACE                     72
+#define TF_FORCENEXT                    73
 
 // Reload impulses
 #define TF_RELOAD_SLOT1         73

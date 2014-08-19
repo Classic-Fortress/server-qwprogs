@@ -5,7 +5,11 @@
 // functions by order of appearance
 float () TeamFortress_GetNoActivePlayers;
 void (entity pe_player) Vote_NextMap;
+void (entity pe_player) Vote_TrickMap;
+void (entity pe_player) Vote_RaceMap;
 float () Vote_GetNextVotes;
+float () Vote_GetTrickVotes;
+float () Vote_GetRaceVotes;
 void (entity pe_player) Vote_ForceNext;
 void () GotoNextMap;
 float () Vote_GetForceNextVotes;
@@ -17,6 +21,8 @@ void () Vote_MenuClose;
 void (entity pe_player) Vote_Menu;
 void (float pf_input) Vote_RemoveVote;
 string () Vote_GetMapList;
+string () Vote_GetTrickList;
+string () Vote_GetRaceList;
 void (string ps_maplist) Vote_PopulateVoteList;
 string (string ps_map, string ps_maplist) Vote_StripMap;
 void () Vote_Reset;
@@ -70,6 +76,68 @@ void (entity pe_player) Vote_NextMap = {
     }
 };
 
+// opens the map voting for trick maps
+// called from weapons.qc:ImpulseCommands()
+void (entity pe_player) Vote_TrickMap = {
+    local float f_votes, f_votes_needed, f_votes_left;
+
+    if (!pe_player.team_no || !pe_player.playerclass)
+        return;
+
+    if (vote_result != string_null) {
+        sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
+        return;
+    }
+    pe_player.vote_trick = 1;
+
+    bprint(PRINT_HIGH, pe_player.netname, " wants to vote for a trick map\n");
+
+    f_votes = Vote_GetTrickVotes();
+    f_votes_needed = ceil(TeamFortress_GetNoActivePlayers() / 2);
+    f_votes_left = f_votes_needed - f_votes;
+    if (f_votes >= f_votes_needed) {
+        Vote_SetupVote(2);
+        //dprint("[", ftos(time), "/cf/mapvote/votetrick]: forcing trick map vote.\n");
+        bprint(PRINT_HIGH, "Commencing vote for trick map\n");
+    } else {
+        if (f_votes_left == 1)
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed (/votetrick)\n");
+        else
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed (/votetrick)\n");
+    }
+};
+
+// opens the map voting for race maps
+// called from weapons.qc:ImpulseCommands()
+void (entity pe_player) Vote_RaceMap = {
+    local float f_votes, f_votes_needed, f_votes_left;
+
+    if (!pe_player.team_no || !pe_player.playerclass)
+        return;
+
+    if (vote_result != string_null) {
+        sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
+        return;
+    }
+    pe_player.vote_race = 1;
+
+    bprint(PRINT_HIGH, pe_player.netname, " wants to vote for a race map\n");
+
+    f_votes = Vote_GetRaceVotes();
+    f_votes_needed = ceil(TeamFortress_GetNoActivePlayers() / 2);
+    f_votes_left = f_votes_needed - f_votes;
+    if (f_votes >= f_votes_needed) {
+        Vote_SetupVote(3);
+        //dprint("[", ftos(time), "/cf/mapvote/voterace]: forcing race map vote.\n");
+        bprint(PRINT_HIGH, "Commencing vote for race map\n");
+    } else {
+        if (f_votes_left == 1)
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more vote needed (/voterace)\n");
+        else
+            bprint(PRINT_HIGH, ftos(f_votes_left), " more votes needed (/voterace)\n");
+    }
+};
+
 // returns the total amount of vote_next votes
 // called from Vote_NextMap()
 float () Vote_GetNextVotes = {
@@ -79,6 +147,38 @@ float () Vote_GetNextVotes = {
     e_player = find(world, classname, "player");
     while (e_player != world) {
         if (e_player.vote_next == 1 && e_player.team_no && e_player.playerclass)
+            f_count = f_count + 1;
+        e_player = find(e_player, classname, "player");
+    }
+
+    return f_count;
+};
+
+// returns the total amount of vote_trick votes
+// called from Vote_TrickMap()
+float () Vote_GetTrickVotes = {
+    local entity e_player;
+    local float f_count = 0;
+
+    e_player = find(world, classname, "player");
+    while (e_player != world) {
+        if (e_player.vote_trick == 1 && e_player.team_no && e_player.playerclass)
+            f_count = f_count + 1;
+        e_player = find(e_player, classname, "player");
+    }
+
+    return f_count;
+};
+
+// returns the total amount of vote_race votes
+// called from Vote_RaceMap()
+float () Vote_GetRaceVotes = {
+    local entity e_player;
+    local float f_count = 0;
+
+    e_player = find(world, classname, "player");
+    while (e_player != world) {
+        if (e_player.vote_race == 1 && e_player.team_no && e_player.playerclass)
             f_count = f_count + 1;
         e_player = find(e_player, classname, "player");
     }
@@ -213,18 +313,24 @@ void () Vote_Check = {
 };
 
 // decides maps should be included in map voting
+// pf_type: 0 = normal vote, 1 = decider vote, 2 = trick vote, 3 = race vote
 // called from Vote_Check()
-void (float pf_decider) Vote_SetupVote = {
+void (float pf_type) Vote_SetupVote = {
     local string s_maplist;
+    vote_decider = 0;
 
-    if (!pf_decider) {
-        vote_decider = 0;
+    if (pf_type == 0) {
         s_maplist = Vote_GetMapList(); // returns a strzoned string
-    } else {
+    } else if (pf_type == 1) {
         vote_decider = 1;
         s_maplist = Vote_GetWinnerList(); // returns a strzoned string
         Vote_ResetVotes();
-        //dprint("[", ftos(time), "/cf/mapvote/setupvote]: decider votelist: ", s_maplist, "\n");
+    } else if (pf_type == 2) {
+        s_maplist = Vote_GetTrickList(); // returns a strzoned string
+        Vote_ResetVotes();
+    } else {
+        s_maplist = Vote_GetRaceList(); // returns a strzoned string
+        Vote_ResetVotes();
     }
     vote_started = time;
 
@@ -538,6 +644,36 @@ string () Vote_GetMapList = {
     s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
 
     //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: votelist: ", s_maplist, "\n");
+    return s_maplist;
+};
+
+// returns a list of trick maps from config
+// called from Vote_SetupVote()
+string () Vote_GetTrickList = {
+    local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
+
+    s_maplist1 = strcat(infokey(world, "votelist_trick1"), " ");
+    s_maplist2 = strcat(infokey(world, "votelist_trick2"), " ");
+    s_maplist3 = strcat(infokey(world, "votelist_trick3"), " ");
+    s_maplist4 = strcat(infokey(world, "votelist_trick4"), " ");
+    s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
+
+    //dprint("[", ftos(time), "/cf/mapvote/gettricklist]: trick votelist: ", s_maplist, "\n");
+    return s_maplist;
+};
+
+// returns a list of race maps from config
+// called from Vote_SetupVote()
+string () Vote_GetRaceList = {
+    local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
+
+    s_maplist1 = strcat(infokey(world, "votelist_race1"), " ");
+    s_maplist2 = strcat(infokey(world, "votelist_race2"), " ");
+    s_maplist3 = strcat(infokey(world, "votelist_race3"), " ");
+    s_maplist4 = strcat(infokey(world, "votelist_race4"), " ");
+    s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
+
+    //dprint("[", ftos(time), "/cf/mapvote/getracelist]: trick votelist: ", s_maplist, "\n");
     return s_maplist;
 };
 
