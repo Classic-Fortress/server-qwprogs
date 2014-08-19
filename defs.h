@@ -373,10 +373,10 @@
 #define TF_FORCENEXT                    73
 
 // Reload impulses
-#define TF_RELOAD_SLOT1         73
-#define TF_RELOAD_SLOT2         74
-#define TF_RELOAD_SLOT3         75
-#define TF_RELOAD_NEXT          76
+#define TF_RELOAD_NEXT          80
+#define TF_RELOAD_SLOT1         81
+#define TF_RELOAD_SLOT2         82
+#define TF_RELOAD_SLOT3         83
 #define TF_RELOAD               173
 
 #define TF_CHANGETEAM           98
