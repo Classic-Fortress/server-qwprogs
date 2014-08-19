@@ -1329,7 +1329,7 @@ void () item_artifact_super_damage = {
 void () BackpackTouch = {
     local string s;
 
-    if (other.classname != "player")
+    if (other.classname != "player" || other.is_feigning)
         return;
     if (other.health <= 0)
         return;
