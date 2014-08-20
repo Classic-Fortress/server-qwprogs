@@ -2571,6 +2571,12 @@ void () W_WeaponFrame = {
         return;
     }
 
+    // medic /saveme
+    if (self.impulse == TF_MEDIC_HELPME) {
+        ImpulseCommands();
+        return;
+    }
+
     if (!WeaponReady(self))
         return;
 
