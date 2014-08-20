@@ -354,7 +354,7 @@ void (float inp) Menu_Spy_Input = {
     } else if (inp == 2) {
         Menu_Spy_Color();
     } else if (inp == 3) {
-        TeamFortress_SpyFeignDeath(0);
+        TeamFortress_SpyFeignDeath(1);
         if (self.is_feigning) {
             Menu_Spy();
         }
@@ -365,26 +365,26 @@ void (float inp) Menu_Spy_Input = {
 
 void () Menu_Spy = {
     local string s_action  = "Action:\n\n";
-    local string s_skin    = "“‘ Change skin   \n";
-    local string s_color   = "”‘ Change color  \n";
+    local string s_skin    = "“‘ Change skin            \n";
+    local string s_color   = "”‘ Change color           \n";
     local string s_feign, s_reset;
-    local string s_nothing = "\n—‘ Nothing       ";
+    local string s_nothing = "\n—‘ Nothing                ";
 
     if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
         return;
     }
 
     if (self.is_feigning)
-        s_feign = "•‘ Stop feigning \n";
+        s_feign = "•‘ Stop feigning          \n";
     else
-        s_feign = "•‘ Start feigning\n";
+        s_feign = "•‘ Start feigning (silent)\n";
 
     if (self.undercover_team != 0 && self.undercover_skin != 0)
-        s_reset = "–‘ Reset disguise\n";
+        s_reset = "–‘ Reset disguise         \n";
     else if (self.undercover_team != 0)
-        s_reset = "–‘ Reset color   \n";
+        s_reset = "–‘ Reset color            \n";
     else if (self.undercover_skin != 0)
-        s_reset = "–‘ Reset skin    \n";
+        s_reset = "–‘ Reset skin             \n";
     else
         s_reset = "\n";
 
