@@ -392,7 +392,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             self.is_feigning = 0;
             self.current_weapon = self.weapon;
             W_SetCurrentAmmo(self);
-            self.tfstate = self.tfstate - (self.tfstate & 65536);
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
             if (self.weapon <= 16) {
                 spy_upaxe1();
@@ -419,10 +419,6 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             sprint(self, PRINT_HIGH, "You cannot feign right now\n");
             return;
         }
-        if (!(self.flags & 512) && (self.waterlevel == 0)) {
-            sprint(self, PRINT_HIGH, "You cannot feign in the air\n");
-            return;
-        }
         at_spot = findradius(self.origin, 64);
         while (at_spot != world) {
             if (((at_spot.classname == "player") && (self != at_spot)) &&
@@ -434,7 +430,8 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             at_spot = at_spot.chain;
         }
         self.immune_to_check = time + 5;
-        self.tfstate = self.tfstate | 65536;
+        if (self.flags & FL_ONGROUND)
+            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
         self.is_feigning = 1;
         Attack_Finished(0.8);

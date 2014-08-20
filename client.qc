@@ -1439,6 +1439,10 @@ void () PlayerPreThink = {
         self.impulse = 0;
     }
 
+    if (self.is_feigning && (self.flags & FL_ONGROUND) && !(self.tfstate & TFSTATE_CANT_MOVE)) {
+        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+        TeamFortress_SetSpeed(self);
+    }
     if (self.is_feigning && (self.waterlevel == 1)) {
         self.watertype = -3;
         self.waterlevel = 3;
