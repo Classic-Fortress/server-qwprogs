@@ -415,7 +415,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
                    "You cannot get up while someone is standing on you\n");
         }
     } else {
-        if (self.is_unabletospy == 1) {
+        if (self.is_unabletospy == 1 || (time - self.antispam_feign) < 3) {
             sprint(self, PRINT_HIGH, "You cannot feign right now\n");
             return;
         }
@@ -429,6 +429,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             }
             at_spot = at_spot.chain;
         }
+        self.antispam_feign = time;
         self.immune_to_check = time + 5;
         if (self.flags & FL_ONGROUND)
             self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
