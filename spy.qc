@@ -449,6 +449,12 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             Spy_DropBackpack();
             deathstring = GetDeathMessage(self, self.attacked_by, deathmsg);
             bprint(PRINT_MEDIUM, deathstring);
+            if (!(self.flags & FL_ONGROUND)) {
+                stuffcmd(self, "cl_backspeed 0\n");
+                stuffcmd(self, "cl_forwardspeed 0\n");
+                stuffcmd(self, "cl_sidespeed 0\n");
+                self.maxspeed = 0;
+            }
         }
         self.angles_x = 0;
         self.angles_z = 0;
