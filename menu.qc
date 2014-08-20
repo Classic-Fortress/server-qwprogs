@@ -23,6 +23,7 @@ float (float tno) TeamFortress_TeamIsCivilian;
 float (float tno) TeamFortress_TeamGetNoPlayers;
 float () TeamFortress_GetNoPlayers;
 
+float (float pc) IsLegalClass;
 void (float inp) TeamFortress_ChangeClass;
 void (entity p) TeamFortress_SetSkin;
 
@@ -198,8 +199,10 @@ void () Menu_Team = {
 };
 
 void (float inp) Menu_Class_Input = {
-    if (inp > 0 && inp <= 10)
-        TeamFortress_ChangeClass(inp);
+    if (!inp || inp > 10 || !IsLegalClass(inp))
+        Menu_Class();
+
+    TeamFortress_ChangeClass(inp);
 };
 
 void () Menu_Class = {
