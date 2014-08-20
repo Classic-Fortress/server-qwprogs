@@ -348,6 +348,12 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_grens = TRUE;
 
+        st = infokey(world, "dg");
+        if (st == string_null)
+            st = infokey(world, "drop_grenades");
+        if (st == "on")
+            drop_grenades = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
