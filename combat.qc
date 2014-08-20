@@ -444,6 +444,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     if (no_damage == TRUE)
         return;
 
+    if (targ.playerclass == PC_SPY)
+        targ.feignmsg = deathmsg;
+
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;
         targ.armorvalue = 0;
