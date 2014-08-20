@@ -390,14 +390,10 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             self.view_ofs = '0 0 22';
             self.movetype = 3;
             self.is_feigning = 0;
-            self.current_weapon = self.weapon;
+            W_WeaponState_Load(self, 0);
             W_SetCurrentAmmo(self);
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
-            if (self.weapon <= 16) {
-                spy_upaxe1();
-                return;
-            }
             if (i == 1) {
                 spy_upb1();
             } else if (i == 2) {
@@ -438,8 +434,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         Attack_Finished(0.8);
         self.invisible_finished = 0;
         self.modelindex = modelindex_player;
-        self.weapon = self.current_weapon;
-        self.current_weapon = 0;
+        W_WeaponState_Save(self);
         self.weaponmodel = "";
         self.weaponframe = 0;
         setsize(self, '-16 -16 -24', '16 16 -16');
