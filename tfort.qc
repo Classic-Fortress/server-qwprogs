@@ -21,7 +21,7 @@ void () UseSpecialSkill = {
     else if (self.playerclass == PC_DEMOMAN)
         self.impulse = TF_PB_DETONATE;
     else if (self.playerclass == PC_SPY)
-        self.impulse = TF_SPY_SILENT_DIE;
+        self.impulse = TF_SPY_DIE;
     else if (self.playerclass == PC_ENGINEER)
         self.impulse = TF_ENGINEER_DETDISP;
     else if (self.playerclass == PC_UNDEFINED) {
