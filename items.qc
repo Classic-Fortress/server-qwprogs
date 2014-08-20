@@ -781,21 +781,32 @@ void (entity pl, float typ) PrintGrenadeType = {
     sprint(pl, PRINT_HIGH, st);
 };
 
-void (entity pe_player, float pf_grenade_type, float pf_count) PrintFoundGrenade = {
-    local float f_count = pf_count;
+float (float pf_grenade_number, float pf_grenade_type) GetMaxGrenades = {
+    if (pf_grenade_number == 1) {
+        if (pf_grenade_type == GR_TYPE_NAIL) {
+            return 2;
+        }
+        if (pf_grenade_type == GR_TYPE_CALTROP) {
+            return 3;
+        }
+    } else {
+        if (pf_grenade_type == GR_TYPE_NAIL) {
+            return 2;
+        }
+        if (pf_grenade_type == GR_TYPE_CONCUSSION) {
+            return 3;
+        }
+    }
+    return 4;
+}
 
-    if (!f_count)
+void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoundGrenade = {
+    if (!pf_grenade_count)
         return;
-
-    if (pe_player.no_grenades_1 >= 4)
-        return;
-
-    if (f_count > 1)
-        f_count = 4 - pe_player.no_grenades_1;
 
     sprint(pe_player, PRINT_HIGH, "You found ");
-    if (f_count > 1)
-        sprint(pe_player, PRINT_HIGH, ftos(f_count), " ");
+    if (pf_grenade_count > 1)
+        sprint(pe_player, PRINT_HIGH, ftos(pf_grenade_count), " ");
     else
         sprint(pe_player, PRINT_HIGH, "a ");
     PrintGrenadeType(pe_player, pf_grenade_type);
@@ -803,7 +814,7 @@ void (entity pe_player, float pf_grenade_type, float pf_count) PrintFoundGrenade
         sprint(pe_player, PRINT_HIGH, " canister");
     else
         sprint(pe_player, PRINT_HIGH, " grenade");
-    if (f_count > 1)
+    if (pf_grenade_count > 1)
         sprint(pe_player, PRINT_HIGH, "s");
     sprint(pe_player, PRINT_HIGH, "\n");
 };
@@ -812,35 +823,24 @@ float () GetGrenadePossibility = {
     local float maxg;
 
     if (random() < 0.500) {
-        return (0);
+        return 0;
     }
-    maxg = 4;
     if (random() < 0.500) {
-        if (other.tp_grenades_1 == 3) {
-            maxg = 2;
-        }
-        if (other.tp_grenades_1 == 10) {
-            maxg = 3;
-        }
+        maxg = GetMaxGrenades(1, other.tp_grenades_1);
         if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
             other.no_grenades_1 = other.no_grenades_1 + 1;
             PrintFoundGrenade(other, other.tp_grenades_1, 1);
-            return (1);
+            return 1;
         }
     } else {
-        if (other.tp_grenades_2 == 3) {
-            maxg = 2;
-        }
-        if (other.tp_grenades_2 == 2) {
-            maxg = 3;
-        }
+        maxg = GetMaxGrenades(1, other.tp_grenades_2);
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
             PrintFoundGrenade(other, other.tp_grenades_2, 1);
-            return (1);
+            return 1;
         }
     }
-    return (0);
+    return 0;
 };
 
 void () ammo_touch = {
@@ -1343,6 +1343,7 @@ void () item_artifact_super_damage = {
 
 void () BackpackTouch = {
     local string s;
+    local float maxg, giveg;
 
     if (other.classname != "player" || other.is_feigning)
         return;
@@ -1356,8 +1357,25 @@ void () BackpackTouch = {
     other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
     other.ammo_cells = other.ammo_cells + self.ammo_cells;
     if (drop_grenades && other.playerclass != PC_SCOUT) {
-        PrintFoundGrenade(other, other.tp_grenades_1, self.no_grenades_1);
-        other.no_grenades_1 = min(4, (other.tp_grenades_1 + self.no_grenades_1));
+
+        // give grenade type 1
+        maxg = GetMaxGrenades(1, other.tp_grenades_1);
+        if ((other.no_grenades_1 + self.no_grenades_1) >= maxg)
+            giveg = maxg - other.no_grenades_1;
+        else
+            giveg = self.no_grenades_1;
+        other.no_grenades_1 = other.no_grenades_1 + giveg;
+        PrintFoundGrenade(other, other.tp_grenades_1, giveg);
+
+        // give grenade type 2
+        maxg = GetMaxGrenades(2, other.tp_grenades_2);
+        if ((other.no_grenades_2 + self.no_grenades_2) >= maxg)
+            giveg = maxg - other.no_grenades_2;
+        else
+            giveg = self.no_grenades_2;
+        other.no_grenades_2 = other.no_grenades_2 + giveg;
+        PrintFoundGrenade(other, other.tp_grenades_2, giveg);
+
     }
     bound_other_ammo(other);
     sprint(other, PRINT_LOW, "You get ");
@@ -1410,8 +1428,24 @@ void () DropBackpack = {
     newmis.ammo_nails = self.ammo_nails;
     newmis.ammo_rockets = self.ammo_rockets;
     newmis.ammo_cells = self.ammo_cells;
-    if (drop_grenades)
-        newmis.no_grenades_1 = self.no_grenades_1;
+    if (drop_grenades) {
+        if (drop_gren1 == -1)
+            newmis.no_grenades_1 = self.no_grenades_1;
+        else if (drop_gren1 > 0) {
+            if (self.no_grenades_1 <= drop_gren1)
+                newmis.no_grenades_1 = self.no_grenades_1;
+            else
+                newmis.no_grenades_1 = drop_gren1;
+        }
+        if (drop_gren2 == -1)
+            newmis.no_grenades_2 = self.no_grenades_2;
+        else if (drop_gren2 > 0) {
+            if (self.no_grenades_2 <= drop_gren2)
+                newmis.no_grenades_2 = self.no_grenades_2;
+            else
+                newmis.no_grenades_2 = drop_gren2;
+        }
+    }
 
     newmis.armorvalue = self.armorvalue;
 

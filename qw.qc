@@ -396,6 +396,8 @@ float invis_only;
 float flagem_checked;
 float cease_fire;
 float drop_grenades;
+float drop_gren1;
+float drop_gren2;
 
 .float teamkills;
 
