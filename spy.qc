@@ -354,6 +354,7 @@ void () spy_upaxe9 =[41, spy_upaxe9] {
 };
 
 void (float issilent) TeamFortress_SpyFeignDeath = {
+    local string deathstring;
     local float i;
     local float j;
     local entity at_spot;
@@ -449,6 +450,8 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         if (issilent == 0) {
             DeathSound();
             Spy_DropBackpack();
+            deathstring = GetDeathMessage(self, self.attacked_by, deathmsg);
+            bprint(PRINT_MEDIUM, deathstring);
         }
         self.angles_x = 0;
         self.angles_z = 0;

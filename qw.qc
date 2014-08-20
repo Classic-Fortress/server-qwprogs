@@ -342,6 +342,7 @@ float num_world_flames;
 .float undercover_team;
 .float undercover_skin;
 .string undercover_name;
+.entity attacked_by;             // Used by spy feign death to produce a fake death message
 
 float live_camera;
 .float camdist;
