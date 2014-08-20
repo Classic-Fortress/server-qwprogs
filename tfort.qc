@@ -685,7 +685,10 @@ void () TeamFortress_GrenadePrimed = {
     newmis.classname = "grenade";
     makevectors(user.v_angle);
     if (user.deadflag) {
-        newmis.velocity = '0 0 200';
+        if (self.weapon == GR_TYPE_NORMAL)
+            newmis.velocity = '0 0 200';
+        else
+            return;
     } else if (user.v_angle_x) {
         newmis.velocity =
             v_forward * 600 + v_up * 200 + crandom() * v_right * 10 +
