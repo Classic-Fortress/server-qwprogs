@@ -758,27 +758,54 @@ void (entity pl, float typ) PrintGrenadeType = {
     st = "";
 
     if (typ == 1) {
-        st = "Normal";
+        st = "normal";
     } else if (typ == 2) {
-        st = "Concussion";
+        st = "concussion";
     } else if (typ == 3) {
-        st = "Nail";
+        st = "nail";
     } else if (typ == 4) {
-        st = "Mirv";
+        st = "mirv";
     } else if (typ == 5) {
-        st = "Napalm";
+        st = "napalm";
     } else if (typ == 6) {
-        st = "Flare";
+        st = "flare";
     } else if (typ == 7) {
-        st = "Gas";
+        st = "gas";
     } else if (typ == 8) {
         st = "EMP";
     } else if (typ == 10) {
-        st = "Caltrop";
+        st = "caltrop";
     } else if (typ == 9) {
-        st = "Flash";
+        st = "flash";
     }
     sprint(pl, PRINT_HIGH, st);
+};
+
+void (entity pe_player, float pf_grenade_type, float pf_count) PrintFoundGrenade = {
+    local float f_count = pf_count;
+
+    if (!f_count)
+        return;
+
+    if (pe_player.no_grenades_1 >= 4)
+        return;
+
+    if (f_count > 1)
+        f_count = 4 - pe_player.no_grenades_1;
+
+    sprint(pe_player, PRINT_HIGH, "You found ");
+    if (f_count > 1)
+        sprint(pe_player, PRINT_HIGH, ftos(f_count), " ");
+    else
+        sprint(pe_player, PRINT_HIGH, "a ");
+    PrintGrenadeType(pe_player, pf_grenade_type);
+    if (pf_grenade_type == GR_TYPE_CALTROP)
+        sprint(pe_player, PRINT_HIGH, " canister");
+    else
+        sprint(pe_player, PRINT_HIGH, " grenade");
+    if (f_count > 1)
+        sprint(pe_player, PRINT_HIGH, "s");
+    sprint(pe_player, PRINT_HIGH, "\n");
 };
 
 float () GetGrenadePossibility = {
@@ -797,13 +824,7 @@ float () GetGrenadePossibility = {
         }
         if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
             other.no_grenades_1 = other.no_grenades_1 + 1;
-            sprint(other, PRINT_HIGH, "You found a ");
-            PrintGrenadeType(other, other.tp_grenades_1);
-            if (other.tp_grenades_1 == GR_TYPE_CALTROP) {
-                sprint(other, PRINT_HIGH, " canister\n");
-            } else {
-                sprint(other, PRINT_HIGH, " grenade\n");
-            }
+            PrintFoundGrenade(other, other.tp_grenades_1, 1);
             return (1);
         }
     } else {
@@ -815,13 +836,7 @@ float () GetGrenadePossibility = {
         }
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
-            sprint(other, PRINT_HIGH, "You found a ");
-            PrintGrenadeType(other, other.tp_grenades_2);
-            if (other.tp_grenades_2 == GR_TYPE_CALTROP) {
-                sprint(other, PRINT_HIGH, " canister\n");
-            } else {
-                sprint(other, PRINT_HIGH, " grenade\n");
-            }
+            PrintFoundGrenade(other, other.tp_grenades_2, 1);
             return (1);
         }
     }
@@ -1340,6 +1355,10 @@ void () BackpackTouch = {
     other.ammo_nails = other.ammo_nails + self.ammo_nails;
     other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
     other.ammo_cells = other.ammo_cells + self.ammo_cells;
+    if (drop_grenades && other.playerclass != PC_SCOUT) {
+        PrintFoundGrenade(other, other.tp_grenades_1, self.no_grenades_1);
+        other.no_grenades_1 = min(4, (other.tp_grenades_1 + self.no_grenades_1));
+    }
     bound_other_ammo(other);
     sprint(other, PRINT_LOW, "You get ");
     if (self.ammo_shells) {
@@ -1379,10 +1398,10 @@ void () DropBackpack = {
     if ((cb_prematch_time + 3) > time)
         return;
 
-    if (!
-        (self.ammo_shells + self.ammo_nails + self.ammo_rockets +
-         self.ammo_cells))
-        return;
+    if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {
+        if (!(drop_grenades && (self.no_grenades_1 + self.no_grenades_2)))
+            return;
+    }
 
     newmis = spawn();
     newmis.origin = self.origin - '0 0 24';
@@ -1391,6 +1410,8 @@ void () DropBackpack = {
     newmis.ammo_nails = self.ammo_nails;
     newmis.ammo_rockets = self.ammo_rockets;
     newmis.ammo_cells = self.ammo_cells;
+    if (drop_grenades)
+        newmis.no_grenades_1 = self.no_grenades_1;
 
     newmis.armorvalue = self.armorvalue;
 
