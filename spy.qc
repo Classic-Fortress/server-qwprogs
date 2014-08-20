@@ -448,7 +448,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         if (issilent == 0) {
             DeathSound();
             Spy_DropBackpack();
-            deathstring = GetDeathMessage(self, self.attacked_by, deathmsg);
+            deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
             bprint(PRINT_MEDIUM, deathstring);
             if (!(self.flags & FL_ONGROUND)) {
                 stuffcmd(self, "cl_backspeed 0\n");
