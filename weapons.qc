@@ -2443,6 +2443,9 @@ void () W_WeaponFrame = {
         return;
     }
 
+    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL)
+        return;
+
     if (self.impulse == TF_WEAPLAST) {
 
         // change to last weapon now
