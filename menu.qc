@@ -199,7 +199,10 @@ void () Menu_Team = {
 };
 
 void (float inp) Menu_Class_Input = {
-    if (!inp || inp > 10 || !IsLegalClass(inp))
+    if (!inp)
+        return;
+
+    if (inp > 10 || !IsLegalClass(inp))
         Menu_Class();
 
     TeamFortress_ChangeClass(inp);
