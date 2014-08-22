@@ -29,8 +29,7 @@ void () LaserBolt_Think = {
 };
 
 //=========================================================================
-// Laserbolt touch function. Just moves through the player and comes out
-// the other side.
+// Laserbolt touch function.
 void () LaserBolt_Touch = {
     local vector org;
 
@@ -49,13 +48,6 @@ void () LaserBolt_Touch = {
         SpawnBlood(org, 15);
         deathmsg = DMSG_LASERBOLT;
         TF_T_Damage(other, self, self.enemy, 25, 2, TF_TD_ELECTRICITY);
-        self.velocity = self.oldorigin;
-        self.owner = other;
-        setmodel(self, string_null);
-        self.touch = SUB_Null;
-        self.nextthink = time + 0.1;
-        self.think = LaserBolt_Think;
-        return;
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_SPIKE);
