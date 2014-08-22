@@ -409,6 +409,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     if (no_damage == 0)
         targ.health = (targ.health - take);
 
+    if (targ.playerclass == PC_SPY)
+        targ.attacked_by = attacker;
+
     if ((attacker.classname == "player")
         && ((targ.classname == "player")
             || (targ.classname == "building_sentrygun")
