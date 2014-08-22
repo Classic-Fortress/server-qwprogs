@@ -682,9 +682,6 @@ void (float damage, vector dir) TraceAttack = {
         blood_org = org;
         AddMultiDamage(trace_ent, damage);
 
-        if (trace_ent.playerclass == PC_SPY)
-            trace_ent.attacked_by = self;
-
     } else
         puff_count = puff_count + 1;
 };
