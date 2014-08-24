@@ -1447,28 +1447,22 @@ void () PlayerPreThink = {
         RemoveGrenades();
     }
 
-    if (self.impulse == TF_VOTENEXT) {
-        Vote_NextMap(self);
-        self.impulse = 0;
-    } else if (self.impulse == TF_VOTETRICK) {
-        Vote_TrickMap(self);
-        self.impulse = 0;
-    } else if (self.impulse == TF_VOTERACE) {
-        Vote_RaceMap(self);
-        self.impulse = 0;
-    } else if (self.impulse == TF_FORCENEXT) {
-        Vote_ForceNext(self);
-        self.impulse = 0;
+    if (self.impulse) {
+        if (self.impulse == TF_VOTENEXT) {
+            Vote_NextMap(self);
+            self.impulse = 0;
+        } else if (self.impulse == TF_VOTETRICK) {
+            Vote_TrickMap(self);
+            self.impulse = 0;
+        } else if (self.impulse == TF_VOTERACE) {
+            Vote_RaceMap(self);
+            self.impulse = 0;
+        } else if (self.impulse == TF_FORCENEXT) {
+            Vote_ForceNext(self);
+            self.impulse = 0;
+        }
     }
 
-    if (self.is_feigning && (self.flags & FL_ONGROUND) && !(self.tfstate & TFSTATE_CANT_MOVE)) {
-        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
-    }
-    if (self.is_feigning && (self.waterlevel == 1)) {
-        self.watertype = -3;
-        self.waterlevel = 3;
-    }
     if (self.cheat_level > 0) {
         self.cheat_level = self.cheat_level - 1;
     }
@@ -1499,14 +1493,24 @@ void () PlayerPreThink = {
     if (self.deadflag == 1) {
         return;
     }
-    if (!self.is_feigning) {
+    if (self.is_feigning) {
+        if ((self.flags & FL_ONGROUND) && !(self.tfstate & TFSTATE_CANT_MOVE)) {
+            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+            TeamFortress_SetSpeed(self);
+        }
+        if (self.waterlevel) {
+            if (self.waterlevel == 1) {
+                self.watertype = -3;
+                self.waterlevel = 3;
+            }
+            self.velocity_z = -100;
+        }
+    } else {
         if (self.button2) {
             PlayerJump();
         } else {
-            self.flags = self.flags | 4096;
+            self.flags = self.flags | FL_JUMPRELEASED;
         }
-    } else if (self.waterlevel) {
-        self.velocity_z = -100;
     }
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
