@@ -353,47 +353,65 @@ void () spy_upaxe9 =[41, spy_upaxe9] {
     player_stand1();
 };
 
+float (entity pe_player) Spy_CheckArea = {
+    local entity at_spot = findradius(self.origin, 64);
+    while (at_spot != world) {
+        if (at_spot.mdl == "progs/detpack.mdl"
+                    || at_spot.mdl == "progs/turrbase.mdl"
+                    || at_spot.mdl == "progs/turrgun.mdl"
+                    || at_spot.mdl == "progs/disp.mdl")
+            return 1;
+        else if (at_spot.classname == "player") {
+            if (at_spot.deadflag == 0 && self != at_spot)
+                return 2;
+            if (self != at_spot && at_spot.is_feigning == 1)
+                return 3;
+        }
+        at_spot = at_spot.chain;
+    }
+    return 0;
+};
+
 void (float issilent) TeamFortress_SpyFeignDeath = {
     local string deathstring;
+    local float area_check;
     local float i;
-    local float j;
-    local entity at_spot;
     local entity te;
 
     if (self.is_feigning) {
-        at_spot = findradius(self.origin, 64);
-        i = 1;
-        j = 0;
-        while (at_spot != world) {
-            if (at_spot.mdl == "progs/detpack.mdl") {
-                j = 1;
-            } else if (at_spot.mdl == "progs/turrbase.mdl") {
-                j = 1;
-            } else if (at_spot.mdl == "progs/turrgun.mdl") {
-                j = 1;
-            } else if (at_spot.mdl == "progs/disp.mdl") {
-                j = 1;
-            } else
-                if (((at_spot.classname == "player") &&
-                     (at_spot.deadflag == 0)) && (self != at_spot)) {
-                j = 2;
-            }
-            if (j > 0) {
-                i = 0;
-            }
-            at_spot = at_spot.chain;
-        }
-        if (i == 1) {
-            i = 1 + floor(random() * 5);
+
+        // check area for obstructing entities
+        area_check = Spy_CheckArea(self);
+
+        // nothing on top => unfeign
+        if (!area_check) {
+
+            // set player velocity to 0
             self.velocity = '0 0 0';
+
+            // set size of player model
             setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
+
+            // set view height
             self.view_ofs = '0 0 22';
-            self.movetype = 3;
-            self.is_feigning = 0;
+
+            // set movetype to walk
+            self.movetype = MOVETYPE_WALK;
+
+            // load saved weapon state and set current ammo
             W_WeaponState_Load(self, 0);
             W_SetCurrentAmmo(self);
+
+            // allow spy to move again
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
+
+            // unset feign variables
+            self.is_feigning = 0;
+            self.feign_areachecked = 0;
+
+            // set revive animation
+            i = 1 + floor(random() * 5);
             if (i == 1) {
                 spy_upb1();
             } else if (i == 2) {
@@ -403,97 +421,113 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             } else {
                 spy_upe1();
             }
-        } else if (j == 1) {
-            sprint(self, PRINT_HIGH,
-                   "You cannot get up with something on top of you\n");
+
+        // something is on top of spy
+        } else if (area_check == 1) {
+            sprint(self, PRINT_HIGH, "You cannot get up with something on top of you\n");
         } else {
-            sprint(self, PRINT_HIGH,
-                   "You cannot get up while someone is standing on you\n");
+            sprint(self, PRINT_HIGH, "You cannot get up while someone is standing on you\n");
         }
     } else {
-        if (self.is_unabletospy == 1 || (time - self.antispam_feign) < 3) {
+
+        // don't feign if not allowed or spam timer is active
+        if (self.is_unabletospy == 1 || time < self.antispam_feign) {
             sprint(self, PRINT_HIGH, "You cannot feign right now\n");
             return;
         }
-        at_spot = findradius(self.origin, 64);
-        while (at_spot != world) {
-            if (((at_spot.classname == "player") && (self != at_spot)) &&
-                (at_spot.is_feigning == 1)) {
-                sprint(self, PRINT_HIGH,
-                       "You cannot feign on top of another spy\n");
-                return;
-            }
-            at_spot = at_spot.chain;
+
+        // check area for feigned spy on thr ground
+        area_check = Spy_CheckArea(self);
+        if (area_check == 3) {
+            sprint(self, PRINT_HIGH, "You cannot feign on top of another spy\n");
+            return;
         }
-        self.antispam_feign = time;
+
+        // stop spy from attempting feign for 3 seconds
+        self.antispam_feign = time + 3;
+
+        // don't check for team color cheat for 5 seconds
         self.immune_to_check = time + 5;
+
+        // stop spy from moving if on the ground
         if (self.flags & FL_ONGROUND)
             self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
+
+        // set spy feign variables
         self.is_feigning = 1;
+
         Attack_Finished(0.8);
         self.invisible_finished = 0;
+
+        // set precached model index
         self.modelindex = modelindex_player;
+
+        // set size of player model
+        setsize(self, '-16 -16 -24', '16 16 -16');
+
+        // set weapon state and remove weapon viewmodel
         W_WeaponState_Save(self);
         self.weaponmodel = "";
         self.weaponframe = 0;
-        setsize(self, '-16 -16 -24', '16 16 -16');
+
+        // set view height to ground
         self.view_ofs = '0 0 4';
-        self.movetype = 6;
+
+        // set movetype to toss
+        self.movetype = MOVETYPE_TOSS;
+
+        // do extra stuff if feign is not silent feign
         if (issilent == 0) {
+            // make a death sound
             DeathSound();
+
+            // drop an empty backpack
             Spy_DropBackpack();
+
+            // print feign message
             deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
             bprint(PRINT_MEDIUM, deathstring);
-            if (!(self.flags & FL_ONGROUND)) {
-                stuffcmd(self, "cl_backspeed 0\n");
-                stuffcmd(self, "cl_forwardspeed 0\n");
-                stuffcmd(self, "cl_sidespeed 0\n");
+
+            // set movement speed to 0 if currently in the air to disable manipulation of trajectory
+            if (!(self.flags & FL_ONGROUND))
                 self.maxspeed = 0;
-            }
         }
-        self.angles_x = 0;
-        self.angles_z = 0;
-        if (self.weapon <= 16) {
+
+        // die with axe equipped if carrying axe, medikit or spanner
+        if (self.weapon <= WEAP_AXE) {
             spy_die_ax1();
             return;
         }
+
+        // drop flag if spy is carrying it
         te = find(world, classname, "item_tfgoal");
         while (te) {
             if (te.owner == self) {
-                if (!(te.goal_activation & 256) ||
-                    (self.has_disconnected == 1)) {
+                if (!(te.goal_activation & TFGI_KEEP) || self.has_disconnected == 1)
                     tfgoalitem_RemoveFromPlayer(te, self, 0);
-                }
                 if (CTF_Map == 1) {
                     if (te.goal_no == 1)
-                        bprint(PRINT_HIGH, self.netname,
-                               " лост the блуе flag!\n");
+                        bprint(PRINT_HIGH, self.netname, " лост the блуе flag!\n");
                     else if (te.goal_no == 2)
-                        bprint(PRINT_HIGH, self.netname,
-                               " лост the ред flag!\n");
+                        bprint(PRINT_HIGH, self.netname, " лост the ред flag!\n");
                 }
             }
             te = find(te, classname, "item_tfgoal");
         }
+
+        // randomize death animation
         i = 1 + floor((random() * 6));
-        if (i == 1) {
+        if (i == 1)
             spy_diea1();
-        } else {
-            if (i == 2) {
-                spy_dieb1();
-            } else {
-                if (i == 3) {
-                    spy_diec1();
-                } else {
-                    if (i == 4) {
-                        spy_died1();
-                    } else {
-                        spy_diee1();
-                    }
-                }
-            }
-        }
+        else if (i == 2)
+            spy_dieb1();
+        else if (i == 3)
+            spy_diec1();
+        else if (i == 4)
+            spy_died1();
+        else
+            spy_diee1();
     }
 };
 
