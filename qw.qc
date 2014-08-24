@@ -50,6 +50,7 @@ typedef void (float) f_void_float;
 .float pipecooldown;            // Time when detpipe command can be issued
 .float disguise_skin;           // The skin the spy is changing to
 .float disguise_team;           // The team the spy is changing to
+.float feign_areachecked;       // TRUE if area around spy has been checked for entities when feigned
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 

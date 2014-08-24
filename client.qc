@@ -8,6 +8,8 @@ float modelindex_eyes;
 float modelindex_player;
 float modelindex_null;
 
+float (entity pe_player) Spy_CheckArea;
+
 void () TeamFortress_CheckTeamCheats;
 void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName;
 void () TeamFortress_RemoveTimers;
@@ -1494,9 +1496,22 @@ void () PlayerPreThink = {
         return;
     }
     if (self.is_feigning) {
-        if ((self.flags & FL_ONGROUND) && !(self.tfstate & TFSTATE_CANT_MOVE)) {
-            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-            TeamFortress_SetSpeed(self);
+        if (self.flags & FL_ONGROUND) {
+            // check area for entities - if found, bounce player forward
+            if (!self.feign_areachecked) {
+                local float check_area = Spy_CheckArea(self);
+                if (check_area == 1 || check_area == 3) {
+                    self.velocity = aim(self, 10000);
+                    self.velocity = self.velocity * 200;
+                    self.velocity_z = 200;
+                } else {
+                    self.feign_areachecked = 1;
+                    if (!(self.tfstate & TFSTATE_CANT_MOVE)) {
+                        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+                        TeamFortress_SetSpeed(self);
+                    }
+                }
+            }
         }
         if (self.waterlevel) {
             if (self.waterlevel == 1) {
