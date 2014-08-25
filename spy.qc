@@ -361,10 +361,10 @@ float (entity pe_player) Spy_CheckArea = {
                     || at_spot.mdl == "progs/turrgun.mdl"
                     || at_spot.mdl == "progs/disp.mdl")
             return 1;
-        else if (at_spot.classname == "player") {
-            if (at_spot.deadflag == 0 && self != at_spot)
+        else if (at_spot.classname == "player" && self != at_spot) {
+            if (!at_spot.is_feigning && at_spot.deadflag == 0)
                 return 2;
-            if (self != at_spot && at_spot.is_feigning == 1)
+            else if (at_spot.is_feigning)
                 return 3;
         }
         at_spot = at_spot.chain;
@@ -425,7 +425,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         // something is on top of spy
         } else if (area_check == 1) {
             sprint(self, PRINT_HIGH, "You cannot get up with something on top of you\n");
-        } else {
+        } else if (area_check == 2) {
             sprint(self, PRINT_HIGH, "You cannot get up while someone is standing on you\n");
         }
     } else {
@@ -436,7 +436,7 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             return;
         }
 
-        // check area for feigned spy on thr ground
+        // check area for feigned spy on the ground
         area_check = Spy_CheckArea(self);
         if (area_check == 3) {
             sprint(self, PRINT_HIGH, "You cannot feign on top of another spy\n");
@@ -450,9 +450,10 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         self.immune_to_check = time + 5;
 
         // stop spy from moving if on the ground
-        if (self.flags & FL_ONGROUND)
+        if (self.flags & FL_ONGROUND) {
             self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
+            TeamFortress_SetSpeed(self);
+        }
 
         // set spy feign variables
         self.is_feigning = 1;
