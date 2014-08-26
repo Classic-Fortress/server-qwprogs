@@ -395,6 +395,10 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             // set movetype to walk
             self.movetype = MOVETYPE_WALK;
 
+            // unset feign variables
+            self.is_feigning = 0;
+            self.feign_areachecked = 0;
+
             // load saved weapon state and set current ammo
             W_WeaponState_Load(self, 0);
             W_SetCurrentAmmo(self);
@@ -402,10 +406,6 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
             // allow spy to move again
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
-
-            // unset feign variables
-            self.is_feigning = 0;
-            self.feign_areachecked = 0;
 
             // set revive animation
             i = 1 + floor(random() * 5);

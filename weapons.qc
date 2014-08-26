@@ -1475,6 +1475,11 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.weaponframe = 0;
     }
 
+    if (pl.is_feigning) {
+        pl.weaponmodel = "";
+        pl.weaponframe = 0;
+    }
+
     // refresh engineer build menu when ammo updated
     if (pl.menu_input == Menu_Engineer_Input)
         Menu_Engineer(pl);
