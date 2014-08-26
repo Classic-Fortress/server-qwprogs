@@ -20,10 +20,7 @@ void (float force) Vote_MenuOpen;
 void () Vote_MenuClose;
 void (entity pe_player) Vote_Menu;
 void (float pf_input) Vote_RemoveVote;
-string () Vote_GetMapList;
-string () Vote_GetTrickList;
-string () Vote_GetRaceList;
-void (string ps_maplist) Vote_PopulateVoteList;
+void (float pf_type) Vote_PopulateVoteList;
 string (string ps_map, string ps_maplist) Vote_StripMap;
 void () Vote_Reset;
 void () Vote_ResetVotes;
@@ -34,7 +31,6 @@ float () Vote_GetWinnerVoteCount;
 string () Vote_GetWinner;
 string () Vote_GetWinnerList;
 string (string ps_maplist) Vote_RandomWinner;
-string () Vote_RandomMap;
 float (float pf_from, float pf_to) RandomRange;
 void () Vote_DropLosers;
 float (string ps_list) List_Count;
@@ -316,27 +312,16 @@ void () Vote_Check = {
 // pf_type: 0 = normal vote, 1 = decider vote, 2 = trick vote, 3 = race vote
 // called from Vote_Check()
 void (float pf_type) Vote_SetupVote = {
-    local string s_maplist;
     vote_decider = 0;
 
-    if (pf_type == 0) {
-        s_maplist = Vote_GetMapList(); // returns a strzoned string
-    } else if (pf_type == 1) {
-        vote_decider = 1;
-        s_maplist = Vote_GetWinnerList(); // returns a strzoned string
-        Vote_ResetVotes();
-    } else if (pf_type == 2) {
-        s_maplist = Vote_GetTrickList(); // returns a strzoned string
-        Vote_ResetVotes();
-    } else {
-        s_maplist = Vote_GetRaceList(); // returns a strzoned string
-        Vote_ResetVotes();
-    }
-    vote_started = time;
+    // set vote*_map variables to randomly selected maps from appropriate map list
+    Vote_PopulateVoteList(pf_type);
 
-    // set vote*_map variables to randomly selected maps from s_maplist
-    Vote_PopulateVoteList(s_maplist);
-    strunzone(s_maplist);
+    if (pf_type == 1) {
+        vote_decider = 1;
+    }
+    Vote_ResetVotes();
+    vote_started = time;
 
     if (vote1_map == string_null) {
         //dprint("[", ftos(time), "/cf/mapvote/setupvote]: no maps found. aborting.\n");
@@ -585,110 +570,179 @@ void (float pf_input) Vote_RemoveVote = {
     //dprint("[", ftos(time), "/cf/mapvote/removevote]: removing vote from ", s_map, ".\n");
 };
 
-// returns a list of maps from config
-// called from Vote_SetupVote()
-string () Vote_GetMapList = {
-    local float f_players = TeamFortress_GetNoPlayers();
-    local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
-
-    if (f_players <= 2) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using tiny votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_tiny1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_tiny2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_tiny3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_tiny4"), " ");
-    } else if (f_players <= 4) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using small votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_small1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_small2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_small3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_small4"), " ");
-    } else if (f_players <= 6) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using medium votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_medium1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_medium2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_medium3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_medium4"), " ");
-    } else if (f_players <= 8) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using large votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_large1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_large2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_large3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_large4"), " ");
-    } else if (f_players <= 12) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xlarge votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_xlarge1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_xlarge2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_xlarge3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_xlarge4"), " ");
-    } else if (f_players <= 14) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxl votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_xxl1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_xxl2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_xxl3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_xxl4"), " ");
-    } else if (f_players <= 16) {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxxl votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_xxxl1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_xxxl2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_xxxl3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_xxxl4"), " ");
-    } else {
-        //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: using xxxxl votelist.\n");
-        s_maplist1 = strcat(infokey(world, "votelist_xxxxl1"), " ");
-        s_maplist2 = strcat(infokey(world, "votelist_xxxxl2"), " ");
-        s_maplist3 = strcat(infokey(world, "votelist_xxxxl3"), " ");
-        s_maplist4 = strcat(infokey(world, "votelist_xxxxl4"), " ");
-    }
-
-    s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
-
-    //dprint("[", ftos(time), "/cf/mapvote/getmaplist]: votelist: ", s_maplist, "\n");
-    return s_maplist;
-};
-
-// returns a list of trick maps from config
-// called from Vote_SetupVote()
-string () Vote_GetTrickList = {
-    local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
-
-    s_maplist1 = strcat(infokey(world, "votelist_trick1"), " ");
-    s_maplist2 = strcat(infokey(world, "votelist_trick2"), " ");
-    s_maplist3 = strcat(infokey(world, "votelist_trick3"), " ");
-    s_maplist4 = strcat(infokey(world, "votelist_trick4"), " ");
-    s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
-
-    //dprint("[", ftos(time), "/cf/mapvote/gettricklist]: trick votelist: ", s_maplist, "\n");
-    return s_maplist;
-};
-
-// returns a list of race maps from config
-// called from Vote_SetupVote()
-string () Vote_GetRaceList = {
-    local string s_maplist, s_maplist1, s_maplist2, s_maplist3, s_maplist4;
-
-    s_maplist1 = strcat(infokey(world, "votelist_race1"), " ");
-    s_maplist2 = strcat(infokey(world, "votelist_race2"), " ");
-    s_maplist3 = strcat(infokey(world, "votelist_race3"), " ");
-    s_maplist4 = strcat(infokey(world, "votelist_race4"), " ");
-    s_maplist = strzone(strcat(s_maplist1, strcat(s_maplist2, strcat(s_maplist3, s_maplist4))));
-
-    //dprint("[", ftos(time), "/cf/mapvote/getracelist]: trick votelist: ", s_maplist, "\n");
-    return s_maplist;
-};
-
 // populates vote*_map variables
 // called from Vote_SetupVote()
-void (string ps_maplist) Vote_PopulateVoteList = {
-    local float f_count, i;
-    local string s_maplist;
+void (float pf_type) Vote_PopulateVoteList = {
+    local float f_count, f_count1, f_count2, f_count3, f_count4, f_count5, f_count6, f_count7, f_count8, f_next, rand, i;
+    local float f_range1, f_range2, f_range3, f_range4, f_range5, f_range6, f_range7, f_range8;
+    local string s_maplist1 = "", s_maplist2 = "", s_maplist3 = "", s_maplist4 = "", s_maplist5 = "", s_maplist6 = "", s_maplist7 = "", s_maplist8 = "", s_map;
+    local string s_tmp, s_tmp1, s_tmp2, s_tmp3, s_tmp4, s_tmp5, s_tmp6, s_tmp7, s_tmp8;
 
-    s_maplist = Vote_StripMap(mapname, ps_maplist); // strip current map from votelist, returns a strzoned string
-    f_count = List_Count(s_maplist);
+    // initialize trick map variables
+    s_tmp5 = strzone("");
+    s_tmp6 = strzone("");
+    s_tmp7 = strzone("");
+    s_tmp8 = strzone("");
+
+    // regular map vote
+    if (pf_type <= 1) {
+
+        local float f_players = TeamFortress_GetNoPlayers();
+
+        if (f_players <= 2) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using tiny votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_tiny1"));
+            s_tmp2 = strzone(infokey(world, "votelist_tiny2"));
+            s_tmp3 = strzone(infokey(world, "votelist_tiny3"));
+            s_tmp4 = strzone(infokey(world, "votelist_tiny4"));
+        } else if (f_players <= 4) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using small votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_small1"));
+            s_tmp2 = strzone(infokey(world, "votelist_small2"));
+            s_tmp3 = strzone(infokey(world, "votelist_small3"));
+            s_tmp4 = strzone(infokey(world, "votelist_small4"));
+        } else if (f_players <= 6) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using medium votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_medium1"));
+            s_tmp2 = strzone(infokey(world, "votelist_medium2"));
+            s_tmp3 = strzone(infokey(world, "votelist_medium3"));
+            s_tmp4 = strzone(infokey(world, "votelist_medium4"));
+        } else if (f_players <= 8) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using large votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_large1"));
+            s_tmp2 = strzone(infokey(world, "votelist_large2"));
+            s_tmp3 = strzone(infokey(world, "votelist_large3"));
+            s_tmp4 = strzone(infokey(world, "votelist_large4"));
+        } else if (f_players <= 12) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using xlarge votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_xlarge1"));
+            s_tmp2 = strzone(infokey(world, "votelist_xlarge2"));
+            s_tmp3 = strzone(infokey(world, "votelist_xlarge3"));
+            s_tmp4 = strzone(infokey(world, "votelist_xlarge4"));
+        } else if (f_players <= 14) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using xxl votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_xxl1"));
+            s_tmp2 = strzone(infokey(world, "votelist_xxl2"));
+            s_tmp3 = strzone(infokey(world, "votelist_xxl3"));
+            s_tmp4 = strzone(infokey(world, "votelist_xxl4"));
+        } else if (f_players <= 16) {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using xxxl votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_xxxl1"));
+            s_tmp2 = strzone(infokey(world, "votelist_xxxl2"));
+            s_tmp3 = strzone(infokey(world, "votelist_xxxl3"));
+            s_tmp4 = strzone(infokey(world, "votelist_xxxl4"));
+        } else {
+            //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using xxxxl votelist.\n");
+            s_tmp1 = strzone(infokey(world, "votelist_xxxxl1"));
+            s_tmp2 = strzone(infokey(world, "votelist_xxxxl2"));
+            s_tmp3 = strzone(infokey(world, "votelist_xxxxl3"));
+            s_tmp4 = strzone(infokey(world, "votelist_xxxxl4"));
+        }
+
+    // trick vote
+    } else if (pf_type == 2) {
+        //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using trick votelist.\n");
+        strunzone(s_tmp5); strunzone(s_tmp6); strunzone(s_tmp7); strunzone(s_tmp8);
+        s_tmp1 = strzone(infokey(world, "votelist_trick1"));
+        s_tmp2 = strzone(infokey(world, "votelist_trick2"));
+        s_tmp3 = strzone(infokey(world, "votelist_trick3"));
+        s_tmp4 = strzone(infokey(world, "votelist_trick4"));
+        s_tmp5 = strzone(infokey(world, "votelist_trick5"));
+        s_tmp6 = strzone(infokey(world, "votelist_trick6"));
+        s_tmp7 = strzone(infokey(world, "votelist_trick7"));
+        s_tmp8 = strzone(infokey(world, "votelist_trick8"));
+
+    // race vote
+    } else {
+        //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: using race votelist.\n");
+        s_tmp1 = strzone(infokey(world, "votelist_race1"));
+        s_tmp2 = strzone(infokey(world, "votelist_race2"));
+        s_tmp3 = strzone(infokey(world, "votelist_race3"));
+        s_tmp4 = strzone(infokey(world, "votelist_race4"));
+    }
+    vote_started = time;
+
+    // filter out current map from map lists
+    s_maplist1 = Vote_StripMap(mapname, s_tmp1);
+    s_maplist2 = Vote_StripMap(mapname, s_tmp2);
+    s_maplist3 = Vote_StripMap(mapname, s_tmp3);
+    s_maplist4 = Vote_StripMap(mapname, s_tmp4);
+    s_maplist5 = Vote_StripMap(mapname, s_tmp5);
+    s_maplist6 = Vote_StripMap(mapname, s_tmp6);
+    s_maplist7 = Vote_StripMap(mapname, s_tmp7);
+    s_maplist8 = Vote_StripMap(mapname, s_tmp8);
+
+    // calculate odds for each maplist
+    f_count1 = List_Count(s_maplist1);
+    f_count2 = List_Count(s_maplist2);
+    f_count3 = List_Count(s_maplist3);
+    f_count4 = List_Count(s_maplist4);
+    f_count5 = List_Count(s_maplist5);
+    f_count6 = List_Count(s_maplist6);
+    f_count7 = List_Count(s_maplist7);
+    f_count8 = List_Count(s_maplist8);
+    f_count = f_count1 + f_count2 + f_count3 + f_count4 + f_count5 + f_count6 + f_count7 + f_count8;
+    f_range1 = f_count1 / f_count * 100;
+    f_range2 = f_range1 + (f_count2 / f_count * 100);
+    f_range3 = f_range2 + (f_count3 / f_count * 100);
+    f_range4 = f_range3 + (f_count4 / f_count * 100);
+    f_range5 = f_range4 + (f_count5 / f_count * 100);
+    f_range6 = f_range5 + (f_count6 / f_count * 100);
+    f_range7 = f_range6 + (f_count7 / f_count * 100);
+    f_range8 = f_range7 + (f_count8 / f_count * 100);
 
     for (i = 0; i < 4; i++) {
-        local float f_next = RandomRange(0, f_count - 1);
-        local string s_map = List_Index(s_maplist, f_next); // returns a strzoned string
+
+        rand = random() * 100;
+        if (rand <= f_range1) {
+            f_count1 = f_count1 - 1;
+            f_next = RandomRange(0, f_count1);
+            s_map = List_Index(s_maplist1, f_next); // returns a strzoned string
+            s_tmp = s_maplist1;
+            s_maplist1 = Vote_StripMap(s_map, s_maplist1);
+        } else if (rand <= f_range2) {
+            f_count2 = f_count2 - 1;
+            f_next = RandomRange(0, f_count2);
+            s_map = List_Index(s_maplist2, f_next); // returns a strzoned string
+            s_tmp = s_maplist2;
+            s_maplist2 = Vote_StripMap(s_map, s_maplist2);
+        } else if (rand <= f_range3) {
+            f_count3 = f_count3 - 1;
+            f_next = RandomRange(0, f_count3);
+            s_map = List_Index(s_maplist3, f_next); // returns a strzoned string
+            s_tmp = s_maplist3;
+            s_maplist3 = Vote_StripMap(s_map, s_maplist3);
+        } else if (rand <= f_range4) {
+            f_count4 = f_count4 - 1;
+            f_next = RandomRange(0, f_count4);
+            s_map = List_Index(s_maplist4, f_next); // returns a strzoned string
+            s_tmp = s_maplist4;
+            s_maplist4 = Vote_StripMap(s_map, s_maplist4);
+        } else if (rand <= f_range5) {
+            f_count5 = f_count5 - 1;
+            f_next = RandomRange(0, f_count5);
+            s_map = List_Index(s_maplist5, f_next); // returns a strzoned string
+            s_tmp = s_maplist5;
+            s_maplist5 = Vote_StripMap(s_map, s_maplist5);
+        } else if (rand <= f_range6) {
+            f_count6 = f_count6 - 1;
+            f_next = RandomRange(0, f_count6);
+            s_map = List_Index(s_maplist6, f_next); // returns a strzoned string
+            s_tmp = s_maplist6;
+            s_maplist6 = Vote_StripMap(s_map, s_maplist6);
+        } else if (rand <= f_range7) {
+            f_count7 = f_count7 - 1;
+            f_next = RandomRange(0, f_count7);
+            s_map = List_Index(s_maplist7, f_next); // returns a strzoned string
+            s_tmp = s_maplist7;
+            s_maplist7 = Vote_StripMap(s_map, s_maplist7);
+        } else {
+            f_count8 = f_count8 - 1;
+            f_next = RandomRange(0, f_count8);
+            s_map = List_Index(s_maplist8, f_next); // returns a strzoned string
+            s_tmp = s_maplist8;
+            s_maplist8 = Vote_StripMap(s_map, s_maplist8);
+        }
 
         if (i == 0) {
             vote1_map = s_map;
@@ -704,29 +758,28 @@ void (string ps_maplist) Vote_PopulateVoteList = {
             //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map4: ", vote4_map, "\n");
         }
 
-        local string s_tmp = s_maplist;
-        s_maplist = Vote_StripMap(s_map, s_maplist); // returns a strzoned string
-        f_count = List_Count(s_maplist);
         strunzone(s_tmp);
     }
     vote5_map = strzone(mapname);
-    strunzone(s_maplist);
     //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map5: ", vote5_map, "\n");
+    strunzone(s_maplist1); strunzone(s_maplist2); strunzone(s_maplist3); strunzone(s_maplist4);
+    strunzone(s_maplist5); strunzone(s_maplist6); strunzone(s_maplist7); strunzone(s_maplist8);
+    strunzone(s_tmp1); strunzone(s_tmp2); strunzone(s_tmp3); strunzone(s_tmp4);
+    strunzone(s_tmp5); strunzone(s_tmp6); strunzone(s_tmp7); strunzone(s_tmp8);
 };
 
 // strips a map from a given list of maps
 // called from Vote_PopulateVoteList()
 string (string ps_map, string ps_maplist) Vote_StripMap = {
     local float f_count, i;
-    local string s_maplist, s_tmp;
+    local string s_tmp;
 
-    s_maplist = ps_maplist;
-    f_count = List_Count(s_maplist);
+    f_count = List_Count(ps_maplist);
 
     // remove current map from list, strzone hack needed because limited string buffer
     s_tmp = strzone("");
     for (i = 0; i < f_count; i++) {
-        local string map = List_Index(s_maplist, i); // returns a strzoned string
+        local string map = List_Index(ps_maplist, i); // returns a strzoned string
         if (map != ps_map) {
             local string tmp_old = s_tmp;
             s_tmp = strzone(strcat(s_tmp, strcat(map, " ")));
@@ -823,7 +876,7 @@ string () Vote_GetWinner = {
     if (s_maplist != string_null)
         s_result = Vote_RandomWinner(s_maplist); // returns a strzoned string
     else
-        s_result = Vote_RandomMap(); // returns a strzoned string
+        s_result = mapname; // returns a strzoned string
 
     return s_result;
 };
@@ -876,22 +929,6 @@ string (string ps_maplist) Vote_RandomWinner = {
 
     //dprint("[", ftos(time), "/cf/mapvote/randomwinner]: random winner: ", s_winner, "\n");
     return s_winner;
-};
-
-// returns a random map from a list of maps
-// called from Vote_PopulateVoteList()
-string () Vote_RandomMap = {
-    local float f_idx, f_count;
-    local string s_maplist, s_map;
-
-    s_maplist = Vote_GetMapList(); // returns a strzoned string
-    f_count = List_Count(s_maplist) - 1;
-    f_idx = RandomRange(0, f_count);
-    s_map = List_Index(s_maplist, f_idx); // returns a strzoned string
-    strunzone(s_maplist);
-
-    //dprint("[", ftos(time), "/cf/mapvote/randommap]: drew random map: ", s_map, "\n");
-    return s_map;
 };
 
 // returns a random number between from and to
