@@ -54,6 +54,8 @@ void (entity pe_player) Vote_NextMap = {
         return;
     }
     pe_player.vote_next = 1;
+    pe_player.vote_trick = 0;
+    pe_player.vote_race = 0;
 
     bprint(PRINT_HIGH, pe_player.netname, " wants to start voting for next map\n");
 
@@ -85,6 +87,8 @@ void (entity pe_player) Vote_TrickMap = {
         return;
     }
     pe_player.vote_trick = 1;
+    pe_player.vote_race = 0;
+    pe_player.vote_next = 0;
 
     bprint(PRINT_HIGH, pe_player.netname, " wants to vote for a trick map\n");
 
@@ -116,6 +120,8 @@ void (entity pe_player) Vote_RaceMap = {
         return;
     }
     pe_player.vote_race = 1;
+    pe_player.vote_trick = 0;
+    pe_player.vote_next = 0;
 
     bprint(PRINT_HIGH, pe_player.netname, " wants to vote for a race map\n");
 
