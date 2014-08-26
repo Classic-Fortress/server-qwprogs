@@ -49,6 +49,11 @@ void (entity pe_player) Vote_NextMap = {
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
         return;
 
+    if (vote_started > 0) {
+        sprint(pe_player, PRINT_HIGH, "There is already a vote in progress.\n");
+        return;
+    }
+
     if (vote_result != string_null) {
         sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
         return;
@@ -82,6 +87,11 @@ void (entity pe_player) Vote_TrickMap = {
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
         return;
 
+    if (vote_started > 0) {
+        sprint(pe_player, PRINT_HIGH, "There is already a vote in progress.\n");
+        return;
+    }
+
     if (vote_result != string_null) {
         sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
         return;
@@ -114,6 +124,11 @@ void (entity pe_player) Vote_RaceMap = {
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
         return;
+
+    if (vote_started > 0) {
+        sprint(pe_player, PRINT_HIGH, "There is already a vote in progress.\n");
+        return;
+    }
 
     if (vote_result != string_null) {
         sprint(pe_player, PRINT_HIGH, "Next map has already been voted to ", vote_result, ". Use /forcenext to force next map.\n");
