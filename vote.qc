@@ -424,7 +424,7 @@ void (float force) Vote_MenuOpen = {
                 if (((time - e_player.spawn_time) <= CF_MAPVOTE_FORCESHOW || (time - e_player.menu_time) <= CF_MAPVOTE_FORCESHOW)
                             && !force) {
                     //dprint("[", ftos(time), "/cf/mapvote/menuopen]: open vote menu for newly spawned ", e_player.netname, ".\n");
-                    if (e_player.menu_time < (time - CF_MAPVOTE_FORCESHOW))
+                    if (!e_player.menu_time || e_player.menu_time < (time - CF_MAPVOTE_FORCESHOW))
                         e_player.menu_time = time;
                     Vote_Menu(e_player);
                 } else if (force == 1) {
