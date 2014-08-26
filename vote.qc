@@ -46,7 +46,7 @@ float vote_started, vote_update, vote_winnercount, vote_decider, vote_abort;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (!pe_player.team_no || !pe_player.playerclass)
+    if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
         return;
 
     if (vote_result != string_null) {
@@ -77,7 +77,7 @@ void (entity pe_player) Vote_NextMap = {
 void (entity pe_player) Vote_TrickMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (!pe_player.team_no || !pe_player.playerclass)
+    if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
         return;
 
     if (vote_result != string_null) {
@@ -108,7 +108,7 @@ void (entity pe_player) Vote_TrickMap = {
 void (entity pe_player) Vote_RaceMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (!pe_player.team_no || !pe_player.playerclass)
+    if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
         return;
 
     if (vote_result != string_null) {
