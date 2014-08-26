@@ -386,9 +386,6 @@ void (float issilent) TeamFortress_SpyFeignDeath = {
         // nothing on top => unfeign
         if (!area_check) {
 
-            // set player velocity to 0
-            self.velocity = '0 0 0';
-
             // set size of player model
             setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
 
