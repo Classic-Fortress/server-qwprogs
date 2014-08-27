@@ -164,7 +164,7 @@ void (entity pe_player) CF_Identify = {
         // dispenser is found
         } else if (trace_ent.classname == "building_dispenser") {
 
-            if (self == trace_ent.real_owner)
+            if (pe_player == trace_ent.real_owner)
                 s_name = "Your dispenser";
             else
                 s_name = strcat(trace_ent.real_owner.netname, "'s dispenser");
@@ -174,7 +174,7 @@ void (entity pe_player) CF_Identify = {
         // sentry gun is found
         } else if (trace_ent.classname == "building_sentrygun" || trace_ent.classname == "building_sentrygun_base") {
 
-            if (self == trace_ent.real_owner)
+            if (pe_player == trace_ent.real_owner)
                 s_name = "Your sentry gun";
             else
                 s_name = strcat(trace_ent.real_owner.netname, "'s sentry gun");
