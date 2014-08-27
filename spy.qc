@@ -372,7 +372,7 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
-void (float issilent) TeamFortress_SpyFeignDeath = {
+void (float issilent) CF_Spy_FeignDeath = {
     local string deathstring;
     local float area_check;
     local float i;

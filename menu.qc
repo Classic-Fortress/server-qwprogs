@@ -4,7 +4,7 @@
 
 void (float class) TeamFortress_SpyChangeSkin;
 void (float teamno) TeamFortress_SpyChangeColor;
-void (float issilent) TeamFortress_SpyFeignDeath;
+void (float issilent) CF_Spy_FeignDeath;
 
 void (entity spy) Spy_RemoveDisguise;
 
@@ -357,7 +357,7 @@ void (float inp) Menu_Spy_Input = {
     } else if (inp == 2) {
         Menu_Spy_Color();
     } else if (inp == 3) {
-        TeamFortress_SpyFeignDeath(1);
+        CF_Spy_FeignDeath(1);
         if (self.is_feigning) {
             Menu_Spy();
         }

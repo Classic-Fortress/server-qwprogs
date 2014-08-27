@@ -2274,10 +2274,10 @@ void () ImpulseCommands = {
     else if ((self.impulse == TF_SPY_SPY) && (self.playerclass == PC_SPY))
         TeamFortress_SpyGoUndercover();
     else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
-        TeamFortress_SpyFeignDeath(0);
+        CF_Spy_FeignDeath(0);
     else if ((self.impulse == TF_SPY_SILENT_DIE) &&
              (self.playerclass == PC_SPY))
-        TeamFortress_SpyFeignDeath(1);
+        CF_Spy_FeignDeath(1);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
