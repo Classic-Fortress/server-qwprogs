@@ -36,6 +36,7 @@ void () PreMatch_Think;
 
 void () DumpClanScores;
 
+void () AutoId;
 void (entity p) SetTeamName;
 
 void () autokick_think;
@@ -963,6 +964,7 @@ void () PutClientInServer = {
     local float oldclass;
     local entity spot;
     local entity te;
+    local entity timer;
 
     self.touch = player_touch;
     self.classname = "player";
@@ -1130,6 +1132,15 @@ void () PutClientInServer = {
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
+    }
+
+    // start autoid timer
+    if (stof(infokey(self, "ai"))) {
+        timer = spawn();
+        timer.nextthink = time + 0.3;
+        timer.think = AutoId;
+        timer.owner = self;
+        timer.classname = "aitimer";
     }
 };
 

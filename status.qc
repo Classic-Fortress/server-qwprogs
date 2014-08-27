@@ -15,6 +15,7 @@ string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
+string(float pc) TeamFortress_GetClassName;
 
 void (entity pl, string...count) Status_Print =
 {
@@ -99,6 +100,7 @@ void (entity pl) RefreshStatusBar = {
     local string s2; // class line
     local string s3; // score & clip
     local string st1, st2, st3, st4; // status bar columns 1-4
+    local string ident;
     local float height;
     local float i;
     local float win, sec;
@@ -115,7 +117,7 @@ void (entity pl) RefreshStatusBar = {
     height = floor(stof(infokey(pl, "sb")));
     if (height > 300)
         height = 300;
-    height = height - pl.StatusStringLines - 3;
+    height = height - pl.StatusStringLines - 6;
 
     // no sbar can be displayed
     if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
@@ -229,7 +231,14 @@ void (entity pl) RefreshStatusBar = {
     s3 = strcat(s3, "\n");
     s3 = strzone(s3);
 
-    centerprint(pl, pl.StatusString, pad, s1, s2, s3);
+    // identify
+    if (pl.ident_string != string_null && time < pl.ident_time) {
+        ident = strcat(pl.ident_string, "\n\n");
+    } else {
+        ident = "\n\n\n";
+    }
+
+    centerprint(pl, pl.StatusString, pad, ident, s1, s2, s3);
     pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(s1); strunzone(s2); strunzone(s3);
 };
