@@ -60,6 +60,10 @@ typedef void (float) f_void_float;
 
 .entity observer_list;          // Used by undefined classes, see TF_MovePlayer
 
+// Identify variables
+.string ident_string;           // Status bar string for identify
+.float ident_time;              // The time when last identify found a player
+
 // Playerclass handling variables
 .float maxammo_shells;
 .float maxammo_nails;

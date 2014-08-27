@@ -110,151 +110,116 @@ void () TeamFortress_SaveMe = {
     }
 };
 
-void () TeamFortress_ID = {
-    local vector src;
-    local string st;
-    local string cls;
+void (entity pe_player) CF_Identify = {
+    local vector v_source;
+    local string s_id_string, s_class = "", s_name = "";
+    local float f_health = 0, f_armor = 0, f_friendly = 0, f_fakefriendly = 0;
 
-    src = self.origin + v_forward * 10;
-    src_z = self.absmin_z + self.size_z * 0.7;
+    v_source = pe_player.origin + v_forward * 10;
+    v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
 
-    traceline(src, src + v_forward * 2048, 0, self);
-    if ((trace_ent != world) && (trace_ent.origin != world.origin)) {
-        if ((trace_ent.classname == "player") && (trace_ent.health > 0)) {
-            if (trace_ent.is_feigning && (self.team_no != 0) &&
-                (self.team_no != trace_ent.team_no)) {
-                return;
-            }
-            self.StatusRefreshTime = time + 1.5;
-            if (((self.team_no != 0) &&
-                 (self.team_no == trace_ent.team_no))
-                || (self.classname == "observer")) {
-                cls = TeamFortress_GetClassName(trace_ent.playerclass);
-                if (self.playerclass == PC_MEDIC) {
-                    st = NumberToString1000(trace_ent.health);
-                    centerprint(self, "\n\n\n\n", trace_ent.netname,
-                                "\nFriendly ", cls, "\n", st, " health\n");
-                    return;
-                } else if (self.playerclass == PC_ENGINEER) {
-                    st = NumberToString1000(trace_ent.armorvalue);
-                    centerprint(self, "\n\n\n\n", trace_ent.netname,
-                                "\nFriendly ", cls, "\n", st, " armor\n");
-                    return;
-                }
-                centerprint(self, "\n\n\n\n", trace_ent.netname,
-                            "\nFriendly ", cls);
-                return;
-            }
-            if (trace_ent.playerclass == 8) {
-                cls = TeamFortress_GetClassName(trace_ent.undercover_skin);
-                if ((self.team_no != 0) &&
-                    (self.team_no == trace_ent.undercover_team)) {
-                    if (self.playerclass == 5) {
-                        st = NumberToString1000(trace_ent.health);
-                        if (trace_ent.undercover_skin != 0) {
-                            centerprint(self, "\n\n\n\n",
-                                        trace_ent.undercover_name,
-                                        "\nFriendly ", cls, "\n", st,
-                                        " health\n");
-                        } else {
-                            centerprint(self, "\n\n\n\n",
-                                        trace_ent.undercover_name,
-                                        "\nFriendly Spy\n", st,
-                                        " health\n");
-                        }
-                        return;
-                    } else {
-                        if (self.playerclass == 9) {
-                            st = NumberToString1000(trace_ent.armorvalue);
-                            if (trace_ent.undercover_skin != 0) {
-                                centerprint(self, "\n\n\n\n",
-                                            trace_ent.undercover_name,
-                                            "\nFriendly ", cls, "\n", st,
-                                            " armor\n");
-                            } else {
-                                centerprint(self, "\n\n\n\n",
-                                            trace_ent.undercover_name,
-                                            "\nFriendly Spy\n", st,
-                                            " armor\n");
-                            }
-                            return;
-                        } else {
-                            st = NumberToString1000(trace_ent.armorvalue);
-                            if (trace_ent.undercover_skin != 0) {
-                                centerprint(self, "\n\n\n\n",
-                                            trace_ent.undercover_name,
-                                            "\nFriendly ", cls);
-                            } else {
-                                centerprint(self, "\n\n\n\n",
-                                            trace_ent.undercover_name,
-                                            "\nFriendly Spy\n");
-                            }
-                            return;
-                        }
-                    }
-                }
-                if (trace_ent.undercover_name != string_null) {
-                    if (trace_ent.undercover_skin != 0) {
-                        centerprint(self, "\n\n\n\n",
-                                    trace_ent.undercover_name, "\nEnemy ",
-                                    cls);
-                    } else {
-                        centerprint(self, "\n\n\n\n",
-                                    trace_ent.undercover_name,
-                                    "\nEnemy Spy");
-                    }
-                } else {
-                    if (trace_ent.undercover_skin != 0) {
-                        centerprint(self, "\n\n\n\n", trace_ent.netname,
-                                    "\nEnemy ", cls);
-                    } else {
-                        centerprint(self, "\n\n\n\n", trace_ent.netname,
-                                    "\nEnemy Spy");
-                    }
-                }
-            } else {
-                cls = TeamFortress_GetClassName(trace_ent.playerclass);
-                centerprint(self, "\n\n\n\n", trace_ent.netname,
-                            "\nEnemy ", cls);
-            }
-        } else {
-            if (trace_ent.classname == "building_dispenser") {
-                self.StatusRefreshTime = time + 1.5;
-                if (self == trace_ent.real_owner) {
-                    centerprint(self, "\n\n\n\nYour Dispenser");
-                } else {
-                    centerprint(self, "\n\n\n\nDispenser made by ",
-                                trace_ent.real_owner.netname);
-                }
-            } else {
-                if ((trace_ent.classname == "building_sentrygun") ||
-                    (trace_ent.classname == "building_sentrygun_base")) {
-                    self.StatusRefreshTime = time + 1.5;
-                    if (self == trace_ent.real_owner) {
-                        centerprint(self, "\n\n\n\nYour SentryGun");
-                    } else {
-                        if (!teamplay) {
-                            centerprint(self,
-                                        "\n\n\n\nSentrygun made by\n",
-                                        trace_ent.real_owner.netname);
-                        } else {
-                            if (((self.team_no != 0) &&
-                                 (self.team_no == trace_ent.team_no)) ||
-                                (self.playerclass == 0)) {
-                                centerprint(self,
-                                            "\n\n\n\nFriendly Sentrygun made by\n",
-                                            trace_ent.real_owner.netname);
-                            } else {
-                                centerprint(self,
-                                            "\n\n\n\nEnemy Sentrygun made by\n",
-                                            trace_ent.real_owner.netname);
-                            }
-                        }
-                    }
-                }
-            }
+    traceline(v_source, v_source + v_forward * 2048, 0, pe_player);
+    if (trace_ent != world) {
+
+        // show as friendly if target is on your team or disguised as your team
+        if (pe_player.team_no) {
+            if (pe_player.team_no == trace_ent.team_no)
+                f_friendly = 1;
+            else if (pe_player.team_no == trace_ent.undercover_team)
+                f_fakefriendly = 1;
         }
+
+        // alive player is found
+        if (trace_ent.classname == "player" && trace_ent.health) {
+
+            // set class and name
+            s_class = TeamFortress_GetClassName(trace_ent.playerclass);
+            s_name = trace_ent.netname;
+
+            // set health if you're a medic
+            if (pe_player.playerclass == PC_MEDIC)
+                f_health = trace_ent.health;
+
+            // set armor if you're an engineer
+            else if (pe_player.playerclass == PC_ENGINEER)
+                f_armor = trace_ent.armorvalue;
+
+            // target is an enemy spy
+            if (trace_ent.playerclass == PC_SPY && !f_friendly) {
+
+                // don't identify feigning enemy spies
+                if (trace_ent.is_feigning)
+                    return;
+
+                // use undercover name if available
+                if (trace_ent.undercover_name != string_null)
+                    s_name = trace_ent.undercover_name;
+
+                // set class to undercover skin
+                if (trace_ent.undercover_skin)
+                    s_class = TeamFortress_GetClassName(trace_ent.undercover_skin);
+
+            }
+
+        // dispenser is found
+        } else if (trace_ent.classname == "building_dispenser") {
+
+            if (self == trace_ent.real_owner)
+                s_name = "Your dispenser";
+            else
+                s_name = strcat(trace_ent.real_owner.netname, "'s dispenser");
+
+            s_class = "";
+
+        // sentry gun is found
+        } else if (trace_ent.classname == "building_sentrygun" || trace_ent.classname == "building_sentrygun_base") {
+
+            if (self == trace_ent.real_owner)
+                s_name = "Your sentry gun";
+            else
+                s_name = strcat(trace_ent.real_owner.netname, "'s sentry gun");
+
+            s_class = "";
+
+        }
+
+        // set name (+ health/armor)
+        if (f_health && (f_friendly || f_fakefriendly)) {
+            s_id_string = strcat(s_name, " (");
+            s_id_string = strcat(s_id_string, ftos(f_health));
+            s_id_string = strcat(s_id_string, " hp)\n");
+        } else if (f_armor && (f_friendly || f_fakefriendly)) {
+            s_id_string = strcat(s_name, " (");
+            s_id_string = strcat(s_id_string, ftos(f_armor));
+            s_id_string = strcat(s_id_string, " armor)\n");
+        } else {
+            s_id_string = strcat(s_name, "\n");
+        }
+
+        // set friendly/enemy
+        if (f_friendly || f_fakefriendly)
+            s_id_string = strcat(s_id_string, "Friendly");
+        else
+            s_id_string = strcat(s_id_string, "Hostile");
+
+        // set class
+        if (s_class != "") {
+            s_id_string = strcat(s_id_string, " ");
+            s_id_string = strcat(s_id_string, s_class);
+        }
+
+        pe_player.ident_time = time + 0.5;
+
+        // don't update memory when the id string is the same
+        if (pe_player.ident_string == s_id_string)
+            return;
+
+        // refresh status bar
+        pe_player.ident_string = strzone(s_id_string);
+        Status_Refresh(pe_player);
+
     }
+
 };
 
 void (float weap) TeamFortress_ReloadWeapon = {

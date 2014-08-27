@@ -7,8 +7,25 @@ void () TeamFortress_ExplodePerson;
 void () TeamFortress_Regenerate;
 void () TeamFortress_CheckforCheats;
 void () TeamFortress_RegenerateCells;
+void (entity pe_player) CF_Identify;
 
 float () CloseToSpawnPoint;
+
+void () AutoId = {
+
+    if (time > self.ident_time || !self.ident_time) {
+
+        // remove ident string from memory
+        if (self.ident_string != string_null) {
+            strunzone(self.ident_string);
+            self.ident_string = string_null;
+        }
+
+        CF_Identify(self.owner);
+    }
+
+    self.nextthink = time + 0.1;
+};
 
 void () UseSpecialSkill = {
     local vector src;
@@ -42,6 +59,15 @@ void () UseSpecialSkill = {
             sprint(self, PRINT_HIGH, "Removed lock\n");
             self.enemy = world;
         }
+    }
+};
+
+void () RemoveAutoIdTimer = {
+    local entity te = find(world, classname, "aitimer");
+    while (te != world) {
+        if (te.owner == self)
+            dremove(te);
+        te = find(te, classname, "aitimer");
     }
 };
 
@@ -2045,6 +2071,7 @@ void () TeamFortress_RemoveTimers = {
             te = find(te, classname, "timer");
     }
 
+    RemoveAutoIdTimer();
     RemoveGrenadeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);

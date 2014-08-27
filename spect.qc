@@ -76,7 +76,7 @@ void () SpectatorImpulseCommand = {
         }
     } else if (self.impulse == TF_ID)
 
-        TeamFortress_ID();
+        CF_Identify(self);
 
     else if (self.impulse == TF_HELP_MAP)
 
