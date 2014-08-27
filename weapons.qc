@@ -45,7 +45,7 @@ void (float zoom_to) Sniper_Zoom;
 void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
-void () TeamFortress_ID;
+void (entity pe_player) CF_Identify;
 void () TeamFortress_ReloadCurrentWeapon;
 void (float slot) TeamFortress_ReloadSlot;
 void () TeamFortress_ReloadNext;
@@ -2252,7 +2252,7 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_GRENADE_SWITCH)
         TeamFortress_GrenadeSwitch();
     else if (self.impulse == TF_ID)
-        TeamFortress_ID();
+        CF_Identify();
     else if (self.impulse == TF_SHOW_IDS)
         TeamFortress_ShowIDs();
     else if ((self.playerclass != 0) && (self.impulse == TF_DROPFLAG))
@@ -2314,7 +2314,7 @@ void () PreMatchImpulses = {
     if (self.impulse == TF_INVENTORY)
         TeamFortress_Inventory();
     else if (self.impulse == TF_ID)
-        TeamFortress_ID();
+        CF_Identify();
     else if (self.impulse == FLAG_INFO) {
         if (CTF_Map == TRUE)
             TeamFortress_CTF_FlagInfo();
