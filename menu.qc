@@ -430,7 +430,7 @@ void (float inp) Menu_Spy_Color_Input = {
         Menu_Spy_Color();
     else if (inp == 3 && color == 12)
         Menu_Spy_Color();
-    else if (inp == 4 && color == 3)
+    else if (inp == 4 && color == 11)
         Menu_Spy_Color();
     else if (inp > 0 && inp <= number_of_teams)
         CF_Spy_ChangeColor(self, inp);
@@ -449,15 +449,22 @@ void () Menu_Spy_Color = {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch\n");
         return;
     }
+
+    // don't display your own team
+    if (color == 13)
+        s_blue = "\n";
+    else if (color == 4)
+        s_red = "\n";
+    else if (color == 12)
+        s_yellow = "\n";
+    else if (color == 11)
+        s_green = "\n";
+
     self.menu_input = nil;
     if (number_of_teams == 1)
         sprint(self, PRINT_HIGH, "There is no other team\n");
-    else if (number_of_teams == 2) {
-        if (color == 4)
-            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, "\n", s_nothing, "\n\n");
-        else
-            Status_Menu(self, Menu_Spy_Color_Input, s_disguise, "\n", s_red, s_nothing, "\n\n");
-    }
+    else if (number_of_teams == 2)
+        Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_nothing, "\n\n");
     else if (number_of_teams == 3)
         Status_Menu(self, Menu_Spy_Color_Input, s_disguise, s_blue, s_red, s_yellow, s_nothing, "\n");
     else
