@@ -2479,7 +2479,7 @@ void () W_WeaponFrame = {
     if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL)
         return;
 
-    if (self.impulse == TF_WEAPLAST) {
+    if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
 
         // change to last weapon now
         if (WeaponReady(self))
