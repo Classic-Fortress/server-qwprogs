@@ -336,14 +336,12 @@ void () Menu_Scout = {
 
 void (float inp) Menu_Spy_Input = {
     if ((inp == 1) || (inp == 2)) {
-        if (self.effects & (8 | 4)) {
-            sprint(self, PRINT_HIGH,
-                   "You cannot go undercover while glowing\n");
+        if (self.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT)) {
+            sprint(self, PRINT_HIGH, "You cannot go undercover while glowing\n");
             return;
         }
-        if (self.is_unabletospy == 1) {
-            sprint(self, PRINT_HIGH,
-                   "You cannot go undercover right now\n");
+        if (self.is_unabletospy) {
+            sprint(self, PRINT_HIGH, "You cannot go undercover right now\n");
             return;
         }
     }
