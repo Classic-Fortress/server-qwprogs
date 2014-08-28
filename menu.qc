@@ -537,6 +537,14 @@ void (float inp) Menu_Engineer_Input = {
     local float dismantle_dispenser;
     local entity te;
 
+    if (inp == 5)
+        return;
+
+    if (self.is_building) {
+        Menu_Engineer(self);
+        return;
+    }
+
     dismantle_sentrygun = 0;
     dismantle_dispenser = 0;
 

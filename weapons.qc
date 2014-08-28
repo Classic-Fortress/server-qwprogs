@@ -2181,6 +2181,9 @@ void () ImpulseCommands = {
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
             CF_Spy_DisguiseStop();
+        else if (self.playerclass == PC_ENGINEER && self.is_building)
+            TeamFortress_EngineerBuildStop();
+            CycleWeaponLast();
     }
 
     if (!self.is_feigning) {
@@ -2192,18 +2195,6 @@ void () ImpulseCommands = {
             TeamFortress_PrimeThrowGrenade(1);
         else if (self.impulse == TF_GRENADE_PT_2)
             TeamFortress_PrimeThrowGrenade(2);
-    }
-
-    if (self.is_building == 1) {
-        if (self.impulse >= 1 && self.impulse <= 5) {
-            TeamFortress_EngineerBuildStop();
-            W_ChangeWeapon(self.impulse);
-        } else if (self.impulse == TF_WEAPNEXT
-                    || self.impulse == TF_WEAPPREV
-                    || self.impulse == TF_WEAPLAST) {
-            TeamFortress_EngineerBuildStop();
-            W_ChangeWeapon(self.impulse);
-        }
     }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
@@ -2472,7 +2463,7 @@ void () W_WeaponFrame = {
 
     if (self.impulse == 5) {
         if (self.playerclass == PC_ENGINEER)
-            TeamFortress_EngineerBuild();
+            Menu_Engineer(self);
         else if (self.playerclass == PC_SCOUT)
             Menu_Scout();
         else if (self.playerclass == PC_SPY)
@@ -2517,7 +2508,7 @@ void () W_WeaponFrame = {
     }
 
     // slot 1-4 binds
-    if (self.impulse >= 1 && self.impulse <= 4 && WeaponReady(self)) {
+    if (self.impulse >= 1 && self.impulse <= 4 && WeaponReady(self) && !self.is_building) {
 
         // load weapon state if current state doesn't match stored state
         if (!W_WeaponState_Check(self))
