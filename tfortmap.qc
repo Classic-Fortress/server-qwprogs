@@ -1938,6 +1938,10 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
         AP.disguise_team = 0;
     }
 
+    // disable spy menu
+    if (AP.menu_input == Menu_Spy_Input || AP.menu_input == Menu_Spy_Skin_Input || AP.menu_input == Menu_Spy_Color_Input)
+        AP.menu_input = nil;
+
     Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
