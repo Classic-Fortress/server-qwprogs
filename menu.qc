@@ -418,6 +418,9 @@ void () Menu_Spy_Skin = {
     local string s_engineer = "›‘ Engineer   \n";
     local string s_nothing  = "\n’‘ Nothing    \n";
 
+    if (!self.undercover_skin)
+        s_spy = "\n";
+
     Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_nothing);
 };
 
