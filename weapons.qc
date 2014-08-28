@@ -52,7 +52,7 @@ void () TeamFortress_ReloadNext;
 void () Sniper_ZoomToggle;
 void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
-void () TeamFortress_SpyGoUndercover;
+void () CF_Spy_GoUndercover;
 void () TeamFortress_DetpackMenu;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
@@ -2180,7 +2180,7 @@ void () ImpulseCommands = {
 
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
-            TeamFortress_SpyGoUndercover();
+            CF_Spy_GoUndercover();
     }
 
     if (!self.is_feigning) {
@@ -2252,7 +2252,7 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_GRENADE_SWITCH)
         TeamFortress_GrenadeSwitch();
     else if (self.impulse == TF_ID)
-        CF_Identify();
+        CF_Identify(self);
     else if (self.impulse == TF_SHOW_IDS)
         TeamFortress_ShowIDs();
     else if ((self.playerclass != 0) && (self.impulse == TF_DROPFLAG))
@@ -2272,13 +2272,47 @@ void () ImpulseCommands = {
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_entrance");
     else if ((self.impulse == TF_SPY_SPY) && (self.playerclass == PC_SPY))
-        TeamFortress_SpyGoUndercover();
+        CF_Spy_GoUndercover();
     else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(0);
     else if ((self.impulse == TF_SPY_SILENT_DIE) &&
              (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(1);
-    else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
+    else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
+        CF_Spy_ChangeSkin(self, 8);
+        CF_Spy_ChangeColor(self, self.team_no);
+    } else if (self.impulse == TF_DISGUISE_SCOUT && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 1);
+    else if (self.impulse == TF_DISGUISE_SNIPER && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 2);
+    else if (self.impulse == TF_DISGUISE_SOLDIER && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 3);
+    else if (self.impulse == TF_DISGUISE_DEMOMAN && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 4);
+    else if (self.impulse == TF_DISGUISE_MEDIC && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 5);
+    else if (self.impulse == TF_DISGUISE_HWGUY && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 6);
+    else if (self.impulse == TF_DISGUISE_PYRO && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 7);
+    else if (self.impulse == TF_DISGUISE_ENGINEER && self.playerclass == PC_SPY)
+        CF_Spy_ChangeSkin(self, 9);
+    else if (self.impulse == TF_DISGUISE_BLUE && self.playerclass == PC_SPY)
+        CF_Spy_ChangeColor(self, 1);
+    else if (self.impulse == TF_DISGUISE_RED && self.playerclass == PC_SPY)
+        CF_Spy_ChangeColor(self, 2);
+    else if (self.impulse == TF_DISGUISE_YELLOW && self.playerclass == PC_SPY)
+        CF_Spy_ChangeColor(self, 3);
+    else if (self.impulse == TF_DISGUISE_GREEN && self.playerclass == PC_SPY)
+        CF_Spy_ChangeColor(self, 4);
+    else if (self.impulse == TF_DISGUISE_ENEMY && self.playerclass == PC_SPY) {
+        if (number_of_teams > 2)
+            Menu_Spy_Color();
+        else if (self.team_no == 1)
+            CF_Spy_ChangeColor(self, 2);
+        else
+            CF_Spy_ChangeColor(self, 1);
+    } else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
     else if ((self.impulse == TF_ENGINEER_BUILD) &&
@@ -2314,7 +2348,7 @@ void () PreMatchImpulses = {
     if (self.impulse == TF_INVENTORY)
         TeamFortress_Inventory();
     else if (self.impulse == TF_ID)
-        CF_Identify();
+        CF_Identify(self);
     else if (self.impulse == FLAG_INFO) {
         if (CTF_Map == TRUE)
             TeamFortress_CTF_FlagInfo();
@@ -2437,7 +2471,7 @@ void () W_WeaponFrame = {
         else if (self.playerclass == PC_SCOUT)
             Menu_Scout();
         else if (self.playerclass == PC_SPY)
-            TeamFortress_SpyGoUndercover();
+            CF_Spy_GoUndercover();
         else if (self.playerclass == PC_DEMOMAN)
             TeamFortress_DetpackMenu();
 

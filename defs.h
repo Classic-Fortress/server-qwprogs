@@ -403,9 +403,25 @@
 #define TF_ZOOMOUT          115
 
 // Help impulses
+#define TF_HELP_MAP         117
 #define TF_DISPLAYLOCATION	118
 #define TF_STATUS_QUERY		119
-#define TF_HELP_MAP		131
+
+// Disguise impulses
+#define TF_DISGUISE_RESET    120
+#define TF_DISGUISE_SCOUT    121
+#define TF_DISGUISE_SNIPER   122
+#define TF_DISGUISE_SOLDIER  123
+#define TF_DISGUISE_DEMOMAN  124
+#define TF_DISGUISE_MEDIC    125
+#define TF_DISGUISE_HWGUY    126
+#define TF_DISGUISE_PYRO     127
+#define TF_DISGUISE_ENGINEER 128
+#define TF_DISGUISE_BLUE     129
+#define TF_DISGUISE_RED      130
+#define TF_DISGUISE_YELLOW   131
+#define TF_DISGUISE_GREEN    132
+#define TF_DISGUISE_ENEMY    133
 
 // Information impulses
 #define TF_INVENTORY		135
