@@ -5,6 +5,8 @@
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin;
 void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor;
 void (float issilent) CF_Spy_FeignDeath;
+void () CF_Spy_Invisible;
+void () CF_Spy_DisguiseStop;
 
 void (entity spy) Spy_RemoveDisguise;
 
@@ -54,7 +56,7 @@ string (float pc, float tno) TeamFortress_ClassGetNoPlayersString;
 void () Menu_Drop;
 void () PlayerObserverMode;
 void () Menu_Scout;
-void () Menu_Spy;
+void (entity pe_player) Menu_Spy;
 void () Menu_Spy_Skin;
 void () Menu_Spy_Color;
 
@@ -346,53 +348,73 @@ void (float inp) Menu_Spy_Input = {
         }
     }
     if (inp == 1) {
-        Menu_Spy_Skin();
-    } else if (inp == 2) {
+        if (invis_only)
+            CF_Spy_Invisible();
+        else if (self.is_undercover == 2)
+            CF_Spy_DisguiseStop();
+        else
+            Menu_Spy_Skin();
+    } else if (inp == 2 && !invis_only) {
         CF_Spy_DisguiseLast();
     } else if (inp == 3) {
         CF_Spy_FeignDeath(1);
         if (self.is_feigning) {
-            Menu_Spy();
+            Menu_Spy(self);
         }
     } else if (inp == 4) {
         Spy_RemoveDisguise(self);
     }
 };
 
-void () Menu_Spy = {
+void (entity pe_player) Menu_Spy = {
     local string s_action  = "Action:\n\n";
     local string s_skin    = "êìë Disguise               \n";
     local string s_last    = "êîë Last disguise          \n";
     local string s_feign, s_reset;
     local string s_nothing = "\nêóë Nothing                ";
 
-    if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
+    if (pe_player.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT) || pe_player.is_unabletospy == 1) {
         return;
     }
 
-    if (!self.last_skin && !self.last_team)
+    if (invis_only)
+        s_skin    = "êìë Go invisible           \n";
+    else if (pe_player.is_undercover == 2)
+        s_skin    = "êìë Stop disguising        \n";
+
+    if ((!pe_player.last_skin && !pe_player.last_team) || invis_only)
         s_last = "\n";
 
-    if (self.is_feigning)
+    if (pe_player.is_feigning)
         s_feign = "êïë Stop feigning          \n";
     else
         s_feign = "êïë Start feigning (silent)\n";
 
-    if (self.undercover_team && self.undercover_skin)
+    if (pe_player.undercover_team && pe_player.undercover_skin)
         s_reset = "êñë Reset disguise         \n";
-    else if (self.undercover_team)
+    else if (pe_player.undercover_team)
         s_reset = "êñë Reset color            \n";
-    else if (self.undercover_skin)
+    else if (pe_player.undercover_skin)
         s_reset = "êñë Reset skin             \n";
     else
         s_reset = "\n";
 
-    Status_Menu(self, Menu_Spy_Input, s_action, s_skin, s_last, s_feign, s_reset, s_nothing);
+    Status_Menu(pe_player, Menu_Spy_Input, s_action, s_skin, s_last, s_feign, s_reset, s_nothing);
 };
 
 void (float inp) Menu_Spy_Skin_Input = {
     if (inp == 0)
         return;
+
+    if (self.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT)) {
+        sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing\n");
+        return;
+    }
+
+    if (self.is_unabletospy) {
+        sprint(self, PRINT_HIGH, "You cannot go undercover right now\n");
+        return;
+    }
 
     CF_Spy_ChangeSkin(self, inp);
 
