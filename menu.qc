@@ -62,6 +62,7 @@ void (float inp) Menu_Scout_Input;
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Color_Input;
+void () CF_Spy_DisguiseLast;
 
 void () Menu_Demoman;
 void () Menu_Demoman_Cancel;
@@ -349,7 +350,7 @@ void (float inp) Menu_Spy_Input = {
     if (inp == 1) {
         Menu_Spy_Skin();
     } else if (inp == 2) {
-        Menu_Spy_Color();
+        CF_Spy_DisguiseLast();
     } else if (inp == 3) {
         CF_Spy_FeignDeath(1);
         if (self.is_feigning) {
@@ -363,13 +364,16 @@ void (float inp) Menu_Spy_Input = {
 void () Menu_Spy = {
     local string s_action  = "Action:\n\n";
     local string s_skin    = "êìë Disguise               \n";
-    local string s_color   = "êîë Change color           \n";
+    local string s_last    = "êîë Last disguise          \n";
     local string s_feign, s_reset;
     local string s_nothing = "\nêóë Nothing                ";
 
     if (self.effects & (8 | 4) || self.is_unabletospy == 1) {
         return;
     }
+
+    if (!self.last_skin && !self.last_team)
+        s_last = "\n";
 
     if (self.is_feigning)
         s_feign = "êïë Stop feigning          \n";

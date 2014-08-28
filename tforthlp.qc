@@ -132,6 +132,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dyellow", TF_DISGUISE_YELLOW, 0);
         TeamFortress_Alias("dgreen", TF_DISGUISE_GREEN, 0);
         TeamFortress_Alias("denemy", TF_DISGUISE_ENEMY, 0);
+        TeamFortress_Alias("dlast", TF_DISGUISE_LAST, 0);
     } else if (self.motd == 55) {
         TeamFortress_Alias("flaginfo", FLAG_INFO, 0);
         TeamFortress_Alias("maphelp", TF_HELP_MAP, 0);

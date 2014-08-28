@@ -422,6 +422,7 @@
 #define TF_DISGUISE_YELLOW   131
 #define TF_DISGUISE_GREEN    132
 #define TF_DISGUISE_ENEMY    133
+#define TF_DISGUISE_LAST     134
 
 // Information impulses
 #define TF_INVENTORY		135
