@@ -758,6 +758,8 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     e_timer.nextthink = time + 4;
     e_timer.skin = pf_class;
     TeamFortress_SetSkin(pe_player);
+
+    Status_Refresh(pe_player);
 };
 
 void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
@@ -812,6 +814,8 @@ void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
     e_timer.think = CF_Spy_UndercoverThink;
     e_timer.nextthink = time + 4;
     e_timer.team = pf_team_no;
+
+    Status_Refresh(pe_player);
 };
 
 void (entity spy) TeamFortress_SpyCalcName = {
