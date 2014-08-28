@@ -2181,9 +2181,10 @@ void () ImpulseCommands = {
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
             CF_Spy_DisguiseStop();
-        else if (self.playerclass == PC_ENGINEER && self.is_building)
+        else if (self.playerclass == PC_ENGINEER && self.is_building) {
             TeamFortress_EngineerBuildStop();
             CycleWeaponLast();
+        }
     }
 
     if (!self.is_feigning) {
