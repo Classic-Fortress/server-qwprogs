@@ -118,6 +118,20 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("votetrick", TF_VOTETRICK, 0);
         TeamFortress_Alias("voterace", TF_VOTERACE, 0);
         TeamFortress_Alias("forcenext", TF_FORCENEXT, 0);
+        TeamFortress_Alias("dreset", TF_DISGUISE_RESET, 0);
+        TeamFortress_Alias("dscout", TF_DISGUISE_SCOUT, 0);
+        TeamFortress_Alias("dsniper", TF_DISGUISE_SNIPER, 0);
+        TeamFortress_Alias("dsoldier", TF_DISGUISE_SOLDIER, 0);
+        TeamFortress_Alias("ddemoman", TF_DISGUISE_DEMOMAN, 0);
+        TeamFortress_Alias("dmedic", TF_DISGUISE_MEDIC, 0);
+        TeamFortress_Alias("dhwguy", TF_DISGUISE_HWGUY, 0);
+        TeamFortress_Alias("dpyro", TF_DISGUISE_PYRO, 0);
+        TeamFortress_Alias("dengineer", TF_DISGUISE_ENGINEER, 0);
+        TeamFortress_Alias("dblue", TF_DISGUISE_BLUE, 0);
+        TeamFortress_Alias("dred", TF_DISGUISE_RED, 0);
+        TeamFortress_Alias("dyellow", TF_DISGUISE_YELLOW, 0);
+        TeamFortress_Alias("dgreen", TF_DISGUISE_GREEN, 0);
+        TeamFortress_Alias("denemy", TF_DISGUISE_ENEMY, 0);
     } else if (self.motd == 55) {
         TeamFortress_Alias("flaginfo", FLAG_INFO, 0);
         TeamFortress_Alias("maphelp", TF_HELP_MAP, 0);

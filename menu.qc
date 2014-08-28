@@ -2,8 +2,8 @@
 // This file handles all menu functions and displays.
 //======================================================
 
-void (float class) TeamFortress_SpyChangeSkin;
-void (float teamno) TeamFortress_SpyChangeColor;
+void (entity pe_player, float pf_class) CF_Spy_ChangeSkin;
+void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor;
 void (float issilent) CF_Spy_FeignDeath;
 
 void (entity spy) Spy_RemoveDisguise;
@@ -56,17 +56,11 @@ void () PlayerObserverMode;
 void () Menu_Scout;
 void () Menu_Spy;
 void () Menu_Spy_Skin;
-void () Menu_Spy_Skin_1;
-void () Menu_Spy_Skin_2;
-void () Menu_Spy_Skin_3;
 void () Menu_Spy_Color;
 
 void (float inp) Menu_Scout_Input;
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
-void (float inp) Menu_Spy_Skin_1_Input;
-void (float inp) Menu_Spy_Skin_2_Input;
-void (float inp) Menu_Spy_Skin_3_Input;
 void (float inp) Menu_Spy_Color_Input;
 
 void () Menu_Demoman;
@@ -368,7 +362,7 @@ void (float inp) Menu_Spy_Input = {
 
 void () Menu_Spy = {
     local string s_action  = "Action:\n\n";
-    local string s_skin    = "“‘ Change skin            \n";
+    local string s_skin    = "“‘ Disguise               \n";
     local string s_color   = "”‘ Change color           \n";
     local string s_feign, s_reset;
     local string s_nothing = "\n—‘ Nothing                ";
@@ -382,88 +376,48 @@ void () Menu_Spy = {
     else
         s_feign = "•‘ Start feigning (silent)\n";
 
-    if (self.undercover_team != 0 && self.undercover_skin != 0)
+    if (self.undercover_team && self.undercover_skin)
         s_reset = "–‘ Reset disguise         \n";
-    else if (self.undercover_team != 0)
+    else if (self.undercover_team)
         s_reset = "–‘ Reset color            \n";
-    else if (self.undercover_skin != 0)
+    else if (self.undercover_skin)
         s_reset = "–‘ Reset skin             \n";
     else
         s_reset = "\n";
 
-    Status_Menu(self, Menu_Spy_Input, s_action, s_skin, s_color, s_feign, s_reset, s_nothing);
+    Status_Menu(self, Menu_Spy_Input, s_action, s_skin, s_last, s_feign, s_reset, s_nothing);
 };
 
 void (float inp) Menu_Spy_Skin_Input = {
-    if (inp == 1) {
-        Menu_Spy_Skin_1();
-    } else if (inp == 2) {
-        Menu_Spy_Skin_2();
-    } else if (inp == 3) {
-        Menu_Spy_Skin_3();
-    }
+    if (inp == 0)
+        return;
+
+    CF_Spy_ChangeSkin(self, inp);
+
+    if (number_of_teams > 2)
+        Menu_Spy_Color();
+    else if (self.team_no == 1)
+        CF_Spy_ChangeColor(self, 2);
+    else
+        CF_Spy_ChangeColor(self, 1);
+
 };
 
 void () Menu_Spy_Skin = {
-    local string s_disguise = "Disguise as:\n\n";
-    local string s_scsnso   = "“‘ Scout / Sniper / Soldier\n";
-    local string s_demehw   = "”‘ Demoman / Medic / HWGuy \n";
-    local string s_pyspen   = "•‘ Pyro / Spy / Engineer   \n";
-    local string s_nothing  = "\n—‘ Nothing                 \n";
+    local string s_disguise = "Disguise as enemy:\n\n";
+    local string s_scout    = "“‘ Scout      \n";
+    local string s_sniper   = "”‘ Sniper     \n";
+    local string s_soldier  = "•‘ Soldier    \n";
+    local string s_demoman  = "–‘ Demoman    \n";
+    local string s_medic    = "—‘ Medic      \n";
+    local string s_hwguy    = "˜‘ HWGuy      \n";
+    local string s_pyro     = "™‘ Pyro       \n";
+    local string s_spy      = "š‘ Spy (reset)\n";
+    local string s_engineer = "›‘ Engineer   \n";
+    local string s_nothing  = "\n’‘ Nothing    \n";
 
-    Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scsnso, s_demehw, s_pyspen, s_nothing);
+    Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_nothing);
 };
-
-void (float inp) Menu_Spy_Skin_1_Input = {
-    if (inp > 0 && inp < 4)
-        TeamFortress_SpyChangeSkin(inp);
-}
-
-void () Menu_Spy_Skin_1 = {
-    local string s_disguise = "Disguise as:\n\n";
-    local string s_scout    = "“‘ Scout  \n";
-    local string s_sniper   = "”‘ Sniper \n";
-    local string s_soldier  = "•‘ Soldier\n";
-    local string s_nothing  = "\n—‘ Nothing\n";
-
-    Status_Menu(self, Menu_Spy_Skin_1_Input, s_disguise, s_scout, s_sniper, s_soldier, s_nothing);
-}
-
-void (float inp) Menu_Spy_Skin_2_Input = {
-    local float classnum;
-    classnum = inp + 3;
-
-    if (inp > 0 && inp < 4)
-        TeamFortress_SpyChangeSkin(classnum);
-}
-
-void () Menu_Spy_Skin_2 = {
-    local string s_disguise = "Disguise as:\n\n";
-    local string s_demoman  = "“‘ Demoman\n";
-    local string s_medic    = "”‘ Medic  \n";
-    local string s_hwguy    = "•‘ HWGuy  \n";
-    local string s_nothing  = "\n—‘ Nothing\n";
-
-    Status_Menu(self, Menu_Spy_Skin_2_Input, s_disguise, s_demoman, s_medic, s_hwguy, s_nothing);
-}
-
-void (float inp) Menu_Spy_Skin_3_Input = {
-    local float classnum;
-    classnum = inp + 6;
-
-    if (inp > 0 && inp < 4)
-        TeamFortress_SpyChangeSkin(classnum);
-}
-
-void () Menu_Spy_Skin_3 = {
-    local string s_disguise = "Disguise as:\n\n";
-    local string s_pyro     = "“‘ Pyro    \n";
-    local string s_spy      = "”‘ Spy     \n";
-    local string s_engineer = "•‘ Engineer\n";
-    local string s_nothing  = "\n—‘ Nothing \n";
-
-    Status_Menu(self, Menu_Spy_Skin_3_Input, s_disguise, s_pyro, s_spy, s_engineer, s_nothing);
-}
 
 void (float inp) Menu_Spy_Color_Input = {
     local float color = stof(infokey(self, "bottomcolor"));
@@ -477,7 +431,7 @@ void (float inp) Menu_Spy_Color_Input = {
     else if (inp == 4 && color == 3)
         Menu_Spy_Color();
     else if (inp > 0 && inp <= number_of_teams)
-        TeamFortress_SpyChangeColor(inp);
+        CF_Spy_ChangeColor(self, inp);
 };
 
 void () Menu_Spy_Color = {

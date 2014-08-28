@@ -386,14 +386,24 @@ string(entity pl) DisguiseToString =
         if (pl.disguise_team) {
             team = strcat(team, "(");
             team = strcat(team, TeamToString(pl.disguise_team));
-            team = strcat(team, ") ");
+            if (!pl.queue_skin)
+                team = strcat(team, ") ");
+        } else if (pl.queue_team) {
+            team = strcat(team, "(");
+            team = strcat(team, TeamToString(pl.queue_team));
+            team = strcat(team, " ");
         } else if (pl.undercover_team) {
             team = strcat(team, TeamToString(pl.undercover_team));
             team = strcat(team, " ");
         }
         if (pl.disguise_skin) {
-            skin = strcat(skin, "(");
+            if (!pl.queue_team)
+                skin = strcat(skin, "(");
             skin = strcat(skin, ClassToString(pl.disguise_skin));
+            skin = strcat(skin, ")");
+        } else if (pl.queue_skin) {
+            skin = strcat(skin, " ");
+            skin = strcat(skin, ClassToString(pl.queue_skin));
             skin = strcat(skin, ")");
         } else if (pl.undercover_skin) {
             skin = strcat(skin, ClassToString(pl.undercover_skin));
