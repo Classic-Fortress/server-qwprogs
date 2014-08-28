@@ -531,6 +531,7 @@ void (float issilent) CF_Spy_FeignDeath = {
 
 void () CF_Spy_GoUndercover = {
     local entity e_timer;
+    local string s_class, s_team;
 
     if (self.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT)) {
         sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing\n");
@@ -580,11 +581,33 @@ void () CF_Spy_GoUndercover = {
 
     } else {
 
-        sprint(self, PRINT_HIGH, "You stop going undercover\n");
+        // set undercover class if spy had the time to change class
+        if (self.undercover_skin)
+            s_class = TeamFortress_GetClassName(self.undercover_skin);
+        else
+            s_class = "Spy";
 
-        self.is_undercover = 0;
+        // set undercover team if spy had the time to change team
+        if (self.undercover_team)
+            s_team = TeamFortress_TeamGetColorString(self.undercover_team);
+        else
+            s_team = TeamFortress_TeamGetColorString(self.team_no);
+
+        // show what's left of the disguise
+        if (self.undercover_skin || self.undercover_team) {
+            sprint(self, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
+            self.is_undercover = 1;
+            self.last_skin = self.undercover_skin;
+            self.last_team = self.undercover_team;
+        } else {
+            sprint(self, PRINT_HIGH, "You stop going undercover\n");
+            self.is_undercover = 0;
+        }
+
         self.disguise_skin = 0;
         self.disguise_team = 0;
+        self.queue_skin = 0;
+        self.queue_team = 0;
 
         // remove disguise timers belonging to self
         e_timer = find(world, classname, "spytimer");
@@ -596,6 +619,8 @@ void () CF_Spy_GoUndercover = {
                 e_timer = find(e_timer, classname, "spytimer");
             }
         }
+
+        Status_Refresh(self);
 
     }
 
@@ -646,7 +671,10 @@ void () CF_Spy_UndercoverThink = {
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
             } else {
-                s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
+                if (self.owner.undercover_team)
+                    s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
+                else
+                    s_team = TeamFortress_TeamGetColorString(self.owner.team_no);
                 s_class = TeamFortress_GetClassName(self.owner.undercover_skin);
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
@@ -702,6 +730,7 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
         sprint(pe_player, PRINT_HIGH, "Skin reset\n");
         pe_player.undercover_skin = 0;
         pe_player.disguise_skin = 0;
+        pe_player.queue_skin = 0;
         TeamFortress_SetSkin(pe_player);
         if (!pe_player.undercover_team)
             pe_player.is_undercover = 0;
@@ -753,6 +782,7 @@ void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
         pe_player.immune_to_check = time + 10;
         pe_player.undercover_team = 0;
         pe_player.disguise_team = 0;
+        pe_player.queue_team = 0;
         stuffcmd(pe_player, "color ");
         stuffcmd(pe_player, ftos(f_team_color));
         stuffcmd(pe_player, "\n");
