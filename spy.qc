@@ -601,6 +601,15 @@ void () CF_Spy_GoUndercover = {
 
 };
 
+void () CF_Spy_DisguiseLast = {
+    if (self.last_skin) {
+        CF_Spy_ChangeSkin(self, self.last_skin);
+    }
+    if (self.last_team) {
+        CF_Spy_ChangeColor(self, self.last_team);
+    }
+};
+
 void () CF_Spy_UndercoverThink = {
     local float f_team_color;
     local string s_team, s_class;
@@ -628,6 +637,7 @@ void () CF_Spy_UndercoverThink = {
 
         if (self.skin) {
             self.owner.undercover_skin = self.skin;
+            self.owner.last_skin = self.skin;
             self.owner.disguise_skin = 0;
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
@@ -643,6 +653,7 @@ void () CF_Spy_UndercoverThink = {
 
         } else if (self.team) {
             self.owner.undercover_team = self.team;
+            self.owner.last_team = self.team;
 
             // tell client to change color
             f_team_color = TeamFortress_TeamGetColor(self.team) - 1;
