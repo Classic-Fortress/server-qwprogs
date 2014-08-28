@@ -52,7 +52,7 @@ void () TeamFortress_ReloadNext;
 void () Sniper_ZoomToggle;
 void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
-void () CF_Spy_GoUndercover;
+void () CF_Spy_DisguiseStop;
 void () TeamFortress_DetpackMenu;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
@@ -2180,7 +2180,7 @@ void () ImpulseCommands = {
 
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
-            CF_Spy_GoUndercover();
+            CF_Spy_DisguiseStop();
     }
 
     if (!self.is_feigning) {
@@ -2271,9 +2271,12 @@ void () ImpulseCommands = {
         DestroyBuilding(self, "building_teleporter_exit");
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_entrance");
-    else if ((self.impulse == TF_SPY_SPY) && (self.playerclass == PC_SPY))
-        CF_Spy_GoUndercover();
-    else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
+    else if ((self.impulse == TF_SPY_SPY) && (self.playerclass == PC_SPY)) {
+        if (invis_only)
+            CF_Spy_Invisible();
+        else
+            Menu_Spy_Skin();
+    } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(0);
     else if ((self.impulse == TF_SPY_SILENT_DIE) &&
              (self.playerclass == PC_SPY))
@@ -2473,7 +2476,7 @@ void () W_WeaponFrame = {
         else if (self.playerclass == PC_SCOUT)
             Menu_Scout();
         else if (self.playerclass == PC_SPY)
-            CF_Spy_GoUndercover();
+            Menu_Spy(self);
         else if (self.playerclass == PC_DEMOMAN)
             TeamFortress_DetpackMenu();
 

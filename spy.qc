@@ -529,100 +529,98 @@ void (float issilent) CF_Spy_FeignDeath = {
     }
 };
 
-void () CF_Spy_GoUndercover = {
+void () CF_Spy_Invisible = {
     local entity e_timer;
-    local string s_class, s_team;
 
     if (self.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT)) {
-        sprint(self, PRINT_MEDIUM, "You cannot disguise while glowing\n");
+        sprint(self, PRINT_MEDIUM, "You cannot become invisible while glowing\n");
         return;
     }
 
     if (self.is_unabletospy) {
-        sprint(self, PRINT_HIGH, "You cannot go undercover right now\n");
+        sprint(self, PRINT_HIGH, "You cannot become invisible right now\n");
         return;
     }
 
-    if (invis_only == 1) {
+    if (self.is_undercover == 1 || self.items & IT_INVISIBILITY) {
 
-        if (self.is_undercover == 1 || self.items & IT_INVISIBILITY) {
+        self.items = self.items - IT_INVISIBILITY;
+        self.invisible_finished = 0;
+        self.invisible_time = 0;
+        self.is_undercover = 0;
+        self.modelindex = modelindex_player;
 
-            self.items = self.items - IT_INVISIBILITY;
-            self.invisible_finished = 0;
-            self.invisible_time = 0;
-            self.is_undercover = 0;
-            self.modelindex = modelindex_player;
+    } else if (self.is_undercover == 2) {
 
-        } else if (self.is_undercover == 2) {
+        sprint(self, PRINT_HIGH, "You become visible again\n");
 
-            sprint(self, PRINT_HIGH, "You stop going undercover\n");
+        self.is_undercover = 0;
 
-            self.is_undercover = 0;
+    } else if (self.ammo_cells > 1) {
 
-        } else if (self.ammo_cells > 1) {
+        sprint(self, PRINT_HIGH, "Going invisible...\n");
 
-            sprint(self, PRINT_HIGH, "Going undercover...\n");
+        self.is_undercover = 2;
 
-            self.is_undercover = 2;
-
-            // create a timer for 4 seconds
-            e_timer = spawn();
-            e_timer.classname = "spytimer";
-            e_timer.owner = self;
-            e_timer.think = CF_Spy_UndercoverThink;
-            e_timer.nextthink = time + 4;
-        }
-
-        Status_Refresh(self);
-
-    } else if (self.is_undercover != 2) {
-
-        Menu_Spy();
-
-    } else {
-
-        // set undercover class if spy had the time to change class
-        if (self.undercover_skin)
-            s_class = TeamFortress_GetClassName(self.undercover_skin);
-        else
-            s_class = "Spy";
-
-        // set undercover team if spy had the time to change team
-        if (self.undercover_team)
-            s_team = TeamFortress_TeamGetColorString(self.undercover_team);
-        else
-            s_team = TeamFortress_TeamGetColorString(self.team_no);
-
-        // show what's left of the disguise
-        if (self.undercover_skin || self.undercover_team) {
-            sprint(self, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
-            self.is_undercover = 1;
-            self.last_skin = self.undercover_skin;
-            self.last_team = self.undercover_team;
-        } else {
-            sprint(self, PRINT_HIGH, "You stop going undercover\n");
-            self.is_undercover = 0;
-        }
-
-        self.disguise_skin = 0;
-        self.disguise_team = 0;
-        self.queue_skin = 0;
-        self.queue_team = 0;
-
-        // remove disguise timers belonging to self
-        e_timer = find(world, classname, "spytimer");
-        while (e_timer != world) {
-            if (e_timer.owner == self) {
-                dremove(e_timer);
-                e_timer = find(world, classname, "spytimer");
-            } else {
-                e_timer = find(e_timer, classname, "spytimer");
-            }
-        }
-
-        Status_Refresh(self);
-
+        // create a timer for 4 seconds
+        e_timer = spawn();
+        e_timer.classname = "spytimer";
+        e_timer.owner = self;
+        e_timer.think = CF_Spy_UndercoverThink;
+        e_timer.nextthink = time + 4;
     }
+
+    Status_Refresh(self);
+
+};
+
+void () CF_Spy_DisguiseStop = {
+    local entity e_timer;
+    local string s_class, s_team;
+
+    if (!self.is_undercover)
+        return;
+
+    // set undercover class if spy had the time to change class
+    if (self.undercover_skin)
+        s_class = TeamFortress_GetClassName(self.undercover_skin);
+    else
+        s_class = "Spy";
+
+    // set undercover team if spy had the time to change team
+    if (self.undercover_team)
+        s_team = TeamFortress_TeamGetColorString(self.undercover_team);
+    else
+        s_team = TeamFortress_TeamGetColorString(self.team_no);
+
+    // show what's left of the disguise
+    if (self.undercover_skin || self.undercover_team) {
+        sprint(self, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
+        self.is_undercover = 1;
+        self.last_skin = self.undercover_skin;
+        self.last_team = self.undercover_team;
+    } else {
+        sprint(self, PRINT_HIGH, "You stop going undercover\n");
+        self.is_undercover = 0;
+    }
+
+    self.disguise_skin = 0;
+    self.disguise_team = 0;
+    self.queue_skin = 0;
+    self.queue_team = 0;
+
+    // remove disguise timers belonging to self
+    e_timer = find(world, classname, "spytimer");
+    while (e_timer != world) {
+        if (e_timer.owner == self) {
+            dremove(e_timer);
+            e_timer = find(world, classname, "spytimer");
+        } else {
+            e_timer = find(e_timer, classname, "spytimer");
+        }
+    }
+
+    Status_Refresh(self);
 
 };
 
@@ -706,6 +704,8 @@ void () CF_Spy_UndercoverThink = {
     }
 
     Status_Refresh(self.owner);
+    if (self.owner.menu_input == Menu_Spy_Input)
+        Menu_Spy(self.owner);
     dremove(self);
 
 };
