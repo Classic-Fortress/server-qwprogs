@@ -45,7 +45,7 @@ void (float zoom_to) Sniper_Zoom;
 void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
-void (entity pe_player, float f_ignore) CF_Identify;
+void (entity pe_player, float f_type) CF_Identify;
 void () TeamFortress_ReloadCurrentWeapon;
 void (float slot) TeamFortress_ReloadSlot;
 void () TeamFortress_ReloadNext;
