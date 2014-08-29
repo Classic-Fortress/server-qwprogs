@@ -113,7 +113,7 @@ void () TeamFortress_SaveMe = {
 void (entity pe_player) CF_Identify = {
     local vector v_source;
     local string s_id_string = "", s_class = "", s_name = "";
-    local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0;
+    local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0, f_sentryhealth = 0, f_maxsentryhealth = 0;
 
     v_source = pe_player.origin + v_forward * 10;
     v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
@@ -180,8 +180,14 @@ void (entity pe_player) CF_Identify = {
 
             if (pe_player == trace_ent.real_owner)
                 s_name = "Your sentry gun";
-            else
+            else {
                 s_name = strcat(trace_ent.real_owner.netname, "'s sentry gun");
+
+                if (pe_player.team_no == trace_ent.team_no) {
+                    f_sentryhealth = trace_ent.health;
+                    f_maxsentryhealth = trace_ent.max_health;
+                }
+            }
 
             s_class = "";
 
@@ -204,6 +210,15 @@ void (entity pe_player) CF_Identify = {
             s_id_string = strcat(s_id_string, "/");
             s_id_string = strcat(s_id_string, ftos(f_maxarmor));
             s_id_string = strcat(s_id_string, " armor\n");
+
+        // set name + health (if sentry + engineer)
+        } else if (f_maxsentryhealth) {
+
+            s_id_string = strcat(s_name, "\n");
+            s_id_string = strcat(s_id_string, ftos(floor(f_sentryhealth)));
+            s_id_string = strcat(s_id_string, "/");
+            s_id_string = strcat(s_id_string, ftos(floor(f_maxsentryhealth)));
+            s_id_string = strcat(s_id_string, " health\n");
 
         // just set name (if other class)
         } else {
