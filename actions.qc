@@ -194,7 +194,7 @@ void (entity pe_player) CF_Identify = {
         }
 
         // set name + health (if medic)
-        if (f_health && (f_friendly || f_fakefriendly)) {
+        if (f_maxhealth && (f_friendly || f_fakefriendly)) {
 
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_health));
@@ -203,7 +203,7 @@ void (entity pe_player) CF_Identify = {
             s_id_string = strcat(s_id_string, " hp\n");
 
         // set name + armor (if engineer)
-        } else if (f_armor && (f_friendly || f_fakefriendly)) {
+        } else if (f_maxarmor && (f_friendly || f_fakefriendly)) {
 
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_armor));
