@@ -112,8 +112,8 @@ void () TeamFortress_SaveMe = {
 
 void (entity pe_player) CF_Identify = {
     local vector v_source;
-    local string s_id_string, s_class = "", s_name = "";
-    local float f_health = 0, f_armor = 0, f_friendly = 0, f_fakefriendly = 0;
+    local string s_id_string = "", s_class = "", s_name = "";
+    local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0;
 
     v_source = pe_player.origin + v_forward * 10;
     v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
@@ -137,12 +137,16 @@ void (entity pe_player) CF_Identify = {
             s_name = trace_ent.netname;
 
             // set health if you're a medic
-            if (pe_player.playerclass == PC_MEDIC)
+            if (pe_player.playerclass == PC_MEDIC) {
                 f_health = trace_ent.health;
+                f_maxhealth = trace_ent.max_health;
+            }
 
             // set armor if you're an engineer
-            else if (pe_player.playerclass == PC_ENGINEER)
+            else if (pe_player.playerclass == PC_ENGINEER) {
                 f_armor = trace_ent.armorvalue;
+                f_maxarmor = trace_ent.maxarmor;
+            }
 
             // target is an enemy spy
             if (trace_ent.playerclass == PC_SPY && !f_friendly) {
@@ -183,17 +187,30 @@ void (entity pe_player) CF_Identify = {
 
         }
 
-        // set name (+ health/armor)
+        // set name + health (if medic)
         if (f_health && (f_friendly || f_fakefriendly)) {
-            s_id_string = strcat(s_name, " (");
-            s_id_string = strcat(s_id_string, ftos(f_health));
-            s_id_string = strcat(s_id_string, " hp)\n");
-        } else if (f_armor && (f_friendly || f_fakefriendly)) {
-            s_id_string = strcat(s_name, " (");
-            s_id_string = strcat(s_id_string, ftos(f_armor));
-            s_id_string = strcat(s_id_string, " armor)\n");
-        } else {
+
             s_id_string = strcat(s_name, "\n");
+            s_id_string = strcat(s_id_string, ftos(f_health));
+            s_id_string = strcat(s_id_string, "/");
+            s_id_string = strcat(s_id_string, ftos(f_maxhealth));
+            s_id_string = strcat(s_id_string, " hp\n");
+
+        // set name + armor (if engineer)
+        } else if (f_armor && (f_friendly || f_fakefriendly)) {
+
+            s_id_string = strcat(s_name, "\n");
+            s_id_string = strcat(s_id_string, ftos(f_armor));
+            s_id_string = strcat(s_id_string, "/");
+            s_id_string = strcat(s_id_string, ftos(f_maxarmor));
+            s_id_string = strcat(s_id_string, " armor\n");
+
+        // just set name (if other class)
+        } else {
+
+            s_id_string = strcat("\n", s_name);
+            s_id_string = strcat(s_id_string, "\n");
+
         }
 
         // set friendly/enemy

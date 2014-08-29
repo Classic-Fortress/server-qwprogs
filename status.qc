@@ -117,7 +117,7 @@ void (entity pl) RefreshStatusBar = {
     height = floor(stof(infokey(pl, "sb")));
     if (height > 300)
         height = 300;
-    height = height - pl.StatusStringLines - 6;
+    height = height - pl.StatusStringLines - 7;
 
     // no sbar can be displayed
     if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
@@ -235,7 +235,7 @@ void (entity pl) RefreshStatusBar = {
     if (pl.ident_string != string_null && time < pl.ident_time) {
         ident = strcat(pl.ident_string, "\n\n");
     } else {
-        ident = "\n\n\n";
+        ident = "\n\n\n\n";
     }
 
     centerprint(pl, pl.StatusString, pad, ident, s1, s2, s3);
