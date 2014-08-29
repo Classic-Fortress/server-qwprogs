@@ -1509,6 +1509,7 @@ void () PlayerPreThink = {
                 } else {
                     self.feign_areachecked = 1;
                     if (!(self.tfstate & TFSTATE_CANT_MOVE)) {
+                        self.movetype = MOVETYPE_NONE;
                         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
                         TeamFortress_SetSpeed(self);
                     }

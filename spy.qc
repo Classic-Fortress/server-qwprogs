@@ -404,6 +404,7 @@ void (float issilent) CF_Spy_FeignDeath = {
             W_SetCurrentAmmo(self);
 
             // allow spy to move again
+            self.movetype = MOVETYPE_WALK;
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(self);
 
