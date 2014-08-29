@@ -53,6 +53,9 @@ float (entity targ, entity inflictor) CanDamage = {
 void (entity targ, entity attacker) Killed = {
     local entity oself;
 
+    if (attacker == world)
+        attacker = targ;
+
     oself = self;
     self = targ;
     if (self.health < -99)
