@@ -2044,6 +2044,25 @@ void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName = {
     sprint(Viewer, PRINT_HIGH, "\n");
 };
 
+void () TeamFortress_StartTimers = {
+    local entity timer;
+
+    // start autoid timer
+    if (stof(infokey(self, "ai"))) {
+        if (!self.autoid_timer) {
+            timer = spawn();
+            timer.nextthink = time + 0.3;
+            timer.think = AutoId;
+            timer.owner = self;
+            timer.classname = "aitimer";
+            self.autoid_timer = 1;
+        }
+    } else if (self.autoid_timer) {
+        RemoveAutoIdTimer();
+        self.autoid_timer = 0;
+    }
+}
+
 void () TeamFortress_RemoveTimers = {
     local entity te;
 

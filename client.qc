@@ -36,7 +36,6 @@ void () PreMatch_Think;
 
 void () DumpClanScores;
 
-void () AutoId;
 void (entity p) SetTeamName;
 
 void () autokick_think;
@@ -940,6 +939,7 @@ entity () SelectSpawnPoint =
 void () PlayerDie;
 void () TeamFortress_SetHealth;
 void () TeamFortress_SetEquipment;
+void () TeamFortress_StartTimers;
 void () player_touch;
 
 // moves the client forward if spawn point is occupied
@@ -964,7 +964,6 @@ void () PutClientInServer = {
     local float oldclass;
     local entity spot;
     local entity te;
-    local entity timer;
 
     self.touch = player_touch;
     self.classname = "player";
@@ -1041,6 +1040,7 @@ void () PutClientInServer = {
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
+    TeamFortress_StartTimers();
 
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
@@ -1132,15 +1132,6 @@ void () PutClientInServer = {
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
-    }
-
-    // start autoid timer
-    if (stof(infokey(self, "ai"))) {
-        timer = spawn();
-        timer.nextthink = time + 0.3;
-        timer.think = AutoId;
-        timer.owner = self;
-        timer.classname = "aitimer";
     }
 };
 
