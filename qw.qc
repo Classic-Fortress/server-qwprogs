@@ -55,6 +55,7 @@ typedef void (float) f_void_float;
 .float queue_team;              // The team the spy will change to after skin disguise is finished
 .float last_team;               // The last team the spy disguised as
 .float feign_areachecked;       // TRUE if area around spy has been checked for entities when feigned
+.float autoid_timer;            // TRUE if player has an active autoid timer
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 
