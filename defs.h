@@ -495,7 +495,9 @@
 #define TF_DISCARD 		184
 
 // ID Player impulse
-#define TF_ID			185
+#define TF_ID               190
+#define TF_ID_TEAM          191
+#define TF_ID_ENEMY         192
 
 // other impulses
 #define TF_SHOW_IDS		186

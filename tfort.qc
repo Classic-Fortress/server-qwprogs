@@ -7,11 +7,23 @@ void () TeamFortress_ExplodePerson;
 void () TeamFortress_Regenerate;
 void () TeamFortress_CheckforCheats;
 void () TeamFortress_RegenerateCells;
-void (entity pe_player) CF_Identify;
+void (entity pe_player, float f_ignore) CF_Identify;
 
 float () CloseToSpawnPoint;
 
 void () AutoId = {
+
+    // ready autoid settings every 5 seconds
+    if (time > self.owner.autoid_time) {
+        self.owner.autoid_type = stof(infokey(self.owner, "ai"));
+        self.owner.autoid_time = time + 5;
+    }
+
+    // try autoid again in 5 seconds if currently turned off
+    if (!self.owner.autoid_type) {
+        self.nextthink = time + 5;
+        return;
+    }
 
     if (time > self.ident_time || !self.ident_time) {
 
@@ -21,7 +33,7 @@ void () AutoId = {
             self.ident_string = string_null;
         }
 
-        CF_Identify(self.owner);
+        CF_Identify(self.owner, self.owner.autoid_type);
     }
 
     self.nextthink = time + 0.1;
@@ -2048,14 +2060,11 @@ void () TeamFortress_StartTimers = {
     local entity timer;
 
     // start autoid timer
-    if (stof(infokey(self, "ai"))) {
-        RemoveAutoIdTimer();
-        timer = spawn();
-        timer.nextthink = time + 0.3;
-        timer.think = AutoId;
-        timer.owner = self;
-        timer.classname = "aitimer";
-    }
+    timer = spawn();
+    timer.nextthink = time + 0.3;
+    timer.think = AutoId;
+    timer.owner = self;
+    timer.classname = "aitimer";
 }
 
 void () TeamFortress_RemoveTimers = {
