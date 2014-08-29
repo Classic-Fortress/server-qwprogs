@@ -7,7 +7,7 @@ void () TeamFortress_ExplodePerson;
 void () TeamFortress_Regenerate;
 void () TeamFortress_CheckforCheats;
 void () TeamFortress_RegenerateCells;
-void (entity pe_player, float f_ignore) CF_Identify;
+void (entity pe_player, float f_type) CF_Identify;
 
 float () CloseToSpawnPoint;
 
