@@ -76,7 +76,7 @@ void () SpectatorImpulseCommand = {
         }
     } else if (self.impulse == TF_ID)
 
-        CF_Identify(self);
+        CF_Identify(self, self.autoid_type);
 
     else if (self.impulse == TF_HELP_MAP)
 

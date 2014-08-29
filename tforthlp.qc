@@ -114,6 +114,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
         TeamFortress_Alias("discard", TF_DISCARD, 0);
         TeamFortress_Alias("id", TF_ID, 0);
+        TeamFortress_Alias("idteam", TF_ID_TEAM, 0);
+        TeamFortress_Alias("idenemy", TF_ID_ENEMY, 0);
         TeamFortress_Alias("votenext", TF_VOTENEXT, 0);
         TeamFortress_Alias("votetrick", TF_VOTETRICK, 0);
         TeamFortress_Alias("voterace", TF_VOTERACE, 0);

@@ -110,7 +110,7 @@ void () TeamFortress_SaveMe = {
     }
 };
 
-void (entity pe_player) CF_Identify = {
+void (entity pe_player, float f_type) CF_Identify = {
     local vector v_source;
     local string s_id_string = "", s_class = "", s_name = "";
     local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0, f_sentryhealth = 0, f_maxsentryhealth = 0;
@@ -123,10 +123,27 @@ void (entity pe_player) CF_Identify = {
 
         // show as friendly if target is on your team or disguised as your team
         if (pe_player.team_no) {
-            if (pe_player.team_no == trace_ent.team_no)
+
+            if (pe_player.team_no == trace_ent.team_no) {
+
+                // ignore teammates if type is set to enemies only
+                if (f_type == 3)
+                    return;
+
                 f_friendly = 1;
-            else if (pe_player.team_no == trace_ent.undercover_team)
+
+            } else if (pe_player.team_no == trace_ent.undercover_team) {
+
+                // ignore teammates if type is set to enemies only
+                if (f_type == 3)
+                    return;
+
                 f_fakefriendly = 1;
+
+            // ignore enemies if type is set to team only
+            } else if (f_type == 2)
+                return;
+
         }
 
         // alive player is found
