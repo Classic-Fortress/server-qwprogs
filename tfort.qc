@@ -2049,17 +2049,12 @@ void () TeamFortress_StartTimers = {
 
     // start autoid timer
     if (stof(infokey(self, "ai"))) {
-        if (!self.autoid_timer) {
-            timer = spawn();
-            timer.nextthink = time + 0.3;
-            timer.think = AutoId;
-            timer.owner = self;
-            timer.classname = "aitimer";
-            self.autoid_timer = 1;
-        }
-    } else if (self.autoid_timer) {
         RemoveAutoIdTimer();
-        self.autoid_timer = 0;
+        timer = spawn();
+        timer.nextthink = time + 0.3;
+        timer.think = AutoId;
+        timer.owner = self;
+        timer.classname = "aitimer";
     }
 }
 
