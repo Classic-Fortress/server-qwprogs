@@ -1532,11 +1532,10 @@ void () PlayerPreThink = {
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
-    if (((time > self.attack_finished) && (self.currentammo == 0)) &&
-        (self.weapon > 16)) {
-        self.weapon = W_BestWeapon();
-        self.current_weaponslot = W_BestWeaponSlot();
+    if (time > self.attack_finished && !self.currentammo && self.weapon > WEAP_AXE) {
+        W_ChangeWeapon(W_BestWeaponSlot());
         W_SetCurrentAmmo(self);
+        W_WeaponState_Save(self);
     }
 };
 
