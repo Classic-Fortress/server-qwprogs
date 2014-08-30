@@ -208,6 +208,10 @@ void (entity pe_player, float f_type) CF_Identify = {
 
             s_class = "";
 
+        } else {
+
+            return;
+
         }
 
         // set name + health (if medic)
