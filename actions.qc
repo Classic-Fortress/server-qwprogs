@@ -121,6 +121,14 @@ void (entity pe_player, float f_type) CF_Identify = {
     traceline(v_source, v_source + v_forward * 2048, 0, pe_player);
     if (trace_ent != world) {
 
+        // don't identify targets above water if player is under water
+        if (pe_player.waterlevel == 3 && !trace_ent.waterlevel)
+            return;
+
+        // don't identify targets under water if player is above water
+        if (pe_player.waterlevel < 3 && trace_ent.waterlevel == 3)
+            return;
+
         // show as friendly if target is on your team or disguised as your team
         if (pe_player.team_no) {
 
