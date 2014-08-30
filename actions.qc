@@ -264,8 +264,10 @@ void (entity pe_player, float f_type) CF_Identify = {
         pe_player.ident_time = time + 0.5;
 
         // don't update memory when the id string is the same
-        if (pe_player.ident_string == s_id_string)
+        if (pe_player.ident_string == s_id_string) {
+            Status_Refresh(pe_player);
             return;
+        }
 
         // refresh status bar
         pe_player.ident_string = strzone(s_id_string);
