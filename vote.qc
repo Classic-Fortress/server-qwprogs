@@ -779,6 +779,17 @@ void (float pf_type) Vote_PopulateVoteList = {
             //dprint("[", ftos(time), "/cf/mapvote/populatevotelist]: adding map4: ", vote4_map, "\n");
         }
 
+        // recalculate odds
+        f_count = f_count1 + f_count2 + f_count3 + f_count4 + f_count5 + f_count6 + f_count7 + f_count8;
+        f_range1 = f_count1 / f_count * 100;
+        f_range2 = f_range1 + (f_count2 / f_count * 100);
+        f_range3 = f_range2 + (f_count3 / f_count * 100);
+        f_range4 = f_range3 + (f_count4 / f_count * 100);
+        f_range5 = f_range4 + (f_count5 / f_count * 100);
+        f_range6 = f_range5 + (f_count6 / f_count * 100);
+        f_range7 = f_range6 + (f_count7 / f_count * 100);
+        f_range8 = f_range7 + (f_count8 / f_count * 100);
+
         strunzone(s_tmp);
     }
     vote5_map = strzone(mapname);
