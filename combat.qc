@@ -53,7 +53,7 @@ float (entity targ, entity inflictor) CanDamage = {
 void (entity targ, entity attacker) Killed = {
     local entity oself;
 
-    if (attacker == world)
+    if (attacker == world && (targ.classname == "building_dispenser" || targ.classname == "building_sentrygun"))
         attacker = targ;
 
     oself = self;
