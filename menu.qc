@@ -235,15 +235,44 @@ void () Menu_Class = {
     local string count_py = TeamFortress_ClassGetNoPlayersString(PC_PYRO, self.team_no);
     local string count_sp = TeamFortress_ClassGetNoPlayersString(PC_SPY, self.team_no);
     local string count_en = TeamFortress_ClassGetNoPlayersString(PC_ENGINEER, self.team_no);
-    s_scout = strcat(s_scout, strcat(count_sc, "\n"));
-    s_sniper = strcat(s_sniper, strcat(count_sn, "\n"));
-    s_soldier = strcat(s_soldier, strcat(count_so, "\n"));
-    s_demoman = strcat(s_demoman, strcat(count_de, "\n"));
-    s_medic = strcat(s_medic, strcat(count_me, "\n"));
-    s_hwguy = strcat(s_hwguy, strcat(count_hw, "\n"));
-    s_pyro = strcat(s_pyro, strcat(count_py, "\n"));
-    s_spy = strcat(s_spy, strcat(count_sp, "\n"));
-    s_engineer = strcat(s_engineer, strcat(count_en, "\n"));
+
+    // only print classes that are allowed
+    if (IsLegalClass(PC_SCOUT) && !ClassIsRestricted(self.team_no, PC_SCOUT))
+        s_scout = strcat(s_scout, strcat(count_sc, "\n"));
+    else
+        s_scout = "\n";
+    if (IsLegalClass(PC_SNIPER) && !ClassIsRestricted(self.team_no, PC_SNIPER))
+        s_sniper = strcat(s_sniper, strcat(count_sn, "\n"));
+    else
+        s_sniper = "\n";
+    if (IsLegalClass(PC_SOLDIER) && !ClassIsRestricted(self.team_no, PC_SOLDIER))
+        s_soldier = strcat(s_soldier, strcat(count_so, "\n"));
+    else
+        s_soldier = "\n";
+    if (IsLegalClass(PC_DEMOMAN) && !ClassIsRestricted(self.team_no, PC_DEMOMAN))
+        s_demoman = strcat(s_demoman, strcat(count_de, "\n"));
+    else
+        s_demoman = "\n";
+    if (IsLegalClass(PC_MEDIC) && !ClassIsRestricted(self.team_no, PC_MEDIC))
+        s_medic = strcat(s_medic, strcat(count_me, "\n"));
+    else
+        s_medic = "\n";
+    if (IsLegalClass(PC_HVYWEAP) && !ClassIsRestricted(self.team_no, PC_HVYWEAP))
+        s_hwguy = strcat(s_hwguy, strcat(count_hw, "\n"));
+    else
+        s_hwguy = "\n";
+    if (IsLegalClass(PC_PYRO) && !ClassIsRestricted(self.team_no, PC_PYRO))
+        s_pyro = strcat(s_pyro, strcat(count_py, "\n"));
+    else
+        s_pyro = "\n";
+    if (IsLegalClass(PC_SPY) && !ClassIsRestricted(self.team_no, PC_SPY))
+        s_spy = strcat(s_spy, strcat(count_sp, "\n"));
+    else
+        s_spy = "\n";
+    if (IsLegalClass(PC_ENGINEER) && !ClassIsRestricted(self.team_no, PC_ENGINEER))
+        s_engineer = strcat(s_engineer, strcat(count_en, "\n"));
+    else
+        s_engineer = "\n";
 
     AD = find(world, classname, "info_tfdetect");
     if (AD) {
