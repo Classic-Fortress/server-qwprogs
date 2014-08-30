@@ -8,6 +8,8 @@ void (float issilent) CF_Spy_FeignDeath;
 void () CF_Spy_Invisible;
 void () CF_Spy_DisguiseStop;
 
+float (float tno, float pc) ClassIsRestricted;
+
 void (entity spy) Spy_RemoveDisguise;
 
 void (entity eng, string bld) DestroyBuilding;
@@ -199,7 +201,7 @@ void (float inp) Menu_Class_Input = {
     if (!inp)
         return;
 
-    if (inp > 10 || !IsLegalClass(inp))
+    if (inp > 10 || !IsLegalClass(inp) || ClassIsRestricted(self.team_no, inp))
         Menu_Class();
 
     TeamFortress_ChangeClass(inp);
