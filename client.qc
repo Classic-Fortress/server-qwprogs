@@ -1238,10 +1238,11 @@ void () NextLevel = {
 };
 
 void () CheckRules = {
-    if (timelimit && (time >= timelimit))
+    if ((timelimit && time >= timelimit) || (fraglimit && self.frags >= fraglimit)) {
         NextLevel();
-    else if (fraglimit && (self.frags >= fraglimit))
-        NextLevel();
+        RemoveGrenadeTimers();
+        RemoveGrenades();
+    }
 };
 
 void () PlayerDeathThink = {
@@ -1446,11 +1447,6 @@ void () CheckWaterJump = {
 };
 
 void () PlayerPreThink = {
-    if (time >= timelimit) {
-        RemoveGrenadeTimers();
-        RemoveGrenades();
-    }
-
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
             Vote_NextMap(self);
@@ -1478,7 +1474,10 @@ void () PlayerPreThink = {
     if (self.view_ofs == '0 0 0') {
         return;
     }
+
+    // Check if timelimit/fraglimit has been met
     CheckRules();
+
     if (self.playerclass != 0) {
         WaterMove();
     }
