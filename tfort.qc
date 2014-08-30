@@ -84,11 +84,22 @@ void () RemoveAutoIdTimer = {
 };
 
 void () RemoveGrenadeTimers = {
-    local entity te = find(world, classname, "gtimer");
+    local entity te;
+
+    te = find(world, classname, "gtimer");
     while (te != world) {
         if (te.owner == self)
             dremove(te);
         te = find(te, classname, "gtimer");
+    }
+
+    if (self.health <= 0) {
+        te = find(world, classname, "primetimer");
+        while (te != world) {
+            if (te.owner == self)
+                dremove(te);
+            te = find(te, classname, "primetimer");
+        }
     }
 };
 
@@ -699,7 +710,7 @@ void () TeamFortress_GrenadePrimed = {
     local entity user;
 
     user = self.owner;
-    if (!(user.tfstate & 1024) && !user.deadflag && !user.has_disconnected) {
+    if (!(user.tfstate & TFSTATE_GRENTHROWING) && !user.deadflag && !user.has_disconnected) {
         self.nextthink = time + 0.1;
         if (!self.think)
             dremove(self);
@@ -709,7 +720,7 @@ void () TeamFortress_GrenadePrimed = {
 
         return;
     }
-    if (!(user.tfstate & 1))
+    if (!(user.tfstate & TFSTATE_GRENPRIMED))
         dprint("GrenadePrimed logic error\n");
 
     user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENPRIMED);
