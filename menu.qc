@@ -125,19 +125,30 @@ void (float inp) Menu_Team_Input = {
     }
 };
 
-void () Menu_Team = {
-    local string ch = "Select team:\n\n";
-    local string t1 = "“‘ Blue team      ";
-    local string t2, t3, t4;
-    local string ta = "\n—‘ Automatically assign team";
+string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
+    local string s_string = "";
+    local float f_gap = 2;
+    local float f_players = TeamFortress_TeamGetNoPlayers(pf_team_no);
 
+    if (number_of_teams >= pf_team_no) {
+        s_string = strpadl(ftos(f_players), f_gap);
+        if (f_players < 10) {
+            s_string = strpadl(s_string, (1 + f_gap));
+            if (f_players == 1)
+                s_string = strcat(s_string, " player \n");
+            else
+                s_string = strcat(s_string, " players\n");
+        } else
+            s_string = strcat(s_string, " players\n");
+        s_string = strcat(ps_team, s_string);
+    }
+
+    return strzone(s_string);
+};
+
+void () Menu_Team = {
     if (self.classname == "observer")
         Status_Menu(self, Menu_Team_Input, "");
-
-    local float t1_players  = TeamFortress_TeamGetNoPlayers(1);
-    local float t2_players  = TeamFortress_TeamGetNoPlayers(2);
-    local float t3_players  = TeamFortress_TeamGetNoPlayers(3);
-    local float t4_players  = TeamFortress_TeamGetNoPlayers(4);
 
     // allow toggling team menu using any method to show it
     if (self.menu_input == Menu_Team_Input) {
@@ -150,53 +161,24 @@ void () Menu_Team = {
             return;
     }
 
-    t2 = "";
-    t3 = "";
-    t4 = "";
+    // prepare team strings
+    local string s_select = "Select team:\n\n";
+    local string s_blue   = "“‘ Blue team  ";
+    local string s_red    = "”‘ Red team   ";
+    local string s_yellow = "•‘ Yellow team";
+    local string s_green  = "–‘ Green team ";
+    local string s_auto   = "—‘ Auto-assign team";
 
-    if (number_of_teams > 1)
-        t2 = "”‘ Red team       ";
+    // put together team strings
+    s_blue = Menu_Team_TeamString(1, s_blue);
+    s_red = Menu_Team_TeamString(2, s_red);
+    s_yellow = Menu_Team_TeamString(3, s_yellow);
+    s_green = Menu_Team_TeamString(4, s_green);
+    s_auto = strpadr(s_auto, (strlen(s_blue) - 1));
 
-    if (number_of_teams > 2)
-        t3 = "•‘ Yellow team    ";
+    Status_Menu(self, Menu_Team_Input, s_select, s_blue, s_red, s_yellow, s_green, "\n", s_auto);
 
-    if (number_of_teams > 3)
-        t4 = "–‘ Green team     ";
-
-    t1 = strcat(t1, strpadl(ftos(t1_players), 2));
-    if (t1_players == 1)
-        t1 = strcat(t1, " player \n");
-    else
-        t1 = strcat(t1, " players\n");
-
-    if (strlen(t2) > 0) {
-        t2 = strcat(t2, strpadl(ftos(t2_players), 2));
-        if (t2_players == 1)
-            t2 = strcat(t2, " player \n");
-        else
-            t2 = strcat(t2, " players\n");
-    } else
-        ta = strcat(ta, "\n");
-
-    if (strlen(t3) > 0) {
-        t3 = strcat(t3, strpadl(ftos(t3_players), 2));
-        if (t3_players == 1)
-            t3 = strcat(t3, " player \n");
-        else
-            t3 = strcat(t3, " players\n");
-    } else
-        ta = strcat(ta, "\n");
-
-    if (strlen(t4) > 0) {
-        t4 = strcat(t4, strpadl(ftos(t4_players), 2));
-        if (t4_players == 1)
-            t4 = strcat(t4, " player \n");
-        else
-            t4 = strcat(t4, " players\n");
-    } else
-        ta = strcat(ta, "\n");
-
-    Status_Menu(self, Menu_Team_Input, ch, t1, t2, t3, t4, ta);
+    strunzone(s_blue); strunzone(s_red); strunzone(s_yellow); strunzone(s_green);
 };
 
 void (float inp) Menu_Class_Input = {
