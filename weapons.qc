@@ -10,6 +10,7 @@ void () SuperDamageSound;
 void () ConcussionGrenadeTimer;
 void () OldConcussionGrenadeTimer;
 
+void (float inp) W_ChangeWeapon;
 void () W_ChangeToBestWeapon;
 void (float slot) W_WeaponSlot;
 void (entity pl) W_WeaponState_Save;
@@ -1772,6 +1773,9 @@ void () W_Attack = {
                 sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
                 self.antispam_assault_cannon = time + 3;
             }
+            W_ChangeWeapon(W_BestWeaponSlot());
+            W_SetCurrentAmmo(self);
+            W_WeaponState_Save(self);
         } else {
             self.ammo_cells = self.ammo_cells - 7;
             self.heat = 1;
