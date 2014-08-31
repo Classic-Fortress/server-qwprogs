@@ -54,6 +54,7 @@ void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
 void () CF_Spy_DisguiseStop;
 void () TeamFortress_DetpackMenu;
+void () CF_Medic_AuraToggle;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
@@ -2257,6 +2258,8 @@ void () ImpulseCommands = {
         TeamFortress_DetonatePipebombs();
     else if (self.impulse == TF_DETPACK_STOP)
         TeamFortress_DetpackStop();
+    else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
+        CF_Medic_AuraToggle();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
              (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_sentrygun");

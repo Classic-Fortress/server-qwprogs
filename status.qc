@@ -10,6 +10,7 @@ string(float num) GreenScoreToString;
 string(entity pl) ClipSizeToString;
 float(entity pl) GetClipSize;
 string(entity pl) DetpackToString;
+string(entity pl) AuraToString;
 string(entity pl) AssaultCannonToString;
 string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
@@ -171,6 +172,8 @@ void (entity pl) RefreshStatusBar = {
         st1 = ScannerToString(pl);
     else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
         st1 = DetpackToString(pl);
+    else if (pl.playerclass == PC_MEDIC)
+        st1 = AuraToString(pl);
     else if (pl.playerclass == PC_HVYWEAP)
         st1 = AssaultCannonToString(pl);
     else if (pl.playerclass == PC_SPY)
@@ -433,6 +436,28 @@ string(entity pl) DetpackToString =
         st = "Δετπαγλ: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " seconds left");
+    }
+
+    return st;
+};
+
+string(entity pl) AuraToString =
+{
+    local string st = "Θεαμιξη Αυςα: ";
+
+    if (pl.aura_active) {
+        if (time < pl.aura_healtime && pl.aura_healcount) {
+            st = strcat(st, ftos(pl.aura_healcount));
+            st = strcat(st, " players healed for ");
+            st = strcat(st, ftos(pl.aura_healamount));
+            st = strcat(st, " hp");
+        }
+        else if (pl.ammo_cells < 100)
+            st = strcat(st, "recharging");
+        else
+            st = strcat(st, "on");
+    } else {
+        st = strcat(st, "off");
     }
 
     return st;

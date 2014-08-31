@@ -4,7 +4,7 @@ void (entity Player, float Armorclass) TeamFortress_DescribeArmor;
 void () TeamFortress_AmmoboxTouch;
 
 void () TeamFortress_ExplodePerson;
-void () TeamFortress_Regenerate;
+void () CF_Medic_Regenerate;
 void () TeamFortress_CheckforCheats;
 void () TeamFortress_RegenerateCells;
 void (entity pe_player, float f_type) CF_Identify;
@@ -49,6 +49,8 @@ void () UseSpecialSkill = {
         self.impulse = TF_ZOOMTOGGLE;
     else if (self.playerclass == PC_DEMOMAN)
         self.impulse = TF_PB_DETONATE;
+    else if (self.playerclass == PC_MEDIC)
+        self.impulse = TF_MEDIC_AURA_TOGGLE;
     else if (self.playerclass == PC_SPY)
         self.impulse = TF_SPY_DIE;
     else if (self.playerclass == PC_ENGINEER)
@@ -1692,7 +1694,19 @@ void () TeamFortress_SetEquipment = {
 
         te = spawn();
         te.nextthink = time + PC_MEDIC_REGEN_TIME;
-        te.think = TeamFortress_Regenerate;
+        te.think = CF_Medic_Regenerate;
+        te.owner = self;
+        te.classname = "timer";
+
+        te = spawn();
+        te.nextthink = time + PC_MEDIC_CELL_REGEN_TIME;
+        te.think = CF_Medic_RegenerateCells;
+        te.owner = self;
+        te.classname = "timer";
+
+        te = spawn();
+        te.nextthink = time + PC_MEDIC_AURA_HEAL_TIME;
+        te.think = CF_Medic_AuraFindPlayers;
         te.owner = self;
         te.classname = "timer";
 
@@ -2758,34 +2772,6 @@ void (string halias, string commands) TeamFortress_AliasString = {
     stuffcmd(self, " \"");
     stuffcmd(self, commands);
     stuffcmd(self, "\"\n");
-};
-
-void () TeamFortress_Regenerate = {
-    if (self.owner.playerclass == PC_MEDIC) {
-        self.nextthink = time + PC_MEDIC_REGEN_TIME;
-
-        if (self.owner.has_disconnected == 1) {
-            dremove(self);
-            return;
-        }
-        if (self.owner.health >= self.owner.max_health)
-            return;
-
-        if (self.owner.ammo_medikit == 0)
-            return;
-
-        if (self.owner.ammo_medikit < PC_MEDIC_REGEN_AMOUNT) {
-            self.owner.health =
-                self.owner.health + self.owner.ammo_medikit;
-            self.owner.ammo_medikit = 0;
-        } else {
-            self.owner.health = self.owner.health + PC_MEDIC_REGEN_AMOUNT;
-            self.owner.ammo_medikit =
-                self.owner.ammo_medikit - PC_MEDIC_REGEN_AMOUNT;
-        }
-        if (self.owner.health > self.owner.max_health)
-            self.owner.health = self.owner.max_health;
-    }
 };
 
 void () TeamFortress_RegenerateCells = {

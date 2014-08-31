@@ -55,6 +55,11 @@ typedef void (float) f_void_float;
 .float queue_team;              // The team the spy will change to after skin disguise is finished
 .float last_team;               // The last team the spy disguised as
 .float feign_areachecked;       // TRUE if area around spy has been checked for entities when feigned
+.float aura_active;             // TRUE if medic aura is active
+.float aura_healamount;         // Amount of health given to other players
+.float aura_healcount;          // Amount of players given health
+.float aura_healtime;           // Aura healing status will be shown in status bar until this time
+.float regen_time;              // Time when the medic last regenerated cells
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 
