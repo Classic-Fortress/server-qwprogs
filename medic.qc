@@ -44,7 +44,7 @@ void () CF_Medic_AuraFindPlayers = {
 
     e_find = findradius(self.owner.origin, PC_MEDIC_AURA_RANGE);
     while (e_find != world) {
-        if (e_find.classname == "player" && e_find.team_no == self.owner.team_no) {
+        if (e_find != self.owner && e_find.classname == "player" && e_find.team_no == self.owner.team_no) {
             f_healamount = CF_Medic_AuraHealPlayer(e_find);
             f_healtotal = f_healtotal + f_healamount;
             if (f_healamount)
