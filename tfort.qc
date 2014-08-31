@@ -94,15 +94,6 @@ void () RemoveGrenadeTimers = {
             dremove(te);
         te = find(te, classname, "gtimer");
     }
-
-    if (self.health <= 0) {
-        te = find(world, classname, "primetimer");
-        while (te != world) {
-            if (te.owner == self)
-                dremove(te);
-            te = find(te, classname, "primetimer");
-        }
-    }
 };
 
 void () RemoveGrenades = {
