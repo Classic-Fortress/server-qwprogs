@@ -214,10 +214,30 @@ void (float inp) Menu_Class_Input = {
     TeamFortress_ChangeClass(inp);
 };
 
-void () Menu_Class = {
-    local float f_max, f_players, f_class, f_gap = 4;
+string (float pf_class, string ps_class) Menu_Class_ClassString = {
     local string s_string;
+    local float f_gap = 4;
+    local float f_max = CF_GetClassRestriction(self.team_no, pf_class);
+    local float f_players = CF_GetClassPlayers(self.team_no, pf_class);
 
+    if (IsLegalClass(pf_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_string = strzone(strcat(ps_class, s_string));
+    } else
+        s_string = strzone("\n");
+
+    return strzone(s_string);
+};
+
+void () Menu_Class = {
     if (self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
         return;
@@ -262,176 +282,17 @@ void () Menu_Class = {
     local string s_engineer = "›‘ Engineer";
     local string s_randompc = "’‘ RandomPC";
 
-    // put together class strings
-    f_class = PC_SCOUT;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_scout = strzone(strcat(s_scout, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_scout = strzone("\n");
-
-    f_class = PC_SNIPER;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_sniper = strzone(strcat(s_sniper, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_sniper = strzone("\n");
-
-    f_class = PC_SOLDIER;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_soldier = strzone(strcat(s_soldier, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_soldier = strzone("\n");
-
-    f_class = PC_DEMOMAN;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_demoman = strzone(strcat(s_demoman, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_demoman = strzone("\n");
-
-    f_class = PC_MEDIC;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_medic = strzone(strcat(s_medic, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_medic = strzone("\n");
-
-    f_class = PC_HVYWEAP;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_hwguy = strzone(strcat(s_hwguy, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_hwguy = strzone("\n");
-
-    f_class = PC_PYRO;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_pyro = strzone(strcat(s_pyro, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_pyro = strzone("\n");
-
-    f_class = PC_SPY;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_spy = strzone(strcat(s_spy, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_spy = strzone("\n");
-
-    f_class = PC_ENGINEER;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_engineer = strzone(strcat(s_engineer, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_engineer = strzone("\n");
-
-    f_class = PC_RANDOM;
-    f_max = CF_GetClassRestriction(self.team_no, f_class);
-    f_players = CF_GetClassPlayers(self.team_no, f_class);
-    if (IsLegalClass(f_class) && f_max >= 0) {
-        if (f_players < 10)
-            s_string = strpadl(ftos(f_players), (1 + f_gap));
-        else
-            s_string = strpadl(ftos(f_players), f_gap);
-        s_string = strcat(s_string, " / ");
-        if (f_max < 10)
-            s_string = strpadr(s_string, (5 + f_gap));
-        s_string = strcat(s_string, ftos(f_max));
-        s_string = strcat(s_string, "\n");
-        s_randompc = strzone(strcat(s_randompc, s_string));
-    } else if (!IsLegalClass(f_class) || f_max == -1)
-        s_randompc = strzone("\n");
+    // put together class strings - all strings are strzoned
+    s_scout = Menu_Class_ClassString(PC_SCOUT, s_scout);
+    s_sniper = Menu_Class_ClassString(PC_SNIPER, s_sniper);
+    s_soldier = Menu_Class_ClassString(PC_SOLDIER, s_soldier);
+    s_demoman = Menu_Class_ClassString(PC_DEMOMAN, s_demoman);
+    s_medic = Menu_Class_ClassString(PC_MEDIC, s_medic);
+    s_hwguy = Menu_Class_ClassString(PC_HVYWEAP, s_hwguy);
+    s_pyro = Menu_Class_ClassString(PC_PYRO, s_pyro);
+    s_spy = Menu_Class_ClassString(PC_SPY, s_spy);
+    s_engineer = Menu_Class_ClassString(PC_ENGINEER, s_engineer);
+    s_randompc = Menu_Class_ClassString(PC_RANDOM, s_randompc);
 
     // print out class menu
     self.menu_input = nil;
