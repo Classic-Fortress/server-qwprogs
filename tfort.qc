@@ -1439,6 +1439,7 @@ void () TeamFortress_SetEquipment = {
     self.detpack_left = 0;
     self.fragstreak = 0;
     self.menu_time = 0;
+    self.nopickup = world;
 
     self.ammo_medikit = 0;
     self.maxammo_medikit = 0;
@@ -2426,42 +2427,96 @@ void () TeamFortress_AmmoboxTouch = {
         return;
     if (other.health <= 0)
         return;
+    if (other.nopickup == self)
+        return;
 
     if (self.weapon == 0) {
-        other.ammo_shells = other.ammo_shells + self.ammo_shells;
-        other.ammo_nails = other.ammo_nails + self.ammo_nails;
-        other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
-        other.ammo_cells = other.ammo_cells + self.ammo_cells;
-    } else if (self.weapon == 1) {
-        if (other.ammo_shells >= TeamFortress_GetMaxAmmo(other, 256))
-            return;
-        other.ammo_shells = other.ammo_shells + self.aflag;
-        self.netname = "shells";
-    } else if (self.weapon == 2) {
-        if (other.ammo_nails >= TeamFortress_GetMaxAmmo(other, 512))
-            return;
-        other.ammo_nails = other.ammo_nails + self.aflag;
-        self.netname = "nails";
-    } else if (self.weapon == 3) {
-        if (other.ammo_rockets >= TeamFortress_GetMaxAmmo(other, 1024))
-            return;
-        other.ammo_rockets = other.ammo_rockets + self.aflag;
-        self.netname = "rockets";
-    } else if (self.weapon == 4) {
-        if (other.ammo_cells >= TeamFortress_GetMaxAmmo(other, 2048))
-            return;
-        other.ammo_cells = other.ammo_cells + self.aflag;
-        self.netname = "cells";
+        if ((other.playerclass == PC_SCOUT)
+                    || (other.playerclass == PC_ENGINEER)) {
+            if (!(self.ammo_shells + self.ammo_nails + self.ammo_cells)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_nails = other.ammo_nails + self.ammo_nails;
+            self.ammo_nails = 0;
+            other.ammo_cells = other.ammo_cells + self.ammo_cells;
+            self.ammo_cells = 0;
+        } else if ((other.playerclass == PC_SNIPER)
+                    || (other.playerclass == PC_SPY)
+                    || (other.playerclass == PC_MEDIC)) {
+            if (!(self.ammo_shells + self.ammo_nails)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_nails = other.ammo_nails + self.ammo_nails;
+            self.ammo_nails = 0;
+        } else if ((other.playerclass == PC_SOLDIER)
+                    || (other.playerclass == PC_DEMOMAN)) {
+            if (!(self.ammo_shells + self.ammo_rockets)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
+            self.ammo_rockets = 0;
+        } else if (other.playerclass == PC_HVYWEAP) {
+            if (!(self.ammo_shells + self.ammo_cells)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_cells = other.ammo_cells + self.ammo_cells;
+            self.ammo_cells = 0;
+        } else if (other.playerclass == PC_PYRO) {
+            if (!(self.ammo_shells + self.ammo_rockets + self.ammo_cells)) {
+                other.nopickup = self;
+                return;
+            }
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            self.ammo_shells = 0;
+            other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
+            self.ammo_rockets = 0;
+            other.ammo_cells = other.ammo_cells + self.ammo_cells;
+            self.ammo_cells = 0;
+        }
+        other.nopickup = self;
+        if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells))
+            dremove(self);
+    } else {
+        if (self.weapon == 1) {
+            if (other.ammo_shells >= TeamFortress_GetMaxAmmo(other, 256))
+                return;
+            other.ammo_shells = other.ammo_shells + self.aflag;
+            self.netname = "shells";
+        } else if (self.weapon == 2) {
+            if (other.ammo_nails >= TeamFortress_GetMaxAmmo(other, 512))
+                return;
+            other.ammo_nails = other.ammo_nails + self.aflag;
+            self.netname = "nails";
+        } else if (self.weapon == 3) {
+            if (other.ammo_rockets >= TeamFortress_GetMaxAmmo(other, 1024))
+                return;
+            other.ammo_rockets = other.ammo_rockets + self.aflag;
+            self.netname = "rockets";
+        } else if (self.weapon == 4) {
+            if (other.ammo_cells >= TeamFortress_GetMaxAmmo(other, 2048))
+                return;
+            other.ammo_cells = other.ammo_cells + self.aflag;
+            self.netname = "cells";
+        }
+        quantity = ftos(self.aflag);
+        sprint(other, PRINT_LOW, "You picked up ", quantity, " ", self.netname, "\n");
+        dremove(self);
     }
     bound_other_ammo(other);
-    if (self.weapon > 0) {
-        quantity = ftos(self.aflag);
-        sprint(other, PRINT_LOW, "You picked up ", quantity, " ",
-               self.netname, "\n");
-    }
     sound(other, 3, "weapons/lock4.wav", 1, 1);
     stuffcmd(other, "bf\n");
-    dremove(self);
     self = other;
     W_SetCurrentAmmo(self);
 };
