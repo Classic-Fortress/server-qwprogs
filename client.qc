@@ -1912,7 +1912,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
         if (pe_attacker.classname == "teledeath") {
             return strcat(pe_target.netname,
                     strcat(" was telefragged by ",
-                    strcat(pe_attacker.netname, "\n")));
+                    strcat(pe_attacker.owner.netname, "\n")));
         }
         if (pf_deathmsg == 37) {
             return strcat(pe_attacker.netname, " shoots his teammate one too many times\n");
