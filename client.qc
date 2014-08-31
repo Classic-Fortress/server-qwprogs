@@ -39,7 +39,7 @@ void () DumpClanScores;
 void (entity p) SetTeamName;
 
 void () autokick_think;
-float (float tno, float pc) ClassIsRestricted;
+float (float pf_team_no, float pf_class) CF_ClassIsRestricted;
 
 void (entity AD) ParseTFDetect;
 entity(float ino) Finditem;
@@ -1021,7 +1021,7 @@ void () PutClientInServer = {
         self.playerclass = 1 + floor(random() * (10 - 1));
         while (!IsLegalClass(self.playerclass) ||
                (self.playerclass == oldclass)
-               || ClassIsRestricted(self.team_no, self.playerclass)) {
+               || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
             self.playerclass = 1 + floor(random() * (10 - 1));
         }
         self.tfstate = TFSTATE_RANDOMPC;

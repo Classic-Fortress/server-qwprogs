@@ -138,7 +138,7 @@ void (float inp) TeamFortress_ChangeClass = {
                    "The spy class has been disabled on the server by the administrator\n");
             return;
         }
-        if (ClassIsRestricted(self.team_no, inp)) {
+        if (CF_ClassIsRestricted(self.team_no, inp)) {
             sprint(self, PRINT_HIGH,
                    "Your team already has enough of that class\n");
             return;
@@ -177,7 +177,7 @@ void (float inp) TeamFortress_ChangeClass = {
                "The spy class has been disabled on the server by the administrator\n");
         return;
     }
-    if (ClassIsRestricted(self.team_no, inp)) {
+    if (CF_ClassIsRestricted(self.team_no, inp)) {
         sprint(self, PRINT_HIGH, "Your team has enough of that class\n");
         return;
     }

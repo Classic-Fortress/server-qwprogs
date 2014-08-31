@@ -884,124 +884,90 @@ float (float tno) TeamFortress_TeamIsCivilian = {
     return (0);
 };
 
-float (float tno, float pc) ClassIsRestricted = {
-    local float num;
-    local float max;
-    local entity te;
-    local string st;
-    max = 0;
+float (float pf_team_no, float pf_class) CF_GetClassRestriction = {
+    local float f_max = 0, f_players = TeamFortress_TeamGetNoPlayers(pf_team_no);
+    local string s_string;
 
-    if (tno == 0) {
-        return (0);
+    // set maximum number based on settings
+    if (pf_class == PC_SCOUT) {
+        s_string = infokey(world, "cr_scout");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_SNIPER) {
+        s_string = infokey(world, "cr_sniper");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_SOLDIER) {
+        s_string = infokey(world, "cr_soldier");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_DEMOMAN) {
+        s_string = infokey(world, "cr_demoman");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_MEDIC) {
+        s_string = infokey(world, "cr_medic");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_HVYWEAP) {
+        s_string = infokey(world, "cr_hwguy");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_PYRO) {
+        s_string = infokey(world, "cr_pyro");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_SPY) {
+        if (spy_off)
+            return -1;
+        s_string = infokey(world, "cr_spy");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_ENGINEER) {
+        s_string = infokey(world, "cr_engineer");
+        f_max = stof(s_string);
+    } else if (pf_class == PC_RANDOM) {
+        s_string = infokey(world, "cr_randompc");
+        f_max = stof(s_string);
     }
-    if (pc == 1) {
-        st = infokey(world, "cr_sc");
-        if (st == string_null) {
-            st = infokey(world, "cr_scout");
-        }
-        max = stof(st);
-    } else {
-        if (pc == 2) {
-            st = infokey(world, "cr_sn");
-            if (st == string_null) {
-                st = infokey(world, "cr_sniper");
-            }
-            max = stof(st);
-        } else {
-            if (pc == 3) {
-                st = infokey(world, "cr_so");
-                if (st == string_null) {
-                    st = infokey(world, "cr_soldier");
-                }
-                max = stof(st);
-            } else {
-                if (pc == 4) {
-                    st = infokey(world, "cr_de");
-                    if (st == string_null) {
-                        st = infokey(world, "cr_demoman");
-                    }
-                    max = stof(st);
-                } else {
-                    if (pc == 5) {
-                        st = infokey(world, "cr_me");
-                        if (st == string_null) {
-                            st = infokey(world, "cr_medic");
-                        }
-                        max = stof(st);
-                    } else {
-                        if (pc == 6) {
-                            st = infokey(world, "cr_hw");
-                            if (st == string_null) {
-                                st = infokey(world, "cr_hwguy");
-                            }
-                            max = stof(st);
-                        } else {
-                            if (pc == 7) {
-                                st = infokey(world, "cr_py");
-                                if (st == string_null) {
-                                    st = infokey(world, "cr_pyro");
-                                }
-                                max = stof(st);
-                            } else {
-                                if (pc == 8) {
-                                    st = infokey(world, "cr_sp");
-                                    if (st == string_null) {
-                                        st = infokey(world, "cr_spy");
-                                    }
-                                    max = stof(st);
-                                } else {
-                                    if (pc == 9) {
-                                        st = infokey(world, "cr_en");
-                                        if (st == string_null) {
-                                            st = infokey(world,
-                                                         "cr_engineer");
-                                        }
-                                        max = stof(st);
-                                    } else {
-                                        if (pc == 10) {
-                                            st = infokey(world, "cr_ra");
-                                            if (st == string_null) {
-                                                st = infokey(world,
-                                                             "cr_random");
-                                            }
-                                            max = stof(st);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+
+    if (f_max == 0 || f_players < f_max)
+        return f_players;
+
+    return f_max;
+};
+
+float (float pf_team_no, float pf_class) CF_GetClassPlayers = {
+    local float f_playing = 0;
+    local entity e_find;
+
+    if (!pf_team_no)
+        return 0;
+
+    // get amount of players currently playing
+    e_find = find(world, classname, "player");
+    while (e_find) {
+        if (e_find.team_no == pf_team_no) {
+            if (pf_class == PC_RANDOM) {
+                if (e_find.tfstate & TFSTATE_RANDOMPC)
+                    f_playing = f_playing + 1;
+            } else if (e_find.playerclass == pf_class || e_find.nextpc == pf_class) {
+                if (!(e_find.tfstate & TFSTATE_RANDOMPC))
+                    f_playing = f_playing + 1;
             }
         }
+        e_find = find(e_find, classname, "player");
     }
-    if (max > 0) {
-        num = 0;
-        te = find(world, classname, "player");
-        while (te) {
-            if (te.team_no == tno) {
-                if (pc == 10) {
-                    if (te.tfstate & 8) {
-                        num = num + 1;
-                    }
-                } else {
-                    if ((te.playerclass == pc) || (te.nextpc == pc)) {
-                        if (!(te.tfstate & 8)) {
-                            num = num + 1;
-                        }
-                    }
-                }
-            }
-            te = find(te, classname, "player");
-        }
-        if (num >= max) {
-            return (1);
-        }
-    }
-    if (max == -1) {
-        return (1);
-    }
-    return (0);
+
+    return f_playing;
+
+};
+
+float (float pf_team_no, float pf_class) CF_ClassIsRestricted = {
+    local float f_playing, f_max;
+
+    if (!pf_team_no)
+        return 0;
+
+    f_max = CF_GetClassRestriction(pf_team_no, pf_class);
+    f_playing = CF_GetClassPlayers(pf_team_no, pf_class);
+
+    if ((f_max > 0 && f_playing >= f_max) || f_max == -1)
+        return 1;
+
+    return 0;
 };
 
 void (float tno, entity ignore, string st) teamsprint = {
