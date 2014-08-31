@@ -385,6 +385,7 @@ float already_chosen_map;
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
 .float antispam_feign;          // don't spam feign deaths
+.float antispam_assault_cannon; // don't spam assault cannon messages
 
 // status bar stuff
 .string StatusString;           // current centerprint text (strzone'd!)

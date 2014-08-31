@@ -1767,10 +1767,12 @@ void () W_Attack = {
         W_FireAutoRifle();
         Attack_Finished(0.1);
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (self.ammo_cells < 7)
-            sprint(self, PRINT_MEDIUM,
-                   "Not enough cells to power up the Assault Cannon\n");
-        else {
+        if (self.ammo_cells < 7) {
+            if (time >= self.antispam_assault_cannon) {
+                sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
+                self.antispam_assault_cannon = time + 3;
+            }
+        } else {
             self.ammo_cells = self.ammo_cells - 7;
             self.heat = 1;
             self.immune_to_check = time + 5;
@@ -2020,8 +2022,10 @@ void (float slot) W_WeaponSlot = {
 void () W_AmmoError = {
     if (self.noammo == 1)
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
-    else if (self.noammo == 2)
+    else if (self.noammo == 2 && time >= self.antispam_assault_cannon) {
         sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
+        self.antispam_assault_cannon = time + 3;
+    }
 };
 
 void (entity pl) W_WeaponState_Save = {
