@@ -452,7 +452,9 @@ string(entity pl) AuraToString =
             st = strcat(st, ftos(pl.aura_healamount));
             st = strcat(st, " hp");
         }
-        else if (pl.ammo_cells < 100)
+        else if (pl.ammo_cells < 50)
+            st = strcat(st, "out of power");
+        else if (pl.ammo_cells < 95)
             st = strcat(st, "recharging");
         else
             st = strcat(st, "on");
