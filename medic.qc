@@ -61,6 +61,9 @@ void () CF_Medic_AuraFindPlayers = {
             self.owner.aura_healamount = f_healtotal;
         self.owner.aura_healtime = time + 3;
         self.owner.aura_healcount = f_healcount;
+        self.owner.ammo_cells = self.owner.ammo_cells - f_healtotal;
+        if (self.owner.current_weapon == WEAP_MEDIKIT)
+            self.owner.currentammo = self.owner.ammo_cells;
         Status_Refresh(self.owner);
     } else if (time >= self.owner.aura_healtime && self.owner.aura_healcount) {
         self.owner.aura_healcount = 0;
@@ -75,11 +78,15 @@ void () CF_Medic_RegenerateCells = {
     self.nextthink = time + PC_MEDIC_CELL_REGEN_TIME;
 
     if (self.owner.ammo_cells < 100) {
-        self.owner.ammo_cells = self.owner.ammo_cells + min(PC_MEDIC_CELL_REGEN_AMOUNT, (100 - self.owner.ammo_cells));
-
         // refresh status bar if cells just hit 100
-        if ((self.owner.ammo_cells + PC_MEDIC_CELL_REGEN_AMOUNT) > 100)
+        if ((self.owner.ammo_cells + PC_MEDIC_CELL_REGEN_AMOUNT) > 100) {
+            self.owner.ammo_cells = self.owner.ammo_cells + min(PC_MEDIC_CELL_REGEN_AMOUNT, (100 - self.owner.ammo_cells));
             Status_Refresh(self.owner);
+        } else {
+            self.owner.ammo_cells = self.owner.ammo_cells + min(PC_MEDIC_CELL_REGEN_AMOUNT, (100 - self.owner.ammo_cells));
+        }
+        if (self.owner.current_weapon == WEAP_MEDIKIT)
+            self.owner.currentammo = self.owner.ammo_cells;
     }
 };
 
