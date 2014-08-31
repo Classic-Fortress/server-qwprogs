@@ -197,7 +197,7 @@ void (float inp) Menu_Class_Input = {
 };
 
 string (float pf_class, string ps_class) Menu_Class_ClassString = {
-    local string s_string;
+    local string s_string = "\n";
     local float f_gap = 4;
     local float f_max = CF_GetClassRestriction(self.team_no, pf_class);
     local float f_players = CF_GetClassPlayers(self.team_no, pf_class);
@@ -213,8 +213,7 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
         s_string = strcat(s_string, ftos(f_max));
         s_string = strcat(s_string, "\n");
         s_string = strzone(strcat(ps_class, s_string));
-    } else
-        s_string = strzone("\n");
+    }
 
     return strzone(s_string);
 };
