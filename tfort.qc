@@ -2521,8 +2521,7 @@ void () TeamFortress_AssaultWeapon = {
         return;
 
     if (self.heat > 0) {
-        sprint(self, PRINT_HIGH,
-               "The assault cannon is still overheated\n");
+        sprint(self, PRINT_HIGH, "The Assault Cannon is still overheated\n");
         return;
     }
 
@@ -2531,9 +2530,9 @@ void () TeamFortress_AssaultWeapon = {
         return;
     }
 
-    if (self.ammo_cells < 6) {
-        sprint(self, PRINT_HIGH,
-               "Not enough cells to power the assault cannon\n");
+    if (self.ammo_cells < 7 && time >= self.antispam_assault_cannon) {
+        sprint(self, PRINT_HIGH, "Not enough cells to power the Assault Cannon\n");
+        self.antispam_assault_cannon = time + 3;
         return;
     }
     self.current_weapon = WEAP_ASSAULT_CANNON;
