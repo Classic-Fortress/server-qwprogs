@@ -8,7 +8,9 @@ void (float issilent) CF_Spy_FeignDeath;
 void () CF_Spy_Invisible;
 void () CF_Spy_DisguiseStop;
 
-float (float tno, float pc) ClassIsRestricted;
+float (float pf_team_no, float pf_class) CF_GetClassRestriction;
+float (float pf_team_no, float pf_class) CF_GetClassPlayers;
+float (float pf_team_no, float pf_class) CF_ClassIsRestricted;
 
 void (entity spy) Spy_RemoveDisguise;
 
@@ -201,112 +203,245 @@ void (float inp) Menu_Class_Input = {
     if (!inp)
         return;
 
-    if (inp > 10 || !IsLegalClass(inp) || ClassIsRestricted(self.team_no, inp))
+    // keep showing menu if class is invalid
+    if (inp > 9 || !IsLegalClass(inp) || CF_ClassIsRestricted(self.team_no, inp))
         Menu_Class();
+
+    // don't try to change class if class is forbidden
+    if (!IsLegalClass(inp) || CF_GetClassRestriction(self.team_no, inp) == -1)
+        return;
 
     TeamFortress_ChangeClass(inp);
 };
 
 void () Menu_Class = {
-    local entity AD;
-    local string s_select   = "Select class:\n\n";
-    local string s_scout    = "“‘ Scout           ";
-    local string s_sniper   = "”‘ Sniper          ";
-    local string s_soldier  = "•‘ Soldier         ";
-    local string s_demoman  = "–‘ Demoman         ";
-    local string s_medic    = "—‘ Medic           ";
-    local string s_hwguy    = "˜‘ HWGuy           ";
-    local string s_pyro     = "™‘ Pyro            ";
-    local string s_spy      = "š‘ Spy             ";
-    local string s_engineer = "›‘ Engineer        ";
-    local string s_randompc = "’‘ RandomPC                 ";
+    local float f_max, f_players, f_class, f_gap = 4;
+    local string s_string;
 
     if (self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
         return;
     }
 
-    local string count_sc = TeamFortress_ClassGetNoPlayersString(PC_SCOUT, self.team_no);
-    local string count_sn = TeamFortress_ClassGetNoPlayersString(PC_SNIPER, self.team_no);
-    local string count_so = TeamFortress_ClassGetNoPlayersString(PC_SOLDIER, self.team_no);
-    local string count_de = TeamFortress_ClassGetNoPlayersString(PC_DEMOMAN, self.team_no);
-    local string count_me = TeamFortress_ClassGetNoPlayersString(PC_MEDIC, self.team_no);
-    local string count_hw = TeamFortress_ClassGetNoPlayersString(PC_HVYWEAP, self.team_no);
-    local string count_py = TeamFortress_ClassGetNoPlayersString(PC_PYRO, self.team_no);
-    local string count_sp = TeamFortress_ClassGetNoPlayersString(PC_SPY, self.team_no);
-    local string count_en = TeamFortress_ClassGetNoPlayersString(PC_ENGINEER, self.team_no);
-
-    // only print classes that are allowed
-    if (IsLegalClass(PC_SCOUT) && !ClassIsRestricted(self.team_no, PC_SCOUT))
-        s_scout = strcat(s_scout, strcat(count_sc, "\n"));
-    else
-        s_scout = "\n";
-    if (IsLegalClass(PC_SNIPER) && !ClassIsRestricted(self.team_no, PC_SNIPER))
-        s_sniper = strcat(s_sniper, strcat(count_sn, "\n"));
-    else
-        s_sniper = "\n";
-    if (IsLegalClass(PC_SOLDIER) && !ClassIsRestricted(self.team_no, PC_SOLDIER))
-        s_soldier = strcat(s_soldier, strcat(count_so, "\n"));
-    else
-        s_soldier = "\n";
-    if (IsLegalClass(PC_DEMOMAN) && !ClassIsRestricted(self.team_no, PC_DEMOMAN))
-        s_demoman = strcat(s_demoman, strcat(count_de, "\n"));
-    else
-        s_demoman = "\n";
-    if (IsLegalClass(PC_MEDIC) && !ClassIsRestricted(self.team_no, PC_MEDIC))
-        s_medic = strcat(s_medic, strcat(count_me, "\n"));
-    else
-        s_medic = "\n";
-    if (IsLegalClass(PC_HVYWEAP) && !ClassIsRestricted(self.team_no, PC_HVYWEAP))
-        s_hwguy = strcat(s_hwguy, strcat(count_hw, "\n"));
-    else
-        s_hwguy = "\n";
-    if (IsLegalClass(PC_PYRO) && !ClassIsRestricted(self.team_no, PC_PYRO))
-        s_pyro = strcat(s_pyro, strcat(count_py, "\n"));
-    else
-        s_pyro = "\n";
-    if (IsLegalClass(PC_SPY) && !ClassIsRestricted(self.team_no, PC_SPY))
-        s_spy = strcat(s_spy, strcat(count_sp, "\n"));
-    else
-        s_spy = "\n";
-    if (IsLegalClass(PC_ENGINEER) && !ClassIsRestricted(self.team_no, PC_ENGINEER))
-        s_engineer = strcat(s_engineer, strcat(count_en, "\n"));
-    else
-        s_engineer = "\n";
-
-    AD = find(world, classname, "info_tfdetect");
-    if (AD) {
+    // print map specific class menu
+    local entity e_info = find(world, classname, "info_tfdetect");
+    if (e_info) {
         if (self.team_no == 1) {
-            if (AD.noise1 != string_null) {
-                Status_Menu(self, Menu_Class_Input, AD.noise1);
+            if (e_info.noise1 != string_null) {
+                Status_Menu(self, Menu_Class_Input, e_info.noise1);
                 return;
             }
         } else if (self.team_no == 2) {
-            if (AD.noise2 != string_null) {
-                Status_Menu(self, Menu_Class_Input, AD.noise2);
+            if (e_info.noise2 != string_null) {
+                Status_Menu(self, Menu_Class_Input, e_info.noise2);
                 return;
             }
         } else if (self.team_no == 3) {
-            if (AD.noise3 != string_null) {
-                Status_Menu(self, Menu_Class_Input, AD.noise3);
+            if (e_info.noise3 != string_null) {
+                Status_Menu(self, Menu_Class_Input, e_info.noise3);
                 return;
             }
         } else if (self.team_no == 4) {
-            if (AD.noise4 != string_null) {
-                Status_Menu(self, Menu_Class_Input, AD.noise4);
+            if (e_info.noise4 != string_null) {
+                Status_Menu(self, Menu_Class_Input, e_info.noise4);
                 return;
             }
         }
     }
 
+    // prepare class strings
+    local string s_select   = "Select class:\n\n";
+    local string s_scout    = "“‘ Scout   ";
+    local string s_sniper   = "”‘ Sniper  ";
+    local string s_soldier  = "•‘ Soldier ";
+    local string s_demoman  = "–‘ Demoman ";
+    local string s_medic    = "—‘ Medic   ";
+    local string s_hwguy    = "˜‘ HWGuy   ";
+    local string s_pyro     = "™‘ Pyro    ";
+    local string s_spy      = "š‘ Spy     ";
+    local string s_engineer = "›‘ Engineer";
+    local string s_randompc = "’‘ RandomPC";
+
+    // put together class strings
+    f_class = PC_SCOUT;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_scout = strzone(strcat(s_scout, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_scout = strzone("\n");
+
+    f_class = PC_SNIPER;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_sniper = strzone(strcat(s_sniper, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_sniper = strzone("\n");
+
+    f_class = PC_SOLDIER;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_soldier = strzone(strcat(s_soldier, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_soldier = strzone("\n");
+
+    f_class = PC_DEMOMAN;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_demoman = strzone(strcat(s_demoman, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_demoman = strzone("\n");
+
+    f_class = PC_MEDIC;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_medic = strzone(strcat(s_medic, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_medic = strzone("\n");
+
+    f_class = PC_HVYWEAP;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_hwguy = strzone(strcat(s_hwguy, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_hwguy = strzone("\n");
+
+    f_class = PC_PYRO;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_pyro = strzone(strcat(s_pyro, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_pyro = strzone("\n");
+
+    f_class = PC_SPY;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_spy = strzone(strcat(s_spy, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_spy = strzone("\n");
+
+    f_class = PC_ENGINEER;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_engineer = strzone(strcat(s_engineer, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_engineer = strzone("\n");
+
+    f_class = PC_RANDOM;
+    f_max = CF_GetClassRestriction(self.team_no, f_class);
+    f_players = CF_GetClassPlayers(self.team_no, f_class);
+    if (IsLegalClass(f_class) && f_max >= 0) {
+        if (f_players < 10)
+            s_string = strpadl(ftos(f_players), (1 + f_gap));
+        else
+            s_string = strpadl(ftos(f_players), f_gap);
+        s_string = strcat(s_string, " / ");
+        if (f_max < 10)
+            s_string = strpadr(s_string, (5 + f_gap));
+        s_string = strcat(s_string, ftos(f_max));
+        s_string = strcat(s_string, "\n");
+        s_randompc = strzone(strcat(s_randompc, s_string));
+    } else if (!IsLegalClass(f_class) || f_max == -1)
+        s_randompc = strzone("\n");
+
+    // print out class menu
     self.menu_input = nil;
     if (TeamFortress_TeamIsCivilian(self.team_no))
         Status_Print(self, "Your team can only be civilians\n");
-    else {
-        if (spy_off == 1)
-            s_spy = "\n";
+    else
         Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
-    }
+
+    strunzone(s_scout); strunzone(s_sniper); strunzone(s_soldier); strunzone(s_demoman); strunzone(s_medic);
+    strunzone(s_hwguy); strunzone(s_pyro); strunzone(s_spy); strunzone(s_engineer); strunzone(s_randompc);
 };
 
 void (float inp) Menu_Drop_Input = {
