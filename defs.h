@@ -840,8 +840,8 @@
 #define PC_MEDIC_AURA_HEAL_TIME     1   // Number of seconds between each aura heal.
 #define PC_MEDIC_AURA_HEAL_AMOUNT   5   // Amount of health given per aura heal.
 #define PC_MEDIC_AURA_RANGE         120 // The aura's range
-#define PC_MEDIC_CELL_REGEN_TIME    0.5 // Number of seconds between each cell regen.
-#define PC_MEDIC_CELL_REGEN_AMOUNT  5   // Amount of cells regenerated each cell regen.
+#define PC_MEDIC_CELL_REGEN_TIME    1   // Number of seconds between each cell regen.
+#define PC_MEDIC_CELL_REGEN_AMOUNT  10  // Amount of cells regenerated each cell regen.
 
 // Class Details for HVYWEAP
 #define PC_HVYWEAP_SKIN			2
