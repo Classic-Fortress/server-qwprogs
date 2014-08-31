@@ -2217,8 +2217,7 @@ void () ImpulseCommands = {
             TeamFortress_SetDetpack(50);
         else if (self.impulse == TF_DROP_AMMO) {
             Menu_Drop();
-        } else if (self.impulse == TF_DISCARD)
-            TeamFortress_Discard();
+        }
     }
 
     if (self.impulse == TF_INVENTORY)
@@ -2561,12 +2560,12 @@ void () W_WeaponFrame = {
         Menu_Team();
         self.impulse = 0;
         return;
-    }
-    if (self.impulse == TF_CHANGECLASS) {
+    } else if (self.impulse == TF_CHANGECLASS) {
         Menu_Class();
         self.impulse = 0;
         return;
-    }
+    } else if (self.impulse == TF_DISCARD)
+            TeamFortress_Discard();
 
     if (intermission_running || cease_fire)
         return;
