@@ -7,15 +7,15 @@ void () TeamFortress_ClipTick;
 void () TeamFortress_Discard = {
     newmis = spawn();
     if ((self.playerclass == PC_SCOUT)
-        || (self.playerclass == PC_SPY)
-        || (self.playerclass == PC_ENGINEER)) {
+                || (self.playerclass == PC_ENGINEER)
+                || (self.playerclass == PC_MEDIC)) {
         newmis.ammo_rockets = self.ammo_rockets;
     } else if ((self.playerclass == PC_SNIPER)
-               || (self.playerclass == PC_MEDIC)) {
+                || (self.playerclass == PC_SPY)) {
         newmis.ammo_rockets = self.ammo_rockets;
         newmis.ammo_cells = self.ammo_cells;
     } else if ((self.playerclass == PC_SOLDIER)
-               || (self.playerclass == PC_DEMOMAN)) {
+                || (self.playerclass == PC_DEMOMAN)) {
         newmis.ammo_cells = self.ammo_cells;
         newmis.ammo_nails = self.ammo_nails;
     } else if (self.playerclass == PC_HVYWEAP) {
