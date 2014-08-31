@@ -997,6 +997,14 @@ void () PutClientInServer = {
     if (! self.last_playerclass)
         self.last_playerclass = self.playerclass;
 
+    // remove prime timers to avoid getting an old grenade in your face
+    te = find(world, classname, "primetimer");
+    while (te != world) {
+        if (te.owner == self)
+            dremove(te);
+        te = find(te, classname, "primetimer");
+    }
+
     DecodeLevelParms();
 
     if (self.playerclass == 0) {
