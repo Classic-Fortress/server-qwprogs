@@ -348,6 +348,9 @@
 // Axe
 #define AXE_IMP			40
 
+// Medic functions
+#define TF_MEDIC_AURA_TOGGLE    41
+
 // Camera Impulse
 #define TF_CAM_TARGET			50
 #define TF_CAM_ZOOM			51
@@ -819,7 +822,7 @@
 #define PC_MEDIC_WEAPONS		WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
 #define PC_MEDIC_MAXAMMO_SHOT		75
 #define PC_MEDIC_MAXAMMO_NAIL		150
-#define PC_MEDIC_MAXAMMO_CELL		50
+#define PC_MEDIC_MAXAMMO_CELL		100
 #define PC_MEDIC_MAXAMMO_ROCKET		25
 #define PC_MEDIC_MAXAMMO_MEDIKIT	100
 #define PC_MEDIC_INITAMMO_SHOT		50
@@ -834,6 +837,11 @@
 #define PC_MEDIC_TF_ITEMS		0
 #define PC_MEDIC_REGEN_TIME		3	// Number of seconds between each regen.
 #define PC_MEDIC_REGEN_AMOUNT		2	// Amount of health regenerated each regen.
+#define PC_MEDIC_AURA_HEAL_TIME     1   // Number of seconds between each aura heal.
+#define PC_MEDIC_AURA_HEAL_AMOUNT   5   // Amount of health given per aura heal.
+#define PC_MEDIC_AURA_RANGE         120 // The aura's range
+#define PC_MEDIC_CELL_REGEN_TIME    0.5 // Number of seconds between each cell regen.
+#define PC_MEDIC_CELL_REGEN_AMOUNT  5   // Amount of cells regenerated each cell regen.
 
 // Class Details for HVYWEAP
 #define PC_HVYWEAP_SKIN			2
