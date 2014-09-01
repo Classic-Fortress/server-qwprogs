@@ -69,7 +69,6 @@ void (entity pe_player) Vote_NextMap = {
     f_votes_left = f_votes_needed - f_votes;
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(0);
-        Vote_MenuOpen(1);
         //dprint("[", ftos(time), "/cf/mapvote/votenext]: forcing map vote.\n");
         bprint(PRINT_HIGH, "Commencing vote for next map\n");
     } else {
@@ -108,7 +107,6 @@ void (entity pe_player) Vote_TrickMap = {
     f_votes_left = f_votes_needed - f_votes;
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(2);
-        Vote_MenuOpen(1);
         //dprint("[", ftos(time), "/cf/mapvote/votetrick]: forcing trick map vote.\n");
         bprint(PRINT_HIGH, "Commencing vote for trick map\n");
     } else {
@@ -147,7 +145,6 @@ void (entity pe_player) Vote_RaceMap = {
     f_votes_left = f_votes_needed - f_votes;
     if (f_votes >= f_votes_needed) {
         Vote_SetupVote(3);
-        Vote_MenuOpen(1);
         //dprint("[", ftos(time), "/cf/mapvote/voterace]: forcing race map vote.\n");
         bprint(PRINT_HIGH, "Commencing vote for race map\n");
     } else {
