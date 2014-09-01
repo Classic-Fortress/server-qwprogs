@@ -120,6 +120,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("votetrick", TF_VOTETRICK, 0);
         TeamFortress_Alias("voterace", TF_VOTERACE, 0);
         TeamFortress_Alias("forcenext", TF_FORCENEXT, 0);
+        TeamFortress_Alias("togglevote", TF_TOGGLEVOTE, 0);
         TeamFortress_Alias("dreset", TF_DISGUISE_RESET, 0);
         TeamFortress_Alias("dscout", TF_DISGUISE_SCOUT, 0);
         TeamFortress_Alias("dsniper", TF_DISGUISE_SNIPER, 0);

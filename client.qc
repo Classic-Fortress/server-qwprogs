@@ -985,6 +985,7 @@ void () PutClientInServer = {
     self.effects = 0;
     self.invincible_time = 0;
     self.spawn_time = time;
+    self.vote_close = 0;
 
     self.reload_shotgun = 0;
     self.reload_super_shotgun = 0;

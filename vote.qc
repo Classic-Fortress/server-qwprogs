@@ -158,6 +158,25 @@ void (entity pe_player) Vote_RaceMap = {
     }
 };
 
+// opens/closes the currently active vote menu
+// called from weapons.qc:ImpulseCommands()
+void (entity pe_player) Vote_ToggleMenu = {
+    if (vote_started > 0 && !vote_abort) {
+        if (pe_player.menu_input != Vote_Input) {
+            //dprint("[", ftos(time), "/cf/mapvote/togglemenu]: toggling map vote on for ", pe_player.netname, ".\n");
+            pe_player.menu_time = time;
+            pe_player.vote_close = 0;
+            Vote_Menu(pe_player);
+        } else {
+            //dprint("[", ftos(time), "/cf/mapvote/togglemenu]: toggling map vote off for ", pe_player.netname, ".\n");
+            pe_player.vote_close = 1;
+            Menu_Close(pe_player);
+        }
+    } else {
+        sprint(pe_player, PRINT_HIGH, "There is no active map vote\n");
+    }
+}
+
 // returns the total amount of vote_next votes
 // called from Vote_NextMap()
 float () Vote_GetNextVotes = {
@@ -423,7 +442,7 @@ void (float force) Vote_MenuOpen = {
 
     while (e_player != world) {
         if (e_player.team_no && e_player.playerclass) {
-            if (!e_player.has_voted_map && e_player.health) {
+            if (!e_player.has_voted_map && e_player.health && !e_player.vote_close) {
                 if (((time - e_player.spawn_time) <= CF_MAPVOTE_FORCESHOW || (time - e_player.menu_time) <= CF_MAPVOTE_FORCESHOW)
                             && !force) {
                     //dprint("[", ftos(time), "/cf/mapvote/menuopen]: open vote menu for newly spawned ", e_player.netname, ".\n");

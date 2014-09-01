@@ -374,6 +374,7 @@
 #define TF_VOTETRICK                    71
 #define TF_VOTERACE                     72
 #define TF_FORCENEXT                    73
+#define TF_TOGGLEVOTE                   74
 
 // Reload impulses
 #define TF_RELOAD_NEXT          80
