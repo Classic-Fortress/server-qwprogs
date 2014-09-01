@@ -118,3 +118,64 @@ void () CF_Medic_Regenerate = {
     if (self.owner.health > self.owner.max_health)
         self.owner.health = self.owner.max_health;
 }
+
+void () BioInfection_Decay = {
+    local entity te;
+    local entity Bio;
+
+    if ((teamplay & TFSTATE_INFECTED) && self.owner.team_no == self.enemy.team_no && self.owner.team_no) {
+        self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_INFECTED);
+        dremove(self);
+        return;
+    } else if (self.invincible_finished > time) {
+        self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_INFECTED);
+        dremove(self);
+        return;
+    }
+
+    // stop infection timer if no longer infected or if medic
+    if (!(self.owner.tfstate & TFSTATE_INFECTED) || self.owner.playerclass == PC_MEDIC) {
+        dremove(self);
+        return;
+    }
+
+    // poison teammates that come too close
+    te = findradius(self.owner.origin, 80);
+    while (te != world && te != self.owner) {
+        if (te.classname == "player" && te.deadflag == 0 && te.playerclass) {
+            if (!(te.tfstate & TFSTATE_INFECTED)) {
+                if (te.playerclass != PC_MEDIC) {
+                    if (!((teamplay & TEAMPLAY_NOEXPLOSIVE) && self.owner.team_no == self.enemy.team_no && self.owner.team_no)) {
+                        Bio = spawn();
+                        Bio.nextthink = 2;
+                        Bio.think = BioInfection_Decay;
+                        Bio.owner = te;
+                        Bio.classname = "timer";
+                        Bio.enemy = self.enemy;
+
+                        te.tfstate = te.tfstate | TFSTATE_INFECTED;
+                        te.infection_team_no = self.owner.infection_team_no;
+
+                        sprint(te, PRINT_MEDIUM, "You have been infected by ", self.owner.netname, "\n");
+                        sprint(self.owner, PRINT_MEDIUM, "You have infected ", te.netname, "\n");
+                    }
+                }
+            }
+        }
+        te = te.chain;
+    }
+    self.nextthink = time + 1;
+    deathmsg = DMSG_BIOWEAPON;
+    TF_T_Damage(self.owner, self, self.enemy, 8, TF_TD_IGNOREARMOUR, TF_TD_OTHER);
+    SpawnBlood(self.owner.origin, 30);
+};
+
+void () BioInfection_MonsterDecay = {
+    self.nextthink = time + 2;
+
+    T_Damage(self.enemy, self, self.owner, 5);
+    SpawnBlood(self.enemy.origin, 20);
+
+    if (self.enemy.health < 1)
+        dremove(self);
+};
