@@ -174,7 +174,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
     } else if (self.motd == 400 && self.team_no == 0) {
-        Menu_Team();
+        Menu_Team(0);
     }
 
     self.motd = self.motd + 1;
