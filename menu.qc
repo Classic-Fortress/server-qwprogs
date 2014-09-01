@@ -246,7 +246,7 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
             s_string = strpadr(s_string, (5 + f_gap));
         s_string = strcat(s_string, ftos(f_max));
         s_string = strcat(s_string, "\n");
-        s_string = strzone(strcat(ps_class, s_string));
+        s_string = strcat(ps_class, s_string);
     } else {
         if (TeamFortress_TeamGetNoPlayers(self.team_no) >= 10)
             s_string = strpadr(ps_class, (12 + f_gap - 3));
