@@ -2189,7 +2189,8 @@ void () ImpulseCommands = {
             TeamFortress_EngineerBuildStop();
             CycleWeaponLast();
         }
-    }
+    } else if (self.impulse == TF_TOGGLEVOTE)
+        Vote_ToggleMenu(self);
 
     if (!self.is_feigning) {
         if (self.impulse == TF_GRENADE_1)

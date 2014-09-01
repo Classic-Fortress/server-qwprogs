@@ -46,6 +46,7 @@ typedef void (float) f_void_float;
 .float vote_trick;              // TRUE if player has voted for a trick map vote
 .float vote_race;               // TRUE if player has voted for a race map vote
 .float force_next;              // TRUE if player has voted to force next map
+.float vote_close;              // TRUE if player has closed the map vote, resets on spawn
 .float detpack_left;            // Seconds left to detpack explosion
 .float pipecooldown;            // Time when detpipe command can be issued
 .float disguise_skin;           // The skin the spy is changing to
