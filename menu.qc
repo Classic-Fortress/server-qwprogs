@@ -54,8 +54,8 @@ float (float v) anglemod;
 
 void (float tno, entity ignore, string st) teamsprint;
 
-void () Menu_Team;
-void () Menu_Class;
+void (float update) Menu_Team;
+void (float update) Menu_Class;
 string (float pc, float tno) TeamFortress_ClassGetNoPlayersString;
 void () Menu_Drop;
 void () PlayerObserverMode;
@@ -116,12 +116,23 @@ void (float inp) Menu_Team_Input = {
     } else if ((number_of_teams == 0) && (inp <= 4)) {
         TeamFortress_TeamSet(inp);
     } else {
-        Menu_Team();
+        Menu_Team(0);
         return;
     }
 
     if ((self.playerclass == 0) && (self.lives != 0)) {
-        Menu_Class();
+        Menu_Class(0);
+    }
+};
+
+void () Menu_Team_Update = {
+    if (self.owner.menu_input == Menu_Team_Input) {
+        self.nextthink = time + 0.5;
+        self = self.owner;
+        Menu_Team(1);
+    } else {
+        self.owner.has_menutimer = 0;
+        dremove(self);
     }
 };
 
@@ -146,12 +157,14 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
     return strzone(s_string);
 };
 
-void () Menu_Team = {
+void (float update) Menu_Team = {
+    local entity timer;
+
     if (self.classname == "observer")
         Status_Menu(self, Menu_Team_Input, "");
 
     // allow toggling team menu using any method to show it
-    if (self.menu_input == Menu_Team_Input) {
+    if (!update && self.menu_input == Menu_Team_Input) {
         Menu_Input(0);
         return;
     }
@@ -176,6 +189,16 @@ void () Menu_Team = {
     s_green = Menu_Team_TeamString(4, s_green);
     s_auto = strpadr(s_auto, (strlen(s_blue) - 1));
 
+    // update menu every 0.5 seconds
+    if (!self.has_menutimer) {
+        self.has_menutimer = 1;
+        timer = spawn();
+        timer.classname = "menu_timer";
+        timer.owner = self;
+        timer.think = Menu_Team_Update;
+        timer.nextthink = time + 0.5;
+    }
+
     Status_Menu(self, Menu_Team_Input, s_select, s_blue, s_red, s_yellow, s_green, "\n", s_auto);
 
     strunzone(s_blue); strunzone(s_red); strunzone(s_yellow); strunzone(s_green);
@@ -187,13 +210,24 @@ void (float inp) Menu_Class_Input = {
 
     // keep showing menu if class is invalid
     if (inp > 9 || !IsLegalClass(inp) || CF_ClassIsRestricted(self.team_no, inp))
-        Menu_Class();
+        Menu_Class(0);
 
     // don't try to change class if class is forbidden
     if (!IsLegalClass(inp) || CF_GetClassRestriction(self.team_no, inp) == -1)
         return;
 
     TeamFortress_ChangeClass(inp);
+};
+
+void () Menu_Class_Update = {
+    if (self.owner.menu_input == Menu_Class_Input) {
+        self.nextthink = time + 0.5;
+        self = self.owner;
+        Menu_Class(1);
+    } else {
+        self.owner.has_menutimer = 0;
+        dremove(self);
+    }
 };
 
 string (float pf_class, string ps_class) Menu_Class_ClassString = {
@@ -224,8 +258,11 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
     return strzone(s_string);
 };
 
-void () Menu_Class = {
-    if (self.menu_input == Menu_Class_Input) {
+void (float update) Menu_Class = {
+    local entity timer;
+
+    // allow toggling team menu using any method to show it
+    if (!update && self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
         return;
     }
@@ -280,6 +317,16 @@ void () Menu_Class = {
     s_spy = Menu_Class_ClassString(PC_SPY, s_spy);
     s_engineer = Menu_Class_ClassString(PC_ENGINEER, s_engineer);
     s_randompc = Menu_Class_ClassString(PC_RANDOM, s_randompc);
+
+    // update menu every 0.5 seconds
+    if (!self.has_menutimer) {
+        self.has_menutimer = 1;
+        timer = spawn();
+        timer.classname = "menu_timer";
+        timer.owner = self;
+        timer.think = Menu_Class_Update;
+        timer.nextthink = time + 0.5;
+    }
 
     // print out class menu
     self.menu_input = nil;

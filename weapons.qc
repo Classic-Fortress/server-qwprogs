@@ -2375,10 +2375,10 @@ void () DeadImpulses = {
         TeamFortress_ChangeClass(self.impulse - 100);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
-        Menu_Team();
+        Menu_Team(0);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
-        Menu_Class();
+        Menu_Class(0);
     } else if (self.is_admin == 1) {
         if (self.impulse == 193)
             Admin_CeaseFire();
@@ -2565,11 +2565,11 @@ void () W_WeaponFrame = {
     }
 
     if (self.impulse == TF_CHANGETEAM) {
-        Menu_Team();
+        Menu_Team(0);
         self.impulse = 0;
         return;
     } else if (self.impulse == TF_CHANGECLASS) {
-        Menu_Class();
+        Menu_Class(0);
         self.impulse = 0;
         return;
     } else if (self.impulse == TF_DISCARD)
