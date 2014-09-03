@@ -2258,6 +2258,8 @@ void () ImpulseCommands = {
         TeamFortress_ShowIDs();
     else if ((self.playerclass != 0) && (self.impulse == TF_DROPFLAG))
         DropGoalItems();
+    else if (self.impulse == TF_DISCARD)
+        TeamFortress_Discard();
     else if (self.impulse == TF_DASH)
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)
@@ -2576,8 +2578,7 @@ void () W_WeaponFrame = {
         Menu_Class(0);
         self.impulse = 0;
         return;
-    } else if (self.impulse == TF_DISCARD)
-            TeamFortress_Discard();
+    }
 
     if (intermission_running || cease_fire)
         return;
@@ -2620,8 +2621,8 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // medic /saveme, scout /dash
-    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH) {
+    // /saveme, /dash, /discard
+    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH || self.impulse == TF_DISCARD) {
         ImpulseCommands();
         return;
     }
