@@ -364,10 +364,12 @@ void () Menu_Drop = {
 
 void (float inp) Menu_Scout_Input = {
     if (inp == 1)
-        self.impulse = TF_SCAN_ENEMY;
+        self.impulse = TF_SCAN;
     else if (inp == 2)
-        self.impulse = TF_SCAN_FRIENDLY;
+        self.impulse = TF_SCAN_ENEMY;
     else if (inp == 3)
+        self.impulse = TF_SCAN_FRIENDLY;
+    else if (inp == 4)
         self.impulse = TF_SCAN_SOUND;
     else
         self.impulse = 0;
@@ -375,26 +377,31 @@ void (float inp) Menu_Scout_Input = {
 
 void () Menu_Scout = {
     local string s_action  = "Scanner settings:\n\n";
-    local string s_scane, s_scanf, s_scansound;
+    local string s_scan, s_scane, s_scanf, s_scansound;
     local string s_nothing = "\nêóë Nothing                   \n\n";
 
-    if (self.tf_items_flags & NIT_SCANNER_ENEMY)
-        s_scane = "êìë Do not scan for enemies   \n";
+    if (!self.ScannerOn)
+        s_scan = "êìë Turn Scanner on           \n";
     else
-        s_scane = "êìë Scan for enemies          \n";
+        s_scan = "êìë Turn Scanner off          \n";
+
+    if (self.tf_items_flags & NIT_SCANNER_ENEMY)
+        s_scane = "êîë Do not scan for enemies   \n";
+    else
+        s_scane = "êîë Scan for enemies          \n";
 
 
     if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
-        s_scanf = "êîë Do not scan for friendlies\n";
+        s_scanf = "êïë Do not scan for friendlies\n";
     else
-        s_scanf = "êîë Scan for friendlies       \n";
+        s_scanf = "êïë Scan for friendlies       \n";
 
     if (self.tf_items_flags & 4)
-        s_scansound = "êïë Turn off scan sound       \n";
+        s_scansound = "êñë Turn off scan sound       \n";
     else
-        s_scansound = "êïë Turn on scan sound        \n";
+        s_scansound = "êñë Turn on scan sound        \n";
 
-    Status_Menu(self, Menu_Scout_Input, s_action, s_scane, s_scanf, s_scansound, s_nothing);
+    Status_Menu(self, Menu_Scout_Input, s_action, s_scan, s_scane, s_scanf, s_scansound, s_nothing);
 };
 
 void (float inp) Menu_Spy_Input = {
