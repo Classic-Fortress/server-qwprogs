@@ -53,6 +53,7 @@ void () TeamFortress_ReloadNext;
 void () Sniper_ZoomToggle;
 void (float zoom_in) Sniper_ZoomAdjust;
 void () TeamFortress_StatusQuery;
+void () CF_Scout_Dash;
 void () CF_Spy_DisguiseStop;
 void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
@@ -2257,6 +2258,8 @@ void () ImpulseCommands = {
         TeamFortress_ShowIDs();
     else if ((self.playerclass != 0) && (self.impulse == TF_DROPFLAG))
         DropGoalItems();
+    else if (self.impulse == TF_DASH)
+        CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)
         TeamFortress_DetonatePipebombs();
     else if (self.impulse == TF_DETPACK_STOP)
@@ -2617,8 +2620,8 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // medic /saveme
-    if (self.impulse == TF_MEDIC_HELPME) {
+    // medic /saveme, scout /dash
+    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH) {
         ImpulseCommands();
         return;
     }

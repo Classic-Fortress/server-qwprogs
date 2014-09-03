@@ -397,6 +397,12 @@ void () DecodeLevelParms = {
         if (st == "on")
             toggleflags = toggleflags | TFLAG_SPAWNFULL;
 
+        st = infokey(world, "sd");
+        if (st == string_null)
+            st = infokey(world, "scoutdash");
+        if (st != "off")
+            toggleflags = toggleflags | TFLAG_SCOUTDASH;
+
         st = infokey(world, "rd");
         if (st == string_null)
             st = infokey(world, "respawn_delay");
