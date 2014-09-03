@@ -76,6 +76,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("reload2", TF_RELOAD_SLOT2, 0);
         TeamFortress_Alias("reload3", TF_RELOAD_SLOT3, 0);
         TeamFortress_Alias("reloadnext", TF_RELOAD_NEXT, 0);
+        TeamFortress_Alias("dash", TF_DASH, 0);
         TeamFortress_Alias("autoscan", TF_SCAN, 0);
         TeamFortress_Alias("scansound", TF_SCAN_SOUND, 0);
         TeamFortress_Alias("scan10", TF_SCAN, 0);

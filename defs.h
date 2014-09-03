@@ -281,6 +281,7 @@
 #define TFLAG_WARSTANDARD	8192
 #define TFLAG_SNIPERRELOAD  16384 // Sniper reload enabled
 #define TFLAG_SPAWNFULL     32768 // Spawn fully stocked
+#define TFLAG_SCOUTDASH     65536 // Scout dash enabled
 
 #define TF_RESPAWNDELAY1	5 	// seconds of waiting before player can respawn
 #define TF_RESPAWNDELAY2	10 	// seconds of waiting before player can respawn
@@ -449,6 +450,9 @@
 #define TF_GRENADE_SWITCH   153 // Switch grenade mode 1/2
 #define TF_GRENADE_PT_1     154 // Prime and throw grenade type 1 (two clicks)
 #define TF_GRENADE_PT_2     155 // Prime and throw grenade type 2 (two clicks)
+
+// Scout dash
+#define TF_DASH             157 // Initialize a forward bunnyhop for Scout
 
 // Impulses for new items
 #define TF_HALT             157 // Stop firing Assault Cannon
