@@ -2524,7 +2524,8 @@ void () W_WeaponFrame = {
     }
 
     // slot 1-4 binds
-    if (self.impulse >= 1 && self.impulse <= 4 && WeaponReady(self) && !self.is_building) {
+    if (self.impulse >= 1 && self.impulse <= 4 && WeaponReady(self)
+                && !self.is_building && !self.is_detpacking) {
 
         // load weapon state if current state doesn't match stored state
         if (!W_WeaponState_Check(self))
@@ -2544,7 +2545,8 @@ void () W_WeaponFrame = {
             W_WeaponState_Load(self, 0);
 
     // +slot1-4 quick fire
-    } else if (self.impulse >= 31 && self.impulse <= 34) {
+    } else if (self.impulse >= 31 && self.impulse <= 34
+                && !self.is_building && !self.is_detpacking) {
 
         self.is_quickfiring = 1;
         self.has_quickfired = 0;
