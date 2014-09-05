@@ -23,6 +23,10 @@ void () CF_Scout_Dash = {
     if (!(toggleflags & TFLAG_SCOUTDASH) || time < self.dash_cooldown)
         return;
 
+    // don't dash if scout is concussed or have damaged legs
+    if (self.leg_damage || self.is_concussed)
+        return;
+
     // determine current speed
     f_velocity = floor(fabs(self.velocity_x) + fabs(self.velocity_z));
 
@@ -287,6 +291,7 @@ void () ConcussionGrenadeTimer = {
     if (self.owner.invincible_finished > time) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.fixangle = 0;
+        self.owner.is_concussed = 0;
         dremove(self);
         return;
     }
@@ -347,6 +352,7 @@ void () ConcussionGrenadeTimer = {
     }
     if (self.health <= 0) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
+        self.owner.is_concussed = 0;
         dremove(self);
     }
 };
@@ -597,6 +603,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.classname = "timer";
                                 te.owner = head;
                                 te.health = 750;
+                                self.owner.is_concussed = 1;
                             }
                         }
                     }

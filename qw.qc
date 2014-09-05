@@ -30,6 +30,7 @@ typedef void (float) f_void_float;
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_quickfiring;          // TRUE for a player if they're using the quick slots
+.float is_concussed;            // TRUE for a player who is affected by concussion grenade
 .float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
