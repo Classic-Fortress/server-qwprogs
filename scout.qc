@@ -18,8 +18,6 @@ entity(entity scanner, float scanrange, float enemies,
 
 void () CF_Scout_Dash = {
     local float f_velocity;
-    local float f_addvelocity;
-    local float f_scoutmax = (PC_SCOUT_MAXSPEED * 2);
 
     // check if dash is allowed in rules and if cooldown has ended
     if (!(toggleflags & TFLAG_SCOUTDASH) || time < self.dash_cooldown)
@@ -28,29 +26,13 @@ void () CF_Scout_Dash = {
     // determine current speed
     f_velocity = floor(fabs(self.velocity_x) + fabs(self.velocity_z));
 
-    // add different speeds depending on current speed
-    if (f_velocity < 500)
-        f_addvelocity = floor(f_scoutmax - f_velocity);
-    else if (f_velocity < f_scoutmax)
-        f_addvelocity = floor(min(200, (f_scoutmax - f_velocity)));
-    else
-        f_addvelocity = 100;
-
-    // calculate new velocity
-    makevectors(self.angles);
-    self.velocity = self.velocity + v_forward * f_addvelocity;
-
-    // add jump height (and jump sound) if player is on ground
-    if (self.flags & FL_ONGROUND) {
+    // only dash if walking or slower
+    if (f_velocity <= 448 && (self.flags & FL_ONGROUND)) {
+        makevectors(self.angles);
+        self.velocity = v_forward * 540;
+        self.velocity_z = 190;
         sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
-        self.velocity_z = 250;
-
-    // if player is falling (z velocity < 0) then reset falling speed to 0
-    } else if (self.velocity_z < 0)
-        self.velocity_z = 0;
-
-    // only allow dash to be used every 3 seconds
-    self.dash_cooldown = time + 3;
+    }
 }
 
 void () CanisterTouch =
