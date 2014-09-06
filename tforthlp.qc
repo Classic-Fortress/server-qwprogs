@@ -84,6 +84,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("scan100", TF_SCAN, 0);
         TeamFortress_Alias("scanf", TF_SCAN_FRIENDLY, 0);
         TeamFortress_Alias("scane", TF_SCAN_ENEMY, 0);
+        TeamFortress_Alias("aura", TF_MEDIC_AURA_TOGGLE, 0);
     } else if (self.motd == 35) {
         TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
         TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
