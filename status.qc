@@ -467,7 +467,7 @@ string(entity pl) AuraToString =
 
 string(entity pl) AssaultCannonToString =
 {
-    if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_HALT))
+    if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_LOCK))
         return "Ασσαυμτ Γαξξοξ Μογλεδ";
     else
         return "";

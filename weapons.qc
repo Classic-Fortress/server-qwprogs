@@ -2587,14 +2587,11 @@ void () W_WeaponFrame = {
 
     // hwguy assault cannon special
     if (self.playerclass == PC_HVYWEAP) {
-        if ((self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_HALT) && !(self.tfstate & TFSTATE_HALT)) {
-            self.tfstate = self.tfstate | TFSTATE_HALT;
-            Status_Refresh(self);
-            self.impulse = 0;
-            return;
-        }
-        else if ((self.impulse == TF_SPECIAL_SKILL || self.impulse == TF_UNHALT) && (self.tfstate & TFSTATE_HALT)) {
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_HALT);
+        if (self.impulse == TF_LOCK) {
+            if (self.tfstate & TFSTATE_LOCK)
+                self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+            else
+                self.tfstate = self.tfstate | TFSTATE_LOCK;
             Status_Refresh(self);
             self.impulse = 0;
             return;

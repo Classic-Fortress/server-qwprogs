@@ -161,8 +161,9 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-det50", TF_DETPACK_STOP, 0);
         TeamFortress_Alias("+det255", TF_DETPACK, 255);
         TeamFortress_Alias("-det255", TF_DETPACK_STOP, 0);
-        TeamFortress_Alias("+halt", TF_HALT, 0);
-        TeamFortress_Alias("-halt", TF_UNHALT, 0);
+        TeamFortress_Alias("locktoggle", TF_LOCK, 0);
+        TeamFortress_Alias("+lock", TF_LOCK, 0);
+        TeamFortress_Alias("-lock", TF_LOCK, 0);
     } else if (self.motd == 85) {
         TeamFortress_Alias("clan1", 82, 0);
         TeamFortress_Alias("clan2", 83, 0);
