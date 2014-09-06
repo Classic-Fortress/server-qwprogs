@@ -455,7 +455,7 @@
 #define TF_DASH             157 // Initialize a forward bunnyhop for Scout
 
 // Impulses for new items
-#define TF_LOCK             157 // Toggle Assault Cannon spinning
+#define TF_LOCK             158 // Toggle Assault Cannon spinning
 #define TF_SCAN			159	// Scanner Pre-Impulse
 #define TF_SCAN_ENEMY		160	// Impulses to toggle scanning of enemies
 #define TF_SCAN_FRIENDLY	161	// Impulses to toggle scanning of friendlies
