@@ -2602,7 +2602,7 @@ void () W_WeaponFrame = {
     }
 
     if (self.playerclass == PC_SNIPER) {
-        if (self.impulse == TF_SPECIAL_SKILL) {
+        if (self.impulse == TF_ZOOMTOGGLE) {
             Sniper_ZoomToggle();
             self.impulse = 0;
             return;
