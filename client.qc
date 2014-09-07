@@ -460,6 +460,12 @@ void () DecodeLevelParms = {
         else
             medicaura = TRUE;
 
+        st = infokey(world, "ob");
+        if (st == string_null)
+            st = infokey(world, "old_biodamage");
+        if (st == "on")
+            old_biodamage = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
