@@ -402,6 +402,14 @@ void () DecodeLevelParms = {
         else
             remember_weapon = TRUE;
 
+        st = infokey(world, "da");
+        if (st == string_null)
+            st = infokey(world, "discammo_pickup");
+        if (st == "off")
+            discammo_pickup = FALSE;
+        else
+            discammo_pickup = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;

@@ -2433,7 +2433,19 @@ void () TeamFortress_AmmoboxTouch = {
         return;
 
     if (self.weapon == 0) {
-        if ((other.playerclass == PC_SCOUT)
+        if (discammo_pickup) {
+            other.ammo_shells = other.ammo_shells + self.ammo_shells;
+            other.ammo_nails = other.ammo_nails + self.ammo_nails;
+            other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
+            other.ammo_cells = other.ammo_cells + self.ammo_cells;
+            dremove(self);
+            bound_other_ammo(other);
+            sound(other, 3, "weapons/lock4.wav", 1, 1);
+            stuffcmd(other, "bf\n");
+            self = other;
+            W_SetCurrentAmmo(self);
+            return;
+        } else if ((other.playerclass == PC_SCOUT)
                     || (other.playerclass == PC_ENGINEER)) {
             if (!(self.ammo_shells + self.ammo_nails + self.ammo_cells)) {
                 other.nopickup = self;
