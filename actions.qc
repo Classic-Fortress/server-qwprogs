@@ -227,8 +227,10 @@ void (entity pe_player, float f_type) CF_Identify = {
 
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_health));
-            s_id_string = strcat(s_id_string, "/");
-            s_id_string = strcat(s_id_string, ftos(f_maxhealth));
+            if (id_extended) {
+                s_id_string = strcat(s_id_string, "/");
+                s_id_string = strcat(s_id_string, ftos(f_maxhealth));
+            }
             s_id_string = strcat(s_id_string, " hp\n");
 
         // set name + armor (if engineer)
@@ -236,18 +238,23 @@ void (entity pe_player, float f_type) CF_Identify = {
 
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_armor));
-            s_id_string = strcat(s_id_string, "/");
-            s_id_string = strcat(s_id_string, ftos(f_maxarmor));
+            if (id_extended) {
+                s_id_string = strcat(s_id_string, "/");
+                s_id_string = strcat(s_id_string, ftos(f_maxarmor));
+            }
             s_id_string = strcat(s_id_string, " armor\n");
 
         // set name + health (if sentry + engineer)
         } else if (f_maxsentryhealth) {
 
             s_id_string = strcat(s_name, "\n");
-            s_id_string = strcat(s_id_string, ftos(floor(f_sentryhealth)));
-            s_id_string = strcat(s_id_string, "/");
-            s_id_string = strcat(s_id_string, ftos(floor(f_maxsentryhealth)));
-            s_id_string = strcat(s_id_string, " health\n");
+            if (id_extended) {
+                s_id_string = strcat(s_id_string, ftos(floor(f_sentryhealth)));
+                s_id_string = strcat(s_id_string, "/");
+                s_id_string = strcat(s_id_string, ftos(floor(f_maxsentryhealth)));
+                s_id_string = strcat(s_id_string, " health");
+            }
+            s_id_string = strcat(s_id_string, "\n");
 
         // just set name (if other class)
         } else {

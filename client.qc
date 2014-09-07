@@ -386,6 +386,14 @@ void () DecodeLevelParms = {
         else
             grentimers = TRUE;
 
+        st = infokey(world, "ie");
+        if (st == string_null)
+            st = infokey(world, "id_extended");
+        if (st == "off")
+            id_extended = FALSE;
+        else
+            id_extended = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
