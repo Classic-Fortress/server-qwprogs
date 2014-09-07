@@ -789,7 +789,11 @@ void () W_FireSniperRifle = {
     src_z = self.absmin_z + self.size_z * 0.7;
 
     use_this = FALSE;
-    traceline(src, src + dir * 9192, FALSE, self);
+
+    if (old_sniperrange)
+        traceline(src, src + dir * 8092, FALSE, self);
+    else
+        traceline(src, src + dir * 9192, FALSE, self);
     if (trace_fraction != 1)
         if (trace_ent != world)
             if (trace_ent.classname == "player")
@@ -799,7 +803,10 @@ void () W_FireSniperRifle = {
 
     if (!use_this) {
         dir = aim(self, 10000);
-        traceline(src, src + dir * 9192, 0, self);
+        if (old_sniperrange)
+            traceline(src, src + dir * 3072, 0, self);
+        else
+            traceline(src, src + dir * 9192, 0, self);
     }
     deathmsg = DMSG_SNIPERRIFLE;
     dam_mult = 1;

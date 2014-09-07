@@ -424,6 +424,12 @@ void () DecodeLevelParms = {
         else
             reload_cliptick = TRUE;
 
+        st = infokey(world, "os");
+        if (st == string_null)
+            st = infokey(world, "old_sniperrange");
+        if (st == "on")
+            old_sniperrange = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
