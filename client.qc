@@ -394,6 +394,14 @@ void () DecodeLevelParms = {
         else
             id_extended = TRUE;
 
+        st = infokey(world, "rw");
+        if (st == string_null)
+            st = infokey(world, "remember_weapon");
+        if (st == "off")
+            remember_weapon = FALSE;
+        else
+            remember_weapon = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
