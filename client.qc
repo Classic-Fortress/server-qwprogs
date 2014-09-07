@@ -356,6 +356,12 @@ void () DecodeLevelParms = {
         if (st == "on")
             drop_grenades = TRUE;
 
+        st = infokey(world, "dgp");
+        if (st == string_null)
+            st = infokey(world, "drop_grenpack");
+        if (st == "on")
+            drop_grenpack = TRUE;
+
         st = infokey(world, "dg1");
         if (st == string_null)
             st = infokey(world, "drop_gren1");
