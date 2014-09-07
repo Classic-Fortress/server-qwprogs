@@ -1401,7 +1401,7 @@ void () TeamFortress_SetEquipment = {
 
     self.items = 0;
     self.weapons_carried = 0;
-    if (self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
+    if (!remember_weapon || self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
         self.current_weapon = 0;
         self.last_weapon = 0;
         self.weaponmode = 0;
