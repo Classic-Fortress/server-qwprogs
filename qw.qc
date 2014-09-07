@@ -421,6 +421,7 @@ float drop_grenades;
 float drop_grenpack;
 float drop_gren1;
 float drop_gren2;
+float grentimers;
 
 .float teamkills;
 
