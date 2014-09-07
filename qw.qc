@@ -432,6 +432,7 @@ float detpipe_limit;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
+float old_biodamage;
 
 .float teamkills;
 
