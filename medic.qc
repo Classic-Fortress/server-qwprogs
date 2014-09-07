@@ -7,6 +7,9 @@ void () CF_Medic_AuraToggle;
 // initializes the medic healing aura
 // called from weapons.qc:ImpulseCommands()
 void () CF_Medic_AuraToggle = {
+    if (!medicaura)
+        return;
+
     if (self.aura_active) {
         self.aura_active = 0;
         sprint(self, PRINT_HIGH, "Healing aura turned off\n");

@@ -452,6 +452,14 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_pipecooldown = TRUE;
 
+        st = infokey(world, "ma");
+        if (st == string_null)
+            st = infokey(world, "medicaura");
+        if (st == "off")
+            medicaura = FALSE;
+        else
+            medicaura = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
