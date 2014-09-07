@@ -2557,25 +2557,31 @@ void () DropGoalItems = {
     te = find(world, classname, "item_tfgoal");
     while (te) {
         if (te.owner == self) {
-            tfgoalitem_RemoveEffectsFromPlayer(te, self);
-            tfgoalitem_drop(te, 1, self);
-            if (self.team_no == 1)
-                bprint(PRINT_HIGH, self.netname, " העןננוה עוה§ף זלבח®\n");
-            else if (self.team_no == 2)
-                bprint(PRINT_HIGH, self.netname, " העןננוה גלץו§ף זלבח®\n");
-            else
-                bprint(PRINT_HIGH, self.netname, " העןננוה פטו ומוםש§ף זלבח®\n");
+            if (old_dropflag) {
+                if (te.goal_activation & 4096)
+                    tfgoalitem_RemoveFromPlayer(te, self, 2);
+            }
+            else {
+                tfgoalitem_RemoveEffectsFromPlayer(te, self);
+                tfgoalitem_drop(te, 1, self);
+                if (self.team_no == 1)
+                    bprint(PRINT_HIGH, self.netname, " העןננוה עוה§ף זלבח®\n");
+                else if (self.team_no == 2)
+                    bprint(PRINT_HIGH, self.netname, " העןננוה גלץו§ף זלבח®\n");
+                else
+                    bprint(PRINT_HIGH, self.netname, " העןננוה פטו ומוםש§ף זלבח®\n");
 
-            Status_Print(self, "\n\n\n", "You dropped the flag!");
-            search = find(world, classname, "player");
-            while (search) {
-                if ((search.team_no == self.team_no) && (self.team_no != 0)) {
-                    if (search != self)
-                        Status_Print(search, "\n\n\n", self.netname, " dropped the enemy flag!");
-                } else {
-                    Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
+                Status_Print(self, "\n\n\n", "You dropped the flag!");
+                search = find(world, classname, "player");
+                while (search) {
+                    if ((search.team_no == self.team_no) && (self.team_no != 0)) {
+                        if (search != self)
+                            Status_Print(search, "\n\n\n", self.netname, " dropped the enemy flag!");
+                    } else {
+                        Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
+                    }
+                    search = find(search, classname, "player");
                 }
-                search = find(search, classname, "player");
             }
         }
         te = find(te, classname, "item_tfgoal");

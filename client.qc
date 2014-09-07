@@ -410,6 +410,12 @@ void () DecodeLevelParms = {
         else
             discammo_pickup = TRUE;
 
+        st = infokey(world, "od");
+        if (st == string_null)
+            st = infokey(world, "old_dropflag");
+        if (st == "on")
+            old_dropflag = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
