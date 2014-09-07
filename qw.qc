@@ -424,6 +424,7 @@ float drop_gren2;
 float grentimers;
 float id_extended;
 float remember_weapon;
+float discammo_pickup;
 
 .float teamkills;
 
