@@ -1356,7 +1356,7 @@ void () BackpackTouch = {
     other.ammo_nails = other.ammo_nails + self.ammo_nails;
     other.ammo_rockets = other.ammo_rockets + self.ammo_rockets;
     other.ammo_cells = other.ammo_cells + self.ammo_cells;
-    if (drop_grenades && other.playerclass != PC_SCOUT) {
+    if (drop_grenpack && other.playerclass != PC_SCOUT) {
 
         // give grenade type 1
         maxg = GetMaxGrenades(1, other.tp_grenades_1);
@@ -1417,7 +1417,7 @@ void () DropBackpack = {
         return;
 
     if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {
-        if (!(drop_grenades && (self.no_grenades_1 + self.no_grenades_2)))
+        if (!(drop_grenpack && (self.no_grenades_1 + self.no_grenades_2)))
             return;
     }
 
@@ -1428,7 +1428,7 @@ void () DropBackpack = {
     newmis.ammo_nails = self.ammo_nails;
     newmis.ammo_rockets = self.ammo_rockets;
     newmis.ammo_cells = self.ammo_cells;
-    if (drop_grenades) {
+    if (drop_grenpack) {
         if (drop_gren1 == -1)
             newmis.no_grenades_1 = self.no_grenades_1;
         else if (drop_gren1 > 0) {
