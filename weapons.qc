@@ -1131,11 +1131,9 @@ void () GrenadeTouch = {
 
 void () ExplodeOldestPipebomb = {
     local entity pipe;
-    local entity oldest;
-    local float numpipes;
-
-    numpipes = 0;
-    oldest = world;
+    local entity oldest = world;
+    local float numpipes = 0;
+    local float numpipes_total = 0;
 
     pipe = find(world, classname, "pipebomb");
     while (pipe != world) {
@@ -1144,10 +1142,13 @@ void () ExplodeOldestPipebomb = {
             if (oldest == world || oldest.nextthink > pipe.nextthink)
                 oldest = pipe;
         }
+        numpipes_total = numpipes_total + 1;
         pipe = find(pipe, classname, "pipebomb");
     }
 
-    if (numpipes >= 6 && oldest != world) {
+    if (((numpipes >= detpipe_limit && detpipe_limit >= 0)
+                || (numpipes_total >= detpipe_limit_world && detpipe_limit_world >= 0))
+                && oldest != world) {
         oldest.nextthink = time + 0.5;
     }
 };

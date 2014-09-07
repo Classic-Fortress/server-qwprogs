@@ -428,6 +428,8 @@ float discammo_pickup;
 float old_dropflag;
 float reload_cliptick;
 float old_sniperrange;
+float detpipe_limit;
+float detpipe_limit_world;
 
 .float teamkills;
 
