@@ -1170,7 +1170,10 @@ void () W_FireGrenade = {
         newmis.touch = GrenadeTouch;
         newmis.nextthink = time + 2.5;
     } else {
-        self.pipecooldown = time + 0.5;
+        if (old_pipecooldown)
+            self.pipecooldown = time + 0.8;
+        else
+            self.pipecooldown = time + 0.5;
         ExplodeOldestPipebomb();
         newmis.classname = "pipebomb";
         newmis.skin = 2;
