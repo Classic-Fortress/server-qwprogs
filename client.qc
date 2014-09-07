@@ -416,6 +416,14 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_dropflag = TRUE;
 
+        st = infokey(world, "rc");
+        if (st == string_null)
+            st = infokey(world, "reload_cliptick");
+        if (st == "off")
+            reload_cliptick = FALSE;
+        else
+            reload_cliptick = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
