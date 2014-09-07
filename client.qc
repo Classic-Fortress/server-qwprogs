@@ -378,6 +378,14 @@ void () DecodeLevelParms = {
         else
             drop_gren2 = -1;
 
+        st = infokey(world, "gt");
+        if (st == string_null)
+            st = infokey(world, "grentimers");
+        if (st == "off")
+            grentimers = FALSE;
+        else
+            grentimers = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;

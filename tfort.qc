@@ -695,7 +695,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
 
         RemoveGrenadeTimers();
 
-        if (!stof(infokey(self, "nt"))) {
+        if (grentimers && !stof(infokey(self, "nt"))) {
             timer = spawn();
             timer.nextthink = time + 0.8;
             timer.think = GrenadeTimer;
