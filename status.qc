@@ -446,23 +446,29 @@ string(entity pl) DetpackToString =
 
 string(entity pl) AuraToString =
 {
-    local string st = "Θεαμιξη Αυςα: ";
+    local string st;
 
-    if (pl.aura_active) {
-        if (time < pl.aura_healtime && pl.aura_healcount) {
-            st = strcat(st, ftos(pl.aura_healcount));
-            st = strcat(st, " players healed for ");
-            st = strcat(st, ftos(pl.aura_healamount));
-            st = strcat(st, " hp");
+    if (medicaura) {
+        st = "Θεαμιξη Αυςα: ";
+
+        if (pl.aura_active) {
+            if (time < pl.aura_healtime && pl.aura_healcount) {
+                st = strcat(st, ftos(pl.aura_healcount));
+                st = strcat(st, " players healed for ");
+                st = strcat(st, ftos(pl.aura_healamount));
+                st = strcat(st, " hp");
+            }
+            else if (pl.ammo_cells < 50)
+                st = strcat(st, "out of power");
+            else if (pl.ammo_cells < 95)
+                st = strcat(st, "recharging");
+            else
+                st = strcat(st, "on");
+        } else {
+            st = strcat(st, "off");
         }
-        else if (pl.ammo_cells < 50)
-            st = strcat(st, "out of power");
-        else if (pl.ammo_cells < 95)
-            st = strcat(st, "recharging");
-        else
-            st = strcat(st, "on");
     } else {
-        st = strcat(st, "off");
+        st = "";
     }
 
     return st;
