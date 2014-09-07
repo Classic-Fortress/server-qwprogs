@@ -430,6 +430,7 @@ float reload_cliptick;
 float old_sniperrange;
 float detpipe_limit;
 float detpipe_limit_world;
+float old_pipecooldown;
 
 .float teamkills;
 

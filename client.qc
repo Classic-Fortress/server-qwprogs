@@ -446,6 +446,12 @@ void () DecodeLevelParms = {
         else
             detpipe_limit_world = -1;
 
+        st = infokey(world, "op");
+        if (st == string_null)
+            st = infokey(world, "old_pipecooldown");
+        if (st == "on")
+            old_pipecooldown = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
