@@ -430,6 +430,22 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_sniperrange = TRUE;
 
+        st = infokey(world, "dl");
+        if (st == string_null)
+            st = infokey(world, "detpipe_limit");
+        if (st != string_null)
+            detpipe_limit = stof(st);
+        else
+            detpipe_limit = -1;
+
+        st = infokey(world, "dw");
+        if (st == string_null)
+            st = infokey(world, "detpipe_limit_world");
+        if (st != string_null)
+            detpipe_limit_world = stof(st);
+        else
+            detpipe_limit_world = -1;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
