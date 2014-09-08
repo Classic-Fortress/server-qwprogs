@@ -434,6 +434,7 @@ float old_pipecooldown;
 float medicaura;
 float old_biodamage;
 float old_spanner;
+float old_railgun;
 
 .float teamkills;
 
