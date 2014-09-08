@@ -756,7 +756,7 @@ void () Dispenser_Die = {
 void (entity disp) Engineer_UseDispenser = {
     local entity dist_checker;
 
-    if (disp.health < disp.max_health) {
+    if (disp.health < disp.max_health && !old_spanner) {
         Engineer_Dispenser_Repair(disp);
         return;
     }
@@ -895,21 +895,21 @@ void (entity disp) Engineer_Dispenser_Repair = {
 };
 
 void (entity gun) Engineer_UseSentryGun = {
-    if (gun.weapon < 3 && self.ammo_cells >= 130) {
-        Engineer_SentryGun_Upgrade(gun);
-        return;
-    }
 
-    if (gun.health < gun.max_health && self.ammo_cells > 0) {
-        Engineer_SentryGun_Repair(gun);
-        return;
-    }
-
-    if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
-                || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
-                && self.ammo_rockets > 0)) {
-        Engineer_SentryGun_InsertAmmo(gun);
-        return;
+    // automate tasks if old_spanner setting is disabled
+    if (!old_spanner) {
+        if (gun.weapon < 3 && self.ammo_cells >= 130) {
+            Engineer_SentryGun_Upgrade(gun);
+            return;
+        } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
+            Engineer_SentryGun_Repair(gun);
+            return;
+        } else if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
+                    || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
+                    && self.ammo_rockets > 0)) {
+            Engineer_SentryGun_InsertAmmo(gun);
+            return;
+        }
     }
 
     sprint(self, PRINT_HIGH, "Level ");

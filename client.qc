@@ -466,6 +466,12 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_biodamage = TRUE;
 
+        st = infokey(world, "os");
+        if (st == string_null)
+            st = infokey(world, "old_spanner");
+        if (st == "on")
+            old_spanner = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
