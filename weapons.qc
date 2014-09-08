@@ -2631,7 +2631,7 @@ void () W_WeaponFrame = {
 
     // hwguy assault cannon special
     if (self.playerclass == PC_HVYWEAP) {
-        if (self.impulse == TF_LOCK) {
+        if (self.impulse == TF_LOCK && cannon_lock) {
             if (self.tfstate & TFSTATE_LOCK)
                 self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
             else

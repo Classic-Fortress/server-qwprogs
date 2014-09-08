@@ -506,6 +506,14 @@ void () DecodeLevelParms = {
         else
             disp_explosion = TRUE;
 
+        st = infokey(world, "cl");
+        if (st == string_null)
+            st = infokey(world, "cannon_lock");
+        if (st == "off")
+            cannon_lock = FALSE;
+        else
+            cannon_lock = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
