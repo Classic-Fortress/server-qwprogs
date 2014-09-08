@@ -492,7 +492,37 @@ void () W_FireMedikit = {
                     }
                     return;
                 }
-                if (trace_ent.health < (trace_ent.max_health + 50)) {
+                if (old_medikit) {
+
+                    if (healam > 0 && trace_ent.health < trace_ent.max_health) {
+
+                        sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                        trace_ent.axhitme = 1;
+                        SpawnBlood(org, 20);
+                        T_Heal(trace_ent, healam, 0);
+
+                    } else if (trace_ent.health >= trace_ent.max_health && trace_ent.health < (trace_ent.max_health + 50)) {
+
+                        healam = 5;
+                        if (healam > (self.ammo_medikit * 5))
+                            healam = self.ammo_medikit * 5;
+
+                        if (healam > 0) {
+                            sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
+                            T_Heal(trace_ent, healam, 1);
+                            self.ammo_medikit = self.ammo_medikit - rint(healam / 5);
+
+                            if (!(trace_ent.items & IT_SUPERHEALTH)) {
+                                trace_ent.items = trace_ent.items | IT_SUPERHEALTH;
+                                newmis = spawn();
+                                newmis.nextthink = time + 5;
+                                newmis.think = item_megahealth_rot;
+                                newmis.owner = trace_ent;
+                            }
+                        }
+                    }
+
+                } else if (trace_ent.health < (trace_ent.max_health + 50)) {
 
                     if (self.ammo_cells >= 50) {
                         healam = trace_ent.max_health - trace_ent.health + 50;
@@ -1458,10 +1488,13 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_ROCKETS;
         pl.weapon = IT_ROCKET_LAUNCHER;
     } else if (pl.current_weapon == WEAP_MEDIKIT) {
-        pl.currentammo = pl.ammo_cells;
+        if (!old_medikit) {
+            pl.currentammo = pl.ammo_cells;
+            pl.items = pl.items | IT_CELLS;
+        } else
+            pl.currentammo = 0;
         pl.weaponmodel = "progs/v_medi.mdl";
         pl.weaponframe = 0;
-        pl.items = pl.items | IT_CELLS;
     } else if (pl.current_weapon == WEAP_TRANQ) {
         pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {

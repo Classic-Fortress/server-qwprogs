@@ -410,7 +410,7 @@ void () DecodeLevelParms = {
         else
             discammo_pickup = TRUE;
 
-        st = infokey(world, "od");
+        st = infokey(world, "odf");
         if (st == string_null)
             st = infokey(world, "old_dropflag");
         if (st == "on")
@@ -459,6 +459,12 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
         else
             medicaura = TRUE;
+
+        st = infokey(world, "om");
+        if (st == string_null)
+            st = infokey(world, "old_medikit");
+        if (st == "on")
+            old_medikit = TRUE;
 
         st = infokey(world, "ob");
         if (st == string_null)
