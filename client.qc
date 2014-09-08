@@ -498,6 +498,14 @@ void () DecodeLevelParms = {
         else
             flame_knockback = TRUE;
 
+        st = infokey(world, "de");
+        if (st == string_null)
+            st = infokey(world, "disp_explosion");
+        if (st == "off")
+            disp_explosion = FALSE;
+        else
+            disp_explosion = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
