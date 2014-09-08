@@ -389,6 +389,7 @@ float already_chosen_map;
 .float antispam_detpack;        // don't spam detpack messages
 .float antispam_feign;          // don't spam feign deaths
 .float antispam_assault_cannon; // don't spam assault cannon messages
+.float antispam_cannon_air;     // don't spam assault cannon air messages
 
 // status bar stuff
 .string StatusString;           // current centerprint text (strzone'd!)
@@ -437,6 +438,7 @@ float old_biodamage;
 float flame_knockback;
 float disp_explosion;
 float cannon_lock;
+float cannon_air;
 
 float old_spanner;
 float old_railgun;
