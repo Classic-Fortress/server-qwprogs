@@ -73,7 +73,7 @@ void () CF_Medic_AuraFindPlayers = {
     }
 
     self.owner.ammo_cells = self.owner.ammo_cells - 5;
-    if (self.owner.current_weapon == WEAP_MEDIKIT)
+    if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
         self.owner.currentammo = self.owner.ammo_cells;
 };
 
@@ -81,6 +81,10 @@ void () CF_Medic_AuraFindPlayers = {
 // called from tfort.qc:TeamFortress_SetEquipment()
 void () CF_Medic_RegenerateCells = {
     local float f_newcells = self.owner.ammo_cells + min(PC_MEDIC_CELL_REGEN_AMOUNT, (100 - self.owner.ammo_cells));
+
+    // don't regenerate cells if not using aura or new medikit
+    if (!medicaura && old_medikit)
+        return;
 
     self.nextthink = time + PC_MEDIC_CELL_REGEN_TIME;
 
@@ -93,7 +97,7 @@ void () CF_Medic_RegenerateCells = {
         else if (f_newcells >= 50 && f_newcells < 60)
             Status_Refresh(self.owner);
 
-        if (self.owner.current_weapon == WEAP_MEDIKIT)
+        if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
             self.owner.currentammo = self.owner.ammo_cells;
     }
 };
