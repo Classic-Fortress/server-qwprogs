@@ -729,6 +729,8 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
         Engineer_Dispenser_InsertAmmo(self.building);
     } else if (inp == 2) {
         Engineer_Dispenser_InsertArmor(self.building);
+    } else if (inp == 3 && old_spanner) {
+        Engineer_Dispenser_Repair(self.building);
     }
 
     self.building = world;
@@ -736,7 +738,7 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 
 void () Menu_EngineerFix_Dispenser = {
     local string s_action = "Dispenser maintenance:\n\n";
-    local string s_ammo, s_armor;
+    local string s_ammo, s_armor, s_repair;
     local string s_nothing = "\n—‘ Nothing     \n\n";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
@@ -752,10 +754,15 @@ void () Menu_EngineerFix_Dispenser = {
     else
         s_armor = "\n";
 
-    Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_nothing);
+    if (old_spanner && self.building.health < self.building.max_health)
+        s_repair = "•‘ Repair      \n";
+    else
+        s_repair = "\n";
+
+    Status_Menu(self, Menu_EngineerFix_Dispenser_Input, s_action, s_ammo, s_armor, s_repair, s_nothing);
 };
 
-void (float inp) Menu_EngineerFix_SentryGun_Input = {
+void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
     if (inp == 1) {
         sprint(self, PRINT_HIGH, "Rotating 45 degrees to the left...\n");
         self.building.waitmin = anglemod(self.building.waitmin + 45);
@@ -771,7 +778,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
     }
 };
 
-void () Menu_EngineerFix_SentryGun = {
+void () Menu_EngineerFix_SentryGun_Rotate = {
     local string action  = "Rotate sentry gun:\n\n";
     local string rotl    = "“‘ 45 degrees left \n";
     local string rot180  = "”‘ 180 degrees     \n";
@@ -782,7 +789,59 @@ void () Menu_EngineerFix_SentryGun = {
                 || self.classname != "player" || self.building == world)
         return;
 
-    Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, rotl, rot180, rotr, nothing);
+    Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rotl, rot180, rotr, nothing);
+};
+
+void (float inp) Menu_EngineerFix_SentryGun_Input = {
+    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
+                || self.classname != "player" || self.building == world)
+        return;
+
+    if (inp == 1) {
+        Engineer_SentryGun_InsertAmmo(self.building);
+    } else if (inp == 2 && self.building.weapon < 3 && self.ammo_cells >= 130) {
+        Engineer_SentryGun_Upgrade(self.building);
+    } else if (inp == 3) {
+        Engineer_SentryGun_Repair(self.building);
+    } else if (inp == 4) {
+        Menu_EngineerFix_SentryGun_Rotate();
+    }
+};
+
+void () Menu_EngineerFix_SentryGun = {
+    
+    // only show this menu if old_spanner setting is enabled, otherwise show rotate menu
+    if (!old_spanner) {
+        Menu_EngineerFix_SentryGun_Rotate();
+        return;
+    }
+
+    local string action  = "Sentry gun maintenance:\n\n";
+    local string putammo, upgrade, repair, rotate;
+    local string nothing = "\n—‘ Nothing    ";
+
+    if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
+            || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
+        putammo = "“‘ Insert ammo\n";
+    else
+        putammo = "\n";
+
+    if (self.building.weapon < 3 && self.ammo_cells >= 130)
+        upgrade = "”‘ Upgrade    \n";
+    else
+        upgrade = "\n";
+
+    if (self.building.health < self.building.max_health)
+        repair = "•‘ Repair     \n";
+    else
+        repair = "\n";
+
+    if (self.building.real_owner == self)
+        rotate  = "–‘ Rotate     \n";
+    else
+        rotate = "\n";
+
+    Status_Menu(self, Menu_EngineerFix_SentryGun_Input, action, putammo, upgrade, repair, rotate, nothing);
 };
 
 void (float inp) Menu_Dispenser_Input = {
