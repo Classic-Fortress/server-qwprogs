@@ -2701,8 +2701,13 @@ void () W_WeaponFrame = {
                 }
             }
         } else {
-            SuperDamageSound();
-            W_Attack();
+            if (self.flags & FL_ONGROUND || cannon_air) {
+                SuperDamageSound();
+                W_Attack();
+            } else if (self.antispam_cannon_air < time) {
+                sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
+                self.antispam_cannon_air = time + 3;
+            }
         }
     } else if (self.playerclass == 0) {
         self.weaponmode = 0;
