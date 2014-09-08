@@ -472,6 +472,12 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_spanner = TRUE;
 
+        st = infokey(world, "or");
+        if (st == string_null)
+            st = infokey(world, "old_railgun");
+        if (st == "on")
+            old_railgun = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
