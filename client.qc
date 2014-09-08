@@ -490,6 +490,14 @@ void () DecodeLevelParms = {
         if (st == "on")
             old_dispenser = TRUE;
 
+        st = infokey(world, "fk");
+        if (st == string_null)
+            st = infokey(world, "flame_knockback");
+        if (st == "off")
+            flame_knockback = FALSE;
+        else
+            flame_knockback = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
