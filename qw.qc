@@ -435,6 +435,7 @@ float medicaura;
 float old_medikit;
 float old_biodamage;
 float flame_knockback;
+float disp_explosion;
 
 float old_spanner;
 float old_railgun;
