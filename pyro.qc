@@ -424,11 +424,13 @@ void () Flamer_stream_touch = {
         if ((other.takedamage == 2) && (other.health > 0)) {
             deathmsg = DMSG_FLAME;
 
-            // knockback target
-            if (other.classname != "building_sentrygun" && other.classname != "building_dispenser") {
-                dir = other.origin - (self.absmin + self.absmax) * 0.5;
-                dir = normalize(dir);
-                other.velocity = other.velocity + dir * 300;
+            if (flame_knockback) {
+                // knockback target
+                if (other.classname != "building_sentrygun" && other.classname != "building_dispenser") {
+                    dir = other.origin - (self.absmin + self.absmax) * 0.5;
+                    dir = normalize(dir);
+                    other.velocity = other.velocity + dir * 300;
+                }
             }
 
             TF_T_Damage(other, self, self.owner, 10, TF_TD_NOTTEAM,
