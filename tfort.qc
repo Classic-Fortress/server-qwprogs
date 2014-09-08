@@ -1926,7 +1926,7 @@ void () TeamFortress_SetEquipment = {
         // dispenser needs
         self.need_shells = 1;
         self.need_nails = 1;
-        self.need_rockets = 0;
+        self.need_rockets = 1;
         self.need_cells = 1;
 
         self.maxammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
