@@ -436,7 +436,7 @@ void () DecodeLevelParms = {
         if (st != string_null)
             detpipe_limit = stof(st);
         else
-            detpipe_limit = -1;
+            detpipe_limit = 6;
 
         st = infokey(world, "dw");
         if (st == string_null)
