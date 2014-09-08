@@ -420,12 +420,20 @@ void (entity disp) Dispenser_AmmoTick = {
     // set restock rate (scales with players on team)
     rate = 1 + 0.5 * (TeamFortress_TeamGetNoPlayers(disp.team_no) - 1);
 
-    if (self.disptimer > 3) {
-        self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS * rate / 300);
-        self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS * rate / 300);
-        self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS * rate / 300);
-        self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS * rate / 300);
-        self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR * rate / 300);
+    if ((old_dispenser && self.disptimer > 23) || (!old_dispenser && self.disptimer > 3)) {
+        if (old_dispenser) {
+            self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS / 20);
+            self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS / 20);
+            self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS / 20);
+            self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS / 20);
+            self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR / 20);
+        } else {
+            self.ammo_shells = self.ammo_shells + rint(BUILD_DISPENSER_MAX_SHELLS * rate / 225);
+            self.ammo_cells = self.ammo_cells + rint(BUILD_DISPENSER_MAX_CELLS * rate / 225);
+            self.ammo_nails = self.ammo_nails + rint(BUILD_DISPENSER_MAX_NAILS * rate / 225);
+            self.ammo_rockets = self.ammo_rockets + rint(BUILD_DISPENSER_MAX_ROCKETS * rate / 225);
+            self.armorvalue = self.armorvalue + rint(BUILD_DISPENSER_MAX_ARMOR * rate / 225);
+        }
 
         if (self.ammo_shells > BUILD_DISPENSER_MAX_SHELLS)
             self.ammo_shells = BUILD_DISPENSER_MAX_SHELLS;
@@ -556,7 +564,7 @@ void (entity disp, entity pl) Dispenser_StockPlayer = {
 
     // set dispenser efficiency (increase with time => just passing by gives less ammo/armor)
     if (!pl.deff || pl.deff >= 4)
-        pl.deff = 1;
+        pl.deff = 0.5;
     else
         pl.deff = pl.deff * 2;
 
@@ -591,8 +599,11 @@ void (entity disp) Dispenser_FindPlayers = {
 void () DispenserThink = {
     CheckBelowBuilding(self);
     Dispenser_AmmoTick(self);
-    Dispenser_FindPlayers(self);
-    self.nextthink = time + 0.4;
+
+    if (!old_dispenser)
+        Dispenser_FindPlayers(self);
+
+    self.nextthink = time + 0.3;
 };
 
 void () TeamFortress_FinishedBuilding = {
@@ -624,7 +635,7 @@ void () TeamFortress_FinishedBuilding = {
         oldself.health = 150;
         oldself.disptimer = 1;
         oldself.think = DispenserThink;
-        oldself.nextthink = time + 0.4;
+        oldself.nextthink = time + 0.3;
         oldself.th_die = Dispenser_Die;
         oldself.mdl = "progs/disp.mdl";
         oldself.team_no = self.team_no;
@@ -713,11 +724,15 @@ void () T_Dispenser = {
     local entity oldself;
     local entity dist_checker;
 
-    // don't show menu to players of same team
-    if (other.classname != "player" || other.team_no == self.team_no || !other.team_no)
+    if (other == world)
         return;
 
-    Status_Print(self.real_owner, "\n\n\n", "Enemies are using your dispenser!");
+    // don't show menu to players of same team (if new dispenser behaviour)
+    if (!old_dispenser && (other.classname != "player" || other.team_no == self.team_no || !other.team_no))
+        return;
+
+    if (other.team_no && other.team_no != self.team_no)
+        Status_Print(self.real_owner, "\n\n\n", "Enemies are using your dispenser!");
 
     if ((other.building == world) && (other.building_wait < time)) {
         other.building = self;
