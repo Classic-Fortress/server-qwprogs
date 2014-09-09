@@ -19,6 +19,9 @@ entity(entity scanner, float scanrange, float enemies,
 void () CF_Scout_Dash = {
     local float f_velocity;
 
+    if (self.playerclass != PC_SCOUT)
+        return;
+
     // check if dash is allowed in rules and if cooldown has ended
     if (!(toggleflags & TFLAG_SCOUTDASH) || time < self.dash_cooldown)
         return;
