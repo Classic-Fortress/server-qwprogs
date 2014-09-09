@@ -185,6 +185,9 @@ float (float tno) TeamFortress_TeamSet = {
     if (!self.deadflag) {
         ClientKill();
     }
+    // swap colors for spy last disguise
+    if (self.playerclass == PC_SPY && self.undercover_team == tno)
+        self.last_team = self.team_no;
     bprint(PRINT_HIGH, self.netname, " has joined the ");
     bprint(PRINT_HIGH, team, "\n");
     stuffcmd(self, "color ");
