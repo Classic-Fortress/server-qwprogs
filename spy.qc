@@ -864,7 +864,7 @@ void () GasGrenadeExplode = {
         te = spawn();
         te.think = GasGrenadeMakeGas;
         te.nextthink = time + 0.1;
-        te.classname = "grentimer";
+        te.classname = "gastimer";
         te.heat = 0;
         te.origin = self.origin;
         te.owner = self.owner;
@@ -901,7 +901,7 @@ void () GasGrenadeMakeGas = {
         self.owner.no_active_gas_grens =
             self.owner.no_active_gas_grens + 1;
         if (self.owner.no_active_gas_grens > 2) {
-            te = find(world, classname, "grentimer");
+            te = find(world, classname, "gastimer");
             while (te) {
                 if ((te.owner == self.owner) &&
                     (te.no_active_gas_grens == 1)) {
@@ -909,7 +909,7 @@ void () GasGrenadeMakeGas = {
                     te.think = RemoveGrenade;
                     te.nextthink = time + 0.1;
                 }
-                te = find(te, classname, "grentimer");
+                te = find(te, classname, "gastimer");
             }
         }
         self.no_active_gas_grens = self.owner.no_active_gas_grens;

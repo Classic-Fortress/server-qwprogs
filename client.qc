@@ -20,6 +20,7 @@ void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
 void () RemoveGrenadeTimers;
+void () RemoveGasTimers;
 void () RemoveGrenades;
 
 void (entity eng) Engineer_RemoveBuildings;
@@ -2041,6 +2042,7 @@ void () ClientDisconnect = {
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
     TeamFortress_RemoveTimers();
+    RemoveGasTimers();
     Engineer_RemoveBuildings(self);
     te = find(world, classname, "detpack");
     while (te) {
