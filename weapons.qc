@@ -2667,8 +2667,9 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // /saveme, /dash, /discard
-    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH || self.impulse == TF_DISCARD) {
+    // /saveme, /dash, /discard, /dropflag
+    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH || self.impulse == TF_DISCARD
+                || self.impulse == TF_DROPFLAG) {
         ImpulseCommands();
         return;
     }
