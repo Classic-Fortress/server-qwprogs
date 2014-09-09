@@ -183,7 +183,7 @@ float (float tno) TeamFortress_TeamSet = {
         return (1);
     }
     if (!self.deadflag) {
-        ClientKill();
+        ClientKill(1);
     }
     // swap colors for spy last disguise
     if (self.playerclass == PC_SPY && self.undercover_team == tno)

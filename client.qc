@@ -872,7 +872,7 @@ float () CloseToSpawnPoint = {
     return 0;
 };
 
-void () ClientKill = {
+void (float force) ClientKill = {
     local entity te;
     local float timeleft;
 
@@ -883,7 +883,7 @@ void () ClientKill = {
     if (self.playerclass == PC_UNDEFINED)
         return;
 
-    if (self.suicide_time > time) {
+    if (self.suicide_time > time && !force) {
         timeleft = self.suicide_time - time;
         sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
         return;
