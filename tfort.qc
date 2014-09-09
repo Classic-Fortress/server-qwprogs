@@ -105,6 +105,17 @@ void () RemoveGrenadeTimers = {
     }
 };
 
+void () RemoveGasTimers = {
+    local entity te;
+
+    te = find(world, classname, "gastimer");
+    while (te != world) {
+        if (te.owner == self)
+            dremove(te);
+        te = find(te, classname, "gastimer");
+    }
+};
+
 void () RemoveGrenades = {
     local entity te = find(world, classname, "grenade");
     while (te) {
