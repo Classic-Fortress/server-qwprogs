@@ -96,6 +96,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-gren2", TF_GRENADE_T, 0);
         TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
         TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
+        TeamFortress_Alias("slot1", 1, 0);
+        TeamFortress_Alias("slot2", 2, 0);
+        TeamFortress_Alias("slot3", 3, 0);
+        TeamFortress_Alias("slot4", 4, 0);
         TeamFortress_AliasString("+slot1", "impulse 31;+attack");
         TeamFortress_AliasString("-slot1", "-attack;impulse 68");
         TeamFortress_AliasString("+slot2", "impulse 32;+attack");
