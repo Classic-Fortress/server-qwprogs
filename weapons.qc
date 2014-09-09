@@ -2233,6 +2233,9 @@ void () ImpulseCommands = {
         else if (self.playerclass == PC_ENGINEER && self.is_building) {
             TeamFortress_EngineerBuildStop();
             CycleWeaponLast();
+        } else if (self.playerclass == PC_DEMOMAN && self.is_detpacking) {
+            TeamFortress_DetpackStop();
+            CycleWeaponLast();
         }
     } else if (self.impulse == TF_TOGGLEVOTE)
         Vote_ToggleMenu(self);
