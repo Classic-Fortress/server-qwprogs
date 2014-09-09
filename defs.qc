@@ -60,7 +60,7 @@ void () StartFrame;
 void () PlayerPreThink;         // Called every frame before physics are run
 void () PlayerPostThink;        // Called every frame after physics are run
 
-void () ClientKill;             // Player entered the suicide command
+void (float force) ClientKill;             // Player entered the suicide command
 void () ClientConnect;          // called when a player connects to a server
 void () PutClientInServer;      // call after setting the parm1... parms
 void () ClientDisconnect;       // called when a player disconnects from a server
