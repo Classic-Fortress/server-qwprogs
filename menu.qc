@@ -43,6 +43,8 @@ void (entity disp) Engineer_Dispenser_Repair;
 void (entity disp) Engineer_SentryGun_InsertAmmo;
 void (entity disp) Engineer_SentryGun_Upgrade;
 void (entity disp) Engineer_SentryGun_Repair;
+void () Menu_Engineer_Cancel;
+void () TeamFortress_EngineerBuildStop;
 
 void (entity targ, entity inflictor, entity attacker, float damage,
       float T_flags, float T_AttackType) TF_T_Damage;
@@ -935,3 +937,17 @@ void () Menu_Dispenser = {
 
     Status_Menu(self, Menu_Dispenser_Input, s_action, s_ammo, s_armor, s_nothing);
 };
+
+void (float inp) Menu_Engineer_Cancel_Input = {
+    if (inp == 1)
+        TeamFortress_EngineerBuildStop();
+    else
+        Menu_Engineer_Cancel();
+}
+
+void () Menu_Engineer_Cancel = {
+    local string s_build = "Building...\n\n";
+    local string s_cancel  = "êìë Cancel!\n\n\n\n\n";
+
+    Status_Menu(self, Menu_Engineer_Cancel_Input, s_build, s_cancel);
+}

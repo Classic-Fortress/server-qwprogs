@@ -16,6 +16,7 @@ void (entity disp) Engineer_SentryGun_ShowMenu;
 void (entity disp) Engineer_SentryGun_InsertAmmo;
 void (entity disp) Engineer_SentryGun_Upgrade;
 void (entity disp) Engineer_SentryGun_Repair;
+void () Menu_Engineer_Cancel;
 float (entity obj, entity builder) CheckArea;
 
 void () LaserBolt_Think = {
@@ -266,6 +267,7 @@ void () TeamFortress_EngineerBuildStop = {
             te = find(te, netname, "build_timer");
         }
     }
+    Menu_Close(self);
     self.is_building = 0;
     self.current_weapon = self.weapon;
     W_SetCurrentAmmo(self);
@@ -380,6 +382,7 @@ void (float objtobuild) TeamFortress_Build = {
     self.weaponframe = 0;
     TeamFortress_SetSpeed(self);
     Status_Refresh(self);
+    Menu_Engineer_Cancel();
 
     newmis.owner = self;
     newmis.classname = "timer";
@@ -621,6 +624,7 @@ void () TeamFortress_FinishedBuilding = {
     self.current_weapon = self.weapon;
     Status_Refresh(self);
     TeamFortress_SetSpeed(self);
+    Menu_Close(self);
     if (oldself.weapon == 1) {
         self.has_dispenser = TRUE;
         sprint(self, PRINT_HIGH, "You finish building the dispenser\n");
