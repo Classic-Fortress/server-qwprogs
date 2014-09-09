@@ -447,8 +447,12 @@ void (float issilent) CF_Spy_FeignDeath = {
         // don't check for team color cheat for 5 seconds
         self.immune_to_check = time + 5;
 
+        // set movetype to toss
+        self.movetype = MOVETYPE_TOSS;
+
         // stop spy from moving if on the ground
         if (self.flags & FL_ONGROUND) {
+            self.movetype = MOVETYPE_NONE;
             self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
             TeamFortress_SetSpeed(self);
         }
@@ -472,9 +476,6 @@ void (float issilent) CF_Spy_FeignDeath = {
 
         // set view height to ground
         self.view_ofs = '0 0 4';
-
-        // set movetype to toss
-        self.movetype = MOVETYPE_TOSS;
 
         // do extra stuff if feign is not silent feign
         if (issilent == 0) {
