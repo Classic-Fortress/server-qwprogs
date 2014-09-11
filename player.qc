@@ -414,6 +414,11 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 
         SuperDamageSound();
 
+        self.tfstate = self.tfstate | TFSTATE_AIMING;
+        if (!cannon_move)
+            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+        TeamFortress_SetSpeed(self);
+
         W_FireAssaultCannon();
         stuffcmd(self, "v_idlescale ");
         if (vlen(self.velocity) < 30) {
@@ -442,6 +447,8 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
         stuffcmd(self, "v_idlescale 0\n");
         self.tfstate = self.tfstate | TFSTATE_AIMING;
+        if (!cannon_move)
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
         TeamFortress_SetSpeed(self);
         self.weaponframe = 0;
         self.count = 1;
@@ -473,6 +480,8 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
         stuffcmd(self, "v_idlescale 0\n");
         self.tfstate = self.tfstate | TFSTATE_AIMING;
+        if (!cannon_move)
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
         TeamFortress_SetSpeed(self);
         self.weaponframe = 0;
         self.count = 1;
@@ -490,6 +499,8 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
         self.heat = 0;
         self.fire_held_down = 0;
         self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
+        if (!cannon_move)
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
         TeamFortress_SetSpeed(self);
         if ((self.ammo_shells < 1) || (self.ammo_cells < 7)) {
             self.current_weapon = W_BestWeapon();

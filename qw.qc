@@ -439,6 +439,7 @@ float flame_knockback;
 float disp_explosion;
 float cannon_lock;
 float cannon_air;
+float cannon_move;
 
 float old_spanner;
 float old_railgun;
