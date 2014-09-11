@@ -518,9 +518,7 @@ void () DecodeLevelParms = {
         st = infokey(world, "ca");
         if (st == string_null)
             st = infokey(world, "cannon_air");
-        if (st == "off")
-            cannon_air = FALSE;
-        else
+        if (st == "on")
             cannon_air = TRUE;
 
         st = infokey(world, "cm");
