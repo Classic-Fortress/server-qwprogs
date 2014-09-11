@@ -559,6 +559,14 @@ void () DecodeLevelParms = {
         else
             feign_air = TRUE;
 
+        st = infokey(world, "fp");
+        if (st == string_null)
+            st = infokey(world, "feign_pack");
+        if (st == "off")
+            feign_pack = FALSE;
+        else
+            feign_pack = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
