@@ -20,6 +20,7 @@ void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
 void () RemoveGrenadeTimers;
+void () RemovePrimeTimers;
 void () RemoveGasTimers;
 void () RemoveGrenades;
 
@@ -1502,6 +1503,7 @@ void () CheckRules = {
     if ((timelimit && time >= timelimit) || (fraglimit && self.frags >= fraglimit)) {
         NextLevel();
         RemoveGrenadeTimers();
+        RemovePrimeTimers();
         RemoveGrenades();
     }
 };
