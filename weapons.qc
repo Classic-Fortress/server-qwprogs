@@ -928,7 +928,11 @@ void () W_FireAssaultCannon = {
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
 
-    if (vlen(self.velocity) < 50)
+    if (cannon_accuracy == 1)
+        FireBullets(5, dir, '0 0 0');
+    else if (cannon_accuracy == 2)
+        FireBullets(5, dir, '0.1 0.1 0');
+    else if (vlen(self.velocity) < 50)
         FireBullets(5, dir, '0.075 0.075 0');
     else
         FireBullets(5, dir, '0.15 0.15 0');

@@ -442,6 +442,7 @@ float cannon_air;
 float cannon_move;
 float cannon_movespin;
 float cannon_conc;
+float cannon_accuracy;
 
 float old_spanner;
 float old_railgun;

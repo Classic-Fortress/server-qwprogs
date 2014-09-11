@@ -543,6 +543,12 @@ void () DecodeLevelParms = {
         else
             cannon_conc = TRUE;
 
+        st = infokey(world, "cac");
+        if (st == string_null)
+            st = infokey(world, "cannon_accuracy");
+        if (st != string_null)
+            cannon_accuracy = stof(st);
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
