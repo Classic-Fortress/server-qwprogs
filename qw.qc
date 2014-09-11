@@ -445,6 +445,7 @@ float cannon_conc;
 float cannon_accuracy;
 float feign_air;
 float feign_pack;
+float feign_msg;
 
 float old_spanner;
 float old_railgun;

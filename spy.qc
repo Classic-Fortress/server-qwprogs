@@ -492,9 +492,11 @@ void (float issilent) CF_Spy_FeignDeath = {
             if (feign_pack)
                 Spy_DropBackpack();
 
-            // print feign message
-            deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
-            bprint(PRINT_MEDIUM, deathstring);
+            // print feign message (if this is not disabled in settings)
+            if (feign_msg) {
+                deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
+                bprint(PRINT_MEDIUM, deathstring);
+            }
 
             // set movement speed to 0 if currently in the air to disable manipulation of trajectory
             if (!(self.flags & FL_ONGROUND))
