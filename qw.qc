@@ -413,6 +413,7 @@ float last_id;
 
 .float tf_id;
 
+float exec_map_cfgs;
 float spy_off;
 float old_grens;
 float invis_only;
