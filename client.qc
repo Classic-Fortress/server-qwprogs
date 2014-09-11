@@ -307,6 +307,7 @@ void () DecodeLevelParms = {
         } else
             clanbattle = FALSE;
 
+        // automatically assign team [off]
         st = infokey(world, "a");
         if (st == string_null)
             st = infokey(world, "autoteam");
@@ -319,67 +320,92 @@ void () DecodeLevelParms = {
             autoteam_time = stof(st);
         }
 
-        st = infokey(world, "akt");
+        // auto kick team killers [4 tks per 60 seconds]
+        st = infokey(world, "akk");
         if (st == string_null)
-            st = infokey(world, "autokick_time");
-        autokick_time = stof(st);
-        if (autokick_time != 0) {
-            st = infokey(world, "akk");
+            st = infokey(world, "autokick_kills");
+        autokick_kills = stof(st);
+        if (autokick_kills) {
+            st = infokey(world, "akt");
             if (st == string_null)
-                st = infokey(world, "autokick_kills");
-            autokick_kills = stof(st);
+                st = infokey(world, "autokick_time");
+            autokick_time = stof(st);
+        } else {
+            autokick_kills = 4;
+            autokick_time = 60;
         }
 
+        // execute map configs [on]
+        st = infokey(world, "exec_map_cfgs");
+        if (st == "off")
+            exec_map_cfgs = FALSE;
+        else
+            exec_map_cfgs = TRUE;
+
+        // show team cap frags for all team members [off]
         st = infokey(world, "t");
         if (st == string_null)
             st = infokey(world, "teamfrags");
         if (st == "on")
             toggleflags = toggleflags | TFLAG_TEAMFRAGS;
-        else if (st == "off")
+        else
             toggleflags = toggleflags - (toggleflags & TFLAG_TEAMFRAGS);
 
+        // every team member carry the total frags for the team [off]
         st = infokey(world, "fts");
         if (st == string_null)
             st = infokey(world, "fullteamscore");
         if (st == "on")
             toggleflags = toggleflags | TFLAG_FULLTEAMSCORE;
+        else
+            toggleflags = toggleflags - (toggleflags & TFLAG_FULLTEAMSCORE);
 
+        // use old concussion, gas and flash grenades [off]
         st = infokey(world, "og");
-        if (st == string_null)
-            st = infokey(world, "old_grenades");
         if (st == string_null)
             st = infokey(world, "old_grens");
         if (st == "on")
             old_grens = TRUE;
+        else
+            old_grens = FALSE;
 
+        // drop primed hand grenades to ground when dying [on]
         st = infokey(world, "dg");
         if (st == string_null)
             st = infokey(world, "drop_grenades");
-        if (st == "on")
+        if (st == "off")
+            drop_grenades = FALSE;
+        else
             drop_grenades = TRUE;
 
+        // drop grenades in backpack upon death [on]
         st = infokey(world, "dgp");
         if (st == string_null)
             st = infokey(world, "drop_grenpack");
-        if (st == "on")
+        if (st == "off")
+            drop_grenpack = FALSE;
+        else
             drop_grenpack = TRUE;
 
+        // maximum grenades type 1 to drop in backpack [1]
         st = infokey(world, "dg1");
         if (st == string_null)
             st = infokey(world, "drop_gren1");
         if (st != string_null)
             drop_gren1 = stof(st);
         else
-            drop_gren1 = -1;
+            drop_gren1 = 1;
 
+        // maximum grenades type 2 to drop in backpack [0]
         st = infokey(world, "dg2");
         if (st == string_null)
             st = infokey(world, "drop_gren2");
         if (st != string_null)
             drop_gren2 = stof(st);
         else
-            drop_gren2 = -1;
+            drop_gren2 = 0;
 
+        // display grenade timer in status bar [on]
         st = infokey(world, "gt");
         if (st == string_null)
             st = infokey(world, "grentimers");
@@ -388,6 +414,7 @@ void () DecodeLevelParms = {
         else
             grentimers = TRUE;
 
+        // show sentry gun health + misc extras in id string [on]
         st = infokey(world, "ie");
         if (st == string_null)
             st = infokey(world, "id_extended");
@@ -396,6 +423,7 @@ void () DecodeLevelParms = {
         else
             id_extended = TRUE;
 
+        // remember weapon across deaths [on]
         st = infokey(world, "rw");
         if (st == string_null)
             st = infokey(world, "remember_weapon");
@@ -404,20 +432,25 @@ void () DecodeLevelParms = {
         else
             remember_weapon = TRUE;
 
+        // pick up discardable ammo in discarded backpacks [off]
         st = infokey(world, "da");
         if (st == string_null)
             st = infokey(world, "discammo_pickup");
-        if (st == "off")
-            discammo_pickup = FALSE;
-        else
+        if (st == "on")
             discammo_pickup = TRUE;
+        else
+            discammo_pickup = FALSE;
 
+        // use old tf style dropflag (map decides on/off) [off]
         st = infokey(world, "odf");
         if (st == string_null)
             st = infokey(world, "old_dropflag");
         if (st == "on")
             old_dropflag = TRUE;
+        else
+            old_dropflag = FALSE;
 
+        // show ticking clip ammo in sbar when reloading [on]
         st = infokey(world, "rc");
         if (st == string_null)
             st = infokey(world, "reload_cliptick");
@@ -426,12 +459,16 @@ void () DecodeLevelParms = {
         else
             reload_cliptick = TRUE;
 
+        // use old tf sniper range (shorter) [off]
         st = infokey(world, "os");
         if (st == string_null)
             st = infokey(world, "old_sniperrange");
         if (st == "on")
             old_sniperrange = TRUE;
+        else
+            old_sniperrange = FALSE;
 
+        // maximum amount of pipebombs per demoman [6]
         st = infokey(world, "dl");
         if (st == string_null)
             st = infokey(world, "detpipe_limit");
@@ -440,6 +477,7 @@ void () DecodeLevelParms = {
         else
             detpipe_limit = 6;
 
+        // maximum amount of pipebombs in game [unlimited]
         st = infokey(world, "dw");
         if (st == string_null)
             st = infokey(world, "detpipe_limit_world");
@@ -448,12 +486,16 @@ void () DecodeLevelParms = {
         else
             detpipe_limit_world = -1;
 
+        // use old tf pipebomb cooldown (0.8 seconds) [off]
         st = infokey(world, "op");
         if (st == string_null)
             st = infokey(world, "old_pipecooldown");
         if (st == "on")
             old_pipecooldown = TRUE;
+        else
+            old_pipecooldown = FALSE;
 
+        // allow medic aura [on]
         st = infokey(world, "ma");
         if (st == string_null)
             st = infokey(world, "medicaura");
@@ -462,36 +504,52 @@ void () DecodeLevelParms = {
         else
             medicaura = TRUE;
 
+        // use old tf style medikit (don't insta-heal max+50) [off]
         st = infokey(world, "om");
         if (st == string_null)
             st = infokey(world, "old_medikit");
         if (st == "on")
             old_medikit = TRUE;
+        else
+            old_medikit = FALSE;
 
+        // use old tf style bioweapon (less damage) [off]
         st = infokey(world, "ob");
         if (st == string_null)
             st = infokey(world, "old_biodamage");
         if (st == "on")
             old_biodamage = TRUE;
+        else
+            old_biodamage = FALSE;
 
+        // use old tf style spanner (non-automated) [off]
         st = infokey(world, "os");
         if (st == string_null)
             st = infokey(world, "old_spanner");
         if (st == "on")
             old_spanner = TRUE;
+        else
+            old_spanner = FALSE;
 
+        // use old tf style railgun (penetrate target) [off]
         st = infokey(world, "or");
         if (st == string_null)
             st = infokey(world, "old_railgun");
         if (st == "on")
             old_railgun = TRUE;
+        else
+            old_railgun = FALSE;
 
+        // use old tf style dispenser (non-auto stocking) [off]
         st = infokey(world, "od");
         if (st == string_null)
             st = infokey(world, "old_dispenser");
         if (st == "on")
             old_dispenser = TRUE;
+        else
+            old_dispenser = FALSE;
 
+        // enable flamethrower knockback [on]
         st = infokey(world, "fk");
         if (st == string_null)
             st = infokey(world, "flame_knockback");
@@ -500,6 +558,7 @@ void () DecodeLevelParms = {
         else
             flame_knockback = TRUE;
 
+        // bigger dispenser explosions [on]
         st = infokey(world, "de");
         if (st == string_null)
             st = infokey(world, "disp_explosion");
@@ -508,6 +567,7 @@ void () DecodeLevelParms = {
         else
             disp_explosion = TRUE;
 
+        // allow assault cannon lock mechanism [on]
         st = infokey(world, "cl");
         if (st == string_null)
             st = infokey(world, "cannon_lock");
@@ -516,6 +576,7 @@ void () DecodeLevelParms = {
         else
             cannon_lock = TRUE;
 
+        // allow assault cannon fire in air [on]
         st = infokey(world, "ca");
         if (st == string_null)
             st = infokey(world, "cannon_air");
@@ -524,6 +585,7 @@ void () DecodeLevelParms = {
         else
             cannon_air = TRUE;
 
+        // allow movement while firing assault cannon [on]
         st = infokey(world, "cm");
         if (st == string_null)
             st = infokey(world, "cannon_move");
@@ -532,12 +594,17 @@ void () DecodeLevelParms = {
         else
             cannon_move = TRUE;
 
+        // make assault cannon spin while moving [off]
         st = infokey(world, "cms");
         if (st == string_null)
             st = infokey(world, "cannon_movespin");
-        if (st == "on")
+        if (st == "on") {
             cannon_movespin = TRUE;
+            cannon_move = TRUE; // required for this to work
+        } else
+            cannon_movespin = FALSE;
 
+        // make hwguy susceptible to concussion grenade while firing assault cannon [on]
         st = infokey(world, "cc");
         if (st == string_null)
             st = infokey(world, "cannon_conc");
@@ -546,12 +613,14 @@ void () DecodeLevelParms = {
         else
             cannon_conc = TRUE;
 
+        // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         st = infokey(world, "cac");
         if (st == string_null)
             st = infokey(world, "cannon_accuracy");
         if (st != string_null)
             cannon_accuracy = stof(st);
 
+        // allow feign death in air [on]
         st = infokey(world, "fa");
         if (st == string_null)
             st = infokey(world, "feign_air");
@@ -560,6 +629,7 @@ void () DecodeLevelParms = {
         else
             feign_air = TRUE;
 
+        // drop an empty backpack when feigning death [on]
         st = infokey(world, "fp");
         if (st == string_null)
             st = infokey(world, "feign_pack");
@@ -568,6 +638,7 @@ void () DecodeLevelParms = {
         else
             feign_pack = TRUE;
 
+        // print fake death message when feigning death [on]
         st = infokey(world, "fm");
         if (st == string_null)
             st = infokey(world, "feign_msg");
@@ -576,14 +647,23 @@ void () DecodeLevelParms = {
         else
             feign_msg = TRUE;
 
+        // allow spy [on]
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
+        else
+            spy_off = FALSE;
 
+        // enable spy invisibility [off]
         st = infokey(world, "s");
         if (st == string_null)
             st = infokey(world, "spyinvis");
+        if ((st == "on") || (toggleflags & TFLAG_SPYINVIS))
+            invis_only = TRUE;
+        else if (st == "off")
+            invis_only = FALSE;
 
+        // allow scout dash [on]
         st = infokey(world, "sd");
         if (st == string_null)
             st = infokey(world, "scoutdash");
@@ -592,6 +672,7 @@ void () DecodeLevelParms = {
         else
             scoutdash = TRUE;
 
+        // enable sniper rifle reload [on]
         st = infokey(world, "sr");
         if (st == string_null)
             st = infokey(world, "sniperreload");
@@ -600,26 +681,23 @@ void () DecodeLevelParms = {
         else
             sniperreload = TRUE;
 
+        // spawn with full ammo/armor [off]
         st = infokey(world, "sf");
         if (st == string_null)
             st = infokey(world, "spawnfull");
         if (st == "on")
             spawnfull = TRUE;
+        else
+            spawnfull = FALSE;
 
-        if ((st == "on") || (toggleflags & TFLAG_SPYINVIS))
-            invis_only = TRUE;
-        else if (st == "off")
-            invis_only = FALSE;
-
+        // delay respawning by this many seconds [0]
         st = infokey(world, "rd");
         if (st == string_null)
             st = infokey(world, "respawn_delay");
         respawn_delay_time = stof(st);
         if (respawn_delay_time)
             toggleflags = toggleflags | TFLAG_RESPAWNDELAY;
-
-        if ((toggleflags & TFLAG_RESPAWNDELAY) &&
-            (respawn_delay_time == 0))
+        if ((toggleflags & TFLAG_RESPAWNDELAY) && !respawn_delay_time)
             respawn_delay_time = RESPAWN_DELAY_TIME;
 
         if (toggleflags & TFLAG_AUTOTEAM) {

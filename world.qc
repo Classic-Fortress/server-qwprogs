@@ -145,8 +145,7 @@ void () worldspawn = {
                 ("QW TF must be run with a gamedir or sv_gamedir of \"fortress\".\n");
     }
 
-    st = infokey(world, "exec_map_cfgs");
-    if (st == "on") {
+    if (exec_map_cfgs) {
         localcmd("exec fortress.cfg\n");
         localcmd("exec cfg/maps/");
         localcmd(mapname);
