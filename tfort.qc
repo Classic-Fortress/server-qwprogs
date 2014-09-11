@@ -1474,7 +1474,7 @@ void () TeamFortress_SetEquipment = {
     if (self.playerclass == PC_SCOUT) {
         self.weapons_carried = self.weapons_carried | PC_SCOUT_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_SCOUT_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SCOUT_MAXAMMO_NAIL;
             self.ammo_shells = PC_SCOUT_MAXAMMO_SHOT;
@@ -1527,7 +1527,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_SNIPER) {
         self.weapons_carried = self.weapons_carried | PC_SNIPER_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_SNIPER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SNIPER_MAXAMMO_NAIL;
             self.ammo_shells = PC_SNIPER_MAXAMMO_SHOT;
@@ -1572,7 +1572,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_SOLDIER) {
         self.weapons_carried = self.weapons_carried | PC_SOLDIER_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_SOLDIER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
             self.ammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
@@ -1618,7 +1618,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_DEMOMAN) {
         self.weapons_carried = self.weapons_carried | PC_DEMOMAN_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_DEMOMAN_MAXAMMO_ROCKET;
             self.ammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
             self.ammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
@@ -1665,7 +1665,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_MEDIC) {
         self.weapons_carried = self.weapons_carried | PC_MEDIC_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_MEDIC_MAXAMMO_ROCKET;
             self.ammo_nails = PC_MEDIC_MAXAMMO_NAIL;
             self.ammo_shells = PC_MEDIC_MAXAMMO_SHOT;
@@ -1731,7 +1731,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_HVYWEAP) {
         self.weapons_carried = self.weapons_carried | PC_HVYWEAP_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_HVYWEAP_MAXAMMO_ROCKET;
             self.ammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
             self.ammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
@@ -1777,7 +1777,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_PYRO) {
         self.weapons_carried = self.weapons_carried | PC_PYRO_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_PYRO_MAXAMMO_ROCKET;
             self.ammo_nails = PC_PYRO_MAXAMMO_NAIL;
             self.ammo_shells = PC_PYRO_MAXAMMO_SHOT;
@@ -1823,7 +1823,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_CIVILIAN) {
         self.weapons_carried = self.weapons_carried | PC_CIVILIAN_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_CIVILIAN_MAXAMMO_ROCKET;
             self.ammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
             self.ammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
@@ -1867,7 +1867,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_SPY) {
         self.weapons_carried = self.weapons_carried | PC_SPY_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_SPY_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SPY_MAXAMMO_NAIL;
             self.ammo_shells = PC_SPY_MAXAMMO_SHOT;
@@ -1920,7 +1920,7 @@ void () TeamFortress_SetEquipment = {
     } else if (self.playerclass == PC_ENGINEER) {
         self.weapons_carried = self.weapons_carried | PC_ENGINEER_WEAPONS;
 
-        if ((toggleflags & TFLAG_SPAWNFULL)) {
+        if (spawnfull) {
             self.ammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
             self.ammo_shells = PC_ENGINEER_MAXAMMO_SHOT;

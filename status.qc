@@ -304,7 +304,7 @@ string(entity pl) ClipSizeToString =
             pl.reload_super_shotgun = max - pl.ammo_shells;
         num = (max - pl.reload_super_shotgun);
     } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (!(toggleflags & TFLAG_SNIPERRELOAD))
+        if (!sniperreload)
             return ("");
         if ((max - pl.reload_sniper_rifle) > pl.ammo_shells)
             pl.reload_sniper_rifle = max - pl.ammo_shells;
