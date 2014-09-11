@@ -17,8 +17,6 @@ entity(entity scanner, float scanrange, float enemies,
        float friends) T_RadiusScan;
 
 void () CF_Scout_Dash = {
-    local float f_velocity;
-
     if (self.playerclass != PC_SCOUT)
         return;
 
@@ -30,11 +28,8 @@ void () CF_Scout_Dash = {
     if (self.leg_damage || self.is_concussed)
         return;
 
-    // determine current speed
-    f_velocity = floor(fabs(self.velocity_x) + fabs(self.velocity_z));
-
     // only dash if walking or slower
-    if (f_velocity <= 448 && (self.flags & FL_ONGROUND)) {
+    if (vlen(self.velocity) <= 450 && (self.flags & FL_ONGROUND)) {
         makevectors(self.angles);
         self.velocity = v_forward * 540;
         self.velocity_z = 190;
