@@ -434,6 +434,12 @@ void (float issilent) CF_Spy_FeignDeath = {
             return;
         }
 
+        // don't allow feign if spy is in air and air feigning is disallowed
+        if (!feign_air && !(self.flags & FL_ONGROUND)) {
+            sprint(self, PRINT_HIGH, "You cannot feign while you are airborne\n");
+            return;
+        }
+
         // check area for feigned spy on the ground
         area_check = Spy_CheckArea(self);
         if (area_check == 3) {

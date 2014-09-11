@@ -551,6 +551,14 @@ void () DecodeLevelParms = {
         if (st != string_null)
             cannon_accuracy = stof(st);
 
+        st = infokey(world, "fa");
+        if (st == string_null)
+            st = infokey(world, "feign_air");
+        if (st == "off")
+            feign_air = FALSE;
+        else
+            feign_air = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
