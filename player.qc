@@ -403,7 +403,8 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
 void () player_assaultcannon1 =[103, player_assaultcannon2] {
     local string st;
 
-    if (vlen(self.velocity) <= 90 && !(self.tfstate & TFSTATE_LOCK)) {
+    if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) <= 30)
+                && !(self.tfstate & TFSTATE_LOCK)) {
         muzzleflash();
         sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
 

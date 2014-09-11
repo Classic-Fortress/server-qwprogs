@@ -527,6 +527,14 @@ void () DecodeLevelParms = {
         if (st == "on")
             cannon_move = TRUE;
 
+        st = infokey(world, "cms");
+        if (st == string_null)
+            st = infokey(world, "cannon_movespin");
+        if (st == "off")
+            cannon_movespin = FALSE;
+        else
+            cannon_movespin = TRUE;
+
         st = infokey(world, "spy");
         if (st == "off")
             spy_off = TRUE;
