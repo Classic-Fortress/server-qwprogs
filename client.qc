@@ -627,6 +627,45 @@ void () DecodeLevelParms = {
             ent.nextthink = time + autoteam_time;
             ent.think = autoteam_think;
         }
+
+        st = infokey(world, "faithful");
+        if (st == "on") {
+            spawnfull = FALSE;
+            drop_grenades = FALSE;
+            drop_grenpack = FALSE;
+            drop_gren1 = 0;
+            drop_gren2 = 0;
+            grentimers = FALSE;
+            id_extended = FALSE;
+            remember_weapon = FALSE;
+            discammo_pickup = TRUE;
+            old_dropflag = TRUE;
+            reload_cliptick = FALSE;
+            scoutdash = FALSE;
+            sniperreload = FALSE;
+            old_sniperrange = FALSE;
+            detpipe_limit = 7;
+            detpipe_limit_world = 7;
+            old_pipecooldown = TRUE;
+            medicaura = FALSE;
+            old_medikit = TRUE;
+            old_biodamage = TRUE;
+            cannon_lock = FALSE;
+            cannon_air = TRUE;
+            cannon_move = TRUE;
+            cannon_movespin = TRUE;
+            cannon_conc = TRUE;
+            cannon_accuracy = 1;
+            flame_knockback = FALSE;
+            old_spanner = TRUE;
+            old_railgun = TRUE;
+            old_dispenser = TRUE;
+            disp_explosion = FALSE;
+            feign_air = FALSE;
+            feign_pack = FALSE;
+            feign_msg = FALSE;
+        }
+
     }
 
     if (parm11)
