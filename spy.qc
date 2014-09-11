@@ -488,8 +488,9 @@ void (float issilent) CF_Spy_FeignDeath = {
             // make a death sound
             DeathSound();
 
-            // drop an empty backpack
-            Spy_DropBackpack();
+            // drop an empty backpack (if this is not disabled in settings)
+            if (feign_pack)
+                Spy_DropBackpack();
 
             // print feign message
             deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
