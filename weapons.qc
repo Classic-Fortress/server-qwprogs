@@ -1384,7 +1384,8 @@ void (entity pl) W_SetCurrentAmmo = {
     if ((pl.health <= 0) || (pl.current_weapon == 0))
         return;
 
-    player_run();
+    if (!(self.tfstate & TFSTATE_AIMING) && !(self.tfstate & TFSTATE_CANT_MOVE))
+        player_run();
 
     pl.items = pl.items - (pl.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
     pl.weapon = 0;
