@@ -2680,16 +2680,7 @@ void () W_WeaponFrame = {
     if (self.impulse != 0 && self.has_disconnected == 0)
         ImpulseCommands();
 
-    if ((self.button0 && self.fire_held_down) &&
-        (self.current_weapon == WEAP_ASSAULT_CANNON)) {
-        player_assaultcannonup1();
-    } else if ((!self.button0 && self.fire_held_down) &&
-        (self.current_weapon == WEAP_ASSAULT_CANNON)) {
-        self.fire_held_down = 0;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
-        TeamFortress_SetSpeed(self);
-        player_run();
-    } else if (self.button0 && !self.fire_held_down) {
+    if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400)
@@ -2704,7 +2695,7 @@ void () W_WeaponFrame = {
                     TeamFortress_SetSpeed(self);
                 }
             }
-        } else {
+        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
             if (self.flags & FL_ONGROUND || cannon_air) {
                 SuperDamageSound();
                 W_Attack();
@@ -2712,6 +2703,9 @@ void () W_WeaponFrame = {
                 sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
                 self.antispam_cannon_air = time + 3;
             }
+        } else {
+            SuperDamageSound();
+            W_Attack();
         }
     } else if (self.playerclass == 0) {
         self.weaponmode = 0;
