@@ -1663,7 +1663,7 @@ float () CheckForReload = {
             return 1;
         }
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && (toggleflags & TFLAG_SNIPERRELOAD)) {
+        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload) {
             TeamFortress_ReloadCurrentWeapon();
             return 1;
         }
@@ -1689,7 +1689,7 @@ float (float weap) CheckForAmmo = {
         if (self.reload_super_shotgun >= 2 && self.ammo_shells > self.reload_super_shotgun)
             return 1;
     } else if (weap == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > self.reload_sniper_rifle && (toggleflags & TFLAG_SNIPERRELOAD))
+        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > self.reload_sniper_rifle && sniperreload)
             return 1;
     } else if (weap == WEAP_GRENADE_LAUNCHER) {
         if (self.reload_grenade_launcher >= 1 && self.ammo_rockets > self.reload_grenade_launcher)
@@ -1806,7 +1806,7 @@ void () W_Attack = {
                 return;
             player_shot1();
             W_FireSniperRifle();
-            if (toggleflags & TFLAG_SNIPERRELOAD) {
+            if (sniperreload) {
                 self.reload_sniper_rifle = self.reload_sniper_rifle + 1;
                 Status_Refresh(self);
                 CheckForReload();

@@ -446,6 +446,9 @@ float cannon_accuracy;
 float feign_air;
 float feign_pack;
 float feign_msg;
+float scoutdash;
+float sniperreload;
+float spawnfull;
 
 float old_spanner;
 float old_railgun;

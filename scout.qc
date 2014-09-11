@@ -21,7 +21,7 @@ void () CF_Scout_Dash = {
         return;
 
     // check if dash is allowed in rules and if cooldown has ended
-    if (!(toggleflags & TFLAG_SCOUTDASH) || time < self.dash_cooldown)
+    if (!scoutdash || time < self.dash_cooldown)
         return;
 
     // don't dash if scout is concussed or have damaged legs

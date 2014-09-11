@@ -583,28 +583,32 @@ void () DecodeLevelParms = {
         if (st == string_null)
             st = infokey(world, "spyinvis");
 
-        if ((st == "on") || (toggleflags & TFLAG_SPYINVIS))
-            invis_only = TRUE;
-        else if (st == "off")
-            invis_only = FALSE;
+        st = infokey(world, "sd");
+        if (st == string_null)
+            st = infokey(world, "scoutdash");
+        if (st == "off")
+            scoutdash = FALSE;
+        else
+            scoutdash = TRUE;
 
         st = infokey(world, "sr");
         if (st == string_null)
             st = infokey(world, "sniperreload");
-        if (st != "off")
-            toggleflags = toggleflags | TFLAG_SNIPERRELOAD;
+        if (st == "off")
+            sniperreload = FALSE;
+        else
+            sniperreload = TRUE;
 
         st = infokey(world, "sf");
         if (st == string_null)
             st = infokey(world, "spawnfull");
         if (st == "on")
-            toggleflags = toggleflags | TFLAG_SPAWNFULL;
+            spawnfull = TRUE;
 
-        st = infokey(world, "sd");
-        if (st == string_null)
-            st = infokey(world, "scoutdash");
-        if (st != "off")
-            toggleflags = toggleflags | TFLAG_SCOUTDASH;
+        if ((st == "on") || (toggleflags & TFLAG_SPYINVIS))
+            invis_only = TRUE;
+        else if (st == "off")
+            invis_only = FALSE;
 
         st = infokey(world, "rd");
         if (st == string_null)
