@@ -335,7 +335,7 @@ void () ConcussionGrenadeTimer = {
     pos = pointcontents(src);
 
     if ((self.owner.flags & 512) || (self.owner.flags & 16)) {
-        if (self.owner.is_feigning == 0) {
+        if (!self.owner.is_feigning && !(self.owner.current_weapon == WEAP_ASSAULT_CANNON && !cannon_conc && self.owner.button0)) {
             makevectors(self.owner.v_angle);
             stumble = crandom() * self.health;
             if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
