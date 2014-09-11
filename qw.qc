@@ -440,6 +440,7 @@ float disp_explosion;
 float cannon_lock;
 float cannon_air;
 float cannon_move;
+float cannon_movespin;
 
 float old_spanner;
 float old_railgun;
