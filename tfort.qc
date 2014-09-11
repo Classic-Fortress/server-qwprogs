@@ -86,17 +86,17 @@ void () RemoveAutoIdTimer = {
 };
 
 void () RemoveGrenadeTimers = {
-    local entity te;
-
-    te = find(world, classname, "gtimer");
+    local entity te = find(world, classname, "gtimer");
     while (te != world) {
         if (te.owner == self)
             dremove(te);
         te = find(te, classname, "gtimer");
     }
+};
 
+void () RemovePrimeTimers = {
     if (!drop_grenades) {
-        te = find(world, classname, "primetimer");
+        local entity te = find(world, classname, "primetimer");
         while (te != world) {
             if (te.owner == self)
                 dremove(te);
@@ -2137,6 +2137,7 @@ void () TeamFortress_RemoveTimers = {
 
     RemoveAutoIdTimer();
     RemoveGrenadeTimers();
+    RemovePrimeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);
 
