@@ -473,7 +473,7 @@ void (entity pe_player) Menu_Spy = {
 };
 
 void (float inp) Menu_Spy_Skin_Input = {
-    if (inp == 0)
+    if (inp == 10)
         return;
 
     if (self.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT)) {
