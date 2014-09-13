@@ -6,10 +6,10 @@ New features
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
 * Force map switch to the voted map early using /forcenext.
-* Auto ID feature (setinfo ai 1 = on, 2 = teammates only, 3 = enemies only).
+* Auto ID feature (cf\_autoid 1 = on, 2 = teammates only, 3 = enemies only).
 * Show friendly Sentry Gun health in /id for Engineers.
 * Show max health and max armor in /id for Medics and Engineers.
-* Grenade timers (disable with /cf\_notimers 1 or disable just sound with /cf\_notimersound 1).
+* Grenade timers (disable with /cf\_notimers 1 = no timers, 2 = no timer sound).
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
@@ -57,6 +57,7 @@ Demolitions Man
 * New detpack menu containing 5, 20, 50 and 255 second detpacks.
 * Changed maximum detpipes allowed per team to 6 per demoman instead of 7 total.
 * Decrease /detpipe cooldown to 0.5 seconds instead of 0.8.
+* Stop detpacking by pressing last weapon bind.
 
 Combat Medic
 ------
