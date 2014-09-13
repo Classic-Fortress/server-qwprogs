@@ -140,6 +140,9 @@ void (float inp) TeamFortress_ChangeClass = {
             sprint(self, PRINT_HIGH, "You are already playing as a ");
             TeamFortress_PrintClassName(self, inp, 0);
             return;
+        } else if (inp == 10 && (self.tfstate & TFSTATE_RANDOMPC)) {
+            sprint(self, PRINT_HIGH, "You are already playing as random player class\n");
+            return;
         }
 
         if (TeamFortress_TeamIsCivilian(self.team_no)) {
