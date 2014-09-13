@@ -222,6 +222,10 @@ void (float inp) Menu_Class_Input = {
     if (!IsLegalClass(inp) || CF_GetClassRestriction(self.team_no, inp) == -1)
         return;
 
+    // close menu if selected class is current class
+    if (self.playerclass == inp || (inp == 10 && (self.tfstate & TFSTATE_RANDOMPC)))
+        Menu_Close(self);
+
     TeamFortress_ChangeClass(inp);
 };
 
