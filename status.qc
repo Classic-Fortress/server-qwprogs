@@ -381,44 +381,52 @@ string(entity pl) DisguiseToString =
     local string team = "";
 
     if (pl.is_undercover == 1) {
-        st = "ױמהועדןצוע: ";
-        if (pl.undercover_team) {
-            st = strcat(st, TeamToString(pl.undercover_team));
-            st = strcat(st, " ");
+        if (self.items & IT_INVISIBILITY) {
+            st = "ֹמציףיגלו";
+        } else {
+            st = "ױמהועדןצוע: ";
+            if (pl.undercover_team) {
+                st = strcat(st, TeamToString(pl.undercover_team));
+                st = strcat(st, " ");
+            }
+            if (pl.undercover_skin)
+                st = strcat(st, ClassToString(pl.undercover_skin));
         }
-        if (pl.undercover_skin)
-            st = strcat(st, ClassToString(pl.undercover_skin));
     } else if (pl.is_undercover == 2) {
-        if (pl.disguise_team) {
-            team = strcat(team, "(");
-            team = strcat(team, TeamToString(pl.disguise_team));
-            if (!pl.queue_skin)
-                team = strcat(team, ") ");
-        } else if (pl.queue_team) {
-            team = strcat(team, "(");
-            team = strcat(team, TeamToString(pl.queue_team));
-            team = strcat(team, " ");
-        } else if (pl.undercover_team) {
-            team = strcat(team, TeamToString(pl.undercover_team));
-            team = strcat(team, " ");
+        if (invis_only) {
+            st = "ֹמציףיגלו in ";
+            st = strcat(st, ftos(pl.undercover_timer));
+            st = strcat(st, " seconds");
+        } else {
+            if (pl.disguise_team) {
+                team = strcat(team, "(");
+                team = strcat(team, TeamToString(pl.disguise_team));
+                if (!pl.queue_skin)
+                    team = strcat(team, ") ");
+            } else if (pl.queue_team) {
+                team = strcat(team, "(");
+                team = strcat(team, TeamToString(pl.queue_team));
+                team = strcat(team, " ");
+            } else if (pl.undercover_team) {
+                team = strcat(team, TeamToString(pl.undercover_team));
+                team = strcat(team, " ");
+            }
+            if (pl.disguise_skin) {
+                if (!pl.queue_team)
+                    skin = strcat(skin, "(");
+                skin = strcat(skin, ClassToString(pl.disguise_skin));
+                skin = strcat(skin, ")");
+            } else if (pl.queue_skin) {
+                skin = strcat(skin, " ");
+                skin = strcat(skin, ClassToString(pl.queue_skin));
+                skin = strcat(skin, ")");
+            } else if (pl.undercover_skin) {
+                skin = strcat(skin, ClassToString(pl.undercover_skin));
+            }
+            st = "ױמהועדןצוע: ";
+            st = strcat(st, team);
+            st = strcat(st, skin);
         }
-        if (pl.disguise_skin) {
-            if (!pl.queue_team)
-                skin = strcat(skin, "(");
-            skin = strcat(skin, ClassToString(pl.disguise_skin));
-            skin = strcat(skin, ")");
-        } else if (pl.queue_skin) {
-            skin = strcat(skin, " ");
-            skin = strcat(skin, ClassToString(pl.queue_skin));
-            skin = strcat(skin, ")");
-        } else if (pl.undercover_skin) {
-            skin = strcat(skin, ClassToString(pl.undercover_skin));
-        }
-        st = "ױמהועדןצוע: ";
-        st = strcat(st, team);
-        st = strcat(st, skin);
-    } else if (invis_only) {
-        st = "ױמהועדןצוע";
     }
 
     return st;

@@ -63,6 +63,7 @@ typedef void (float) f_void_float;
 .float aura_healtime;           // Aura healing status will be shown in status bar until this time
 .float regen_time;              // Time when the medic last regenerated cells
 .float dash_cooldown;           // Cooldown for Scout dash
+.float undercover_timer;        // Seconds left until disguised
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 .entity nopickup;                // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types

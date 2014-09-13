@@ -578,7 +578,8 @@ void () CF_Spy_Invisible = {
         e_timer.classname = "spytimer";
         e_timer.owner = self;
         e_timer.think = CF_Spy_UndercoverThink;
-        e_timer.nextthink = time + 4;
+        e_timer.nextthink = time + 1;
+        self.undercover_timer = 4;
     }
 
     Status_Refresh(self);
@@ -648,6 +649,14 @@ void () CF_Spy_UndercoverThink = {
     local float f_team_color;
     local string s_team, s_class;
 
+    // keep track of seconds left to
+    if (self.owner.undercover_timer > 1) {
+        self.owner.undercover_timer = self.owner.undercover_timer - 1;
+        self.nextthink = time + 1;
+        Status_Refresh(self.owner);
+        return;
+    }
+
     // stop if player is not a spy
     if (self.owner.playerclass != PC_SPY)
         return;
@@ -657,7 +666,7 @@ void () CF_Spy_UndercoverThink = {
         return;
 
     // make spy invisible if invis_only is turned on
-    if (invis_only == 1) {
+    if (invis_only) {
 
         self.owner.items = self.owner.items | IT_INVISIBILITY;
         self.owner.frame = 0;
@@ -766,8 +775,9 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
     e_timer.think = CF_Spy_UndercoverThink;
-    e_timer.nextthink = time + 4;
+    e_timer.nextthink = time + 1;
     e_timer.skin = pf_class;
+    pe_player.undercover_timer = 4;
     TeamFortress_SetSkin(pe_player);
 
     Status_Refresh(pe_player);
