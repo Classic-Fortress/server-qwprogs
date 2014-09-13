@@ -537,7 +537,7 @@ void () W_FireMedikit = {
                     }
 
                     if (self.current_weapon == WEAP_MEDIKIT)
-                        self.currentammo = self.owner.ammo_cells;
+                        self.currentammo = self.ammo_cells;
 
                     T_Heal(trace_ent, healam, 1);
 
