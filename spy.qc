@@ -693,7 +693,10 @@ void () CF_Spy_UndercoverThink = {
                     s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
                 else
                     s_team = TeamFortress_TeamGetColorString(self.owner.team_no);
-                s_class = TeamFortress_GetClassName(self.owner.undercover_skin);
+                if (self.owner.undercover_skin)
+                    s_class = TeamFortress_GetClassName(self.owner.undercover_skin);
+                else
+                    s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
 
@@ -714,7 +717,10 @@ void () CF_Spy_UndercoverThink = {
                 CF_Spy_ChangeSkin(self.owner, self.owner.queue_skin);
             } else {
                 s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
-                s_class = TeamFortress_GetClassName(self.owner.undercover_skin);
+                if (self.owner.undercover_skin)
+                    s_class = TeamFortress_GetClassName(self.owner.undercover_skin);
+                else
+                    s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
         }
