@@ -527,6 +527,7 @@ void () W_FireMedikit = {
                     if (self.ammo_cells >= 50) {
                         healam = trace_ent.max_health - trace_ent.health + 50;
                         self.ammo_cells = 0;
+                        self.regen_cooldown = time + PC_MEDIC_CELL_REGEN_CD;
                         sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
                     }
                     else {

@@ -62,6 +62,7 @@ typedef void (float) f_void_float;
 .float aura_healcount;          // Amount of players given health
 .float aura_healtime;           // Aura healing status will be shown in status bar until this time
 .float regen_time;              // Time when the medic last regenerated cells
+.float regen_cooldown;          // Time to cooldown cell regeneration after using medikit heal
 .float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float fragstreak;              // Frag streak

@@ -86,6 +86,12 @@ void () CF_Medic_RegenerateCells = {
     if (!medicaura && old_medikit)
         return;
 
+    // skip this regen tick if on cooldown
+    if (time <= self.owner.regen_cooldown) {
+        self.nextthink = time + 1;
+        return;
+    }
+
     self.nextthink = time + PC_MEDIC_CELL_REGEN_TIME;
 
     if (self.owner.ammo_cells < 100) {
