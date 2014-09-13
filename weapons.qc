@@ -539,6 +539,7 @@ void () W_FireMedikit = {
                     if (self.current_weapon == WEAP_MEDIKIT)
                         self.currentammo = self.ammo_cells;
 
+                    Status_Refresh(self);
                     T_Heal(trace_ent, healam, 1);
 
                     if (trace_ent.health > trace_ent.max_health) {
