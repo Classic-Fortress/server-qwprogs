@@ -191,6 +191,10 @@ void (float update) Menu_Team = {
     s_green = Menu_Team_TeamString(4, s_green);
     s_auto = strpadr(s_auto, (strlen(s_blue) - 1));
 
+    // don't show auto team if already assigned a team
+    if (self.team_no)
+        s_auto = "";
+
     // update menu every 0.5 seconds
     if (!self.has_menutimer) {
         self.has_menutimer = 1;
