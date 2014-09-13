@@ -136,6 +136,12 @@ void (float inp) TeamFortress_ChangeClass = {
         if ((deathmatch != 3) && (cb_prematch_time < time))
             return;
 
+        if (self.playerclass == inp) {
+            sprint(self, PRINT_HIGH, "You are already playing as a ");
+            TeamFortress_PrintClassName(self, inp, 0);
+            return;
+        }
+
         if (TeamFortress_TeamIsCivilian(self.team_no)) {
             sprint(self, PRINT_HIGH, "You cannot change class\n");
             return;
