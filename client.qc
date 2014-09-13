@@ -335,13 +335,6 @@ void () DecodeLevelParms = {
             autokick_time = 60;
         }
 
-        // execute map configs [on]
-        st = infokey(world, "exec_map_cfgs");
-        if (st == "off")
-            exec_map_cfgs = FALSE;
-        else
-            exec_map_cfgs = TRUE;
-
         // show team cap frags for all team members [off]
         st = infokey(world, "t");
         if (st == string_null)
