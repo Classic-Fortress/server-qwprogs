@@ -274,7 +274,7 @@
 #define TFLAG_TEAMFRAGS		128	// Individual Frags, or Frags = TeamScore
 #define TFLAG_FIRSTENTRY	256	// Used to determine the first time toggleflags is set
 					// in a map. Cannot be toggled by players.
-#define TFLAG_SPYINVIS		512	// Spy invisible only
+// unused           		512
 #define TFLAG_GRAPPLE		1024	// Grapple on/off
 #define TFLAG_FULLTEAMSCORE	2048
 #define TFLAG_FLAGEMU		4096

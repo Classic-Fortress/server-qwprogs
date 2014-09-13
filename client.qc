@@ -651,9 +651,9 @@ void () DecodeLevelParms = {
         st = infokey(world, "s");
         if (st == string_null)
             st = infokey(world, "spyinvis");
-        if ((st == "on") || (toggleflags & TFLAG_SPYINVIS))
+        if (st == "on")
             invis_only = TRUE;
-        else if (st == "off")
+        else
             invis_only = FALSE;
 
         // allow scout dash [on]

@@ -447,9 +447,14 @@ void (entity pe_player) Menu_Spy = {
         return;
     }
 
-    if (invis_only)
-        s_skin    = "“‘ Go invisible           \n";
-    else if (pe_player.is_undercover == 2)
+    if (invis_only) {
+        if (pe_player.is_undercover == 1)
+            s_skin    = "“‘ Become visible         \n";
+        else if (pe_player.is_undercover == 2)
+            s_skin    = "“‘ Stop going invisible   \n";
+        else
+            s_skin    = "“‘ Go invisible           \n";
+    } else if (pe_player.is_undercover == 2)
         s_skin    = "“‘ Stop disguising        \n";
 
     if ((!pe_player.last_skin && !pe_player.last_team) || invis_only)
