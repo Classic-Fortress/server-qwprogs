@@ -1176,7 +1176,8 @@ void () ExplodeOldestPipebomb = {
             if (oldest == world || oldest.nextthink > pipe.nextthink)
                 oldest = pipe;
         }
-        numpipes_total = numpipes_total + 1;
+        if (pipe.owner.team_no == self.team_no)
+            numpipes_total = numpipes_total + 1;
         pipe = find(pipe, classname, "pipebomb");
     }
 
