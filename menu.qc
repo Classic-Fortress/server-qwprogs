@@ -491,7 +491,8 @@ void (float inp) Menu_Spy_Skin_Input = {
         return;
     }
 
-    CF_Spy_ChangeSkin(self, inp);
+    if (self.skin != inp)
+        CF_Spy_ChangeSkin(self, inp);
 
     if (number_of_teams > 2)
         Menu_Spy_Color();
@@ -511,12 +512,9 @@ void () Menu_Spy_Skin = {
     local string s_medic    = "—‘ Medic      \n";
     local string s_hwguy    = "˜‘ HWGuy      \n";
     local string s_pyro     = "™‘ Pyro       \n";
-    local string s_spy      = "š‘ Spy (reset)\n";
+    local string s_spy      = "š‘ Spy        \n";
     local string s_engineer = "›‘ Engineer   \n";
     local string s_nothing  = "\n’‘ Nothing    \n";
-
-    if (!self.undercover_skin)
-        s_spy = "\n";
 
     Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_nothing);
 };
