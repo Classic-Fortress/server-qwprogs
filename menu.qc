@@ -211,7 +211,7 @@ void (float inp) Menu_Class_Input = {
         return;
 
     // keep showing menu if class is invalid
-    if (inp > 9 || !IsLegalClass(inp) || CF_ClassIsRestricted(self.team_no, inp))
+    if (inp > 10 || !IsLegalClass(inp) || CF_ClassIsRestricted(self.team_no, inp))
         Menu_Class(0);
 
     // don't try to change class if class is forbidden
