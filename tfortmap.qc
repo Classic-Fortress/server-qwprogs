@@ -2561,7 +2561,7 @@ void () DropGoalItems = {
                 if (te.goal_activation & 4096)
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
             }
-            else {
+            else if (self.effects & EF_DIMLIGHT) {
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
                 if (self.team_no == 1)
