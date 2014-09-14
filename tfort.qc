@@ -166,7 +166,7 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
         self.nextpc = inp;
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint() && self.suicide_time <= time) {
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
             ClientKill(0, 1);
             self.suicide_time = time;
         } else {
@@ -597,7 +597,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Grenade";
 
         if (self.no_grenades_1 > 0) {
-            self.suicide_time = time + 10;
+            self.has_throwngren = TRUE;
             self.no_grenades_1 = self.no_grenades_1 - 1;
             if (gtype == 6) {
                 newmis = spawn();
@@ -657,7 +657,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Grenade";
 
         if (self.no_grenades_2 > 0) {
-            self.suicide_time = time + 10;
+            self.has_throwngren = TRUE;
             self.no_grenades_2 = self.no_grenades_2 - 1;
             if (gtype == 6) {
                 newmis = spawn();

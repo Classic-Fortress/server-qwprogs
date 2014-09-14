@@ -1069,7 +1069,7 @@ void (float force, float free) ClientKill = {
     // players can't suicide again for 10 seconds
     self.suicide_time = time + 5 + random() * 5;
 
-    if (free) {
+    if (free && !self.has_throwngren && (self.has_changedteam || self.nextpc)) {
         TeamFortress_SetupRespawn(FALSE);
     } else {
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
@@ -1310,6 +1310,8 @@ void () PutClientInServer = {
     self.invincible_time = 0;
     self.spawn_time = time;
     self.vote_close = 0;
+    self.has_throwngren = FALSE;
+    self.has_changedteam = FALSE;
 
     self.reload_shotgun = 0;
     self.reload_super_shotgun = 0;
