@@ -185,6 +185,9 @@ float (float tno) TeamFortress_TeamSet = {
     if (!self.deadflag) {
         ClientKill(1);
     }
+    // remove engineer buildings
+    if (self.playerclass == PC_ENGINEER)
+        Engineer_RemoveBuildings(self);
     // swap colors for spy last disguise
     if (self.playerclass == PC_SPY && self.undercover_team == tno)
         self.last_team = self.team_no;
