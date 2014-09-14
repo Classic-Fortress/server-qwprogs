@@ -2546,7 +2546,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL)
+    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME)
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
