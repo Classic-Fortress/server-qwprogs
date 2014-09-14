@@ -1039,7 +1039,7 @@ float () CloseToSpawnPoint = {
     return 0;
 };
 
-void (float force) ClientKill = {
+void (float force, float free) ClientKill = {
     local entity te;
     local float timeleft;
 
@@ -1069,7 +1069,9 @@ void (float force) ClientKill = {
     // players can't suicide again for 10 seconds
     self.suicide_time = time + 5 + random() * 5;
 
-    if (!(self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint())) {
+    if (free) {
+        TeamFortress_SetupRespawn(FALSE);
+    } else {
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
 
         // If infected, give the medic a frag
@@ -1088,8 +1090,6 @@ void (float force) ClientKill = {
         TF_AddFrags(self, -1);
         TeamFortress_SetupRespawn(TRUE);
         self.th_die();
-    } else {
-        TeamFortress_SetupRespawn(FALSE);
     }
 
     self.health = -1;
