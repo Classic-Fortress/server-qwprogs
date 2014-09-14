@@ -167,7 +167,7 @@ void (float inp) TeamFortress_ChangeClass = {
         }
         self.nextpc = inp;
         if (self.health == self.max_health && (self.spawn_time + 10) > time && self.nextpc && CloseToSpawnPoint() && self.suicide_time <= time) {
-            ClientKill(0);
+            ClientKill(0, 1);
             self.suicide_time = time;
         } else {
             sprint(self, PRINT_HIGH, "After dying, you will return as a ");

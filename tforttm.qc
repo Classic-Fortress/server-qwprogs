@@ -183,7 +183,10 @@ float (float tno) TeamFortress_TeamSet = {
         return (1);
     }
     if (!self.deadflag) {
-        ClientKill(1);
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time)
+            ClientKill(1, 1);
+        else
+            ClientKill(1, 0);
     }
     // remove engineer buildings
     if (self.playerclass == PC_ENGINEER)
