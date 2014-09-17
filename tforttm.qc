@@ -182,14 +182,14 @@ float (float tno) TeamFortress_TeamSet = {
         }
         return (1);
     }
-    self.has_changedteam = TRUE;
     if (!self.deadflag) {
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time)
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
+            self.has_changedteam = 1;
             ClientKill(1, 1);
-        else
+            self.has_changedteam = 0;
+        } else
             ClientKill(1, 0);
     }
-    self.has_changedteam = FALSE;
     // remove engineer buildings
     if (self.playerclass == PC_ENGINEER)
         Engineer_RemoveBuildings(self);
