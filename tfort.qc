@@ -13,7 +13,7 @@ float () CloseToSpawnPoint;
 
 void () AutoId = {
 
-    // ready autoid settings every 5 seconds
+    // read autoid settings every 5 seconds
     if (time > self.owner.autoid_time) {
         self.owner.autoid_type = stof(infokey(self.owner, "ai"));
         self.owner.autoid_time = time + 5;
@@ -36,7 +36,7 @@ void () AutoId = {
         CF_Identify(self.owner, self.owner.autoid_type);
     }
 
-    self.nextthink = time + 0.1;
+    self.nextthink = time + 0.3;
 };
 
 void () UseSpecialSkill = {
