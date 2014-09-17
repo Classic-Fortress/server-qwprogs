@@ -61,7 +61,7 @@ void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
-void () TeamFortress_DetonatePipebombs;
+void (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 
@@ -2321,7 +2321,7 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_DASH)
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)
-        TeamFortress_DetonatePipebombs();
+        TeamFortress_DetonatePipebombs(0);
     else if (self.impulse == TF_DETPACK_STOP)
         TeamFortress_DetpackStop();
     else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
