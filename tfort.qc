@@ -51,7 +51,15 @@ void () UseSpecialSkill = {
         self.impulse = TF_PB_DETONATE;
     else if (self.playerclass == PC_MEDIC)
         self.impulse = TF_MEDIC_AURA_TOGGLE;
-    else if (self.playerclass == PC_SPY)
+    else if (self.playerclass == PC_HVYWEAP) {
+        if (self.tfstate & TFSTATE_LOCK)
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+        else
+            self.tfstate = self.tfstate | TFSTATE_LOCK;
+        Status_Refresh(self);
+        self.impulse = 0;
+        return;
+    } else if (self.playerclass == PC_SPY)
         self.impulse = TF_SPY_DIE;
     else if (self.playerclass == PC_ENGINEER)
         self.impulse = TF_ENGINEER_DETDISP;
