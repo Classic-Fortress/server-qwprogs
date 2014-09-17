@@ -34,6 +34,7 @@ typedef void (float) f_void_float;
 .float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
+.float has_changedclass;        // TRUE for a player that has changed class
 .float has_disconnected;        // TRUE if the player has disconnected
 .float has_menutimer;           // TRUE if the player has an active menu timer
 .float default_sensitivity;     // Player's default (non-zoomed) sensitivity
