@@ -2196,7 +2196,7 @@ void () TeamFortress_RemoveTimers = {
         te = find(te, classname, "detpack");
     }
 
-    TeamFortress_DetonatePipebombs();
+    TeamFortress_DetonatePipebombs(1);
     if (self.has_disconnected == 1) {
         te = find(world, classname, "grenade");
         while (te) {

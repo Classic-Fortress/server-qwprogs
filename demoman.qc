@@ -17,10 +17,10 @@ void () TeamFortress_DetpackTouch;
 void () TeamFortress_DetpackDisarm;
 void () TeamFortress_DetpackCountDown;
 
-void () TeamFortress_DetonatePipebombs = {
+void (float force) TeamFortress_DetonatePipebombs = {
     local entity e;
 
-    if (time < self.pipecooldown)
+    if (time < self.pipecooldown && !force)
         return;
 
     e = find(world, classname, "pipebomb");
