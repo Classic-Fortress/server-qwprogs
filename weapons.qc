@@ -319,8 +319,9 @@ void () W_FireSpanner = {
             trace_ent.axhitme = 1;
             SpawnBlood(org, 20);
             deathmsg = DMSG_SPANNER;
-            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM,
-                        TF_TD_OTHER);
+            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
+        } else {
+            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
     } else {
         sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
@@ -575,6 +576,8 @@ void () W_FireMedikit = {
                 BioInfection.enemy = self;
                 trace_ent.infection_team_no = self.team_no;
             }
+        } else {
+            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
     } else {
         // hit wall
