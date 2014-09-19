@@ -455,6 +455,7 @@ float feign_msg;
 float scoutdash;
 float sniperreload;
 float spawnfull;
+float stockfull;
 
 float old_spanner;
 float old_railgun;

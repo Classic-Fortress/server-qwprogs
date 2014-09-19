@@ -683,6 +683,15 @@ void () DecodeLevelParms = {
         else
             spawnfull = FALSE;
 
+        // stock full ammo/armor [on]
+        st = infokey(world, "stf");
+        if (st == string_null)
+            st = infokey(world, "stockfull");
+        if (st == "off")
+            stockfull = FALSE;
+        else
+            stockfull = TRUE;
+
         // delay respawning by this many seconds [0]
         st = infokey(world, "rd");
         if (st == string_null)
@@ -703,6 +712,7 @@ void () DecodeLevelParms = {
         st = infokey(world, "faithful");
         if (st == "on") {
             spawnfull = FALSE;
+            stockfull = FALSE;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
             drop_gren1 = 0;
