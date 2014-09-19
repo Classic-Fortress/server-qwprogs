@@ -318,6 +318,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
             return;
         }
         if (self.ammo_shells >= 1) {
+            self.current_weapon = weap;
             if (self.reload_shotgun >= self.ammo_shells)
                 reloadamount = self.ammo_shells;
             else
@@ -357,6 +358,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
             return;
         }
         if (self.ammo_shells >= 2) {
+            self.current_weapon = weap;
             if (self.reload_super_shotgun >= self.ammo_shells)
                 reloadamount = self.ammo_shells;
             else
@@ -396,6 +398,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
             return;
         }
         if (self.ammo_shells >= 1) {
+            self.current_weapon = weap;
             if (self.reload_super_shotgun >= self.ammo_shells)
                 reloadamount = self.ammo_shells;
             else
@@ -436,6 +439,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
             return;
         }
         if (self.ammo_rockets >= 1) {
+            self.current_weapon = weap;
             if (self.reload_grenade_launcher >= self.ammo_rockets)
                 reloadamount = self.ammo_rockets;
             else
@@ -477,6 +481,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
             return;
         }
         if (self.ammo_rockets >= 1) {
+            self.current_weapon = weap;
             if (self.reload_rocket_launcher >= self.ammo_rockets)
                 reloadamount = self.ammo_rockets;
             else
@@ -535,7 +540,6 @@ void (float slot) TeamFortress_ReloadSlot = {
         weap = W_WeaponSlot3();
     }
 
-    self.current_weapon = weap;
     TeamFortress_ReloadWeapon(weap);
 };
 
