@@ -111,6 +111,7 @@ void () TeamFortress_SaveMe = {
         }
         te = find(te, classname, "player");
     }
+    self.saveme_time = time;
 };
 
 void (entity pe_player, float f_type) CF_Identify = {

@@ -1321,6 +1321,7 @@ void () PutClientInServer = {
     self.spawn_time = time;
     self.vote_close = 0;
     self.has_throwngren = FALSE;
+    self.saveme_time = 0;
 
     self.reload_shotgun = 0;
     self.reload_super_shotgun = 0;
