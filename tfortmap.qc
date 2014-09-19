@@ -690,7 +690,10 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (addb) {
         if (Player.health > 0) {
             if (Goal.health > 0) {
-                T_Heal(Player, Goal.health, 0);
+                if (stockfull)
+                    T_Heal(Player, Player.max_health, 0);
+                else
+                    T_Heal(Player, Goal.health, 0);
             }
             if (Goal.health < 0) {
                 if ((0 - Player.health) > Goal.health) {
@@ -703,15 +706,22 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             }
         }
         if (Player.health > 0) {
-            if (Goal.armortype > 0) {
-                Player.armortype = Goal.armortype;
-            } else if (Goal.armorvalue > 0) {
-                Player.armortype = Player.armor_allowed;
+            if (stockfull) {
+                if (Goal.armortype > 0)
+                    Player.armortype = Player.armor_allowed;
+                else if (Goal.armorvalue > 0)
+                    Player.armortype = Player.armor_allowed;
+                Player.armorvalue = Player.maxarmor;
+            } else {
+                if (Goal.armortype > 0)
+                    Player.armortype = Goal.armortype;
+                else if (Goal.armorvalue > 0)
+                    Player.armortype = Player.armor_allowed;
+                Player.armorvalue = Player.armorvalue + Goal.armorvalue;
             }
-            Player.armorvalue = Player.armorvalue + Goal.armorvalue;
-            if (Goal.armorclass > 0) {
+            if (Goal.armorclass > 0)
                 Player.armorclass = Goal.armorclass;
-            }
+
             Player.ammo_shells = Player.ammo_shells + Goal.ammo_shells;
             Player.ammo_nails = Player.ammo_nails + Goal.ammo_nails;
             Player.ammo_rockets = Player.ammo_rockets + Goal.ammo_rockets;
