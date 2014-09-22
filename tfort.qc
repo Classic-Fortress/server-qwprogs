@@ -381,125 +381,117 @@ void () TeamFortress_DisplayLegalClasses = {
 };
 
 void () TeamFortress_Inventory = {
-    local entity tg;
-    local string ac;
-    local float col;
+    local entity en;
+    local string st;
+    local float fl;
 
-    col = TeamFortress_TeamGetColor(self.team_no);
-    sprint(self, PRINT_HIGH, "You are in team ");
-    ac = ftos(self.team_no);
-    sprint(self, PRINT_HIGH, ac, ", color ");
-    ac = ftos(col);
-    sprint(self, PRINT_HIGH, ac, ".\n");
-    if (self.lives != -1) {
-        ac = ftos(self.lives);
-        sprint(self, PRINT_HIGH, "You have got ", ac);
-        if (self.lives == 1)
-            sprint(self, PRINT_HIGH, " life.\n");
-        else
-            sprint(self, PRINT_HIGH, " lives.\n");
+    st = TeamFortress_TeamGetColorString(self.team_no);
+    sprint(self, PRINT_HIGH, st, " team\n");
+
+    if (self.playerclass == PC_SPY) {
+        if (self.undercover_team || self.undercover_skin) {
+            sprint(self, PRINT_HIGH, "Disguised as ");
+            if (self.undercover_team != 0)
+                st = TeamFortress_TeamGetColorString(self.undercover_team);
+            else if (self.team_no == 1)
+                st = "Blue";
+            else if (self.team_no == 2)
+                st = "Red";
+            else if (self.team_no == 3)
+                st = "Yellow";
+            else if (self.team_no == 4)
+                st = "Green";
+            sprint(self, PRINT_HIGH, st);
+            if (self.undercover_skin != 0)
+                st = TeamFortress_GetClassName(self.undercover_skin);
+            else
+                st = "Spy";
+            sprint(self, PRINT_HIGH, " ", st, "\n");
+        }
     }
-    if (self.no_grenades_1 > 0) {
-        sprint(self, PRINT_HIGH, "Grenade type 1: ");
+
+    fl = self.no_grenades_1;
+    if (fl > 0) {
+        sprint(self, PRINT_HIGH, ftos(fl));
         if (self.tp_grenades_1 == GR_TYPE_NORMAL)
-            sprint(self, PRINT_HIGH, "Normal (");
+            sprint(self, PRINT_HIGH, " normal grenade");
         else if (self.tp_grenades_1 == GR_TYPE_NAIL)
-            sprint(self, PRINT_HIGH, "Nail (");
+            sprint(self, PRINT_HIGH, " nail grenade");
         else if (self.tp_grenades_1 == GR_TYPE_MIRV)
-            sprint(self, PRINT_HIGH, "Mirv (");
+            sprint(self, PRINT_HIGH, " mirv grenade");
         else if (self.tp_grenades_1 == GR_TYPE_NAPALM)
-            sprint(self, PRINT_HIGH, "Napalm (");
+            sprint(self, PRINT_HIGH, " napalm grenade");
         else if (self.tp_grenades_1 == GR_TYPE_FLARE)
-            sprint(self, PRINT_HIGH, "Flare (");
+            sprint(self, PRINT_HIGH, " flare");
         else if (self.tp_grenades_1 == GR_TYPE_GAS)
-            sprint(self, PRINT_HIGH, "Hallucinogenic (");
+            sprint(self, PRINT_HIGH, " hallucinogenic grenade");
         else if (self.tp_grenades_1 == GR_TYPE_EMP)
-            sprint(self, PRINT_HIGH, "EMP (");
-        else if (self.tp_grenades_2 == GR_TYPE_CALTROP)
-            sprint(self, PRINT_HIGH, "Caltrop (");
-        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
-            sprint(self, PRINT_HIGH, "Flash (");
-        else
-            sprint(self, PRINT_HIGH, "BUG (");
+            sprint(self, PRINT_HIGH, " EMP grenade");
+        else if (self.tp_grenades_1 == GR_TYPE_CALTROP)
+            sprint(self, PRINT_HIGH, " caltrop canister");
+        else if (self.tp_grenades_1 == GR_TYPE_FLASH)
+            sprint(self, PRINT_HIGH, " flash grenade");
 
-        ac = ftos(self.no_grenades_1);
-        sprint(self, PRINT_HIGH, ac, ")\n");
+        if (fl > 1)
+            sprint(self, PRINT_HIGH, "s");
+        sprint(self, PRINT_HIGH, "\n");
     }
-    if (self.no_grenades_2 > 0) {
-        sprint(self, PRINT_HIGH, "Grenade type 2: ");
-        if (self.tp_grenades_2 == GR_TYPE_NORMAL)
-            sprint(self, PRINT_HIGH, "Normal (");
-        else if (self.tp_grenades_1 == GR_TYPE_CONCUSSION)
-            sprint(self, PRINT_HIGH, "Concussion (");
-        else if (self.tp_grenades_2 == GR_TYPE_NAIL)
-            sprint(self, PRINT_HIGH, "Nail (");
-        else if (self.tp_grenades_2 == GR_TYPE_MIRV)
-            sprint(self, PRINT_HIGH, "Mirv (");
-        else if (self.tp_grenades_2 == GR_TYPE_NAPALM)
-            sprint(self, PRINT_HIGH, "Napalm (");
-        else if (self.tp_grenades_2 == GR_TYPE_FLARE)
-            sprint(self, PRINT_HIGH, "Flare (");
-        else if (self.tp_grenades_2 == GR_TYPE_GAS)
-            sprint(self, PRINT_HIGH, "Hallucinogenic (");
-        else if (self.tp_grenades_2 == GR_TYPE_EMP)
-            sprint(self, PRINT_HIGH, "EMP (");
-        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
-            sprint(self, PRINT_HIGH, "Flash (");
-        else
-            sprint(self, PRINT_HIGH, "BUG (");
 
-        ac = ftos(self.no_grenades_2);
-        sprint(self, PRINT_HIGH, ac, ")\n");
+    fl = self.no_grenades_2;
+    if (fl > 0) {
+        sprint(self, PRINT_HIGH, ftos(fl));
+        if (self.tp_grenades_2 == GR_TYPE_NORMAL)
+            sprint(self, PRINT_HIGH, " normal grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_CONCUSSION)
+            sprint(self, PRINT_HIGH, " concussion grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_NAIL)
+            sprint(self, PRINT_HIGH, " nail grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_MIRV)
+            sprint(self, PRINT_HIGH, " mirv grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_NAPALM)
+            sprint(self, PRINT_HIGH, " napalm grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_FLARE)
+            sprint(self, PRINT_HIGH, " flare");
+        else if (self.tp_grenades_2 == GR_TYPE_GAS)
+            sprint(self, PRINT_HIGH, " hallucinogenic grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_EMP)
+            sprint(self, PRINT_HIGH, " EMP grenade");
+        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
+            sprint(self, PRINT_HIGH, " flash grenade");
+
+        if (fl > 1)
+            sprint(self, PRINT_HIGH, "s");
+        sprint(self, PRINT_HIGH, "\n");
     }
     if (self.tf_items & NIT_SCANNER)
-        sprint(self, PRINT_HIGH, "Scanner. ");
+        sprint(self, PRINT_HIGH, "Scanner");
 
-    if (self.weapons_carried & WEAP_MEDIKIT) {
-        sprint(self, PRINT_HIGH, "Medikit (");
-        ac = ftos(self.ammo_medikit);
-        sprint(self, PRINT_HIGH, ac, ") ");
-    }
+    if (self.weapons_carried & WEAP_MEDIKIT)
+        sprint(self, PRINT_HIGH, "Medikit");
+
     if (self.weapons_carried & WEAP_DETPACK) {
         if (self.ammo_detpack > 0) {
-            ac = ftos(self.ammo_detpack);
-            sprint(self, PRINT_HIGH, ac, " Detpack");
+            st = ftos(self.ammo_detpack);
+            sprint(self, PRINT_HIGH, st, " detpack");
             if (self.ammo_detpack > 1)
                 sprint(self, PRINT_HIGH, "s");
-            sprint(self, PRINT_HIGH, ". ");
         }
     }
-    tg = find(world, classname, "item_tfgoal");
-    while (tg) {
-        if (tg.owner == self) {
-            sprint(self, PRINT_HIGH, tg.netname, ". ");
-        }
-        tg = find(tg, classname, "item_tfgoal");
+
+    if (self.playerclass == PC_SPY && invis_only) {
+        sprint(self, PRINT_HIGH, "Invisibility device");
     }
+
     if (self.armorvalue > 0)
         TeamFortress_DescribeArmor(self, self.armorclass);
 
-    if (!invis_only) {
-        if ((self.playerclass == PC_SPY) && (invis_only == 0)) {
-            sprint(self, PRINT_HIGH, "Skin: ");
-            if (self.undercover_skin != 0)
-                TeamFortress_PrintClassName(self, self.undercover_skin, 0);
-            else
-                sprint(self, PRINT_HIGH, "Spy\n");
-            sprint(self, PRINT_HIGH, "Colors: ");
-            if (self.undercover_team != 0)
-                ac = ftos(self.undercover_team);
-            else if (self.team_no == 1)
-                ac = "Blue";
-            else if (self.team_no == 2)
-                ac = "Red";
-            else if (self.team_no == 3)
-                ac = "Yellow";
-            else if (self.team_no == 4)
-                ac = "Green";
-            sprint(self, PRINT_HIGH, ac);
+    en = find(world, classname, "item_tfgoal");
+    while (en) {
+        if (en.owner == self) {
+            sprint(self, PRINT_HIGH, en.netname, "\n");
         }
+        en = find(en, classname, "item_tfgoal");
     }
-    sprint(self, PRINT_HIGH, "\n");
 };
 
 void () TeamFortress_ShowTF = {
