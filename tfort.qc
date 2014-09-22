@@ -393,14 +393,6 @@ void () TeamFortress_Inventory = {
             sprint(self, PRINT_HIGH, "Disguised as ");
             if (self.undercover_team != 0)
                 st = TeamFortress_TeamGetColorString(self.undercover_team);
-            else if (self.team_no == 1)
-                st = "Blue";
-            else if (self.team_no == 2)
-                st = "Red";
-            else if (self.team_no == 3)
-                st = "Yellow";
-            else if (self.team_no == 4)
-                st = "Green";
             sprint(self, PRINT_HIGH, st);
             if (self.undercover_skin != 0)
                 st = TeamFortress_GetClassName(self.undercover_skin);
