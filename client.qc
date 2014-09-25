@@ -2237,6 +2237,19 @@ void () ClientDisconnect = {
         }
         te = find(te, classname, "detpack");
     }
+    te = find(world, classname, "countdown_timer");
+    while (te) {
+        if (te.owner == self) {
+            if (te.weaponmode == 1) {
+                TeamFortress_SetSpeed(te.enemy);
+                dremove(te.oldenemy);
+                dremove(te.observer_list);
+            }
+            dremove(te);
+            te = world;
+        }
+        te = find(te, classname, "countdown_timer");
+    }
     RemoveGrenades();
     if (clanbattle && (self.tf_id != 0)) {
         te = spawn();
