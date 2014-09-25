@@ -707,11 +707,13 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         }
         if (Player.health > 0) {
             if (stockfull) {
-                if (Goal.armortype > 0)
+                if (Goal.armortype > 0) {
                     Player.armortype = Player.armor_allowed;
-                else if (Goal.armorvalue > 0)
+                    Player.armorvalue = Player.maxarmor;
+                } else if (Goal.armorvalue > 0) {
                     Player.armortype = Player.armor_allowed;
-                Player.armorvalue = Player.maxarmor;
+                    Player.armorvalue = Player.maxarmor;
+                }
             } else {
                 if (Goal.armortype > 0)
                     Player.armortype = Goal.armortype;
