@@ -686,6 +686,7 @@ void () TeamFortress_FinishedBuilding = {
         newmis.th_die = Sentry_Die;
         newmis.th_pain = Sentry_Pain;
         newmis.mdl = "progs/turrgun.mdl";
+        self.sentry_ent = newmis;
         sound(oldself, 3, "weapons/turrset.wav", 1, 1);
         newmis.solid = SOLID_BBOX;
         setmodel(newmis, newmis.mdl);

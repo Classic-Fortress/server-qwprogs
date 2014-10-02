@@ -495,20 +495,24 @@ string(entity pl) RangeToString =
     local entity te;
     local float num;
 
+    if (!pl.ScannerOn) {
+        return "";
+    }
+
     te = find(world, netname, "scanner");
-    while ((te != world) && (te.owner != pl))
+    while ((te != world) && (te.owner != pl)) {
         te = find(te, netname, "scanner");
+    }
 
-    if (pl.ScannerOn != 1)
-        return ("");
-    else
-        num = te.health;
+    num = te.health;
 
-    if (num <= 0)
-        return ("");
+    if (num <= 0) {
+        return "";
+    }
 
-    if (num > 99)
-        return ("99+ m");
+    if (num > 99) {
+        return "99+ m";
+    }
 
     return strcat(strpadl(ftos(floor(num)), 3), " m");
 };
@@ -516,15 +520,19 @@ string(entity pl) RangeToString =
 string(entity pl) ScannerToString =
 {
     local entity te;
-    local string st, scanfor = "", range = "";
+    local string st = "";
+    local string scanfor = "";
+    local string range = "";
     local float pad;
 
     te = find(world, netname, "scanner");
-    while ((te != world) && (te.owner != pl))
+    while ((te != world) && (te.owner != pl)) {
         te = find(te, netname, "scanner");
+    }
 
-    if (pl.ScannerOn != 1)
-        return ("Σγαξξες: off");
+    if (pl.ScannerOn != 1) {
+        return "Σγαξξες: off";
+    }
 
     if (te.health > 0) {
         st = "Σγαξξες: ";
@@ -540,46 +548,52 @@ string(entity pl) ScannerToString =
     } else {
         st = "Σγαξξες: on";
         st = strcat(st, "  Σγαξξιξη: ");
-        if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+
+        if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
             scanfor = "team";
+        }
+
         if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
-            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
                 scanfor = strcat(scanfor, ", ");
+            }
+
             scanfor = strcat(scanfor, "enemy");
         }
-        if (!strlen(scanfor))
+
+        if (!strlen(scanfor)) {
             scanfor = "nothing";
+        }
+
         st = strcat(st, scanfor);
     }
+
     return st;
 };
 
 string(entity pl) SentryDetailsToString =
 {
-    local entity te;
     local string ammo    = "";
     local string shells  = "";
     local string rockets = "";
     local string hp      = "";
     local string st      = "";
 
-    te = find(world, classname, "building_sentrygun");
-    while (te) {
-        if (te.real_owner == self) {
-            hp = strcat(strpadl(ftos(floor(te.health)), 3), " hp");
-            shells = ftos(floor(te.ammo_shells));
-            if (te.weapon == 3) {
-                rockets = ftos(floor(te.ammo_rockets));
-                ammo = strcat("  Αννο: ", strcat(shells, strcat("/", rockets)));
-            } else {
-                ammo = strcat("  Αννο: ", shells);
-            }
-            st = strcat("Σεξτςω: ", strcat(hp, ammo));
-            st = strpadr(st, 32);
-            st = strcat(st, strcat("Μεφεμ: ", ftos(te.weapon)));
-            return st;
+    if (self.has_sentry) {
+        hp = strcat(strpadl(ftos(floor(self.sentry_ent.health)), 3), " hp");
+        shells = ftos(floor(self.sentry_ent.ammo_shells));
+
+        if (self.sentry_ent.weapon == 3) {
+            rockets = ftos(floor(self.sentry_ent.ammo_rockets));
+            ammo = strcat("  Αννο: ", strcat(shells, strcat("/", rockets)));
+        } else {
+            ammo = strcat("  Αννο: ", shells);
         }
-        te = find(te, classname, "building_sentrygun");
+
+        st = strcat("Σεξτςω: ", strcat(hp, ammo));
+        st = strpadr(st, 32);
+        st = strcat(st, strcat("Μεφεμ: ", ftos(self.sentry_ent.weapon)));
     }
-    return ("");
+
+    return st;
 };
