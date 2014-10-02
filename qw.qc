@@ -156,6 +156,7 @@ float coop;
 .entity real_owner;
 .float has_dispenser;           // TRUE for an ENGINEER if he has a dispenser
 .float has_sentry;              // TRUE for an ENGINEER if he has a sentry
+.entity sentry_ent;				// Contains sentry gun entity
 
 .float real_frags;              // Used to store the players frags when TeamFrags is On
 
