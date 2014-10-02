@@ -376,6 +376,7 @@ void (float objtobuild) TeamFortress_Build = {
     self.is_building = 1;
     self.immune_to_check = time + 5;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+    self.movetype = MOVETYPE_NONE;
     self.weapon = self.current_weapon;
     self.current_weapon = 0;
     self.weaponmodel = "";
@@ -621,6 +622,7 @@ void () TeamFortress_FinishedBuilding = {
     oldself.real_owner = self;
     self.is_building = FALSE;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+    self.movetype = MOVETYPE_WALK;
     self.current_weapon = self.weapon;
     Status_Refresh(self);
     TeamFortress_SetSpeed(self);
