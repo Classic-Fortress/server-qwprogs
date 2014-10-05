@@ -486,42 +486,170 @@ void () TeamFortress_Inventory = {
     }
 };
 
+void (string ps_description, float pf_setting, string ps_last, float pf_bool) CF_PrintSetting = {
+    local string st;
+
+    st = strpadr(ps_description, 40);
+
+    if (!pf_bool) {
+        st = strcat(st, ftos(pf_setting));
+    } else if (pf_setting) {
+        st = strcat(st, "on");
+    } else {
+        st = strcat(st, "off");
+    }
+
+    if (strlen(ps_last) > 0) {
+        st = strcat(st, " ");
+        st = strcat(st, ps_last);
+    }
+
+    st = strcat(st, "\n");
+
+    sprint(self, PRINT_HIGH, st);
+};
+
 void () TeamFortress_ShowTF = {
     local string st;
 
-    if (toggleflags & TFLAG_CLASS_PERSIST)
-        sprint(self, PRINT_HIGH, "Class persistence on\n");
-    else
-        sprint(self, PRINT_HIGH, "Class persistence off\n");
+    sprint(self, PRINT_HIGH, "\nThis server is running Classic Fortress ");
+    sprint(self, PRINT_HIGH, VER);
+    sprint(self, PRINT_HIGH, "\n\n");
 
-    if (toggleflags & TFLAG_CHEATCHECK)
-        sprint(self, PRINT_HIGH, "Cheat checking on\n");
-    else
-        sprint(self, PRINT_HIGH, "Cheat checking off\n");
+    sprint(self, PRINT_HIGH, "== Team Fortress ==\n");
+    if (autokick_kills) {
+        sprint(self, PRINT_HIGH, "Kick teamkillers                        ");
+        sprint(self, PRINT_HIGH, ftos(autokick_kills));
+        sprint(self, PRINT_HIGH, " kills / ");
+        sprint(self, PRINT_HIGH, ftos(autokick_time));
+        sprint(self, PRINT_HIGH, " secs\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Kick teamkillers                        off\n");
+    }
 
-    if (toggleflags & TFLAG_AUTOTEAM)
-        sprint(self, PRINT_HIGH, "Autoteam on\n");
-    else
-        sprint(self, PRINT_HIGH, "Autoteam off\n");
+    if (toggleflags & TFLAG_CLASS_PERSIST) {
+        sprint(self, PRINT_HIGH, "Class persistence                       on\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Class persistence                       off\n");
+    }
 
-    if (toggleflags & TFLAG_RESPAWNDELAY)
+    if (toggleflags & TFLAG_CHEATCHECK) {
+        sprint(self, PRINT_HIGH, "Cheat checking                          on\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Cheat checking                          off\n");
+    }
+
+    if (toggleflags & TFLAG_AUTOTEAM) {
+        sprint(self, PRINT_HIGH, "Autoteam                                on\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Autoteam                                off\n");
+    }
+
+    sprint(self, PRINT_HIGH, "Respawn delay                           ");
+    if (toggleflags & TFLAG_RESPAWNDELAY) {
         st = ftos(respawn_delay_time);
-    else
-        st = "No";
+    } else {
+        st = "off";
+    }
     sprint(self, PRINT_HIGH, st);
-    if (st != "No")
-        sprint(self, PRINT_HIGH, " second");
-    sprint(self, PRINT_HIGH, " Respawn delay\n");
+    if (st != "off") {
+        sprint(self, PRINT_HIGH, " seconds");
+    }
+    sprint(self, PRINT_HIGH, "\n");
 
-    if (toggleflags & TFLAG_TEAMFRAGS)
-        sprint(self, PRINT_HIGH, "Teamfrags on\n");
-    else
-        sprint(self, PRINT_HIGH, "Teamfrags off\n");
+    if (toggleflags & TFLAG_TEAMFRAGS) {
+        sprint(self, PRINT_HIGH, "Teamfrags                               on\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Teamfrags                               off\n");
+    }
 
-    if (toggleflags & TFLAG_FULLTEAMSCORE)
-        sprint(self, PRINT_HIGH, "Full teamscore on\n");
-    else
-        sprint(self, PRINT_HIGH, "Full teamscore off\n");
+    if (toggleflags & TFLAG_FULLTEAMSCORE) {
+        sprint(self, PRINT_HIGH, "Full teamscore                          on\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Full teamscore                          off\n");
+    }
+
+    sprint(self, PRINT_HIGH, "\n== Classic Fortress ==\n");
+    CF_PrintSetting("Spawn with full health/armor", spawnfull, "", 1);
+    CF_PrintSetting("Stock players with full health/armor", stockfull, "", 1);
+    CF_PrintSetting("Old dropflag behaviour", old_dropflag, "", 1);
+    CF_PrintSetting("Remember weapon", remember_weapon, "", 1);
+    CF_PrintSetting("Pick up discarded ammo", discammo_pickup, "", 1);
+    CF_PrintSetting("Reload clip tick", reload_cliptick, "", 1);
+    CF_PrintSetting("ID extras", id_extended, "", 1);
+    CF_PrintSetting("Old grenades", old_grens, "", 1);
+    CF_PrintSetting("Drop grenades on ground", drop_grenades, "", 1);
+    CF_PrintSetting("Drop grenades in pack", drop_grenpack, "", 1);
+    if (drop_grenpack) {
+        CF_PrintSetting("- Grenades type 1", drop_gren1, "", 0);
+        CF_PrintSetting("- Grenades type 2", drop_gren2, "", 0);
+    }
+    CF_PrintSetting("Grenade timers", grentimers, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Scout ==\n");
+    CF_PrintSetting("Scout dash ability", scoutdash, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Sniper ==\n");
+    CF_PrintSetting("Sniper reload", sniperreload, "", 1);
+    CF_PrintSetting("Old sniper rifle range", old_sniperrange, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Demolitions Man ==\n");
+    if (detpipe_limit > 0) {
+        CF_PrintSetting("Pipebomb limit (per demoman)", detpipe_limit, "", 0);
+    } else if (detpipe_limit == 0) {
+        sprint(self, PRINT_HIGH, "Pipebomb limit (per demoman):           0 (disallow)\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Pipebomb limit (per demoman):           unlimited\n");
+    }
+    if (detpipe_limit_world > 0) {
+        CF_PrintSetting("Pipebomb limit (team)", detpipe_limit_world, "", 0);
+    } else if (detpipe_limit_world == 0) {
+        sprint(self, PRINT_HIGH, "Pipebomb limit (team):                  0 (disallow)\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Pipebomb limit (team):                  unlimited\n");
+    }
+    CF_PrintSetting("Old pipebomb cooldown", old_pipecooldown, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Combat Medic ==\n");
+    CF_PrintSetting("Medic aura ability", medicaura, "", 1);
+    CF_PrintSetting("Old medikit behaviour", old_medikit, "", 1);
+    CF_PrintSetting("Old bioweapon damage", old_sniperrange, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Heavy Weapons Guy ==\n");
+    CF_PrintSetting("Assault Cannon lock ability", cannon_lock, "", 1);
+    CF_PrintSetting("Allow Assault Cannon in air", cannon_air, "", 1);
+    if (!cannon_movespin) {
+        CF_PrintSetting("Allow Assault Cannon while moving", cannon_move, "", 1);
+    }
+    CF_PrintSetting("Spin Assault Cannon while moving", cannon_movespin, "", 1);
+    CF_PrintSetting("Allow Assault Cannon concussion", cannon_conc, "", 1);
+    if (cannon_movespin == 0) {
+        sprint(self, PRINT_HIGH, "Assault Cannon accuracy:                CF style\n");
+    } else if (cannon_movespin == 1) {
+        sprint(self, PRINT_HIGH, "Assault Cannon accuracy:                TF 2.8 style\n");
+    } else {
+        sprint(self, PRINT_HIGH, "Assault Cannon accuracy:                TF 2.9 style\n");
+    }
+
+    sprint(self, PRINT_HIGH, "\n== Pyro ==\n");
+    CF_PrintSetting("Flamethrower knockback", flame_knockback, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Engineer ==\n");
+    CF_PrintSetting("Old spanner behaviour", old_spanner, "", 1);
+    CF_PrintSetting("Old railgun behaviour", old_railgun, "", 1);
+    CF_PrintSetting("Old dispenser behaviour", old_dispenser, "", 1);
+    CF_PrintSetting("Bigger dispenser explosions", disp_explosion, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Spy ==\n");
+    CF_PrintSetting("Allow feign death while airborne", feign_air, "", 1);
+    CF_PrintSetting("Drop feign backpack", feign_pack, "", 1);
+    CF_PrintSetting("Print feign death message", feign_msg, "", 1);
+
+    if (server_faithful) {
+        sprint(self, PRINT_HIGH, "\nThis server is running faithful Team Fortress settings.\n");
+    } else if (server_default) {
+        sprint(self, PRINT_HIGH, "\nThis server is running default Classic Fortress settings.\n");
+    }
 };
 
 void () TeamFortress_GrenadePrimed;
