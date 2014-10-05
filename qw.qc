@@ -458,6 +458,8 @@ float scoutdash;
 float sniperreload;
 float spawnfull;
 float stockfull;
+float server_default;
+float server_faithful;
 
 float old_spanner;
 float old_railgun;

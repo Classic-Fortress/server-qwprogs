@@ -126,7 +126,33 @@ void () autokick_think = {
     dremove(self);
 };
 
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+    local string st;
+
+    st = infokey(world, ps_short);
+    if (st == string_null) {
+        st = infokey(world, ps_setting);
+    }
+
+    if (st == "on") {
+        return TRUE;
+    } else if (st == "off") {
+        return FALSE;
+    } else if (stof(st) != 0) {
+        return stof(st);
+    } else if (ps_default == "on") {
+        return TRUE;
+    } else if (ps_default == "off") {
+        return FALSE;
+    } else if (stof(ps_default) != 0) {
+        return stof(ps_default);
+    }
+
+    return 0;
+};
+
 void () DecodeLevelParms = {
+    local float fl;
     local string st;
     local entity ent;
 
@@ -225,21 +251,14 @@ void () DecodeLevelParms = {
         local float autoteam_time;
         autoteam_time = 30;
 
-        st = infokey(world, "c");
-        if (st == string_null)
-            st = infokey(world, "clan");
+        clanbattle = CF_GetSetting("c", "clan", "off");
+        if (clanbattle) {
 
-        if (st == "on") {
-
-            clanbattle = TRUE;
             clan_scores_dumped = 0;
             game_locked = 0;
 
-            st = infokey(world, "pm");
-            if (st == string_null)
-                st = infokey(world, "prematch");
-
-            cb_prematch_time = time + stof(st) * 60;
+            cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
+            cb_prematch_time = time + cb_prematch_time * 60;
 
             if (timelimit && ((time + timelimit) < cb_prematch_time)) {
 
@@ -258,11 +277,7 @@ void () DecodeLevelParms = {
 
             }
 
-            st = infokey(world, "cft");
-            if (st == string_null)
-                st = infokey(world, "ceasefire_time");
-
-            cb_ceasefire_time = stof(st);
+            cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
             if (cb_ceasefire_time != 0) {
 
                 cb_ceasefire_time = time + cb_ceasefire_time * 60;
@@ -297,410 +312,165 @@ void () DecodeLevelParms = {
                 te.nextthink = time + 5;
 
             }
-            st = infokey(world, "lg");
-            if (st == string_null)
-                st = infokey(world, "locked_game");
-
-            if (st == "on")
-                game_locked = TRUE;
+            game_locked = CF_GetSetting("lg", "locked_game", "off");
 
         } else
             clanbattle = FALSE;
 
         // automatically assign team [off]
-        st = infokey(world, "a");
-        if (st == string_null)
-            st = infokey(world, "autoteam");
-        if (st == "on")
+        fl = CF_GetSetting("a", "autoteam", "off");
+        if (fl > 1) {
             toggleflags = toggleflags | TFLAG_AUTOTEAM;
-        else if (st == "off")
+            autoteam_time = fl;
+        } else if (fl) {
+            toggleflags = toggleflags | TFLAG_AUTOTEAM;
+        } else {
             toggleflags = toggleflags - (toggleflags & TFLAG_AUTOTEAM);
-        else if (stof(st) != 0) {
-            toggleflags = toggleflags | TFLAG_AUTOTEAM;
-            autoteam_time = stof(st);
         }
 
         // auto kick team killers [4 tks per 60 seconds]
-        st = infokey(world, "akk");
-        if (st == string_null)
-            st = infokey(world, "autokick_kills");
-        autokick_kills = stof(st);
-        if (autokick_kills) {
-            st = infokey(world, "akt");
-            if (st == string_null)
-                st = infokey(world, "autokick_time");
-            autokick_time = stof(st);
-        } else {
-            autokick_kills = 4;
-            autokick_time = 60;
-        }
+        autokick_kills = CF_GetSetting("akk", "autokick_kills", "4");
+        autokick_time = CF_GetSetting("akt", "autokick_time", "60");
 
         // show team cap frags for all team members [off]
-        st = infokey(world, "t");
-        if (st == string_null)
-            st = infokey(world, "teamfrags");
-        if (st == "on")
+        if (CF_GetSetting("t", "teamfrags", "off")) {
             toggleflags = toggleflags | TFLAG_TEAMFRAGS;
-        else
+        } else {
             toggleflags = toggleflags - (toggleflags & TFLAG_TEAMFRAGS);
+        }
 
         // every team member carry the total frags for the team [off]
-        st = infokey(world, "fts");
-        if (st == string_null)
-            st = infokey(world, "fullteamscore");
-        if (st == "on")
+        if (CF_GetSetting("fts", "fullteamscore", "off")) {
             toggleflags = toggleflags | TFLAG_FULLTEAMSCORE;
-        else
+        } else {
             toggleflags = toggleflags - (toggleflags & TFLAG_FULLTEAMSCORE);
+        }
 
         // use old concussion, gas and flash grenades [off]
-        st = infokey(world, "og");
-        if (st == string_null)
-            st = infokey(world, "old_grens");
-        if (st == "on")
-            old_grens = TRUE;
-        else
-            old_grens = FALSE;
+        old_grens = CF_GetSetting("og", "old_grens", "off");
 
         // drop primed hand grenades to ground when dying [on]
-        st = infokey(world, "dg");
-        if (st == string_null)
-            st = infokey(world, "drop_grenades");
-        if (st == "off")
-            drop_grenades = FALSE;
-        else
-            drop_grenades = TRUE;
+        drop_grenades = CF_GetSetting("dg", "drop_grenades", "on");
 
         // drop grenades in backpack upon death [on]
-        st = infokey(world, "dgp");
-        if (st == string_null)
-            st = infokey(world, "drop_grenpack");
-        if (st == "off")
-            drop_grenpack = FALSE;
-        else
-            drop_grenpack = TRUE;
+        drop_grenpack = CF_GetSetting("dgp", "drop_grenpack", "on");
 
         // maximum grenades type 1 to drop in backpack [1]
-        st = infokey(world, "dg1");
-        if (st == string_null)
-            st = infokey(world, "drop_gren1");
-        if (st != string_null)
-            drop_gren1 = stof(st);
-        else
-            drop_gren1 = 1;
+        drop_gren1 = CF_GetSetting("dg1", "drop_gren1", "1");
 
         // maximum grenades type 2 to drop in backpack [0]
-        st = infokey(world, "dg2");
-        if (st == string_null)
-            st = infokey(world, "drop_gren2");
-        if (st != string_null)
-            drop_gren2 = stof(st);
-        else
-            drop_gren2 = 0;
+        drop_gren2 = CF_GetSetting("dg2", "drop_gren2", "0");
 
         // display grenade timer in status bar [on]
-        st = infokey(world, "gt");
-        if (st == string_null)
-            st = infokey(world, "grentimers");
-        if (st == "off")
-            grentimers = FALSE;
-        else
-            grentimers = TRUE;
+        grentimers = CF_GetSetting("gt", "grentimers", "on");
 
         // show sentry gun health + misc extras in id string [on]
-        st = infokey(world, "ie");
-        if (st == string_null)
-            st = infokey(world, "id_extended");
-        if (st == "off")
-            id_extended = FALSE;
-        else
-            id_extended = TRUE;
+        id_extended = CF_GetSetting("ie", "id_extended", "on");
 
         // remember weapon across deaths [on]
-        st = infokey(world, "rw");
-        if (st == string_null)
-            st = infokey(world, "remember_weapon");
-        if (st == "off")
-            remember_weapon = FALSE;
-        else
-            remember_weapon = TRUE;
+        remember_weapon = CF_GetSetting("rw", "remember_weapon", "on");
 
         // pick up discardable ammo in discarded backpacks [off]
-        st = infokey(world, "da");
-        if (st == string_null)
-            st = infokey(world, "discammo_pickup");
-        if (st == "on")
-            discammo_pickup = TRUE;
-        else
-            discammo_pickup = FALSE;
+        discammo_pickup = CF_GetSetting("da", "discammo_pickup", "off");
 
         // use old tf style dropflag (map decides on/off) [off]
-        st = infokey(world, "odf");
-        if (st == string_null)
-            st = infokey(world, "old_dropflag");
-        if (st == "on")
-            old_dropflag = TRUE;
-        else
-            old_dropflag = FALSE;
+        old_dropflag = CF_GetSetting("odf", "old_dropflag", "off");
 
         // show ticking clip ammo in sbar when reloading [on]
-        st = infokey(world, "rc");
-        if (st == string_null)
-            st = infokey(world, "reload_cliptick");
-        if (st == "off")
-            reload_cliptick = FALSE;
-        else
-            reload_cliptick = TRUE;
+        reload_cliptick = CF_GetSetting("rc", "reload_cliptick", "on");
 
         // use old tf sniper range (shorter) [off]
-        st = infokey(world, "os");
-        if (st == string_null)
-            st = infokey(world, "old_sniperrange");
-        if (st == "on")
-            old_sniperrange = TRUE;
-        else
-            old_sniperrange = FALSE;
+        old_sniperrange = CF_GetSetting("os", "old_sniperrange", "off");
 
         // maximum amount of pipebombs per demoman [6]
-        st = infokey(world, "dl");
-        if (st == string_null)
-            st = infokey(world, "detpipe_limit");
-        if (st != string_null)
-            detpipe_limit = stof(st);
-        else
-            detpipe_limit = 6;
+        detpipe_limit = CF_GetSetting("dl", "detpipe_limit", "6");
 
         // maximum amount of pipebombs in game [unlimited]
-        st = infokey(world, "dw");
-        if (st == string_null)
-            st = infokey(world, "detpipe_limit_world");
-        if (st != string_null)
-            detpipe_limit_world = stof(st);
-        else
-            detpipe_limit_world = -1;
+        detpipe_limit_world = CF_GetSetting("dw", "detpipe_limit_world", "-1");
 
         // use old tf pipebomb cooldown (0.8 seconds) [off]
-        st = infokey(world, "op");
-        if (st == string_null)
-            st = infokey(world, "old_pipecooldown");
-        if (st == "on")
-            old_pipecooldown = TRUE;
-        else
-            old_pipecooldown = FALSE;
+        old_pipecooldown = CF_GetSetting("op", "old_pipecooldown", "off");
 
         // allow medic aura [on]
-        st = infokey(world, "ma");
-        if (st == string_null)
-            st = infokey(world, "medicaura");
-        if (st == "off")
-            medicaura = FALSE;
-        else
-            medicaura = TRUE;
+        medicaura = CF_GetSetting("ma", "medicaura", "on");
 
         // use old tf style medikit (don't insta-heal max+50) [off]
-        st = infokey(world, "om");
-        if (st == string_null)
-            st = infokey(world, "old_medikit");
-        if (st == "on")
-            old_medikit = TRUE;
-        else
-            old_medikit = FALSE;
+        old_medikit = CF_GetSetting("om", "old_medikit", "off");
 
         // use old tf style bioweapon (less damage) [off]
-        st = infokey(world, "ob");
-        if (st == string_null)
-            st = infokey(world, "old_biodamage");
-        if (st == "on")
-            old_biodamage = TRUE;
-        else
-            old_biodamage = FALSE;
+        old_biodamage = CF_GetSetting("ob", "old_biodamage", "off");
 
         // use old tf style spanner (non-automated) [off]
-        st = infokey(world, "os");
-        if (st == string_null)
-            st = infokey(world, "old_spanner");
-        if (st == "on")
-            old_spanner = TRUE;
-        else
-            old_spanner = FALSE;
+        old_spanner = CF_GetSetting("os", "old_spanner", "off");
 
         // use old tf style railgun (penetrate target) [off]
-        st = infokey(world, "or");
-        if (st == string_null)
-            st = infokey(world, "old_railgun");
-        if (st == "on")
-            old_railgun = TRUE;
-        else
-            old_railgun = FALSE;
+        old_railgun = CF_GetSetting("or", "old_railgun", "off");
 
         // use old tf style dispenser (non-auto stocking) [off]
-        st = infokey(world, "od");
-        if (st == string_null)
-            st = infokey(world, "old_dispenser");
-        if (st == "on")
-            old_dispenser = TRUE;
-        else
-            old_dispenser = FALSE;
+        old_dispenser = CF_GetSetting("od", "old_dispenser", "off");
 
         // enable flamethrower knockback [on]
-        st = infokey(world, "fk");
-        if (st == string_null)
-            st = infokey(world, "flame_knockback");
-        if (st == "off")
-            flame_knockback = FALSE;
-        else
-            flame_knockback = TRUE;
+        flame_knockback = CF_GetSetting("fk", "flame_knockback", "on");
 
         // bigger dispenser explosions [on]
-        st = infokey(world, "de");
-        if (st == string_null)
-            st = infokey(world, "disp_explosion");
-        if (st == "off")
-            disp_explosion = FALSE;
-        else
-            disp_explosion = TRUE;
+        disp_explosion = CF_GetSetting("de", "disp_explosion", "on");
 
         // allow assault cannon lock mechanism [on]
-        st = infokey(world, "cl");
-        if (st == string_null)
-            st = infokey(world, "cannon_lock");
-        if (st == "off")
-            cannon_lock = FALSE;
-        else
-            cannon_lock = TRUE;
+        cannon_lock = CF_GetSetting("cl", "cannon_lock", "on");
 
         // allow assault cannon fire in air [on]
-        st = infokey(world, "ca");
-        if (st == string_null)
-            st = infokey(world, "cannon_air");
-        if (st == "off")
-            cannon_air = FALSE;
-        else
-            cannon_air = TRUE;
+        cannon_air = CF_GetSetting("ca", "cannon_air", "on");
 
         // allow movement while firing assault cannon [on]
-        st = infokey(world, "cm");
-        if (st == string_null)
-            st = infokey(world, "cannon_move");
-        if (st == "off")
-            cannon_move = FALSE;
-        else
-            cannon_move = TRUE;
+        cannon_move = CF_GetSetting("cm", "cannon_move", "on");
 
         // make assault cannon spin while moving [off]
-        st = infokey(world, "cms");
-        if (st == string_null)
-            st = infokey(world, "cannon_movespin");
-        if (st == "on") {
-            cannon_movespin = TRUE;
+        cannon_movespin = CF_GetSetting("cms", "cannon_movespin", "off");
+        if (cannon_movespin) {
             cannon_move = TRUE; // required for this to work
-        } else
-            cannon_movespin = FALSE;
+        }
 
         // make hwguy susceptible to concussion grenade while firing assault cannon [on]
-        st = infokey(world, "cc");
-        if (st == string_null)
-            st = infokey(world, "cannon_conc");
-        if (st == "off")
-            cannon_conc = FALSE;
-        else
-            cannon_conc = TRUE;
+        cannon_conc = CF_GetSetting("cc", "cannon_conc", "on");
 
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
-        st = infokey(world, "cac");
-        if (st == string_null)
-            st = infokey(world, "cannon_accuracy");
-        if (st != string_null)
-            cannon_accuracy = stof(st);
+        cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
         // allow feign death in air [on]
-        st = infokey(world, "fa");
-        if (st == string_null)
-            st = infokey(world, "feign_air");
-        if (st == "off")
-            feign_air = FALSE;
-        else
-            feign_air = TRUE;
+        feign_air = CF_GetSetting("fa", "feign_air", "on");
 
         // drop an empty backpack when feigning death [on]
-        st = infokey(world, "fp");
-        if (st == string_null)
-            st = infokey(world, "feign_pack");
-        if (st == "off")
-            feign_pack = FALSE;
-        else
-            feign_pack = TRUE;
+        feign_pack = CF_GetSetting("fp", "feign_pack", "on");
 
         // print fake death message when feigning death [on]
-        st = infokey(world, "fm");
-        if (st == string_null)
-            st = infokey(world, "feign_msg");
-        if (st == "off")
-            feign_msg = FALSE;
-        else
-            feign_msg = TRUE;
+        feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
-        // allow spy [on]
-        st = infokey(world, "spy");
-        if (st == "off")
-            spy_off = TRUE;
-        else
-            spy_off = FALSE;
+        // turn off spy [off]
+        spy_off = CF_GetSetting("spy", "spy", "off");
 
         // enable spy invisibility [off]
-        st = infokey(world, "s");
-        if (st == string_null)
-            st = infokey(world, "spyinvis");
-        if (st == "on")
-            invis_only = TRUE;
-        else
-            invis_only = FALSE;
+        invis_only = CF_GetSetting("s", "spyinvis", "off");
 
         // allow scout dash [on]
-        st = infokey(world, "sd");
-        if (st == string_null)
-            st = infokey(world, "scoutdash");
-        if (st == "off")
-            scoutdash = FALSE;
-        else
-            scoutdash = TRUE;
+        scoutdash = CF_GetSetting("sd", "scoutdash", "on");
 
         // enable sniper rifle reload [on]
-        st = infokey(world, "sr");
-        if (st == string_null)
-            st = infokey(world, "sniperreload");
-        if (st == "off")
-            sniperreload = FALSE;
-        else
-            sniperreload = TRUE;
+        sniperreload = CF_GetSetting("sr", "sniperreload", "on");
 
         // spawn with full ammo/armor [off]
-        st = infokey(world, "sf");
-        if (st == string_null)
-            st = infokey(world, "spawnfull");
-        if (st == "on")
-            spawnfull = TRUE;
-        else
-            spawnfull = FALSE;
+        spawnfull = CF_GetSetting("sf", "spawnfull", "off");
 
         // stock full ammo/armor [on]
-        st = infokey(world, "stf");
-        if (st == string_null)
-            st = infokey(world, "stockfull");
-        if (st == "off")
-            stockfull = FALSE;
-        else
-            stockfull = TRUE;
+        stockfull = CF_GetSetting("stf", "stockfull", "on");
 
         // delay respawning by this many seconds [0]
-        st = infokey(world, "rd");
-        if (st == string_null)
-            st = infokey(world, "respawn_delay");
-        respawn_delay_time = stof(st);
-        if (respawn_delay_time)
+        respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
+        if (respawn_delay_time) {
             toggleflags = toggleflags | TFLAG_RESPAWNDELAY;
-        if ((toggleflags & TFLAG_RESPAWNDELAY) && !respawn_delay_time)
+        }
+        if ((toggleflags & TFLAG_RESPAWNDELAY) && !respawn_delay_time) {
             respawn_delay_time = RESPAWN_DELAY_TIME;
+        }
 
         if (toggleflags & TFLAG_AUTOTEAM) {
             toggleflags = toggleflags - (toggleflags & TFLAG_AUTOTEAM);
@@ -709,10 +479,50 @@ void () DecodeLevelParms = {
             ent.think = autoteam_think;
         }
 
+        st = infokey(world, "default");
+        if (st == "on") {
+            server_default = TRUE;
+            old_grens = FALSE;
+            drop_grenades = TRUE;
+            drop_grenpack = TRUE;
+            drop_gren1 = 1;
+            drop_gren2 = 0;
+            grentimers = TRUE;
+            id_extended = TRUE;
+            remember_weapon = TRUE;
+            discammo_pickup = FALSE;
+            old_dropflag = FALSE;
+            reload_cliptick = TRUE;
+            scoutdash = TRUE;
+            sniperreload = TRUE;
+            old_sniperrange = FALSE;
+            detpipe_limit = 6;
+            detpipe_limit_world = -1;
+            old_pipecooldown = FALSE;
+            medicaura = TRUE;
+            old_medikit = FALSE;
+            old_biodamage = FALSE;
+            cannon_lock = TRUE;
+            cannon_air = TRUE;
+            cannon_move = TRUE;
+            cannon_movespin = FALSE;
+            cannon_conc = TRUE;
+            cannon_accuracy = 0;
+            flame_knockback = TRUE;
+            old_spanner = FALSE;
+            old_railgun = FALSE;
+            old_dispenser = FALSE;
+            disp_explosion = TRUE;
+            feign_air = TRUE;
+            feign_pack = TRUE;
+            feign_msg = TRUE;
+            spawnfull = FALSE;
+            stockfull = TRUE;
+        }
+
         st = infokey(world, "faithful");
         if (st == "on") {
-            spawnfull = FALSE;
-            stockfull = FALSE;
+            server_faithful = TRUE;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
             drop_gren1 = 0;
@@ -746,6 +556,8 @@ void () DecodeLevelParms = {
             feign_air = FALSE;
             feign_pack = FALSE;
             feign_msg = FALSE;
+            spawnfull = FALSE;
+            stockfull = FALSE;
         }
 
     }
