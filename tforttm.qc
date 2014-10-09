@@ -113,13 +113,9 @@ void (entity p) SetTeamName = {
     stuffcmd(p, "\n");
 };
 
-float (float tno) TeamFortress_TeamSet = {
-    local string st;
+float (float tno) CF_TeamIsValid = {
     local float tc;
-    local string team;
-
-    if ((intermission_running != 0) || (intermission_exittime > time))
-        return (0);
+    local string team, st;
 
     if (tno == 1)
         team = "blue team";
@@ -133,24 +129,52 @@ float (float tno) TeamFortress_TeamSet = {
     if (teamplay < 1) {
         sprint(self, PRINT_HIGH,
                "Teamplay is not on, so teams are inactive\n");
-        return (0);
+        return 0;
     }
+
     if ((tno > number_of_teams) && (number_of_teams != 0)) {
         sprint(self, PRINT_HIGH, "There can be only ");
         st = ftos(number_of_teams);
         sprint(self, PRINT_HIGH, st, " teams on this map\n");
-        return (0);
+        return 0;
     }
+
     if (self.team_no == tno) {
         sprint(self, PRINT_HIGH, "You're already in the ");
         sprint(self, PRINT_HIGH, team, "\n");
-        return (0);
+        return 0;
     }
+
     tc = TeamFortress_TeamGetNoPlayers(tno);
     if (tc >= TeamFortress_TeamGetMaxPlayers(tno)) {
         sprint(self, PRINT_HIGH, "That team is full, pick another\n");
-        return (0);
+        return 0;
     }
+
+    return 1;
+}
+
+float (float tno) TeamFortress_TeamSet = {
+    local string st;
+    local float tc;
+    local string team;
+
+    if ((intermission_running != 0) || (intermission_exittime > time))
+        return (0);
+
+    if (!CF_TeamIsValid) {
+        return 0;
+    }
+
+    if (tno == 1)
+        team = "blue team";
+    else if (tno == 2)
+        team = "red team";
+    else if (tno == 3)
+        team = "yellow team";
+    else
+        team = "green team";
+
     if (TeamFortress_TeamGetColor(tno) == 0) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
