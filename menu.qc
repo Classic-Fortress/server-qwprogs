@@ -111,7 +111,9 @@ void (float inp) Menu_Team_Input = {
 
     if (inp == 0) {
         return;
-    } if (inp == 5) {
+    }
+
+    if (inp == 5) {
         TeamFortress_TeamPutPlayerInTeam();
     } else if ((inp <= number_of_teams) && (inp > 0)) {
         TeamFortress_TeamSet(inp);
@@ -822,7 +824,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Input = {
 };
 
 void () Menu_EngineerFix_SentryGun = {
-    
+
     // only show this menu if old_spanner setting is enabled, otherwise show rotate menu
     if (!old_spanner) {
         Menu_EngineerFix_SentryGun_Rotate();
