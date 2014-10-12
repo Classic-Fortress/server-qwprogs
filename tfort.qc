@@ -656,14 +656,11 @@ void () TeamFortress_GrenadePrimed;
 
 void () GrenadeTimer = {
     self.heat = self.heat - 1;
+    self.nextthink = time + 1;
     self.owner.StatusGrenTime = self.heat;
     Status_Refresh(self.owner);
 
-    if (self.heat > 0) {
-        if (!stof(infokey(self.owner, "nt")))
-            stuffcmd(self.owner, "play items/grentimer.wav\n");
-        self.nextthink = time + 1.0;
-    } else {
+    if (!self.heat) {
         dremove(self);
     }
 };
@@ -846,6 +843,9 @@ void (float inp) TeamFortress_PrimeGrenade = {
             timer.heat = 4;
             timer.owner = self;
             timer.classname = "gtimer";
+            if (!notimers) {
+                stuffcmd(self, "play grentimer\n");
+            }
         }
     }
 
