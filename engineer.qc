@@ -257,6 +257,7 @@ void () TeamFortress_EngineerBuildStop = {
 
     sprint(self, PRINT_HIGH, "You stop building\n");
     self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
+    self.movetype = MOVETYPE_WALK;
     TeamFortress_SetSpeed(self);
     te = find(world, netname, "build_timer");
     while (te) {
