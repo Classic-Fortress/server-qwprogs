@@ -800,6 +800,8 @@ void (vector direction, float damage) FireSniperBullet = {
     if (trace_fraction != 1)
         TraceAttack(damage, direction);
 
+    FireBullets(1, direction, '0 0 0');
+
     ApplyMultiDamage();
 };
 
@@ -907,6 +909,8 @@ void () W_FireSniperRifle = {
 
     if (trace_fraction != 1)
         TraceAttack(self.heat * dam_mult, dir);
+
+    FireBullets(1, dir, '0 0 0');
 
     ApplyMultiDamage();
 };
