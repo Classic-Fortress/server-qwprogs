@@ -796,6 +796,8 @@ void (vector direction, float damage) FireSniperBullet = {
     src_z = self.absmin_z + self.size_z * 0.7;
     ClearMultiDamage();
 
+    KickPlayer(-3, self);
+
     traceline(src, src + direction * 4096, FALSE, self);
     if (trace_fraction != 1)
         TraceAttack(damage, direction);
@@ -1281,7 +1283,7 @@ void () W_FireSuperSpikes = {
     newmis.weapon = DMSG_SNAILGUN;
     setmodel(newmis, "progs/s_spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    KickPlayer(-2, self);
+    KickPlayer(-3, self);
 };
 
 void (float ox) W_FireSpikes = {
@@ -1307,7 +1309,7 @@ void (float ox) W_FireSpikes = {
     }
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
-    KickPlayer(-2, self);
+    KickPlayer(-3, self);
 };
 
 .float hit_z;
