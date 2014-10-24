@@ -1962,6 +1962,9 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 void () ReturnItem = {
     local entity te;
 
+    if (self.enemy.origin == self.enemy.oldorigin)
+        return;
+
     self.enemy.goal_state = 2;
     if ((self.enemy.goal_activation & 8192) &&
         (self.enemy.classname == "item_tfgoal"))
