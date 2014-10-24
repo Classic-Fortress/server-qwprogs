@@ -46,6 +46,9 @@ float vote_started, vote_update, vote_winnercount, vote_decider, vote_abort;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
+    if (clanbattle)
+        return;
+
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
         return;
 
@@ -83,6 +86,9 @@ void (entity pe_player) Vote_NextMap = {
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_TrickMap = {
     local float f_votes, f_votes_needed, f_votes_left;
+
+    if (clanbattle)
+        return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
         return;
@@ -122,6 +128,9 @@ void (entity pe_player) Vote_TrickMap = {
 void (entity pe_player) Vote_RaceMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
+    if (clanbattle)
+        return;
+
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
         return;
 
@@ -158,6 +167,10 @@ void (entity pe_player) Vote_RaceMap = {
 // opens/closes the currently active vote menu
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ToggleMenu = {
+
+    if (clanbattle)
+        return;
+
     if (vote_started > 0 && !vote_abort) {
         if (pe_player.menu_input != Vote_Input) {
             //dprint("[", ftos(time), "/cf/mapvote/togglemenu]: toggling map vote on for ", pe_player.netname, ".\n");
@@ -226,6 +239,9 @@ float () Vote_GetRaceVotes = {
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ForceNext = {
     local float f_votes, f_votes_needed, f_votes_left;
+
+    if (clanbattle)
+        return;
 
     if (!pe_player.team_no || !pe_player.playerclass)
         return;
