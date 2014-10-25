@@ -1962,9 +1962,6 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 void () ReturnItem = {
     local entity te;
 
-    if (self.enemy.origin == self.enemy.oldorigin)
-        return;
-
     self.enemy.goal_state = 2;
     if ((self.enemy.goal_activation & 8192) &&
         (self.enemy.classname == "item_tfgoal"))
@@ -1980,8 +1977,12 @@ void () ReturnItem = {
         setmodel(self.enemy, self.enemy.mdl);
 
     setorigin(self.enemy, self.enemy.origin);
-    sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
     tfgoalitem_checkgoalreturn(self.enemy);
+
+    if (self.enemy.origin == self.enemy.oldorigin)
+        return;
+
+    sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
 
     if (self.weapon != 2) {
         if ((self.enemy.noise3 != string_null) ||
