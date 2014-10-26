@@ -951,21 +951,51 @@ void () W_FireAssaultCannon = {
 };
 
 void () s_explode1 =[0, s_explode2] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () s_explode2 =[1, s_explode3] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () s_explode3 =[2, s_explode4] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () s_explode4 =[3, s_explode5] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () s_explode5 =[4, s_explode6] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () s_explode6 =[5, SUB_Remove] {
+    if (self.classname == "flamerflame") {
+        if (pointcontents(self.origin) < -1) {
+            dremove(self);
+        }
+    }
 };
 
 void () BecomeExplosion = {
