@@ -153,7 +153,7 @@ void () worldspawn = {
         exec_map_cfgs = TRUE;
 
     if (exec_map_cfgs) {
-        localcmd("exec fortress.cfg\n");
+        localcmd("exec cfg/default.cfg\n");
         localcmd("exec cfg/maps/");
         localcmd(mapname);
         localcmd(".cfg\n");
