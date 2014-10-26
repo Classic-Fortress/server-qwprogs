@@ -523,13 +523,12 @@ void () Napalm_touch = {
                     (other.team_no == self.owner.team_no)) {
                     return;
                 }
+                sound(other, CHAN_VOICE, "ambience/fire1.wav", 1, ATTN_NORM);
                 CenterPrint(other, "You are on fire!\n");
                 stuffcmd(other, "bf\n");
             }
             if (other.numflames < 1) {
                 flame = FlameSpawn("1", other);
-                sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1,
-                      ATTN_NORM);
             } else {
                 flame = FlameSpawn("3", other);
                 if (flame == world) {
