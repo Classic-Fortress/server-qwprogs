@@ -118,9 +118,14 @@ void () CF_Medic_Regenerate = {
         return;
     }
 
-    // only regen if 50 or more cells
-    if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < 50)
+    // only regen if 50 or more cells with new medikit
+    if (!old_medikit) {
+        if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < 50) {
+            return;
+        }
+    } else if (self.owner.health >= self.owner.max_health || self.owner.ammo_medikit) {
         return;
+    }
 
     if (self.owner.ammo_medikit < PC_MEDIC_REGEN_AMOUNT) {
         self.owner.health = self.owner.health + self.owner.ammo_medikit;
