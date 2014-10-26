@@ -1837,6 +1837,11 @@ void () item_tfgoal_touch = {
     if (other == self.owner)
         return;
 
+    // check if a wall or something is in the way of the flag
+    traceline(other.origin, self.origin, TRUE, world);
+    if (trace_fraction < 1)
+        return;
+
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
             if (self.origin != self.oldorigin) {
