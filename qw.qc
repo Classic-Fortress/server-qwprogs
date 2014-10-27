@@ -308,9 +308,9 @@ float coop;
 
 .float all_active;
 
-.float item_list;               // Used to keep track of which goalitems are 
+.float item_list;               // Used to keep track of which goalitems are
                                 // affecting the player at any time.
-                                // GoalItems use it to keep track of their own 
+                                // GoalItems use it to keep track of their own
                                 // mask to apply to a player's item_list
 
 float item_list_bit;            // Global, used to determine what the bit of
