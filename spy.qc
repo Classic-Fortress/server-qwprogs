@@ -354,14 +354,14 @@ void () spy_upaxe9 =[41, spy_upaxe9] {
 };
 
 float (entity pe_player) Spy_CheckArea = {
-    local entity at_spot = findradius(self.origin, 64);
+    local entity at_spot = findradius(pe_player.origin, 64);
     while (at_spot != world) {
         if (at_spot.mdl == "progs/detpack.mdl"
                     || at_spot.mdl == "progs/turrbase.mdl"
                     || at_spot.mdl == "progs/turrgun.mdl"
                     || at_spot.mdl == "progs/disp.mdl")
             return 1;
-        else if (at_spot.classname == "player" && self != at_spot) {
+        else if (at_spot.classname == "player" && pe_player != at_spot) {
             if (!at_spot.is_feigning && at_spot.deadflag == 0)
                 return 2;
             else if (at_spot.is_feigning)
@@ -372,11 +372,40 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
+void () CF_Spy_AirThink = {
+    local float area_check = 0;
+
+    // only do stuff when spy is no longer moving
+    if (!self.owner.velocity) {
+
+        // if spy is in the air, set movetype to walk (so he falls to ground)
+        if (!(self.owner.flags & FL_ONGROUND)) {
+            self.owner.movetype = MOVETYPE_WALK;
+            TeamFortress_SetSpeed(self.owner);
+        }
+
+        // if spy is on ground and an entity is not nearby, set movetype to none (so he can't move)
+        else if (self.owner.flags & FL_ONGROUND) {
+            area_check = Spy_CheckArea(self.owner);
+            if (area_check == 0) {
+                self.owner.movetype = MOVETYPE_NONE;
+                self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+                TeamFortress_SetSpeed(self.owner);
+                dremove(self);
+                return;
+            }
+        }
+
+    }
+
+    self.nextthink = time + 0.1;
+};
+
 void (float issilent) CF_Spy_FeignDeath = {
     local string deathstring;
     local float area_check;
     local float i;
-    local entity te;
+    local entity te, spy;
 
     if (self.is_feigning) {
 
@@ -391,9 +420,6 @@ void (float issilent) CF_Spy_FeignDeath = {
 
             // set view height
             self.view_ofs = '0 0 22';
-
-            // set movetype to walk
-            self.movetype = MOVETYPE_WALK;
 
             // unset feign variables
             self.is_feigning = 0;
@@ -461,6 +487,15 @@ void (float issilent) CF_Spy_FeignDeath = {
             self.movetype = MOVETYPE_NONE;
             self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
             TeamFortress_SetSpeed(self);
+        } else {
+            // this timer starts when the spy is not on the ground
+            // e.g. resting on a player's head, and will make sure
+            // the spy falls to the ground when possible
+            spy = spawn();
+            spy.classname = "airtimer";
+            spy.owner = self;
+            spy.think = CF_Spy_AirThink;
+            spy.nextthink = time + 0.1;
         }
 
         // set spy feign variables
