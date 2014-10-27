@@ -2536,39 +2536,42 @@ void () DeadImpulses = {
             self.tf_items_flags = self.tf_items_flags | 4;
             sprint(self, PRINT_HIGH, "on\n");
         }
-    } else if ((self.playerclass == 1) && (self.impulse == TF_SCAN_ENEMY)) {
+    } else if ((self.playerclass == PC_SCOUT) && (self.impulse == TF_SCAN_ENEMY)) {
         sprint(self, PRINT_HIGH, "Scanning for: ");
         if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
             self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_ENEMY;
-            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
                 sprint(self, PRINT_HIGH, "Friendlies only\n");
-            else
+            } else {
                 sprint(self, PRINT_HIGH, "Nothing\n");
+            }
         } else {
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
-            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
+            if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
                 sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
-            else
+            } else {
                 sprint(self, PRINT_HIGH, "Enemies only\n");
+            }
+            Status_Refresh(self);
         }
-    } else if ((self.playerclass == 1) &&
-               (self.impulse == TF_SCAN_FRIENDLY)) {
+    } else if ((self.playerclass == PC_SCOUT) && (self.impulse == TF_SCAN_FRIENDLY)) {
         sprint(self, PRINT_HIGH, "Scanning for: ");
         if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
-            self.tf_items_flags =
-                self.tf_items_flags - NIT_SCANNER_FRIENDLY;
-            if (self.tf_items_flags & NIT_SCANNER_ENEMY)
+            self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_FRIENDLY;
+            if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
                 sprint(self, PRINT_HIGH, "Enemies only\n");
-            else
+            } else {
                 sprint(self, PRINT_HIGH, "Nothing\n");
+            }
         } else {
-            self.tf_items_flags =
-                self.tf_items_flags | NIT_SCANNER_FRIENDLY;
-            if (self.tf_items_flags & NIT_SCANNER_ENEMY)
+            self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_FRIENDLY;
+            if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
                 sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
-            else
+            } else {
                 sprint(self, PRINT_HIGH, "Friendlies only\n");
+            }
         }
+        Status_Refresh(self);
     } else if (self.impulse == TF_ALIAS_CHECK) {
         sprint(self, PRINT_HIGH, "Aliases checked\n");
         self.got_aliases = 1;
