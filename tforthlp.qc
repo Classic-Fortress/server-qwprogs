@@ -60,6 +60,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("-slot4", "-attack;impulse 68");
     } else if (self.motd == 30) {
         TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
+        TeamFortress_Alias("teamblue", TF_TEAM_1, 0);
+        TeamFortress_Alias("teamred", TF_TEAM_2, 0);
+        TeamFortress_Alias("teamyellow", TF_TEAM_3, 0);
+        TeamFortress_Alias("teamgreen", TF_TEAM_4, 0);
         TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("legalclasses", TF_SHOWLEGALCLASSES, 0);
