@@ -587,34 +587,3 @@ void () TeamFortress_ClipTick = {
         dremove(self);
     }
 };
-
-void (float messageno) TeamFortress_Message = {
-    local entity te;
-    local string wstr;
-
-    wstr = infokey(world, "clanmsgs");
-    if (wstr != "on")
-        return;
-
-    if (self.last_saveme_sound > time)
-        return;
-
-    self.last_saveme_sound = time + 3;
-    if (messageno == 1)
-        wstr = "play clan1.wav\n";
-    else if (messageno == 2)
-        wstr = "play clan2.wav\n";
-    else if (messageno == 3)
-        wstr = "play clan3.wav\n";
-    else if (messageno == 4)
-        wstr = "play clan4.wav\n";
-    else if (messageno == 5)
-        wstr = "play clan5.wav\n";
-
-    te = find(world, classname, "player");
-    while (te) {
-        if ((te.team_no == self.team_no) && (self.team_no != 0))
-            stuffcmd(te, wstr);
-        te = find(te, classname, "player");
-    }
-};

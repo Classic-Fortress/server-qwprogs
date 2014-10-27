@@ -167,12 +167,6 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
     } else if (self.motd == 130) {
-        TeamFortress_Alias("clan1", 82, 0);
-        TeamFortress_Alias("clan2", 83, 0);
-        TeamFortress_Alias("clan3", 84, 0);
-        TeamFortress_Alias("clan4", 85, 0);
-        TeamFortress_Alias("clan5", 86, 0);
-    } else if (self.motd == 140) {
         stuffcmd(self, "is_aliased\n");
     } else if (self.motd == 400 && self.team_no == 0) {
         Menu_Team(1);

@@ -24,8 +24,6 @@ void () DropGoalItems;
 
 void () TeamFortress_DisplayLegalClasses;
 
-void (float messageno) TeamFortress_Message;
-
 void () TeamFortress_ShowIDs;
 void () TeamFortress_ShowTF;
 
@@ -2341,16 +2339,6 @@ void () ImpulseCommands = {
         TeamFortress_Inventory();
     else if ((self.playerclass != 0) && (self.impulse == TF_MEDIC_HELPME))
         TeamFortress_SaveMe();
-    else if ((self.playerclass != 0) && (self.impulse == 82))
-        TeamFortress_Message(1);
-    else if ((self.playerclass != 0) && (self.impulse == 83))
-        TeamFortress_Message(2);
-    else if ((self.playerclass != 0) && (self.impulse == 84))
-        TeamFortress_Message(3);
-    else if ((self.playerclass != 0) && (self.impulse == 85))
-        TeamFortress_Message(4);
-    else if ((self.playerclass != 0) && (self.impulse == 86))
-        TeamFortress_Message(5);
     else if (self.impulse == TF_GRENADE_T)
         TeamFortress_ThrowGrenade();
     else if (self.impulse == TF_GRENADE_SWITCH)
