@@ -415,6 +415,9 @@ void () DecodeLevelParms = {
         // bigger dispenser explosions [on]
         disp_explosion = CF_GetSetting("de", "disp_explosion", "on");
 
+        // allow building in water [on]
+        build_water = CF_GetSetting("bw", "build_water", "on");
+
         // allow assault cannon lock mechanism [on]
         cannon_lock = CF_GetSetting("cl", "cannon_lock", "on");
 
@@ -513,6 +516,7 @@ void () DecodeLevelParms = {
             old_railgun = FALSE;
             old_dispenser = FALSE;
             disp_explosion = TRUE;
+            build_water = TRUE;
             feign_air = TRUE;
             feign_pack = TRUE;
             feign_msg = TRUE;
@@ -553,6 +557,7 @@ void () DecodeLevelParms = {
             old_railgun = TRUE;
             old_dispenser = TRUE;
             disp_explosion = FALSE;
+            build_water = FALSE;
             feign_air = FALSE;
             feign_pack = FALSE;
             feign_msg = FALSE;

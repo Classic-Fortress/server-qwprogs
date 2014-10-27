@@ -370,9 +370,16 @@ void (float objtobuild) TeamFortress_Build = {
         dremove(newmis);
         return;
     }
-    if (!(self.flags & 512)) {
-        Status_Print(self, "\n\n\n\n\n\n\n", "You cannot build in the air");
-        return;
+    if (!(self.flags & FL_ONGROUND)) {
+        if (!build_water && self.waterlevel) {
+            sprint(self, PRINT_HIGH, "You cannot build in the water\n");
+            dremove(newmis);
+            return;
+        } else if (!self.waterlevel) {
+            sprint(self, PRINT_HIGH, "You cannot build in the air\n");
+            dremove(newmis);
+            return;
+        }
     }
     self.is_building = 1;
     self.immune_to_check = time + 5;
