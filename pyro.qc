@@ -289,7 +289,7 @@ void () FlameFollow = {
             setmodel(self, self.model);
         }
     }
-    if (self.enemy.waterlevel > 1) {
+    if ((self.enemy.waterlevel > 1) || (self.enemy.classname != "player" && self.enemy.waterlevel > 0)) {
         sound(self, 2, "misc/vapeur2.wav", 1, 1);
         self.enemy.numflames = self.enemy.numflames - 1;
         FlameDestroy(self);
