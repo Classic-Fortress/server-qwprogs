@@ -62,6 +62,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
         TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
+        TeamFortress_Alias("legalclasses", TF_SHOWLEGALCLASSES, 0);
         TeamFortress_Alias("classhelp", TF_CLASSHELP, 0);
         TeamFortress_Alias("scout", TF_CHANGEPC + PC_SCOUT, 0);
         TeamFortress_Alias("sniper", TF_CHANGEPC + PC_SNIPER, 0);
