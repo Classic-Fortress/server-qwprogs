@@ -2570,7 +2570,7 @@ void () W_WeaponFrame = {
         }
     }
 
-    if (self.impulse == 5) {
+    if (self.impulse == TF_CLASSMENU) {
         if (self.playerclass == PC_ENGINEER)
             Menu_Engineer(self);
         else if (self.playerclass == PC_SCOUT)
