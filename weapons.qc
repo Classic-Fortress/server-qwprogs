@@ -2442,12 +2442,7 @@ void () ImpulseCommands = {
 };
 
 void () PreMatchImpulses = {
-    if (((self.impulse >= 1) && (self.impulse < 8)) ||
-        (self.impulse == TF_MEDIKIT))
-        W_ChangeWeapon(self.impulse);
-    else if (self.impulse == AXE_IMP)
-        W_ChangeWeapon(self.impulse);
-    else if (self.impulse == TF_WEAPNEXT)
+    if (self.impulse == TF_WEAPNEXT)
         CycleWeaponNext();
     else if (self.impulse == TF_WEAPPREV)
         CycleWeaponPrev();
