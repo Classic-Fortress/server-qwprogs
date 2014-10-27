@@ -950,50 +950,62 @@ void () W_FireAssaultCannon = {
         FireBullets(5, dir, '0.15 0.15 0');
 };
 
+void (entity pe_flame) CF_ExtinguishFlame = {
+    local float rn;
+
+    rn = random();
+    if (rn < 0.5) {
+        sound(pe_flame, CHAN_VOICE, "misc/water1.wav", 1, ATTN_NORM);
+    } else {
+        sound(pe_flame, CHAN_VOICE, "misc/water2.wav", 1, ATTN_NORM);
+    }
+    dremove(pe_flame);
+};
+
 void () s_explode1 =[0, s_explode2] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
 
 void () s_explode2 =[1, s_explode3] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
 
 void () s_explode3 =[2, s_explode4] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
 
 void () s_explode4 =[3, s_explode5] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
 
 void () s_explode5 =[4, s_explode6] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
 
 void () s_explode6 =[5, SUB_Remove] {
-    if (self.classname == "flamerflame") {
+    if (!server_faithful && self.classname == "flamerflame") {
         if (pointcontents(self.origin) < -1) {
-            dremove(self);
+            CF_ExtinguishFlame(self);
         }
     }
 };
@@ -2597,7 +2609,7 @@ void () W_WeaponFrame = {
         // change to weaponstate (prior to quick fire) when weapon is ready
         else if (self.is_quickfiring)
             self.queue_weaponstate = 2;
-        // change to last weapon when weapon is ready 
+        // change to last weapon when weapon is ready
         else
             self.queue_weaponslot = self.last_weaponslot;
     }
