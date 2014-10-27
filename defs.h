@@ -321,192 +321,263 @@
 					// through the playerclass.
 
 /*======================================================*/
-/* Impulse Defines					*/
+/* Impulse Defines                                      */
 /*======================================================*/
-#define TF_CLASSMENU            5
-#define TF_WEAPNEXT             10
-#define TF_WEAPPREV             12
-// Alias check to see whether they already have the aliases
-#define TF_ALIAS_CHECK		13
-
-// Class help alias
-#define TF_CLASSHELP            14
-
-// CTF Support Impulses
-#define HOOK_IMP1		22
-#define FLAG_INFO		23
-#define HOOK_IMP2		39
-
-// Quick weapon impulses
-#define TF_QUICKSLOT1           31
-#define TF_QUICKSLOT2           32
-#define TF_QUICKSLOT3           33
-#define TF_QUICKSLOT4           34
-
-// Axe
-#define AXE_IMP			40
-
-// Medic functions
-#define TF_MEDIC_AURA_TOGGLE    41
-
-// Camera Impulse
-#define TF_CAM_TARGET			50
-#define TF_CAM_ZOOM			51
-#define TF_CAM_ANGLE			52
-#define TF_CAM_VEC			53
-#define TF_CAM_PROJECTILE		54
-#define TF_CAM_PROJECTILE_Z		55
-#define TF_CAM_REVANGLE			56
-#define TF_CAM_OFFSET			57
-#define TF_CAM_DROP			58
-#define TF_CAM_FADETOBLACK		59
-#define TF_CAM_FADEFROMBLACK		60
-#define TF_CAM_FADETOWHITE		61
-#define TF_CAM_FADEFROMWHITE		62
-
-#define TF_QUICKSTOP                    68
-#define TF_WEAPLAST                     69
-
-// CF map voting
-#define TF_VOTENEXT                     70
-#define TF_VOTETRICK                    71
-#define TF_VOTERACE                     72
-#define TF_FORCENEXT                    73
-#define TF_TOGGLEVOTE                   74
-
-// Reload impulses
-#define TF_RELOAD_NEXT          80
-#define TF_RELOAD_SLOT1         81
-#define TF_RELOAD_SLOT2         82
-#define TF_RELOAD_SLOT3         83
-#define TF_RELOAD               173
-
-#define TF_CHANGETEAM           98
-#define TF_CHANGECLASS		99
-// Added to PC_??? to get impulse to use if this clashes with your
-// own impulses, just change this value, not the PC_??
-#define TF_CHANGEPC		100
-// The next few impulses are all the class selections
-//PC_SCOUT		101
-//PC_SNIPER		102
-//PC_SOLDIER		103
-//PC_DEMOMAN		104
-//PC_MEDIC		105
-//PC_HVYWEAP		106
-//PC_PYRO		107
-//PC_RANDOM		108
-//PC_CIVILIAN		109  // Cannot be used
-//PC_SPY		110
-//PC_ENGINEER		111
-
-// Sniper Zoom impulses
-#define TF_ZOOMTOGGLE       113
-#define TF_ZOOMIN           114
-#define TF_ZOOMOUT          115
-
-// Help impulses
-#define TF_HELP_MAP         117
-#define TF_DISPLAYLOCATION	118
-#define TF_STATUS_QUERY		119
-
-// Disguise impulses
-#define TF_DISGUISE_RESET    120
-#define TF_DISGUISE_SCOUT    121
-#define TF_DISGUISE_SNIPER   122
-#define TF_DISGUISE_SOLDIER  123
-#define TF_DISGUISE_DEMOMAN  124
-#define TF_DISGUISE_MEDIC    125
-#define TF_DISGUISE_HWGUY    126
-#define TF_DISGUISE_PYRO     127
-#define TF_DISGUISE_ENGINEER 128
-#define TF_DISGUISE_BLUE     129
-#define TF_DISGUISE_RED      130
-#define TF_DISGUISE_YELLOW   131
-#define TF_DISGUISE_GREEN    132
-#define TF_DISGUISE_ENEMY    133
-#define TF_DISGUISE_LAST     134
-
-// Information impulses
-#define TF_INVENTORY		135
-#define TF_SHOWTF		136
-#define TF_SHOWLEGALCLASSES	137
-
-// Team Impulses
-#define TF_TEAM_1		140   // Join Team 1
-#define TF_TEAM_2		141   // Join Team 2
-#define TF_TEAM_3		142   // Join Team 3
-#define TF_TEAM_4		143   // Join Team 4
-#define TF_TEAM_CLASSES		144   // Impulse to display team classes
-#define TF_TEAM_SCORES		145   // Impulse to display team scores
-#define TF_TEAM_LIST		146   // Impulse to display the players in each team.
-
-// Grenade Impulses
-#define TF_GRENADE_1		150	// Prime grenade type 1
-#define TF_GRENADE_2		151	// Prime grenade type 2
-#define TF_GRENADE_T		152	// Throw primed grenade
-#define TF_GRENADE_SWITCH   153 // Switch grenade mode 1/2
-#define TF_GRENADE_PT_1     154 // Prime and throw grenade type 1 (two clicks)
-#define TF_GRENADE_PT_2     155 // Prime and throw grenade type 2 (two clicks)
-
-// Scout dash
-#define TF_DASH             156 // Initialize a forward bunnyhop for Scout
-
-// Impulses for new items
-#define TF_LOCKON           157 // Turn Assault Cannon fire on
-#define TF_LOCKOFF          158 // Turn Assault Cannon fire off
-#define TF_SCAN			159	// Scanner Pre-Impulse
-#define TF_SCAN_ENEMY		160	// Impulses to toggle scanning of enemies
-#define TF_SCAN_FRIENDLY	161	// Impulses to toggle scanning of friendlies
-#define TF_SCAN_SOUND		162	// Toggle scanner sound
-#define TF_SCAN_30		163	// Scan using 30 energy (2 cells)
-#define TF_SCAN_100		164	// Scan using 100 energy (5 cells)
-#define TF_DETPACK_5		165	// Detpack set to 5 seconds
-#define TF_DETPACK_20		166	// Detpack set to 20 seconds
-#define TF_DETPACK_50		167	// Detpack set to 50 seconds
-#define TF_DETPACK		168	// Detpack Pre-Impulse
-#define TF_DETPACK_STOP		169	// Impulse to stop setting detpack
-#define TF_PB_DETONATE		170	// Detonate Pipebombs
-
-// Special skill
-#define TF_SPECIAL_SKILL	171
-
-// Ammo Drop impulse
-#define TF_DROP_AMMO		172
-
-// drop/pass commands
-#define TF_DROPKEY		175
-
-// Select Medikit
-#define TF_MEDIKIT		176
-
-// Spy Impulses
-#define TF_SPY_SPY		177	// On net, go invisible, on LAN, change skin/color
-#define TF_SPY_DIE		178	// Feign Death
-#define TF_SPY_SILENT_DIE	199	// silent feign death
-
-// Engineer Impulses
-#define TF_ENGINEER_BUILD	179
-#define TF_ENGINEER_SANDBAG	180
-#define TF_ENGINEER_DETDISP	187
-#define TF_ENGINEER_DETSENTRY	188
-
-// Demoman Impulses
-#define TF_DEMOMAN_DETPACK   189
-
-// Medic!!
-#define TF_MEDIC_HELPME		181
-
-// Discard impulse
-#define TF_DISCARD 		184
-
-// ID Player impulse
-#define TF_ID               190
-#define TF_ID_TEAM          191
-#define TF_ID_ENEMY         192
-
-// other impulses
-#define TF_SHOW_IDS		186
-#define TF_DROPFLAG		194
+#define TF_SLOT1                1   // Changes weapon to slot 1 (primary weapon)
+#define TF_SLOT2                2   // Changes weapon to slot 2 (secondary weapon)
+#define TF_SLOT3                3   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_SLOT4                4   // Changes weapon to slot 4 (melee weapon)
+#define TF_CLASSMENU            5   // Brings up class menu
+// unused                       6
+// unused                       7
+// unused                       8
+// unused                       9
+// unused                       10
+#define TF_WEAPNEXT             11  // Selects the next weapon slot
+#define TF_WEAPPREV             12  // Selects the previous weapon slot
+#define TF_WEAPLAST             13  // Selects the last used weapon slot
+#define TF_GRENADE_1            14  // Prime grenade type 1
+#define TF_GRENADE_2            15  // Prime grenade type 2
+#define TF_GRENADE_T            16  // Throw primed grenade
+#define TF_GRENADE_PT_1         17  // Prime and throw grenade type 1 (two clicks)
+#define TF_GRENADE_PT_2         18  // Prime and throw grenade type 2 (two clicks)
+#define TF_GRENADE_SWITCH       19  // Switch grenade mode 1/2
+#define TF_QUICKSLOT1           20  // Fire weapon slot 1 and then switch back to current weapon
+#define TF_QUICKSLOT2           21  // Fire weapon slot 2 and then switch back to current weapon
+#define TF_QUICKSLOT3           22  // Fire weapon slot 3 and then switch back to current weapon
+#define TF_QUICKSLOT4           23  // Fire weapon slot 4 and then switch back to current weapon
+#define TF_QUICKSTOP            24  // Used to tell server that quick firing has stopped
+#define TF_RELOAD_SLOT1         25  // Reload weapon slot 1
+#define TF_RELOAD_SLOT2         26  // Reload weapon slot 2
+#define TF_RELOAD_SLOT3         27  // Reload weapon slot 3
+#define TF_RELOAD               28  // Reload current weapon
+#define TF_RELOAD_NEXT          29  // Reload next weapon with a non-full clip
+#define TF_SPECIAL_SKILL        30  // Class special
+#define TF_DROPFLAG             31  // Drop flag
+#define TF_DROPKEY              32  // Drop key
+#define TF_DISCARD              33  // Discard useless ammo
+#define TF_DROP_AMMO            34  // Drop an ammo box on the ground
+#define TF_MEDIC_HELPME         35  // Alert players around you that you are in need of medical attention
+#define TF_INVENTORY            36  // Displays current inventory
+#define FLAG_INFO               37  // Displays current flag location
+#define TF_ID                   38  // Identify player/object in front of player
+#define TF_ID_TEAM              39  // Identify team player/object in front of player
+#define TF_ID_ENEMY             40  // Identify enemy player/object in front of player
+#define TF_DASH                 41  // Scout: Initialize a forward bunnyhop
+#define TF_SCAN                 42  // Scout: Toggle Scanner on/off
+#define TF_SCAN_ENEMY           43  // Scout: Toggle scanning of enemies
+#define TF_SCAN_FRIENDLY        44  // Scout: Toggle scanning of friendlies
+#define TF_SCAN_SOUND           45  // Scout: Toggle scanner sound
+#define TF_ZOOMTOGGLE           46  // Sniper: Toggle zoom mode on/off
+#define TF_ZOOMIN               47  // Sniper: Zoom in (while zoom mode is on)
+#define TF_ZOOMOUT              48  // Sniper: Zoom out (while zoom mode is on)
+#define TF_DEMOMAN_DETPACK      49  // Demoman: Bring up detpack menu
+#define TF_DETPACK              50  // Demoman: Detpack Pre-Impulse
+#define TF_DETPACK_STOP         51  // Demoman: Impulse to stop setting detpack
+#define TF_DETPACK_5            52  // Demoman: Detpack set to 5 seconds
+#define TF_DETPACK_20           53  // Demoman: Detpack set to 20 seconds
+#define TF_DETPACK_50           54  // Demoman: Detpack set to 50 seconds
+#define TF_PB_DETONATE          55  // Demoman: Detonate Pipebombs
+#define TF_MEDIC_AURA_TOGGLE    56  // Medic: Toggle Healing Aura on/off
+#define TF_LOCKON               57  // HWGuy: Turn Assault Cannon fire on
+#define TF_LOCKOFF              58  // HWGuy: Turn Assault Cannon fire off
+#define TF_SPY_DIE              59  // Spy: Feign death
+#define TF_SPY_SILENT_DIE       60  // Spy: Silent feign death
+#define TF_SPY_SPY              61  // Spy: Bring up disguise menu
+#define TF_DISGUISE_ENEMY       62  // Spy: Disguise as enemy team
+#define TF_DISGUISE_LAST        63  // Spy: Use last disguise
+#define TF_DISGUISE_RESET       64  // Spy: Reset disguise
+#define TF_DISGUISE_SCOUT       65  // Spy: Disguise as Scout
+#define TF_DISGUISE_SNIPER      66  // Spy: Disguise as Sniper
+#define TF_DISGUISE_SOLDIER     67  // Spy: Disguise as Soldier
+#define TF_DISGUISE_DEMOMAN     68  // Spy: Disguise as Demoman
+#define TF_DISGUISE_MEDIC       69  // Spy: Disguise as Medic
+#define TF_DISGUISE_HWGUY       70  // Spy: Disguise as HWGuy
+#define TF_DISGUISE_PYRO        71  // Spy: Disguise as Pyro
+#define TF_DISGUISE_ENGINEER    72  // Spy: Disguise as Engineer
+#define TF_DISGUISE_BLUE        73  // Spy: Disguise as blue team
+#define TF_DISGUISE_RED         74  // Spy: Disguise as red team
+#define TF_DISGUISE_YELLOW      75  // Spy: Disguise as yellow team
+#define TF_DISGUISE_GREEN       76  // Spy: Disguise as green team
+#define TF_ENGINEER_BUILD       77  // Engineer: Bring up build menu for Engineer
+#define TF_ENGINEER_DETDISP     78  // Engineer: Detonate dispenser for Engineer
+#define TF_ENGINEER_DETSENTRY   79  // Engineer: Detonate sentry gun for Engineer
+// unused                       80
+// unused                       81
+// unused                       82
+// unused                       83
+// unused                       84
+// unused                       85
+// unused                       86
+// unused                       87
+// unused                       88
+// unused                       89
+// unused                       90
+// unused                       91
+// unused                       92
+// unused                       93
+// unused                       94
+// unused                       95
+// unused                       96
+// unused                       97
+// unused                       98
+// unused                       99
+#define TF_CHANGETEAM           100 // Bring up team selection menu
+#define TF_TEAM_1               101 // Join team 1
+#define TF_TEAM_2               102 // Join team 2
+#define TF_TEAM_3               103 // Join team 3
+#define TF_TEAM_4               104 // Join team 4
+#define TF_DISPLAYLOCATION      105 // Displays current location and angles (for developers)
+#define TF_SHOWTF               106 // Displays server settings and mod version
+#define TF_SHOWLEGALCLASSES     107 // Show what classes are allowed by current map
+#define TF_SHOW_IDS             108 // Show ids of connected players
+#define TF_ALIAS_CHECK          109 // Check if client has gotten all the aliases
+#define TF_CHANGECLASS          110 // Bring up class selection menu
+#define TF_CHANGEPC_SCOUT       111 // Change class to Scout
+#define TF_CHANGEPC_SNIPER      112 // Change class to Sniper
+#define TF_CHANGEPC_SOLDIER     113 // Change class to Soldier
+#define TF_CHANGEPC_DEMOMAN     114 // Change class to Demoman
+#define TF_CHANGEPC_MEDIC       115 // Change class to Medic
+#define TF_CHANGEPC_HVYWEAP     116 // Change class to HWGuy
+#define TF_CHANGEPC_PYRO        117 // Change class to Pyro
+#define TF_CHANGEPC_SPY         118 // Change class to Spy
+#define TF_CHANGEPC_ENGINEER    119 // Change class to Engineer
+#define TF_CHANGEPC_RANDOM      120 // Change class to RandomPC
+#define TF_HELP_MAP             121 // Displays current map objectives
+#define TF_CLASSHELP            122 // Class help alias
+#define TF_TEAM_CLASSES         123 // Display team classes
+#define TF_TEAM_LIST            124 // Display the players in each team
+#define TF_TEAM_SCORES          125 // Display team scores
+#define TF_STATUS_QUERY         126 // Displays current team balance and equilization ratios
+// unused                       127
+// unused                       128
+// unused                       129
+#define TF_TOGGLEVOTE           130 // Toggle vote menu on/off
+#define TF_VOTENEXT             131 // Vote to start voting for next map
+#define TF_VOTETRICK            132 // Vote to start voting for a trick map
+#define TF_VOTERACE             133 // Vote to start voting for a race map
+#define TF_FORCENEXT            134 // Vote to force a change to voted map
+// unused                       135
+// unused                       136
+// unused                       137
+// unused                       138
+// unused                       139
+// unused                       140
+// unused                       141
+// unused                       142
+// unused                       143
+// unused                       144
+// unused                       145
+// unused                       146
+// unused                       147
+// unused                       148
+// unused                       149
+// unused                       150
+// unused                       151
+// unused                       152
+// unused                       153
+// unused                       154
+// unused                       155
+// unused                       156
+// unused                       157
+// unused                       158
+// unused                       159
+// unused                       160
+// unused                       161
+// unused                       162
+// unused                       163
+// unused                       164
+// unused                       165
+// unused                       166
+// unused                       167
+// unused                       168
+// unused                       169
+// unused                       170
+// unused                       171
+// unused                       172
+// unused                       173
+// unused                       174
+// unused                       175
+// unused                       176
+// unused                       177
+// unused                       178
+// unused                       179
+// unused                       180
+// unused                       181
+// unused                       182
+// unused                       183
+// unused                       184
+// unused                       185
+// unused                       186
+// unused                       187
+// unused                       188
+// unused                       189
+// unused                       190
+// unused                       191
+// unused                       192
+// unused                       193
+// unused                       194
+// unused                       195
+// unused                       196
+// unused                       197
+// unused                       198
+// unused                       199
+// unused                       200
+// unused                       201
+// unused                       202
+// unused                       203
+// unused                       204
+// unused                       205
+// unused                       206
+// unused                       207
+// unused                       208
+// unused                       209
+// unused                       210
+// unused                       211
+// unused                       212
+// unused                       213
+// unused                       214
+// unused                       215
+// unused                       216
+// unused                       217
+// unused                       218
+// unused                       219
+// unused                       220
+// unused                       221
+// unused                       222
+// unused                       223
+// unused                       224
+// unused                       225
+// unused                       226
+// unused                       227
+// unused                       228
+// unused                       229
+// unused                       230
+// unused                       231
+// unused                       232
+// unused                       233
+// unused                       234
+// unused                       235
+// unused                       236
+// unused                       237
+// unused                       238
+// unused                       239
+// unused                       240
+// unused                       241
+// unused                       242
+// unused                       243
+// unused                       244
+// unused                       245
+// unused                       246
+// unused                       247
+// unused                       248
+// unused                       249
+// unused                       250
+// unused                       251
+// unused                       252
+// unused                       253
+// unused                       254
+// unused                       255
 
 /*======================================================*/
 /*	Colors						*/

@@ -64,16 +64,16 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("legalclasses", TF_SHOWLEGALCLASSES, 0);
         TeamFortress_Alias("classhelp", TF_CLASSHELP, 0);
-        TeamFortress_Alias("scout", TF_CHANGEPC + PC_SCOUT, 0);
-        TeamFortress_Alias("sniper", TF_CHANGEPC + PC_SNIPER, 0);
-        TeamFortress_Alias("soldier", TF_CHANGEPC + PC_SOLDIER, 0);
-        TeamFortress_Alias("demoman", TF_CHANGEPC + PC_DEMOMAN, 0);
-        TeamFortress_Alias("medic", TF_CHANGEPC + PC_MEDIC, 0);
-        TeamFortress_Alias("hwguy", TF_CHANGEPC + PC_HVYWEAP, 0);
-        TeamFortress_Alias("pyro", TF_CHANGEPC + PC_PYRO, 0);
-        TeamFortress_Alias("spy", TF_CHANGEPC + PC_SPY, 0);
-        TeamFortress_Alias("engineer", TF_CHANGEPC + PC_ENGINEER, 0);
-        TeamFortress_Alias("randompc", TF_CHANGEPC + PC_RANDOM, 0);
+        TeamFortress_Alias("scout", TF_CHANGEPC_SCOUT, 0);
+        TeamFortress_Alias("sniper", TF_CHANGEPC_SNIPER, 0);
+        TeamFortress_Alias("soldier", TF_CHANGEPC_SOLDIER, 0);
+        TeamFortress_Alias("demoman", TF_CHANGEPC_DEMOMAN, 0);
+        TeamFortress_Alias("medic", TF_CHANGEPC_MEDIC, 0);
+        TeamFortress_Alias("hwguy", TF_CHANGEPC_HVYWEAP, 0);
+        TeamFortress_Alias("pyro", TF_CHANGEPC_PYRO, 0);
+        TeamFortress_Alias("spy", TF_CHANGEPC_SPY, 0);
+        TeamFortress_Alias("engineer", TF_CHANGEPC_ENGINEER, 0);
+        TeamFortress_Alias("randompc", TF_CHANGEPC_RANDOM, 0);
     } else if (self.motd == 40) {
         TeamFortress_Alias("query", TF_STATUS_QUERY, 0);
         TeamFortress_Alias("inv", TF_INVENTORY, 0);
