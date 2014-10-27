@@ -2638,14 +2638,22 @@ void () W_WeaponFrame = {
             W_WeaponState_Load(self, 0);
 
     // +slot1-4 quick fire
-    } else if (self.impulse >= 31 && self.impulse <= 34
+    } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4
                 && !self.is_building && !self.is_detpacking) {
 
         self.is_quickfiring = 1;
         self.has_quickfired = 0;
 
-        if (WeaponReady(self))
-            W_ChangeWeapon((self.impulse - 30));
+        if (WeaponReady(self)) {
+            if (self.impulse == TF_QUICKSLOT1)
+                W_ChangeWeapon(1);
+            else if (self.impulse == TF_QUICKSLOT2)
+                W_ChangeWeapon(2);
+            else if (self.impulse == TF_QUICKSLOT3)
+                W_ChangeWeapon(3);
+            else if (self.impulse == TF_QUICKSLOT4)
+                W_ChangeWeapon(4);
+        }
 
     // change weapon if queue_weaponslot has been set
     } else if (self.queue_weaponslot > 0) {
