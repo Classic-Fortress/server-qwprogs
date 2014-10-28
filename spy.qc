@@ -375,6 +375,9 @@ float (entity pe_player) Spy_CheckArea = {
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
+    if (self.owner.deadflag >= 2)
+        dremove(self);
+
     // only do stuff when spy is no longer moving
     if (!self.owner.velocity) {
 
