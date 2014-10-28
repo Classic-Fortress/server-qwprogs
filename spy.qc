@@ -375,29 +375,29 @@ float (entity pe_player) Spy_CheckArea = {
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-    if (self.owner.deadflag >= 2)
+    if ((self.owner.deadflag >= 2) || (self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
         dremove(self);
+        return;
+    }
 
     // only do stuff when spy is no longer moving
     if (!self.owner.velocity) {
 
-        // if spy is in the air, set movetype to walk (so he falls to ground)
-        if (!(self.owner.flags & FL_ONGROUND)) {
-            self.owner.movetype = MOVETYPE_WALK;
-            TeamFortress_SetSpeed(self.owner);
-        }
-
         // if spy is on ground and an entity is not nearby, set movetype to none (so he can't move)
-        else if (self.owner.flags & FL_ONGROUND) {
+        if (self.owner.flags & FL_ONGROUND) {
             area_check = Spy_CheckArea(self.owner);
             if (area_check == 0) {
                 self.owner.movetype = MOVETYPE_NONE;
                 self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
-                TeamFortress_SetSpeed(self.owner);
-                dremove(self);
-                return;
             }
         }
+
+        // if spy is in the air, set movetype to walk (so he falls to ground)
+        else {
+            self.owner.movetype = MOVETYPE_WALK;
+        }
+
+        TeamFortress_SetSpeed(self.owner);
 
     }
 
@@ -485,21 +485,13 @@ void (float issilent) CF_Spy_FeignDeath = {
         // set movetype to toss
         self.movetype = MOVETYPE_TOSS;
 
-        // stop spy from moving if on the ground
-        if (self.flags & FL_ONGROUND) {
-            self.movetype = MOVETYPE_NONE;
-            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-            TeamFortress_SetSpeed(self);
-        } else {
-            // this timer starts when the spy is not on the ground
-            // e.g. resting on a player's head, and will make sure
-            // the spy falls to the ground when possible
-            spy = spawn();
-            spy.classname = "airtimer";
-            spy.owner = self;
-            spy.think = CF_Spy_AirThink;
-            spy.nextthink = time + 0.1;
-        }
+        // this timer will make sure the spy falls
+        // to the ground when possible
+        spy = spawn();
+        spy.classname = "airtimer";
+        spy.owner = self;
+        spy.think = CF_Spy_AirThink;
+        spy.nextthink = time + 0.1;
 
         // set spy feign variables
         self.is_feigning = 1;
