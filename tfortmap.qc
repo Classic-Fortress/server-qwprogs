@@ -1825,8 +1825,26 @@ void () tfgoal_timer_tick = {
     }
 };
 
+void () CF_FlagFollowPlayer = {
+    if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
+        makevectors(self.real_owner.angles);
+        self.owner.origin = self.real_owner.origin - v_forward * 20 - v_right * 5 + v_up * 10;
+        self.owner.angles = self.real_owner.angles + '0 0 16';
+        if (self.owner.mdl == "progs/tf_flag.mdl") {
+            self.owner.origin_z = self.owner.origin_z + 6;
+        } else {
+            self.owner.origin_z = self.owner.origin_z - 6;
+        }
+        setorigin(self.owner, self.owner.origin);
+        setmodel(self.owner, self.owner.mdl);
+        self.nextthink = time + 0.1;
+    } else {
+        dremove(self);
+    }
+};
+
 void () item_tfgoal_touch = {
-    local entity te;
+    local entity te, flw;
 
     if (other.classname != "player")
         return;
@@ -1843,6 +1861,12 @@ void () item_tfgoal_touch = {
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
         return;
+
+    flw = spawn();
+    flw.real_owner = other;
+    flw.owner = self;
+    flw.think = CF_FlagFollowPlayer;
+    flw.nextthink = time + 0.1;
 
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
