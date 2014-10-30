@@ -172,12 +172,14 @@ void (entity Goal) UpdateAbbreviations =
                 || (Goal.mdl == "progs/w_s_key.mdl")) {
 
                 Goal.mdl = "progs/tf_flag.mdl";
+                Goal.origin_z = Goal.origin_z + 6;
                 Goal.skin = 1;
             } else if ((Goal.mdl == "progs/b_g_key.mdl")
                        || (Goal.mdl == "progs/m_g_key.mdl")
                        || (Goal.mdl == "progs/w_g_key.mdl")) {
 
                 Goal.mdl = "progs/tf_flag.mdl";
+                Goal.origin_z = Goal.origin_z + 6;
                 Goal.skin = 2;
             }
         }
@@ -2343,8 +2345,10 @@ void () item_flag_team2 = {
 
     if (toggleflags & TFLAG_WARSTANDARD)
         self.mdl = "progs/tf_stan.mdl";
-    else
+    else {
         self.mdl = "progs/tf_flag.mdl";
+        self.origin_z = self.origin_z + 6;
+    }
 
     self.skin = 0;
     setmodel(self, self.mdl);
@@ -2418,8 +2422,10 @@ void () item_flag_team1 = {
 
     if (toggleflags & TFLAG_WARSTANDARD)
         self.mdl = "progs/tf_stan.mdl";
-    else
+    else {
         self.mdl = "progs/tf_flag.mdl";
+        self.origin_z = self.origin_z + 6;
+    }
 
     setmodel(self, self.mdl);
     self.skin = 1;
