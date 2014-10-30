@@ -427,8 +427,7 @@ void () Flamer_stream_touch = {
             if (flame_knockback) {
                 // knockback target
                 if (other.classname != "building_sentrygun" && other.classname != "building_dispenser") {
-                    makevectors(self.owner.angles);
-                    other.velocity = other.velocity + v_forward * 300;
+                    other.velocity = other.velocity + self.velocity / 2;
                 }
             }
 
