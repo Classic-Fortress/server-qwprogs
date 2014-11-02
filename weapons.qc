@@ -2716,7 +2716,7 @@ void () W_WeaponFrame = {
     }
 
     // class specials and grenade impulses always possible
-    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= 150 && self.impulse <= 155)) {
+    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
         ImpulseCommands();
         return;
     }
