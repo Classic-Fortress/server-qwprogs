@@ -46,18 +46,18 @@ void () TeamFortress_MOTD = {
         }
 
         TeamFortress_Alias("menu", TF_CLASSMENU, 0);
-        TeamFortress_Alias("slot1", 1, 0);
-        TeamFortress_Alias("slot2", 2, 0);
-        TeamFortress_Alias("slot3", 3, 0);
-        TeamFortress_Alias("slot4", 4, 0);
-        TeamFortress_AliasString("+slot1", "impulse 31;+attack");
-        TeamFortress_AliasString("-slot1", "-attack;impulse 68");
-        TeamFortress_AliasString("+slot2", "impulse 32;+attack");
-        TeamFortress_AliasString("-slot2", "-attack;impulse 68");
-        TeamFortress_AliasString("+slot3", "impulse 33;+attack");
-        TeamFortress_AliasString("-slot3", "-attack;impulse 68");
-        TeamFortress_AliasString("+slot4", "impulse 34;+attack");
-        TeamFortress_AliasString("-slot4", "-attack;impulse 68");
+        TeamFortress_Alias("slot1", TF_SLOT1, 0);
+        TeamFortress_Alias("slot2", TF_SLOT2, 0);
+        TeamFortress_Alias("slot3", TF_SLOT3, 0);
+        TeamFortress_Alias("slot4", TF_SLOT4, 0);
+        TeamFortress_AliasString("+slot1", "impulse 20;+attack");
+        TeamFortress_AliasString("-slot1", "-attack;impulse 24");
+        TeamFortress_AliasString("+slot2", "impulse 21;+attack");
+        TeamFortress_AliasString("-slot2", "-attack;impulse 24");
+        TeamFortress_AliasString("+slot3", "impulse 22;+attack");
+        TeamFortress_AliasString("-slot3", "-attack;impulse 24");
+        TeamFortress_AliasString("+slot4", "impulse 23;+attack");
+        TeamFortress_AliasString("-slot4", "-attack;impulse 24");
     } else if (self.motd == 30) {
         TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
         TeamFortress_Alias("teamblue", TF_TEAM_1, 0);
