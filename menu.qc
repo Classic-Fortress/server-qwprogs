@@ -366,6 +366,20 @@ void () Menu_Drop = {
     local string s_cells   = "êñë Cells  \n";
     local string s_nothing = "\nêóë Nothing";
 
+    if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {
+        sprint(self, PRINT_HIGH, "Not enough ammo\n");
+        return;
+    }
+
+    if (!self.ammo_shells)
+        s_shells  = "\n";
+    if (!self.ammo_nails)
+        s_nails   = "\n";
+    if (!self.ammo_rockets)
+        s_rockets = "\n";
+    if (!self.ammo_cells)
+        s_cells   = "\n";
+
     self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER)
         s_drop = "Drop or make:\n\n";
