@@ -1551,7 +1551,7 @@ void () TeamFortress_SetEquipment = {
         self.weaponmode = 0;
         self.last_weaponmode = 0;
         self.current_weaponslot = 1;
-        self.last_weaponslot = 1;
+        self.last_weaponslot = 2;
         W_WeaponState_Save(self);
     }
 
