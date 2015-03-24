@@ -528,6 +528,9 @@ void (float inp) Menu_Spy_Skin_Input = {
 };
 
 void () Menu_Spy_Skin = {
+    if (self.is_unabletospy == 1)
+        return;
+
     local string s_disguise = "Disguise as enemy:\n\n";
     local string s_scout    = "“‘ Scout      \n";
     local string s_sniper   = "”‘ Sniper     \n";
