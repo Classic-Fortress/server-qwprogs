@@ -1828,8 +1828,8 @@ void () tfgoal_timer_tick = {
 void () CF_FlagFollowPlayer = {
     if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
         makevectors(self.real_owner.angles);
-        self.owner.origin = self.real_owner.origin - v_forward * 20 - v_right * 5 + v_up * 10;
-        self.owner.angles = self.real_owner.angles + '0 0 16';
+        self.owner.origin = self.real_owner.origin - v_forward * 25 - v_right * 0 + v_up * 10;
+        self.owner.angles = self.real_owner.angles + '0 90 16';
         if (self.owner.mdl == "progs/tf_flag.mdl") {
             self.owner.origin_z = self.owner.origin_z + 6;
         } else {
@@ -2609,10 +2609,13 @@ void () DropGoalItems = {
     while (te) {
         if (te.owner == self) {
             if (old_dropflag) {
-                if (te.goal_activation & 4096)
+                if (te.goal_activation & 4096) {
+                    te.angles = '0 0 0';
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
+                }
             }
             else if (self.effects & EF_DIMLIGHT) {
+                te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
                 if (self.team_no == 1)
