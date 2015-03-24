@@ -339,6 +339,14 @@ void (float objtobuild) TeamFortress_Build = {
     tmp1 = '0 0 0';
     tmp2 = '0 0 0';
 
+    tmp1 = self.origin + normalize(v_forward) * 64;
+    tmp2 = self.origin + normalize(v_forward) * 64 - normalize(v_up) * 128;
+    traceline(tmp1, tmp2, 1, world);
+    if (trace_ent != world) {
+        sprint(self, PRINT_HIGH, "You cannot build here\n");
+        return;
+    }
+
     newmis = spawn();
     makevectors(self.v_angle);
     v_forward_z = 0;
