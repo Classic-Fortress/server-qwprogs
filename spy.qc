@@ -457,8 +457,8 @@ void (float issilent) CF_Spy_FeignDeath = {
         }
     } else {
 
-        // don't feign if not allowed or spam timer is active
-        if (self.is_unabletospy == 1 || time < self.antispam_feign) {
+        // don't feign spam timer is active
+        if (time < self.antispam_feign) {
             sprint(self, PRINT_HIGH, "You cannot feign right now\n");
             return;
         }
@@ -533,12 +533,6 @@ void (float issilent) CF_Spy_FeignDeath = {
                 self.maxspeed = 0;
         }
 
-        // die with axe equipped if carrying axe, medikit or spanner
-        if (self.weapon <= WEAP_AXE) {
-            spy_die_ax1();
-            return;
-        }
-
         // drop flag if spy is carrying it
         te = find(world, classname, "item_tfgoal");
         while (te) {
@@ -553,6 +547,12 @@ void (float issilent) CF_Spy_FeignDeath = {
                 }
             }
             te = find(te, classname, "item_tfgoal");
+        }
+
+        // die with axe equipped if carrying axe, medikit or spanner
+        if (self.weapon <= WEAP_AXE) {
+            spy_die_ax1();
+            return;
         }
 
         // randomize death animation
