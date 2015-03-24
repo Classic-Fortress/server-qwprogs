@@ -2041,6 +2041,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     }
 
     tfgoalitem_RemoveEffectsFromPlayer(Item, AP);
+    Item.angles = '0 0 0';
 
     te = find(world, classname, "player");
     while (te != world) {
@@ -2610,7 +2611,6 @@ void () DropGoalItems = {
         if (te.owner == self) {
             if (old_dropflag) {
                 if (te.goal_activation & 4096) {
-                    te.angles = '0 0 0';
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
                 }
             }
