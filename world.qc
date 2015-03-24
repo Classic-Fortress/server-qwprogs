@@ -227,9 +227,13 @@ void () worldspawn = {
     precache_model("progs/s_bubble.spr");
     precache_model("progs/s_explod.spr");
     precache_model("progs/v_axe.mdl");
+    precache_model("progs/v_tranq.mdl");
     precache_model("progs/v_shot.mdl");
     precache_model("progs/v_nail.mdl");
     precache_model("progs/v_rock.mdl");
+    precache_model("progs/v_pipe.mdl");
+    precache_model("progs/v_flame.mdl");
+    precache_model("progs/v_irock.mdl");
     precache_model("progs/v_shot2.mdl");
     precache_model("progs/v_nail2.mdl");
     precache_model("progs/v_rock2.mdl");
