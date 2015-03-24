@@ -17,6 +17,7 @@ void (entity disp) Engineer_SentryGun_InsertAmmo;
 void (entity disp) Engineer_SentryGun_Upgrade;
 void (entity disp) Engineer_SentryGun_Repair;
 void () Menu_Engineer_Cancel;
+void () CF_CheckBuilding;
 float (entity obj, entity builder) CheckArea;
 
 void () LaserBolt_Think = {
@@ -254,14 +255,26 @@ void () TeamFortress_EngineerBuild = {
 
 void () TeamFortress_EngineerBuildStop = {
     local entity te;
+    local vector dist;
 
-    sprint(self, PRINT_HIGH, "You stop building\n");
     self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
     self.movetype = MOVETYPE_WALK;
     TeamFortress_SetSpeed(self);
     te = find(world, netname, "build_timer");
     while (te) {
         if (te.owner == self) {
+            dist = self.origin - te.origin;
+            if (vlen(dist) > 128) {
+                sprint(self, PRINT_HIGH, "Your building disappeared\n");
+                WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+                WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+                WriteCoord(MSG_MULTICAST, te.origin_x);
+                WriteCoord(MSG_MULTICAST, te.origin_y);
+                WriteCoord(MSG_MULTICAST, te.origin_z);
+                multicast(te.origin, MULTICAST_PHS);
+            } else {
+                sprint(self, PRINT_HIGH, "You stop building\n");
+            }
             dremove(te);
             te = world;
         } else {
@@ -335,26 +348,39 @@ void (float objtobuild) TeamFortress_Build = {
     local float btime;
     local vector tmp1;
     local vector tmp2;
+    local entity oldmis;
     btime = 0;
     tmp1 = '0 0 0';
     tmp2 = '0 0 0';
-
-    tmp1 = self.origin + normalize(v_forward) * 64;
-    tmp2 = self.origin + normalize(v_forward) * 64 - normalize(v_up) * 128;
-    traceline(tmp1, tmp2, 1, world);
-    if (trace_ent != world) {
-        sprint(self, PRINT_HIGH, "You cannot build here\n");
-        return;
-    }
 
     newmis = spawn();
     makevectors(self.v_angle);
     v_forward_z = 0;
     v_forward = normalize(v_forward) * 64;
     newmis.origin = self.origin + v_forward;
+
+    tmp1 = newmis.origin;
+    tmp2 = newmis.origin - normalize(v_up) * 128;
+    traceline(tmp1, tmp2, 1, world);
+    if (trace_ent != world) {
+        sprint(self, PRINT_HIGH, "You cannot build here\n");
+        dremove(newmis);
+        return;
+    }
+
+    tmp1 = self.origin;
+    tmp2 = self.origin - normalize(v_up) * 128;
+    traceline(tmp1, tmp2, 1, world);
+    if (trace_ent != world) {
+        sprint(self, PRINT_HIGH, "You can only build while standing on solid ground\n");
+        dremove(newmis);
+        return;
+    }
+
     if (objtobuild == 1) {
         if (self.has_dispenser) {
             sprint(self, PRINT_HIGH, "You can only have one dispenser\n");
+            dremove(newmis);
             return;
         }
         tmp1 = '-16 -16 0';
@@ -365,6 +391,7 @@ void (float objtobuild) TeamFortress_Build = {
     } else if (objtobuild == 2) {
         if (self.has_sentry) {
             sprint(self, PRINT_HIGH, "You can only have one sentry gun\n");
+            dremove(newmis);
             return;
         }
         tmp1 = '-16 -16 0';
@@ -416,6 +443,36 @@ void (float objtobuild) TeamFortress_Build = {
     setsize(newmis, tmp1, tmp2);
     setorigin(newmis, newmis.origin);
     newmis.flags = newmis.flags - (newmis.flags & 512);
+
+    oldmis = newmis;
+    newmis = spawn();
+    newmis.owner = self;
+    newmis.enemy = oldmis;
+    newmis.classname = "timer";
+    newmis.netname = "buildcheck_timer";
+    newmis.nextthink = time + 0.3;
+    newmis.think = CF_CheckBuilding;
+};
+
+void () CF_CheckBuilding = {
+    local vector dist;
+    local entity timer = self;
+    local entity building = self.enemy;
+    self = self.owner;
+
+    if (self.is_building == 0) {
+        dremove(timer);
+        return;
+    }
+
+    dist = self.origin - building.origin;
+    if (vlen(dist) > 128) {
+        TeamFortress_EngineerBuildStop();
+        dremove(timer);
+        return;
+    }
+
+    timer.nextthink = time + 0.3;
 };
 
 void (entity bld) CheckBelowBuilding = {
