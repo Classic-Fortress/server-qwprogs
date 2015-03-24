@@ -1492,7 +1492,10 @@ void (entity pl) W_SetCurrentAmmo = {
     } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
         pl.currentammo = pl.ammo_rockets;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rock.mdl";
+            if (pl.weaponmode == 0)
+                pl.weaponmodel = "progs/v_rock.mdl";
+            else
+                pl.weaponmodel = "progs/v_pipe.mdl";
             pl.weaponframe = 0;
         }
         pl.weapon = IT_GRENADE_LAUNCHER;
@@ -1532,7 +1535,7 @@ void (entity pl) W_SetCurrentAmmo = {
     } else if (pl.current_weapon == WEAP_FLAMETHROWER) {
         pl.currentammo = pl.ammo_cells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rock.mdl";
+            pl.weaponmodel = "progs/v_flame.mdl";
             pl.weaponframe = 0;
         }
         pl.items = pl.items | IT_CELLS;
@@ -1540,7 +1543,7 @@ void (entity pl) W_SetCurrentAmmo = {
     } else if (pl.current_weapon == WEAP_INCENDIARY) {
         pl.currentammo = pl.ammo_rockets;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rock2.mdl";
+            pl.weaponmodel = "progs/v_irock.mdl";
             pl.weaponframe = 0;
         }
         pl.items = pl.items | IT_ROCKETS;
@@ -1556,7 +1559,7 @@ void (entity pl) W_SetCurrentAmmo = {
     } else if (pl.current_weapon == WEAP_TRANQ) {
         pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_shot.mdl";
+            pl.weaponmodel = "progs/v_tranq.mdl";
             pl.weaponframe = 0;
         }
         pl.items = pl.items | IT_SHELLS;
@@ -1688,7 +1691,10 @@ void () W_Reload_sniper_rifle = {
 
 void () W_Reload_grenade_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_rock.mdl";
+    if (self.owner.weaponmode == 0)
+        self.owner.weaponmodel = "progs/v_rock.mdl";
+    else
+        self.owner.weaponmodel = "progs/v_pipe.mdl";
     sprint(self.owner, PRINT_LOW, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
