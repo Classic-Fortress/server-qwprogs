@@ -2291,6 +2291,13 @@ void () ImpulseCommands = {
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
 
+    if (self.impulse == TF_NEXTTIP) {
+        self.display_tip = 0;
+        self.tip_type = 0;
+        self.tip_time = time;
+        Status_Refresh(self);
+    }
+
     if (self.impulse == TF_WEAPLAST) {
         if (self.playerclass == PC_SPY && self.is_undercover == 2)
             CF_Spy_DisguiseStop();

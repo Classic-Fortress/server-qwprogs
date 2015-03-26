@@ -46,6 +46,9 @@ typedef void (float) f_void_float;
 .float has_voted_map;           // Map option that player voted for
 .float spawn_time;              // Time when player spawned
 .float menu_time;               // Time when vote map menu was first issued
+.float display_tip;             // Last class tip displayed
+.float tip_type;                // Whether the tip displayed is a general tip (1) or class tip (2)
+.float tip_time;                // Time when players last requested to see a tip
 .float vote_next;               // TRUE if player has voted for a map vote
 .float vote_trick;              // TRUE if player has voted for a trick map vote
 .float vote_race;               // TRUE if player has voted for a race map vote
@@ -459,6 +462,7 @@ float scoutdash;
 float sniperreload;
 float spawnfull;
 float stockfull;
+float classtips;
 float server_default;
 float server_faithful;
 

@@ -466,6 +466,9 @@ void () DecodeLevelParms = {
         // stock full ammo/armor [on]
         stockfull = CF_GetSetting("stf", "stockfull", "on");
 
+        // display class tips [on]
+        classtips = CF_GetSetting("ct", "classtips", "on");
+
         // delay respawning by this many seconds [0]
         respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (respawn_delay_time) {
@@ -522,6 +525,7 @@ void () DecodeLevelParms = {
             feign_msg = TRUE;
             spawnfull = FALSE;
             stockfull = TRUE;
+            classtips = TRUE;
         }
 
         st = infokey(world, "faithful");
@@ -563,6 +567,7 @@ void () DecodeLevelParms = {
             feign_msg = FALSE;
             spawnfull = FALSE;
             stockfull = FALSE;
+            classtips = FALSE;
         }
 
     }
@@ -1139,6 +1144,8 @@ void () PutClientInServer = {
     self.vote_close = 0;
     self.has_throwngren = FALSE;
     self.saveme_time = 0;
+    self.display_tip = 0;
+    self.tip_type = 0;
 
     self.reload_shotgun = 0;
     self.reload_super_shotgun = 0;
