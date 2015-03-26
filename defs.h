@@ -449,7 +449,7 @@
 #define TF_TEAM_LIST            124 // Display the players in each team
 #define TF_TEAM_SCORES          125 // Display team scores
 #define TF_STATUS_QUERY         126 // Displays current team balance and equilization ratios
-// unused                       127
+#define TF_NEXTTIP              127 // Shows the next general/class tip
 // unused                       128
 // unused                       129
 #define TF_TOGGLEVOTE           130 // Toggle vote menu on/off

@@ -298,6 +298,7 @@ void (float inp) TeamFortress_ChangeClass = {
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
     }
+    self.spawn_time = time;
 };
 
 void () TeamFortress_DisplayLegalClasses = {
@@ -577,6 +578,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Pick up discarded ammo", discammo_pickup, "", 1);
     CF_PrintSetting("Reload clip tick", reload_cliptick, "", 1);
     CF_PrintSetting("ID extras", id_extended, "", 1);
+    CF_PrintSetting("Display class tips", classtips, "", 1);
     CF_PrintSetting("Old grenades", old_grens, "", 1);
     CF_PrintSetting("Drop grenades on ground", drop_grenades, "", 1);
     CF_PrintSetting("Drop grenades in pack", drop_grenpack, "", 1);

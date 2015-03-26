@@ -91,6 +91,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("idenemy", TF_ID_ENEMY, 0);
         TeamFortress_Alias("is_aliased", TF_ALIAS_CHECK, 0);
     } else if (self.motd == 50) {
+        TeamFortress_Alias("nexttip", TF_NEXTTIP, 0);
         TeamFortress_Alias("votenext", TF_VOTENEXT, 0);
         TeamFortress_Alias("votetrick", TF_VOTETRICK, 0);
         TeamFortress_Alias("voterace", TF_VOTERACE, 0);
