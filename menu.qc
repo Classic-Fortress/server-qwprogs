@@ -371,13 +371,13 @@ void () Menu_Drop = {
         return;
     }
 
-    if (!self.ammo_shells)
+    if (self.ammo_shells < 20)
         s_shells  = "\n";
-    if (!self.ammo_nails)
+    if (self.ammo_nails < 20)
         s_nails   = "\n";
-    if (!self.ammo_rockets)
+    if (self.ammo_rockets < 10)
         s_rockets = "\n";
-    if (!self.ammo_cells)
+    if (self.ammo_cells < 10)
         s_cells   = "\n";
 
     self.menu_input = nil;
