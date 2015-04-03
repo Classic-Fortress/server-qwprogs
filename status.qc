@@ -9,6 +9,7 @@ string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
 string(entity pl) ClipSizeToString;
 float(entity pl) GetClipSize;
+string(entity pl) SniperPowerToString;
 string(entity pl) DetpackToString;
 string(entity pl) AuraToString;
 string(entity pl) AssaultCannonToString;
@@ -643,6 +644,8 @@ void (entity pl) RefreshStatusBar = {
     st1 = "";
     if (pl.playerclass == PC_SCOUT)
         st1 = ScannerToString(pl);
+    else if (pl.playerclass == PC_SNIPER && (pl.tfstate & TFSTATE_AIMING))
+        st1 = SniperPowerToString(pl);
     else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
         st1 = DetpackToString(pl);
     else if (pl.playerclass == PC_MEDIC)
@@ -899,6 +902,25 @@ string(entity pl) DisguiseToString =
             st = "Υξδεςγοφες: ";
             st = strcat(st, team);
             st = strcat(st, skin);
+        }
+    }
+
+    return st;
+};
+
+string(entity pl) SniperPowerToString =
+{
+    local string st = "";
+
+    if (!sniperpower)
+        return st;
+
+    if (pl.heat) {
+        st = "Ποχες: ";
+        st = strcat(st, ftos(pl.heat));
+        st = strcat(st, " dmg");
+        if (pl.power_full) {
+            st = strcat(st, " (max)");
         }
     }
 
