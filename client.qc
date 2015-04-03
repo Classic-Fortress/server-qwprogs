@@ -469,6 +469,9 @@ void () DecodeLevelParms = {
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
 
+        // display sniper rifle power in status bar [on]
+        sniperpower = CF_GetSetting("sp", "sniperpower", "on");
+
         // delay respawning by this many seconds [0]
         respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (respawn_delay_time) {
@@ -526,6 +529,7 @@ void () DecodeLevelParms = {
             spawnfull = FALSE;
             stockfull = TRUE;
             classtips = TRUE;
+            sniperpower = TRUE;
         }
 
         st = infokey(world, "faithful");
@@ -568,6 +572,7 @@ void () DecodeLevelParms = {
             spawnfull = FALSE;
             stockfull = FALSE;
             classtips = FALSE;
+            sniperpower = FALSE;
         }
 
     }

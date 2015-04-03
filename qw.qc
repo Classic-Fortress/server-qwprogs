@@ -72,6 +72,8 @@ typedef void (float) f_void_float;
 .float saveme_time;             // Time when player issued /saveme command
 .float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
+.float power_time;              // The time when sniper power in status bar was last updated
+.float power_full;				// Whether sniper power has reached full power or not
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 .entity nopickup;                // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
@@ -463,6 +465,7 @@ float sniperreload;
 float spawnfull;
 float stockfull;
 float classtips;
+float sniperpower;
 float server_default;
 float server_faithful;
 

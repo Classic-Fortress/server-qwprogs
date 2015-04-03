@@ -2750,8 +2750,16 @@ void () W_WeaponFrame = {
     if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
-                if (self.heat < 400)
+                if (self.heat < 400) {
                     self.heat = self.heat + 3;
+                    if ((sniperpower) && (self.power_time < (time - 0.3))) {
+                        self.power_time = time;
+                        Status_Refresh(self);
+                    }
+                } else if ((sniperpower) && (!self.power_full)) {
+                    self.power_full = 1;
+                    Status_Refresh(self);
+                }
             } else {
                 local vector tv = self.velocity;
                 tv_z = 0;
@@ -2759,6 +2767,7 @@ void () W_WeaponFrame = {
                     SniperSight_Create();
                     self.heat = 50;
                     self.tfstate = self.tfstate | 2048;
+                    self.power_full = 0;
                     TeamFortress_SetSpeed(self);
                 }
             }
