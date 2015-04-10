@@ -204,6 +204,7 @@ float coop;
 .float reload_tick;             // how often the status bar should be refreshed during reload
 .float reload_time;             // when the reload will finish
 .float reload_clipsize;         // how much ammo is currently in the reloading clip
+.float reload_sniper_ticks;		// used to indicate when sniper rifle (with only 1 clip) will be reloaded
 
 // Assault Cannon
 .float heat;
@@ -466,6 +467,7 @@ float spawnfull;
 float stockfull;
 float classtips;
 float sniperpower;
+float sniperreloadpercent;
 float server_default;
 float server_faithful;
 

@@ -1680,14 +1680,27 @@ void () W_Reload_super_shotgun = {
     Status_Refresh(self.owner);
 };
 
-void () W_Reload_sniper_rifle = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_srifle.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
+void (entity pl) W_Reload_sniper_rifle = {
+    pl.reload_sniper_ticks = 0;
+    pl.tfstate = pl.tfstate - (pl.tfstate & TFSTATE_RELOADING);
+    pl.weaponmodel = "progs/v_srifle.mdl";
+    sprint(pl, PRINT_LOW, "Finished reloading\n");
+    W_WeaponState_Load(pl, 0);
+    Status_Refresh(pl);
 };
+
+void () W_Reload_sniper_rifle_tick = {
+    self.owner.reload_sniper_ticks = self.owner.reload_sniper_ticks + 1;
+
+    if (self.owner.reload_sniper_ticks >= 4) {
+        W_Reload_sniper_rifle(self.owner);
+        dremove(self);
+        return;
+    }
+
+    Status_Refresh(self.owner);
+    self.nextthink = time + 1;
+}
 
 void () W_Reload_grenade_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
