@@ -595,6 +595,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Sniper reload", sniperreload, "", 1);
     CF_PrintSetting("Old sniper rifle range", old_sniperrange, "", 1);
     CF_PrintSetting("Sniper Rifle power in status bar", sniperpower, "", 1);
+    CF_PrintSetting("Reload percentage in status bar", sniperreloadpercent, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Demolitions Man ==\n");
     if (detpipe_limit > 0) {

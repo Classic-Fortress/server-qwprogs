@@ -695,12 +695,17 @@ void (entity pl) RefreshStatusBar = {
     // status line 3 column 3 - clip size
     if (pl.tfstate & TFSTATE_RELOADING) {
         st3 = "Ãלינ: ";
-        if (reload_cliptick)
-            st3 = strcat(st3, strpadl(ftos(pl.reload_clipsize), 2));
-        else
-            st3 = strcat(st3, " 0");
-        st3 = strcat(st3, "/");
-        st3 = strcat(st3, strpadr(ftos(GetClipSize(pl)), 3));
+        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
+            st3 = strcat(st3, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
+            st3 = strcat(st3, "%  ");
+        } else {
+            if (reload_cliptick)
+                st3 = strcat(st3, strpadl(ftos(pl.reload_clipsize), 2));
+            else
+                st3 = strcat(st3, " 0");
+            st3 = strcat(st3, "/");
+            st3 = strcat(st3, strpadr(ftos(GetClipSize(pl)), 3));
+        }
     } else {
         st3 = ClipSizeToString(pl);
     }

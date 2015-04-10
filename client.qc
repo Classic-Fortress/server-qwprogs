@@ -472,6 +472,9 @@ void () DecodeLevelParms = {
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
 
+        // display sniper rifle reload percentage status bar [on]
+        sniperreloadpercent = CF_GetSetting("rp", "sniperreloadpercent", "on");
+
         // delay respawning by this many seconds [0]
         respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (respawn_delay_time) {
@@ -530,6 +533,7 @@ void () DecodeLevelParms = {
             stockfull = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
+            sniperreloadpercent = TRUE;
         }
 
         st = infokey(world, "faithful");
@@ -573,6 +577,7 @@ void () DecodeLevelParms = {
             stockfull = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
+            sniperreloadpercent = FALSE;
         }
 
     }

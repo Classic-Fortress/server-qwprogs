@@ -404,9 +404,8 @@ void (float weap) TeamFortress_ReloadWeapon = {
                 reloadamount = self.reload_sniper_rifle;
             Attack_Finished(1.5);
             self.reload_clipsize = (1 - reloadamount);
-            reloadtime = (1 - reloadamount) / 1;
-            reloadtime = 4 - (4 * reloadtime);
             self.reload_sniper_rifle = 0;
+            self.reload_sniper_ticks = 0;
             if (self.ammo_shells < 1) {
                 self.reload_sniper_rifle = 1 - self.ammo_shells;
             }
@@ -416,8 +415,8 @@ void (float weap) TeamFortress_ReloadWeapon = {
             tWeapon = spawn();
             tWeapon.owner = self;
             tWeapon.classname = "timer";
-            tWeapon.nextthink = time + reloadtime;
-            tWeapon.think = W_Reload_sniper_rifle;
+            tWeapon.nextthink = time + 1; // this will tick four times before finishing reload
+            tWeapon.think = W_Reload_sniper_rifle_tick;
             self.weaponmodel = "";
             self.weaponframe = 0;
         } else {
