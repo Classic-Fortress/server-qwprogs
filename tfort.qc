@@ -3050,8 +3050,8 @@ void (entity p) TeamFortress_ExecMapScript = {
         st = infokey(p, "exec_map");
 
     if (st == "on") {
-        stuffcmd(p, "exec mapdefault.cfg\n");
-        stuffcmd(p, "exec ");
+        stuffcmd(p, "exec maps/default.cfg\n");
+        stuffcmd(p, "exec maps/");
         stuffcmd(p, mapname);
         stuffcmd(p, ".cfg\n");
     }
