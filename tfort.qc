@@ -643,6 +643,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Old railgun behaviour", old_railgun, "", 1);
     CF_PrintSetting("Old dispenser behaviour", old_dispenser, "", 1);
     CF_PrintSetting("Bigger dispenser explosions", disp_explosion, "", 1);
+    CF_PrintSetting("Build status in status bar", buildstatus, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Spy ==\n");
     CF_PrintSetting("Allow feign death while airborne", feign_air, "", 1);
