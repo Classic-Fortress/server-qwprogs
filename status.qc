@@ -17,6 +17,7 @@ string(entity pl) RangeToString;
 string(entity pl) ScannerToString;
 string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
+string(entity pl) BuildingToString;
 string(float pc) TeamFortress_GetClassName;
 
 string (float class) CF_GetRandomClassTip {
@@ -657,7 +658,7 @@ void (entity pl) RefreshStatusBar = {
     else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
         st1 = SentryDetailsToString(pl);
     if (pl.playerclass == PC_ENGINEER && pl.is_building)
-        st1 = "Building...";
+        st1 = BuildingToString(pl);
     // status line 2
     s2 = strpadr(st1, 40);
     s2 = strcat(s2, "\n");
@@ -1094,6 +1095,20 @@ string(entity pl) SentryDetailsToString =
         st = strpadr(st, 32);
         st = strcat(st, strcat("Ìוצול: ", ftos(self.sentry_ent.weapon)));
     }
+
+    return st;
+};
+
+string(entity pl) BuildingToString =
+{
+    local string st = "";
+
+    if (!buildstatus)
+        return "Building...";
+
+    st = "Âץילהימח: ";
+    st = strcat(st, ftos(pl.building_percentage));
+    st = strcat(st, "%");
 
     return st;
 };

@@ -283,6 +283,7 @@ void () TeamFortress_EngineerBuildStop = {
     }
     Menu_Close(self);
     self.is_building = 0;
+    self.building_percentage = 0;
     self.current_weapon = self.weapon;
     W_SetCurrentAmmo(self);
 }
@@ -388,6 +389,7 @@ void (float objtobuild) TeamFortress_Build = {
         newmis.mdl = "progs/disp.mdl";
         newmis.netname = "dispenser";
         btime = time + 2;
+        self.dispenser_ticks = 0;
     } else if (objtobuild == 2) {
         if (self.has_sentry) {
             sprint(self, PRINT_HIGH, "You can only have one sentry gun\n");
@@ -399,6 +401,7 @@ void (float objtobuild) TeamFortress_Build = {
         newmis.mdl = "progs/turrbase.mdl";
         newmis.netname = "sentrygun";
         btime = time + 5;
+        self.sentry_ticks = 0;
     }
     if (CheckArea(newmis, self) == 0) {
         sprint(self, PRINT_HIGH, "Not enough room to build here\n");
@@ -471,6 +474,16 @@ void () CF_CheckBuilding = {
         dremove(timer);
         return;
     }
+
+    if (building.weapon == 2) {
+        self.sentry_ticks = self.sentry_ticks + 0.3;
+        self.building_percentage = ceil((self.sentry_ticks / 5) * 100);
+    } else if (building.weapon == 1) {
+        self.dispenser_ticks = self.dispenser_ticks + 0.3;
+        self.building_percentage = ceil((self.dispenser_ticks / 2) * 100);
+    }
+
+    Status_Refresh(self);
 
     timer.nextthink = time + 0.3;
 };
@@ -694,6 +707,7 @@ void () TeamFortress_FinishedBuilding = {
     oldself.owner = world;
     oldself.real_owner = self;
     self.is_building = FALSE;
+    self.building_percentage = 0;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     self.movetype = MOVETYPE_WALK;
     self.current_weapon = self.weapon;

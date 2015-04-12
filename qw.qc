@@ -73,14 +73,17 @@ typedef void (float) f_void_float;
 .float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
-.float power_full;				// Whether sniper power has reached full power or not
+.float power_full;              // Whether sniper power has reached full power or not
+.float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
+.float dispenser_ticks;         // Used to indicate when engineer's dispenser is finished building
+.float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
-.entity nopickup;                // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
+.entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress
 .entity linked_list;            // Used just like chain. Has to be separate so
-                        // it doesn't interfere with chain. See T_RadiusScan
+                                // it doesn't interfere with chain. See T_RadiusScan
 
 .entity observer_list;          // Used by undefined classes, see TF_MovePlayer
 
@@ -468,6 +471,7 @@ float stockfull;
 float classtips;
 float sniperpower;
 float sniperreloadpercent;
+float buildstatus;
 float server_default;
 float server_faithful;
 
