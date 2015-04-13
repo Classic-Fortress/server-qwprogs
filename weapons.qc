@@ -1434,6 +1434,8 @@ void () superspike_touch = {
 };
 
 void (entity pl) W_SetCurrentAmmo = {
+    entity oldself;
+
     if ((pl.health <= 0) || (pl.current_weapon == 0))
         return;
 
@@ -1586,6 +1588,12 @@ void (entity pl) W_SetCurrentAmmo = {
     // refresh engineer build menu when ammo updated
     if (pl.menu_input == Menu_Engineer_Input)
         Menu_Engineer(pl);
+    else if (pl.menu_input == Menu_Drop_Input) {
+        oldself = self;
+        self = pl;
+        Menu_Drop();
+        self = oldself;
+    }
 };
 
 float () W_BestWeapon = {
