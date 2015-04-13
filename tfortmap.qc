@@ -832,6 +832,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         self = Player;
         TeamFortress_CheckClassStats();
         W_SetCurrentAmmo(self);
+        sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
         self = oldself;
     }
     if ((Player.playerclass == PC_SPY) &&
