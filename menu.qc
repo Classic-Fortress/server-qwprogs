@@ -360,25 +360,39 @@ void (float inp) Menu_Drop_Input = {
 
 void () Menu_Drop = {
     local string s_drop;
-    local string s_shells  = "“‘ Shells \n";
-    local string s_nails   = "”‘ Nails  \n";
-    local string s_rockets = "•‘ Rockets\n";
-    local string s_cells   = "–‘ Cells  \n";
-    local string s_nothing = "\n—‘ Nothing";
+    local string s_shells  = "“‘ Shells        \n";
+    local string s_nails   = "”‘ Nails         \n";
+    local string s_rockets = "•‘ Rockets       \n";
+    local string s_cells   = "–‘ Cells         \n";
+    local string s_nothing = "\n—‘ Nothing       ";
 
     if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
     }
 
-    if (self.ammo_shells < 20)
+    if (self.ammo_shells < DROP_SHELLS)
         s_shells  = "\n";
-    if (self.ammo_nails < 20)
+    if (self.ammo_nails < DROP_NAILS)
         s_nails   = "\n";
-    if (self.ammo_rockets < 10)
+    if (self.ammo_rockets < DROP_ROCKETS)
         s_rockets = "\n";
-    if (self.ammo_cells < 10)
+    if (self.ammo_cells < DROP_CELLS)
         s_cells   = "\n";
+
+    if (self.playerclass == PC_ENGINEER) {
+        if ((self.ammo_shells < DROP_SHELLS) && ((self.ammo_cells / AMMO_COST_SHELLS) > (DROP_SHELLS - self.ammo_shells)))
+            s_shells  = "“‘ Shells (make) \n";
+        if ((self.ammo_nails < DROP_NAILS) && ((self.ammo_cells / AMMO_COST_NAILS) > (DROP_NAILS - self.ammo_nails)))
+            s_nails  = "”‘ Nails (make)  \n";
+        if ((self.ammo_rockets < DROP_ROCKETS) && ((self.ammo_cells / AMMO_COST_ROCKETS) > (DROP_ROCKETS - self.ammo_rockets)))
+            s_rockets  = "•‘ Rockets (make)\n";
+        if (self.ammo_cells < DROP_CELLS)
+            s_cells   = "\n";
+    }
+
+    if (s_shells == "\n" && s_nails == "\n" && s_rockets == "\n" && s_cells == "\n")
+        return;
 
     self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER)
