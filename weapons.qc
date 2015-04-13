@@ -1922,9 +1922,14 @@ void () W_Attack = {
         else
             Attack_Finished(0.15);
     } else if (self.current_weapon == WEAP_INCENDIARY) {
-        player_rocket1();
-        W_FireIncendiaryCannon();
-        Attack_Finished(1.2);
+        if (self.ammo_rockets >= 3) {
+            player_rocket1();
+            W_FireIncendiaryCannon();
+            Attack_Finished(1.2);
+        } else if (time >= self.antispam_incendiary_cannon) {
+            sprint(self, PRINT_HIGH, "Not enough ammo\n");
+            self.antispam_incendiary_cannon = time + 3;
+        }
     } else if (self.current_weapon == WEAP_MEDIKIT) {
         sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
