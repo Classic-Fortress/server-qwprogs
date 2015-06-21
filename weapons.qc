@@ -523,7 +523,7 @@ void () W_FireMedikit = {
 
                 } else if (trace_ent.health < (trace_ent.max_health + 50)) {
 
-                    if (self.ammo_cells >= 50) {
+                    if (self.ammo_cells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
                         healam = trace_ent.max_health - trace_ent.health + 50;
                         self.ammo_cells = 0;
                         if (trace_ent.saveme_time <= (time - PC_MEDIC_SAVEME_GRACE))
@@ -532,7 +532,7 @@ void () W_FireMedikit = {
                     }
                     else {
                         healam = min(10, ((trace_ent.max_health + 50) - trace_ent.health));
-                        self.ammo_cells = self.ammo_cells - min(self.ammo_cells, 5);
+                        self.ammo_cells = self.ammo_cells - min(self.ammo_cells, ceil((PC_MEDIC_MAXAMMO_CELL / 20)));
                         sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                     }
 

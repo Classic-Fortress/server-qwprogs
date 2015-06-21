@@ -895,7 +895,7 @@
 #define PC_MEDIC_WEAPONS		WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
 #define PC_MEDIC_MAXAMMO_SHOT		75
 #define PC_MEDIC_MAXAMMO_NAIL		150
-#define PC_MEDIC_MAXAMMO_CELL		100
+#define PC_MEDIC_MAXAMMO_CELL		50
 #define PC_MEDIC_MAXAMMO_ROCKET		25
 #define PC_MEDIC_MAXAMMO_MEDIKIT	100
 #define PC_MEDIC_INITAMMO_SHOT		50
@@ -914,7 +914,7 @@
 #define PC_MEDIC_AURA_HEAL_AMOUNT   5   // Amount of health given per aura heal.
 #define PC_MEDIC_AURA_RANGE         120 // The aura's range
 #define PC_MEDIC_CELL_REGEN_TIME    1   // Number of seconds between each cell regen.
-#define PC_MEDIC_CELL_REGEN_AMOUNT  10  // Amount of cells regenerated each cell regen.
+#define PC_MEDIC_CELL_REGEN_PERCENT 10  // Percentage of max cells regenerated each cell regen.
 #define PC_MEDIC_CELL_REGEN_CD      5   // Seconds to cooldown cell regeneration after healing with medikit.
 #define PC_MEDIC_SAVEME_GRACE       5   // Seconds after which /saveme gives grace period to medikit (no cell regeneration cooldown)
 
