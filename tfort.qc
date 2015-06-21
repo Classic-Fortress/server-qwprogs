@@ -1169,25 +1169,55 @@ void (entity p) TeamFortress_SetSpeed = {
 
 void () TeamFortress_SetHealth = {
     if (self.playerclass == PC_SCOUT) {
-        self.max_health = PC_SCOUT_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 75;
+        else
+            self.max_health = PC_SCOUT_MAXHEALTH;
     } else if (self.playerclass == PC_SNIPER) {
-        self.max_health = PC_SNIPER_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 90;
+        else
+            self.max_health = PC_SNIPER_MAXHEALTH;
     } else if (self.playerclass == PC_SOLDIER) {
-        self.max_health = PC_SOLDIER_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 100;
+        else
+            self.max_health = PC_SOLDIER_MAXHEALTH;
     } else if (self.playerclass == PC_DEMOMAN) {
-        self.max_health = PC_DEMOMAN_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 90;
+        else
+            self.max_health = PC_DEMOMAN_MAXHEALTH;
     } else if (self.playerclass == PC_MEDIC) {
-        self.max_health = PC_MEDIC_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 90;
+        else
+            self.max_health = PC_MEDIC_MAXHEALTH;
     } else if (self.playerclass == PC_HVYWEAP) {
-        self.max_health = PC_HVYWEAP_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 100;
+        else
+            self.max_health = PC_HVYWEAP_MAXHEALTH;
     } else if (self.playerclass == PC_PYRO) {
-        self.max_health = PC_PYRO_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 100;
+        else
+            self.max_health = PC_PYRO_MAXHEALTH;
     } else if (self.playerclass == PC_CIVILIAN) {
-        self.max_health = PC_CIVILIAN_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 50;
+        else
+            self.max_health = PC_CIVILIAN_MAXHEALTH;
     } else if (self.playerclass == PC_SPY) {
-        self.max_health = PC_SPY_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 90;
+        else
+            self.max_health = PC_SPY_MAXHEALTH;
     } else if (self.playerclass == PC_ENGINEER) {
-        self.max_health = PC_ENGINEER_MAXHEALTH;
+        if (old_hp_armor)
+            self.max_health = 80;
+        else
+            self.max_health = PC_ENGINEER_MAXHEALTH;
     } else {
         self.max_health = 1;
         self.takedamage = DAMAGE_NO;
@@ -1554,14 +1584,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SCOUT_MAXAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_MAXAMMO_CELL;
             self.armortype = PC_SCOUT_MAXARMORTYPE;
-            self.armorvalue = PC_SCOUT_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_SCOUT_MAXARMOR;
         } else {
             self.ammo_rockets = PC_SCOUT_INITAMMO_ROCKET;
             self.ammo_nails = PC_SCOUT_INITAMMO_NAIL;
             self.ammo_shells = PC_SCOUT_INITAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_INITAMMO_CELL;
             self.armortype = PC_SCOUT_INITARMORTYPE;
-            self.armorvalue = PC_SCOUT_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 25;
+            else
+                self.armorvalue = PC_SCOUT_INITARMOR;
         }
 
         // dispenser needs
@@ -1591,7 +1627,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | 0;
         self.armor_allowed = PC_SCOUT_MAXARMORTYPE;
-        self.maxarmor = PC_SCOUT_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 50;
+        else
+            self.maxarmor = PC_SCOUT_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_NAILGUN;
 
@@ -1607,14 +1646,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SNIPER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_MAXAMMO_CELL;
             self.armortype = PC_SNIPER_MAXARMORTYPE;
-            self.armorvalue = PC_SNIPER_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_SNIPER_MAXARMOR;
         } else {
             self.ammo_rockets = PC_SNIPER_INITAMMO_ROCKET;
             self.ammo_nails = PC_SNIPER_INITAMMO_NAIL;
             self.ammo_shells = PC_SNIPER_INITAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_INITAMMO_CELL;
             self.armortype = PC_SNIPER_INITARMORTYPE;
-            self.armorvalue = PC_SNIPER_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 0;
+            else
+                self.armorvalue = PC_SNIPER_INITARMOR;
         }
 
         // dispenser needs
@@ -1636,7 +1681,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_SNIPER_INITARMORCLASS;
         self.armor_allowed = PC_SNIPER_MAXARMORTYPE;
-        self.maxarmor = PC_SNIPER_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 50;
+        else
+            self.maxarmor = PC_SNIPER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_SNIPER_RIFLE;
 
@@ -1652,14 +1700,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_MAXAMMO_CELL;
             self.armortype = PC_SOLDIER_MAXARMORTYPE;
-            self.armorvalue = PC_SOLDIER_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 200;
+            else
+                self.armorvalue = PC_SOLDIER_MAXARMOR;
         } else {
             self.ammo_rockets = PC_SOLDIER_INITAMMO_ROCKET;
             self.ammo_nails = PC_SOLDIER_INITAMMO_NAIL;
             self.ammo_shells = PC_SOLDIER_INITAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
             self.armortype = PC_SOLDIER_INITARMORTYPE;
-            self.armorvalue = PC_SOLDIER_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 100;
+            else
+                self.armorvalue = PC_SOLDIER_INITARMOR;
         }
 
         // dispenser needs
@@ -1681,7 +1735,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_SOLDIER_INITARMORCLASS;
         self.armor_allowed = PC_SOLDIER_MAXARMORTYPE;
-        self.maxarmor = PC_SOLDIER_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 200;
+        else
+            self.maxarmor = PC_SOLDIER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_ROCKET_LAUNCHER;
 
@@ -1698,14 +1755,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
             self.armortype = PC_DEMOMAN_MAXARMORTYPE;
-            self.armorvalue = PC_DEMOMAN_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 120;
+            else
+                self.armorvalue = PC_DEMOMAN_MAXARMOR;
         } else {
             self.ammo_rockets = PC_DEMOMAN_INITAMMO_ROCKET;
             self.ammo_nails = PC_DEMOMAN_INITAMMO_NAIL;
             self.ammo_shells = PC_DEMOMAN_INITAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_INITAMMO_CELL;
             self.armortype = PC_DEMOMAN_INITARMORTYPE;
-            self.armorvalue = PC_DEMOMAN_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_DEMOMAN_INITARMOR;
         }
 
         // dispenser needs
@@ -1730,7 +1793,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_DEMOMAN_INITARMORCLASS;
         self.armor_allowed = PC_DEMOMAN_MAXARMORTYPE;
-        self.maxarmor = PC_DEMOMAN_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 120;
+        else
+            self.maxarmor = PC_DEMOMAN_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_GRENADE_LAUNCHER;
 
@@ -1745,14 +1811,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_MEDIC_MAXAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_MAXAMMO_CELL;
             self.armortype = PC_MEDIC_MAXARMORTYPE;
-            self.armorvalue = PC_MEDIC_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 100;
+            else
+                self.armorvalue = PC_MEDIC_MAXARMOR;
         } else {
             self.ammo_rockets = PC_MEDIC_INITAMMO_ROCKET;
             self.ammo_nails = PC_MEDIC_INITAMMO_NAIL;
             self.ammo_shells = PC_MEDIC_INITAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_INITAMMO_CELL;
             self.armortype = PC_MEDIC_INITARMORTYPE;
-            self.armorvalue = PC_MEDIC_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_MEDIC_INITARMOR;
         }
 
         // dispenser needs
@@ -1774,7 +1846,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_MEDIC_INITARMORCLASS;
         self.armor_allowed = PC_MEDIC_MAXARMORTYPE;
-        self.maxarmor = PC_MEDIC_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 100;
+        else
+            self.maxarmor = PC_MEDIC_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_SUPER_NAILGUN;
 
@@ -1811,14 +1886,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
             self.armortype = PC_HVYWEAP_MAXARMORTYPE;
-            self.armorvalue = PC_HVYWEAP_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 300;
+            else
+                self.armorvalue = PC_HVYWEAP_MAXARMOR;
         } else {
             self.ammo_rockets = PC_HVYWEAP_INITAMMO_ROCKET;
             self.ammo_nails = PC_HVYWEAP_INITAMMO_NAIL;
             self.ammo_shells = PC_HVYWEAP_INITAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_INITAMMO_CELL;
             self.armortype = PC_HVYWEAP_INITARMORTYPE;
-            self.armorvalue = PC_HVYWEAP_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 150;
+            else
+                self.armorvalue = PC_HVYWEAP_INITARMOR;
         }
 
         // dispenser needs
@@ -1840,7 +1921,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_HVYWEAP_INITARMORCLASS;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
-        self.maxarmor = PC_HVYWEAP_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 300;
+        else
+            self.maxarmor = PC_HVYWEAP_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_SUPER_SHOTGUN;
 
@@ -1857,14 +1941,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_PYRO_MAXAMMO_SHOT;
             self.ammo_cells = PC_PYRO_MAXAMMO_CELL;
             self.armortype = PC_PYRO_MAXARMORTYPE;
-            self.armorvalue = PC_PYRO_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 150;
+            else
+                self.armorvalue = PC_PYRO_MAXARMOR;
         } else {
             self.ammo_rockets = PC_PYRO_INITAMMO_ROCKET;
             self.ammo_nails = PC_PYRO_INITAMMO_NAIL;
             self.ammo_shells = PC_PYRO_INITAMMO_SHOT;
             self.ammo_cells = PC_PYRO_INITAMMO_CELL;
             self.armortype = PC_PYRO_INITARMORTYPE;
-            self.armorvalue = PC_PYRO_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_PYRO_INITARMOR;
         }
 
         // dispenser needs
@@ -1886,7 +1976,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_PYRO_INITARMORCLASS;
         self.armor_allowed = PC_PYRO_MAXARMORTYPE;
-        self.maxarmor = PC_PYRO_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 150;
+        else
+            self.maxarmor = PC_PYRO_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_FLAMETHROWER;
 
@@ -1903,14 +1996,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_CIVILIAN_MAXAMMO_SHOT;
             self.ammo_cells = PC_CIVILIAN_MAXAMMO_CELL;
             self.armortype = PC_CIVILIAN_MAXARMORTYPE;
-            self.armorvalue = PC_CIVILIAN_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 0;
+            else
+                self.armorvalue = PC_CIVILIAN_MAXARMOR;
         } else {
             self.ammo_rockets = PC_CIVILIAN_INITAMMO_ROCKET;
             self.ammo_nails = PC_CIVILIAN_INITAMMO_NAIL;
             self.ammo_shells = PC_CIVILIAN_INITAMMO_SHOT;
             self.ammo_cells = PC_CIVILIAN_INITAMMO_CELL;
             self.armortype = PC_CIVILIAN_INITARMORTYPE;
-            self.armorvalue = PC_CIVILIAN_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 0;
+            else
+                self.armorvalue = PC_CIVILIAN_INITARMOR;
         }
 
         // dispenser needs
@@ -1932,7 +2031,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_CIVILIAN_INITARMORCLASS;
         self.armor_allowed = PC_CIVILIAN_MAXARMORTYPE;
-        self.maxarmor = PC_CIVILIAN_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 0;
+        else
+            self.maxarmor = PC_CIVILIAN_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_AXE;
 
@@ -1947,14 +2049,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SPY_MAXAMMO_SHOT;
             self.ammo_cells = PC_SPY_MAXAMMO_CELL;
             self.armortype = PC_SPY_MAXARMORTYPE;
-            self.armorvalue = PC_SPY_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 100;
+            else
+                self.armorvalue = PC_SPY_MAXARMOR;
         } else {
             self.ammo_rockets = PC_SPY_INITAMMO_ROCKET;
             self.ammo_nails = PC_SPY_INITAMMO_NAIL;
             self.ammo_shells = PC_SPY_INITAMMO_SHOT;
             self.ammo_cells = PC_SPY_INITAMMO_CELL;
             self.armortype = PC_SPY_INITARMORTYPE;
-            self.armorvalue = PC_SPY_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 25;
+            else
+                self.armorvalue = PC_SPY_INITARMOR;
         }
 
         // dispenser needs
@@ -1976,7 +2084,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_SPY_INITARMORCLASS;
         self.armor_allowed = PC_SPY_MAXARMORTYPE;
-        self.maxarmor = PC_SPY_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 100;
+        else
+            self.maxarmor = PC_SPY_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_TRANQ;
 
@@ -2000,14 +2111,20 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_MAXAMMO_CELL;
             self.armortype = PC_ENGINEER_MAXARMORTYPE;
-            self.armorvalue = PC_ENGINEER_MAXARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 50;
+            else
+                self.armorvalue = PC_ENGINEER_MAXARMOR;
         } else {
             self.ammo_rockets = PC_ENGINEER_INITAMMO_ROCKET;
             self.ammo_nails = PC_ENGINEER_INITAMMO_NAIL;
             self.ammo_shells = PC_ENGINEER_INITAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_INITAMMO_CELL;
             self.armortype = PC_ENGINEER_INITARMORTYPE;
-            self.armorvalue = PC_ENGINEER_INITARMOR;
+            if (old_hp_armor)
+                self.armorvalue = 25;
+            else
+                self.armorvalue = PC_ENGINEER_INITARMOR;
         }
 
         // dispenser needs
@@ -2029,7 +2146,10 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_ENGINEER_INITARMORCLASS;
         self.armor_allowed = PC_ENGINEER_MAXARMORTYPE;
-        self.maxarmor = PC_ENGINEER_MAXARMOR;
+        if (old_hp_armor)
+            self.maxarmor = 50;
+        else
+            self.maxarmor = PC_ENGINEER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_LASER;
 

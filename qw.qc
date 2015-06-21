@@ -479,6 +479,7 @@ float server_faithful;
 float old_spanner;
 float old_railgun;
 float old_dispenser;
+float old_hp_armor;
 
 .float teamkills;
 
