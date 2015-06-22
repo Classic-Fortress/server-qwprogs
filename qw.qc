@@ -1,7 +1,7 @@
 #include "defs.h"
 
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
-typedef void (float) f_void_float;
+typedef void (float n) f_void_float;
 
 //===========================================================================
 // TEAMFORTRESS Defs
