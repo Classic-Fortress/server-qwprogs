@@ -9,7 +9,7 @@ void () Sentry_Rotate;
 float () Sentry_FindTarget;
 void () Sentry_FoundTarget;
 void () Sentry_HuntTarget;
-void (entity, float) Sentry_Pain;
+void (entity e, float f) Sentry_Pain;
 void () Sentry_Die;
 float () Sentry_Fire;
 void () Sentry_MuzzleFlash;
