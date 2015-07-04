@@ -135,6 +135,7 @@ void () worldspawn = {
     localcmd("serverinfo cf_rev \"");
     localcmd(REV);
     localcmd("\"\n");
+    localcmd("serverinfo gametype \"cfortress\"\n");
 
     st = infokey(world, "*sv_gamedir");
     if ((st != string_null) && (st != "fortress"))
