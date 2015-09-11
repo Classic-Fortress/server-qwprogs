@@ -56,3 +56,7 @@ Classic Fortress v0.1 beta
 * Fixed endless intermission bug.
 * Fixed bug where players got stuck in intermission mode upon map change and hence could not respawn.
 * Major code cleanup and rewrites.
+
+=== Compile ===
+Compile with GMQCC:
+gmqcc -std=gmqcc -fftepp
