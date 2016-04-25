@@ -168,6 +168,7 @@ void () worldspawn = {
     precache_sound("misc/h2ohit1.wav");
     precache_sound("items/itembk2.wav");
     precache_sound("player/plyrjmp8.wav");
+    precache_sound("dash.wav");
     precache_sound("player/land.wav");
     precache_sound("player/land2.wav");
     precache_sound("player/drown1.wav");
