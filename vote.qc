@@ -447,6 +447,9 @@ void (float pf_input) Vote_Input = {
 // opens map vote menu for newly spawned players who haven't voted yet
 // called from Vote_Input(), Vote_Check()
 void (float force) Vote_MenuOpen = {
+    if (clanbattle)
+        return;
+
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
     local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
     local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
