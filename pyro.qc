@@ -415,7 +415,7 @@ void () WorldFlame_touch = {
 
 void () Flamer_stream_touch = {
     local entity flame;
-    local vector vtemp;
+    local vector vtemp, dir;
 
     if (other.classname == "fire") {
         return;

@@ -26,6 +26,25 @@ New features
 * Updated class help (bindings, aliases and settings) reachable with /classhelp.
 * Dropping flag now possible on all maps using /dropflag.
 * Class configs are now executed from /fortress/classes/ subdirectory.
+* Allow team changing.
+* Any non-valid impulse now closes the active menu.
+
+== Removed ===
+* Removed weapon messages for weapons without weapon modes.
+* Removed bioweapon (merged into medikit).
+* Removed grapple hook.
+* Removed birthday mode.
+* Removed engineer mortar (not used anymore).
+* Removed bindings menu.
+* Removed class help.
+
+=== Fixed ===
+* Fixed the spamming weapon messages (e.g. Tranquiliser gun selected).
+* Fixed the sentry gun menu to not close prematurely.
+* Fixed broken ammo display.
+* Fixed endless intermission bug.
+* Fixed bug where players got stuck in intermission mode upon map change and hence could not respawn.
+* Major code cleanup and rewrites.
 * When using class configs, /fortress/classes/default.cfg gets executed first.
 * Team player count in team selection menu.
 * Class player count (and class restrictions) in class selection menu.
@@ -47,10 +66,7 @@ Scout
 Sniper
 ------
 * Sniper Rifle range increased.
-* Automatic sensitivity scaling while zoomed in.
-* Use the special button as a zoom button.
-* Use mouse wheel to adjust zoom while zoomed in.
-* Sniper Rifle now needs to be reloaded between shots.
+* Automatic sensitivity scaling while zoomed in.  Use the special button as a zoom button.  Use mouse wheel to adjust zoom while zoomed in.  Sniper Rifle now needs to be reloaded between shots.  
 
 Demolitions Man
 ------
@@ -107,3 +123,12 @@ Engineer
 * Changed class special to detonate dispenser.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 * Railgun no longer penetrates targets.
+
+
+Compilation
+------
+Compile with GMQCC:
+
+```bash
+$ gmqcc -std=gmqcc -fftepp
+```
