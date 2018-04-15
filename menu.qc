@@ -98,7 +98,7 @@ void (entity pl) Menu_Close =
 
 void (float inp) Menu_Input =
 {
-    local f_void_float tmp = self.menu_input;
+    var f_void_float tmp; tmp = self.menu_input;
     self.menu_input = nil;
     self.impulse = 0;
     tmp(inp);

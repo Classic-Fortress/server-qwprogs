@@ -478,6 +478,9 @@ void () DecodeLevelParms = {
         // display build status in status bar [on]
         buildstatus = CF_GetSetting("bs", "buildstatus", "on");
 
+        // use old init/max hp/armor [off]
+        old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
+
         // delay respawning by this many seconds [0]
         respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (respawn_delay_time) {
@@ -538,6 +541,7 @@ void () DecodeLevelParms = {
             sniperpower = TRUE;
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
+            old_hp_armor = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -583,6 +587,7 @@ void () DecodeLevelParms = {
             sniperpower = FALSE;
             sniperreloadpercent = FALSE;
             buildstatus = FALSE;
+            old_hp_armor = TRUE;
         }
 
     }

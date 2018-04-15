@@ -42,7 +42,7 @@ void () CF_Medic_AuraFindPlayers = {
 
     self.nextthink = time + PC_MEDIC_AURA_HEAL_TIME;
 
-    if (!self.owner.aura_active || self.owner.ammo_cells < 50)
+    if (!self.owner.aura_active || self.owner.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2))
         return;
 
     e_find = findradius(self.owner.origin, PC_MEDIC_AURA_RANGE);
@@ -72,7 +72,7 @@ void () CF_Medic_AuraFindPlayers = {
         self.owner.aura_healtime = 0;
     }
 
-    self.owner.ammo_cells = self.owner.ammo_cells - 5;
+    self.owner.ammo_cells = self.owner.ammo_cells - ceil(PC_MEDIC_MAXAMMO_CELL / 20);
     if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
         self.owner.currentammo = self.owner.ammo_cells;
 };
@@ -80,7 +80,8 @@ void () CF_Medic_AuraFindPlayers = {
 // increases the medic's cells two times per second
 // called from tfort.qc:TeamFortress_SetEquipment()
 void () CF_Medic_RegenerateCells = {
-    local float f_newcells = self.owner.ammo_cells + min(PC_MEDIC_CELL_REGEN_AMOUNT, (100 - self.owner.ammo_cells));
+    local entity oldself;
+    local float f_newcells = self.owner.ammo_cells + min(ceil(PC_MEDIC_MAXAMMO_CELL * (PC_MEDIC_CELL_REGEN_PERCENT / 100)), ceil(PC_MEDIC_MAXAMMO_CELL - self.owner.ammo_cells));
 
     // don't regenerate cells if not using aura or new medikit
     if (!medicaura && old_medikit)
@@ -94,17 +95,25 @@ void () CF_Medic_RegenerateCells = {
 
     self.nextthink = time + PC_MEDIC_CELL_REGEN_TIME;
 
-    if (self.owner.ammo_cells < 100) {
+    if (self.owner.ammo_cells < PC_MEDIC_MAXAMMO_CELL) {
         self.owner.ammo_cells = f_newcells;
 
-        // refresh status bar if cells just hit 100
-        if (f_newcells >= 100)
+        // refresh status bar if cells just hit max
+        if (f_newcells >= PC_MEDIC_MAXAMMO_CELL)
             Status_Refresh(self.owner);
-        else if (f_newcells >= 50 && f_newcells < 60)
+        else if (f_newcells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2) && f_newcells < ceil(PC_MEDIC_MAXAMMO_CELL / 2 + PC_MEDIC_MAXAMMO_CELL / 10))
             Status_Refresh(self.owner);
 
         if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
             self.owner.currentammo = self.owner.ammo_cells;
+    }
+
+    // Update drop ammo menu if cells are
+    if ((self.owner.menu_input == Menu_Drop_Input) && (self.owner.ammo_cells >= DROP_CELLS)) {
+        oldself = self;
+        self = self.owner;
+        Menu_Drop();
+        self = oldself;
     }
 };
 
@@ -118,9 +127,9 @@ void () CF_Medic_Regenerate = {
         return;
     }
 
-    // only regen if 50 or more cells with new medikit
+    // only regen if half of max or more cells with new medikit
     if (!old_medikit) {
-        if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < 50) {
+        if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
             return;
         }
     } else if (self.owner.health >= self.owner.max_health || self.owner.ammo_medikit) {

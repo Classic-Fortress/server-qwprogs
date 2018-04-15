@@ -290,6 +290,10 @@ float () Vote_GetForceNextVotes = {
 // check if voting should start each frame
 // called from world.qc:StartFrame()
 void () Vote_Check = {
+
+    if (clanbattle)
+        return;
+
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
     local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
     local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
