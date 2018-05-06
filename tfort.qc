@@ -457,10 +457,10 @@ void () TeamFortress_Inventory = {
         sprint(self, PRINT_HIGH, "\n");
     }
     if (self.tf_items & NIT_SCANNER)
-        sprint(self, PRINT_HIGH, "Scanner");
+        sprint(self, PRINT_HIGH, "Scanner\n");
 
     if (self.weapons_carried & WEAP_MEDIKIT)
-        sprint(self, PRINT_HIGH, "Medikit");
+        sprint(self, PRINT_HIGH, "Medikit\n");
 
     if (self.weapons_carried & WEAP_DETPACK) {
         if (self.ammo_detpack > 0) {
@@ -468,11 +468,12 @@ void () TeamFortress_Inventory = {
             sprint(self, PRINT_HIGH, st, " detpack");
             if (self.ammo_detpack > 1)
                 sprint(self, PRINT_HIGH, "s");
+            sprint(self, PRINT_HIGH, "\n");
         }
     }
 
     if (self.playerclass == PC_SPY && invis_only) {
-        sprint(self, PRINT_HIGH, "Invisibility device");
+        sprint(self, PRINT_HIGH, "Invisibility device\n");
     }
 
     if (self.armorvalue > 0)
