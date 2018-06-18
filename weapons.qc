@@ -1307,7 +1307,7 @@ void (vector org, vector dir) launch_spike = {
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
-    newmis.velocity = dir * 1000;
+    newmis.velocity = dir * 1500;
 };
 
 void () W_FireSuperSpikes = {

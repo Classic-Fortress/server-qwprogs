@@ -63,6 +63,7 @@ void () NailGrenadeLaunchNail = {
 
         deathmsg = DMSG_GREN_NAIL;
         launch_spike(self.origin, v_forward);
+        newmis.velocity = v_forward * 1000;
         newmis.touch = superspike_touch;
         newmis.weapon = DMSG_GREN_NAIL;
 
