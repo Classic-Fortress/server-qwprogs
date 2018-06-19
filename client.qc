@@ -497,6 +497,13 @@ void () DecodeLevelParms = {
             ent.think = autoteam_think;
         }
 
+        // fortress one
+        // use old 1000 unit velocity for nailguns
+        old_ng_velocity = CF_GetSetting("ongv", "old_ng_velocity", "off");
+
+        // use old ROF for nailguns
+        old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
+
         st = infokey(world, "default");
         if (st == "on") {
             server_default = TRUE;
@@ -542,6 +549,8 @@ void () DecodeLevelParms = {
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
+            old_ng_velocity = FALSE;
+            old_ng_rof = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -588,6 +597,8 @@ void () DecodeLevelParms = {
             sniperreloadpercent = FALSE;
             buildstatus = FALSE;
             old_hp_armor = TRUE;
+            old_ng_velocity = TRUE;
+            old_ng_rof = TRUE;
         }
 
     }

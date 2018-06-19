@@ -481,6 +481,9 @@ float old_railgun;
 float old_dispenser;
 float old_hp_armor;
 
+float old_ng_velocity;
+float old_ng_rof;
+
 .float teamkills;
 
 float autokick_time;
