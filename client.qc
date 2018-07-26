@@ -499,7 +499,7 @@ void () DecodeLevelParms = {
 
         // fortress one
         // use old 1000 unit velocity for nailguns
-        old_ng_velocity = CF_GetSetting("ongv", "old_ng_velocity", "off");
+        ng_velocity = CF_GetSetting("ngv", "ng_velocity", "1500");
 
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
@@ -549,7 +549,7 @@ void () DecodeLevelParms = {
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
-            old_ng_velocity = FALSE;
+            ng_velocity = 1500;
             old_ng_rof = FALSE;
         }
 
@@ -597,7 +597,7 @@ void () DecodeLevelParms = {
             sniperreloadpercent = FALSE;
             buildstatus = FALSE;
             old_hp_armor = TRUE;
-            old_ng_velocity = TRUE;
+            ng_velocity = 1000;
             old_ng_rof = TRUE;
         }
 

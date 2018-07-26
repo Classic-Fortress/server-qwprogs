@@ -1307,10 +1307,7 @@ void (vector org, vector dir) launch_spike = {
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
-    if (old_ng_velocity)
-        newmis.velocity = dir * 1000;
-    else
-        newmis.velocity = dir * 1500;
+    newmis.velocity = dir * ng_velocity;
 };
 
 void () W_FireSuperSpikes = {
