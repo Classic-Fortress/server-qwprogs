@@ -1377,10 +1377,10 @@ void () spike_touch = {
                         TF_TD_NAIL);
         } else {
             if (old_ng_rof) {
-                TF_T_Damage(other, self, self.owner, 18, TF_TD_NOTTEAM,
+                TF_T_Damage(other, self, self.owner, ng_damage * 2, TF_TD_NOTTEAM,
                         TF_TD_NAIL);
             } else {
-                TF_T_Damage(other, self, self.owner, 9, TF_TD_NOTTEAM,
+                TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                         TF_TD_NAIL);
             }
         }
@@ -1425,9 +1425,9 @@ void () superspike_touch = {
         }
         else {
             if (old_ng_rof) {
-                ndmg = 13;
+                ndmg = sng_damage * 2;
             } else {
-                ndmg = 26;
+                ndmg = sng_damage;
             }
         }            
 

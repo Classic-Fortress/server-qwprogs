@@ -500,6 +500,8 @@ void () DecodeLevelParms = {
         // fortress one
         // use old 1000 unit velocity for nailguns
         ng_velocity = CF_GetSetting("ngv", "ng_velocity", "1500");
+        ng_damage = CF_GetSetting("ngd", "ng_damage", "9");
+        sng_damage = CF_GetSetting("sngd", "sng_damage", "13");
 
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
