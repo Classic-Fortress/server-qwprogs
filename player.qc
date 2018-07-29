@@ -339,6 +339,16 @@ void () player_nail2 =[104, player_nail1] {
     if (self.weaponframe == 9) {
         self.weaponframe = 1;
     }
+    if (!old_ng_rof) {
+        SuperDamageSound();
+        if (self.nailpos == 0) {
+            W_FireSpikes(4);
+            self.nailpos = 1;
+        } else {
+            W_FireSpikes(-4);
+            self.nailpos = 0;
+        }
+    }  
     Attack_Finished(0.2);
 };
 

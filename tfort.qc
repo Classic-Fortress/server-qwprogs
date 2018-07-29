@@ -2355,10 +2355,10 @@ void () TeamFortress_RemoveTimers = {
             if (CTF_Map == 1) {
                 if (te.goal_no == 1) {
                     bprint(PRINT_HIGH, self.netname,
-                           " лост the блуе flag!\n");
+                           " О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫ flag!\n");
                 } else if (te.goal_no == 2) {
                     bprint(PRINT_HIGH, self.netname,
-                           " лост the ред flag!\n");
+                           " О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫ flag!\n");
                 }
             }
         }
