@@ -1376,13 +1376,8 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner.owner, 9, TF_TD_NOTTEAM,
                         TF_TD_NAIL);
         } else {
-            if (old_ng_rof) {
-                TF_T_Damage(other, self, self.owner, ng_damage * 2, TF_TD_NOTTEAM,
-                        TF_TD_NAIL);
-            } else {
-                TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
-                        TF_TD_NAIL);
-            }
+            TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
+                    TF_TD_NAIL);
         }
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -1424,11 +1419,7 @@ void () superspike_touch = {
             ndmg = 40;
         }
         else {
-            if (old_ng_rof) {
-                ndmg = sng_damage * 2;
-            } else {
-                ndmg = sng_damage;
-            }
+            ndmg = sng_damage;
         }            
 
         if (self.owner.classname == "grenade")
