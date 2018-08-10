@@ -165,7 +165,8 @@ void (float update) Menu_Team = {
     local entity timer;
 
     if (self.classname == "observer")
-        Status_Menu(self, Menu_Team_Input, "");
+        /* Status_Menu(self, Menu_Team_Input, ""); */
+        return;
 
     // allow toggling team menu using any method to show it
     if (!update && self.menu_input == Menu_Team_Input) {

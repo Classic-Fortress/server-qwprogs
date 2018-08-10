@@ -9,6 +9,9 @@ void (float inp) MOTD_Input = {
 };
 
 void () TeamFortress_MOTD = {
+    if (self.classname == "observer")
+        return;
+
     local string st1;
     local string st2;
     local string ya;
