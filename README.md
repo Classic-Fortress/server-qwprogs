@@ -9,7 +9,7 @@ New features
 * Auto ID feature (cf\_autoid 1 = on, 2 = teammates only, 3 = enemies only).
 * Show friendly Sentry Gun health in /id for Engineers.
 * Show max health and max armor in /id for Medics and Engineers.
-* Grenade timers (disable with /cf\_notimers 1 = no timers, 2 = no timer sound).
+* Grenade timers (disable with `setinfo nt 1` for no timers, or `setinfo nt 2` for no timer sound).
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
