@@ -127,8 +127,4 @@ Engineer
 
 Compilation
 ------
-Compile with GMQCC:
-
-```bash
-$ gmqcc -std=gmqcc -fftepp
-```
+Compile with [FTEQCC](https://sourceforge.net/projects/fteqw/)
