@@ -158,9 +158,12 @@ void (float timer) TeamFortress_SetDetpack = {
         }
         at_spot = at_spot.chain;
     }
-    if (!(self.flags & FL_ONGROUND)) {
-        sprint(self, PRINT_HIGH, "You cannot set detpacks in the air\n");
-        return;
+
+    if (!self.waterlevel) {
+        if (!(self.flags & FL_ONGROUND)) {
+            sprint(self, PRINT_HIGH, "You cannot set detpacks in the air\n");
+            return;
+        }
     }
 
     te = find(world, classname, "detpack");
