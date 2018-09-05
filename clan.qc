@@ -38,6 +38,30 @@ void () PreMatch_Think = {
     if (game_locked)
         bprint(PRINT_HIGH, "Game is now locked\n");
 
+
+        if (infokey (world, "serverdemo") == "on")
+        {
+		calltimeofday ();
+
+		localcmd ("record \"");
+		localcmd (ftos (tod_day)); // day
+		localcmd ("-");
+		localcmd (ftos (tod_mon)); // month
+		localcmd ("-");
+		localcmd (ftos (tod_year)); // year
+		localcmd ("_");
+		localcmd (ftos (tod_hour)); // hour
+		localcmd ("-");
+		localcmd (ftos (tod_min)); // minute
+		localcmd ("-");
+		localcmd (ftos (tod_sec)); // second
+
+		localcmd ("_[");
+		localcmd (mapname);
+		localcmd ("]");
+		localcmd ("\"\n");
+        }
+
     team4score = 0;
     team3score = 0;
     team2score = 0;
