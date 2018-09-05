@@ -956,30 +956,31 @@ string () Vote_GetWinner = {
 // called from Vote_SetupVote(), Vote_GetWinner()
 string () Vote_GetWinnerList = {
     local string s_maplist;
+    local string s_tmp;
 
     s_maplist = strzone("");
     if (vote1_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote1_map, " ")));
         strunzone(s_tmp);
     }
     if (vote2_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote2_map, " ")));
         strunzone(s_tmp);
     }
     if (vote3_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote3_map, " ")));
         strunzone(s_tmp);
     }
     if (vote4_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote4_map, " ")));
         strunzone(s_tmp);
     }
     if (vote5_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, vote5_map));
         strunzone(s_tmp);
     }
