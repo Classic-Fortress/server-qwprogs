@@ -3,6 +3,7 @@ Classic Fortress v0.9 beta
 
 New features
 ------
+* Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
 * Force map switch to the voted map early using /forcenext.
