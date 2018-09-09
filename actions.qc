@@ -28,11 +28,16 @@ void () TeamFortress_Discard = {
     if (self.playerclass == PC_MEDIC && !medicaura && old_medikit)
         newmis.ammo_cells = self.ammo_cells;
 
+
     if (!(newmis.ammo_shells + newmis.ammo_nails + newmis.ammo_rockets + newmis.ammo_cells)) {
         dremove(newmis);
-        Menu_Drop();
+        if (self.menu_input != Menu_Drop_Input)
+        	Menu_Drop();
+        else
+        	Menu_Close(self);
         return;
     }
+
     if (newmis.ammo_shells) {
         self.ammo_shells = 0;
     }

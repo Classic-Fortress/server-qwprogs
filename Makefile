@@ -7,7 +7,7 @@ ifndef REV
 endif
 
 all:
-	gmqcc -std=fteqcc -fvariadic-args -funtyped-nil -DVER=\"$(VER)\" -DREV=\"$(REV)\"
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\"
 
 clean:
 	rm -f $(TARGET) qwprogs.lno files.dat progdefs.h

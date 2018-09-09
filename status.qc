@@ -787,7 +787,7 @@ string(entity pl) ClipSizeToString =
         num = (max - pl.reload_super_shotgun);
     } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
         if (!sniperreload)
-            return ("");
+            return "";
         if ((max - pl.reload_sniper_rifle) > pl.ammo_shells)
             pl.reload_sniper_rifle = max - pl.ammo_shells;
         num = (max - pl.reload_sniper_rifle);
@@ -800,7 +800,7 @@ string(entity pl) ClipSizeToString =
             pl.reload_rocket_launcher = (max - pl.ammo_rockets);
         num = (max - pl.reload_rocket_launcher);
     } else
-        return ("");
+        return "";
 
     if (num > 99)
         num = 99;
@@ -967,9 +967,9 @@ string(entity pl) AuraToString =
                 st = strcat(st, ftos(pl.aura_healamount));
                 st = strcat(st, " hp");
             }
-            else if (pl.ammo_cells < 50)
+            else if (pl.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2))
                 st = strcat(st, "out of power");
-            else if (pl.ammo_cells < 95)
+            else if (pl.ammo_cells < floor(PC_MEDIC_MAXAMMO_CELL * 0.95))
                 st = strcat(st, "recharging");
             else
                 st = strcat(st, "on");

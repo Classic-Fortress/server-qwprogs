@@ -2,4 +2,5 @@
 *.lno
 *.exe
 *.log
-*.bat
+*.patch
+fteqcc64

@@ -290,6 +290,10 @@ float () Vote_GetForceNextVotes = {
 // check if voting should start each frame
 // called from world.qc:StartFrame()
 void () Vote_Check = {
+
+    if (clanbattle)
+        return;
+
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
     local float decidertime_force = closetime - CF_MAPVOTE_FORCESHOW;
     local float decidertime = closetime - CF_MAPVOTE_DURATION_DECIDER;
@@ -952,30 +956,31 @@ string () Vote_GetWinner = {
 // called from Vote_SetupVote(), Vote_GetWinner()
 string () Vote_GetWinnerList = {
     local string s_maplist;
+    local string s_tmp;
 
     s_maplist = strzone("");
     if (vote1_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote1_map, " ")));
         strunzone(s_tmp);
     }
     if (vote2_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote2_map, " ")));
         strunzone(s_tmp);
     }
     if (vote3_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote3_map, " ")));
         strunzone(s_tmp);
     }
     if (vote4_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, strcat(vote4_map, " ")));
         strunzone(s_tmp);
     }
     if (vote5_cnt) {
-        local string s_tmp = s_maplist;
+        s_tmp = s_maplist;
         s_maplist = strzone(strcat(s_maplist, vote5_map));
         strunzone(s_tmp);
     }

@@ -478,6 +478,9 @@ void () DecodeLevelParms = {
         // display build status in status bar [on]
         buildstatus = CF_GetSetting("bs", "buildstatus", "on");
 
+        // use old init/max hp/armor [off]
+        old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
+
         // delay respawning by this many seconds [0]
         respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (respawn_delay_time) {
@@ -493,6 +496,15 @@ void () DecodeLevelParms = {
             ent.nextthink = time + autoteam_time;
             ent.think = autoteam_think;
         }
+
+        // fortress one
+        // use old 1000 unit velocity for nailguns
+        ng_velocity = CF_GetSetting("ngv", "ng_velocity", "1500");
+        ng_damage = CF_GetSetting("ngd", "ng_damage", "9");
+        sng_damage = CF_GetSetting("sngd", "sng_damage", "13");
+
+        // use old ROF for nailguns
+        old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -538,6 +550,9 @@ void () DecodeLevelParms = {
             sniperpower = TRUE;
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
+            old_hp_armor = FALSE;
+            ng_velocity = 1500;
+            old_ng_rof = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -583,6 +598,9 @@ void () DecodeLevelParms = {
             sniperpower = FALSE;
             sniperreloadpercent = FALSE;
             buildstatus = FALSE;
+            old_hp_armor = TRUE;
+            ng_velocity = 1000;
+            old_ng_rof = TRUE;
         }
 
     }

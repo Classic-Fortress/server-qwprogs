@@ -3,13 +3,14 @@ Classic Fortress v0.9 beta
 
 New features
 ------
+* Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
 * Force map switch to the voted map early using /forcenext.
 * Auto ID feature (cf\_autoid 1 = on, 2 = teammates only, 3 = enemies only).
 * Show friendly Sentry Gun health in /id for Engineers.
 * Show max health and max armor in /id for Medics and Engineers.
-* Grenade timers (disable with /cf\_notimers 1 = no timers, 2 = no timer sound).
+* Grenade timers (disable with `setinfo nt 1` for no timers, or `setinfo nt 2` for no timer sound).
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
@@ -26,6 +27,25 @@ New features
 * Updated class help (bindings, aliases and settings) reachable with /classhelp.
 * Dropping flag now possible on all maps using /dropflag.
 * Class configs are now executed from /fortress/classes/ subdirectory.
+* Allow team changing.
+* Any non-valid impulse now closes the active menu.
+
+== Removed ===
+* Removed weapon messages for weapons without weapon modes.
+* Removed bioweapon (merged into medikit).
+* Removed grapple hook.
+* Removed birthday mode.
+* Removed engineer mortar (not used anymore).
+* Removed bindings menu.
+* Removed class help.
+
+=== Fixed ===
+* Fixed the spamming weapon messages (e.g. Tranquiliser gun selected).
+* Fixed the sentry gun menu to not close prematurely.
+* Fixed broken ammo display.
+* Fixed endless intermission bug.
+* Fixed bug where players got stuck in intermission mode upon map change and hence could not respawn.
+* Major code cleanup and rewrites.
 * When using class configs, /fortress/classes/default.cfg gets executed first.
 * Team player count in team selection menu.
 * Class player count (and class restrictions) in class selection menu.
@@ -47,10 +67,7 @@ Scout
 Sniper
 ------
 * Sniper Rifle range increased.
-* Automatic sensitivity scaling while zoomed in.
-* Use the special button as a zoom button.
-* Use mouse wheel to adjust zoom while zoomed in.
-* Sniper Rifle now needs to be reloaded between shots.
+* Automatic sensitivity scaling while zoomed in.  Use the special button as a zoom button.  Use mouse wheel to adjust zoom while zoomed in.  Sniper Rifle now needs to be reloaded between shots.  
 
 Demolitions Man
 ------
@@ -107,3 +124,8 @@ Engineer
 * Changed class special to detonate dispenser.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 * Railgun no longer penetrates targets.
+
+
+Compilation
+------
+Compile with [FTEQCC](https://sourceforge.net/projects/fteqw/)

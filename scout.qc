@@ -32,8 +32,8 @@ void () CF_Scout_Dash = {
     if (vlen(self.velocity) <= 450 && (self.flags & FL_ONGROUND)) {
         makevectors(self.angles);
         self.velocity = v_forward * 540;
-        self.velocity_z = 190;
-        sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
+        self.velocity_z = 181;
+        sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
     }
 }
 

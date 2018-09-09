@@ -523,7 +523,7 @@ void () W_FireMedikit = {
 
                 } else if (trace_ent.health < (trace_ent.max_health + 50)) {
 
-                    if (self.ammo_cells >= 50) {
+                    if (self.ammo_cells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
                         healam = trace_ent.max_health - trace_ent.health + 50;
                         self.ammo_cells = 0;
                         if (trace_ent.saveme_time <= (time - PC_MEDIC_SAVEME_GRACE))
@@ -532,7 +532,7 @@ void () W_FireMedikit = {
                     }
                     else {
                         healam = min(10, ((trace_ent.max_health + 50) - trace_ent.health));
-                        self.ammo_cells = self.ammo_cells - min(self.ammo_cells, 5);
+                        self.ammo_cells = self.ammo_cells - min(self.ammo_cells, ceil((PC_MEDIC_MAXAMMO_CELL / 20)));
                         sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                     }
 
@@ -1307,7 +1307,7 @@ void (vector org, vector dir) launch_spike = {
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
-    newmis.velocity = dir * 1000;
+    newmis.velocity = dir * ng_velocity;
 };
 
 void () W_FireSuperSpikes = {
@@ -1315,7 +1315,10 @@ void () W_FireSuperSpikes = {
 
     sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
 
-    self.ammo_nails = self.ammo_nails - 4;
+    if (old_ng_rof)
+        self.ammo_nails = self.ammo_nails - 4;
+    else
+        self.ammo_nails = self.ammo_nails - 2;
     self.currentammo = self.ammo_nails;
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16', dir);
@@ -1330,7 +1333,7 @@ void (float ox) W_FireSpikes = {
     local vector dir;
 
     makevectors(self.v_angle);
-    if ((self.ammo_nails >= 4) &&
+    if (((self.ammo_nails >= 4) || ((self.ammo_nails >= 2) && !old_ng_rof)) &&
         (self.current_weapon == WEAP_SUPER_NAILGUN)) {
         W_FireSuperSpikes();
         return;
@@ -1340,7 +1343,7 @@ void (float ox) W_FireSpikes = {
         return;
     }
     sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-    if (self.ammo_nails == 1) {
+    if ((self.ammo_nails == 1) || !old_ng_rof) {
         self.ammo_nails = self.ammo_nails - 1;
         self.currentammo = self.ammo_nails;
     } else {
@@ -1369,12 +1372,13 @@ void () spike_touch = {
     if (other.takedamage) {
         spawn_touchblood(9);
         deathmsg = self.weapon;
-        if (self.owner.classname == "grenade")
+        if (self.owner.classname == "grenade") {
             TF_T_Damage(other, self, self.owner.owner, 9, TF_TD_NOTTEAM,
                         TF_TD_NAIL);
-        else
-            TF_T_Damage(other, self, self.owner, 18, TF_TD_NOTTEAM,
-                        TF_TD_NAIL);
+        } else {
+            TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
+                    TF_TD_NAIL);
+        }
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1411,10 +1415,12 @@ void () superspike_touch = {
     if (other.takedamage) {
         spawn_touchblood(18);
         deathmsg = self.weapon;
-        if (deathmsg == DMSG_GREN_NAIL)
+        if (deathmsg == DMSG_GREN_NAIL) {
             ndmg = 40;
-        else
-            ndmg = 26;
+        }
+        else {
+            ndmg = sng_damage;
+        }            
 
         if (self.owner.classname == "grenade")
             TF_T_Damage(other, self, self.owner.owner, ndmg, TF_TD_NOTTEAM,

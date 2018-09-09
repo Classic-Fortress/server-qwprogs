@@ -774,11 +774,11 @@
 /*======================================================================*/
 // Class Details for SCOUT
 #define PC_SCOUT_SKIN			4 	// Skin for this class when Classkin is on.
-#define PC_SCOUT_MAXHEALTH		75	// Maximum Health Level
+#define PC_SCOUT_MAXHEALTH		100	// Maximum Health Level
 #define PC_SCOUT_MAXSPEED		450	// Maximum movement speed
 #define PC_SCOUT_MAXSTRAFESPEED		450	// Maximum strafing movement speed
-#define PC_SCOUT_MAXARMOR		50 	// Maximum Armor Level, of any armor class
-#define PC_SCOUT_INITARMOR		25 	// Armor level when respawned
+#define PC_SCOUT_MAXARMOR		25 	// Maximum Armor Level, of any armor class
+#define PC_SCOUT_INITARMOR		0 	// Armor level when respawned
 #define PC_SCOUT_MAXARMORTYPE		0.3	// Maximum level of Armor absorption
 #define PC_SCOUT_INITARMORTYPE		0.3	// Absorption Level of armor when respawned
 #define PC_SCOUT_ARMORCLASSES		3 	// #AT_SAVESHOT | #AT_SAVENAIL	<-Armor Classes allowed for this class
@@ -803,10 +803,10 @@
 
 // Class Details for SNIPER
 #define PC_SNIPER_SKIN			5
-#define PC_SNIPER_MAXHEALTH		90
+#define PC_SNIPER_MAXHEALTH		100
 #define PC_SNIPER_MAXSPEED		300
 #define PC_SNIPER_MAXSTRAFESPEED	300
-#define PC_SNIPER_MAXARMOR		50
+#define PC_SNIPER_MAXARMOR		40
 #define PC_SNIPER_INITARMOR		0
 #define PC_SNIPER_MAXARMORTYPE		0.3
 #define PC_SNIPER_INITARMORTYPE		0.3
@@ -855,11 +855,11 @@
 
 // Class Details for DEMOLITION MAN
 #define PC_DEMOMAN_SKIN			1
-#define PC_DEMOMAN_MAXHEALTH		90
+#define PC_DEMOMAN_MAXHEALTH		100
 #define PC_DEMOMAN_MAXSPEED		280
 #define PC_DEMOMAN_MAXSTRAFESPEED	280
-#define PC_DEMOMAN_MAXARMOR		120
-#define PC_DEMOMAN_INITARMOR		50
+#define PC_DEMOMAN_MAXARMOR		110
+#define PC_DEMOMAN_INITARMOR		40
 #define PC_DEMOMAN_MAXARMORTYPE		0.6
 #define PC_DEMOMAN_INITARMORTYPE	0.6
 #define PC_DEMOMAN_ARMORCLASSES		31	// ALL
@@ -883,11 +883,11 @@
 
 // Class Details for COMBAT MEDIC
 #define PC_MEDIC_SKIN			3
-#define PC_MEDIC_MAXHEALTH		90
+#define PC_MEDIC_MAXHEALTH		100
 #define PC_MEDIC_MAXSPEED		320
 #define PC_MEDIC_MAXSTRAFESPEED		320
-#define PC_MEDIC_MAXARMOR		100
-#define PC_MEDIC_INITARMOR		50
+#define PC_MEDIC_MAXARMOR		90
+#define PC_MEDIC_INITARMOR		40
 #define PC_MEDIC_MAXARMORTYPE		0.6
 #define PC_MEDIC_INITARMORTYPE		0.3
 #define PC_MEDIC_ARMORCLASSES		11	// ALL except EXPLOSION
@@ -895,7 +895,7 @@
 #define PC_MEDIC_WEAPONS		WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
 #define PC_MEDIC_MAXAMMO_SHOT		75
 #define PC_MEDIC_MAXAMMO_NAIL		150
-#define PC_MEDIC_MAXAMMO_CELL		100
+#define PC_MEDIC_MAXAMMO_CELL		50
 #define PC_MEDIC_MAXAMMO_ROCKET		25
 #define PC_MEDIC_MAXAMMO_MEDIKIT	100
 #define PC_MEDIC_INITAMMO_SHOT		50
@@ -914,7 +914,7 @@
 #define PC_MEDIC_AURA_HEAL_AMOUNT   5   // Amount of health given per aura heal.
 #define PC_MEDIC_AURA_RANGE         120 // The aura's range
 #define PC_MEDIC_CELL_REGEN_TIME    1   // Number of seconds between each cell regen.
-#define PC_MEDIC_CELL_REGEN_AMOUNT  10  // Amount of cells regenerated each cell regen.
+#define PC_MEDIC_CELL_REGEN_PERCENT 10  // Percentage of max cells regenerated each cell regen.
 #define PC_MEDIC_CELL_REGEN_CD      5   // Seconds to cooldown cell regeneration after healing with medikit.
 #define PC_MEDIC_SAVEME_GRACE       5   // Seconds after which /saveme gives grace period to medikit (no cell regeneration cooldown)
 
@@ -973,11 +973,11 @@
 
 // Class Details for SPY
 #define PC_SPY_SKIN			22
-#define PC_SPY_MAXHEALTH		90
+#define PC_SPY_MAXHEALTH		100
 #define PC_SPY_MAXSPEED			300
 #define PC_SPY_MAXSTRAFESPEED		300
-#define PC_SPY_MAXARMOR			100
-#define PC_SPY_INITARMOR		25
+#define PC_SPY_MAXARMOR			90
+#define PC_SPY_INITARMOR		15
 #define PC_SPY_MAXARMORTYPE		0.6
 #define PC_SPY_INITARMORTYPE		0.6
 #define PC_SPY_ARMORCLASSES		27	// ALL except EXPLOSION
@@ -1003,11 +1003,11 @@
 
 // Class Details for ENGINEER
 #define PC_ENGINEER_SKIN		22	// Not used anymore
-#define PC_ENGINEER_MAXHEALTH		80
+#define PC_ENGINEER_MAXHEALTH		100
 #define PC_ENGINEER_MAXSPEED		300
 #define PC_ENGINEER_MAXSTRAFESPEED	300
-#define PC_ENGINEER_MAXARMOR		50
-#define PC_ENGINEER_INITARMOR		25
+#define PC_ENGINEER_MAXARMOR		30
+#define PC_ENGINEER_INITARMOR		5
 #define PC_ENGINEER_MAXARMORTYPE	0.6
 #define PC_ENGINEER_INITARMORTYPE	0.3
 #define PC_ENGINEER_ARMORCLASSES	31	// ALL
