@@ -972,53 +972,55 @@ void () GasGrenadeMakeGas = {
     self.nextthink = time + 0.75;
     te = findradius(self.origin, 200);
     while (te != world) {
-        if (((te.classname == "player") && (te.deadflag == 0)) &&
-            (te.has_disconnected != 1)) {
-            deathmsg = 24;
-            TF_T_Damage(te, world, self.owner, 10, (1 | 2), 0);
-            if (te.tfstate & 16384) {
-                timer = find(world, classname, "timer");
-                while (((timer.owner != te) ||
-                        (timer.think != HallucinationTimer)) &&
-                       (timer != world)) {
-                    timer = find(timer, classname, "timer");
-                }
-                if (timer != world) {
-                    timer.health = timer.health + 25;
-                    if (old_grens == 1) {
-                        if (timer.health < 100) {
-                            timer.health = 100;
-                        }
-                        timer.nextthink = time + 0.5;
-                    } else {
-                        if (timer.health < 150) {
-                            timer.health = 150;
-                        }
-                        timer.nextthink = time + 0.3;
+        if (CanDamage(te, self)) {
+            if (((te.classname == "player") && (te.deadflag == 0)) &&
+                (te.has_disconnected != 1)) {
+                deathmsg = 24;
+                TF_T_Damage(te, world, self.owner, 10, (1 | 2), 0);
+                if (te.tfstate & 16384) {
+                    timer = find(world, classname, "timer");
+                    while (((timer.owner != te) ||
+                            (timer.think != HallucinationTimer)) &&
+                           (timer != world)) {
+                        timer = find(timer, classname, "timer");
                     }
-                }
-            } else {
-                if (old_grens == 1) {
-                    stuffcmd(te, "v_cshift 50 25 50 -50\n");
-                    sprint(te, PRINT_HIGH, "Far out man!\n");
+                    if (timer != world) {
+                        timer.health = timer.health + 25;
+                        if (old_grens == 1) {
+                            if (timer.health < 100) {
+                                timer.health = 100;
+                            }
+                            timer.nextthink = time + 0.5;
+                        } else {
+                            if (timer.health < 150) {
+                                timer.health = 150;
+                            }
+                            timer.nextthink = time + 0.3;
+                        }
+                    }
                 } else {
-                    sprint(te, PRINT_HIGH,
-                           "Run for cover! They are everywhere!\n");
+                    if (old_grens == 1) {
+                        stuffcmd(te, "v_cshift 50 25 50 -50\n");
+                        sprint(te, PRINT_HIGH, "Far out man!\n");
+                    } else {
+                        sprint(te, PRINT_HIGH,
+                               "Run for cover! They are everywhere!\n");
+                    }
+                    te.tfstate = te.tfstate | TFSTATE_HALLUCINATING;
+                    timer = spawn();
+                    if (old_grens == 1)
+                        timer.nextthink = time + 0.5;
+                    else
+                        timer.nextthink = time + 0.3;
+                    timer.think = HallucinationTimer;
+                    timer.classname = "timer";
+                    timer.owner = te;
+                    if (old_grens == 1)
+                        timer.health = 100;
+                    else
+                        timer.health = 150;
+                    timer.team_no = self.team_no;
                 }
-                te.tfstate = te.tfstate | TFSTATE_HALLUCINATING;
-                timer = spawn();
-                if (old_grens == 1)
-                    timer.nextthink = time + 0.5;
-                else
-                    timer.nextthink = time + 0.3;
-                timer.think = HallucinationTimer;
-                timer.classname = "timer";
-                timer.owner = te;
-                if (old_grens == 1)
-                    timer.health = 100;
-                else
-                    timer.health = 150;
-                timer.team_no = self.team_no;
             }
         }
         te = te.chain;
