@@ -3,6 +3,7 @@ Classic Fortress v0.9 beta
 
 New features
 ------
+* Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
