@@ -574,6 +574,7 @@ void () TeamFortress_ShowTF = {
     sprint(self, PRINT_HIGH, "\n== Classic Fortress ==\n");
     CF_PrintSetting("Spawn with full health/armor", spawnfull, "", 1);
     CF_PrintSetting("Stock players with full health/armor", stockfull, "", 1);
+    CF_PrintSetting("Stock player on cap", stock_on_cap, "", 1);
     CF_PrintSetting("Old dropflag behaviour", old_dropflag, "", 1);
     CF_PrintSetting("Remember weapon", remember_weapon, "", 1);
     CF_PrintSetting("Pick up discarded ammo", discammo_pickup, "", 1);
