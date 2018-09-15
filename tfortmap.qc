@@ -842,8 +842,6 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
 
                         Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
                         Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
-
-                        Player.ammo_detpack = Player.maxammo_detpack;
                     }
                 }
             }
