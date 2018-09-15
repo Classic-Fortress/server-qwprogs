@@ -423,8 +423,8 @@ float (float x, float y) pow                                        = #97;
 float (string s) strlen                                             = #114;
 string (string s1, string s2) strcat                                = #115;
 string (string s, float start, float count) substr                  = #116;
-string (string s, ...) strzone                                           = #118;
-void (string s, ...) strunzone                                           = #119;
+string (string s, ...) strzone                                      = #118;
+void (string s, ...) strunzone                                      = #119;
 
 void() calltimeofday						    = #231;  // force server to call mod function timeofday
 
@@ -433,7 +433,7 @@ float tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;
 
 //This function is to facilitate use, and need not be modified.
 void(float s, float mi, float h, float d, float mo, float y, string tmp_timeofday) timeofday =
-{ tod_sec = s; tod_min = mi; tod_hour = h; tod_day = d; tod_mon = mo; tod_year = y; };
+{ tod_sec = s; tod_min = mi; tod_hour = h; tod_day = d; tod_mon = (mo + 1); tod_year = y; };
 
 //============================================================================
 

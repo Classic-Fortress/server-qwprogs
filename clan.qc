@@ -1,4 +1,3 @@
-
 void () PreMatch_Think = {
     local float time_left;
     local string st;
