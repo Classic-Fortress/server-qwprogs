@@ -686,73 +686,6 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
-
-                if (stock_on_cap) {
-                    if (Player.health > 0) {
-                        T_Heal(Player, Player.max_health, 0);
-                        Player.armortype = Player.armor_allowed;
-                        Player.armorvalue = Player.maxarmor;
-
-
-                        Player.ammo_shells = Player.ammo_shells + Goal.ammo_shells;
-                        Player.ammo_nails = Player.ammo_nails + Goal.ammo_nails;
-                        Player.ammo_rockets = Player.ammo_rockets + Goal.ammo_rockets;
-                        Player.ammo_cells = Player.ammo_cells + Goal.ammo_cells;
-                        Player.ammo_medikit = Player.ammo_medikit + Goal.ammo_medikit;
-                        Player.ammo_detpack = Player.ammo_detpack + Goal.ammo_detpack;
-                        Player.no_grenades_1 =
-                            Player.no_grenades_1 + Goal.no_grenades_1;
-                        Player.no_grenades_2 =
-                            Player.no_grenades_2 + Goal.no_grenades_2;
-
-                        if (Player.no_grenades_1 > 4) {
-                            Player.no_grenades_1 = 4;
-                        }
-                        if (Player.no_grenades_2 > 4) {
-                            Player.no_grenades_2 = 4;
-                        }
-                        if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                                (Player.no_grenades_1 > 2)) {
-                            Player.no_grenades_1 = 2;
-                        }
-                        if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                                (Player.no_grenades_2 > 2)) {
-                            Player.no_grenades_2 = 2;
-                        }
-                        if (Player.ammo_detpack > Player.maxammo_detpack) {
-                            Player.ammo_detpack = Player.maxammo_detpack;
-                        }
-                        if (Player.tfstate & TFSTATE_GRENPRIMED) {
-                            te = find(world, classname, "primer");
-                            while (te) {
-                                if (te.owner == Player) {
-                                    if ((te.impulse == TF_GRENADE_2) &&
-                                            (Player.no_grenades_2 <= 0)) {
-                                        Player.tfstate =
-                                            Player.tfstate -
-                                            (Player.tfstate & TFSTATE_GRENPRIMED);
-                                        Player.tfstate =
-                                            Player.tfstate -
-                                            (Player.tfstate & TFSTATE_GRENTHROWING);
-                                        dremove(te);
-                                    } else if ((te.impulse == TF_GRENADE_1) &&
-                                            (Player.no_grenades_1 <= 0)) {
-                                        Player.tfstate =
-                                            Player.tfstate -
-                                            (Player.tfstate & TFSTATE_GRENPRIMED);
-                                        Player.tfstate =
-                                            Player.tfstate -
-                                            (Player.tfstate & TFSTATE_GRENTHROWING);
-                                        dremove(te);
-                                    }
-                                    te = world;
-                                } else {
-                                    te = find(te, classname, "primer");
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -890,10 +823,30 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             }
         }
         Player.lives = Player.lives + Goal.lives;
+
         if (Goal.frags) {
-            if ((Goal.goal_effects == TFGE_AP) ||
-                    !(toggleflags & TFLAG_FULLTEAMSCORE))
+            if ((Goal.goal_effects == TFGE_AP) || !(toggleflags & TFLAG_FULLTEAMSCORE)) {
                 TF_AddFrags(Player, Goal.frags);
+                if (stock_on_cap) {
+                    if (Player.health > 0) {
+                        T_Heal(Player, Player.max_health, 0);
+                        Player.armortype = Player.armor_allowed;
+                        Player.armorvalue = Player.maxarmor;
+
+                        Player.ammo_shells = Player.maxammo_shells;
+                        Player.ammo_nails = Player.maxammo_nails;
+                        Player.ammo_rockets = Player.maxammo_rockets;
+                        Player.ammo_cells = Player.maxammo_cells;
+                        Player.ammo_medikit = Player.maxammo_medikit;
+                        Player.ammo_detpack = Player.maxammo_detpack;
+
+                        Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
+                        Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
+
+                        Player.ammo_detpack = Player.maxammo_detpack;
+                    }
+                }
+            }
         }
         oldself = self;
         self = Player;
