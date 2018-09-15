@@ -166,17 +166,17 @@ void (entity Goal) UpdateAbbreviations =
             flagem_checked = 1;
         }
         if ((toggleflags & TFLAG_FLAGEMU) &&
-            !(toggleflags & TFLAG_WARSTANDARD)) {
+                !(toggleflags & TFLAG_WARSTANDARD)) {
             if ((Goal.mdl == "progs/b_s_key.mdl")
-                || (Goal.mdl == "progs/m_s_key.mdl")
-                || (Goal.mdl == "progs/w_s_key.mdl")) {
+                    || (Goal.mdl == "progs/m_s_key.mdl")
+                    || (Goal.mdl == "progs/w_s_key.mdl")) {
 
                 Goal.mdl = "progs/tf_flag.mdl";
                 Goal.origin_z = Goal.origin_z + 6;
                 Goal.skin = 1;
             } else if ((Goal.mdl == "progs/b_g_key.mdl")
-                       || (Goal.mdl == "progs/m_g_key.mdl")
-                       || (Goal.mdl == "progs/w_g_key.mdl")) {
+                    || (Goal.mdl == "progs/m_g_key.mdl")
+                    || (Goal.mdl == "progs/w_g_key.mdl")) {
 
                 Goal.mdl = "progs/tf_flag.mdl";
                 Goal.origin_z = Goal.origin_z + 6;
@@ -185,14 +185,14 @@ void (entity Goal) UpdateAbbreviations =
         }
         if (toggleflags & TFLAG_WARSTANDARD) {
             if ((Goal.mdl == "progs/b_s_key.mdl")
-                || (Goal.mdl == "progs/m_s_key.mdl")
-                || (Goal.mdl == "progs/w_s_key.mdl")) {
+                    || (Goal.mdl == "progs/m_s_key.mdl")
+                    || (Goal.mdl == "progs/w_s_key.mdl")) {
 
                 Goal.mdl = "progs/tf_stan.mdl";
                 Goal.skin = 1;
             } else if ((Goal.mdl == "progs/b_g_key.mdl")
-                       || (Goal.mdl == "progs/m_g_key.mdl")
-                       || (Goal.mdl == "progs/w_g_key.mdl")) {
+                    || (Goal.mdl == "progs/m_g_key.mdl")
+                    || (Goal.mdl == "progs/w_g_key.mdl")) {
 
                 Goal.mdl = "progs/tf_stan.mdl";
                 Goal.skin = 2;
@@ -289,10 +289,10 @@ float () CheckExistence = {
         return (FALSE);
     }
     if ((self.ex_skill_min && (self.ex_skill_min != -1)) &&
-        (skill < self.ex_skill_min)) {
+            (skill < self.ex_skill_min)) {
         return (FALSE);
     } else if ((self.ex_skill_max && (self.ex_skill_max != -1)) &&
-               (skill > self.ex_skill_max)) {
+            (skill > self.ex_skill_max)) {
         return (FALSE);
     }
     return (TRUE);
@@ -585,7 +585,7 @@ void (entity Goal) InactivateGoal = {
     if (Goal.goal_state == 1) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
-                (Goal.classname == "item_tfgoal"))
+                    (Goal.classname == "item_tfgoal"))
                 Goal.solid = SOLID_BBOX;
             else
                 Goal.solid = SOLID_TRIGGER;
@@ -600,7 +600,7 @@ void (entity Goal) RestoreGoal = {
     if (Goal.goal_state == 3) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
-                (Goal.classname == "item_tfgoal")) {
+                    (Goal.classname == "item_tfgoal")) {
                 Goal.solid = 2;
             } else {
                 Goal.solid = 1;
@@ -661,11 +661,11 @@ float (entity Goal, entity Player, entity AP) IsAffectedBy = {
         }
     }
     if ((Goal.maxammo_shells != 0) &&
-        (Player.team_no == Goal.maxammo_shells)) {
+            (Player.team_no == Goal.maxammo_shells)) {
         return (1);
     }
     if ((Goal.maxammo_nails != 0) &&
-        (Player.team_no != Goal.maxammo_shells)) {
+            (Player.team_no != Goal.maxammo_shells)) {
         return (1);
     }
     return (0);
@@ -683,7 +683,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player == AP) {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
-              // TODO: Restock player
+                // TODO: Restock player
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
@@ -701,10 +701,10 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             if (Goal.health < 0) {
                 if ((0 - Player.health) > Goal.health) {
                     TF_T_Damage(Player, Goal, Goal, (Player.health + 1), 1,
-                                0);
+                            0);
                 } else {
                     TF_T_Damage(Player, Goal, Goal, (0 - Goal.health), 1,
-                                0);
+                            0);
                 }
             }
         }
@@ -745,11 +745,11 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 Player.no_grenades_2 = 4;
             }
             if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                (Player.no_grenades_1 > 2)) {
+                    (Player.no_grenades_1 > 2)) {
                 Player.no_grenades_1 = 2;
             }
             if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                (Player.no_grenades_2 > 2)) {
+                    (Player.no_grenades_2 > 2)) {
                 Player.no_grenades_2 = 2;
             }
             if (Player.ammo_detpack > Player.maxammo_detpack) {
@@ -760,7 +760,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 while (te) {
                     if (te.owner == Player) {
                         if ((te.impulse == TF_GRENADE_2) &&
-                            (Player.no_grenades_2 <= 0)) {
+                                (Player.no_grenades_2 <= 0)) {
                             Player.tfstate =
                                 Player.tfstate -
                                 (Player.tfstate & TFSTATE_GRENPRIMED);
@@ -769,7 +769,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                                 (Player.tfstate & TFSTATE_GRENTHROWING);
                             dremove(te);
                         } else if ((te.impulse == TF_GRENADE_1) &&
-                                   (Player.no_grenades_1 <= 0)) {
+                                (Player.no_grenades_1 <= 0)) {
                             Player.tfstate =
                                 Player.tfstate -
                                 (Player.tfstate & TFSTATE_GRENPRIMED);
@@ -826,7 +826,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         Player.lives = Player.lives + Goal.lives;
         if (Goal.frags) {
             if ((Goal.goal_effects == TFGE_AP) ||
-                !(toggleflags & TFLAG_FULLTEAMSCORE))
+                    !(toggleflags & TFLAG_FULLTEAMSCORE))
                 TF_AddFrags(Player, Goal.frags);
         }
         oldself = self;
@@ -836,7 +836,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         self = oldself;
     }
     if ((Player.playerclass == PC_SPY) &&
-        (Goal.goal_result & TFGR_REMOVE_DISGUISE)) {
+            (Goal.goal_result & TFGR_REMOVE_DISGUISE)) {
         self.immune_to_check = time + 10;
         Spy_RemoveDisguise(Player);
     }
@@ -854,7 +854,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         te = find(world, classname, "item_tfgoal");
         while (te) {
             if ((te.group_no == Goal.remove_item_group) &&
-                (te.owner == AP)) {
+                    (te.owner == AP)) {
                 oldte = te;
                 te = find(te, classname, "item_tfgoal");
                 tfgoalitem_RemoveFromPlayer(oldte, Player, 1);
@@ -924,7 +924,7 @@ void (entity Goal, entity Player) RemoveResults = {
         Player.armorclass - (Player.armorclass & Goal.armorclass);
     if (Goal.frags) {
         if ((Goal.goal_effects == TFGE_AP) ||
-            !(toggleflags & TFLAG_FULLTEAMSCORE))
+                !(toggleflags & TFLAG_FULLTEAMSCORE))
             TF_AddFrags(Player, Goal.frags);
     }
     Player.ammo_shells = Player.ammo_shells - Goal.ammo_shells;
@@ -943,10 +943,10 @@ void (entity Goal, entity Player) RemoveResults = {
         Player.no_grenades_2 = 4;
 
     if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-        (Player.no_grenades_1 > 2))
+            (Player.no_grenades_1 > 2))
         Player.no_grenades_1 = 2;
     if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-        (Player.no_grenades_2 > 2))
+            (Player.no_grenades_2 > 2))
         Player.no_grenades_2 = 2;
 
     if (Player.ammo_detpack > Player.maxammo_detpack)
@@ -957,7 +957,7 @@ void (entity Goal, entity Player) RemoveResults = {
         while (te) {
             if (te.owner == Player) {
                 if ((te.impulse == TF_GRENADE_2) &&
-                    (Player.no_grenades_2 <= 0)) {
+                        (Player.no_grenades_2 <= 0)) {
                     Player.tfstate =
                         Player.tfstate -
                         (Player.tfstate & TFSTATE_GRENPRIMED);
@@ -966,7 +966,7 @@ void (entity Goal, entity Player) RemoveResults = {
                         (Player.tfstate & TFSTATE_GRENTHROWING);
                     dremove(te);
                 } else if ((te.impulse == TF_GRENADE_1) &&
-                           (Player.no_grenades_1 <= 0)) {
+                        (Player.no_grenades_1 <= 0)) {
                     Player.tfstate =
                         Player.tfstate -
                         (Player.tfstate & TFSTATE_GRENPRIMED);
@@ -1100,7 +1100,7 @@ float (entity Goal, entity AP) APMeetsCriteria = {
         te = Finditem(Goal.if_item_has_moved);
         if (te) {
             if ((te.goal_state != TFGS_ACTIVE) &&
-                (te.origin == te.oldorigin))
+                    (te.origin == te.oldorigin))
                 return (0);
         }
     }
@@ -1108,7 +1108,7 @@ float (entity Goal, entity AP) APMeetsCriteria = {
         te = Finditem(Goal.if_item_hasnt_moved);
         if (te) {
             if ((te.goal_state == TFGS_ACTIVE) ||
-                (te.origin != te.oldorigin))
+                    (te.origin != te.oldorigin))
                 return (0);
         }
     }
@@ -1118,7 +1118,7 @@ float (entity Goal, entity AP) APMeetsCriteria = {
             te = find(world, classname, "item_tfgoal");
             while ((te != world) && !gotone) {
                 if ((te.group_no == Goal.has_item_from_group) &&
-                    (te.owner == AP))
+                        (te.owner == AP))
                     gotone = 1;
                 te = find(te, classname, "item_tfgoal");
             }
@@ -1129,7 +1129,7 @@ float (entity Goal, entity AP) APMeetsCriteria = {
             te = find(world, classname, "item_tfgoal");
             while ((te != world) && !gotone) {
                 if ((te.group_no == Goal.hasnt_item_from_group) &&
-                    (te.owner == AP))
+                        (te.owner == AP))
                     return (0);
                 te = find(te, classname, "item_tfgoal");
             }
@@ -1541,32 +1541,32 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             winners = random();
                             if (winners < 0.1) {
                                 CenterPrint2(te, "\n\n\n",
-                                             "You got the enemy flag!\n\nFlee!");
+                                        "You got the enemy flag!\n\nFlee!");
                             } else {
                                 if (winners < 0.2) {
                                     CenterPrint2(te, "\n\n\n",
-                                                 "You got the enemy flag!\n\nHead for home!");
+                                            "You got the enemy flag!\n\nHead for home!");
                                 } else {
                                     if (winners < 0.6) {
                                         CenterPrint2(te, "\n\n\n",
-                                                     "You got the enemy flag!\n\nReturn to base!");
+                                                "You got the enemy flag!\n\nReturn to base!");
                                     } else {
                                         if (winners < 0.7) {
                                             CenterPrint2(te, "\n\n\n",
-                                                         "You got the enemy flag!\n\n<Insert witty comment here>");
+                                                    "You got the enemy flag!\n\n<Insert witty comment here>");
                                         } else {
                                             if (winners < 0.8) {
                                                 CenterPrint2(te, "\n\n\n",
-                                                             "You got the enemy flag!\n\n");
+                                                        "You got the enemy flag!\n\n");
                                             } else {
                                                 if (winners < 0.95) {
                                                     CenterPrint2(te,
-                                                                 "\n\n\n",
-                                                                 "You got the enemy flag!\n\n");
+                                                            "\n\n\n",
+                                                            "You got the enemy flag!\n\n");
                                                 } else {
                                                     CenterPrint2(te,
-                                                                 "\n\n\n",
-                                                                 "Is that a flag in your pocket\nor a you just happy to see me?");
+                                                            "\n\n\n",
+                                                            "Is that a flag in your pocket\nor a you just happy to see me?");
                                                 }
                                             }
                                         }
@@ -1575,11 +1575,11 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                         "Your team гот the енемы flag!!");
+                                    "Your team гот the енемы flag!!");
                         }
                     } else {
                         CenterPrint2(te, "\n\n\n",
-                                     "Your flag has been такен!!");
+                                "Your flag has been такен!!");
                     }
                     te = find(te, classname, "player");
                 }
@@ -1594,33 +1594,33 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 winners = random();
                                 if (winners < 0.1) {
                                     CenterPrint2(te, "\n\n\n",
-                                                 "You got the enemy flag!\n\nFlee!");
+                                            "You got the enemy flag!\n\nFlee!");
                                 } else {
                                     if (winners < 0.2) {
                                         CenterPrint2(te, "\n\n\n",
-                                                     "You got the enemy flag!\n\nHead for home!");
+                                                "You got the enemy flag!\n\nHead for home!");
                                     } else {
                                         if (winners < 0.6) {
                                             CenterPrint2(te, "\n\n\n",
-                                                         "You got the enemy flag!\n\nReturn to base!");
+                                                    "You got the enemy flag!\n\nReturn to base!");
                                         } else {
                                             if (winners < 0.7) {
                                                 CenterPrint2(te, "\n\n\n",
-                                                             "You got the enemy flag!\n\n<Insert witty comment here>");
+                                                        "You got the enemy flag!\n\n<Insert witty comment here>");
                                             } else {
                                                 if (winners < 0.8) {
                                                     CenterPrint2(te,
-                                                                 "\n\n\n",
-                                                                 "You got the enemy flag!\n\nRed's dead baby, Red's dead...");
+                                                            "\n\n\n",
+                                                            "You got the enemy flag!\n\nRed's dead baby, Red's dead...");
                                                 } else {
                                                     if (winners < 0.95) {
                                                         CenterPrint2(te,
-                                                                     "\n\n\n",
-                                                                     "You got the enemy flag!\n\n");
+                                                                "\n\n\n",
+                                                                "You got the enemy flag!\n\n");
                                                     } else {
                                                         CenterPrint2(te,
-                                                                     "\n\n\n",
-                                                                     "Is that a flag in your pocket\nor a you just happy to see me?");
+                                                                "\n\n\n",
+                                                                "Is that a flag in your pocket\nor a you just happy to see me?");
                                                     }
                                                 }
                                             }
@@ -1629,11 +1629,11 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                             "Your team гот the енемы flag!!");
+                                        "Your team гот the енемы flag!!");
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                         "Your flag has been такен!!");
+                                    "Your flag has been такен!!");
                         }
                         te = find(te, classname, "player");
                     }
@@ -1646,19 +1646,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             if (te.team_no == 2) {
                                 if (te == AP) {
                                     CenterPrint2(te, "\n\n\n",
-                                                 "You цаптуред the flag!!");
+                                            "You цаптуред the flag!!");
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                                 "Your flag was цаптуред!!");
+                                            "Your flag was цаптуред!!");
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                             "Your team цаптуред the flag!!");
+                                        "Your team цаптуред the flag!!");
                             }
                             te = find(te, classname, "player");
                         }
                         bprint(PRINT_HIGH, AP.netname,
-                               " цаптуред the ред flag!\n");
+                                " цаптуред the ред flag!\n");
                         AP.items = AP.items - (AP.items & IT_KEY2);
                     } else {
                         if (Goal.goal_no == 4) {
@@ -1667,19 +1667,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 if (te.team_no == 1) {
                                     if (te == AP) {
                                         CenterPrint2(te, "\n\n\n",
-                                                     "You цаптуред the flag!!");
+                                                "You цаптуред the flag!!");
                                     } else {
                                         CenterPrint2(te, "\n\n\n",
-                                                     "Your flag was цаптуред!!");
+                                                "Your flag was цаптуред!!");
                                     }
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                                 "Your team цаптуред the flag!!");
+                                            "Your team цаптуред the flag!!");
                                 }
                                 te = find(te, classname, "player");
                             }
                             bprint(PRINT_HIGH, AP.netname,
-                                   " цаптуред the блуе flag!\n");
+                                    " цаптуред the блуе flag!\n");
                             AP.items = AP.items - (AP.items & IT_KEY1);
                         }
                     }
@@ -1703,7 +1703,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         } else {
             if (AP.team_no == te.team_no) {
                 if ((Goal.owners_team_broadcast != string_null) &&
-                    (te.team_no == Goal.owned_by)) {
+                        (te.team_no == Goal.owned_by)) {
                     CenterPrint2(te, "\n\n\n", Goal.owners_team_broadcast);
                 } else {
                     if (Goal.team_broadcast != string_null) {
@@ -1711,33 +1711,33 @@ void (entity Goal, entity AP, float addb) DoResults = {
                     }
                 }
                 if ((Goal.netname_owners_team_broadcast != string_null) &&
-                    (te.team_no == Goal.owned_by)) {
+                        (te.team_no == Goal.owned_by)) {
                     sprint(te, PRINT_HIGH, AP.netname,
-                           Goal.netname_owners_team_broadcast);
+                            Goal.netname_owners_team_broadcast);
                 } else {
                     if (Goal.netname_team_broadcast != string_null) {
                         sprint(te, PRINT_HIGH, AP.netname,
-                               Goal.netname_team_broadcast);
+                                Goal.netname_team_broadcast);
                     }
                 }
             } else {
                 if ((Goal.owners_team_broadcast != string_null) &&
-                    (te.team_no == Goal.owned_by)) {
+                        (te.team_no == Goal.owned_by)) {
                     CenterPrint2(te, "\n\n\n", Goal.owners_team_broadcast);
                 } else {
                     if (Goal.non_team_broadcast != string_null) {
                         CenterPrint2(te, "\n\n\n",
-                                     Goal.non_team_broadcast);
+                                Goal.non_team_broadcast);
                     }
                 }
                 if ((Goal.netname_owners_team_broadcast != string_null) &&
-                    (te.team_no == Goal.owned_by)) {
+                        (te.team_no == Goal.owned_by)) {
                     sprint(te, PRINT_HIGH, AP.netname,
-                           Goal.netname_owners_team_broadcast);
+                            Goal.netname_owners_team_broadcast);
                 } else {
                     if (Goal.netname_non_team_broadcast != string_null) {
                         sprint(te, PRINT_HIGH, AP.netname,
-                               Goal.netname_non_team_broadcast);
+                                Goal.netname_non_team_broadcast);
                     }
                 }
             }
@@ -1879,10 +1879,10 @@ void () item_tfgoal_touch = {
                     while (te != world) {
                         if (te.team_no == 1) {
                             CenterPrint2(te, "\n\n\n",
-                                         "Your flag was ретурнед!!");
+                                    "Your flag was ретурнед!!");
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                         "The енемы flag was ретурнед!!");
+                                    "The енемы flag was ретурнед!!");
                         }
                         te = find(te, classname, "player");
                     }
@@ -1910,10 +1910,10 @@ void () item_tfgoal_touch = {
                         while (te != world) {
                             if (te.team_no == 2) {
                                 CenterPrint(te,
-                                            "\n\n\n Your flag was ретурнед!!");
+                                        "\n\n\n Your flag was ретурнед!!");
                             } else {
                                 CenterPrint(te,
-                                            "\n\n\n The енемы flag was ретурнед!!");
+                                        "\n\n\n The енемы flag was ретурнед!!");
                             }
                             te = find(te, classname, "player");
                         }
@@ -1995,7 +1995,7 @@ void () ReturnItem = {
 
     self.enemy.goal_state = 2;
     if ((self.enemy.goal_activation & 8192) &&
-        (self.enemy.classname == "item_tfgoal"))
+            (self.enemy.classname == "item_tfgoal"))
         self.enemy.solid = 2;
     else
         self.enemy.solid = 1;
@@ -2017,7 +2017,7 @@ void () ReturnItem = {
 
     if (self.weapon != 2) {
         if ((self.enemy.noise3 != string_null) ||
-            (self.enemy.noise4 != string_null)) {
+                (self.enemy.noise4 != string_null)) {
             te = find(world, classname, "player");
             while (te) {
                 if (te.team_no == self.enemy.owned_by)
@@ -2058,7 +2058,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
 
                 if (Item.netname_team_drop != string_null) {
                     sprint(te, PRINT_HIGH, AP.netname,
-                           Item.netname_team_drop);
+                            Item.netname_team_drop);
                 }
             } else {
                 if (Item.non_team_drop != string_null)
@@ -2066,7 +2066,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
 
                 if (Item.netname_non_team_drop != string_null) {
                     sprint(te, PRINT_HIGH, AP.netname,
-                           Item.netname_non_team_drop);
+                            Item.netname_non_team_drop);
                 }
             }
             te = find(te, classname, "player");
@@ -2300,7 +2300,7 @@ void (entity Item) tfgoalitem_checkgoalreturn = {
 void (entity Goal, entity Player, entity Item) DisplayItemStatus = {
     if (Item.goal_state == 1 && Item.owner != world) {
         if ((Goal.team_str_carried != string_null) ||
-            (Goal.non_team_str_carried != string_null)) {
+                (Goal.non_team_str_carried != string_null)) {
             if (Player.team_no == Item.owned_by) {
                 sprint(Player, PRINT_HIGH, Goal.team_str_carried);
             } else {
@@ -2317,7 +2317,7 @@ void (entity Goal, entity Player, entity Item) DisplayItemStatus = {
     } else {
         if (Item.origin != Item.oldorigin) {
             if ((Goal.team_str_moved != string_null) ||
-                (Goal.non_team_str_moved != string_null)) {
+                    (Goal.non_team_str_moved != string_null)) {
                 if (Player.team_no == Item.owned_by) {
                     sprint(Player, PRINT_HIGH, Goal.team_str_moved);
                 } else {
@@ -2327,7 +2327,7 @@ void (entity Goal, entity Player, entity Item) DisplayItemStatus = {
             }
         } else {
             if ((Goal.team_str_home != string_null) ||
-                (Goal.non_team_str_home != string_null)) {
+                    (Goal.non_team_str_home != string_null)) {
                 if (Player.team_no == Item.owned_by) {
                     sprint(Player, PRINT_HIGH, Goal.team_str_home);
                 } else {
@@ -2561,7 +2561,7 @@ void (entity P) ForceRespawn = {
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+            (cb_prematch_time < time)) {
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te) {
