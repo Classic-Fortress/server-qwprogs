@@ -467,7 +467,7 @@ void () DecodeLevelParms = {
         stockfull = CF_GetSetting("stf", "stockfull", "on");
 
         // stock full ammo/armor [on]
-        stock_on_cap = CF_GetSetting("soc", "stockoncap", "on");
+        stock_on_cap = CF_GetSetting("soc", "stock_on_cap", "on");
 
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
