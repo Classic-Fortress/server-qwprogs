@@ -469,6 +469,7 @@ float scoutdash;
 float sniperreload;
 float spawnfull;
 float stockfull;
+float stock_on_cap;
 float classtips;
 float sniperpower;
 float sniperreloadpercent;

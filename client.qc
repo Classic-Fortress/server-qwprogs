@@ -466,6 +466,9 @@ void () DecodeLevelParms = {
         // stock full ammo/armor [on]
         stockfull = CF_GetSetting("stf", "stockfull", "on");
 
+        // stock on cap [on]
+        stock_on_cap = CF_GetSetting("soc", "stock_on_cap", "on");
+
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
 
@@ -546,6 +549,7 @@ void () DecodeLevelParms = {
             feign_msg = TRUE;
             spawnfull = FALSE;
             stockfull = TRUE;
+            stock_on_cap = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
             sniperreloadpercent = TRUE;
@@ -594,6 +598,7 @@ void () DecodeLevelParms = {
             feign_msg = FALSE;
             spawnfull = FALSE;
             stockfull = FALSE;
+            stock_on_cap = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
             sniperreloadpercent = FALSE;
