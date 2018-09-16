@@ -204,6 +204,10 @@ void (entity Goal) UpdateAbbreviations =
 };
 
 void () TF_PlaceItem = {
+    dprint("=========TF_PlaceItem=========\n");
+    eprint(self);
+    dprint("=========TF_PlaceItem=========\n");
+
     local float oldz;
 
     self.flags = FL_ITEM;
@@ -223,8 +227,25 @@ void () TF_PlaceItem = {
     self.movetype = 0;
     self.oldorigin = self.origin;
 
-    if (self.goal_activation & TFGI_ITEMGLOWS)
+    if (self.goal_activation & TFGI_ITEMGLOWS) {
         self.effects = self.effects | EF_DIMLIGHT;
+
+        if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
+            if (self.skin == 1.0) {
+                self.effects = self.effects | EF_BLUE;
+            }
+            if (self.skin == 2.0) {
+                self.effects = self.effects | EF_RED;
+            }
+            if (self.skin == 3.0) {
+                self.effects = self.effects | EF_RED;
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+            if (self.skin == 4.0) {
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+        }
+    }
 
     if (item_list_bit == 0)
         item_list_bit = 1;
@@ -234,6 +255,26 @@ void () TF_PlaceItem = {
 };
 
 void () TF_StartItem = {
+    dprint("=========TF_StartItem=========\n");
+    eprint(self);
+    dprint("=========TF_StartItem=========\n");
+    if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
+        self.effects = self.effects | EF_DIMLIGHT;
+
+        if (self.skin == 1.0) {
+            self.effects = self.effects | EF_BLUE;
+        }
+        if (self.skin == 2.0) {
+            self.effects = self.effects | EF_RED;
+        }
+        if (self.skin == 3.0) {
+            self.effects = self.effects | EF_RED;
+            self.effects = self.effects | EF_MUZZLEFLASH;
+        }
+        if (self.skin == 4.0) {
+            self.effects = self.effects | EF_MUZZLEFLASH;
+        }
+    }
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
@@ -242,6 +283,10 @@ void () TF_StartItem = {
 };
 
 void () TF_PlaceGoal = {
+    dprint("=========TF_PlaceGoal=========\n");
+    eprint(self);
+    dprint("=========TF_PlaceGoal=========\n");
+
     local float oldz;
 
     if (self.classname != "info_tfgoal_timer") {
@@ -254,6 +299,7 @@ void () TF_PlaceGoal = {
         self.classname = "info_tfgoal";
     }
     if (self.goal_activation & 2048) {
+
         self.movetype = MOVETYPE_TOSS;
         self.origin_z = self.origin_z + 6;
         oldz = self.origin_z;
@@ -272,6 +318,10 @@ void () TF_PlaceGoal = {
 };
 
 void () TF_StartGoal = {
+    dprint("=========TF_StartGoal=========\n");
+    eprint(self);
+    dprint("=========TF_StartGoal=========\n");
+
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceGoal;
@@ -2022,7 +2072,13 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Item.solid = 0;
     if (Item.goal_activation & TFGI_GLOW) {
         AP.effects = AP.effects | EF_DIMLIGHT;
+
+        if (Goal.mdl == "progs/tf_flag.mdl" || Goal.mdl == "progs/tf_stan.mdl" ) {
+            AP.effects = Goal.effects;
+            Goal.effects = 0;
+        }
     }
+
     if (Item.goal_activation & TFGI_SLOW)
         TeamFortress_SetSpeed(AP);
 
@@ -2294,6 +2350,30 @@ void () tfgoalitem_droptouch = {
 };
 
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
+    dprint("=========tfgoalitem_drop=========\n");
+    eprint(Item);
+    dprint("==================\n");
+    eprint(P);
+    dprint("=========tfgoalitem_drop=========\n");
+
+    if (Item.model == "progs/tf_flag.mdl" || Item.model == "progs/tf_stan.mdl") {
+        Item.effects = self.effects | EF_DIMLIGHT;
+
+        if (Item.skin == 1.0) {
+            Item.effects = Item.effects | EF_BLUE;
+        }
+        if (Item.skin == 2.0) {
+            Item.effects = Item.effects | EF_RED;
+        }
+        if (Item.skin == 3.0) {
+            Item.effects = Item.effects | EF_RED;
+            Item.effects = Item.effects | EF_MUZZLEFLASH;
+        }
+        if (Item.skin == 4.0) {
+            Item.effects = Item.effects | EF_MUZZLEFLASH;
+        }
+    }
+
     Item.origin = Item.owner.origin;
     setorigin(Item, Item.origin);
     Item.camangle = Item.owner.origin - '0 0 8';
@@ -2665,6 +2745,11 @@ void (entity P) ForceRespawn = {
 };
 
 void () DropGoalItems = {
+    dprint("=========TF_DropGoalItems=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========TF_DropGoalItems=========\n");
+    
     local entity te, search;
 
     newmis = spawn();
