@@ -830,65 +830,67 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             }
 
             if (stock_on_cap) {
-                if (Player.health > 0) {
-                    T_Heal(Player, Player.max_health, 0);
-                    Player.armortype = Player.armor_allowed;
-                    Player.armorvalue = Player.maxarmor;
+                if (Player == AP) {
+                    if (Player.health > 0) {
+                        T_Heal(Player, Player.max_health, 0);
+                        Player.armortype = Player.armor_allowed;
+                        Player.armorvalue = Player.maxarmor;
 
-                    Player.ammo_shells = Player.maxammo_shells;
-                    Player.ammo_nails = Player.maxammo_nails;
-                    Player.ammo_rockets = Player.maxammo_rockets;
-                    Player.ammo_cells = Player.maxammo_cells;
-                    Player.ammo_medikit = Player.maxammo_medikit;
-                    Player.ammo_detpack = Player.maxammo_detpack;
+                        Player.ammo_shells = Player.maxammo_shells;
+                        Player.ammo_nails = Player.maxammo_nails;
+                        Player.ammo_rockets = Player.maxammo_rockets;
+                        Player.ammo_cells = Player.maxammo_cells;
+                        Player.ammo_medikit = Player.maxammo_medikit;
+                        Player.ammo_detpack = Player.maxammo_detpack;
 
-                    Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
-                    Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
+                        Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
+                        Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
 
-                    te = find(Player, classname, "timer");
+                        te = find(Player, classname, "timer");
 
-                    if (te.think == ConcussionGrenadeTimer || te.think == OldConcussionGrenadeTimer) {
-                        if (old_grens == TRUE) {
-                            stuffcmd(Player, "v_idlescale 0\nfov 90\n");
-                        }
-                        dremove(te);
-                    }
-
-                    if (Player.tfstate & TFSTATE_HALLUCINATING) {
-                        if (te.think == HallucinationTimer) {
+                        if (te.think == ConcussionGrenadeTimer || te.think == OldConcussionGrenadeTimer) {
                             if (old_grens == TRUE) {
-                                stuffcmd(trace_ent, "v_cshift; wait; bf\n");
+                                stuffcmd(Player, "v_idlescale 0\nfov 90\n");
                             }
                             dremove(te);
                         }
-                    }
 
-                    if (Player.tfstate & TFSTATE_TRANQUILISED) {
-                        if (te.think == TranquiliserTimer) {
+                        if (Player.tfstate & TFSTATE_HALLUCINATING) {
+                            if (te.think == HallucinationTimer) {
+                                if (old_grens == TRUE) {
+                                    stuffcmd(trace_ent, "v_cshift; wait; bf\n");
+                                }
+                                dremove(te);
+                            }
+                        }
+
+                        if (Player.tfstate & TFSTATE_TRANQUILISED) {
+                            if (te.think == TranquiliserTimer) {
+                                Player.tfstate =
+                                    Player.tfstate -
+                                    (Player.tfstate & TFSTATE_TRANQUILISED);
+                                TeamFortress_SetSpeed(Player);
+                                dremove(te);
+                            }
+                        }
+
+                        if (Player.tfstate & TFSTATE_INFECTED) {
                             Player.tfstate =
-                                Player.tfstate -
-                                (Player.tfstate & TFSTATE_TRANQUILISED);
-                            TeamFortress_SetSpeed(Player);
+                                trace_ent.tfstate -
+                                (trace_ent.tfstate & TFSTATE_INFECTED);
+                        }
+
+                        if (Player.numflames > 0) {
+                            sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                            Player.numflames = 0;
+                        }
+
+                        if (Player.FlashTime > 0) {
+                            Player.FlashTime = 0;
+                            stuffcmd(Player, "v_cshift; wait; bf\n");
+                            te = find(Player, netname, "flashtimer");
                             dremove(te);
                         }
-                    }
-
-                    if (Player.tfstate & TFSTATE_INFECTED) {
-                        Player.tfstate =
-                            trace_ent.tfstate -
-                            (trace_ent.tfstate & TFSTATE_INFECTED);
-                    }
-
-                    if (Player.numflames > 0) {
-                        sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
-                        Player.numflames = 0;
-                    }
-
-                    if (Player.FlashTime > 0) {
-                        Player.FlashTime = 0;
-                        stuffcmd(Player, "v_cshift; wait; bf\n");
-                        te = find(Player, netname, "flashtimer");
-                        dremove(te);
                     }
                 }
             }
