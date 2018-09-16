@@ -885,8 +885,9 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     }
 
                     if (Player.FlashTime > 0) {
-                        te = find(Player, netname, "flashtimer");
                         Player.FlashTime = 0;
+                        stuffcmd(Player, "v_cshift; wait; bf\n");
+                        te = find(Player, netname, "flashtimer");
                         dremove(te);
                     }
                 }
