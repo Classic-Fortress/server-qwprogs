@@ -571,7 +571,7 @@ void (entity pl) RefreshStatusBar = {
     local string ident;
     local float height;
     local float i;
-    local float win, sec;
+    /* local float win, sec; */
 
     pad = "";
 
@@ -665,57 +665,64 @@ void (entity pl) RefreshStatusBar = {
     s2 = strzone(s2);
 
     // status line 3 column 1 - team 1 score
-    win = TeamFortress_TeamGetWinner();
-    sec = TeamFortress_TeamGetSecond();
-    if (win == 0)
-        st1 = BlueScoreToString(team1score);
-    else if (win == 1)
-        st1 = BlueScoreToString(team1score);
-    else if (win == 2)
-        st1 = RedScoreToString(team2score);
-    else if (win == 3)
-        st1 = YellowScoreToString(team3score);
-    else
-        st1 = GreenScoreToString(team4score);
-    st1 = strcat(st1, " ");
-    // status line 3 column 2 - team 2 score
-    if (sec == 0) {
-        if (win < 2)
-            st2 = RedScoreToString(team2score);
-        else
-            st2 = BlueScoreToString(team1score);
-    }
-    else if (sec == 1)
-        st2 = BlueScoreToString(team1score);
-    else if (sec == 2)
-        st2 = RedScoreToString(team2score);
-    else if (sec == 3)
-        st2 = YellowScoreToString(team3score);
-    else
-        st2 = GreenScoreToString(team4score);
-    // status line 3 column 3 - clip size
+    /* win = TeamFortress_TeamGetWinner(); */
+    /* sec = TeamFortress_TeamGetSecond(); */
+    /* if (win == 0) */
+    /*     st1 = BlueScoreToString(team1score); */
+    /* else if (win == 1) */
+    /*     st1 = BlueScoreToString(team1score); */
+    /* else if (win == 2) */
+    /*     st1 = RedScoreToString(team2score); */
+    /* else if (win == 3) */
+    /*     st1 = YellowScoreToString(team3score); */
+    /* else */
+    /*     st1 = GreenScoreToString(team4score); */
+    /* // status line 3 column 2 - team 2 score */
+    /* if (sec == 0) { */
+    /*     if (win < 2) */
+    /*         st2 = RedScoreToString(team2score); */
+    /*     else */
+    /*         st2 = BlueScoreToString(team1score); */
+    /* } */
+    /* else if (sec == 1) */
+    /*     st2 = BlueScoreToString(team1score); */
+    /* else if (sec == 2) */
+    /*     st2 = RedScoreToString(team2score); */
+    /* else if (sec == 3) */
+    /*     st2 = YellowScoreToString(team3score); */
+    /* else */
+    /*     st2 = GreenScoreToString(team4score); */
+    st1 = "";
+    st2 = "";
+
+    // status line 3 column 2 - clip size
     if (pl.tfstate & TFSTATE_RELOADING) {
-        st3 = "Ãìéð: ";
+        st2 = "Ãìéð: ";
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            st3 = strcat(st3, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
-            st3 = strcat(st3, "%  ");
+            st2 = strcat(st2, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
+            st2 = strcat(st2, "%  ");
         } else {
             if (reload_cliptick)
-                st3 = strcat(st3, strpadl(ftos(pl.reload_clipsize), 2));
+                st2 = strcat(st2, strpadl(ftos(pl.reload_clipsize), 2));
             else
-                st3 = strcat(st3, " 0");
-            st3 = strcat(st3, "/");
-            st3 = strcat(st3, strpadr(ftos(GetClipSize(pl)), 3));
+                st2 = strcat(st2, " 0");
+            st2 = strcat(st2, "/");
+            st2 = strcat(st2, strpadr(ftos(GetClipSize(pl)), 3));
         }
     } else {
-        st3 = ClipSizeToString(pl);
+        st2 = ClipSizeToString(pl);
     }
-    // status line 3 column 4 - grenade count
-    st4 = strcat("Çòåî: ", strcat(strcat(ftos(pl.no_grenades_1), "+"), ftos(pl.no_grenades_2)));
+
+    // status line 3 column 3 - grenade 1 count
+    st3 = strcat("Çòåî±: ", ftos(pl.no_grenades_1));
+
+    // status line 3 column 4 - grenade 2 count
+    st4 = strcat("Çòåî²: ", ftos(pl.no_grenades_2));
+
     // status line 3
     s3 = strcat(st1, st2);
     s3 = strpadr(s3, 19);
-    s3 = strcat(s3, strpadl(strcat(st3, st4), 21));
+    s3 = strcat(s3, strpadl(strcat(st3, strcat("  ", st4)), 21));
     s3 = strcat(s3, "\n");
     s3 = strzone(s3);
 
