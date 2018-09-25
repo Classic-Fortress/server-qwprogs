@@ -130,7 +130,7 @@ Engineer
 
 Compilation
 ------
-Compile with [FTEQCC](https://sourceforge.net/projects/fteqw/)
+Compile with [FTEQCC](http://fte.triptohell.info/downloads)
 
 Ensure that `fteqcc64` is available in `$PATH` and:
 
