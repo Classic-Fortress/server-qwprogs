@@ -204,10 +204,6 @@ void (entity Goal) UpdateAbbreviations =
 };
 
 void () TF_PlaceItem = {
-    dprint("=========TF_PlaceItem=========\n");
-    eprint(self);
-    dprint("=========TF_PlaceItem=========\n");
-
     local float oldz;
 
     self.flags = FL_ITEM;
@@ -227,25 +223,8 @@ void () TF_PlaceItem = {
     self.movetype = 0;
     self.oldorigin = self.origin;
 
-    if (self.goal_activation & TFGI_ITEMGLOWS) {
+    if (self.goal_activation & TFGI_ITEMGLOWS)
         self.effects = self.effects | EF_DIMLIGHT;
-
-        if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
-            if (self.skin == 1.0) {
-                self.effects = self.effects | EF_BLUE;
-            }
-            if (self.skin == 2.0) {
-                self.effects = self.effects | EF_RED;
-            }
-            if (self.skin == 3.0) {
-                self.effects = self.effects | EF_RED;
-                self.effects = self.effects | EF_MUZZLEFLASH;
-            }
-            if (self.skin == 4.0) {
-                self.effects = self.effects | EF_MUZZLEFLASH;
-            }
-        }
-    }
 
     if (item_list_bit == 0)
         item_list_bit = 1;
@@ -2067,25 +2046,22 @@ void () item_tfgoal_touch = {
 };
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
+    Item.effects = 0;
+
     Item.owner = AP;
     if (Item.mdl != string_null) {
         setmodel(Item, string_null);
     }
     Item.solid = 0;
     if (Item.goal_activation & TFGI_GLOW) {
-        AP.effects = AP.effects | EF_DIMLIGHT;
-
-        if (Goal.mdl == "progs/tf_flag.mdl" || Goal.mdl == "progs/tf_stan.mdl" ) {
-            AP.effects = Goal.effects;
-            Goal.effects = 0;
-        }
+        AP.effects = EF_DIMLIGHT;
     }
 
     if (Item.goal_activation & TFGI_SLOW)
         TeamFortress_SetSpeed(AP);
 
     if (Item.goal_activation & TFGI_ITEMGLOWS)
-        Item.effects = Item.effects - (Item.effects | EF_DIMLIGHT);
+        Item.effects = EF_DIMLIGHT;
 
     if (Item.items & IT_KEY1)
         AP.items = AP.items | IT_KEY1;
@@ -2284,8 +2260,8 @@ void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
         AP.effects = AP.effects - (AP.effects & 64);
         AP.effects = AP.effects - (AP.effects & 128);
     }
-    if (Item.goal_activation & 512)
-        Item.effects = Item.effects | 8;
+    /* if (Item.goal_activation & 512) */
+    /*     Item.effects = Item.effects | 8; */
 
     if (!spyoff)
         AP.is_unabletospy = 0;
