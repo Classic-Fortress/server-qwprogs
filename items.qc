@@ -793,9 +793,6 @@ float (float pf_grenade_number, float pf_grenade_type) GetMaxGrenades = {
         if (pf_grenade_type == GR_TYPE_NAIL) {
             return 2;
         }
-        if (pf_grenade_type == GR_TYPE_CONCUSSION) {
-            return 3;
-        }
     }
     return 4;
 }
