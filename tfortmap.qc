@@ -204,6 +204,11 @@ void (entity Goal) UpdateAbbreviations =
 };
 
 void () TF_PlaceItem = {
+    dprint("\n\n=========TF_PlaceItem=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========TF_PlaceItem=========\n\n\n");
+
     local float oldz;
 
     self.flags = FL_ITEM;
@@ -234,9 +239,11 @@ void () TF_PlaceItem = {
 };
 
 void () TF_StartItem = {
-    dprint("=========TF_StartItem=========\n");
+    dprint("\n\n=========TF_StartItem=========\n");
+    dprint("=========self=========\n");
     eprint(self);
-    dprint("=========TF_StartItem=========\n");
+    dprint("=========TF_StartItem=========\n\n\n");
+
     if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
         self.effects = self.effects | EF_DIMLIGHT;
 
@@ -262,9 +269,10 @@ void () TF_StartItem = {
 };
 
 void () TF_PlaceGoal = {
-    dprint("=========TF_PlaceGoal=========\n");
+    dprint("\n\n=========TF_PlaceGoal=========\n");
+    dprint("=========self=========\n");
     eprint(self);
-    dprint("=========TF_PlaceGoal=========\n");
+    dprint("=========TF_PlaceGoal=========\n\n\n");
 
     local float oldz;
 
@@ -297,9 +305,10 @@ void () TF_PlaceGoal = {
 };
 
 void () TF_StartGoal = {
-    dprint("=========TF_StartGoal=========\n");
+    dprint("\n\n=========TF_StartGoal=========\n");
+    dprint("=========self=========\n");
     eprint(self);
-    dprint("=========TF_StartGoal=========\n");
+    dprint("=========TF_StartGoal=========\n\n\n");
 
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
@@ -328,6 +337,11 @@ float () CheckExistence = {
 };
 
 void () info_tfdetect = {
+    dprint("\n\n=========info_tfdetect=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("\n\n=========info_tfdetect=========\n");
+
     UpdateAbbreviations(self);
 };
 
@@ -626,6 +640,13 @@ void (entity Goal) InactivateGoal = {
 };
 
 void (entity Goal) RestoreGoal = {
+    dprint("\n\n=========RestoreGoal=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========Goal=========\n");
+    eprint(Goal);
+    dprint("=========RestoreGoal=========\n\n\n");
+
     if (Goal.goal_state == 3) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
@@ -640,6 +661,23 @@ void (entity Goal) RestoreGoal = {
         Goal.goal_state = 2;
         if (Goal.mdl != string_null) {
             setmodel(Goal, Goal.mdl);
+        }
+        if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
+            Goal.effects = self.effects | EF_DIMLIGHT;
+
+            if (Goal.skin == 1.0) {
+                Goal.effects = Goal.effects | EF_BLUE;
+            }
+            if (Goal.skin == 2.0) {
+                Goal.effects = Goal.effects | EF_RED;
+            }
+            if (Goal.skin == 3.0) {
+                Goal.effects = Goal.effects | EF_RED;
+                Goal.effects = Goal.effects | EF_MUZZLEFLASH;
+            }
+            if (Goal.skin == 4.0) {
+                Goal.effects = Goal.effects | EF_MUZZLEFLASH;
+            }
         }
     }
 };
@@ -1235,6 +1273,12 @@ float (entity Goal, entity AP) APMeetsCriteria = {
 };
 
 void (entity Goal) SetupRespawn = {
+    dprint("\n\n=========SetupRespawn=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========Goal=========\n");
+    eprint(Goal);
+    dprint("=========SetupRespawn=========\n\n\n");
     if (Goal.search_time != 0) {
         InactivateGoal(Goal);
         Goal.think = tfgoal_timer_tick;
@@ -1256,6 +1300,10 @@ void (entity Goal) SetupRespawn = {
 };
 
 void () DoRespawn = {
+    dprint("\n\n=========DoRespawn=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========DoRespawn=========\n\n\n");
     RestoreGoal(self);
     InactivateGoal(self);
 };
@@ -2046,6 +2094,15 @@ void () item_tfgoal_touch = {
 };
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
+    dprint("\n\n=========tfgoalitem_GiveToPlayer=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("=========AP=========\n");
+    eprint(AP);
+    dprint("=========Goal=========\n");
+    eprint(Goal);
+    dprint("\n\n=========tfgoalitem_GiveToPlayer=========\n");
+
     Item.effects = 0;
 
     Item.owner = AP;
@@ -2060,8 +2117,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     if (Item.goal_activation & TFGI_SLOW)
         TeamFortress_SetSpeed(AP);
 
-    if (Item.goal_activation & TFGI_ITEMGLOWS)
-        Item.effects = EF_DIMLIGHT;
+    /* if (Item.goal_activation & TFGI_ITEMGLOWS) */
+    /*     Item.effects = EF_DIMLIGHT; */
 
     if (Item.items & IT_KEY1)
         AP.items = AP.items | IT_KEY1;
@@ -2090,6 +2147,11 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 };
 
 void () ReturnItem = {
+    dprint("\n\n=========ReturnItem=========\n");
+    dprint("=========self=========\n");
+    eprint(self);
+    dprint("\n\n=========ReturnItem=========\n");
+
     local entity te;
 
     self.enemy.goal_state = 2;
@@ -2221,6 +2283,8 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
 };
 
 void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
+    dprint("\n\n=========tfgoalitem_RemoveEffectsFromPlayer=========\n");
+    dprint("\n\n=========tfgoalitem_RemoveEffectsFromPlayer=========\n");
     local entity te;
     local float lighton = 0;
     local float slowon = 0;
