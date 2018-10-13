@@ -3,7 +3,8 @@ Classic Fortress v0.9 beta
 
 New features
 ------
-* Option for to fully restock player on cap. `localinfo stock_on_cap on`.
+* Option to adjust conussion effect time. `localinfo cusstime`. Default is 750.
+* Option to fully restock player on cap. `localinfo stock_on_cap on`.
 * Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).

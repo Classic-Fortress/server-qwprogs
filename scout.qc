@@ -600,7 +600,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.team_no = attacker.team_no;
                                 te.classname = "timer";
                                 te.owner = head;
-                                te.health = 750;
+                                te.health = CF_GetSetting("ct", "cusstime", "750");
                                 self.owner.is_concussed = 1;
                             }
                         }
