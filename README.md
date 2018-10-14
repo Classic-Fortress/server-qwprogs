@@ -3,7 +3,7 @@ Classic Fortress v0.9 beta
 
 New features
 ------
-* Option to adjust conussion effect time. `localinfo cusstime`. Default is 750.
+* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
 * Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
