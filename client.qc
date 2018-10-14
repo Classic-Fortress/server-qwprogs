@@ -472,6 +472,9 @@ void () DecodeLevelParms = {
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
 
+        // concussion grenade effect time [19]
+        cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
+
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
 
