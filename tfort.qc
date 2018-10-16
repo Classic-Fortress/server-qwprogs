@@ -590,9 +590,12 @@ void () TeamFortress_ShowTF = {
     }
     CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
+    sprint(self, PRINT_HIGH, "Concussion effect lasts ");
+    sprint(self, PRINT_HIGH, cussgrentime);
+    sprint(self, PRINT_HIGH, " seconds");
+
     sprint(self, PRINT_HIGH, "\n== Scout ==\n");
     CF_PrintSetting("Scout dash ability", scoutdash, "", 1);
-
     sprint(self, PRINT_HIGH, "\n== Sniper ==\n");
     CF_PrintSetting("Sniper reload", sniperreload, "", 1);
     CF_PrintSetting("Old sniper rifle range", old_sniperrange, "", 1);

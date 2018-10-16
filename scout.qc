@@ -578,7 +578,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.health = 100;
                                 te.nextthink = time + 5;
                             } else {
-                                te.health = 750;
+                                te.health = 40 * cussgrentime;
                                 te.nextthink = time + 0.25;
                             }
                         } else {
@@ -600,7 +600,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.team_no = attacker.team_no;
                                 te.classname = "timer";
                                 te.owner = head;
-                                te.health = 750;
+                                te.health = 40 * cussgrentime;
                                 self.owner.is_concussed = 1;
                             }
                         }
