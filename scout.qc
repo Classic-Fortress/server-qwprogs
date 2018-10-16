@@ -578,7 +578,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.health = 100;
                                 te.nextthink = time + 5;
                             } else {
-                                te.health = 750;
+                                te.health = 40 * cussgrentime;
                                 te.nextthink = time + 0.25;
                             }
                         } else {
