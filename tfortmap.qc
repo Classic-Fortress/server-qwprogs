@@ -250,6 +250,17 @@ void () TF_StartItem = {
             self.effects = self.effects | EF_MUZZLEFLASH;
         }
     }
+
+    if (self.model == "progs/basrkey.bsp" ) {
+        self.effects = self.effects | EF_DIMLIGHT;
+        self.effects = self.effects | EF_RED;
+    }
+
+    if (self.model == "progs/basbkey.bsp" ) {
+        self.effects = self.effects | EF_DIMLIGHT;
+        self.effects = self.effects | EF_BLUE;
+    }
+
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
@@ -630,7 +641,7 @@ void (entity Goal) RestoreGoal = {
             setmodel(Goal, Goal.mdl);
         }
         if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
-            Goal.effects = self.effects | EF_DIMLIGHT;
+            Goal.effects = Goal.effects | EF_DIMLIGHT;
 
             if (Goal.skin == 1.0) {
                 Goal.effects = Goal.effects | EF_BLUE;
@@ -645,6 +656,16 @@ void (entity Goal) RestoreGoal = {
             if (Goal.skin == 4.0) {
                 Goal.effects = Goal.effects | EF_MUZZLEFLASH;
             }
+        }
+
+        if (Goal.model == "progs/basrkey.bsp" ) {
+            Goal.effects = Goal.effects | EF_DIMLIGHT;
+            Goal.effects = Goal.effects | EF_RED;
+        }
+
+        if (Goal.model == "progs/basbkey.bsp" ) {
+            Goal.effects = Goal.effects | EF_DIMLIGHT;
+            Goal.effects = Goal.effects | EF_BLUE;
         }
     }
 };
@@ -2109,6 +2130,8 @@ void () ReturnItem = {
     self.enemy.origin = self.enemy.oldorigin;
 
     if (self.enemy.model == "progs/tf_flag.mdl" || self.enemy.model == "progs/tf_stan.mdl") {
+        self.enemy.effects = self.effects | EF_DIMLIGHT;
+
         if (self.enemy.skin == 1.0) {
             self.enemy.effects = self.enemy.effects | EF_BLUE;
         }
@@ -2122,6 +2145,16 @@ void () ReturnItem = {
         if (self.enemy.skin == 4.0) {
             self.enemy.effects = self.enemy.effects | EF_MUZZLEFLASH;
         }
+    }
+
+    if (self.enemy.model == "progs/basrkey.bsp" ) {
+        self.enemy.effects = self.effects | EF_DIMLIGHT;
+        self.enemy.effects = self.enemy.effects | EF_RED;
+    }
+
+    if (self.enemy.model == "progs/basbkey.bsp" ) {
+        self.enemy.effects = self.effects | EF_DIMLIGHT;
+        self.enemy.effects = self.enemy.effects | EF_BLUE;
     }
 
     if (self.enemy.mdl != string_null)
@@ -2132,22 +2165,6 @@ void () ReturnItem = {
 
     if (self.enemy.origin == self.enemy.oldorigin)
         return;
-
-    if (self.enemy.model == "progs/tf_flag.mdl" || self.enemy.model == "progs/tf_stan.mdl") {
-        if (self.enemy.skin == 1.0) {
-            self.enemy.effects = self.enemy.effects | EF_BLUE;
-        }
-        if (self.enemy.skin == 2.0) {
-            self.enemy.effects = self.enemy.effects | EF_RED;
-        }
-        if (self.enemy.skin == 3.0) {
-            self.enemy.effects = self.enemy.effects | EF_RED;
-            self.enemy.effects = self.enemy.effects | EF_MUZZLEFLASH;
-        }
-        if (self.enemy.skin == 4.0) {
-            self.enemy.effects = self.enemy.effects | EF_MUZZLEFLASH;
-        }
-    }
 
     sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
 
@@ -2366,7 +2383,7 @@ void () tfgoalitem_droptouch = {
 
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
     if (Item.model == "progs/tf_flag.mdl" || Item.model == "progs/tf_stan.mdl") {
-        Item.effects = self.effects | EF_DIMLIGHT;
+        Item.effects = Item.effects | EF_DIMLIGHT;
 
         if (Item.skin == 1.0) {
             Item.effects = Item.effects | EF_BLUE;
@@ -2381,6 +2398,16 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         if (Item.skin == 4.0) {
             Item.effects = Item.effects | EF_MUZZLEFLASH;
         }
+    }
+
+    if (Item.model == "progs/basrkey.bsp" ) {
+        Item.effects = Item.effects | EF_DIMLIGHT;
+        Item.effects = Item.effects | EF_RED;
+    }
+
+    if (Item.model == "progs/basbkey.bsp" ) {
+        Item.effects = Item.effects | EF_DIMLIGHT;
+        Item.effects = Item.effects | EF_BLUE;
     }
 
     Item.origin = Item.owner.origin;
