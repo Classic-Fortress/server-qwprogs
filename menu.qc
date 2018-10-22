@@ -811,7 +811,7 @@ void () Menu_EngineerFix_Dispenser = {
 
 void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
     if (inp == 1) {
-        sprint(self, PRINT_HIGH, "Rotating 45 degrees to the left...\n");
+        sprint(self, PRINT_HIGH, "Rotating 45 degrees anticlockwise...\n");
         self.building.waitmin = anglemod(self.building.waitmin + 45);
         self.building.waitmax = anglemod(self.building.waitmax + 45);
     } else if (inp == 2) {
@@ -819,7 +819,7 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
         self.building.waitmin = anglemod(self.building.waitmin + 180);
         self.building.waitmax = anglemod(self.building.waitmax + 180);
     } else if (inp == 3) {
-        sprint(self, PRINT_HIGH, "Rotating 45 degrees to the right...\n");
+        sprint(self, PRINT_HIGH, "Rotating 45 degrees clockwise...\n");
         self.building.waitmin = anglemod(self.building.waitmin - 45);
         self.building.waitmax = anglemod(self.building.waitmax - 45);
     }
@@ -827,9 +827,9 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
 
 void () Menu_EngineerFix_SentryGun_Rotate = {
     local string action  = "Rotate sentry gun:\n\n";
-    local string rotl    = "êìë 45 degrees left \n";
+    local string rotl    = "êìë anticlockwise \n";
     local string rot180  = "êîë 180 degrees     \n";
-    local string rotr    = "êïë 45 degrees right\n";
+    local string rotr    = "êïë clockwise\n";
     local string nothing = "\nêóë Nothing         \n";
 
     if (!self.building.real_owner.has_sentry || self.building.real_owner != self
