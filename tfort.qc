@@ -36,7 +36,7 @@ void () AutoId = {
         CF_Identify(self.owner, self.owner.autoid_type);
     }
 
-    self.nextthink = time + 0.3;
+    self.nextthink = time + 0.03;
 };
 
 void () UseSpecialSkill = {
