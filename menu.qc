@@ -827,10 +827,10 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
 
 void () Menu_EngineerFix_SentryGun_Rotate = {
     local string action  = "Rotate sentry gun:\n\n";
-    local string rotl    = "“‘ anticlockwise \n";
-    local string rot180  = "”‘ 180 degrees     \n";
-    local string rotr    = "•‘ clockwise\n";
-    local string nothing = "\n—‘ Nothing         \n";
+    local string rotl    = "“‘ anticlockwise\n";
+    local string rot180  = "”‘ 180 degrees  \n";
+    local string rotr    = "•‘ clockwise    \n";
+    local string nothing = "\n—‘ Nothing      \n";
 
     if (!self.building.real_owner.has_sentry || self.building.real_owner != self
                 || self.classname != "player" || self.building == world)
