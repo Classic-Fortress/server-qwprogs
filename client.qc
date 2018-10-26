@@ -1988,7 +1988,6 @@ void () ClientConnect = {
     local string st2;
     local float got_one;
 
-    stuffcmd(self, "set fortressone 1\n");
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
