@@ -1,5 +1,5 @@
-// MAP VOTING FOR CLASSIC FORTRESS
-// ===============================
+// MAP VOTING FOR FORTRESSONE
+// ==========================
 // Displays a vote menu during the last few minutes of gameplay on a map.
 
 // functions by order of appearance

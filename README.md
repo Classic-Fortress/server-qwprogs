@@ -1,4 +1,4 @@
-Classic Fortress v0.9 beta
+FortressOne Server v0.1.0
 ==========================
 
 New features

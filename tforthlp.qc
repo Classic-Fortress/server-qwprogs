@@ -17,7 +17,7 @@ void () TeamFortress_MOTD = {
     local string ya;
 
     if (self.motd == 5) {
-        sprint(self, PRINT_HIGH, "\nClassic Fortress ", VER, "\n\n");
+        sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
 
         st1 = infokey(world, "motd1");
         if (st1 != string_null) {
@@ -26,7 +26,7 @@ void () TeamFortress_MOTD = {
                 st1 = strcat(strcat(st1, "\n"), st2);
             }
         } else {
-            st1 = "Welcome to Classic Fortress\nby Empezar & hifi\n==================================\ngithub.com/classic-fortress";
+            st1 = "Welcome to FortressOne\n==================================\nwww.github.com/FortressOne";
         }
 
         sprint(self, PRINT_HIGH, st1);

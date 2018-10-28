@@ -514,7 +514,7 @@ void (string ps_description, float pf_setting, string ps_last, float pf_bool) CF
 void () TeamFortress_ShowTF = {
     local string st;
 
-    sprint(self, PRINT_HIGH, "\nThis server is running Classic Fortress ");
+    sprint(self, PRINT_HIGH, "\nThis server is running FortressOne ");
     sprint(self, PRINT_HIGH, VER);
     sprint(self, PRINT_HIGH, "\n\n");
 
@@ -571,7 +571,7 @@ void () TeamFortress_ShowTF = {
         sprint(self, PRINT_HIGH, "Full teamscore                          off\n");
     }
 
-    sprint(self, PRINT_HIGH, "\n== Classic Fortress ==\n");
+    sprint(self, PRINT_HIGH, "\n== FortressOne Server ==\n");
     CF_PrintSetting("Spawn with full health/armor", spawnfull, "", 1);
     CF_PrintSetting("Stock players with full health/armor", stockfull, "", 1);
     CF_PrintSetting("Stock player on cap", stock_on_cap, "", 1);
@@ -658,7 +658,7 @@ void () TeamFortress_ShowTF = {
     if (server_faithful) {
         sprint(self, PRINT_HIGH, "\nThis server is running faithful Team Fortress settings.\n");
     } else if (server_default) {
-        sprint(self, PRINT_HIGH, "\nThis server is running default Classic Fortress settings.\n");
+        sprint(self, PRINT_HIGH, "\nThis server is running default FortressOne Server settings.\n");
     }
 };
 

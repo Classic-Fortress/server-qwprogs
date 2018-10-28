@@ -1,5 +1,5 @@
-// CLASS HELP FOR CLASSIC FORTRESS
-// ===============================
+// CLASS HELP FOR FORTRESSONE
+// ==========================
 // Shows class bindings for each class.
 
 // functions by order of appearance
