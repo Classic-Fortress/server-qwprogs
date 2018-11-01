@@ -103,6 +103,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dropkey", TF_DROPKEY, 0);
         TeamFortress_Alias("dropammo", TF_DROP_AMMO, 0);
         TeamFortress_Alias("dropflag", TF_DROPFLAG, 0);
+        TeamFortress_Alias("dropitems", TF_DROPFLAG, 0);
         TeamFortress_Alias("showloc", TF_DISPLAYLOCATION, 0);
         TeamFortress_Alias("special", TF_SPECIAL_SKILL, 0);
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
