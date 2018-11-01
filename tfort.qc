@@ -3146,25 +3146,24 @@ void (entity p) TeamFortress_ExecClassScript = {
         st = infokey(p, "exec_class");
 
     if (st == "1") {
-        stuffcmd(p, "exec classes/default.cfg\n");
         if (p.playerclass == PC_SCOUT)
-            stuffcmd(p, "exec classes/scout.cfg\n");
+            stuffcmd(p, "exec scout.cfg\n");
         else if (p.playerclass == PC_SNIPER)
-            stuffcmd(p, "exec classes/sniper.cfg\n");
+            stuffcmd(p, "exec sniper.cfg\n");
         else if (p.playerclass == PC_SOLDIER)
-            stuffcmd(p, "exec classes/soldier.cfg\n");
+            stuffcmd(p, "exec soldier.cfg\n");
         else if (p.playerclass == PC_DEMOMAN)
-            stuffcmd(p, "exec classes/demoman.cfg\n");
+            stuffcmd(p, "exec demoman.cfg\n");
         else if (p.playerclass == PC_MEDIC)
-            stuffcmd(p, "exec classes/medic.cfg\n");
+            stuffcmd(p, "exec medic.cfg\n");
         else if (p.playerclass == PC_HVYWEAP)
-            stuffcmd(p, "exec classes/hwguy.cfg\n");
+            stuffcmd(p, "exec hwguy.cfg\n");
         else if (p.playerclass == PC_PYRO)
-            stuffcmd(p, "exec classes/pyro.cfg\n");
+            stuffcmd(p, "exec pyro.cfg\n");
         else if (p.playerclass == PC_SPY)
-            stuffcmd(p, "exec classes/spy.cfg\n");
+            stuffcmd(p, "exec spy.cfg\n");
         else if (p.playerclass == PC_ENGINEER)
-            stuffcmd(p, "exec classes/engineer.cfg\n");
+            stuffcmd(p, "exec engineer.cfg\n");
     }
 };
 

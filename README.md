@@ -29,7 +29,6 @@ New features
 * Free class switch during first 10 seconds after spawning.
 * Updated class help (bindings, aliases and settings) reachable with /classhelp.
 * Dropping flag now possible on all maps using /dropflag.
-* Class configs are now executed from /fortress/classes/ subdirectory.
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
 
@@ -49,7 +48,6 @@ New features
 * Fixed endless intermission bug.
 * Fixed bug where players got stuck in intermission mode upon map change and hence could not respawn.
 * Major code cleanup and rewrites.
-* When using class configs, /fortress/classes/default.cfg gets executed first.
 * Team player count in team selection menu.
 * Class player count (and class restrictions) in class selection menu.
 * Changing teams is now allowed.
