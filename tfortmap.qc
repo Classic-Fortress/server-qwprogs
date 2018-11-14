@@ -420,6 +420,53 @@ void () info_tfgoal = {
     TF_StartGoal();
 };
 
+// q3 support
+void () func_goalinfo = {
+    self.classname = "info_tfgoal";
+    if (self.allowteams == "blue") {
+        self.team_no = 1;
+    }
+    if (self.allowteams == "red") {
+        self.team_no = 2;
+    }
+    self.mdl = self.model;
+    self.noise = self.active_all_sound;
+    self.armortype = "0.8";
+
+    float comindex, startpos;
+    comindex = 0;
+    string searchterm;
+    searchterm = self.give;
+    startpos = 0;
+    // while index is not -1
+    while (comindex >= 0) {
+        // find index of comma
+        comindex = strstrofs(searchterm, ",", startpos);
+        // get substring up to the comma
+        string val;
+        val = substring(searchterm, startpos, comindex);
+        // set pos for next loop
+        startpos = comindex + 1;
+
+        // process val "health=+100"
+        float eqindex, opindex, len, amt;
+        eqindex = strstrofs(val, "=", 0);
+        string givetype, posneg, samt;
+        givetype = substring(val, 0, eqindex);
+        opindex = eqindex + 1;
+        posneg = substring(val, eqindex, opindex);
+        len = comindex - 1;
+        samt = substring(val, opindex, len);
+        amt = stof(samt);
+
+        
+    }
+    
+    
+
+    info_tfgoal();
+}
+
 void () i_t_g = {
     self.classname = "info_tfgoal";
     info_tfgoal();
