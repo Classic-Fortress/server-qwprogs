@@ -361,6 +361,19 @@ void () info_player_teamspawn = {
     }
 };
 
+void () info_player_start = {
+    if (self.allowteams == "blue") {
+        self.classname = "info_player_teamspawn";
+        self.team_no = 1;
+        info_player_teamspawn();
+    }
+    if (self.allowteams == "red") {
+        self.classname = "info_player_teamspawn";
+        self.team_no = 2;
+        info_player_teamspawn();
+    }
+};
+
 void () i_p_t = {
     self.classname = "info_player_teamspawn";
     info_player_teamspawn();
@@ -1697,15 +1710,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your team гот the енемы flag!!");
+                                    "Your team О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫О©╫ flag!!");
                         }
                     } else {
                         CenterPrint2(te, "\n\n\n",
-                                "Your flag has been такен!!");
+                                "Your flag has been О©╫О©╫О©╫О©╫О©╫!!");
                     }
                     te = find(te, classname, "player");
                 }
-                bprint(PRINT_HIGH, AP.netname, " гот the блуе flag!\n");
+                bprint(PRINT_HIGH, AP.netname, " О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫ flag!\n");
                 AP.items = AP.items | IT_KEY1;
             } else {
                 if (Goal.goal_no == 2) {
@@ -1751,15 +1764,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                        "Your team гот the енемы flag!!");
+                                        "Your team О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫О©╫ flag!!");
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your flag has been такен!!");
+                                    "Your flag has been О©╫О©╫О©╫О©╫О©╫!!");
                         }
                         te = find(te, classname, "player");
                     }
-                    bprint(PRINT_HIGH, AP.netname, " гот the ред flag!\n");
+                    bprint(PRINT_HIGH, AP.netname, " О©╫О©╫О©╫ the О©╫О©╫О©╫ flag!\n");
                     AP.items = AP.items | IT_KEY2;
                 } else {
                     if (Goal.goal_no == 3) {
@@ -1768,19 +1781,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             if (te.team_no == 2) {
                                 if (te == AP) {
                                     CenterPrint2(te, "\n\n\n",
-                                            "You цаптуред the flag!!");
+                                            "You О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the flag!!");
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                            "Your flag was цаптуред!!");
+                                            "Your flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                        "Your team цаптуред the flag!!");
+                                        "Your team О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the flag!!");
                             }
                             te = find(te, classname, "player");
                         }
                         bprint(PRINT_HIGH, AP.netname,
-                                " цаптуред the ред flag!\n");
+                                " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫ flag!\n");
                         AP.items = AP.items - (AP.items & IT_KEY2);
                     } else {
                         if (Goal.goal_no == 4) {
@@ -1789,19 +1802,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 if (te.team_no == 1) {
                                     if (te == AP) {
                                         CenterPrint2(te, "\n\n\n",
-                                                "You цаптуред the flag!!");
+                                                "You О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the flag!!");
                                     } else {
                                         CenterPrint2(te, "\n\n\n",
-                                                "Your flag was цаптуред!!");
+                                                "Your flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                                     }
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                            "Your team цаптуред the flag!!");
+                                            "Your team О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the flag!!");
                                 }
                                 te = find(te, classname, "player");
                             }
                             bprint(PRINT_HIGH, AP.netname,
-                                    " цаптуред the блуе flag!\n");
+                                    " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫ flag!\n");
                             AP.items = AP.items - (AP.items & IT_KEY1);
                         }
                     }
@@ -1996,15 +2009,15 @@ void () item_tfgoal_touch = {
             if (self.origin != self.oldorigin) {
                 if (other.team_no == 1) {
                     bprint(2, other.netname);
-                    bprint(2, " ретурнед the блуе flag!\n");
+                    bprint(2, " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫О©╫ flag!\n");
                     te = find(world, classname, "player");
                     while (te != world) {
                         if (te.team_no == 1) {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your flag was ретурнед!!");
+                                    "Your flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "The енемы flag was ретурнед!!");
+                                    "The О©╫О©╫О©╫О©╫О©╫ flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                         }
                         te = find(te, classname, "player");
                     }
@@ -2027,15 +2040,15 @@ void () item_tfgoal_touch = {
                 if (self.origin != self.oldorigin) {
                     if (other.team_no == 2) {
                         bprint(2, other.netname);
-                        bprint(2, " ретурнед the ред flag!\n");
+                        bprint(2, " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the О©╫О©╫О©╫ flag!\n");
                         te = find(world, classname, "player");
                         while (te != world) {
                             if (te.team_no == 2) {
                                 CenterPrint(te,
-                                        "\n\n\n Your flag was ретурнед!!");
+                                        "\n\n\n Your flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                             } else {
                                 CenterPrint(te,
-                                        "\n\n\n The енемы flag was ретурнед!!");
+                                        "\n\n\n The О©╫О©╫О©╫О©╫О©╫ flag was О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫!!");
                             }
                             te = find(te, classname, "player");
                         }
@@ -2545,7 +2558,7 @@ void () item_flag_team2 = {
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
     self.netname = "Blue Flag";
-    self.broadcast = " гот the enemy team's flag!\n";
+    self.broadcast = " О©╫О©╫О©╫ the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
 
@@ -2582,8 +2595,8 @@ void () item_flag_team2 = {
     dp.items_allowed = 2;
     dp.goal_no = 3;
     dp.goal_effects = 3;
-    dp.broadcast = " цаптуред the enemy flag!\n";
-    dp.message = "You цаптуред the enemy flag!\n";
+    dp.broadcast = " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the enemy flag!\n";
+    dp.message = "You О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the enemy flag!\n";
     dp.noise = "boss2/pop2.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 5;
@@ -2622,7 +2635,7 @@ void () item_flag_team1 = {
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
     self.netname = "Red Flag";
-    self.broadcast = " гот the enemy team's flag!\n";
+    self.broadcast = " О©╫О©╫О©╫ the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
 
@@ -2657,8 +2670,8 @@ void () item_flag_team1 = {
     dp.items_allowed = 1;
     dp.goal_no = 4;
     dp.goal_effects = 3;
-    dp.broadcast = " цаптуред the enemy flag!\n";
-    dp.message = "You цаптуред the enemy flag!\n";
+    dp.broadcast = " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the enemy flag!\n";
+    dp.message = "You О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ the enemy flag!\n";
     dp.noise = "boss2/pop2.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 6;
@@ -2800,11 +2813,11 @@ void () DropGoalItems = {
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
                 if (self.team_no == 1)
-                    bprint(PRINT_HIGH, self.netname, " ДРОППЕД═РЕД╖С═ФЛАГ╝\n");
+                    bprint(PRINT_HIGH, self.netname, " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫\n");
                 else if (self.team_no == 2)
-                    bprint(PRINT_HIGH, self.netname, " ДРОППЕД═БЛУЕ╖С═ФЛАГ╝\n");
+                    bprint(PRINT_HIGH, self.netname, " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫\n");
                 else
-                    bprint(PRINT_HIGH, self.netname, " ДРОППЕД═ТХЕ═ЕНЕМЫ╖С═ФЛАГ╝\n");
+                    bprint(PRINT_HIGH, self.netname, " О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫\n");
 
                 Status_Print(self, "\n\n\n", "You dropped the flag!");
                 search = find(world, classname, "player");
