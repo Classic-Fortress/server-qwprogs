@@ -375,6 +375,13 @@ void () func_door = {
         self.noise1 = "doors/ddoor2.wav";
         self.noise2 = "doors/ddoor1.wav";
     }
+    // q3 fields
+    if (self.allowteams == "blue") {
+        self.team_no = 1;
+    }
+    if (self.allowteams == "red") {
+        self.team_no = 2;
+    }
     SetMovedir();
     self.max_health = self.health;
     self.solid = SOLID_BSP;
