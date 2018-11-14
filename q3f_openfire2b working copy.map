@@ -1,0 +1,333 @@
+// Game: Quake
+// Format: Standard
+// entity 0
+{
+"angle" "90"
+"classname" "worldspawn"
+"team_blue_name" "Blue Team"
+"team_red_name" "Red Team"
+"author" "Jeremy Raymond"
+"message" "Openfire by War|ocK"
+"atmosphere" "T=RAIN,B=5 10,C=0.5,G=0.5 2,BV=0,GV=0 100,W=1 2,D=300"
+
+}
+
+// entity 3
+{
+"classname" "target_position"
+"targetname" "t3"
+"origin" "1072 1152 -88"
+}
+
+// entity 65
+{
+"angle" "180"
+"classname" "func_goalinfo"
+"allowteams" "red"
+"flags" "hideactive"
+"origin" "-1801 855 223"
+"active_all_sound" "sound/misc/am_pkup.wav"
+"give" "health=+100,armor=+300,ammo_shells=+100,ammo_bullets=+100,ammo_rockets=+100,ammo_cells=+200,gren1=+2,gren2=+0,ammo_medikit=+100"
+"model" "models/objects/backpack/backpack.md3"
+"wait" "2"
+}
+
+// entity 93
+{
+"inactivetarget" "redflaghud=~inactive"
+"activetarget" "redflaghud=~active"
+"carriedtarget" "redflaghud=~carried"
+"sparkle" "1.000000 0.392157 0.392157"
+"angle" "90"
+"classname" "func_goalitem"
+"carried_sound" "sound/teamplay/flagtk_red.wav"
+"carried_all_sound" "sound/teamplay/flagtk_red.wav"
+"carried_message" "~You got the ^1red^* flag! Run for it!"
+"carried_all_message" "%N nabbed the ^1red^* flag!"
+"groupname" "redflag"
+"origin" "-2562 -1154 158"
+"allowteams" "blue"
+"model" "models/flags/r_flag.md3"
+"inactive_all_message" "The ^1red^* flag returned to base!"
+"active_all_message" "The ^1red^* flag was dropped in the field!"
+"flags" "showcarry,revealagent"
+"active_flaginfo" "The ^1Red^* flag has been dropped in the field!"
+"inactive_flaginfo" "The ^1Red^* flag is at base."
+"carried_flaginfo" "%N is carrying the ^1Red^* flag!"
+"wait" "45"
+"_color" "1.000000 0.392157 0.392157"
+"light" "50"
+}
+// entity 94
+{
+"classname" "func_goalinfo"
+"holding" "blueflag"
+"give" "health=+100,armor=+300,ammo_shells=+100,ammo_bullets=+100,ammo_rockets=+100,ammo_cells=+100,gren1=+2,gren2=+2,ammo_medikit=+100,ammo_detpack=+1"
+"teamscore" "10"
+"origin" "-2513 239 159"
+"active_team_sound" "sound/teamplay/flagcap_red.wav"
+"active_all_message" "~%N CAPTURED the ^4blue ^*flag!"
+"active_sound" "sound/teamplay/flagcap_red.wav"
+"activetarget" "blueflag=~inactive,scorer"
+"angle" "270"
+"active_all_sound" "sound/teamplay/flagcap_red.wav"
+}
+// entity 95
+{
+"origin" "-352 512 128"
+"angle" "315"
+"classname" "info_player_intermission"
+}
+// entity 96
+{
+"origin" "-424 520 136"
+"slot" "1"
+"inactive_model" "models/flags/r_flag.md3"
+"holding" "redflag"
+"classname" "func_hud"
+}
+{
+"scale" ".5"
+"targetname" "redflaghud"
+"carried_shader" "textures/q3f_hud/red_lost"
+"active_shader" "textures/q3f_hud/red_down"
+"inactive_shader" "textures/q3f_hud/red_safe"
+"slot" "3"
+"origin" "-400 520 136"
+"classname" "func_hud"
+}
+// entity 100
+{
+"angle" "270"
+"classname" "func_goalitem"
+"carried_sound" "sound/teamplay/flagtk_red.wav"
+"carried_all_sound" "sound/teamplay/flagtk_red.wav"
+"carried_message" "~You got the ^4blue^* flag! Run for it!"
+"carried_all_message" "%N nabbed the ^4blue^* flag!"
+"groupname" "blueflag"
+"origin" "2558 1150 158"
+"allowteams" "red"
+"model" "models/flags/b_flag.md3"
+"inactive_all_message" "The ^4blue^* flag returned to base!"
+"active_all_message" "The ^4blue^* flag was dropped in the field!"
+"flags" "showcarry,revealagent"
+"active_flaginfo" "The ^4Blue^* flag has been dropped in the field!"
+"inactive_flaginfo" "The ^4Blue^* flag is at base."
+"carried_flaginfo" "%N is carrying the ^4Blue^* flag!"
+"wait" "45"
+"_color" "0.392157 0.392157 1.000000"
+"light" "50"
+"sparkle" "0.392157 0.392157 1.000000"
+"carriedtarget" "blueflaghud=~carried"
+"activetarget" "blueflaghud=~active"
+"inactivetarget" "blueflaghud=~inactive"
+}
+// entity 101
+{
+"activetarget" "redflag=~inactive,scorer"
+"active_sound" "sound/teamplay/flagcap_red.wav"
+"active_all_message" "~%N CAPTURED the ^1red ^*flag!"
+"active_team_sound" "sound/teamplay/flagcap_red.wav"
+"origin" "2511 -241 159"
+"teamscore" "10"
+"give" "health=+100,armor=+300,ammo_shells=+100,ammo_bullets=+100,ammo_rockets=+100,ammo_cells=+100,gren1=+2,gren2=+2,ammo_medikit=+100,ammo_detpack=+1"
+"holding" "redflag"
+"classname" "func_goalinfo"
+"angle" "90"
+"active_all_sound" "sound/teamplay/flagcap_red.wav"
+}
+// entity 102
+{
+"classname" "target_kill"
+"targetname" "kill"
+"origin" "2433 1150 239"
+"checkstate" "t1=inactive"
+}
+// entity 103
+{
+"allowteams" "red"
+"classname" "trigger_multiple"
+"target" "kill"
+// brush 0
+{
+( 2483 -65535 65535 ) ( 2483 65535 65535 ) ( 2483 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 2477 65535 65535 ) ( 2477 -65535 65535 ) ( 2477 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 1280 65535 ) ( -65535 1280 65535 ) ( -65535 1280 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -65535 1024 65535 ) ( 65535 1024 65535 ) ( -65535 1024 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 65535 336 ) ( 65535 -65535 336 ) ( -65535 -65535 336 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -65535 128 ) ( 65535 65535 128 ) ( -65535 -65535 128 ) e2u3/floor1_2 0 0 0 1 1
+}
+}
+// entity 104
+{
+"targetname" "t1"
+"lip" "0"
+"wait" "30"
+"classname" "func_door"
+"angle" "270"
+"speed" "9999"
+}
+// entity 105
+{
+"allowteams" "red"
+"activetarget" "t1"
+"wait" "30"
+"angle" "270"
+"classname" "func_button"
+// brush 0
+{
+( 2351 -65535 65535 ) ( 2351 65535 65535 ) ( 2351 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 2320 65535 65535 ) ( 2320 -65535 65535 ) ( 2320 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -496 65535 ) ( -65535 -496 65535 ) ( -65535 -496 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -65535 -504 65535 ) ( 65535 -504 65535 ) ( -65535 -504 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 65535 176 ) ( 65535 -65535 176 ) ( -65535 -65535 176 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -65535 144 ) ( 65535 65535 144 ) ( -65535 -65535 144 ) e2u3/floor1_2 0 0 0 1 1
+}
+}
+// entity 106
+{
+"targetname" "t1"
+"lip" "0"
+"wait" "30"
+"angle" "90"
+"classname" "func_door"
+"speed" "9999"
+}
+// entity 107
+{
+"targetname" "t1"
+"lip" "0"
+"wait" "30"
+"speed" "9999"
+"angle" "270"
+"classname" "func_door"
+}
+// entity 108
+{
+"speed" "9999"
+"classname" "func_door"
+"angle" "90"
+"wait" "30"
+"lip" "0"
+"targetname" "t1"
+}
+// entity 109
+{
+"classname" "func_door"
+"angle" "270"
+"speed" "9999"
+"wait" "30"
+"lip" "0"
+"targetname" "t1"
+}
+// entity 110
+{
+"targetname" "t1"
+"lip" "0"
+"wait" "30"
+"angle" "90"
+"classname" "func_door"
+"speed" "9999"
+}
+// entity 111
+{
+"checkstate" "t2=inactive"
+"origin" "-2433 -1150 239"
+"targetname" "kill2"
+"classname" "target_kill"
+}
+// entity 112
+{
+"target" "kill2"
+"classname" "trigger_multiple"
+"allowteams" "blue"
+// brush 0
+{
+( -2477 -65535 65535 ) ( -2477 65535 65535 ) ( -2477 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -2483 65535 65535 ) ( -2483 -65535 65535 ) ( -2483 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -1024 65535 ) ( -65535 -1024 65535 ) ( -65535 -1024 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -65535 -1280 65535 ) ( 65535 -1280 65535 ) ( -65535 -1280 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 65535 336 ) ( 65535 -65535 336 ) ( -65535 -65535 336 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -65535 128 ) ( 65535 65535 128 ) ( -65535 -65535 128 ) e2u3/floor1_2 0 0 0 1 1
+}
+}
+// entity 113
+{
+"speed" "9999"
+"angle" "270"
+"classname" "func_door"
+"wait" "30"
+"lip" "0"
+"targetname" "t2"
+}
+// entity 114
+{
+"classname" "func_button"
+"angle" "90"
+"wait" "30"
+"activetarget" "t2"
+"allowteams" "blue"
+// brush 0
+{
+( -2320 -65535 65535 ) ( -2320 65535 65535 ) ( -2320 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -2351 65535 65535 ) ( -2351 -65535 65535 ) ( -2351 65535 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 504 65535 ) ( -65535 504 65535 ) ( -65535 504 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( -65535 496 65535 ) ( 65535 496 65535 ) ( -65535 496 -65535 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 65535 176 ) ( 65535 -65535 176 ) ( -65535 -65535 176 ) e2u3/floor1_2 0 0 0 1 1
+( 65535 -65535 144 ) ( 65535 65535 144 ) ( -65535 -65535 144 ) e2u3/floor1_2 0 0 0 1 1
+}
+}
+// entity 115
+{
+"speed" "9999"
+"classname" "func_door"
+"angle" "90"
+"wait" "30"
+"lip" "0"
+"targetname" "t2"
+}
+// entity 116
+{
+"classname" "func_door"
+"angle" "270"
+"speed" "9999"
+"wait" "30"
+"lip" "0"
+"targetname" "t2"
+}
+// entity 117
+{
+"targetname" "t2"
+"lip" "0"
+"wait" "30"
+"angle" "90"
+"classname" "func_door"
+"speed" "9999"
+}
+// entity 118
+{
+"targetname" "t2"
+"lip" "0"
+"wait" "30"
+"speed" "9999"
+"angle" "270"
+"classname" "func_door"
+}
+// entity 119
+{
+"speed" "9999"
+"classname" "func_door"
+"angle" "90"
+"wait" "30"
+"lip" "0"
+"targetname" "t2"
+}
+
+// entity 207
+{
+"origin" "0 -320 -192"
+"noise" "sound/world/curnt2.wav"
+"classname" "target_speaker"
+"spawnflags" "1"
+}
+
