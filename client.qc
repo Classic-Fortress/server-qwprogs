@@ -1128,6 +1128,10 @@ entity () SelectSpawnPoint =
     }
     spot = find(world, classname, "info_player_start");
     if (!spot) {
+        spot = find(world, classname, "info_player_teamspawn");
+    }
+
+    if (!spot) {
         error("PutClientInServer: no info_player_start on level\n");
     }
     return (spot);
@@ -1345,12 +1349,12 @@ void () PutClientInServer = {
     }
 };
 
-void () info_player_start = {
-    if (CheckExistence() == FALSE) {
-        dremove(self);
-        return;
-    }
-};
+//void () info_player_start = {
+//    if (CheckExistence() == FALSE) {
+//        dremove(self);
+//        return;
+//    }
+//};
 
 void () info_player_start2 = {
     if (CheckExistence() == FALSE) {
