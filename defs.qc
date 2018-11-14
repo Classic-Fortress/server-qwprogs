@@ -456,3 +456,9 @@ void () SUB_Remove;
 void (entity targ, entity inflictor, entity attacker, float damage) T_Damage;
 float (entity e, float healamount, float ignore) T_Heal;        // health function
 float (entity targ, entity inflictor) CanDamage;
+
+
+//
+// q3 defs
+// 
+.string allowteams;
