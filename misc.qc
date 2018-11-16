@@ -6,6 +6,12 @@ void () info_null = {
 void () info_notnull = {
 };
 
+// q3
+/*void () target_position = {
+    self.classname = "info_notnull";
+    info_notnull();
+};*/
+
 void () light_use = {
     if (self.spawnflags & 1) {
         lightstyle(self.style, "m");

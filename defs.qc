@@ -462,3 +462,6 @@ float (entity targ, entity inflictor) CanDamage;
 // q3 defs
 // 
 .string allowteams;
+.string give;
+.string active_all_sound;
+.string model;

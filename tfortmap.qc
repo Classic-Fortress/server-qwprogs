@@ -421,7 +421,9 @@ void () info_tfgoal = {
 };
 
 // q3 support
+/*
 void () func_goalinfo = {
+    dprint("processing func_goalinfo");
     self.classname = "info_tfgoal";
     if (self.allowteams == "blue") {
         self.team_no = 1;
@@ -431,42 +433,47 @@ void () func_goalinfo = {
     }
     self.mdl = self.model;
     self.noise = self.active_all_sound;
-    self.armortype = "0.8";
+    self.armortype = 0.8;
 
-    float comindex, startpos;
-    comindex = 0;
-    string searchterm;
-    searchterm = self.give;
+    dprint("past setting of fields");
+    float startpos, endpos;
     startpos = 0;
-    // while index is not -1
-    while (comindex >= 0) {
-        // find index of comma
-        comindex = strstrofs(searchterm, ",", startpos);
-        // get substring up to the comma
-        string val;
-        val = substring(searchterm, startpos, comindex);
-        // set pos for next loop
-        startpos = comindex + 1;
-
-        // process val "health=+100"
+    string searchterm = self.give;
+    endpos = strstrofs(searchterm, ",", startpos);
+    dprint(searchterm);
+    do {
+        string splitterm = substring(searchterm, startpos, endpos);
+        dprint(splitterm);
+        // split it up "health=+100"
         float eqindex, opindex, len, amt;
-        eqindex = strstrofs(val, "=", 0);
         string givetype, posneg, samt;
-        givetype = substring(val, 0, eqindex);
+        eqindex = strstrofs(splitterm, "=", 0);
         opindex = eqindex + 1;
-        posneg = substring(val, eqindex, opindex);
-        len = comindex - 1;
-        samt = substring(val, opindex, len);
+        givetype = substring(splitterm, 0, eqindex);
+        posneg = substring(splitterm, eqindex, opindex);
+        len = endpos - 1;
+        samt = substring(splitterm, opindex, len);
         amt = stof(samt);
 
-        
-    }
-    
-    
+        // now process with case statement
+        dprint(splitterm);
+        dprint(givetype);
+        dprint(posneg);
+        dprint(samt);
+
+        // next loop, set startpos to endpos through index for while condition
+        startpos = strstrofs(searchterm, ",", startpos);
+        endpos = strstrofs(searchterm, ",", startpos);
+        if (endpos == -1) {
+            // set endpos to end of string
+            endpos = strlen(searchterm);
+            endpos = endpos - startpos;
+        }
+    } while (startpos >= -1);
 
     info_tfgoal();
 }
-
+*/
 void () i_t_g = {
     self.classname = "info_tfgoal";
     info_tfgoal();

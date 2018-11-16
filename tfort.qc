@@ -591,7 +591,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
-    sprint(self, PRINT_HIGH, cussgrentime);
+    sprint(self, PRINT_HIGH, ftos(cussgrentime));
     sprint(self, PRINT_HIGH, " seconds");
 
     sprint(self, PRINT_HIGH, "\n== Scout ==\n");
