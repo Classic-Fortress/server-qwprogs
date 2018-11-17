@@ -3085,7 +3085,7 @@ void () PlayerObserverMode = {
     stuffcmd(self, "cl_rollangle 0\n");
 };
 
-float (vector veca, vector vecb) crossproduct = {
+float (vector veca, vector vecb) crossproducttf = {
     local float result;
 
     result = veca_x * vecb_y - vecb_x * veca_y;

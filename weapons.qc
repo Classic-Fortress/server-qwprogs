@@ -1,7 +1,7 @@
 void () player_run;
 
 void () TeamFortress_DisplayDetectionItems;
-float (vector veca, vector vecb) crossproduct;
+float (vector veca, vector vecb) crossproducttf;
 
 void (vector org, float damage) SpawnBlood;
 
@@ -185,7 +185,7 @@ void () W_FireAxe = {
             makevectors(self.v_angle);
 
             // Backstab
-            if (crossproduct(def, v_forward) > 0) {
+            if (crossproducttf(def, v_forward) > 0) {
                 deathmsg = DMSG_BACKSTAB;
                 TF_T_Damage(trace_ent, self, self, 120,
                             TF_TD_NOTTEAM | TF_TD_IGNOREARMOUR,
