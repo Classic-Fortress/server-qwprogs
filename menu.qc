@@ -181,11 +181,11 @@ void (float update) Menu_Team = {
 
     // prepare team strings
     local string s_select = "Select team:\n\n";
-    local string s_blue   = "“‘ Blue team  ";
-    local string s_red    = "”‘ Red team   ";
-    local string s_yellow = "•‘ Yellow team";
-    local string s_green  = "–‘ Green team ";
-    local string s_auto   = "—‘ Auto-assign team";
+    local string s_blue   = "ÂÂ“Â‘ Blue team  ";
+    local string s_red    = "ÂÂ”Â‘ Red team   ";
+    local string s_yellow = "ÂÂ•Â‘ Yellow team";
+    local string s_green  = "ÂÂ–Â‘ Green team ";
+    local string s_auto   = "ÂÂ—Â‘ Auto-assign team";
 
     // put together team strings
     s_blue = Menu_Team_TeamString(1, s_blue);
@@ -308,16 +308,16 @@ void (float update) Menu_Class = {
 
     // prepare class strings
     local string s_select   = "Select class:\n\n";
-    local string s_scout    = "“‘ Scout   ";
-    local string s_sniper   = "”‘ Sniper  ";
-    local string s_soldier  = "•‘ Soldier ";
-    local string s_demoman  = "–‘ Demoman ";
-    local string s_medic    = "—‘ Medic   ";
-    local string s_hwguy    = "˜‘ HWGuy   ";
-    local string s_pyro     = "™‘ Pyro    ";
-    local string s_spy      = "š‘ Spy     ";
-    local string s_engineer = "›‘ Engineer";
-    local string s_randompc = "’‘ RandomPC";
+    local string s_scout    = "ÂÂ“Â‘ Scout   ";
+    local string s_sniper   = "ÂÂ”Â‘ Sniper  ";
+    local string s_soldier  = "ÂÂ•Â‘ Soldier ";
+    local string s_demoman  = "ÂÂ–Â‘ Demoman ";
+    local string s_medic    = "ÂÂ—Â‘ Medic   ";
+    local string s_hwguy    = "ÂÂ˜Â‘ HWGuy   ";
+    local string s_pyro     = "ÂÂ™Â‘ Pyro    ";
+    local string s_spy      = "ÂÂšÂ‘ Spy     ";
+    local string s_engineer = "ÂÂ›Â‘ Engineer";
+    local string s_randompc = "ÂÂ’Â‘ RandomPC";
 
     // put together class strings - all strings are strzoned
     s_scout = Menu_Class_ClassString(PC_SCOUT, s_scout);
@@ -361,11 +361,11 @@ void (float inp) Menu_Drop_Input = {
 
 void () Menu_Drop = {
     local string s_drop;
-    local string s_shells  = "“‘ Shells        \n";
-    local string s_nails   = "”‘ Nails         \n";
-    local string s_rockets = "•‘ Rockets       \n";
-    local string s_cells   = "–‘ Cells         \n";
-    local string s_nothing = "\n—‘ Nothing       ";
+    local string s_shells  = "ÂÂ“Â‘ Shells        \n";
+    local string s_nails   = "ÂÂ”Â‘ Nails         \n";
+    local string s_rockets = "ÂÂ•Â‘ Rockets       \n";
+    local string s_cells   = "ÂÂ–Â‘ Cells         \n";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing       ";
 
     if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
@@ -383,11 +383,11 @@ void () Menu_Drop = {
 
     if (self.playerclass == PC_ENGINEER) {
         if ((self.ammo_shells < DROP_SHELLS) && ((self.ammo_cells / AMMO_COST_SHELLS) > (DROP_SHELLS - self.ammo_shells)))
-            s_shells  = "“‘ Shells (make) \n";
+            s_shells  = "ÂÂ“Â‘ Shells (make) \n";
         if ((self.ammo_nails < DROP_NAILS) && ((self.ammo_cells / AMMO_COST_NAILS) > (DROP_NAILS - self.ammo_nails)))
-            s_nails  = "”‘ Nails (make)  \n";
+            s_nails  = "ÂÂ”Â‘ Nails (make)  \n";
         if ((self.ammo_rockets < DROP_ROCKETS) && ((self.ammo_cells / AMMO_COST_ROCKETS) > (DROP_ROCKETS - self.ammo_rockets)))
-            s_rockets  = "•‘ Rockets (make)\n";
+            s_rockets  = "ÂÂ•Â‘ Rockets (make)\n";
         if (self.ammo_cells < DROP_CELLS)
             s_cells   = "\n";
     }
@@ -419,28 +419,28 @@ void (float inp) Menu_Scout_Input = {
 void () Menu_Scout = {
     local string s_action  = "Scanner settings:\n\n";
     local string s_scan, s_scane, s_scanf, s_scansound;
-    local string s_nothing = "\n—‘ Nothing                   \n\n";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing                   \n\n";
 
     if (!self.ScannerOn)
-        s_scan = "“‘ Turn Scanner on           \n";
+        s_scan = "ÂÂ“Â‘ Turn Scanner on           \n";
     else
-        s_scan = "“‘ Turn Scanner off          \n";
+        s_scan = "ÂÂ“Â‘ Turn Scanner off          \n";
 
     if (self.tf_items_flags & NIT_SCANNER_ENEMY)
-        s_scane = "”‘ Do not scan for enemies   \n";
+        s_scane = "ÂÂ”Â‘ Do not scan for enemies   \n";
     else
-        s_scane = "”‘ Scan for enemies          \n";
+        s_scane = "ÂÂ”Â‘ Scan for enemies          \n";
 
 
     if (self.tf_items_flags & NIT_SCANNER_FRIENDLY)
-        s_scanf = "•‘ Do not scan for friendlies\n";
+        s_scanf = "ÂÂ•Â‘ Do not scan for friendlies\n";
     else
-        s_scanf = "•‘ Scan for friendlies       \n";
+        s_scanf = "ÂÂ•Â‘ Scan for friendlies       \n";
 
     if (self.tf_items_flags & 4)
-        s_scansound = "–‘ Turn off scan sound       \n";
+        s_scansound = "ÂÂ–Â‘ Turn off scan sound       \n";
     else
-        s_scansound = "–‘ Turn on scan sound        \n";
+        s_scansound = "ÂÂ–Â‘ Turn on scan sound        \n";
 
     Status_Menu(self, Menu_Scout_Input, s_action, s_scan, s_scane, s_scanf, s_scansound, s_nothing);
 };
@@ -477,10 +477,10 @@ void (float inp) Menu_Spy_Input = {
 
 void (entity pe_player) Menu_Spy = {
     local string s_action  = "Action:\n\n";
-    local string s_skin    = "“‘ Disguise               \n";
-    local string s_last    = "”‘ Last disguise          \n";
+    local string s_skin    = "ÂÂ“Â‘ Disguise               \n";
+    local string s_last    = "ÂÂ”Â‘ Last disguise          \n";
     local string s_feign, s_reset;
-    local string s_nothing = "\n—‘ Nothing                ";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing                ";
 
     if (pe_player.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT) || pe_player.is_unabletospy == 1) {
         return;
@@ -488,28 +488,28 @@ void (entity pe_player) Menu_Spy = {
 
     if (invis_only) {
         if (pe_player.is_undercover == 1)
-            s_skin    = "“‘ Become visible         \n";
+            s_skin    = "ÂÂ“Â‘ Become visible         \n";
         else if (pe_player.is_undercover == 2)
-            s_skin    = "“‘ Stop going invisible   \n";
+            s_skin    = "ÂÂ“Â‘ Stop going invisible   \n";
         else
-            s_skin    = "“‘ Go invisible           \n";
+            s_skin    = "ÂÂ“Â‘ Go invisible           \n";
     } else if (pe_player.is_undercover == 2)
-        s_skin    = "“‘ Stop disguising        \n";
+        s_skin    = "ÂÂ“Â‘ Stop disguising        \n";
 
     if ((!pe_player.last_skin && !pe_player.last_team) || invis_only)
         s_last = "\n";
 
     if (pe_player.is_feigning)
-        s_feign = "•‘ Stop feigning          \n";
+        s_feign = "ÂÂ•Â‘ Stop feigning          \n";
     else
-        s_feign = "•‘ Start feigning (silent)\n";
+        s_feign = "ÂÂ•Â‘ Start feigning (silent)\n";
 
     if (pe_player.undercover_team && pe_player.undercover_skin)
-        s_reset = "–‘ Reset disguise         \n";
+        s_reset = "ÂÂ–Â‘ Reset disguise         \n";
     else if (pe_player.undercover_team)
-        s_reset = "–‘ Reset color            \n";
+        s_reset = "ÂÂ–Â‘ Reset color            \n";
     else if (pe_player.undercover_skin)
-        s_reset = "–‘ Reset skin             \n";
+        s_reset = "ÂÂ–Â‘ Reset skin             \n";
     else
         s_reset = "\n";
 
@@ -547,16 +547,16 @@ void () Menu_Spy_Skin = {
         return;
 
     local string s_disguise = "Disguise as enemy:\n\n";
-    local string s_scout    = "“‘ Scout      \n";
-    local string s_sniper   = "”‘ Sniper     \n";
-    local string s_soldier  = "•‘ Soldier    \n";
-    local string s_demoman  = "–‘ Demoman    \n";
-    local string s_medic    = "—‘ Medic      \n";
-    local string s_hwguy    = "˜‘ HWGuy      \n";
-    local string s_pyro     = "™‘ Pyro       \n";
-    local string s_spy      = "š‘ Spy        \n";
-    local string s_engineer = "›‘ Engineer   \n";
-    local string s_nothing  = "\n’‘ Nothing    \n";
+    local string s_scout    = "ÂÂ“Â‘ Scout      \n";
+    local string s_sniper   = "ÂÂ”Â‘ Sniper     \n";
+    local string s_soldier  = "ÂÂ•Â‘ Soldier    \n";
+    local string s_demoman  = "ÂÂ–Â‘ Demoman    \n";
+    local string s_medic    = "ÂÂ—Â‘ Medic      \n";
+    local string s_hwguy    = "ÂÂ˜Â‘ HWGuy      \n";
+    local string s_pyro     = "ÂÂ™Â‘ Pyro       \n";
+    local string s_spy      = "ÂÂšÂ‘ Spy        \n";
+    local string s_engineer = "ÂÂ›Â‘ Engineer   \n";
+    local string s_nothing  = "\nÂÂ’Â‘ Nothing    \n";
 
     Status_Menu(self, Menu_Spy_Skin_Input, s_disguise, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_nothing);
 };
@@ -579,11 +579,11 @@ void (float inp) Menu_Spy_Color_Input = {
 void () Menu_Spy_Color = {
     local float color       = stof(infokey(self, "bottomcolor"));
     local string s_disguise = "Disguise as:\n\n";
-    local string s_blue     = "“‘ Blue team  \n";
-    local string s_red      = "”‘ Red team   \n";
-    local string s_yellow   = "•‘ Yellow team\n";
-    local string s_green    = "–‘ Green team \n";
-    local string s_nothing  = "\n—‘ Nothing    ";
+    local string s_blue     = "ÂÂ“Â‘ Blue team  \n";
+    local string s_red      = "ÂÂ”Â‘ Red team   \n";
+    local string s_yellow   = "ÂÂ•Â‘ Yellow team\n";
+    local string s_green    = "ÂÂ–Â‘ Green team \n";
+    local string s_nothing  = "\nÂÂ—Â‘ Nothing    ";
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch\n");
@@ -624,11 +624,11 @@ void (float inp) Menu_Demoman_Input = {
 
 void () Menu_Demoman = {
     local string s_detpack = "Set detpack for:\n\n";
-    local string s_5       = "“‘ 5 seconds  \n";
-    local string s_20      = "”‘ 20 seconds \n";
-    local string s_50      = "•‘ 50 seconds \n";
-    local string s_255     = "–‘ 255 seconds\n";
-    local string s_nothing = "\n—‘ Nothing    ";
+    local string s_5       = "ÂÂ“Â‘ 5 seconds  \n";
+    local string s_20      = "ÂÂ”Â‘ 20 seconds \n";
+    local string s_50      = "ÂÂ•Â‘ 50 seconds \n";
+    local string s_255     = "ÂÂ–Â‘ 255 seconds\n";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing    ";
 
     Status_Menu(self, Menu_Demoman_Input, s_detpack, s_5, s_20, s_50, s_255, s_nothing);
 }
@@ -642,7 +642,7 @@ void (float inp) Menu_Demoman_Cancel_Input = {
 
 void () Menu_Demoman_Cancel = {
     local string s_detpack = "Setting detpack...\n\n";
-    local string s_cancel  = "“‘ Cancel!\n\n\n\n\n";
+    local string s_cancel  = "ÂÂ“Â‘ Cancel!\n\n\n\n\n";
 
     Status_Menu(self, Menu_Demoman_Cancel_Input, s_detpack, s_cancel);
 }
@@ -715,35 +715,35 @@ void (entity player) Menu_Engineer = {
     local string s_disp    = "\n";
     local string s_dsentry = "\n";
     local string s_ddisp   = "\n";
-    local string s_nothing = "\n—‘ Nothing             ";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing             ";
 
     if (player.has_sentry) {
         s_sentry = "\n";
-        s_dsentry = "•‘ Destroy sentry gun  \n";
+        s_dsentry = "ÂÂ•Â‘ Destroy sentry gun  \n";
         te = findradius(player.origin, 100);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == player)
-                    s_dsentry = "•‘ Dismantle sentry gun\n";
+                    s_dsentry = "ÂÂ•Â‘ Dismantle sentry gun\n";
             }
             te = te.chain;
         }
     } else if (player.ammo_cells >= 130) {
-        s_sentry = "“‘ Build sentry gun    \n";
+        s_sentry = "ÂÂ“Â‘ Build sentry gun    \n";
     }
 
     if (player.has_dispenser) {
-        s_ddisp = "–‘ Destroy dispenser   \n";
+        s_ddisp = "ÂÂ–Â‘ Destroy dispenser   \n";
         te = findradius(player.origin, 100);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == player)
-                    s_ddisp = "–‘ Dismantle dispenser \n";
+                    s_ddisp = "ÂÂ–Â‘ Dismantle dispenser \n";
             }
             te = te.chain;
         }
     } else if (player.ammo_cells >= 100) {
-            s_disp = "”‘ Build dispenser     \n";
+            s_disp = "ÂÂ”Â‘ Build dispenser     \n";
     }
 
     if ((player.has_dispenser || player.has_sentry) && !player.has_menutimer) {
@@ -786,23 +786,23 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 void () Menu_EngineerFix_Dispenser = {
     local string s_action = "Dispenser maintenance:\n\n";
     local string s_ammo, s_armor, s_repair;
-    local string s_nothing = "\n—‘ Nothing     \n\n";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing     \n\n";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < 400)
             || (self.ammo_nails > 0 && self.building.ammo_nails < 600)
             || (self.ammo_rockets > 0 && self.building.ammo_rockets < 300)
             || (self.ammo_cells > 0 && self.building.ammo_cells < 400))
-        s_ammo = "“‘ Insert ammo \n";
+        s_ammo = "ÂÂ“Â‘ Insert ammo \n";
     else
         s_ammo = "\n";
 
     if (self.armorvalue > 0 && self.building.armorvalue < 500)
-        s_armor = "”‘ Insert armor\n";
+        s_armor = "ÂÂ”Â‘ Insert armor\n";
     else
         s_armor = "\n";
 
     if (old_spanner && self.building.health < self.building.max_health)
-        s_repair = "•‘ Repair      \n";
+        s_repair = "ÂÂ•Â‘ Repair      \n";
     else
         s_repair = "\n";
 
@@ -827,10 +827,10 @@ void (float inp) Menu_EngineerFix_SentryGun_Rotate_Input = {
 
 void () Menu_EngineerFix_SentryGun_Rotate = {
     local string action  = "Rotate sentry gun:\n\n";
-    local string rotl    = "“‘ anticlockwise\n";
-    local string rot180  = "”‘ 180 degrees  \n";
-    local string rotr    = "•‘ clockwise    \n";
-    local string nothing = "\n—‘ Nothing      \n";
+    local string rotl    = "ÂÂ“Â‘ anticlockwise\n";
+    local string rot180  = "ÂÂ”Â‘ 180 degrees  \n";
+    local string rotr    = "ÂÂ•Â‘ clockwise    \n";
+    local string nothing = "\nÂÂ—Â‘ Nothing      \n";
 
     if (!self.building.real_owner.has_sentry || self.building.real_owner != self
                 || self.classname != "player" || self.building == world)
@@ -865,26 +865,26 @@ void () Menu_EngineerFix_SentryGun = {
 
     local string action  = "Sentry gun maintenance:\n\n";
     local string putammo, upgrade, repair, rotate;
-    local string nothing = "\n—‘ Nothing    ";
+    local string nothing = "\nÂÂ—Â‘ Nothing    ";
 
     if ((self.ammo_shells > 0 && self.building.ammo_shells < self.building.maxammo_shells)
             || (self.ammo_rockets > 0 && self.building.weapon == 3 && self.building.ammo_rockets < self.building.maxammo_rockets))
-        putammo = "“‘ Insert ammo\n";
+        putammo = "ÂÂ“Â‘ Insert ammo\n";
     else
         putammo = "\n";
 
     if (self.building.weapon < 3 && self.ammo_cells >= 130)
-        upgrade = "”‘ Upgrade    \n";
+        upgrade = "ÂÂ”Â‘ Upgrade    \n";
     else
         upgrade = "\n";
 
     if (self.building.health < self.building.max_health)
-        repair = "•‘ Repair     \n";
+        repair = "ÂÂ•Â‘ Repair     \n";
     else
         repair = "\n";
 
     if (self.building.real_owner == self)
-        rotate  = "–‘ Rotate     \n";
+        rotate  = "ÂÂ–Â‘ Rotate     \n";
     else
         rotate = "\n";
 
@@ -965,18 +965,18 @@ void (float inp) Menu_Dispenser_Input = {
 void () Menu_Dispenser = {
     local string s_action  = "Use dispenser:\n\n";
     local string s_ammo, s_armor;
-    local string s_nothing = "\n—‘ Nothing            \n\n";
+    local string s_nothing = "\nÂÂ—Â‘ Nothing            \n\n";
 
     if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
             || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
             || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
             || (self.building.ammo_cells > 0 && self.ammo_cells < self.maxammo_cells))
-        s_ammo = "“‘ Withdraw some ammo \n";
+        s_ammo = "ÂÂ“Â‘ Withdraw some ammo \n";
     else
         s_ammo = "\n";
 
     if (self.building.armorvalue > 0 && self.armorvalue < self.maxarmor)
-        s_armor = "”‘ Withdraw some armor\n";
+        s_armor = "ÂÂ”Â‘ Withdraw some armor\n";
     else
         s_armor = "\n";
 
@@ -992,7 +992,7 @@ void (float inp) Menu_Engineer_Cancel_Input = {
 
 void () Menu_Engineer_Cancel = {
     local string s_build = "Building...\n\n";
-    local string s_cancel  = "“‘ Cancel!\n\n\n\n\n";
+    local string s_cancel  = "ÂÂ“Â‘ Cancel!\n\n\n\n\n";
 
     Status_Menu(self, Menu_Engineer_Cancel_Input, s_build, s_cancel);
 }
