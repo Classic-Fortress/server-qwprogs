@@ -18,8 +18,8 @@ Available options:
 #pragma warning error Q105 /*too few parms*/
 #pragma warning error Q106 /*assignment to constant/lvalue*/
 #pragma warning disable Q208 /*system crc unknown*/
-#pragma warning disable F211 /*system crc outdated (eg: dp's csqc)*/
-#pragma warning disable F301 /*non-utf-8 strings*/
+#pragma warning disable F211 /*system crc outdated (eg: dp's csqc)*/ 
+#pragma warning enable F301 /*non-utf-8 strings*/
 #pragma warning enable F302 /*uninitialised locals*/
 
 
