@@ -39,8 +39,9 @@ string (float class) CF_GetRandomClassTip {
 
     if (self.tip_type == 1) {
         // general tip
-        tiptype = "Çåîåòáì ôéŵ:\n";
-
+        //tiptype = "Çåîåòáì ôéŵ:\n";
+        tiptype = Q"\sgeneral tip\s:\n";
+        
         while (strlen(line1) == 0) {
             if (!self.display_tip)
                 self.display_tip = ceil(random() * 14);
