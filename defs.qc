@@ -315,12 +315,12 @@ void (entity e, vector min, vector max) setsize = #4;
 // #5 was removed
 // #6 was removed (was: break)
 float () random = #7;        // returns 0 - 1
-//void (entity e, float chan, string samp, float vol, float atten) sound = #8;
+void (entity e, float chan, string samp, float vol, float atten) sound = #8;
 vector(vector v) normalize = #9;
 void (string e) error = #10;
 void (string e) objerror = #11;
 float (vector v) vlen = #12;
-//float (vector v) vectoyaw = #13;
+float (vector v) vectoyaw = #13;
 entity()spawn = #14;
 void (entity e) remove = #15;
 
@@ -336,25 +336,25 @@ entity(entity start,.string fld, string match) find = #18;
 string(string s) precache_sound = #19;
 string(string s) precache_model = #20;
 void (entity client, string s) stuffcmd = #21;
-//entity(vector org, float rad) findradius = #22;
-//void (...) bprint = #23;
+entity(vector org, float rad) findradius = #22;
+void (...) bprint = #23;
 void (...) bprint2 = #23;
 void (...) bprint3 = #23;
 void (...) bprint4 = #23;
-//void (...) sprint = #24;
+void (...) sprint = #24;
 void (...) sprint2 = #24;
 void (...) sprint3 = #24;
-//void (...) dprint = #25;
+void (...) dprint = #25;
 string(float f) ftos = #26;
 string(vector v) vtos = #27;
 void () coredump = #28;      // prints all edicts
 void () traceon = #29;       // turns statment trace on
 void () traceoff = #30;
 void (entity e) eprint = #31;        // prints an entire edict
-//float (float yaw, float dist) walkmove = #32;        // returns TRUE or FALSE
+float (float yaw, float dist) walkmove = #32;        // returns TRUE or FALSE
 // #33 was removed
 float () droptofloor = #34;     // TRUE if landed on floor
-//void (float style, string value) lightstyle = #35;
+void (float style, string value) lightstyle = #35;
 float (float v) rint = #36;  // round to nearest int
 float (float v) floor = #37; // largest integer <= v
 float (float v) ceil = #38;  // smallest integer >= v
@@ -371,7 +371,7 @@ void (vector o, vector d, float color, float count) particle = #48;
 void () ChangeYaw = #49;     // turn towards self.ideal_yaw
                                                 // at self.yaw_speed
 // #50 was removed
-//vector(vector v) vectoangles = #51;
+vector(vector v) vectoangles = #51;
 
 //
 // direct client message generation
@@ -391,13 +391,13 @@ void (float step) movetogoal = #67;
 
 string(string s) precache_file = #68;        // no effect except for -copy
 void (entity e) makestatic = #69;
-//void (string s) changelevel = #70;
+void (string s) changelevel = #70;
 
 //#71 was removed
 
 void (string var, string val) cvar_set = #72;        // sets cvar.value
 
-//void (...) centerprint = #73;        // sprint, but in middle
+void (...) centerprint = #73;        // sprint, but in middle
 
 void (vector pos, string samp, float vol, float atten) ambientsound = #74;
 
@@ -421,10 +421,10 @@ float (float min, float value, float max) bound                     = #96;
 float (float x, float y) pow                                        = #97;
 
 float (string s) strlen                                             = #114;
-//string (string s1, string s2) strcat                                = #115;
+string (string s1, string s2) strcat                                = #115;
 string (string s, float start, float count) substr                  = #116;
 string (string s, ...) strzone                                      = #118;
-//void (string s, ...) strunzone                                      = #119;
+void (string s, ...) strunzone                                      = #119;
 
 void() calltimeofday						    = #231;  // force server to call mod function timeofday
 
