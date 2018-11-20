@@ -1,6 +1,6 @@
 qwprogs.dat
-fteextensions.qc
 defs.qc
+fteextensions.qc
 qw.qc
 debug.qc
 status.qc
