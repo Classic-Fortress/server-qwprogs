@@ -39,7 +39,6 @@ string (float class) CF_GetRandomClassTip {
 
     if (self.tip_type == 1) {
         // general tip
-        //tiptype = "Çåîåòáì ôéŵ:\n";
         tiptype = Q"\sgeneral tip\s:\n";
         
         while (strlen(line1) == 0) {
@@ -94,7 +93,7 @@ string (float class) CF_GetRandomClassTip {
         }
     } else {
         // class tip
-        tiptype = "Ãìáóó Ôéŵ:\n";
+        tiptype = Q"\sclass tip\s:\n";
 
         if (class == PC_SCOUT) {
             while (strlen(line1) == 0) {
@@ -609,7 +608,7 @@ void (entity pl) RefreshStatusBar = {
 
     // status line 1 column 1 - grenade timer
     if (pl.StatusGrenTime > 0) {
-        st1 = strcat("Çòåîáäå: ", ftos(pl.StatusGrenTime));
+        st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
         if (pl.fragstreak > 1 && pl.caps)
             st1 = strcat(st1, " sec");
         else
@@ -618,14 +617,14 @@ void (entity pl) RefreshStatusBar = {
         st1 = "";
     // status line 1 column 3 - kill streak & caps
     if (pl.fragstreak > 1) {
-        st2 = "Ëéìì óôòåáë: ";
+        st2 = Q"\sKill Streak\s: ";
         st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
     } else
         st2 = "";
     if (pl.caps) {
         if (pl.fragstreak > 1)
             st2 = strcat(st2, "  ");
-        st3 = "Ãáŵó: ";
+        st3 = Q"\sCaps\s: ";
         st3 = strcat(st3, strpadl(ftos(pl.caps),2));
     } else
         st3 = "";
@@ -698,7 +697,7 @@ void (entity pl) RefreshStatusBar = {
 
     // status line 3 column 2 - clip size
     if (pl.tfstate & TFSTATE_RELOADING) {
-        st2 = "Ãìéŵ: ";
+        st2 = Q"\sClip\s: ";
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
             st2 = strcat(st2, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
             st2 = strcat(st2, "%  ");
@@ -715,10 +714,10 @@ void (entity pl) RefreshStatusBar = {
     }
 
     // status line 3 column 3 - grenade 1 count
-    st3 = strcat("Çòåîḟ: ", ftos(pl.no_grenades_1));
+    st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
 
     // status line 3 column 4 - grenade 2 count
-    st4 = strcat("ÇòåîĠ: ", ftos(pl.no_grenades_2));
+    st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
 
     // status line 3
     s3 = strcat(st1, st2);
@@ -752,7 +751,7 @@ string(float num) BlueScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Âìõå:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sBlue\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) RedScoreToString =
@@ -760,7 +759,7 @@ string(float num) RedScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Òåä :", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sRed\s :", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) YellowScoreToString =
@@ -768,7 +767,7 @@ string(float num) YellowScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Ùåìì:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sYell\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) GreenScoreToString =
@@ -776,7 +775,7 @@ string(float num) GreenScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Çòåî:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sGren\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(entity pl) ClipSizeToString =
@@ -813,7 +812,7 @@ string(entity pl) ClipSizeToString =
     if (num > 99)
         num = 99;
 
-    st = "Ãìéŵ: ";
+    st = Q"\sClip\s: ";
     st = strcat(st, strpadl(ftos(floor(num)), 2));
     st = strcat(st, "/");
     st = strcat(st, strpadr(ftos(max), 3));
@@ -872,9 +871,9 @@ string(entity pl) DisguiseToString =
 
     if (pl.is_undercover == 1) {
         if (self.items & IT_INVISIBILITY) {
-            st = "Éîöéóéâìå";
+            st = Q"\sInvisible\s";
         } else {
-            st = "Õîäåòãïöåò: ";
+            st = Q"\sUndercover\s: ";
             if (pl.undercover_team) {
                 st = strcat(st, TeamToString(pl.undercover_team));
                 st = strcat(st, " ");
@@ -884,7 +883,7 @@ string(entity pl) DisguiseToString =
         }
     } else if (pl.is_undercover == 2) {
         if (invis_only) {
-            st = "Éîöéóéâìå in ";
+            st = Q"\sInvisible\s in ";
             st = strcat(st, ftos(pl.undercover_timer));
             st = strcat(st, " seconds");
         } else {
@@ -913,7 +912,7 @@ string(entity pl) DisguiseToString =
             } else if (pl.undercover_skin) {
                 skin = strcat(skin, ClassToString(pl.undercover_skin));
             }
-            st = "Õîäåòãïöåò: ";
+            st = Q"\sUndercover\s: ";
             st = strcat(st, team);
             st = strcat(st, skin);
         }
@@ -946,14 +945,14 @@ string(entity pl) DetpackToString =
     local string st = "";
 
     if (pl.is_detpacking) {
-        st = "Äåôŵáãë: ";
+        st = Q"\sDetpack\s: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " (");
         st = strcat(st, ftos(pl.is_detpacking));
         st = strcat(st, ")");
         st = strcat(st, " seconds left");
     } else if (pl.detpack_left) {
-        st = "Äåôŵáãë: ";
+        st = Q"\sDetpack\s: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " seconds left");
     }
@@ -966,7 +965,7 @@ string(entity pl) AuraToString =
     local string st;
 
     if (medicaura) {
-        st = "Èåáìéîç Áõòá: ";
+        st = Q"\sHealing Aura\s: ";
 
         if (pl.aura_active) {
             if (time < pl.aura_healtime && pl.aura_healcount) {
@@ -994,7 +993,7 @@ string(entity pl) AuraToString =
 string(entity pl) AssaultCannonToString =
 {
     if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_LOCK))
-        return "Áóóáõìô Ãáîîïî Ìïãëåä";
+        return Q"\sAssault Cannon Locked\s";
     else
         return "";
 };
@@ -1040,11 +1039,11 @@ string(entity pl) ScannerToString =
     }
 
     if (pl.ScannerOn != 1) {
-        return "Óãáîîåò: off";
+        return Q"\sScanner\s: off";
     }
 
     if (te.health > 0) {
-        st = "Óãáîîåò: ";
+        st = Q"\sScanner\s: ";
         st = strcat(st, TeamToString(te.team_no));
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
