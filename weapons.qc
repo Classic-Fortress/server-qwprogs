@@ -591,7 +591,7 @@ void () W_FireMedikit = {
     }
 };
 
-vector()wall_velocity =
+vector () wall_velocity =
 {
     local vector vel;
 
