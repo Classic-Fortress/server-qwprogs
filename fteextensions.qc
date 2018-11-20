@@ -1504,7 +1504,7 @@ void(string s, ...) dprint = #25; /*
 
 #endif
 #if defined(CSQC) || defined(QWSSQC)
-/*void(string s, ...) dprint = #25; /*
+void(string s, ...) dprint = #25; /*
 		QW: Unconditionally prints the given message on the server's console.  Arguments will be concatenated into a single message. */
 
 #endif
