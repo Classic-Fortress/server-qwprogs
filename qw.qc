@@ -504,6 +504,18 @@ float deathmsg;                 // Global, which is set before every T_Damage, t
 float intermission_running;
 float intermission_exittime;
 
+// q3 defs - enable q3f map ents
+.string allowteams;
+.string give;
+.string active_all_sound;
+.string model;
+
+// add clientkill ent defs
+.float force;
+.float free;
+
+
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {

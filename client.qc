@@ -912,7 +912,7 @@ float () CloseToSpawnPoint = {
     return 0;
 };
 
-void (float force, float free) ClientKill = {
+void () ClientKill = {
     local entity te;
     local float timeleft;
 
@@ -923,7 +923,7 @@ void (float force, float free) ClientKill = {
     if (self.playerclass == PC_UNDEFINED)
         return;
 
-    if (self.suicide_time > time && !force) {
+    if (self.suicide_time > time && self.force == 0) {
         timeleft = self.suicide_time - time;
         sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
         return;
@@ -942,7 +942,7 @@ void (float force, float free) ClientKill = {
     // players can't suicide again for 10 seconds
     self.suicide_time = time + 5 + random() * 5;
 
-    if (free && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
+    if (self.free == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
         TeamFortress_SetupRespawn(FALSE);
     } else {
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
@@ -965,6 +965,8 @@ void (float force, float free) ClientKill = {
         self.th_die();
     }
 
+    self.force = 0;
+    self.free = 0;
     self.health = -1;
     self.deadflag = DEAD_RESPAWNABLE;
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;

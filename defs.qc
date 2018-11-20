@@ -60,7 +60,7 @@ void () StartFrame;
 void () PlayerPreThink;         // Called every frame before physics are run
 void () PlayerPostThink;        // Called every frame after physics are run
 
-void (float force, float free) ClientKill;             // Player entered the suicide command
+void () ClientKill;             // Player entered the suicide command
 void () ClientConnect;          // called when a player connects to a server
 void () PutClientInServer;      // call after setting the parm1... parms
 void () ClientDisconnect;       // called when a player disconnects from a server
@@ -456,16 +456,6 @@ void () SUB_Remove;
 void (entity targ, entity inflictor, entity attacker, float damage) T_Damage;
 float (entity e, float healamount, float ignore) T_Heal;        // health function
 float (entity targ, entity inflictor) CanDamage;
-
-
-//
-// q3 defs
-// 
-.string allowteams;
-.string give;
-.string active_all_sound;
-.string model;
-
 
 // enable qw in fteextensions
 #define QUAKEWORLD
