@@ -344,7 +344,7 @@ void (...) bprint4 = #23;
 void (...) sprint = #24;
 void (...) sprint2 = #24;
 void (...) sprint3 = #24;
-void (...) dprint = #25;
+//void (...) dprint = #25;
 string(float f) ftos = #26;
 string(vector v) vtos = #27;
 void () coredump = #28;      // prints all edicts
@@ -465,3 +465,7 @@ float (entity targ, entity inflictor) CanDamage;
 .string give;
 .string active_all_sound;
 .string model;
+
+
+// enable qw in fteextensions
+#define QUAKEWORLD
