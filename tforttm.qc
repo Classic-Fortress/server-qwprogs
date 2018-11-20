@@ -209,14 +209,14 @@ float (float tno) TeamFortress_TeamSet = {
     if (!self.deadflag) {
         if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
             self.has_changedteam = 1;
-            self.force = 1;
-            self.free = 1;
+            self.clientkillforce = 1;
+            self.clientkillfree = 1;
             ClientKill();
             self.has_changedteam = 0;
         } else
         {
-            self.force = 1;
-            self.free = 0; 
+            self.clientkillforce = 1;
+            self.clientkillfree = 0; 
             ClientKill();  
         }
     }

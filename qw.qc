@@ -511,8 +511,8 @@ float intermission_exittime;
 .string model;
 
 // add clientkill ent defs
-.float force;
-.float free;
+.float clientkillforce;
+.float clientkillfree;
 
 
 
