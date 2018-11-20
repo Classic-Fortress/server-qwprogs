@@ -14,17 +14,13 @@ Available options:
 */
 #pragma noref 1
 //#pragma flag enable logicops
-#pragma warning error Q101 /*too many parms*/
-#pragma warning error Q105 /*too few parms*/
-#pragma warning error Q106 /*assignment to constant/lvalue*/
-#pragma warning disable Q208 /*system crc unknown*/
-#pragma warning disable F211 /*system crc outdated (eg: dp's csqc)*/ 
-#pragma warning enable F301 /*non-utf-8 strings*/
-#pragma warning enable F302 /*uninitialised locals*/
-
-
-#define QUAKEWORLD
-
+#pragma warning error Q101 /*too many parms. The vanilla qcc didn't validate properly, hence why fteqcc normally treats it as a warning.*/
+#pragma warning error Q105 /*too few parms. The vanilla qcc didn't validate properly, hence why fteqcc normally treats it as a warning.*/
+#pragma warning error Q106 /*assignment to constant/lvalue. Define them as var if you want to initialise something.*/
+#pragma warning error Q208 /*system crc unknown. Compatibility goes out of the window if you disable this.*/
+#pragma warning disable F211 /*system crc outdated (eg: dp's csqc). Note that this may trigger emulation.*/
+#pragma warning enable F301 /*non-utf-8 strings. Think of the foreigners! Also think of text editors that insist on screwing up your char encodings.*/
+#pragma warning enable F302 /*uninitialised locals. They usually default to 0 in qc (except in recursive functions), but its still probably a bug*/
 #if !defined(CSQC) && !defined(NQSSQC) && !defined(QWSSQC)&& !defined(MENU)
 #ifdef QUAKEWORLD
 #define QWSSQC
@@ -337,8 +333,8 @@ void() StartFrame;	/* Called at the start of each new physics frame. Player enti
 void() PlayerPreThink;	/* With Prediction(QW compat/FTE default): Called before the player's input commands are processed.
 No Prediction(NQ compat): Called AFTER the player's movement intents have already been processed (ie: velocity will have already changed according to input_*, but before the actual position change. */
 void() PlayerPostThink;	/* Called after the player's input commands are processed. */
-//void() ClientKill;	/* Called in response to 'cmd kill' (or just 'kill'). */
-//void(optional float csqcactive) ClientConnect;	/* Called after the connecting client has finished loading and is ready to receive active entities. Note that this is NOT the first place that a client might be referred to. */
+void() ClientKill;	/* Called in response to 'cmd kill' (or just 'kill'). */
+void(optional float csqcactive) ClientConnect;	/* Called after the connecting client has finished loading and is ready to receive active entities. Note that this is NOT the first place that a client might be referred to. */
 void() PutClientInServer;	/* Enginewise, this is only ever called immediately after ClientConnect and is thus a little redundant. Modwise, this is also called for respawning a player etc. */
 void() ClientDisconnect;	/* Called once a client disconnects or times out. Not guarenteed to be called on map changes. */
 void() SetNewParms;	/* Called without context when a new client initially connects (before ClientConnect is even called). This function is expected to only set the parm* globals so that they can be decoded properly later. You should not rely on 'self' being set. */
@@ -1226,6 +1222,7 @@ const float LFIELD_ROTATION = 13;
 const float LFIELD_DIETIME = 14;
 const float LFIELD_RGBDECAY = 15;
 const float LFIELD_RADIUSDECAY = 16;
+const float LFIELD_STYLESTRING = 17;
 const float LFLAG_NORMALMODE = 1;
 const float LFLAG_REALTIMEMODE = 2;
 const float LFLAG_LIGHTMAP = 4;
@@ -1403,8 +1400,8 @@ void() breakpoint = #6; /*
 float() random = #7; /*
 		Returns a random value between 0 and 1. Be warned, this builtin can return 1 in most engines, which can break arrays. */
 
-//void(entity e, float chan, string samp, float vol, float atten, optional float speedpct, optional float flags, optional float timeofs) sound = #8; /*
-/*		Starts a sound centered upon the given entity.
+void(entity e, float chan, string samp, float vol, float atten, optional float speedpct, optional float flags, optional float timeofs) sound = #8; /*
+		Starts a sound centered upon the given entity.
 		chan is the entity sound channel to use, channel 0 will allow you to mix many samples at once, others will replace the old sample
 		'samp' must have been precached first
 		if specified, 'speedpct' should normally be around 100 (or =0), 200 for double speed or 50 for half speed.
@@ -1423,7 +1420,7 @@ void(string e) objerror = #11; /*
 float(vector v) vlen = #12; /*
 		Returns the square root of the dotproduct of a vector with itself. Or in other words the length of a distance vector, in quake units. */
 
-/*float(vector v, optional entity reference) vectoyaw = #13; /*
+float(vector v, optional entity reference) vectoyaw = #13; /*
 		Given a direction vector, returns the yaw angle in which that direction vector points. If an entity is passed, the yaw angle will be relative to that entity's gravity direction. */
 
 entity() spawn = #14; /*
@@ -1474,7 +1471,7 @@ void(entity client, float flags, string s) stuffcmdflags = #0:stuffcmdflags; /* 
 
 #endif
 #if defined(CSQC) || defined(SSQC)
-/*entity(vector org, float rad, optional .entity chainfield) findradius = #22; /*
+entity(vector org, float rad, optional .entity chainfield) findradius = #22; /*
 		Finds all entities within a distance of the 'org' specified. One entity is returned directly, while other entities are returned via that entity's .chain field. */
 
 #endif
@@ -1484,7 +1481,7 @@ void(string s, optional string s2, optional string s3, optional string s4, optio
 
 #endif
 #if defined(QWSSQC)
-/*void(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) bprint = #23; /*
+void(float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7) bprint = #23; /*
 		QW: Concatenates all string arguments, and prints the messsage on the console of only all clients who's 'msg' infokey is set lower or equal to the supplied 'msglvl' argument. */
 
 #endif
@@ -1494,7 +1491,7 @@ void(entity client, string s, optional string s2, optional string s3, optional s
 
 #endif
 #if defined(QWSSQC)
-/*void(entity client, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6) sprint = #24; /*
+void(entity client, float msglvl, string s, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6) sprint = #24; /*
 		QW: Concatenates all string arguments, and prints the messsage on the named client's console, but only if that client's 'msg' infokey is set lower or equal to the supplied 'msglvl' argument. */
 
 #endif
@@ -1527,7 +1524,7 @@ void() traceoff = #30; /*
 void(entity e) eprint = #31; /*
 		Debugging builtin that prints all fields of the given entity to the console. */
 
-/*float(float yaw, float dist, optional float settraceglobals) walkmove = #32; /*
+float(float yaw, float dist, optional float settraceglobals) walkmove = #32; /*
 		Attempt to walk the entity at a given angle for a given distance.
 		if settraceglobals is set, the trace_* globals will be set, showing the results of the movement.
 		This function will trigger touch events. */
@@ -1535,7 +1532,7 @@ void(entity e) eprint = #31; /*
 float() droptofloor = #34; /*
 		Instantly moves the entity downwards until it hits the ground. If the entity is in solid or would need to drop more than 'pr_droptofloorunits' quake units, its position will be considered invalid and the builtin will abort, returning FALSE, otherwise TRUE. */
 
-/*void(float lightstyle, string stylestring, optional vector rgb) lightstyle = #35; /*
+void(float lightstyle, string stylestring, optional vector rgb) lightstyle = #35; /*
 		Specifies an auto-animating string that specifies the light intensity for entities using that lightstyle.
 		a is off, z is fully lit. Should be lower case only.
 		rgb will recolour all lights using that lightstyle. */
@@ -1581,7 +1578,7 @@ void(vector pos, vector dir, float colour, float count) particle = #48; /*
 void() changeyaw = #49; /*
 		Changes the self.angles_y field towards self.ideal_yaw by up to self.yaw_speed. */
 
-/*vector(vector fwd, optional vector up) vectoangles = #51; /*
+vector(vector fwd, optional vector up) vectoangles = #51; /*
 		Returns the angles (+x=UP) required to orient an entity to look in the given direction. The 'up' argument is required if you wish to set a roll angle, otherwise it will be limited to just monster-style turning. */
 
 #endif
@@ -1622,7 +1619,7 @@ void(entity e) makestatic = #69; /*
 
 #endif
 #ifdef SSQC
-/*void(string mapname, optional string newmapstartspot) changelevel = #70; /*
+void(string mapname, optional string newmapstartspot) changelevel = #70; /*
 		Attempts to change the map to the named map. If 'newmapstartspot' is specified, the state of the current map will be preserved, and the argument will be passed to the next map in the 'startspot' global, and the next map will be loaded from archived state if it was previously visited. If not specified, all archived map states will be purged. */
 
 #endif
@@ -1632,7 +1629,7 @@ void(string cvarname, string valuetoset) cvar_set = #72; /*
 
 #endif
 #ifdef SSQC
-//void(entity ent, string text, optional string text2, optional string text3, optional string text4, optional string text5, optional string text6, optional string text7) centerprint = #73;
+void(entity ent, string text, optional string text2, optional string text3, optional string text4, optional string text5, optional string text6, optional string text7) centerprint = #73;
 #endif
 #if defined(CSQC) || defined(SSQC)
 void (vector pos, string samp, float vol, float atten) ambientsound = #74;
@@ -1726,7 +1723,7 @@ float(string builtinname) builtin_find = #100; /*
 
 #endif
 #if defined(CSQC) || defined(SSQC)
-//float(float value) anglemod = #102;
+float(float value) anglemod = #102;
 #endif
 #ifdef SSQC
 void(string slot, string picname, float x, float y, float zone, optional entity player) showpic = #104; /* Part of TEI_SHOWLMP2*/
@@ -1761,13 +1758,13 @@ int(filestream fhandle, optional int newsize) fsize = #0:fsize; /* Part of FTE_Q
 
 #if defined(CSQC) || defined(SSQC)
 float(string s) strlen = #114; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS*/
-//string(string s1, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7, optional string s8) strcat = #115; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS*/
+string(string s1, optional string s2, optional string s3, optional string s4, optional string s5, optional string s6, optional string s7, optional string s8) strcat = #115; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS*/
 string(string s, float start, float length) substring = #116; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS*/
 vector(string s) stov = #117; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS*/
 string(string s, ...) strzone = #118; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS
 		Create a semi-permanent copy of a string that only becomes invalid once strunzone is called on the string (instead of when the engine assumes your string has left scope). This builtin has become redundant in FTEQW due to the FTE_QC_PERSISTENTTEMPSTRINGS extension and is now functionally identical to strcat for compatibility with old engines+mods. */
 
-/*void(string s) strunzone = #119; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS
+void(string s) strunzone = #119; /* Part of FRIK_FILE, FTE_STRINGS, ZQ_QC_STRINGS
 		Destroys a string that was allocated by strunzone. Further references to the string MAY crash the game. In FTE, this function became redundant and now does nothing. */
 
 #endif
@@ -2064,7 +2061,7 @@ float(float modidx, float framenum, int eventidx, __out float timestamp, __out i
 #endif
 #define dotproduct(v1,v2) ((vector)(v1)*(vector)(v2))
 vector(vector v1, vector v2) crossproduct = #0:crossproduct; /* Part of FTE_QC_CROSSPRODUCT
-//		Small helper function to calculate the crossproduct of two vectors. */
+		Small helper function to calculate the crossproduct of two vectors. */
 
 #if defined(CSQC) || defined(SSQC)
 float(entity pusher, vector move, vector amove) pushmove = #0:pushmove;
