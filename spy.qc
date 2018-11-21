@@ -541,9 +541,9 @@ void (float issilent) CF_Spy_FeignDeath = {
                     tfgoalitem_RemoveFromPlayer(te, self, 0);
                 if (CTF_Map == 1) {
                     if (te.goal_no == 1)
-                        bprint(PRINT_HIGH, self.netname, " ÌÏÓÔ the ÂÌÕÅ flag!\n");
+                        bprint(PRINT_HIGH, self.netname, Q" \slost\s the \sblue\s flag!\n");
                     else if (te.goal_no == 2)
-                        bprint(PRINT_HIGH, self.netname, " ÌÏÓÔ the ÒÅÄ flag!\n");
+                        bprint(PRINT_HIGH, self.netname, Q" \slost\s the \sred\s flag!\n");
                 }
             }
             te = find(te, classname, "item_tfgoal");
@@ -1151,7 +1151,7 @@ void () HallucinationTimer = {
                 stuffcmd(self.owner, "play weapons/tink1.wav\n");
             } else if (halltype2 < 0.55) {
                 CenterPrint2(self.owner, "\n\n\n",
-                             "Your team ÃÁŴÔÕÒÅÄ the flag!!");
+                             Q"Your team \scaptured\s the flag!!");
                 stuffcmd(self.owner, "play weapons/grenade.wav\n");
             } else if (halltype2 < 0.6) {
                 stuffcmd(self.owner, "play weapons/bounce.wav\n");
@@ -1203,7 +1203,7 @@ void () HallucinationTimer = {
                 stuffcmd(self.owner, "play weapons/sniper.wav\n");
             } else if (halltype2 < 0.6) {
                 CenterPrint2(self.owner, "\n\n\n",
-                             "Your flag has been ÔÁËÅÎ!!");
+                             Q"Your flag has been \staken\s!!");
                 stuffcmd(self.owner, "play weapons/flmfire2.wav\n");
             } else if (halltype2 < 0.7) {
                 stuffcmd(self.owner, "play weapons/flmgrexp.wav\n");
