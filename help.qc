@@ -71,8 +71,8 @@ void () Help_ShowSniper = {
     sprint(self, PRINT_HIGH, Q"\szoomin\s     - Zoom in (for adjusting zoom while in zoom mode)\n");
     sprint(self, PRINT_HIGH, Q"\szoomout\s    - Zoom out (for adjusting zoom while in zoom mode)\n");
     sprint(self, PRINT_HIGH, "\nSettings for Sniper:\n");
-    sprint(self, PRINT_HIGH, Q"\szf ỳfovẅ\s  - The default zoom fov which zoomtoggle zooms to (default 30)\n");
-    sprint(self, PRINT_HIGH, Q"\szS ỳfovẅ\s  - The fov increments/decrements used by zoomin/zoomout (default 20)\n");
+    sprint(self, PRINT_HIGH, Q"\szf \"fov\"\s  - The default zoom fov which zoomtoggle zooms to (default 30)\n");
+    sprint(self, PRINT_HIGH, Q"\szs \"fov\"\s  - The fov increments/decrements used by zoomin/zoomout (default 20)\n");
     sprint(self, PRINT_HIGH, "Usage: setinfo <setting> <value>\n");
 };
 
