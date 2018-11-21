@@ -39,7 +39,7 @@ string (float class) CF_GetRandomClassTip {
 
     if (self.tip_type == 1) {
         // general tip
-        tiptype = Q"\sgeneral tip\s:\n";
+        tiptype = Q"\sGeneral tip\s:\n";
         
         while (strlen(line1) == 0) {
             if (!self.display_tip)
@@ -93,7 +93,7 @@ string (float class) CF_GetRandomClassTip {
         }
     } else {
         // class tip
-        tiptype = Q"\sclass tip\s:\n";
+        tiptype = Q"\sClass tip\s:\n";
 
         if (class == PC_SCOUT) {
             while (strlen(line1) == 0) {
@@ -929,7 +929,7 @@ string(entity pl) SniperPowerToString =
         return st;
 
     if (pl.heat) {
-        st = "Ŵïṫåò: ";
+        st = Q"\spower\s: ";
         st = strcat(st, ftos(pl.heat));
         st = strcat(st, " dmg");
         if (pl.power_full) {
@@ -1048,14 +1048,14 @@ string(entity pl) ScannerToString =
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
         st = strpadr(st, 26);
-        range = "Òáîçå: ";
+        range = Q"\srange\s: ";
         range = strcat(range, RangeToString(pl));
         pad = 40 - strlen(range);
         st = strpadr(st, pad);
         st = strcat(st, range);
     } else {
-        st = "Óãáîîåò: on";
-        st = strcat(st, "  Óãáîîéîç: ");
+        st = Q"\sScanner\s: on";
+        st = strcat(st, Q"  \sScanning\s: ");
 
         if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
             scanfor = "team";
@@ -1093,14 +1093,14 @@ string(entity pl) SentryDetailsToString =
 
         if (self.sentry_ent.weapon == 3) {
             rockets = ftos(floor(self.sentry_ent.ammo_rockets));
-            ammo = strcat("  Áííï: ", strcat(shells, strcat("/", rockets)));
+            ammo = strcat(Q"  \sAmmo\s: ", strcat(shells, strcat("/", rockets)));
         } else {
-            ammo = strcat("  Áííï: ", shells);
+            ammo = strcat(Q"  \sAmmo\s: ", shells);
         }
 
-        st = strcat("Óåîôòù: ", strcat(hp, ammo));
+        st = strcat(Q"\sSentry\s: ", strcat(hp, ammo));
         st = strpadr(st, 32);
-        st = strcat(st, strcat("Ìåöåì: ", ftos(self.sentry_ent.weapon)));
+        st = strcat(st, strcat(Q"\slevel\s: ", ftos(self.sentry_ent.weapon)));
     }
 
     return st;
@@ -1113,7 +1113,7 @@ string(entity pl) BuildingToString =
     if (!buildstatus)
         return "Building...";
 
-    st = "Âõéìäéîç: ";
+    st = Q"\sBuilding\s: ";
     st = strcat(st, ftos(pl.building_percentage));
     st = strcat(st, "%");
 
