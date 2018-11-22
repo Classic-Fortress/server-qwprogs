@@ -1,4 +1,16 @@
+string (string s) prepq3fstring = {
+    string ret;
 
+    ret = strireplace("%n", "", s);
+    ret = strireplace("~", "", ret);
+    ret = strireplace("^*", "", ret);
+
+    ret = strireplace("^4blue", Q"\sblue\s", ret);
+    ret = strireplace("^1red", Q"\sred\s", ret);
+
+    ret = strcat(ret, "\n");
+    return (ret);
+}
 
 // backpacks, cap points etc
 void () func_goalinfo = {
@@ -10,7 +22,7 @@ void () func_goalinfo = {
     self.armortype = 0.8;
     self.goal_effects = 1;
     self.goal_activation = 1; // touched by player
-    self.n_b = self.active_all_message;
+    self.n_b = prepq3fstring(self.active_all_message);
 
     // probably have to tokenise this?
     if (self.allowteams == "blue") 
@@ -119,21 +131,22 @@ void () func_goalitem = {
             break;
         default:
     }
-    string cam;
-    cam = self.carried_all_message;
-    cam = strireplace("%n", "", cam);
+    string cam, iam;
+    cam = prepq3fstring(self.carried_all_message);
+    iam = prepq3fstring(self.inactive_all_message);
 
-    self.team_broadcast = strcat(cam, "\n");
-    self.non_team_broadcast = strcat(self.carried_all_message, "\n");
-    self.message = strcat(self.carried_message, "\n");
+    self.team_broadcast = cam;
+    self.non_team_broadcast = cam;
+    self.message = prepq3fstring(self.carried_message);
     self.noise = self.carried_all_sound;
-    self.noise3 = strcat(self.inactive_all_message, "\n");
-    self.noise4 = strcat(self.inactive_all_message, "\n");
-    self.n_b = strcat(self.carried_all_message, "\n");
-    self.d_n_n = strcat(self.active_all_message, "\n");
+    self.noise3 = iam;
+    self.noise4 = iam;
+    self.n_b = cam;
+    self.d_n_n = prepq3fstring(self.active_all_message);
 
     item_tfgoal();
 }
+
 
 
 /*
