@@ -1701,7 +1701,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                                 } else {
                                                     CenterPrint2(te,
                                                             "\n\n\n",
-                                                            "Is that a flag in your pocket\nor a you just happy to see me?");
+                                                            "Is that a flag in your pocket\nor are you just happy to see me?");
                                                 }
                                             }
                                         }
@@ -1710,15 +1710,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your team ��� the ����� flag!!");
+                                    Q"Your team \sgot\s the \senemy\s flag!!");
                         }
                     } else {
                         CenterPrint2(te, "\n\n\n",
-                                "Your flag has been �����!!");
+                                Q"Your flag has been \staken\s!!");
                     }
                     te = find(te, classname, "player");
                 }
-                bprint(PRINT_HIGH, AP.netname, " ��� the ���� flag!\n");
+                bprint(PRINT_HIGH, AP.netname, Q" \sgot\s the \sblue\s flag!\n");
                 AP.items = AP.items | IT_KEY1;
             } else {
                 if (Goal.goal_no == 2) {
@@ -1755,7 +1755,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                                     } else {
                                                         CenterPrint2(te,
                                                                 "\n\n\n",
-                                                                "Is that a flag in your pocket\nor a you just happy to see me?");
+                                                                "Is that a flag in your pocket\nor are you just happy to see me?");
                                                     }
                                                 }
                                             }
@@ -1764,15 +1764,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                        "Your team ��� the ����� flag!!");
+                                        Q"Your team \sgot\s the \senemy\s flag!!");
                             }
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your flag has been �����!!");
+                                    Q"Your flag has been \staken\s!!");
                         }
                         te = find(te, classname, "player");
                     }
-                    bprint(PRINT_HIGH, AP.netname, " ��� the ��� flag!\n");
+                    bprint(PRINT_HIGH, AP.netname, Q" \sgot\s the \sred\s flag!\n");
                     AP.items = AP.items | IT_KEY2;
                 } else {
                     if (Goal.goal_no == 3) {
@@ -1781,19 +1781,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                             if (te.team_no == 2) {
                                 if (te == AP) {
                                     CenterPrint2(te, "\n\n\n",
-                                            "You �������� the flag!!");
+                                            Q"You \scaptured\s the flag!!");
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                            "Your flag was ��������!!");
+                                            Q"Your flag was \scaptured\s!!");
                                 }
                             } else {
                                 CenterPrint2(te, "\n\n\n",
-                                        "Your team �������� the flag!!");
+                                        Q"Your team \scaptured\s the flag!!");
                             }
                             te = find(te, classname, "player");
                         }
                         bprint(PRINT_HIGH, AP.netname,
-                                " �������� the ��� flag!\n");
+                                Q" \scaptured\s the \sred\s flag!\n");
                         AP.items = AP.items - (AP.items & IT_KEY2);
                     } else {
                         if (Goal.goal_no == 4) {
@@ -1802,19 +1802,19 @@ void (entity Goal, entity AP, float addb) DoResults = {
                                 if (te.team_no == 1) {
                                     if (te == AP) {
                                         CenterPrint2(te, "\n\n\n",
-                                                "You �������� the flag!!");
+                                                Q"You \scaptured\s the flag!!");
                                     } else {
                                         CenterPrint2(te, "\n\n\n",
-                                                "Your flag was ��������!!");
+                                                Q"Your flag was \scaptured\s!!");
                                     }
                                 } else {
                                     CenterPrint2(te, "\n\n\n",
-                                            "Your team �������� the flag!!");
+                                            Q"Your team \scaptured\s the flag!!");
                                 }
                                 te = find(te, classname, "player");
                             }
                             bprint(PRINT_HIGH, AP.netname,
-                                    " �������� the ���� flag!\n");
+                                    Q" \scaptured\s the \sblue\s flag!\n");
                             AP.items = AP.items - (AP.items & IT_KEY1);
                         }
                     }
@@ -2009,15 +2009,15 @@ void () item_tfgoal_touch = {
             if (self.origin != self.oldorigin) {
                 if (other.team_no == 1) {
                     bprint(2, other.netname);
-                    bprint(2, " �������� the ���� flag!\n");
+                    bprint(2, Q" \scaptured\s the \sblue\s flag!\n");
                     te = find(world, classname, "player");
                     while (te != world) {
                         if (te.team_no == 1) {
                             CenterPrint2(te, "\n\n\n",
-                                    "Your flag was ��������!!");
+                                    Q"Your flag was \scaptured\s!!");
                         } else {
                             CenterPrint2(te, "\n\n\n",
-                                    "The ����� flag was ��������!!");
+                                    Q"The \senemy\s flag was \scaptured\s!!");
                         }
                         te = find(te, classname, "player");
                     }
@@ -2040,15 +2040,15 @@ void () item_tfgoal_touch = {
                 if (self.origin != self.oldorigin) {
                     if (other.team_no == 2) {
                         bprint(2, other.netname);
-                        bprint(2, " �������� the ��� flag!\n");
+                        bprint(2, Q" \scaptured\s the \sred\s flag!\n");
                         te = find(world, classname, "player");
                         while (te != world) {
                             if (te.team_no == 2) {
                                 CenterPrint(te,
-                                        "\n\n\n Your flag was ��������!!");
+                                        Q"\n\n\n Your flag was \scaptured\s!!");
                             } else {
                                 CenterPrint(te,
-                                        "\n\n\n The ����� flag was ��������!!");
+                                        Q"\n\n\n The \senemy\s flag was \scaptured\s!!");
                             }
                             te = find(te, classname, "player");
                         }
@@ -2558,7 +2558,7 @@ void () item_flag_team2 = {
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
     self.netname = "Blue Flag";
-    self.broadcast = " ��� the enemy team's flag!\n";
+    self.broadcast = Q" \sgot\s the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
 
@@ -2595,8 +2595,8 @@ void () item_flag_team2 = {
     dp.items_allowed = 2;
     dp.goal_no = 3;
     dp.goal_effects = 3;
-    dp.broadcast = " �������� the enemy flag!\n";
-    dp.message = "You �������� the enemy flag!\n";
+    dp.broadcast = Q" \scaptured\s the enemy flag!\n";
+    dp.message = Q"You \scaptured\s the enemy flag!\n";
     dp.noise = "boss2/pop2.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 5;
@@ -2635,7 +2635,7 @@ void () item_flag_team1 = {
     precache_sound("boss2/pop2.wav");
     self.classname = "item_tfgoal";
     self.netname = "Red Flag";
-    self.broadcast = " ��� the enemy team's flag!\n";
+    self.broadcast = Q" \sgot\s the enemy team's flag!\n";
     self.deathtype = "You've got the enemy flag!\n";
     self.noise = "ogre/ogwake.wav";
 
@@ -2670,8 +2670,8 @@ void () item_flag_team1 = {
     dp.items_allowed = 1;
     dp.goal_no = 4;
     dp.goal_effects = 3;
-    dp.broadcast = " �������� the enemy flag!\n";
-    dp.message = "You �������� the enemy flag!\n";
+    dp.broadcast = Q" \scaptured\s the enemy flag!\n";
+    dp.message = Q"You \scaptured\s the enemy flag!\n";
     dp.noise = "boss2/pop2.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 6;
@@ -2813,11 +2813,11 @@ void () DropGoalItems = {
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
                 if (self.team_no == 1)
-                    bprint(PRINT_HIGH, self.netname, " ���������������\n");
+                    bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
                 else if (self.team_no == 2)
-                    bprint(PRINT_HIGH, self.netname, " ����������������\n");
+                    bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
                 else
-                    bprint(PRINT_HIGH, self.netname, " ���������������������\n");
+                    bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
 
                 Status_Print(self, "\n\n\n", "You dropped the flag!");
                 search = find(world, classname, "player");
