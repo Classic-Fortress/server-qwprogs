@@ -420,60 +420,6 @@ void () info_tfgoal = {
     TF_StartGoal();
 };
 
-// q3 support
-/*
-void () func_goalinfo = {
-    dprint("processing func_goalinfo");
-    self.classname = "info_tfgoal";
-    if (self.allowteams == "blue") {
-        self.team_no = 1;
-    }
-    if (self.allowteams == "red") {
-        self.team_no = 2;
-    }
-    self.mdl = self.model;
-    self.noise = self.active_all_sound;
-    self.armortype = 0.8;
-
-    dprint("past setting of fields");
-    float startpos, endpos;
-    startpos = 0;
-    string searchterm = self.give;
-    endpos = strstrofs(searchterm, ",", startpos);
-    dprint(searchterm);
-    do {
-        string splitterm = substring(searchterm, startpos, endpos);
-        dprint(splitterm);
-        // split it up "health=+100"
-        float eqindex, opindex, len, amt;
-        string givetype, posneg, samt;
-        eqindex = strstrofs(splitterm, "=", 0);
-        opindex = eqindex + 1;
-        givetype = substring(splitterm, 0, eqindex);
-        posneg = substring(splitterm, eqindex, opindex);
-        len = endpos - 1;
-        samt = substring(splitterm, opindex, len);
-        amt = stof(samt);
-
-        // now process with case statement
-        dprint(splitterm);
-        dprint(givetype);
-        dprint(posneg);
-        dprint(samt);
-
-        // next loop, set startpos to endpos through index for while condition
-        startpos = strstrofs(searchterm, ",", startpos);
-        endpos = strstrofs(searchterm, ",", startpos);
-        if (endpos == -1) {
-            // set endpos to end of string
-            endpos = strlen(searchterm);
-            endpos = endpos - startpos;
-        }
-    } while (startpos >= -1);
-
-    info_tfgoal();
-}
-*/
 void () i_t_g = {
     self.classname = "info_tfgoal";
     info_tfgoal();

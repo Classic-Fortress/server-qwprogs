@@ -2,6 +2,7 @@ qwprogs.dat
 defs.qc
 fteextensions.qc
 qw.qc
+q3.qc
 debug.qc
 status.qc
 menu.qc
