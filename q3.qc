@@ -12,6 +12,7 @@ void () func_goalinfo = {
     self.noise = self.active_all_sound;
     self.armortype = 0.8;
     self.goal_effects = 1;
+    self.goal_activation = 1; // touched by player
 
     // probably have to tokenise this?
     if (self.allowteams == "blue") {
@@ -74,12 +75,50 @@ void () func_goalinfo = {
             break;
             default:
                 dprint("gtype not found, discarding\n");
-            break;
         }
     }
 
     info_tfgoal();
 }
+
+// flags
+void () func_goalitem = {
+    self.classname = "item_tfgoal";
+    self.mdl = self.model;
+    self.delay = self.wait; // is delay used anymore?
+    self.pausetime = self.wait;
+    self.netname = self.groupname;
+    self.g_a = "4789";
+    switch(self.allowteams)
+    {
+        case "blue":
+            self.team_no = 1;
+            self.owned_by = 2;
+            self.skin = 1; 
+            self.goal_no = 2;
+            self.items = "262144"; // used by hud?
+            break;
+        case "red":
+            self.team_no = 2;
+            self.owned_by = 1;
+            self.skin = 2; 
+            self.goal_no = 1;
+            self.items = "131072"; // used by hud?
+            break;
+        default:
+    }
+    self.team_broadcast = strcat(self.carried_all_message, "\n");
+    self.non_team_broadcast = strcat(self.carried_all_message, "\n");
+    self.message = strcat(self.carried_message, "\n");
+    self.noise = strcat(self.carried_all_sound;
+    self.noise3 = strcat(self.inactive_all_message, "\n");
+    self.noise4 = strcat(self.inactive_all_message, "\n");
+    self.n_b = strcat(self.carried_all_message, "\n");
+    self.d_n_n = strcat(self.active_all_message, "\n");
+
+    item_tfgoal();
+}
+
 
 /*
 void () target_position = {
