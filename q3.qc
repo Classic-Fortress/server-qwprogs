@@ -1,8 +1,4 @@
-// q3 defs - enable q3f map ents
-.string allowteams;
-.string give;
-.string active_all_sound;
-.string model;
+
 
 // backpacks, cap points etc
 void () func_goalinfo = {
@@ -29,37 +25,35 @@ void () func_goalinfo = {
     // note: need to see if this is groupname or builtin name in q3f
     if (self.holding == "blueflag") 
     {
-        self.items_allowed = "1";
-        self.owned_by "1";
-        self.axhitme = "1";
+        self.items_allowed = 1;
+        self.owned_by = 1;
+        self.axhitme = 1;
     }
     if (self.holding == "redflag")
     {
-        self.items_allowed = "2";
-        self.owned_by "2";
-        self.axhitme = "2";
+        self.items_allowed = 2;
+        self.owned_by = 2;
+        self.axhitme = 2;
     }
-
-    string give;
-    give = self.give;
-    
+   
     float count = tokenizebyseparator(self.give, ",");
 
-    for (i = 0; i <= count; i++)
+    for (float i = 0; i <= count; i++)
     {
-        string s, gtype, gop, gamt, val;
-        float loc, slen;
+        string s, gtype, gop, gamt;
+        float loc, slen, val;
         
-        s = argv[i];
+        s = argv(i);
         slen = strlen(s);
+        loc = strstrofs(s, "=");
 
         gtype = substring(s, 0, loc);
         gop = substring(s, loc, loc + 1);
         gamt = substring(s, loc + 1, slen);
         if (gop == "-") {
-            val = "-" + ftos(gamt);
+            val = stof(strcat("-", gamt));
         } else {
-            val = ftos(gamt);
+            val = stof(gamt);
         }
         dprint(gtype);
         dprint(gop);
@@ -106,7 +100,7 @@ void () func_goalitem = {
     self.delay = self.wait; // is delay used anymore?
     self.pausetime = self.wait;
     self.netname = self.groupname;
-    self.g_a = "4789";
+    self.g_a = 4789;
     switch(self.allowteams)
     {
         case "blue":
@@ -114,21 +108,25 @@ void () func_goalitem = {
             self.owned_by = 2;
             self.skin = 1; 
             self.goal_no = 2;
-            self.items = "262144"; // used by hud?
+            self.items = 262144; // used by hud?
             break;
         case "red":
             self.team_no = 2;
             self.owned_by = 1;
             self.skin = 2; 
             self.goal_no = 1;
-            self.items = "131072"; // used by hud?
+            self.items = 131072; // used by hud?
             break;
         default:
     }
-    self.team_broadcast = strcat(self.carried_all_message, "\n");
+    string cam;
+    cam = self.carried_all_message;
+    cam = strireplace("%n", "", cam);
+
+    self.team_broadcast = strcat(cam, "\n");
     self.non_team_broadcast = strcat(self.carried_all_message, "\n");
     self.message = strcat(self.carried_message, "\n");
-    self.noise = strcat(self.carried_all_sound;
+    self.noise = self.carried_all_sound;
     self.noise3 = strcat(self.inactive_all_message, "\n");
     self.noise4 = strcat(self.inactive_all_message, "\n");
     self.n_b = strcat(self.carried_all_message, "\n");
