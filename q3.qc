@@ -4,22 +4,40 @@
 .string active_all_sound;
 .string model;
 
-// backpacks etc
+// backpacks, cap points etc
 void () func_goalinfo = {
     self.classname = "info_tfgoal";
-
+    self.frags = self.teamscore;
+    self.count = self.teamscore;
     self.mdl = self.model;
     self.noise = self.active_all_sound;
     self.armortype = 0.8;
     self.goal_effects = 1;
     self.goal_activation = 1; // touched by player
+    self.n_b = self.active_all_message;
 
     // probably have to tokenise this?
-    if (self.allowteams == "blue") {
+    if (self.allowteams == "blue") 
+    {
         self.team_no = 1;
     }
-    if (self.allowteams == "red") {
+    if (self.allowteams == "red") 
+    {
         self.team_no = 2;
+    }
+
+    // note: need to see if this is groupname or builtin name in q3f
+    if (self.holding == "blueflag") 
+    {
+        self.items_allowed = "1";
+        self.owned_by "1";
+        self.axhitme = "1";
+    }
+    if (self.holding == "redflag")
+    {
+        self.items_allowed = "2";
+        self.owned_by "2";
+        self.axhitme = "2";
     }
 
     string give;
