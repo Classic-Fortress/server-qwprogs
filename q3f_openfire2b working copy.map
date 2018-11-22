@@ -12,13 +12,15 @@
 
 }
 
+/*
 // entity 3
 {
 "classname" "target_position"
 "targetname" "t3"
 "origin" "1072 1152 -88"
 }
-
+*/
+/*
 // entity 65
 {
 "angle" "180"
@@ -31,15 +33,16 @@
 "model" "models/objects/backpack/backpack.md3"
 "wait" "2"
 }
-
+*/
+/*
 // entity 93
 {
+"classname" "func_goalitem"
 "inactivetarget" "redflaghud=~inactive"
 "activetarget" "redflaghud=~active"
 "carriedtarget" "redflaghud=~carried"
 "sparkle" "1.000000 0.392157 0.392157"
 "angle" "90"
-"classname" "func_goalitem"
 "carried_sound" "sound/teamplay/flagtk_red.wav"
 "carried_all_sound" "sound/teamplay/flagtk_red.wav"
 "carried_message" "~You got the ^1red^* flag! Run for it!"
@@ -58,6 +61,8 @@
 "_color" "1.000000 0.392157 0.392157"
 "light" "50"
 }
+*/
+/*
 // entity 94
 {
 "classname" "func_goalinfo"
@@ -72,6 +77,7 @@
 "angle" "270"
 "active_all_sound" "sound/teamplay/flagcap_red.wav"
 }
+*/
 // entity 95
 {
 "origin" "-352 512 128"
