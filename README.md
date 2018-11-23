@@ -5,6 +5,11 @@ New features
 ------
 * Option for medic to be immune from cusscussion effects. `localinfo medicnocuss on`.
 * Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime n`.
+* Increased nail velocity. Disable with `localinfo old_ng_velocity on`.
+* Nailgun and Super-nailgun damage configurable with `localinfo ng_damage` and `localinfo sng_damage`.
+* Keys and flags glow their colour.
+* Capping player gets full restock.
+* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
 * Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
@@ -33,6 +38,7 @@ New features
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
 
+
 == Removed ===
 * Removed weapon messages for weapons without weapon modes.
 * Removed bioweapon (merged into medikit).
@@ -43,6 +49,8 @@ New features
 * Removed class help.
 
 === Fixed ===
+* Don't allow building in prematch.
+* Gas no longer goes through walls.
 * Fixed the spamming weapon messages (e.g. Tranquiliser gun selected).
 * Fixed the sentry gun menu to not close prematurely.
 * Fixed broken ammo display.
