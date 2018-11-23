@@ -32,11 +32,7 @@
 "non_team_broadcast" "Your flag has been taken!\n"
 "d_n_n" " dropped blue's flag.\n"
 }
-// entity 68
-{
-"origin" "-272 935 -3184"
-"classname" "info_player_start"
-}
+
 // entity 69
 {
 "origin" "-208 1280 -3168"
