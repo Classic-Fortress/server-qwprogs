@@ -559,6 +559,10 @@ void (entity inflictor, entity attacker, float bounce,
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
+                        if (medicnocuss && head.playerclass == 5) {
+                            return;
+                        }
+
                         te = find(world, classname, "timer");
                         if (old_grens == TRUE)
                             while (((te.owner != head) ||
@@ -583,10 +587,6 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
-                            if (medicnocuss && self.owner.playerclass == 5) {
-                                return;
-                            }
-
                             if (old_grens == TRUE) {
                                 stuffcmd(head, "v_idlescale 100\n");
                                 stuffcmd(head, "fov 130\n");
