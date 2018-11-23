@@ -3,7 +3,8 @@ FortressOne Server v0.1.0
 
 New features
 ------
-* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
+* Option for medic to be immune from cusscussion effects. `localinfo medicnocuss on`.
+* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime n`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
 * Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
