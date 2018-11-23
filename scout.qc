@@ -286,6 +286,12 @@ void () ConcussionGrenadeTimer = {
     local float concadjust;
     local float stumble;
 
+    if (self.owner.playerclass == 5) {
+        self.owner.fixangle = 0;
+        self.owner.is_concussed = 0;
+        dremove(self);
+    }
+
     if (self.owner.invincible_finished > time) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.fixangle = 0;
@@ -293,6 +299,7 @@ void () ConcussionGrenadeTimer = {
         dremove(self);
         return;
     }
+
     if ((self.health == 200) || (self.health == 400) ||
         (self.health == 600)
         || (self.health == 800) || (self.health == 1000)) {
