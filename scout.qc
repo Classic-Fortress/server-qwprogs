@@ -286,13 +286,6 @@ void () ConcussionGrenadeTimer = {
     local float concadjust;
     local float stumble;
 
-    if (self.owner.playerclass == 5) {
-        self.owner.fixangle = 0;
-        self.owner.is_concussed = 0;
-        dremove(self);
-        return;
-    }
-
     if (self.owner.invincible_finished > time) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.fixangle = 0;
@@ -590,6 +583,10 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
+                            if (self.owner.playerclass == 5) {
+                                return;
+                            }
+
                             if (old_grens == TRUE) {
                                 stuffcmd(head, "v_idlescale 100\n");
                                 stuffcmd(head, "fov 130\n");
