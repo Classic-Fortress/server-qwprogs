@@ -290,6 +290,7 @@ void () ConcussionGrenadeTimer = {
         self.owner.fixangle = 0;
         self.owner.is_concussed = 0;
         dremove(self);
+        return;
     }
 
     if (self.owner.invincible_finished > time) {
