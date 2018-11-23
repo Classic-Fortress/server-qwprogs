@@ -583,7 +583,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
-                            if (self.owner.playerclass == 5) {
+                            if (medicnocuss && self.owner.playerclass == 5) {
                                 return;
                             }
 
