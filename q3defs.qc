@@ -12,3 +12,5 @@
 .string carried_message;
 .string carried_all_sound;
 .string inactive_all_message;
+.string activetarget;
+.string checkstate;

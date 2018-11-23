@@ -104,6 +104,17 @@ void () func_button = {
 
     SetMovedir();
 
+    // q3 support
+    if (self.activetarget != "") {
+        self.target = self.activetarget;
+    }
+    if (self.allowteams == "blue") {
+        self.team_no = 1;
+    }
+    if (self.allowteams == "red") {
+        self.team_no = 2;
+    }
+
     self.movetype = MOVETYPE_PUSH;
     self.solid = SOLID_BSP;
     setmodel(self, self.model);
