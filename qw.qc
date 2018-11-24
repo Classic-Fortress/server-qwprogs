@@ -472,6 +472,7 @@ float stockfull;
 float stock_on_cap;
 float classtips;
 float cussgrentime;
+float medicnocuss;
 float sniperpower;
 float sniperreloadpercent;
 float buildstatus;
