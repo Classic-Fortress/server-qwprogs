@@ -1333,6 +1333,33 @@ void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate = {
     if (cb_prematch_time > time)
         return;
 
+    
+    // q3f support
+    if (Goal.checkstate != string_null) {
+        string cname, cstate;
+        float slen, idx;
+        entity targ;
+        targ = world;
+       
+        idx = strstrofs(Goal.checkstate, "=");
+        slen = strlen(Goal.checkstate);
+        cname = substring(Goal.checkstate, 0, idx);
+        targ = find(targ, targetname, cname);
+        cstate = substring(Goal.checkstate, idx + 1, slen);
+        switch (cstate)
+        {
+            case "inactive":
+                if (targ.active == TFGS_ACTIVE) {
+                    return;
+                }
+            break;
+            case "active":
+                if (targ.active == TFGS_INACTIVE) {
+                    return;
+                }
+        }
+    }
+
     if (Activated(Goal, AP)) {
         if (ActivatingGoal == Goal)
             DoResults(Goal, AP, 1);
@@ -1638,6 +1665,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         te.weapon = addb;
         return;
     }
+
     UpdateAbbreviations(Goal);
     Goal.goal_state = 2;
     if ((Goal.classname == "info_tfgoal") && (Goal.mdl != string_null)) {
@@ -1946,6 +1974,7 @@ void () tfgoal_touch = {
 };
 
 void () info_tfgoal_use = {
+    dprint("info_tfgoal_use\n");
     AttemptToActivate(self, activator, self);
 };
 

@@ -14,3 +14,4 @@
 .string inactive_all_message;
 .string activetarget;
 .string checkstate;
+.float active;

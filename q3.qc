@@ -153,23 +153,6 @@ void () target_kill = {
     self.deathtype = " died\n";
     self.goal_effects = 1;
 
-    string cname, cstate;
-    float slen, idx;
-
-    idx = strstrofs(s, "=");
-    slen = strlen(self.checkstate);
-    cname = substring(self.checkstate, 0, idx);
-    cstate = substring(self.checkstate, idx + 1, slen);
-
-    switch (cstate)
-    {
-        case "inactive":
-            self.if_goal_is_inactive = cname;
-        break;
-        case "active":
-            self.if_goal_is_active = cname;
-    }
-
     info_tfgoal();
 }
 
