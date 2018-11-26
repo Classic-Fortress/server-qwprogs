@@ -147,7 +147,14 @@ void () func_goalitem = {
     item_tfgoal();
 }
 
+void () target_kill = {
+    self.classname = "info_tfgoal";
+    self.health = -500;
+    self.deathtype = " died\n";
+    self.goal_effects = 1;
 
+    info_tfgoal();
+}
 
 /*
 void () target_position = {
