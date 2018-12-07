@@ -2760,8 +2760,9 @@ void () W_WeaponFrame = {
         }
     }
 
-    // class specials and grenade impulses always possible
-    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
+    // class specials and grenade impulses always possible, also detpipe
+    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)
+            || self.impulse == TF_PB_DETONATE) {
         ImpulseCommands();
         return;
     }
