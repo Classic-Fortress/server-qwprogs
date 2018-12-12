@@ -108,6 +108,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("special", TF_SPECIAL_SKILL, 0);
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
         TeamFortress_Alias("discard", TF_DISCARD, 0);
+        TeamFortress_Alias("discard_drop_ammo", TF_DISCARD_DROP_AMMO, 0);
     } else if (self.motd == 60) {
         TeamFortress_Alias("weapnext", TF_WEAPNEXT, 0);
         TeamFortress_Alias("weapprev", TF_WEAPPREV, 0);

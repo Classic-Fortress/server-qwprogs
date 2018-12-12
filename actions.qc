@@ -6,36 +6,35 @@ void () TeamFortress_ClipTick;
 
 void () TeamFortress_Discard = {
     newmis = spawn();
-    if ((self.playerclass == PC_SCOUT)
-                || (self.playerclass == PC_ENGINEER)
-                || (self.playerclass == PC_MEDIC)) {
-        newmis.ammo_rockets = self.ammo_rockets;
-    } else if ((self.playerclass == PC_SNIPER)
-                || (self.playerclass == PC_SPY)) {
-        newmis.ammo_rockets = self.ammo_rockets;
-        newmis.ammo_cells = self.ammo_cells;
-    } else if ((self.playerclass == PC_SOLDIER)
-                || (self.playerclass == PC_DEMOMAN)) {
-        newmis.ammo_cells = self.ammo_cells;
-        newmis.ammo_nails = self.ammo_nails;
-    } else if (self.playerclass == PC_HVYWEAP) {
-        newmis.ammo_rockets = self.ammo_rockets;
-        newmis.ammo_nails = self.ammo_nails;
-    } else if (self.playerclass == PC_PYRO) {
-        newmis.ammo_nails = self.ammo_nails;
-    }
-
-    if (self.playerclass == PC_MEDIC && !medicaura && old_medikit)
-        newmis.ammo_cells = self.ammo_cells;
-
-
-    if (!(newmis.ammo_shells + newmis.ammo_nails + newmis.ammo_rockets + newmis.ammo_cells)) {
-        dremove(newmis);
-        if (self.menu_input != Menu_Drop_Input)
-        	Menu_Drop();
-        else
-        	Menu_Close(self);
-        return;
+    switch (self.playerclass) {
+        case PC_SCOUT:
+        case PC_ENGINEER:
+            newmis.ammo_rockets = self.ammo_rockets;
+            break;
+        case PC_MEDIC:
+            newmis.ammo_rockets = self.ammo_rockets;
+            if (!medicaura && old_medikit) {
+                newmis.ammo_cells = self.ammo_cells;
+            }
+            break;
+        case PC_SNIPER:
+        case PC_SPY:
+            newmis.ammo_rockets = self.ammo_rockets;
+             newmis.ammo_cells = self.ammo_cells;
+            break;
+        case PC_SOLDIER:
+        case PC_DEMOMAN:
+            newmis.ammo_cells = self.ammo_cells;
+            newmis.ammo_nails = self.ammo_nails;
+            break;
+        case PC_HVYWEAP:
+            newmis.ammo_rockets = self.ammo_rockets;
+             newmis.ammo_nails = self.ammo_nails;
+            break;
+        case PC_PYRO:
+            newmis.ammo_nails = self.ammo_nails;
+            break;
+        default:
     }
 
     if (newmis.ammo_shells) {
@@ -74,6 +73,50 @@ void () TeamFortress_Discard = {
     newmis.think = SUB_Remove;
     newmis.touch = TeamFortress_AmmoboxTouch;
     setmodel(newmis, "progs/backpack.mdl");
+};
+
+void () TeamFortress_Discard_DropAmmo = {
+    // if nothing to discard, do dropammo instead
+    float disc;
+    disc = 0;
+
+    switch (self.playerclass) {
+        case PC_SCOUT:
+        case PC_ENGINEER:
+            disc = self.ammo_rockets;
+            break;
+        case PC_MEDIC:
+            disc = self.ammo_rockets;
+            if (!medicaura && old_medikit) {
+                disc += self.ammo_cells;
+            }
+            break;
+        case PC_SNIPER:
+        case PC_SPY:
+            disc = self.ammo_rockets + self.ammo_cells;
+            break;
+        case PC_SOLDIER:
+        case PC_DEMOMAN:
+            disc = self.ammo_cells + self.ammo_nails;
+            break;
+        case PC_HVYWEAP:
+            disc = self.ammo_rockets + self.ammo_nails;
+            break;
+        case PC_PYRO:
+            disc = self.ammo_nails;
+            break;
+        default:
+    }
+
+    if (disc == 0) {
+        if (self.menu_input != Menu_Drop_Input)
+        	Menu_Drop();
+        else
+        	Menu_Close(self);
+        return;
+    } else {
+        TeamFortress_Discard();
+    }
 };
 
 void () TeamFortress_SaveMe = {
