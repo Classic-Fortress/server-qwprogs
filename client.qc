@@ -475,6 +475,9 @@ void () DecodeLevelParms = {
         // concussion grenade effect time [19]
         cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
 
+        // medic immune to concussion grenade effects [on]
+        medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
+
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
 

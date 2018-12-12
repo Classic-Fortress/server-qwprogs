@@ -293,6 +293,7 @@ void () ConcussionGrenadeTimer = {
         dremove(self);
         return;
     }
+
     if ((self.health == 200) || (self.health == 400) ||
         (self.health == 600)
         || (self.health == 800) || (self.health == 1000)) {
@@ -558,6 +559,10 @@ void (entity inflictor, entity attacker, float bounce,
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
+                        if (medicnocuss && head.playerclass == 5) {
+                            return;
+                        }
+
                         te = find(world, classname, "timer");
                         if (old_grens == TRUE)
                             while (((te.owner != head) ||

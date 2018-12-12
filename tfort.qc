@@ -598,11 +598,15 @@ void () TeamFortress_ShowTF = {
 
     sprint(self, PRINT_HIGH, "\n== Scout ==\n");
     CF_PrintSetting("Scout dash ability", scoutdash, "", 1);
+
     sprint(self, PRINT_HIGH, "\n== Sniper ==\n");
     CF_PrintSetting("Sniper reload", sniperreload, "", 1);
     CF_PrintSetting("Old sniper rifle range", old_sniperrange, "", 1);
     CF_PrintSetting("Sniper Rifle power in status bar", sniperpower, "", 1);
     CF_PrintSetting("Reload percentage in status bar", sniperreloadpercent, "", 1);
+
+    sprint(self, PRINT_HIGH, "\n== Medic ==\n");
+    CF_PrintSetting("Medic immune to concussion grenade", medicnocuss, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Demolitions Man ==\n");
     if (detpipe_limit > 0) {
