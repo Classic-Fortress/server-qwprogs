@@ -402,7 +402,7 @@
 #define TF_ENGINEER_BUILD       77  // Engineer: Bring up build menu for Engineer
 #define TF_ENGINEER_DETDISP     78  // Engineer: Detonate dispenser for Engineer
 #define TF_ENGINEER_DETSENTRY   79  // Engineer: Detonate sentry gun for Engineer
-// unused                       80
+#define TF_DISCARD_DROP_AMMO    80
 // unused                       81
 // unused                       82
 // unused                       83
