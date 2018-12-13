@@ -59,7 +59,7 @@ void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
-void () TeamFortress_Discard_Drop_Ammo;
+void () TeamFortress_Discard_DropAmmo;
 void (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
@@ -2402,7 +2402,7 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_DISCARD)
         TeamFortress_Discard();
     else if (self.impulse == TF_DISCARD_DROP_AMMO)
-        TeamFortress_Discard_Drop_Ammo();
+        TeamFortress_Discard_DropAmmo();
     else if (self.impulse == TF_DASH)
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)
