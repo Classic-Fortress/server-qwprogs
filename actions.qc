@@ -20,7 +20,7 @@ void () TeamFortress_Discard = {
         case PC_SNIPER:
         case PC_SPY:
             newmis.ammo_rockets = self.ammo_rockets;
-             newmis.ammo_cells = self.ammo_cells;
+            newmis.ammo_cells = self.ammo_cells;
             break;
         case PC_SOLDIER:
         case PC_DEMOMAN:
@@ -29,12 +29,15 @@ void () TeamFortress_Discard = {
             break;
         case PC_HVYWEAP:
             newmis.ammo_rockets = self.ammo_rockets;
-             newmis.ammo_nails = self.ammo_nails;
+            newmis.ammo_nails = self.ammo_nails;
             break;
         case PC_PYRO:
             newmis.ammo_nails = self.ammo_nails;
             break;
         default:
+    }
+    if ((newmis.ammo_rockets + newmis.ammo_cells + newmis.ammo_nails + newmis.ammo_shells) == 0) {
+        return;
     }
 
     if (newmis.ammo_shells) {
