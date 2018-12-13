@@ -39,8 +39,8 @@ string (float class) CF_GetRandomClassTip {
 
     if (self.tip_type == 1) {
         // general tip
-        tiptype = "Çומועבל פינ:\n";
-
+        tiptype = Q"\sGeneral tip\s:\n";
+        
         while (strlen(line1) == 0) {
             if (!self.display_tip)
                 self.display_tip = ceil(random() * 14);
@@ -93,7 +93,7 @@ string (float class) CF_GetRandomClassTip {
         }
     } else {
         // class tip
-        tiptype = "Ãלבףף Ôינ:\n";
+        tiptype = Q"\sClass tip\s:\n";
 
         if (class == PC_SCOUT) {
             while (strlen(line1) == 0) {
@@ -608,7 +608,7 @@ void (entity pl) RefreshStatusBar = {
 
     // status line 1 column 1 - grenade timer
     if (pl.StatusGrenTime > 0) {
-        st1 = strcat("Çעומבהו: ", ftos(pl.StatusGrenTime));
+        st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
         if (pl.fragstreak > 1 && pl.caps)
             st1 = strcat(st1, " sec");
         else
@@ -617,14 +617,14 @@ void (entity pl) RefreshStatusBar = {
         st1 = "";
     // status line 1 column 3 - kill streak & caps
     if (pl.fragstreak > 1) {
-        st2 = "Ëילל ףפעובכ: ";
+        st2 = Q"\sKill Streak\s: ";
         st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
     } else
         st2 = "";
     if (pl.caps) {
         if (pl.fragstreak > 1)
             st2 = strcat(st2, "  ");
-        st3 = "Ãבנף: ";
+        st3 = Q"\sCaps\s: ";
         st3 = strcat(st3, strpadl(ftos(pl.caps),2));
     } else
         st3 = "";
@@ -697,7 +697,7 @@ void (entity pl) RefreshStatusBar = {
 
     // status line 3 column 2 - clip size
     if (pl.tfstate & TFSTATE_RELOADING) {
-        st2 = "Ãלינ: ";
+        st2 = Q"\sClip\s: ";
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
             st2 = strcat(st2, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
             st2 = strcat(st2, "%  ");
@@ -714,10 +714,10 @@ void (entity pl) RefreshStatusBar = {
     }
 
     // status line 3 column 3 - grenade 1 count
-    st3 = strcat("Çעומ±: ", ftos(pl.no_grenades_1));
+    st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
 
     // status line 3 column 4 - grenade 2 count
-    st4 = strcat("Çעומ²: ", ftos(pl.no_grenades_2));
+    st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
 
     // status line 3
     s3 = strcat(st1, st2);
@@ -751,7 +751,7 @@ string(float num) BlueScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Âלץו:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sBlue\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) RedScoreToString =
@@ -759,7 +759,7 @@ string(float num) RedScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Òוה :", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sRed\s :", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) YellowScoreToString =
@@ -767,7 +767,7 @@ string(float num) YellowScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Ùולל:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sYell\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(float num) GreenScoreToString =
@@ -775,7 +775,7 @@ string(float num) GreenScoreToString =
     if (num > 999)
         num = 999;
 
-    return strcat("Çעומ:", strpadl(ftos(floor(num)), 3));
+    return strcat(Q"\sGren\s:", strpadl(ftos(floor(num)), 3));
 };
 
 string(entity pl) ClipSizeToString =
@@ -812,7 +812,7 @@ string(entity pl) ClipSizeToString =
     if (num > 99)
         num = 99;
 
-    st = "Ãלינ: ";
+    st = Q"\sClip\s: ";
     st = strcat(st, strpadl(ftos(floor(num)), 2));
     st = strcat(st, "/");
     st = strcat(st, strpadr(ftos(max), 3));
@@ -871,9 +871,9 @@ string(entity pl) DisguiseToString =
 
     if (pl.is_undercover == 1) {
         if (self.items & IT_INVISIBILITY) {
-            st = "Éמציףיגלו";
+            st = Q"\sInvisible\s";
         } else {
-            st = "Õמהועדןצוע: ";
+            st = Q"\sUndercover\s: ";
             if (pl.undercover_team) {
                 st = strcat(st, TeamToString(pl.undercover_team));
                 st = strcat(st, " ");
@@ -883,7 +883,7 @@ string(entity pl) DisguiseToString =
         }
     } else if (pl.is_undercover == 2) {
         if (invis_only) {
-            st = "Éמציףיגלו in ";
+            st = Q"\sInvisible\s in ";
             st = strcat(st, ftos(pl.undercover_timer));
             st = strcat(st, " seconds");
         } else {
@@ -912,7 +912,7 @@ string(entity pl) DisguiseToString =
             } else if (pl.undercover_skin) {
                 skin = strcat(skin, ClassToString(pl.undercover_skin));
             }
-            st = "Õמהועדןצוע: ";
+            st = Q"\sUndercover\s: ";
             st = strcat(st, team);
             st = strcat(st, skin);
         }
@@ -929,7 +929,7 @@ string(entity pl) SniperPowerToString =
         return st;
 
     if (pl.heat) {
-        st = "Ðןקוע: ";
+        st = Q"\spower\s: ";
         st = strcat(st, ftos(pl.heat));
         st = strcat(st, " dmg");
         if (pl.power_full) {
@@ -945,14 +945,14 @@ string(entity pl) DetpackToString =
     local string st = "";
 
     if (pl.is_detpacking) {
-        st = "Äופנבדכ: ";
+        st = Q"\sDetpack\s: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " (");
         st = strcat(st, ftos(pl.is_detpacking));
         st = strcat(st, ")");
         st = strcat(st, " seconds left");
     } else if (pl.detpack_left) {
-        st = "Äופנבדכ: ";
+        st = Q"\sDetpack\s: ";
         st = strcat(st, ftos(pl.detpack_left));
         st = strcat(st, " seconds left");
     }
@@ -965,7 +965,7 @@ string(entity pl) AuraToString =
     local string st;
 
     if (medicaura) {
-        st = "Èובלימח Áץעב: ";
+        st = Q"\sHealing Aura\s: ";
 
         if (pl.aura_active) {
             if (time < pl.aura_healtime && pl.aura_healcount) {
@@ -993,7 +993,7 @@ string(entity pl) AuraToString =
 string(entity pl) AssaultCannonToString =
 {
     if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_LOCK))
-        return "Áףףבץלפ Ãבממןמ Ìןדכוה";
+        return Q"\sAssault Cannon Locked\s";
     else
         return "";
 };
@@ -1039,23 +1039,23 @@ string(entity pl) ScannerToString =
     }
 
     if (pl.ScannerOn != 1) {
-        return "Óדבממוע: off";
+        return Q"\sScanner\s: off";
     }
 
     if (te.health > 0) {
-        st = "Óדבממוע: ";
+        st = Q"\sScanner\s: ";
         st = strcat(st, TeamToString(te.team_no));
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
         st = strpadr(st, 26);
-        range = "Òבמחו: ";
+        range = Q"\srange\s: ";
         range = strcat(range, RangeToString(pl));
         pad = 40 - strlen(range);
         st = strpadr(st, pad);
         st = strcat(st, range);
     } else {
-        st = "Óדבממוע: on";
-        st = strcat(st, "  Óדבממימח: ");
+        st = Q"\sScanner\s: on";
+        st = strcat(st, Q"  \sScanning\s: ");
 
         if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
             scanfor = "team";
@@ -1093,14 +1093,14 @@ string(entity pl) SentryDetailsToString =
 
         if (self.sentry_ent.weapon == 3) {
             rockets = ftos(floor(self.sentry_ent.ammo_rockets));
-            ammo = strcat("  Áםםן: ", strcat(shells, strcat("/", rockets)));
+            ammo = strcat(Q"  \sAmmo\s: ", strcat(shells, strcat("/", rockets)));
         } else {
-            ammo = strcat("  Áםםן: ", shells);
+            ammo = strcat(Q"  \sAmmo\s: ", shells);
         }
 
-        st = strcat("Óומפעש: ", strcat(hp, ammo));
+        st = strcat(Q"\sSentry\s: ", strcat(hp, ammo));
         st = strpadr(st, 32);
-        st = strcat(st, strcat("Ìוצול: ", ftos(self.sentry_ent.weapon)));
+        st = strcat(st, strcat(Q"\slevel\s: ", ftos(self.sentry_ent.weapon)));
     }
 
     return st;
@@ -1113,7 +1113,7 @@ string(entity pl) BuildingToString =
     if (!buildstatus)
         return "Building...";
 
-    st = "Âץילהימח: ";
+    st = Q"\sBuilding\s: ";
     st = strcat(st, ftos(pl.building_percentage));
     st = strcat(st, "%");
 

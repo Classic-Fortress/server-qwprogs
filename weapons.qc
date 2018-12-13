@@ -1,7 +1,7 @@
 void () player_run;
 
 void () TeamFortress_DisplayDetectionItems;
-float (vector veca, vector vecb) crossproduct;
+float (vector veca, vector vecb) crossproducttf;
 
 void (vector org, float damage) SpawnBlood;
 
@@ -59,6 +59,7 @@ void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
+void () TeamFortress_Discard_DropAmmo;
 void (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
@@ -185,7 +186,7 @@ void () W_FireAxe = {
             makevectors(self.v_angle);
 
             // Backstab
-            if (crossproduct(def, v_forward) > 0) {
+            if (crossproducttf(def, v_forward) > 0) {
                 deathmsg = DMSG_BACKSTAB;
                 TF_T_Damage(trace_ent, self, self, 120,
                             TF_TD_NOTTEAM | TF_TD_IGNOREARMOUR,
@@ -591,7 +592,7 @@ void () W_FireMedikit = {
     }
 };
 
-vector()wall_velocity =
+vector () wall_velocity =
 {
     local vector vel;
 
@@ -2400,6 +2401,8 @@ void () ImpulseCommands = {
         DropGoalItems();
     else if (self.impulse == TF_DISCARD)
         TeamFortress_Discard();
+    else if (self.impulse == TF_DISCARD_DROP_AMMO)
+        TeamFortress_Discard_DropAmmo();
     else if (self.impulse == TF_DASH)
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)
@@ -2760,8 +2763,9 @@ void () W_WeaponFrame = {
         }
     }
 
-    // class specials and grenade impulses always possible
-    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
+    // class specials and grenade impulses always possible, also detpipe
+    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)
+            || self.impulse == TF_PB_DETONATE) {
         ImpulseCommands();
         return;
     }

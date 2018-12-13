@@ -176,7 +176,9 @@ void (float inp) TeamFortress_ChangeClass = {
         self.nextpc = inp;
         if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
             self.has_changedclass = 1;
-            ClientKill(0, 1);
+            self.clientkillforce = 0;
+            self.clientkillfree = 1;
+            ClientKill();
             self.has_changedclass = 0;
             self.suicide_time = time;
         } else {
@@ -591,7 +593,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
-    sprint(self, PRINT_HIGH, cussgrentime);
+    sprint(self, PRINT_HIGH, ftos(cussgrentime));
     sprint(self, PRINT_HIGH, " seconds");
 
     sprint(self, PRINT_HIGH, "\n== Scout ==\n");
@@ -2363,10 +2365,10 @@ void () TeamFortress_RemoveTimers = {
             if (CTF_Map == 1) {
                 if (te.goal_no == 1) {
                     bprint(PRINT_HIGH, self.netname,
-                           " ���� the ���� flag!\n");
+                           Q" \stook\s the \sblue\s flag!\n");
                 } else if (te.goal_no == 2) {
                     bprint(PRINT_HIGH, self.netname,
-                           " ���� the ��� flag!\n");
+                           Q" \stook\s the \sred\s flag!\n");
                 }
             }
         }
@@ -3089,7 +3091,7 @@ void () PlayerObserverMode = {
     stuffcmd(self, "cl_rollangle 0\n");
 };
 
-float (vector veca, vector vecb) crossproduct = {
+float (vector veca, vector vecb) crossproducttf = {
     local float result;
 
     result = veca_x * vecb_y - vecb_x * veca_y;

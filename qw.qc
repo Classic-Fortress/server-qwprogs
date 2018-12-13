@@ -505,6 +505,10 @@ float deathmsg;                 // Global, which is set before every T_Damage, t
 float intermission_running;
 float intermission_exittime;
 
+// add clientkill ent defs
+.float clientkillforce;
+.float clientkillfree;
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {

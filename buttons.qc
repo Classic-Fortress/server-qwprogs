@@ -18,6 +18,14 @@ void () button_done = {
 };
 
 void () button_return = {
+    // q3f support
+    string targname;
+    entity targ;
+    targ = world;
+    targname = self.target;
+    targ = find(targ, targetname, targname);
+    targ.active = TFGS_INACTIVE;
+
     self.goal_state = TFGS_INACTIVE;
     self.state = STATE_DOWN;
     SUB_CalcMove(self.pos1, self.speed, button_done);
@@ -33,6 +41,14 @@ void () button_blocked =        // do nothing, just don't come all the way back 
 void () button_fire = {
     if ((self.state == STATE_UP) || (self.state == STATE_TOP))
         return;
+
+    // q3f support
+    string targname;
+    entity targ;
+    targ = world;
+    targname = self.target;
+    targ = find(targ, targetname, targname);   
+    targ.active = TFGS_ACTIVE;
 
     sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
@@ -103,6 +119,18 @@ void () func_button = {
     }
 
     SetMovedir();
+
+    // q3 support
+    if (self.activetarget != "") {
+        self.target = self.activetarget;
+    }
+    if (self.allowteams == "blue") {
+        self.team_no = 1;
+    }
+    if (self.allowteams == "red") {
+        self.team_no = 2;
+    }
+
 
     self.movetype = MOVETYPE_PUSH;
     self.solid = SOLID_BSP;

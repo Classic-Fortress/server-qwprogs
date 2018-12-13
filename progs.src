@@ -1,7 +1,8 @@
 qwprogs.dat
-
 defs.qc
+fteextensions.qc
 qw.qc
+q3defs.qc
 debug.qc
 status.qc
 menu.qc
@@ -42,3 +43,4 @@ ctf.qc
 coop.qc
 actions.qc
 spect.qc
+q3.qc

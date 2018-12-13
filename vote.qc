@@ -542,7 +542,7 @@ void (entity pe_player) Vote_Menu = {
 
     if (vote1_map != string_null) {
         strunzone(s_tmp1);
-        s_tmp1 = strcat("êìë ", vote1_map);
+        s_tmp1 = strcat(Q"\s[1]\s ", vote1_map);
         if (vote1_cnt)
             s_tmp1 = strzone(strcat(s_tmp1, strcat(" (", strcat(ftos(vote1_cnt), " votes)"))));
         else
@@ -552,7 +552,7 @@ void (entity pe_player) Vote_Menu = {
     }
     if (vote2_map != string_null) {
         strunzone(s_tmp2);
-        s_tmp2 = strcat("êîë ", vote2_map);
+        s_tmp2 = strcat(Q"\s[2]\s ", vote2_map);
         if (vote2_cnt)
             s_tmp2 = strzone(strcat(s_tmp2, strcat(" (", strcat(ftos(vote2_cnt), " votes)"))));
         else
@@ -563,7 +563,7 @@ void (entity pe_player) Vote_Menu = {
     if (vote3_map != string_null) {
         strunzone(s_tmp3);
         if (!vote_decider || vote3_cnt)
-            s_tmp3 = strcat("êïë ", vote3_map);
+            s_tmp3 = strcat(Q"\s[3]\s ", vote3_map);
         if (vote3_cnt)
             s_tmp3 = strzone(strcat(s_tmp3, strcat(" (", strcat(ftos(vote3_cnt), " votes)"))));
         else
@@ -574,7 +574,7 @@ void (entity pe_player) Vote_Menu = {
     if (vote4_map != string_null) {
         strunzone(s_tmp4);
         if (!vote_decider || vote4_cnt)
-            s_tmp4 = strcat("êñë ", vote4_map);
+            s_tmp4 = strcat(Q"\s[4]\s ", vote4_map);
         if (vote4_cnt)
             s_tmp4 = strzone(strcat(s_tmp4, strcat(" (", strcat(ftos(vote4_cnt), " votes)"))));
         else
@@ -585,7 +585,7 @@ void (entity pe_player) Vote_Menu = {
     if (vote5_map != string_null) {
         strunzone(s_tmp5);
         if (!vote_decider || vote5_cnt)
-            s_tmp5 = strcat("êóë ", vote5_map);
+            s_tmp5 = strcat(Q"\s[5]\s ", vote5_map);
         if (vote5_cnt)
             s_tmp5 = strzone(strcat(s_tmp5, strcat(" (", strcat(ftos(vote5_cnt), " votes)"))));
         else

@@ -100,6 +100,18 @@ void () trigger_multiple = {
     }
     self.use = multi_use;
 
+    // q3 fields
+    switch(self.allowteams)
+    {
+        case "blue":
+            self.team_no = 1;
+            break;
+        case "red":
+            self.team_no = 2;
+            break;
+        default:
+    }
+
     InitTrigger();
 
     if (self.health) {
