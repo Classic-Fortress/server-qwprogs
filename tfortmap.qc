@@ -1671,8 +1671,13 @@ void (entity Goal, entity AP, float addb) DoResults = {
     if ((Goal.classname == "info_tfgoal") && (Goal.mdl != string_null)) {
         setmodel(Goal, string_null);
     }
+
     if (Goal.noise) {
-        sound(other, 3, Goal.noise, 1, 1);
+        if (other == world) {
+            sound(Goal, 3, Goal.noise, 1, 1);
+        } else {
+            sound(other, 3, Goal.noise, 1, 1);
+        }
     }
     winners = 0;
     if (Goal.increase_team1 != 0) {
