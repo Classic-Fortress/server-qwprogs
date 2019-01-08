@@ -2205,9 +2205,6 @@ void () ReturnItem = {
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);
 
-    if (self.enemy.origin == self.enemy.oldorigin)
-        return;
-
     sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
 
     if (self.weapon != 2) {
