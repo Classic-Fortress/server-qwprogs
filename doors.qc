@@ -17,7 +17,7 @@ void () door_blocked = {
     }
     T_Damage(other, self, self, self.dmg);
 
-    if (self.wait >= 0) {
+    if (self.wait >= 0 && self.forcecloseonblock == 0) {
         if (self.state == STATE_DOWN)
             door_go_up();
         else

@@ -509,6 +509,9 @@ float intermission_exittime;
 .float clientkillforce;
 .float clientkillfree;
 
+// ability for doors to close instantly if they have a wait and are blocked
+.float forcecloseonblock;
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {
