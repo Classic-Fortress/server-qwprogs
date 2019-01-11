@@ -781,20 +781,15 @@ void (entity pl, float typ) PrintGrenadeType = {
     sprint(pl, PRINT_HIGH, st);
 };
 
-float (float pf_grenade_number, float pf_grenade_type) GetMaxGrenades = {
-    if (pf_grenade_number == 1) {
-        if (pf_grenade_type == GR_TYPE_NAIL) {
-            return 2;
-        }
-        if (pf_grenade_type == GR_TYPE_CALTROP) {
+float (float pf_grenade_type) GetMaxGrenades = {
+    switch(pf_grenade_type) {
+        case GR_TYPE_NAIL:
+            return 1;
+        case GR_TYPE_CALTROP:
             return 3;
-        }
-    } else {
-        if (pf_grenade_type == GR_TYPE_NAIL) {
-            return 2;
-        }
+        default:
+            return 4;
     }
-    return 4;
 }
 
 void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoundGrenade = {
@@ -823,14 +818,14 @@ float () GetGrenadePossibility = {
         return 0;
     }
     if (random() < 0.500) {
-        maxg = GetMaxGrenades(1, other.tp_grenades_1);
+        maxg = GetMaxGrenades(other.tp_grenades_1);
         if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
             other.no_grenades_1 = other.no_grenades_1 + 1;
             PrintFoundGrenade(other, other.tp_grenades_1, 1);
             return 1;
         }
     } else {
-        maxg = GetMaxGrenades(1, other.tp_grenades_2);
+        maxg = GetMaxGrenades(other.tp_grenades_2);
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
             PrintFoundGrenade(other, other.tp_grenades_2, 1);
@@ -1356,7 +1351,7 @@ void () BackpackTouch = {
     if (drop_grenpack && other.playerclass != PC_SCOUT) {
 
         // give grenade type 1
-        maxg = GetMaxGrenades(1, other.tp_grenades_1);
+        maxg = GetMaxGrenades(other.tp_grenades_1);
         if ((other.no_grenades_1 + self.no_grenades_1) >= maxg)
             giveg = maxg - other.no_grenades_1;
         else
@@ -1365,7 +1360,7 @@ void () BackpackTouch = {
         PrintFoundGrenade(other, other.tp_grenades_1, giveg);
 
         // give grenade type 2
-        maxg = GetMaxGrenades(2, other.tp_grenades_2);
+        maxg = GetMaxGrenades(other.tp_grenades_2);
         if ((other.no_grenades_2 + self.no_grenades_2) >= maxg)
             giveg = maxg - other.no_grenades_2;
         else
