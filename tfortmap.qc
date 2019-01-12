@@ -812,12 +812,12 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 Player.no_grenades_2 = 4;
             }
             if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_1 > 2)) {
-                Player.no_grenades_1 = 2;
+                    (Player.no_grenades_1 > 1)) {
+                Player.no_grenades_1 = 1;
             }
             if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_2 > 2)) {
-                Player.no_grenades_2 = 2;
+                    (Player.no_grenades_2 > 1)) {
+                Player.no_grenades_2 = 1;
             }
             if (Player.ammo_detpack > Player.maxammo_detpack) {
                 Player.ammo_detpack = Player.maxammo_detpack;
@@ -911,8 +911,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         Player.ammo_medikit = Player.maxammo_medikit;
                         Player.ammo_detpack = Player.maxammo_detpack;
 
-                        Player.no_grenades_1 = GetMaxGrenades(1, Player.tp_grenades_1);
-                        Player.no_grenades_2 = GetMaxGrenades(2, Player.tp_grenades_2);
+                        Player.no_grenades_1 = GetMaxGrenades(Player.tp_grenades_1);
+                        Player.no_grenades_2 = GetMaxGrenades(Player.tp_grenades_2);
 
                         te = find(Player, classname, "timer");
 
@@ -1078,11 +1078,11 @@ void (entity Goal, entity Player) RemoveResults = {
         Player.no_grenades_2 = 4;
 
     if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_1 > 2))
-        Player.no_grenades_1 = 2;
+            (Player.no_grenades_1 > 1))
+        Player.no_grenades_1 = 1;
     if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_2 > 2))
-        Player.no_grenades_2 = 2;
+            (Player.no_grenades_2 > 1))
+        Player.no_grenades_2 = 1;
 
     if (Player.ammo_detpack > Player.maxammo_detpack)
         Player.ammo_detpack = Player.maxammo_detpack;
