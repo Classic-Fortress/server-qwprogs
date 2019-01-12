@@ -814,13 +814,13 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
 
             // This should never happen
             if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_1 > GR_SOLDIER_GRENADE_MAX_2)) {
-                Player.no_grenades_1 = GR_SOLDIER_GRENADE_MAX_2;
+                    (Player.no_grenades_1 > PC_SOLDIER_GRENADE_MAX_2)) {
+                Player.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_2;
             }
 
             if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_2 > GR_SOLDIER_GRENADE_MAX_2)) {
-                Player.no_grenades_2 = GR_SOLDIER_GRENADE_MAX_2;
+                    (Player.no_grenades_2 > PC_SOLDIER_GRENADE_MAX_2)) {
+                Player.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
             }
             if (Player.ammo_detpack > Player.maxammo_detpack) {
                 Player.ammo_detpack = Player.maxammo_detpack;
@@ -1082,12 +1082,12 @@ void (entity Goal, entity Player) RemoveResults = {
 
     // this should never happen
     if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_1 > GR_SOLDIER_GRENADE_MAX_2))
-        Player.no_grenades_1 = GR_SOLDIER_GRENADE_MAX_2;
+            (Player.no_grenades_1 > PC_SOLDIER_GRENADE_MAX_2))
+        Player.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_2;
 
     if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_2 > GR_SOLDIER_GRENADE_MAX_2))
-        Player.no_grenades_2 = GR_SOLDIER_GRENADE_MAX_2;
+            (Player.no_grenades_2 > PC_SOLDIER_GRENADE_MAX_2))
+        Player.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
 
     if (Player.ammo_detpack > Player.maxammo_detpack)
         Player.ammo_detpack = Player.maxammo_detpack;
