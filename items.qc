@@ -784,9 +784,9 @@ void (entity pl, float typ) PrintGrenadeType = {
 float (float pf_grenade_type) GetMaxGrenades = {
     switch(pf_grenade_type) {
         case GR_TYPE_NAIL:
-            return 1;
+            return PC_SOLDIER_GRENADE_MAX_2;
         case GR_TYPE_CALTROP:
-            return 3;
+            return PC_SCOUT_GRENADE_MAX_1;
         default:
             return 4;
     }
