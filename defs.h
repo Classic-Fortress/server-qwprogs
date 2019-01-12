@@ -796,6 +796,8 @@
 #define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_CONCUSSION	//    <- 2nd Type of Grenade this class has
 #define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
 #define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
+#define PC_SCOUT_GRENADE_MAX_1		3
+#define PC_SCOUT_GRENADE_MAX_2		4
 #define PC_SCOUT_TF_ITEMS		NIT_SCANNER  // <- TeamFortress Items this class has
 
 #define PC_SCOUT_MOTION_MIN_I		0.5 	// < Short range
@@ -825,6 +827,8 @@
 #define PC_SNIPER_GRENADE_TYPE_2	GR_TYPE_FLARE
 #define PC_SNIPER_GRENADE_INIT_1	2
 #define PC_SNIPER_GRENADE_INIT_2	3
+#define PC_SNIPER_GRENADE_MAX_1	        4
+#define PC_SNIPER_GRENADE_MAX_2	        4
 #define PC_SNIPER_TF_ITEMS		0
 
 // Class Details for SOLDIER
@@ -851,6 +855,8 @@
 #define PC_SOLDIER_GRENADE_TYPE_2	GR_TYPE_NAIL
 #define PC_SOLDIER_GRENADE_INIT_1	4
 #define PC_SOLDIER_GRENADE_INIT_2	1
+#define PC_SOLDIER_GRENADE_MAX_1	4
+#define PC_SOLDIER_GRENADE_MAX_2	1
 #define PC_SOLDIER_TF_ITEMS		0
 
 // Class Details for DEMOLITION MAN
@@ -879,6 +885,8 @@
 #define PC_DEMOMAN_GRENADE_TYPE_2	GR_TYPE_MIRV
 #define PC_DEMOMAN_GRENADE_INIT_1	4
 #define PC_DEMOMAN_GRENADE_INIT_2	4
+#define PC_DEMOMAN_GRENADE_MAX_1	4
+#define PC_DEMOMAN_GRENADE_MAX_2	4
 #define PC_DEMOMAN_TF_ITEMS		0
 
 // Class Details for COMBAT MEDIC
@@ -907,6 +915,8 @@
 #define PC_MEDIC_GRENADE_TYPE_2		GR_TYPE_CONCUSSION
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		2
+#define PC_MEDIC_GRENADE_MAX_1		4
+#define PC_MEDIC_GRENADE_MAX_2		4
 #define PC_MEDIC_TF_ITEMS		0
 #define PC_MEDIC_REGEN_TIME		3	// Number of seconds between each regen.
 #define PC_MEDIC_REGEN_AMOUNT		2	// Amount of health regenerated each regen.
@@ -942,6 +952,8 @@
 #define PC_HVYWEAP_GRENADE_TYPE_2	GR_TYPE_MIRV
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
+#define PC_HVYWEAP_GRENADE_MAX_1	4
+#define PC_HVYWEAP_GRENADE_MAX_2	4
 #define PC_HVYWEAP_TF_ITEMS		0
 
 
@@ -969,6 +981,8 @@
 #define PC_PYRO_GRENADE_TYPE_2		GR_TYPE_NAPALM
 #define PC_PYRO_GRENADE_INIT_1		1
 #define PC_PYRO_GRENADE_INIT_2		4
+#define PC_PYRO_GRENADE_MAX_1		4
+#define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
 
 // Class Details for SPY
@@ -995,6 +1009,8 @@
 #define PC_SPY_GRENADE_TYPE_2		GR_TYPE_GAS
 #define PC_SPY_GRENADE_INIT_1		2
 #define PC_SPY_GRENADE_INIT_2		2
+#define PC_SPY_GRENADE_MAX_1		4
+#define PC_SPY_GRENADE_MAX_2		4
 #define PC_SPY_TF_ITEMS			0
 #define PC_SPY_CELL_REGEN_TIME		5
 #define PC_SPY_CELL_REGEN_AMOUNT	1
@@ -1025,6 +1041,8 @@
 #define PC_ENGINEER_GRENADE_TYPE_2	GR_TYPE_EMP
 #define PC_ENGINEER_GRENADE_INIT_1	2
 #define PC_ENGINEER_GRENADE_INIT_2	2
+#define PC_ENGINEER_GRENADE_MAX_1	4
+#define PC_ENGINEER_GRENADE_MAX_2	4
 #define PC_ENGINEER_TF_ITEMS		0
 
 // Class Details for CIVILIAN
@@ -1051,6 +1069,8 @@
 #define PC_CIVILIAN_GRENADE_TYPE_2	0
 #define PC_CIVILIAN_GRENADE_INIT_1	0
 #define PC_CIVILIAN_GRENADE_INIT_2	0
+#define PC_CIVILIAN_GRENADE_MAX_1	0
+#define PC_CIVILIAN_GRENADE_MAX_2	0
 #define PC_CIVILIAN_TF_ITEMS		0
 
 
