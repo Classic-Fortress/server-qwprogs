@@ -411,8 +411,6 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
 };
 
 void () player_assaultcannon1 =[103, player_assaultcannon2] {
-    local string st;
-
     if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) <= 30)
                 && !(self.tfstate & TFSTATE_LOCK)) {
         muzzleflash();
@@ -431,20 +429,6 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
         TeamFortress_SetSpeed(self);
 
         W_FireAssaultCannon();
-        stuffcmd(self, "v_idlescale ");
-        if (vlen(self.velocity) < 30) {
-            if (self.heat < 5)
-                st = ftos(self.heat * 4);
-            else
-                st = "20";
-        } else {
-            if (self.heat < 5)
-                st = ftos(self.heat * 8);
-            else
-                st = "40";
-        }
-        stuffcmd(self, st);
-        stuffcmd(self, "\n");
     } else {
         sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
 
@@ -452,11 +436,8 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
             self.weaponframe = 0;
         else
             self.weaponframe = 2;
-
-        stuffcmd(self, "v_idlescale 5\n");
     }
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        stuffcmd(self, "v_idlescale 0\n");
         self.tfstate = self.tfstate | TFSTATE_AIMING;
         if (!cannon_move)
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
@@ -470,7 +451,6 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 };
 
 void () player_assaultcannon2 =[104, player_assaultcannon1] {
-    stuffcmd(self, "v_idlescale 0\n");
     if (vlen(self.velocity) < 30 && !(self.tfstate & TFSTATE_LOCK)) {
         if (self.weaponframe == 2) {
             self.weaponframe = 4;
@@ -480,7 +460,6 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
         SuperDamageSound();
         W_FireAssaultCannon();
         self.heat = self.heat + 0.1;
-        stuffcmd(self, "bf\n");
     } else {
         if (self.weaponframe == 2) {
             self.weaponframe = 0;
@@ -489,7 +468,6 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
         }
     }
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        stuffcmd(self, "v_idlescale 0\n");
         self.tfstate = self.tfstate | TFSTATE_AIMING;
         if (!cannon_move)
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);

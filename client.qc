@@ -1531,7 +1531,6 @@ void () PlayerJump = {
                 sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
         if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
-            stuffcmd(self, "v_idlescale 0\n");
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
@@ -1567,7 +1566,6 @@ void () PlayerJump = {
             self.count = 1;
             self.heat = 0;
             player_assaultcannondown1();
-            stuffcmd(self, "v_idlescale 0\n");
         } else {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
