@@ -485,29 +485,11 @@ void (entity p) bound_other_ammo = {
     if (p.armorvalue > p.maxarmor) {
         p.armorvalue = p.maxarmor;
     }
-    if (p.no_grenades_1 > 4) {
-        p.no_grenades_1 = 4;
+    if (p.no_grenades_1 > p.max_grenades_1) {
+        p.no_grenades_1 = p.max_grenades_1;
     }
-    if (p.no_grenades_2 > 4) {
-        p.no_grenades_2 = 4;
-    }
-    if ((p.tp_grenades_1 == 3) && (p.no_grenades_1 > 2)) {
-        p.no_grenades_1 = 2;
-    }
-    if ((p.tp_grenades_2 == 3) && (p.no_grenades_2 > 2)) {
-        p.no_grenades_2 = 2;
-    }
-    if ((p.tp_grenades_1 == 2) && (p.no_grenades_1 > 3)) {
-        p.no_grenades_1 = 3;
-    }
-    if ((p.tp_grenades_2 == 2) && (p.no_grenades_2 > 3)) {
-        p.no_grenades_2 = 3;
-    }
-    if ((p.tp_grenades_1 == 10) && (p.no_grenades_1 > 3)) {
-        p.no_grenades_1 = 3;
-    }
-    if ((p.tp_grenades_2 == 10) && (p.no_grenades_2 > 3)) {
-        p.no_grenades_2 = 3;
+    if (p.no_grenades_2 > p.max_grenades_2) {
+        p.no_grenades_2 = p.max_grenades_2;
     }
 };
 
@@ -781,17 +763,6 @@ void (entity pl, float typ) PrintGrenadeType = {
     sprint(pl, PRINT_HIGH, st);
 };
 
-float (float pf_grenade_type) GetMaxGrenades = {
-    switch(pf_grenade_type) {
-        case GR_TYPE_NAIL:
-            return PC_SOLDIER_GRENADE_MAX_2;
-        case GR_TYPE_CALTROP:
-            return PC_SCOUT_GRENADE_MAX_1;
-        default:
-            return 4;
-    }
-}
-
 void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoundGrenade = {
     if (!pf_grenade_count)
         return;
@@ -818,14 +789,14 @@ float () GetGrenadePossibility = {
         return 0;
     }
     if (random() < 0.500) {
-        maxg = GetMaxGrenades(other.tp_grenades_1);
+        maxg = other.max_grenades_1;
         if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
             other.no_grenades_1 = other.no_grenades_1 + 1;
             PrintFoundGrenade(other, other.tp_grenades_1, 1);
             return 1;
         }
     } else {
-        maxg = GetMaxGrenades(other.tp_grenades_2);
+        maxg = other.max_grenades_2;
         if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
             other.no_grenades_2 = other.no_grenades_2 + 1;
             PrintFoundGrenade(other, other.tp_grenades_2, 1);
@@ -1351,7 +1322,7 @@ void () BackpackTouch = {
     if (drop_grenpack && other.playerclass != PC_SCOUT) {
 
         // give grenade type 1
-        maxg = GetMaxGrenades(other.tp_grenades_1);
+        maxg = other.max_grenades_1;
         if ((other.no_grenades_1 + self.no_grenades_1) >= maxg)
             giveg = maxg - other.no_grenades_1;
         else
@@ -1360,7 +1331,7 @@ void () BackpackTouch = {
         PrintFoundGrenade(other, other.tp_grenades_1, giveg);
 
         // give grenade type 2
-        maxg = GetMaxGrenades(other.tp_grenades_2);
+        maxg = other.max_grenades_2;
         if ((other.no_grenades_2 + self.no_grenades_2) >= maxg)
             giveg = maxg - other.no_grenades_2;
         else

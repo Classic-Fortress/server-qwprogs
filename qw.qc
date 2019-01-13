@@ -516,6 +516,10 @@ float intermission_exittime;
 .entity last_spawn_spot;
 .float spawn_at_last_spawn_spot;
 
+.float max_grenades_1;
+.float max_grenades_2;
+
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {
