@@ -174,10 +174,11 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
         self.nextpc = inp;
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint()) {
             self.has_changedclass = 1;
             self.clientkillforce = 0;
             self.clientkillfree = 1;
+            self.spawn_at_last_spawn_spot = 1;
             ClientKill();
             self.has_changedclass = 0;
             self.suicide_time = time;
@@ -231,7 +232,6 @@ void (float inp) TeamFortress_ChangeClass = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
 
     setmodel(self, string_null);
     modelindex_null = self.modelindex;

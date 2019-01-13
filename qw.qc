@@ -512,8 +512,13 @@ float intermission_exittime;
 // ability for doors to close instantly if they have a wait and are blocked
 .float forcecloseonblock;
 
+// used to remember last spawn
+.entity last_spawn_spot;
+.float spawn_at_last_spawn_spot;
+
 .float max_grenades_1;
 .float max_grenades_2;
+
 
 //============================================================================
 
