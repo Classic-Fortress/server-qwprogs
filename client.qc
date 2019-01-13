@@ -1091,9 +1091,15 @@ entity () SelectSpawnPoint =
     local entity spot;
     local float attempts;
 
+    if (self.spawn_at_last_spawn_spot == 1) {
+        self.spawn_at_last_spawn_spot = 0;
+        return(self.last_spawn_spot);
+    }
+
     if (self.team_no != 0) {
         spot = FindTeamSpawnPoint(self.team_no);
         if (spot != world)
+            self.last_spawn_spot = spot;
             return (spot);
     }
     if (coop) {
@@ -1102,6 +1108,7 @@ entity () SelectSpawnPoint =
             lastspawn = find(world, classname, "info_player_coop");
         }
         if (lastspawn != world) {
+            self.last_spawn_spot = lastspawn;
             return (lastspawn);
         }
     } else {
@@ -1115,6 +1122,7 @@ entity () SelectSpawnPoint =
                 attempts = attempts + 1;
                 if (CheckSpawnPoint(spot.origin) || (attempts >= 10)) {
                     lastspawn = spot;
+                    self.last_spawn_spot = spot;
                     return (spot);
                 }
                 spot = find(spot, classname, "info_player_deathmatch");
@@ -1128,6 +1136,7 @@ entity () SelectSpawnPoint =
     if (serverflags) {
         spot = find(world, classname, "info_player_start2");
         if (spot) {
+            self.last_spawn_spot = spot;
             return (spot);
         }
     }
@@ -1139,6 +1148,7 @@ entity () SelectSpawnPoint =
     if (!spot) {
         error("PutClientInServer: no info_player_start on level\n");
     }
+    self.last_spawn_spot = spot;
     return (spot);
 };
 
@@ -1147,24 +1157,6 @@ void () TeamFortress_SetHealth;
 void () TeamFortress_SetEquipment;
 void () TeamFortress_StartTimers;
 void () player_touch;
-
-// moves the client forward if spawn point is occupied
-void () CheckClientSpawn = {
-    local float attempts;
-    local vector orig = self.origin;
-    attempts = 0;
-
-    while (!CheckSpawnPoint(self.origin) && attempts < 30) {
-        makevectors(self.angles);
-        self.origin = self.origin + v_forward * 60;
-        attempts = attempts + 1;
-    }
-
-    if (attempts == 30) {
-        dprint("Warning: Could not find a safe spawn point for player!\n");
-        self.origin = orig;
-    }
-};
 
 void () PutClientInServer = {
     local float oldclass;
@@ -1286,7 +1278,6 @@ void () PutClientInServer = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
 
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);

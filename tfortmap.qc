@@ -2787,7 +2787,6 @@ void (entity P) ForceRespawn = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
     if ((spot.classname == "info_player_teamspawn") &&
