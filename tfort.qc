@@ -174,7 +174,7 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
         self.nextpc = inp;
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
+        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint()) {
             self.has_changedclass = 1;
             self.clientkillforce = 0;
             self.clientkillfree = 1;
