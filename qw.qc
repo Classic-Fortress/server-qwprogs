@@ -512,6 +512,9 @@ float intermission_exittime;
 // ability for doors to close instantly if they have a wait and are blocked
 .float forcecloseonblock;
 
+.float max_grenades_1;
+.float max_grenades_2;
+
 //============================================================================
 
 void (float psize, entity p) KickPlayer = {
