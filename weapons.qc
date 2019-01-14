@@ -1680,7 +1680,7 @@ float () W_CheckNoAmmo = {
 void () W_Reload_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1689,7 +1689,7 @@ void () W_Reload_shotgun = {
 void () W_Reload_super_shotgun = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_shot2.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1699,7 +1699,7 @@ void (entity pl) W_Reload_sniper_rifle = {
     pl.reload_sniper_ticks = 0;
     pl.tfstate = pl.tfstate - (pl.tfstate & TFSTATE_RELOADING);
     pl.weaponmodel = "progs/v_srifle.mdl";
-    sprint(pl, PRINT_LOW, "Finished reloading\n");
+    sprint(pl, PRINT_HIGH, "Finished reloading\n");
     W_WeaponState_Load(pl, 0);
     Status_Refresh(pl);
 };
@@ -1723,7 +1723,7 @@ void () W_Reload_grenade_launcher = {
         self.owner.weaponmodel = "progs/v_rock.mdl";
     else
         self.owner.weaponmodel = "progs/v_pipe.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
@@ -1732,7 +1732,7 @@ void () W_Reload_grenade_launcher = {
 void () W_Reload_rocket_launcher = {
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
     self.owner.weaponmodel = "progs/v_rock2.mdl";
-    sprint(self.owner, PRINT_LOW, "Finished reloading\n");
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
     dremove(self);
     W_WeaponState_Load(self.owner, 0);
     Status_Refresh(self.owner);
