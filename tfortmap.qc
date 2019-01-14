@@ -2124,10 +2124,18 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 
     if (Item.items & IT_KEY1)
         AP.items = AP.items | IT_KEY1;
-        Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        } else {
+            Status_Print(AP, "\n\n\n", AP.message);
+        }
     if (Item.items & IT_KEY2)
         AP.items = AP.items | IT_KEY2;
-        Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        } else {
+            Status_Print(AP, "\n\n\n", AP.message);
+        }
 
     if (Goal != Item) {
         if (Goal.goal_result & TFGR_NO_ITEM_RESULTS) {
