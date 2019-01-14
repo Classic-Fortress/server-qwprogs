@@ -2122,10 +2122,21 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     /* if (Item.goal_activation & TFGI_ITEMGLOWS) */
     /*     Item.effects = EF_DIMLIGHT; */
 
-    if (Item.items & IT_KEY1)
+    if (Item.items & IT_KEY1) {
         AP.items = AP.items | IT_KEY1;
-    if (Item.items & IT_KEY2)
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        }
+        // else is taken care of in DoResults()
+    }
+
+    if (Item.items & IT_KEY2) {
         AP.items = AP.items | IT_KEY2;
+        if (Item.message == string_null) {
+            Status_Print(AP, "\n\n\n", "You got the enemy flag!");
+        }
+        // else is taken care of in DoResults()
+    }
 
     if (Goal != Item) {
         if (Goal.goal_result & TFGR_NO_ITEM_RESULTS) {
