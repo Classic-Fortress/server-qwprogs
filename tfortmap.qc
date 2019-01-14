@@ -804,24 +804,14 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 Player.no_grenades_1 + Goal.no_grenades_1;
             Player.no_grenades_2 =
                 Player.no_grenades_2 + Goal.no_grenades_2;
-
-            if (Player.no_grenades_1 > 4) {
-                Player.no_grenades_1 = 4;
+            
+             if (Player.no_grenades_1 > Player.max_grenades_1) {
+                Player.no_grenades_1 = Player.max_grenades_1;
             }
-            if (Player.no_grenades_2 > 4) {
-                Player.no_grenades_2 = 4;
-            }
-
-            // This should never happen
-            if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_1 > PC_SOLDIER_GRENADE_MAX_2)) {
-                Player.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_2;
+            if (Player.no_grenades_2 > Player.max_grenades_2) {
+                Player.no_grenades_2 = Player.max_grenades_2;
             }
 
-            if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-                    (Player.no_grenades_2 > PC_SOLDIER_GRENADE_MAX_2)) {
-                Player.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
-            }
             if (Player.ammo_detpack > Player.maxammo_detpack) {
                 Player.ammo_detpack = Player.maxammo_detpack;
             }
@@ -914,8 +904,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         Player.ammo_medikit = Player.maxammo_medikit;
                         Player.ammo_detpack = Player.maxammo_detpack;
 
-                        Player.no_grenades_1 = GetMaxGrenades(Player.tp_grenades_1);
-                        Player.no_grenades_2 = GetMaxGrenades(Player.tp_grenades_2);
+                        Player.no_grenades_1 = Player.max_grenades_1;
+                        Player.no_grenades_2 = Player.max_grenades_2;
 
                         te = find(Player, classname, "timer");
 
@@ -1074,20 +1064,11 @@ void (entity Goal, entity Player) RemoveResults = {
     Player.no_grenades_1 = Player.no_grenades_1 - Goal.no_grenades_1;
     Player.no_grenades_2 = Player.no_grenades_2 - Goal.no_grenades_2;
 
-    if (Player.no_grenades_1 > 4)
-        Player.no_grenades_1 = 4;
+    if (Player.no_grenades_1 > Player.max_grenades_1)
+        Player.no_grenades_1 = Player.max_grenades_1;
 
-    if (Player.no_grenades_2 > 4)
-        Player.no_grenades_2 = 4;
-
-    // this should never happen
-    if ((Player.tp_grenades_1 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_1 > PC_SOLDIER_GRENADE_MAX_2))
-        Player.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_2;
-
-    if ((Player.tp_grenades_2 == GR_TYPE_NAIL) &&
-            (Player.no_grenades_2 > PC_SOLDIER_GRENADE_MAX_2))
-        Player.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
+    if (Player.no_grenades_2 > Player.max_grenades_2)
+        Player.no_grenades_2 = Player.max_grenades_2;
 
     if (Player.ammo_detpack > Player.maxammo_detpack)
         Player.ammo_detpack = Player.maxammo_detpack;
@@ -2787,7 +2768,6 @@ void (entity P) ForceRespawn = {
     self.origin = spot.origin + '0 0 1';
     self.angles = spot.angles;
     self.fixangle = 1;
-    CheckClientSpawn();
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
     if ((spot.classname == "info_player_teamspawn") &&
