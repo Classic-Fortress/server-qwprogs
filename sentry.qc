@@ -273,9 +273,6 @@ float () Sentry_Fire = {
     org = self.origin;
     org_z = org_z + 20;
     dir = self.enemy.origin - org;
-    dprint("enemy origin: ", vtos(self.enemy.origin), "\n");
-    dprint("sentry origin: ", vtos(self.origin), "\n");
-    
 
     if (((self.ideal_yaw - anglemod(self.angles_y)) < -10)
         || ((self.ideal_yaw - anglemod(self.angles_y)) > 10))
