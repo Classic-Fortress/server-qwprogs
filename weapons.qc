@@ -105,6 +105,7 @@ void () HallucinationTimer;
 void () TranquiliserTimer;
 
 void () TeamFortress_CTF_FlagInfo;
+void () ClanMode;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -2523,7 +2524,7 @@ void () DeadImpulses = {
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (cb_prematch_time < time)) {
         Menu_Class(0);
-    } else if (self.is_admin == 1) {
+    } else if (self.is_admin) {
         if (self.impulse == 193)
             Admin_CeaseFire();
         else if (self.impulse == 192)
@@ -2538,6 +2539,12 @@ void () DeadImpulses = {
             Admin_CycleDeal();
         else if (self.impulse == 198)
             Admin_ListIPs();
+        else if (self.impulse == 207)
+            ClanMode();
+        else if (self.impulse == 239) {
+            self.current_menu_page = 1;
+            Menu_Admin();
+        }
     }
     if (self.impulse == TF_HELP_MAP)
         TeamFortress_HelpMap();

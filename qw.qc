@@ -111,6 +111,11 @@ typedef void (float n) f_void_float;
 .float weaponmode;              // Used for multiple mode weapons
 .float last_weaponmode;         // Last weapon's weapon mode
 .float motd;                    // Used to display MOTD
+.float current_menu;
+.float current_menu_type;
+.float current_menu_page;
+.float menu_count;
+.float menu_displaytime;
 .f_void_float menu_input;
 
 float toggleflags;              // toggleable flags
@@ -555,3 +560,6 @@ string (string s, float width) strpadr =
 
     return s;
 };
+
+float captainmode;
+.float captain;

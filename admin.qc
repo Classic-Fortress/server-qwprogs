@@ -225,3 +225,32 @@ void (entity p) CheckAutoKick = {
         }
     }
 };
+
+void (string cl_pwd) Admin_Check =
+{
+    local string st2;
+
+    st2 = infokey (world, "adminpwd");
+    if ((cl_pwd != string_null))
+    {
+        stuffcmd (self, "setinfo adminpwd \"");
+        stuffcmd (self, "\"\n");
+        if (((st2 != string_null) && (cl_pwd == st2)))
+        {
+            self.is_admin = TRUE;
+        }
+    }
+};
+
+void () Admin_Aliases =
+{
+    TeamFortress_Alias("countplayers", 192, 0);
+    TeamFortress_Alias("deal", 189, 0);
+    TeamFortress_Alias("kick", 190, 0);
+    TeamFortress_Alias("ban", 191, 0);
+    TeamFortress_Alias("next", 195, 0);
+    TeamFortress_Alias("ceasefire", 193, 0);
+    TeamFortress_Alias("listips", 198, 0);
+    TeamFortress_Alias("clan", 207, 0);
+    TeamFortress_Alias("adminmenu", 239, 0);
+};

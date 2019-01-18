@@ -12,6 +12,7 @@
 void () SpectatorDisconnect;
 void () SpectatorImpulseCommand;
 void () SpectatorThink;
+void () Admin_Aliases;
 
 void () SpectatorConnect = {
     local string st;
@@ -35,13 +36,7 @@ void () SpectatorConnect = {
         stuffcmd(self, "\"\n");
         stuffcmd(self, "setinfo adminpwd \"");
         stuffcmd(self, "\"\n");
-        TeamFortress_Alias("countplayers", 192, 0);
-        TeamFortress_Alias("deal", 189, 0);
-        TeamFortress_Alias("kick", 190, 0);
-        TeamFortress_Alias("ban", 191, 0);
-        TeamFortress_Alias("next", 195, 0);
-        TeamFortress_Alias("ceasefire", 193, 0);
-        TeamFortress_Alias("listips", 198, 0);
+        Admin_Aliases();
     } else
         self.is_admin = FALSE;
 

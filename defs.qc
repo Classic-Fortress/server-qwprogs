@@ -286,6 +286,7 @@ float rj;
 
 // misc flag
 .float cnt;
+.float cnt2;
 
 // subs
 .void () think1;
@@ -414,6 +415,10 @@ string(entity e, string key) infokey = #80;  // get a key value (world = serveri
 float (string s) stof = #81; // convert string to float
 void (vector where, float set) multicast = #82;      // sends the temp message to a set
                                                 // of clients, possibly in PVS or PHS
+
+void(string str) tokanize = #84; // tokanize text
+float() argc = #85; // returns number of tokens
+string(float num) argv_mvdsv = #86; // returns token for the given number
 
 float (float a, float b, ...) min                                   = #94;
 float (float a, float b, ...) max                                   = #95;
