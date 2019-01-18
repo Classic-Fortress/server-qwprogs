@@ -4,7 +4,7 @@ FortressOne Server v0.1.0
 New features
 ------
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
-* Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime n`.
+* Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
 * Increased nail velocity. Disable with `localinfo old_ng_velocity on`.
 * Nailgun and Super-nailgun damage configurable with `localinfo ng_damage` and `localinfo sng_damage`.
 * Keys and flags glow their colour.
