@@ -1316,7 +1316,7 @@ float (entity Goal, entity AP) Activated = {
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate = {
     local entity te;
 
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
 
     
@@ -1635,7 +1635,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     local float winners;
     local float gotone;
 
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         return;
     }
     if (Goal.goal_state == 1) {
@@ -1944,7 +1944,7 @@ void () tfgoal_touch = {
         return;
     if (other.classname != "player")
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
     if (self.goal_state == TFGS_ACTIVE)
         return;
@@ -2006,7 +2006,7 @@ void () item_tfgoal_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
     if (other.is_feigning)
         return;

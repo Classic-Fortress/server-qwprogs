@@ -1071,111 +1071,173 @@ float (float pc) IsLegalClass = {
     return (TRUE);
 };
 
-void (entity p) TeamFortress_SetSpeed = {
+void (entity p) TeamFortress_SetSpeed =
+{
     local string sp;
     local float tf;
     local entity te;
+    local string st;
 
-    stuffcmd(p, "cl_movespeedkey 1\n");
-    if (p.tfstate & TFSTATE_CANT_MOVE || p.is_building == 1 || p.is_detpacking > 0) {
-#ifdef STOP_MOUSE_MOVEMENT
-        stuffcmd(p, "m_forward 0\n");
-        stuffcmd(p, "m_side 0\n");
-#endif
+    stuffcmd (p, "cl_movespeedkey 1\n");
+    if ((p.tfstate & 65536))
+    {
+        if ((0 == 1))
+        {
+            stuffcmd (p, "m_forward 0\n");
+            stuffcmd (p, "m_side 0\n");
+        }
         p.velocity = '0 0 0';
-        stuffcmd(p, "cl_backspeed 0\n");
-        stuffcmd(p, "cl_forwardspeed 0\n");
-        stuffcmd(p, "cl_sidespeed 0\n");
+        stuffcmd (p, "cl_backspeed 0\n");
+        stuffcmd (p, "cl_forwardspeed 0\n");
+        stuffcmd (p, "cl_sidespeed 0\n");
         p.maxspeed = 0;
         return;
     }
-#ifdef STOP_MOUSE_MOVEMENT
-    else {
-        stuffcmd(p, "m_forward 1\n");
-        stuffcmd(p, "m_side 0.8\n");
+    else
+    {
+        if ((0 == 1))
+        {
+            stuffcmd (p, "m_forward 1\n");
+            stuffcmd (p, "m_side 0.8\n");
+        }
     }
-#endif
-    if (p.playerclass == PC_SCOUT) {
-        p.maxfbspeed = PC_SCOUT_MAXSPEED;
-        p.maxstrafespeed = PC_SCOUT_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SNIPER) {
-        p.maxfbspeed = PC_SNIPER_MAXSPEED;
-        p.maxstrafespeed = PC_SNIPER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SOLDIER) {
-        p.maxfbspeed = PC_SOLDIER_MAXSPEED;
-        p.maxstrafespeed = PC_SOLDIER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_DEMOMAN) {
-        p.maxfbspeed = PC_DEMOMAN_MAXSPEED;
-        p.maxstrafespeed = PC_DEMOMAN_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_MEDIC) {
-        p.maxfbspeed = PC_MEDIC_MAXSPEED;
-        p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_HVYWEAP) {
-        p.maxfbspeed = PC_HVYWEAP_MAXSPEED;
-        p.maxstrafespeed = PC_HVYWEAP_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_PYRO) {
-        p.maxfbspeed = PC_PYRO_MAXSPEED;
-        p.maxstrafespeed = PC_PYRO_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_CIVILIAN) {
-        p.maxfbspeed = PC_CIVILIAN_MAXSPEED;
-        p.maxstrafespeed = PC_CIVILIAN_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SPY) {
-        p.maxfbspeed = PC_SPY_MAXSPEED;
-        p.maxstrafespeed = PC_SPY_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_ENGINEER) {
-        p.maxfbspeed = PC_ENGINEER_MAXSPEED;
-        p.maxstrafespeed = PC_ENGINEER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_UNDEFINED) {
-//      p.maxfbspeed = 320;
-//      p.maxstrafespeed = 320;
-        p.maxfbspeed = 0;
-        p.maxstrafespeed = 0;
-        p.maxspeed = 0;
-        return;
+    if ((p.playerclass == 1))
+    {
+        p.maxspeed = 450;
     }
-    tf = 0;
-    te = find(world, classname, "item_tfgoal");
-    while ((te != world) && (tf == 0)) {
-        if (te.owner == p) {
-            if (te.goal_activation & TFGI_SLOW) {
-                tf = 1;
-                p.maxfbspeed = p.maxfbspeed / 2;
-                p.maxstrafespeed = p.maxstrafespeed / 2;
+    else
+    {
+        if ((p.playerclass == 2))
+        {
+            p.maxspeed = 300;
+        }
+        else
+        {
+            if ((p.playerclass == 3))
+            {
+                p.maxspeed = 240;
+            }
+            else
+            {
+                if ((p.playerclass == 4))
+                {
+                    p.maxspeed = 280;
+                }
+                else
+                {
+                    if ((p.playerclass == 5))
+                    {
+                        p.maxspeed = 320;
+                    }
+                    else
+                    {
+                        if ((p.playerclass == 6))
+                        {
+                            p.maxspeed = 230;
+                        }
+                        else
+                        {
+                            if ((p.playerclass == 7))
+                            {
+                                p.maxspeed = 300;
+                            }
+                            else
+                            {
+                                if ((p.playerclass == 11))
+                                {                                    
+                                    p.maxspeed = 240;                                    
+                                }
+                                else
+                                {
+                                    if ((p.playerclass == 8))
+                                    {
+                                        p.maxspeed = 300;
+                                    }
+                                    else
+                                    {
+                                        if ((p.playerclass == 9))
+                                        {
+                                            p.maxspeed = 300;
+                                        }
+                                        else
+                                        {
+                                            if (!p.playerclass)
+                                            {
+                                                st = infokey (world, "clan");
+                                                if ((st == "on"))
+                                                {
+                                                    p.maxspeed = 0;
+                                                    return;
+                                                }
+                                                else
+                                                {
+                                                    p.maxspeed = 400;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        te = find(te, classname, "item_tfgoal");
     }
-    if (p.tfstate & TFSTATE_TRANQUILISED) {
-        p.maxfbspeed = p.maxfbspeed / 2;
-        p.maxstrafespeed = p.maxstrafespeed / 2;
+    tf = 0;
+    te = find (world, classname, "item_tfgoal");
+    while (((te != world) && (tf == 0)))
+    {
+        if ((te.owner == p))
+        {
+            if ((te.goal_activation & 2))
+            {
+                tf = 1;
+                p.maxspeed = (p.maxspeed / 2);
+            }
+        }
+        te = find (te, classname, "item_tfgoal");
     }
-    if (p.leg_damage) {
-        if (p.leg_damage > 6) {
+    if ((p.tfstate & 32768))
+    {
+        p.maxspeed = (p.maxspeed / 2);
+    }
+    if (p.leg_damage)
+    {
+        if ((p.leg_damage > 6))
+        {
             p.leg_damage = 6;
         }
-        p.maxfbspeed = p.maxfbspeed * (10 - p.leg_damage) / 10;
-        p.maxstrafespeed = p.maxstrafespeed * (10 - p.leg_damage) / 10;
+        p.maxspeed = (p.maxspeed * ((10 - p.leg_damage) / 10));
     }
-    if (p.tfstate & TFSTATE_AIMING) {
-        if (p.maxfbspeed > 80) {
-            p.maxfbspeed = 80;
+    if ((p.tfstate & 2048))
+    {
+        if ((p.current_weapon == 32768))
+        {
+            if ((p.maxspeed > (p.maxspeed / 2)))
+            {
+                p.maxspeed = (p.maxspeed / 2);
+            }
         }
-        if (p.maxstrafespeed > 80) {
-            p.maxstrafespeed = 80;
+        else
+        {
+            if ((p.maxspeed > 80))
+            {
+                p.maxspeed = 80;
+            }
         }
     }
-    sp = ftos(p.maxfbspeed);
-    stuffcmd(p, "cl_backspeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
-    stuffcmd(p, "cl_forwardspeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
-    sp = ftos(p.maxstrafespeed);
-    stuffcmd(p, "cl_sidespeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
-    p.maxspeed = p.maxfbspeed;
+    sp = ftos (p.maxspeed);
+    sp = "9999";
+    stuffcmd (p, "cl_backspeed ");
+    stuffcmd (p, sp);
+    stuffcmd (p, "\n");
+    stuffcmd (p, "cl_forwardspeed ");
+    stuffcmd (p, sp);
+    stuffcmd (p, "\n");
+    stuffcmd (p, "cl_sidespeed ");
+    stuffcmd (p, sp);
+    stuffcmd (p, "\n");
 };
 
 void () TeamFortress_SetHealth = {
@@ -2470,7 +2532,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
             restime = restime + 7;
         }
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         if (self.lives > 0)
             self.lives = self.lives - 1;
 

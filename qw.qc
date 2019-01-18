@@ -424,6 +424,7 @@ float already_chosen_map;
 
 float clanbattle;
 float clan_scores_dumped;
+float cb_prematch;
 float cb_prematch_time;
 float cb_ceasefire_time;
 float game_locked;

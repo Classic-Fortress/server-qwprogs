@@ -563,7 +563,7 @@ void () W_FireMedikit = {
 
                 if (trace_ent.playerclass == PC_MEDIC)
                     return;
-                if (cb_prematch_time > time)
+                if (cb_prematch)
                     return;
                 if (trace_ent.tfstate & TFSTATE_INFECTED)
                     return;
@@ -1252,7 +1252,7 @@ void () W_FireGrenade = {
     newmis.owner = self;
     newmis.movetype = 10;
     newmis.solid = 2;
-    if ((self.weaponmode == 0) || (cb_prematch_time > time)) {
+    if ((self.weaponmode == 0) || (cb_prematch)) {
         newmis.weapon = 5;
         newmis.classname = "grenade";
         newmis.skin = 1;
@@ -1975,7 +1975,7 @@ void () W_PrintWeaponMessage = {
     if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if (self.weaponmode == GL_NORMAL)
             sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
-        else if (cb_prematch_time > time)
+        else if (cb_prematch)
             sprint(self, PRINT_MEDIUM,
                    "Pipebomb mode not available in prematch\n");
         else if (self.weaponmode == GL_PIPEBOMB)
@@ -2316,7 +2316,7 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if ((cb_prematch_time > time) || cease_fire) {
+    if ((cb_prematch) || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();
         self.impulse = 0;
@@ -2738,7 +2738,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (intermission_running || cease_fire)
+    if (intermission_running)
         return;
 
     // hwguy assault cannon special

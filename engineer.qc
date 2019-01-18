@@ -346,7 +346,7 @@ float (entity obj, entity builder) CheckArea = {
 };
 
 void (float objtobuild) TeamFortress_Build = {
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         sprint(self, PRINT_MEDIUM, "You cannot build during prematch\n");
         return;
     }

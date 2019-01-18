@@ -122,73 +122,73 @@ void () Admin_DoBan = {
     self.admin_use = world;
 };
 
-void () CeaseFire_think = {
+void () CeaseFire_think =
+{
     local entity te;
+    local float temp;
 
-    if ((time > cb_ceasefire_time) && (self.weapon == 1) &&
-        (cease_fire == 1)) {
-        cease_fire = 0;
-        bprint(PRINT_HIGH, "Resume fire\n");
-        te = find(world, classname, "player");
-        while (te) {
-            CenterPrint3(te, "Resume fire\nCalled by: ",
-                         self.owner.netname, "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate - (te.tfstate & 65536);
-            TeamFortress_SetSpeed(te);
-            te = find(te, classname, "player");
-        }
-        dremove(self);
-        return;
-    }
-    if (!cease_fire) {
-        dremove(self);
+    if (cease_fire == 0)
+    {
+        dremove (self);
         return;
     }
     te = find(world, classname, "player");
-    while (te) {
-        CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.owner.netname,
-                     "\n");
-        te = find(te, classname, "player");
+    while (te)
+    {
+        CenterPrint3 (te, "CEASE FIRE\nCalled by: ", self.owner.netname, "\n");
+        te = find (te, classname, "player");
     }
-    self.nextthink = time + 5;
+    self.nextthink = (time + 5);
 };
 
 void () Admin_CeaseFire = {
-    local entity te;
+        local entity te;
 
-    if (!cease_fire) {
-        cease_fire = 1;
-        bprint(PRINT_HIGH, "Cease fire\n");
-        te = find(world, classname, "player");
-        while (te) {
-            CenterPrint3(te, "Cease fire\nCalled by: ", self.netname,
-                         "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate | 65536;
-            TeamFortress_SetSpeed(te);
-            te = find(te, classname, "player");
+    if (!cease_fire)
+    {
+        if (cb_prematch)
+        {
+            StopTimer ();
         }
-        te = spawn();
+        cease_fire = 1;
+        bprint (2, "CEASE FIRE\n");
+        te = find (world, classname, "player");
+        while (te)
+        {
+            CenterPrint3 (te, "CEASE FIRE\nCalled by: ", self.netname, "\n");
+            te.immune_to_check = (time + 5);
+            te.tfstate = (te.tfstate | 65536);
+            TeamFortress_SetSpeed (te);
+            te = find (te, classname, "player");
+        }
+        te = spawn ();
         te.owner = self;
         te.classname = "ceasefire";
         te.think = CeaseFire_think;
-        te.nextthink = time + 5;
-    } else {
-        te = find(world, classname, "ceasefire");
+        te.nextthink = (time + 5);
+    }
+    else
+    {
+        te = find (world, classname, "ceasefire");
         if (te)
-            dremove(te);
-
+        {
+            dremove (te);
+        }
         cease_fire = 0;
-        bprint(PRINT_HIGH, "Resume fire\n");
-        te = find(world, classname, "player");
-        while (te) {
-            CenterPrint3(te, "Resume fire\nCalled by: ", self.netname,
-                         "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate - (te.tfstate & 65536);
-            TeamFortress_SetSpeed(te);
-            te = find(te, classname, "player");
+        if (cb_prematch)
+        {
+            cb_prematch_time = 0;
+            StartTimer ();
+        }
+        bprint (2, "RESUME FIRE\n");
+        te = find (world, classname, "player");
+        while (te)
+        {
+            CenterPrint3 (te, "RESUME FIRE\nCalled by: ", self.netname, "\n");
+            te.immune_to_check = (time + 5);
+            te.tfstate = (te.tfstate - (te.tfstate & 65536));
+            TeamFortress_SetSpeed (te);
+            te = find (te, classname, "player");
         }
     }
 };

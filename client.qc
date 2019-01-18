@@ -50,6 +50,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer;
 
 void () CTF_FlagCheck;
 void (entity pl) Sniper_ZoomReset;
+void () StartTimer;
+void () StopTimer;
 
 string nextmap;
 
@@ -253,69 +255,48 @@ void () DecodeLevelParms = {
 
         clanbattle = CF_GetSetting("c", "clan", "off");
         if (clanbattle) {
-
+            localcmd ("serverinfo status Standby\n");
+            
             clan_scores_dumped = 0;
             game_locked = 0;
 
+            cb_prematch = 1;
             cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
-            cb_prematch_time = time + cb_prematch_time * 60;
-
-            if (timelimit && ((time + timelimit) < cb_prematch_time)) {
-
-                timelimit = timelimit + cb_prematch_time;
-                ti = ceil(timelimit / 60);
-                st = ftos(ti);
-                cvar_set("timelimit", st);
-
+            if (cb_prematch_time)
+            {
+                StartTimer();
             }
-            if (cb_prematch_time > time) {
+            if (!cb_prematch_time) {
+              cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
+                if (cb_ceasefire_time) {
 
-                cb_prematch_time = cb_prematch_time + 5;
-                ent = spawn();
-                ent.think = PreMatch_Think;
-                ent.nextthink = time + 5;
-
-            }
-
-            cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
-            if (cb_ceasefire_time != 0) {
-
-                cb_ceasefire_time = time + cb_ceasefire_time * 60;
-                if (cb_prematch_time < cb_ceasefire_time) {
-
-                    cb_prematch_time = cb_ceasefire_time + 5;
-                    if (timelimit &&
-                        ((time + timelimit) < cb_prematch_time)) {
-
-                        timelimit = timelimit + cb_ceasefire_time;
-                        ti = ceil(timelimit / 60);
-                        st = ftos(ti);
-                        cvar_set("timelimit", st);
-
+                    cease_fire = 1;
+                    bprint (2, "CEASE FIRE\n");
+                    te = find (world, classname, "player");
+                    while (te)
+                    {
+                        centerprint (te, "CEASE FIRE\n");
+                        te.immune_to_check = (time + 5);
+                        te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
+                        TeamFortress_SetSpeed (te);
+                        te = find (te, classname, "player");
                     }
+                    te = spawn ();
+                    te.classname = "ceasefire";
+                    te.think = CeaseFire_think;
+                    te.nextthink = (time + 5);
+                    te.weapon = 1;
+                    StartTimer();
 
-                }
-                cease_fire = 1;
-                bprint(PRINT_HIGH, "Cease fire\n");
-
-                te = find(world, classname, "player");
-                while (te) {
-                    centerprint(te, "Cease fire\n");
-                    te.immune_to_check = time + 10;
-                    te.tfstate = te.tfstate | TFSTATE_CANT_MOVE;
-                    TeamFortress_SetSpeed(te);
-                    te = find(te, classname, "player");
-                }
-                te = spawn();
-                te.classname = "ceasefire";
-                te.think = CeaseFire_think;
-                te.nextthink = time + 5;
-
+                }  
             }
+            
             game_locked = CF_GetSetting("lg", "locked_game", "off");
 
-        } else
+        } else {
             clanbattle = FALSE;
+            localcmd ("serverinfo status Normal\n");
+        }
 
         // automatically assign team [off]
         fl = CF_GetSetting("a", "autoteam", "off");
@@ -1435,6 +1416,10 @@ void () DumpScore = {
 float already_cycled;
 
 void () NextLevel = {
+    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
+    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
+    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
+    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
     local entity o;
 
     if (already_cycled)
@@ -1448,7 +1433,18 @@ void () NextLevel = {
 };
 
 void () CheckRules = {
-    if ((timelimit && time >= timelimit) || (fraglimit && self.frags >= fraglimit)) {
+    if (!clanbattle)
+    {
+        if ((timelimit && (time >= timelimit)))
+        {
+            NextLevel();
+            RemoveGrenadeTimers();
+            RemovePrimeTimers();
+            RemoveGrenades();
+        }
+    }
+    if ((fraglimit && (self.frags >= fraglimit)))
+    {
         NextLevel();
         RemoveGrenadeTimers();
         RemovePrimeTimers();
@@ -2070,7 +2066,7 @@ void () ClientConnect = {
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in prematch time\n");
 };
 

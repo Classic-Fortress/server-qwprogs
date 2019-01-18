@@ -214,7 +214,7 @@ float () UserCmd =
         {
             if (self.is_admin)
             {
-                if (clanbattle == 1 && !(cb_prematch_time > time))
+                if (clanbattle == 1 && !(cb_prematch))
                 {
                     sprint (self, 2, "Clan Battle in progress....\n");
                     self.impulse = 0;
