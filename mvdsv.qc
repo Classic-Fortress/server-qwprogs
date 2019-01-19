@@ -1,7 +1,6 @@
 float () UserCmd =
 {
-    local float arg_num;
-    local float fl;
+    local float arg_num; 
     local string tmp;
 
     arg_num = argc ();
@@ -259,15 +258,12 @@ float () UserCmd =
             sprint (self, 2, "\n");
             return (1);
         }
-
     }
-
     return 0;
 };
 
 float () ConsoleCmd {
-local float arg_num;
-    local float fl;
+    local float arg_num;
     local string tmp;
 
     arg_num = argc ();
@@ -319,4 +315,5 @@ local float arg_num;
             }
         }
     }
+    return 0;
 }

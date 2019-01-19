@@ -4,7 +4,6 @@ void (entity p) SetTeamName;
 void (entity pl) Menu_Close;
 
 void (float tno) playerSetTeam = {
-	local entity te;
 	local string st;
 
 	TeamFortress_TeamSet (tno);

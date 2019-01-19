@@ -159,7 +159,6 @@ void () DecodeLevelParms = {
     local entity ent;
 
     local entity te;
-    local float ti;
 
     if (serverflags)
         if (world.model == "maps/start.bsp")
