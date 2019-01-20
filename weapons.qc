@@ -2736,8 +2736,7 @@ void () W_WeaponFrame = {
         Menu_Class(0);
         self.impulse = 0;
         return;
-    }
-
+    }    
     if (intermission_running)
         return;
 
@@ -2789,6 +2788,8 @@ void () W_WeaponFrame = {
 
     if (self.impulse != 0 && self.has_disconnected == 0)
         ImpulseCommands();
+    if (cease_fire)
+        return;
 
     if (self.button0 && !self.fire_held_down) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
