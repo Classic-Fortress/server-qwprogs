@@ -1415,10 +1415,6 @@ void () DumpScore = {
 float already_cycled;
 
 void () NextLevel = {
-    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
-    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
-    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
-    bprint(PRINT_MEDIUM, "NEXT LEVEL CALLED?\n");
     local entity o;
 
     if (already_cycled)
