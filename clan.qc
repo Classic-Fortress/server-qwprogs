@@ -43,7 +43,7 @@ void () MatchThink =
         if (((self.cnt == 1) || (self.cnt == 5)))
         {
             tmp = ftos (self.cnt);
-            bprint3 (2, "", tmp, "‘ minute");
+            bprint3 (2, Q"\s[\s", tmp, "\s]\s minute");
             if ((self.cnt != 1))
             {
                 bprint (2, "s");
@@ -61,7 +61,7 @@ void () MatchThink =
     if ((!self.cnt && (((self.cnt2 == 30) || (self.cnt2 == 15)) || (self.cnt2 <= 10))))
     {
         tmp = ftos (self.cnt2);
-        bprint3 (2, "", tmp, "‘ second");
+        bprint3 (2, Q"\s[\s", tmp, "\s]\s second");
         if ((self.cnt2 != 1))
         {
             bprint (2, "s");
@@ -285,9 +285,9 @@ void () StartTimer =
     local float f1;
     local string tmp;
 
-    if ((clanbattle == 0))
+    if (clanbattle == 0)
     {
-        if ((self != world))
+        if (self != world)
         {
             sprint (self, 2, "Clan mode off....\n");
             sprint (self, 2, "Match cannot be started.\n");
@@ -299,7 +299,7 @@ void () StartTimer =
         }
         return;
     }
-    if (((clanbattle == 1) && (cb_prematch == 0)))
+    if (clanbattle == 1 && cb_prematch == 0)
     {
         if ((self != world))
         {
@@ -313,7 +313,7 @@ void () StartTimer =
         }
         return;
     }
-    if ((infokey (world, "status") == "Countdown"))
+    if (infokey (world, "status") == "Countdown")
     {
         if ((self != world))
         {
@@ -326,7 +326,7 @@ void () StartTimer =
         return;
     }
     timer = find (world, classname, "prematch");
-    while ((timer != world))
+    while (timer != world)
     {
         dremove (timer);
         timer = find (timer, classname, "prematch");
@@ -347,7 +347,7 @@ void () StartTimer =
     else
     {
         lightstyle (0, "e");
-        if ((stof (infokey (world, "demo_auto_left")) > 0))
+        if (stof (infokey (world, "demo_auto_left")) > 0)
         {
             if (infokey (world, "serverdemo") == "on")
             {
@@ -385,7 +385,8 @@ void () StartTimer =
         timer.cnt2 = rint (stof (infokey (world, "count")));
         if ((timer.cnt2 < 1))
         {
-            timer.cnt2 = 0;
+            //By default, 10 seconds of countdown
+            timer.cnt2 = 10;
         }
     }
     timer.cnt2 = (timer.cnt2 + 1);

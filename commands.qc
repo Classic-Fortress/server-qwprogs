@@ -1,7 +1,6 @@
 void () ClanMode =
 {
 	local string st;
-
 	st = infokey (world, "clan");
 	if ((st == "on"))
 	{

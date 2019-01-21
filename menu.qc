@@ -1039,7 +1039,7 @@ void () Menu_Admin =
     self.impulse = 0;
 
     if (self.current_menu_type == 0) {
-        s_menu1 =         "HueTF Admin Menu:                \n\n";
+        s_menu1 =         "FortressOne Admin Menu:                \n\n";
         if (self.current_menu_page == 1) {
             s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode                    \n");
             s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
@@ -1140,7 +1140,7 @@ void () Menu_Admin =
         }
 
         if (f_tmp == 0 &&  ( self.current_menu_type == 5 || self.current_menu_type == 4 ) ) {
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s.\n");
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
                 temp = self;
                 te = find (world, classname, "player");
                 while (te != world) {
@@ -1368,13 +1368,9 @@ void (float inp) Menu_Admin_Input =
 
         }
 
-
         if (self.current_menu_type != 5) {
-            sprint(self,2,"TEST CAP\n");
             if (self.admin_use != world) {
-                sprint(self,2,"TEST CAPy\n");
                 if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
-                    sprint(self,2,"TEST CAP2\n");
                     temp = self;
                     self = self.admin_use;
                     self.captain = 9;
