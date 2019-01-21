@@ -267,11 +267,13 @@ void () Sentry_Die = {
 };
 
 float () Sentry_Fire = {
-    local vector dir;
+    local vector dir, org;
 
     self.effects = self.effects - (self.effects & EF_DIMLIGHT);
+    org = self.origin;
+    org_z = org_z + 20;
+    dir = self.enemy.origin - org;
 
-    dir = self.enemy.origin - self.origin;
     if (((self.ideal_yaw - anglemod(self.angles_y)) < -10)
         || ((self.ideal_yaw - anglemod(self.angles_y)) > 10))
         return (0);
