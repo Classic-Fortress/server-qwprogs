@@ -2316,7 +2316,7 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if ((cb_prematch) || cease_fire) {
+    if (cb_prematch || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();
         self.impulse = 0;
