@@ -621,7 +621,7 @@ void () IncendiaryRadius =
 {
     local float damg;
 
-    damg = 64;
+    damg = 69;
     deathmsg = 15;
     T_RadiusDamage(self, self.owner, damg, other);
     self.origin = (self.origin - (8 * normalize (self.velocity)));
@@ -647,7 +647,7 @@ void () T_IncendiaryTouch = {
     }
     self.effects = self.effects | 4;
     if (pyro_type == 1)
-        damg = 50 + random() * 20;
+        damg = 45 + random() * 20;
     else   
         damg = 30 + random() * 20;
     if (other.health) {
