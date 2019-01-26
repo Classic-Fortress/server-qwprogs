@@ -554,6 +554,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            pyro_type = 0;
         }
 
         st = infokey(world, "faithful");
@@ -604,6 +605,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             old_ng_rof = TRUE;
+            pyro_type = 0;
         }
 
     }
