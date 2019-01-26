@@ -502,6 +502,9 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // oztf-like classes
+        oztf_classes = CF_GetSetting("oztfclasses", "oztf_classes", "on");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
