@@ -1933,7 +1933,7 @@ void () W_Attack = {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            if (oztf_classes)
+            if (pyro_type == 1)
                 Attack_Finished(0.9);
             else 
                 Attack_Finished(1.2);

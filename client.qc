@@ -502,8 +502,8 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
-        // oztf-like classes
-        oztf_classes = CF_GetSetting("oztfclasses", "oztf_classes", "on");
+        // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", 0);
 
         st = infokey(world, "default");
         if (st == "on") {

@@ -646,7 +646,7 @@ void () T_IncendiaryTouch = {
         return;
     }
     self.effects = self.effects | 4;
-    if (oztf_classes)
+    if (pyro_type == 1)
         damg = 50 + random() * 20;
     else   
         damg = 30 + random() * 20;
@@ -655,7 +655,7 @@ void () T_IncendiaryTouch = {
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     }
-    if (oztf_classes)
+    if (pyro_type == 1)
         IncendiaryRadius();
     else {
         head = findradius(self.origin, 180);
@@ -702,7 +702,7 @@ void () W_FireIncendiaryCannon = {
     newmis.solid = SOLID_BBOX;
     makevectors(self.v_angle);
     newmis.velocity = aim(self, 1000);
-    if (oztf_classes) {
+    if (pyro_type == 1) {
         newmis.velocity = newmis.velocity * 800;
         newmis.think = IncendiaryRadius;
     }
