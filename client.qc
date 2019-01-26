@@ -498,6 +498,9 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // oztf-like classes
+        oztf_classes = CF_GetSetting("oztfclasses", "oztf_classes", "on");
+
         st = infokey(world, "default");
         if (st == "on") {
             server_default = TRUE;

@@ -494,6 +494,7 @@ float ng_velocity;
 float ng_damage;
 float sng_damage;
 float old_ng_rof;
+float oztf_classes;
 
 .float teamkills;
 

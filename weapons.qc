@@ -1933,7 +1933,10 @@ void () W_Attack = {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            Attack_Finished(1.2);
+            if (oztf_classes)
+                Attack_Finished(0.9);
+            else 
+                Attack_Finished(1.2);
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
