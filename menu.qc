@@ -1037,6 +1037,8 @@ void () Menu_Admin =
     local float f_tmp2;
 
     self.impulse = 0;
+    s_menu1 = "";
+    s_menu2 = "";
 
     if (self.current_menu_type == 0) {
         s_menu1 =         "FortressOne Admin Menu:                \n\n";
@@ -1280,19 +1282,19 @@ void (float inp) Menu_Admin_Input =
 
             } else {  // end captainmode1
                 disableCaptain();
-                local entity te;
-                local entity temp;
-                te = self;
-                temp = find (world, classname, "player");
-                while (temp != world) {
-                    self = temp;
-                    temp.captain = 0;
+                local entity pl;
+                local entity temppl;
+                pl = self;
+                temppl = find (world, classname, "player");
+                while (temppl != world) {
+                    self = temppl;
+                    temppl.captain = 0;
                     Menu_Close(self);
                     self.current_menu_type = 0;
                     self.current_menu_page = 0;
-                    temp = find (temp, classname, "player");
+                    temppl = find (temppl, classname, "player");
                 }
-                self = te;
+                self = pl;
             }
             Menu_Admin();
 
