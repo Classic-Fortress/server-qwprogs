@@ -76,96 +76,74 @@ void () Admin_CycleDeal = {
         }
         if (self.admin_use == world) {
             self.admin_use = find(self.admin_use, classname, "observer");
-            while ((self.admin_use != world) &&
-                   ((self.admin_use.netname == string_null)
-                    || (self.admin_use == self))) {
-                self.admin_use =
-                    find(self.admin_use, classname, "observer");
+            while ((self.admin_use != world) && ((self.admin_use.netname == string_null) || (self.admin_use == self))) {
+                self.admin_use = find(self.admin_use, classname, "observer");
             }
         }
-    } else {
+    } 
+    else {
         self.admin_use = find(self.admin_use, classname, "observer");
-        while ((self.admin_use != world) &&
-               ((self.admin_use.netname == string_null)
-                || (self.admin_use == self))) {
+        while ((self.admin_use != world) && ((self.admin_use.netname == string_null) || (self.admin_use == self))) {
             self.admin_use = find(self.admin_use, classname, "observer");
         }
     }
     if (self.admin_use) {
         self.admin_use.ip = infokey(self.admin_use, "ip");
         self.admin_mode = 1;
-        sprint(self, PRINT_HIGH, self.admin_use.netname, " (",
-               self.admin_use.ip, ")");
-        if (self.admin_use.classname == "observer") {
+        sprint(self, PRINT_HIGH, self.admin_use.netname, " (", self.admin_use.ip, ")");
+        if (self.admin_use.classname == "observer")
             sprint(self, PRINT_HIGH, " (spectator)");
-        }
         sprint(self, PRINT_HIGH, "\n   kick/ban/next?\n");
-    } else {
+    } 
+    else {
         self.admin_mode = 0;
         sprint(self, PRINT_HIGH, "End of player list\n");
     }
 };
 
 void () Admin_DoKick = {
-    bprint4(PRINT_HIGH, self.admin_use.netname, " was kicked by ",
-            self.netname, "\n");
+    bprint4(PRINT_HIGH, self.admin_use.netname, " was kicked by ", self.netname, "\n");
     KickCheater(self.admin_use);
     self.admin_mode = 0;
     self.admin_use = world;
 };
 
 void () Admin_DoBan = {
-    bprint4(PRINT_HIGH, self.admin_use.netname, " was banned by ",
-            self.netname, "\n");
+    bprint4(PRINT_HIGH, self.admin_use.netname, " was banned by ", self.netname, "\n");
     BanCheater(self.admin_use);
     self.admin_mode = 0;
     self.admin_use = world;
 };
 
-void () CeaseFire_think = {
+void () CeaseFire_think =
+{
     local entity te;
-
-    if ((time > cb_ceasefire_time) && (self.weapon == 1) &&
-        (cease_fire == 1)) {
-        cease_fire = 0;
-        bprint(PRINT_HIGH, "Resume fire\n");
-        te = find(world, classname, "player");
-        while (te) {
-            CenterPrint3(te, "Resume fire\nCalled by: ",
-                         self.owner.netname, "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate - (te.tfstate & 65536);
-            TeamFortress_SetSpeed(te);
-            te = find(te, classname, "player");
-        }
-        dremove(self);
-        return;
-    }
-    if (!cease_fire) {
+    if (cease_fire == 0) {
         dremove(self);
         return;
     }
     te = find(world, classname, "player");
     while (te) {
-        CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.owner.netname,
-                     "\n");
+        CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.owner.netname, "\n");
         te = find(te, classname, "player");
     }
-    self.nextthink = time + 5;
+    self.nextthink = (time + 5);
 };
 
 void () Admin_CeaseFire = {
     local entity te;
 
     if (!cease_fire) {
+        if (cb_prematch) {
+            StopTimer();
+        }
         cease_fire = 1;
-        bprint(PRINT_HIGH, "Cease fire\n");
+        bprint(2, "CEASE FIRE\n");
         te = find(world, classname, "player");
         while (te) {
-            CenterPrint3(te, "Cease fire\nCalled by: ", self.netname,
-                         "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate | 65536;
+            CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.netname, "\n");
+            te.immune_to_check = (time + 5);
+            te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
             TeamFortress_SetSpeed(te);
             te = find(te, classname, "player");
         }
@@ -173,22 +151,26 @@ void () Admin_CeaseFire = {
         te.owner = self;
         te.classname = "ceasefire";
         te.think = CeaseFire_think;
-        te.nextthink = time + 5;
-    } else {
+        te.nextthink = (time + 5);
+    }
+    else {
         te = find(world, classname, "ceasefire");
-        if (te)
+        if (te) {
             dremove(te);
-
+        }
         cease_fire = 0;
-        bprint(PRINT_HIGH, "Resume fire\n");
+        if (cb_prematch) {
+            cb_prematch_time = 0;
+            StartTimer();
+        }
+        bprint(2, "RESUME FIRE\n");
         te = find(world, classname, "player");
         while (te) {
-            CenterPrint3(te, "Resume fire\nCalled by: ", self.netname,
-                         "\n");
-            te.immune_to_check = time + 10;
-            te.tfstate = te.tfstate - (te.tfstate & 65536);
-            TeamFortress_SetSpeed(te);
-            te = find(te, classname, "player");
+            CenterPrint3(te, "RESUME FIRE\nCalled by: ", self.netname, "\n");
+            te.immune_to_check = (time + 5);
+            te.tfstate = (te.tfstate - (te.tfstate & TFSTATE_CANT_MOVE));
+            TeamFortress_SetSpeed (te);
+            te = find (te, classname, "player");
         }
     }
 };
@@ -202,7 +184,8 @@ void (entity p) CheckAutoKick = {
                 " was kicked for killing teammates\n");
         sprint(p, PRINT_HIGH, "You were kicked for killing teammates\n");
         KickCheater(p);
-    } else if (autokick_kills != 0) {
+    } 
+    else if (autokick_kills != 0) {
         if (p.teamkills == (autokick_kills - 1)) {
             sprint(p, PRINT_HIGH,
                    "Kill one more teammate, and you will get kicked out\n");
@@ -224,4 +207,34 @@ void (entity p) CheckAutoKick = {
             te.nextthink = time + autokick_time;
         }
     }
+};
+
+void (string cl_pwd) Admin_Check =
+{
+    local string st2;
+
+    st2 = infokey(world, "adminpwd");
+    if (cl_pwd != string_null) {
+        stuffcmd(self, "setinfo adminpwd \"");
+        stuffcmd(self, "\"\n");
+        if (st2 != string_null && cl_pwd == st2) {
+            self.is_admin = TRUE;
+            bprint2(2, self.netname, "\s gains full admin status!\s\n");
+            sprint(self, 2, "Type \scmd list\s for admin commands.\n");
+            sprint(self, 2, "You can also use the \sadminmenu\s command for adjusting some settings.\n");  
+        }
+    }
+};
+
+void () Admin_Aliases =
+{
+    TeamFortress_Alias("countplayers", 192, 0);
+    TeamFortress_Alias("deal", 189, 0);
+    TeamFortress_Alias("kick", 190, 0);
+    TeamFortress_Alias("ban", 191, 0);
+    TeamFortress_Alias("next", 195, 0);
+    TeamFortress_Alias("ceasefire", 193, 0);
+    TeamFortress_Alias("listips", 198, 0);
+    TeamFortress_Alias("clan", 207, 0);
+    TeamFortress_Alias("adminmenu", 239, 0);
 };

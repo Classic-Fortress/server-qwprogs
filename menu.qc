@@ -90,11 +90,29 @@ void (float inp) Menu_EngineerFix_SentryGun_Input;
 void () Menu_Dispenser;
 void (float inp) Menu_Dispenser_Input;
 
+void () Menu_Admin;
+void (float inp) Menu_Admin_Input;
+void () Admin_DoKick;
+
 void (entity pl) Menu_Close =
 {
     pl.menu_input = nil;
-    Status_Print(pl, "");
+    Status_Print(pl, "");    
 };
+
+string (string text, float maxlength) Menu_Indent_line = 
+{
+    local float spaces; 
+    local float i;
+    
+    spaces = maxlength - (strlen(text));
+    for (i = 0; i < spaces; i = i + 1)
+    {
+      text = strcat(text," ");
+    }
+    text = strcat(text,"\n");
+    return text;
+}
 
 void (float inp) Menu_Input =
 {
@@ -996,3 +1014,476 @@ void () Menu_Engineer_Cancel = {
 
     Status_Menu(self, Menu_Engineer_Cancel_Input, s_build, s_cancel);
 }
+
+void () Menu_Admin =
+{
+    local string s_menu1;
+    local string s_menu2;
+
+    /* More menu lines, commented for the sake of unecessary warnings
+     * local string s_menu3;
+     * local string s_menu4;
+     * local string s_menu5;
+     * local string s_menu6;
+     */ 
+    local string s_menu7;
+    local string s_menu8;
+    local string s_menu9;  
+
+    local entity te;
+    local entity temp;
+
+    local float f_tmp;
+    local float f_tmp2;
+
+    self.impulse = 0;
+    s_menu1 = "";
+    s_menu2 = "";
+
+    if (self.current_menu_type == 0) {
+        s_menu1 =         "FortressOne Admin Menu:                \n\n";
+        if (self.current_menu_page == 1) {
+            s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode                    \n");
+            s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
+            s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
+            s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
+            s_menu1 = strcat(s_menu1, Q"\s[5]\s Captain                      \n");
+            s_menu1 = strcat(s_menu1, Q"\s[6]\s Randomize Teams              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[7]\s Restart current map          \n");
+        } else if (self.current_menu_page == 2) {
+            s_menu1 = strcat(s_menu1, Q"\s[1]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[2]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[3]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[4]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
+            s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
+        }
+        s_menu1 = strcat(s_menu1, "\n\n");
+        s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
+        s_menu1 = strcat(s_menu1, Q"\s[9]\s Next Page                    \n");
+        s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                    \n");
+
+        Status_Menu(self, Menu_Admin_Input, s_menu1);
+    }
+
+// 1 = kick selection menu
+// 2 = ban selection menu
+// 3 = team 1's captain select menu
+// 4 = team 2's captain select menu
+// 5 = captain player selection menu
+
+    if (self.current_menu_type == 1 || self.current_menu_type == 2 || self.current_menu_type == 3 || self.current_menu_type == 4 || self.current_menu_type == 5) {
+        if (self.current_menu_type == 1) {
+            s_menu1 = "Admin Kick Menu:              \n\n";
+        } else if (self.current_menu_type == 2) {
+            s_menu1 = "Admin Ban Menu:              \n\n";
+        } else if (self.current_menu_type == 3) {
+            s_menu1 = "Captain Team 1 Select Menu:              \n\n";
+        } else if (self.current_menu_type == 4) {
+            s_menu1 = "Captain Team 2 Select Menu:              \n\n";
+        } else if (self.current_menu_type == 5) {
+            s_menu1 = strcat(Q"\[\sCaptain\s\] Team ", ftos(self.team_no));
+            s_menu1 = strcat(s_menu1, " :              \n\n");
+        }
+
+        f_tmp = 0;
+        f_tmp2 = 0;
+        s_menu2 = strcat (s_menu2, "\bPlayers:\b                      \n");
+        s_menu2 = "\sPage\s ";
+        s_menu2 = strcat (s_menu2, ftos(self.current_menu_page));
+        s_menu2 = strcat (s_menu2, "\n");
+        s_menu2 = Menu_Indent_line(s_menu2, 30);
+
+        te = find (world, classname, "player");
+        while (te != world) {
+            if ( (f_tmp < (self.current_menu_page * 7) ) && ( f_tmp >= ((self.current_menu_page - 1) * 7) ) && ( ( ( self.current_menu_type == 5 || self.current_menu_type == 4 )  && !te.captain) || (self.current_menu_type != 5 && self.current_menu_type != 4) ) )  {
+                f_tmp2 = f_tmp2 + 1;
+                f_tmp = f_tmp + 1;
+                s_menu2 = strcat( s_menu2, Q"\s[\s" );
+                s_menu2 = strcat( s_menu2, ftos(f_tmp2));
+                s_menu2 = strcat( s_menu2, Q"\s]\s " );              
+                if (strlen(te.netname) <= 26) {
+                    s_menu2 = strcat( s_menu2, te.netname );                    
+                } 
+                else {
+                    s_menu2 = strcat( s_menu2, substr(te.netname,0,25));
+                }
+                s_menu2 = Menu_Indent_line(s_menu2, 30);
+            }
+
+            if (( f_tmp < (self.current_menu_page - 1) * 7) &&  ( ( ( self.current_menu_type == 5 || self.current_menu_type == 4 )  && !te.captain) || ( self.current_menu_type != 5 && self.current_menu_type != 4 ) ) ) {
+                f_tmp = f_tmp + 1;
+            }
+
+            te = find (te, classname, "player");
+        }
+
+        if (self.current_menu_type != 3 && self.current_menu_type != 4 && self.current_menu_type != 5 ) {
+            te = find (world, classname, "observer");
+            while (te != world) {
+                if ( (f_tmp <= (self.current_menu_page * 7) ) && (f_tmp > (self.current_menu_page - 1) * 7) && te.netname != "")  {
+                    f_tmp2 = f_tmp2 + 1;
+                    s_menu2 = strcat( s_menu2, Q"\s[\s" );
+                    s_menu2 = strcat( s_menu2, ftos(f_tmp2));
+                    s_menu2 = strcat( s_menu2, Q"\s]\s " );
+                    s_menu2 = strcat( s_menu2, te.netname );
+                    if (strlen(te.netname) <= 26) {
+                        s_menu2 = strcat( s_menu2, te.netname );                    
+                    } 
+                    else {
+                        s_menu2 = strcat( s_menu2, substr(te.netname,0,25));
+                    }
+                    s_menu2 = Menu_Indent_line(s_menu2, 30);
+                }
+                f_tmp = f_tmp + 1;
+                te = find (te, classname, "observer");
+            }
+        }
+
+        if (f_tmp == 0 &&  ( self.current_menu_type == 5 || self.current_menu_type == 4 ) ) {
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+                temp = self;
+                te = find (world, classname, "player");
+                while (te != world) {
+                        te.captain = 0;
+                        self = te;
+                        Menu_Close(self);
+                        self.current_menu_type = 0;
+                        self.current_menu_page = 0;
+                    te = find (te, classname, "player");
+                }
+                self = temp;
+                captainmode = 0;
+                return;
+        }
+        s_menu2 = strcat( s_menu2, "\n");
+        s_menu7 = "\b[\b8\b]\b \bPrevious Page\b         ";
+        s_menu7 = Menu_Indent_line(s_menu7, 30);
+        s_menu8 = "\b[\b9\b]\b \bNext Page\b             ";
+        s_menu8 = Menu_Indent_line(s_menu8, 30);
+        if (self.is_admin || self.captain == 1) {
+                s_menu9 = "\b[\b0\b]\b \bBack to Main Menu\b     ";
+                s_menu9 = Menu_Indent_line(s_menu9, 30);
+        } else {
+                s_menu9 = "\n";
+        }
+        if ((self.is_admin || self.captain == 1) && captainmode) {
+                s_menu9 = strcat(s_menu9, "Option 0 results in canceling captain mode.\n");
+        }
+
+        s_menu1 = strcat(s_menu1, s_menu2);
+        s_menu1 = strcat(s_menu1, s_menu7);
+        s_menu1 = strcat(s_menu1, s_menu8);
+        s_menu1 = strcat(s_menu1, s_menu9);
+
+        Status_Menu(self, Menu_Admin_Input, s_menu1);
+    }
+};
+
+void (float inp) Menu_Admin_Input =
+{
+    local entity temp;
+    local entity te;
+    local string s_temp;
+    local float f_tmp;
+
+    // Actions for AdminMenu Page 0
+    if (self.current_menu_type == 0 && self.current_menu_page == 1) {
+        
+        /*
+         * Toggle Clanmode Option
+         */
+        if (inp == 1) {
+            localcmd("clan\n");
+            Menu_Close(self);
+            self.current_menu_type = 0;
+            self.current_menu_page = 0;
+        }
+
+        /*
+         * Change Timelimit
+         */
+        if (inp == 2) {
+            if (stof(infokey (world, "timelimit")) > 35) {
+                s_temp = "5";
+            } else {
+                s_temp = ftos(timelimit/60 + 5);
+            }
+
+            localcmd ("timelimit ");
+            localcmd(s_temp);
+            localcmd("\n");
+
+            bprint ( 2, self.netname);
+            bprint ( 2, " sets ");
+            bprint ( 2, "\stimelimit\s to: ");
+            bprint ( 2, s_temp);
+            bprint ( 2, "\n");
+        }
+
+        /*
+         * Kick Player Menu
+         */
+        if (inp == 3) {
+            self.current_menu_type = 1;
+            self.current_menu_page = 1;
+            Menu_Admin();
+        }
+
+        /*
+         * Ban Player Menu
+         */
+        if (inp == 4) {
+            self.current_menu_type = 2;
+            self.current_menu_page = 1;
+            Menu_Admin();
+        }
+
+        /*
+         * Restart Current Map Option
+         */
+        if (inp == 7) {
+
+            bprint(2, self.netname);
+            bprint(2, " Has restarted the map.\n");
+
+            localcmd ("map ");
+            localcmd (mapname);
+            localcmd ("\n");
+        }
+
+        /*
+         * Randomize Teams Option
+         */
+        if (inp == 6) {
+            randomizeTeams();
+        }
+
+        /*
+         * Toggle Captain (pickup) Mode
+         */
+        if (inp == 5) {
+            if (!captainmode) {
+                captainmode = 1;
+                self.current_menu_type = 3;
+                self.current_menu_page = 1;
+
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s is now \sON\s.\n");
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+
+                temp = find (world, classname, "player");
+                while (temp != world) {
+                    temp.captain = 0;
+                    temp = find (temp, classname, "player");
+                }
+
+            } else {  // end captainmode1
+                disableCaptain();
+                local entity pl;
+                local entity temppl;
+                pl = self;
+                temppl = find (world, classname, "player");
+                while (temppl != world) {
+                    self = temppl;
+                    temppl.captain = 0;
+                    Menu_Close(self);
+                    self.current_menu_type = 0;
+                    self.current_menu_page = 0;
+                    temppl = find (temppl, classname, "player");
+                }
+                self = pl;
+            }
+            Menu_Admin();
+
+        }
+    // Actions for AdminMenu Page 1
+    } else if (self.current_menu_type == 0 && self.current_menu_page == 2) {
+        if (inp == 1) {
+            sprint(self, 2, "AdminMenu Page 2 Action 1\n");
+        }
+        else if (inp == 2) {
+            sprint(self, 2, "AdminMenu Page 2 Action 2\n");
+        }
+        else if (inp == 3) {
+            sprint(self, 2, "AdminMenu Page 2 Action 3\n");
+        }
+        else if (inp == 4) {
+            sprint(self, 2, "AdminMenu Page 2 Action 4\n");
+        }
+        else if (inp == 5) {
+            sprint(self, 2, "AdminMenu Page 2 Action 5\n");
+        }
+        else if (inp == 6) {
+            sprint(self, 2, "AdminMenu Page 2 Action 6\n");
+        }
+        else if (inp == 7) {
+            sprint(self, 2, "AdminMenu Page 2 Action 7\n");
+        }
+
+
+    } else if ((self.current_menu_type == 1 || self.current_menu_type == 2 ) && inp >= 1 && inp <= 7) { // Kick / Ban Actions
+        f_tmp = 1;    
+        self.admin_use = find (world, classname, "player");
+        while (self.admin_use != world)  {
+            if (f_tmp < ((self.current_menu_page - 1) * 7) + inp ) {            
+                f_tmp = f_tmp + 1;
+                self.admin_use = find (self.admin_use, classname, "player");
+            } else {
+                break;
+            }
+        }
+        if (f_tmp < ((self.current_menu_page - 1) * 7) + inp) {
+            self.admin_use = find (world, classname, "observer");
+            while (self.admin_use != world)  {
+                if (f_tmp < ((self.current_menu_page - 1) * 7) + inp && self.admin_use.netname != "") {
+                    f_tmp = f_tmp + 1;
+                } else {
+                    break;
+                }
+                self.admin_use = find (self.admin_use, classname, "observer");
+            }
+        }
+        if (self.admin_use) {
+            if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
+                self.admin_use.ip = infokey (self.admin_use, "ip");
+                if (self.current_menu_type == 2) {
+                    localcmd("addip ");
+                    localcmd(self.admin_use.ip);
+                    localcmd("\n");
+                }
+                Admin_DoKick();
+            }
+        }
+    } else if ((self.current_menu_type == 3 || self.current_menu_type == 4 || self.current_menu_type == 5) && inp >= 1 && inp <= 7) { // Captain Actions
+        f_tmp = 1;
+        self.admin_use = find (world, classname, "player");
+        while (self.admin_use != world)  {
+            if ( (f_tmp < ((self.current_menu_page - 1) * 7) + inp ) && ( ( (self.current_menu_type == 5 || self.current_menu_type == 4) && !self.admin_use.captain) || (self.current_menu_type != 5 && self.current_menu_type != 4) ) ) {
+                f_tmp = f_tmp + 1;
+            } else if ( (f_tmp == ((self.current_menu_page - 1) * 7) + inp) && ( ( (self.current_menu_type == 5 || self.current_menu_type == 4) && !self.admin_use.captain) || (self.current_menu_type != 5 && self.current_menu_type != 4) ) ) {
+                break;
+            }
+            self.admin_use = find (self.admin_use, classname, "player");
+
+        }
+
+        if (self.current_menu_type != 5) {
+            if (self.admin_use != world) {
+                if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
+                    temp = self;
+                    self = self.admin_use;
+                    self.captain = 9;
+                    if (temp.current_menu_type == 3) {
+                        // Captain for Team 1
+                        self.team_no = 1;
+                        temp.current_menu_type = 4;
+                        Menu_Admin();
+                    } else if (temp.current_menu_type == 4) {
+                        // Captain for Team 2
+                        self.team_no = 2;
+
+                        randomizeCaptains();
+
+                        te = find (world, classname, "player");
+                        while (te != world)
+                        {
+                            self = te;
+                            if (!self.captain)
+                            {
+                                self.playerclass = 0;
+                                playerSetTeam (-1);
+                                self.current_menu = 0;
+                                self.impulse = 0;
+                            } else if (self.captain > 0 && self.captain < 5) {
+                                //TeamFortress_TeamSet(self.team_no);
+                                self.playerclass = 0;
+                                playerSetTeam(self.team_no);
+                                bprint(2, "\[\sCaptain Mode\s\]\s:\s ");
+                                bprint(2, self.netname);
+                                bprint(2, " \bIs the captain for team\b ");
+                                bprint(2, TeamToString(self.team_no));
+                                bprint(2, "\b.\b\n");
+                            }
+                            te = find (te, classname, "player");
+                        }
+                        self = temp;
+                        bprint(2, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+                        Menu_Close(self);
+                        self.current_menu_type = 0;
+                        self.current_menu_page = 0;
+                    }
+                    self = temp;
+                }
+            }
+        } else {
+            if (self.admin_use && f_tmp == ((self.current_menu_page - 1) * 7) + inp && self.captain == 1) {
+                temp = self;
+                self = self.admin_use;
+                self.captain = 10;
+
+                playerSetTeam (temp.team_no);
+
+                bprint(2, "\[\bCaptain Mode\b\]\b:\b ");
+                bprint(2, temp.netname);
+                bprint(2, " \bcalled\b ");
+                bprint(2, self.netname);
+                bprint(2, " \bfor team\b ");
+                bprint(2, TeamToString(self.team_no));
+                bprint(2, "\b.\b\n");
+                self = temp;
+
+                nextCaptain();
+                Menu_Close(self);
+                self.current_menu_type = 0;
+                self.current_menu_page = 0;
+            }
+        }
+    }
+    //Previous page
+    if (inp == 8) {
+        if (self.current_menu_page > 1) {
+            self.current_menu_page = self.current_menu_page - 1;
+        }
+    }
+    //Next page
+    if (inp == 9) {
+        if (self.current_menu_page < 5) {
+            self.current_menu_page = self.current_menu_page + 1;
+        }
+    }
+
+    //Closes menus, disables captain mode
+    if (inp == 10) {
+        if (self.current_menu_type == 4 || self.current_menu_type == 5 ||  self.current_menu_type == 3) {
+            captainmode = 0;
+            bprint(2, "\[\sCaptain Mode\s\]\s:\s \scanceled by request of\s ");
+            bprint(2, self.netname);
+            bprint(2, ".\n");
+            te = self;
+            temp = find (world, classname, "player");
+            while (temp != world) {
+                self = temp;
+                temp.captain = 0;
+                Menu_Close(self);
+                self.current_menu_type = 0;
+                self.current_menu_page = 0;
+                temp = find (temp, classname, "player");
+            }
+            self = te;
+        }
+        if (self.current_menu_type == 0) {
+            Menu_Close(self);
+            self.current_menu_type = 0;
+            self.current_menu_page = 0;
+        }
+        else if (self.is_admin) {
+            self.current_menu_type = 0;
+            self.current_menu_page = 1;
+            Menu_Admin();
+        }
+    }
+    self.impulse = 0;
+};

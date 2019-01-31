@@ -10,7 +10,7 @@ float (string id_flame) RemoveFlameFromQueue;
 
 entity(string type, entity p_owner) FlameSpawn =
 {
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         return (world);
     }
     if (type != "1") {
@@ -317,7 +317,7 @@ void () OnPlayerFlame_touch = {
     local vector vtemp;
 
     if (((other != world) && (other.health > 0)) && (other != self.enemy)) {
-        if (cb_prematch_time > time) {
+        if (cb_prematch) {
             return;
         }
         if (other.numflames >= 4) {
@@ -375,7 +375,7 @@ void () WorldFlame_touch = {
         self.nextthink = time + 1;
     }
     if (((other != world) && (other.solid != 1)) && (other.health > 0)) {
-        if (cb_prematch_time > time) {
+        if (cb_prematch) {
             return;
         }
         if (other.numflames >= 4) {
@@ -433,7 +433,7 @@ void () Flamer_stream_touch = {
 
             TF_T_Damage(other, self, self.owner, 10, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
-            if (cb_prematch_time > time) {
+            if (cb_prematch) {
                 return;
             }
             if (other.numflames >= 4) {
@@ -506,7 +506,7 @@ void () Napalm_touch = {
             deathmsg = DMSG_FLAME;
             TF_T_Damage(other, self, self.owner, 6, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
-            if (cb_prematch_time > time) {
+            if (cb_prematch) {
                 return;
             }
             if (other.numflames >= 4) {

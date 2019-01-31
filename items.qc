@@ -226,7 +226,7 @@ void () health_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     medi = 0;
@@ -332,7 +332,7 @@ void () armor_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     if (self.classname == "item_armor1") {
@@ -550,7 +550,7 @@ void () weapon_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     stemp = self;
@@ -821,7 +821,7 @@ void () ammo_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     gotgren = 0;
@@ -1028,7 +1028,7 @@ void () key_touch = {
     if ((other.tfstate & 65536) || (other.tfstate & 2048)) {
         return;
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch == 1) {
         return;
     }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
@@ -1128,7 +1128,7 @@ void () sigil_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
@@ -1181,7 +1181,7 @@ void () powerup_touch = {
         return;
     if ((other.tfstate & 65536) || (other.tfstate & 2048))
         return;
-    if (cb_prematch_time > time)
+    if (cb_prematch == 1)
         return;
 
     sprint(other, PRINT_LOW, "You got the ");
@@ -1376,7 +1376,7 @@ void () BackpackTouch = {
 };
 
 void () DropBackpack = {
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch == 1)
         return;
 
     if (!(self.ammo_shells + self.ammo_nails + self.ammo_rockets + self.ammo_cells)) {

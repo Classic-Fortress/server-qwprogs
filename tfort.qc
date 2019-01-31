@@ -2470,7 +2470,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
             restime = restime + 7;
         }
     }
-    if (cb_prematch_time > time) {
+    if (cb_prematch) {
         if (self.lives > 0)
             self.lives = self.lives - 1;
 

@@ -64,7 +64,7 @@ void () button_use = {
 void () button_touch = {
     local entity te;
 
-    if (cb_prematch_time > time)
+    if (cb_prematch)
         return;
 
     if (other.classname != "player")
