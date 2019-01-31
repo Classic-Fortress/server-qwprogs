@@ -197,7 +197,6 @@ void () PreMatch_Think = {
         if (self.cnt2 == 10) {
             lightstyle(0, "e");
             localcmd("serverinfo status Countdown\n");
-            bprint(2,"\n");
 
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
@@ -223,7 +222,7 @@ void () PreMatch_Think = {
                 }
             }
         }
-        num = ftos(self.cnt2);
+        num = strzone(ftos(self.cnt2));
         p = find(world, classname, "player");
         tmp = strcat(num ,"\n\n\b:[\b");
         tmp = strcat(tmp, mapname);
@@ -246,6 +245,7 @@ void () PreMatch_Think = {
         else {
             bprint(2, "1 second \n");
         }
+        strunzone(num);
     }
     self.nextthink = (time + 1);
 };
