@@ -617,6 +617,23 @@ void () W_FireFlame = {
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 };
 
+void () IncendiaryRadius =
+{
+    local float damg;
+
+    damg = 72;
+    deathmsg = 15;
+    T_RadiusDamage(self, self.owner, damg, other);
+    self.origin = (self.origin - (8 * normalize (self.velocity)));
+    WriteByte(4, 23);
+    WriteByte(4, 3);
+    WriteCoord(4, self.origin_x);
+    WriteCoord(4, self.origin_y);
+    WriteCoord(4, self.origin_z);
+    multicast(self.origin, 1);
+    dremove(self);
+};
+
 void () T_IncendiaryTouch = {
     local float damg;
     local entity head;
@@ -629,39 +646,46 @@ void () T_IncendiaryTouch = {
         return;
     }
     self.effects = self.effects | 4;
-    damg = 30 + random() * 20;
+    if (pyro_type == 1)
+        damg = 42 + random() * 20;
+    else   
+        damg = 30 + random() * 20;
     if (other.health) {
         deathmsg = DMSG_FLAME;
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     }
-    head = findradius(self.origin, 180);
-    while (head) {
-        if (head.takedamage) {
-            traceline(self.origin, head.origin, 1, self);
-            if ((trace_fraction == 1)
-                || ((trace_fraction != 1)
-                    && (vlen(self.origin - head.origin) <= 64))) {
-                deathmsg = DMSG_FLAME;
-                TF_T_Damage(head, self, self.owner, 10, TF_TD_NOTTEAM,
-                            TF_TD_FIRE);
-                other = head;
-                Napalm_touch();
-                if (other.classname == "player") {
-                    stuffcmd(other, "bf\nbf\n");
+    if (pyro_type == 1)
+        IncendiaryRadius();
+    else {
+        head = findradius(self.origin, 180);
+        while (head) {
+            if (head.takedamage) {
+                traceline(self.origin, head.origin, 1, self);
+                if ((trace_fraction == 1)
+                    || ((trace_fraction != 1)
+                        && (vlen(self.origin - head.origin) <= 64))) {
+                    deathmsg = DMSG_FLAME;
+                    TF_T_Damage(head, self, self.owner, 10, TF_TD_NOTTEAM,
+                                TF_TD_FIRE);
+                    other = head;
+                    Napalm_touch();
+                    if (other.classname == "player") {
+                        stuffcmd(other, "bf\nbf\n");
+                    }
                 }
             }
+            head = head.chain;
         }
-        head = head.chain;
+        self.origin = self.origin - 8 * normalize(self.velocity);
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+        WriteCoord(MSG_MULTICAST, self.origin_x);
+        WriteCoord(MSG_MULTICAST, self.origin_y);
+        WriteCoord(MSG_MULTICAST, self.origin_z);
+        multicast(self.origin, MULTICAST_PHS);
+        dremove(self);
     }
-    self.origin = self.origin - 8 * normalize(self.velocity);
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
 };
 
 void () W_FireIncendiaryCannon = {
@@ -678,11 +702,17 @@ void () W_FireIncendiaryCannon = {
     newmis.solid = SOLID_BBOX;
     makevectors(self.v_angle);
     newmis.velocity = aim(self, 1000);
-    newmis.velocity = newmis.velocity * 600;
+    if (pyro_type == 1) {
+        newmis.velocity = newmis.velocity * 800;
+        newmis.think = IncendiaryRadius;
+    }
+    else {
+        newmis.velocity = newmis.velocity * 600;
+        newmis.think = SUB_Remove;
+    }
     newmis.angles = vectoangles(newmis.velocity);
     newmis.touch = T_IncendiaryTouch;
     newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
     newmis.weapon = DMSG_INCENDIARY;
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');

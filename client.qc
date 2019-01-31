@@ -502,6 +502,9 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", 0);
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -551,6 +554,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            pyro_type = 0;
         }
 
         st = infokey(world, "faithful");
@@ -601,6 +605,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             old_ng_rof = TRUE;
+            pyro_type = 0;
         }
 
     }

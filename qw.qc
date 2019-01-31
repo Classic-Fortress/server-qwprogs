@@ -495,6 +495,7 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float impulse_queue;
+float pyro_type;
 
 .float teamkills;
 
