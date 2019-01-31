@@ -503,7 +503,7 @@ void () DecodeLevelParms = {
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
-        pyro_type = CF_GetSetting("pyrotype", "pyro_type", 0);
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", 1);
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -554,7 +554,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
-            pyro_type = 0;
+            pyro_type = 1;
         }
 
         st = infokey(world, "faithful");
