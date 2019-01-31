@@ -498,8 +498,13 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // impulse command queueing
+        // ensures detpipe impulse isn't cleared at end of function
+        impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
+
         st = infokey(world, "default");
         if (st == "on") {
+            impulse_queue = FALSE;
             server_default = TRUE;
             old_grens = FALSE;
             drop_grenades = TRUE;
@@ -550,6 +555,7 @@ void () DecodeLevelParms = {
 
         st = infokey(world, "faithful");
         if (st == "on") {
+            impulse_queue = FALSE;
             server_faithful = TRUE;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;

@@ -17,11 +17,13 @@ void () TeamFortress_DetpackTouch;
 void () TeamFortress_DetpackDisarm;
 void () TeamFortress_DetpackCountDown;
 
-void (float force) TeamFortress_DetonatePipebombs = {
+float (float force) TeamFortress_DetonatePipebombs = {
     local entity e;
 
     if (time < self.pipecooldown && !force)
-        return;
+    {
+        return impulse_queue ? FALSE : TRUE;       
+    }
 
     e = find(world, classname, "pipebomb");
     while (e != world) {
@@ -29,6 +31,7 @@ void (float force) TeamFortress_DetonatePipebombs = {
             e.nextthink = time;
         e = find(e, classname, "pipebomb");
     }
+    return TRUE;
 };
 
 void () PipebombTouch = {
