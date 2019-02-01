@@ -684,13 +684,15 @@ void () Spy_SetClientSkins = {
     skin = TeamFortress_GetSkin(self);
 
     te = find(world, classname, "player");
-    while (te) {
+    while (te) 
+    {
         if (
             (te.team_no == self.team_no) 
             || (te.team_no == self.undercover_team && self.undercover_skin == PC_SPY)
             )
         {
-            if (visible(te)) {
+            if (visible(te)) 
+            {
                 msg_entity = te;
 
                 // set skin
