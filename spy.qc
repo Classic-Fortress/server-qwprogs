@@ -694,6 +694,7 @@ void () Spy_SetClientSkins = {
         {
             if (visible(te)) 
             {
+                color = (te.team_no == self.team_no) ? color : dcolor;
                 msg_entity = te;
 
                 // set skin
@@ -702,18 +703,17 @@ void () Spy_SetClientSkins = {
                 WriteString(MSG_ONE, "skin");
                 WriteString(MSG_ONE, skin);
 
-                // set colour / color
+                // set top colour / color
                 WriteByte(MSG_ONE, svc_setinfo);
-                WriteByte(MSG_ONE, self.colormap-1); // ???? 0 based player index
-                WriteString(MSG_ONE, "color");
-                if (te.team_no == self.team_no)
-                {
-                    WriteString(MSG_ONE, color);
-                }
-                else
-                {
-                    WriteString(MSG_ONE, dcolor);
-                }
+                WriteByte(MSG_ONE, self.colormap-1);
+                WriteString(MSG_ONE, "topcolor");
+                WriteString(MSG_ONE, color);
+                
+                // set bottom colour / color
+                WriteByte(MSG_ONE, svc_setinfo);
+                WriteByte(MSG_ONE, self.colormap-1);
+                WriteString(MSG_ONE, "bottomcolor");
+                WriteString(MSG_ONE, color);
             }
         }
         te = find(te, classname, "player");
