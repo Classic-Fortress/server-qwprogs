@@ -675,6 +675,41 @@ void () CF_Spy_DisguiseLast = {
     }
 };
 
+void () Spy_SetClientSkins = {
+    entity te;
+    string color, skin;
+    float team;
+    team = self.undercover_team == 0 ? self.team_no : self.undercover_team;
+    color = ftos(TeamFortress_TeamGetColor(t) - 1);
+    skin = TeamFortress_GetSkin(self);
+
+    te = find(world, classname, "player");
+    while (te) {
+        if (
+            (te.team_no == self.team_no) 
+            || (te.team_no == self.undercover_team && self.undercover_skin == PC_SPY)
+            )
+        {
+            if (visible(te)) {
+                msg_entity = te;
+
+                // set skin
+                WriteByte(MSG_ONE, svc_setinfo);
+                WriteByte(MSG_ONE, self.colormap-1); // ???? 0 based player index
+                WriteString(MSG_ONE, "skin");
+                WriteString(MSG_ONE, skin);
+
+                // set colour / color
+                WriteByte(MSG_ONE, svc_setinfo);
+                WriteByte(MSG_ONE, self.colormap-1); // ???? 0 based player index
+                WriteString(MSG_ONE, "color");
+                WriteString(MSG_ONE, color);
+            }
+        }
+        te = find(te, classname, "player");
+    }
+}
+
 void () CF_Spy_UndercoverThink = {
     local float f_team_color;
     local string s_team, s_class;
@@ -697,12 +732,10 @@ void () CF_Spy_UndercoverThink = {
 
     // make spy invisible if invis_only is turned on
     if (invis_only) {
-
         self.owner.items = self.owner.items | IT_INVISIBILITY;
         self.owner.frame = 0;
         self.owner.modelindex = modelindex_eyes;
         self.owner.is_undercover = 1;
-
     } else {
 
         // don't check for color cheating for next 10 seconds
@@ -715,6 +748,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
+            Spy_SetClientSkins();
 
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
@@ -742,6 +776,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_team = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
+            Spy_SetClientSkins();
 
             if (self.owner.queue_skin) {
                 CF_Spy_ChangeSkin(self.owner, self.owner.queue_skin);
@@ -1377,35 +1412,3 @@ void () Spy_DropBackpack = {
     newmis.nextthink = time + 120;
     newmis.think = SUB_Remove;
 };
-
-void () SpyParticles = {
-     if (self.playerclass == PC_SPY)
-     {
-        entity te, t1;
-        te = find(world, classname, "player");
-        while (te) {
-            if (
-                (te.team_no == self.team_no) 
-                || (te.team_no == self.undercover_team && self.undercover_skin == PC_SPY)
-                )
-            {
-                if (visible(te)) {
-                    msg_entity = te;
-                    tl = spawn();
-                    tl.origin = self.origin;
-                    WriteByte(MSG_ONE, SVC_TEMPENTITY);
-                    WriteByte(MSG_ONE, TE_LIGHTNING3);
-                    WriteEntity(MSG_ONE, tl);
-                    WriteCoord(MSG_ONE, tl.origin_x);
-                    WriteCoord(MSG_ONE, tl.origin_y);
-                    WriteCoord(MSG_ONE, tl.origin_z + 56);
-                    WriteCoord(MSG_ONE, self.origin_x);
-                    WriteCoord(MSG_ONE, self.origin_y);
-                    WriteCoord(MSG_ONE, self.origin_z + 32);
-                    dremove(tl);
-                }
-            }
-            te = find(te, classname, "player");
-        }
-     }
-}

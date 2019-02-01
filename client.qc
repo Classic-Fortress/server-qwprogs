@@ -1932,8 +1932,6 @@ void () CheckPowerups = {
     }
 };
 
-void () SpyParticles;
-
 void () PlayerPostThink = {
     local float fdmg;
 
@@ -1945,8 +1943,6 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
-
-    SpyParticles();
 
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
