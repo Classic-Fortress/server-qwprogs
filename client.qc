@@ -1932,6 +1932,8 @@ void () CheckPowerups = {
     }
 };
 
+void () SpyParticles;
+
 void () PlayerPostThink = {
     local float fdmg;
 
