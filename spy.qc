@@ -675,47 +675,72 @@ void () CF_Spy_DisguiseLast = {
     }
 };
 
-void () Spy_SetClientSkins = {
+string (float team) Spy_GetSkin = {
+    string skin;
+    skin = "";
+    switch (team)
+    {
+        case 1:
+            skin = "blue_spy";
+            break;
+        case 2:
+            skin = "red_spy";
+            break;
+        case 3:
+            skin = "yell_spy";
+            break;
+        case 4:
+            skin = "gren_spy";
+            break;
+    }
+    return skin;
+}
+
+void (entity owner) Spy_SetClientSkins = {
     entity te;
-    string color, dcolor, skin;
+    string color, dcolor, skin, dskin, sendcolor, sendskin;
     float dteam;
-    dteam = self.undercover_team == 0 ? self.team_no : self.undercover_team;
-    color = ftos(TeamFortress_TeamGetColor(self.team_no) - 1);
+    dteam = owner.undercover_team == 0 ? owner.team_no : owner.undercover_team;
+    color = ftos(TeamFortress_TeamGetColor(owner.team_no) - 1);
     dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
-    skin = TeamFortress_GetSkin(self);
+    
+    skin = Spy_GetSkin(owner.team_no);
+    dskin = Spy_GetSkin(dteam);
 
     te = find(world, classname, "player");
     while (te) 
     {
-        if (
-            (te.team_no == self.team_no) 
-            || (te.team_no == self.undercover_team && self.undercover_skin == PC_SPY)
-            )
+        if (te.team_no)
         {
-            if (visible(te)) 
+            if (
+            (te.team_no == owner.team_no) 
+            || (te.team_no == owner.undercover_team && owner.undercover_skin == PC_SPY)
+            )
             {
-                color = (te.team_no == self.team_no) ? color : dcolor;
+                sendcolor = (te.team_no == owner.team_no) ? color : dcolor;
+                sendskin = (te.team_no == owner.team_no) ? skin : dskin;
                 msg_entity = te;
 
                 // set skin
-                WriteByte(MSG_ONE, svc_setinfo);
-                WriteByte(MSG_ONE, self.colormap-1); // ???? 0 based player index
+                WriteByte(MSG_ONE, SVC_SETINFO);
+                WriteByte(MSG_ONE, owner.colormap-1); // ???? 0 based player index
                 WriteString(MSG_ONE, "skin");
-                WriteString(MSG_ONE, skin);
+                WriteString(MSG_ONE, sendskin);
 
                 // set top colour / color
-                WriteByte(MSG_ONE, svc_setinfo);
-                WriteByte(MSG_ONE, self.colormap-1);
+                WriteByte(MSG_ONE, SVC_SETINFO);
+                WriteByte(MSG_ONE, owner.colormap-1);
                 WriteString(MSG_ONE, "topcolor");
-                WriteString(MSG_ONE, color);
+                WriteString(MSG_ONE, sendcolor);
                 
                 // set bottom colour / color
-                WriteByte(MSG_ONE, svc_setinfo);
-                WriteByte(MSG_ONE, self.colormap-1);
+                WriteByte(MSG_ONE, SVC_SETINFO);
+                WriteByte(MSG_ONE, owner.colormap-1);
                 WriteString(MSG_ONE, "bottomcolor");
-                WriteString(MSG_ONE, color);
+                WriteString(MSG_ONE, sendcolor);
             }
         }
+        
         te = find(te, classname, "player");
     }
 }
@@ -758,8 +783,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
-            Spy_SetClientSkins();
-
+            
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
             } else {
@@ -773,7 +797,7 @@ void () CF_Spy_UndercoverThink = {
                     s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
-
+            
         } else if (self.team) {
             self.owner.undercover_team = self.team;
             self.owner.last_team = self.team;
@@ -786,7 +810,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_team = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
-            Spy_SetClientSkins();
+            
 
             if (self.owner.queue_skin) {
                 CF_Spy_ChangeSkin(self.owner, self.owner.queue_skin);
@@ -799,7 +823,7 @@ void () CF_Spy_UndercoverThink = {
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
         }
-
+        
         TeamFortress_SpyCalcName(self.owner);
 
     }

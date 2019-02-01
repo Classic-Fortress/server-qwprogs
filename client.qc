@@ -1932,6 +1932,8 @@ void () CheckPowerups = {
     }
 };
 
+void (entity owner) Spy_SetClientSkins;
+
 void () PlayerPostThink = {
     local float fdmg;
 
@@ -1969,6 +1971,12 @@ void () PlayerPostThink = {
         }
     }
     self.jump_flag = self.velocity_z;
+
+    if (self.playerclass == PC_SPY)
+    {
+        Spy_SetClientSkins(self);
+    }
+    
     CheckPowerups();
     W_WeaponFrame();
     if (self.motd <= 400) {
