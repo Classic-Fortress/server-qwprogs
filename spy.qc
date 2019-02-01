@@ -680,7 +680,7 @@ void () Spy_SetClientSkins = {
     string color, skin;
     float team;
     team = self.undercover_team == 0 ? self.team_no : self.undercover_team;
-    color = ftos(TeamFortress_TeamGetColor(t) - 1);
+    color = ftos(TeamFortress_TeamGetColor(team) - 1);
     skin = TeamFortress_GetSkin(self);
 
     te = find(world, classname, "player");
