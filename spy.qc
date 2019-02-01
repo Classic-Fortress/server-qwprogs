@@ -677,10 +677,11 @@ void () CF_Spy_DisguiseLast = {
 
 void () Spy_SetClientSkins = {
     entity te;
-    string color, skin;
-    float team;
-    team = self.undercover_team == 0 ? self.team_no : self.undercover_team;
-    color = ftos(TeamFortress_TeamGetColor(team) - 1);
+    string color, dcolor, skin;
+    float dteam;
+    dteam = self.undercover_team == 0 ? self.team_no : self.undercover_team;
+    color = ftos(TeamFortress_TeamGetColor(self.team_no) - 1);
+    dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
     skin = TeamFortress_GetSkin(self);
 
     te = find(world, classname, "player");
@@ -705,7 +706,14 @@ void () Spy_SetClientSkins = {
                 WriteByte(MSG_ONE, svc_setinfo);
                 WriteByte(MSG_ONE, self.colormap-1); // ???? 0 based player index
                 WriteString(MSG_ONE, "color");
-                WriteString(MSG_ONE, color);
+                if (te.team_no == self.team_no)
+                {
+                    WriteString(MSG_ONE, color);
+                }
+                else
+                {
+                    WriteString(MSG_ONE, dcolor);
+                }
             }
         }
         te = find(te, classname, "player");
