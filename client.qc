@@ -1943,6 +1943,9 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
+
+    SpyParticles();
+
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {

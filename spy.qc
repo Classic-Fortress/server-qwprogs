@@ -1377,3 +1377,35 @@ void () Spy_DropBackpack = {
     newmis.nextthink = time + 120;
     newmis.think = SUB_Remove;
 };
+
+void () SpyParticles = {
+     if (self.playerclass == PC_SPY)
+     {
+        entity te, t1;
+        te = find(world, classname, "player");
+        while (te) {
+            if (
+                (te.team_no == self.team_no) 
+                || (te.team_no == self.undercover_team && self.undercover_skin == PC_SPY)
+                )
+            {
+                if (visible(te)) {
+                    msg_entity = te;
+                    tl = spawn();
+                    tl.origin = self.origin;
+                    WriteByte(MSG_ONE, SVC_TEMPENTITY);
+                    WriteByte(MSG_ONE, TE_LIGHTNING3);
+                    WriteEntity(MSG_ONE, tl);
+                    WriteCoord(MSG_ONE, tl.origin_x);
+                    WriteCoord(MSG_ONE, tl.origin_y);
+                    WriteCoord(MSG_ONE, tl.origin_z + 56);
+                    WriteCoord(MSG_ONE, self.origin_x);
+                    WriteCoord(MSG_ONE, self.origin_y);
+                    WriteCoord(MSG_ONE, self.origin_z + 32);
+                    dremove(tl);
+                }
+            }
+            te = find(te, classname, "player");
+        }
+     }
+}
