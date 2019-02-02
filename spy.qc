@@ -696,15 +696,16 @@ string (float team) Spy_GetSkin = {
     return skin;
 }
 
-void (entity owner) Spy_SetClientSkins = {
-    entity te;
+void () Spy_SetClientSkinsThink = {
+    entity te, own;
     string color, dcolor, skin, dskin, sendcolor, sendskin;
     float dteam;
-    dteam = owner.undercover_team == 0 ? owner.team_no : owner.undercover_team;
-    color = ftos(TeamFortress_TeamGetColor(owner.team_no) - 1);
+    own = self.owner;
+    dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
+    color = ftos(TeamFortress_TeamGetColor(own.team_no) - 1);
     dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
     
-    skin = Spy_GetSkin(owner.team_no);
+    skin = Spy_GetSkin(own.team_no);
     dskin = Spy_GetSkin(dteam);
 
     te = find(world, classname, "player");
@@ -713,29 +714,29 @@ void (entity owner) Spy_SetClientSkins = {
         if (te.team_no)
         {
             if (
-            (te.team_no == owner.team_no) 
-            || (te.team_no == owner.undercover_team && owner.undercover_skin == PC_SPY)
+            (te.team_no == own.team_no) 
+            || (te.team_no == own.undercover_team && own.undercover_skin == PC_SPY)
             )
             {
-                sendcolor = (te.team_no == owner.team_no) ? color : dcolor;
-                sendskin = (te.team_no == owner.team_no) ? skin : dskin;
+                sendcolor = (te.team_no == own.team_no) ? color : dcolor;
+                sendskin = (te.team_no == own.team_no) ? skin : dskin;
                 msg_entity = te;
 
                 // set skin
                 WriteByte(MSG_ONE, SVC_SETINFO);
-                WriteByte(MSG_ONE, owner.colormap-1); // ???? 0 based player index
+                WriteByte(MSG_ONE, own.colormap-1); // ???? 0 based player index
                 WriteString(MSG_ONE, "skin");
                 WriteString(MSG_ONE, sendskin);
 
                 // set top colour / color
                 WriteByte(MSG_ONE, SVC_SETINFO);
-                WriteByte(MSG_ONE, owner.colormap-1);
+                WriteByte(MSG_ONE, own.colormap-1);
                 WriteString(MSG_ONE, "topcolor");
                 WriteString(MSG_ONE, sendcolor);
                 
                 // set bottom colour / color
                 WriteByte(MSG_ONE, SVC_SETINFO);
-                WriteByte(MSG_ONE, owner.colormap-1);
+                WriteByte(MSG_ONE, own.colormap-1);
                 WriteString(MSG_ONE, "bottomcolor");
                 WriteString(MSG_ONE, sendcolor);
             }
@@ -743,6 +744,8 @@ void (entity owner) Spy_SetClientSkins = {
         
         te = find(te, classname, "player");
     }
+
+    dremove(self);
 }
 
 void () CF_Spy_UndercoverThink = {
@@ -831,8 +834,15 @@ void () CF_Spy_UndercoverThink = {
     Status_Refresh(self.owner);
     if (self.owner.menu_input == Menu_Spy_Input)
         Menu_Spy(self.owner);
-    dremove(self);
 
+    entity e_timer;
+    e_timer = spawn();
+    e_timer.classname = "spytimerskins";
+    e_timer.owner = self.owner;
+    e_timer.think = Spy_SetClientSkinsThink;
+    e_timer.nextthink = time + 1;
+    
+    dremove(self);
 };
 
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
