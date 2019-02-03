@@ -1306,7 +1306,7 @@ void (entity p) TeamFortress_SetSkin = {
     local string st;
 
     p.immune_to_check = time + 10;
-    if (p.playerclass == PC_SPY)
+    if (p.playerclass == PC_SPY || p.last_playerclass == PC_SPY)
     {
         if (!p.is_undercover)
         {
