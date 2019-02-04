@@ -293,7 +293,7 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_ExecClassScript(self);
-    W_ChangeWeapon(1);
+    W_ChangeWeapon(W_BestWeaponSlot());
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
