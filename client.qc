@@ -2706,7 +2706,7 @@ void (entity targ, entity attacker) ClientObituary = {
 };
 
 float () IsUsingOldImpulses = {
-    return (infokey(self, "old_impulses") == "1");
+    return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
 }
 
 float () GetLastWeaponImpulse = {

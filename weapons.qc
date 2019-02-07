@@ -1630,12 +1630,12 @@ float () W_BestWeapon = {
         return WEAP_SUPER_NAILGUN;
     else if (self.ammo_nails >= 1 && it & WEAP_LASER)
         return WEAP_LASER;
+    else if (self.ammo_shells >= 1 && it & WEAP_TRANQ)
+        return WEAP_TRANQ;
     else if (self.ammo_shells >= 2 && it & WEAP_SUPER_SHOTGUN)
         return WEAP_SUPER_SHOTGUN;
     else if (self.ammo_shells >= 1 && it & WEAP_SNIPER_RIFLE)
         return WEAP_SNIPER_RIFLE;
-    else if (self.ammo_shells >= 1 && it & WEAP_TRANQ)
-        return WEAP_TRANQ;
     else if (self.ammo_nails >= 1 && it & WEAP_NAILGUN)
         return WEAP_NAILGUN;
     else if (self.ammo_shells >= 1 && it & WEAP_SHOTGUN)
@@ -3072,7 +3072,7 @@ void () W_WeaponFrame = {
         }
     }
 
-    if (self.impulse == TF_CLASSMENU) {
+    if (self.impulse == TF_CLASSMENU && self.playerclass != PC_MEDIC) {
         if (self.playerclass == PC_ENGINEER)
             Menu_Engineer(self);
         else if (self.playerclass == PC_SCOUT)
