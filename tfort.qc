@@ -1534,7 +1534,7 @@ void () TeamFortress_SetEquipment = {
         self.last_weapon = 0;
         self.weaponmode = 0;
         self.last_weaponmode = 0;
-        self.current_weaponslot = 1;
+        self.current_weaponslot = W_BestWeaponSlot();
         self.last_weaponslot = 2;
         W_WeaponState_Save(self);
     }
@@ -1647,7 +1647,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 50;
         else
             self.maxarmor = PC_SCOUT_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
+        if (self.last_playerclass != self.playerclass)  
             self.current_weapon = WEAP_NAILGUN;
 
         self.items_allowed = PC_SCOUT_WEAPONS;
@@ -2257,6 +2257,8 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_ARMOR1;
 
     W_SetCurrentAmmo(self);
+    if (self.last_playerclass != self.playerclass)
+        self.current_weaponslot = W_BestWeaponSlot();  
 };
 
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo = {
