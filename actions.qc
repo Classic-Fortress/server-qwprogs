@@ -609,22 +609,22 @@ void (float slot) TeamFortress_ReloadSlot = {
         else if (slot == 7)
             weap = W_OldWeaponSlot7();
         if (weap != 0)
-            TeamFortress_ReloadWeapon(weap);  
+            TeamFortress_ReloadWeapon(weap);
     }
 };
 
 void () TeamFortress_ReloadNext = {
     local float slot, reload = 0, weap = 0;
 
-    // reload current slot first
-    slot = W_GetSlot(self.current_weapon);
-    if (CheckForAmmo(self.current_weapon)) {
-        TeamFortress_ReloadWeapon(self.current_weapon);
-        reload = 1;
-        return;
-    }
-
     if (!IsUsingOldImpulses()) {
+        // reload current slot first
+        slot = W_GetSlot(self.current_weapon);
+        if (CheckForAmmo(self.current_weapon)) {
+            TeamFortress_ReloadWeapon(self.current_weapon);
+            reload = 1;
+            return;
+        }
+
         // then go through each slot
         for (slot = 1; slot < 4; slot++) {
             if (slot == 1)
@@ -646,8 +646,14 @@ void () TeamFortress_ReloadNext = {
         }
     }
     else {
+        slot = W_OldGetSlot(self.current_weapon);
+        if (CheckForAmmo(self.current_weapon)) {
+            TeamFortress_ReloadWeapon(self.current_weapon);
+            reload = 1;
+            return;
+        }
         // then go through each slot
-        for (slot = 1; slot < 4; slot++) {
+        for (slot = 1; slot < GetLastWeaponImpulse(); slot++) {
             if (slot == 1)
                 weap = W_OldWeaponSlot1();
             else if (slot == 2)
@@ -662,6 +668,13 @@ void () TeamFortress_ReloadNext = {
                 weap = W_OldWeaponSlot6();
             else if (slot == 7)
                 weap = W_OldWeaponSlot7();
+
+            if (CheckForAmmo(weap)) {
+                self.current_weapon = weap;
+                TeamFortress_ReloadWeapon(weap);
+                reload = 1;
+                break;
+            }
         }
     }
 
