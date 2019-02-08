@@ -505,6 +505,9 @@ void () DecodeLevelParms = {
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
+        // ceasefire type, 0: Default, 1: Pause
+        ceasefire_type = CF_GetSetting("ceasefire_type", "cft", "1");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;

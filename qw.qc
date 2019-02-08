@@ -496,6 +496,9 @@ float sng_damage;
 float old_ng_rof;
 float impulse_queue;
 float pyro_type;
+float ceasefire_type;
+float pause_requested_by;
+float is_paused;
 
 .float teamkills;
 
