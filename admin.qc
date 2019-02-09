@@ -175,6 +175,28 @@ void () Admin_CeaseFire = {
     }
 };
 
+void () Admin_Pause = {
+    if (!is_paused) {
+        setpause(1);
+        is_paused = 1;
+        pause_actor = self.netname;
+        bprint2(2, pause_actor, " paused the game\n");
+    }
+    else {
+        pause_actor = self.netname;
+        if (!unpause_requested) {                        
+            bprint2(2, pause_actor, " has requested to unpause the game in 5 seconds\n");     
+            unpause_requested = 1;
+        }
+        else {
+            bprint2(2, pause_actor, " cancels unpause request\n"); 
+            unpause_requested = 0;
+            unpause_countdown = 0;
+            unpause_lastcountnumber = 0;
+        }
+    }
+}
+
 void (entity p) CheckAutoKick = {
     local float rnum;
     local entity te;
@@ -233,7 +255,7 @@ void () Admin_Aliases =
     TeamFortress_Alias("kick", 190, 0);
     TeamFortress_Alias("ban", 191, 0);
     TeamFortress_Alias("next", 195, 0);
-    TeamFortress_Alias("ceasefire", 193, 0);
+    stuffcmd(self,"alias ceasefire \"cmd ceasefire\"\n");
     TeamFortress_Alias("listips", 198, 0);
     TeamFortress_Alias("clan", 207, 0);
     TeamFortress_Alias("adminmenu", 239, 0);
