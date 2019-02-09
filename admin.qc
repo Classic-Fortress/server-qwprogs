@@ -180,9 +180,21 @@ void () Admin_Pause = {
         setpause(1);
         is_paused = 1;
         pause_actor = self.netname;
+        if (cb_prematch && infokey(world, "status") == "Countdown") {
+            StopTimer();
+            bprint2(2, pause_actor, " stops the countdown\n");
+            return;
+        }
         bprint2(2, pause_actor, " paused the game\n");
     }
     else {
+        if (cb_prematch) {
+            cb_prematch_time = 0;
+            StartTimer();            
+            setpause(0);
+            is_paused = 0;
+            return;
+        }
         pause_actor = self.netname;
         if (!unpause_requested) {                        
             bprint2(2, pause_actor, " has requested to unpause the game in 5 seconds\n");     
