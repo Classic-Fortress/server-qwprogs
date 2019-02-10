@@ -86,6 +86,82 @@ void (entity targ, entity attacker) Killed = {
     self = oself;
 };
 
+void (entity targ, entity attacker, float damage, float T_AttackType) HitSound = {
+
+	if((attacker.classname == "player") || (attacker.classname == "building_sentrygun")){
+	
+			if((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")){
+		
+				local entity trueattacker;
+							
+				if (attacker.classname == "building_sentrygun"){	// work out correct attacker
+					trueattacker = attacker.real_owner;
+				}
+				else {
+					trueattacker = attacker;
+				}
+				
+				if (trueattacker == targ)
+					{
+						return;
+					}
+
+								
+				local string hitsound;
+				hitsound = infokey(trueattacker, "hitsound");
+				
+				if(hitsound == "1" || hitsound == "2"){
+				
+					local float crit;
+
+					if((T_AttackType == 0) && (damage >= 80)){	//rocket direct
+						crit = 1;
+					}
+					if ((T_AttackType == 1) && (damage >= 40)){  	//ssg meatshot
+						crit = 1;
+					}
+					if ((T_AttackType == 4) && (damage >= 95)){ 	//grens
+						crit = 1;
+					}
+					if((T_AttackType == 16) && (damage >= 40)){ 	//pyro rocket direct
+						crit = 1;
+					}
+					
+					local float sameteam;
+					
+					if (attacker.team_no == targ.team_no){
+						sameteam = 1;
+					}
+					else {
+						sameteam = 0;
+						
+						if(targ.classname == "player"){				//spy disguise check
+							if(targ.playerclass == 8){
+								if (targ.is_undercover == 1){
+									sameteam = 1;
+								}
+							}
+						}
+					}
+					
+					if (sameteam == 0) {
+						if (crit == 1){
+							stuffcmd(trueattacker, "play misc/hitsoundcrit.wav\n");		//sounds precached in weapons.qc
+						}
+						else { 
+							stuffcmd(trueattacker, "play misc/hitsound.wav\n");		//sounds precached in weapons.qc
+						}
+					}
+					else {
+						if (hitsound == "2"){
+							stuffcmd(trueattacker, "play misc/hitsoundteam.wav\n");		//sounds precached in weapons.qc
+						}
+					}	
+				}
+		}
+	}
+};
+
 void (entity targ, entity inflictor, entity attacker,
       float damage) T_Damage = {
     local vector dir;
@@ -255,6 +331,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
             }
         }
     }
+    
+    HitSound(targ, attacker, damage, T_AttackType);
+    
     damage_attacker = attacker;
 
     if (teamplay & (TEAMPLAY_LESSSCOREHELP | TEAMPLAY_LESSPLAYERSHELP))
