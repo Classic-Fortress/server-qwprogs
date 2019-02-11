@@ -256,6 +256,8 @@ void () DecodeLevelParms = {
         autoteam_time = 30;
 
         clanbattle = CF_GetSetting("c", "clan", "off");
+        quadmode = CF_GetSetting("quadmode", "quadmode", "off");
+        
         if (clanbattle) {
             localcmd ("serverinfo status Standby\n");
             
