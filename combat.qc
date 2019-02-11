@@ -86,7 +86,7 @@ void (entity targ, entity attacker) Killed = {
     self = oself;
 };
 
-void (entity targ, entity attacker, float damage, float T_AttackType) HitSound = {
+void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 
 	if((attacker.classname == "player") || (attacker.classname == "building_sentrygun")){
 	
@@ -114,16 +114,16 @@ void (entity targ, entity attacker, float damage, float T_AttackType) HitSound =
 				
 					local float crit;
 
-					if((T_AttackType == 0) && (damage >= 80)){	//rocket direct
+					if((inflictor.weapon == DMSG_ROCKETL) && (damage >= 80)){
 						crit = 1;
 					}
-					if ((T_AttackType == 1) && (damage >= 40)){  	//ssg meatshot
+					if ((inflictor.weapon == DMSG_SSHOTGUN) && (damage >= 40)){
 						crit = 1;
 					}
-					if ((T_AttackType == 4) && (damage >= 95)){ 	//grens
+					if ((inflictor.weapon == DMSG_GRENADEL) && (damage >= 85)){
 						crit = 1;
 					}
-					if((T_AttackType == 16) && (damage >= 40)){ 	//pyro rocket direct
+					if((inflictor.weapon == DMSG_INCENDIARY) && (damage >= 40)){
 						crit = 1;
 					}
 					
@@ -135,9 +135,12 @@ void (entity targ, entity attacker, float damage, float T_AttackType) HitSound =
 					else {
 						sameteam = 0;
 						
-						if(targ.classname == "player"){				//spy disguise check
-							if(targ.playerclass == 8){
-								if (targ.is_undercover == 1){
+						if(targ.classname == "player"){	
+							if(targ.playerclass == PC_SPY){
+								if (targ.is_feigning){
+									return;
+								}
+								if (targ.is_undercover){
 									sameteam = 1;
 								}
 							}
@@ -332,7 +335,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         }
     }
     
-    HitSound(targ, attacker, damage, T_AttackType);
+    HitSound(targ, inflictor, attacker, damage);
     
     damage_attacker = attacker;
 
