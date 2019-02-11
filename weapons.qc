@@ -106,6 +106,9 @@ void () TranquiliserTimer;
 
 void () TeamFortress_CTF_FlagInfo;
 void () ClanMode;
+void () QuadMode;
+void () EndQuadRound;
+void () PlayerReady;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");

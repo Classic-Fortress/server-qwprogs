@@ -36,10 +36,7 @@ float () CheckWinningTeam = {
 };
 
 void () QuadRoundOver = {
-	local string st;
-
 	round_over = 2;
-
 	self.think = StartQuadRound;
 	self.nextthink = (time + 0.5);
 };
@@ -60,8 +57,7 @@ void () QuadRoundThink = {
 	}
 
 	if (self.cnt == -1)
-		return;
-	
+		return;	
 
 	if ( self.cnt == stof(infokey(world, "round_time")) - 1 && self.cnt2 == 59 ) {
 		localcmd("serverinfo status \"");
@@ -84,12 +80,11 @@ void () QuadRoundThink = {
 
 	if (!cease_fire)
 		self.cnt2 = (self.cnt2 - 1);
-
-	localcmd(sprintf("timelimit %s\n", ftos(stof(infokey(world, "round_time")))));
+	
 	if (!self.cnt2)	{
 		if ((self.cnt == 1) || (self.cnt == 5)) {
 			tmp = ftos (self.cnt);
-			bprint3(2, "", tmp, "‘ minute");
+			bprint3(2, "\s[\s", tmp, "\s]\s minute");
 			if (self.cnt != 1) 
 				bprint(2, "s");
 			bprint(2, " remaining\n");
@@ -99,18 +94,17 @@ void () QuadRoundThink = {
 				bprint(2, "ROUND TIME OVER\nNext round begins in 10 seconds\n");
 
 //			lightstyle (0, "e");
-			localcmd("serverinfo status Countdown\n");
 
 			self.think = QuadRoundOver;
 			self.nextthink = (time + 0.1);
 			return;
 		}
 	}
-	if (!self.cnt && (((self.cnt2 == 30) || (self.cnt2 == 15)) || (self.cnt2 <= enter))) {
+	if (!self.cnt && (((self.cnt2 == 30) || (self.cnt2 == 15)) || (self.cnt2 <= 10))) {
 		fl = ceil (self.cnt2);
 		if (!(fl - self.cnt2)) {
 			tmp = ftos(self.cnt2);
-			bprint3(2, "", tmp, "‘ second");
+			bprint3(2, "\s[\s", tmp, "\s]\s second");
 			if ((self.cnt2 != 1))
 				bprint(2, "s");			
 			bprint(2, " remaining\n");
@@ -121,13 +115,11 @@ void () QuadRoundThink = {
 };
 
 void () QuadRoundBegin = {
+
 	local entity te;
 	local entity oldself;
-	local string st;
-	local string tmp;
-	local float bomber;
 	local float counter;
-
+	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
 	te = find(world, classname, "func_breakable");
 	while (te) {
 		setmodel(te, te.mdl);
@@ -138,11 +130,6 @@ void () QuadRoundBegin = {
 	while (te != world) {
 		oldself = self;
 		self = te;
-		if (self.hook_out) {
-			Reset_Grapple(self.hook);
-			Attack_Finished(0.75);
-			self.hook_out = 1;
-		}
 		TeamFortress_RemoveTimers();
 		setspawnparms(self);
 		PutClientInServer();
@@ -151,14 +138,9 @@ void () QuadRoundBegin = {
 	}
 //	lightstyle (0, "m");
 
-	localcmd("serverinfo status \"");
-
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
-	round_active = 1;
+ 	round_active = 1;
 	round_over = 0;
-	if (speedcap) {
-		self.invisible_time = time;
-	}
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;		
 		self.cnt2 = 60;
@@ -174,17 +156,20 @@ void () QuadRoundBegin = {
 		else
 			self.cnt = counter;
 	}
+	self.cnt2 = self.cnt2 + 1;
+	localcmd("serverinfo status \"");
+	local string tmp = ftos (self.cnt + 1);
+	localcmd(tmp);
+	localcmd(" min left\"\n");
 	self.think = QuadRoundThink;
-	self.nextthink = (time + 0.1);
+	self.nextthink = (time + 0.001);
 };
 
 void () QuadRoundInit = {
 	local string num;
-	local float fl;
 	local entity p;
 
-	fl = TeamFortress_NoTeams();
-	if ((fl < 1) || cease_fire)	{
+	if ((number_of_teams < 1) || cease_fire)	{
 		self.nextthink = (time + 2);
 		if (self.cnt2 <= 5)
 			self.cnt2 = 10;
@@ -195,10 +180,8 @@ void () QuadRoundInit = {
 		round_over = 2;
 	if (self.cnt2 == 1)	{
 		p = find(world, classname, "player");
-		while (p != world)
-		{
-			if (p.netname != "")
-			{
+		while (p != world) {
+			if (p.netname != "") {
 				p.takedamage = 0;
 				p.solid = 0;
 				p.movetype = 0;
@@ -225,7 +208,7 @@ void () QuadRoundInit = {
 		}
 	}
 	if (self.cnt2 <= 5)	{
-		num = ftos (self.cnt2);
+		num = ftos(self.cnt2);
 		p = find (world, classname, "player");
 		while (p != world) {
 			if (p.netname != "") {
@@ -233,7 +216,7 @@ void () QuadRoundInit = {
 				cease_fire = 0;
 				stuffcmd(p, "play buttons/switch04.wav\n");
 			}
-			p = find (p, classname, "player");
+			p = find(p, classname, "player");
 		}
 	}
 	self.nextthink = (time + 1);
@@ -249,6 +232,9 @@ void () StartQuadRound =
 	local entity gren;
 	local entity p;
 
+	lightstyle(0, "m");
+	cb_prematch = 0;
+    cease_fire = 0;
 
 	if (rounds == 1) {
 		quad_winner = CheckWinningTeam();
@@ -282,7 +268,6 @@ void () StartQuadRound =
 	if (intermission_running)
 		return;
 
-	tfs_winner = 0;
 	round_over = 1;
 
 	te = find(world, classname, "info_tfgoal");
@@ -304,124 +289,95 @@ void () StartQuadRound =
 		door_go_down();
 		self.think = LinkDoors;
 		self = te2;
-		te = find (te, classname, "door");
+		te = find(te, classname, "door");
 	}
 
 
-	if (round_active)
-	{
-		te = find (world, classname, "player");
+	if (round_active) {
+		te = find(world, classname, "player");
 		while (te != world)	{
 			oldself = self;
 			self = te;
-			if (self.hook_out) {
-				Reset_Grapple (self.hook);
-				Attack_Finished (0.75);
-				self.hook_out = 1;
-			}
 			self.menu_count = 30;
 			self.current_menu = 1;
-			TeamFortress_ThrowGrenade ();
-			TeamFortress_RemoveTimers ();
+			TeamFortress_ThrowGrenade();
+			TeamFortress_RemoveTimers();
 			if (self.playerclass == 9) {
-				Engineer_RemoveBuildings (self);
+				Engineer_RemoveBuildings(self);
 			}
 			self = oldself;
 			te = find (te, classname, "player");
 		}
 		round_active = 0;
 	}
-	gren = find (world, classname, "grenade");
-	while (gren)
-	{
+	gren = find(world, classname, "grenade");
+	while (gren) {
 		gren.think = SUB_Remove;
 		gren.nextthink = (time + 0.1);
-		gren = find (gren, classname, "grenade");
+		gren = find(gren, classname, "grenade");
 	}
-	gren = find (world, classname, "grentimer");
-	while (gren)
-	{
+	gren = find(world, classname, "grentimer");
+	while (gren) {
 		gren.think = SUB_Remove;
 		gren.nextthink = (time + 0.1);
-		gren = find (gren, classname, "grentimer");
+		gren = find(gren, classname, "grentimer");
 	}
-	te = find (world, classname, "detpack");
-	while (te)
-	{
-		if ((te.weaponmode == 1))
-		{
+	te = find(world, classname, "detpack");
+	while (te){
+		if (te.weaponmode == 1) {
 			TeamFortress_SetSpeed (te.enemy);
-			dremove (te.oldenemy);
-			dremove (te.observer_list);
+			dremove(te.oldenemy);
+			dremove(te.observer_list);
 		}
-		dremove (te.linked_list);
-		dremove (te);
+		dremove(te.linked_list);
+		dremove(te);
 		te = find (te, classname, "detpack");
 	}
-	te = find (world, classname, "item_tfgoal");
-	while (te)
-	{
-		if ((te.origin != te.oldorigin))
-		{
-			oldself = spawn ();
+	te = find(world, classname, "item_tfgoal");
+	while (te) {
+		bprint(2,"Goal Name: ");
+		bprint(2,te.netname);
+		bprint(2, "\n");
+		if (te.origin != te.oldorigin) {
+			oldself = spawn();
 			oldself.enemy = te;
 			oldself.weapon = 3;
 			oldself.nextthink = (time + 0.2);
 			oldself.think = ReturnItem;
 		}
-		te = find (te, classname, "item_tfgoal");
+		te = find(te, classname, "item_tfgoal");
 	}
-	te = find (world, classname, "item_ball");
-	while (te)
-	{
-		if ((te.origin != te.oldorigin))
-		{
-			te.nextthink = (time + 0.3);
-			te.think = ball_reset;
-		}
-		te = find (te, classname, "item_ball");
-	}
-	te = find (world, classname, "ammobox");
-	while (te)
-	{
-		te.nextthink = (time + 0.3);
-		te.think = TeamFortress_AmmoboxThink;
-		te = find (te, classname, "ammobox");
-	}
-	te = find (world, classname, "round");
-	st = infokey (world, "count");
-	fl = stof (st);
-	if ((fl < 3) || (fl > 20))
-	{
-		fl = enter;
+	te = find(world, classname, "round");
+	st = infokey(world, "count");
+	fl = stof(st);
+	if ((fl < 3) || (fl > 20)) {
+		fl = 10;
 	}
 	te.cnt2 = 10;
 	st = infokey (world, "round_time");
 	te.cnt = stof (st);
-	quad_winner = CheckWinningTeam();	
+	quad_winner = CheckWinningTeam();
+	bprint(2, ftos(rounds));
+	bprint(2, "\n");
+	localcmd("serverinfo status Standby\n");
 	if (rounds > 1) {
-//		lightstyle (0, "e");
-		localcmd("serverinfo status Countdown\n");
 		te.think = QuadRoundBegin;
 		te.nextthink = (time + 0.01);
 	}
 	else {
-//		lightstyle (0, "e");
-		localcmd("serverinfo status Countdown\n");
 		te.think = QuadRoundInit;
 		te.nextthink = (time + 1); 
 	}
 };
 
-void () EndRound = {
+void () EndQuadRound = {
 	if (infokey(world, "quadmode") == "on") {
 		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
 			if (rounds > 1) {
 				bprint (2, "ROUND TIME OVER\nNext round begins in 10 seconds\n");
-//					lightstyle (0, "e");
-					localcmd("serverinfo status Countdown\n");
-					self.think = QuadRoundOver;
-					self.nextthink = (time + 0.1);
+				lightstyle (0, "e");
+				self.think = QuadRoundOver;
+				self.nextthink = (time + 0.1);
 			}
 			else if (rounds == 1) {
 				StartQuadRound();

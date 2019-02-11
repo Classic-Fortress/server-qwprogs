@@ -52,6 +52,7 @@ void () CTF_FlagCheck;
 void (entity pl) Sniper_ZoomReset;
 void () StartTimer;
 void () StopTimer;
+void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 
@@ -257,7 +258,13 @@ void () DecodeLevelParms = {
 
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
-        
+
+        rounds = CF_GetSetting("rounds","rounds","on");
+        if (!rounds)
+            rounds = -1;
+        else if (rounds > 0)
+            rounds = rounds + 1;
+
         if (clanbattle) {
             localcmd ("serverinfo status Standby\n");
             
@@ -300,6 +307,13 @@ void () DecodeLevelParms = {
         } else {
             clanbattle = FALSE;
             localcmd ("serverinfo status Normal\n");
+        }
+        if (rounds) {
+            st = infokey (world, "round_time");
+            te = spawn ();
+            te.owner = world;
+            te.classname = "round";
+            te.cnt = stof(st);
         }
 
         // automatically assign team [off]
