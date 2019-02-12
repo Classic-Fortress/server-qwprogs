@@ -527,6 +527,7 @@ float intermission_exittime;
 .float max_grenades_1;
 .float max_grenades_2;
 
+.entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
 
 //============================================================================
 
