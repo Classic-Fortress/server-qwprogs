@@ -345,6 +345,9 @@ void () DecodeLevelParms = {
         // maximum grenades type 2 to drop in backpack [0]
         drop_gren2 = CF_GetSetting("dg2", "drop_gren2", "0");
 
+        // soldier maximum grenades type 2
+        sold_max_gren2 = CF_GetSetting("smg2", "sold_max_gren2", PC_SOLDIER_GRENADE_MAX_2);
+
         // display grenade timer in status bar [on]
         grentimers = CF_GetSetting("gt", "grentimers", "on");
 
@@ -515,6 +518,7 @@ void () DecodeLevelParms = {
             drop_grenpack = TRUE;
             drop_gren1 = 1;
             drop_gren2 = 0;
+            sold_max_gren2 = 1;
             grentimers = TRUE;
             id_extended = TRUE;
             remember_weapon = TRUE;
@@ -566,6 +570,7 @@ void () DecodeLevelParms = {
             drop_grenpack = FALSE;
             drop_gren1 = 0;
             drop_gren2 = 0;
+            sold_max_gren2 = 4;
             grentimers = FALSE;
             id_extended = FALSE;
             remember_weapon = FALSE;

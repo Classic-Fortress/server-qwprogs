@@ -590,6 +590,7 @@ void () TeamFortress_ShowTF = {
         CF_PrintSetting("- Grenades type 1", drop_gren1, "", 0);
         CF_PrintSetting("- Grenades type 2", drop_gren2, "", 0);
     }
+    CF_PrintSetting("Soldier max grenades type 2", sold_max_gren2, "", PC_SOLDIER_GRENADE_MAX_2);
     CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
@@ -1538,7 +1539,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_cells = PC_SOLDIER_MAXAMMO_CELL;
             self.armortype = PC_SOLDIER_MAXARMORTYPE;
             self.no_grenades_1 = PC_SOLDIER_GRENADE_MAX_1;
-            self.no_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
+            self.no_grenades_2 = sold_max_gren2;
+
             if (old_hp_armor)
                 self.armorvalue = 200;
             else
@@ -1550,7 +1552,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
             self.armortype = PC_SOLDIER_INITARMORTYPE;
             self.no_grenades_1 = PC_SOLDIER_GRENADE_INIT_1;
-            self.no_grenades_2 = PC_SOLDIER_GRENADE_INIT_2;
+            self.no_grenades_2 = sold_max_gren2;
+
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -1568,7 +1571,7 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SOLDIER_MAXAMMO_CELL;
         self.max_grenades_1 = PC_SOLDIER_GRENADE_MAX_1;
-        self.max_grenades_2 = PC_SOLDIER_GRENADE_MAX_2;
+        self.max_grenades_2 = sold_max_gren2;
 
         self.tp_grenades_1 = PC_SOLDIER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SOLDIER_GRENADE_TYPE_2;
