@@ -54,6 +54,7 @@ void () StartTimer;
 void () StopTimer;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
+float () GetLastWeaponImpulse;
 
 
 string nextmap;
@@ -1253,8 +1254,9 @@ void () PutClientInServer = {
     W_SetCurrentAmmo(self);
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
         W_ChangeWeapon(self.current_weaponslot);
-    else
-        W_ChangeWeapon(1);
+    else {
+        W_ChangeWeapon(W_BestWeaponSlot());
+    }
     self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
@@ -2704,3 +2706,14 @@ void (entity targ, entity attacker) ClientObituary = {
     }
 
 };
+
+float () IsUsingOldImpulses = {
+    return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () GetLastWeaponImpulse = {
+    if (IsUsingOldImpulses())
+        return 7;
+    else 
+        return 4;
+}
