@@ -560,7 +560,7 @@ void (entity inflictor, entity attacker, float bounce,
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
                         if (medicnocuss && head.playerclass == 5) {
-                            return;
+                            continue;
                         }
 
                         te = find(world, classname, "timer");
