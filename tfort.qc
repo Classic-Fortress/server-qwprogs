@@ -1552,7 +1552,12 @@ void () TeamFortress_SetEquipment = {
             self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
             self.armortype = PC_SOLDIER_INITARMORTYPE;
             self.no_grenades_1 = PC_SOLDIER_GRENADE_INIT_1;
-            self.no_grenades_2 = sold_max_gren2;
+
+            if (PC_SOLDIER_GRENADE_INIT_2 > sold_max_gren2) {
+                self.no_grenades_2 = sold_max_gren2;
+            } else {
+                self.no_grenades_2 = PC_SOLDIER_GRENADE_INIT_2;
+            }
 
             if (old_hp_armor)
                 self.armorvalue = 100;
