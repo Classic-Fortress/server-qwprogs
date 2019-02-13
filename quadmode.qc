@@ -126,10 +126,15 @@ void () QuadRoundBegin = {
 		te.solid = 4;
 		te = find(te, classname, "func_breakable");
 	}
+	cb_prematch = 0;
+
 	te = find(world, classname, "player");
 	while (te != world) {
 		oldself = self;
 		self = te;
+		self.takedamage = 2;
+		self.solid = 3;
+		self.movetype = 3;
 		TeamFortress_RemoveTimers();
 		setspawnparms(self);
 		PutClientInServer();
@@ -178,19 +183,6 @@ void () QuadRoundInit = {
 	self.cnt2 = (self.cnt2 - 1);
 	if (self.cnt2 == 2)
 		round_over = 2;
-	if (self.cnt2 == 1)	{
-		p = find(world, classname, "player");
-		while (p != world) {
-			if (p.netname != "") {
-				p.takedamage = 0;
-				p.solid = 0;
-				p.movetype = 0;
-				p.modelindex = 0;
-				p.model = string_null;
-			}
-			p = find(p, classname, "player");
-		}
-	}
 	else {
 		if (!self.cnt2)	{
 			self.nextthink = (time + 0.1);
@@ -233,8 +225,20 @@ void () StartQuadRound =
 	local entity p;
 
 	lightstyle(0, "m");
-	cb_prematch = 0;
+	cb_prematch = 1;
     cease_fire = 0;
+
+	p = find(world, classname, "player");
+	while (p != world) {
+		if (p.netname != "") {
+			p.takedamage = 0;
+			p.solid = 0;
+			p.movetype = 0;
+			p.modelindex = 0;
+			p.model = string_null;
+		}
+		p = find(p, classname, "player");
+	}
 
 	if (rounds == 1) {
 		quad_winner = CheckWinningTeam();
@@ -270,18 +274,6 @@ void () StartQuadRound =
 
 	round_over = 1;
 
-	te = find(world, classname, "info_tfgoal");
-	while (te != world) {
-		if (te.netname == "blue_det" || te.netname == "red_det") {
-			te2 = self;
-			self = te;
-			self.goal_activation = 2;
-			self.solid = 1;
-			self.goal_state = 2;
-			self = te2;
-		}
-		te = find(te, classname, "info_tfgoal");
-	}
 	te = find(world, classname, "door");
 	while (te != world) {
 		te2 = self;
@@ -292,6 +284,19 @@ void () StartQuadRound =
 		te = find(te, classname, "door");
 	}
 
+	te = find(world, classname, "item_tfgoal");
+	while (te) {
+		if (te.origin != te.oldorigin) {
+			if (te.owner != world)
+					tfgoalitem_RemoveFromPlayer(te, te.owner, 1);
+			oldself = spawn();
+			oldself.enemy = te;
+			oldself.weapon = 3;
+			oldself.nextthink = (time + 0.2);
+			oldself.think = ReturnItem;
+		}
+		te = find(te, classname, "item_tfgoal");
+	}
 
 	if (round_active) {
 		te = find(world, classname, "player");
@@ -333,20 +338,7 @@ void () StartQuadRound =
 		dremove(te);
 		te = find (te, classname, "detpack");
 	}
-	te = find(world, classname, "item_tfgoal");
-	while (te) {
-		bprint(2,"Goal Name: ");
-		bprint(2,te.netname);
-		bprint(2, "\n");
-		if (te.origin != te.oldorigin) {
-			oldself = spawn();
-			oldself.enemy = te;
-			oldself.weapon = 3;
-			oldself.nextthink = (time + 0.2);
-			oldself.think = ReturnItem;
-		}
-		te = find(te, classname, "item_tfgoal");
-	}
+
 	te = find(world, classname, "round");
 	st = infokey(world, "count");
 	fl = stof(st);
@@ -357,8 +349,6 @@ void () StartQuadRound =
 	st = infokey (world, "round_time");
 	te.cnt = stof (st);
 	quad_winner = CheckWinningTeam();
-	bprint(2, ftos(rounds));
-	bprint(2, "\n");
 	localcmd("serverinfo status Standby\n");
 	if (rounds > 1) {
 		te.think = QuadRoundBegin;
