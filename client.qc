@@ -1943,6 +1943,7 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
+
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
@@ -1968,6 +1969,7 @@ void () PlayerPostThink = {
         }
     }
     self.jump_flag = self.velocity_z;
+    
     CheckPowerups();
     W_WeaponFrame();
     if (self.motd <= 400) {
