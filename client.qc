@@ -860,51 +860,35 @@ float () CloseToSpawnPoint = {
     local entity spot = nil;
     local entity te = nil;
     local float i;
+    string searchstr;
 
-    if (self.team_no == 1) {
-        spot = find(world, team_str_home, "ts1");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts1");
+    switch (self.team_no)
+    {
+        case 1:
+            searchstr = "ts1";
+            break;
+        case 2:
+            searchstr = "ts2";
+            break;
+        case 3:
+            searchstr = "ts3";
+            break;
+        case 4:
+            searchstr = "ts4";
+            break;
+        default:
+            return 0;
+    }
+
+    spot = find(world, team_str_home, searchstr);
+    for(i = 1; i < 30; i++) {
+        te = findradius(spot.origin, 185);
+        while (te != world) {
+            if (te == self)
+                return 1;
+            te = te.chain;
         }
-    } else if (self.team_no == 2) {
-        spot = find(world, team_str_home, "ts2");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts2");
-        }
-    } else if (self.team_no == 3) {
-        spot = find(world, team_str_home, "ts3");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts3");
-        }
-    } else if (self.team_no == 4) {
-        spot = find(world, team_str_home, "ts4");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts4");
-        }
+        spot = find(spot, team_str_home, searchstr);
     }
 
     return 0;
