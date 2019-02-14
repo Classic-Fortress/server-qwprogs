@@ -442,6 +442,7 @@ float rounds;
 float round_active;
 float round_over;
 float gametime;
+float is_countdown;
 
 .float tf_id;
 

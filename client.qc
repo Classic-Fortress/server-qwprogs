@@ -1292,8 +1292,14 @@ void () PutClientInServer = {
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
 
+    if (cb_prematch_time < time) {
+       bprint(2,"TEST PREMATCH\n");
+    bprint(2,"TEST PREMATCH\n");
+    bprint(2,"TEST PREMATCH\n"); 
+    }
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+        (!cb_prematch)) {
+        
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)

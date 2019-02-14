@@ -179,6 +179,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
     } else if (self.motd == 130) {
         stuffcmd(self, "is_aliased\n");
+        TeamFortress_Alias ("ready", TF_PLAYERREADY, 0);
+        TeamFortress_Alias ("break", TF_PLAYERBREAK, 0);
     } else if (self.motd == 400 && self.team_no == 0) {
         Menu_Team(1);
     }

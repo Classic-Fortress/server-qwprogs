@@ -71,7 +71,7 @@ void () StartMatch =
     local entity oldself;
     local entity gren;
 
-    lightstyle(0, "m");    
+    lightstyle(0, "m");
     bprint(2, "MATCH BEGINS NOW\n");
 
     team4score = 0;
@@ -174,6 +174,7 @@ void () PreMatch_Think = {
     }
     else {
         if (!self.cnt2) {
+            is_countdown = 0;
             self.nextthink = (time + 0.1);
             self.think = SUB_Remove;
             p = find(world, classname, "player");
@@ -203,6 +204,7 @@ void () PreMatch_Think = {
     }
     if (self.cnt2 <= 10) {
         if (self.cnt2 == 10) {
+            is_countdown = 1;
             lightstyle(0, "e");
 
             if (stof(infokey(world, "demo_auto_left")) > 0) {
@@ -257,6 +259,18 @@ void () PreMatch_Think = {
     self.nextthink = (time + 1);
 };
 
+void () ResetBreakAndReady = {
+    local entity te;
+    te = find (world, classname, "player");
+    while (te != world) {
+        te.bvote = 0;
+        te.is_ready = 0;
+        v_break = 0;
+        v_ready = 0;
+        te = find (te, classname, "player");
+    }   
+}
+
 void () StartTimer =
 {
     local entity timer;
@@ -303,6 +317,7 @@ void () StartTimer =
         }
     }
     else {
+        ResetBreakAndReady(); 
         lightstyle (0, "e");
         if (stof(infokey(world, "demo_auto_left")) > 0) {
             if (infokey(world, "serverdemo") == "on") {
@@ -755,148 +770,8 @@ void () TeamFortress_ShowIDs = {
         sprint(self, PRINT_HIGH, "None\n");
 };
 
-void () ResetBreakAndReady = {
+void () Broadcast_Players_NotReady = {
     local entity te;
-    te = find (world, classname, "player");
-    while (te != world) {
-        te.bvote = 0;
-        te.is_ready = 0;
-        v_break = 0;
-        v_ready = 0;
-        te = find (te, classname, "player");
-    }   
-}
-
-void () PlayerBreak =
-{
-    local float f1;
-    local float f2;
-    local string tmp;
-
-    if (intermission_running) {
-        return;
-    }
-    if (self.classname != "player") {
-        return;
-    }
-    if (infokey(world, "quadmode") == "on" && (infokey (world, "status") == "Countdown" || infokey(world, "status") == "Standby")) {
-        sprint(self, 2, "You cannot break at this time.\n");
-        return;
-    } 
-    tmp = infokey(world, "votetime");
-    f1 = (stof(tmp) * 60);
-    if (f1 > time) {
-        sprint(self, 2, "You cannot break at this time.\n");
-        return;
-    }
-    if (self.allowvote > time) {
-        return;
-    }
-    self.allowvote = (time + 3);
-    if (self.bvote) {              
-        bprint2(2, self.netname, " \swithdraws\s his/her vote\n");        
-        self.bvote = 0;
-        v_break = (v_break - 1);
-        return;
-    }
-    if (quadmode) {
-        bprint2(3, self.netname, " votes for ending the round\n");
-    }
-    else if (clanbattle) {
-        bprint2(3, self.netname, " votes for stopping the match\n");
-    }
-    else {
-        bprint2(3, self.netname, " votes to end the current map\n");
-    }
-    self.bvote = 1;
-    v_break = (v_break + 1);
-    f1 = TeamFortress_GetNoPlayers();
-    f2 = (floor(f1 / 2) + 1);
-    if (v_break >= f2) {
-        if (quadmode) {
-            bprint(2, "Round ended by majority vote\n");
-            ResetBreakAndReady();
-            EndQuadRound();
-            return;
-        }
-        if (clanbattle) {
-            bprint(2, "Match stopped by majority vote\n");
-        }
-        else {
-            bprint(2, "Map ended by majority vote\n");
-        }
-        StopTimer();
-        NextLevel ();
-        return;
-    }
-    if (v_break != 0) {
-        f1 = (f2 - v_break);
-        tmp = ftos (f1);
-        bprint3(2, "\s", tmp, "\s more vote");
-        if (f1 > 1) {
-            bprint(2, "s");
-        }
-        bprint(2, " needed\n");
-    }
-};
-
-void () PlayerReady =
-{
-    local float f1;
-    local string tmp;
-    local entity te;
-
-    if (quadmode && (infokey (world, "status") == "Countdown")) {
-        sprint (self, 2, "Use 'break' to stop the countdown.\n");
-        return;
-    }
-    if (quadmode && (infokey (world, "status") != "Standby")) {
-        sprint (self, 2, "You cannot do this after the match has started.\n");
-        return;
-    }
-    if (self.team_no == 0) {
-        sprint (self, 2, "You must join a team first.\n");
-        return;
-    }
-    if (self.playerclass == 0) {
-        sprint (self, 2, "You must choose a class first.\n");
-        return;
-    }   
-    if (intermission_running)
-    {
-        return;
-    }
-    if ((self.classname != "player"))
-    {
-        return;
-    }
-    tmp = infokey (world, "votetime");
-    f1 = (stof (tmp) * 60);
-    if (f1 > time) {
-        sprint (self, 2, "You cannot be ready at this time.\n");
-        return;
-    }
-    if (self.allowvote > time) {
-        return;
-    }
-    self.allowvote = (time + 3);
-    if (self.is_ready) {
-        bprint2 (2, self.netname, " is NOT ready anymore\n ");
-        self.is_ready = 0;
-        v_ready = (v_ready - 1);
-        return;
-    }
-    self.is_ready = 1;
-    v_ready = v_ready + 1;
-    bprint2 (3, self.netname, " is ready to start the match\n");
-    f1 = TeamFortress_GetNoPlayers ();
-    if (v_ready == f1 ) {
-        bprint (2, "All players ready, starting match\n");
-        cb_prematch_time = 0;
-        ResetBreakAndReady();
-        StartTimer ();
-        return;
-    }
     if (v_ready != 0) {
         local string players_not_ready = "Not ready: ";
         local float first = 1;
@@ -916,11 +791,66 @@ void () PlayerReady =
         te = find (world, classname, "player");
         while (te != world) {
             if (te.is_ready == 0)
-                sprint (te, 2, "If you are ready, type 'ready' in the console\n");
-            te = find (te, classname, "player");
+                sprint(te, 2, "If you are ready, type 'ready' in the console\n");
+            te = find(te, classname, "player");
         }
         return;
     }
+    else {
+        bprint(1, "No player is ready\n");
+    }
+
+}
+
+void () PlayerNotReady = {
+    bprint2 (2, self.netname, " is NOT ready anymore\n ");
+    self.is_ready = 0;
+    v_ready = (v_ready - 1);
+    Broadcast_Players_NotReady();
+    return;
+}
+
+void () PlayerReady =
+{
+    local float f1;
+    local string tmp;
+    local entity te;
+
+    if (is_countdown) {
+        sprint(self, 2, "You cannot do this after countdown has started.\n");
+        return;
+    }
+    if (infokey (world, "status") != "Standby") {
+        sprint(self, 2, "You cannot do this after the match has started.\n");
+        return;
+    }
+    if (self.team_no == 0) {
+        sprint(self, 2, "You must join a team first.\n");
+        return;
+    }
+    if (self.playerclass == 0) {
+        sprint(self, 2, "You must choose a class first.\n");
+        return;
+    }   
+    if (intermission_running)
+        return;
+    if (self.classname != "player")
+        return;
+    if (self.is_ready) {
+        PlayerNotReady();
+        return;
+    }
+    self.is_ready = 1;
+    v_ready = v_ready + 1;
+    bprint2 (3, self.netname, " is ready to start the match\n");
+    f1 = TeamFortress_GetNoPlayers ();
+    if (v_ready == f1 ) {
+        bprint (2, "All players ready, starting match\n");
+        cb_prematch_time = 0;
+        StartTimer ();
+        return;
+    }
+    Broadcast_Players_NotReady();
 };
 
 void () RemoveVotes = {

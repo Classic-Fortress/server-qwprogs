@@ -109,6 +109,7 @@ void () ClanMode;
 void () QuadMode;
 void () EndQuadRound;
 void () PlayerReady;
+void () StartTimer;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -2532,10 +2533,10 @@ void () DeadImpulses = {
     else if ((self.impulse >= TF_CHANGEPC_SCOUT) && (self.impulse <= TF_CHANGEPC_RANDOM)) {
         TeamFortress_ChangeClass(self.impulse - TF_CHANGEPC_SCOUT + 1);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
-               && (deathmatch == 3) && (cb_prematch_time < time)) {
+               && (deathmatch == 3) && (!cb_prematch)) {
         Menu_Team(0);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
-               && (deathmatch == 3) && (cb_prematch_time < time)) {
+               && (deathmatch == 3) && (!cb_prematch)) {
         Menu_Class(0);
     } else if (self.is_admin) {
         if (self.impulse == 193)
@@ -2557,6 +2558,9 @@ void () DeadImpulses = {
         else if (self.impulse == 239) {
             self.current_menu_page = 1;
             Menu_Admin();
+        }
+        else if (self.impulse == TF_FORCESTARTMATCH) {
+            StartTimer();
         }
     }
     if (self.impulse == TF_HELP_MAP)
@@ -2627,6 +2631,18 @@ void () DeadImpulses = {
         sprint(self, PRINT_HIGH, "Aliases checked\n");
         self.got_aliases = 1;
         self.impulse = 0;
+    }
+    if (self.impulse == TF_PLAYERREADY) {
+        if (clanbattle == 1) {
+            if (!cb_prematch) {
+                sprint (self, 2, "Match already in progress...\n");
+                self.impulse = 0;
+                return;
+            }
+            PlayerReady();                                                                                                                                              self.impulse = 0;
+            self.impulse = 0;
+            return;
+        }
     }
 };
 
