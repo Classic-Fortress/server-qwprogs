@@ -132,12 +132,27 @@ void () autokick_think = {
     dremove(self);
 };
 
+float (string ps_short, string ps_setting) SettingHasValue = {
+    st = infokey(world, ps_short);
+    if (st == string_null) {
+        st = infokey(world, ps_setting);
+        if (st == string_null) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     local string st;
 
     st = infokey(world, ps_short);
     if (st == string_null) {
         st = infokey(world, ps_setting);
+        if (st == string_null) {
+            return FALSE;
+        }
     }
 
     if (st == "on") {
@@ -154,7 +169,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
         return stof(ps_default);
     }
 
-    return 0;
+    return FALSE;
 };
 
 void () DecodeLevelParms = {
