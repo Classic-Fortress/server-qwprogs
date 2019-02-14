@@ -55,6 +55,7 @@ void () StopTimer;
 void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
+void () PreMatch_Message;
 
 
 string nextmap;
@@ -270,37 +271,12 @@ void () DecodeLevelParms = {
             
             clan_scores_dumped = 0;
             game_locked = 0;
-
             cb_prematch = 1;
-            cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
-            if (cb_prematch_time)
-            {
-                StartTimer();
-            }
-            if (!cb_prematch_time) {
-              cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
-                if (cb_ceasefire_time) {
-
-                    cease_fire = 1;
-                    bprint (2, "CEASE FIRE\n");
-                    te = find (world, classname, "player");
-                    while (te)
-                    {
-                        centerprint (te, "CEASE FIRE\n");
-                        te.immune_to_check = (time + 5);
-                        te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
-                        TeamFortress_SetSpeed (te);
-                        te = find (te, classname, "player");
-                    }
-                    te = spawn ();
-                    te.classname = "ceasefire";
-                    te.think = CeaseFire_think;
-                    te.nextthink = (time + 5);
-                    te.weapon = 1;
-                    StartTimer();
-
-                }  
-            }
+            local entity pm_message = spawn();
+            pm_message.owner = world;
+            pm_message.classname = "pmmessage";
+            pm_message.think = PreMatch_Message;
+            pm_message.nextthink = 1;
             
             game_locked = CF_GetSetting("lg", "locked_game", "off");
 
@@ -1292,11 +1268,6 @@ void () PutClientInServer = {
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
 
-    if (cb_prematch_time < time) {
-       bprint(2,"TEST PREMATCH\n");
-    bprint(2,"TEST PREMATCH\n");
-    bprint(2,"TEST PREMATCH\n"); 
-    }
     if ((spot.classname == "info_player_teamspawn") &&
         (!cb_prematch)) {
         
@@ -2068,7 +2039,7 @@ void () ClientConnect = {
             }
         }
         if (!got_one) {
-            if (game_locked && (cb_prematch_time < time)) {
+            if (game_locked && (!cb_prematch)) {
                 sprint(self, PRINT_HIGH,
                        "Closed server. Clan battle in progress.\n");
                 KickCheater(self);
@@ -2630,7 +2601,7 @@ void (entity targ, entity attacker) ClientObituary = {
 
     Sniper_ZoomReset(targ);
 
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     deathstring = GetDeathMessage(targ, attacker, deathmsg);

@@ -1350,7 +1350,7 @@ void (entity spy) Spy_RemoveDisguise = {
 };
 
 void () Spy_DropBackpack = {
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     newmis = spawn();

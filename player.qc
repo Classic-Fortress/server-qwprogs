@@ -44,7 +44,7 @@ void () player_touch = {
             }
         }
     }
-    if ((self.tfstate & 16) && (cb_prematch_time < time)) {
+    if ((self.tfstate & 16) && (!cb_prematch)) {
         if ((other.classname == "player") && (te.playerclass != 0)) {
             if (!(other.tfstate & 16)) {
                 if (other.playerclass != 5) {

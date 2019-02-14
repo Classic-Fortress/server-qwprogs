@@ -109,6 +109,7 @@ void () ClanMode;
 void () QuadMode;
 void () EndQuadRound;
 void () PlayerReady;
+void () PlayerNotReady;
 void () StartTimer;
 
 void () W_Precache = {
@@ -2632,7 +2633,7 @@ void () DeadImpulses = {
         self.got_aliases = 1;
         self.impulse = 0;
     }
-    if (self.impulse == TF_PLAYERREADY) {
+    if (self.impulse == TF_PLAYER_READY) {
         if (clanbattle == 1) {
             if (!cb_prematch) {
                 sprint (self, 2, "Match already in progress...\n");
@@ -2640,6 +2641,18 @@ void () DeadImpulses = {
                 return;
             }
             PlayerReady();                                                                                                                                              self.impulse = 0;
+            self.impulse = 0;
+            return;
+        }
+    }
+    else if (self.impulse == TF_PLAYER_NOT_READY) {
+        if (clanbattle == 1) {
+            if (!cb_prematch) {
+                sprint (self, 2, "Match already in progress...\n");
+                self.impulse = 0;
+                return;
+            }
+            PlayerNotReady();                                                                                                                                              self.impulse = 0;
             self.impulse = 0;
             return;
         }

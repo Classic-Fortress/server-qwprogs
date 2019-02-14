@@ -106,6 +106,7 @@ void () StartMatch =
     }
     cb_prematch = 0;
     cease_fire = 0;
+
     te = find(world, classname, "prematch");
     te.classname = "match";
     te.cnt = (timelimit / 60);
@@ -275,8 +276,7 @@ void () StartTimer =
 {
     local entity timer;
     local entity p;
-    local float f1;
-    local string tmp;
+    local entity te;
 
     if (clanbattle == 0) {
         if (self != world) {
@@ -305,60 +305,33 @@ void () StartTimer =
         dremove(timer);
         timer = find(timer, classname, "prematch");
     }
-    f1 = stof(infokey (world, "prematch"));
+    te = find(world,classname,"pmmessage");
+    if (te != world) {
+        te.think = SUB_Remove;
+        te.nextthink = 0.01;
+    }
+
+    ResetBreakAndReady(); 
     timer = spawn();
     timer.owner = world;
     timer.classname = "prematch";
     timer.cnt = 0;
-    if (cb_prematch_time) {
-        timer.cnt2 = rint(cb_prematch_time * 60);
-        if (timer.cnt2 < 1) {
-            timer.cnt2 = 1;
-        }
-    }
-    else {
-        ResetBreakAndReady(); 
-        lightstyle (0, "e");
-        if (stof(infokey(world, "demo_auto_left")) > 0) {
-            if (infokey(world, "serverdemo") == "on") {
-                calltimeofday();
-
-                localcmd("record \"");
-                localcmd(ftos (tod_day)); // day
-                localcmd("-");
-                localcmd(ftos (tod_mon)); // month
-                localcmd("-");
-                localcmd(ftos (tod_year)); // year
-                localcmd("_");
-                localcmd(ftos (tod_hour)); // hour
-                localcmd("-");
-                localcmd(ftos (tod_min)); // minute
-                localcmd("-");
-                localcmd(ftos (tod_sec)); // second
-
-                localcmd("_[");
-                localcmd(mapname);
-                localcmd("]");
-                localcmd("\"\n");
-            }
-        }
-        p = find(world, classname, "player");
-        while (p != world) {
-            if (p.netname != "") {
-                stuffcmd(p, "play items/protect2.wav\n");
-            }
-            p = find(timer, classname, "player");
-        }
-        timer.cnt2 = rint(stof(infokey(world, "count")));
-        if (timer.cnt2 < 1) {
-            //By default, 10 seconds of countdown
-            timer.cnt2 = 10;
-        }
+    timer.cnt2 = rint(stof(infokey(world, "count")));
+    if (timer.cnt2 < 1) {
+        //By default, 10 seconds of countdown
+        timer.cnt2 = 10;
     }
     timer.cnt2 = (timer.cnt2 + 1);
     timer.nextthink = (time + 0.1);
-    tmp = ftos(timer.cnt2);
     timer.think = PreMatch_Think;
+
+    p = find(world, classname, "player");
+    while (p != world) {
+        if (p.netname != "") {
+            stuffcmd(p, "play items/protect2.wav\n");
+        }
+        p = find(timer, classname, "player");
+    }
 };
 
 void () StopTimer =
@@ -803,18 +776,17 @@ void () Broadcast_Players_NotReady = {
 }
 
 void () PlayerNotReady = {
-    bprint2 (2, self.netname, " is NOT ready anymore\n ");
-    self.is_ready = 0;
-    v_ready = (v_ready - 1);
-    Broadcast_Players_NotReady();
-    return;
+    if (self.is_ready) {
+        bprint2 (2, self.netname, " is NOT ready anymore\n ");
+        self.is_ready = 0;
+        v_ready = (v_ready - 1);
+        Broadcast_Players_NotReady();
+    }
 }
 
 void () PlayerReady =
 {
     local float f1;
-    local string tmp;
-    local entity te;
 
     if (is_countdown) {
         sprint(self, 2, "You cannot do this after countdown has started.\n");
@@ -846,7 +818,6 @@ void () PlayerReady =
     f1 = TeamFortress_GetNoPlayers ();
     if (v_ready == f1 ) {
         bprint (2, "All players ready, starting match\n");
-        cb_prematch_time = 0;
         StartTimer ();
         return;
     }
@@ -865,3 +836,19 @@ void () RemoveVotes = {
         v_ready = (v_ready - 1);
     }
 };
+
+void () PreMatch_Message = {
+    local entity p = find (world, classname, "player");
+    while (p != world) {
+        if (p.netname != "") {
+            sprint(p, "Game in \sPREMATCH\s mode.\n");
+            if (p.is_ready)
+                sprint(p, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
+            else
+                sprint(p, "Type \s/ready\s in the console if you are ready to start the match\n");
+            stuffcmd(p, "play buttons/switch04.wav\n");
+        }
+        p = find(p, classname, "player");
+    }
+    self.nextthink = time + 30;   
+}
