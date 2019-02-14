@@ -2055,7 +2055,7 @@ void () ClientConnect = {
         }
     }
     if (cb_prematch)
-        sprint(self, PRINT_HIGH, "Currently in prematch time\n");
+        sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
 
 void () ClientDisconnect = {

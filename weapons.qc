@@ -110,6 +110,7 @@ void () QuadMode;
 void () EndQuadRound;
 void () PlayerReady;
 void () PlayerNotReady;
+void () Broadcast_Players_NotReady;
 void () StartTimer;
 
 void () W_Precache = {
@@ -2560,9 +2561,10 @@ void () DeadImpulses = {
             self.current_menu_page = 1;
             Menu_Admin();
         }
-        else if (self.impulse == TF_FORCESTARTMATCH) {
+        else if (self.impulse == TF_FORCESTARTMATCH)
             StartTimer();
-        }
+        else if (self.impulse == TF_READYSTATUS)
+            Broadcast_Players_NotReady();
     }
     if (self.impulse == TF_HELP_MAP)
         TeamFortress_HelpMap();

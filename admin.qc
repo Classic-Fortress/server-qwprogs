@@ -237,4 +237,5 @@ void () Admin_Aliases =
     TeamFortress_Alias("clan", 207, 0);
     TeamFortress_Alias("adminmenu", 239, 0);
     TeamFortress_Alias("startmatch", TF_FORCESTARTMATCH, 0);
+    TeamFortress_Alias("readystatus", TF_READYSTATUS, 0);
 };

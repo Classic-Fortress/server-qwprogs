@@ -17,16 +17,9 @@ void () MatchThink =
         return;
     }
 
-    if ( self.cnt == cvar("timelimit") - 1 && self.cnt2 == 59 ) {
-        localcmd("serverinfo status \"");
-        tmp = ftos(self.cnt + 1);
-        localcmd(tmp);
-        localcmd(" min left\"\n");
-    }
-
     if (self.cnt2 == 1) {
         localcmd("serverinfo status \"");
-        tmp = ftos(self.cnt + 1);
+        tmp = ftos(self.cnt);
         localcmd(tmp);
         localcmd(" min left\"\n");
     }
@@ -764,7 +757,7 @@ void () Broadcast_Players_NotReady = {
         te = find (world, classname, "player");
         while (te != world) {
             if (te.is_ready == 0)
-                sprint(te, 2, "If you are ready, type 'ready' in the console\n");
+                sprint(te, 2, "If you are ready, type \s/ready\s in the console\n");
             te = find(te, classname, "player");
         }
         return;
@@ -841,11 +834,11 @@ void () PreMatch_Message = {
     local entity p = find (world, classname, "player");
     while (p != world) {
         if (p.netname != "") {
-            sprint(p, "Game in \sPREMATCH\s mode.\n");
+            sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
             if (p.is_ready)
-                sprint(p, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
+                sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
             else
-                sprint(p, "Type \s/ready\s in the console if you are ready to start the match\n");
+                sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
             stuffcmd(p, "play buttons/switch04.wav\n");
         }
         p = find(p, classname, "player");

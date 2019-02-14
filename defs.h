@@ -460,7 +460,7 @@
 #define TF_PLAYER_READY         135
 #define TF_PLAYER_NOT_READY     136
 #define TF_FORCESTARTMATCH      137
-// unused                       138
+#define TF_READYSTATUS          138
 // unused                       139
 // unused                       140
 // unused                       141
