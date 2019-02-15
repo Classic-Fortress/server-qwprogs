@@ -159,6 +159,7 @@ void () EMPGrenadeExplode = {
 
     te = findradius(self.origin, 240);
     while (te) {
+        te.chain2 = te.chain;
         if ((te.touch == ammo_touch) || (te.touch == weapon_touch)) {
             if (te.classname != "item_spikes") {
                 te.solid = SOLID_NOT;
@@ -235,7 +236,7 @@ void () EMPGrenadeExplode = {
                 }
             }
         }
-        te = te.chain;
+        te = te.chain2;
     }
     dremove(self);
 };

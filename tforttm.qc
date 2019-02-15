@@ -9,7 +9,7 @@ float (float tno) TeamFortress_TeamGetLives;
 float (float tno) TeamFortress_TeamGetMaxPlayers;
 string(float tno) TeamFortress_TeamGetColorString;
 float (float tno) TeamFortress_TeamGetIllegalClasses;
-string(entity p) TeamFortress_GetSkin;
+string(float tn, float pc) TeamFortress_GetSkin;
 
 float () TeamFortress_TeamPutPlayerInTeam =
 {
@@ -273,40 +273,23 @@ void () TeamFortress_CheckTeamCheats = {
     if ((self.team_no > 0) && (teamplay > 0)) {
         st = infokey(self, "bottomcolor");
         tc = stof(st);
-        if ((self.playerclass == 8) && (self.undercover_team != 0)) {
-            if ((TeamFortress_TeamGetColor(self.undercover_team) - 1) !=
-                tc) {
-                stuffcmd(self, "color ");
-                tc = TeamFortress_TeamGetColor(self.undercover_team) - 1;
-                st = ftos(tc);
-                stuffcmd(self, st);
-                stuffcmd(self, "\n");
-                bprint2(PRINT_MEDIUM, self.netname,
-                        " has been kicked for changing color\n");
-                sprint(self, PRINT_HIGH,
-                       "You have been kicked for changing your pants color\n");
-                KickCheater(self);
-                return;
-            }
-        } else {
-            if (tc != (TeamFortress_TeamGetColor(self.team_no) - 1)) {
-                stuffcmd(self, "color ");
-                tc = TeamFortress_TeamGetColor(self.team_no) - 1;
-                st = ftos(tc);
-                stuffcmd(self, st);
-                stuffcmd(self, "\n");
-                bprint2(PRINT_MEDIUM, self.netname,
-                        " has been kicked for changing color\n");
-                sprint(self, PRINT_HIGH,
-                       "You have been kicked for changing your pants color\n");
-                KickCheater(self);
-                return;
-            }
+        if (tc != (TeamFortress_TeamGetColor(self.team_no) - 1)) {
+            stuffcmd(self, "color ");
+            tc = TeamFortress_TeamGetColor(self.team_no) - 1;
+            st = ftos(tc);
+            stuffcmd(self, st);
+            stuffcmd(self, "\n");
+            bprint2(PRINT_MEDIUM, self.netname,
+                    " has been kicked for changing color\n");
+            sprint(self, PRINT_HIGH,
+                    "You have been kicked for changing your pants color\n");
+            KickCheater(self);
+            return;
         }
         if (self.playerclass != 0) {
             st = infokey(self, "skin");
             tc = 0;
-            sk = TeamFortress_GetSkin(self);
+            sk = TeamFortress_GetSkin(self.team_no, self.playerclass);
             if (st != sk) {
                 TeamFortress_SetSkin(self);
                 bprint2(PRINT_MEDIUM, self.netname,
