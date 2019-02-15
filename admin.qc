@@ -235,6 +235,7 @@ void () Admin_Aliases =
     TeamFortress_Alias("ceasefire", 193, 0);
     TeamFortress_Alias("listips", 198, 0);
     TeamFortress_Alias("clan", 207, 0);
+    TeamFortress_Alias("quadmode", 208, 0);
     TeamFortress_Alias("adminmenu", 239, 0);
     TeamFortress_Alias("startmatch", TF_FORCESTARTMATCH, 0);
     TeamFortress_Alias("readystatus", TF_READYSTATUS, 0);

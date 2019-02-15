@@ -2996,6 +2996,8 @@ void () DeadImpulses = {
             Admin_ListIPs();
         else if (self.impulse == 207)
             ClanMode();
+        else if (self.impulse == 208)
+            QuadMode();
         else if (self.impulse == 239) {
             self.current_menu_page = 1;
             Menu_Admin();
