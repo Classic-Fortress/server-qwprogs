@@ -56,7 +56,7 @@ void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
-
+float () GetLastWeaponImpulse;
 
 string nextmap;
 
@@ -139,23 +139,20 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     st = infokey(world, ps_short);
     if (st == string_null) {
         st = infokey(world, ps_setting);
+        if (st == string_null) {
+            st = ps_default;
+        }
     }
 
-    if (st == "on") {
-        return TRUE;
-    } else if (st == "off") {
-        return FALSE;
-    } else if (stof(st) != 0) {
-        return stof(st);
-    } else if (ps_default == "on") {
-        return TRUE;
-    } else if (ps_default == "off") {
-        return FALSE;
-    } else if (stof(ps_default) != 0) {
-        return stof(ps_default);
+    switch (st)
+    {
+        case "on":
+            return TRUE;
+        case "off":
+            return FALSE;
+        default:            
+            return stof(st);
     }
-
-    return 0;
 };
 
 void () DecodeLevelParms = {
@@ -851,51 +848,35 @@ float () CloseToSpawnPoint = {
     local entity spot = nil;
     local entity te = nil;
     local float i;
+    string searchstr;
 
-    if (self.team_no == 1) {
-        spot = find(world, team_str_home, "ts1");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts1");
+    switch (self.team_no)
+    {
+        case 1:
+            searchstr = "ts1";
+            break;
+        case 2:
+            searchstr = "ts2";
+            break;
+        case 3:
+            searchstr = "ts3";
+            break;
+        case 4:
+            searchstr = "ts4";
+            break;
+        default:
+            return 0;
+    }
+
+    spot = find(world, team_str_home, searchstr);
+    for(i = 1; i < 30; i++) {
+        te = findradius(spot.origin, 185);
+        while (te != world) {
+            if (te == self)
+                return 1;
+            te = te.chain;
         }
-    } else if (self.team_no == 2) {
-        spot = find(world, team_str_home, "ts2");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts2");
-        }
-    } else if (self.team_no == 3) {
-        spot = find(world, team_str_home, "ts3");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts3");
-        }
-    } else if (self.team_no == 4) {
-        spot = find(world, team_str_home, "ts4");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts4");
-        }
+        spot = find(spot, team_str_home, searchstr);
     }
 
     return 0;
@@ -1245,8 +1226,9 @@ void () PutClientInServer = {
     W_SetCurrentAmmo(self);
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
         W_ChangeWeapon(self.current_weaponslot);
-    else
-        W_ChangeWeapon(1);
+    else {
+        W_ChangeWeapon(W_BestWeaponSlot());
+    }
     self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
@@ -1936,6 +1918,7 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
+
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
@@ -1961,6 +1944,7 @@ void () PlayerPostThink = {
         }
     }
     self.jump_flag = self.velocity_z;
+    
     CheckPowerups();
     W_WeaponFrame();
     if (self.motd <= 400) {
@@ -2695,3 +2679,14 @@ void (entity targ, entity attacker) ClientObituary = {
     }
 
 };
+
+float () IsUsingOldImpulses = {
+    return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () GetLastWeaponImpulse = {
+    if (IsUsingOldImpulses())
+        return 7;
+    else 
+        return 4;
+}
