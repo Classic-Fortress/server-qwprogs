@@ -181,7 +181,7 @@ void (float timer) TeamFortress_SetDetpack = {
 
     if (timer < 5) {
         sprint(self, PRINT_HIGH,
-               "You cannot set detpacks for less that 5 seconds\n");
+               "You cannot set detpacks for less than 5 seconds\n");
         return;
     }
 
