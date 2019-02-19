@@ -1092,9 +1092,10 @@ entity () SelectSpawnPoint =
 
     if (self.team_no != 0) {
         spot = FindTeamSpawnPoint(self.team_no);
-        if (spot != world)
+        if (spot != world) {
             self.last_spawn_spot = spot;
             return (spot);
+        }
     }
     if (coop) {
         lastspawn = find(lastspawn, classname, "info_player_coop");
