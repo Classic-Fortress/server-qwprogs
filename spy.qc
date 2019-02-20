@@ -375,10 +375,14 @@ float (entity pe_player) Spy_CheckArea = {
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-    if ((self.owner.deadflag >= 2) || (self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
-        // reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
-        self.owner.movetype = MOVETYPE_NONE;
-        self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+	if(self.owner.deadflag >= 2) {
+		// reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
+		self.owner.movetype = MOVETYPE_NONE;
+		self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+        dremove(self);
+        return;
+    }
+    if ((self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
         dremove(self);
         return;
     }
