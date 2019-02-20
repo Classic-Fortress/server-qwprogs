@@ -34,7 +34,7 @@ void () ClanMode =
 	else {
 		st = "on";
 		localcmd("localinfo clan on\n");
-		bprint(2, "Map Restart needed to take affect!\n");
+		bprint(2, "Map Restart needed to take effect!\n");
 	}
 	bprint3(2, "Clan Mode set to ", st, "\n");
 };
