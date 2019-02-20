@@ -1965,7 +1965,6 @@ void () tfgoal_touch = {
 };
 
 void () info_tfgoal_use = {
-    dprint("info_tfgoal_use\n");
     AttemptToActivate(self, activator, self);
 };
 
