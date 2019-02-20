@@ -457,10 +457,10 @@
 #define TF_VOTETRICK            132 // Vote to start voting for a trick map
 #define TF_VOTERACE             133 // Vote to start voting for a race map
 #define TF_FORCENEXT            134 // Vote to force a change to voted map
-// unused                       135
-// unused                       136
-// unused                       137
-// unused                       138
+#define TF_PLAYER_READY         135
+#define TF_PLAYER_NOT_READY     136
+#define TF_FORCESTARTMATCH      137
+#define TF_READYSTATUS          138
 // unused                       139
 // unused                       140
 // unused                       141

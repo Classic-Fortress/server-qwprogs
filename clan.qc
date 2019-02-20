@@ -1,3 +1,5 @@
+void () ReturnItem;
+
 void () MatchThink =
 {
     local string tmp;
@@ -15,16 +17,9 @@ void () MatchThink =
         return;
     }
 
-    if ( self.cnt == cvar("timelimit") - 1 && self.cnt2 == 59 ) {
-        localcmd("serverinfo status \"");
-        tmp = ftos(self.cnt + 1);
-        localcmd(tmp);
-        localcmd(" min left\"\n");
-    }
-
     if (self.cnt2 == 1) {
         localcmd("serverinfo status \"");
-        tmp = ftos(self.cnt + 1);
+        tmp = ftos(self.cnt);
         localcmd(tmp);
         localcmd(" min left\"\n");
     }
@@ -69,7 +64,7 @@ void () StartMatch =
     local entity oldself;
     local entity gren;
 
-    lightstyle(0, "m");    
+    lightstyle(0, "m");
     bprint(2, "MATCH BEGINS NOW\n");
 
     team4score = 0;
@@ -90,7 +85,7 @@ void () StartMatch =
         self.frags = 0;
         self.real_frags = 0;        
         setspawnparms(self);
-        if (infokey(world, "quadmode") != "on")
+        if (!quadmode)
             PutClientInServer();
         self = oldself;
         te = find(te, classname, "player");
@@ -104,6 +99,7 @@ void () StartMatch =
     }
     cb_prematch = 0;
     cease_fire = 0;
+
     te = find(world, classname, "prematch");
     te.classname = "match";
     te.cnt = (timelimit / 60);
@@ -122,7 +118,7 @@ void () StartMatch =
         st = ftos(te.cnt);
         localcmd(st);
         localcmd(" min left\"\n");
-        if (infokey(world, "quadmode") != "on") {
+        if (!quadmode) {
             te.think = MatchThink;
             te.nextthink = (time + 1);
         }       
@@ -143,7 +139,11 @@ void () StartMatch =
     localcmd(st);
     localcmd("\n");
 
-    st = infokey(world, "quadmode");
+    if (quadmode) {
+        if (rounds) {
+            StartQuadRound();
+        }
+    }
 };
 
 void () PreMatch_Think = {
@@ -166,9 +166,9 @@ void () PreMatch_Think = {
             p = find(p, classname, "player");
         }
     }
-    else
-    {
+    else {
         if (!self.cnt2) {
+            is_countdown = 0;
             self.nextthink = (time + 0.1);
             self.think = SUB_Remove;
             p = find(world, classname, "player");
@@ -180,7 +180,10 @@ void () PreMatch_Think = {
                 }
                 p = find(p, classname, "player");
             }
-            StartMatch();
+            if (!quadmode)
+                StartMatch();
+            else 
+                StartQuadRound();
             return;
         }
     }
@@ -195,8 +198,8 @@ void () PreMatch_Think = {
     }
     if (self.cnt2 <= 10) {
         if (self.cnt2 == 10) {
+            is_countdown = 1;
             lightstyle(0, "e");
-            localcmd("serverinfo status Countdown\n");
 
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
@@ -250,12 +253,23 @@ void () PreMatch_Think = {
     self.nextthink = (time + 1);
 };
 
+void () ResetBreakAndReady = {
+    local entity te;
+    te = find (world, classname, "player");
+    while (te != world) {
+        te.bvote = 0;
+        te.is_ready = 0;
+        v_break = 0;
+        v_ready = 0;
+        te = find (te, classname, "player");
+    }   
+}
+
 void () StartTimer =
 {
     local entity timer;
     local entity p;
-    local float f1;
-    local string tmp;
+    local entity te;
 
     if (clanbattle == 0) {
         if (self != world) {
@@ -279,74 +293,38 @@ void () StartTimer =
         }
         return;
     }
-    if (infokey(world, "status") == "Countdown") {
-        if (self != world) {
-            sprint(self, 2, "Countdown in progress....\n");
-        }
-        else {
-            dprint("Countdown in progress....\n");
-        }
-        return;
-    }
     timer = find(world, classname, "prematch");
     while (timer != world) {
         dremove(timer);
         timer = find(timer, classname, "prematch");
     }
-    f1 = stof(infokey (world, "prematch"));
+    te = find(world,classname,"pmmessage");
+    if (te != world) {
+        te.think = SUB_Remove;
+        te.nextthink = 0.01;
+    }
+
+    ResetBreakAndReady(); 
     timer = spawn();
     timer.owner = world;
     timer.classname = "prematch";
     timer.cnt = 0;
-    if (cb_prematch_time) {
-        timer.cnt2 = rint(cb_prematch_time * 60);
-        if (timer.cnt2 < 1) {
-            timer.cnt2 = 1;
-        }
-    }
-    else {
-        lightstyle (0, "e");
-        if (stof(infokey(world, "demo_auto_left")) > 0) {
-            if (infokey(world, "serverdemo") == "on") {
-                calltimeofday();
-
-                localcmd("record \"");
-                localcmd(ftos (tod_day)); // day
-                localcmd("-");
-                localcmd(ftos (tod_mon)); // month
-                localcmd("-");
-                localcmd(ftos (tod_year)); // year
-                localcmd("_");
-                localcmd(ftos (tod_hour)); // hour
-                localcmd("-");
-                localcmd(ftos (tod_min)); // minute
-                localcmd("-");
-                localcmd(ftos (tod_sec)); // second
-
-                localcmd("_[");
-                localcmd(mapname);
-                localcmd("]");
-                localcmd("\"\n");
-            }
-        }
-        localcmd("serverinfo status Countdown\n");
-        p = find(world, classname, "player");
-        while (p != world) {
-            if (p.netname != "") {
-                stuffcmd(p, "play items/protect2.wav\n");
-            }
-            p = find(timer, classname, "player");
-        }
-        timer.cnt2 = rint(stof(infokey(world, "count")));
-        if (timer.cnt2 < 1) {
-            //By default, 10 seconds of countdown
-            timer.cnt2 = 10;
-        }
+    timer.cnt2 = rint(stof(infokey(world, "count")));
+    if (timer.cnt2 < 1) {
+        //By default, 10 seconds of countdown
+        timer.cnt2 = 10;
     }
     timer.cnt2 = (timer.cnt2 + 1);
     timer.nextthink = (time + 0.1);
-    tmp = ftos(timer.cnt2);
     timer.think = PreMatch_Think;
+
+    p = find(world, classname, "player");
+    while (p != world) {
+        if (p.netname != "") {
+            stuffcmd(p, "play items/protect2.wav\n");
+        }
+        p = find(timer, classname, "player");
+    }
 };
 
 void () StopTimer =
@@ -757,3 +735,113 @@ void () TeamFortress_ShowIDs = {
     if (!got_one)
         sprint(self, PRINT_HIGH, "None\n");
 };
+
+void () Broadcast_Players_NotReady = {
+    local entity te;
+    if (v_ready != 0) {
+        local string players_not_ready = "Not ready: ";
+        local float first = 1;
+        te = find (world, classname, "player");
+        while (te != world) {
+            if (te.is_ready == 0) {
+                if (!first)
+                    players_not_ready = strcat(players_not_ready, ", ");
+                else
+                    first = 0;                      
+                players_not_ready = strcat(players_not_ready, te.netname);
+            }
+            te = find (te, classname, "player");
+        }   
+        players_not_ready = strcat(players_not_ready, "\n");
+        bprint(1, players_not_ready);
+        te = find (world, classname, "player");
+        while (te != world) {
+            if (te.is_ready == 0)
+                sprint(te, 2, "If you are ready, type \s/ready\s in the console\n");
+            te = find(te, classname, "player");
+        }
+        return;
+    }
+    else {
+        bprint(1, "No player is ready\n");
+    }
+
+}
+
+void () PlayerNotReady = {
+    if (self.is_ready) {
+        bprint2 (2, self.netname, " is NOT ready anymore\n ");
+        self.is_ready = 0;
+        v_ready = (v_ready - 1);
+        Broadcast_Players_NotReady();
+    }
+}
+
+void () PlayerReady =
+{
+    local float f1;
+
+    if (is_countdown) {
+        sprint(self, 2, "You cannot do this after countdown has started.\n");
+        return;
+    }
+    if (infokey (world, "status") != "Standby") {
+        sprint(self, 2, "You cannot do this after the match has started.\n");
+        return;
+    }
+    if (self.team_no == 0) {
+        sprint(self, 2, "You must join a team first.\n");
+        return;
+    }
+    if (self.playerclass == 0) {
+        sprint(self, 2, "You must choose a class first.\n");
+        return;
+    }   
+    if (intermission_running)
+        return;
+    if (self.classname != "player")
+        return;
+    if (self.is_ready) {
+        PlayerNotReady();
+        return;
+    }
+    self.is_ready = 1;
+    v_ready = v_ready + 1;
+    bprint2 (3, self.netname, " is ready to start the match\n");
+    f1 = TeamFortress_GetNoPlayers ();
+    if (v_ready == f1 ) {
+        bprint (2, "All players ready, starting match\n");
+        StartTimer ();
+        return;
+    }
+    Broadcast_Players_NotReady();
+};
+
+void () RemoveVotes = {
+    if (self.bvote) {
+        bprint2(2, self.netname, " \swithdraws\s his/her vote\n");
+        self.bvote = 0;
+        v_break = (v_break - 1);
+    }
+    if (self.is_ready) {
+        bprint2(2, self.netname, " is NOT ready anymore\n ");
+        self.is_ready = 0;
+        v_ready = (v_ready - 1);
+    }
+};
+
+void () PreMatch_Message = {
+    local entity p = find (world, classname, "player");
+    while (p != world) {
+        if (p.netname != "") {
+            sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
+            if (p.is_ready)
+                sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
+            else
+                sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
+            stuffcmd(p, "play buttons/switch04.wav\n");
+        }
+        p = find(p, classname, "player");
+    }
+    self.nextthink = time + 30;   
+}

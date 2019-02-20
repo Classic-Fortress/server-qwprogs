@@ -141,7 +141,7 @@ void (float inp) TeamFortress_ChangeClass = {
         return;
 
     if (self.playerclass != 0) {
-        if ((deathmatch != 3) && (cb_prematch_time < time))
+        if ((deathmatch != 3) && (!cb_prematch))
             return;
 
         if (self.playerclass == inp) {
@@ -252,7 +252,7 @@ void (float inp) TeamFortress_ChangeClass = {
         self.playerclass = 1 + floor(random() * 9);
     }
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+        (!cb_prematch)) {
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)
@@ -2282,7 +2282,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
     else
         restime = 0;
 
-    if (cb_prematch_time < time) {
+    if (!cb_prematch) {
         if (Suicided) {
             if (self.lives > 0)
                 self.lives = self.lives - 1;

@@ -274,5 +274,10 @@ float () ConsoleCmd {
         ClanMode();
         return (1);
     }
+    else if (argv_mvdsv (0) == "quadmode")
+    {
+        QuadMode();
+        return (1);
+    }
     return 0;
 }
