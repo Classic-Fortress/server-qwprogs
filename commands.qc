@@ -18,7 +18,7 @@ void () QuadMode =
 		localcmd ("localinfo rounds 2\n");
 		localcmd ("timelimit 0\n");
 		localcmd ("localinfo round_time 10\n");
-		bprint (2, "Map Restart needed to take affect!\n");
+		bprint (2, "Map Restart needed to take effect!\n");
 	}
 	bprint3 (2, "Quad Mode set to ", st, "\n");
 };
