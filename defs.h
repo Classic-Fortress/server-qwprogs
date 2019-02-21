@@ -459,8 +459,8 @@
 #define TF_FORCENEXT            134 // Vote to force a change to voted map
 #define TF_PLAYER_READY         135
 #define TF_PLAYER_NOT_READY     136
-#define TF_FORCESTARTMATCH      137
-#define TF_READYSTATUS          138
+#define TF_ADMIN_FORCESTARTMATCH      137
+#define TF_ADMIN_READYSTATUS          138
 // unused                       139
 // unused                       140
 // unused                       141
@@ -511,16 +511,16 @@
 // unused                       186
 // unused                       187
 // unused                       188
-// unused                       189
-// unused                       190
-// unused                       191
-// unused                       192
-// unused                       193
+#define TF_ADMIN_CYCLEDEAL          189
+#define TF_ADMIN_KICK          190
+#define TF_ADMIN_BAN          191
+#define TF_ADMIN_COUNTPLAYERS          192
+#define TF_ADMIN_CEASEFIRE          193
 // unused                       194
-// unused                       195
+#define TF_ADMIN_NEXT          195
 // unused                       196
 // unused                       197
-// unused                       198
+#define TF_ADMIN_LISTIPS          198
 // unused                       199
 // unused                       200
 // unused                       201
@@ -529,8 +529,8 @@
 // unused                       204
 // unused                       205
 // unused                       206
-// unused                       207
-// unused                       208
+#define TF_ADMIN_CLANMODE          207
+#define TF_ADMIN_QUADMODE          208
 // unused                       209
 // unused                       210
 // unused                       211
@@ -561,7 +561,7 @@
 // unused                       236
 // unused                       237
 // unused                       238
-// unused                       239
+#define TF_ADMIN_ADMINMENU          239
 // unused                       240
 // unused                       241
 // unused                       242
@@ -1233,6 +1233,7 @@
 #define MENU_DISPENSER				19
 
 #define MENU_REFRESH_RATE 			25
+
 
 /*======================================================*/
 /* Misc defines						*/

@@ -2980,31 +2980,31 @@ void () DeadImpulses = {
                && (deathmatch == 3) && (!cb_prematch)) {
         Menu_Class(0);
     } else if (self.is_admin) {
-        if (self.impulse == 193)
+        if (self.impulse == TF_ADMIN_CEASEFIRE)
             Admin_CeaseFire();
-        else if (self.impulse == 192)
+        else if (self.impulse == TF_ADMIN_COUNTPLAYERS)
             Admin_CountPlayers();
-        else if (self.impulse == 189)
+        else if (self.impulse == TF_ADMIN_CYCLEDEAL)
             Admin_CycleDeal();
-        else if ((self.impulse == 190) && (self.admin_mode == 1))
+        else if ((self.impulse == TF_ADMIN_KICK) && (self.admin_mode == 1))
             Admin_DoKick();
-        else if ((self.impulse == 191) && (self.admin_mode == 1))
+        else if ((self.impulse == TF_ADMIN_BAN) && (self.admin_mode == 1))
             Admin_DoBan();
-        else if ((self.impulse == 195) && (self.admin_mode == 1))
+        else if ((self.impulse == TF_ADMIN_NEXT) && (self.admin_mode == 1))
             Admin_CycleDeal();
-        else if (self.impulse == 198)
+        else if (self.impulse == TF_ADMIN_LISTIPS)
             Admin_ListIPs();
-        else if (self.impulse == 207)
+        else if (self.impulse == TF_ADMIN_CLANMODE)
             ClanMode();
-        else if (self.impulse == 208)
+        else if (self.impulse == TF_ADMIN_QUADMODE)
             QuadMode();
-        else if (self.impulse == 239) {
+        else if (self.impulse == TF_ADMIN_ADMINMENU) {
             self.current_menu_page = 1;
             Menu_Admin();
         }
-        else if (self.impulse == TF_FORCESTARTMATCH)
+        else if (self.impulse == TF_ADMIN_FORCESTARTMATCH)
             StartTimer();
-        else if (self.impulse == TF_READYSTATUS)
+        else if (self.impulse == TF_ADMIN_READYSTATUS)
             Broadcast_Players_NotReady();
     }
     if (self.impulse == TF_HELP_MAP)
