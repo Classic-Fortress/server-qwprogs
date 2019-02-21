@@ -399,9 +399,9 @@ void () CF_Spy_AirThink = {
             }
         }
 
-        // if spy is in the air, set movetype to walk (so he falls to ground)
+        // if spy is in the air, set movetype to walk^H^H^H^H toss (so he falls to ground)
         else {
-            self.owner.movetype = MOVETYPE_WALK;
+            self.owner.movetype = MOVETYPE_TOSS;
         }
 
         TeamFortress_SetSpeed(self.owner);
