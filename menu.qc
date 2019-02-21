@@ -1040,53 +1040,100 @@ void () Menu_Admin =
     s_menu1 = "";
     s_menu2 = "";
 
-    if (self.current_menu_type == ADMIN_MENU_TYPE_MAIN) {
-        s_menu1 =         "FortressOne Admin Menu:                \n\n";
-        if (self.current_menu_page == 1) {
-            s_menu1 = strcat(s_menu1, Q"\s[1]\s Not Used                     \n");
-            s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
-            s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
-            s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
-            s_menu1 = strcat(s_menu1, Q"\s[5]\s Captain                      \n");
-            s_menu1 = strcat(s_menu1, Q"\s[6]\s Randomize Teams              \n");
-            s_menu1 = strcat(s_menu1, Q"\s[7]\s Restart current map          \n");
-        } else if (self.current_menu_page == 2) {
-            s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode                    \n");
-            s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode                    \n");
-            s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
-            s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
-            s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
-            s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
-            s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
-        }
-        s_menu1 = strcat(s_menu1, "\n\n");
-        s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
-        s_menu1 = strcat(s_menu1, Q"\s[9]\s Next Page                    \n");
-        s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                    \n");
+    switch (self.current_menu_type)
+    {
+        case ADMIN_MENU_TYPE_MAIN:
+            s_menu1 =         "FortressOne Admin Menu:                \n\n";
+            if (self.current_menu_page == 1) {
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Not Used                     \n");
+                s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
+                s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
+                s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
+                s_menu1 = strcat(s_menu1, Q"\s[5]\s Captain                      \n");
+                s_menu1 = strcat(s_menu1, Q"\s[6]\s Randomize Teams              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[7]\s Restart current map          \n");
+            } else if (self.current_menu_page == 2) {
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode                    \n");
+                s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode                    \n");
+                s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
+                s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
+                s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
+            }
+            s_menu1 = strcat(s_menu1, "\n\n");
+            s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
+            s_menu1 = strcat(s_menu1, Q"\s[9]\s Next Page                    \n");
+            s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                    \n");
 
-        Status_Menu(self, Menu_Admin_Input, s_menu1);
-    }
+            Status_Menu(self, Menu_Admin_Input, s_menu1);
+            break;
+        case ADMIN_MENU_TYPE_QUADMODE:
+            s_menu1 =                  "Quad Mode Admin Menu:                \n\n";
+            local string rounds, roundtime, pad;
+            local float roundlen, tlen, diff;
 
-// 1 = kick selection menu
-// 2 = ban selection menu
-// 3 = team 1's captain select menu
-// 4 = team 2's captain select menu
-// 5 = captain player selection menu
+            exitpad = "";
+            rounds = infokey(world, "rounds");
+            roundlen = strlen(rounds);
+            
+            roundtime = infokey(world, "round_time");
+            tlen = strlen(roundtime);
 
-    if (self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) {
-        if (self.current_menu_type == ADMIN_MENU_TYPE_KICK) {
+            diff = (roundlen - tlen);
+
+            if (diff < 0)
+            {
+                while (diff < 0)
+                {
+                    diff = diff + 1;
+                    pad = strcat(" ", pad);
+                }
+            } 
+            else if (diff > 0)
+            {
+                while (diff > 0)
+                {
+                    diff = diff - 1;
+                    pad = strcat(" ", pad);
+                }
+            }
+
+            rounds = strcat("[", rounds, "]");
+            roundtime = strcat("[", roundtime, "]");
+            exitpad = strcat("  ", exitpad);
+
+            s_menu1 = strcat(s_menu1, Q"\s[1]\s Rounds                   ", pad, rounds,"\n");
+            s_menu1 = strcat(s_menu1, Q"\s[2]\s Round Timelimit          ", pad, roundtime, "\n");
+            s_menu1 = strcat(s_menu1, "\n\n");
+            s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                ", pad, "\n");
+
+            Status_Menu(self, Menu_Admin_Input, s_menu1);
+            break;
+        case ADMIN_MENU_TYPE_KICK:
             s_menu1 = "Admin Kick Menu:              \n\n";
-        } else if (self.current_menu_type == ADMIN_MENU_TYPE_BAN) {
+            break;
+        case ADMIN_MENU_TYPE_BAN:
             s_menu1 = "Admin Ban Menu:              \n\n";
-        } else if (self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE) {
+            break;
+        case ADMIN_MENU_TYPE_CAPTAINTEAMONE:
             s_menu1 = "Captain Team 1 Select Menu:              \n\n";
-        } else if (self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO) {
+            break;
+        case ADMIN_MENU_TYPE_CAPTAINTEAMTWO:
             s_menu1 = "Captain Team 2 Select Menu:              \n\n";
-        } else if (self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) {
+            break;
+        case ADMIN_MENU_TYPE_CAPTAINSELECT:
             s_menu1 = strcat(Q"\[\sCaptain\s\] Team ", ftos(self.team_no));
             s_menu1 = strcat(s_menu1, " :              \n\n");
-        }
-
+            break;
+    }
+    
+    // jesus christ what is this, this should be separated out for the good of the people
+    // or maybe made understandable
+    if (self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) 
+    {
         f_tmp = 0;
         f_tmp2 = 0;
         s_menu2 = strcat (s_menu2, "\bPlayers:\b                      \n");
@@ -1189,155 +1236,121 @@ void (float inp) Menu_Admin_Input =
     local float f_tmp;
 
     // Actions for AdminMenu Page 0
-    if (self.current_menu_type == ADMIN_MENU_TYPE_MAIN && self.current_menu_page == 1) {
-        
-        /*
-         * Unused
-         */
-        if (inp == 1) {
-            return;
-        }
+    if (self.current_menu_type == ADMIN_MENU_TYPE_MAIN) {
+        if (self.current_menu_page == 1)
+        {
+            switch (inp)
+            {
+                case 1: // Unused
+                    return;
+                case 2: // Change Timelimit
+                    if (stof(infokey (world, "timelimit")) > 35) {
+                        s_temp = "5";
+                    } else {
+                        s_temp = ftos(timelimit/60 + 5);
+                    }
 
-        /*
-         * Change Timelimit
-         */
-        if (inp == 2) {
-            if (stof(infokey (world, "timelimit")) > 35) {
-                s_temp = "5";
-            } else {
-                s_temp = ftos(timelimit/60 + 5);
+                    localcmd ("timelimit ");
+                    localcmd(s_temp);
+                    localcmd("\n");
+
+                    bprint ( 2, self.netname);
+                    bprint ( 2, " sets ");
+                    bprint ( 2, "\stimelimit\s to: ");
+                    bprint ( 2, s_temp);
+                    bprint ( 2, "\n");
+                    break;
+                case 3: // Kick Player Menu
+                    self.current_menu_type = ADMIN_MENU_TYPE_KICK;
+                    self.current_menu_page = 1;
+                    Menu_Admin();
+                    break;
+                case 4: // Ban Player Menu
+                    self.current_menu_type = ADMIN_MENU_TYPE_BAN;
+                    self.current_menu_page = 1;
+                    Menu_Admin();
+                    break;
+                case 5: // Toggle Captain (pickup) Mode
+                    if (!captainmode) {
+                        captainmode = 1;
+                        self.current_menu_type = ADMIN_MENU_TYPE_CAPTAINTEAMONE;
+                        self.current_menu_page = 1;
+
+                        bprint(2, "\[\sCaptain Mode\s\]\s:\s is now \sON\s.\n");
+                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+
+                        temp = find (world, classname, "player");
+                        while (temp != world) {
+                            temp.captain = 0;
+                            temp = find (temp, classname, "player");
+                        }
+
+                    } else {  // end captainmode1
+                        disableCaptain();
+                        local entity pl;
+                        local entity temppl;
+                        pl = self;
+                        temppl = find (world, classname, "player");
+                        while (temppl != world) {
+                            self = temppl;
+                            temppl.captain = 0;
+                            Menu_Close(self);
+                            self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
+                            self.current_menu_page = 0;
+                            temppl = find (temppl, classname, "player");
+                        }
+                        self = pl;
+                    }
+                    Menu_Admin();
+                    break;
+                case 6: // Randomize Teams Option
+                    randomizeTeams();
+                    break;
+
+                case 7: // Restart Current Map Option
+                    bprint(2, self.netname);
+                    bprint(2, " Has restarted the map.\n");
+
+                    localcmd ("map ");
+                    localcmd (mapname);
+                    localcmd ("\n");
+                    break;
             }
-
-            localcmd ("timelimit ");
-            localcmd(s_temp);
-            localcmd("\n");
-
-            bprint ( 2, self.netname);
-            bprint ( 2, " sets ");
-            bprint ( 2, "\stimelimit\s to: ");
-            bprint ( 2, s_temp);
-            bprint ( 2, "\n");
-        }
-
-        /*
-         * Kick Player Menu
-         */
-        if (inp == 3) {
-            self.current_menu_type = ADMIN_MENU_TYPE_KICK;
-            self.current_menu_page = 1;
-            Menu_Admin();
-        }
-
-        /*
-         * Ban Player Menu
-         */
-        if (inp == 4) {
-            self.current_menu_type = ADMIN_MENU_TYPE_BAN;
-            self.current_menu_page = 1;
-            Menu_Admin();
-        }
-
-        /*
-         * Restart Current Map Option
-         */
-        if (inp == 7) {
-
-            bprint(2, self.netname);
-            bprint(2, " Has restarted the map.\n");
-
-            localcmd ("map ");
-            localcmd (mapname);
-            localcmd ("\n");
-        }
-
-        /*
-         * Randomize Teams Option
-         */
-        if (inp == 6) {
-            randomizeTeams();
-        }
-
-        /*
-         * Toggle Captain (pickup) Mode
-         */
-        if (inp == 5) {
-            if (!captainmode) {
-                captainmode = 1;
-                self.current_menu_type = ADMIN_MENU_TYPE_CAPTAINTEAMONE;
-                self.current_menu_page = 1;
-
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s is now \sON\s.\n");
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
-
-                temp = find (world, classname, "player");
-                while (temp != world) {
-                    temp.captain = 0;
-                    temp = find (temp, classname, "player");
-                }
-
-            } else {  // end captainmode1
-                disableCaptain();
-                local entity pl;
-                local entity temppl;
-                pl = self;
-                temppl = find (world, classname, "player");
-                while (temppl != world) {
-                    self = temppl;
-                    temppl.captain = 0;
+        } 
+        else if (self.current_menu_page == 2) 
+        {
+            switch (inp)
+            {
+                case 1: // Toggle Clanmode Option
+                    ClanMode();
                     Menu_Close(self);
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                     self.current_menu_page = 0;
-                    temppl = find (temppl, classname, "player");
-                }
-                self = pl;
+                    break;
+                case 2: // quad mode
+                    QuadMode();
+                    self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
+                    self.current_menu_page = 0;
+                    Menu_Admin();
+                    break;
+                case 3: // pub mode
+                    PubMode();
+                    Menu_Close(self);
+                    self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
+                    self.current_menu_page = 0;
+                    break;
+                case 4: // duel mode
+                    bprint(2, "Not Implemented!\n");
+                    Menu_Close(self);
+                    self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
+                    self.current_menu_page = 0;
+                    break;
             }
-            Menu_Admin();
-
         }
-    // Actions for AdminMenu Page 1
-    } else if (self.current_menu_type == ADMIN_MENU_TYPE_MAIN && self.current_menu_page == 2) {
-        
-        /*
-         * Toggle Clanmode Option
-         */
-        if (inp == 1) {
-            localcmd("clan\n");
-            Menu_Close(self);
-            self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-            self.current_menu_page = 0;
-        }
-
-        /*
-         * quad mode, pub mode, duel mode
-         */
-        if (inp == 3) {
-            self.current_menu_type = 6;
-            self.current_menu_page = 1;
-            Menu_Admin();
-        }
-
-        else if (inp == 2) {
-            sprint(self, 2, "AdminMenu Page 2 Action 2\n");
-        }
-        else if (inp == 3) {
-            sprint(self, 2, "AdminMenu Page 2 Action 3\n");
-        }
-        else if (inp == 4) {
-            sprint(self, 2, "AdminMenu Page 2 Action 4\n");
-        }
-        else if (inp == 5) {
-            sprint(self, 2, "AdminMenu Page 2 Action 5\n");
-        }
-        else if (inp == 6) {
-            sprint(self, 2, "AdminMenu Page 2 Action 6\n");
-        }
-        else if (inp == 7) {
-            sprint(self, 2, "AdminMenu Page 2 Action 7\n");
-        }
-
-    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) && inp >= 1 && inp <= 7) { // Kick / Ban Actions
+    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) 
+                && inp >= 1 && inp <= 7) { // Kick / Ban Actions
         f_tmp = 1;    
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1370,7 +1383,9 @@ void (float inp) Menu_Admin_Input =
                 Admin_DoKick();
             }
         }
-    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) && inp >= 1 && inp <= 7) { // Captain Actions
+    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) && inp >= 1 && inp <= 7) { // Captain Actions
         f_tmp = 1;
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
