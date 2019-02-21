@@ -5,24 +5,24 @@ void () QuadMode =
     localcmd ("localinfo rounds 2\n");
     localcmd ("timelimit 0\n");
     localcmd ("localinfo round_time 10\n");
-    bprint (2, "Map Restart needed to take effect!\n");
 	bprint (2, "Quad Mode set to on\n");
+    bprint (2, "Map Restart needed to take effect!\n");
 };
 
 void () ClanMode =
 {
     localcmd("localinfo clan on\n");
-    bprint(2, "Map Restart needed to take effect!\n");
-	bprint(2, "Clan Mode set to on\n");
+    bprint(2, "Clan Mode set to on\n");
+	bprint(2, "Map Restart needed to take effect!\n");
 };
 
 void () PubMode = 
 {
-    localcmd("localinfo clan off");
-    localcmd("localinfo quadmode off");
-    localcmd("localinfo rounds 0");
-    localcmd("timelimit 30\n");
+    localcmd("localinfo clan off\n");
+    localcmd("localinfo quadmode off\n");
+    localcmd("localinfo rounds 0\n");
+    localcmd("timelimit 20\n");
     localcmd("localinfo round_time 0\n");
-    bprint(2, "Map Restart needed to take effect!\n");
-	bprint(2, "Pub Mode set to on\n");
+    bprint(2, "Pub Mode set to on\n");
+	bprint(2, "Map Restart needed to take effect!\n");
 }

@@ -1015,6 +1015,9 @@ void () Menu_Engineer_Cancel = {
     Status_Menu(self, Menu_Engineer_Cancel_Input, s_build, s_cancel);
 }
 
+void () ClanMode;
+void () QuadMode;
+void () PubMode;
 void () Menu_Admin =
 {
     local string s_menu1;
@@ -1070,43 +1073,25 @@ void () Menu_Admin =
             break;
         case ADMIN_MENU_TYPE_QUADMODE:
             s_menu1 =                  "Quad Mode Admin Menu:                \n\n";
-            local string rounds, roundtime, pad;
-            local float roundlen, tlen, diff;
 
-            exitpad = "";
-            rounds = infokey(world, "rounds");
-            roundlen = strlen(rounds);
-            
-            roundtime = infokey(world, "round_time");
-            tlen = strlen(roundtime);
-
-            diff = (roundlen - tlen);
-
-            if (diff < 0)
-            {
-                while (diff < 0)
-                {
-                    diff = diff + 1;
-                    pad = strcat(" ", pad);
-                }
-            } 
-            else if (diff > 0)
-            {
-                while (diff > 0)
-                {
-                    diff = diff - 1;
-                    pad = strcat(" ", pad);
-                }
-            }
-
-            rounds = strcat("[", rounds, "]");
-            roundtime = strcat("[", roundtime, "]");
-            exitpad = strcat("  ", exitpad);
-
-            s_menu1 = strcat(s_menu1, Q"\s[1]\s Rounds                   ", pad, rounds,"\n");
-            s_menu1 = strcat(s_menu1, Q"\s[2]\s Round Timelimit          ", pad, roundtime, "\n");
+            s_menu1 = strcat(s_menu1, Q"\s[1]\s Rounds                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[2]\s Round Timelimit          \n");
             s_menu1 = strcat(s_menu1, "\n\n");
-            s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                ", pad, "\n");
+            s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                \n");
+
+            Status_Menu(self, Menu_Admin_Input, s_menu1);
+            break;
+        case ADMIN_MENU_TYPE_QUAD_ROUNDNUM:
+            s_menu1 = "Number of Rounds Input Menu:             \n\n";
+            s_menu1 = strcat(s_menu1, "Enter a number between 1 and 10          \n");
+            s_menu1 = strcat(s_menu1, "\n\n");
+
+            Status_Menu(self, Menu_Admin_Input, s_menu1);
+            break;
+        case ADMIN_MENU_TYPE_QUAD_ROUNDTL:
+            s_menu1 = "Round Time Input Menu:               \n\n";
+            s_menu1 = strcat(s_menu1, "Enter a number between 1 and 10      \n");
+            s_menu1 = strcat(s_menu1, "\n\n");
 
             Status_Menu(self, Menu_Admin_Input, s_menu1);
             break;
@@ -1197,7 +1182,7 @@ void () Menu_Admin =
                         self = te;
                         Menu_Close(self);
                         self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                        self.current_menu_page = 0;
+                        self.current_menu_page = 1;
                     te = find (te, classname, "player");
                 }
                 self = temp;
@@ -1298,7 +1283,7 @@ void (float inp) Menu_Admin_Input =
                             temppl.captain = 0;
                             Menu_Close(self);
                             self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                            self.current_menu_page = 0;
+                            self.current_menu_page = 1;
                             temppl = find (temppl, classname, "player");
                         }
                         self = pl;
@@ -1327,30 +1312,32 @@ void (float inp) Menu_Admin_Input =
                     ClanMode();
                     Menu_Close(self);
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                    self.current_menu_page = 0;
+                    self.current_menu_page = 1;
                     break;
                 case 2: // quad mode
                     QuadMode();
                     self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
-                    self.current_menu_page = 0;
+                    self.current_menu_page = 1;
                     Menu_Admin();
                     break;
                 case 3: // pub mode
                     PubMode();
                     Menu_Close(self);
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                    self.current_menu_page = 0;
+                    self.current_menu_page = 1;
                     break;
                 case 4: // duel mode
                     bprint(2, "Not Implemented!\n");
                     Menu_Close(self);
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                    self.current_menu_page = 0;
+                    self.current_menu_page = 1;
                     break;
             }
         }
-    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) 
-                && inp >= 1 && inp <= 7) { // Kick / Ban Actions
+    } 
+    else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) 
+                && inp >= 1 && inp <= 7) 
+    { // Kick / Ban Actions
         f_tmp = 1;    
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1383,9 +1370,11 @@ void (float inp) Menu_Admin_Input =
                 Admin_DoKick();
             }
         }
-    } else if ((self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE 
+    } 
+    else if ((self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE 
         || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO 
-        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) && inp >= 1 && inp <= 7) { // Captain Actions
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) && inp >= 1 && inp <= 7) 
+    { // Captain Actions
         f_tmp = 1;
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1441,7 +1430,7 @@ void (float inp) Menu_Admin_Input =
                         bprint(2, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
                         Menu_Close(self);
                         self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                        self.current_menu_page = 0;
+                        self.current_menu_page = 1;
                     }
                     self = temp;
                 }
@@ -1466,20 +1455,61 @@ void (float inp) Menu_Admin_Input =
                 nextCaptain();
                 Menu_Close(self);
                 self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                self.current_menu_page = 0;
+                self.current_menu_page = 1;
             }
         }
+    } 
+    else if (self.current_menu_type == ADMIN_MENU_TYPE_QUADMODE)
+    {
+        switch (inp)
+        {
+            case 1:
+                // rounds
+                self.current_menu_type = ADMIN_MENU_TYPE_QUAD_ROUNDNUM;
+                self.current_menu_page = 1;
+                Menu_Admin();
+                break;
+            case 2:
+                // round time limit
+                self.current_menu_type = ADMIN_MENU_TYPE_QUAD_ROUNDTL;
+                self.current_menu_page = 1;
+                Menu_Admin();
+                break;
+        }
     }
+    else if (self.current_menu_type == ADMIN_MENU_TYPE_QUAD_ROUNDNUM)
+    {
+        local string cmd;
+        cmd = strcat("localinfo rounds ", ftos(inp), "\n");
+        localcmd(cmd);
+        bprint(2, "Quad Round Number changed to ", ftos(inp), "\n");
+        self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
+        self.current_menu_page = 1;
+        Menu_Admin();
+    }
+    else if (self.current_menu_type == ADMIN_MENU_TYPE_QUAD_ROUNDTL)
+    {
+        local string d;
+        d = strcat("localinfo round_time ", ftos(inp), "\n");
+        localcmd(d);
+        bprint(2, "Quad Round Timelimit changed to ", ftos(inp), "\n");
+        self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
+        self.current_menu_page = 1;
+        Menu_Admin();
+    }
+
     //Previous page
     if (inp == 8) {
         if (self.current_menu_page > 1) {
             self.current_menu_page = self.current_menu_page - 1;
+            Menu_Admin();
         }
     }
     //Next page
     if (inp == 9) {
         if (self.current_menu_page < 5) {
             self.current_menu_page = self.current_menu_page + 1;
+            Menu_Admin();
         }
     }
 
@@ -1497,7 +1527,7 @@ void (float inp) Menu_Admin_Input =
                 temp.captain = 0;
                 Menu_Close(self);
                 self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-                self.current_menu_page = 0;
+                self.current_menu_page = 1;
                 temp = find (temp, classname, "player");
             }
             self = te;
@@ -1505,7 +1535,7 @@ void (float inp) Menu_Admin_Input =
         if (self.current_menu_type == ADMIN_MENU_TYPE_MAIN) {
             Menu_Close(self);
             self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
-            self.current_menu_page = 0;
+            self.current_menu_page = 1;
         }
         else if (self.is_admin) {
             self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
