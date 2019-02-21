@@ -320,6 +320,21 @@
 #define PC_LASTCLASS		12 	// Use this as the high-boundary for any loops
 					// through the playerclass.
 
+// admin menu page consts
+// 1 = kick selection menu
+// 2 = ban selection menu
+// 3 = team 1's captain select menu
+// 4 = team 2's captain select menu
+// 5 = captain player selection menu
+#define ADMIN_MENU_TYPE_MAIN 0
+#define ADMIN_MENU_TYPE_KICK 1
+#define ADMIN_MENU_TYPE_BAN 2
+#define ADMIN_MENU_TYPE_CAPTAINTEAMONE 3
+#define ADMIN_MENU_TYPE_CAPTAINTEAMTWO 4
+#define ADMIN_MENU_TYPE_CAPTAINSELECT 5
+#define ADMIN_MENU_TYPE_QUADMODE 6
+
+
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
