@@ -227,16 +227,16 @@ void (string cl_pwd) Admin_Check =
 
 void () Admin_Aliases =
 {
-    TeamFortress_Alias("countplayers", 192, 0);
-    TeamFortress_Alias("deal", 189, 0);
-    TeamFortress_Alias("kick", 190, 0);
-    TeamFortress_Alias("ban", 191, 0);
-    TeamFortress_Alias("next", 195, 0);
-    TeamFortress_Alias("ceasefire", 193, 0);
-    TeamFortress_Alias("listips", 198, 0);
-    TeamFortress_Alias("clan", 207, 0);
-    TeamFortress_Alias("quadmode", 208, 0);
-    TeamFortress_Alias("adminmenu", 239, 0);
-    TeamFortress_Alias("startmatch", TF_FORCESTARTMATCH, 0);
-    TeamFortress_Alias("readystatus", TF_READYSTATUS, 0);
+    TeamFortress_Alias("countplayers", TF_ADMIN_COUNTPLAYERS, 0);
+    TeamFortress_Alias("deal", TF_ADMIN_CYCLEDEAL, 0);
+    TeamFortress_Alias("kick", TF_ADMIN_KICK, 0);
+    TeamFortress_Alias("ban", TF_ADMIN_BAN, 0);
+    TeamFortress_Alias("next", TF_ADMIN_NEXT, 0);
+    TeamFortress_Alias("ceasefire", TF_ADMIN_CEASEFIRE, 0);
+    TeamFortress_Alias("listips", TF_ADMIN_LISTIPS, 0);
+    TeamFortress_Alias("clan", TF_ADMIN_CLANMODE, 0);
+    TeamFortress_Alias("quadmode", TF_ADMIN_QUADMODE, 0);
+    TeamFortress_Alias("adminmenu", TF_ADMIN_ADMINMENU, 0);
+    TeamFortress_Alias("startmatch", TF_ADMIN_FORCESTARTMATCH, 0);
+    TeamFortress_Alias("readystatus", TF_ADMIN_READYSTATUS, 0);
 };
