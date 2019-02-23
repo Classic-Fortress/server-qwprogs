@@ -631,6 +631,12 @@ entity()FindIntermission =
         }
         return (spot);
     }
+
+    // q3f
+    spot = find(world, classname, "info_player_intermission");
+    if (spot)
+        return (spot);
+
     objerror("FindIntermission: no spot");
     return (world);
 };
