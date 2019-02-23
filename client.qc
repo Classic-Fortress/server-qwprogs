@@ -68,6 +68,15 @@ void () info_intermission =
     }
 };
 
+void () info_player_intermission =
+{
+    self.classname = "info_intermission";
+    if (CheckExistence() == 0) {
+        dremove(self);
+        return;
+    }
+};
+
 void () SetChangeParms = {
     if (self.health <= 0) {
         SetNewParms();
@@ -631,11 +640,6 @@ entity()FindIntermission =
         }
         return (spot);
     }
-
-    // q3f
-    spot = find(world, classname, "info_player_intermission");
-    if (spot)
-        return (spot);
 
     objerror("FindIntermission: no spot");
     return (world);
