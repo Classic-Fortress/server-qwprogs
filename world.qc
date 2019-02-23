@@ -340,7 +340,7 @@ void () InitBodyQue = {
 };
 
 void (entity ent) CopyToBodyQue = {
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     bodyque_head.angles = ent.angles;

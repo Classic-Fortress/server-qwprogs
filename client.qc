@@ -52,10 +52,11 @@ void () CTF_FlagCheck;
 void (entity pl) Sniper_ZoomReset;
 void () StartTimer;
 void () StopTimer;
+void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
+void () PreMatch_Message;
 float () GetLastWeaponImpulse;
-
 
 string nextmap;
 
@@ -254,48 +255,38 @@ void () DecodeLevelParms = {
         autoteam_time = 30;
 
         clanbattle = CF_GetSetting("c", "clan", "off");
+        quadmode = CF_GetSetting("quadmode", "quadmode", "off");
+
+        rounds = CF_GetSetting("rounds","rounds","on");
+        if (!rounds)
+            rounds = -1;
+        else if (rounds > 0)
+            rounds = rounds + 1;
+
         if (clanbattle) {
             localcmd ("serverinfo status Standby\n");
             
             clan_scores_dumped = 0;
             game_locked = 0;
-
             cb_prematch = 1;
-            cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
-            if (cb_prematch_time)
-            {
-                StartTimer();
-            }
-            if (!cb_prematch_time) {
-              cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
-                if (cb_ceasefire_time) {
-
-                    cease_fire = 1;
-                    bprint (2, "CEASE FIRE\n");
-                    te = find (world, classname, "player");
-                    while (te)
-                    {
-                        centerprint (te, "CEASE FIRE\n");
-                        te.immune_to_check = (time + 5);
-                        te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
-                        TeamFortress_SetSpeed (te);
-                        te = find (te, classname, "player");
-                    }
-                    te = spawn ();
-                    te.classname = "ceasefire";
-                    te.think = CeaseFire_think;
-                    te.nextthink = (time + 5);
-                    te.weapon = 1;
-                    StartTimer();
-
-                }  
-            }
+            local entity pm_message = spawn();
+            pm_message.owner = world;
+            pm_message.classname = "pmmessage";
+            pm_message.think = PreMatch_Message;
+            pm_message.nextthink = 1;
             
             game_locked = CF_GetSetting("lg", "locked_game", "off");
 
         } else {
             clanbattle = FALSE;
             localcmd ("serverinfo status Normal\n");
+        }
+        if (rounds) {
+            st = infokey (world, "round_time");
+            te = spawn ();
+            te.owner = world;
+            te.classname = "round";
+            te.cnt = stof(st);
         }
 
         // automatically assign team [off]
@@ -1261,7 +1252,8 @@ void () PutClientInServer = {
         spawn_tdeath(self.origin, self);
 
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+        (!cb_prematch)) {
+        
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)
@@ -2032,7 +2024,7 @@ void () ClientConnect = {
             }
         }
         if (!got_one) {
-            if (game_locked && (cb_prematch_time < time)) {
+            if (game_locked && (!cb_prematch)) {
                 sprint(self, PRINT_HIGH,
                        "Closed server. Clan battle in progress.\n");
                 KickCheater(self);
@@ -2048,7 +2040,7 @@ void () ClientConnect = {
         }
     }
     if (cb_prematch)
-        sprint(self, PRINT_HIGH, "Currently in prematch time\n");
+        sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
 
 void () ClientDisconnect = {
@@ -2594,7 +2586,7 @@ void (entity targ, entity attacker) ClientObituary = {
 
     Sniper_ZoomReset(targ);
 
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     deathstring = GetDeathMessage(targ, attacker, deathmsg);
