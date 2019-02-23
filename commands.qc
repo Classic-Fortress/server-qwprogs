@@ -44,4 +44,6 @@ void () DuelMode =
     localcmd ("password none\n");
     localcmd("timelimit 0\n");
     localcmd ("fraglimit 30\n");
+    bprint(2, "Duel Mode set to on\n");
+	bprint(2, "Map Restart needed to take effect!\n");
 }
