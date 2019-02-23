@@ -5,6 +5,10 @@ void () QuadMode =
     localcmd ("localinfo rounds 2\n");
     localcmd ("timelimit 0\n");
     localcmd ("localinfo round_time 10\n");
+    localcmd ("localinfo teamfrags on\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd ("password pineapple\n");
+    localcmd ("fraglimit 0\n");
 	bprint (2, "Quad Mode set to on\n");
     bprint (2, "Map Restart needed to take effect!\n");
 };
@@ -20,9 +24,24 @@ void () PubMode =
 {
     localcmd("localinfo clan off\n");
     localcmd("localinfo quadmode off\n");
+    localcmd ("localinfo teamfrags off\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd ("password none\n");
     localcmd("localinfo rounds 0\n");
     localcmd("timelimit 20\n");
+    localcmd ("fraglimit 0\n");
     localcmd("localinfo round_time 0\n");
     bprint(2, "Pub Mode set to on\n");
 	bprint(2, "Map Restart needed to take effect!\n");
+}
+
+void () DuelMode =
+{
+    localcmd ("localinfo teamfrags off\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd("localinfo clan off\n");
+    localcmd("localinfo quadmode off\n");
+    localcmd ("password none\n");
+    localcmd("timelimit 0\n");
+    localcmd ("fraglimit 30\n");
 }
