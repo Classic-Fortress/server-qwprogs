@@ -164,7 +164,10 @@ float () crandom = {
 };
 
 void (float att_delay) Attack_Finished = {
-    self.attack_finished = time + att_delay;
+    if (self.tfstate & TFSTATE_TRANQUILISED)
+        self.attack_finished = time + att_delay * 2;
+    else
+        self.attack_finished = time + att_delay;
 };
 
 void () W_FireAxe = {
