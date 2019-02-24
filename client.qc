@@ -859,6 +859,7 @@ float () CloseToSpawnPoint = {
     local entity te = nil;
     local float i;
     string searchstr;
+    searchstr = "";
 
     switch (self.team_no)
     {
