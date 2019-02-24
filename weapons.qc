@@ -164,10 +164,7 @@ float () crandom = {
 };
 
 void (float att_delay) Attack_Finished = {
-    if (self.tfstate & 32768)
-        self.attack_finished = time + att_delay * 2;
-    else
-        self.attack_finished = time + att_delay;
+    self.attack_finished = time + att_delay;
 };
 
 void () W_FireAxe = {
@@ -1999,7 +1996,7 @@ float (entity pl) WeaponReady = {
     if (time >= pl.attack_finished && !(pl.tfstate & TFSTATE_RELOADING)) {
         return 1;
     }
-
+              
     return 0;
 }
 
@@ -3083,7 +3080,7 @@ void () DeadImpulses = {
                 self.impulse = 0;
                 return;
             }
-            PlayerReady();                                                                                                                                              self.impulse = 0;
+            PlayerReady();
             self.impulse = 0;
             return;
         }
@@ -3095,7 +3092,7 @@ void () DeadImpulses = {
                 self.impulse = 0;
                 return;
             }
-            PlayerNotReady();                                                                                                                                              self.impulse = 0;
+            PlayerNotReady();
             self.impulse = 0;
             return;
         }

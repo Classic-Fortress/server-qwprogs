@@ -447,7 +447,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
         player_assaultcannondown1();
         return;
     }
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
 };
 
 void () player_assaultcannon2 =[104, player_assaultcannon1] {
@@ -477,7 +477,7 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
         player_assaultcannondown1();
         return;
     }
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
 };
 
 void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
