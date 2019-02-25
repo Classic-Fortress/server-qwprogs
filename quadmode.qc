@@ -132,9 +132,9 @@ void () QuadRoundBegin = {
 	while (te != world) {
 		oldself = self;
 		self = te;
-		self.takedamage = 2;
-		self.solid = 3;
-		self.movetype = 3;
+		self.takedamage = DAMAGE_AIM;
+		self.solid = SOLID_SLIDEBOX;
+		self.movetype = MOVETYPE_WALK;
 		TeamFortress_RemoveTimers();
 		setspawnparms(self);
 		PutClientInServer();
@@ -190,9 +190,9 @@ void () QuadRoundInit = {
 			p = find(world, classname, "player");
 			while (p != world) {
 				if (p.netname != "") {
-					p.takedamage = 2;
-					p.solid = 3;
-					p.movetype = 3;
+					p.takedamage = DAMAGE_AIM;
+					p.solid = SOLID_SLIDEBOX;
+					p.movetype = MOVETYPE_WALK;
 				}
 				p = find(p, classname, "player");
 			}
@@ -231,9 +231,9 @@ void () StartQuadRound =
 	p = find(world, classname, "player");
 	while (p != world) {
 		if (p.netname != "") {
-			p.takedamage = 0;
-			p.solid = 0;
-			p.movetype = 0;
+			p.takedamage = DAMAGE_NO;
+			p.solid = SOLID_NOT;
+			p.movetype = MOVETYPE_NONE;
 			p.modelindex = 0;
 			p.model = string_null;
 		}
@@ -255,9 +255,9 @@ void () StartQuadRound =
 		p = find (world, classname, "player");
 		while (p != world) {
 			if (p.netname != "") {
-				p.takedamage = 0;
-				p.solid = 0;
-				p.movetype = 0;
+				p.takedamage = DAMAGE_NO;
+				p.solid = SOLID_NOT;
+				p.movetype = MOVETYPE_NONE;
 				p.modelindex = 0;
 				p.model = string_null;
 			}
