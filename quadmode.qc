@@ -91,12 +91,7 @@ void () QuadRoundThink = {
 		}
 		if (!self.cnt) {
 			if (rounds > 1)
-            {
-                local string st;
-                st = infokey(world, "round_delay_time");
-                bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
-            }
-				
+				bprint(2, "ROUND TIME OVER\nNext round begins in 10 seconds\n");
 
 //			lightstyle (0, "e");
 
@@ -128,7 +123,7 @@ void () QuadRoundBegin = {
 	te = find(world, classname, "func_breakable");
 	while (te) {
 		setmodel(te, te.mdl);
-		te.solid = SOLID_BSP;
+		te.solid = 4;
 		te = find(te, classname, "func_breakable");
 	}
 	cb_prematch = 0;
@@ -204,21 +199,18 @@ void () QuadRoundInit = {
 			return;
 		}
 	}
-
-    num = ftos(self.cnt2);
-    p = find (world, classname, "player");
-    while (p) {
-        if (p.netname != "") {
-            CenterPrint3(p, "Round begins in: ", num, " second(s).\nEnsure correct class is chosen!\n");
-            
-            if (self.cnt2 <= 5)
-            {
-                cease_fire = 0;
-                stuffcmd(p, "play buttons/switch04.wav\n");
-            }
-        }
-        p = find(p, classname, "player");
-    }
+	if (self.cnt2 <= 5)	{
+		num = ftos(self.cnt2);
+		p = find (world, classname, "player");
+		while (p != world) {
+			if (p.netname != "") {
+				CenterPrint3(p, "Round begins in: ", num, " second(s).\n");
+				cease_fire = 0;
+				stuffcmd(p, "play buttons/switch04.wav\n");
+			}
+			p = find(p, classname, "player");
+		}
+	}
 	self.nextthink = (time + 1);
 };
 
@@ -353,11 +345,7 @@ void () StartQuadRound =
 	if ((fl < 3) || (fl > 20)) {
 		fl = 10;
 	}
-
-    local float rdt;
-    st = infokey(world, "round_delay_time");
-    rdt = ftos(st);
-	te.cnt2 = rdt;
+	te.cnt2 = 10;
 	st = infokey (world, "round_time");
 	te.cnt = stof (st);
 	quad_winner = CheckWinningTeam();
@@ -376,9 +364,7 @@ void () EndQuadRound = {
 	if (infokey(world, "quadmode") == "on") {
 		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
 			if (rounds > 1) {
-                local string st;
-                st = infokey(world, "round_delay_time");
-                bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
+				bprint (2, "ROUND TIME OVER\nNext round begins in 10 seconds\n");
 				lightstyle (0, "e");
 				self.think = QuadRoundOver;
 				self.nextthink = (time + 0.1);
