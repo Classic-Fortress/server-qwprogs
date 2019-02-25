@@ -356,7 +356,7 @@ void () StartQuadRound =
 
     local float rdt;
     st = infokey(world, "round_delay_time");
-    rdt = ftos(st);
+    rdt = stof(st);
 	te.cnt2 = rdt;
 	st = infokey (world, "round_time");
 	te.cnt = stof (st);
