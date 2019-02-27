@@ -1222,6 +1222,8 @@ void () PutClientInServer = {
     if (self.playerclass != PC_ENGINEER)
         Engineer_RemoveBuildings(self);
 
+    self.skin = self.playerclass;
+
     self.takedamage = 2;
 
     TeamFortress_PrintClassName(self, self.playerclass,
