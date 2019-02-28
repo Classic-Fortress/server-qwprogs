@@ -652,6 +652,7 @@ void (entity Goal) RestoreGoal = {
         Goal.goal_state = 2;
         if (Goal.mdl != string_null) {
             setmodel(Goal, Goal.mdl);
+            setsize(Goal, Goal.goal_min, Goal.goal_max);
         }
         if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
             Goal.effects = Goal.effects | EF_DIMLIGHT;
