@@ -425,14 +425,22 @@ float already_chosen_map;
 float clanbattle;
 float clan_scores_dumped;
 float cb_prematch;
-float cb_prematch_time;
-float cb_ceasefire_time;
+float v_break;
+float v_ready;
+.float allowvote;
 float game_locked;
 float team1frags;
 float team2frags;
 float team3frags;
 float team4frags;
 float last_id;
+float quadmode;
+float quad_winner;
+float rounds;
+float round_active;
+float round_over;
+float gametime;
+float is_countdown;
 
 .float tf_id;
 
@@ -509,6 +517,10 @@ float unpause_lastcountnumber;
 float autokick_time;
 float autokick_kills;
 
+.float vote;
+.float bvote;
+.float is_ready;
+
 .float is_admin;
 .float admin_mode;
 .entity admin_use;
@@ -534,6 +546,7 @@ float intermission_exittime;
 .float max_grenades_1;
 .float max_grenades_2;
 
+.entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
 
 //============================================================================
 

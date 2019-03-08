@@ -82,19 +82,19 @@ void () SpectatorImpulseCommand = {
         return;
     }
 
-    if (self.impulse == 193)
+    if (self.impulse == TF_ADMIN_CEASEFIRE)
         Admin_CeaseFire();
-    else if (self.impulse == 192)
+    else if (self.impulse == TF_ADMIN_COUNTPLAYERS)
         Admin_CountPlayers();
-    else if (self.impulse == 189)
+    else if (self.impulse == TF_ADMIN_CYCLEDEAL)
         Admin_CycleDeal();
-    else if ((self.impulse == 190) && (self.admin_mode == 1))
+    else if ((self.impulse == TF_ADMIN_KICK) && (self.admin_mode == 1))
         Admin_DoKick();
-    else if ((self.impulse == 191) && (self.admin_mode == 1))
+    else if ((self.impulse == TF_ADMIN_BAN) && (self.admin_mode == 1))
         Admin_DoBan();
-    else if ((self.impulse == 195) && (self.admin_mode == 1))
+    else if ((self.impulse == TF_ADMIN_NEXT) && (self.admin_mode == 1))
         Admin_CycleDeal();
-    else if (self.impulse == 198)
+    else if (self.impulse == TF_ADMIN_LISTIPS)
         Admin_ListIPs();
 
     self.impulse = 0;

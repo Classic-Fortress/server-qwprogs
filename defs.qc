@@ -416,7 +416,7 @@ float (string s) stof = #81; // convert string to float
 void (vector where, float set) multicast = #82;      // sends the temp message to a set
                                                 // of clients, possibly in PVS or PHS
 
-void(string str) tokanize = #84; // tokanize text
+void(string str) tokenize = #84; // tokenize text
 float() argc = #85; // returns number of tokens
 string(float num) argv_mvdsv = #86; // returns token for the given number
 
@@ -431,7 +431,8 @@ string (string s, float start, float count) substr                  = #116;
 string (string s, ...) strzone                                      = #118;
 void (string s, ...) strunzone                                      = #119;
 
-void() calltimeofday						    = #231;  // force server to call mod function timeofday
+void() calltimeofday						                        = #231;  // force server to call mod function timeofday
+
 
 //In order to make it more useful, this header includes a timeofday function which just grabs the values for you to use in your qc code straight after calling calltimeofday.
 float tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;

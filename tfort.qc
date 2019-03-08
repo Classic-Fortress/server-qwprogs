@@ -141,7 +141,7 @@ void (float inp) TeamFortress_ChangeClass = {
         return;
 
     if (self.playerclass != 0) {
-        if ((deathmatch != 3) && (cb_prematch_time < time))
+        if ((deathmatch != 3) && (!cb_prematch))
             return;
 
         if (self.playerclass == inp) {
@@ -252,7 +252,7 @@ void (float inp) TeamFortress_ChangeClass = {
         self.playerclass = 1 + floor(random() * 9);
     }
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+        (!cb_prematch)) {
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)
@@ -293,7 +293,7 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_ExecClassScript(self);
-    W_ChangeWeapon(1);
+    W_ChangeWeapon(W_BestWeaponSlot());
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
@@ -1236,266 +1236,69 @@ void () TeamFortress_SetHealth = {
     self.health = self.max_health;
 };
 
-string(entity p) TeamFortress_GetSkin =
+string (float tn) TeamFortress_GetColorSkin = {
+    string s;
+    s = "";
+    switch (tn)
+    {
+        case 1:
+            s = "blue";
+            break;
+        case 2:
+            s = "red";
+            break;
+        case 3:
+            s = "yell";
+            break;
+        case 4:
+            s = "gren";
+            break;
+    }
+
+    return s;
+}
+
+string(float tn, float pc) TeamFortress_GetSkin =
 {
-    local float tn;
-    local float pc;
-    local string st;
     local string skin = "base";
 
-    tn = p.team_no;
-    pc = p.playerclass;
-    if (p.playerclass == 8) {
-        if (p.undercover_team != 0) {
-            tn = p.undercover_team;
-        }
-        if (p.undercover_skin != 0) {
-            pc = p.undercover_skin;
-        }
-    }
-    if (tn == 4) {
-        if (pc == 1) {
-            st = infokey(world, "sk_t4_scout");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_sco";
-        } else if (pc == 2) {
-            st = infokey(world, "sk_t4_sniper");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_sni";
-        } else if (pc == 3) {
-            st = infokey(world, "sk_t4_soldier");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_sol";
-        } else if (pc == 4) {
-            st = infokey(world, "sk_t4_demoman");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_dem";
-        } else if (pc == 5) {
-            st = infokey(world, "sk_t4_medic");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_med";
-        } else if (pc == 6) {
-            st = infokey(world, "sk_t4_hwguy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_hwg";
-        } else if (pc == 7) {
-            st = infokey(world, "sk_t4_pyro");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_pyr";
-        } else if (pc == 8) {
-            st = infokey(world, "sk_t4_spy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_spy";
-        } else if (pc == 9) {
-            st = infokey(world,
-                         "sk_t4_engineer");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "gren_eng";
-        } else if (pc == 11) {
-            skin = "gren_civ";
-        }
-    } else if (tn == 3) {
-        if (pc == 1) {
-            st = infokey(world, "sk_t3_scout");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_sco";
-        } else if (pc == 2) {
-            st = infokey(world, "sk_t3_sniper");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_sni";
-        } else if (pc == 3) {
-            st = infokey(world, "sk_t3_soldier");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_sol";
-        } else if (pc == 4) {
-            st = infokey(world, "sk_t3_demoman");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_dem";
-        } else if (pc == 5) {
-            st = infokey(world, "sk_t3_medic");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_med";
-        } else if (pc == 6) {
-            st = infokey(world, "sk_t3_hwguy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_hwg";
-        } else if (pc == 7) {
-            st = infokey(world, "sk_t3_pyro");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_pyr";
-        } else if (pc == 8) {
-            st = infokey(world,
-                         "sk_t3_spy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_spy";
-        } else if (pc == 9) {
-            st = infokey(world,
-                         "sk_t3_engineer");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "yell_eng";
-        } else if (pc == 11) {
-            skin = "yell_civ";
-        }
-    } else if (tn == 2) {
-        if (pc == 1) {
-            st = infokey(world, "sk_t2_scout");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_sco";
-        } else if (pc == 2) {
-            st = infokey(world, "sk_t2_sniper");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_sni";
-        } else if (pc == 3) {
-            st = infokey(world, "sk_t2_soldier");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_sol";
-        } else if (pc == 4) {
-            st = infokey(world, "sk_t2_demoman");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_dem";
-        } else if (pc == 5) {
-            st = infokey(world, "sk_t2_medic");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_med";
-        } else if (pc == 6) {
-            st = infokey(world, "sk_t2_hwguy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_hwg";
-        } else if (pc == 7) {
-            st = infokey(world,
-                         "sk_t2_pyro");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_pyr";
-        } else if (pc == 8) {
-            st = infokey(world,
-                         "sk_t2_spy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_spy";
-        } else if (pc == 9) {
-            st = infokey(world,
-                         "sk_t2_engineer");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "red_eng";
-        } else if (pc == 11) {
-            skin = "red_civ";
-        }
-    } else if (tn == 1) {
-        if (pc == 1) {
-            st = infokey(world, "sk_t1_scout");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_sco";
-        } else if (pc == 2) {
-            st = infokey(world, "sk_t1_sniper");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_sni";
-        } else if (pc == 3) {
-            st = infokey(world, "sk_t1_soldier");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_sol";
-        } else if (pc == 4) {
-            st = infokey(world, "sk_t1_demoman");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_dem";
-        } else if (pc == 5) {
-            st = infokey(world, "sk_t1_medic");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_med";
-        } else if (pc == 6) {
-            st = infokey(world, "sk_t1_hwguy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_hwg";
-        } else if (pc == 7) {
-            st = infokey(world,
-                         "sk_t1_pyro");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_pyr";
-        } else if (pc == 8) {
-            st = infokey(world,
-                         "sk_t1_spy");
-            if (st != string_null) {
-                skin = st;
-            }
-            skin = "blue_spy";
-        } else if (pc == 9) {
-            st = infokey(world,
-                         "sk_t1_engineer");
-            if (st != string_null) {
-                skin = st;
-            }
-           skin = "blue_eng";
-        } else if (pc == 11) {
-            skin = "blue_civ";
-        }
-    }
+    string col;
+    col = TeamFortress_GetColorSkin(tn);
 
+    switch (pc)
+    {
+        case 1:
+            skin = strcat(col, "_sco");
+            break;
+        case 2:
+            skin = strcat(col, "_sni");
+            break;
+        case 3:
+            skin = strcat(col, "_sol");
+            break;
+        case 4:
+            skin = strcat(col, "_dem");
+            break;
+        case 5:
+            skin = strcat(col, "_med");
+            break;
+        case 6:
+            skin = strcat(col, "_hwg");
+            break;
+        case 7:
+            skin = strcat(col, "_pyr");
+            break;
+        case 8:
+            skin = strcat(col, "_spy");
+            break;
+        case 9:
+            skin = strcat(col, "_eng");
+            break;
+        case 11:
+            skin = strcat(col, "_civ");
+            break;
+
+    }
     return skin;
 };
 
@@ -1503,18 +1306,32 @@ void (entity p) TeamFortress_SetSkin = {
     local string st;
 
     p.immune_to_check = time + 10;
-    if ((p.playerclass == PC_SPY) && (p.undercover_skin != 0))
-        p.skin = p.undercover_skin;
+    if (p.playerclass == PC_SPY || p.last_playerclass == PC_SPY)
+    {
+        if (!p.is_undercover)
+        {
+            stuffcmd(p, "skin ");
+            st = TeamFortress_GetSkin(p.team_no, p.playerclass);
+            stuffcmd(p, st);
+            stuffcmd(p, "\n");
+        }
+        Spy_SetClientSkins(p);
+    }
     else
+    {
         p.skin = p.playerclass;
-
-    if (p.skin != 0) {
-        stuffcmd(p, "skin ");
-        st = TeamFortress_GetSkin(p);
-        stuffcmd(p, st);
-        stuffcmd(p, "\n");
-    } else
-        stuffcmd(p, "skin base\n");
+    
+        if (p.skin != 0) {
+            stuffcmd(p, "skin ");
+            st = TeamFortress_GetSkin(p.team_no, p.playerclass);
+            stuffcmd(p, st);
+            stuffcmd(p, "\n");
+        } 
+        else
+        {
+            stuffcmd(p, "skin base\n");
+        }
+    }
 };
 
 void () TeamFortress_SetEquipment = {
@@ -1534,7 +1351,7 @@ void () TeamFortress_SetEquipment = {
         self.last_weapon = 0;
         self.weaponmode = 0;
         self.last_weaponmode = 0;
-        self.current_weaponslot = 1;
+        self.current_weaponslot = W_BestWeaponSlot();
         self.last_weaponslot = 2;
         W_WeaponState_Save(self);
     }
@@ -1647,7 +1464,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 50;
         else
             self.maxarmor = PC_SCOUT_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
+        if (self.last_playerclass != self.playerclass)  
             self.current_weapon = WEAP_NAILGUN;
 
         self.items_allowed = PC_SCOUT_WEAPONS;
@@ -2257,6 +2074,8 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_ARMOR1;
 
     W_SetCurrentAmmo(self);
+    if (self.last_playerclass != self.playerclass)
+        self.current_weaponslot = W_BestWeaponSlot();  
 };
 
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo = {
@@ -2463,7 +2282,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
     else
         restime = 0;
 
-    if (cb_prematch_time < time) {
+    if (!cb_prematch) {
         if (Suicided) {
             if (self.lives > 0)
                 self.lives = self.lives - 1;

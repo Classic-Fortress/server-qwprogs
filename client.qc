@@ -52,14 +52,25 @@ void () CTF_FlagCheck;
 void (entity pl) Sniper_ZoomReset;
 void () StartTimer;
 void () StopTimer;
+void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
-
+void () PreMatch_Message;
+float () GetLastWeaponImpulse;
 
 string nextmap;
 
 void () info_intermission =
 {
+    if (CheckExistence() == 0) {
+        dremove(self);
+        return;
+    }
+};
+
+void () info_player_intermission =
+{
+    self.classname = "info_intermission";
     if (CheckExistence() == 0) {
         dremove(self);
         return;
@@ -137,23 +148,20 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     st = infokey(world, ps_short);
     if (st == string_null) {
         st = infokey(world, ps_setting);
+        if (st == string_null) {
+            st = ps_default;
+        }
     }
 
-    if (st == "on") {
-        return TRUE;
-    } else if (st == "off") {
-        return FALSE;
-    } else if (stof(st) != 0) {
-        return stof(st);
-    } else if (ps_default == "on") {
-        return TRUE;
-    } else if (ps_default == "off") {
-        return FALSE;
-    } else if (stof(ps_default) != 0) {
-        return stof(ps_default);
+    switch (st)
+    {
+        case "on":
+            return TRUE;
+        case "off":
+            return FALSE;
+        default:            
+            return stof(st);
     }
-
-    return 0;
 };
 
 void () DecodeLevelParms = {
@@ -256,48 +264,38 @@ void () DecodeLevelParms = {
         autoteam_time = 30;
 
         clanbattle = CF_GetSetting("c", "clan", "off");
+        quadmode = CF_GetSetting("quadmode", "quadmode", "off");
+
+        rounds = CF_GetSetting("rounds","rounds","on");
+        if (!rounds)
+            rounds = -1;
+        else if (rounds > 0)
+            rounds = rounds + 1;
+
         if (clanbattle) {
             localcmd ("serverinfo status Standby\n");
             
             clan_scores_dumped = 0;
             game_locked = 0;
-
             cb_prematch = 1;
-            cb_prematch_time = CF_GetSetting("pm", "prematch", "0");
-            if (cb_prematch_time)
-            {
-                StartTimer();
-            }
-            if (!cb_prematch_time) {
-              cb_ceasefire_time = CF_GetSetting("cft", "ceasefire_time", "0");
-                if (cb_ceasefire_time) {
-
-                    cease_fire = 1;
-                    bprint (2, "CEASE FIRE\n");
-                    te = find (world, classname, "player");
-                    while (te)
-                    {
-                        centerprint (te, "CEASE FIRE\n");
-                        te.immune_to_check = (time + 5);
-                        te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
-                        TeamFortress_SetSpeed (te);
-                        te = find (te, classname, "player");
-                    }
-                    te = spawn ();
-                    te.classname = "ceasefire";
-                    te.think = CeaseFire_think;
-                    te.nextthink = (time + 5);
-                    te.weapon = 1;
-                    StartTimer();
-
-                }  
-            }
+            local entity pm_message = spawn();
+            pm_message.owner = world;
+            pm_message.classname = "pmmessage";
+            pm_message.think = PreMatch_Message;
+            pm_message.nextthink = 1;
             
             game_locked = CF_GetSetting("lg", "locked_game", "off");
 
         } else {
             clanbattle = FALSE;
             localcmd ("serverinfo status Normal\n");
+        }
+        if (rounds) {
+            st = infokey (world, "round_time");
+            te = spawn ();
+            te.owner = world;
+            te.classname = "round";
+            te.cnt = stof(st);
         }
 
         // automatically assign team [off]
@@ -645,6 +643,7 @@ entity()FindIntermission =
         }
         return (spot);
     }
+
     objerror("FindIntermission: no spot");
     return (world);
 };
@@ -862,51 +861,36 @@ float () CloseToSpawnPoint = {
     local entity spot = nil;
     local entity te = nil;
     local float i;
+    string searchstr;
+    searchstr = "";
 
-    if (self.team_no == 1) {
-        spot = find(world, team_str_home, "ts1");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts1");
+    switch (self.team_no)
+    {
+        case 1:
+            searchstr = "ts1";
+            break;
+        case 2:
+            searchstr = "ts2";
+            break;
+        case 3:
+            searchstr = "ts3";
+            break;
+        case 4:
+            searchstr = "ts4";
+            break;
+        default:
+            return 0;
+    }
+
+    spot = find(world, team_str_home, searchstr);
+    for(i = 1; i < 30; i++) {
+        te = findradius(spot.origin, 185);
+        while (te != world) {
+            if (te == self)
+                return 1;
+            te = te.chain;
         }
-    } else if (self.team_no == 2) {
-        spot = find(world, team_str_home, "ts2");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts2");
-        }
-    } else if (self.team_no == 3) {
-        spot = find(world, team_str_home, "ts3");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts3");
-        }
-    } else if (self.team_no == 4) {
-        spot = find(world, team_str_home, "ts4");
-        for(i = 1; i < 30; i++) {
-            te = findradius(spot.origin, 85);
-            while (te != world) {
-                if (te == self)
-                    return 1;
-                te = te.chain;
-            }
-            spot = find(spot, team_str_home, "ts4");
-        }
+        spot = find(spot, team_str_home, searchstr);
     }
 
     return 0;
@@ -1095,9 +1079,10 @@ entity () SelectSpawnPoint =
 
     if (self.team_no != 0) {
         spot = FindTeamSpawnPoint(self.team_no);
-        if (spot != world)
+        if (spot != world) {
             self.last_spawn_spot = spot;
             return (spot);
+        }
     }
     if (coop) {
         lastspawn = find(lastspawn, classname, "info_player_coop");
@@ -1240,6 +1225,8 @@ void () PutClientInServer = {
     if (self.playerclass != PC_ENGINEER)
         Engineer_RemoveBuildings(self);
 
+    self.skin = self.playerclass;
+
     self.takedamage = 2;
 
     TeamFortress_PrintClassName(self, self.playerclass,
@@ -1256,8 +1243,9 @@ void () PutClientInServer = {
     W_SetCurrentAmmo(self);
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
         W_ChangeWeapon(self.current_weaponslot);
-    else
-        W_ChangeWeapon(1);
+    else {
+        W_ChangeWeapon(W_BestWeaponSlot());
+    }
     self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
@@ -1280,7 +1268,8 @@ void () PutClientInServer = {
         spawn_tdeath(self.origin, self);
 
     if ((spot.classname == "info_player_teamspawn") &&
-        (cb_prematch_time < time)) {
+        (!cb_prematch)) {
+        
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)
@@ -1946,6 +1935,7 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
+
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
@@ -1971,6 +1961,7 @@ void () PlayerPostThink = {
         }
     }
     self.jump_flag = self.velocity_z;
+    
     CheckPowerups();
     W_WeaponFrame();
     if (self.motd <= 400) {
@@ -2049,7 +2040,7 @@ void () ClientConnect = {
             }
         }
         if (!got_one) {
-            if (game_locked && (cb_prematch_time < time)) {
+            if (game_locked && (!cb_prematch)) {
                 sprint(self, PRINT_HIGH,
                        "Closed server. Clan battle in progress.\n");
                 KickCheater(self);
@@ -2065,7 +2056,7 @@ void () ClientConnect = {
         }
     }
     if (cb_prematch)
-        sprint(self, PRINT_HIGH, "Currently in prematch time\n");
+        sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
 
 void () ClientDisconnect = {
@@ -2611,7 +2602,7 @@ void (entity targ, entity attacker) ClientObituary = {
 
     Sniper_ZoomReset(targ);
 
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     deathstring = GetDeathMessage(targ, attacker, deathmsg);
@@ -2705,3 +2696,14 @@ void (entity targ, entity attacker) ClientObituary = {
     }
 
 };
+
+float () IsUsingOldImpulses = {
+    return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () GetLastWeaponImpulse = {
+    if (IsUsingOldImpulses())
+        return 7;
+    else 
+        return 4;
+}

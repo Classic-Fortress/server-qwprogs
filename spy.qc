@@ -675,8 +675,62 @@ void () CF_Spy_DisguiseLast = {
     }
 };
 
+void (entity own) Spy_SetClientSkins = {
+    entity te;
+    string color, dcolor, skin, dskin, sendcolor, sendskin;
+    float dteam, dpc;
+    
+    dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
+    dpc = own.undercover_skin == 0 ? own.playerclass : own.undercover_skin;
+    color = ftos(TeamFortress_TeamGetColor(own.team_no) - 1);
+    dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
+    
+    skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
+    dskin = TeamFortress_GetSkin(dteam, dpc);
+
+    te = find(world, classname, "player");
+    while (te) 
+    {
+        if (te.team_no)
+        {
+            if (te.team_no == own.team_no)
+            {
+                // on same team, send them spy/team (initial spawn etc)
+                sendcolor = color;
+                sendskin = skin;
+            }
+            else // not on same team, send them disguise
+            {
+                sendcolor = dcolor;
+                sendskin = dskin;                
+            }
+            
+            msg_entity = te;
+
+            // set skin
+            WriteByte(MSG_ONE, SVC_SETINFO);
+            WriteByte(MSG_ONE, own.colormap-1); // ???? 0 based player index
+            WriteString(MSG_ONE, "skin");
+            WriteString(MSG_ONE, sendskin);
+
+            // set top colour / color
+            WriteByte(MSG_ONE, SVC_SETINFO);
+            WriteByte(MSG_ONE, own.colormap-1);
+            WriteString(MSG_ONE, "topcolor");
+            WriteString(MSG_ONE, sendcolor);
+            
+            // set bottom colour / color
+            WriteByte(MSG_ONE, SVC_SETINFO);
+            WriteByte(MSG_ONE, own.colormap-1);
+            WriteString(MSG_ONE, "bottomcolor");
+            WriteString(MSG_ONE, sendcolor);
+        }
+        
+        te = find(te, classname, "player");
+    }
+}
+
 void () CF_Spy_UndercoverThink = {
-    local float f_team_color;
     local string s_team, s_class;
 
     // keep track of seconds left to
@@ -697,12 +751,10 @@ void () CF_Spy_UndercoverThink = {
 
     // make spy invisible if invis_only is turned on
     if (invis_only) {
-
         self.owner.items = self.owner.items | IT_INVISIBILITY;
         self.owner.frame = 0;
         self.owner.modelindex = modelindex_eyes;
         self.owner.is_undercover = 1;
-
     } else {
 
         // don't check for color cheating for next 10 seconds
@@ -715,7 +767,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
-
+            
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
             } else {
@@ -729,16 +781,10 @@ void () CF_Spy_UndercoverThink = {
                     s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
-
+            
         } else if (self.team) {
             self.owner.undercover_team = self.team;
             self.owner.last_team = self.team;
-
-            // tell client to change color
-            f_team_color = TeamFortress_TeamGetColor(self.team) - 1;
-            stuffcmd(self.owner, "color ");
-            stuffcmd(self.owner, ftos(f_team_color));
-            stuffcmd(self.owner, "\n");
             self.owner.queue_team = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
@@ -754,7 +800,7 @@ void () CF_Spy_UndercoverThink = {
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
         }
-
+        
         TeamFortress_SpyCalcName(self.owner);
 
     }
@@ -762,8 +808,8 @@ void () CF_Spy_UndercoverThink = {
     Status_Refresh(self.owner);
     if (self.owner.menu_input == Menu_Spy_Input)
         Menu_Spy(self.owner);
+   
     dremove(self);
-
 };
 
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
@@ -814,7 +860,6 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     e_timer.nextthink = time + 1;
     e_timer.skin = pf_class;
     pe_player.undercover_timer = 4;
-    TeamFortress_SetSkin(pe_player);
 
     Status_Refresh(pe_player);
 };
@@ -842,9 +887,6 @@ void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
         pe_player.undercover_team = 0;
         pe_player.disguise_team = 0;
         pe_player.queue_team = 0;
-        stuffcmd(pe_player, "color ");
-        stuffcmd(pe_player, ftos(f_team_color));
-        stuffcmd(pe_player, "\n");
         if (!pe_player.undercover_skin)
             pe_player.is_undercover = 0;
         TeamFortress_SetSkin(pe_player);
@@ -1305,8 +1347,6 @@ void () TranquiliserTimer = {
 };
 
 void (entity spy) Spy_RemoveDisguise = {
-    local string st;
-    local float tc;
     local float coverblown = 0;
 
     if (invis_only != 1) {
@@ -1315,11 +1355,6 @@ void (entity spy) Spy_RemoveDisguise = {
                 spy.immune_to_check = time + 10;
                 spy.undercover_team = 0;
                 spy.disguise_team = 0;
-                stuffcmd(spy, "color ");
-                tc = TeamFortress_TeamGetColor(spy.team_no) - 1;
-                st = ftos(tc);
-                stuffcmd(spy, st);
-                stuffcmd(spy, "\n");
                 coverblown = 1;
             }
             if (spy.undercover_skin != 0) {
@@ -1350,7 +1385,7 @@ void (entity spy) Spy_RemoveDisguise = {
 };
 
 void () Spy_DropBackpack = {
-    if ((cb_prematch_time + 3) > time)
+    if (cb_prematch)
         return;
 
     newmis = spawn();

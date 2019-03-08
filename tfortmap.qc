@@ -652,6 +652,7 @@ void (entity Goal) RestoreGoal = {
         Goal.goal_state = 2;
         if (Goal.mdl != string_null) {
             setmodel(Goal, Goal.mdl);
+            setsize(Goal, Goal.goal_min, Goal.goal_max);
         }
         if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
             Goal.effects = Goal.effects | EF_DIMLIGHT;
@@ -1965,7 +1966,6 @@ void () tfgoal_touch = {
 };
 
 void () info_tfgoal_use = {
-    dprint("info_tfgoal_use\n");
     AttemptToActivate(self, activator, self);
 };
 
@@ -2782,7 +2782,7 @@ void (entity P) ForceRespawn = {
     if (self.playerclass != 0)
         spawn_tdeath(self.origin, self);
     if ((spot.classname == "info_player_teamspawn") &&
-            (cb_prematch_time < time)) {
+            (!cb_prematch)) {
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te) {
