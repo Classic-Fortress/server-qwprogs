@@ -5,6 +5,7 @@ void () plat_trigger_use;
 void () plat_go_up;
 void () plat_go_down;
 void () plat_crush;
+void (entity pe_player, float stopdead) Spy_CheckForFuncTouch;
 
 void () plat_spawn_inside_trigger = {
     local entity trigger;
@@ -83,6 +84,8 @@ void () plat_center_touch = {
     if (other.playerclass == 0)
         return;
 
+    Spy_CheckForFuncTouch(other, 1);
+
     if (!Activated(self, other)) {
         if (self.else_goal != 0) {
             te = Findgoal(self.else_goal);
@@ -107,6 +110,8 @@ void () plat_outside_touch = {
 
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
 
     if (!Activated(self, other)) {
         if (self.else_goal != 0) {

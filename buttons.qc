@@ -3,6 +3,7 @@
 #define BUTTON_START_OUT	32
 
 void () button_return;
+void (entity pe_player, float stopdead) Spy_CheckForFuncTouch;
 
 void () button_wait = {
     self.state = STATE_TOP;
@@ -69,6 +70,8 @@ void () button_touch = {
 
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
 
     if (self.goal_activation & TFGA_SPANNER)
         return;

@@ -372,6 +372,20 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
+void (entity pe_player, float stopdead) Spy_CheckForFuncTouch = {
+    if (pe_player.classname == "player" && pe_player.playerclass == PC_SPY) {
+        if(pe_player.is_feigning) {
+            pe_player.velocity_x = 0;
+            pe_player.velocity_y = 0;
+            pe_player.movetype = MOVETYPE_TOSS;
+            if(!stopdead) {
+                pe_player.tfstate = pe_player.tfstate | TFSTATE_CANT_MOVE;
+                TeamFortress_SetSpeed(pe_player);
+            }
+        }
+    }
+};
+
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
@@ -389,12 +403,18 @@ void () CF_Spy_AirThink = {
 
     // only do stuff when spy is no longer moving
     if (!self.owner.velocity) {
-
         // if spy is on ground and an entity is not nearby, set movetype to none (so he can't move)
         if (self.owner.flags & FL_ONGROUND) {
             area_check = Spy_CheckArea(self.owner);
             if (area_check == 0) {
-                self.owner.movetype = MOVETYPE_NONE;
+                traceline(self.owner.origin, self.owner.origin, 0, self.owner);
+                if(trace_ent) {
+                    if(trace_ent.classname == "door" || trace_ent.classname == "plat" || trace_ent.classname == "train") {
+                        self.owner.movetype = MOVETYPE_TOSS;
+                    }
+                } else {
+                    self.owner.movetype = MOVETYPE_NONE;
+                }
                 self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
             }
         }
