@@ -1,7 +1,7 @@
 
 void () door_go_down;
 void () door_go_up;
-void (entity pe_player, float stopdead) Spy_CheckForFuncTouch;
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch;
 
 void () door_blocked = {
     if (other.classname == "detpack") {

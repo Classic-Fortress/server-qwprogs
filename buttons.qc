@@ -3,7 +3,7 @@
 #define BUTTON_START_OUT	32
 
 void () button_return;
-void (entity pe_player, float stopdead) Spy_CheckForFuncTouch;
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch;
 
 void () button_wait = {
     self.state = STATE_TOP;

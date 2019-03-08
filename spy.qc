@@ -372,13 +372,14 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
-void (entity pe_player, float stopdead) Spy_CheckForFuncTouch = {
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
     if (pe_player.classname == "player" && pe_player.playerclass == PC_SPY) {
         if(pe_player.is_feigning) {
             pe_player.velocity_x = 0;
             pe_player.velocity_y = 0;
             pe_player.movetype = MOVETYPE_TOSS;
-            if(!stopdead) {
+            //This is needed for plats that have a virtual presence and this causes you to fall slowly when inside it
+            if(!dontstopdead) {
                 pe_player.tfstate = pe_player.tfstate | TFSTATE_CANT_MOVE;
                 TeamFortress_SetSpeed(pe_player);
             }
@@ -407,6 +408,7 @@ void () CF_Spy_AirThink = {
         if (self.owner.flags & FL_ONGROUND) {
             area_check = Spy_CheckArea(self.owner);
             if (area_check == 0) {
+                //This checks if something is trying to squish you, fixing some situations where the door or whatever would just go through you.
                 traceline(self.owner.origin, self.owner.origin, 0, self.owner);
                 if(trace_ent) {
                     if(trace_ent.classname == "door" || trace_ent.classname == "plat" || trace_ent.classname == "train") {
