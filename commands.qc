@@ -8,7 +8,6 @@ void () QuadMode =
     localcmd ("localinfo round_delay_time 30\n");
     localcmd ("localinfo teamfrags on\n");
     localcmd ("localinfo fullteamscore off\n");
-    localcmd ("password pineapple\n");
     localcmd ("fraglimit 0\n");
     localcmd ("exec of_quadmode.cfg\n");
 	bprint (2, "Quad Mode set to on\n");
