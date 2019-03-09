@@ -734,7 +734,7 @@
 #define GR_TYPE_FLASH		9
 #define GR_TYPE_CALTROP		10
 
-// NailGren Types
+// Defines for NailGren Types
 #define NGR_TYPE_DEFAULT	0
 #define NGR_TYPE_LASER		1
 #define NGR_TYPE_BURST		2

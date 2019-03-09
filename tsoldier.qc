@@ -100,7 +100,7 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
     if(self.playerclass == 0){
     	self.velocity = '0 0 0';
 	self.real_owner = self.owner;
-	self.owner = world;			//workaround because traceent wouldnt hit self or self.owner
+	self.owner = world;			//work-around because traceent wouldnt hit self or self.owner
 	current_yaw = 0;
 	lasergren_reqthinks = (lasergren_rotationcount * lasergren_rotationtime) / lasergren_thinktime;
         lasergren_angleperthink = (lasergren_rotationcount * 360) / lasergren_reqthinks;

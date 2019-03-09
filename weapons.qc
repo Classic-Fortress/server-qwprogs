@@ -3011,7 +3011,7 @@ void () DeadImpulses = {
     if (self.impulse == TF_HELP_MAP)
         TeamFortress_HelpMap();
     else if (self.impulse == TF_NAILGREN_INFO)
-	TeamFortress_NailGrenInfo();
+	TeamFortress_NailGrenInfo(); 
     else if (self.impulse == TF_STATUS_QUERY)
         TeamFortress_StatusQuery();
     else if (self.impulse == TF_TEAM_1)
