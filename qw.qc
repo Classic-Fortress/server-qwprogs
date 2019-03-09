@@ -446,6 +446,17 @@ float is_countdown;
 
 float exec_map_cfgs;
 float spy_off;
+float nailgren_type;
+float lasergren_rotationcount;
+float lasergren_rotationtime;
+float lasergren_thinktime;
+float lasergren_range;
+float lasergren_damage;
+float lasergren_reqthinks;
+float lasergren_angleperthink;
+float burstgren_count;
+float burstgren_interval;
+float burstgren_range;
 float old_grens;
 float invis_only;
 float flagem_checked;
