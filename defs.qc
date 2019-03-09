@@ -441,7 +441,6 @@ float tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;
 void(float s, float mi, float h, float d, float mo, float y, string tmp_timeofday) timeofday =
 { tod_sec = s; tod_min = mi; tod_hour = h; tod_day = d; tod_mon = (mo + 1); tod_year = y; };
 
-void() setpause                                                     = #531;
 //============================================================================
 
 //

@@ -366,7 +366,7 @@ void () player_assaultcannonup1 =[103, player_assaultcannonup2] {
         sound(self, 1, "weapons/asscan1.wav", 1, 1);
     }
     SuperDamageSound();
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
     if ((self.heat != 2) && (self.heat != 4)) {
         if (self.weaponframe >= 3) {
             self.weaponframe = 0;
@@ -391,7 +391,7 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
         return;
     }
     SuperDamageSound();
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
     if (((self.heat != 2) && (self.heat != 4)) && (self.heat != 7)) {
         if ((self.weaponframe == 2) && (self.heat >= 9)) {
             self.weaponframe = 0;
@@ -447,7 +447,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
         player_assaultcannondown1();
         return;
     }
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
 };
 
 void () player_assaultcannon2 =[104, player_assaultcannon1] {
@@ -477,7 +477,7 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
         player_assaultcannondown1();
         return;
     }
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
 };
 
 void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
@@ -510,7 +510,7 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
         }
     }
     self.count = self.count + 1;
-    Attack_Finished(0.1);
+    Attack_Finished(0.2);
 };
 
 void () player_light1 =[105, player_light2] {

@@ -68,6 +68,15 @@ void () info_intermission =
     }
 };
 
+void () info_player_intermission =
+{
+    self.classname = "info_intermission";
+    if (CheckExistence() == 0) {
+        dremove(self);
+        return;
+    }
+};
+
 void () SetChangeParms = {
     if (self.health <= 0) {
         SetNewParms();
@@ -634,6 +643,7 @@ entity()FindIntermission =
         }
         return (spot);
     }
+
     objerror("FindIntermission: no spot");
     return (world);
 };
@@ -852,6 +862,7 @@ float () CloseToSpawnPoint = {
     local entity te = nil;
     local float i;
     string searchstr;
+    searchstr = "";
 
     switch (self.team_no)
     {
@@ -1213,6 +1224,8 @@ void () PutClientInServer = {
 
     if (self.playerclass != PC_ENGINEER)
         Engineer_RemoveBuildings(self);
+
+    self.skin = self.playerclass;
 
     self.takedamage = 2;
 
