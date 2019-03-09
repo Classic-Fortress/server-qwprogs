@@ -190,6 +190,7 @@ void () QuadRoundInit = {
 		round_over = 2;
 	else {
 		if (!self.cnt2)	{
+			localcmd("serverinfo status \"0 min left\"\n");
 			self.nextthink = (time + 0.1);
 			self.think = QuadRoundBegin;
 			p = find(world, classname, "player");

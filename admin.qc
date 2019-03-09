@@ -174,6 +174,39 @@ void () Admin_CeaseFire = {
     }
 };
 
+void () Admin_Pause = {
+    if (!is_paused) {
+        setpause(1);
+        is_paused = 1;
+        pause_actor = self.netname;
+        if (cb_prematch && infokey(world, "status") == "Countdown") {
+            StopTimer();
+            bprint2(2, pause_actor, " stops the countdown\n");
+            return;
+        }
+        bprint2(2, pause_actor, " paused the game\n");
+    }
+    else {
+        if (cb_prematch) {
+            StartTimer();            
+            setpause(0);
+            is_paused = 0;
+            return;
+        }
+        pause_actor = self.netname;
+        if (!unpause_requested) {                        
+            bprint2(2, pause_actor, " has requested to unpause the game in 5 seconds\n");     
+            unpause_requested = 1;
+        }
+        else {
+            bprint2(2, pause_actor, " cancels unpause request\n"); 
+            unpause_requested = 0;
+            unpause_countdown = 0;
+            unpause_lastcountnumber = 0;
+        }
+    }
+}
+
 void (entity p) CheckAutoKick = {
     local float rnum;
     local entity te;
@@ -239,4 +272,5 @@ void () Admin_Aliases =
     TeamFortress_Alias("adminmenu", TF_ADMIN_ADMINMENU, 0);
     TeamFortress_Alias("startmatch", TF_ADMIN_FORCESTARTMATCH, 0);
     TeamFortress_Alias("readystatus", TF_ADMIN_READYSTATUS, 0);
+    stuffcmd(self,"alias ceasefire \"cmd ceasefire\"\n");
 };

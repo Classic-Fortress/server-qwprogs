@@ -561,6 +561,14 @@ void (entity pl, string s1, string s2, string s3) CenterPrint3 = {
     Status_Print(pl, s1, s2, s3);
 };
 
+void (entity pl, string s1, string s2, string s3, string s4) CenterPrint4 = {
+    Status_Print(pl, s1, s2, s3, s4);
+};
+
+void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPrint5 = {
+    Status_Print(pl, s1, s2, s3, s4, s5);
+};
+
 void (entity pl) RefreshStatusBar = {
     local string pad;
     local string s1; // will be used for grenade timers
