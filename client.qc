@@ -327,6 +327,33 @@ void () DecodeLevelParms = {
             toggleflags = toggleflags - (toggleflags & TFLAG_FULLTEAMSCORE);
         }
 
+	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
+        nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_DEFAULT));
+        
+        // how many rotations the nailgren does [2]
+        lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
+        
+        // time each rotation takes [1]
+        lasergren_rotationtime = CF_GetSetting("lgrt", "lasergren_rotationtime", ftos(NGR_LASER_DEFAULT_ROTATIONTIME));
+        
+        // damage [20]
+        lasergren_damage = CF_GetSetting("lgd", "lasergren_damage", ftos(NGR_LASER_DEFAULT_DAMAGE));
+        
+        // think time for lightning, lower is smoother [0.1]
+        lasergren_thinktime = CF_GetSetting("lgtt", "lasergren_thinktime", "0.1"); //ftos cuts off after 1 dec place, using ftos here would result in 0 and crash?
+        
+        // range of shaft [150]
+        lasergren_range = CF_GetSetting("lgr", "lasergren_range", ftos(NGR_LASER_DEFAULT_RANGE));
+        
+        // how many bursts of nails [2]
+        burstgren_count = CF_GetSetting("bgc", "burstgren_count", ftos(NGR_BURST_DEFAULT_COUNT));
+        
+        // time between each burst [0.7]
+        burstgren_interval = CF_GetSetting("bgi", "burstgren_interval", ftos(NGR_BURST_DEFAULT_INTERVAL));
+        
+        // time before nail projectile destroys itself [0.3]
+        burstgren_range = CF_GetSetting("bgr", "burstgren_range", ftos(NGR_BURST_DEFAULT_RANGE));
+
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
