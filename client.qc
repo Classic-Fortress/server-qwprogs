@@ -340,7 +340,7 @@ void () DecodeLevelParms = {
         lasergren_damage = CF_GetSetting("lgd", "lasergren_damage", ftos(NGR_LASER_DEFAULT_DAMAGE));
         
         // think time for lightning, lower is smoother [0.1]
-        lasergren_thinktime = CF_GetSetting("lgtt", "lasergren_thinktime", "0.1"); //ftos cuts off after 1 dec place, using ftos here would result in 0 and crash?
+        lasergren_thinktime = CF_GetSetting("lgtt", "lasergren_thinktime", "0.01"); //ftos cuts off after 1 dec place, using ftos here would result in 0 and crash?
         
         // range of shaft [150]
         lasergren_range = CF_GetSetting("lgr", "lasergren_range", ftos(NGR_LASER_DEFAULT_RANGE));
