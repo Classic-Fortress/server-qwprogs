@@ -328,7 +328,7 @@ void () DecodeLevelParms = {
         }
 
 	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
-        nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_DEFAULT));
+        nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
         
         // how many rotations the nailgren does [2]
         lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
