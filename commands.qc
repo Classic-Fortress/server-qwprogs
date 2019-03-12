@@ -182,7 +182,7 @@ float (string arg1, string arg2) ParseCmds = {
                     localcmd(arg2);
                     localcmd("\n");
                 }
-                if (arg_num == 1) {
+                else if (arg_num == 1) {
                     sprint (self, PRINT_HIGH, "usage: cmd map mapname, where mapname is the map name you wish to change to\n");
                     sprint (self, PRINT_HIGH, "\n");
                 }
