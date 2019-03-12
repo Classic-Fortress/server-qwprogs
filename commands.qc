@@ -173,26 +173,18 @@ float (string arg1, string arg2) ParseCmds = {
                 break;
             case "map":
                 processedCmd = TRUE;
-                if (clanbattle == 1 && !(cb_prematch)) 
-                {
-                    sprint(self, PRINT_HIGH, "Clan Battle in progress....\n");
-                    self.impulse = 0;
+                if (arg_num == 2) {
+                    bprint(PRINT_HIGH, self.netname);
+                    bprint(PRINT_HIGH, " has changed the map to ");
+                    bprint(PRINT_HIGH, arg2);
+                    bprint(PRINT_HIGH, "\n");
+                    localcmd("map ");
+                    localcmd(arg2);
+                    localcmd("\n");
                 }
-                else
-                {
-                    if (arg_num == 2) {
-                        bprint(PRINT_HIGH, self.netname);
-                        bprint(PRINT_HIGH, " has changed the map to ");
-                        bprint(PRINT_HIGH, arg2);
-                        bprint(PRINT_HIGH, "\n");
-                        localcmd("map ");
-                        localcmd(arg2);
-                        localcmd("\n");
-                    }
-                    if (arg_num == 1) {
-                        sprint (self, PRINT_HIGH, "usage: cmd map mapname, where mapname is the map name you wish to change to\n");
-                        sprint (self, PRINT_HIGH, "\n");
-                    }
+                if (arg_num == 1) {
+                    sprint (self, PRINT_HIGH, "usage: cmd map mapname, where mapname is the map name you wish to change to\n");
+                    sprint (self, PRINT_HIGH, "\n");
                 }
                 break;
             case "help":
