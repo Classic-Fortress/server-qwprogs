@@ -78,69 +78,59 @@ void (float duration) GE_PausedTic = {
             is_paused = 0;
             unpause_countdown = 0;
             unpause_requested = 0;
+            unpause_lastcountnumber = 0;
             setpause(0);
         }
         else  {
-            if (ftos(duration) == ftos(unpause_countdown - 4)) {
-                if (unpause_lastcountnumber != 4) {
-                    unpause_lastcountnumber = 4;
-                    p = find (world, classname, "player");
-                    while (p) {
-                        if (p.netname != "") {
-                            stuffcmd(p, "play buttons/switch04.wav\n");
-                        }
-                        p = find(p, classname, "player");
+            if (duration >= (unpause_countdown - 4) && (unpause_lastcountnumber == 0)) {           
+                unpause_lastcountnumber = 4;
+                p = find (world, classname, "player");
+                while (p) {
+                    if (p.netname != "") {
+                        stuffcmd(p, "play buttons/switch04.wav\n");
                     }
-                    
-                    bprint(2, "Unpausing in 4 seconds\n" );
-                }
+                    p = find(p, classname, "player");
+                }                    
+                bprint(PRINT_HIGH, "Unpausing in 4 seconds\n" );
+                
             }
-            else if (ftos(duration) == ftos(unpause_countdown - 3)) {
-                if (unpause_lastcountnumber != 3) {
-                    unpause_lastcountnumber = 3;
-                    p = find (world, classname, "player");
-                    while (p) {
-                        if (p.netname != "") {
-                            stuffcmd(p, "play buttons/switch04.wav\n");
-                        }
-                        p = find(p, classname, "player");
+            else if (duration >= (unpause_countdown - 3) && (unpause_lastcountnumber == 4)) {
+                unpause_lastcountnumber = 3;
+                p = find (world, classname, "player");
+                while (p) {
+                    if (p.netname != "") {
+                        stuffcmd(p, "play buttons/switch04.wav\n");
                     }
-                    bprint(2, "Unpausing in 3 seconds\n" );
+                    p = find(p, classname, "player");
                 }
+                bprint(PRINT_HIGH, "Unpausing in 3 seconds\n" );                
             }
-            else if (ftos(duration) == ftos(unpause_countdown - 2)) {
-                if (unpause_lastcountnumber != 2) {
-                    unpause_lastcountnumber = 2;
-                    p = find (world, classname, "player");
-                    while (p) {
-                        if (p.netname != "") {
-                            stuffcmd(p, "play buttons/switch04.wav\n");
-                        }
-                        p = find(p, classname, "player");
+            else if (duration >= (unpause_countdown - 2) && (unpause_lastcountnumber == 3)) {
+                unpause_lastcountnumber = 2;
+                p = find (world, classname, "player");
+                while (p) {
+                    if (p.netname != "") {
+                        stuffcmd(p, "play buttons/switch04.wav\n");
                     }
-                    bprint(2, "Unpausing in 2 seconds\n" );
+                    p = find(p, classname, "player");
                 }
+                bprint(PRINT_HIGH, "Unpausing in 2 seconds\n" );
             }
-            else if (ftos(duration) == ftos(unpause_countdown - 1)) {
-                if (unpause_lastcountnumber != 1) {
-                    unpause_lastcountnumber = 1;
-                    p = find (world, classname, "player");
-                    while (p) {
-                        if (p.netname != "") {
-                            stuffcmd(p, "play buttons/switch04.wav\n");
-                        }
-                        p = find(p, classname, "player");
+            else if (duration >= (unpause_countdown - 1) && (unpause_lastcountnumber == 2)) {
+                unpause_lastcountnumber = 1;
+                p = find (world, classname, "player");
+                while (p) {
+                    if (p.netname != "") {
+                        stuffcmd(p, "play buttons/switch04.wav\n");
                     }
-                    bprint(2, "Unpausing in 1 second\n" );
+                    p = find(p, classname, "player");
                 }
+                bprint(PRINT_HIGH, "Unpausing in 1 second\n" );
             }
-            else if (ftos(duration) == ftos(unpause_countdown)) {
-                if (unpause_lastcountnumber != 0) {
-                    unpause_lastcountnumber = 0;
-                    bprint(2, "GAME UNPAUSED\n" );
-                }
-            }
-
         }
     }
 }   
+
+void(float pauseduration) SV_PausedTic = {
+    GE_PausedTic(pauseduration);
+}
