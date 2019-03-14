@@ -533,6 +533,9 @@ void () DecodeLevelParms = {
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
 
+        // wait until attack_finished is over before changing weapons
+        chweap_wait_attfinished = CF_GetSetting("cwaf", "chweap_wait_atk", "on");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
