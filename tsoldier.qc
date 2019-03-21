@@ -98,20 +98,21 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
     local vector org;
     
     if(self.playerclass == 0){
-    	self.velocity = '0 0 0';
-	self.real_owner = self.owner;
-	self.owner = world;			//work-around because traceent wouldnt hit self or self.owner
-	current_yaw = 0;
-	lasergren_reqthinks = (lasergren_rotationcount * lasergren_rotationtime) / lasergren_thinktime;
+        self.velocity = '0 0 0';
+        self.real_owner = self.owner;
+        self.owner = world;			//work-around because traceent wouldnt hit self or self.owner
+        current_yaw = 0;
+        lasergren_reqthinks = (lasergren_rotationcount * lasergren_rotationtime) / lasergren_thinktime;
         lasergren_angleperthink = (lasergren_rotationcount * 360) / lasergren_reqthinks;
-	}
-    else{
-	current_yaw = anglemod(self.angles_y + lasergren_angleperthink);
-	}
-    self.angles_y = current_yaw;
-    self.angles_x = 0;
-    self.angles_z = 0;
-    makevectors(self.angles);
+        self.v_angle = self.angles;
+    } else {
+        current_yaw = anglemod(self.v_angle_y + lasergren_angleperthink);
+    }
+    self.v_angle_y = current_yaw;
+    self.v_angle_x = 0;
+    self.v_angle_z = 0;
+    self.angles = self.v_angle;
+    makevectors(self.v_angle);
 
     org = self.origin;
     traceline(org, org + v_forward * lasergren_range, 0, self);
@@ -146,7 +147,8 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
     
     self.nextthink = time + lasergren_thinktime;
     self.playerclass++;
-    current_yaw = anglemod(self.angles_y + lasergren_angleperthink);
+    //already did this above
+    //current_yaw = anglemod(self.angles_y + lasergren_angleperthink);
 	
     if (self.playerclass > lasergren_reqthinks) { 	//not >= to give an extra think so it hits start again
 	self.owner = self.real_owner;
