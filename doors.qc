@@ -1,6 +1,7 @@
 
 void () door_go_down;
 void () door_go_up;
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch;
 
 void () door_blocked = {
     if (other.classname == "detpack") {
@@ -151,6 +152,9 @@ void () door_touch = {
 
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
+
     if (self.owner.attack_finished > time)
         return;
 
@@ -540,6 +544,8 @@ void () secret_blocked = {
 void () secret_touch = {
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
 
     if (self.attack_finished > time)
         return;

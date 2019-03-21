@@ -474,7 +474,7 @@
 #define TF_ADMIN_FORCESTARTMATCH      137
 #define TF_ADMIN_READYSTATUS          138
 // unused                       139
-// unused                       140
+#define TF_NAILGREN_INFO        140
 // unused                       141
 // unused                       142
 // unused                       143
@@ -733,6 +733,21 @@
 #define GR_TYPE_EMP		8
 #define GR_TYPE_FLASH		9
 #define GR_TYPE_CALTROP		10
+
+// Defines for NailGren Types
+#define NGR_TYPE_DEFAULT	0
+#define NGR_TYPE_LASER		1
+#define NGR_TYPE_BURST		2
+
+// NailGren Default Settings
+#define NGR_LASER_DEFAULT_ROTATIONCOUNT		2
+#define NGR_LASER_DEFAULT_ROTATIONTIME		1
+#define NGR_LASER_DEFAULT_DAMAGE		20
+#define NGR_LASER_DEFAULT_RANGE			150
+
+#define NGR_BURST_DEFAULT_COUNT			2
+#define NGR_BURST_DEFAULT_INTERVAL		0.7
+#define NGR_BURST_DEFAULT_RANGE			0.3
 
 // Defines for WeaponMode
 #define GL_NORMAL	0

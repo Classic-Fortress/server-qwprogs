@@ -372,29 +372,58 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
+    if (pe_player.classname == "player" && pe_player.playerclass == PC_SPY) {
+        if(pe_player.is_feigning) {
+            pe_player.velocity_x = 0;
+            pe_player.velocity_y = 0;
+            pe_player.movetype = MOVETYPE_TOSS;
+            //This is needed for plats that have a virtual presence and this causes you to fall slowly when inside it
+            if(!dontstopdead) {
+                pe_player.tfstate = pe_player.tfstate | TFSTATE_CANT_MOVE;
+                TeamFortress_SetSpeed(pe_player);
+            }
+        }
+    }
+};
+
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-    if ((self.owner.deadflag >= 2) || (self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
+	if(self.owner.deadflag >= 2) {
+		// reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
+		self.owner.movetype = MOVETYPE_NONE;
+		self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+        dremove(self);
+        return;
+    }
+    if ((self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
         dremove(self);
         return;
     }
 
     // only do stuff when spy is no longer moving
     if (!self.owner.velocity) {
-
         // if spy is on ground and an entity is not nearby, set movetype to none (so he can't move)
         if (self.owner.flags & FL_ONGROUND) {
             area_check = Spy_CheckArea(self.owner);
             if (area_check == 0) {
-                self.owner.movetype = MOVETYPE_NONE;
+                //This checks if something is trying to squish you, fixing some situations where the door or whatever would just go through you.
+                traceline(self.owner.origin, self.owner.origin, 0, self.owner);
+                if(trace_ent) {
+                    if(trace_ent.classname == "door" || trace_ent.classname == "plat" || trace_ent.classname == "train") {
+                        self.owner.movetype = MOVETYPE_TOSS;
+                    }
+                } else {
+                    self.owner.movetype = MOVETYPE_NONE;
+                }
                 self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
             }
         }
 
-        // if spy is in the air, set movetype to walk (so he falls to ground)
+        // if spy is in the air, set movetype to walk^H^H^H^H toss (so he falls to ground)
         else {
-            self.owner.movetype = MOVETYPE_WALK;
+            self.owner.movetype = MOVETYPE_TOSS;
         }
 
         TeamFortress_SetSpeed(self.owner);

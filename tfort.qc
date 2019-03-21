@@ -410,9 +410,13 @@ void () TeamFortress_Inventory = {
         sprint(self, PRINT_HIGH, ftos(fl));
         if (self.tp_grenades_1 == GR_TYPE_NORMAL)
             sprint(self, PRINT_HIGH, " normal grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_NAIL)
-            sprint(self, PRINT_HIGH, " nail grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_MIRV)
+        else if (self.tp_grenades_1 == GR_TYPE_NAIL) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                sprint(self, PRINT_HIGH, " shock grenade");
+            } else {
+                sprint(self, PRINT_HIGH, " nail grenade");
+            }
+        } else if (self.tp_grenades_1 == GR_TYPE_MIRV)
             sprint(self, PRINT_HIGH, " mirv grenade");
         else if (self.tp_grenades_1 == GR_TYPE_NAPALM)
             sprint(self, PRINT_HIGH, " napalm grenade");
@@ -439,9 +443,13 @@ void () TeamFortress_Inventory = {
             sprint(self, PRINT_HIGH, " normal grenade");
         else if (self.tp_grenades_2 == GR_TYPE_CONCUSSION)
             sprint(self, PRINT_HIGH, " concussion grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_NAIL)
-            sprint(self, PRINT_HIGH, " nail grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_MIRV)
+        else if (self.tp_grenades_2 == GR_TYPE_NAIL) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                sprint(self, PRINT_HIGH, " shock grenade");
+            } else {
+                sprint(self, PRINT_HIGH, " nail grenade");
+            }
+        } else if (self.tp_grenades_2 == GR_TYPE_MIRV)
             sprint(self, PRINT_HIGH, " mirv grenade");
         else if (self.tp_grenades_2 == GR_TYPE_NAPALM)
             sprint(self, PRINT_HIGH, " napalm grenade");
@@ -712,9 +720,13 @@ void (float inp) TeamFortress_PrimeGrenade = {
 
         if (self.tp_grenades_1 == 2)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_1 == 3)
-            gs = "Nail grenade";
-        else if (self.tp_grenades_1 == 4)
+        else if (self.tp_grenades_1 == 3) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                gs = "Shock grenade";
+            } else {
+                gs = "Nail grenade";
+            }
+        } else if (self.tp_grenades_1 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_1 == 5)
             gs = "Napalm grenade";
@@ -774,9 +786,13 @@ void (float inp) TeamFortress_PrimeGrenade = {
 
         if (self.tp_grenades_2 == 2)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_2 == 3)
-            gs = "Nail grenade";
-        else if (self.tp_grenades_2 == 4)
+        else if (self.tp_grenades_2 == 3) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                gs = "Shock grenade";
+            } else {
+                gs = "Nail grenade";
+            }
+        } else if (self.tp_grenades_2 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_2 == 5)
             gs = "Napalm grenade";
@@ -993,9 +1009,13 @@ void () TeamFortress_GrenadeSwitch = {
         self.tp_grenade_switch = 0;
         if (self.tp_grenades_1 == 2)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_1 == 3)
-            gs = "Nail grenade";
-        else if (self.tp_grenades_1 == 4)
+        else if (self.tp_grenades_1 == 3) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                gs = "Shock grenade";
+            } else {
+                gs = "Nail grenade";
+            }
+        } else if (self.tp_grenades_1 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_1 == 5)
             gs = "Napalm grenade";
@@ -1011,9 +1031,13 @@ void () TeamFortress_GrenadeSwitch = {
         self.tp_grenade_switch = 1;
         if (self.tp_grenades_2 == 2)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_2 == 3)
-            gs = "Nail grenade";
-        else if (self.tp_grenades_2 == 4)
+        else if (self.tp_grenades_2 == 3) {
+            if (nailgren_type == NGR_TYPE_LASER) {
+                gs = "Shock grenade";
+            } else {
+                gs = "Nail grenade";
+            }
+        } else if (self.tp_grenades_2 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_2 == 5)
             gs = "Napalm grenade";
