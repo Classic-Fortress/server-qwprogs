@@ -2196,9 +2196,11 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     return strcat(pe_target.netname, s_deathstring);
 
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-
-                    return strcat(pe_target.netname, " hammers himself\n");
-
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        return strcat(pe_target.netname, " electrocutes himself\n");
+                    } else {
+                        return strcat(pe_target.netname, " hammers himself\n");
+                    }
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
 
                     if (pe_target.playerclass == PC_DEMOMAN)
@@ -2306,8 +2308,13 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
 
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-                    s_deathstring = " gets flayed by ";
-                    s_deathstring2 = "'s nail grenade\n";
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        s_deathstring = " gets melted by ";
+                        s_deathstring2 = "'s shock grenade\n";
+                    } else {
+                        s_deathstring = " gets flayed by ";
+                        s_deathstring2 = "'s nail grenade\n";
+                    }
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
                     if (pe_attacker.playerclass == PC_DEMOMAN) {
                         s_deathstring = " does a dance on ";

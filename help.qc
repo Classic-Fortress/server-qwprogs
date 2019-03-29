@@ -82,7 +82,7 @@ void () Help_ShowSoldier = {
     sprint(self, PRINT_HIGH, Q"\s2\s      - Equip Super Shotgun\n");
     sprint(self, PRINT_HIGH, Q"\s2\s      - Equip Shotgun\n");
     sprint(self, PRINT_HIGH, Q"\s4\s      - Equip Axe\n");
-    sprint(self, PRINT_HIGH, Q"\sf\s      - Prime/throw Nail Grenade\n");
+    sprint(self, PRINT_HIGH, Q"\sf\s      - Prime/throw Nail/Shock Grenade\n");
     sprint(self, PRINT_HIGH, Q"\smouse2\s - Prime/throw Hand Grenade\n");
 };
 

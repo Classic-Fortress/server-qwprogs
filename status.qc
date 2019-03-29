@@ -232,7 +232,11 @@ string (float class) CF_GetRandomClassTip {
                     line1 = "Use the super shotgun (2) at very close";
                     line2 = "range to avoid splash damage.";
                 } else if (self.display_tip == 7) {
-                    line1 = "Use a nail grenade (f) to clear a small";
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        line1 = "Use a shock grenade (f) to clear a small";
+                    } else {
+                        line1 = "Use a nail grenade (f) to clear a small";
+                    }
                     line2 = "room or block a bottle neck.";
                 }
             }
