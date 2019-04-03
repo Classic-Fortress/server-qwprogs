@@ -145,7 +145,7 @@ void () StartMatch =
         }
     }
 };
-
+void () CenterPrint_Players_NotReady;
 void () PreMatch_Think = {
     local entity p;
     local string num, tmp;
@@ -250,6 +250,10 @@ void () PreMatch_Think = {
         }
         strunzone(num);
     }
+
+    // centerprint those not ready
+    CenterPrint_Players_NotReady();
+
     self.nextthink = (time + 1);
 };
 
@@ -735,6 +739,43 @@ void () TeamFortress_ShowIDs = {
     if (!got_one)
         sprint(self, PRINT_HIGH, "None\n");
 };
+
+void () CenterPrint_Players_NotReady = {
+    string players_not_ready;
+    entity te;
+    players_not_ready = "Not ready: ";
+
+    local float first = 0;
+    te = find (world, classname, "player");
+    while (te) {
+        if (te.is_ready == 0)
+        {
+            first = first + 1;
+            if (first == 1)
+            {
+                players_not_ready = strcat(players_not_ready, te.netname);
+            }
+            else if (first > 1 && first < 5)
+            {
+                players_not_ready = strcat(players_not_ready, ", ", te.netname);
+            }
+            else if (first >= 5)
+            {
+                players_not_ready = strcat(players_not_ready, " and others...");
+                break;
+            }
+        }
+        te = find (te, classname, "player");
+    }
+    players_not_ready = strcat(players_not_ready, "\n", "If you are ready, type \s/ready\s in the console\n");
+    
+    te = find(world, classname, "player");
+    while (te)
+    {
+        centerprint(te, players_not_ready);
+        te = find(te, classname, "player");
+    }
+}
 
 void () Broadcast_Players_NotReady = {
     local entity te;
