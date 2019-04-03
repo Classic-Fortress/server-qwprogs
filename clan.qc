@@ -145,7 +145,7 @@ void () StartMatch =
         }
     }
 };
-void () CenterPrint_Players_NotReady;
+
 void () PreMatch_Think = {
     local entity p;
     local string num, tmp;
@@ -250,9 +250,6 @@ void () PreMatch_Think = {
         }
         strunzone(num);
     }
-
-    // centerprint those not ready
-    CenterPrint_Players_NotReady();
 
     self.nextthink = (time + 1);
 };
@@ -767,12 +764,12 @@ void () CenterPrint_Players_NotReady = {
         }
         te = find (te, classname, "player");
     }
-    players_not_ready = strcat(players_not_ready, "\n", "If you are ready, type \s/ready\s in the console\n");
+    players_not_ready = strcat(players_not_ready, "\n", "Type \s/ready\s in the console to toggle your ready status\n");
     
     te = find(world, classname, "player");
     while (te)
     {
-        centerprint(te, players_not_ready);
+        CenterPrint(te, players_not_ready);
         te = find(te, classname, "player");
     }
 }
@@ -872,17 +869,22 @@ void () RemoveVotes = {
 };
 
 void () PreMatch_Message = {
-    local entity p = find (world, classname, "player");
-    while (p != world) {
-        if (p.netname != "") {
-            sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
-            if (p.is_ready)
-                sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
-            else
-                sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
-            stuffcmd(p, "play buttons/switch04.wav\n");
+    self.cnt2 = self.cnt2 + 1;
+    if (self.cnt2 % 30 == 0)
+    {
+        local entity p = find (world, classname, "player");
+        while (p != world) {
+            if (p.netname != "") {
+                sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
+                if (p.is_ready)
+                    sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
+                else
+                    sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
+                stuffcmd(p, "play buttons/switch04.wav\n");
+            }
+            p = find(p, classname, "player");
         }
-        p = find(p, classname, "player");
     }
-    self.nextthink = time + 30;   
+    CenterPrint_Players_NotReady();
+    self.nextthink = time + 1;   
 }
