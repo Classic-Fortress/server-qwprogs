@@ -243,6 +243,10 @@ void (entity p) CheckAutoKick = {
 
 void (string cl_pwd) Admin_Check =
 {
+    if (self.is_admin) {
+        sprint(self, PRINT_HIGH, "You are already an admin\n");
+        return;
+    }
     local string st2;
 
     st2 = infokey(world, "adminpwd");

@@ -12,9 +12,6 @@ float (string arg1, string arg2) ParseCmds = {
     {
         processedCmd = TRUE;
         if (arg_num == 2) {
-            if (self.is_admin) {
-                sprint(self, PRINT_HIGH, "You are already an admin\n");
-            }
             Admin_Check(arg2);
             if (self.is_admin) {
                 Admin_Aliases();
