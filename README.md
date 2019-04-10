@@ -3,6 +3,7 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* Option for statusbar flaginfo. `setinfo sbflaginfo on `
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
