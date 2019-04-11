@@ -2584,7 +2584,6 @@ float (entity pl) W_WeaponState_Check = {
 }
 
 void (float inp) W_ChangeWeapon = {
-
     if (inp < 1 || inp > GetLastWeaponImpulse())
         return;
 
@@ -2596,9 +2595,9 @@ void (float inp) W_ChangeWeapon = {
         self.queue_weaponslot = inp;
 
     // halt if weapon is not ready to be fired
-    if (!WeaponReady(self))
+    if (!WeaponReady(self) && chweap_wait_attfinished)
         return;
-
+    
     if (IsUsingOldImpulses()) {
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
@@ -3161,17 +3160,23 @@ void () W_WeaponFrame = {
     }
 
     // slot 1-4 (or 1-7) binds
-    if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && WeaponReady(self)
+    if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
                 && !self.is_building && !self.is_detpacking) {
 
-        // load weapon state if current state doesn't match stored state
-        if (!W_WeaponState_Check(self))
-            W_WeaponState_Load(self, 0);
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
+            // load weapon state if current state doesn't match stored state
+            if (!W_WeaponState_Check(self))
+                W_WeaponState_Load(self, 0);
 
-        // obviously not quickfiring if we're changing weapon
-        self.is_quickfiring = 0;
-        self.has_quickfired = 0;
-        W_ChangeWeapon(self.impulse);
+            // obviously not quickfiring if we're changing weapon
+            self.is_quickfiring = 0;
+            self.has_quickfired = 0;
+            W_ChangeWeapon(self.impulse);
+        } 
+        else if (!chweap_wait_attfinished) {
+            //clears impulse so it doesn't switch weapons just after reloading   
+            self.impulse = 0;
+        }
 
     // regular attack (both +attack and -attack)
     } else if (!self.impulse && !self.is_quickfiring) {

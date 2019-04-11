@@ -708,17 +708,17 @@ void (entity own) Spy_SetClientSkins = {
     entity te;
     string color, dcolor, skin, dskin, sendcolor, sendskin;
     float dteam, dpc;
-    
+
     dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
     dpc = own.undercover_skin == 0 ? own.playerclass : own.undercover_skin;
     color = ftos(TeamFortress_TeamGetColor(own.team_no) - 1);
     dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
-    
+
     skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
     dskin = TeamFortress_GetSkin(dteam, dpc);
 
     te = find(world, classname, "player");
-    while (te) 
+    while (te)
     {
         if (te.team_no)
         {
@@ -731,9 +731,9 @@ void (entity own) Spy_SetClientSkins = {
             else // not on same team, send them disguise
             {
                 sendcolor = dcolor;
-                sendskin = dskin;                
+                sendskin = dskin;
             }
-            
+
             msg_entity = te;
 
             // set skin
@@ -747,14 +747,14 @@ void (entity own) Spy_SetClientSkins = {
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "topcolor");
             WriteString(MSG_ONE, sendcolor);
-            
+
             // set bottom colour / color
             WriteByte(MSG_ONE, SVC_SETINFO);
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "bottomcolor");
             WriteString(MSG_ONE, sendcolor);
         }
-        
+
         te = find(te, classname, "player");
     }
 }
@@ -796,7 +796,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
-            
+
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
             } else {
@@ -810,7 +810,7 @@ void () CF_Spy_UndercoverThink = {
                     s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
-            
+
         } else if (self.team) {
             self.owner.undercover_team = self.team;
             self.owner.last_team = self.team;
@@ -829,7 +829,7 @@ void () CF_Spy_UndercoverThink = {
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
         }
-        
+
         TeamFortress_SpyCalcName(self.owner);
 
     }
@@ -837,7 +837,7 @@ void () CF_Spy_UndercoverThink = {
     Status_Refresh(self.owner);
     if (self.owner.menu_input == Menu_Spy_Input)
         Menu_Spy(self.owner);
-   
+
     dremove(self);
 };
 
@@ -1437,6 +1437,7 @@ void () Spy_DropBackpack = {
     setmodel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
+    newmis.classname = "backpack";
 
     newmis.nextthink = time + 120;
     newmis.think = SUB_Remove;

@@ -233,34 +233,51 @@ void () TF_PlaceItem = {
 };
 
 void () TF_StartItem = {
-    if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
-        self.effects = self.effects | EF_DIMLIGHT;
-
-        if (self.skin == 1.0) {
+    local entity tfdet;  //info_tfdetect entity
+    tfdet = find(world, classname, "info_tfdetect");
+    if (tfdet && (tfdet.display_item_status1 == self.goal_no || tfdet.display_item_status2 == self.goal_no || tfdet.display_item_status3 == self.goal_no || tfdet.display_item_status4 == self.goal_no)) {
+        if (self.owned_by == 1.0) {
             self.effects = self.effects | EF_BLUE;
         }
-        if (self.skin == 2.0) {
+        if (self.owned_by == 2.0) {
             self.effects = self.effects | EF_RED;
         }
-        if (self.skin == 3.0) {
+        if (self.owned_by == 3.0) {
             self.effects = self.effects | EF_RED;
             self.effects = self.effects | EF_MUZZLEFLASH;
         }
-        if (self.skin == 4.0) {
+        if (self.owned_by == 4.0) {
             self.effects = self.effects | EF_MUZZLEFLASH;
         }
-    }
+    } else {
+        if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
+            self.effects = self.effects | EF_DIMLIGHT;
 
-    if (self.model == "progs/basrkey.bsp" ) {
-        self.effects = self.effects | EF_DIMLIGHT;
-        self.effects = self.effects | EF_RED;
-    }
+            if (self.skin == 1.0) {
+                self.effects = self.effects | EF_BLUE;
+            }
+            if (self.skin == 2.0) {
+                self.effects = self.effects | EF_RED;
+            }
+            if (self.skin == 3.0) {
+                self.effects = self.effects | EF_RED;
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+            if (self.skin == 4.0) {
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+        }
 
-    if (self.model == "progs/basbkey.bsp" ) {
-        self.effects = self.effects | EF_DIMLIGHT;
-        self.effects = self.effects | EF_BLUE;
-    }
+        if (self.model == "progs/basrkey.bsp" ) {
+            self.effects = self.effects | EF_DIMLIGHT;
+            self.effects = self.effects | EF_RED;
+        }
 
+        if (self.model == "progs/basbkey.bsp" ) {
+            self.effects = self.effects | EF_DIMLIGHT;
+            self.effects = self.effects | EF_BLUE;
+        }
+    }
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
@@ -2376,13 +2393,13 @@ void () tfgoalitem_dropthink = {
     self.movetype = 6;
     if (self.pausetime != 0) {
         pos = pointcontents(self.origin);
-        if (pos == -4) {
+        if (pos == -4) { //CONTENT_SLIME
             self.nextthink = time + (self.pausetime / 4);
         } else {
-            if (pos == -5) {
+            if (pos == -5) { //CONTENT_LAVA
                 self.nextthink = time + 5;
             } else {
-                if ((pos == -2) || (pos == -6)) {
+                if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
                     if (self.camdist < 3) {
                         self.origin = self.camangle;
                         setorigin(self, self.origin);
@@ -2480,11 +2497,13 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         }
         Item.touch = SUB_Null;
         Item.nextthink = time + 0.75;
+        Item.bubble_count = time + Item.pausetime + 0.75 + 4.25; //used by the return timer
         Item.think = tfgoalitem_droptouch;
     } else {
         Item.touch = item_tfgoal_touch;
         Item.nextthink = time + 5;
         Item.think = tfgoalitem_dropthink;
+        Item.bubble_count = time + Item.pausetime + 5; //used by the return timer
     }
     Item.owner = world;
 };
@@ -2501,6 +2520,7 @@ void () tfgoalitem_remove = {
         te.weapon = 3;
         te.nextthink = time + 0.1;
         te.think = ReturnItem;
+        te.bubble_count = 0; //reset return time counter
         return;
     }
     dremove(self);
@@ -2835,17 +2855,33 @@ void () DropGoalItems = {
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
                 }
             }
-            else if (self.effects & EF_DIMLIGHT) {
+            //Always allow dropping 4096
+            else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
-                if (self.team_no == 1)
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
-                else if (self.team_no == 2)
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
-                else
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
-
+                if (!te.netname_team_drop || !te.netname_non_team_drop) {
+                    if (te.netname) {
+                        bprint(PRINT_HIGH, self.netname, Q" \sdropped ", te.netname ,"!\s\n");
+                    } else if (te.owned_by > 0) {
+                        if (te.owned_by == 1)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
+                        else if (te.owned_by == 2)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
+                        else if (te.owned_by == 3)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped yellow's flag!\s\n");
+                        else if (te.owned_by == 4)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped green's flag!\s\n");
+                    } else {
+                        if (self.team_no == 1)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
+                        else if (self.team_no == 2)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
+                        else
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
+                    }
+                }
+                
                 Status_Print(self, "\n\n\n", "You dropped the flag!");
                 search = find(world, classname, "player");
                 while (search) {
@@ -2856,6 +2892,14 @@ void () DropGoalItems = {
                         Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
                     }
                     search = find(search, classname, "player");
+                    if (te.owned_by > 0) {
+                        if (te.netname_team_drop && te.netname_non_team_drop && search.team_no == te.owned_by) {
+                            sprint(PRINT_HIGH, self.netname, te.netname_team_drop);
+                        } 
+                        if (te.netname_team_drop && te.netname_non_team_drop && search.team_no != te.owned_by) {
+                            sprint(PRINT_HIGH, self.netname, te.netname_non_team_drop);
+                        } 
+                   }
                 }
             }
         }

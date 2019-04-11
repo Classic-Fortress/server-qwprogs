@@ -19,6 +19,8 @@ string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
 string(entity pl) BuildingToString;
 string(float pc) TeamFortress_GetClassName;
+entity(float ino) Finditem;
+void () tfgoalitem_droptouch;
 
 string (float class) CF_GetRandomClassTip {
     local string tiptype = "";
@@ -573,6 +575,42 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
     Status_Print(pl, s1, s2, s3, s4, s5);
 };
 
+string (entity Player, entity Item) GetItemStatus = {
+    local string st = Item.netname;
+    if (Player.team_no == Item.owned_by) {
+        st = strcat(Q"\x10", st ,Q"\x11");
+        //st = strcat("[", st ,"]");
+   }
+    if (Item.goal_state == 1 && Item.owner != world) {
+        if (Player == Item.owner) {
+            st = strcat(st, Q"\s: Carried by \sYOU");
+        } else {
+            st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
+        }
+
+    } else {
+        if (Item.origin != Item.oldorigin) {
+            //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
+            if((Item.nextthink - time) >= 0) {
+                if(Item.think == tfgoalitem_droptouch) {
+                //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.pausetime + Item.nextthink - time)));
+                    st = strcat(st, Q"\s: Dropped \s");
+                } else {
+                    //tfgoalitem_dropthink is the normal countdown
+                //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
+                    st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
+                }
+                
+            } else {
+                st = strcat(st, Q"\s: Returning\s NOW!");
+            }
+        } else {
+            st = strcat(st, Q"\s: Safe\s");
+        }
+    }
+    return st;
+}
+
 void (entity pl) RefreshStatusBar = {
     local string pad;
     local string s1; // will be used for grenade timers
@@ -583,6 +621,10 @@ void (entity pl) RefreshStatusBar = {
     local string ident;
     local float height;
     local float i;
+    local entity tfdet;  //info_tfdetect entity
+    local entity te;
+    local string sbflaginfo;
+    sbflaginfo = infokey(pl, "sbflaginfo");
     /* local float win, sec; */
 
     pad = "";
@@ -615,7 +657,34 @@ void (entity pl) RefreshStatusBar = {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
-        ct = strzone("\n\n\n\n\n\n");
+        tfdet = find(world, classname, "info_tfdetect");
+        if (!tfdet || sbflaginfo != "on") {
+            ct = strzone("\n\n\n\n\n\n");
+        } else {
+            ct = "";
+            if (tfdet.display_item_status1 != 0) {
+                te = Finditem(tfdet.display_item_status1);
+                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
+            }
+            ct = strcat(ct, "\n");
+            if (tfdet.display_item_status2 != 0) {
+                te = Finditem(tfdet.display_item_status2);
+                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
+            }
+            ct = strcat(ct, "\n");
+            if (tfdet.display_item_status3 != 0) {
+                te = Finditem(tfdet.display_item_status3);
+                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
+            }
+            ct = strcat(ct, "\n");
+            if (tfdet.display_item_status4 != 0) {
+                te = Finditem(tfdet.display_item_status4);
+                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
+            }
+            ct = strcat(ct, "\n\n\n");
+            
+            ct = strzone(ct);
+        }
     }
 
     // status line 1 column 1 - grenade timer

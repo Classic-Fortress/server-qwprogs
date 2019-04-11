@@ -523,6 +523,7 @@ string pause_actor;
 float unpause_requested;
 float unpause_countdown;
 float unpause_lastcountnumber;
+float chweap_wait_attfinished;
 
 
 .float teamkills;
