@@ -83,7 +83,7 @@ void () StartMatch =
 
         TeamFortress_RemoveTimers();
         self.frags = 0;
-        self.real_frags = 0;        
+        self.real_frags = 0;
         setspawnparms(self);
         if (!quadmode)
             PutClientInServer();
@@ -97,6 +97,18 @@ void () StartMatch =
         gren.nextthink = (time + 0.1);
         gren = find(gren, classname, "grenade");
     }
+	te = find(world, classname, "detpack");
+	while (te){
+		if (te.weaponmode == 1) {
+			TeamFortress_SetSpeed (te.enemy);
+			dremove(te.oldenemy);
+			dremove(te.observer_list);
+		}
+		dremove(te.linked_list);
+		dremove(te);
+		te = find (te, classname, "detpack");
+	}
+
     cb_prematch = 0;
     cease_fire = 0;
 
@@ -121,7 +133,7 @@ void () StartMatch =
         if (!quadmode) {
             te.think = MatchThink;
             te.nextthink = (time + 1);
-        }       
+        }
     }
     st = infokey(world, "spectalk");
     f2 = stof(st);
@@ -182,7 +194,7 @@ void () PreMatch_Think = {
             }
             if (!quadmode)
                 StartMatch();
-            else 
+            else
                 StartQuadRound();
             return;
         }
@@ -263,7 +275,7 @@ void () ResetBreakAndReady = {
         v_break = 0;
         v_ready = 0;
         te = find (te, classname, "player");
-    }   
+    }
 }
 
 void () StartTimer =
@@ -305,7 +317,7 @@ void () StartTimer =
         te.nextthink = 0.01;
     }
 
-    ResetBreakAndReady(); 
+    ResetBreakAndReady();
     timer = spawn();
     timer.owner = world;
     timer.classname = "prematch";
@@ -426,13 +438,13 @@ void () DumpClanScores = {
     if ((no_teams == 2) && (((team1score == team2score) && teamfrags)
                             || ((team1frags == team2frags) && !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else if ((no_teams == 3) &&
                ((((team1score == team2score) == team3score) && teamfrags)
                 || (((team1frags == team2frags) == team3frags) &&
                     !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else if ((no_teams == 3)
                &&
                (((((team1score == team2score) == team3score) == team4score)
@@ -441,7 +453,7 @@ void () DumpClanScores = {
                 ((((team1frags == team2frags) == team3frags) == team4frags)
                  && !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else {
         st = GetTeamName(winners);
         bprint(PRINT_HIGH, st, " defeated ");
@@ -765,7 +777,7 @@ void () CenterPrint_Players_NotReady = {
         te = find (te, classname, "player");
     }
     players_not_ready = strcat(players_not_ready, "\n", "Type \s/ready\s in the console to toggle your ready status\n");
-    
+
     te = find(world, classname, "player");
     while (te)
     {
@@ -785,11 +797,11 @@ void () Broadcast_Players_NotReady = {
                 if (!first)
                     players_not_ready = strcat(players_not_ready, ", ");
                 else
-                    first = 0;                      
+                    first = 0;
                 players_not_ready = strcat(players_not_ready, te.netname);
             }
             te = find (te, classname, "player");
-        }   
+        }
         players_not_ready = strcat(players_not_ready, "\n");
         bprint(1, players_not_ready);
         te = find (world, classname, "player");
@@ -834,7 +846,7 @@ void () PlayerReady =
     if (self.playerclass == 0) {
         sprint(self, 2, "You must choose a class first.\n");
         return;
-    }   
+    }
     if (intermission_running)
         return;
     if (self.classname != "player")
@@ -886,5 +898,5 @@ void () PreMatch_Message = {
         }
     }
     CenterPrint_Players_NotReady();
-    self.nextthink = time + 1;   
+    self.nextthink = time + 1;
 }
