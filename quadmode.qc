@@ -8,7 +8,7 @@ float () CheckWinningTeam = {
 		win_score = team1score;
 		winning_team = 1;
 	}
-	
+
 	if (team2score > win_score) {
 		win_score = team2score;
 		winning_team = 2;
@@ -57,7 +57,7 @@ void () QuadRoundThink = {
 	}
 
 	if (self.cnt == -1)
-		return;	
+		return;
 
 	if ( self.cnt == stof(infokey(world, "round_time")) - 1 && self.cnt2 == 59 ) {
 		localcmd("serverinfo status \"");
@@ -75,17 +75,17 @@ void () QuadRoundThink = {
 
 	if (self.cnt2 == -1) {
 		self.cnt2 = 59;
-		self.cnt = (self.cnt - 1);		
+		self.cnt = (self.cnt - 1);
 	}
 
 	if (!cease_fire)
 		self.cnt2 = (self.cnt2 - 1);
-	
+
 	if (!self.cnt2)	{
 		if ((self.cnt == 1) || (self.cnt == 5)) {
 			tmp = ftos (self.cnt);
 			bprint3(2, "\s[\s", tmp, "\s]\s minute");
-			if (self.cnt != 1) 
+			if (self.cnt != 1)
 				bprint(2, "s");
 			bprint(2, " remaining\n");
 		}
@@ -96,7 +96,7 @@ void () QuadRoundThink = {
                 st = infokey(world, "round_delay_time");
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
-				
+
 
 //			lightstyle (0, "e");
 
@@ -111,7 +111,7 @@ void () QuadRoundThink = {
 			tmp = ftos(self.cnt2);
 			bprint3(2, "\s[\s", tmp, "\s]\s second");
 			if ((self.cnt2 != 1))
-				bprint(2, "s");			
+				bprint(2, "s");
 			bprint(2, " remaining\n");
 		}
 	}
@@ -152,12 +152,12 @@ void () QuadRoundBegin = {
  	round_active = 1;
 	round_over = 0;
 	if (!self.cnt) {
-		self.cnt = stof(infokey (world, "round_time")) - 1;		
+		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
 	}
 	else {
 		counter = floor(self.cnt);
-		if (counter < self.cnt) 
+		if (counter < self.cnt)
 			self.cnt2 = ((self.cnt - counter) * 60);
 		else
 			self.cnt2 = 60;
@@ -211,7 +211,7 @@ void () QuadRoundInit = {
     while (p) {
         if (p.netname != "") {
             CenterPrint3(p, "Round begins in: ", num, " second(s).\nEnsure correct class is chosen!\n");
-            
+
             if (self.cnt2 <= 5)
             {
                 cease_fire = 0;
@@ -347,6 +347,18 @@ void () StartQuadRound =
 		dremove(te);
 		te = find (te, classname, "detpack");
 	}
+	te = find(world, classname, "backpack");
+	while (te) {
+		te.think = SUB_Remove;
+		te.nextthink = (time + 0.1);
+		te = find(te, classname, "backpack");
+	}
+	te = find(world, classname, "ammobox");
+	while (te) {
+		te.think = SUB_Remove;
+		te.nextthink = (time + 0.1);
+		te = find(te, classname, "ammobox");
+	}
 
 	te = find(world, classname, "round");
 	st = infokey(world, "count");
@@ -369,7 +381,7 @@ void () StartQuadRound =
 	}
 	else {
 		te.think = QuadRoundInit;
-		te.nextthink = (time + 1); 
+		te.nextthink = (time + 1);
 	}
 };
 
