@@ -24,7 +24,7 @@ void () CF_Scout_Dash = {
     if (!scoutdash || time < self.dash_cooldown)
         return;
 
-
+        self.dash_cooldown = time + 1;
         makevectors(self.angles);
         self.velocity = v_forward * 540;
         self.velocity_z = 181;
