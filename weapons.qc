@@ -3013,13 +3013,13 @@ void () DeadImpulses = {
 	TeamFortress_NailGrenInfo(); 
     else if (self.impulse == TF_STATUS_QUERY)
         TeamFortress_StatusQuery();
-    else if (self.impulse == TF_TEAM_1)
+    else if (self.impulse == TF_TEAM_1 && number_of_teams > 0)
         TeamFortress_TeamSet(1);
-    else if (self.impulse == TF_TEAM_2)
+    else if (self.impulse == TF_TEAM_2 && number_of_teams > 1)
         TeamFortress_TeamSet(2);
-    else if (self.impulse == TF_TEAM_3)
+    else if (self.impulse == TF_TEAM_3 && number_of_teams > 2)
         TeamFortress_TeamSet(3);
-    else if (self.impulse == TF_TEAM_4)
+    else if (self.impulse == TF_TEAM_4 && number_of_teams > 3)
         TeamFortress_TeamSet(4);
     else if (self.impulse == TF_TEAM_SCORES)
         TeamFortress_TeamShowScores(0);
