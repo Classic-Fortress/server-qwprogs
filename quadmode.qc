@@ -287,7 +287,8 @@ void () StartQuadRound =
 	while (te != world) {
 		te2 = self;
 		self = te;
-		door_go_down();
+		//door_go_down();
+		door_go_down_silent();
 		self.think = LinkDoors;
 		self = te2;
 		te = find(te, classname, "door");
