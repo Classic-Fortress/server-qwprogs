@@ -159,10 +159,13 @@ void () Admin_CeaseFire = {
             dremove(te);
         }
         cease_fire = 0;
-        if (cb_prematch) {
-            StartTimer();
-        }
         bprint(2, "RESUME FIRE\n");
+        if (cb_prematch) {
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
+            if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
+                StartTimer();
+            }
+        }
         te = find(world, classname, "player");
         while (te) {
             CenterPrint3(te, "RESUME FIRE\nCalled by: ", self.netname, "\n");
@@ -188,7 +191,10 @@ void () Admin_Pause = {
     }
     else {
         if (cb_prematch) {
-            StartTimer();            
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
+            if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
+                StartTimer();
+            }
             setpause(0);
             is_paused = 0;
             return;

@@ -94,6 +94,11 @@ void () Menu_Admin;
 void (float inp) Menu_Admin_Input;
 void () Admin_DoKick;
 
+void () Admin_Pause;
+void () Admin_CeaseFire;
+void () Broadcast_Players_NotReady;
+void () StartTimer;
+
 void (entity pl) Menu_Close =
 {
     pl.menu_input = nil;
@@ -1048,7 +1053,7 @@ void () Menu_Admin =
         case ADMIN_MENU_TYPE_MAIN:
             s_menu1 =         "FortressOne Admin Menu:                \n\n";
             if (self.current_menu_page == 1) {
-                s_menu1 = strcat(s_menu1, Q"\s[1]\s Not Used                     \n");
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Ceasefire                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
@@ -1061,8 +1066,8 @@ void () Menu_Admin =
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
                 s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
-                s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
-                s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[6]\s Ready Status                 \n");
+                s_menu1 = strcat(s_menu1, Q"\s[7]\s Force Match Start (Be Nice)  \n");
             }
             s_menu1 = strcat(s_menu1, "\n\n");
             s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
@@ -1226,7 +1231,11 @@ void (float inp) Menu_Admin_Input =
         {
             switch (inp)
             {
-                case 1: // Unused
+                case 1: // Ceasefire
+                    if (ceasefire_type) 
+                        Admin_Pause();
+                    else
+                        Admin_CeaseFire();
                     return;
                 case 2: // Change Timelimit
                     if (stof(infokey (world, "timelimit")) > 35) {
@@ -1332,6 +1341,20 @@ void (float inp) Menu_Admin_Input =
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                     self.current_menu_page = 1;
                     break;
+                case 5: // unused
+                    return;
+                case 6: // ready status
+                    Broadcast_Players_NotReady();
+                    Menu_Close(self);
+                    return;
+                case 7: // force match start
+                    if (clanbattle == 1 && cb_prematch == 1) {
+                        bprint(PRINT_HIGH, self.netname);
+                        bprint(PRINT_HIGH, " has forced the match start.\n");
+                        StartTimer();
+                    }
+                    Menu_Close(self);
+                    return;
             }
         }
     } 
