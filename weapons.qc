@@ -3002,8 +3002,9 @@ void () DeadImpulses = {
             self.current_menu_page = 1;
             Menu_Admin();
         }
-        else if (self.impulse == TF_ADMIN_FORCESTARTMATCH)
+        else if (self.impulse == TF_ADMIN_FORCESTARTMATCH) {
             StartTimer();
+        }
         else if (self.impulse == TF_ADMIN_READYSTATUS)
             Broadcast_Players_NotReady();
     }
