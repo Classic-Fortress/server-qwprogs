@@ -94,6 +94,11 @@ void () Menu_Admin;
 void (float inp) Menu_Admin_Input;
 void () Admin_DoKick;
 
+void () Admin_Pause;
+void () Admin_CeaseFire;
+void () Broadcast_Players_NotReady;
+void () StartTimer;
+
 void (entity pl) Menu_Close =
 {
     pl.menu_input = nil;
@@ -1227,7 +1232,10 @@ void (float inp) Menu_Admin_Input =
             switch (inp)
             {
                 case 1: // Ceasefire
-                    self.impulse = TF_ADMIN_CEASEFIRE;
+                    if (ceasefire_type) 
+                        Admin_Pause();
+                    else
+                        Admin_CeaseFire();
                     return;
                 case 2: // Change Timelimit
                     if (stof(infokey (world, "timelimit")) > 35) {
@@ -1336,15 +1344,15 @@ void (float inp) Menu_Admin_Input =
                 case 5: // unused
                     return;
                 case 6: // ready status
-                    self.impulse = TF_ADMIN_READYSTATUS;
+                    Broadcast_Players_NotReady();
                     Menu_Close(self);
                     return;
                 case 7: // force match start
                     if (clanbattle == 1 && cb_prematch == 1) {
                         bprint(PRINT_HIGH, self.netname);
                         bprint(PRINT_HIGH, " has forced the match start.\n");
+                        StartTimer();
                     }
-                    self.impulse = TF_ADMIN_FORCESTARTMATCH;
                     Menu_Close(self);
                     return;
             }

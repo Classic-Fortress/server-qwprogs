@@ -161,6 +161,7 @@ void () Admin_CeaseFire = {
         cease_fire = 0;
         bprint(2, "RESUME FIRE\n");
         if (cb_prematch) {
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
             if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
                 StartTimer();
             }
@@ -190,7 +191,10 @@ void () Admin_Pause = {
     }
     else {
         if (cb_prematch) {
-            StartTimer();            
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
+            if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
+                StartTimer();
+            }
             setpause(0);
             is_paused = 0;
             return;
