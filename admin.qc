@@ -132,8 +132,6 @@ void () CeaseFire_think =
 
 void () Admin_CeaseFire = {
     local entity te;
-    bprint(2, "Admin_CeaseFire, cb_prematch: ",ftos(cb_prematch)," is_countdown: ",ftos(is_countdown),"\n");
-    bprint(2, "Admin_CeaseFire, v_ready: ",ftos(v_ready)," TeamFortress_GetNoPlayers: ",ftos(TeamFortress_GetNoPlayers()),"\n");
 
     if (!cease_fire) {
         if (cb_prematch) {
