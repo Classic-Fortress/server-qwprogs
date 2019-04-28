@@ -860,8 +860,12 @@ void () PlayerReady =
     bprint2 (3, self.netname, " is ready to start the match\n");
     f1 = TeamFortress_GetNoPlayers ();
     if (v_ready == f1 ) {
-        bprint (2, "All players ready, starting match\n");
-        StartTimer ();
+        if(cease_fire) {
+            bprint (2, "All players ready, match will start after ceasefire ends.\n");
+        } else {
+            bprint (2, "All players ready, starting match\n");
+            StartTimer ();
+        }
         return;
     }
     Broadcast_Players_NotReady();
