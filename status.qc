@@ -745,34 +745,6 @@ void (entity pl) RefreshStatusBar = {
     s2 = strcat(s2, "\n");
     s2 = strzone(s2);
 
-    // status line 3 column 1 - team 1 score
-    /* win = TeamFortress_TeamGetWinner(); */
-    /* sec = TeamFortress_TeamGetSecond(); */
-    /* if (win == 0) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 1) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 2) */
-    /*     st1 = RedScoreToString(team2score); */
-    /* else if (win == 3) */
-    /*     st1 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st1 = GreenScoreToString(team4score); */
-    /* // status line 3 column 2 - team 2 score */
-    /* if (sec == 0) { */
-    /*     if (win < 2) */
-    /*         st2 = RedScoreToString(team2score); */
-    /*     else */
-    /*         st2 = BlueScoreToString(team1score); */
-    /* } */
-    /* else if (sec == 1) */
-    /*     st2 = BlueScoreToString(team1score); */
-    /* else if (sec == 2) */
-    /*     st2 = RedScoreToString(team2score); */
-    /* else if (sec == 3) */
-    /*     st2 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st2 = GreenScoreToString(team4score); */
     st1 = "";
     st2 = "";
 
