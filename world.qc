@@ -122,6 +122,8 @@ void () worldspawn = {
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
+    loadloc(); 
+
     local string st;
 
     lastspawn = world;

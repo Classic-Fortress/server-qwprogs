@@ -2818,46 +2818,39 @@ void () NormalGrenadeExplode = {
 };
 
 void () TeamFortress_DisplayDetectionItems = {
-    local entity Goal;
+    local entity tfdet;
     local entity te;
+    te = world;
 
-    Goal = find(world, classname, "info_tfdetect");
-    if (!Goal)
+    tfdet = find(world, classname, "info_tfdetect");
+    if (!tfdet)
         return;
 
-    if (Goal.display_item_status1 != 0) {
-        te = Finditem(Goal.display_item_status1);
-        if (te)
-            DisplayItemStatus(Goal, self, te);
-        else
-            sprint(self, PRINT_HIGH, "Item is missing\n");
-    } else
-        return;
+    for (float t = 1; t <= number_of_teams; t++) {
+        switch (t)
+        {
+            case 1:
+                te = Finditem(tfdet.display_item_status1);
+                break;
+            case 2:
+                te = Finditem(tfdet.display_item_status2);
+                break;
+            case 3:
+                te = Finditem(tfdet.display_item_status3);
+                break;
+            case 4:
+                te = Finditem(tfdet.display_item_status4);
+                break;
+        }
 
-    if (Goal.display_item_status2 != 0) {
-        te = Finditem(Goal.display_item_status2);
         if (te)
-            DisplayItemStatus(Goal, self, te);
+        {
+            sprint(self, PRINT_HIGH, strcat(GetItemStatus(self, te, t), "\n"));
+        }
         else
+        {
             sprint(self, PRINT_HIGH, "Item is missing\n");
-    } else
-        return;
-
-    if (Goal.display_item_status3 != 0) {
-        te = Finditem(Goal.display_item_status3);
-        if (te)
-            DisplayItemStatus(Goal, self, te);
-        else
-            sprint(self, PRINT_HIGH, "Item is missing\n");
-    } else
-        return;
-
-    if (Goal.display_item_status4 != 0) {
-        te = Finditem(Goal.display_item_status4);
-        if (te)
-            DisplayItemStatus(Goal, self, te);
-        else
-            sprint(self, PRINT_HIGH, "Item is missing\n");
+        }
     }
 };
 
