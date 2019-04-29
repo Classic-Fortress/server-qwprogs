@@ -185,7 +185,7 @@ void () DecodeLevelParms = {
     self.armortype = parm9 * 0.01;
 
     if (!(toggleflags & TFLAG_FIRSTENTRY)) {
-        loadloc(); 
+        
 
         toggleflags = parm10;
         flagem_checked = 0;
