@@ -525,6 +525,9 @@ float unpause_countdown;
 float unpause_lastcountnumber;
 float chweap_wait_attfinished;
 
+float numlocs;
+typedef struct {vector pos; string desc;} loc_t;
+loc_t *locs;
 
 .float teamkills;
 

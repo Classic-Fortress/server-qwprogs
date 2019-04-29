@@ -12,6 +12,7 @@ help.qc
 subs.qc
 combat.qc
 items.qc
+locfiles.qc
 weapons.qc
 world.qc
 client.qc
