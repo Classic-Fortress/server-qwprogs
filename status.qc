@@ -575,8 +575,25 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
     Status_Print(pl, s1, s2, s3, s4, s5);
 };
 
-string (entity Player, entity Item) GetItemStatus = {
-    local string st = Item.netname;
+string getLocationName(vector location);
+
+string (entity Player, entity Item, float teamno) GetItemStatus = {
+    local string st;
+    switch (teamno)
+    {
+        case 1:
+            st = "Blue Flag";
+            break;
+        case 2:
+            st = "Red Flag";
+            break;
+        case 3:
+            st = "Yellow Flag";
+            break;
+        case 4:
+            st = "Green Flag";
+            break;
+    }
     if (Player.team_no == Item.owned_by) {
         st = strcat(Q"\x10", st ,Q"\x11");
         //st = strcat("[", st ,"]");
@@ -592,13 +609,12 @@ string (entity Player, entity Item) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                if(Item.think == tfgoalitem_droptouch) {
                 //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.pausetime + Item.nextthink - time)));
-                    st = strcat(st, Q"\s: Dropped \s");
-                } else {
+                    st = strcat(st, Q"\s: Dropped: \s", getLocationName(Item.origin));
+                if(Item.think != tfgoalitem_droptouch) {
                     //tfgoalitem_dropthink is the normal countdown
                 //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
-                    st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
+                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 }
                 
             } else {
@@ -662,24 +678,29 @@ void (entity pl) RefreshStatusBar = {
             ct = strzone("\n\n\n\n\n\n");
         } else {
             ct = "";
-            if (tfdet.display_item_status1 != 0) {
-                te = Finditem(tfdet.display_item_status1);
-                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
-            }
-            ct = strcat(ct, "\n");
-            if (tfdet.display_item_status2 != 0) {
-                te = Finditem(tfdet.display_item_status2);
-                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
-            }
-            ct = strcat(ct, "\n");
-            if (tfdet.display_item_status3 != 0) {
-                te = Finditem(tfdet.display_item_status3);
-                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
-            }
-            ct = strcat(ct, "\n");
-            if (tfdet.display_item_status4 != 0) {
-                te = Finditem(tfdet.display_item_status4);
-                if (te) ct = strcat(ct, strpadr(GetItemStatus(pl, te),40));
+
+            for (float t = 1; t <= number_of_teams; t++) {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                }
+                ct = strcat(ct, "\n");
             }
             ct = strcat(ct, "\n\n\n");
             
@@ -745,34 +766,6 @@ void (entity pl) RefreshStatusBar = {
     s2 = strcat(s2, "\n");
     s2 = strzone(s2);
 
-    // status line 3 column 1 - team 1 score
-    /* win = TeamFortress_TeamGetWinner(); */
-    /* sec = TeamFortress_TeamGetSecond(); */
-    /* if (win == 0) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 1) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 2) */
-    /*     st1 = RedScoreToString(team2score); */
-    /* else if (win == 3) */
-    /*     st1 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st1 = GreenScoreToString(team4score); */
-    /* // status line 3 column 2 - team 2 score */
-    /* if (sec == 0) { */
-    /*     if (win < 2) */
-    /*         st2 = RedScoreToString(team2score); */
-    /*     else */
-    /*         st2 = BlueScoreToString(team1score); */
-    /* } */
-    /* else if (sec == 1) */
-    /*     st2 = BlueScoreToString(team1score); */
-    /* else if (sec == 2) */
-    /*     st2 = RedScoreToString(team2score); */
-    /* else if (sec == 3) */
-    /*     st2 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st2 = GreenScoreToString(team4score); */
     st1 = "";
     st2 = "";
 
