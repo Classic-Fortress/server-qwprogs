@@ -612,7 +612,7 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
                 if(Item.think != tfgoalitem_droptouch) {
-                    st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
+                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
                     st = strcat(st, Q"\s: Dropped\s");
                 }
@@ -705,7 +705,11 @@ void (entity pl) RefreshStatusBar = {
                         }
                         i += 1;
                     } else {
-                        ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner) {
+                            ct = strcat(ct, strpadr(strcat(GetItemStatus(pl, te, t),"\s: \s", getLocationName(te.origin)),40));
+                        } else {
+                            ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                        }
                     }
                 }
                 ct = strcat(ct, "\n");
