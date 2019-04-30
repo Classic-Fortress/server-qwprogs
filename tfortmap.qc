@@ -588,7 +588,7 @@ void (entity AD) ParseTFDetect = {
 entity(float ino) Finditem =
 {
     local entity tg;
-    local string st;
+    //local string st;
 
     tg = find(world, classname, "item_tfgoal");
     while (tg) {
@@ -596,10 +596,10 @@ entity(float ino) Finditem =
             return (tg);
         tg = find(tg, classname, "item_tfgoal");
     }
-    dprint("Could not find an item with a goal_no of ");
-    st = ftos(ino);
-    dprint(st);
-    dprint(".\n");
+    //dprint("Could not find an item with a goal_no of ");
+    //st = ftos(ino);
+    //dprint(st);
+    //dprint(".\n");
     return world;
 };
 
@@ -2844,7 +2844,6 @@ void (entity P) ForceRespawn = {
 void () DropGoalItems = {
     local entity te, search;
     
-    dprint("DropGoalItems requested");
     newmis = spawn();
     makevectors(self.v_angle);
     v_forward = normalize(v_forward) * 64;
@@ -2893,15 +2892,15 @@ void () DropGoalItems = {
                     } else {
                         Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
                     }
-                    search = find(search, classname, "player");
-                    if (te.owned_by > 0) {
+                    if (te.owned_by) {
                         if (te.netname_team_drop && te.netname_non_team_drop && search.team_no == te.owned_by) {
-                            sprint(PRINT_HIGH, self.netname, te.netname_team_drop);
+                            sprint(search, PRINT_HIGH, self.netname, te.netname_team_drop);
                         } 
                         if (te.netname_team_drop && te.netname_non_team_drop && search.team_no != te.owned_by) {
-                            sprint(PRINT_HIGH, self.netname, te.netname_non_team_drop);
+                            sprint(search, PRINT_HIGH, self.netname, te.netname_non_team_drop);
                         } 
-                   }
+                    }
+                    search = find(search, classname, "player");
                 }
             }
         }

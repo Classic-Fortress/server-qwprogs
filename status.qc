@@ -21,6 +21,7 @@ string(entity pl) BuildingToString;
 string(float pc) TeamFortress_GetClassName;
 entity(float ino) Finditem;
 void () tfgoalitem_droptouch;
+void () tfgoalitem_dropthink;
 
 string (float class) CF_GetRandomClassTip {
     local string tiptype = "";
@@ -627,7 +628,9 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
                     if(Item.think != tfgoalitem_droptouch) {
                         //tfgoalitem_dropthink is the normal countdown
                     //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
-                        st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
+                        st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
+                    } else {
+                        st = strcat(st, Q"\s: Dropped\s");
                     }
                 //}
                 
@@ -715,7 +718,7 @@ void (entity pl) RefreshStatusBar = {
                 {
                     if(number_of_teams < 3) {
                         ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
-                        if(te.think != tfgoalitem_droptouch) {
+                        if(te.think == tfgoalitem_dropthink && te.flags & FL_ONGROUND) {
                             ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
                         }
                         i += 1;
