@@ -1667,6 +1667,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         te.owner = AP;
         te.enemy = Goal;
         te.weapon = addb;
+        Goal.bubble_count = time + Goal.delay_time;
         return;
     }
 
@@ -2842,7 +2843,8 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
-
+    
+    dprint("DropGoalItems requested");
     newmis = spawn();
     makevectors(self.v_angle);
     v_forward = normalize(v_forward) * 64;

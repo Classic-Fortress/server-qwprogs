@@ -609,13 +609,27 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.pausetime + Item.nextthink - time)));
-                    st = strcat(st, Q"\s: Dropped: \s", getLocationName(Item.origin));
-                if(Item.think != tfgoalitem_droptouch) {
-                    //tfgoalitem_dropthink is the normal countdown
-                //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
-                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
-                }
+                //if(number_of_teams < 3) {
+                //    if(Item.think != tfgoalitem_droptouch) {
+                //        //tfgoalitem_dropthink is the normal countdown
+                //    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
+                //        st = strpadr(strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)), "\n"),40);
+                //        dprint(st);
+                //    } else {
+                //        st = strpadr(strcat(st, Q"\s: Dropped: \s\n"),40);
+                //    }
+                //     st = strcat(st, strpadr(strcat(Q"\s Location: \s", getLocationName(Item.origin)),40));
+                //    dprint(st);
+               
+                //} else {
+                    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.pausetime + Item.nextthink - time)));
+                    //st = strcat(st, Q"\s: Dropped: \s", getLocationName(Item.origin));
+                    if(Item.think != tfgoalitem_droptouch) {
+                        //tfgoalitem_dropthink is the normal countdown
+                    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
+                        st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
+                    }
+                //}
                 
             } else {
                 st = strcat(st, Q"\s: Returning\s NOW!");
@@ -638,7 +652,8 @@ void (entity pl) RefreshStatusBar = {
     local float height;
     local float i;
     local entity tfdet;  //info_tfdetect entity
-    local entity te;
+    local entity te, tg;
+    local string bi; //button info
     local string sbflaginfo;
     sbflaginfo = infokey(pl, "sbflaginfo");
     /* local float win, sec; */
@@ -678,7 +693,7 @@ void (entity pl) RefreshStatusBar = {
             ct = strzone("\n\n\n\n\n\n");
         } else {
             ct = "";
-
+            i = 0; // Extra newlines
             for (float t = 1; t <= number_of_teams; t++) {
                 switch (t)
                 {
@@ -698,11 +713,43 @@ void (entity pl) RefreshStatusBar = {
 
                 if (te)
                 {
-                    ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                    if(number_of_teams < 3) {
+                        ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
+                        if(te.think != tfgoalitem_droptouch) {
+                            ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
+                        }
+                        i += 1;
+                    } else {
+                        ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                    }
                 }
                 ct = strcat(ct, "\n");
             }
-            ct = strcat(ct, "\n\n\n");
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.track_goal && tg.goal_state == TFGS_DELAYED) {
+                    bi = "";
+                    //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
+                    if(tg.netname) {
+                        bi = tg.netname;
+                        if(tg.team_str_moved) {
+                            bi = strcat(bi,": ", tg.team_str_moved);
+                        } else {
+                            bi = strcat(bi,": \sOffline\s");
+                        }
+                        bi = strcat(bi, " ", ftos(rint(tg.bubble_count - time)));
+                        ct = strcat(ct, strpadr(bi,40),"\n");
+                        i += 1;
+                    }
+                }
+                tg = find(tg, classname, "info_tfgoal");
+            }
+
+            
+            for (float t = 0; t < (3 - i); t++)
+                ct = strcat(ct, "\n");
+            
+            //ct = strcat(ct, "\n\n\n");
             
             ct = strzone(ct);
         }
