@@ -610,30 +610,11 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                //if(number_of_teams < 3) {
-                //    if(Item.think != tfgoalitem_droptouch) {
-                //        //tfgoalitem_dropthink is the normal countdown
-                //    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
-                //        st = strpadr(strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)), "\n"),40);
-                //        dprint(st);
-                //    } else {
-                //        st = strpadr(strcat(st, Q"\s: Dropped: \s\n"),40);
-                //    }
-                //     st = strcat(st, strpadr(strcat(Q"\s Location: \s", getLocationName(Item.origin)),40));
-                //    dprint(st);
-               
-                //} else {
-                    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.pausetime + Item.nextthink - time)));
-                    //st = strcat(st, Q"\s: Dropped: \s", getLocationName(Item.origin));
-                    if(Item.think != tfgoalitem_droptouch) {
-                        //tfgoalitem_dropthink is the normal countdown
-                    //    st = strcat(st, Q"\s: Dropped \s", ftos(rint(Item.nextthink - time)));
-                        st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
-                    } else {
-                        st = strcat(st, Q"\s: Dropped\s");
-                    }
-                //}
-                
+                if(Item.think != tfgoalitem_droptouch) {
+                    st = strcat(st, Q"\s: Returning: \s", ftos(rint(Item.bubble_count - time)));
+                } else {
+                    st = strcat(st, Q"\s: Dropped\s");
+                }
             } else {
                 st = strcat(st, Q"\s: Returning\s NOW!");
             }
@@ -716,7 +697,7 @@ void (entity pl) RefreshStatusBar = {
 
                 if (te)
                 {
-                    if(number_of_teams < 3) {
+                    if(number_of_teams < 4) {
                         ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
                         if(te.think == tfgoalitem_dropthink && te.flags & FL_ONGROUND) {
                             ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
@@ -730,7 +711,7 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
-                if (tg.track_goal && tg.goal_state == TFGS_DELAYED) {
+                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 3) {
                     bi = "";
                     //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
                     if(tg.netname) {
