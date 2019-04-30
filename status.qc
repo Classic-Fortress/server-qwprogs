@@ -22,6 +22,7 @@ string(float pc) TeamFortress_GetClassName;
 entity(float ino) Finditem;
 void () tfgoalitem_droptouch;
 void () tfgoalitem_dropthink;
+void () tfgoalitem_remove;
 
 string (float class) CF_GetRandomClassTip {
     local string tiptype = "";
@@ -699,7 +700,7 @@ void (entity pl) RefreshStatusBar = {
                 {
                     if(number_of_teams < 4) {
                         ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
-                        if(te.think == tfgoalitem_dropthink && te.flags & FL_ONGROUND) {
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner) {
                             ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
                         }
                         i += 1;
