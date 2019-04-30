@@ -3,6 +3,10 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* Admin system created to allow for easy setup of pub/pug/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
+* Loc support added to server, show locations for dropped flag.
+* Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
+* Option for flaginfo on sbar. `setinfo sbflaginfo on`
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
