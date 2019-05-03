@@ -536,6 +536,9 @@ void () DecodeLevelParms = {
         // wait until attack_finished is over before changing weapons
         chweap_wait_attfinished = CF_GetSetting("cwaf", "chweap_wait_atk", "on");
 
+        // enable flag model following the player who has it
+        flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;

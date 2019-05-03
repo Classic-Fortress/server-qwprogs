@@ -2035,11 +2035,13 @@ void () item_tfgoal_touch = {
     if (trace_fraction < 1)
         return;
 
-    flw = spawn();
-    flw.real_owner = other;
-    flw.owner = self;
-    flw.think = CF_FlagFollowPlayer;
-    flw.nextthink = time + 0.1;
+    if (flag_follow) {
+        flw = spawn();
+        flw.real_owner = other;
+        flw.owner = self;
+        flw.think = CF_FlagFollowPlayer;
+        flw.nextthink = time + 0.1;
+    }
 
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
