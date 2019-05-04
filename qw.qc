@@ -332,6 +332,7 @@ float item_list_bit;            // Global, used to determine what the bit of
 
 .float delay_time;              // For delayed goal results
 .float dont_do_triggerwork;
+.float track_goal;              // Track this info_goal in the statusbar
 
 // Abbreviations for the above
 .float g_a;                     // goal_activation
