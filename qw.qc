@@ -518,6 +518,7 @@ float sng_damage;
 float old_ng_rof;
 float impulse_queue;
 float pyro_type;
+float flag_follow;
 float ceasefire_type;
 float is_paused;
 string pause_actor;
