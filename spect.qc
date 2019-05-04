@@ -110,7 +110,7 @@ void () SpectatorImpulseCommand = {
         Broadcast_Players_NotReady();
     
     else if (self.impulse > 0 && self.impulse <= 10) {
-        self.menu_input(self.impulse);
+        Menu_Input(self.impulse);
     }
     
     self.impulse = 0;
