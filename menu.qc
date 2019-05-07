@@ -124,7 +124,8 @@ void (float inp) Menu_Input =
     var f_void_float tmp; tmp = self.menu_input;
     self.menu_input = nil;
     self.impulse = 0;
-    tmp(inp);
+    if(tmp)
+        tmp(inp);
     Status_Print(self, "");
 };
 
