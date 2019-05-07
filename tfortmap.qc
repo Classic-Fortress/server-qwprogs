@@ -480,7 +480,7 @@ void () i_t_t = {
 };
 
 void () item_tfgoal = {
-    dprint("item_tfgoal\n");
+    bprint(PRINT_HIGH, "item_tfgoal\n");
     if (CheckExistence() == FALSE) {
         dremove(self);
         return;
@@ -2015,10 +2015,14 @@ void () CF_FlagFollowPlayer = {
         setmodel(self.owner, self.owner.mdl);
         self.nextthink = time + 0.1;
     } else {
-        dprint("CF_FlagFollowPlayer dremoving\n");
+        bprint(PRINT_HIGH, "CF_FlagFollowPlayer dremoving\n");
         dremove(self);
     }
 };
+
+void () idle_think = {
+    self.nextthink = time + 0.1;
+}
 
 void () item_tfgoal_touch = {
     //dprint("item_tfgoal_touch\n");
@@ -2039,14 +2043,6 @@ void () item_tfgoal_touch = {
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
         return;
-
-    if (flag_follow) {
-        flw = spawn();
-        flw.real_owner = other;
-        flw.owner = self;
-        flw.think = CF_FlagFollowPlayer;
-        flw.nextthink = time + 0.1;
-    }
 
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
@@ -2124,12 +2120,26 @@ void () item_tfgoal_touch = {
             if (te) {
                 AttemptToActivate(te, other, self);
             }
+        } else {
+            //Make sure we don't try to follow someone who fails the criteria
+            return;
         }
+    }
+    
+    if (flag_follow) {
+        flw = spawn();
+        flw.real_owner = other;
+        flw.owner = self;
+        flw.think = CF_FlagFollowPlayer;
+        //flw.solid = SOLID_NOT;
+        //self.solid = SOLID_NOT;
+        self.think = idle_think;
+        flw.nextthink = time + 0.1;
     }
 };
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
-    dprint("tfgoalitem_GiveToPlayer\n");
+    bprint(PRINT_HIGH, "tfgoalitem_GiveToPlayer\n");
     Item.effects = 0;
 
     Item.owner = AP;
@@ -2185,7 +2195,7 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 };
 
 void () ReturnItem = {
-    dprint("ReturnItem\n");
+    bprint(PRINT_HIGH, "ReturnItem\n");
     local entity te;
 
     self.enemy.goal_state = 2;
@@ -2252,7 +2262,7 @@ void () ReturnItem = {
 };
 
 void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
-    dprint("tfgoalitem_RemoveFromPlayer\n");
+    bprint(PRINT_HIGH, "tfgoalitem_RemoveFromPlayer\n");
     local entity te;
     local entity DelayReturn;
 
@@ -2343,7 +2353,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
 };
 
 void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
-    dprint("tfgoalitem_RemoveEffectsFromPlayer\n");
+    bprint(PRINT_HIGH, "tfgoalitem_RemoveEffectsFromPlayer\n");
     local entity te;
     local float lighton = 0;
     local float slowon = 0;
@@ -2399,7 +2409,7 @@ void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
 };
 
 void () tfgoalitem_dropthink = {
-    dprint("tfgoalitem_dropthink\n");
+    bprint(PRINT_HIGH, "tfgoalitem_dropthink\n");
     local float pos;
 
     self.movetype = 6;
@@ -2431,7 +2441,7 @@ void () tfgoalitem_dropthink = {
                         setsize(self, self.goal_min, self.goal_max);
                         self.camdist = self.camdist + 1;
                         self.nextthink = time + 5;
-                        dprint("tfgoalitem_dropthink setting tfgoalitem_dropthink\n");
+                        bprint(PRINT_HIGH, "tfgoalitem_dropthink setting tfgoalitem_dropthink\n");
                         self.think = tfgoalitem_dropthink;
                         return;
                     } else {
@@ -2447,14 +2457,14 @@ void () tfgoalitem_dropthink = {
 };
 
 void () tfgoalitem_droptouch = {
-    dprint("tfgoalitem_droptouch\n");
+    bprint(PRINT_HIGH, "tfgoalitem_droptouch\n");
     self.touch = item_tfgoal_touch;
     self.nextthink = time + 4.25;
     self.think = tfgoalitem_dropthink;
 };
 
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
-    dprint("tfgoalitem_drop\n");
+    bprint(PRINT_HIGH, "tfgoalitem_drop\n");
     if (Item.model == "progs/tf_flag.mdl" || Item.model == "progs/tf_stan.mdl") {
         Item.effects = Item.effects | EF_DIMLIGHT;
 
@@ -2513,10 +2523,10 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.touch = SUB_Null;
         Item.nextthink = time + 0.75;
         Item.bubble_count = time + Item.pausetime + 0.75 + 4.25; //used by the return timer
-        dprint("tfgoalitem_drop setting tfgoalitem_droptouch\n");
+        bprint(PRINT_HIGH, "tfgoalitem_drop setting tfgoalitem_droptouch\n");
         Item.think = tfgoalitem_droptouch;
     } else {
-        dprint("tfgoalitem_drop setting tfgoalitem_dropthink\n");
+        bprint(PRINT_HIGH, "tfgoalitem_drop setting tfgoalitem_dropthink\n");
         Item.touch = item_tfgoal_touch;
         Item.nextthink = time + 5;
         Item.think = tfgoalitem_dropthink;
@@ -2526,7 +2536,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
 };
 
 void () tfgoalitem_remove = {
-    dprint("tfgoalitem_remove\n");
+    bprint(PRINT_HIGH, "tfgoalitem_remove\n");
     local entity te;
 
     if (self.goal_state == 1) {
