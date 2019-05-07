@@ -669,16 +669,16 @@ void (entity pl) RefreshStatusBar = {
     pad = strzone(pad);
 
     // class tip
-    if (((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfo != "always") {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
         tfdet = find(world, classname, "info_tfdetect");
-        if (!tfdet || sbflaginfo != "on") {
+        if (!tfdet || (sbflaginfo != "on" && sbflaginfo != "always")) {
             ct = strzone("\n\n\n\n\n\n");
         } else {
             ct = "";
-            i = 0; // Extra newlines
+            i = number_of_teams; // Extra newlines
             for (float t = 1; t <= number_of_teams; t++) {
                 switch (t)
                 {
@@ -700,12 +700,12 @@ void (entity pl) RefreshStatusBar = {
                 {
                     if(number_of_teams < 4) {
                         ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
-                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner) {
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner && (te.origin != te.oldorigin)) {
                             ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
                         }
                         i += 1;
                     } else {
-                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner) {
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner && (te.origin != te.oldorigin)) {
                             ct = strcat(ct, strpadr(strcat(GetItemStatus(pl, te, t),"\s: \s", getLocationName(te.origin)),40));
                         } else {
                             ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
@@ -716,7 +716,7 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
-                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 3) {
+                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 6) {
                     bi = "";
                     //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
                     if(tg.netname) {
@@ -735,7 +735,7 @@ void (entity pl) RefreshStatusBar = {
             }
 
             
-            for (float t = 0; t < (3 - i); t++)
+            for (float t = 0; t < (6 - i); t++)
                 ct = strcat(ct, "\n");
             
             //ct = strcat(ct, "\n\n\n");
