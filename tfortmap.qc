@@ -480,7 +480,6 @@ void () i_t_t = {
 };
 
 void () item_tfgoal = {
-    bprint(PRINT_HIGH, "item_tfgoal\n");
     if (CheckExistence() == FALSE) {
         dremove(self);
         return;
@@ -2002,7 +2001,6 @@ void () tfgoal_timer_tick = {
 
 void () CF_FlagFollowPlayer = {
     if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
-        //dprint("CF_FlagFollowPlayer player is itemed!\n");
         makevectors(self.real_owner.angles);
         self.owner.origin = self.real_owner.origin - v_forward * 25 - v_right * 0 + v_up * 10;
         self.owner.angles = self.real_owner.angles + '0 90 16';
@@ -2015,7 +2013,6 @@ void () CF_FlagFollowPlayer = {
         setmodel(self.owner, self.owner.mdl);
         self.nextthink = time + 0.1;
     } else {
-        bprint(PRINT_HIGH, "CF_FlagFollowPlayer dremoving\n");
         dremove(self);
     }
 };
@@ -2025,7 +2022,6 @@ void () idle_think = {
 }
 
 void () item_tfgoal_touch = {
-    //dprint("item_tfgoal_touch\n");
     local entity te, flw;
 
     if (other.classname != "player")
@@ -2139,7 +2135,6 @@ void () item_tfgoal_touch = {
 };
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
-    bprint(PRINT_HIGH, "tfgoalitem_GiveToPlayer\n");
     Item.effects = 0;
 
     Item.owner = AP;
@@ -2195,7 +2190,6 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 };
 
 void () ReturnItem = {
-    bprint(PRINT_HIGH, "ReturnItem\n");
     local entity te;
 
     self.enemy.goal_state = 2;
@@ -2262,7 +2256,6 @@ void () ReturnItem = {
 };
 
 void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
-    bprint(PRINT_HIGH, "tfgoalitem_RemoveFromPlayer\n");
     local entity te;
     local entity DelayReturn;
 
@@ -2353,7 +2346,6 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
 };
 
 void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
-    bprint(PRINT_HIGH, "tfgoalitem_RemoveEffectsFromPlayer\n");
     local entity te;
     local float lighton = 0;
     local float slowon = 0;
@@ -2409,7 +2401,6 @@ void (entity Item, entity AP) tfgoalitem_RemoveEffectsFromPlayer = {
 };
 
 void () tfgoalitem_dropthink = {
-    bprint(PRINT_HIGH, "tfgoalitem_dropthink\n");
     local float pos;
 
     self.movetype = 6;
@@ -2441,7 +2432,6 @@ void () tfgoalitem_dropthink = {
                         setsize(self, self.goal_min, self.goal_max);
                         self.camdist = self.camdist + 1;
                         self.nextthink = time + 5;
-                        bprint(PRINT_HIGH, "tfgoalitem_dropthink setting tfgoalitem_dropthink\n");
                         self.think = tfgoalitem_dropthink;
                         return;
                     } else {
@@ -2457,14 +2447,12 @@ void () tfgoalitem_dropthink = {
 };
 
 void () tfgoalitem_droptouch = {
-    bprint(PRINT_HIGH, "tfgoalitem_droptouch\n");
     self.touch = item_tfgoal_touch;
     self.nextthink = time + 4.25;
     self.think = tfgoalitem_dropthink;
 };
 
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
-    bprint(PRINT_HIGH, "tfgoalitem_drop\n");
     if (Item.model == "progs/tf_flag.mdl" || Item.model == "progs/tf_stan.mdl") {
         Item.effects = Item.effects | EF_DIMLIGHT;
 
@@ -2523,10 +2511,8 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.touch = SUB_Null;
         Item.nextthink = time + 0.75;
         Item.bubble_count = time + Item.pausetime + 0.75 + 4.25; //used by the return timer
-        bprint(PRINT_HIGH, "tfgoalitem_drop setting tfgoalitem_droptouch\n");
         Item.think = tfgoalitem_droptouch;
     } else {
-        bprint(PRINT_HIGH, "tfgoalitem_drop setting tfgoalitem_dropthink\n");
         Item.touch = item_tfgoal_touch;
         Item.nextthink = time + 5;
         Item.think = tfgoalitem_dropthink;
@@ -2536,7 +2522,6 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
 };
 
 void () tfgoalitem_remove = {
-    bprint(PRINT_HIGH, "tfgoalitem_remove\n");
     local entity te;
 
     if (self.goal_state == 1) {
