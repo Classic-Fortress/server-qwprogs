@@ -641,7 +641,15 @@ void (entity pl) RefreshStatusBar = {
     local string bi; //button info
     local string sbflaginfo;
     sbflaginfo = infokey(pl, "sbflaginfo");
+    local float sbflaginfostate = 1; //By default, show after tips; 0/off = off; 2 = always
     /* local float win, sec; */
+    
+    if(sbflaginfo == "0" || sbflaginfo == "off")
+        sbflaginfostate = 0;
+    else if(sbflaginfo == "1" || sbflaginfo == "on")
+        sbflaginfostate = 1;
+    else if(sbflaginfo == "2")
+        sbflaginfostate = 2;
 
     pad = "";
 
@@ -669,12 +677,12 @@ void (entity pl) RefreshStatusBar = {
     pad = strzone(pad);
 
     // class tip
-    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfo != "always") {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
         tfdet = find(world, classname, "info_tfdetect");
-        if (!tfdet || (sbflaginfo != "on" && sbflaginfo != "always")) {
+        if (!tfdet || !sbflaginfostate) {
             ct = strzone("\n\n\n\n\n\n");
         } else {
             ct = "";
