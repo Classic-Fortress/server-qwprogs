@@ -2017,6 +2017,10 @@ void () CF_FlagFollowPlayer = {
     }
 };
 
+void () idle_think = {
+    self.nextthink = time + 0.1;
+}
+
 void () item_tfgoal_touch = {
     local entity te, flw;
 
@@ -2035,14 +2039,6 @@ void () item_tfgoal_touch = {
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
         return;
-
-    if (flag_follow) {
-        flw = spawn();
-        flw.real_owner = other;
-        flw.owner = self;
-        flw.think = CF_FlagFollowPlayer;
-        flw.nextthink = time + 0.1;
-    }
 
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
@@ -2120,7 +2116,21 @@ void () item_tfgoal_touch = {
             if (te) {
                 AttemptToActivate(te, other, self);
             }
+        } else {
+            //Make sure we don't try to follow someone who fails the criteria
+            return;
         }
+    }
+    
+    if (flag_follow) {
+        flw = spawn();
+        flw.real_owner = other;
+        flw.owner = self;
+        flw.think = CF_FlagFollowPlayer;
+        //flw.solid = SOLID_NOT;
+        //self.solid = SOLID_NOT;
+        self.think = idle_think;
+        flw.nextthink = time + 0.1;
     }
 };
 
