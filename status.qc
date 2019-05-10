@@ -23,6 +23,7 @@ entity(float ino) Finditem;
 void () tfgoalitem_droptouch;
 void () tfgoalitem_dropthink;
 void () tfgoalitem_remove;
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 string (float class) CF_GetRandomClassTip {
     local string tiptype = "";
@@ -639,17 +640,9 @@ void (entity pl) RefreshStatusBar = {
     local entity tfdet;  //info_tfdetect entity
     local entity te, tg;
     local string bi; //button info
-    local string sbflaginfo;
-    sbflaginfo = infokey(pl, "sbflaginfo");
-    local float sbflaginfostate = 1; //By default, show after tips; 0/off = off; 2 = always
+    //By default, show after tips; 0/off = off; 2 = always
+    local float sbflaginfostate = CF_GetSetting("sbflaginfo", "sbflaginfo", "on"); 
     /* local float win, sec; */
-    
-    if(sbflaginfo == "0" || sbflaginfo == "off")
-        sbflaginfostate = 0;
-    else if(sbflaginfo == "1" || sbflaginfo == "on")
-        sbflaginfostate = 1;
-    else if(sbflaginfo == "2")
-        sbflaginfostate = 2;
 
     pad = "";
 
