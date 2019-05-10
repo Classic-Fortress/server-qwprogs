@@ -1958,8 +1958,6 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
-    local float fdmg;
-
     if (self.view_ofs == '0 0 0') {
         return;
     }
@@ -1968,32 +1966,6 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
-
-    if (((self.jump_flag < -300) && (self.flags & 512)) &&
-        (self.health > 0)) {
-        if (self.watertype == -3) {
-            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
-        } else {
-            if (self.jump_flag < -650) {
-                fdmg = 5;
-                fdmg = (fdmg * (self.jump_flag / 300)) * -1;
-                if (self.playerclass == 1) {
-                    fdmg = fdmg / 2;
-                } else {
-                    if (self.playerclass == 6) {
-                        fdmg = fdmg * 1.5;
-                    }
-                }
-                fdmg = rint(fdmg);
-                TF_T_Damage(self, world, world, fdmg, 1, 0);
-                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
-                self.deathtype = "falling";
-            } else {
-                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
-            }
-        }
-    }
-    self.jump_flag = self.velocity_z;
     
     CheckPowerups();
     W_WeaponFrame();
@@ -2746,4 +2718,37 @@ float () GetLastWeaponImpulse = {
         return 7;
     else 
         return 4;
+}
+
+void() SV_RunClientCommand = {
+
+    local float fdmg;
+
+    runstandardplayerphysics(self);
+
+    if (((self.jump_flag < -300) && (self.flags & 512)) &&
+        (self.health > 0)) {
+        if (self.watertype == -3) {
+            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+        } else {
+            if (self.jump_flag < -650) {
+                fdmg = 5;
+                fdmg = (fdmg * (self.jump_flag / 300)) * -1;
+                if (self.playerclass == 1) {
+                    fdmg = fdmg / 2;
+                } else {
+                    if (self.playerclass == 6) {
+                        fdmg = fdmg * 1.5;
+                    }
+                }
+                fdmg = rint(fdmg);
+                TF_T_Damage(self, world, world, fdmg, 1, 0);
+                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                self.deathtype = "falling";
+            } else {
+                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+            }
+        }
+    }
+    self.jump_flag = self.velocity_z;
 }
