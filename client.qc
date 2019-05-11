@@ -142,12 +142,13 @@ void () autokick_think = {
     dremove(self);
 };
 
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting = {
     local string st;
 
-    st = infokey(world, ps_short);
+    st = infokey(ent, ps_short);
     if (st == string_null) {
-        st = infokey(world, ps_setting);
+        st = infokey(ent, ps_setting);
         if (st == string_null) {
             st = ps_default;
         }
@@ -162,6 +163,10 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
         default:            
             return stof(st);
     }
+};
+
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+    return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
 void () DecodeLevelParms = {
