@@ -609,3 +609,198 @@ void () misc_noisemaker = {
     self.nextthink = time + 0.1 + random();
     self.think = noise_think;
 };
+
+void() blocker_use = 
+{
+	if (!(self.state))
+	{
+		self.state = 1;
+		setorigin(self, self.origin - '8000 8000 8000');
+		sound(self, 2, self.noise1, 1, 1);
+	}
+	else
+	{
+		self.state = 0;
+		setorigin(self, self.origin + '8000 8000 8000');
+		sound(self, 2, self.noise, 1, 1);
+	}
+};
+
+void(entity attacker, float damage) glass_pain = 
+{
+	if (self.spawnflags & 8)
+	{
+		self.health = self.max_health;
+	}
+};
+
+void() glass_die = 
+{
+	local entity new;
+	local vector tmpvec;
+	while (self.color > 0)
+	{
+		new = spawn();
+		new.origin = self.origin;
+		if (random() < 0.5)
+		{
+			setmodel(new, "progs/glass2.mdl");
+		}
+		else
+		{
+			setmodel(new, "progs/glass1.mdl");
+		}
+		setsize(new, '0 0 0', '0 0 0');
+		if (self.height != 100)
+		{
+			new.velocity_x = 70 * crandom();
+			new.velocity_y = 70 * crandom();
+			new.velocity_z = 140 + 70 * random();
+		}
+		else
+		{
+			new.velocity_x = 400 * crandom();
+			new.velocity_y = 400 * crandom();
+			new.velocity_z = 140 + 70 * random();
+		}
+		new.movetype = 10;
+		new.solid = 2;
+		new.avelocity_x = random() * 600;
+		new.avelocity_y = random() * 600;
+		new.avelocity_z = random() * 600;
+		new.nextthink = time + 2 + random() * 3;
+		new.think = SUB_Remove;
+		self.absmin = self.origin + self.mins;
+		self.absmax = self.origin + self.maxs;
+		tmpvec_x = self.absmin_x + random() * (self.absmax_x - self.absmin_x);
+		tmpvec_y = self.absmin_y + random() * (self.absmax_y - self.absmin_y);
+		tmpvec_z = self.absmin_z + random() * (self.absmax_z - self.absmin_z);
+		setorigin(new, tmpvec);
+		self.color = self.color - 1;
+	}
+	if (self.noise2)
+	{
+		if (pointcontents(self.origin) == -3)
+		{
+			sound(self, 2, "effects/rcksplsh.wav", 1, 1);
+		}
+		else
+		{
+			sound(self, 2, self.noise2, 1, 1);
+		}
+	}
+	remove(self);
+};
+
+void() func_glass = 
+{
+	local vector tmpvec;
+	self.movetype = 7;
+	self.solid = 4;
+	self.mdl = self.model;
+	setmodel(self, self.model);
+	setsize(self, self.mins, self.maxs);
+	setorigin(self, self.origin);
+	self.model = string_null;
+	precache_sound("misc/null.wav");
+	if (self.health > 0)
+	{
+		if (!(self.color))
+		{
+			tmpvec = self.maxs - self.mins;
+			tmpvec = tmpvec * 0.031;
+			if (tmpvec_x < 1)
+			{
+				tmpvec_x = 1;
+			}
+			if (tmpvec_y < 1)
+			{
+				tmpvec_y = 1;
+			}
+			if (tmpvec_z < 1)
+			{
+				tmpvec_z = 1;
+			}
+			self.color = tmpvec_x * tmpvec_y * tmpvec_z;
+		}
+		else
+		{
+			if (self.color == -1)
+			{
+				self.color = 0;
+			}
+		}
+		if (self.color > 16)
+		{
+			self.color = 16;
+		}
+		self.takedamage = 1;
+		self.max_health = self.health;
+		self.th_die = glass_die;
+		self.th_pain = glass_pain;
+		precache_model("progs/glass1.mdl");
+		precache_model("progs/glass2.mdl");
+	}
+	if (self.target)
+	{
+		if (!(self.speed))
+		{
+			self.speed = 100;
+		}
+		if (!(self.dmg))
+		{
+			self.dmg = 2;
+		}
+		if (self.sounds == 1)
+		{
+			if (!(self.noise))
+			{
+				self.noise = "plats/train2.wav";
+			}
+			if (!(self.noise1))
+			{
+				self.noise1 = "plats/train1.wav";
+			}
+			precache_sound(self.noise);
+			precache_sound(self.noise1);
+		}
+		self.cnt = 1;
+		self.blocked = train_blocked;
+		self.use = train_use;
+		self.classname = "train";
+		self.think = func_train_find;
+		self.nextthink = self.ltime + 0.6;
+	}
+	else
+	{
+		self.use = blocker_use;
+		if (self.spawnflags & 4)
+		{
+			self.state = 0;
+			setorigin(self, self.origin + '8000 8000 8000');
+		}
+		else
+		{
+			self.state = 1;
+			if (self.noise1)
+			{
+				sound(self, 2, self.noise1, 1, 1);
+			}
+		}
+	}
+	if (!(self.noise))
+	{
+		self.noise = "misc/null.wav";
+	}
+	if (!(self.noise1))
+	{
+		self.noise1 = "misc/null.wav";
+	}
+	if (!(self.noise2))
+	{
+		self.noise2 = "effects/shatter.wav";
+	}
+	precache_sound(self.noise);
+	precache_sound(self.noise1);
+	precache_sound(self.noise2);
+};
