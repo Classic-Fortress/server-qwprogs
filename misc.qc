@@ -703,6 +703,7 @@ void() func_glass =
 	setorigin(self, self.origin);
 	self.model = string_null;
 	precache_sound("misc/null.wav");
+    precache_sound("effects/rcksplsh.wav");
 	if (self.health > 0)
 	{
 		if (!(self.color))
