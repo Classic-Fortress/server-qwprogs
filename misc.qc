@@ -638,7 +638,7 @@ void() glass_die =
 {
 	local entity new;
 	local vector tmpvec;
-	while (self.color > 0)
+	while (self.cnt2 > 0)
 	{
 		new = spawn();
 		new.origin = self.origin;
@@ -676,7 +676,7 @@ void() glass_die =
 		tmpvec_y = self.absmin_y + random() * (self.absmax_y - self.absmin_y);
 		tmpvec_z = self.absmin_z + random() * (self.absmax_z - self.absmin_z);
 		setorigin(new, tmpvec);
-		self.color = self.color - 1;
+		self.cnt2 = self.cnt2 - 1;
 	}
 	if (self.noise2)
 	{
@@ -704,9 +704,13 @@ void() func_glass =
 	self.model = string_null;
 	precache_sound("misc/null.wav");
     precache_sound("effects/rcksplsh.wav");
+    precache_sound("effects/shatter.wav");
+    precache_model("progs/glass2.mdl");
+    precache_model("progs/glass1.mdl");
+    
 	if (self.health > 0)
 	{
-		if (!(self.color))
+		if (!(self.cnt2))
 		{
 			tmpvec = self.maxs - self.mins;
 			tmpvec = tmpvec * 0.031;
@@ -722,18 +726,18 @@ void() func_glass =
 			{
 				tmpvec_z = 1;
 			}
-			self.color = tmpvec_x * tmpvec_y * tmpvec_z;
+			self.cnt2 = tmpvec_x * tmpvec_y * tmpvec_z;
 		}
 		else
 		{
-			if (self.color == -1)
+			if (self.cnt2 == -1)
 			{
-				self.color = 0;
+				self.cnt2 = 0;
 			}
 		}
-		if (self.color > 16)
+		if (self.cnt2 > 16)
 		{
-			self.color = 16;
+			self.cnt2 = 16;
 		}
 		self.takedamage = 1;
 		self.max_health = self.health;
