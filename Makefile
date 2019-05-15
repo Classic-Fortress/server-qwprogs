@@ -8,6 +8,7 @@ endif
 
 all:
 	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\"
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./csqc/csprogs.src
 
 clean:
 	rm -f $(TARGET) qwprogs.lno files.dat progdefs.h
