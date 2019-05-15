@@ -44,7 +44,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     }
 */
     renderscene();
-    for(float i = 0; i < FlagInfoLines.length; i++) {
+    float yoffset = height - 64;
+    for(float i = FlagInfoLines.length - 1; i >= 0; i--) {
 	if(FlagInfoLines[i].id) {
 	    string icon = "sb_key1";
 	    vector iconcolour = '1 1 1';
@@ -66,15 +67,19 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 	    if(FlagInfoLines[i].state == FLAGINFO_HOME) {
 		alpha = 0.3;
 	    } else if(FlagInfoLines[i].state == FLAGINFO_CARRIED) {
-		drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+		//drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+		drawstring([32, yoffset + 4 - 24 * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 	    } else if(FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) {
-		drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+		drawstring([32, yoffset + 4 - 24 * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 	    }
-	    drawpic([8, 28 + 24 * i, 0], icon, '24 24 0', iconcolour, alpha, 1);
+	    //drawpic([8, 28 + 24 * i, 0], icon, '24 24 0', iconcolour, alpha, 1);
+	    drawpic([8, yoffset - 4 - 24 * i, 0], icon, '24 24 0', iconcolour, alpha, 1);
 	    //drawstring([32, 32 + 24 * i, 0], strcat(FlagInfoLines[i].message," ",ftos(FlagInfoLines[i].timeleft)), '8 8', '1 1 1', 1, 0);
 	    //drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].message, '8 8', '1 1 1', 1, 0);
 	    if(FlagInfoLines[i].timeleft >= 0) {
-		drawstring([24, 46 + 24 * i, 0], ftos(FlagInfoLines[i].timeleft), '6 6', '1 1 1', 1, 0);
+		string stime = ftos(FlagInfoLines[i].timeleft);
+		//drawstring([24, 46 + 24 * i, 0], ftos(FlagInfoLines[i].timeleft), '6 6', '1 1 1', 1, 0);
+		drawstring([30 - stringwidth(stime, 1, '6 6'), yoffset + 14 - 24 * i, 0], stime, '6 6', '1 1 1', 1, 0);
 	    }
 	    //addentity(FlagInfoLines[i].model);
 	    //drawstring([300, 32 + 16 * i, 0], strcat(vtos(FlagInfoLines[i].model.origin), " ", FlagInfoLines[i].model.model), '8 8', '1 1 1', 1, 0);
