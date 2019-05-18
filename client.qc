@@ -544,6 +544,9 @@ void () DecodeLevelParms = {
         // enable flag model following the player who has it
         flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
 
+        // override map-set class restrictions [off]
+        override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -1250,7 +1253,7 @@ void () PutClientInServer = {
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
-        while (!IsLegalClass(self.playerclass) ||
+        while ((!IsLegalClass(self.playerclass) && !override_mapclasses) ||
                (self.playerclass == oldclass)
                || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
             self.playerclass = 1 + floor(random() * (10 - 1));
