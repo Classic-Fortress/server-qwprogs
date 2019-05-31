@@ -3,6 +3,7 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* Server option for overriding map class restrictions (except civilian). `serverinfo override_mapclasses 1` or `serverinfo omc 1`.
 * Option for statusbar flaginfo. `setinfo sbflaginfo 1` (default). Setting it to `2` will skip the tf tips on respawn and show flag info all the time.
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
