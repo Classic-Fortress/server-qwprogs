@@ -498,6 +498,7 @@ float sniperreload;
 float spawnfull;
 float stockfull;
 float stock_on_cap;
+float stock_reload;
 float classtips;
 float cussgrentime;
 float medicnocuss;
