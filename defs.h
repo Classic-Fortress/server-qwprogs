@@ -331,6 +331,7 @@
 #define ADMIN_MENU_TYPE_QUAD_ROUNDNUM 7
 #define ADMIN_MENU_TYPE_QUAD_ROUNDTL 8
 #define ADMIN_MENU_TYPE_CLASSES 9
+#define ADMIN_MENU_TYPE_FORCESPEC 10
 
 
 /*======================================================*/

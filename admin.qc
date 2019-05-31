@@ -115,6 +115,13 @@ void () Admin_DoBan = {
     self.admin_use = world;
 };
 
+void () Admin_ForceSpectator = {
+    bprint4(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+    stuffcmd(self.admin_use, "observe\n");
+    self.admin_mode = 0;
+    self.admin_use = world;
+};
+
 void () CeaseFire_think =
 {
     local entity te;

@@ -93,6 +93,7 @@ void (float inp) Menu_Dispenser_Input;
 void () Menu_Admin;
 void (float inp) Menu_Admin_Input;
 void () Admin_DoKick;
+void () Admin_ForceSpectator;
 
 void () Admin_Pause;
 void () Admin_CeaseFire;
@@ -1070,7 +1071,7 @@ void () Menu_Admin =
                 s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
-                s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[5]\s Force Spectate               \n");
                 s_menu1 = strcat(s_menu1, Q"\s[6]\s Ready Status                 \n");
                 s_menu1 = strcat(s_menu1, Q"\s[7]\s Force Match Start (Be Nice)  \n");
             } else if (self.current_menu_page == 3) {
@@ -1126,14 +1127,15 @@ void () Menu_Admin =
         case ADMIN_MENU_TYPE_CLASSES:
             s_menu1 = "Class Management Menu:        \n\n";
             //override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
-            //if(override_mapclasses) {
-            //    override = "\x10 on\x11";
-            //} else {
-            //    override = "\x10off\x11";
-            //}
+            if(override_mapclasses) {
+                override = "\x10 on\x11";
+            } else {
+                override = "\x10off\x11";
+            }
+            //sprint(self, PRINT_HIGH, "Override: ", override, " float: ",ftos(override_mapclasses),"\n");
             if (self.current_menu_page == 1) {
-                //s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings   ", override, "\n");
-                s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings        \n");
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings   ", override, "\n");
+                //s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings        \n");
                 //s_menu1 = strcat(s_menu1, Q"\s[2]\s Scout                        \n");
                 //s_menu1 = strcat(s_menu1, Q"\s[3]\s Sniper                       \n");
                 //s_menu1 = strcat(s_menu1, Q"\s[4]\s Soldier                      \n");
@@ -1162,7 +1164,7 @@ void () Menu_Admin =
     // or maybe made understandable
     if (self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN 
         || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO 
-        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT || self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) 
     {
         f_tmp = 0;
         f_tmp2 = 0;
@@ -1381,8 +1383,11 @@ void (float inp) Menu_Admin_Input =
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                     self.current_menu_page = 1;
                     break;
-                case 5: // unused
-                    return;
+                case 5: // force spectator
+                    self.current_menu_type = ADMIN_MENU_TYPE_FORCESPEC;
+                    self.current_menu_page = 1;
+                    Menu_Admin();
+                    break;
                 case 6: // ready status
                     Broadcast_Players_NotReady();
                     Menu_Close(self);
@@ -1409,9 +1414,10 @@ void (float inp) Menu_Admin_Input =
             }
         }
     } 
-    else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) 
+    else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN || self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) 
                 && inp >= 1 && inp <= 7) 
     { // Kick / Ban Actions
+        bprint(PRINT_HIGH, "Getting player ", ftos(inp), "\n");
         f_tmp = 1;    
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1434,14 +1440,20 @@ void (float inp) Menu_Admin_Input =
             }
         }
         if (self.admin_use) {
+            bprint(PRINT_HIGH, "Player found: ", ftos(f_tmp), ", ", ftos(((self.current_menu_page - 1) * 7) + inp),", ", self.admin_use.classname , "\n");
             if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
-                self.admin_use.ip = infokey (self.admin_use, "ip");
-                if (self.current_menu_type == ADMIN_MENU_TYPE_BAN) {
-                    localcmd("addip ");
-                    localcmd(self.admin_use.ip);
-                    localcmd("\n");
+                if(self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) {
+                    Admin_ForceSpectator();
+                    Menu_Close(self);
+                } else {
+                    self.admin_use.ip = infokey (self.admin_use, "ip");
+                    if (self.current_menu_type == ADMIN_MENU_TYPE_BAN) {
+                        localcmd("addip ");
+                        localcmd(self.admin_use.ip);
+                        localcmd("\n");
+                    }
+                    Admin_DoKick();
                 }
-                Admin_DoKick();
             }
         }
     } 
@@ -1580,7 +1592,7 @@ void (float inp) Menu_Admin_Input =
             {
                 case 1: 
                     override_mapclasses = !override_mapclasses;
-                    localcmd("localinfo omc ");
+                    localcmd("serverinfo omc ");
                     localcmd(ftos(override_mapclasses));
                     localcmd("\n");
                     bprint(PRINT_HIGH, self.netname, " has set server class overrides to ", ftos(override_mapclasses), "\n");
