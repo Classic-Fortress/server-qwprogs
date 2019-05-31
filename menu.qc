@@ -1132,7 +1132,6 @@ void () Menu_Admin =
             } else {
                 override = "\x10off\x11";
             }
-            //sprint(self, PRINT_HIGH, "Override: ", override, " float: ",ftos(override_mapclasses),"\n");
             if (self.current_menu_page == 1) {
                 s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings   ", override, "\n");
                 //s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings        \n");
@@ -1198,7 +1197,7 @@ void () Menu_Admin =
             te = find (te, classname, "player");
         }
 
-        if (self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMONE && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMTWO && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINSELECT ) {
+        if (self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMONE && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMTWO && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINSELECT && self.current_menu_type != ADMIN_MENU_TYPE_FORCESPEC ) {
             te = find (world, classname, "observer");
             while (te != world) {
                 if ( (f_tmp <= (self.current_menu_page * 7) ) && (f_tmp > (self.current_menu_page - 1) * 7) && te.netname != "")  {
