@@ -547,6 +547,28 @@ void () DecodeLevelParms = {
         // enable flag model following the player who has it
         flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
 
+        // Maximum number of primary grenades per class
+        max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
+        max_gren1_sniper = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
+        max_gren1_soldier = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
+        max_gren1_demoman = CF_GetSetting("mg1_4", "max_gren1_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_1));
+        max_gren1_medic = CF_GetSetting("mg1_5", "max_gren1_medic", ftos(PC_MEDIC_GRENADE_MAX_1));
+        max_gren1_hwguy = CF_GetSetting("mg1_6", "max_gren1_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_1));
+        max_gren1_pyro = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
+        max_gren1_spy = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
+        max_gren1_engineer = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
+
+        // Maximum number of secondary grenades per class
+        max_gren2_scout = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
+        max_gren2_sniper = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
+        max_gren2_soldier = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
+        max_gren2_demoman = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
+        max_gren2_medic = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
+        max_gren2_hwguy = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
+        max_gren2_pyro = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
+        max_gren2_spy = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
+        max_gren2_engineer = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -598,6 +620,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             pyro_type = 1;
+            max_gren1_scout = PC_SCOUT_GRENADE_MAX_1;
+            max_gren1_sniper = PC_SNIPER_GRENADE_MAX_1;
+            max_gren1_soldier = PC_SOLDIER_GRENADE_MAX_1;
+            max_gren1_demoman = PC_DEMOMAN_GRENADE_MAX_1;
+            max_gren1_medic = PC_MEDIC_GRENADE_MAX_1;
+            max_gren1_hwguy = PC_HVYWEAP_GRENADE_MAX_1;
+            max_gren1_pyro = PC_PYRO_GRENADE_MAX_1;
+            max_gren1_spy = PC_SPY_GRENADE_MAX_1;
+            max_gren1_engineer = PC_ENGINEER_GRENADE_MAX_1;
+            max_gren2_scout = PC_SCOUT_GRENADE_MAX_2;
+            max_gren2_sniper = PC_SNIPER_GRENADE_MAX_2;
+            max_gren2_soldier = PC_SOLDIER_GRENADE_MAX_2;
+            max_gren2_demoman = PC_DEMOMAN_GRENADE_MAX_2;
+            max_gren2_medic = PC_MEDIC_GRENADE_MAX_2;
+            max_gren2_hwguy = PC_HVYWEAP_GRENADE_MAX_2;
+            max_gren2_pyro = PC_PYRO_GRENADE_MAX_2;
+            max_gren2_spy = PC_SPY_GRENADE_MAX_2;
+            max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
         }
 
         st = infokey(world, "faithful");
@@ -650,6 +690,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             old_ng_rof = TRUE;
             pyro_type = 0;
+            max_gren1_scout = 4;
+            max_gren1_sniper = 4;
+            max_gren1_soldier = 4;
+            max_gren1_demoman = 4;
+            max_gren1_medic = 4;
+            max_gren1_hwguy = 4;
+            max_gren1_pyro = 4;
+            max_gren1_spy = 4;
+            max_gren1_engineer = 4;
+            max_gren2_scout = 3;
+            max_gren2_sniper = 4;
+            max_gren2_soldier = 3;
+            max_gren2_demoman = 4;
+            max_gren2_medic = 3;
+            max_gren2_hwguy = 4;
+            max_gren2_pyro = 4;
+            max_gren2_spy = 4;
+            max_gren2_engineer = 4;
         }
 
     }
