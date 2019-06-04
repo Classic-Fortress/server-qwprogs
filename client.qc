@@ -482,6 +482,9 @@ void () DecodeLevelParms = {
         // stock on cap [on]
         stock_on_cap = CF_GetSetting("soc", "stock_on_cap", "on");
 
+        // stock clip to full for reloading guns [on]
+        stock_reload = CF_GetSetting("srd", "stock_reload", "on");
+
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
 
@@ -608,6 +611,7 @@ void () DecodeLevelParms = {
             spawnfull = TRUE;
             stockfull = TRUE;
             stock_on_cap = TRUE;
+            stock_reload = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
             sniperreloadpercent = TRUE;
@@ -677,6 +681,7 @@ void () DecodeLevelParms = {
             spawnfull = FALSE;
             stockfull = FALSE;
             stock_on_cap = FALSE;
+            stock_reload = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
             sniperreloadpercent = FALSE;
