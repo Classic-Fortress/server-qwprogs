@@ -818,12 +818,71 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             Player.ammo_cells = Player.ammo_cells + Goal.ammo_cells;
             Player.ammo_medikit = Player.ammo_medikit + Goal.ammo_medikit;
             Player.ammo_detpack = Player.ammo_detpack + Goal.ammo_detpack;
+            //refill the clip if stock_reload is 2
+            if (stock_reload == 2) {
+                if(Goal.ammo_shells) {
+                    if(Player.current_weapon == WEAP_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                }
+                if(Goal.ammo_rockets) {
+                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
+                }
+            } else {
+                //for use in map entities without specifically enabling the general override
+                if(Goal.reload_shotgun) {
+                    if(Player.current_weapon == WEAP_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_super_shotgun) {
+                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_sniper_rifle) {
+                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_grenade_launcher) {
+                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                }
+                if(Goal.reload_rocket_launcher) {
+                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
+                }
+            }
             Player.no_grenades_1 =
                 Player.no_grenades_1 + Goal.no_grenades_1;
             Player.no_grenades_2 =
                 Player.no_grenades_2 + Goal.no_grenades_2;
             
-             if (Player.no_grenades_1 > Player.max_grenades_1) {
+            if (Player.no_grenades_1 > Player.max_grenades_1) {
                 Player.no_grenades_1 = Player.max_grenades_1;
             }
             if (Player.no_grenades_2 > Player.max_grenades_2) {
@@ -969,6 +1028,15 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             stuffcmd(Player, "v_cshift; wait; bf\n");
                             te = find(Player, netname, "flashtimer");
                             dremove(te);
+                        }
+                        //Refill the clip while restocking
+                        if (stock_reload) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                            Player.reload_shotgun = 0;
+                            Player.reload_super_shotgun = 0;
+                            Player.reload_grenade_launcher = 0;
+                            Player.reload_rocket_launcher = 0;
+                            Player.reload_sniper_rifle = 0;
                         }
                     }
                 }
