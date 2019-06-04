@@ -140,6 +140,7 @@ void (float inp) TeamFortress_ChangeClass = {
     if ((intermission_running != 0) || (intermission_exittime > time))
         return;
 
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
     if (self.playerclass != 0) {
         if ((deathmatch != 3) && (!cb_prematch))
             return;
@@ -157,7 +158,7 @@ void (float inp) TeamFortress_ChangeClass = {
             sprint(self, PRINT_HIGH, "You cannot change class\n");
             return;
         }
-        if (!IsLegalClass(inp)) {
+        if (!IsLegalClass(inp) && !override_mapclasses) {
             sprint(self, PRINT_HIGH,
                    "Your team cannot play that class\n");
             TeamFortress_DisplayLegalClasses();
@@ -202,7 +203,7 @@ void (float inp) TeamFortress_ChangeClass = {
         sprint(self, PRINT_HIGH, "You have no lives left\n");
         return;
     }
-    if (!IsLegalClass(inp) && (inp != 11)) {
+    if (!IsLegalClass(inp) && !override_mapclasses && (inp != 11)) {
         sprint(self, PRINT_HIGH,
                "You cannot play that class on this map\n");
         TeamFortress_DisplayLegalClasses();
@@ -307,9 +308,14 @@ void () TeamFortress_DisplayLegalClasses = {
     local float gotone;
     local float ill;
 
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
     sprint(self, PRINT_HIGH, "Legal classes for your team are:\n");
     gotone = 0;
-    ill = TeamFortress_TeamGetIllegalClasses(self.team_no);
+    if(override_mapclasses) {
+        ill = -1; //Nothing is illegal unless restricted on server
+    } else {
+        ill = TeamFortress_TeamGetIllegalClasses(self.team_no);
+    }
     if (!(illegalclasses & 1) && !(ill & 1)) {
         if (gotone) {
             sprint(self, PRINT_HIGH, ", ");
@@ -689,6 +695,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Allow feign death while airborne", feign_air, "", 1);
     CF_PrintSetting("Drop feign backpack", feign_pack, "", 1);
     CF_PrintSetting("Print feign death message", feign_msg, "", 1);
+    CF_PrintSetting("Override Map Class Limits", override_mapclasses, "", 0);
 
     if (server_faithful) {
         sprint(self, PRINT_HIGH, "\nThis server is running faithful Team Fortress settings.\n");
@@ -1109,8 +1116,9 @@ float (float pc) IsLegalClass = {
     else if (pc == PC_RANDOM)
         bit = TF_ILL_RANDOMPC;
 
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
     if ((illegalclasses & bit) ||
-        (TeamFortress_TeamGetIllegalClasses(self.team_no) & bit))
+        (TeamFortress_TeamGetIllegalClasses(self.team_no) & bit && !override_mapclasses))
         return (FALSE);
 
     return (TRUE);
