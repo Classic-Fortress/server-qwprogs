@@ -372,29 +372,58 @@ float (entity pe_player) Spy_CheckArea = {
     return 0;
 };
 
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
+    if (pe_player.classname == "player" && pe_player.playerclass == PC_SPY) {
+        if(pe_player.is_feigning) {
+            pe_player.velocity_x = 0;
+            pe_player.velocity_y = 0;
+            pe_player.movetype = MOVETYPE_TOSS;
+            //This is needed for plats that have a virtual presence and this causes you to fall slowly when inside it
+            if(!dontstopdead) {
+                pe_player.tfstate = pe_player.tfstate | TFSTATE_CANT_MOVE;
+                TeamFortress_SetSpeed(pe_player);
+            }
+        }
+    }
+};
+
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-    if ((self.owner.deadflag >= 2) || (self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
+	if(self.owner.deadflag >= 2) {
+		// reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
+		self.owner.movetype = MOVETYPE_NONE;
+		self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+        dremove(self);
+        return;
+    }
+    if ((self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
         dremove(self);
         return;
     }
 
     // only do stuff when spy is no longer moving
     if (!self.owner.velocity) {
-
         // if spy is on ground and an entity is not nearby, set movetype to none (so he can't move)
         if (self.owner.flags & FL_ONGROUND) {
             area_check = Spy_CheckArea(self.owner);
             if (area_check == 0) {
-                self.owner.movetype = MOVETYPE_NONE;
+                //This checks if something is trying to squish you, fixing some situations where the door or whatever would just go through you.
+                traceline(self.owner.origin, self.owner.origin, 0, self.owner);
+                if(trace_ent) {
+                    if(trace_ent.classname == "door" || trace_ent.classname == "plat" || trace_ent.classname == "train") {
+                        self.owner.movetype = MOVETYPE_TOSS;
+                    }
+                } else {
+                    self.owner.movetype = MOVETYPE_NONE;
+                }
                 self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
             }
         }
 
-        // if spy is in the air, set movetype to walk (so he falls to ground)
+        // if spy is in the air, set movetype to walk^H^H^H^H toss (so he falls to ground)
         else {
-            self.owner.movetype = MOVETYPE_WALK;
+            self.owner.movetype = MOVETYPE_TOSS;
         }
 
         TeamFortress_SetSpeed(self.owner);
@@ -679,17 +708,17 @@ void (entity own) Spy_SetClientSkins = {
     entity te;
     string color, dcolor, skin, dskin, sendcolor, sendskin;
     float dteam, dpc;
-    
+
     dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
     dpc = own.undercover_skin == 0 ? own.playerclass : own.undercover_skin;
     color = ftos(TeamFortress_TeamGetColor(own.team_no) - 1);
     dcolor = ftos(TeamFortress_TeamGetColor(dteam) - 1);
-    
+
     skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
     dskin = TeamFortress_GetSkin(dteam, dpc);
 
     te = find(world, classname, "player");
-    while (te) 
+    while (te)
     {
         if (te.team_no)
         {
@@ -702,9 +731,9 @@ void (entity own) Spy_SetClientSkins = {
             else // not on same team, send them disguise
             {
                 sendcolor = dcolor;
-                sendskin = dskin;                
+                sendskin = dskin;
             }
-            
+
             msg_entity = te;
 
             // set skin
@@ -718,14 +747,14 @@ void (entity own) Spy_SetClientSkins = {
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "topcolor");
             WriteString(MSG_ONE, sendcolor);
-            
+
             // set bottom colour / color
             WriteByte(MSG_ONE, SVC_SETINFO);
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "bottomcolor");
             WriteString(MSG_ONE, sendcolor);
         }
-        
+
         te = find(te, classname, "player");
     }
 }
@@ -767,7 +796,7 @@ void () CF_Spy_UndercoverThink = {
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
             TeamFortress_SetSkin(self.owner);
-            
+
             if (self.owner.queue_team) {
                 CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
             } else {
@@ -781,7 +810,7 @@ void () CF_Spy_UndercoverThink = {
                     s_class = "Spy";
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
-            
+
         } else if (self.team) {
             self.owner.undercover_team = self.team;
             self.owner.last_team = self.team;
@@ -800,7 +829,7 @@ void () CF_Spy_UndercoverThink = {
                 sprint(self.owner, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
             }
         }
-        
+
         TeamFortress_SpyCalcName(self.owner);
 
     }
@@ -808,7 +837,7 @@ void () CF_Spy_UndercoverThink = {
     Status_Refresh(self.owner);
     if (self.owner.menu_input == Menu_Spy_Input)
         Menu_Spy(self.owner);
-   
+
     dremove(self);
 };
 
@@ -1408,6 +1437,7 @@ void () Spy_DropBackpack = {
     setmodel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
+    newmis.classname = "backpack";
 
     newmis.nextthink = time + 120;
     newmis.think = SUB_Remove;

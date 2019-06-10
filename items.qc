@@ -1422,6 +1422,7 @@ void () DropBackpack = {
     setmodel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
+    newmis.classname = "backpack";
 
     newmis.nextthink = time + 120;
     newmis.think = SUB_Remove;

@@ -142,12 +142,13 @@ void () autokick_think = {
     dremove(self);
 };
 
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting = {
     local string st;
 
-    st = infokey(world, ps_short);
+    st = infokey(ent, ps_short);
     if (st == string_null) {
-        st = infokey(world, ps_setting);
+        st = infokey(ent, ps_setting);
         if (st == string_null) {
             st = ps_default;
         }
@@ -162,6 +163,10 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
         default:            
             return stof(st);
     }
+};
+
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+    return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
 void () DecodeLevelParms = {
@@ -327,6 +332,33 @@ void () DecodeLevelParms = {
             toggleflags = toggleflags - (toggleflags & TFLAG_FULLTEAMSCORE);
         }
 
+	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
+        nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
+        
+        // how many rotations the nailgren does [2]
+        lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
+        
+        // time each rotation takes [1]
+        lasergren_rotationtime = CF_GetSetting("lgrt", "lasergren_rotationtime", ftos(NGR_LASER_DEFAULT_ROTATIONTIME));
+        
+        // damage [20]
+        lasergren_damage = CF_GetSetting("lgd", "lasergren_damage", ftos(NGR_LASER_DEFAULT_DAMAGE));
+        
+        // think time for lightning, lower is smoother [0.1]
+        lasergren_thinktime = CF_GetSetting("lgtt", "lasergren_thinktime", "0.01"); //ftos cuts off after 1 dec place, using ftos here would result in 0 and crash?
+        
+        // range of shaft [150]
+        lasergren_range = CF_GetSetting("lgr", "lasergren_range", ftos(NGR_LASER_DEFAULT_RANGE));
+        
+        // how many bursts of nails [2]
+        burstgren_count = CF_GetSetting("bgc", "burstgren_count", ftos(NGR_BURST_DEFAULT_COUNT));
+        
+        // time between each burst [0.7]
+        burstgren_interval = CF_GetSetting("bgi", "burstgren_interval", ftos(NGR_BURST_DEFAULT_INTERVAL));
+        
+        // time before nail projectile destroys itself [0.3]
+        burstgren_range = CF_GetSetting("bgr", "burstgren_range", ftos(NGR_BURST_DEFAULT_RANGE));
+
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
@@ -450,6 +482,9 @@ void () DecodeLevelParms = {
         // stock on cap [on]
         stock_on_cap = CF_GetSetting("soc", "stock_on_cap", "on");
 
+        // stock clip to full for reloading guns [on]
+        stock_reload = CF_GetSetting("srd", "stock_reload", "on");
+
         // display class tips [on]
         classtips = CF_GetSetting("ct", "classtips", "on");
 
@@ -503,6 +538,39 @@ void () DecodeLevelParms = {
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
+        // ceasefire type - 0: default; 1: pause
+        ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
+
+        // wait until attack_finished is over before changing weapons
+        chweap_wait_attfinished = CF_GetSetting("cwaf", "chweap_wait_atk", "on");
+
+        // enable flag model following the player who has it
+        flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
+
+        // override map-set class restrictions [off]
+        override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+        // Maximum number of primary grenades per class
+        max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
+        max_gren1_sniper = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
+        max_gren1_soldier = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
+        max_gren1_demoman = CF_GetSetting("mg1_4", "max_gren1_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_1));
+        max_gren1_medic = CF_GetSetting("mg1_5", "max_gren1_medic", ftos(PC_MEDIC_GRENADE_MAX_1));
+        max_gren1_hwguy = CF_GetSetting("mg1_6", "max_gren1_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_1));
+        max_gren1_pyro = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
+        max_gren1_spy = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
+        max_gren1_engineer = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
+
+        // Maximum number of secondary grenades per class
+        max_gren2_scout = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
+        max_gren2_sniper = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
+        max_gren2_soldier = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
+        max_gren2_demoman = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
+        max_gren2_medic = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
+        max_gren2_hwguy = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
+        max_gren2_pyro = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
+        max_gren2_spy = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
+        max_gren2_engineer = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -545,6 +613,7 @@ void () DecodeLevelParms = {
             spawnfull = TRUE;
             stockfull = TRUE;
             stock_on_cap = TRUE;
+            stock_reload = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
             sniperreloadpercent = TRUE;
@@ -553,6 +622,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             pyro_type = 1;
+            max_gren1_scout = PC_SCOUT_GRENADE_MAX_1;
+            max_gren1_sniper = PC_SNIPER_GRENADE_MAX_1;
+            max_gren1_soldier = PC_SOLDIER_GRENADE_MAX_1;
+            max_gren1_demoman = PC_DEMOMAN_GRENADE_MAX_1;
+            max_gren1_medic = PC_MEDIC_GRENADE_MAX_1;
+            max_gren1_hwguy = PC_HVYWEAP_GRENADE_MAX_1;
+            max_gren1_pyro = PC_PYRO_GRENADE_MAX_1;
+            max_gren1_spy = PC_SPY_GRENADE_MAX_1;
+            max_gren1_engineer = PC_ENGINEER_GRENADE_MAX_1;
+            max_gren2_scout = PC_SCOUT_GRENADE_MAX_2;
+            max_gren2_sniper = PC_SNIPER_GRENADE_MAX_2;
+            max_gren2_soldier = PC_SOLDIER_GRENADE_MAX_2;
+            max_gren2_demoman = PC_DEMOMAN_GRENADE_MAX_2;
+            max_gren2_medic = PC_MEDIC_GRENADE_MAX_2;
+            max_gren2_hwguy = PC_HVYWEAP_GRENADE_MAX_2;
+            max_gren2_pyro = PC_PYRO_GRENADE_MAX_2;
+            max_gren2_spy = PC_SPY_GRENADE_MAX_2;
+            max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
         }
 
         st = infokey(world, "faithful");
@@ -596,6 +683,7 @@ void () DecodeLevelParms = {
             spawnfull = FALSE;
             stockfull = FALSE;
             stock_on_cap = FALSE;
+            stock_reload = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
             sniperreloadpercent = FALSE;
@@ -604,6 +692,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             old_ng_rof = TRUE;
             pyro_type = 0;
+            max_gren1_scout = 4;
+            max_gren1_sniper = 4;
+            max_gren1_soldier = 4;
+            max_gren1_demoman = 4;
+            max_gren1_medic = 4;
+            max_gren1_hwguy = 4;
+            max_gren1_pyro = 4;
+            max_gren1_spy = 4;
+            max_gren1_engineer = 4;
+            max_gren2_scout = 3;
+            max_gren2_sniper = 4;
+            max_gren2_soldier = 3;
+            max_gren2_demoman = 4;
+            max_gren2_medic = 3;
+            max_gren2_hwguy = 4;
+            max_gren2_pyro = 4;
+            max_gren2_spy = 4;
+            max_gren2_engineer = 4;
         }
 
     }
@@ -1209,7 +1315,7 @@ void () PutClientInServer = {
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
-        while (!IsLegalClass(self.playerclass) ||
+        while ((!IsLegalClass(self.playerclass) && !override_mapclasses) ||
                (self.playerclass == oldclass)
                || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
             self.playerclass = 1 + floor(random() * (10 - 1));
@@ -1922,8 +2028,6 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
-    local float fdmg;
-
     if (self.view_ofs == '0 0 0') {
         return;
     }
@@ -1932,6 +2036,8 @@ void () PlayerPostThink = {
         self.impulse = 0;
         return;
     }
+
+    local float fdmg;
 
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
@@ -2166,9 +2272,11 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     return strcat(pe_target.netname, s_deathstring);
 
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-
-                    return strcat(pe_target.netname, " hammers himself\n");
-
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        return strcat(pe_target.netname, " electrocutes himself\n");
+                    } else {
+                        return strcat(pe_target.netname, " hammers himself\n");
+                    }
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
 
                     if (pe_target.playerclass == PC_DEMOMAN)
@@ -2276,8 +2384,13 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
 
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-                    s_deathstring = " gets flayed by ";
-                    s_deathstring2 = "'s nail grenade\n";
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        s_deathstring = " gets melted by ";
+                        s_deathstring2 = "'s shock grenade\n";
+                    } else {
+                        s_deathstring = " gets flayed by ";
+                        s_deathstring2 = "'s nail grenade\n";
+                    }
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
                     if (pe_attacker.playerclass == PC_DEMOMAN) {
                         s_deathstring = " does a dance on ";
@@ -2704,3 +2817,39 @@ float () GetLastWeaponImpulse = {
     else 
         return 4;
 }
+
+// this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
+/*
+void() SV_RunClientCommand = {
+
+    local float fdmg;
+
+    runstandardplayerphysics(self);
+
+    if (((self.jump_flag < -300) && (self.flags & 512)) &&
+        (self.health > 0)) {
+        if (self.watertype == -3) {
+            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+        } else {
+            if (self.jump_flag < -650) {
+                fdmg = 5;
+                fdmg = (fdmg * (self.jump_flag / 300)) * -1;
+                if (self.playerclass == 1) {
+                    fdmg = fdmg / 2;
+                } else {
+                    if (self.playerclass == 6) {
+                        fdmg = fdmg * 1.5;
+                    }
+                }
+                fdmg = rint(fdmg);
+                TF_T_Damage(self, world, world, fdmg, 1, 0);
+                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                self.deathtype = "falling";
+            } else {
+                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+            }
+        }
+    }
+    self.jump_flag = self.velocity_z;
+}
+*/
