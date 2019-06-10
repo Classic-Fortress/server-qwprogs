@@ -93,6 +93,14 @@ void (float inp) Menu_Dispenser_Input;
 void () Menu_Admin;
 void (float inp) Menu_Admin_Input;
 void () Admin_DoKick;
+void () Admin_ForceSpectator;
+
+void () Admin_Pause;
+void () Admin_CeaseFire;
+void () Broadcast_Players_NotReady;
+void () StartTimer;
+
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity pl) Menu_Close =
 {
@@ -119,7 +127,8 @@ void (float inp) Menu_Input =
     var f_void_float tmp; tmp = self.menu_input;
     self.menu_input = nil;
     self.impulse = 0;
-    tmp(inp);
+    if(tmp)
+        tmp(inp);
     Status_Print(self, "");
 };
 
@@ -234,13 +243,13 @@ void (float update) Menu_Team = {
 void (float inp) Menu_Class_Input = {
     if (!inp)
         return;
-
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
     // keep showing menu if class is invalid
-    if (inp > 10 || !IsLegalClass(inp) || CF_ClassIsRestricted(self.team_no, inp))
+    if (inp > 10 || (!IsLegalClass(inp) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, inp))
         Menu_Class(0);
 
     // don't try to change class if class is forbidden
-    if (!IsLegalClass(inp) || CF_GetClassRestriction(self.team_no, inp) == -1)
+    if ((!IsLegalClass(inp) && !override_mapclasses) || CF_GetClassRestriction(self.team_no, inp) == -1)
         return;
 
     // close menu if selected class is current class
@@ -267,7 +276,8 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
     local float f_max = CF_GetClassRestriction(self.team_no, pf_class);
     local float f_players = CF_GetClassPlayers(self.team_no, pf_class);
 
-    if (IsLegalClass(pf_class) && f_max >= 0) {
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+    if ((IsLegalClass(pf_class) || override_mapclasses) && f_max >= 0) {
         if (f_players < 10)
             s_string = strpadl(ftos(f_players), (1 + f_gap));
         else
@@ -1022,6 +1032,7 @@ void () Menu_Admin =
 {
     local string s_menu1;
     local string s_menu2;
+    local string override;
 
     /* More menu lines, commented for the sake of unecessary warnings
      * local string s_menu3;
@@ -1048,7 +1059,7 @@ void () Menu_Admin =
         case ADMIN_MENU_TYPE_MAIN:
             s_menu1 =         "FortressOne Admin Menu:                \n\n";
             if (self.current_menu_page == 1) {
-                s_menu1 = strcat(s_menu1, Q"\s[1]\s Not Used                     \n");
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Ceasefire                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
@@ -1060,9 +1071,11 @@ void () Menu_Admin =
                 s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode                    \n");
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
-                s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
-                s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
-                s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
+                s_menu1 = strcat(s_menu1, Q"\s[5]\s Force Spectate               \n");
+                s_menu1 = strcat(s_menu1, Q"\s[6]\s Ready Status                 \n");
+                s_menu1 = strcat(s_menu1, Q"\s[7]\s Force Match Start (Be Nice)  \n");
+            } else if (self.current_menu_page == 3) {
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Class Settings               \n");
             }
             s_menu1 = strcat(s_menu1, "\n\n");
             s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
@@ -1111,13 +1124,46 @@ void () Menu_Admin =
             s_menu1 = strcat(Q"\[\sCaptain\s\] Team ", ftos(self.team_no));
             s_menu1 = strcat(s_menu1, " :              \n\n");
             break;
+        case ADMIN_MENU_TYPE_CLASSES:
+            s_menu1 = "Class Management Menu:        \n\n";
+            //override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+            if(override_mapclasses) {
+                override = "\x10 on\x11";
+            } else {
+                override = "\x10off\x11";
+            }
+            if (self.current_menu_page == 1) {
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings   ", override, "\n");
+                //s_menu1 = strcat(s_menu1, Q"\s[1]\s Override Map Settings        \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[2]\s Scout                        \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[3]\s Sniper                       \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[4]\s Soldier                      \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[5]\s Demoman                      \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[6]\s Medic                        \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[7]\s Heavy                        \n");
+            } else if (self.current_menu_page == 2) {
+                //s_menu1 = strcat(s_menu1, Q"\s[1]\s Pyro                         \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[2]\s Spy                          \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[3]\s Engineer                     \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[4]\s RandomPC                     \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[5]\s                              \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[6]\s                              \n");
+                //s_menu1 = strcat(s_menu1, Q"\s[7]\s                              \n");
+            }
+            s_menu1 = strcat(s_menu1, "\n\n");
+            s_menu1 = strcat(s_menu1, Q"\s[8]\s Previous Page                \n");
+            s_menu1 = strcat(s_menu1, Q"\s[9]\s Next Page                    \n");
+            s_menu1 = strcat(s_menu1, Q"\s[0]\s Exit Menu                    \n");
+
+            Status_Menu(self, Menu_Admin_Input, s_menu1);
+            break;
     }
     
     // jesus christ what is this, this should be separated out for the good of the people
     // or maybe made understandable
     if (self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN 
         || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO 
-        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT) 
+        || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT || self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) 
     {
         f_tmp = 0;
         f_tmp2 = 0;
@@ -1151,7 +1197,7 @@ void () Menu_Admin =
             te = find (te, classname, "player");
         }
 
-        if (self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMONE && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMTWO && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINSELECT ) {
+        if (self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMONE && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINTEAMTWO && self.current_menu_type != ADMIN_MENU_TYPE_CAPTAINSELECT && self.current_menu_type != ADMIN_MENU_TYPE_FORCESPEC ) {
             te = find (world, classname, "observer");
             while (te != world) {
                 if ( (f_tmp <= (self.current_menu_page * 7) ) && (f_tmp > (self.current_menu_page - 1) * 7) && te.netname != "")  {
@@ -1226,7 +1272,11 @@ void (float inp) Menu_Admin_Input =
         {
             switch (inp)
             {
-                case 1: // Unused
+                case 1: // Ceasefire
+                    if (ceasefire_type) 
+                        Admin_Pause();
+                    else
+                        Admin_CeaseFire();
                     return;
                 case 2: // Change Timelimit
                     if (stof(infokey (world, "timelimit")) > 35) {
@@ -1332,12 +1382,41 @@ void (float inp) Menu_Admin_Input =
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                     self.current_menu_page = 1;
                     break;
+                case 5: // force spectator
+                    self.current_menu_type = ADMIN_MENU_TYPE_FORCESPEC;
+                    self.current_menu_page = 1;
+                    Menu_Admin();
+                    break;
+                case 6: // ready status
+                    Broadcast_Players_NotReady();
+                    Menu_Close(self);
+                    return;
+                case 7: // force match start
+                    if (clanbattle == 1 && cb_prematch == 1) {
+                        bprint(PRINT_HIGH, self.netname);
+                        bprint(PRINT_HIGH, " has forced the match start.\n");
+                        StartTimer();
+                    }
+                    Menu_Close(self);
+                    return;
+            }
+        }
+        else if (self.current_menu_page == 3) 
+        {
+            switch (inp)
+            {
+                case 1:
+                    self.current_menu_type = ADMIN_MENU_TYPE_CLASSES;
+                    self.current_menu_page = 1;
+                    Menu_Admin();
+                    return;
             }
         }
     } 
-    else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN ) 
+    else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN || self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) 
                 && inp >= 1 && inp <= 7) 
     { // Kick / Ban Actions
+        bprint(PRINT_HIGH, "Getting player ", ftos(inp), "\n");
         f_tmp = 1;    
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1360,14 +1439,20 @@ void (float inp) Menu_Admin_Input =
             }
         }
         if (self.admin_use) {
+            bprint(PRINT_HIGH, "Player found: ", ftos(f_tmp), ", ", ftos(((self.current_menu_page - 1) * 7) + inp),", ", self.admin_use.classname , "\n");
             if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
-                self.admin_use.ip = infokey (self.admin_use, "ip");
-                if (self.current_menu_type == ADMIN_MENU_TYPE_BAN) {
-                    localcmd("addip ");
-                    localcmd(self.admin_use.ip);
-                    localcmd("\n");
+                if(self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) {
+                    Admin_ForceSpectator();
+                    Menu_Close(self);
+                } else {
+                    self.admin_use.ip = infokey (self.admin_use, "ip");
+                    if (self.current_menu_type == ADMIN_MENU_TYPE_BAN) {
+                        localcmd("addip ");
+                        localcmd(self.admin_use.ip);
+                        localcmd("\n");
+                    }
+                    Admin_DoKick();
                 }
-                Admin_DoKick();
             }
         }
     } 
@@ -1496,6 +1581,24 @@ void (float inp) Menu_Admin_Input =
         self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
         self.current_menu_page = 1;
         Menu_Admin();
+    }
+    else if (self.current_menu_type == ADMIN_MENU_TYPE_CLASSES)
+    {
+        if (self.current_menu_page == 1)
+        {
+            override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+            switch (inp)
+            {
+                case 1: 
+                    override_mapclasses = !override_mapclasses;
+                    localcmd("serverinfo omc ");
+                    localcmd(ftos(override_mapclasses));
+                    localcmd("\n");
+                    bprint(PRINT_HIGH, self.netname, " has set server class overrides to ", ftos(override_mapclasses), "\n");
+                    Menu_Admin();
+                    return;
+            }
+        }
     }
 
     //Previous page

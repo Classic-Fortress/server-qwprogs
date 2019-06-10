@@ -89,6 +89,7 @@ void (entity gun) Engineer_UseSentryGun;
 
 void () TeamFortress_MOTD;
 void () TeamFortress_HelpMap;
+void () TeamFortress_NailGrenInfo;
 
 void () BioInfection_Decay;
 void () BioInfection_MonsterDecay;
@@ -2583,7 +2584,6 @@ float (entity pl) W_WeaponState_Check = {
 }
 
 void (float inp) W_ChangeWeapon = {
-
     if (inp < 1 || inp > GetLastWeaponImpulse())
         return;
 
@@ -2595,9 +2595,9 @@ void (float inp) W_ChangeWeapon = {
         self.queue_weaponslot = inp;
 
     // halt if weapon is not ready to be fired
-    if (!WeaponReady(self))
+    if (!WeaponReady(self) && chweap_wait_attfinished)
         return;
-
+    
     if (IsUsingOldImpulses()) {
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
@@ -3002,22 +3002,25 @@ void () DeadImpulses = {
             self.current_menu_page = 1;
             Menu_Admin();
         }
-        else if (self.impulse == TF_ADMIN_FORCESTARTMATCH)
+        else if (self.impulse == TF_ADMIN_FORCESTARTMATCH) {
             StartTimer();
+        }
         else if (self.impulse == TF_ADMIN_READYSTATUS)
             Broadcast_Players_NotReady();
     }
     if (self.impulse == TF_HELP_MAP)
         TeamFortress_HelpMap();
+    else if (self.impulse == TF_NAILGREN_INFO)
+	TeamFortress_NailGrenInfo(); 
     else if (self.impulse == TF_STATUS_QUERY)
         TeamFortress_StatusQuery();
-    else if (self.impulse == TF_TEAM_1)
+    else if (self.impulse == TF_TEAM_1 && number_of_teams > 0)
         TeamFortress_TeamSet(1);
-    else if (self.impulse == TF_TEAM_2)
+    else if (self.impulse == TF_TEAM_2 && number_of_teams > 1)
         TeamFortress_TeamSet(2);
-    else if (self.impulse == TF_TEAM_3)
+    else if (self.impulse == TF_TEAM_3 && number_of_teams > 2)
         TeamFortress_TeamSet(3);
-    else if (self.impulse == TF_TEAM_4)
+    else if (self.impulse == TF_TEAM_4 && number_of_teams > 3)
         TeamFortress_TeamSet(4);
     else if (self.impulse == TF_TEAM_SCORES)
         TeamFortress_TeamShowScores(0);
@@ -3158,17 +3161,23 @@ void () W_WeaponFrame = {
     }
 
     // slot 1-4 (or 1-7) binds
-    if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && WeaponReady(self)
+    if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
                 && !self.is_building && !self.is_detpacking) {
 
-        // load weapon state if current state doesn't match stored state
-        if (!W_WeaponState_Check(self))
-            W_WeaponState_Load(self, 0);
+        if (!(self.tfstate & TFSTATE_RELOADING)) {
+            // load weapon state if current state doesn't match stored state
+            if (!W_WeaponState_Check(self))
+                W_WeaponState_Load(self, 0);
 
-        // obviously not quickfiring if we're changing weapon
-        self.is_quickfiring = 0;
-        self.has_quickfired = 0;
-        W_ChangeWeapon(self.impulse);
+            // obviously not quickfiring if we're changing weapon
+            self.is_quickfiring = 0;
+            self.has_quickfired = 0;
+            W_ChangeWeapon(self.impulse);
+        } 
+        else if (!chweap_wait_attfinished) {
+            //clears impulse so it doesn't switch weapons just after reloading   
+            self.impulse = 0;
+        }
 
     // regular attack (both +attack and -attack)
     } else if (!self.impulse && !self.is_quickfiring) {

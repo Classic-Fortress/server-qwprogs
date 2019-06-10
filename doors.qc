@@ -1,6 +1,7 @@
 
 void () door_go_down;
 void () door_go_up;
+void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch;
 
 void () door_blocked = {
     if (other.classname == "detpack") {
@@ -41,14 +42,18 @@ void () door_hit_bottom = {
     self.state = 1;
 };
 
-void () door_go_down = {
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+void () door_go_down_silent = {
     if (self.max_health) {
         self.takedamage = 1;
         self.health = self.max_health;
     }
     self.state = STATE_DOWN;
     SUB_CalcMove(self.pos1, self.speed, door_hit_bottom);
+}
+
+void () door_go_down = {
+    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    door_go_down_silent();
 };
 
 void () door_go_up = {
@@ -151,6 +156,9 @@ void () door_touch = {
 
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
+
     if (self.owner.attack_finished > time)
         return;
 
@@ -540,6 +548,8 @@ void () secret_blocked = {
 void () secret_touch = {
     if (other.classname != "player")
         return;
+
+    Spy_CheckForFuncTouch(other, 0);
 
     if (self.attack_finished > time)
         return;

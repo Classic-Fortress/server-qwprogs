@@ -233,34 +233,51 @@ void () TF_PlaceItem = {
 };
 
 void () TF_StartItem = {
-    if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
-        self.effects = self.effects | EF_DIMLIGHT;
-
-        if (self.skin == 1.0) {
+    local entity tfdet;  //info_tfdetect entity
+    tfdet = find(world, classname, "info_tfdetect");
+    if (tfdet && (tfdet.display_item_status1 == self.goal_no || tfdet.display_item_status2 == self.goal_no || tfdet.display_item_status3 == self.goal_no || tfdet.display_item_status4 == self.goal_no)) {
+        if (self.owned_by == 1.0) {
             self.effects = self.effects | EF_BLUE;
         }
-        if (self.skin == 2.0) {
+        if (self.owned_by == 2.0) {
             self.effects = self.effects | EF_RED;
         }
-        if (self.skin == 3.0) {
+        if (self.owned_by == 3.0) {
             self.effects = self.effects | EF_RED;
             self.effects = self.effects | EF_MUZZLEFLASH;
         }
-        if (self.skin == 4.0) {
+        if (self.owned_by == 4.0) {
             self.effects = self.effects | EF_MUZZLEFLASH;
         }
-    }
+    } else {
+        if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
+            self.effects = self.effects | EF_DIMLIGHT;
 
-    if (self.model == "progs/basrkey.bsp" ) {
-        self.effects = self.effects | EF_DIMLIGHT;
-        self.effects = self.effects | EF_RED;
-    }
+            if (self.skin == 1.0) {
+                self.effects = self.effects | EF_BLUE;
+            }
+            if (self.skin == 2.0) {
+                self.effects = self.effects | EF_RED;
+            }
+            if (self.skin == 3.0) {
+                self.effects = self.effects | EF_RED;
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+            if (self.skin == 4.0) {
+                self.effects = self.effects | EF_MUZZLEFLASH;
+            }
+        }
 
-    if (self.model == "progs/basbkey.bsp" ) {
-        self.effects = self.effects | EF_DIMLIGHT;
-        self.effects = self.effects | EF_BLUE;
-    }
+        if (self.model == "progs/basrkey.bsp" ) {
+            self.effects = self.effects | EF_DIMLIGHT;
+            self.effects = self.effects | EF_RED;
+        }
 
+        if (self.model == "progs/basbkey.bsp" ) {
+            self.effects = self.effects | EF_DIMLIGHT;
+            self.effects = self.effects | EF_BLUE;
+        }
+    }
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
@@ -571,7 +588,7 @@ void (entity AD) ParseTFDetect = {
 entity(float ino) Finditem =
 {
     local entity tg;
-    local string st;
+    //local string st;
 
     tg = find(world, classname, "item_tfgoal");
     while (tg) {
@@ -579,10 +596,10 @@ entity(float ino) Finditem =
             return (tg);
         tg = find(tg, classname, "item_tfgoal");
     }
-    dprint("Could not find an item with a goal_no of ");
-    st = ftos(ino);
-    dprint(st);
-    dprint(".\n");
+    //dprint("Could not find an item with a goal_no of ");
+    //st = ftos(ino);
+    //dprint(st);
+    //dprint(".\n");
     return world;
 };
 
@@ -652,6 +669,7 @@ void (entity Goal) RestoreGoal = {
         Goal.goal_state = 2;
         if (Goal.mdl != string_null) {
             setmodel(Goal, Goal.mdl);
+            setsize(Goal, Goal.goal_min, Goal.goal_max);
         }
         if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
             Goal.effects = Goal.effects | EF_DIMLIGHT;
@@ -800,12 +818,71 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
             Player.ammo_cells = Player.ammo_cells + Goal.ammo_cells;
             Player.ammo_medikit = Player.ammo_medikit + Goal.ammo_medikit;
             Player.ammo_detpack = Player.ammo_detpack + Goal.ammo_detpack;
+            //refill the clip if stock_reload is 2
+            if (stock_reload == 2) {
+                if(Goal.ammo_shells) {
+                    if(Player.current_weapon == WEAP_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                }
+                if(Goal.ammo_rockets) {
+                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
+                }
+            } else {
+                //for use in map entities without specifically enabling the general override
+                if(Goal.reload_shotgun) {
+                    if(Player.current_weapon == WEAP_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_super_shotgun) {
+                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_sniper_rifle) {
+                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                }
+                if(Goal.reload_grenade_launcher) {
+                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                }
+                if(Goal.reload_rocket_launcher) {
+                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                    }
+                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
+                }
+            }
             Player.no_grenades_1 =
                 Player.no_grenades_1 + Goal.no_grenades_1;
             Player.no_grenades_2 =
                 Player.no_grenades_2 + Goal.no_grenades_2;
             
-             if (Player.no_grenades_1 > Player.max_grenades_1) {
+            if (Player.no_grenades_1 > Player.max_grenades_1) {
                 Player.no_grenades_1 = Player.max_grenades_1;
             }
             if (Player.no_grenades_2 > Player.max_grenades_2) {
@@ -951,6 +1028,15 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             stuffcmd(Player, "v_cshift; wait; bf\n");
                             te = find(Player, netname, "flashtimer");
                             dremove(te);
+                        }
+                        //Refill the clip while restocking
+                        if (stock_reload) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                            Player.reload_shotgun = 0;
+                            Player.reload_super_shotgun = 0;
+                            Player.reload_grenade_launcher = 0;
+                            Player.reload_rocket_launcher = 0;
+                            Player.reload_sniper_rifle = 0;
                         }
                     }
                 }
@@ -1649,6 +1735,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         te.owner = AP;
         te.enemy = Goal;
         te.weapon = addb;
+        Goal.bubble_count = time + Goal.delay_time;
         return;
     }
 
@@ -1998,6 +2085,10 @@ void () CF_FlagFollowPlayer = {
     }
 };
 
+void () idle_think = {
+    self.nextthink = time + 0.1;
+}
+
 void () item_tfgoal_touch = {
     local entity te, flw;
 
@@ -2016,12 +2107,6 @@ void () item_tfgoal_touch = {
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
         return;
-
-    flw = spawn();
-    flw.real_owner = other;
-    flw.owner = self;
-    flw.think = CF_FlagFollowPlayer;
-    flw.nextthink = time + 0.1;
 
     if (CTF_Map == 1) {
         if (self.goal_no == 1) {
@@ -2099,7 +2184,21 @@ void () item_tfgoal_touch = {
             if (te) {
                 AttemptToActivate(te, other, self);
             }
+        } else {
+            //Make sure we don't try to follow someone who fails the criteria
+            return;
         }
+    }
+    
+    if (flag_follow) {
+        flw = spawn();
+        flw.real_owner = other;
+        flw.owner = self;
+        flw.think = CF_FlagFollowPlayer;
+        //flw.solid = SOLID_NOT;
+        //self.solid = SOLID_NOT;
+        self.think = idle_think;
+        flw.nextthink = time + 0.1;
     }
 };
 
@@ -2375,13 +2474,13 @@ void () tfgoalitem_dropthink = {
     self.movetype = 6;
     if (self.pausetime != 0) {
         pos = pointcontents(self.origin);
-        if (pos == -4) {
+        if (pos == -4) { //CONTENT_SLIME
             self.nextthink = time + (self.pausetime / 4);
         } else {
-            if (pos == -5) {
+            if (pos == -5) { //CONTENT_LAVA
                 self.nextthink = time + 5;
             } else {
-                if ((pos == -2) || (pos == -6)) {
+                if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
                     if (self.camdist < 3) {
                         self.origin = self.camangle;
                         setorigin(self, self.origin);
@@ -2479,11 +2578,13 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         }
         Item.touch = SUB_Null;
         Item.nextthink = time + 0.75;
+        Item.bubble_count = time + Item.pausetime + 0.75 + 4.25; //used by the return timer
         Item.think = tfgoalitem_droptouch;
     } else {
         Item.touch = item_tfgoal_touch;
         Item.nextthink = time + 5;
         Item.think = tfgoalitem_dropthink;
+        Item.bubble_count = time + Item.pausetime + 5; //used by the return timer
     }
     Item.owner = world;
 };
@@ -2500,6 +2601,7 @@ void () tfgoalitem_remove = {
         te.weapon = 3;
         te.nextthink = time + 0.1;
         te.think = ReturnItem;
+        te.bubble_count = 0; //reset return time counter
         return;
     }
     dremove(self);
@@ -2821,7 +2923,7 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
-
+    
     newmis = spawn();
     makevectors(self.v_angle);
     v_forward = normalize(v_forward) * 64;
@@ -2834,17 +2936,33 @@ void () DropGoalItems = {
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
                 }
             }
-            else if (self.effects & EF_DIMLIGHT) {
+            //Always allow dropping 4096
+            else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
-                if (self.team_no == 1)
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
-                else if (self.team_no == 2)
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
-                else
-                    bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
-
+                if (!te.netname_team_drop || !te.netname_non_team_drop) {
+                    if (te.netname) {
+                        bprint(PRINT_HIGH, self.netname, Q" \sdropped ", te.netname ,"!\s\n");
+                    } else if (te.owned_by > 0) {
+                        if (te.owned_by == 1)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
+                        else if (te.owned_by == 2)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
+                        else if (te.owned_by == 3)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped yellow's flag!\s\n");
+                        else if (te.owned_by == 4)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped green's flag!\s\n");
+                    } else {
+                        if (self.team_no == 1)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped red's flag!\s\n");
+                        else if (self.team_no == 2)
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped blue's flag!\s\n");
+                        else
+                            bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
+                    }
+                }
+                
                 Status_Print(self, "\n\n\n", "You dropped the flag!");
                 search = find(world, classname, "player");
                 while (search) {
@@ -2853,6 +2971,14 @@ void () DropGoalItems = {
                             Status_Print(search, "\n\n\n", self.netname, " dropped the enemy flag!");
                     } else {
                         Status_Print(search, "\n\n\n", "The enemy dropped your flag!");
+                    }
+                    if (te.owned_by) {
+                        if (te.netname_team_drop && te.netname_non_team_drop && search.team_no == te.owned_by) {
+                            sprint(search, PRINT_HIGH, self.netname, te.netname_team_drop);
+                        } 
+                        if (te.netname_team_drop && te.netname_non_team_drop && search.team_no != te.owned_by) {
+                            sprint(search, PRINT_HIGH, self.netname, te.netname_non_team_drop);
+                        } 
                     }
                     search = find(search, classname, "player");
                 }

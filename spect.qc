@@ -96,7 +96,23 @@ void () SpectatorImpulseCommand = {
         Admin_CycleDeal();
     else if (self.impulse == TF_ADMIN_LISTIPS)
         Admin_ListIPs();
-
+    else if (self.impulse == TF_ADMIN_CLANMODE)
+        ClanMode();
+    else if (self.impulse == TF_ADMIN_QUADMODE)
+        QuadMode();
+    else if (self.impulse == TF_ADMIN_ADMINMENU) {
+        self.current_menu_page = 1;
+        Menu_Admin();
+    }
+    else if (self.impulse == TF_ADMIN_FORCESTARTMATCH)
+        StartTimer();
+    else if (self.impulse == TF_ADMIN_READYSTATUS)
+        Broadcast_Players_NotReady();
+    
+    else if (self.impulse > 0 && self.impulse <= 10) {
+        Menu_Input(self.impulse);
+    }
+    
     self.impulse = 0;
 };
 

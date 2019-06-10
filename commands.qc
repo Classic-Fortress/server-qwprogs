@@ -1,3 +1,227 @@
+float (string arg1, string arg2) ParseCmds = {
+    local float arg_num, processedCmd;
+    local string tmp;
+    processedCmd = FALSE;
+    
+    if (arg1)
+        arg_num = 1;
+    if (arg2)
+        arg_num = 2;
+    
+    if (arg1 == "adminpwd")
+    {
+        processedCmd = TRUE;
+        if (arg_num == 2) {
+            Admin_Check(arg2);
+            if (self.is_admin) {
+                Admin_Aliases();
+            }
+        }
+        if (arg_num == 1) {
+            sprint(self, PRINT_HIGH, "usage: cmd adminpwd password, where password is the admin password\n");
+            sprint(self, PRINT_HIGH, "\n");
+        }
+        return processedCmd;
+    }
+    
+    if (self.is_admin)
+    {
+        switch (arg1)
+        {
+            case "timelimit":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("timelimit ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    tmp = infokey(world, arg1);
+                    sprint(self, PRINT_HIGH, "timelimit is ");
+                    sprint(self, PRINT_HIGH, "\"");
+                    sprint(self, PRINT_HIGH, tmp);
+                    sprint(self, PRINT_HIGH, "\"\n");
+                }
+                break;
+            case "prematch":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("prematch ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    tmp = infokey(world, arg1);
+                    sprint(self, PRINT_HIGH, "prematch is ");
+                    sprint(self, PRINT_HIGH, "\"");
+                    sprint(self, PRINT_HIGH, tmp);
+                    sprint(self, PRINT_HIGH, "\"\n");
+                }
+                break;
+            case "fraglimit":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("fraglimit ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    tmp = infokey(world, arg1);
+                    sprint(self, PRINT_HIGH, "fraglimit is ");
+                    sprint(self, PRINT_HIGH, "\"");
+                    sprint(self, PRINT_HIGH, tmp);
+                    sprint(self, PRINT_HIGH, "\"\n");
+                }
+                break;
+            case "teamplay":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("teamplay ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    tmp = infokey(world, arg1);
+                    sprint(self, PRINT_HIGH, "teamplay is ");
+                    sprint(self, PRINT_HIGH, "\"");
+                    sprint(self, PRINT_HIGH, tmp);
+                    sprint(self, PRINT_HIGH, "\"\n");
+                }
+                break;
+            case "password":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("password ");
+                    if (arg2 == "none") {
+                        bprint(PRINT_HIGH, Q"\n\sServer Password removed!\s\n\n");
+                        localcmd("\"\"");
+                    } 
+                    else {
+                        bprint(PRINT_HIGH, Q"\n\sServer Password changed to \"", arg2, "\"\s\n\n");
+                        localcmd(arg2);
+                    }
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    sprint(self, PRINT_HIGH, "usage: cmd password pwd\n");
+                    sprint(self, PRINT_HIGH, "\n");
+                }
+                break;
+            case "record":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("record ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    sprint(self, PRINT_HIGH, "usage: cmd record demo, where demo is the demo name\n");
+                    sprint(self, PRINT_HIGH, "\n");
+                }
+                break;
+            case "easyrecord":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("easyrecord ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    localcmd("easyrecord\n");
+                }
+                break;
+            case "autorecord":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    localcmd("localinfo demo_auto_left ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                if (arg_num == 1) {
+                    tmp = infokey(world, "demo_auto_left");
+                    if (stof(tmp) > 0) {
+                        sprint (self, PRINT_HIGH, "Auto-Recording off\n");
+                        localcmd ("localinfo demo_auto_left 0\n");
+                    }
+                    else {
+                        sprint(self, PRINT_HIGH, "Auto-Recording the next match\n");
+                        localcmd("localinfo demo_auto_left 1\n");
+                    }
+                }
+                break;
+            case "cancel":
+                localcmd ("cancel\n");
+                processedCmd = TRUE;
+                break;
+            case "stop":
+                localcmd ("stop\n");
+                processedCmd = TRUE;
+                break;
+            case "kick":
+                Admin_CycleDeal();
+                processedCmd = TRUE;
+                break;
+            case "ceasefire":
+                if (ceasefire_type) 
+                    Admin_Pause();
+                else
+                    Admin_CeaseFire();
+                processedCmd = TRUE;
+                break;
+            case "map":
+                processedCmd = TRUE;
+                if (arg_num == 2) {
+                    bprint(PRINT_HIGH, self.netname);
+                    bprint(PRINT_HIGH, " has changed the map to ");
+                    bprint(PRINT_HIGH, arg2);
+                    bprint(PRINT_HIGH, "\n");
+                    localcmd("map ");
+                    localcmd(arg2);
+                    localcmd("\n");
+                }
+                else if (arg_num == 1) {
+                    sprint (self, PRINT_HIGH, "usage: cmd map mapname, where mapname is the map name you wish to change to\n");
+                    sprint (self, PRINT_HIGH, "\n");
+                }
+                break;
+            case "help":
+            case "list":
+                processedCmd = TRUE;
+                sprint(self, PRINT_HIGH, "Commands list:\n");
+                sprint(self, PRINT_HIGH, "cmd adminpwd\n");
+                sprint(self, PRINT_HIGH, "cmd timelimit\n");
+                sprint(self, PRINT_HIGH, "cmd prematch\n");
+                sprint(self, PRINT_HIGH, "cmd fraglimit\n");
+                sprint(self, PRINT_HIGH, "cmd teamplay\n");
+                sprint(self, PRINT_HIGH, "cmd password\n");
+                sprint(self, PRINT_HIGH, "cmd map\n");
+                sprint(self, PRINT_HIGH, "cmd record\n");
+                sprint(self, PRINT_HIGH, "cmd easyrecord\n");
+                sprint(self, PRINT_HIGH, "cmd autorecord\n");
+                sprint(self, PRINT_HIGH, "cmd cancel\n");
+                sprint(self, PRINT_HIGH, "cmd stop\n");
+                sprint(self, PRINT_HIGH, "cmd kick\n");
+                sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
+                sprint(self, PRINT_HIGH, "\n");
+                break;
+        }
+    }
+
+    return processedCmd;
+}
+
+void (string cmd) SV_ParseClientCommand = {
+    float isProcessed;
+    tokenize(cmd);
+
+    isProcessed = ParseCmds(argv(0), argv(1));
+    
+    if (!isProcessed)
+    {
+        clientcommand(self, cmd);
+    }
+}
+
 void () QuadMode =
 {
     localcmd ("localinfo clan on\n");
@@ -8,19 +232,18 @@ void () QuadMode =
     localcmd ("localinfo round_delay_time 30\n");
     localcmd ("localinfo teamfrags on\n");
     localcmd ("localinfo fullteamscore off\n");
-    localcmd ("password pineapple\n");
     localcmd ("fraglimit 0\n");
-    localcmd ("exec of_quadmode.cfg\n");
-	bprint (2, "Quad Mode set to on\n");
-    bprint (2, "Map Restart needed to take effect!\n");
+    localcmd ("exec fo_quadmode.cfg\n");
+	bprint (PRINT_HIGH, "Quad Mode set to on\n");
+    bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
 };
 
 void () ClanMode =
 {
     localcmd("localinfo clan on\n");
-    localcmd ("exec of_clanmode.cfg\n");
-    bprint(2, "Clan Mode set to on\n");
-	bprint(2, "Map Restart needed to take effect!\n");
+    localcmd ("exec fo_clanmode.cfg\n");
+    bprint(PRINT_HIGH, "Clan Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
 };
 
 void () PubMode = 
@@ -34,9 +257,9 @@ void () PubMode =
     localcmd("timelimit 20\n");
     localcmd ("fraglimit 0\n");
     localcmd("localinfo round_time 0\n");
-    localcmd ("exec of_pubmode.cfg\n");
-    bprint(2, "Pub Mode set to on\n");
-	bprint(2, "Map Restart needed to take effect!\n");
+    localcmd ("exec fo_pubmode.cfg\n");
+    bprint(PRINT_HIGH, "Pub Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
 }
 
 void () DuelMode =
@@ -48,7 +271,7 @@ void () DuelMode =
     localcmd ("password none\n");
     localcmd("timelimit 0\n");
     localcmd ("fraglimit 30\n");
-    localcmd ("exec of_duelmode.cfg\n");
-    bprint(2, "Duel Mode set to on\n");
-	bprint(2, "Map Restart needed to take effect!\n");
+    localcmd ("exec fo_duelmode.cfg\n");
+    bprint(PRINT_HIGH, "Duel Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
 }

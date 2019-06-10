@@ -62,7 +62,9 @@ void (entity targ, entity attacker) Killed = {
         self.health = -99;
 
     if ((self.movetype == MOVETYPE_PUSH) ||
-        (self.movetype == MOVETYPE_NONE)) {
+        //make sure unmovable players like those feigning/building are still given an obituary
+        //(self.movetype == MOVETYPE_NONE && !self.is_building && !self.is_detpacking && !self.is_feigning)) {
+        (self.movetype == MOVETYPE_NONE && self.classname != "player")) {
 
         self.th_die();
         self = oself;

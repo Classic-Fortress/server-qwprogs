@@ -115,6 +115,13 @@ void () Admin_DoBan = {
     self.admin_use = world;
 };
 
+void () Admin_ForceSpectator = {
+    bprint4(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+    stuffcmd(self.admin_use, "observe\n");
+    self.admin_mode = 0;
+    self.admin_use = world;
+};
+
 void () CeaseFire_think =
 {
     local entity te;
@@ -159,10 +166,13 @@ void () Admin_CeaseFire = {
             dremove(te);
         }
         cease_fire = 0;
-        if (cb_prematch) {
-            StartTimer();
-        }
         bprint(2, "RESUME FIRE\n");
+        if (cb_prematch) {
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
+            if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
+                StartTimer();
+            }
+        }
         te = find(world, classname, "player");
         while (te) {
             CenterPrint3(te, "RESUME FIRE\nCalled by: ", self.netname, "\n");
@@ -173,6 +183,42 @@ void () Admin_CeaseFire = {
         }
     }
 };
+
+void () Admin_Pause = {
+    if (!is_paused) {
+        setpause(1);
+        is_paused = 1;
+        pause_actor = self.netname;
+        if (cb_prematch && infokey(world, "status") == "Countdown") {
+            StopTimer();
+            bprint2(2, pause_actor, " stops the countdown\n");
+            return;
+        }
+        bprint2(2, pause_actor, " paused the game\n");
+    }
+    else {
+        if (cb_prematch) {
+            //Make sure you don't just start the countdown on resume when not everyone's readied up
+            if (is_countdown || v_ready == TeamFortress_GetNoPlayers () ) {
+                StartTimer();
+            }
+            setpause(0);
+            is_paused = 0;
+            return;
+        }
+        pause_actor = self.netname;
+        if (!unpause_requested) {                        
+            bprint2(2, pause_actor, " has requested to unpause the game in 5 seconds\n");     
+            unpause_requested = 1;
+        }
+        else {
+            bprint2(2, pause_actor, " cancels unpause request\n"); 
+            unpause_requested = 0;
+            unpause_countdown = 0;
+            unpause_lastcountnumber = 0;
+        }
+    }
+}
 
 void (entity p) CheckAutoKick = {
     local float rnum;
@@ -210,6 +256,10 @@ void (entity p) CheckAutoKick = {
 
 void (string cl_pwd) Admin_Check =
 {
+    if (self.is_admin) {
+        sprint(self, PRINT_HIGH, "You are already an admin\n");
+        return;
+    }
     local string st2;
 
     st2 = infokey(world, "adminpwd");
@@ -239,4 +289,5 @@ void () Admin_Aliases =
     TeamFortress_Alias("adminmenu", TF_ADMIN_ADMINMENU, 0);
     TeamFortress_Alias("startmatch", TF_ADMIN_FORCESTARTMATCH, 0);
     TeamFortress_Alias("readystatus", TF_ADMIN_READYSTATUS, 0);
+    stuffcmd(self,"alias ceasefire \"cmd ceasefire\"\n");
 };

@@ -19,6 +19,11 @@ string(entity pl) DisguiseToString;
 string(entity pl) SentryDetailsToString;
 string(entity pl) BuildingToString;
 string(float pc) TeamFortress_GetClassName;
+entity(float ino) Finditem;
+void () tfgoalitem_droptouch;
+void () tfgoalitem_dropthink;
+void () tfgoalitem_remove;
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
 
 string (float class) CF_GetRandomClassTip {
     local string tiptype = "";
@@ -232,7 +237,11 @@ string (float class) CF_GetRandomClassTip {
                     line1 = "Use the super shotgun (2) at very close";
                     line2 = "range to avoid splash damage.";
                 } else if (self.display_tip == 7) {
-                    line1 = "Use a nail grenade (f) to clear a small";
+                    if (nailgren_type == NGR_TYPE_LASER) {
+                        line1 = "Use a shock grenade (f) to clear a small";
+                    } else {
+                        line1 = "Use a nail grenade (f) to clear a small";
+                    }
                     line2 = "room or block a bottle neck.";
                 }
             }
@@ -561,6 +570,63 @@ void (entity pl, string s1, string s2, string s3) CenterPrint3 = {
     Status_Print(pl, s1, s2, s3);
 };
 
+void (entity pl, string s1, string s2, string s3, string s4) CenterPrint4 = {
+    Status_Print(pl, s1, s2, s3, s4);
+};
+
+void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPrint5 = {
+    Status_Print(pl, s1, s2, s3, s4, s5);
+};
+
+string getLocationName(vector location);
+
+string (entity Player, entity Item, float teamno) GetItemStatus = {
+    local string st;
+    switch (teamno)
+    {
+        case 1:
+            st = "Blue Flag";
+            break;
+        case 2:
+            st = "Red Flag";
+            break;
+        case 3:
+            st = "Yellow Flag";
+            break;
+        case 4:
+            st = "Green Flag";
+            break;
+    }
+    if (Player.team_no == Item.owned_by) {
+        st = strcat(Q"\x10", st ,Q"\x11");
+        //st = strcat("[", st ,"]");
+   }
+    if (Item.goal_state == 1 && Item.owner != world) {
+        if (Player == Item.owner) {
+            st = strcat(st, Q"\s: Carried by \sYOU");
+        } else {
+            st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
+        }
+
+    } else {
+        if (Item.origin != Item.oldorigin) {
+            //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
+            if((Item.nextthink - time) >= 0) {
+                if(Item.think != tfgoalitem_droptouch) {
+                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
+                } else {
+                    st = strcat(st, Q"\s: Dropped\s");
+                }
+            } else {
+                st = strcat(st, Q"\s: Returning\s NOW!");
+            }
+        } else {
+            st = strcat(st, Q"\s: Safe\s");
+        }
+    }
+    return st;
+}
+
 void (entity pl) RefreshStatusBar = {
     local string pad;
     local string s1; // will be used for grenade timers
@@ -571,6 +637,11 @@ void (entity pl) RefreshStatusBar = {
     local string ident;
     local float height;
     local float i;
+    local entity tfdet;  //info_tfdetect entity
+    local entity te, tg;
+    local string bi; //button info
+    //By default, show after tips; 0/off = off; 2 = always
+    local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
     /* local float win, sec; */
 
     pad = "";
@@ -599,11 +670,79 @@ void (entity pl) RefreshStatusBar = {
     pad = strzone(pad);
 
     // class tip
-    if (((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
-        ct = strzone("\n\n\n\n\n\n");
+        tfdet = find(world, classname, "info_tfdetect");
+        if (!tfdet || !sbflaginfostate) {
+            ct = strzone("\n\n\n\n\n\n");
+        } else {
+            ct = "";
+            i = number_of_teams; // Extra newlines
+            for (float t = 1; t <= number_of_teams; t++) {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    if(number_of_teams < 4) {
+                        ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40),"\n");
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner && (te.origin != te.oldorigin)) {
+                            ct = strcat(ct, strpadr(strcat("\s Location: \s", getLocationName(te.origin)),40));
+                        }
+                        i += 1;
+                    } else {
+                        if((te.think == tfgoalitem_dropthink || te.think == tfgoalitem_remove) && !te.owner && (te.origin != te.oldorigin)) {
+                            ct = strcat(ct, strpadr(strcat(GetItemStatus(pl, te, t),"\s: \s", getLocationName(te.origin)),40));
+                        } else {
+                            ct = strcat(ct, strpadr(GetItemStatus(pl, te, t),40));
+                        }
+                    }
+                }
+                ct = strcat(ct, "\n");
+            }
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 6) {
+                    bi = "";
+                    //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
+                    if(tg.netname) {
+                        bi = tg.netname;
+                        if(tg.team_str_moved) {
+                            bi = strcat(bi,": ", tg.team_str_moved);
+                        } else {
+                            bi = strcat(bi,": \sOffline\s");
+                        }
+                        bi = strcat(bi, " ", ftos(rint(tg.bubble_count - time)));
+                        ct = strcat(ct, strpadr(bi,40),"\n");
+                        i += 1;
+                    }
+                }
+                tg = find(tg, classname, "info_tfgoal");
+            }
+
+            
+            for (float t = 0; t < (6 - i); t++)
+                ct = strcat(ct, "\n");
+            
+            //ct = strcat(ct, "\n\n\n");
+            
+            ct = strzone(ct);
+        }
     }
 
     // status line 1 column 1 - grenade timer
@@ -664,34 +803,6 @@ void (entity pl) RefreshStatusBar = {
     s2 = strcat(s2, "\n");
     s2 = strzone(s2);
 
-    // status line 3 column 1 - team 1 score
-    /* win = TeamFortress_TeamGetWinner(); */
-    /* sec = TeamFortress_TeamGetSecond(); */
-    /* if (win == 0) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 1) */
-    /*     st1 = BlueScoreToString(team1score); */
-    /* else if (win == 2) */
-    /*     st1 = RedScoreToString(team2score); */
-    /* else if (win == 3) */
-    /*     st1 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st1 = GreenScoreToString(team4score); */
-    /* // status line 3 column 2 - team 2 score */
-    /* if (sec == 0) { */
-    /*     if (win < 2) */
-    /*         st2 = RedScoreToString(team2score); */
-    /*     else */
-    /*         st2 = BlueScoreToString(team1score); */
-    /* } */
-    /* else if (sec == 1) */
-    /*     st2 = BlueScoreToString(team1score); */
-    /* else if (sec == 2) */
-    /*     st2 = RedScoreToString(team2score); */
-    /* else if (sec == 3) */
-    /*     st2 = YellowScoreToString(team3score); */
-    /* else */
-    /*     st2 = GreenScoreToString(team4score); */
     st1 = "";
     st2 = "";
 

@@ -332,6 +332,7 @@ float item_list_bit;            // Global, used to determine what the bit of
 
 .float delay_time;              // For delayed goal results
 .float dont_do_triggerwork;
+.float track_goal;              // Track this info_goal in the statusbar
 
 // Abbreviations for the above
 .float g_a;                     // goal_activation
@@ -446,6 +447,19 @@ float is_countdown;
 
 float exec_map_cfgs;
 float spy_off;
+
+float nailgren_type;
+float lasergren_rotationcount;
+float lasergren_rotationtime;
+float lasergren_thinktime;
+float lasergren_range;
+float lasergren_damage;
+float lasergren_reqthinks;
+float lasergren_angleperthink;
+float burstgren_count;
+float burstgren_interval;
+float burstgren_range;
+
 float old_grens;
 float invis_only;
 float flagem_checked;
@@ -454,6 +468,24 @@ float drop_grenades;
 float drop_grenpack;
 float drop_gren1;
 float drop_gren2;
+float max_gren1_scout;
+float max_gren1_sniper;
+float max_gren1_soldier;
+float max_gren1_demoman;
+float max_gren1_medic;
+float max_gren1_hwguy;
+float max_gren1_pyro;
+float max_gren1_spy;
+float max_gren1_engineer;
+float max_gren2_scout;
+float max_gren2_sniper;
+float max_gren2_soldier;
+float max_gren2_demoman;
+float max_gren2_medic;
+float max_gren2_hwguy;
+float max_gren2_pyro;
+float max_gren2_spy;
+float max_gren2_engineer;
 float grentimers;
 float id_extended;
 float remember_weapon;
@@ -484,6 +516,7 @@ float sniperreload;
 float spawnfull;
 float stockfull;
 float stock_on_cap;
+float stock_reload;
 float classtips;
 float cussgrentime;
 float medicnocuss;
@@ -504,6 +537,19 @@ float sng_damage;
 float old_ng_rof;
 float impulse_queue;
 float pyro_type;
+float flag_follow;
+float ceasefire_type;
+float is_paused;
+string pause_actor;
+float unpause_requested;
+float unpause_countdown;
+float unpause_lastcountnumber;
+float chweap_wait_attfinished;
+float override_mapclasses;
+
+float numlocs;
+typedef struct {vector pos; string desc;} loc_t;
+loc_t *locs;
 
 .float teamkills;
 

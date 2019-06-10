@@ -83,7 +83,7 @@ void () StartMatch =
 
         TeamFortress_RemoveTimers();
         self.frags = 0;
-        self.real_frags = 0;        
+        self.real_frags = 0;
         setspawnparms(self);
         if (!quadmode)
             PutClientInServer();
@@ -97,6 +97,18 @@ void () StartMatch =
         gren.nextthink = (time + 0.1);
         gren = find(gren, classname, "grenade");
     }
+	te = find(world, classname, "detpack");
+	while (te){
+		if (te.weaponmode == 1) {
+			TeamFortress_SetSpeed (te.enemy);
+			dremove(te.oldenemy);
+			dremove(te.observer_list);
+		}
+		dremove(te.linked_list);
+		dremove(te);
+		te = find (te, classname, "detpack");
+	}
+
     cb_prematch = 0;
     cease_fire = 0;
 
@@ -121,7 +133,7 @@ void () StartMatch =
         if (!quadmode) {
             te.think = MatchThink;
             te.nextthink = (time + 1);
-        }       
+        }
     }
     st = infokey(world, "spectalk");
     f2 = stof(st);
@@ -182,7 +194,7 @@ void () PreMatch_Think = {
             }
             if (!quadmode)
                 StartMatch();
-            else 
+            else
                 StartQuadRound();
             return;
         }
@@ -250,6 +262,7 @@ void () PreMatch_Think = {
         }
         strunzone(num);
     }
+
     self.nextthink = (time + 1);
 };
 
@@ -262,7 +275,7 @@ void () ResetBreakAndReady = {
         v_break = 0;
         v_ready = 0;
         te = find (te, classname, "player");
-    }   
+    }
 }
 
 void () StartTimer =
@@ -304,7 +317,7 @@ void () StartTimer =
         te.nextthink = 0.01;
     }
 
-    ResetBreakAndReady(); 
+    ResetBreakAndReady();
     timer = spawn();
     timer.owner = world;
     timer.classname = "prematch";
@@ -425,13 +438,13 @@ void () DumpClanScores = {
     if ((no_teams == 2) && (((team1score == team2score) && teamfrags)
                             || ((team1frags == team2frags) && !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else if ((no_teams == 3) &&
                ((((team1score == team2score) == team3score) && teamfrags)
                 || (((team1frags == team2frags) == team3frags) &&
                     !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else if ((no_teams == 3)
                &&
                (((((team1score == team2score) == team3score) == team4score)
@@ -440,7 +453,7 @@ void () DumpClanScores = {
                 ((((team1frags == team2frags) == team3frags) == team4frags)
                  && !teamfrags))) {
         bprint(PRINT_HIGH, " draw ");
-    } 
+    }
     else {
         st = GetTeamName(winners);
         bprint(PRINT_HIGH, st, " defeated ");
@@ -736,6 +749,43 @@ void () TeamFortress_ShowIDs = {
         sprint(self, PRINT_HIGH, "None\n");
 };
 
+void () CenterPrint_Players_NotReady = {
+    string players_not_ready;
+    entity te;
+    players_not_ready = "Not ready: ";
+
+    local float first = 0;
+    te = find (world, classname, "player");
+    while (te) {
+        if (te.is_ready == 0)
+        {
+            first = first + 1;
+            if (first == 1)
+            {
+                players_not_ready = strcat(players_not_ready, te.netname);
+            }
+            else if (first > 1 && first < 5)
+            {
+                players_not_ready = strcat(players_not_ready, ", ", te.netname);
+            }
+            else if (first >= 5)
+            {
+                players_not_ready = strcat(players_not_ready, " and others...");
+                break;
+            }
+        }
+        te = find (te, classname, "player");
+    }
+    players_not_ready = strcat(players_not_ready, "\n", "Type \s/ready\s in the console to toggle your ready status\n");
+
+    te = find(world, classname, "player");
+    while (te)
+    {
+        CenterPrint(te, players_not_ready);
+        te = find(te, classname, "player");
+    }
+}
+
 void () Broadcast_Players_NotReady = {
     local entity te;
     if (v_ready != 0) {
@@ -747,11 +797,11 @@ void () Broadcast_Players_NotReady = {
                 if (!first)
                     players_not_ready = strcat(players_not_ready, ", ");
                 else
-                    first = 0;                      
+                    first = 0;
                 players_not_ready = strcat(players_not_ready, te.netname);
             }
             te = find (te, classname, "player");
-        }   
+        }
         players_not_ready = strcat(players_not_ready, "\n");
         bprint(1, players_not_ready);
         te = find (world, classname, "player");
@@ -796,7 +846,7 @@ void () PlayerReady =
     if (self.playerclass == 0) {
         sprint(self, 2, "You must choose a class first.\n");
         return;
-    }   
+    }
     if (intermission_running)
         return;
     if (self.classname != "player")
@@ -810,8 +860,12 @@ void () PlayerReady =
     bprint2 (3, self.netname, " is ready to start the match\n");
     f1 = TeamFortress_GetNoPlayers ();
     if (v_ready == f1 ) {
-        bprint (2, "All players ready, starting match\n");
-        StartTimer ();
+        if(cease_fire) {
+            bprint (2, "All players ready, match will start after ceasefire ends.\n");
+        } else {
+            bprint (2, "All players ready, starting match\n");
+            StartTimer ();
+        }
         return;
     }
     Broadcast_Players_NotReady();
@@ -831,17 +885,22 @@ void () RemoveVotes = {
 };
 
 void () PreMatch_Message = {
-    local entity p = find (world, classname, "player");
-    while (p != world) {
-        if (p.netname != "") {
-            sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
-            if (p.is_ready)
-                sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
-            else
-                sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
-            stuffcmd(p, "play buttons/switch04.wav\n");
+    self.cnt2 = self.cnt2 + 1;
+    if (self.cnt2 % 30 == 0)
+    {
+        local entity p = find (world, classname, "player");
+        while (p != world) {
+            if (p.netname != "") {
+                sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
+                if (p.is_ready)
+                    sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
+                else
+                    sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
+                stuffcmd(p, "play buttons/switch04.wav\n");
+            }
+            p = find(p, classname, "player");
         }
-        p = find(p, classname, "player");
     }
-    self.nextthink = time + 30;   
+    CenterPrint_Players_NotReady();
+    self.nextthink = time + 1;
 }
