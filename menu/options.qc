@@ -54,7 +54,16 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	//random art for style
 #if 1//def CSQC
 	//m.addm(spawn (mitem_spinnymodel, item_text: "progs/suit.mdl"), [0, 12*-16/2], [160, 12*16/2]);
-	m.add(spawn (mitem_spinnymodel, item_text: "progs/tf_flag.mdl", skin:"skin1",dontrotate:1, startangle:'0 192 0', firstframe:0, framecount:6), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [64, 12*-16/2], [160, 12*16/2]);
+	m.add(spawn (
+		mitem_spinnymodel, 
+		item_text: "progs/tf_stan.mdl", 
+		skin:"",
+		dontrotate:0, 
+		startangle:'0 192 0', 
+		firstframe:0, 
+		framecount:1,
+		fov:40
+	), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [64, 12*-16/2], [160, 12*16/2]);
 #else
 	//menuqc doesn't support entities. shove some random crappy static image there instead.
 	local mitem_pic plaque = spawn (mitem_pic, item_text:"gfx/qplaque.lmp", item_alpha:1);

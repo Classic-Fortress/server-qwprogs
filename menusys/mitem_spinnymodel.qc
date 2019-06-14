@@ -63,6 +63,7 @@ class mitem_spinnymodel : mitem
 	string skin;
 	float topcolour;
 	float bottomcolour;
+	float fov;
 	
 	//angles.y = startangle;
 #ifndef EXT_CSQC
@@ -93,10 +94,12 @@ class mitem_spinnymodel : mitem
 		clearscene(); //wipe the scene, and apply the default rendering values.
 		setviewprop(VF_MIN, vtodpp(pos)); //min pos
 		setviewprop(VF_SIZE, vtodpp(item_size));	//size=maxpos-minpos
+		if(!fov)
+			fov = 30;
 		if (dp_workarounds)
-			setviewprop(VF_FOV, [25, atan(item_size_y/(item_size_x/tan(25/360*6.28))) * 360/6.28]); //set an explicit fov. this thing had better be square. DP doesn't support VF_AFOV
+			setviewprop(VF_FOV, [fov, atan(item_size_y/(item_size_x/tan(fov/360*6.28))) * 360/6.28]); //set an explicit fov. this thing had better be square. DP doesn't support VF_AFOV
 		else
-			setviewprop(VF_AFOV, 30); //set the aproximate fov (ie: engine takes care of aspect ratio).
+			setviewprop(VF_AFOV, fov); //set the aproximate fov (ie: engine takes care of aspect ratio).
 #ifdef CSQC
 		setproperty(VF_DRAWENGINESBAR, FALSE);
 		setproperty(VF_DRAWWORLD, FALSE);
