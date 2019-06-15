@@ -268,7 +268,7 @@ void () TeamFortress_DetpackSet = {
     newmis.owner = self.owner;
     newmis.origin = (self.owner.origin - '0 0 23');
     newmis.movetype = MOVETYPE_BOUNCE;
-    newmis.solid = SOLID_BBOX;
+    newmis.solid = SOLID_TRIGGER; //so that scout can disarm
     newmis.classname = "detpack";
     newmis.flags = FL_ITEM;
     newmis.angles = '90 0 0';
@@ -388,11 +388,15 @@ void () TeamFortress_DetpackTouch = {
         return;
 
     makevectors(other.v_angle);
-    source = other.origin + '0 0 16';
-
-    traceline(source, source + v_forward * 64, 0, other);
-    if ((trace_fraction == 1) || (trace_ent != self))
+    //source = other.origin + '0 0 16';
+    source = other.origin + other.view_ofs;
+    
+    self.solid = SOLID_BBOX;
+    traceline(source, source + v_forward * 64, MOVE_HITMODEL | MOVE_EVERYTHING | MOVE_TRIGGERS, other);
+    self.solid = SOLID_TRIGGER;
+    if ((trace_fraction == 1) || (trace_ent != self)) {
         return;
+    }
 
     other.immune_to_check = time + 5;
     other.tfstate = other.tfstate | TFSTATE_CANT_MOVE;
@@ -420,7 +424,7 @@ void () TeamFortress_DetpackDisarm = {
     }
     bprint(PRINT_MEDIUM, self.enemy.owner.netname,
            "'s detpack was defused by ", self.owner.netname, "\n");
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 65536);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
     TF_AddFrags(self.owner, 1);
     TeamFortress_SetSpeed(self.owner);
     self.enemy.owner.detpack_left = 0;
