@@ -889,6 +889,20 @@ void () Dispenser_Die = {
 void (entity disp) Engineer_UseDispenser = {
     local entity dist_checker;
 
+    // engineer hits enemy dispenser - dismantle
+    if(!(disp.team_no > 0 && disp.team_no == self.team_no)) {
+        self.ammo_cells = self.ammo_cells + 50;
+        disp.real_owner.has_dispenser = 0;
+        bprint(PRINT_HIGH, self.netname, " dismantled ", disp.real_owner.netname, "'s dispenser\n");
+        TF_AddFrags(self, 1);
+        sprint(disp.real_owner, PRINT_HIGH, "Your dispenser was dismantled by ",self.netname,"\n");
+        dremove (disp);
+        ThrowGib("progs/dgib1.mdl", -30);
+        ThrowGib("progs/dgib2.mdl", -50);
+        ThrowGib("progs/dgib3.mdl", -50);
+        return;
+    }
+
     if (disp.health < disp.max_health && !old_spanner) {
         Engineer_Dispenser_Repair(disp);
         return;
@@ -1031,16 +1045,30 @@ void (entity gun) Engineer_UseSentryGun = {
 
     // automate tasks if old_spanner setting is disabled
     if (!old_spanner) {
-        if (gun.weapon < 3 && self.ammo_cells >= 130) {
-            Engineer_SentryGun_Upgrade(gun);
-            return;
-        } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
-            Engineer_SentryGun_Repair(gun);
-            return;
-        } else if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
-                    || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
-                    && self.ammo_rockets > 0)) {
-            Engineer_SentryGun_InsertAmmo(gun);
+        if(gun.team_no > 0 && gun.team_no == self.team_no) {
+            if (gun.weapon < 3 && self.ammo_cells >= 130) {
+                Engineer_SentryGun_Upgrade(gun);
+                return;
+            } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
+                Engineer_SentryGun_Repair(gun);
+                return;
+            } else if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
+                        || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
+                        && self.ammo_rockets > 0)) {
+                Engineer_SentryGun_InsertAmmo(gun);
+                return;
+            }
+        } else { // hit enemy sentry
+            self.ammo_cells = self.ammo_cells + 65;
+            gun.real_owner.has_sentry = 0;
+            bprint(PRINT_HIGH, self.netname, " dismantled ", gun.real_owner.netname, "'s sentry gun\n");
+            TF_AddFrags(self, 1);
+            sprint(gun.real_owner, PRINT_HIGH, "Your sentry gun was dismantled by ",self.netname,"\n");
+            dremove (gun.trigger_field);
+            dremove (gun);
+            ThrowGib("progs/tgib1.mdl", -30);
+            ThrowGib("progs/tgib2.mdl", -50);
+            ThrowGib("progs/tgib3.mdl", -50);
             return;
         }
     }
