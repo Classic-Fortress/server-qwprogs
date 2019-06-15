@@ -571,6 +571,9 @@ void () DecodeLevelParms = {
         max_gren2_spy = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
         max_gren2_engineer = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
 
+        // solid detpack toggle [0]
+        solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -640,6 +643,7 @@ void () DecodeLevelParms = {
             max_gren2_pyro = PC_PYRO_GRENADE_MAX_2;
             max_gren2_spy = PC_SPY_GRENADE_MAX_2;
             max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
+            solid_detpack = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -710,6 +714,7 @@ void () DecodeLevelParms = {
             max_gren2_pyro = 4;
             max_gren2_spy = 4;
             max_gren2_engineer = 4;
+            solid_detpack = TRUE;
         }
 
     }

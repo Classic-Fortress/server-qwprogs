@@ -268,7 +268,11 @@ void () TeamFortress_DetpackSet = {
     newmis.owner = self.owner;
     newmis.origin = (self.owner.origin - '0 0 23');
     newmis.movetype = MOVETYPE_BOUNCE;
-    newmis.solid = SOLID_TRIGGER; //so that scout can disarm
+    if(solid_detpack) {
+        newmis.solid = SOLID_BBOX;
+    } else {
+        newmis.solid = SOLID_TRIGGER; //so that scout can disarm
+    }
     newmis.classname = "detpack";
     newmis.flags = FL_ITEM;
     newmis.angles = '90 0 0';
@@ -393,7 +397,8 @@ void () TeamFortress_DetpackTouch = {
     
     self.solid = SOLID_BBOX;
     traceline(source, source + v_forward * 64, MOVE_HITMODEL | MOVE_EVERYTHING | MOVE_TRIGGERS, other);
-    self.solid = SOLID_TRIGGER;
+    if(!solid_detpack)
+        self.solid = SOLID_TRIGGER;
     if ((trace_fraction == 1) || (trace_ent != self)) {
         return;
     }
