@@ -696,6 +696,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Drop feign backpack", feign_pack, "", 1);
     CF_PrintSetting("Print feign death message", feign_msg, "", 1);
     CF_PrintSetting("Override Map Class Limits", override_mapclasses, "", 0);
+    CF_PrintSetting("Solid Detpack", solid_detpack, "", 0);
 
     if (server_faithful) {
         sprint(self, PRINT_HIGH, "\nThis server is running faithful Team Fortress settings.\n");

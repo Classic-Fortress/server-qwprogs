@@ -546,6 +546,7 @@ float unpause_countdown;
 float unpause_lastcountnumber;
 float chweap_wait_attfinished;
 float override_mapclasses;
+float solid_detpack;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
