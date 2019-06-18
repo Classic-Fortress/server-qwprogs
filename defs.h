@@ -636,6 +636,8 @@
 #define BUILD_HEALTH_DISPENSER	150
 #define BUILD_HEALTH_SENTRYGUN	150
 
+#define SPAWNFLAG_BLOCK_EMP 4096
+
 // Dispenser's maximum carrying capability
 #define BUILD_DISPENSER_MAX_SHELLS  400
 #define BUILD_DISPENSER_MAX_NAILS   600

@@ -149,6 +149,7 @@ void () EMPGrenadeExplode = {
     local float expsize;
     local entity te;
     local entity oldself;
+    local float candamage;
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
@@ -160,79 +161,88 @@ void () EMPGrenadeExplode = {
     te = findradius(self.origin, 240);
     while (te) {
         te.chain2 = te.chain;
-        if ((te.touch == ammo_touch) || (te.touch == weapon_touch)) {
-            if (te.classname != "item_spikes") {
+        candamage = TRUE;
+        if(walls_block_emp)
+            candamage = CanDamage(te, self);
+        traceline(self.origin, te.origin, MOVE_NOMONSTERS, self);
+        if(trace_ent && trace_ent.spawnflags & SPAWNFLAG_BLOCK_EMP) {
+            candamage = FALSE;
+        }
+        if(candamage) {
+            if ((te.touch == ammo_touch) || (te.touch == weapon_touch)) {
+                if (te.classname != "item_spikes") {
+                    te.solid = SOLID_NOT;
+                    te.enemy = self.owner;
+                    te.nextthink = time + 1 + random() * 2;
+                    te.think = EMPExplode;
+                }
+            } else if (te.think == TeamFortress_DetpackExplode) {
                 te.solid = SOLID_NOT;
-                te.enemy = self.owner;
                 te.nextthink = time + 1 + random() * 2;
-                te.think = EMPExplode;
-            }
-        } else if (te.think == TeamFortress_DetpackExplode) {
-            te.solid = SOLID_NOT;
-            te.nextthink = time + 1 + random() * 2;
-            dremove(te.oldenemy);
-        } else if (te.classname == "pipebomb") {
-            te.nextthink = time + 0.1;
-        } else if ((te.classname == "building_dispenser") ||
-                   (te.classname == "building_sentrygun")) {
-            if (!
-                (((teamplay & 16) && (te.team_no > 0)) &&
-                 (te.team_no == self.owner.team_no))) {
-                TF_T_Damage(te, self, self.owner, 200, 0, TF_TD_EXPLOSION);
-            }
-        } else if (te.classname == "ammobox") {
-            expsize = 0;
-            expsize = expsize + te.ammo_shells * 0.75;
-            expsize = expsize + te.ammo_rockets * 0.75 * 2;
-            expsize = expsize + te.ammo_cells * 0.75 * 2;
-            if (expsize > 0) {
-                te.solid = 0;
-                deathmsg = 30;
-                T_RadiusDamage(te, self.owner, expsize, te);
-                te.think = SUB_Remove;
+                dremove(te.oldenemy);
+            } else if (te.classname == "pipebomb") {
                 te.nextthink = time + 0.1;
-                WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-                WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-                WriteCoord(MSG_MULTICAST, te.origin_x);
-                WriteCoord(MSG_MULTICAST, te.origin_y);
-                WriteCoord(MSG_MULTICAST, te.origin_z);
-                multicast(te.origin, MULTICAST_PHS);
-            }
-        } else if ((te.classname == "player") ||
-                   (te.touch == BackpackTouch)) {
-            if (!
-                ((teamplay & 16) && (te.team_no > 0) &&
-                 (te.team_no == self.owner.team_no))) {
+            } else if ((te.classname == "building_dispenser") ||
+                       (te.classname == "building_sentrygun")) {
+                if (!
+                    (((teamplay & 16) && (te.team_no > 0)) &&
+                     (te.team_no == self.owner.team_no))) {
+                    TF_T_Damage(te, self, self.owner, 200, 0, TF_TD_EXPLOSION);
+                }
+            } else if (te.classname == "ammobox") {
                 expsize = 0;
                 expsize = expsize + te.ammo_shells * 0.75;
                 expsize = expsize + te.ammo_rockets * 0.75 * 2;
-                if (te.playerclass != PC_ENGINEER) {
-                    expsize = expsize + te.ammo_cells * 0.75;
-                }
+                expsize = expsize + te.ammo_cells * 0.75 * 2;
                 if (expsize > 0) {
+                    te.solid = 0;
                     deathmsg = 30;
                     T_RadiusDamage(te, self.owner, expsize, te);
-                    if (te.touch != BackpackTouch) {
-                        TF_T_Damage(te, self, self.owner, expsize, 2, 4);
-                        te.ammo_shells = ceil(te.ammo_shells * 0.25);
-                        te.ammo_rockets = ceil(te.ammo_rockets * 0.25);
-                        if (te.playerclass != PC_ENGINEER) {
-                            te.ammo_cells = ceil(te.ammo_cells * 0.25);
-                        }
-                        oldself = self;
-                        self = te;
-                        W_SetCurrentAmmo(self);
-                        self = oldself;
-                    } else {
-                        te.think = SUB_Remove;
-                        te.nextthink = time + 0.1;
-                    }
+                    te.think = SUB_Remove;
+                    te.nextthink = time + 0.1;
                     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
                     WriteByte(MSG_MULTICAST, TE_EXPLOSION);
                     WriteCoord(MSG_MULTICAST, te.origin_x);
                     WriteCoord(MSG_MULTICAST, te.origin_y);
                     WriteCoord(MSG_MULTICAST, te.origin_z);
                     multicast(te.origin, MULTICAST_PHS);
+                }
+            } else if ((te.classname == "player") ||
+                       (te.touch == BackpackTouch)) {
+                if (!
+                    ((teamplay & 16) && (te.team_no > 0) &&
+                     (te.team_no == self.owner.team_no))) {
+                    expsize = 0;
+                    expsize = expsize + te.ammo_shells * 0.75;
+                    expsize = expsize + te.ammo_rockets * 0.75 * 2;
+                    if (te.playerclass != PC_ENGINEER) {
+                        expsize = expsize + te.ammo_cells * 0.75;
+                    }
+                    if (expsize > 0) {
+                        deathmsg = 30;
+                        T_RadiusDamage(te, self.owner, expsize, te);
+                        if (te.touch != BackpackTouch) {
+                            TF_T_Damage(te, self, self.owner, expsize, 2, 4);
+                            te.ammo_shells = ceil(te.ammo_shells * 0.25);
+                            te.ammo_rockets = ceil(te.ammo_rockets * 0.25);
+                            if (te.playerclass != PC_ENGINEER) {
+                                te.ammo_cells = ceil(te.ammo_cells * 0.25);
+                            }
+                            oldself = self;
+                            self = te;
+                            W_SetCurrentAmmo(self);
+                            self = oldself;
+                        } else {
+                            te.think = SUB_Remove;
+                            te.nextthink = time + 0.1;
+                        }
+                        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+                        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+                        WriteCoord(MSG_MULTICAST, te.origin_x);
+                        WriteCoord(MSG_MULTICAST, te.origin_y);
+                        WriteCoord(MSG_MULTICAST, te.origin_z);
+                        multicast(te.origin, MULTICAST_PHS);
+                    }
                 }
             }
         }
