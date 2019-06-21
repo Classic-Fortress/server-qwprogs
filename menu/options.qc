@@ -45,7 +45,7 @@ nonstatic void(mitem_desktop desktop) M_Options =
 		{fr.add(spawn(mitem_text, item_text:"Particles",		item_command:"m_pop;m_particles", 	item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
 	if (assumefalsecheckcommand("ezhud_nquake"))
 		{fr.add(spawn(mitem_text, item_text:"Hud",			item_command:"m_pop;m_hud", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
-	fr.add(spawn(mitem_text, item_text:"Keys", 				item_command:"m_pop;m_keys", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;
+	fr.add(spawn(mitem_text, item_text:"Controls", 				item_command:"m_pop;m_keys", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;
 	if (assumefalsecheckcommand("cfg_save"))
 		{fr.add(spawn(mitem_text, item_text:"Save Settings", 		item_command:"cfg_save", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
 	if (assumefalsecheckcommand("cvarreset"))
@@ -57,7 +57,8 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	m.add(spawn (
 		mitem_spinnymodel, 
 		item_text: "progs/tf_stan.mdl", 
-		skin:"",
+		customskin:"skin2",
+		trueskin:"skin2",
 		dontrotate:0, 
 		startangle:'0 192 0', 
 		firstframe:0, 

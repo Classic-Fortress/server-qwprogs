@@ -49,6 +49,7 @@ noref .vector mins;
 noref .vector maxs;
 noref .string model;
 noref .float frame, frame2, lerpfrac, renderflags;
+noref .string skin;
 float frametime;
 class mitem_spinnymodel : mitem
 {
@@ -60,7 +61,8 @@ class mitem_spinnymodel : mitem
 	float dontrotate;
 	float rotatespeed;
 	vector startangle;
-	string skin;
+	string customskin;
+	string trueskin;
 	float topcolour;
 	float bottomcolour;
 	float fov;
@@ -139,7 +141,8 @@ class mitem_spinnymodel : mitem
 			setviewprop(VF_MIN, vtodpp('0 0 0'));
 			setviewprop(VF_SIZE, vtodpp(ui.screensize));
 		}
-		setcustomskin(self, "", sprintf("q1upper \"%f\"\nq1lower \"%f\"\nqwskin \"%s\"\n", topcolour, bottomcolour, skin));
+		setcustomskin(self, "", sprintf("q1upper \"%f\"\nq1lower \"%f\"\nqwskin \"%s\"\n", topcolour, bottomcolour, customskin));
+		skin = trueskin;
 		//setcustomskin(self, skin, "");
 		//setcustomskin(self, "", sprintf("q1upper \"%s\"\nq1lower \"%s\"\n\n", cvar_string("topcolor"), cvar_string("bottomcolor")));
 	};

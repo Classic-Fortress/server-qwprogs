@@ -4,6 +4,7 @@ const static struct
 	string cmd;
 } binds[] =
 {
+	{_(""),			"Movement"},
 	{_("Forwards"), 		"+forward"},
 	{_("Back"),	 		"+back"},
 	{_("Move Left"),		"+moveleft"},
@@ -27,7 +28,7 @@ const static struct
 //	{_("Keyboard Look"),		"+klook"},
 	{_("Strafe"),			"+strafe"},
 	{_("Run"),			"+speed"},
-	{0,				0},
+	{_(""),			"Weapons"},
 	{_("Primary Weapon"),			"weapon 1"},
 	{_("Secondary Weapon"),			"weapon 2"},
 	{_("Last Resort"),		"weapon 3"},
@@ -119,9 +120,14 @@ void(mitem_desktop desktop) M_Options_Keys =
 		//throw a load of bind options onto it by reading from the array.
 		for (i = 0; i < sizeof(binds) / sizeof(binds[0]); i++)
 		{
-			if (binds[i].name == "")	//no name is a spacer
+			if (binds[i].name == "") {	//no name is a spacer
+				if(binds[i].cmd) {
+					fr.add(spawn(mitem_text, item_text:strcat("^{e080} ^a",binds[i].cmd,"^d ^{e082}"), item_command:"", item_scale:8, item_flags:IF_CENTERALIGN), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN, [0, (i*8)], [0, 8]);
+					i ++;
+				}
 				continue;
-			fr.add(menuitembind_spawn(binds[i].name, 		binds[i].cmd, '280 8'), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, (i*8)], '0 8');
+			}
+			fr.add(menuitembind_spawn(binds[i].name, 		binds[i].cmd, '280 8'), RS_X_MIN_PARENT_MIN|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MAX|RS_Y_MAX_OWN_MIN, [0, (i*8) + 4], '0 8');
 		}
 	}
 	

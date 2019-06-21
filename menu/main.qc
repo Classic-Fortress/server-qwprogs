@@ -132,7 +132,7 @@ nonstatic void(mitem_desktop desktop) M_Main =
 		shootframes:6, 
 		dontrotate:1, 
 		startangle:'0 155 0', 
-		skin:skin, 
+		customskin:skin, 
 		rotatespeed:10,
 		topcolour:col,
 		bottomcolour:col
