@@ -145,7 +145,7 @@ void (float inp) TeamFortress_ChangeClass = {
         if ((deathmatch != 3) && (!cb_prematch))
             return;
 
-        if (self.playerclass == inp) {
+        if (self.playerclass == inp && !(self.tfstate & TFSTATE_RANDOMPC)) {
             sprint(self, PRINT_HIGH, "You are already playing as a ");
             TeamFortress_PrintClassName(self, inp, 0);
             return;
