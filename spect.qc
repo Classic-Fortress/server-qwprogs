@@ -100,6 +100,8 @@ void () SpectatorImpulseCommand = {
         ClanMode();
     else if (self.impulse == TF_ADMIN_QUADMODE)
         QuadMode();
+    else if (self.impulse == TF_ADMIN_DUELMODE)
+        DuelMode();
     else if (self.impulse == TF_ADMIN_ADMINMENU) {
         self.current_menu_page = 1;
         Menu_Admin();

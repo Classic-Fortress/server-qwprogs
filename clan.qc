@@ -757,7 +757,7 @@ void () CenterPrint_Players_NotReady = {
     local float first = 0;
     te = find (world, classname, "player");
     while (te) {
-        if (te.is_ready == 0)
+        if (te.is_ready == 0 && !te.has_disconnected)
         {
             first = first + 1;
             if (first == 1)
@@ -793,7 +793,7 @@ void () Broadcast_Players_NotReady = {
         local float first = 1;
         te = find (world, classname, "player");
         while (te != world) {
-            if (te.is_ready == 0) {
+            if (te.is_ready == 0 && !te.has_disconnected) {
                 if (!first)
                     players_not_ready = strcat(players_not_ready, ", ");
                 else
@@ -806,7 +806,7 @@ void () Broadcast_Players_NotReady = {
         bprint(1, players_not_ready);
         te = find (world, classname, "player");
         while (te != world) {
-            if (te.is_ready == 0)
+            if (te.is_ready == 0 && !te.has_disconnected)
                 sprint(te, 2, "If you are ready, type \s/ready\s in the console\n");
             te = find(te, classname, "player");
         }

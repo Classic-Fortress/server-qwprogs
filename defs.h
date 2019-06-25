@@ -545,7 +545,7 @@
 // unused                       206
 #define TF_ADMIN_CLANMODE          207
 #define TF_ADMIN_QUADMODE          208
-// unused                       209
+#define TF_ADMIN_DUELMODE          209
 // unused                       210
 // unused                       211
 // unused                       212
