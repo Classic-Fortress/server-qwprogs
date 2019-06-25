@@ -2653,9 +2653,12 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         strcat(pe_attacker.real_owner.netname, s_deathstring2)));
 
             }
-
-        } else {
-
+        //only do world-based deaths if not caused by a tf goal with a defined custom death (or broadcast) message
+        } else if (!((
+            pe_attacker.classname == "info_tfgoal" || 
+            pe_attacker.classname == "info_tfgoal_timer" || 
+            pe_attacker.classname == "item_tfgoal"
+        ) && (pe_attacker.deathtype || pe_attacker.n_b || pe_attacker.netname_broadcast))) {
             rnum = pe_target.watertype;
 
             if (rnum == -3) {
