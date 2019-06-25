@@ -1,6 +1,7 @@
 void () T_MissileTouch;
 void () info_player_start;
 void (entity targ, entity attacker) ClientObituary;
+void () ResetPlayers;
 
 void (entity Goal, entity AP, float addb) DoResults;
 float (entity Goal, entity AP) Activated;
@@ -86,6 +87,7 @@ void (entity targ, entity attacker) Killed = {
     monster_death_use();
     self.th_die();
     self = oself;
+    ResetPlayers();
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {

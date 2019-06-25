@@ -65,6 +65,11 @@ float () ConsoleCmd {
         QuadMode();
         return (1);
     }
+    else if (argv_mvdsv (0) == "duelmode")
+    {
+        DuelMode();
+        return (1);
+    }
     return 0;
 }
 
