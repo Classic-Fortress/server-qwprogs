@@ -573,6 +573,8 @@ void () DecodeLevelParms = {
 
         // solid detpack toggle [0]
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
+        // All Walls Block EMP [0]
+        walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -644,6 +646,7 @@ void () DecodeLevelParms = {
             max_gren2_spy = PC_SPY_GRENADE_MAX_2;
             max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
+            walls_block_emp = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -715,6 +718,7 @@ void () DecodeLevelParms = {
             max_gren2_spy = 4;
             max_gren2_engineer = 4;
             solid_detpack = TRUE;
+            walls_block_emp = FALSE;
         }
 
     }
