@@ -87,7 +87,8 @@ void (entity targ, entity attacker) Killed = {
     monster_death_use();
     self.th_die();
     self = oself;
-    ResetPlayers();
+    if(duelmode)
+        ResetPlayers();
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
