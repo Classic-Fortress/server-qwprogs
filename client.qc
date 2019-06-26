@@ -576,6 +576,8 @@ void () DecodeLevelParms = {
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
         // All Walls Block EMP [0]
         walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
+        // For duelmode, how soon to reset the winning player (allows for double KOs)
+        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
 
         st = infokey(world, "default");
         if (st == "on") {

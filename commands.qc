@@ -271,7 +271,8 @@ void () DuelMode =
     localcmd ("localinfo clan on\n");
     localcmd ("localinfo quadmode off\n");
     localcmd ("localinfo duelmode on\n");
-    localcmd ("localinfo sf on\n"); //spawnfull, ie spawn fully stocked
+    localcmd ("localinfo sf on\n"); // spawnfull, ie spawn fully stocked
+    localcmd ("localinfo drd 0.5\n"); // wait half a second before resetting the winner
     localcmd ("password none\n");
     localcmd ("timelimit 0\n");
     localcmd ("fraglimit 30\n");

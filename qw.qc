@@ -443,6 +443,7 @@ float round_over;
 float gametime;
 float is_countdown;
 float duelmode;
+float duel_reset_delay;
 
 .float tf_id;
 
