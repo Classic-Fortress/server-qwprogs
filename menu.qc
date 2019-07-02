@@ -1028,11 +1028,13 @@ void () Menu_Engineer_Cancel = {
 void () ClanMode;
 void () QuadMode;
 void () PubMode;
+void () DuelMode;
 void () Menu_Admin =
 {
     local string s_menu1;
     local string s_menu2;
     local string override;
+    local string blanks = "                   ";
 
     /* More menu lines, commented for the sake of unecessary warnings
      * local string s_menu3;
@@ -1060,17 +1062,44 @@ void () Menu_Admin =
             s_menu1 =         "FortressOne Admin Menu:                \n\n";
             if (self.current_menu_page == 1) {
                 s_menu1 = strcat(s_menu1, Q"\s[1]\s Ceasefire                    \n");
-                s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit                    \n");
+                override = strcat("\x10",ftos(timelimit/60),"\x11");
+                override = strcat(substring(blanks, 0, 19 - strlen(override)), override);
+                s_menu1 = strcat(s_menu1, Q"\s[2]\s Timelimit ", override,      "\n");
                 s_menu1 = strcat(s_menu1, Q"\s[3]\s Kick                         \n");
                 s_menu1 = strcat(s_menu1, Q"\s[4]\s Ban                          \n");
-                s_menu1 = strcat(s_menu1, Q"\s[5]\s Captain                      \n");
+                if(captainmode) {
+                    override = " \x10on\x11";
+                } else {
+                    override = "\x10off\x11";
+                }
+                s_menu1 = strcat(s_menu1, Q"\s[5]\s Captain                 ",override,"\n");
                 s_menu1 = strcat(s_menu1, Q"\s[6]\s Randomize Teams              \n");
                 s_menu1 = strcat(s_menu1, Q"\s[7]\s Restart current map          \n");
             } else if (self.current_menu_page == 2) {
-                s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode                    \n");
-                s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode                    \n");
-                s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                     \n");
-                s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode (Not implemented)  \n");
+                if(clanbattle) {
+                    override = " \x10on\x11";
+                } else {
+                    override = "\x10off\x11";
+                }
+                s_menu1 = strcat(s_menu1, Q"\s[1]\s Clan Mode               ",override,"\n");
+                if(quadmode) {
+                    override = " \x10on\x11";
+                } else {
+                    override = "\x10off\x11";
+                }
+                s_menu1 = strcat(s_menu1, Q"\s[2]\s Quad Mode               ",override,"\n");
+                if(!clanbattle && !quadmode && !duelmode) {
+                    override = " \x10on\x11";
+                } else {
+                    override = "\x10off\x11";
+                }
+                s_menu1 = strcat(s_menu1, Q"\s[3]\s Pub Mode                ",override,"\n");
+                if(duelmode) {
+                    override = " \x10on\x11";
+                } else {
+                    override = "\x10off\x11";
+                }
+                s_menu1 = strcat(s_menu1, Q"\s[4]\s Duel Mode               ",override,"\n");
                 s_menu1 = strcat(s_menu1, Q"\s[5]\s Force Spectate               \n");
                 s_menu1 = strcat(s_menu1, Q"\s[6]\s Ready Status                 \n");
                 s_menu1 = strcat(s_menu1, Q"\s[7]\s Force Match Start (Be Nice)  \n");
@@ -1128,7 +1157,7 @@ void () Menu_Admin =
             s_menu1 = "Class Management Menu:        \n\n";
             //override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
             if(override_mapclasses) {
-                override = "\x10 on\x11";
+                override = " \x10on\x11";
             } else {
                 override = "\x10off\x11";
             }
@@ -1377,7 +1406,7 @@ void (float inp) Menu_Admin_Input =
                     self.current_menu_page = 1;
                     break;
                 case 4: // duel mode
-                    bprint(2, "Not Implemented!\n");
+                    DuelMode();
                     Menu_Close(self);
                     self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                     self.current_menu_page = 1;

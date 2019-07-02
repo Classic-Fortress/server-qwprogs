@@ -270,6 +270,7 @@ void () DecodeLevelParms = {
 
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
+        duelmode = CF_GetSetting("duelmode", "duelmode", "off");
 
         rounds = CF_GetSetting("rounds","rounds","on");
         if (!rounds)
@@ -575,6 +576,8 @@ void () DecodeLevelParms = {
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
         // All Walls Block EMP [0]
         walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
+        // For duelmode, how soon to reset the winning player (allows for double KOs)
+        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -1008,6 +1011,29 @@ float () CloseToSpawnPoint = {
     return 0;
 };
 
+void () ResetPlayers = {
+    if(cb_prematch)
+        return;
+    local entity te, oldself;
+    te = find(world, classname, "player");
+	while (te != world) {
+		if(!te.has_disconnected && !te.deadflag) {
+            oldself = self;
+            self = te;
+            //self.takedamage = DAMAGE_AIM;
+            //self.solid = SOLID_SLIDEBOX;
+            //self.movetype = MOVETYPE_WALK;
+            TeamFortress_RemoveTimers();
+            setspawnparms(self);
+            PutClientInServer();
+            
+            self = oldself;
+        }
+		te = find (te, classname, "player");
+	}
+
+}
+
 void () ClientKill = {
     local entity te;
     local float timeleft;
@@ -1287,6 +1313,8 @@ void () PutClientInServer = {
     self.reload_super_shotgun = 0;
     self.reload_grenade_launcher = 0;
     self.reload_rocket_launcher = 0;
+    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
+    self.reload_sniper_rifle = 0;
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;

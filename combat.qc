@@ -1,6 +1,7 @@
 void () T_MissileTouch;
 void () info_player_start;
 void (entity targ, entity attacker) ClientObituary;
+void () ResetPlayers;
 
 void (entity Goal, entity AP, float addb) DoResults;
 float (entity Goal, entity AP) Activated;
@@ -50,8 +51,14 @@ float (entity targ, entity inflictor) CanDamage = {
     return (FALSE);
 };
 
+void () ResetPlayersDelayed = {
+    ResetPlayers();
+    dremove(self);
+};
+
+
 void (entity targ, entity attacker) Killed = {
-    local entity oself;
+    local entity oself, reset_timer;
 
     if (attacker == world && (targ.classname == "building_dispenser" || targ.classname == "building_sentrygun"))
         attacker = targ;
@@ -86,6 +93,15 @@ void (entity targ, entity attacker) Killed = {
     monster_death_use();
     self.th_die();
     self = oself;
+    if(duelmode) {
+        if(duel_reset_delay) {
+            reset_timer = spawn();
+            reset_timer.nextthink = time + duel_reset_delay;
+            reset_timer.think = ResetPlayersDelayed;
+        } else {
+            ResetPlayers();
+        }
+    }
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
