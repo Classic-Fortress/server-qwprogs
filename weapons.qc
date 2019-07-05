@@ -1373,6 +1373,50 @@ void (float ox) W_FireSpikes = {
     KickPlayer(-3, self);
 };
 
+void () t_climb = {
+
+	if (time < self.heat)
+		return;
+		
+	self.heat = time + 0.1;
+
+	if (other.classname != "player")
+	return;
+
+	if (spurs_enabled == 0)
+	return;
+
+	if (other.items & IT_KEY1 && spurs_flag == 0 )
+	return;
+	    
+	if (other.items & IT_KEY2 && spurs_flag == 0 )
+	return;
+
+	if(other == self.owner || spurs_enabled == 3 || ((self.owner.team_no == other.team_no) && spurs_enabled == 2))
+		{
+			if (self.origin_z > other.origin_z){
+				other.velocity_z = spurs_boost;
+
+			}
+			
+		if(spurs_consume)
+			dremove(self);
+		}
+
+};
+
+void (entity e) ConvertToSpurs =
+{
+	e.origin = self.origin + ( normalize(self.velocity) * -5);
+	e.movetype = MOVETYPE_NONE;
+	e.velocity = '0 0 0';
+	e.solid = SOLID_TRIGGER;
+	e.touch = t_climb;
+	e.think = SUB_Remove;
+	e.nextthink = time + spurs_duration;
+	e.heat = time;
+};
+
 .float hit_z;
 
 void () spike_touch = {
@@ -1397,6 +1441,9 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                     TF_TD_NAIL);
         }
+        
+        dremove(self);
+        
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1409,8 +1456,18 @@ void () spike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
+    
+    if(other.classname == "worldspawn" && spurs_enabled > 0)
+    {
+		if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 || self.owner.playerclass == PC_SPY && spurs_spy == 1)
+		{
+			ConvertToSpurs(self);
+			return;
+		}
     }
+		
     dremove(self);
+   }
 };
 
 void () superspike_touch = {
