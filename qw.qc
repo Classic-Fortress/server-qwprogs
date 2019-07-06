@@ -452,6 +452,15 @@ float no_fire_mode;
 float exec_map_cfgs;
 float spy_off;
 
+float spurs_scout;
+float spurs_spy;
+float spurs_engineer;
+float spurs_duration;
+float spurs_enabled;
+float spurs_boost;
+float spurs_consume;
+float spurs_flag;
+
 float nailgren_type;
 float lasergren_rotationcount;
 float lasergren_rotationtime;

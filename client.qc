@@ -332,6 +332,17 @@ void () DecodeLevelParms = {
         } else {
             toggleflags = toggleflags - (toggleflags & TFLAG_FULLTEAMSCORE);
         }
+        
+        // climbing spikes
+        spurs_scout	= CF_GetSetting("spscout", "spurs_scout"	, "1");		// scouts allowed to spawn spurs
+        spurs_spy	= CF_GetSetting("spspy", "spurs_spy"	 	, "1");		// spy allowed to spawn spurs
+        spurs_engineer	= CF_GetSetting("speng", "spurs_engineer"	, "1");		// engineer allowed to spawn spurs
+        spurs_duration	= CF_GetSetting("spd", 	"spurs_duration"	 	, "2");		// how long until self destroy
+        spurs_boost	= CF_GetSetting("spb", "spurs_boost"	 	, "300");	// height gained from touch
+        spurs_enabled	= CF_GetSetting("spe", "spurs_enabled"	 	, "0");		// 0 = OFF , 1 = useable by owner , 2 = useable by owners team, 3 = useable by both teams
+        spurs_consume	= CF_GetSetting("spc", "spurs_consume" 	 	, "0");		// destroy on touch
+        spurs_flag	= CF_GetSetting("spf", "spurs_flag" 		, "0");		// can climb with flag
+
 
 	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
         nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
