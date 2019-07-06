@@ -52,13 +52,25 @@ float (entity targ, entity inflictor) CanDamage = {
 };
 
 void () ResetPlayersDelayed = {
-    ResetPlayers();
-    dremove(self);
+    if(duel_reset_timer < 1 && duel_reset_timer > 0) {
+        self.nextthink = time + duel_reset_timer;
+        duel_reset_timer = 0;
+    } else if(duel_reset_timer <= 0) {
+        ResetPlayers();
+        dremove(self);
+    } else {
+        bprint(PRINT_HIGH, Q"\sReset in \x10", ftos(duel_reset_timer), "\x11\s\n");
+        sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
+        //stuffcmd (p, "play buttons/switch04.wav\n");
+        duel_reset_timer--;
+        self.nextthink = time + 1;
+    }
 };
 
 
 void (entity targ, entity attacker) Killed = {
     local entity oself, reset_timer;
+    local float remainder;
 
     if (attacker == world && (targ.classname == "building_dispenser" || targ.classname == "building_sentrygun"))
         attacker = targ;
@@ -94,12 +106,27 @@ void (entity targ, entity attacker) Killed = {
     self.th_die();
     self = oself;
     if(duelmode) {
-        if(duel_reset_delay) {
-            reset_timer = spawn();
-            reset_timer.nextthink = time + duel_reset_delay;
-            reset_timer.think = ResetPlayersDelayed;
-        } else {
+        //Already in no fire mode - implies you're not the first to die
+        if(no_fire_mode) {
+            reset_timer = find(world, classname, "duel_reset_timer");
+            while (reset_timer != world) {
+                oself = reset_timer;
+                reset_timer = find (reset_timer, classname, "duel_reset_timer");
+                dremove(oself);
+            }
             ResetPlayers();
+        } else {
+            no_fire_mode = 1;
+            if(duel_reset_delay) {
+                remainder = duel_reset_delay % 1;
+                duel_reset_timer = duel_reset_delay - remainder;
+                reset_timer = spawn();
+                reset_timer.classname = "duel_reset_timer";
+                reset_timer.nextthink = time + remainder;
+                reset_timer.think = ResetPlayersDelayed;
+            } else {
+                ResetPlayers();
+            }
         }
     }
 };

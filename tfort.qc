@@ -743,6 +743,9 @@ void (float inp) TeamFortress_PrimeGrenade = {
     if ((self.tfstate & TFSTATE_GRENPRIMED) ||
         (self.tfstate & TFSTATE_GRENTHROWING))
         return;
+    
+    if (no_fire_mode)
+        return;
 
     if (    (inp == 1 && self.tp_grenade_switch != 1)
          || (inp == 2 && self.tp_grenade_switch == 1)) {

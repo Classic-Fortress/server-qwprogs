@@ -1850,6 +1850,9 @@ void () W_Attack = {
 
     if (self.tfstate & TFSTATE_RELOADING)
         return;
+    
+    if(no_fire_mode)
+        return;
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
         (self.undercover_skin != 0))
