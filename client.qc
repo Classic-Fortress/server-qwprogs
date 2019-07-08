@@ -1012,12 +1012,13 @@ float () CloseToSpawnPoint = {
 };
 
 void () ResetPlayers = {
+    no_fire_mode = 0;
     if(cb_prematch)
         return;
     local entity te, oldself;
     te = find(world, classname, "player");
 	while (te != world) {
-		if(!te.has_disconnected && !te.deadflag) {
+		if(!te.has_disconnected) {
             oldself = self;
             self = te;
             //self.takedamage = DAMAGE_AIM;

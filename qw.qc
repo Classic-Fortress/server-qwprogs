@@ -444,6 +444,8 @@ float gametime;
 float is_countdown;
 float duelmode;
 float duel_reset_delay;
+float duel_reset_timer;
+float no_fire_mode;
 
 .float tf_id;
 
