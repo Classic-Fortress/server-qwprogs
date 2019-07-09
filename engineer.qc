@@ -68,8 +68,18 @@ void () LaserBolt_Touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
+  
+    if(other.classname == "worldspawn" && spurs_enabled > 0)
+    {
+		if(self.owner.playerclass == PC_ENGINEER && spurs_engineer == 1)
+		{
+			ConvertToSpurs(self);
+			return;
+		}
     }
+
     dremove(self);
+}
 };
 
 void () W_FireLaser = {
