@@ -3,6 +3,8 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
+* Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)
 * Admin option to enable duel mode. Will auto-reset/resup the not dead player. Main option - `localinfo duelmode on`
 * Server option for making all walls block EMP. Off by default. `localinfo walls_block_emp 1` or `localinfo wbe 1`. (SPAWNFLAG_BLOCK_EMP 4096 will work regardless)

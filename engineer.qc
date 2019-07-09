@@ -1243,7 +1243,7 @@ void () CheckDistance = {
     self.nextthink = time + 0.3;
 };
 
-void (entity eng, string bld) DestroyBuilding = {
+void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
     local entity te;
     local entity oldself;
     local float pos;
@@ -1264,13 +1264,34 @@ void (entity eng, string bld) DestroyBuilding = {
                 Menu_Close(te.real_owner);
                 te.real_owner.building = world;
             }
-            TF_T_Damage(te, world, world, 500, 0, 0);
+            if(explode) {
+                TF_T_Damage(te, world, world, 500, 0, 0);
+            } else {
+                if(bld == "building_dispenser")
+                    te.real_owner.has_dispenser = 0;
+                if(bld == "building_sentrygun") {
+                    te.real_owner.has_sentry = 0;
+                    dremove (te.trigger_field);
+                }
+                spawn_tfog(te.origin);
+                dremove (te);
+            }
         }
         te = find(te, classname, bld);
     }
+};
+
+void (entity eng, string bld) DestroyBuilding = {
+    DestroyBuildingWithOptions(eng, bld, TRUE);
+}
+
+void (entity eng) Engineer_QuietlyRemoveBuildings = {
+    DestroyBuildingWithOptions(eng, "building_dispenser", FALSE);
+    DestroyBuildingWithOptions(eng, "building_sentrygun", FALSE);
 };
 
 void (entity eng) Engineer_RemoveBuildings = {
     DestroyBuilding(eng, "building_dispenser");
     DestroyBuilding(eng, "building_sentrygun");
 };
+

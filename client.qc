@@ -25,6 +25,7 @@ void () RemoveGasTimers;
 void () RemoveGrenades;
 
 void (entity eng) Engineer_RemoveBuildings;
+void (entity eng) Engineer_QuietlyRemoveBuildings;
 
 void (string halias, float himpulse1, float himpulse2) TeamFortress_Alias;
 
@@ -169,6 +170,21 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
+void () InitPrematch = {
+    localcmd ("serverinfo status Standby\n");
+    
+    clan_scores_dumped = 0;
+    game_locked = 0;
+    cb_prematch = 1;
+    local entity pm_message = spawn();
+    pm_message.owner = world;
+    pm_message.classname = "pmmessage";
+    pm_message.think = PreMatch_Message;
+    pm_message.nextthink = 1;
+    
+    game_locked = CF_GetSetting("lg", "locked_game", "off");
+}
+
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -279,19 +295,7 @@ void () DecodeLevelParms = {
             rounds = rounds + 1;
 
         if (clanbattle) {
-            localcmd ("serverinfo status Standby\n");
-            
-            clan_scores_dumped = 0;
-            game_locked = 0;
-            cb_prematch = 1;
-            local entity pm_message = spawn();
-            pm_message.owner = world;
-            pm_message.classname = "pmmessage";
-            pm_message.think = PreMatch_Message;
-            pm_message.nextthink = 1;
-            
-            game_locked = CF_GetSetting("lg", "locked_game", "off");
-
+            InitPrematch();
         } else {
             clanbattle = FALSE;
             localcmd ("serverinfo status Normal\n");
@@ -589,6 +593,10 @@ void () DecodeLevelParms = {
         walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
         // For duelmode, how soon to reset the winning player (allows for double KOs)
         duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
+        // remove packs in duelmode [1]
+        duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
+        // spawn with all possible grenades [0]
+        duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -1022,6 +1030,61 @@ float () CloseToSpawnPoint = {
     return 0;
 };
 
+void () RemovePlayerOwnedEnts = {
+    local entity te;
+
+    te = find(world, classname, "pipebomb");
+    while (te) {
+        if (te.owner == self) {
+            dremove(te);
+        }
+        te = find(te, classname, "pipebomb");
+    }
+    TeamFortress_RemoveTimers();
+    RemoveGasTimers();
+    Engineer_QuietlyRemoveBuildings(self);
+    te = find(world, classname, "detpack");
+    while (te) {
+        if (te.owner == self) {
+            if (te.weaponmode == 1) {
+                TeamFortress_SetSpeed(te.enemy);
+                dremove(te.oldenemy);
+                dremove(te.observer_list);
+            }
+            dremove(te);
+            te = world;
+        }
+        te = find(te, classname, "detpack");
+    }
+    te = find(world, classname, "countdown_timer");
+    while (te) {
+        if (te.owner == self) {
+            if (te.weaponmode == 1) {
+                TeamFortress_SetSpeed(te.enemy);
+                dremove(te.oldenemy);
+                dremove(te.observer_list);
+            }
+            dremove(te);
+            te = world;
+        }
+        te = find(te, classname, "countdown_timer");
+    }
+    RemoveGrenades();
+    if (clanbattle && (self.tf_id != 0)) {
+        te = spawn();
+        te.classname = "ghost";
+        te.tf_id = self.tf_id;
+        te.team_no = self.team_no;
+        te.frags = self.frags;
+        te.real_frags = self.real_frags;
+        te.netname = self.netname;
+        te.playerclass = self.playerclass;
+        if (self.tfstate & 8) {
+            te.tfstate = 8;
+        }
+    }  
+}
+
 void () ResetPlayers = {
     no_fire_mode = 0;
     if(cb_prematch)
@@ -1030,12 +1093,12 @@ void () ResetPlayers = {
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
+            if(te.health > 0) {
+                stuffcmd(te, "f_respawn\n");
+            }
             oldself = self;
             self = te;
-            //self.takedamage = DAMAGE_AIM;
-            //self.solid = SOLID_SLIDEBOX;
-            //self.movetype = MOVETYPE_WALK;
-            TeamFortress_RemoveTimers();
+            RemovePlayerOwnedEnts();
             setspawnparms(self);
             PutClientInServer();
             
@@ -1105,6 +1168,9 @@ void () ClientKill = {
     self.deadflag = DEAD_RESPAWNABLE;
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.takedamage = 0;
+    if(duelmode) {
+        ResetPlayers();
+    }
 };
 
 entity lastspawn_team1;
@@ -2212,7 +2278,6 @@ void () ClientConnect = {
 };
 
 void () ClientDisconnect = {
-    local entity te;
     local string st;
     local float fr;
 
@@ -2222,47 +2287,20 @@ void () ClientDisconnect = {
             " frags\n");
     sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
-    TeamFortress_RemoveTimers();
-    RemoveGasTimers();
-    Engineer_RemoveBuildings(self);
-    te = find(world, classname, "detpack");
-    while (te) {
-        if (te.owner == self) {
-            if (te.weaponmode == 1) {
-                TeamFortress_SetSpeed(te.enemy);
-                dremove(te.oldenemy);
-                dremove(te.observer_list);
+    RemovePlayerOwnedEnts();
+
+    if (duelmode && clanbattle && !cb_prematch) {
+        //In duelmode, reset back to prematch if everyone leaves half-way through a round
+        local float playersleft = 0;
+        local entity te = find (world, classname, "player");
+        while (te) {
+            if (!te.has_disconnected) {
+                playersleft = playersleft + 1;
             }
-            dremove(te);
-            te = world;
+            te = find (te, classname, "player");
         }
-        te = find(te, classname, "detpack");
-    }
-    te = find(world, classname, "countdown_timer");
-    while (te) {
-        if (te.owner == self) {
-            if (te.weaponmode == 1) {
-                TeamFortress_SetSpeed(te.enemy);
-                dremove(te.oldenemy);
-                dremove(te.observer_list);
-            }
-            dremove(te);
-            te = world;
-        }
-        te = find(te, classname, "countdown_timer");
-    }
-    RemoveGrenades();
-    if (clanbattle && (self.tf_id != 0)) {
-        te = spawn();
-        te.classname = "ghost";
-        te.tf_id = self.tf_id;
-        te.team_no = self.team_no;
-        te.frags = self.frags;
-        te.real_frags = self.real_frags;
-        te.netname = self.netname;
-        te.playerclass = self.playerclass;
-        if (self.tfstate & 8) {
-            te.tfstate = 8;
+        if (!playersleft) {
+            InitPrematch();
         }
     }
     set_suicide_frame();

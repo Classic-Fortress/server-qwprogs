@@ -446,6 +446,8 @@ float duelmode;
 float duel_reset_delay;
 float duel_reset_timer;
 float no_fire_mode;
+float duel_all_grens;
+float duel_no_packs;
 
 .float tf_id;
 

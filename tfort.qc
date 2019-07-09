@@ -2123,6 +2123,12 @@ void () TeamFortress_SetEquipment = {
 
         setmodel(self, string_null);
     }
+    if(duelmode && !duel_all_grens) {
+        //unless duel_all_grens is set, remove all secondary grens except emps
+        if(self.playerclass != PC_ENGINEER) {
+            self.no_grenades_2 = 0;
+        }
+    }
 
     if (self.armortype >= 0.8)
         self.items = self.items | IT_ARMOR3;
@@ -2379,7 +2385,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
         }
     }
     self.respawn_time = time + restime;
-    if (restime > 3) {
+    if (restime > 3 && !duelmode) {
         db = ftos(restime);
         sprint(self, PRINT_HIGH, db, " seconds till respawn\n");
     }
