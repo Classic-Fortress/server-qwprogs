@@ -777,8 +777,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         }
     }
     if (addb) {
-        if (Player.health > 0 && !(duelmode && duel_no_packs)) {
-            if (Goal.health > 0) {
+        if (Player.health > 0) {
+            if (Goal.health > 0 && !(duelmode && duel_no_packs)) {
                 if (stockfull)
                     T_Heal(Player, Player.max_health, 0);
                 else
@@ -793,173 +793,175 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             0);
                 }
             }
-            if (stockfull) {
-                if (Goal.armortype > 0) {
-                    Player.armortype = Player.armor_allowed;
-                    Player.armorvalue = Player.maxarmor;
-                } else if (Goal.armorvalue > 0) {
-                    Player.armortype = Player.armor_allowed;
-                    Player.armorvalue = Player.maxarmor;
+            if(!(duelmode && duel_no_packs)) {
+                if (stockfull) {
+                    if (Goal.armortype > 0) {
+                        Player.armortype = Player.armor_allowed;
+                        Player.armorvalue = Player.maxarmor;
+                    } else if (Goal.armorvalue > 0) {
+                        Player.armortype = Player.armor_allowed;
+                        Player.armorvalue = Player.maxarmor;
+                    }
+                } else {
+                    if (Goal.armortype > 0)
+                        Player.armortype = Goal.armortype;
+                    else if (Goal.armorvalue > 0)
+                        Player.armortype = Player.armor_allowed;
+                    Player.armorvalue = Player.armorvalue + Goal.armorvalue;
                 }
-            } else {
-                if (Goal.armortype > 0)
-                    Player.armortype = Goal.armortype;
-                else if (Goal.armorvalue > 0)
-                    Player.armortype = Player.armor_allowed;
-                Player.armorvalue = Player.armorvalue + Goal.armorvalue;
-            }
-            if (Goal.armorclass > 0)
-                Player.armorclass = Goal.armorclass;
+                if (Goal.armorclass > 0)
+                    Player.armorclass = Goal.armorclass;
 
-            Player.ammo_shells = Player.ammo_shells + Goal.ammo_shells;
-            Player.ammo_nails = Player.ammo_nails + Goal.ammo_nails;
-            Player.ammo_rockets = Player.ammo_rockets + Goal.ammo_rockets;
-            Player.ammo_cells = Player.ammo_cells + Goal.ammo_cells;
-            Player.ammo_medikit = Player.ammo_medikit + Goal.ammo_medikit;
-            Player.ammo_detpack = Player.ammo_detpack + Goal.ammo_detpack;
-            //refill the clip if stock_reload is 2
-            if (stock_reload == 2) {
-                if(Goal.ammo_shells) {
-                    if(Player.current_weapon == WEAP_SHOTGUN) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
-                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
-                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
-                }
-                if(Goal.ammo_rockets) {
-                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
-                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
-                }
-            } else {
-                //for use in map entities without specifically enabling the general override
-                if(Goal.reload_shotgun) {
-                    if(Player.current_weapon == WEAP_SHOTGUN) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
-                }
-                if(Goal.reload_super_shotgun) {
-                    if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
-                }
-                if(Goal.reload_sniper_rifle) {
-                    if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
-                }
-                if(Goal.reload_grenade_launcher) {
-                    if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
-                }
-                if(Goal.reload_rocket_launcher) {
-                    if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
-                        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
-                    }
-                    Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
-                }
-            }
-            Player.no_grenades_1 =
-                Player.no_grenades_1 + Goal.no_grenades_1;
-            Player.no_grenades_2 =
-                Player.no_grenades_2 + Goal.no_grenades_2;
-            
-            if (Player.no_grenades_1 > Player.max_grenades_1) {
-                Player.no_grenades_1 = Player.max_grenades_1;
-            }
-            if (Player.no_grenades_2 > Player.max_grenades_2) {
-                Player.no_grenades_2 = Player.max_grenades_2;
-            }
-
-            if (Player.ammo_detpack > Player.maxammo_detpack) {
-                Player.ammo_detpack = Player.maxammo_detpack;
-            }
-            if (Player.tfstate & TFSTATE_GRENPRIMED) {
-                te = find(world, classname, "primer");
-                while (te) {
-                    if (te.owner == Player) {
-                        if ((te.impulse == TF_GRENADE_2) &&
-                                (Player.no_grenades_2 <= 0)) {
-                            Player.tfstate =
-                                Player.tfstate -
-                                (Player.tfstate & TFSTATE_GRENPRIMED);
-                            Player.tfstate =
-                                Player.tfstate -
-                                (Player.tfstate & TFSTATE_GRENTHROWING);
-                            dremove(te);
-                        } else if ((te.impulse == TF_GRENADE_1) &&
-                                (Player.no_grenades_1 <= 0)) {
-                            Player.tfstate =
-                                Player.tfstate -
-                                (Player.tfstate & TFSTATE_GRENPRIMED);
-                            Player.tfstate =
-                                Player.tfstate -
-                                (Player.tfstate & TFSTATE_GRENTHROWING);
-                            dremove(te);
+                Player.ammo_shells = Player.ammo_shells + Goal.ammo_shells;
+                Player.ammo_nails = Player.ammo_nails + Goal.ammo_nails;
+                Player.ammo_rockets = Player.ammo_rockets + Goal.ammo_rockets;
+                Player.ammo_cells = Player.ammo_cells + Goal.ammo_cells;
+                Player.ammo_medikit = Player.ammo_medikit + Goal.ammo_medikit;
+                Player.ammo_detpack = Player.ammo_detpack + Goal.ammo_detpack;
+                //refill the clip if stock_reload is 2
+                if (stock_reload == 2) {
+                    if(Goal.ammo_shells) {
+                        if(Player.current_weapon == WEAP_SHOTGUN) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
                         }
-                        te = world;
-                    } else {
-                        te = find(te, classname, "primer");
+                        Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                        if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                        if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                    }
+                    if(Goal.ammo_rockets) {
+                        if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                        if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
+                    }
+                } else {
+                    //for use in map entities without specifically enabling the general override
+                    if(Goal.reload_shotgun) {
+                        if(Player.current_weapon == WEAP_SHOTGUN) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_shotgun = max(Player.reload_shotgun - Goal.ammo_shells, 0);
+                    }
+                    if(Goal.reload_super_shotgun) {
+                        if(Player.current_weapon == WEAP_SUPER_SHOTGUN) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_super_shotgun = max(Player.reload_super_shotgun - Goal.ammo_shells, 0);
+                    }
+                    if(Goal.reload_sniper_rifle) {
+                        if(Player.current_weapon == WEAP_SNIPER_RIFLE) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+                    }
+                    if(Goal.reload_grenade_launcher) {
+                        if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_grenade_launcher = max(Player.reload_grenade_launcher - Goal.ammo_rockets, 0);
+                    }
+                    if(Goal.reload_rocket_launcher) {
+                        if(Player.current_weapon == WEAP_ROCKET_LAUNCHER) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
                     }
                 }
-            }
-            if (Goal.invincible_finished > 0) {
-                Player.items = Player.items | IT_INVULNERABILITY;
-                Player.invincible_time = 1;
-                Player.invincible_finished =
-                    time + Goal.invincible_finished;
-                if (Goal.classname == "item_tfgoal") {
-                    Player.tfstate = Player.tfstate | TFSTATE_INVINCIBLE;
-                    Player.invincible_finished = time + 666;
+                Player.no_grenades_1 =
+                    Player.no_grenades_1 + Goal.no_grenades_1;
+                Player.no_grenades_2 =
+                    Player.no_grenades_2 + Goal.no_grenades_2;
+                
+                if (Player.no_grenades_1 > Player.max_grenades_1) {
+                    Player.no_grenades_1 = Player.max_grenades_1;
                 }
-            }
-            if (Goal.invisible_finished > 0) {
-                Player.items = Player.items | IT_INVISIBILITY;
-                Player.invisible_time = 1;
-                Player.invisible_finished = time + Goal.invisible_finished;
-                if (Goal.classname == "item_tfgoal") {
-                    Player.tfstate = Player.tfstate | TFSTATE_INVISIBLE;
-                    Player.invisible_finished = time + 666;
+                if (Player.no_grenades_2 > Player.max_grenades_2) {
+                    Player.no_grenades_2 = Player.max_grenades_2;
                 }
-            }
-            if (Goal.super_damage_finished > 0) {
-                Player.items = Player.items | IT_QUAD;
-                Player.super_time = 1;
-                Player.super_damage_finished =
-                    time + Goal.super_damage_finished;
-                if (Goal.classname == "item_tfgoal") {
-                    Player.tfstate = Player.tfstate | TFSTATE_QUAD;
-                    Player.super_damage_finished = time + 666;
+
+                if (Player.ammo_detpack > Player.maxammo_detpack) {
+                    Player.ammo_detpack = Player.maxammo_detpack;
                 }
-            }
-            if (Goal.radsuit_finished > 0) {
-                Player.items = Player.items | IT_SUIT;
-                Player.rad_time = 1;
-                Player.radsuit_finished = time + Goal.radsuit_finished;
-                if (Goal.classname == "item_tfgoal") {
-                    Player.tfstate = Player.tfstate | TFSTATE_RADSUIT;
-                    Player.radsuit_finished = time + 666;
+                if (Player.tfstate & TFSTATE_GRENPRIMED) {
+                    te = find(world, classname, "primer");
+                    while (te) {
+                        if (te.owner == Player) {
+                            if ((te.impulse == TF_GRENADE_2) &&
+                                    (Player.no_grenades_2 <= 0)) {
+                                Player.tfstate =
+                                    Player.tfstate -
+                                    (Player.tfstate & TFSTATE_GRENPRIMED);
+                                Player.tfstate =
+                                    Player.tfstate -
+                                    (Player.tfstate & TFSTATE_GRENTHROWING);
+                                dremove(te);
+                            } else if ((te.impulse == TF_GRENADE_1) &&
+                                    (Player.no_grenades_1 <= 0)) {
+                                Player.tfstate =
+                                    Player.tfstate -
+                                    (Player.tfstate & TFSTATE_GRENPRIMED);
+                                Player.tfstate =
+                                    Player.tfstate -
+                                    (Player.tfstate & TFSTATE_GRENTHROWING);
+                                dremove(te);
+                            }
+                            te = world;
+                        } else {
+                            te = find(te, classname, "primer");
+                        }
+                    }
+                }
+                if (Goal.invincible_finished > 0) {
+                    Player.items = Player.items | IT_INVULNERABILITY;
+                    Player.invincible_time = 1;
+                    Player.invincible_finished =
+                        time + Goal.invincible_finished;
+                    if (Goal.classname == "item_tfgoal") {
+                        Player.tfstate = Player.tfstate | TFSTATE_INVINCIBLE;
+                        Player.invincible_finished = time + 666;
+                    }
+                }
+                if (Goal.invisible_finished > 0) {
+                    Player.items = Player.items | IT_INVISIBILITY;
+                    Player.invisible_time = 1;
+                    Player.invisible_finished = time + Goal.invisible_finished;
+                    if (Goal.classname == "item_tfgoal") {
+                        Player.tfstate = Player.tfstate | TFSTATE_INVISIBLE;
+                        Player.invisible_finished = time + 666;
+                    }
+                }
+                if (Goal.super_damage_finished > 0) {
+                    Player.items = Player.items | IT_QUAD;
+                    Player.super_time = 1;
+                    Player.super_damage_finished =
+                        time + Goal.super_damage_finished;
+                    if (Goal.classname == "item_tfgoal") {
+                        Player.tfstate = Player.tfstate | TFSTATE_QUAD;
+                        Player.super_damage_finished = time + 666;
+                    }
+                }
+                if (Goal.radsuit_finished > 0) {
+                    Player.items = Player.items | IT_SUIT;
+                    Player.rad_time = 1;
+                    Player.radsuit_finished = time + Goal.radsuit_finished;
+                    if (Goal.classname == "item_tfgoal") {
+                        Player.tfstate = Player.tfstate | TFSTATE_RADSUIT;
+                        Player.radsuit_finished = time + 666;
+                    }
                 }
             }
         }
-        Player.lives = Player.lives + Goal.lives;
+            Player.lives = Player.lives + Goal.lives;
 
         if (Goal.frags) {
             if ((Goal.goal_effects == TFGE_AP) || !(toggleflags & TFLAG_FULLTEAMSCORE)) {
