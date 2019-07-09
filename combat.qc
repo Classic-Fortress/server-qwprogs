@@ -105,7 +105,7 @@ void (entity targ, entity attacker) Killed = {
     monster_death_use();
     self.th_die();
     self = oself;
-    if(duelmode) {
+    if(duelmode && targ.classname == "player") {
         //Already in no fire mode - implies you're not the first to die
         if(no_fire_mode) {
             reset_timer = find(world, classname, "duel_reset_timer");

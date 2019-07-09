@@ -108,6 +108,16 @@ void () StartMatch =
 		dremove(te);
 		te = find (te, classname, "detpack");
 	}
+	if(duelmode) {
+        //Hide all packs
+        te = find(world, classname, "info_tfgoal");
+        while (te){
+            if (te.mdl) {
+                setmodel(te, string_null);
+            }
+            te = find (te, classname, "info_tfgoal");
+        }
+    }
 
     cb_prematch = 0;
     cease_fire = 0;

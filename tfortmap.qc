@@ -649,8 +649,9 @@ void (entity Goal) InactivateGoal = {
                 Goal.solid = SOLID_TRIGGER;
         }
         Goal.goal_state = 2;
-        if (Goal.mdl != string_null)
+        if (Goal.mdl != string_null && !duelmode) {
             setmodel(Goal, Goal.mdl);
+        }
     }
 };
 
@@ -776,7 +777,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         }
     }
     if (addb) {
-        if (Player.health > 0) {
+        if (Player.health > 0 && !duelmode) {
             if (Goal.health > 0) {
                 if (stockfull)
                     T_Heal(Player, Player.max_health, 0);
@@ -792,8 +793,6 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             0);
                 }
             }
-        }
-        if (Player.health > 0) {
             if (stockfull) {
                 if (Goal.armortype > 0) {
                     Player.armortype = Player.armor_allowed;
@@ -2131,7 +2130,7 @@ void () item_tfgoal_touch = {
                     self.origin = self.oldorigin;
                     setmodel(self, self.mdl);
                     setorigin(self, self.origin);
-                    sound(self, 2, "items/itembk2.wav", 1, 1);
+                   sound(self, 2, "items/itembk2.wav", 1, 1);
                     return;
                 }
             } else {
@@ -2299,8 +2298,9 @@ void () ReturnItem = {
         self.enemy.effects = self.enemy.effects | EF_BLUE;
     }
 
-    if (self.enemy.mdl != string_null)
+    if (self.enemy.mdl != string_null) {
         setmodel(self.enemy, self.enemy.mdl);
+    }
 
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);

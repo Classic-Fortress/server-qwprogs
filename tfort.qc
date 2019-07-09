@@ -2379,7 +2379,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
         }
     }
     self.respawn_time = time + restime;
-    if (restime > 3) {
+    if (restime > 3 && !duelmode) {
         db = ftos(restime);
         sprint(self, PRINT_HIGH, db, " seconds till respawn\n");
     }
