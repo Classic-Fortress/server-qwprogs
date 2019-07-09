@@ -2123,6 +2123,12 @@ void () TeamFortress_SetEquipment = {
 
         setmodel(self, string_null);
     }
+    if(duelmode && !duel_all_grens) {
+        //unless duel_all_grens is set, remove all secondary grens except emps
+        if(self.playerclass != PC_ENGINEER) {
+            self.no_grenades_2 = 0;
+        }
+    }
 
     if (self.armortype >= 0.8)
         self.items = self.items | IT_ARMOR3;

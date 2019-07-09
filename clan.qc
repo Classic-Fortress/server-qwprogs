@@ -108,7 +108,7 @@ void () StartMatch =
 		dremove(te);
 		te = find (te, classname, "detpack");
 	}
-	if(duelmode) {
+	if(duelmode && duel_no_packs) {
         //Hide all packs
         te = find(world, classname, "info_tfgoal");
         while (te){

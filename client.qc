@@ -25,6 +25,7 @@ void () RemoveGasTimers;
 void () RemoveGrenades;
 
 void (entity eng) Engineer_RemoveBuildings;
+void (entity eng) Engineer_QuietlyRemoveBuildings;
 
 void (string halias, float himpulse1, float himpulse2) TeamFortress_Alias;
 
@@ -592,6 +593,10 @@ void () DecodeLevelParms = {
         walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
         // For duelmode, how soon to reset the winning player (allows for double KOs)
         duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
+        // remove packs in duelmode [1]
+        duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
+        // spawn with all possible grenades [0]
+        duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -1028,9 +1033,16 @@ float () CloseToSpawnPoint = {
 void () RemovePlayerOwnedEnts = {
     local entity te;
 
+    te = find(world, classname, "pipebomb");
+    while (te) {
+        if (te.owner == self) {
+            dremove(te);
+        }
+        te = find(te, classname, "pipebomb");
+    }
     TeamFortress_RemoveTimers();
     RemoveGasTimers();
-    Engineer_RemoveBuildings(self);
+    Engineer_QuietlyRemoveBuildings(self);
     te = find(world, classname, "detpack");
     while (te) {
         if (te.owner == self) {
@@ -1081,12 +1093,11 @@ void () ResetPlayers = {
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
+            if(te.health > 0) {
+                stuffcmd(te, "f_respawn\n");
+            }
             oldself = self;
             self = te;
-            //self.takedamage = DAMAGE_AIM;
-            //self.solid = SOLID_SLIDEBOX;
-            //self.movetype = MOVETYPE_WALK;
-            //TeamFortress_RemoveTimers();
             RemovePlayerOwnedEnts();
             setspawnparms(self);
             PutClientInServer();
@@ -1157,6 +1168,9 @@ void () ClientKill = {
     self.deadflag = DEAD_RESPAWNABLE;
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.takedamage = 0;
+    if(duelmode) {
+        ResetPlayers();
+    }
 };
 
 entity lastspawn_team1;

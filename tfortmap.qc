@@ -649,7 +649,7 @@ void (entity Goal) InactivateGoal = {
                 Goal.solid = SOLID_TRIGGER;
         }
         Goal.goal_state = 2;
-        if (Goal.mdl != string_null && !duelmode) {
+        if (Goal.mdl != string_null && !(duelmode && duel_no_packs)) {
             setmodel(Goal, Goal.mdl);
         }
     }
@@ -777,7 +777,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         }
     }
     if (addb) {
-        if (Player.health > 0 && !duelmode) {
+        if (Player.health > 0 && !(duelmode && duel_no_packs)) {
             if (Goal.health > 0) {
                 if (stockfull)
                     T_Heal(Player, Player.max_health, 0);
