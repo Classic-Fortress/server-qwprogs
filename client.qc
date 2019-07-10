@@ -2275,6 +2275,8 @@ void () ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
+    if (duelmode)
+        precache_sound("buttons/switch04.wav");
 };
 
 void () ClientDisconnect = {
@@ -2300,6 +2302,7 @@ void () ClientDisconnect = {
             te = find (te, classname, "player");
         }
         if (!playersleft) {
+            bprint(PRINT_HIGH, "Match \sabandoned\s, resetting to prematch\n");
             InitPrematch();
         }
     }
