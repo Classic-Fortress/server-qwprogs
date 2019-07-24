@@ -170,7 +170,8 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
-void () InitPrematch = {
+void InitPrematch()
+{
     localcmd ("serverinfo status Standby\n");
     
     clan_scores_dumped = 0;
@@ -183,6 +184,8 @@ void () InitPrematch = {
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
+
+}
 
 void (entity goalitem) SetFlagSendMethod = {
     if(goalitem) {
@@ -763,7 +766,7 @@ void () DecodeLevelParms = {
         self.is_admin = parm15;
 };
 
-entity()FindIntermission =
+entity() FindIntermission =
 {
     local entity spot;
     local float cyc;
