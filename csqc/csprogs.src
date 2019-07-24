@@ -1,5 +1,5 @@
 ../csprogs.dat
 csdefs.qc
-../commondefs.qc
+../share/commondefs.qc
 csextradefs.qc
 main.qc

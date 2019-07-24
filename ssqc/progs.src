@@ -1,7 +1,7 @@
-qwprogs.dat
+../qwprogs.dat
 defs.qc
-fteextensions.qc
-commondefs.qc
+../share/fteextensions.qc
+../share/commondefs.qc
 qw.qc
 q3defs.qc
 debug.qc
