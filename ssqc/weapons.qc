@@ -947,6 +947,7 @@ void () W_FireAutoRifle = {
     FireSniperBullet(dir, 8);
 };
 
+void FireAssCan (float shotcount, vector dir, vector spread);
 void () W_FireAssaultCannon = {
     local vector dir;
 
@@ -955,15 +956,22 @@ void () W_FireAssaultCannon = {
     self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
-
-    if (cannon_accuracy == 1)
-        FireBullets(5, dir, '0 0 0');
-    else if (cannon_accuracy == 2)
-        FireBullets(5, dir, '0.1 0.1 0');
-    else if (vlen(self.velocity) < 50)
-        FireBullets(5, dir, '0.075 0.075 0');
+    
+    if (fo_hwguy == FALSE)
+    {
+        if (cannon_accuracy == 1)
+            FireBullets(5, dir, '0 0 0');
+        else if (cannon_accuracy == 2)
+            FireBullets(5, dir, '0.1 0.1 0');
+        else if (vlen(self.velocity) < 50)
+            FireBullets(5, dir, '0.075 0.075 0');
+        else
+            FireBullets(5, dir, '0.15 0.15 0');
+    }
     else
-        FireBullets(5, dir, '0.15 0.15 0');
+    {
+        FireAssCan(5, dir, '0.04 0.04 0');
+    }
 };
 
 void (entity pe_flame) CF_ExtinguishFlame = {

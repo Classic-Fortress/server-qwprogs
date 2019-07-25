@@ -986,6 +986,8 @@
 #define PC_HVYWEAP_GRENADE_MAX_1	4
 #define PC_HVYWEAP_GRENADE_MAX_2	2
 #define PC_HVYWEAP_TF_ITEMS		0
+#define PC_HVYWEAP_PROJSPEED	5000
+#define MODEL_PROJ_DIAM2 "progs/proj_diam2.mdl"
 
 
 // Class Details for PYRO

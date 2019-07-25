@@ -523,6 +523,7 @@ float cannon_move;
 float cannon_movespin;
 float cannon_conc;
 float cannon_accuracy;
+float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
