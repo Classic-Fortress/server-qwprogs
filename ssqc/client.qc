@@ -481,6 +481,9 @@ void () DecodeLevelParms = {
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
+        // projectile FO style hwguy
+        fo_hwguy = CF_GetSetting("fohw", "fo_hwguy", "on");
+
         // allow feign death in air [on]
         feign_air = CF_GetSetting("fa", "feign_air", "on");
 
@@ -1406,6 +1409,7 @@ void () PutClientInServer = {
     self.reload_rocket_launcher = 0;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
     self.reload_sniper_rifle = 0;
+    self.reload_assault_cannon = 0;
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;

@@ -411,6 +411,16 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
 };
 
 void () player_assaultcannon1 =[103, player_assaultcannon2] {
+    if (fo_hwguy)
+    {
+        if (self.tfstate & TFSTATE_RELOADING)
+        {
+            self.count = 1;
+            player_assaultcannondown1();
+            return;
+        }
+    }
+
     if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) <= 30)
                 && !(self.tfstate & TFSTATE_LOCK)) {
         muzzleflash();
@@ -451,6 +461,15 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 };
 
 void () player_assaultcannon2 =[104, player_assaultcannon1] {
+    if (fo_hwguy)
+    {
+        if (self.tfstate & TFSTATE_RELOADING)
+        {
+            self.count = 1;
+            player_assaultcannondown1();
+            return;
+        }
+    }
     if (vlen(self.velocity) < 30 && !(self.tfstate & TFSTATE_LOCK)) {
         if (self.weaponframe == 2) {
             self.weaponframe = 4;
