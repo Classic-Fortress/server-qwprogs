@@ -526,6 +526,46 @@ void () TeamFortress_Scan = {
     return;
 };
 
+void CussSpeedBump()
+{
+    entity p;
+    p = self.owner;
+    self.nextthink = time + .3;
+
+    if (!self.cnt2)
+    {
+        makevectors(p.v_angle);
+
+        // if medic within x units of ground, slow
+        traceline(p.origin, (v_up * -1000), MOVE_NOMONSTERS, p);
+
+        if (vlen(p.origin - trace_endpos) <= 100)
+        {
+            // near ground
+            self.cnt2 = 1;
+        }
+    }
+
+    if (self.cnt2)
+    {
+        self.cnt = self.cnt + 1;
+
+        if (vlen(p.velocity) > 1000)
+        {
+            if (self.cnt < 10)
+            {
+                p.velocity = p.velocity *.9;
+            }        
+        }
+    }
+    
+
+    if (self.cnt >= 10)
+    {
+        dremove(self);
+    }
+}
+
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce = {
     local float points;
@@ -553,9 +593,19 @@ void (entity inflictor, entity attacker, float bounce,
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
-                        if (medicnocuss && head.playerclass == 5) {
-                            head = head.chain;
-                            continue;
+                        if (head.playerclass == PC_MEDIC)
+                        {
+                            if (medicnocuss)
+                            {
+                                entity speedbump;
+                                speedbump = spawn();
+                                speedbump.think = CussSpeedBump;
+                                speedbump.nextthink = time + 1;
+                                speedbump.owner = head;
+
+                                head = head.chain;
+                                continue;
+                            }
                         }
 
                         te = find(world, classname, "timer");

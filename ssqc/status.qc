@@ -998,7 +998,6 @@ string(entity pl) ClipSizeToString =
     } else
         return "";
 
-    // TODO - can we up this to 100 for ass can?
     if (num > 999)
         num = 999;
 
