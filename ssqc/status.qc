@@ -988,11 +988,19 @@ string(entity pl) ClipSizeToString =
         if ((max - pl.reload_rocket_launcher) > pl.ammo_rockets)
             pl.reload_rocket_launcher = (max - pl.ammo_rockets);
         num = (max - pl.reload_rocket_launcher);
+    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if ((max - pl.reload_assault_cannon) > pl.ammo_shells)
+                pl.reload_assault_cannon = (max - pl.ammo_shells);
+            num = (max - pl.reload_assault_cannon);
+        }
     } else
         return "";
 
-    if (num > 99)
-        num = 99;
+    // TODO - can we up this to 100 for ass can?
+    if (num > 999)
+        num = 999;
 
     st = Q"\sClip\s: ";
     st = strcat(st, strpadl(ftos(floor(num)), 2));
@@ -1002,21 +1010,33 @@ string(entity pl) ClipSizeToString =
     return st;
 };
 
-float(entity pl) GetClipSize =
+float GetClipSize(entity pl) 
 {
-    if (pl.current_weapon == WEAP_SHOTGUN)
-        return 8;
-    else if (pl.current_weapon == WEAP_SUPER_SHOTGUN)
-        return 16;
-    else if (pl.current_weapon == WEAP_SNIPER_RIFLE)
-        return 1;
-    else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER)
-        return 6;
-    else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER)
-        return 4;
-    else
-        return 0;
-};
+    switch (pl.current_weapon)
+    {
+        case WEAP_SHOTGUN:
+            return 8;
+        case WEAP_SUPER_SHOTGUN:
+            return 16;
+        case WEAP_SNIPER_RIFLE:
+            return 1;
+        case WEAP_GRENADE_LAUNCHER:
+            return 6;
+        case WEAP_ROCKET_LAUNCHER:
+            return 4;
+        case WEAP_ASSAULT_CANNON:
+            if (fo_hwguy)
+            {
+                return PC_HVYWEAP_ASSCAN_CLIPSIZE;
+            }
+            else
+            {
+                return 0;
+            }
+        default:
+            return 0;
+    }
+}
 
 string(float num) TeamToString =
 {

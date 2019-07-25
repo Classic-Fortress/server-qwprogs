@@ -1409,6 +1409,7 @@ void () PutClientInServer = {
     self.reload_rocket_launcher = 0;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
     self.reload_sniper_rifle = 0;
+    self.reload_assault_cannon = 0;
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;

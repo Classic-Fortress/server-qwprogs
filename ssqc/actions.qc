@@ -256,7 +256,6 @@ void (entity pe_player, float f_type) CF_Identify = {
 
         // sentry gun is found
         } else if (trace_ent.classname == "building_sentrygun" || trace_ent.classname == "building_sentrygun_base") {
-
             if (pe_player == trace_ent.real_owner)
                 s_name = "Your sentry gun";
             else {
@@ -269,16 +268,12 @@ void (entity pe_player, float f_type) CF_Identify = {
             }
 
             s_class = "";
-
         } else {
-
             return;
-
         }
 
         // set name + health (if medic)
         if (f_maxhealth && (f_friendly || f_fakefriendly)) {
-
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_health));
             if (id_extended) {
@@ -289,7 +284,6 @@ void (entity pe_player, float f_type) CF_Identify = {
 
         // set name + armor (if engineer)
         } else if (f_maxarmor && (f_friendly || f_fakefriendly)) {
-
             s_id_string = strcat(s_name, "\n");
             s_id_string = strcat(s_id_string, ftos(f_armor));
             if (id_extended) {
@@ -300,7 +294,6 @@ void (entity pe_player, float f_type) CF_Identify = {
 
         // set name + health (if sentry + engineer)
         } else if (f_maxsentryhealth) {
-
             s_id_string = strcat(s_name, "\n");
             if (id_extended) {
                 s_id_string = strcat(s_id_string, ftos(floor(f_sentryhealth)));
@@ -312,10 +305,8 @@ void (entity pe_player, float f_type) CF_Identify = {
 
         // just set name (if other class)
         } else {
-
             s_id_string = strcat("\n", s_name);
             s_id_string = strcat(s_id_string, "\n");
-
         }
 
         // set friendly/enemy
@@ -341,12 +332,11 @@ void (entity pe_player, float f_type) CF_Identify = {
         // refresh status bar
         pe_player.ident_string = strzone(s_id_string);
         Status_Refresh(pe_player);
-
     }
-
 };
 
-void (float weap) TeamFortress_ReloadWeapon = {
+void TeamFortress_ReloadWeapon(float weap)
+{
     local float reloadtime = 0;
     local float reloadamount = 0;
     local entity tWeapon, tClip;
@@ -557,7 +547,54 @@ void (float weap) TeamFortress_ReloadWeapon = {
         } else {
             sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
         }
+    } else if (weap == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if (self.ammo_shells == 0) {
+                sprint(self, PRINT_HIGH, "Out of shells\n");
+                return;
+            }
+
+            if (self.reload_assault_cannon == 0) {
+                sprint(self, PRINT_HIGH, "Clip full\n");
+                return;
+            }
+
+            if ((PC_HVYWEAP_ASSCAN_CLIPSIZE - self.reload_assault_cannon) == self.ammo_shells) {
+                sprint(self, PRINT_HIGH, "All shells are in the clip\n");
+                return;
+            }
+
+            if (self.ammo_shells >= 1) {
+                self.current_weapon = weap;
+                if (self.reload_assault_cannon >= self.ammo_shells)
+                    reloadamount = self.ammo_shells;
+                else
+                    reloadamount = self.reload_assault_cannon;
+                Attack_Finished(0.8);
+                self.reload_clipsize = (PC_HVYWEAP_ASSCAN_CLIPSIZE - reloadamount);
+                reloadtime = (PC_HVYWEAP_ASSCAN_CLIPSIZE - reloadamount) / PC_HVYWEAP_ASSCAN_CLIPSIZE;
+                reloadtime = 4 - (4 * reloadtime);
+                self.reload_assault_cannon = 0;
+                if (self.ammo_shells < PC_HVYWEAP_ASSCAN_CLIPSIZE) {
+                    self.reload_assault_cannon = PC_HVYWEAP_ASSCAN_CLIPSIZE - self.ammo_shells;
+                }
+                sprint(self, PRINT_HIGH, "Reloading Assault Cannon...\n");
+                self.tfstate = self.tfstate | TFSTATE_RELOADING;
+                Status_Refresh(self);
+                tWeapon = spawn();
+                tWeapon.owner = self;
+                tWeapon.classname = "timer";
+                tWeapon.nextthink = time + reloadtime;
+                tWeapon.think = W_Reload_assault_cannon;
+                self.weaponmodel = "";
+                self.weaponframe = 0;
+            } else {
+                sprint(self, PRINT_HIGH, "Not enough ammo to reload\n");
+            }
+        }        
     }
+
     if (reloadamount && reloadtime) {
         self.reload_time = time + reloadtime;
         self.reload_tick = reloadtime / reloadamount;
@@ -567,7 +604,7 @@ void (float weap) TeamFortress_ReloadWeapon = {
         tClip.nextthink = time + self.reload_tick;
         tClip.think = TeamFortress_ClipTick;
     }
-};
+}
 
 void () TeamFortress_ReloadCurrentWeapon = {
     TeamFortress_ReloadWeapon(self.current_weapon);

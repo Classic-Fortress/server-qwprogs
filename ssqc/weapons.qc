@@ -1834,6 +1834,15 @@ void () W_Reload_rocket_launcher = {
     Status_Refresh(self.owner);
 };
 
+void () W_Reload_assault_cannon = {
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
+    self.owner.weaponmodel = "progs/v_asscan.mdl";
+    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
+    dremove(self);
+    W_WeaponState_Load(self.owner, 0);
+    Status_Refresh(self.owner);
+};
+
 float () CheckForReload = {
     if (self.current_weapon == WEAP_SHOTGUN) {
         if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
@@ -1860,6 +1869,14 @@ float () CheckForReload = {
             TeamFortress_ReloadCurrentWeapon();
             return 1;
         }
+    } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > 0) {
+                TeamFortress_ReloadCurrentWeapon();
+                return 1;
+            }
+        }
     }
     return 0;
 };
@@ -1880,6 +1897,12 @@ float (float weap) CheckForAmmo = {
     } else if (weap == WEAP_ROCKET_LAUNCHER) {
         if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
             return 1;
+    } else if (weap == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > self.reload_assault_cannon)
+                return 1;
+        }
     }
     return 0;
 };
@@ -2004,6 +2027,12 @@ void () W_Attack = {
         W_FireAutoRifle();
         Attack_Finished(0.1);
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if (CheckForReload() == TRUE)
+            return;
+        }
+
         if (self.ammo_cells < 7) {
             if (time >= self.antispam_assault_cannon) {
                 sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");

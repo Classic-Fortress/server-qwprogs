@@ -87,6 +87,10 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 
 void FireAssCan (float shotcount, vector dir, vector spread)
 {
+    self.reload_assault_cannon = self.reload_assault_cannon + 1;
+    Status_Refresh(self);
+    CheckForReload();
+    
     vector bullet_dir, spread_dir, rand_dir, org;
 	float bullet_speed, var_speed;
 
@@ -95,7 +99,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
     
-    while (shotcount > 0) {
+    while (shotcount > 0) {       
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
         rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
 		spread_dir = bullet_dir + rand_dir;
