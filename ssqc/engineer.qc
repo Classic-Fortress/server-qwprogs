@@ -51,16 +51,13 @@ void () LaserBolt_Touch = {
         deathmsg = DMSG_LASERBOLT;
         TF_T_Damage(other, self, self.enemy, 25, 2, TF_TD_ELECTRICITY);
 
-        // create a new projectile on other side of target if old_railgun is enabled
-        if (old_railgun) {
-            self.velocity = self.oldorigin;
-            self.owner = other;
-            setmodel(self, string_null);
-            self.touch = SUB_Null;
-            self.nextthink = time + 0.1;
-            self.think = LaserBolt_Think;
-            return;
-        }
+        // create a new projectile on other side of target
+        self.velocity = self.oldorigin;
+        self.owner = other;
+        setmodel(self, string_null);
+        self.touch = SUB_Null;
+        self.nextthink = time + 0.1;
+        self.think = LaserBolt_Think;
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_SPIKE);
@@ -873,16 +870,9 @@ void () Dispenser_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = 39;
-        if (disp_explosion) {
-            sdmg = 45 + self.ammo_rockets * 3 + self.ammo_cells;
-            if (sdmg > 350) {
-                sdmg = 350;
-            }
-        } else {
-            sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
-            if (sdmg > 250) {
-                sdmg = 250;
-            }
+        sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
+        if (sdmg > 250) {
+            sdmg = 250;
         }
         T_RadiusDamage(self, self.real_owner, sdmg, self);
     }
