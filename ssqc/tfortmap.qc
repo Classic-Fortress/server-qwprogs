@@ -833,6 +833,11 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
                         }
                         Player.reload_sniper_rifle = max(Player.reload_sniper_rifle - Goal.ammo_shells, 0);
+
+                        if(Player.current_weapon == WEAP_ASSAULT_CANNON) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_assault_cannon = max(Player.reload_assault_cannon - Goal.ammo_shells, 0);
                     }
                     if(Goal.ammo_rockets) {
                         if(Player.current_weapon == WEAP_GRENADE_LAUNCHER) {
@@ -876,6 +881,13 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         }
                         Player.reload_rocket_launcher = max(Player.reload_rocket_launcher - Goal.ammo_rockets, 0);
                     }
+                    if (Goal.reload_assault_cannon)
+                    {
+                        if(Player.current_weapon == WEAP_ASSAULT_CANNON) {
+                            Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_RELOADING);
+                        }
+                        Player.reload_assault_cannon = max(Player.reload_assault_cannon - Goal.ammo_shells, 0);
+                    }  
                 }
                 Player.no_grenades_1 =
                     Player.no_grenades_1 + Goal.no_grenades_1;
@@ -1038,6 +1050,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             Player.reload_grenade_launcher = 0;
                             Player.reload_rocket_launcher = 0;
                             Player.reload_sniper_rifle = 0;
+                            Player.reload_assault_cannon = 0;
                         }
                     }
                 }

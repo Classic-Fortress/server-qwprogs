@@ -7,7 +7,9 @@ ifndef REV
 endif
 
 all:
-	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\"
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./ssqc/progs.src
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./csqc/csprogs.src
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./menu/menu.src
 
 clean:
 	rm -f $(TARGET) qwprogs.lno files.dat progdefs.h

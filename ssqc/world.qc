@@ -298,6 +298,7 @@ void () worldspawn = {
     precache_sound2("speech/saveme2.wav");
     precache_model2("progs/detpack2.mdl");
     precache_model2("progs/grenade3.mdl");
+    precache_model2(MODEL_PROJ_DIAM2);
     precache_sound("grentimer.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");

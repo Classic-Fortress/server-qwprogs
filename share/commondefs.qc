@@ -1,0 +1,11 @@
+#define MAX_FLAGINFO_LINES  10
+
+#define MSG_FLAGINFOINIT    1
+#define MSG_FLAGINFO        2
+
+#define FLAGINFO_HOME       1
+#define FLAGINFO_CARRIED    2
+#define FLAGINFO_DROPPED    3
+#define FLAGINFO_RETURNING  4
+#define FLAGINFO_LOCATION   5
+#define FLAGINFO_NOLOCATION 6

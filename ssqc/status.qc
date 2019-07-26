@@ -580,8 +580,79 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
 
 string getLocationName(vector location);
 
+void (entity Player, float index, entity Item) InitClientFlagStatus = {
+    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
+    if(csqcactive) {
+        msg_entity = Player;
+        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+        WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
+        WriteFloat(MSG_MULTICAST, index);
+        WriteFloat(MSG_MULTICAST, Item.goal_no);
+        WriteString(MSG_MULTICAST, Item.mdl);
+        WriteFloat(MSG_MULTICAST, Item.skin);
+        WriteFloat(MSG_MULTICAST, Item.owned_by);
+        multicast('0 0 0', MULTICAST_ONE_R); 
+    }
+}
+
+void (entity Player, entity Item) UpdateClientFlagStatus = {
+    //Check if client is running csqc
+    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
+    if(csqcactive) {
+        //bprint(PRINT_HIGH, "Player ", Player.netname, " is ", infokey(Player, INFOKEY_P_CSQCACTIVE), "\n");
+
+        msg_entity = Player;
+        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+        WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
+        WriteFloat(MSG_MULTICAST, Item.goal_no);
+        if (Item.goal_state == 1 && Item.owner != world) {
+            WriteFloat(MSG_MULTICAST, FLAGINFO_CARRIED);
+            if (Player == Item.owner) {
+                WriteString(MSG_MULTICAST, "YOU");
+            } else {
+                WriteString(MSG_MULTICAST, Item.owner.netname);
+            }
+        } else {
+            if (Item.origin != Item.oldorigin) {
+                if((Item.nextthink - time) >= 0) {
+                    WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
+                    if(Item.think != tfgoalitem_droptouch) {
+                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                        if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
+                            WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+                            WriteCoord(MSG_MULTICAST, Item.origin_x);
+                            WriteCoord(MSG_MULTICAST, Item.origin_y);
+                            WriteCoord(MSG_MULTICAST, Item.origin_z);
+                            WriteString(MSG_MULTICAST, getLocationName(Item.origin));
+                        } else {
+                            WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
+                        }
+                    } else {
+                        WriteFloat(MSG_MULTICAST, -1);
+                        WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
+                    }
+                } else {
+                   WriteFloat(MSG_MULTICAST, FLAGINFO_RETURNING);
+                }
+            } else {
+                WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
+            }
+        }
+        multicast('0 0 0', MULTICAST_ONE); 
+        //multicast('0 0 0', MULTICAST_ONE_R); 
+    }
+}
+
+float(entity playerent, float changedflags) SendClientFlagStatus = {
+    bprint(PRINT_HIGH, "SendClientFlagStatus, for: ",playerent.netname,"\n");
+    WriteByte (MSG_ENTITY, MSG_FLAGINFO);
+    WriteString (MSG_ENTITY, self.mdl);
+    return TRUE;
+}
+
 string (entity Player, entity Item, float teamno) GetItemStatus = {
     local string st;
+    UpdateClientFlagStatus(Player, Item);
     switch (teamno)
     {
         case 1:
@@ -917,11 +988,18 @@ string(entity pl) ClipSizeToString =
         if ((max - pl.reload_rocket_launcher) > pl.ammo_rockets)
             pl.reload_rocket_launcher = (max - pl.ammo_rockets);
         num = (max - pl.reload_rocket_launcher);
+    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
+        if (fo_hwguy)
+        {
+            if ((max - pl.reload_assault_cannon) > pl.ammo_shells)
+                pl.reload_assault_cannon = (max - pl.ammo_shells);
+            num = (max - pl.reload_assault_cannon);
+        }
     } else
         return "";
 
-    if (num > 99)
-        num = 99;
+    if (num > 999)
+        num = 999;
 
     st = Q"\sClip\s: ";
     st = strcat(st, strpadl(ftos(floor(num)), 2));
@@ -931,21 +1009,33 @@ string(entity pl) ClipSizeToString =
     return st;
 };
 
-float(entity pl) GetClipSize =
+float GetClipSize(entity pl) 
 {
-    if (pl.current_weapon == WEAP_SHOTGUN)
-        return 8;
-    else if (pl.current_weapon == WEAP_SUPER_SHOTGUN)
-        return 16;
-    else if (pl.current_weapon == WEAP_SNIPER_RIFLE)
-        return 1;
-    else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER)
-        return 6;
-    else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER)
-        return 4;
-    else
-        return 0;
-};
+    switch (pl.current_weapon)
+    {
+        case WEAP_SHOTGUN:
+            return 8;
+        case WEAP_SUPER_SHOTGUN:
+            return 16;
+        case WEAP_SNIPER_RIFLE:
+            return 1;
+        case WEAP_GRENADE_LAUNCHER:
+            return 6;
+        case WEAP_ROCKET_LAUNCHER:
+            return 4;
+        case WEAP_ASSAULT_CANNON:
+            if (fo_hwguy)
+            {
+                return PC_HVYWEAP_ASSCAN_CLIPSIZE;
+            }
+            else
+            {
+                return 0;
+            }
+        default:
+            return 0;
+    }
+}
 
 string(float num) TeamToString =
 {

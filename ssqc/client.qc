@@ -170,7 +170,8 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
     return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
-void () InitPrematch = {
+void InitPrematch()
+{
     localcmd ("serverinfo status Standby\n");
     
     clan_scores_dumped = 0;
@@ -183,6 +184,13 @@ void () InitPrematch = {
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
+
+}
+
+void (entity goalitem) SetFlagSendMethod = {
+    if(goalitem) {
+        goalitem.SendEntity = SendClientFlagStatus;
+    }
 }
 
 void () DecodeLevelParms = {
@@ -223,6 +231,11 @@ void () DecodeLevelParms = {
 
             if ((number_of_teams <= 0) || (number_of_teams >= 5))
                 number_of_teams = 4;
+
+            //SetFlagSendMethod(Finditem(ent.display_item_status1));
+            //SetFlagSendMethod(Finditem(ent.display_item_status2));
+            //SetFlagSendMethod(Finditem(ent.display_item_status3));
+            //SetFlagSendMethod(Finditem(ent.display_item_status4));
 
         } else {
 
@@ -467,6 +480,9 @@ void () DecodeLevelParms = {
 
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
+
+        // projectile FO style hwguy
+        fo_hwguy = CF_GetSetting("fohw", "fo_hwguy", "on");
 
         // allow feign death in air [on]
         feign_air = CF_GetSetting("fa", "feign_air", "on");
@@ -753,7 +769,7 @@ void () DecodeLevelParms = {
         self.is_admin = parm15;
 };
 
-entity()FindIntermission =
+entity() FindIntermission =
 {
     local entity spot;
     local float cyc;
@@ -1393,6 +1409,7 @@ void () PutClientInServer = {
     self.reload_rocket_launcher = 0;
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
     self.reload_sniper_rifle = 0;
+    self.reload_assault_cannon = 0;
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
@@ -2272,6 +2289,13 @@ void () ClientConnect = {
             stuffcmd(self, "\n");
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
+    }
+    entity tfdet = find(world, classname, "info_tfdetect");
+    if(tfdet) {
+        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1));
+        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2));
+        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3));
+        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4));
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
