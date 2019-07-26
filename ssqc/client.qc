@@ -454,9 +454,6 @@ void () DecodeLevelParms = {
         // enable flamethrower knockback [on]
         flame_knockback = CF_GetSetting("fk", "flame_knockback", "on");
 
-        // bigger dispenser explosions [on]
-        disp_explosion = CF_GetSetting("de", "disp_explosion", "on");
-
         // allow building in water [on]
         build_water = CF_GetSetting("bw", "build_water", "on");
 
@@ -648,7 +645,6 @@ void () DecodeLevelParms = {
             old_spanner = FALSE;
             old_railgun = FALSE;
             old_dispenser = FALSE;
-            disp_explosion = TRUE;
             build_water = TRUE;
             feign_air = TRUE;
             feign_pack = TRUE;
@@ -720,7 +716,6 @@ void () DecodeLevelParms = {
             old_spanner = TRUE;
             old_railgun = TRUE;
             old_dispenser = TRUE;
-            disp_explosion = FALSE;
             build_water = FALSE;
             feign_air = FALSE;
             feign_pack = FALSE;

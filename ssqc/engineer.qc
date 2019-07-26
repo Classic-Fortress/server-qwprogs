@@ -873,16 +873,9 @@ void () Dispenser_Explode = {
 
     if (self.real_owner.has_disconnected != 1) {
         deathmsg = 39;
-        if (disp_explosion) {
-            sdmg = 45 + self.ammo_rockets * 3 + self.ammo_cells;
-            if (sdmg > 350) {
-                sdmg = 350;
-            }
-        } else {
-            sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
-            if (sdmg > 250) {
-                sdmg = 250;
-            }
+        sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
+        if (sdmg > 250) {
+            sdmg = 250;
         }
         T_RadiusDamage(self, self.real_owner, sdmg, self);
     }

@@ -516,7 +516,6 @@ float medicaura;
 float old_medikit;
 float old_biodamage;
 float flame_knockback;
-float disp_explosion;
 float build_water;
 float cannon_lock;
 float cannon_air;
