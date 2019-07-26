@@ -138,7 +138,6 @@ Engineer
 * Upgrade/repair/restock Sentry Gun on spanner hit.
 * Dispenser automatically stocks nearby team members.
 * Dispenser restock rate increases with more players on team.
-* Rocket ammo in Dispenser increase explosions more than before.
 * Repair Dispenser on spanner hit.
 * Dismantle Sentry Gun/Dispenser using build menu when standing close.
 * Stop building by pressing last weapon key.
@@ -146,7 +145,6 @@ Engineer
 * Added dismantle message to show how many cells were returned to Engineer.
 * Changed class special to detonate dispenser.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
-* Railgun no longer penetrates targets.
 
 
 Compilation

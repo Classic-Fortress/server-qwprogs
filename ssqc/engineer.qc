@@ -51,16 +51,13 @@ void () LaserBolt_Touch = {
         deathmsg = DMSG_LASERBOLT;
         TF_T_Damage(other, self, self.enemy, 25, 2, TF_TD_ELECTRICITY);
 
-        // create a new projectile on other side of target if old_railgun is enabled
-        if (old_railgun) {
-            self.velocity = self.oldorigin;
-            self.owner = other;
-            setmodel(self, string_null);
-            self.touch = SUB_Null;
-            self.nextthink = time + 0.1;
-            self.think = LaserBolt_Think;
-            return;
-        }
+        // create a new projectile on other side of target
+        self.velocity = self.oldorigin;
+        self.owner = other;
+        setmodel(self, string_null);
+        self.touch = SUB_Null;
+        self.nextthink = time + 0.1;
+        self.think = LaserBolt_Think;
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_SPIKE);

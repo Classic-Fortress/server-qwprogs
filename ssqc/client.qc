@@ -445,9 +445,6 @@ void () DecodeLevelParms = {
         // use old tf style spanner (non-automated) [off]
         old_spanner = CF_GetSetting("os", "old_spanner", "off");
 
-        // use old tf style railgun (penetrate target) [off]
-        old_railgun = CF_GetSetting("or", "old_railgun", "off");
-
         // use old tf style dispenser (non-auto stocking) [off]
         old_dispenser = CF_GetSetting("od", "old_dispenser", "off");
 
@@ -643,7 +640,6 @@ void () DecodeLevelParms = {
             cannon_accuracy = 0;
             flame_knockback = TRUE;
             old_spanner = FALSE;
-            old_railgun = FALSE;
             old_dispenser = FALSE;
             build_water = TRUE;
             feign_air = TRUE;
@@ -714,7 +710,6 @@ void () DecodeLevelParms = {
             cannon_accuracy = 1;
             flame_knockback = FALSE;
             old_spanner = TRUE;
-            old_railgun = TRUE;
             old_dispenser = TRUE;
             build_water = FALSE;
             feign_air = FALSE;
