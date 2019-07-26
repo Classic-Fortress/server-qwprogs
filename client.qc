@@ -2275,8 +2275,6 @@ void () ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
-    if (duelmode)
-        precache_sound("buttons/switch04.wav");
 };
 
 void () ClientDisconnect = {
