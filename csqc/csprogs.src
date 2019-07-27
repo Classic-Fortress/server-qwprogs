@@ -2,4 +2,8 @@
 csdefs.qc
 ../share/commondefs.qc
 csextradefs.qc
+sui_sys.qc
+input.qc
 main.qc
+hud_helpers.qc
+hud.qc
