@@ -58,6 +58,8 @@ void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
+float () CheckAllPlayersReady;
+string(float)TeamFortress_TeamGetColorString;
 
 string nextmap;
 
@@ -1122,7 +1124,43 @@ void () ResetPlayers = {
         }
 		te = find (te, classname, "player");
 	}
+}
 
+float () CountRemainingTeams = {
+    local float teamsleft, teamflags, playersleft;
+    local entity te, lastplayer;
+    te = find(world, classname, "player");
+    while (te != world) {
+        if(!te.has_disconnected && te.health > 0) {
+            teamflags = teamflags | pow(2, te.team_no);
+            lastplayer = te;
+            playersleft++;
+        }
+        te = find (te, classname, "player");
+    }
+    teamsleft = 0;
+    if(teamflags & 2) {
+        teamsleft++;
+    }
+    if(teamflags & 4) {
+        teamsleft++;
+    }
+    if(teamflags & 8) {
+        teamsleft++;
+    }
+    if(teamflags & 16) {
+        teamsleft++;
+    }
+    if(teamsleft == 1) {
+        if(playersleft == 1) {
+            bprint(PRINT_HIGH, lastplayer.netname, " of team ", TeamFortress_TeamGetColorString(lastplayer.team_no) ,", wins the round!\n");
+        } else {
+            bprint(PRINT_HIGH, TeamFortress_TeamGetColorString(lastplayer.team_no), " team wins the round!\n");
+        }
+    } else if(teamsleft == 0) {
+        bprint(PRINT_HIGH, "Everybody died! It's a draw.\n");
+    }
+    return teamsleft;
 }
 
 void () ClientKill = {
@@ -1185,7 +1223,9 @@ void () ClientKill = {
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.takedamage = 0;
     if(duelmode) {
-        ResetPlayers();
+        if(CountRemainingTeams() < 2) {
+            ResetPlayers();
+        }
     }
 };
 
@@ -2336,6 +2376,15 @@ void () ClientDisconnect = {
     if (self.StatusString)
         strunzone(self.StatusString);
     self.StatusString = string_null;
+
+    if(cb_prematch) {
+        //Check in case the player leaving is the last not-readied player
+        if(self.is_ready) {
+            v_ready = (v_ready - 1);
+        } else {
+            CheckAllPlayersReady();
+        }
+    }
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {

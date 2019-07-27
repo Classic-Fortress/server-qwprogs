@@ -6,6 +6,7 @@ void () ResetPlayers;
 void (entity Goal, entity AP, float addb) DoResults;
 float (entity Goal, entity AP) Activated;
 float (entity targ, entity attacker, float damage) TeamEqualiseDamage;
+float () CountRemainingTeams;
 
 void () monster_death_use = {
     if (self.flags & FL_FLY)
@@ -108,24 +109,28 @@ void (entity targ, entity attacker) Killed = {
     if(duelmode && targ.classname == "player" && !cb_prematch) {
         //Already in no fire mode - implies you're not the first to die
         if(no_fire_mode) {
-            reset_timer = find(world, classname, "duel_reset_timer");
-            while (reset_timer != world) {
-                oself = reset_timer;
-                reset_timer = find (reset_timer, classname, "duel_reset_timer");
-                dremove(oself);
-            }
-            ResetPlayers();
-        } else {
-            no_fire_mode = 1;
-            if(duel_reset_delay) {
-                remainder = duel_reset_delay % 1;
-                duel_reset_timer = duel_reset_delay - remainder;
-                reset_timer = spawn();
-                reset_timer.classname = "duel_reset_timer";
-                reset_timer.nextthink = time + remainder;
-                reset_timer.think = ResetPlayersDelayed;
-            } else {
+            if(CountRemainingTeams() == 0) {
+                reset_timer = find(world, classname, "duel_reset_timer");
+                while (reset_timer != world) {
+                    oself = reset_timer;
+                    reset_timer = find (reset_timer, classname, "duel_reset_timer");
+                    dremove(oself);
+                }
                 ResetPlayers();
+            }
+        } else {
+            if(CountRemainingTeams() < 2) {
+                no_fire_mode = 1;
+                if(duel_reset_delay) {
+                    remainder = duel_reset_delay % 1;
+                    duel_reset_timer = duel_reset_delay - remainder;
+                    reset_timer = spawn();
+                    reset_timer.classname = "duel_reset_timer";
+                    reset_timer.nextthink = time + remainder;
+                    reset_timer.think = ResetPlayersDelayed;
+                } else {
+                    ResetPlayers();
+                }
             }
         }
     }
