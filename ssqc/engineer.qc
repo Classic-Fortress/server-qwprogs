@@ -172,8 +172,17 @@ void () EMPGrenadeExplode = {
         //bprint(PRINT_HIGH, "Found EMP Block at ", vtos(te2.origin), " with radius ", ftos(te2.t_length), "\n");
         //bprint(PRINT_HIGH, "Block is ", ftos(vlen(te2.origin - self.origin)), " units away\n");
         if(vlen(te2.origin - self.origin) <= te2.t_length) {
-            empblockinrage = TRUE;
-            break;
+            if(te2.goal_effects & 16) {
+                traceline(self.origin, te2.origin, 0, self);
+                //bprint(PRINT_HIGH, "Block wall check is ", ftos(trace_fraction), "\n");
+                if (trace_fraction == 1) {
+                    empblockinrage = TRUE;
+                    break;
+                }
+           } else {
+                empblockinrage = TRUE;
+                break;
+            }
         }
         te2 = find(te2, classname, "info_empblock");
     }
