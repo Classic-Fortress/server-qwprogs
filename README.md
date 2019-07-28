@@ -3,6 +3,7 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
 * Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
 * Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)
