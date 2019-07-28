@@ -49,8 +49,10 @@ vector UpdatePos(string id, vector mousepos)
     return pos;
 }
 
-float(string id, vector pos, vector size) hud_panel =
+float(string id, vector pos, vector size, float alpha) hud_panel =
 {
+    vector basecolor = MENU_BG;
+
     if (fo_hud_editor)
     {
         if (sui_is_last_clicked(id))
@@ -69,12 +71,22 @@ float(string id, vector pos, vector size) hud_panel =
             HudSettings.MousePos = [0, 0];
         }
         
+        if (sui_is_hovered(id))
+        {
+            alpha = 0.6;
+            basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1; 
+        }
+        
+        if (sui_is_held(id))
+        {
+            alpha = 0.6;
+            basecolor = MENU_BG - MENU_DARKEN * 0.1;
+        }
     }
 
 	sui_push_frame(pos, size);
-	vector basecolor = sui_is_hovered(id) ? MENU_BG + MENU_HIGHLIGHT * 0.1 : MENU_BG; 
-	basecolor = sui_is_held(id) ? MENU_BG - MENU_DARKEN * 0.1 : basecolor;
-	sui_fill([0, 0], size, basecolor, 0.6, 0);
+    
+	sui_fill([0, 0], size, basecolor, alpha, 0);
     
 	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
 	sui_action_element([0, 0], size, id, sui_noop);
