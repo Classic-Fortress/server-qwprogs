@@ -39,15 +39,28 @@ void FO_Hud_Editor_LoadSettings(float height)
 void Hud_Draw(float width, float height)
 {
     vector pos;
+
+    float flagInfoCount = 0;
+    for (float i = FlagInfoLines.length - 1; i >= 0; i--) 
+    {
+		if (FlagInfoLines[i].id) 
+        {
+            flagInfoCount++;
+        }
+    }
+
     if (firstrun)
     {
-        firstrun = FALSE;
-        pos = HudSettings.FlagIcon.Position;
-        pos_y = pos_y - 4 - 24 * 2;
-        HudSettings.FlagIcon.Position = pos;
-    }
+        if (flagInfoCount > 0)
+        {
+            firstrun = FALSE;
+            pos = HudSettings.FlagIcon.Position;
+            pos_y = pos_y - 4 - 24 * (flagInfoCount - 2);
+            HudSettings.FlagIcon.Position = pos;
+        }
+    } 
     
-    vector fillsize = [width*.2, height*.2];
+    vector fillsize = [width*.2, 24 * flagInfoCount];
     float alpha = 0;
     if (hud_panel("flagiconpanel", HudSettings.FlagIcon.Position, fillsize, alpha))
     {
@@ -83,19 +96,19 @@ void Hud_Draw(float width, float height)
 			}
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - 24 * (i - 1), 0], icon, '24 24 0', iconcolour, alpha, 1);
+            drawpic([pos_x, pos_y - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], icon, '24 24 0', iconcolour, alpha, 1);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - 24 * (i - 1), 0], stime, '6 6', '1 1 1', 1, 0);
+			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			}
 		}
     }
