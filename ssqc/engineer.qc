@@ -153,9 +153,9 @@ void () EMPGrenadeTouch = {
 
 void () EMPGrenadeExplode = {
     local float expsize;
-    local entity te;
+    local entity te, te2;
     local entity oldself;
-    local float candamage;
+    local float candamage, empblockinrage;
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
@@ -164,11 +164,31 @@ void () EMPGrenadeExplode = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
+    te2 = find(world, classname, "info_empblock");
+    while(te2) {
+        //bprint(PRINT_HIGH, "Found EMP Block at ", vtos(te2.origin), " with radius ", ftos(te2.t_length), "\n");
+        //bprint(PRINT_HIGH, "Block is ", ftos(vlen(te2.origin - self.origin)), " units away\n");
+        if(vlen(te2.origin - self.origin) <= te2.t_length) {
+            if(te2.goal_effects & 16) {
+                traceline(self.origin, te2.origin, 0, self);
+                //bprint(PRINT_HIGH, "Block wall check is ", ftos(trace_fraction), "\n");
+                if (trace_fraction == 1) {
+                    empblockinrage = TRUE;
+                    break;
+                }
+           } else {
+                empblockinrage = TRUE;
+                break;
+            }
+        }
+        te2 = find(te2, classname, "info_empblock");
+    }
+
     te = findradius(self.origin, 240);
     while (te) {
         te.chain2 = te.chain;
         candamage = TRUE;
-        if(walls_block_emp)
+        if(walls_block_emp || empblockinrage)
             candamage = CanDamage(te, self);
         traceline(self.origin, te.origin, MOVE_NOMONSTERS, self);
         if(trace_ent && trace_ent.spawnflags & SPAWNFLAG_BLOCK_EMP) {
@@ -1284,3 +1304,7 @@ void (entity eng) Engineer_RemoveBuildings = {
     DestroyBuilding(eng, "building_sentrygun");
 };
 
+void () info_empblock = {
+    self.weapon = 512;
+    self.netname = "EMP Block";
+};
