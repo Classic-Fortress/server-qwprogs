@@ -94,3 +94,33 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
 	
 	return sui_is_clicked(id);
 };
+
+
+string FormatHudCfgString(string line, string field, string value)
+{
+    line = strcat(line, "\n", field, ":", value);
+
+    return line;
+}
+
+string FormatHudCfgVector(string line, string field, vector value)
+{
+    line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
+
+    return line;
+}
+
+void WriteHudCfg(string path)
+{
+    // this overwrites
+    float filehandle;
+    filehandle = fopen(path, FILE_WRITE);
+    string line;
+
+    line = FormatHudCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
+    line = FormatHudCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
+    line = FormatHudCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
+
+    fputs(filehandle, line);
+    fclose(filehandle);
+}

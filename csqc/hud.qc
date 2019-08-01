@@ -5,7 +5,7 @@ void FO_Hud_Editor()
         fo_hud_editor = FALSE;
         setcursormode(FALSE);
 
-        // TODO - save file with new panel positions
+        WriteHudCfg(FO_HUD_CONFIG_PATH);
     }
     else
     {
@@ -13,6 +13,7 @@ void FO_Hud_Editor()
         setcursormode(TRUE);
     }
 }
+
 float firstrun;
 void FO_Hud_Editor_LoadSettings(float height)
 {
@@ -27,13 +28,55 @@ void FO_Hud_Editor_LoadSettings(float height)
     // TODO - maybe implement these to allow for pivoting of items
     HudFlagIcon.GrowDirection = FO_HUD_GROW_UP;
     HudFlagIcon.NodeInsertLoc = FO_HUD_INSERT_AFTER;
-
     HudSettings.FlagIcon = HudFlagIcon;
 
-    // TODO - check if file exists
-    
-    // TODO - if exists, load all data overwriting struct  
-    
+    // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
+    float filehandle;
+    filehandle = fopen(FO_HUD_CONFIG_PATH, FILE_READ);
+	if (filehandle >= 0) {
+        // get number of lines                  
+        string ln;
+        ln = fgets(filehandle);
+        while (ln)
+        {
+            if (strlen(ln) > 0)
+            {
+                ln = strreplace("\n", "", ln);
+                string val, field;
+
+                float count = tokenizebyseparator(ln, ":");
+                field = argv(0);
+                field = strtrim(field);
+                val = argv(1);
+                val = strtrim(val);
+
+                print(strcat("field: ", field, " val: ", val, "\n"));
+
+                switch(field)
+                {
+                    case "hudflagicon.position":
+                        count = tokenizebyseparator(val, ",");
+                        float x = stof(argv(0));
+                        float y = stof(argv(1));
+                        HudSettings.FlagIcon.Position = [x, y];
+                        break;
+                    case "hudflagicon.growdirection":
+                        HudSettings.FlagIcon.GrowDirection = stof(val);
+                        break;
+                    case "hudflagicon.nodeinsertloc":
+                        HudSettings.FlagIcon.NodeInsertLoc = stof(val);
+                        break;
+                }
+            }
+            ln = fgets(filehandle);
+        }
+        fclose(filehandle);
+    }
+    else
+    {
+        // write a new file
+        WriteHudCfg(FO_HUD_CONFIG_PATH);
+    }    
 }
 
 void Hud_Draw(float width, float height)

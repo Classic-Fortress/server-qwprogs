@@ -37,3 +37,16 @@ typedef struct {
 } FO_Hud_Settings;
 
 FO_Hud_Settings HudSettings;
+
+#pragma noref 1
+#pragma warning error Q101 /*too many parms*/
+#pragma warning error Q105 /*too few parms*/
+#pragma warning enable F301 /*non-utf-8 strings*/
+#pragma warning enable F302 /*uninitialised locals*/
+#pragma target FTE
+#ifndef CSQC
+#define CSQC
+#endif
+
+string(string s) strtrim = #0:strtrim; /*
+		Trims the whitespace from the start+end of the string. */
