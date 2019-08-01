@@ -837,10 +837,33 @@ void () PlayerNotReady = {
     }
 }
 
+float () CheckAllPlayersReady = {
+    local float f1;
+    if (is_countdown) {
+        return 0;
+    }
+    if (infokey (world, "status") != "Standby") {
+        return 0;
+    }
+    if (intermission_running)
+        return 0;
+        
+    f1 = TeamFortress_GetNoPlayers ();
+    bprint (PRINT_HIGH, "Checking readiness - ",ftos(v_ready),"/",ftos(f1),".\n");
+    if (v_ready == f1 ) {
+        if(cease_fire) {
+            bprint (2, "All players ready, match will start after ceasefire ends.\n");
+        } else {
+            bprint (2, "All players ready, starting match\n");
+            StartTimer ();
+        }
+        return 1;
+    }
+    return 0;
+}
+
 void () PlayerReady =
 {
-    local float f1;
-
     if (is_countdown) {
         sprint(self, 2, "You cannot do this after countdown has started.\n");
         return;
@@ -868,17 +891,8 @@ void () PlayerReady =
     self.is_ready = 1;
     v_ready = v_ready + 1;
     bprint2 (3, self.netname, " is ready to start the match\n");
-    f1 = TeamFortress_GetNoPlayers ();
-    if (v_ready == f1 ) {
-        if(cease_fire) {
-            bprint (2, "All players ready, match will start after ceasefire ends.\n");
-        } else {
-            bprint (2, "All players ready, starting match\n");
-            StartTimer ();
-        }
-        return;
-    }
-    Broadcast_Players_NotReady();
+    if(!CheckAllPlayersReady())
+        Broadcast_Players_NotReady();
 };
 
 void () RemoveVotes = {
