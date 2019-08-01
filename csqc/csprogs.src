@@ -1,5 +1,12 @@
 ../csprogs.dat
 csdefs.qc
-../share/commondefs.qc
 csextradefs.qc
+//fteextensions.qc
+../share/commondefs.qc
+
+
+sui_sys.qc
+input.qc
 main.qc
+hud_helpers.qc
+hud.qc

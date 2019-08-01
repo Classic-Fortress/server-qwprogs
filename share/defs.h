@@ -29,6 +29,7 @@
 #define FL_ONGROUND	512 	// standing on something
 #define FL_PARTIALGROUND	1024 	// not all corners are valid
 #define FL_WATERJUMP	2048 	// player jumping out of water
+
 #define FL_JUMPRELEASED	4096 	// for jump debouncing
 
 // edict.movetype values
@@ -100,6 +101,7 @@
 #define IT_HOOK			8388608
 
 // point content values
+
 #define CONTENT_EMPTY	-1
 #define CONTENT_SOLID	-2
 #define CONTENT_WATER	-3
@@ -158,6 +160,7 @@
 // sound channels
 // channel 0 never willingly overrides
 // other channels (1-7) allways override a playing sound on that channel
+
 #define CHAN_AUTO	0
 #define CHAN_WEAPON	1
 #define CHAN_VOICE	2
@@ -1291,3 +1294,14 @@
 #define RESPAWN_DELAY_TIME	5	// this is the respawn delay, if the RESPAWN_DELAY option is
 					// turned on with temp1.  QuakeWorld servers can use
 					// serverinfo respawn_delay to set their own time.
+
+
+// CSQC defines
+#define FO_HUD_GROW_UP		1
+#define FO_HUD_GROW_DOWN	2
+#define FO_HUD_GROW_LEFT	3
+#define FO_HUD_GROW_RIGHT	4
+
+#define FO_HUD_INSERT_AFTER		1
+#define FO_HUD_INSERT_BEFORE	1
+#define FO_HUD_CONFIG_PATH	"fortressone_hud.focfg"

@@ -1,25 +1,20 @@
+void FO_Hud_Editor();
+void Hud_Draw(float width, float height);
+void FO_Hud_Editor_LoadSettings(float height);
+
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
     precache_model("progs/weapons/v_rock.mdl");
+	registercommand("fo_hud_editor");
+	
+	vector vsize = (vector)getproperty(VF_SCREENVSIZE);
+
+	FO_Hud_Editor_LoadSettings(vsize_y);
 };
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
 }
-
-typedef struct {
-    float id;
-    string message;
-    //string model;
-    entity model;
-    float timeleft;
-    float state;
-    vector loc;
-    string carrier;
-    string locname;
-} FlagInfoLine;
-
-var FlagInfoLine FlagInfoLines[10];
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
@@ -34,58 +29,12 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //setviewprop(VF_AFOV, cvar("fov”));        //note: fov_x and fov_y control individual axis. afov is general
     //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
-/*
-    for(float i = 0; i < FlagInfoLines.length; i++) {
-	if(FlagInfoLines[i].id) {
-	    //drawstring([16, 32 + 16 * i, 0], FlagInfoLines[i].message, '8 8', '1 1 1', 1, 0);
-	    FlagInfoLines[i].model.origin = [random() * 100 - 50,random() * 100 - 50,random() * 100 - 50];
-	    addentity(FlagInfoLines[i].model);
-	}
-    }
-*/
-    renderscene();
-    float yoffset = height - 64;
-    for(float i = FlagInfoLines.length - 1; i >= 0; i--) {
-	if(FlagInfoLines[i].id) {
-	    string icon = "sb_key1";
-	    vector iconcolour = '1 1 1';
-	    float alpha = 1;
-	    if(FlagInfoLines[i].model) {
-		switch(FlagInfoLines[i].model.owned_by) {
-		    case 2:
-			icon = "sb_key2";
-			break;
-		    case 3:
-			iconcolour = '1 1 0';
-			break;
-		    case 4:
-			icon = "sb_key2";
-			iconcolour = '0 1 0';
-			break;
-		}
-	    }
-	    if(FlagInfoLines[i].state == FLAGINFO_HOME) {
-		alpha = 0.3;
-	    } else if(FlagInfoLines[i].state == FLAGINFO_CARRIED) {
-		//drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
-		drawstring([32, yoffset + 4 - 24 * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
-	    } else if(FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) {
-		drawstring([32, yoffset + 4 - 24 * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
-	    }
-	    //drawpic([8, 28 + 24 * i, 0], icon, '24 24 0', iconcolour, alpha, 1);
-	    drawpic([8, yoffset - 4 - 24 * i, 0], icon, '24 24 0', iconcolour, alpha, 1);
-	    //drawstring([32, 32 + 24 * i, 0], strcat(FlagInfoLines[i].message," ",ftos(FlagInfoLines[i].timeleft)), '8 8', '1 1 1', 1, 0);
-	    //drawstring([32, 32 + 24 * i, 0], FlagInfoLines[i].message, '8 8', '1 1 1', 1, 0);
-	    if(FlagInfoLines[i].timeleft >= 0) {
-		string stime = ftos(FlagInfoLines[i].timeleft);
-		//drawstring([24, 46 + 24 * i, 0], ftos(FlagInfoLines[i].timeleft), '6 6', '1 1 1', 1, 0);
-		drawstring([30 - stringwidth(stime, 1, '6 6'), yoffset + 14 - 24 * i, 0], stime, '6 6', '1 1 1', 1, 0);
-	    }
-	    //addentity(FlagInfoLines[i].model);
-	    //drawstring([300, 32 + 16 * i, 0], strcat(vtos(FlagInfoLines[i].model.origin), " ", FlagInfoLines[i].model.model), '8 8', '1 1 1', 1, 0);
-	}
-    }
 
+    renderscene();
+
+	sui_begin(width, height);
+	Hud_Draw(width, height);
+	sui_end();
 }
 
 void GetSelf() = {
@@ -94,15 +43,13 @@ void GetSelf() = {
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
-    //switch(argv(0)) {
-	//case "moregold":
-    //}	
+    switch(argv(0)) {
+		case "fo_hud_editor":
+			FO_Hud_Editor();
+			break;
+    }	
     return FALSE;
 };
-
-float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
-    return FALSE;
-}
 
 void(float isnew) CSQC_Ent_Update = {
     print("CSQC_Ent_Update, new: ", ftos(isnew), "\n");
