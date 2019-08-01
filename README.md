@@ -3,6 +3,7 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* CSQC - fo_hud_editor to move panels and save to config
 * Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
 * Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)
