@@ -2981,13 +2981,6 @@ float () GetLastWeaponImpulse = {
         return 4;
 }
 
-
-void SV_RunClientCommand()
-{
-    self.pmove_flags &= ~1;
-    runstandardplayerphysics(self);
-}
-
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*
 void() SV_RunClientCommand = {

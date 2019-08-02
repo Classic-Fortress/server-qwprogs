@@ -6,6 +6,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
     precache_model("progs/weapons/v_rock.mdl");
 	registercommand("fo_hud_editor");
+	registercommand("fo_autohop");
 	
 	vector vsize = (vector)getproperty(VF_SCREENVSIZE);
 
@@ -43,9 +44,23 @@ void GetSelf() = {
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
+	float val;
     switch(argv(0)) {
 		case "fo_hud_editor":
 			FO_Hud_Editor();
+			break;
+		case "fo_autohop":
+			val = stof(argv(1));
+			if (val == 1)
+			{
+				fo_autohop = TRUE;
+				print("auto bunnyhop has been enabled\n");
+			}
+			else if (val == 0)
+			{
+				fo_autohop = FALSE;
+				print("auto bunnyhop has been disabled\n");
+			}			
 			break;
     }	
     return FALSE;
@@ -69,6 +84,22 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     print("CSQC_Ent_Remove\n");
     remove(self);
 };
+
+noref void CSQC_Input_Frame()
+{
+	if (fo_autohop)
+	{
+		if (input_buttons&2)
+		{
+			// jump is held
+			if (jumptime <= time - .2)
+			{
+				input_buttons &= ~2;
+				jumptime = time;
+			}
+		}	
+	}
+}
 
 void() CSQC_Parse_Event = {
     //print("CSQC_Parse_Event\n");
