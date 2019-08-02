@@ -2,6 +2,8 @@
 
 .float owned_by;
 float fo_hud_editor;
+float jumptime;
+float fo_autohop;
 
 typedef struct
 {
