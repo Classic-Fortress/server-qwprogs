@@ -544,7 +544,6 @@ float server_faithful;
 
 float old_spanner;
 float old_dispenser;
-float old_emp_radius;
 float old_hp_armor;
 
 float ng_velocity;
@@ -564,6 +563,7 @@ float chweap_wait_attfinished;
 float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
+float new_emp;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;

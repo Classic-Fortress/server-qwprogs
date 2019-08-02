@@ -156,6 +156,7 @@ void () EMPGrenadeExplode = {
     local entity te, te2;
     local entity oldself;
     local float candamage, empblockinrange;
+    empblockinrange = FALSE;
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
@@ -184,7 +185,17 @@ void () EMPGrenadeExplode = {
         te2 = find(te2, classname, "info_empblock");
     }
 
-    te = findradius(self.origin, 240);
+    float emprange;
+    if (new_emp)
+    {
+        emprange = PC_ENGINEER_GRENADE_TYPE_2_NEWRANGE;
+    }
+    else
+    {
+        emprange = PC_ENGINEER_GRENADE_TYPE_2_OLDRANGE;
+    }
+    
+    te = findradius(self.origin, emprange);
     while (te) {
         te.chain2 = te.chain;
         candamage = TRUE;
@@ -239,13 +250,54 @@ void () EMPGrenadeExplode = {
                     ((teamplay & 16) && (te.team_no > 0) &&
                      (te.team_no == self.owner.team_no))) {
                     expsize = 0;
-                    expsize = expsize + te.ammo_shells * 0.75;
-                    expsize = expsize + te.ammo_rockets * 0.75 * 2;
-                    if (te.playerclass != PC_ENGINEER) {
-                        expsize = expsize + te.ammo_cells * 0.75;
+
+                    if (new_emp)
+                    {
+                        // we assume player has discarded non-needed ammo for damage calcs
+                        expsize = expsize + te.maxammo_shells * .75;
+                        expsize = expsize + te.maxammo_rockets * .75 * 2;
+                        expsize = expsize + te.maxammo_cells * 0.75;
+
+                        // remove discard ammo amount
+                        switch (te.playerclass)
+                        {
+                            case PC_SCOUT:
+                                expsize = expsize - te.maxammo_rockets * .75 * 2;
+                                break;
+                            case PC_MEDIC:
+                                expsize = expsize - te.maxammo_rockets * .75 * 2;
+                                if (!medicaura && old_medikit) {
+                                    expsize = expsize - te.maxammo_cells * .75;
+                                }
+                                break;
+                            case PC_SNIPER:
+                            case PC_SPY:
+                            case PC_ENGINEER:
+                                expsize = expsize - te.maxammo_rockets * .75 * 2;
+                                expsize = expsize - te.maxammo_cells * .75;
+                                break;
+                            case PC_SOLDIER:
+                            case PC_DEMOMAN:
+                                expsize = expsize - te.maxammo_cells * .75;
+                                break;
+                            case PC_HVYWEAP:
+                                expsize = expsize - te.maxammo_rockets * .75 * 2;
+                                break;
+                            default:
+                        }
                     }
+                    else
+                    {
+                        expsize = expsize + te.ammo_shells * 0.75;
+                        expsize = expsize + te.ammo_rockets * 0.75 * 2;
+                        if (te.playerclass != PC_ENGINEER) {
+                            expsize = expsize + te.ammo_cells * 0.75;
+                        }    
+                    }
+                    
+                    
                     if (expsize > 0) {
-                        deathmsg = 30;
+                        deathmsg = DMSG_GREN_EMP;
                         T_RadiusDamage(te, self.owner, expsize, te);
                         if (te.touch != BackpackTouch) {
                             TF_T_Damage(te, self, self.owner, expsize, 2, 4);

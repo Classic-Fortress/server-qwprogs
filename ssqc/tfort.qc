@@ -777,7 +777,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         if (self.no_grenades_1 > 0) {
             self.has_throwngren = TRUE;
             self.no_grenades_1 = self.no_grenades_1 - 1;
-            if (gtype == 6) {
+            if (gtype == GR_TYPE_FLARE) {
                 newmis = spawn();
                 newmis.owner = self;
                 newmis.movetype = 6;
@@ -841,7 +841,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         if (self.no_grenades_2 > 0) {
             self.has_throwngren = TRUE;
             self.no_grenades_2 = self.no_grenades_2 - 1;
-            if (gtype == 6) {
+            if (gtype == GR_TYPE_FLARE) {
                 newmis = spawn();
                 newmis.owner = self;
                 newmis.movetype = 6;
