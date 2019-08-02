@@ -155,7 +155,7 @@ void () EMPGrenadeExplode = {
     local float expsize;
     local entity te, te2;
     local entity oldself;
-    local float candamage, empblockinrage;
+    local float candamage, empblockinrange;
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
@@ -173,11 +173,11 @@ void () EMPGrenadeExplode = {
                 traceline(self.origin, te2.origin, 0, self);
                 //bprint(PRINT_HIGH, "Block wall check is ", ftos(trace_fraction), "\n");
                 if (trace_fraction == 1) {
-                    empblockinrage = TRUE;
+                    empblockinrange = TRUE;
                     break;
                 }
            } else {
-                empblockinrage = TRUE;
+                empblockinrange = TRUE;
                 break;
             }
         }
@@ -188,7 +188,7 @@ void () EMPGrenadeExplode = {
     while (te) {
         te.chain2 = te.chain;
         candamage = TRUE;
-        if(walls_block_emp || empblockinrage)
+        if(walls_block_emp || empblockinrange)
             candamage = CanDamage(te, self);
         traceline(self.origin, te.origin, MOVE_NOMONSTERS, self);
         if(trace_ent && trace_ent.spawnflags & SPAWNFLAG_BLOCK_EMP) {
