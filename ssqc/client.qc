@@ -603,6 +603,10 @@ void () DecodeLevelParms = {
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
         // All Walls Block EMP [0]
         walls_block_emp = CF_GetSetting("wbp", "walls_block_emp", "0");
+
+        // new emp range and set damage values (so no dropammo to reduce)
+        new_emp = CF_GetSetting("nemp", "new_emp", "1");
+
         // For duelmode, how soon to reset the winning player (allows for double KOs)
         duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
         // remove packs in duelmode [1]
@@ -1119,6 +1123,11 @@ void () ResetPlayers = {
 float () CountRemainingTeams = {
     local float teamsleft, teamflags, playersleft;
     local entity te, lastplayer;
+
+    lastplayer = world;
+    teamflags = 0;
+    playersleft = 0;
+
     te = find(world, classname, "player");
     while (te != world) {
         if(!te.has_disconnected && te.health > 0) {
