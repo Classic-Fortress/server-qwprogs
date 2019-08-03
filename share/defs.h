@@ -1246,6 +1246,11 @@
 #define DMSG_SENTRYGUN_ROCKET		34
 #define DMSG_GREN_FLASH			35
 #define DMSG_TRIGGER			36
+#define DMSG_TEAMKILL			37
+#define DMSG_SENTRYGUN_EXPLODE			38
+#define DMSG_DISPENSER_EXPLODE			39
+#define DMSG_GREN_PIPE_AIR			40
+#define DMSG_GREN_CALTROP			41
 
 /*======================================================*/
 /* Menus						*/
