@@ -13,6 +13,7 @@ void AssCanBulletTouch()
 	if (other == self.owner) 
         return;			// Touching self, do nothing
 
+    deathmsg = self.weapon;
     if (other.health)
     {
         TF_T_Damage(other, self, self.owner, 8, TF_TD_NOTTEAM,
@@ -76,6 +77,7 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	setmodel(newmis, newmis.mdl);				// Diamond model
 	newmis.frame = random()*15;					// Full range of sizes
 	newmis.skin = 16 + random()*7;				// Bright colours
+    newmis.weapon = DMSG_ASSAULTCANNON;
 
 	newmis.velocity = dir * proj_speed;			// Constant speed multiplier
 	newmis.angles = vectoangles(dir);			// Create direction angle

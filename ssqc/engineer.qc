@@ -941,7 +941,7 @@ void () Dispenser_Explode = {
     local float sdmg;
 
     if (self.real_owner.has_disconnected != 1) {
-        deathmsg = 39;
+        deathmsg = DMSG_DISPENSER_EXPLODE;
         sdmg = 25 + self.ammo_rockets * 3 + self.ammo_cells;
         if (sdmg > 250) {
             sdmg = 250;

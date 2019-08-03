@@ -702,7 +702,7 @@ void () player_axpain6 =[34, player_run] {
 
 void (entity et, float f) player_pain = {
     if (self.weaponframe) {
-        if (deathmsg == 37)
+        if (deathmsg == DMSG_TEAMKILL)
             PainSound();
         return;
     }

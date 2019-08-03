@@ -51,7 +51,7 @@ void () CaltropTouch = {
     sprint(other, PRINT_HIGH, "Ow, ow, ow! Caltrops!\n");
     other.leg_damage = other.leg_damage + 2;
     TeamFortress_SetSpeed(other);
-    deathmsg = 41;
+    deathmsg = DMSG_GREN_CALTROP;
     T_Damage(other, self, self.owner, 10);
     dremove(self);
 };
