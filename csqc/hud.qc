@@ -50,8 +50,6 @@ void FO_Hud_Editor_LoadSettings(float height)
                 val = argv(1);
                 val = strtrim(val);
 
-                print(strcat("field: ", field, " val: ", val, "\n"));
-
                 switch(field)
                 {
                     case "hudflagicon.position":
@@ -79,7 +77,7 @@ void FO_Hud_Editor_LoadSettings(float height)
     }    
 }
 
-void Hud_Draw(float width, float height)
+void Hud_DrawFlagStatusBar(float width)
 {
     vector pos;
 
@@ -113,7 +111,7 @@ void Hud_Draw(float width, float height)
             
         }
     }
-
+    
     pos = HudSettings.FlagIcon.Position;
     for (float i = FlagInfoLines.length - 1; i >= 0; i--) 
     {
@@ -155,4 +153,10 @@ void Hud_Draw(float width, float height)
 			}
 		}
     }
+}
+
+void Hud_Draw(float width, float height)
+{
+    Hud_DrawFlagStatusBar(width);
+    
 }
