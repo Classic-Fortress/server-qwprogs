@@ -529,9 +529,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
             else if (teamplay & TEAMPLAY_HALFDIRECT)
                 take = take / 2;
         }
-
     }
-
 
     if (targ.playerclass == PC_SPY) {
         targ.attacked_by = attacker;
@@ -564,7 +562,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
             if (T_AttackType & TF_TD_EXPLOSION) {
 
-                deathmsg = 37;
+                deathmsg = DMSG_TEAMKILL;
                 if (teamplay & 16384)
                     TF_T_Damage(attacker, world, world, take, 1, 0);
                 else if (teamplay & 8192)
@@ -572,7 +570,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
             } else {
 
-                deathmsg = 37;
+                deathmsg = DMSG_TEAMKILL;
                 if (teamplay & 4096)
                     TF_T_Damage(attacker, world, world, take, 1, 0);
                 else if (teamplay & 2048)
