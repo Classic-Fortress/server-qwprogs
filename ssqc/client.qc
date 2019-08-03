@@ -2260,7 +2260,6 @@ void (optional float csqcactive) ClientConnect = {
 
     stuffcmd(self, "set fortressone 1\n");
 
-    self.hascsqc = csqcactive;
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
