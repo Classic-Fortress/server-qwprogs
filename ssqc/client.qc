@@ -2253,12 +2253,13 @@ void () PlayerPostThink = {
     }
 };
 
-void () ClientConnect = {
+void (optional float csqcactive) ClientConnect = {
     local entity te;
     local string st;
     local float got_one;
 
     stuffcmd(self, "set fortressone 1\n");
+
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
