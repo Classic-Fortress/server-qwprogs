@@ -92,10 +92,10 @@ noref void CSQC_Input_Frame()
 		if (input_buttons&2)
 		{
 			// jump is held
-			if (jumptime <= time - .2)
+			if (jumptime <= time)
 			{
 				input_buttons &= ~2;
-				jumptime = time;
+				jumptime = time + .3;
 			}
 		}	
 	}
