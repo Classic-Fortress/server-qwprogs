@@ -645,55 +645,47 @@ float(entity playerent, float changedflags) SendClientFlagStatus = {
 
 string (entity Player, entity Item, float teamno) GetItemStatus = {
     local string st = "";
-
-    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
-    if(csqcactive) {
-        UpdateClientFlagStatus(Player, Item);
-    }
-    else
+    switch (teamno)
     {
-        switch (teamno)
-        {
-            case 1:
-                st = "Blue Flag";
-                break;
-            case 2:
-                st = "Red Flag";
-                break;
-            case 3:
-                st = "Yellow Flag";
-                break;
-            case 4:
-                st = "Green Flag";
-                break;
-        }
-        if (Player.team_no == Item.owned_by) {
-            st = strcat(Q"\x10", st ,Q"\x11");
-        }
-        if (Item.goal_state == 1 && Item.owner != world) {
-            if (Player == Item.owner) {
-                st = strcat(st, Q"\s: Carried by \sYOU");
-            } else {
-                st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
-            }
+        case 1:
+            st = "Blue Flag";
+            break;
+        case 2:
+            st = "Red Flag";
+            break;
+        case 3:
+            st = "Yellow Flag";
+            break;
+        case 4:
+            st = "Green Flag";
+            break;
+    }
+    if (Player.team_no == Item.owned_by) {
+        st = strcat(Q"\x10", st ,Q"\x11");
+    }
+    if (Item.goal_state == 1 && Item.owner != world) {
+        if (Player == Item.owner) {
+            st = strcat(st, Q"\s: Carried by \sYOU");
         } else {
-            if (Item.origin != Item.oldorigin) {
-                //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
-                if((Item.nextthink - time) >= 0) {
-                    if(Item.think != tfgoalitem_droptouch) {
-                        st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
-                    } else {
-                        st = strcat(st, Q"\s: Dropped\s");
-                    }
+            st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
+        }
+    } else {
+        if (Item.origin != Item.oldorigin) {
+            //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
+            if((Item.nextthink - time) >= 0) {
+                if(Item.think != tfgoalitem_droptouch) {
+                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
-                    st = strcat(st, Q"\s: Returning\s NOW!");
+                    st = strcat(st, Q"\s: Dropped\s");
                 }
             } else {
-                st = strcat(st, Q"\s: Safe\s");
+                st = strcat(st, Q"\s: Returning\s NOW!");
             }
+        } else {
+            st = strcat(st, Q"\s: Safe\s");
         }
     }
-    
+
     return st;
 }
 
@@ -745,9 +737,41 @@ void (entity pl) RefreshStatusBar = {
     } else {
         pl.display_tip = 0;
         tfdet = find(world, classname, "info_tfdetect");
-        if (!tfdet || !sbflaginfostate) {
+
+        float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+        // we get flag info from tfdetect
+        if (!tfdet || (!sbflaginfostate && !csqcactive))
+        {
             ct = strzone("\n\n\n\n\n\n");
-        } else {
+        }
+        else if (csqcactive) // has csqc
+        {
+            for (float t = 1; t <= number_of_teams; t++) 
+            {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    UpdateClientFlagStatus(pl, te);
+                }
+            }
+        }
+        else // no csqc but has sbflaginfo on
+        {
             ct = "";
             i = number_of_teams; // Extra newlines
             for (float t = 1; t <= number_of_teams; t++) {
@@ -804,12 +828,9 @@ void (entity pl) RefreshStatusBar = {
                 }
                 tg = find(tg, classname, "info_tfgoal");
             }
-
             
             for (float t = 0; t < (6 - i); t++)
                 ct = strcat(ct, "\n");
-            
-            //ct = strcat(ct, "\n\n\n");
             
             ct = strzone(ct);
         }
