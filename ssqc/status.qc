@@ -596,51 +596,44 @@ void (entity Player, float index, entity Item) InitClientFlagStatus = {
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
-    //Check if client is running csqc
-    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
-    if(csqcactive) {
-        //bprint(PRINT_HIGH, "Player ", Player.netname, " is ", infokey(Player, INFOKEY_P_CSQCACTIVE), "\n");
-
-        msg_entity = Player;
-        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-        WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
-        WriteFloat(MSG_MULTICAST, Item.goal_no);
-        if (Item.goal_state == 1 && Item.owner != world) {
-            WriteFloat(MSG_MULTICAST, FLAGINFO_CARRIED);
-            if (Player == Item.owner) {
-                WriteString(MSG_MULTICAST, "YOU");
-            } else {
-                WriteString(MSG_MULTICAST, Item.owner.netname);
-            }
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
+    WriteFloat(MSG_MULTICAST, Item.goal_no);
+    if (Item.goal_state == 1 && Item.owner != world) {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_CARRIED);
+        if (Player == Item.owner) {
+            WriteString(MSG_MULTICAST, "YOU");
         } else {
-            if (Item.origin != Item.oldorigin) {
-                if((Item.nextthink - time) >= 0) {
-                    WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
-                    if(Item.think != tfgoalitem_droptouch) {
-                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
-                        if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
-                            WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
-                            WriteCoord(MSG_MULTICAST, Item.origin_x);
-                            WriteCoord(MSG_MULTICAST, Item.origin_y);
-                            WriteCoord(MSG_MULTICAST, Item.origin_z);
-                            WriteString(MSG_MULTICAST, getLocationName(Item.origin));
-                        } else {
-                            WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
-                        }
+            WriteString(MSG_MULTICAST, Item.owner.netname);
+        }
+    } else {
+        if (Item.origin != Item.oldorigin) {
+            if((Item.nextthink - time) >= 0) {
+                WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
+                if(Item.think != tfgoalitem_droptouch) {
+                    WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
+                        WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+                        WriteCoord(MSG_MULTICAST, Item.origin_x);
+                        WriteCoord(MSG_MULTICAST, Item.origin_y);
+                        WriteCoord(MSG_MULTICAST, Item.origin_z);
+                        WriteString(MSG_MULTICAST, getLocationName(Item.origin));
                     } else {
-                        WriteFloat(MSG_MULTICAST, -1);
                         WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
                     }
                 } else {
-                   WriteFloat(MSG_MULTICAST, FLAGINFO_RETURNING);
+                    WriteFloat(MSG_MULTICAST, -1);
+                    WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
                 }
             } else {
-                WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
+                WriteFloat(MSG_MULTICAST, FLAGINFO_RETURNING);
             }
+        } else {
+            WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
         }
-        multicast('0 0 0', MULTICAST_ONE); 
-        //multicast('0 0 0', MULTICAST_ONE_R); 
     }
+    multicast('0 0 0', MULTICAST_ONE); 
 }
 
 float(entity playerent, float changedflags) SendClientFlagStatus = {
@@ -651,50 +644,56 @@ float(entity playerent, float changedflags) SendClientFlagStatus = {
 }
 
 string (entity Player, entity Item, float teamno) GetItemStatus = {
-    local string st;
-    UpdateClientFlagStatus(Player, Item);
-    switch (teamno)
-    {
-        case 1:
-            st = "Blue Flag";
-            break;
-        case 2:
-            st = "Red Flag";
-            break;
-        case 3:
-            st = "Yellow Flag";
-            break;
-        case 4:
-            st = "Green Flag";
-            break;
-    }
-    if (Player.team_no == Item.owned_by) {
-        st = strcat(Q"\x10", st ,Q"\x11");
-        //st = strcat("[", st ,"]");
-   }
-    if (Item.goal_state == 1 && Item.owner != world) {
-        if (Player == Item.owner) {
-            st = strcat(st, Q"\s: Carried by \sYOU");
-        } else {
-            st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
-        }
+    local string st = "";
 
-    } else {
-        if (Item.origin != Item.oldorigin) {
-            //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
-            if((Item.nextthink - time) >= 0) {
-                if(Item.think != tfgoalitem_droptouch) {
-                    st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
-                } else {
-                    st = strcat(st, Q"\s: Dropped\s");
-                }
+    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
+    if(csqcactive) {
+        UpdateClientFlagStatus(Player, Item);
+    }
+    else
+    {
+        switch (teamno)
+        {
+            case 1:
+                st = "Blue Flag";
+                break;
+            case 2:
+                st = "Red Flag";
+                break;
+            case 3:
+                st = "Yellow Flag";
+                break;
+            case 4:
+                st = "Green Flag";
+                break;
+        }
+        if (Player.team_no == Item.owned_by) {
+            st = strcat(Q"\x10", st ,Q"\x11");
+        }
+        if (Item.goal_state == 1 && Item.owner != world) {
+            if (Player == Item.owner) {
+                st = strcat(st, Q"\s: Carried by \sYOU");
             } else {
-                st = strcat(st, Q"\s: Returning\s NOW!");
+                st = strcat(st, Q"\s: Carried by \s", Item.owner.netname);
             }
         } else {
-            st = strcat(st, Q"\s: Safe\s");
+            if (Item.origin != Item.oldorigin) {
+                //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
+                if((Item.nextthink - time) >= 0) {
+                    if(Item.think != tfgoalitem_droptouch) {
+                        st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
+                    } else {
+                        st = strcat(st, Q"\s: Dropped\s");
+                    }
+                } else {
+                    st = strcat(st, Q"\s: Returning\s NOW!");
+                }
+            } else {
+                st = strcat(st, Q"\s: Safe\s");
+            }
         }
     }
+    
     return st;
 }
 
