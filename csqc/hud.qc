@@ -1,3 +1,5 @@
+// TODO - reset to defaults command
+// TODO - implement scale on elements
 void FO_Hud_Editor()
 {
     if (fo_hud_editor)
@@ -15,7 +17,7 @@ void FO_Hud_Editor()
 }
 
 float firstrun;
-void FO_Hud_Editor_LoadSettings(float height)
+void FO_Hud_Editor_LoadSettings(float width, float height)
 {
     fo_hud_editor = FALSE;
     HudSettings.MousePos = [0, 0];
@@ -28,7 +30,13 @@ void FO_Hud_Editor_LoadSettings(float height)
     // TODO - maybe implement these to allow for pivoting of items
     HudFlagIcon.GrowDirection = FO_HUD_GROW_UP;
     HudFlagIcon.NodeInsertLoc = FO_HUD_INSERT_AFTER;
+
     HudSettings.FlagIcon = HudFlagIcon;
+
+    FO_Hud_ClipSize HudClipSize;
+    HudClipSize.Position = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
+    HudClipSize.Scale = 1;
+    HudSettings.ClipSize = HudClipSize;
 
     // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
     float filehandle;
@@ -44,6 +52,7 @@ void FO_Hud_Editor_LoadSettings(float height)
                 ln = strreplace("\n", "", ln);
                 string val, field;
 
+                float x = 0, y = 0;
                 float count = tokenizebyseparator(ln, ":");
                 field = argv(0);
                 field = strtrim(field);
@@ -54,8 +63,8 @@ void FO_Hud_Editor_LoadSettings(float height)
                 {
                     case "hudflagicon.position":
                         count = tokenizebyseparator(val, ",");
-                        float x = stof(argv(0));
-                        float y = stof(argv(1));
+                        x = stof(argv(0));
+                        y = stof(argv(1));
                         HudSettings.FlagIcon.Position = [x, y];
                         break;
                     case "hudflagicon.growdirection":
@@ -63,6 +72,14 @@ void FO_Hud_Editor_LoadSettings(float height)
                         break;
                     case "hudflagicon.nodeinsertloc":
                         HudSettings.FlagIcon.NodeInsertLoc = stof(val);
+                        break;
+                    case "hudclipsize.position":
+                        count = tokenizebyseparator(val, ",");
+                        x = stof(argv(0));
+                        y = stof(argv(1));
+                        HudSettings.ClipSize.Position = [x, y];
+                        break;
+                    case "hudclipsize.scale":
                         break;
                 }
             }
@@ -100,10 +117,10 @@ void Hud_DrawFlagStatusBar(float width)
             HudSettings.FlagIcon.Position = pos;
         }
     } 
-    
+    pos = HudSettings.FlagIcon.Position;
     vector fillsize = [width*.2, 24 * flagInfoCount];
     float alpha = 0;
-    if (hud_panel("flagiconpanel", HudSettings.FlagIcon.Position, fillsize, alpha))
+    if (hud_panel("flagiconpanel", pos, fillsize, alpha))
     {
         // click event
         if (fo_hud_editor)
@@ -112,7 +129,6 @@ void Hud_DrawFlagStatusBar(float width)
         }
     }
     
-    pos = HudSettings.FlagIcon.Position;
     for (float i = FlagInfoLines.length - 1; i >= 0; i--) 
     {
 		if (FlagInfoLines[i].id) 
@@ -137,26 +153,44 @@ void Hud_DrawFlagStatusBar(float width)
 			}
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    drawstring([pos_x + HUD_FLAGICON_SIZE, pos_y + 4 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + 24, pos_y + 4 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    drawstring([pos_x + HUD_FLAGICON_SIZE, pos_y + 4 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], icon, '24 24 0', iconcolour, alpha, 1);
+            drawpic([pos_x, pos_y - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], icon, [HUD_FLAGICON_SIZE, HUD_FLAGICON_SIZE, 0], iconcolour, alpha, 1);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - 24 * (i - 1) + 24 * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
+			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			}
 		}
     }
 }
 
+void Hud_DrawClipSize(float width)
+{
+    vector pos = HudSettings.ClipSize.Position;
+    vector fillsize = [FO_HUD_CLIPSIZE_PANEL_X, FO_HUD_CLIPSIZE_PANEL_Y];
+    float alpha = 0;
+
+    if (hud_panel("clipsizepanel", pos, fillsize, alpha))
+    {
+        // click event
+        if (fo_hud_editor)
+        {
+            
+        }
+    }
+
+    drawstring([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, '8 8', '1 1 1', 1, 0);
+}
+
 void Hud_Draw(float width, float height)
 {
     Hud_DrawFlagStatusBar(width);
-    
+    Hud_DrawClipSize(width);
 }
