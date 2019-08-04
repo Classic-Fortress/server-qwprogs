@@ -1311,4 +1311,4 @@
 
 #define FO_HUD_INSERT_AFTER		1
 #define FO_HUD_INSERT_BEFORE	1
-#define FO_HUD_CONFIG_PATH	"fortressone_hud.focfg"
+#define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"

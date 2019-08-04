@@ -41,8 +41,13 @@ vector UpdatePos(string id, vector mousepos)
                 pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
                 HudSettings.FlagIcon.Position = pos;
             }
-            HudSettings.MousePos = mousepos;
-            
+            break;
+        case "clipsizepanel":
+            if (HudSettings.MousePos != [0, 0])
+            {
+                pos = HudSettings.ClipSize.Position + mousepos - HudSettings.MousePos;
+                HudSettings.ClipSize.Position = pos;
+            }
             break;
     }
 
@@ -65,10 +70,6 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
             pos = [Mouse.x, Mouse.y];
             pos = UpdatePos(id, pos);
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
-        }
-        else
-        {
-            HudSettings.MousePos = [0, 0];
         }
         
         if (sui_is_hovered(id))
@@ -95,6 +96,59 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
 	return sui_is_clicked(id);
 };
 
+// this draws backwards, haven't bothered to change as we don't use it
+void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
+{
+    float c;
+    float len, i;
+    string s;
+    if (!size) size = 24;
+    vector vsize = [size, size, 0];
+    if (value < 0)
+        value = 0;    //hrm
+    s = ftos(floor(value));
+    len = strlen(s);
+    i = 0;
+    if (value <= threshhold) {    //use alternate (red) numbers
+        while(i<len) {
+            i+=1;
+            c = str2chr(s, len-i);
+            drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+    } else {    //use normal numbers
+        while(i<len) {
+            i+=1;
+            c = str2chr(s, len-i);
+            drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+    }
+}
+
+void Hud_DrawStringLMP(vector pos, string value, float size)
+{
+    float c;
+    float len, i;
+    string s;
+    if (!size) size = 24;
+    vector vsize = [size, size, 0];
+    s = value;
+    len = strlen(s);
+    i = 0;
+
+    while(i<len) {
+        c = str2chr(s, i);
+        if (c == 47) // "/"
+        {
+            // because i'm dodgy
+            drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
+        }
+        else
+        {
+            drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+        i+=1;
+    }
+}
 
 string FormatHudCfgString(string line, string field, string value)
 {
@@ -110,7 +164,7 @@ string FormatHudCfgVector(string line, string field, vector value)
     return line;
 }
 
-void WriteHudCfg(string path)
+void Hud_WriteCfg(string path)
 {
     // this overwrites
     float filehandle;
@@ -120,6 +174,9 @@ void WriteHudCfg(string path)
     line = FormatHudCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
     line = FormatHudCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
     line = FormatHudCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
+    line = FormatHudCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
+    line = FormatHudCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
+    line = FormatHudCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
 
     fputs(filehandle, line);
     fclose(filehandle);

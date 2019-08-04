@@ -4,6 +4,7 @@
 float fo_hud_editor;
 float jumptime;
 float fo_autohop;
+string ClipSizeMsg;
 
 typedef struct
 {
@@ -27,18 +28,31 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+// hud stuff
+
+typedef struct {
+    vector Position;
+    float Scale;
+} FO_Hud_ClipSize;
+
 typedef struct {
     vector Position;
     float GrowDirection;
     float NodeInsertLoc;
+    float Scale;
 } FO_Hud_FlagIcon;
 
 typedef struct {
     FO_Hud_FlagIcon FlagIcon;
+    FO_Hud_ClipSize ClipSize;
     vector MousePos;
 } FO_Hud_Settings;
-
 FO_Hud_Settings HudSettings;
+
+#define HUD_FLAGICON_SIZE_X   24
+#define HUD_FLAGICON_SIZE_Y   24
+#define FO_HUD_CLIPSIZE_PANEL_X 125
+#define FO_HUD_CLIPSIZE_PANEL_Y 50
 
 #pragma noref 1
 #pragma warning error Q101 /*too many parms*/

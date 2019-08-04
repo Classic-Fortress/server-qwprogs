@@ -8,5 +8,6 @@ csextradefs.qc
 sui_sys.qc
 input.qc
 main.qc
+events.qc
 hud_helpers.qc
 hud.qc
