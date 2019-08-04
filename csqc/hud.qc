@@ -7,7 +7,7 @@ void FO_Hud_Editor()
         fo_hud_editor = FALSE;
         setcursormode(FALSE);
 
-        WriteHudCfg(FO_HUD_CONFIG_PATH);
+        Hud_WriteCfg(FO_HUD_CONFIG_PATH);
     }
     else
     {
@@ -104,7 +104,7 @@ void FO_Hud_Editor_LoadSettings()
     else
     {
         // write a new file
-        WriteHudCfg(FO_HUD_CONFIG_PATH);
+        Hud_WriteCfg(FO_HUD_CONFIG_PATH);
     }    
 }
 
