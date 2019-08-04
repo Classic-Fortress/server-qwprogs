@@ -81,6 +81,9 @@ void FO_Hud_Editor_LoadSettings()
                         y = stof(argv(1));
                         HudSettings.FlagIcon.Position = [x, y];
                         break;
+                    case "hudflagicon.scale":
+                        HudSettings.FlagIcon.Scale = stof(val);
+                        break;
                     case "hudflagicon.growdirection":
                         HudSettings.FlagIcon.GrowDirection = stof(val);
                         break;
@@ -112,6 +115,10 @@ void FO_Hud_Editor_LoadSettings()
 void Hud_DrawFlagStatusBar(float width)
 {
     vector pos;
+    pos = HudSettings.FlagIcon.Position;
+    float sizey, sizex;
+    sizey = HUD_FLAGICON_SIZE_Y * HudSettings.FlagIcon.Scale;
+    sizex = HUD_FLAGICON_SIZE_X * HudSettings.FlagIcon.Scale;
 
     float flagInfoCount = 0;
     for (float i = FlagInfoLines.length - 1; i >= 0; i--) 
@@ -121,19 +128,18 @@ void Hud_DrawFlagStatusBar(float width)
             flagInfoCount++;
         }
     }
-
+    
     if (firstrun)
     {
         if (flagInfoCount > 0)
         {
             firstrun = FALSE;
-            pos = HudSettings.FlagIcon.Position;
-            pos_y = pos_y - 4 - HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2);
+            pos_y = pos_y - 4 - sizey * (flagInfoCount - 2);
             HudSettings.FlagIcon.Position = pos;
         }
-    } 
-    pos = HudSettings.FlagIcon.Position;
-    vector fillsize = [HUD_FLAGICON_SIZE_X * 4, HUD_FLAGICON_SIZE_Y * flagInfoCount];
+    }
+
+    vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
     if (hud_panel("flagiconpanel", pos, fillsize, alpha))
     {
@@ -168,19 +174,19 @@ void Hud_DrawFlagStatusBar(float width)
 			}
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + HUD_FLAGICON_SIZE_X, pos_y + 4 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + HUD_FLAGICON_SIZE_X, pos_y + 4 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - HUD_FLAGICON_SIZE_X * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], icon, [HUD_FLAGICON_SIZE_X, HUD_FLAGICON_SIZE_Y, 0], iconcolour, alpha, 1);
+            drawpic([pos_x, pos_y - sizex * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 1);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
+			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			}
 		}
     }
