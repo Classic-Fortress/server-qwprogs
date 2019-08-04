@@ -1098,10 +1098,16 @@ void () RemovePlayerOwnedEnts = {
 }
 
 void () ResetPlayers = {
+    local entity te, oldself, reset_timer;
     no_fire_mode = 0;
+    reset_timer = find(world, classname, "duel_reset_timer");
+    while (reset_timer != world) {
+        oldself = reset_timer;
+        reset_timer = find (reset_timer, classname, "duel_reset_timer");
+        dremove(oldself);
+    }
     if(cb_prematch)
         return;
-    local entity te, oldself;
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
@@ -1113,6 +1119,7 @@ void () ResetPlayers = {
             RemovePlayerOwnedEnts();
             setspawnparms(self);
             PutClientInServer();
+            self.respawn_time = 0;
             
             self = oldself;
         }
@@ -1223,7 +1230,7 @@ void () ClientKill = {
     self.takedamage = 0;
     if(duelmode) {
         if(CountRemainingTeams() < 2) {
-            ResetPlayers();
+            ResetPlayersWithCountdown();
         }
     }
 };
@@ -2366,7 +2373,10 @@ void () ClientDisconnect = {
         if (!playersleft) {
             bprint(PRINT_HIGH, "Match \sabandoned\s, resetting to prematch\n");
             InitPrematch();
+        } else if(CountRemainingTeams() < 2) {
+            ResetPlayersWithCountdown();
         }
+
     }
     set_suicide_frame();
     self.netname = string_null;

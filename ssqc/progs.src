@@ -1,6 +1,8 @@
 ../qwprogs.dat
-defs.qc
+
+#define QWSSQC 
 ../share/fteextensions.qc
+defs.qc
 ../share/commondefs.qc
 qw.qc
 q3defs.qc
