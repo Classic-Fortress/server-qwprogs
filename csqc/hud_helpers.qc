@@ -150,14 +150,14 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
     }
 }
 
-string FormatHudCfgString(string line, string field, string value)
+string FormatCfgString(string line, string field, string value)
 {
     line = strcat(line, "\n", field, ":", value);
 
     return line;
 }
 
-string FormatHudCfgVector(string line, string field, vector value)
+string FormatCfgVector(string line, string field, vector value)
 {
     line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
 
@@ -171,12 +171,12 @@ void Hud_WriteCfg(string path)
     filehandle = fopen(path, FILE_WRITE);
     string line;
 
-    line = FormatHudCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
-    line = FormatHudCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
-    line = FormatHudCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
-    line = FormatHudCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
-    line = FormatHudCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
-    line = FormatHudCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
+    line = FormatCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
+    line = FormatCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
+    line = FormatCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
+    line = FormatCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
+    line = FormatCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
+    line = FormatCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
 
     fputs(filehandle, line);
     fclose(filehandle);
