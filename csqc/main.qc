@@ -2,6 +2,8 @@ void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings();
 void FO_Hud_Editor_LoadDefaultSettings();
+void FO_LoadSettings();
+void FO_WriteSettings();
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
@@ -12,6 +14,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercommand("fo_autohop");
 
 	FO_Hud_Editor_LoadSettings();
+	FO_LoadSettings();
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -60,14 +63,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			val = stof(argv(1));
 			if (val == 1)
 			{
-				fo_autohop = TRUE;
+				Settings.Autohop = 1;
 				print("auto bunnyhop has been enabled\n");
 			}
 			else if (val == 0)
 			{
-				fo_autohop = FALSE;
+				Settings.Autohop = 0;
 				print("auto bunnyhop has been disabled\n");
-			}			
+			}
+			FO_WriteSettings();
 			break;
     }	
     return FALSE;
@@ -94,7 +98,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame()
 {
-	if (fo_autohop)
+	if (Settings.Autohop == 1)
 	{
 		if (input_buttons&2)
 		{

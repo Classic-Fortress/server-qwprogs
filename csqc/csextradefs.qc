@@ -3,7 +3,6 @@
 .float owned_by;
 float fo_hud_editor;
 float jumptime;
-float fo_autohop;
 string ClipSizeMsg;
 
 typedef struct
@@ -48,6 +47,11 @@ typedef struct {
     vector MousePos;
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
+
+typedef struct {
+    float Autohop;
+} FO_Settings;
+FO_Settings Settings;
 
 #define HUD_FLAGICON_SIZE_X   24
 #define HUD_FLAGICON_SIZE_Y   24
