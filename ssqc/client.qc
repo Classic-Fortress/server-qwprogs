@@ -1194,8 +1194,7 @@ void () ClientKill = {
     self.suicide_time = time + 5 + random() * 5;
 
     if (self.clientkillfree == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
-        if(!duelmode)
-            TeamFortress_SetupRespawn(FALSE);
+        TeamFortress_SetupRespawn(FALSE);
     } else {
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
 
@@ -1213,8 +1212,7 @@ void () ClientKill = {
             logfrag(self, self);
 
         TF_AddFrags(self, -1);
-        if(!duelmode)
-            TeamFortress_SetupRespawn(TRUE);
+        TeamFortress_SetupRespawn(TRUE);
         self.th_die();
     }
 
