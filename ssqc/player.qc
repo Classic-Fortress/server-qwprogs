@@ -892,15 +892,19 @@ void () GibPlayer = {
     } else {
         self.deadflag = 2;
     }
-    TeamFortress_SetupRespawn(0);
+    if(!duelmode) {
+        TeamFortress_SetupRespawn(0);
+    } else {
+        self.respawn_time = 9999;
+    }
     if (damage_attacker.classname == "teledeath") {
         sound(self, 2, "player/teledth1.wav", 1, 0);
-        self.respawn_time = (self.respawn_time + 2) + (random() * 2);
+        if(!duelmode) self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
     }
     if (damage_attacker.classname == "teledeath2") {
         sound(self, 2, "player/teledth1.wav", 1, 0);
-        self.respawn_time = (self.respawn_time + 2) + (random() * 2);
+        if(!duelmode) self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
     }
     if (random() < 0.5) {
@@ -955,7 +959,8 @@ void () PlayerDie = {
     self.angles_z = 0;
     if (self.current_weapon <= 16) {
         player_die_ax1();
-        TeamFortress_SetupRespawn(0);
+        if(!duelmode)
+            TeamFortress_SetupRespawn(0);
         return;
     }
     i = 1 + floor(random() * 6);
@@ -970,7 +975,9 @@ void () PlayerDie = {
     else
         player_diee1();
 
-    TeamFortress_SetupRespawn(0);
+    self.respawn_time = 9999;
+    if(!duelmode)
+        TeamFortress_SetupRespawn(0);
 };
 
 void () set_suicide_frame = {

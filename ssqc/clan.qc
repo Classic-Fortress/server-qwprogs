@@ -849,7 +849,7 @@ float () CheckAllPlayersReady = {
         return 0;
         
     f1 = TeamFortress_GetNoPlayers ();
-    bprint (PRINT_HIGH, "Checking readiness - ",ftos(v_ready),"/",ftos(f1),".\n");
+    bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
     if (v_ready == f1 ) {
         if(cease_fire) {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");

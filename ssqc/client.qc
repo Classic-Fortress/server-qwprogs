@@ -1113,6 +1113,7 @@ void () ResetPlayers = {
             RemovePlayerOwnedEnts();
             setspawnparms(self);
             PutClientInServer();
+            self.respawn_time = 0;
             
             self = oldself;
         }
@@ -1193,7 +1194,8 @@ void () ClientKill = {
     self.suicide_time = time + 5 + random() * 5;
 
     if (self.clientkillfree == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
-        TeamFortress_SetupRespawn(FALSE);
+        if(!duelmode)
+            TeamFortress_SetupRespawn(FALSE);
     } else {
         bprint(PRINT_MEDIUM, self.netname, " suicides\n");
 
@@ -1211,7 +1213,8 @@ void () ClientKill = {
             logfrag(self, self);
 
         TF_AddFrags(self, -1);
-        TeamFortress_SetupRespawn(TRUE);
+        if(!duelmode)
+            TeamFortress_SetupRespawn(TRUE);
         self.th_die();
     }
 
@@ -2253,7 +2256,7 @@ void () PlayerPostThink = {
     }
 };
 
-void () ClientConnect = {
+void (optional float csqcactive) ClientConnect = {
     local entity te;
     local string st;
     local float got_one;
