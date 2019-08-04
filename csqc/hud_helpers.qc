@@ -96,7 +96,9 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
 	return sui_is_clicked(id);
 };
 
-void(vector pos, float value, float threshhold, float size) Hud_DrawLargeValue = {
+// this draws backwards, haven't bothered to change as we don't use it
+void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
+{
     float c;
     float len, i;
     string s;
@@ -120,7 +122,33 @@ void(vector pos, float value, float threshhold, float size) Hud_DrawLargeValue =
             drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
     }
-};
+}
+
+void Hud_DrawStringLMP(vector pos, string value, float size)
+{
+    float c;
+    float len, i;
+    string s;
+    if (!size) size = 24;
+    vector vsize = [size, size, 0];
+    s = value;
+    len = strlen(s);
+    i = 0;
+
+    while(i<len) {
+        c = str2chr(s, i);
+        if (c == 47) // "/"
+        {
+            // because i'm dodgy
+            drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
+        }
+        else
+        {
+            drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+        i+=1;
+    }
+}
 
 string FormatHudCfgString(string line, string field, string value)
 {
@@ -146,6 +174,7 @@ void Hud_WriteCfg(string path)
     line = FormatHudCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
     line = FormatHudCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
     line = FormatHudCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
+    line = FormatHudCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
     line = FormatHudCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
     line = FormatHudCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
 

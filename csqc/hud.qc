@@ -94,6 +94,7 @@ void FO_Hud_Editor_LoadSettings()
                         HudSettings.ClipSize.Position = [x, y];
                         break;
                     case "hudclipsize.scale":
+                        HudSettings.ClipSize.Scale = stof(val);
                         break;
                 }
             }
@@ -188,7 +189,7 @@ void Hud_DrawFlagStatusBar(float width)
 void Hud_DrawClipSize(float width)
 {
     vector pos = HudSettings.ClipSize.Position;
-    vector fillsize = [FO_HUD_CLIPSIZE_PANEL_X, FO_HUD_CLIPSIZE_PANEL_Y];
+    vector fillsize = [FO_HUD_CLIPSIZE_PANEL_X * HudSettings.ClipSize.Scale, FO_HUD_CLIPSIZE_PANEL_Y * HudSettings.ClipSize.Scale];
     float alpha = 0;
 
     if (hud_panel("clipsizepanel", pos, fillsize, alpha))
@@ -200,7 +201,7 @@ void Hud_DrawClipSize(float width)
         }
     }
 
-    drawstring([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, '20 20', '1 1 1', 1, 0);
+    Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, 24 * HudSettings.ClipSize.Scale);
 }
 
 void Hud_Draw(float width, float height)
