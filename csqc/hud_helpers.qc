@@ -96,6 +96,31 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
 	return sui_is_clicked(id);
 };
 
+void(vector pos, float value, float threshhold, float size) Hud_DrawLargeValue = {
+    float c;
+    float len, i;
+    string s;
+    if (!size) size = 24;
+    vector vsize = [size, size, 0];
+    if (value < 0)
+        value = 0;    //hrm
+    s = ftos(floor(value));
+    len = strlen(s);
+    i = 0;
+    if (value <= threshhold) {    //use alternate (red) numbers
+        while(i<len) {
+            i+=1;
+            c = str2chr(s, len-i);
+            drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+    } else {    //use normal numbers
+        while(i<len) {
+            i+=1;
+            c = str2chr(s, len-i);
+            drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+        }
+    }
+};
 
 string FormatHudCfgString(string line, string field, string value)
 {
@@ -111,7 +136,7 @@ string FormatHudCfgVector(string line, string field, vector value)
     return line;
 }
 
-void WriteHudCfg(string path)
+void Hud_WriteCfg(string path)
 {
     // this overwrites
     float filehandle;
