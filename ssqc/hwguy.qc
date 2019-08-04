@@ -13,6 +13,7 @@ void AssCanBulletTouch()
 	if (other == self.owner) 
         return;			// Touching self, do nothing
 
+    deathmsg = self.weapon;
     if (other.health)
     {
         TF_T_Damage(other, self, self.owner, 8, TF_TD_NOTTEAM,
@@ -76,6 +77,7 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	setmodel(newmis, newmis.mdl);				// Diamond model
 	newmis.frame = random()*15;					// Full range of sizes
 	newmis.skin = 16 + random()*7;				// Bright colours
+    newmis.weapon = DMSG_ASSAULTCANNON;
 
 	newmis.velocity = dir * proj_speed;			// Constant speed multiplier
 	newmis.angles = vectoangles(dir);			// Create direction angle
@@ -95,6 +97,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
 	float bullet_speed, var_speed;
 
     makevectors(self.v_angle);
+
     // Infront of player model and down towards gun
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
@@ -103,7 +106,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
         rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
 		spread_dir = bullet_dir + rand_dir;
-        org = self.origin + rand_dir;
+        org = self.origin + '0 0 10' + rand_dir;
 
 		LaunchAssCan(org, spread_dir, var_speed);
 

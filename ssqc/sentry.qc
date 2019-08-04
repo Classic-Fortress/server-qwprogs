@@ -238,7 +238,7 @@ void () Sentry_Explode = {
     ThrowGib("progs/tgib3.mdl", -70);
 
     if (self.real_owner.has_disconnected != 1) {
-        deathmsg = 38;
+        deathmsg = DMSG_SENTRYGUN_EXPLODE;
         T_RadiusDamage(self, self.real_owner, 75 + self.ammo_rockets * 8,
                        self);
     }
