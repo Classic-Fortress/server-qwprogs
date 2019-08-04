@@ -48,7 +48,8 @@ typedef struct {
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
 
-#define HUD_FLAGICON_SIZE   24
+#define HUD_FLAGICON_SIZE_X   24
+#define HUD_FLAGICON_SIZE_Y   24
 #define FO_HUD_CLIPSIZE_PANEL_X 50
 #define FO_HUD_CLIPSIZE_PANEL_Y 50
 

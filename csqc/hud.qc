@@ -113,12 +113,12 @@ void Hud_DrawFlagStatusBar(float width)
         {
             firstrun = FALSE;
             pos = HudSettings.FlagIcon.Position;
-            pos_y = pos_y - 4 - 24 * (flagInfoCount - 2);
+            pos_y = pos_y - 4 - HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2);
             HudSettings.FlagIcon.Position = pos;
         }
     } 
     pos = HudSettings.FlagIcon.Position;
-    vector fillsize = [width*.2, 24 * flagInfoCount];
+    vector fillsize = [HUD_FLAGICON_SIZE_X * 4, HUD_FLAGICON_SIZE_Y * flagInfoCount];
     float alpha = 0;
     if (hud_panel("flagiconpanel", pos, fillsize, alpha))
     {
@@ -153,19 +153,19 @@ void Hud_DrawFlagStatusBar(float width)
 			}
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + HUD_FLAGICON_SIZE, pos_y + 4 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    drawstring([pos_x + HUD_FLAGICON_SIZE_X, pos_y + 4 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + HUD_FLAGICON_SIZE, pos_y + 4 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    drawstring([pos_x + HUD_FLAGICON_SIZE_X, pos_y + 4 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], icon, [HUD_FLAGICON_SIZE, HUD_FLAGICON_SIZE, 0], iconcolour, alpha, 1);
+            drawpic([pos_x, pos_y - HUD_FLAGICON_SIZE_X * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], icon, [HUD_FLAGICON_SIZE_X, HUD_FLAGICON_SIZE_Y, 0], iconcolour, alpha, 1);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - HUD_FLAGICON_SIZE * (i - 1) + HUD_FLAGICON_SIZE * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
+			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - HUD_FLAGICON_SIZE_Y * (i - 1) + HUD_FLAGICON_SIZE_Y * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			}
 		}
     }
@@ -186,11 +186,13 @@ void Hud_DrawClipSize(float width)
         }
     }
 
-    drawstring([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, '8 8', '1 1 1', 1, 0);
+    drawstring([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, '20 20', '1 1 1', 1, 0);
 }
 
 void Hud_Draw(float width, float height)
 {
     Hud_DrawFlagStatusBar(width);
     Hud_DrawClipSize(width);
+
+    HudSettings.MousePos = [Mouse.x, Mouse.y];
 }

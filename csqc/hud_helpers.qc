@@ -41,8 +41,13 @@ vector UpdatePos(string id, vector mousepos)
                 pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
                 HudSettings.FlagIcon.Position = pos;
             }
-            HudSettings.MousePos = mousepos;
-            
+            break;
+        case "clipsizepanel":
+            if (HudSettings.MousePos != [0, 0])
+            {
+                pos = HudSettings.ClipSize.Position + mousepos - HudSettings.MousePos;
+                HudSettings.ClipSize.Position = pos;
+            }
             break;
     }
 
@@ -65,10 +70,6 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
             pos = [Mouse.x, Mouse.y];
             pos = UpdatePos(id, pos);
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
-        }
-        else
-        {
-            HudSettings.MousePos = [0, 0];
         }
         
         if (sui_is_hovered(id))

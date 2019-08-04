@@ -70,7 +70,6 @@ void() CSQC_Parse_Event = {
             }
             break;
          case MSG_CLIPSIZE:
-            print("reading clipsize\n");
             string test;
             test = readstring();
 
