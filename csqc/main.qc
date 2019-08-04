@@ -1,16 +1,17 @@
 void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
-void FO_Hud_Editor_LoadSettings(float width, float height);
+void FO_Hud_Editor_LoadSettings();
+void FO_Hud_Editor_LoadDefaultSettings();
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
     precache_model("progs/weapons/v_rock.mdl");
 	registercommand("fo_hud_editor");
+	registercommand("fo_hud_reload");
+	registercommand("fo_hud_reset");
 	registercommand("fo_autohop");
-	
-	vector vsize = (vector)getproperty(VF_SCREENVSIZE);
 
-	FO_Hud_Editor_LoadSettings(vsize_x, vsize_y);
+	FO_Hud_Editor_LoadSettings();
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -48,6 +49,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     switch(argv(0)) {
 		case "fo_hud_editor":
 			FO_Hud_Editor();
+			break;
+		case "fo_hud_reload":
+			FO_Hud_Editor_LoadSettings();
+			break;
+		case "fo_hud_reset":
+			FO_Hud_Editor_LoadDefaultSettings();
 			break;
 		case "fo_autohop":
 			val = stof(argv(1));

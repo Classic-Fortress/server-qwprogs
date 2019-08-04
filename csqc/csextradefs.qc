@@ -39,6 +39,7 @@ typedef struct {
     vector Position;
     float GrowDirection;
     float NodeInsertLoc;
+    float Scale;
 } FO_Hud_FlagIcon;
 
 typedef struct {

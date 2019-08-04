@@ -16,27 +16,41 @@ void FO_Hud_Editor()
     }
 }
 
-float firstrun;
-void FO_Hud_Editor_LoadSettings(float width, float height)
+void FO_Hud_Editor_LoadDefaultSettings()
 {
-    fo_hud_editor = FALSE;
-    HudSettings.MousePos = [0, 0];
+    vector vsize = (vector)getproperty(VF_SCREENVSIZE);
+    float width = vsize_x;
+    float height = vsize_y;
+
     // check struct, put defaults in
     float yoffset = height - 64;
     FO_Hud_FlagIcon HudFlagIcon;
     HudFlagIcon.Position = [8, yoffset];
-    firstrun = TRUE;
 
     // TODO - maybe implement these to allow for pivoting of items
     HudFlagIcon.GrowDirection = FO_HUD_GROW_UP;
     HudFlagIcon.NodeInsertLoc = FO_HUD_INSERT_AFTER;
-
+    HudFlagIcon.Scale = 1;
     HudSettings.FlagIcon = HudFlagIcon;
 
     FO_Hud_ClipSize HudClipSize;
     HudClipSize.Position = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
     HudClipSize.Scale = 1;
     HudSettings.ClipSize = HudClipSize;
+}
+
+float firstrun;
+void FO_Hud_Editor_LoadSettings()
+{
+    vector vsize = (vector)getproperty(VF_SCREENVSIZE);
+    float width = vsize_x;
+    float height = vsize_y;
+    fo_hud_editor = FALSE;
+
+    FO_Hud_Editor_LoadDefaultSettings();
+
+    HudSettings.MousePos = [0, 0];
+    firstrun = TRUE;
 
     // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
     float filehandle;
