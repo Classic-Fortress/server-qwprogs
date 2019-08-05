@@ -757,16 +757,22 @@ void UpdateClientStatusBar(entity pl)
         case PC_SCOUT:
             // off, on
             WriteFloat(MSG_MULTICAST, pl.ScannerOn);
-            // going to send info whether it's on or not, csqc can figure it out
-            entity te;
-            te = find(world, netname, "scanner");
-            while ((te != world) && (te.owner != pl)) {
-                te = find(te, netname, "scanner");
+            
+            if (pl.ScannerOn)
+            {
+                entity te;
+                te = find(world, netname, "scanner");
+                while ((te != world) && (te.owner != pl)) {
+                    te = find(te, netname, "scanner");
+                }
+                WriteFloat(MSG_MULTICAST, te.health); // range to person, 0 or less if no one
+                if (te.health)
+                {
+                    WriteFloat(MSG_MULTICAST, te.team_no);
+                    WriteFloat(MSG_MULTICAST, te.playerclass);
+                    WriteFloat(MSG_MULTICAST, te.tf_items_flags); // nothing, friendly, enemy
+                }
             }
-            WriteFloat(MSG_MULTICAST, te.health); // range to person, 0 or less if no one
-            WriteFloat(MSG_MULTICAST, te.team_no);
-            WriteFloat(MSG_MULTICAST, te.playerclass);
-            WriteFloat(MSG_MULTICAST, te.tf_items_flags); // nothing, friendly, enemy
             break;
         case PC_SNIPER:
             float dam, max;
