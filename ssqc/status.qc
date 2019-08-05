@@ -745,12 +745,41 @@ void (entity pl) RefreshStatusBar = {
     //By default, show after tips; 0/off = off; 2 = always
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
     /* local float win, sec; */
+    tfdet = find(world, classname, "info_tfdetect");
 
 
     float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
     if (csqcactive)
     {
         UpdateClientStatusBar(pl)
+
+        // flag info
+        if (tfdet)
+        {
+            for (float t = 1; t <= number_of_teams; t++) 
+            {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    UpdateClientFlagStatus(pl, te);
+                }
+            }
+        }
         return; // csqc ends here
     }
     
@@ -784,40 +813,13 @@ void (entity pl) RefreshStatusBar = {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
-        tfdet = find(world, classname, "info_tfdetect");
 
         // we get flag info from tfdetect
-        if (!tfdet || (!sbflaginfostate && !csqcactive))
+        if (!tfdet || !sbflaginfostate)
         {
             ct = strzone("\n\n\n\n\n\n");
         }
-        else if (csqcactive) // has csqc
-        {
-            for (float t = 1; t <= number_of_teams; t++) 
-            {
-                switch (t)
-                {
-                    case 1:
-                        te = Finditem(tfdet.display_item_status1);
-                        break;
-                    case 2:
-                        te = Finditem(tfdet.display_item_status2);
-                        break;
-                    case 3:
-                        te = Finditem(tfdet.display_item_status3);
-                        break;
-                    case 4:
-                        te = Finditem(tfdet.display_item_status4);
-                        break;
-                }
-
-                if (te)
-                {
-                    UpdateClientFlagStatus(pl, te);
-                }
-            }
-        }
-        else // no csqc but has sbflaginfo on
+        else // has sbflaginfo on
         {
             ct = "";
             i = number_of_teams; // Extra newlines
