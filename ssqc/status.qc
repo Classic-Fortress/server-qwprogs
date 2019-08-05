@@ -689,33 +689,43 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
     return st;
 }
 
-void UpdateClientClipStatus(entity pl)
+string GetSBClipString(entity pl, float csqcactive)
 {
-    string msg = "0";
-    
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIPSIZE);
-
+    string msg = "";
     if (pl.tfstate & TFSTATE_RELOADING) 
     {
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            msg = strcat(ftos(25 * pl.reload_sniper_ticks), "%");
+            msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
         } else {
             if (reload_cliptick)
-                msg = ftos(pl.reload_clipsize);
+                msg = csqcactive ? ftos(pl.reload_clipsize) : strpadl(ftos(pl.reload_clipsize), 2);
             else
-                msg = "0";
+                msg = csqcactive ? "0" : " 0";
+
             msg = strcat(msg, "/");
-            msg = strcat(msg, ftos(GetClipSize(pl)));
+            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl), strpadr(ftos(GetClipSize(pl)), 3))));
         }
     } 
     else 
     {
-        msg = ClipSizeToString(pl, TRUE);
+        msg = ClipSizeToString(pl, csqcactive);
     }
 
-    WriteString(MSG_MULTICAST, msg);
+    return msg;
+}
+
+void UpdateClientStatusBar(entity pl)
+{
+    // if we ever change to fte only, this could be changed to stats
+    string msg = "";
+    msg_entity = pl;
+
+    string clipMsg = GetSBClipString(pl, TRUE);
+
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_SBAR);
+    WriteString(MSG_MULTICAST, clipMsg);
+
     multicast('0 0 0', MULTICAST_ONE); 
 }
 
@@ -736,6 +746,14 @@ void (entity pl) RefreshStatusBar = {
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
     /* local float win, sec; */
 
+
+    float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+    if (csqcactive)
+    {
+        UpdateClientStatusBar(pl)
+        return; // csqc ends here
+    }
+    
     pad = "";
 
     if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
@@ -760,8 +778,6 @@ void (entity pl) RefreshStatusBar = {
     for (i = 0; i < height; i++)
         pad = strcat(pad, "\n");
     pad = strzone(pad);
-
-    float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
 
     // class tip
     if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
@@ -929,29 +945,8 @@ void (entity pl) RefreshStatusBar = {
     st2 = "";
 
     // status line 3 column 2 - clip size
-    if (csqcactive)
-    {
-        UpdateClientClipStatus(pl);
-    }
-    else if (pl.tfstate & TFSTATE_RELOADING) 
-    {
-        st2 = Q"\sClip\s: ";
-        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            st2 = strcat(st2, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
-            st2 = strcat(st2, "%  ");
-        } else {
-            if (reload_cliptick)
-                st2 = strcat(st2, strpadl(ftos(pl.reload_clipsize), 2));
-            else
-                st2 = strcat(st2, " 0");
-            st2 = strcat(st2, "/");
-            st2 = strcat(st2, strpadr(ftos(GetClipSize(pl)), 3));
-        }
-    } 
-    else 
-    {
-        st2 = ClipSizeToString(pl, FALSE);
-    }
+    st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
+    
 
     // status line 3 column 3 - grenade 1 count
     st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
