@@ -783,6 +783,8 @@ void UpdateClientStatusBar(entity pl)
             break;
         case PC_DEMOMAN:
             // seconds left on detpack
+            WriteFloat(MSG_MULTICAST, pl.is_detpacking);
+            WriteFloat(MSG_MULTICAST, pl.detpack_left);
             break;
         case PC_MEDIC:
             // aura on/off
