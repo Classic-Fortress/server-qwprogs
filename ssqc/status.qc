@@ -742,7 +742,6 @@ void UpdateClientStatusBar(entity pl)
     msg_entity = pl;
 
     string clipMsg = GetSBClipString(pl, TRUE);
-    string classMsg = GetSBClassInfo(pl, TRUE);
 
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SBAR);
@@ -920,7 +919,7 @@ void (entity pl) RefreshStatusBar = {
     float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
     if (csqcactive)
     {
-        pl.StatusRefreshTime = time + 1;
+        //pl.StatusRefreshTime = time + 1;
         UpdateClientStatusBar(pl);
 
         // flag info

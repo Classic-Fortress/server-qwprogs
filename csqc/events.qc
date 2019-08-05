@@ -1,3 +1,5 @@
+void ParseSBAR();
+
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
     local float goalno; 
@@ -69,13 +71,110 @@ void() CSQC_Parse_Event = {
                 }
             }
             break;
-         case MSG_CLIPSIZE:
-            string test;
-            test = readstring();
-
-            ClipSizeMsg = test;
+        case MSG_SBAR:
+            ParseSBAR();
             break;
         default:
             print("CSQC_Parse_Event, unknown event: ",ftos(msgtype),"\n");
+    }
+}
+
+void ParseSBAR()
+{
+    SBAR.ClipSize = readstring();
+    SBAR.FragStreak = readfloat();
+    SBAR.Caps = readfloat();
+    SBAR.Identify = readstring();
+    SBAR.PlayerClass = readfloat();
+
+    if (SBAR.PlayerClass)
+    {
+        SBAR.Gren1 = readfloat();
+        SBAR.Gren2 = readfloat();
+    }
+    
+    switch (SBAR.PlayerClass)
+    {
+        case PC_SCOUT:
+            SBAR.ScannerOn = readfloat();
+            if (SBAR.ScannerOn)
+            {
+                SBAR.ScannerRange = readfloat();
+
+                if (SBAR.ScannerRange)
+                {
+                    SBAR.ScannerTeamNo = readfloat();
+                    SBAR.ScannerPlayerClass = readfloat();
+                    SBAR.ScannerTFItemsFlags = readfloat();
+                }
+            }
+            break;
+        case PC_SNIPER:
+            SBAR.SniperDam = readfloat();
+            SBAR.SniperMax = readfloat();
+            break;
+        case PC_DEMOMAN:
+            SBAR.IsDetpacking = readfloat();
+            SBAR.DetpackLeft = readfloat();
+            break;
+        case PC_MEDIC:
+            float medicaura = readfloat();
+            if (medicaura)
+            {
+                SBAR.AuraActive = readfloat();
+                if (SBAR.AuraActive)
+                {
+                    SBAR.HealCount = readfloat();
+                    SBAR.HealAmount = readfloat();
+                    SBAR.AuraStatus = readfloat();
+                }
+            }
+            break;
+        case PC_HVYWEAP:
+            SBAR.LockedCannon = readfloat();
+            break;
+        case PC_SPY:
+            SBAR.IsUndercover = readfloat();
+
+            if (SBAR.IsUndercover == 1)
+            {
+                SBAR.InvisOnly = readfloat();
+                SBAR.UndercoverTeam = readfloat();
+                SBAR.UndercoverSkin = readfloat();
+            }
+            else if (SBAR.IsUndercover == 2)
+            {
+                SBAR.InvisOnly = readfloat();
+                SBAR.UndercoverTimer = readfloat();
+                SBAR.UndercoverTeam = readfloat();
+                SBAR.DisguiseTeam = readfloat();
+                SBAR.QueueTeam = readfloat();
+                SBAR.UndercoverSkin = readfloat();
+                SBAR.DisguiseSkin = readfloat();
+                SBAR.QueueSkin = readfloat();
+            }
+            break;
+        case PC_ENGINEER:
+            SBAR.IsBuilding = readfloat();
+            if (SBAR.IsBuilding)
+            {
+                SBAR.BuildingPercentage = readfloat();
+            }
+            
+            SBAR.HasSentry = readfloat();
+            if (SBAR.HasSentry)
+            {
+                SBAR.SentryLevel = readfloat();
+                SBAR.SentryHealth = readfloat();
+                SBAR.SentryAmmoShells = readfloat();
+                SBAR.SentryAmmoRockets = readfloat();
+            }
+            
+            SBAR.HasDispenser = readfloat();
+            if (SBAR.HasDispenser)
+            {
+                SBAR.DispenserHealth = readfloat();
+            }
+            break;
     }
 }

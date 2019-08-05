@@ -207,7 +207,7 @@ void Hud_DrawClipSize(float width)
         }
     }
 
-    Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], ClipSizeMsg, 24 * HudSettings.ClipSize.Scale);
+    Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], SBAR.ClipSize, 24 * HudSettings.ClipSize.Scale);
 }
 
 void Hud_Draw(float width, float height)

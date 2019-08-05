@@ -3,7 +3,6 @@
 .float owned_by;
 float fo_hud_editor;
 float jumptime;
-string ClipSizeMsg;
 
 typedef struct
 {
@@ -52,6 +51,56 @@ typedef struct {
     float Autohop;
 } FO_Settings;
 FO_Settings Settings;
+
+typedef struct {
+    string ClipSize;
+    float FragStreak;
+    float Caps;
+    string Identify;
+    float PlayerClass;
+    float Gren1;
+    float Gren2;
+    // scout
+    float ScannerOn;
+    float ScannerRange;
+    float ScannerTeamNo;
+    float ScannerPlayerClass;
+    float ScannerTFItemsFlags;
+    // sniper
+    float SniperDam;
+    float SniperMax;
+    // demoman
+    float IsDetpacking;
+    float DetpackLeft;
+    // medic
+    float AuraActive;
+    float HealCount;
+    float HealAmount;
+    float AuraStatus;
+    // hwguy
+    float LockedCannon;
+    // spy
+    float IsUndercover;
+    float InvisOnly;
+    float UndercoverTeam;
+    float UndercoverSkin;
+    float UndercoverTimer;
+    float DisguiseTeam;
+    float QueueTeam;
+    float DisguiseSkin;
+    float QueueSkin;
+    // engineer
+    float IsBuilding;
+    float BuildingPercentage;
+    float HasSentry;
+    float SentryLevel;
+    float SentryHealth;
+    float SentryAmmoShells;
+    float SentryAmmoRockets;
+    float HasDispenser;
+    float DispenserHealth;
+} FO_SBAR;
+FO_SBAR SBAR;
 
 #define HUD_FLAGICON_SIZE_X   24
 #define HUD_FLAGICON_SIZE_Y   24
