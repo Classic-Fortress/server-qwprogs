@@ -4,7 +4,7 @@ void FO_WriteSettings()
     float filehandle;
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
     string line;
-
+    line = "";
     line = FormatCfgString(line, "fo_autohop", ftos(Settings.Autohop));
 
     fputs(filehandle, line);

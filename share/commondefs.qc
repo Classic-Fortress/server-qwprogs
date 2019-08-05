@@ -3,6 +3,7 @@
 #define MSG_FLAGINFOINIT    1
 #define MSG_FLAGINFO        2
 #define MSG_CLIPSIZE        3
+#define MSG_SBAR        4
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

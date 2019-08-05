@@ -701,7 +701,7 @@ string GetSBClipString(entity pl, float csqcactive)
                 msg = csqcactive ? "0" : " 0";
 
             msg = strcat(msg, "/");
-            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl), strpadr(ftos(GetClipSize(pl)), 3))));
+            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl)) : strpadr(ftos(GetClipSize(pl)), 3)));
         }
     } 
     else 
@@ -749,7 +749,19 @@ void UpdateClientStatusBar(entity pl)
     WriteString(MSG_MULTICAST, clipMsg);
     WriteFloat(MSG_MULTICAST, pl.fragstreak);
     WriteFloat(MSG_MULTICAST, pl.caps);
+    // identify
+    if (pl.ident_string && time < pl.ident_time) {
+        WriteString(MSG_MULTICAST, pl.ident_string);
+    } else {
+        WriteString(MSG_MULTICAST, "");
+    }
+
     WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
+    if (pl.playerclass)
+    {
+        WriteFloat(MSG_MULTICAST, pl.no_grenades_1);
+        WriteFloat(MSG_MULTICAST, pl.no_grenades_2);
+    }
 
     // class info
     switch (pl.playerclass)
@@ -851,14 +863,42 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
         case PC_ENGINEER:
-            // sg - shells rockets, health, level
-            // disp - health
+            // building status??
+            WriteFloat(MSG_MULTICAST, pl.is_building);
+            if (pl.is_building)
+            {
+                WriteFloat(MSG_MULTICAST, pl.building_percentage);
+            }
+
+            WriteFloat(MSG_MULTICAST, pl.has_sentry);
+            if (pl.has_sentry)
+            {
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.weapon); // level
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.health);
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.ammo_shells);
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.ammo_rockets);
+                
+            }
+
+            WriteFloat(MSG_MULTICAST, pl.has_dispenser);
+            if (pl.has_dispenser)
+            {
+                entity disp;
+                disp = find(world, classname, "building_dispenser");
+                while (disp)
+                {
+                    if (disp.real_owner == pl)
+                    {
+                        WriteFloat(MSG_MULTICAST, disp.health);
+                    }
+                    disp = find(disp, classname, "building_dispenser");
+                }
+            }
             break;
     }
 
     multicast('0 0 0', MULTICAST_ONE); 
 }
-
 
 void (entity pl) RefreshStatusBar = {
     local string pad;
@@ -875,14 +915,13 @@ void (entity pl) RefreshStatusBar = {
     local string bi; //button info
     //By default, show after tips; 0/off = off; 2 = always
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
-    /* local float win, sec; */
     tfdet = find(world, classname, "info_tfdetect");
-
 
     float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
     if (csqcactive)
     {
-        UpdateClientStatusBar(pl)
+        pl.StatusRefreshTime = time + 1;
+        UpdateClientStatusBar(pl);
 
         // flag info
         if (tfdet)
@@ -1064,7 +1103,6 @@ void (entity pl) RefreshStatusBar = {
 
     // status line 3 column 2 - clip size
     st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
-    
 
     // status line 3 column 3 - grenade 1 count
     st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
