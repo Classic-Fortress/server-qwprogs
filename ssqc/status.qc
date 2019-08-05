@@ -788,14 +788,36 @@ void UpdateClientStatusBar(entity pl)
             WriteFloat(MSG_MULTICAST, max);
             break;
         case PC_DEMOMAN:
-            // seconds left on detpack
             WriteFloat(MSG_MULTICAST, pl.is_detpacking);
             WriteFloat(MSG_MULTICAST, pl.detpack_left);
             break;
         case PC_MEDIC:
-            // aura on/off
-            // out of power, recharging
-            // healed x players for y health
+            WriteFloat(MSG_MULTICAST, medicaura);
+
+            if (medicaura)
+            {
+                WriteFloat(MSG_MULTICAST, pl.aura_active);
+
+                if (pl.aura_active) 
+                {
+                    float c, a;
+                    c = (time < pl.aura_healtime) ? pl.aura_healcount : 0;
+                    a = (time < pl.aura_healtime) ? pl.aura_healamount : 0;
+                    WriteFloat(MSG_MULTICAST, c);
+                    WriteFloat(MSG_MULTICAST, a);
+                    // state
+                    float s = PC_MEDIC_AURA_ACTIVE;
+                    if (pl.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2))
+                    {
+                        s = PC_MEDIC_AURA_OUTOFPOWER;
+                    }
+                    else if (pl.ammo_cells < floor(PC_MEDIC_MAXAMMO_CELL * 0.95))
+                    {
+                        s = PC_MEDIC_AURA_RECHARGING;
+                    }
+                    WriteFloat(MSG_MULTICAST, s);
+                }
+            }
             break;
         case PC_HVYWEAP:
             // ass can locked

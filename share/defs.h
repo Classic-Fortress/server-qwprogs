@@ -961,6 +961,9 @@
 #define PC_MEDIC_CELL_REGEN_PERCENT 10  // Percentage of max cells regenerated each cell regen.
 #define PC_MEDIC_CELL_REGEN_CD      5   // Seconds to cooldown cell regeneration after healing with medikit.
 #define PC_MEDIC_SAVEME_GRACE       5   // Seconds after which /saveme gives grace period to medikit (no cell regeneration cooldown)
+#define PC_MEDIC_AURA_ACTIVE    1
+#define PC_MEDIC_AURA_RECHARGING    2
+#define PC_MEDIC_AURA_OUTOFPOWER    3
 
 // Class Details for HVYWEAP
 #define PC_HVYWEAP_SKIN			2
