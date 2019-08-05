@@ -712,6 +712,29 @@ string GetSBClipString(entity pl, float csqcactive)
     return msg;
 }
 
+string GetSBClassInfo(entity pl, float csqcactive)
+{
+    string st1 = "";
+    if (pl.playerclass == PC_SCOUT)
+        st1 = ScannerToString(pl);
+    else if (pl.playerclass == PC_SNIPER && (pl.tfstate & TFSTATE_AIMING))
+        st1 = SniperPowerToString(pl);
+    else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
+        st1 = DetpackToString(pl);
+    else if (pl.playerclass == PC_MEDIC)
+        st1 = AuraToString(pl);
+    else if (pl.playerclass == PC_HVYWEAP)
+        st1 = AssaultCannonToString(pl);
+    else if (pl.playerclass == PC_SPY)
+        st1 = DisguiseToString(pl);
+    else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
+        st1 = SentryDetailsToString(pl);
+    if (pl.playerclass == PC_ENGINEER && pl.is_building)
+        st1 = BuildingToString(pl);
+
+    return st1;
+}
+
 void UpdateClientStatusBar(entity pl)
 {
     // if we ever change to fte only, this could be changed to stats
@@ -719,13 +742,61 @@ void UpdateClientStatusBar(entity pl)
     msg_entity = pl;
 
     string clipMsg = GetSBClipString(pl, TRUE);
+    string classMsg = GetSBClassInfo(pl, TRUE);
 
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SBAR);
     WriteString(MSG_MULTICAST, clipMsg);
+    WriteFloat(MSG_MULTICAST, pl.fragstreak);
+    WriteFloat(MSG_MULTICAST, pl.caps);
+    WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
+
+    // class info
+    switch (pl.playerclass)
+    {
+        case PC_SCOUT:
+            // off, on
+            WriteFloat(MSG_MULTICAST, pl.ScannerOn);
+            // going to send info whether it's on or not, csqc can figure it out
+            entity te;
+            te = find(world, netname, "scanner");
+            while ((te != world) && (te.owner != pl)) {
+                te = find(te, netname, "scanner");
+            }
+            WriteFloat(MSG_MULTICAST, te.health); // range to person, 0 or less if no one
+            WriteFloat(MSG_MULTICAST, te.team_no);
+            WriteFloat(MSG_MULTICAST, te.playerclass);
+            WriteFloat(MSG_MULTICAST, te.tf_items_flags); // nothing, friendly, enemy
+            break;
+        case PC_SNIPER:
+            // damage
+            // damage maxed
+            break;
+        case PC_DEMOMAN:
+            // seconds left on detpack
+            break;
+        case PC_MEDIC:
+            // aura on/off
+            // out of power, recharging
+            // healed x players for y health
+            break;
+        case PC_HVYWEAP:
+            // ass can locked
+            break;
+        case PC_SPY:
+            // invivislbe in x secs
+            // disguising
+            // disguised as
+            break;
+        case PC_ENGINEER:
+            // sg - shells rockets, health, level
+            // disp - health
+            break;
+    }
 
     multicast('0 0 0', MULTICAST_ONE); 
 }
+
 
 void (entity pl) RefreshStatusBar = {
     local string pad;
@@ -919,23 +990,8 @@ void (entity pl) RefreshStatusBar = {
     s1 = strzone(s1);
 
     // status line 2 column 1 - class specific information
-    st1 = "";
-    if (pl.playerclass == PC_SCOUT)
-        st1 = ScannerToString(pl);
-    else if (pl.playerclass == PC_SNIPER && (pl.tfstate & TFSTATE_AIMING))
-        st1 = SniperPowerToString(pl);
-    else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
-        st1 = DetpackToString(pl);
-    else if (pl.playerclass == PC_MEDIC)
-        st1 = AuraToString(pl);
-    else if (pl.playerclass == PC_HVYWEAP)
-        st1 = AssaultCannonToString(pl);
-    else if (pl.playerclass == PC_SPY)
-        st1 = DisguiseToString(pl);
-    else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
-        st1 = SentryDetailsToString(pl);
-    if (pl.playerclass == PC_ENGINEER && pl.is_building)
-        st1 = BuildingToString(pl);
+    st1 = GetSBClassInfo(pl, csqcactive);
+    
     // status line 2
     s2 = strpadr(st1, 40);
     s2 = strcat(s2, "\n");
@@ -1288,17 +1344,18 @@ string(entity pl) ScannerToString =
     local string range = "";
     local float pad;
 
+    st = Q"\sScanner\s: ";
+
+    if (pl.ScannerOn != TRUE) {
+        return strcat(st, "off");
+    }
+
     te = find(world, netname, "scanner");
     while ((te != world) && (te.owner != pl)) {
         te = find(te, netname, "scanner");
     }
 
-    if (pl.ScannerOn != 1) {
-        return Q"\sScanner\s: off";
-    }
-
     if (te.health > 0) {
-        st = Q"\sScanner\s: ";
         st = strcat(st, TeamToString(te.team_no));
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
@@ -1309,7 +1366,7 @@ string(entity pl) ScannerToString =
         st = strpadr(st, pad);
         st = strcat(st, range);
     } else {
-        st = Q"\sScanner\s: on";
+        st = strcat(st, "on");
         st = strcat(st, Q"  \sScanning\s: ");
 
         if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
