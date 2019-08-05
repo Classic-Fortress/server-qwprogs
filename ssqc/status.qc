@@ -1,8 +1,6 @@
 float (float tno) TeamFortress_TeamGetScore;
 float () TeamFortress_TeamGetWinner;
 float () TeamFortress_TeamGetSecond;
-string(float num) NumberToString1000;
-
 string(float num) BlueScoreToString;
 string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
@@ -973,14 +971,6 @@ void (entity pl) RefreshStatusBar = {
     centerprint(pl, pl.StatusString, pad, ident, ct, s1, s2, s3);
     pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(ct); strunzone(s1); strunzone(s2); strunzone(s3);
-};
-
-string(float num) NumberToString1000 =
-{
-    if (num > 999)
-        return "999";
-
-    return strpadl(ftos(floor(num)), 3);
 };
 
 string(float num) BlueScoreToString =
