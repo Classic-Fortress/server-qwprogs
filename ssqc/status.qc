@@ -769,8 +769,17 @@ void UpdateClientStatusBar(entity pl)
             WriteFloat(MSG_MULTICAST, te.tf_items_flags); // nothing, friendly, enemy
             break;
         case PC_SNIPER:
-            // damage
-            // damage maxed
+            float dam, max;
+            dam = 0;
+            max = FALSE;
+            if (sniperpower)
+            {
+                dam = pl.heat;
+                max = pl.power_full;
+            }
+            
+            WriteFloat(MSG_MULTICAST, dam);
+            WriteFloat(MSG_MULTICAST, max);
             break;
         case PC_DEMOMAN:
             // seconds left on detpack
