@@ -31,6 +31,7 @@ FlagInfoLine FlagInfoLines[10];
 typedef struct {
     vector Position;
     float Scale;
+    float Display;
 } FO_Hud_ClipSize;
 
 typedef struct {
@@ -38,6 +39,7 @@ typedef struct {
     float GrowDirection;
     float NodeInsertLoc;
     float Scale;
+    float Display;
 } FO_Hud_FlagIcon;
 
 typedef struct {

@@ -175,8 +175,10 @@ void Hud_WriteCfg(string path)
     line = FormatCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
     line = FormatCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
     line = FormatCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
+    line = FormatCfgString(line, "hudflagicon.display", ftos(HudSettings.FlagIcon.Display));
     line = FormatCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
     line = FormatCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
+    line = FormatCfgString(line, "hudclipsize.display", ftos(HudSettings.ClipSize.Display));
 
     fputs(filehandle, line);
     fclose(filehandle);

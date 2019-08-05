@@ -1,5 +1,3 @@
-// TODO - reset to defaults command
-// TODO - implement scale on elements
 void FO_Hud_Editor()
 {
     if (fo_hud_editor)
@@ -31,11 +29,13 @@ void FO_Hud_Editor_LoadDefaultSettings()
     HudFlagIcon.GrowDirection = FO_HUD_GROW_UP;
     HudFlagIcon.NodeInsertLoc = FO_HUD_INSERT_AFTER;
     HudFlagIcon.Scale = 1;
+    HudFlagIcon.Display = 1;
     HudSettings.FlagIcon = HudFlagIcon;
 
     FO_Hud_ClipSize HudClipSize;
     HudClipSize.Position = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
     HudClipSize.Scale = 1;
+    HudClipSize.Display = 1;
     HudSettings.ClipSize = HudClipSize;
 }
 
@@ -90,6 +90,9 @@ void FO_Hud_Editor_LoadSettings()
                     case "hudflagicon.nodeinsertloc":
                         HudSettings.FlagIcon.NodeInsertLoc = stof(val);
                         break;
+                    case "hudflagicon.display":
+                        HudSettings.FlagIcon.Display = stof(val);
+                        break;
                     case "hudclipsize.position":
                         count = tokenizebyseparator(val, ",");
                         x = stof(argv(0));
@@ -98,6 +101,9 @@ void FO_Hud_Editor_LoadSettings()
                         break;
                     case "hudclipsize.scale":
                         HudSettings.ClipSize.Scale = stof(val);
+                        break;
+                    case "hudclipsize.display":
+                        HudSettings.ClipSize.Display = stof(val);
                         break;
                 }
             }
@@ -114,6 +120,9 @@ void FO_Hud_Editor_LoadSettings()
 
 void Hud_DrawFlagStatusBar(float width)
 {
+    if (!HudSettings.FlagIcon.Display)
+        return;
+
     vector pos;
     pos = HudSettings.FlagIcon.Position;
     float sizey, sizex;
@@ -194,6 +203,9 @@ void Hud_DrawFlagStatusBar(float width)
 
 void Hud_DrawClipSize(float width)
 {
+    if (!HudSettings.ClipSize.Display)
+        return;
+
     vector pos = HudSettings.ClipSize.Position;
     vector fillsize = [FO_HUD_CLIPSIZE_PANEL_X * HudSettings.ClipSize.Scale, FO_HUD_CLIPSIZE_PANEL_Y * HudSettings.ClipSize.Scale];
     float alpha = 0;
@@ -208,12 +220,16 @@ void Hud_DrawClipSize(float width)
     }
 
     Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], SBAR.ClipSize, 24 * HudSettings.ClipSize.Scale);
+
 }
 
 void Hud_Draw(float width, float height)
 {
     Hud_DrawFlagStatusBar(width);
     Hud_DrawClipSize(width);
+    
+    
+
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
