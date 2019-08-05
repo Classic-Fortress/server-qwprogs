@@ -821,6 +821,13 @@ void UpdateClientStatusBar(entity pl)
             break;
         case PC_HVYWEAP:
             // ass can locked
+            float l = FALSE;
+            if (pl.tfstate & TFSTATE_LOCK)
+            {
+                l = TRUE;
+            }
+
+            WriteFloat(MSG_MULTICAST, l);
             break;
         case PC_SPY:
             // invivislbe in x secs
