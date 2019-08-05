@@ -830,9 +830,25 @@ void UpdateClientStatusBar(entity pl)
             WriteFloat(MSG_MULTICAST, l);
             break;
         case PC_SPY:
-            // invivislbe in x secs
-            // disguising
-            // disguised as
+            WriteFloat(MSG_MULTICAST, pl.is_undercover);
+            
+            if (pl.is_undercover == 1)
+            {
+                WriteFloat(MSG_MULTICAST, invis_only);
+                WriteFloat(MSG_MULTICAST, pl.undercover_team);
+                WriteFloat(MSG_MULTICAST, pl.undercover_skin);
+            }
+            else if (pl.is_undercover == 2)
+            {
+                WriteFloat(MSG_MULTICAST, invis_only);
+                WriteFloat(MSG_MULTICAST, pl.undercover_timer);
+                WriteFloat(MSG_MULTICAST, pl.undercover_team);
+                WriteFloat(MSG_MULTICAST, pl.disguise_team);
+                WriteFloat(MSG_MULTICAST, pl.queue_team);
+                WriteFloat(MSG_MULTICAST, pl.undercover_skin);
+                WriteFloat(MSG_MULTICAST, pl.disguise_skin);
+                WriteFloat(MSG_MULTICAST, pl.queue_skin);
+            }
             break;
         case PC_ENGINEER:
             // sg - shells rockets, health, level
