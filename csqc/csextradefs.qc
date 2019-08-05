@@ -43,8 +43,16 @@ typedef struct {
 } FO_Hud_FlagIcon;
 
 typedef struct {
+    vector Position;
+    vector FillSize;
+    float Scale;
+    float Display;
+} FO_Hud_Panel;
+
+typedef struct {
     FO_Hud_FlagIcon FlagIcon;
     FO_Hud_ClipSize ClipSize;
+    FO_Hud_Panel FragStreak;
     vector MousePos;
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;

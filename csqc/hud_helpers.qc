@@ -179,6 +179,9 @@ void Hud_WriteCfg(string path)
     line = FormatCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
     line = FormatCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
     line = FormatCfgString(line, "hudclipsize.display", ftos(HudSettings.ClipSize.Display));
+    line = FormatCfgVector(line, "hudfragstreak.position", HudSettings.FragStreak.Position);
+    line = FormatCfgString(line, "hudfragstreak.scale", ftos(HudSettings.FragStreak.Scale));
+    line = FormatCfgString(line, "hudfragstreak.display", ftos(HudSettings.FragStreak.Display));
 
     fputs(filehandle, line);
     fclose(filehandle);

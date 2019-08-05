@@ -1,3 +1,6 @@
+FO_Hud_Panel DrawPanel;
+FO_Hud_Panel NewPanel;
+
 void FO_Hud_Editor()
 {
     if (fo_hud_editor)
@@ -12,6 +15,18 @@ void FO_Hud_Editor()
         fo_hud_editor = TRUE;
         setcursormode(TRUE);
     }
+}
+
+void GetNewPanel(vector pos, vector fillSize, float scale, float display)
+{
+    FO_Hud_Panel pnl;
+
+    pnl.Position = pos;
+    pnl.FillSize = fillSize;
+    pnl.Scale = scale;
+    pnl.Display = display;
+
+    NewPanel = pnl;
 }
 
 void FO_Hud_Editor_LoadDefaultSettings()
@@ -32,11 +47,24 @@ void FO_Hud_Editor_LoadDefaultSettings()
     HudFlagIcon.Display = 1;
     HudSettings.FlagIcon = HudFlagIcon;
 
+    vector pos, fill;
+    float scale, display;
+    
+    pos = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
     FO_Hud_ClipSize HudClipSize;
-    HudClipSize.Position = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
+    HudClipSize.Position = pos;
     HudClipSize.Scale = 1;
     HudClipSize.Display = 1;
     HudSettings.ClipSize = HudClipSize;
+
+    pos = [pos_x, pos_y - 2 - 50];
+    fill = [50, 50];
+    scale = 1;
+    display = 1;
+
+    GetNewPanel(pos, fill, scale, display);
+    FO_Hud_Panel HudFragStreak = NewPanel;
+    HudSettings.FragStreak = HudFragStreak;
 }
 
 float firstrun;
@@ -104,6 +132,18 @@ void FO_Hud_Editor_LoadSettings()
                         break;
                     case "hudclipsize.display":
                         HudSettings.ClipSize.Display = stof(val);
+                        break;
+                    case "hudfragstreak.position":
+                        count = tokenizebyseparator(val, ",");
+                        x = stof(argv(0));
+                        y = stof(argv(1));
+                        HudSettings.FragStreak.Position = [x, y];
+                        break;
+                    case "hudfragstreak.scale":
+                        HudSettings.FragStreak.Scale = stof(val);
+                        break;
+                    case "hudfragstreak.display":
+                        HudSettings.FragStreak.Display = stof(val);
                         break;
                 }
             }
@@ -220,7 +260,27 @@ void Hud_DrawClipSize(float width)
     }
 
     Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], SBAR.ClipSize, 24 * HudSettings.ClipSize.Scale);
+}
 
+
+void Hud_DrawPanelLMP(string id, float val)
+{
+    if (!DrawPanel.Display)
+        return;
+
+    vector pos;
+    pos = DrawPanel.Position;
+
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    {
+        // click event
+        if (fo_hud_editor)
+        {
+
+        }
+    }
+    
+    Hud_DrawStringLMP([pos_x + 2, pos_y + 2, 0], ftos(val), 24 * DrawPanel.Scale);
 }
 
 void Hud_Draw(float width, float height)
@@ -228,8 +288,8 @@ void Hud_Draw(float width, float height)
     Hud_DrawFlagStatusBar(width);
     Hud_DrawClipSize(width);
     
-    
-
+    DrawPanel = HudSettings.FragStreak;
+    Hud_DrawPanelLMP("fragstreakpanel", SBAR.FragStreak);
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
