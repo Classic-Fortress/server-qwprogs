@@ -140,8 +140,9 @@ void() CSQC_Parse_Event = {
 		string iconname = "sb_key1";
 		vector iconcolour = '1 1 1';
 		if(iconindex == FLAGINFO_ICON_FLAG) {
-		    //iconname = "sb_key1";
-		    //iconcolour = '1 1 1';
+		    iconname = strcat("flag_", ftos(ownerteam));;
+		    iconcolour = '1 1 1';
+		    /*
 		    switch (ownerteam) {
 			case 2:
 			    iconname = "sb_key2";
@@ -154,7 +155,11 @@ void() CSQC_Parse_Event = {
 			    iconcolour = '0 1 0';
 			break;
 		    }
+		    */
 		} else if(iconindex == FLAGINFO_ICON_BUTTON) {
+		    iconname = strcat("off_icon_glow_", ftos(ownerteam));;
+		    iconcolour = '1 1 1';
+		    /*
 		    iconname = "net";
 		    switch (ownerteam) {
 			case 1:
@@ -169,6 +174,7 @@ void() CSQC_Parse_Event = {
 			    iconcolour = '0 1 0';
 			break;
 		    }
+		    */
 		}
 		FlagInfoLines[index].icon.filename = iconname;
 		FlagInfoLines[index].icon.colour = iconcolour;
