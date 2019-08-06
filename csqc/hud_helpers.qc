@@ -46,6 +46,14 @@ void GetDrawPanel(string id)
         case "capspanel":
             DrawPanel = HudSettings.Caps;
             break;
+        case "hudgren1":
+        case "gren1panel":
+            DrawPanel = HudSettings.Gren1;
+            break;
+        case "hudgren2":
+        case "gren2panel":
+            DrawPanel = HudSettings.Gren2;
+            break;
     }
 }
 
@@ -64,6 +72,14 @@ void SetDrawPanel(string id)
         case "hudcaps":
         case "capspanel":
             HudSettings.Caps = DrawPanel;
+            break;
+        case "hudgren1":
+        case "gren1panel":
+            HudSettings.Gren1 = DrawPanel;
+            break;
+        case "hudgren2":
+        case "gren2panel":
+            HudSettings.Gren2 = DrawPanel;
             break;
     }
 }
@@ -232,6 +248,11 @@ void Hud_WriteCfg(string path)
 
     DrawPanel = HudSettings.Caps;
     line = GetPanelString(line, "hudcaps");
+
+    DrawPanel = HudSettings.Gren1;
+    line = GetPanelString(line, "hudgren1");
+    DrawPanel = HudSettings.Gren2;
+    line = GetPanelString(line, "hudgren2");
 
     fputs(filehandle, line);
     fclose(filehandle);

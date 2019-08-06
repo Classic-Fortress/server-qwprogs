@@ -71,6 +71,20 @@ void FO_Hud_Editor_LoadDefaultSettings()
     GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
     FO_Hud_Panel HudCaps = NewPanel;
     HudSettings.Caps = HudCaps;
+
+    pos = [pos_x, pos_y - 2 - 24];
+    fill = [50, 26];
+
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
+    FO_Hud_Panel HudGren1 = NewPanel;
+    HudSettings.Gren1 = HudGren1;
+
+    pos = [pos_x, pos_y - 2 - 24];
+    fill = [50, 26];
+
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
+    FO_Hud_Panel HudGren2 = NewPanel;
+    HudSettings.Gren2 = HudGren2;
 }
 
 float firstrun;
@@ -274,7 +288,7 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
 
     float len;
     len = strlen(val);
-    float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_AFTER) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
 
     pos = [pos_x + offset, pos_y, 0];
     Hud_DrawStringLMP(pos, val, 24 * DrawPanel.Scale);
@@ -292,6 +306,14 @@ void Hud_Draw(float width, float height)
 
     DrawPanel = HudSettings.Caps;
     Hud_DrawPanelLMP("capspanel", ftos(SBAR.Caps), HudIcons[12].icon);
+
+    // identify
+
+    DrawPanel = HudSettings.Gren1;
+    Hud_DrawPanelLMP("gren1panel", ftos(SBAR.Gren1), HudIcons[13].icon);
+
+    DrawPanel = HudSettings.Gren2;
+    Hud_DrawPanelLMP("gren2panel", ftos(SBAR.Gren2), HudIcons[14].icon);
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
