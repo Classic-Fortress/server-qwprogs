@@ -51,6 +51,7 @@ typedef struct {
     FO_Hud_FlagIcon FlagIcon;
     FO_Hud_Panel ClipSize;
     FO_Hud_Panel FragStreak;
+    FO_Hud_Panel Caps;
     vector MousePos;
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;

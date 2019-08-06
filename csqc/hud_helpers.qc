@@ -30,6 +30,44 @@ float(string id, vector pos, vector size, string text) hud_button =
 	return sui_is_clicked(id);
 };
 
+void GetDrawPanel(string id)
+{
+    switch (id)
+    {
+        case "hudclipsize":
+        case "clipsizepanel":
+            DrawPanel = HudSettings.ClipSize;
+            break;    
+        case "hudfragstreak":
+        case "fragstreakpanel":
+            DrawPanel = HudSettings.FragStreak;
+            break;
+        case "hudcaps":
+        case "capspanel":
+            DrawPanel = HudSettings.Caps;
+            break;
+    }
+}
+
+void SetDrawPanel(string id)
+{
+    switch (id)
+    {
+        case "hudclipsize":
+        case "clipsizepanel":
+            HudSettings.ClipSize = DrawPanel;
+            break;    
+        case "hudfragstreak":
+        case "fragstreakpanel":
+            HudSettings.FragStreak = DrawPanel;
+            break;
+        case "hudcaps":
+        case "capspanel":
+            HudSettings.Caps = DrawPanel;
+            break;
+    }
+}
+
 vector UpdatePos(string id, vector mousepos)
 {
     vector pos;
@@ -42,12 +80,11 @@ vector UpdatePos(string id, vector mousepos)
                 HudSettings.FlagIcon.Position = pos;
             }
             break;
-        case "clipsizepanel":
-            if (HudSettings.MousePos != [0, 0])
-            {
-                pos = HudSettings.ClipSize.Position + mousepos - HudSettings.MousePos;
-                HudSettings.ClipSize.Position = pos;
-            }
+        default:
+            GetDrawPanel(id);
+            pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
+            DrawPanel.Position = pos;
+            SetDrawPanel(id);
             break;
     }
 
@@ -192,6 +229,9 @@ void Hud_WriteCfg(string path)
 
     DrawPanel = HudSettings.FragStreak;
     line = GetPanelString(line, "hudfragstreak");
+
+    DrawPanel = HudSettings.Caps;
+    line = GetPanelString(line, "hudcaps");
 
     fputs(filehandle, line);
     fclose(filehandle);

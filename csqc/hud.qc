@@ -58,12 +58,19 @@ void FO_Hud_Editor_LoadDefaultSettings()
     FO_Hud_Panel HudClipSize = NewPanel;
     HudSettings.ClipSize = HudClipSize;
 
-    pos = [pos_x, pos_y - 2 - 50];
-    fill = [50, 50];
+    pos = [pos_x, pos_y - 2 - 24];
+    fill = [50, 26];
 
     GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
     FO_Hud_Panel HudFragStreak = NewPanel;
     HudSettings.FragStreak = HudFragStreak;
+
+    pos = [pos_x, pos_y - 2 - 24];
+    fill = [50, 26];
+
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
+    FO_Hud_Panel HudCaps = NewPanel;
+    HudSettings.Caps = HudCaps;
 }
 
 float firstrun;
@@ -124,15 +131,7 @@ void FO_Hud_Editor_LoadSettings()
                         count = tokenizebyseparator(field, ".");
                         string pnl;
                         pnl = argv(0);
-                        switch (pnl)
-                        {
-                            case "hudclipsize":
-                                DrawPanel = HudSettings.ClipSize;
-                                break;
-                            case "hudfragstreak":
-                                DrawPanel = HudSettings.FragStreak;
-                                break;
-                        }
+                        GetDrawPanel(pnl);
 
                         switch (argv(1))
                         {
@@ -153,17 +152,7 @@ void FO_Hud_Editor_LoadSettings()
                                 break;
                         }
                         
-                        // is this necessary? how does qc copy
-                        switch (pnl)
-                        {
-                            case "hudclipsize":
-                                HudSettings.ClipSize = DrawPanel;
-                                break;
-                            case "hudfragstreak":
-                                HudSettings.FragStreak = DrawPanel;
-                                break;
-                        }
-
+                        SetDrawPanel(pnl);
                         break;
                 }
             }
@@ -296,10 +285,13 @@ void Hud_Draw(float width, float height)
     Hud_DrawFlagStatusBar(width);
 
     DrawPanel = HudSettings.ClipSize;
-    Hud_DrawPanelLMP("clipsizepanel", SBAR.ClipSize, HudIcons[13].icon);
+    Hud_DrawPanelLMP("clipsizepanel", SBAR.ClipSize, HudIcons[10].icon);
     
     DrawPanel = HudSettings.FragStreak;
-    Hud_DrawPanelLMP("fragstreakpanel", ftos(SBAR.FragStreak), HudIcons[12].icon);
+    Hud_DrawPanelLMP("fragstreakpanel", ftos(SBAR.FragStreak), HudIcons[11].icon);
+
+    DrawPanel = HudSettings.Caps;
+    Hud_DrawPanelLMP("capspanel", ftos(SBAR.Caps), HudIcons[12].icon);
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
