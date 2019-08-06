@@ -1,5 +1,3 @@
-FO_Hud_Panel DrawPanel;
-FO_Hud_Panel NewPanel;
 
 void FO_Hud_Editor()
 {
@@ -17,7 +15,7 @@ void FO_Hud_Editor()
     }
 }
 
-void GetNewPanel(vector pos, vector fillSize, float scale, float display)
+void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc)
 {
     FO_Hud_Panel pnl;
 
@@ -25,6 +23,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display)
     pnl.FillSize = fillSize;
     pnl.Scale = scale;
     pnl.Display = display;
+    pnl.NodeInsertLoc = nodeInsertLoc;
 
     NewPanel = pnl;
 }
@@ -48,20 +47,21 @@ void FO_Hud_Editor_LoadDefaultSettings()
     HudSettings.FlagIcon = HudFlagIcon;
 
     vector pos, fill;
-    float scale, display;
+    float scale, display, nodeInsertLoc;
     pos = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
     scale = 1;
     display = 1;
+    nodeInsertLoc = FO_HUD_INSERT_BEFORE;
     fill = [FO_HUD_CLIPSIZE_PANEL_X, FO_HUD_CLIPSIZE_PANEL_Y];
     
-    GetNewPanel(pos, fill, scale, display);
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
     FO_Hud_Panel HudClipSize = NewPanel;
     HudSettings.ClipSize = HudClipSize;
 
     pos = [pos_x, pos_y - 2 - 50];
     fill = [50, 50];
 
-    GetNewPanel(pos, fill, scale, display);
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
     FO_Hud_Panel HudFragStreak = NewPanel;
     HudSettings.FragStreak = HudFragStreak;
 }
@@ -120,29 +120,50 @@ void FO_Hud_Editor_LoadSettings()
                     case "hudflagicon.display":
                         HudSettings.FlagIcon.Display = stof(val);
                         break;
-                    case "hudclipsize.position":
-                        count = tokenizebyseparator(val, ",");
-                        x = stof(argv(0));
-                        y = stof(argv(1));
-                        HudSettings.ClipSize.Position = [x, y];
-                        break;
-                    case "hudclipsize.scale":
-                        HudSettings.ClipSize.Scale = stof(val);
-                        break;
-                    case "hudclipsize.display":
-                        HudSettings.ClipSize.Display = stof(val);
-                        break;
-                    case "hudfragstreak.position":
-                        count = tokenizebyseparator(val, ",");
-                        x = stof(argv(0));
-                        y = stof(argv(1));
-                        HudSettings.FragStreak.Position = [x, y];
-                        break;
-                    case "hudfragstreak.scale":
-                        HudSettings.FragStreak.Scale = stof(val);
-                        break;
-                    case "hudfragstreak.display":
-                        HudSettings.FragStreak.Display = stof(val);
+                    default:
+                        count = tokenizebyseparator(field, ".");
+                        string pnl;
+                        pnl = argv(0);
+                        switch (pnl)
+                        {
+                            case "hudclipsize":
+                                DrawPanel = HudSettings.ClipSize;
+                                break;
+                            case "hudfragstreak":
+                                DrawPanel = HudSettings.FragStreak;
+                                break;
+                        }
+
+                        switch (argv(1))
+                        {
+                            case "position":
+                                count = tokenizebyseparator(val, ",");
+                                x = stof(argv(0));
+                                y = stof(argv(1));
+                                DrawPanel.Position = [x, y];
+                                break;
+                            case "scale":
+                                DrawPanel.Scale = stof(val);
+                                break;
+                            case "display":
+                                DrawPanel.Display = stof(val);
+                                break;
+                            case "nodeinsertloc":
+                                DrawPanel.NodeInsertLoc = stof(val);
+                                break;
+                        }
+                        
+                        // is this necessary? how does qc copy
+                        switch (pnl)
+                        {
+                            case "hudclipsize":
+                                HudSettings.ClipSize = DrawPanel;
+                                break;
+                            case "hudfragstreak":
+                                HudSettings.FragStreak = DrawPanel;
+                                break;
+                        }
+
                         break;
                 }
             }
@@ -240,6 +261,7 @@ void Hud_DrawFlagStatusBar(float width)
     }
 }
 
+// draws value string using lmps
 void Hud_DrawPanelLMP(string id, string val, string icon)
 {
     if (!DrawPanel.Display)
@@ -256,10 +278,16 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
 
         }
     }
+
     vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
     drawpic(pos, icon, size, '1 1 1', 1, 1);
-    pos = [pos_x + 2 + size_x, pos_y, 0];
+
+    float len;
+    len = strlen(val);
+    float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_AFTER) ? 2 + size_x : (2 + (size_x * len)) * -1;
+
+    pos = [pos_x + offset, pos_y, 0];
     Hud_DrawStringLMP(pos, val, 24 * DrawPanel.Scale);
 }
 
@@ -268,7 +296,7 @@ void Hud_Draw(float width, float height)
     Hud_DrawFlagStatusBar(width);
 
     DrawPanel = HudSettings.ClipSize;
-    Hud_DrawPanelLMP("fragstreakpanel", SBAR.ClipSize, HudIcons[13].icon);
+    Hud_DrawPanelLMP("clipsizepanel", SBAR.ClipSize, HudIcons[13].icon);
     
     DrawPanel = HudSettings.FragStreak;
     Hud_DrawPanelLMP("fragstreakpanel", ftos(SBAR.FragStreak), HudIcons[12].icon);

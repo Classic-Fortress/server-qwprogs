@@ -41,7 +41,11 @@ typedef struct {
     vector FillSize;
     float Scale;
     float Display;
+    float NodeInsertLoc;
 } FO_Hud_Panel;
+
+FO_Hud_Panel DrawPanel;
+FO_Hud_Panel NewPanel;
 
 typedef struct {
     FO_Hud_FlagIcon FlagIcon;

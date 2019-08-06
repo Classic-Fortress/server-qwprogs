@@ -164,6 +164,16 @@ string FormatCfgVector(string line, string field, vector value)
     return line;
 }
 
+string GetPanelString(string line, string name)
+{
+    line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
+    line = FormatCfgString(line, strcat(name, ".scale"), ftos(DrawPanel.Scale));
+    line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
+    line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.NodeInsertLoc));
+
+    return line;
+}
+
 void Hud_WriteCfg(string path)
 {
     // this overwrites
@@ -176,12 +186,12 @@ void Hud_WriteCfg(string path)
     line = FormatCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
     line = FormatCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
     line = FormatCfgString(line, "hudflagicon.display", ftos(HudSettings.FlagIcon.Display));
-    line = FormatCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
-    line = FormatCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
-    line = FormatCfgString(line, "hudclipsize.display", ftos(HudSettings.ClipSize.Display));
-    line = FormatCfgVector(line, "hudfragstreak.position", HudSettings.FragStreak.Position);
-    line = FormatCfgString(line, "hudfragstreak.scale", ftos(HudSettings.FragStreak.Scale));
-    line = FormatCfgString(line, "hudfragstreak.display", ftos(HudSettings.FragStreak.Display));
+
+    DrawPanel = HudSettings.ClipSize;
+    line = GetPanelString(line, "hudclipsize");
+
+    DrawPanel = HudSettings.FragStreak;
+    line = GetPanelString(line, "hudfragstreak");
 
     fputs(filehandle, line);
     fclose(filehandle);

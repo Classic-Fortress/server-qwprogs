@@ -1312,8 +1312,6 @@
 #define FO_HUD_GROW_LEFT	3
 #define FO_HUD_GROW_RIGHT	4
 
-#define FO_HUD_INSERT_AFTER		1
-#define FO_HUD_INSERT_BEFORE	1
 #define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"
 #define FO_CONFIG_PATH	"fortressone_csqc.cfg"
 
@@ -1321,6 +1319,8 @@
 #define HUD_ICON_SIZE_Y   24
 #define FO_HUD_CLIPSIZE_PANEL_X 125
 #define FO_HUD_CLIPSIZE_PANEL_Y 50
+#define FO_HUD_INSERT_BEFORE	0
+#define FO_HUD_INSERT_AFTER	1
 
 #define ICON_CLIPSIZE "progs/gfx/hud/clipsize.png"
 #define ICON_FRAGSTREAK "progs/gfx/hud/fragstreak.png"
