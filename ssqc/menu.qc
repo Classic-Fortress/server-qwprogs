@@ -1445,7 +1445,7 @@ void (float inp) Menu_Admin_Input =
     else if ((self.current_menu_type == ADMIN_MENU_TYPE_KICK || self.current_menu_type == ADMIN_MENU_TYPE_BAN || self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) 
                 && inp >= 1 && inp <= 7) 
     { // Kick / Ban Actions
-        bprint(PRINT_HIGH, "Getting player ", ftos(inp), "\n");
+        //bprint(PRINT_HIGH, "Getting player ", ftos(inp), "\n");
         f_tmp = 1;    
         self.admin_use = find (world, classname, "player");
         while (self.admin_use != world)  {
@@ -1468,7 +1468,7 @@ void (float inp) Menu_Admin_Input =
             }
         }
         if (self.admin_use) {
-            bprint(PRINT_HIGH, "Player found: ", ftos(f_tmp), ", ", ftos(((self.current_menu_page - 1) * 7) + inp),", ", self.admin_use.classname , "\n");
+            //bprint(PRINT_HIGH, "Player found: ", ftos(f_tmp), ", ", ftos(((self.current_menu_page - 1) * 7) + inp),", ", self.admin_use.classname , "\n");
             if (f_tmp == ((self.current_menu_page - 1) * 7) + inp) {
                 if(self.current_menu_type == ADMIN_MENU_TYPE_FORCESPEC) {
                     Admin_ForceSpectator();

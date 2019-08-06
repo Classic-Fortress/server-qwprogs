@@ -68,10 +68,28 @@ void () ResetPlayersDelayed = {
     }
 };
 
+void () ResetPlayersWithCountdown = {
+    local entity reset_timer;
+    local float remainder;
+    no_fire_mode = 1;
+    if(duel_reset_delay) {
+        reset_timer = find(world, classname, "duel_reset_timer");
+        if(!reset_timer) {
+            remainder = duel_reset_delay % 1;
+            duel_reset_timer = duel_reset_delay - remainder;
+            reset_timer = spawn();
+            reset_timer.classname = "duel_reset_timer";
+            reset_timer.nextthink = time + remainder;
+            reset_timer.think = ResetPlayersDelayed;
+        }
+    } else {
+        ResetPlayers();
+    }
+
+}
 
 void (entity targ, entity attacker) Killed = {
-    local entity oself, reset_timer;
-    local float remainder;
+    local entity oself;
 
     if (attacker == world && (targ.classname == "building_dispenser" || targ.classname == "building_sentrygun"))
         attacker = targ;
@@ -110,27 +128,11 @@ void (entity targ, entity attacker) Killed = {
         //Already in no fire mode - implies you're not the first to die
         if(no_fire_mode) {
             if(CountRemainingTeams() == 0) {
-                reset_timer = find(world, classname, "duel_reset_timer");
-                while (reset_timer != world) {
-                    oself = reset_timer;
-                    reset_timer = find (reset_timer, classname, "duel_reset_timer");
-                    dremove(oself);
-                }
                 ResetPlayers();
             }
         } else {
             if(CountRemainingTeams() < 2) {
-                no_fire_mode = 1;
-                if(duel_reset_delay) {
-                    remainder = duel_reset_delay % 1;
-                    duel_reset_timer = duel_reset_delay - remainder;
-                    reset_timer = spawn();
-                    reset_timer.classname = "duel_reset_timer";
-                    reset_timer.nextthink = time + remainder;
-                    reset_timer.think = ResetPlayersDelayed;
-                } else {
-                    ResetPlayers();
-                }
+                ResetPlayersWithCountdown();
             }
         }
     }
