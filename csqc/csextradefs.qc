@@ -54,6 +54,7 @@ typedef struct {
     FO_Hud_Panel Caps;
     FO_Hud_Panel Gren1;
     FO_Hud_Panel Gren2;
+    FO_Hud_Panel PlayerClass;
     vector MousePos;
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
@@ -136,7 +137,10 @@ FO_Hud_Icons HudIcons[16] = {
     {ICON_GREN2}
 };
 
+float team_no;
+
 vector FO_Hud_Icon_Size = [24, 24, 0];
+vector FO_Hud_Icon_Font_Size = [24, 24, 0];
 
 #pragma noref 1
 #pragma warning error Q101 /*too many parms*/

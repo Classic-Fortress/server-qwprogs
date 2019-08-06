@@ -1338,3 +1338,7 @@
 #define ICON_SPY "progs/gfx/hud/spy.png"
 #define ICON_ENGINEER_SG "progs/gfx/hud/engineer_sg.png"
 #define ICON_ENGINEER_DISP "progs/gfx/hud/engineer_disp.png"
+
+// stats
+// first 32 are reserved
+#define STAT_TEAMNO    33
