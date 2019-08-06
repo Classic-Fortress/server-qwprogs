@@ -30,12 +30,6 @@ FlagInfoLine FlagInfoLines[10];
 
 typedef struct {
     vector Position;
-    float Scale;
-    float Display;
-} FO_Hud_ClipSize;
-
-typedef struct {
-    vector Position;
     float GrowDirection;
     float NodeInsertLoc;
     float Scale;
@@ -51,7 +45,7 @@ typedef struct {
 
 typedef struct {
     FO_Hud_FlagIcon FlagIcon;
-    FO_Hud_ClipSize ClipSize;
+    FO_Hud_Panel ClipSize;
     FO_Hud_Panel FragStreak;
     vector MousePos;
 } FO_Hud_Settings;
@@ -112,10 +106,30 @@ typedef struct {
 } FO_SBAR;
 FO_SBAR SBAR;
 
-#define HUD_FLAGICON_SIZE_X   24
-#define HUD_FLAGICON_SIZE_Y   24
-#define FO_HUD_CLIPSIZE_PANEL_X 125
-#define FO_HUD_CLIPSIZE_PANEL_Y 50
+typedef struct 
+{
+    string icon;
+} FO_Hud_Icons;
+FO_Hud_Icons HudIcons[16] = {
+    {ICON_SCOUT},
+    {ICON_SNIPER},
+    {ICON_SOLDIER},
+    {ICON_DEMOMAN},
+    {ICON_MEDIC},
+    {ICON_HWGUY},
+    {ICON_PYRO},
+    {ICON_SPY},
+    {ICON_ENGINEER_SG},
+    {ICON_ENGINEER_DISP},
+    {ICON_CLIPSIZE},
+    {ICON_FRAGSTREAK},
+    {ICON_CAPS},
+    {ICON_IDENTIFY},
+    {ICON_GREN1},
+    {ICON_GREN2}
+};
+
+vector FO_Hud_Icon_Size = [24, 24, 0];
 
 #pragma noref 1
 #pragma warning error Q101 /*too many parms*/

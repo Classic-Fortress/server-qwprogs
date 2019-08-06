@@ -1316,3 +1316,25 @@
 #define FO_HUD_INSERT_BEFORE	1
 #define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"
 #define FO_CONFIG_PATH	"fortressone_csqc.cfg"
+
+#define HUD_ICON_SIZE_X   24
+#define HUD_ICON_SIZE_Y   24
+#define FO_HUD_CLIPSIZE_PANEL_X 125
+#define FO_HUD_CLIPSIZE_PANEL_Y 50
+
+#define ICON_CLIPSIZE "progs/gfx/hud/clipsize.png"
+#define ICON_FRAGSTREAK "progs/gfx/hud/fragstreak.png"
+#define ICON_CAPS "progs/gfx/hud/caps.png"
+#define ICON_IDENTIFY "progs/gfx/hud/identify.png"
+#define ICON_GREN1 "progs/gfx/hud/gren1.png"
+#define ICON_GREN2 "progs/gfx/hud/gren2.png"
+#define ICON_SCOUT "progs/gfx/hud/scout.png"
+#define ICON_SNIPER "progs/gfx/hud/sniper.png"
+#define ICON_SOLDIER "progs/gfx/hud/soldier.png"
+#define ICON_DEMOMAN "progs/gfx/hud/demoman.png"
+#define ICON_MEDIC "progs/gfx/hud/medic.png"
+#define ICON_HWGUY "progs/gfx/hud/hwguy.png"
+#define ICON_PYRO "progs/gfx/hud/pyro.png"
+#define ICON_SPY "progs/gfx/hud/spy.png"
+#define ICON_ENGINEER_SG "progs/gfx/hud/engineer_sg.png"
+#define ICON_ENGINEER_DISP "progs/gfx/hud/engineer_disp.png"
