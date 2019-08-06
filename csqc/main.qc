@@ -102,9 +102,10 @@ noref void CSQC_Input_Frame()
 }
 
 void() CSQC_Parse_Event = {
-    //print("CSQC_Parse_Event\n");
+    //print("MEHT: CSQC_Parse_Event\n");
     float msgtype = readbyte();
     local float goalno; 
+    //print("MEHT: CSQC_Parse_Event MessageType: ",ftos(msgtype),"\n");
     switch (msgtype) {
 	case MSG_FLAGINFOINIT:
 	    float index = readfloat();
@@ -112,6 +113,24 @@ void() CSQC_Parse_Event = {
 	    string mdl = readstring();
 	    float skinindex = readfloat();
 	    float ownerteam = readfloat();
+	    float iconindex = readfloat();
+	    print("MEHT: CSQC_Parse_Event index: ",ftos(index),"\n");
+	    print("MEHT: CSQC_Parse_Event goalno: ",ftos(goalno),"\n");
+	    print("MEHT: CSQC_Parse_Event mdl: ",mdl,"\n");
+	    print("MEHT: CSQC_Parse_Event skinindex: ",ftos(skinindex),"\n");
+	    print("MEHT: CSQC_Parse_Event team: ",ftos(ownerteam),"\n");
+	    print("MEHT: CSQC_Parse_Event icon: ",ftos(iconindex),"\n");
+
+	    //use next available
+	    if(index < 0) {
+		for(float i = 0; i < FlagInfoLines.length; i++) {
+		    if(FlagInfoLines[i].id == 0) {
+			index = i;
+			break;
+		    }
+		}
+	    }
+	    print("MEHT: CSQC_Parse_Event final index: ",ftos(index),"\n");
 	    if(index >= 0 && index < MAX_FLAGINFO_LINES) {
 		FlagInfoLines[index].id = goalno;
 		FlagInfoLines[index].message = "";
@@ -126,6 +145,42 @@ void() CSQC_Parse_Event = {
 		setsize(te, '-16 -16 0', '16 16 8');
 		te.skin = skinindex;
 		te.owned_by = ownerteam;
+
+		string iconname = "sb_key1";
+		vector iconcolour = '1 1 1';
+		if(iconindex == FLAGINFO_ICON_FLAG) {
+		    //iconname = "sb_key1";
+		    //iconcolour = '1 1 1';
+		    switch (ownerteam) {
+			case 2:
+			    iconname = "sb_key2";
+			break;
+			case 3:
+			    iconcolour = '1 1 0';
+			break;
+			case 4:
+			    iconname = "sb_key2";
+			    iconcolour = '0 1 0';
+			break;
+		    }
+		} else if(iconindex == FLAGINFO_ICON_BUTTON) {
+		    iconname = "net";
+		    switch (ownerteam) {
+			case 1:
+			    iconcolour = '0 0 0.5';
+			case 2:
+			    iconcolour = '1 0 0';
+			break;
+			case 3:
+			    iconcolour = '1 1 0';
+			break;
+			case 4:
+			    iconcolour = '0 1 0';
+			break;
+		    }
+		}
+		FlagInfoLines[index].icon.filename = iconname;
+		FlagInfoLines[index].icon.colour = iconcolour;
 		FlagInfoLines[index].model = te;
 	    }
 	    break;
