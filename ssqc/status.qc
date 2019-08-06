@@ -597,18 +597,14 @@ void (entity Player, float index, entity Item, float icon) InitClientFlagStatus 
 }
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
-    //dprint("MEHT: changing state from ", ftos(laststate), " to ", ftos(Goal.goal_state), "\n");
-    //dprint("MEHT: nextthink ", ftos(Goal.nextthink - time), " bubbles: ", ftos(rint(Goal.bubble_count - time)), "\n");
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
     WriteFloat(MSG_MULTICAST, Goal.goal_no);
     if(Goal.goal_no == 11) {
         if(Goal.goal_state != laststate) {
-            bprint(PRINT_HIGH, "MEHT: changing state from ", ftos(laststate), " to ", ftos(Goal.goal_state), "\n");
             laststate = Goal.goal_state;
         }
-        bprint(PRINT_HIGH, "MEHT: nextthink ", ftos(Goal.nextthink - time), " bubbles: ", ftos(rint(Goal.bubble_count - time)), "\n");
     }
     if(Goal.goal_state == TFGS_DELAYED) {
         WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
@@ -852,7 +848,6 @@ void (entity pl) RefreshStatusBar = {
                 }
                 ct = strcat(ct, "\n");
             }
-//            dprint("MEHT: checking track_goals for ", pl.netname, ", csqc: ", ftos(csqcactive), "\n");
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
                 if (tg.track_goal && i < 6 && tg.goal_state == TFGS_DELAYED) {

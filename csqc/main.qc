@@ -102,10 +102,8 @@ noref void CSQC_Input_Frame()
 }
 
 void() CSQC_Parse_Event = {
-    //print("MEHT: CSQC_Parse_Event\n");
     float msgtype = readbyte();
     local float goalno; 
-    //print("MEHT: CSQC_Parse_Event MessageType: ",ftos(msgtype),"\n");
     switch (msgtype) {
 	case MSG_FLAGINFOINIT:
 	    float index = readfloat();
@@ -114,12 +112,6 @@ void() CSQC_Parse_Event = {
 	    float skinindex = readfloat();
 	    float ownerteam = readfloat();
 	    float iconindex = readfloat();
-	    print("MEHT: CSQC_Parse_Event index: ",ftos(index),"\n");
-	    print("MEHT: CSQC_Parse_Event goalno: ",ftos(goalno),"\n");
-	    print("MEHT: CSQC_Parse_Event mdl: ",mdl,"\n");
-	    print("MEHT: CSQC_Parse_Event skinindex: ",ftos(skinindex),"\n");
-	    print("MEHT: CSQC_Parse_Event team: ",ftos(ownerteam),"\n");
-	    print("MEHT: CSQC_Parse_Event icon: ",ftos(iconindex),"\n");
 
 	    //use next available
 	    if(index < 0) {
@@ -130,7 +122,6 @@ void() CSQC_Parse_Event = {
 		    }
 		}
 	    }
-	    print("MEHT: CSQC_Parse_Event final index: ",ftos(index),"\n");
 	    if(index >= 0 && index < MAX_FLAGINFO_LINES) {
 		FlagInfoLines[index].id = goalno;
 		FlagInfoLines[index].message = "";

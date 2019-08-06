@@ -2337,12 +2337,10 @@ void (optional float csqcactive) ClientConnect = {
         InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
         InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
     }
-    bprint(PRINT_HIGH, "MEHT Client connected: ", self.netname, ", csqcactive: ",ftos(csqcactive),"\n");
     if(csqcactive) {
         tfdet = find(world, classname, "info_tfgoal");
         while (tfdet) {
             if (tfdet.track_goal) {
-                bprint(PRINT_HIGH, "MEHT Sending button info: ", tfdet.netname, "\n");
                 InitClientFlagStatus(self, -1, tfdet, FLAGINFO_ICON_BUTTON);
             }
             tfdet = find(tfdet, classname, "info_tfgoal");
