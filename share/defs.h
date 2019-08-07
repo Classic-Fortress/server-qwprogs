@@ -1322,22 +1322,22 @@
 #define FO_HUD_INSERT_BEFORE	0
 #define FO_HUD_INSERT_AFTER	1
 
-#define ICON_CLIPSIZE "progs/gfx/hud/clipsize.png"
-#define ICON_FRAGSTREAK "progs/gfx/hud/fragstreak.png"
-#define ICON_CAPS "progs/gfx/hud/caps.png"
-#define ICON_IDENTIFY "progs/gfx/hud/identify.png"
-#define ICON_GREN1 "progs/gfx/hud/gren1.png"
-#define ICON_GREN2 "progs/gfx/hud/gren2.png"
-#define ICON_SCOUT "progs/gfx/hud/scout.png"
-#define ICON_SNIPER "progs/gfx/hud/sniper.png"
-#define ICON_SOLDIER "progs/gfx/hud/soldier.png"
-#define ICON_DEMOMAN "progs/gfx/hud/demoman.png"
-#define ICON_MEDIC "progs/gfx/hud/medic.png"
-#define ICON_HWGUY "progs/gfx/hud/hwguy.png"
-#define ICON_PYRO "progs/gfx/hud/pyro.png"
-#define ICON_SPY "progs/gfx/hud/spy.png"
-#define ICON_ENGINEER_SG "progs/gfx/hud/engineer_sg.png"
-#define ICON_ENGINEER_DISP "progs/gfx/hud/engineer_disp.png"
+#define ICON_CLIPSIZE "clipsize.png"
+#define ICON_FRAGSTREAK "fragstreak.png"
+#define ICON_CAPS "caps.png"
+#define ICON_IDENTIFY "identify.png"
+#define ICON_GREN1 "gren1.png"
+#define ICON_GREN2 "gren2.png"
+#define ICON_SCOUT "scout.png"
+#define ICON_SNIPER "sniper.png"
+#define ICON_SOLDIER "soldier.png"
+#define ICON_DEMOMAN "demoman.png"
+#define ICON_MEDIC "medic.png"
+#define ICON_HWGUY "hwguy.png"
+#define ICON_PYRO "pyro.png"
+#define ICON_SPY "spy.png"
+#define ICON_ENGINEER_SG "engineer_sg.png"
+#define ICON_ENGINEER_DISP "engineer_disp.png"
 
 // stats
 // first 32 are reserved
