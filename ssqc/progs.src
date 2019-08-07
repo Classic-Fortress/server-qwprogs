@@ -4,6 +4,7 @@
 ../share/fteextensions.qc
 defs.qc
 ../share/commondefs.qc
+../share/common_helpers.qc
 qw.qc
 q3defs.qc
 debug.qc

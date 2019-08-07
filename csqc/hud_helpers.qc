@@ -14,6 +14,26 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+void Hud_WriteCfg(string path);
+void GetDrawPanel(string id);
+void SetDrawPanel(string id);
+
+void FO_Hud_Editor()
+{
+    if (fo_hud_editor)
+    {
+        fo_hud_editor = FALSE;
+        setcursormode(FALSE);
+
+        Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+    }
+    else
+    {
+        fo_hud_editor = TRUE;
+        setcursormode(TRUE);
+    }
+}
+
 float(string id, vector pos, vector size, string text) hud_button =
 {
 	sui_push_frame(pos, size);
@@ -42,12 +62,11 @@ vector UpdatePos(string id, vector mousepos)
                 HudSettings.FlagIcon.Position = pos;
             }
             break;
-        case "clipsizepanel":
-            if (HudSettings.MousePos != [0, 0])
-            {
-                pos = HudSettings.ClipSize.Position + mousepos - HudSettings.MousePos;
-                HudSettings.ClipSize.Position = pos;
-            }
+        default:
+            GetDrawPanel(id);
+            pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
+            DrawPanel.Position = pos;
+            SetDrawPanel(id);
             break;
     }
 
@@ -164,20 +183,168 @@ string FormatCfgVector(string line, string field, vector value)
     return line;
 }
 
-void Hud_WriteCfg(string path)
+string GetPanelString(string line, string name)
 {
-    // this overwrites
+    line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
+    line = FormatCfgString(line, strcat(name, ".scale"), ftos(DrawPanel.Scale));
+    line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
+    line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.NodeInsertLoc));
+
+    return line;
+}
+
+float firstrun;
+void FO_Hud_Editor_LoadSettings()
+{
+    vector vsize = (vector)getproperty(VF_SCREENVSIZE);
+    float width = vsize_x;
+    float height = vsize_y;
+    fo_hud_editor = FALSE;
+
+    FO_Hud_Editor_LoadDefaultSettings();
+
+    HudSettings.MousePos = [0, 0];
+    firstrun = TRUE;
+
+    // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
     float filehandle;
-    filehandle = fopen(path, FILE_WRITE);
-    string line;
+    filehandle = fopen(FO_HUD_CONFIG_PATH, FILE_READ);
+	if (filehandle >= 0) {
+        // get number of lines                  
+        string ln;
+        ln = fgets(filehandle);
+        while (ln)
+        {
+            if (strlen(ln) > 0)
+            {
+                ln = strreplace("\n", "", ln);
+                string val, field;
 
-    line = FormatCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
-    line = FormatCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
-    line = FormatCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
-    line = FormatCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
-    line = FormatCfgVector(line, "hudclipsize.position", HudSettings.ClipSize.Position);
-    line = FormatCfgString(line, "hudclipsize.scale", ftos(HudSettings.ClipSize.Scale));
+                float x = 0, y = 0;
+                float count = tokenizebyseparator(ln, ":");
+                field = argv(0);
+                field = strtrim(field);
+                val = argv(1);
+                val = strtrim(val);
 
-    fputs(filehandle, line);
-    fclose(filehandle);
+                switch(field)
+                {
+                    case "hudflagicon.position":
+                        count = tokenizebyseparator(val, ",");
+                        x = stof(argv(0));
+                        y = stof(argv(1));
+                        HudSettings.FlagIcon.Position = [x, y];
+                        break;
+                    case "hudflagicon.scale":
+                        HudSettings.FlagIcon.Scale = stof(val);
+                        break;
+                    case "hudflagicon.growdirection":
+                        HudSettings.FlagIcon.GrowDirection = stof(val);
+                        break;
+                    case "hudflagicon.nodeinsertloc":
+                        HudSettings.FlagIcon.NodeInsertLoc = stof(val);
+                        break;
+                    case "hudflagicon.display":
+                        HudSettings.FlagIcon.Display = stof(val);
+                        break;
+                    default:
+                        count = tokenizebyseparator(field, ".");
+                        string pnl;
+                        pnl = argv(0);
+                        GetDrawPanel(pnl);
+
+                        switch (argv(1))
+                        {
+                            case "position":
+                                count = tokenizebyseparator(val, ",");
+                                x = stof(argv(0));
+                                y = stof(argv(1));
+                                DrawPanel.Position = [x, y];
+                                break;
+                            case "scale":
+                                DrawPanel.Scale = stof(val);
+                                break;
+                            case "display":
+                                DrawPanel.Display = stof(val);
+                                break;
+                            case "nodeinsertloc":
+                                DrawPanel.NodeInsertLoc = stof(val);
+                                break;
+                        }
+                        
+                        SetDrawPanel(pnl);
+                        break;
+                }
+            }
+            ln = fgets(filehandle);
+        }
+        fclose(filehandle);
+    }
+    else
+    {
+        // write a new file
+        Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+    }    
+}
+
+void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc)
+{
+    FO_Hud_Panel pnl;
+
+    pnl.Position = pos;
+    pnl.FillSize = fillSize;
+    pnl.Scale = scale;
+    pnl.Display = display;
+    pnl.NodeInsertLoc = nodeInsertLoc;
+
+    NewPanel = pnl;
+}
+
+// draws value string using lmps
+void Hud_DrawPanelLMP(string id, string val, string icon)
+{
+    if (!DrawPanel.Display)
+        return;
+
+    vector pos;
+    pos = DrawPanel.Position;
+
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    {
+        // click event
+        if (fo_hud_editor)
+        {
+
+        }
+    }
+
+    vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
+    pos = [pos_x + 2, pos_y + 2, 0];
+    drawpic(pos, icon, size, '1 1 1', 1, 1);
+
+    float len;
+    len = strlen(val);
+    float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+
+    pos = [pos_x + offset, pos_y, 0];
+    Hud_DrawStringLMP(pos, val, 24 * DrawPanel.Scale);
+}
+
+
+vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
+{
+    float len, offset;
+    len = strlen(msg);
+    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
+    pos = [basepos_x + offset, newline ? pos_y + 2 + ((size_y - fontSize_y) * .5) : pos_y + ((size_y - fontSize_y) * .5), 0];
+
+    return pos;
+}
+
+vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline, vector colour)
+{
+    pos = GetStringOffsetPos(msg, size, fontSize, pos, basepos, newline);
+    drawstring(pos, msg, fontSize, colour, 1, 0);
+
+    return pos;
 }

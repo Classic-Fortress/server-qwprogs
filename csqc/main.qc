@@ -5,9 +5,20 @@ void FO_Hud_Editor_LoadDefaultSettings();
 void FO_LoadSettings();
 void FO_WriteSettings();
 
+void GetSelf() = {
+    self = findfloat(world, entnum, player_localentnum);
+}
+
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
+
     precache_model("progs/weapons/v_rock.mdl");
+
+	for (float i = 0; i < HudIcons.length; i++)
+	{
+		precache_pic(HudIcons[i].icon);
+	}
+
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
 	registercommand("fo_hud_reset");
@@ -22,6 +33,7 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
+	team_no = getstatf(STAT_TEAMNO);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -40,10 +52,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 	sui_begin(width, height);
 	Hud_Draw(width, height);
 	sui_end();
-}
-
-void GetSelf() = {
-    self = findfloat(world, entnum, player_localentnum);
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {

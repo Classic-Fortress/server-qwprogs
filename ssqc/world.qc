@@ -313,6 +313,8 @@ void () worldspawn = {
     lightstyle(10, "mmamammmmammamamaaamammma");
     lightstyle(11, "abcdefghijklmnopqrrqponmlkjihgfedcba");
     lightstyle(63, "a");
+
+    clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
 };
 
 void () StartFrame = {

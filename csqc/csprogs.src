@@ -2,6 +2,7 @@
 csdefs.qc
 csextradefs.qc
 ../share/commondefs.qc
+../share/common_helpers.qc
 sui_sys.qc
 input.qc
 main.qc
