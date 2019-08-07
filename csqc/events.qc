@@ -10,8 +10,18 @@ void() CSQC_Parse_Event = {
             string mdl = readstring();
             float skinindex = readfloat();
             float ownerteam = readfloat();
-            if(index >= 0 && index < MAX_FLAGINFO_LINES) 
-            {
+            float iconindex = readfloat();
+
+            //use next available
+            if(index < 0) {
+                for(float i = 0; i < FlagInfoLines.length; i++) {
+                    if(FlagInfoLines[i].id == 0) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            if(index >= 0 && index < MAX_FLAGINFO_LINES) {
                 FlagInfoLines[index].id = goalno;
                 FlagInfoLines[index].message = "";
                 if(mdl)
@@ -20,11 +30,20 @@ void() CSQC_Parse_Event = {
                 te.renderflags = RF_VIEWMODEL | RF_DEPTHHACK | RF_NOSHADOW;
                 te.origin = [5, 0, 0];
                 te.angles = '-60 0 0';
-                //setmodel(te,mdl);
-                setmodel(te, "progs/weapons/v_rock.mdl");
-                setsize(te, '-16 -16 0', '16 16 8');
                 te.skin = skinindex;
                 te.owned_by = ownerteam;
+
+                string iconname = "sb_key1";
+                vector iconcolour = '1 1 1';
+                if(iconindex == FLAGINFO_ICON_FLAG) {
+                    iconname = strcat("flag_", ftos(ownerteam));
+                    iconcolour = '1 1 1';
+                } else if(iconindex == FLAGINFO_ICON_BUTTON) {
+                    iconname = strcat("off_icon_glow_", ftos(ownerteam));
+                    iconcolour = '1 1 1';
+                }
+                FlagInfoLines[index].icon.filename = iconname;
+                FlagInfoLines[index].icon.colour = iconcolour;
                 FlagInfoLines[index].model = te;
             }
             break;
@@ -49,11 +68,11 @@ void() CSQC_Parse_Event = {
                     timeleft = readfloat();
                     float showloc = readfloat();
                     if(showloc == FLAGINFO_LOCATION) {
-                    droploc_x = readcoord();
-                    droploc_y = readcoord();
-                    droploc_z = readcoord();
-                    locname = readstring();
-                    message = strcat(message," at ", locname);
+                        droploc_x = readcoord();
+                        droploc_y = readcoord();
+                        droploc_z = readcoord();
+                        locname = readstring();
+                        message = strcat(message," at ", locname);
                     }
                     break;
                 case FLAGINFO_RETURNING:
@@ -74,8 +93,6 @@ void() CSQC_Parse_Event = {
         case MSG_SBAR:
             ParseSBAR();
             break;
-        default:
-            print("CSQC_Parse_Event, unknown event: ",ftos(msgtype),"\n");
     }
 }
 

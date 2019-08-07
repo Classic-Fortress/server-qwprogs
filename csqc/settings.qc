@@ -3,9 +3,7 @@ void FO_WriteSettings()
     // this overwrites
     float filehandle;
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
-    string line;
-    line = "";
-    line = FormatCfgString(line, "fo_autohop", ftos(Settings.Autohop));
+    string line = FormatCfgString("", "fo_autohop", ftos(Settings.Autohop));
 
     fputs(filehandle, line);
     fclose(filehandle);

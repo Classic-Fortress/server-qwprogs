@@ -2339,10 +2339,19 @@ void (optional float csqcactive) ClientConnect = {
     }
     entity tfdet = find(world, classname, "info_tfdetect");
     if(tfdet) {
-        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1));
-        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2));
-        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3));
-        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4));
+        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
+    }
+    if(csqcactive) {
+        tfdet = find(world, classname, "info_tfgoal");
+        while (tfdet) {
+            if (tfdet.track_goal) {
+                InitClientFlagStatus(self, -1, tfdet, FLAGINFO_ICON_BUTTON);
+            }
+            tfdet = find(tfdet, classname, "info_tfgoal");
+        }
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

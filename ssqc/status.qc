@@ -578,7 +578,7 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
 
 string getLocationName(vector location);
 
-void (entity Player, float index, entity Item) InitClientFlagStatus = {
+void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
     float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     if(csqcactive) {
         msg_entity = Player;
@@ -589,8 +589,39 @@ void (entity Player, float index, entity Item) InitClientFlagStatus = {
         WriteString(MSG_MULTICAST, Item.mdl);
         WriteFloat(MSG_MULTICAST, Item.skin);
         WriteFloat(MSG_MULTICAST, Item.owned_by);
+        WriteFloat(MSG_MULTICAST, icon);
         multicast('0 0 0', MULTICAST_ONE_R); 
     }
+}
+float laststate;
+void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
+    WriteFloat(MSG_MULTICAST, Goal.goal_no);
+    if(Goal.goal_no == 11) {
+        if(Goal.goal_state != laststate) {
+            laststate = Goal.goal_state;
+        }
+    }
+    if(Goal.goal_state == TFGS_DELAYED) {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
+        WriteFloat(MSG_MULTICAST, rint(Goal.bubble_count - time));
+        //WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
+        WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+        WriteCoord(MSG_MULTICAST, Goal.origin_x);
+        WriteCoord(MSG_MULTICAST, Goal.origin_y);
+        WriteCoord(MSG_MULTICAST, Goal.origin_z);
+        //WriteString(MSG_MULTICAST, getLocationName(Item.origin));
+        if(Goal.team_str_moved) {
+            WriteString(MSG_MULTICAST, Goal.team_str_moved);
+        } else {
+            WriteString(MSG_MULTICAST,"\sOffline\s");
+        }
+    } else {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
+    }
+    multicast('0 0 0', MULTICAST_ONE);    
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
@@ -912,46 +943,11 @@ void (entity pl) RefreshStatusBar = {
     local entity tfdet;  //info_tfdetect entity
     local entity te, tg;
     local string bi; //button info
+    local float csqcactive;
     //By default, show after tips; 0/off = off; 2 = always
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
     tfdet = find(world, classname, "info_tfdetect");
-
-    float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
-    if (csqcactive)
-    {
-        //pl.StatusRefreshTime = time + 1;
-        UpdateClientStatusBar(pl);
-
-        // flag info
-        if (tfdet)
-        {
-            for (float t = 1; t <= number_of_teams; t++) 
-            {
-                switch (t)
-                {
-                    case 1:
-                        te = Finditem(tfdet.display_item_status1);
-                        break;
-                    case 2:
-                        te = Finditem(tfdet.display_item_status2);
-                        break;
-                    case 3:
-                        te = Finditem(tfdet.display_item_status3);
-                        break;
-                    case 4:
-                        te = Finditem(tfdet.display_item_status4);
-                        break;
-                }
-
-                if (te)
-                {
-                    UpdateClientFlagStatus(pl, te);
-                }
-            }
-        }
-        return; // csqc ends here
-    }
-    
+   
     pad = "";
 
     if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
@@ -977,6 +973,8 @@ void (entity pl) RefreshStatusBar = {
         pad = strcat(pad, "\n");
     pad = strzone(pad);
 
+    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+
     // class tip
     if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
         ct = CF_GetRandomClassTip(pl.playerclass);
@@ -988,7 +986,48 @@ void (entity pl) RefreshStatusBar = {
         {
             ct = strzone("\n\n\n\n\n\n");
         }
-        else // has sbflaginfo on
+        else if (csqcactive) // has csqc
+        {
+            //pl.StatusRefreshTime = time + 1;
+            UpdateClientStatusBar(pl);
+
+            // flag info
+            if (tfdet)
+            {
+                for (float t = 1; t <= number_of_teams; t++) 
+                {
+                    switch (t)
+                    {
+                        case 1:
+                            te = Finditem(tfdet.display_item_status1);
+                            break;
+                        case 2:
+                            te = Finditem(tfdet.display_item_status2);
+                            break;
+                        case 3:
+                            te = Finditem(tfdet.display_item_status3);
+                            break;
+                        case 4:
+                            te = Finditem(tfdet.display_item_status4);
+                            break;
+                    }
+
+                    if (te)
+                    {
+                        UpdateClientFlagStatus(pl, te);
+                    }
+                }
+            }
+
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.track_goal) {
+                    UpdateClientButtonStatus(pl, tg);
+                }
+                tg = find(tg, classname, "info_tfgoal");
+            }
+        }
+        else // no csqc but has sbflaginfo on
         {
             ct = "";
             i = number_of_teams; // Extra newlines
@@ -1029,7 +1068,7 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
-                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 6) {
+                if (tg.track_goal && i < 6 && tg.goal_state == TFGS_DELAYED) {
                     bi = "";
                     //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
                     if(tg.netname) {
@@ -1054,75 +1093,79 @@ void (entity pl) RefreshStatusBar = {
         }
     }
 
-    // status line 1 column 1 - grenade timer
-    if (pl.StatusGrenTime > 0) {
-        st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
-        if (pl.fragstreak > 1 && pl.caps)
-            st1 = strcat(st1, " sec");
-        else
-            st1 = strcat(st1, " seconds");
-    } else
+    if (!csqcactive)
+    {
+        // status line 1 column 1 - grenade timer
+        if (pl.StatusGrenTime > 0) {
+            st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
+            if (pl.fragstreak > 1 && pl.caps)
+                st1 = strcat(st1, " sec");
+            else
+                st1 = strcat(st1, " seconds");
+        } else
+            st1 = "";
+        // status line 1 column 3 - kill streak & caps
+        if (pl.fragstreak > 1) {
+            st2 = Q"\sKill Streak\s: ";
+            st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
+        } else
+            st2 = "";
+        if (pl.caps) {
+            if (pl.fragstreak > 1)
+                st2 = strcat(st2, "  ");
+            st3 = Q"\sCaps\s: ";
+            st3 = strcat(st3, strpadl(ftos(pl.caps),2));
+        } else
+            st3 = "";
+        st2 = strcat(st2, st3);
+        // status line 1
+        if (pl.fragstreak > 1 && pl.caps) {
+            st2 = strpadl(st2, 25);
+            s1 = strpadr(st1, 15);
+        } else {
+            st2 = strpadl(st2, 20);
+            s1 = strpadr(st1, 20);
+        }
+        s1 = strcat(s1, st2);
+        s1 = strcat(s1, "\n");
+        s1 = strzone(s1);
+
+        // status line 2 column 1 - class specific information
+        st1 = GetSBClassInfo(pl, csqcactive);
+        
+        // status line 2
+        s2 = strpadr(st1, 40);
+        s2 = strcat(s2, "\n");
+        s2 = strzone(s2);
+
         st1 = "";
-    // status line 1 column 3 - kill streak & caps
-    if (pl.fragstreak > 1) {
-        st2 = Q"\sKill Streak\s: ";
-        st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
-    } else
         st2 = "";
-    if (pl.caps) {
-        if (pl.fragstreak > 1)
-            st2 = strcat(st2, "  ");
-        st3 = Q"\sCaps\s: ";
-        st3 = strcat(st3, strpadl(ftos(pl.caps),2));
-    } else
-        st3 = "";
-    st2 = strcat(st2, st3);
-    // status line 1
-    if (pl.fragstreak > 1 && pl.caps) {
-        st2 = strpadl(st2, 25);
-        s1 = strpadr(st1, 15);
-    } else {
-        st2 = strpadl(st2, 20);
-        s1 = strpadr(st1, 20);
-    }
-    s1 = strcat(s1, st2);
-    s1 = strcat(s1, "\n");
-    s1 = strzone(s1);
 
-    // status line 2 column 1 - class specific information
-    st1 = GetSBClassInfo(pl, csqcactive);
+        // status line 3 column 2 - clip size
+        st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
+
+        // status line 3 column 3 - grenade 1 count
+        st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
+
+        // status line 3 column 4 - grenade 2 count
+        st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
     
-    // status line 2
-    s2 = strpadr(st1, 40);
-    s2 = strcat(s2, "\n");
-    s2 = strzone(s2);
+        
 
-    st1 = "";
-    st2 = "";
+        // status line 3
+        s3 = strcat(st1, st2);
+        s3 = strpadr(s3, 19);
+        s3 = strcat(s3, strpadl(strcat(st3, strcat("  ", st4)), 21));
+        s3 = strcat(s3, "\n");
+        s3 = strzone(s3);
 
-    // status line 3 column 2 - clip size
-    st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
-
-    // status line 3 column 3 - grenade 1 count
-    st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
-
-    // status line 3 column 4 - grenade 2 count
-    st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
-
-    // status line 3
-    s3 = strcat(st1, st2);
-    s3 = strpadr(s3, 19);
-    s3 = strcat(s3, strpadl(strcat(st3, strcat("  ", st4)), 21));
-    s3 = strcat(s3, "\n");
-    s3 = strzone(s3);
-
-    // identify
-    if (pl.ident_string != string_null && time < pl.ident_time) {
-        ident = strcat(pl.ident_string, "\n\n");
-    } else {
-        ident = "\n\n\n\n";
+        // identify
+        if (pl.ident_string != string_null && time < pl.ident_time) {
+            ident = strcat(pl.ident_string, "\n\n");
+        } else {
+            ident = "\n\n\n\n";
+        }
     }
-
     centerprint(pl, pl.StatusString, pad, ident, ct, s1, s2, s3);
     pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(ct); strunzone(s1); strunzone(s2); strunzone(s3);
