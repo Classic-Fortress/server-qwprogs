@@ -55,6 +55,7 @@ typedef struct {
     FO_Hud_Panel Gren1;
     FO_Hud_Panel Gren2;
     FO_Hud_Panel PlayerClass;
+    FO_Hud_Panel Identify;
     vector MousePos;
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;

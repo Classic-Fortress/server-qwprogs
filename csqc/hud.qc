@@ -27,6 +27,10 @@ void GetDrawPanel(string id)
         case "playerclasspanel":
             DrawPanel = HudSettings.PlayerClass;
             break;
+        case "hudidentify":
+        case "identifypanel":
+            DrawPanel = HudSettings.Identify;
+            break;
     }
 }
 
@@ -57,6 +61,10 @@ void SetDrawPanel(string id)
         case "hudplayerclass":
         case "playerclasspanel":
             HudSettings.PlayerClass = DrawPanel;
+            break;
+        case "hudidentify":
+        case "identifypanel":
+            HudSettings.Identify = DrawPanel;
             break;
     }
 }
@@ -91,6 +99,9 @@ void Hud_WriteCfg(string path)
 
     DrawPanel = HudSettings.PlayerClass;
     line = GetPanelString(line, "hudplayerclass");
+
+    DrawPanel = HudSettings.Identify;
+    line = GetPanelString(line, "hudidentify");
 
     fputs(filehandle, line);
     fclose(filehandle);
@@ -161,6 +172,13 @@ void FO_Hud_Editor_LoadDefaultSettings()
     GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
     FO_Hud_Panel HudPlayerClass = NewPanel;
     HudSettings.PlayerClass = HudPlayerClass;
+
+    pos = [pos_x, pos_y - 2 - 24];
+    fill = [50, 26];
+
+    GetNewPanel(pos, fill, scale, display, nodeInsertLoc);
+    FO_Hud_Panel HudIdentify = NewPanel;
+    HudSettings.Identify = HudIdentify;
 }
 
 void Hud_DrawFlagStatusBar(float width)
@@ -453,6 +471,27 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
     }
 }
 
+void Hud_DrawIdentifyPanel(string id, string identify)
+{
+    if (!DrawPanel.Display)
+        return;
+
+    vector pos;
+    pos = DrawPanel.Position;
+
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    {
+        // click event
+        if (fo_hud_editor)
+        {
+
+        }
+    }
+
+    vector fontSize = FO_Hud_Icon_Font_Size * DrawPanel.Scale;
+    drawstring(pos, identify, fontSize, '1 1 1', 1, 0);
+}
+
 void Hud_Draw(float width, float height)
 {
     Hud_DrawFlagStatusBar(width);
@@ -470,6 +509,11 @@ void Hud_Draw(float width, float height)
     Hud_DrawPanelLMP("capspanel", ftos(SBAR.Caps), HudIcons[12].icon);
 
     // identify
+    if (strlen(SBAR.Identify) > 0)
+    {
+        GetDrawPanel("identifypanel");
+        Hud_DrawIdentifyPanel("identifypanel", SBAR.Identify);
+    }
 
     GetDrawPanel("gren1panel");
     Hud_DrawPanelLMP("gren1panel", ftos(SBAR.Gren1), HudIcons[13].icon);
