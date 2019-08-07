@@ -111,5 +111,3 @@ noref void CSQC_Input_Frame()
 		}	
 	}
 }
-
-
