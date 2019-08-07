@@ -277,6 +277,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         vector fontSize = FO_Hud_Icon_Font_Size * DrawPanel.Scale;
         pos = [pos_x + 2, pos_y + 2, 0];
         vector basepos = pos;
+        vector colour = '1 1 1';
         string icon = "";
         string msg = "";
 
@@ -289,25 +290,16 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         {
             case PC_SCOUT:
                 msg = SBAR.ScannerOn ? "Scanning" : "Offline";
-                len = strlen(msg);
-                offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-                pos = [pos_x + offset, pos_y, 0];
-                drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+                DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.ScannerOn)
                 {
                     msg = SBAR.ScannerRange ? strcat("Dist: ", ftos(SBAR.ScannerRange)) : "No targets";
-                    len = strlen(msg);
-                    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-                    pos = [basepos_x + offset, pos_y + 2 + fontSize_y, 0];
-                    drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+                    pos = DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
                     if (SBAR.ScannerRange)
                     {
                         msg = (SBAR.ScannerTeamNo == team_no) ? "Friendly" : "Enemy";
                         msg = strcat(msg, " ", ClassToString(SBAR.ScannerPlayerClass));
-                        len = strlen(msg);
-                        offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-                        pos = [basepos_x + offset, pos_y + 2 + fontSize_y, 0];
-                        drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 break;
@@ -315,23 +307,147 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 if (SBAR.SniperDam)
                 {
                     msg = strcat("Dam: ", ftos(SBAR.SniperDam));
-                    len = strlen(msg);
-                    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-                    pos = [pos_x + offset, pos_y, 0];
-                    drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                     
                     if (SBAR.SniperMax)
                     {
                         msg = "(100%)";
-                        len = strlen(msg);
-                        offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-                        pos = [basepos_x + offset, pos_y + 2 + fontSize_y, 0];
-                        drawstring(pos, msg, fontSize, '0 0 1', 1, 0);
+                        colour = '1 0 0';
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 break;
             case PC_DEMOMAN:
+                if (SBAR.IsDetpacking)
+                {
+                    msg = "Setting";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
 
+                    msg = strcat(ftos(SBAR.DetpackLeft), " (", ftos(SBAR.IsDetpacking), ") secs left");
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                }
+                else if (SBAR.DetpackLeft)
+                {
+                    msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                }
+                break;
+            case PC_MEDIC:
+                msg = SBAR.AuraActive ? "On" : "Off";
+                DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                if (SBAR.AuraActive)
+                {
+                    if (SBAR.HealCount)
+                    {
+                        msg = strcat(ftos(SBAR.HealCount), " players healed");
+                        pos = DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+
+                        msg = strcat("for ", ftos(SBAR.HealAmount), " hp");
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                    }
+                    else
+                    {
+                        if (SBAR.AuraStatus == PC_MEDIC_AURA_OUTOFPOWER)
+                        {
+                            msg = "Out of power";
+                            DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                        }
+                        else if (SBAR.AuraStatus == PC_MEDIC_AURA_RECHARGING)
+                        {
+                            msg = "Recharging";
+                            DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                        }
+                    }
+                }
+                break;
+            case PC_HVYWEAP:
+                if (SBAR.LockedCannon)
+                {
+                    msg = "Assault Cannon Locked";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
+                }
+                break;
+            case PC_SPY:
+                if (SBAR.IsUndercover == 1)
+                {
+                    if (SBAR.InvisOnly)
+                    {
+                        msg = "Invisible";
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                    }
+                    else
+                    {
+                        msg = "Undercover";
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        msg = strcat(TeamToString(SBAR.UndercoverTeam), " ", ClassToString(SBAR.UndercoverSkin));
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                    }
+                }
+                else if (SBAR.IsUndercover == 2)
+                {
+                    if (SBAR.InvisOnly)
+                    {
+                        msg = "Invisible";
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        msg = strcat("In ", ftos(SBAR.UndercoverTimer), " secs");
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                    }
+                    else
+                    {
+                        msg = "Disguising";
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        if (SBAR.DisguiseTeam)
+                        {
+                            msg = strcat("(", TeamToString(SBAR.DisguiseTeam), SBAR.QueueSkin ? "" : ") ");
+                        }
+                        else if (SBAR.QueueTeam)
+                        {
+                            msg = strcat("(", TeamToString(SBAR.QueueTeam), " ");
+                        }
+                        else if (SBAR.UndercoverTeam)
+                        {
+                            msg = strcat(TeamToString(SBAR.UndercoverTeam), " ");
+                        }
+                        string msg2 = "";
+                        if (SBAR.DisguiseSkin)
+                        {
+                            msg2 = strcat(SBAR.QueueTeam ? "" : "(", ClassToString(SBAR.DisguiseSkin), ")");
+                        }
+                        else if (SBAR.QueueSkin)
+                        {
+                            msg2 = strcat(" ", ClassToString(SBAR.QueueSkin), ")");
+                        }
+                        else if (SBAR.UndercoverSkin)
+                        {
+                            msg2 = strcat(ClassToString(SBAR.UndercoverSkin));
+                        }
+                        msg = strcat(msg, msg2);
+                        DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
+                    }
+                }
+                break;
+            case PC_ENGINEER:
+                if (SBAR.HasSentry)
+                {
+                    msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(SBAR.SentryHealth), " S: ", ftos(SBAR.SentryAmmoShells), " R: ", ftos(SBAR.SentryAmmoRockets));
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                }
+                else if (SBAR.IsBuilding)
+                {
+                    msg = strcat(ftos(SBAR.BuildingPercentage), "%");
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                }
+                
+                // disp
+                pos = [pos_x, pos_y - size_y - 2];
+                basepos = pos;
+                icon = HudIcons[playerclass].icon;
+                drawpic(pos, icon, size, '1 1 1', 1, 1);
+                if (SBAR.HasDispenser)
+                {
+                    msg = strcat("H: ", ftos(SBAR.DispenserHealth));
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                }
                 break;
         }
         

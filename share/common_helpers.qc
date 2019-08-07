@@ -14,3 +14,12 @@ string ClassToString(float num)
     if (num == 14) return "Goal Item";
     return "";
 }
+
+string TeamToString(float num)
+{
+    if (num == 1) return "Blue";
+    if (num == 2) return "Red";
+    if (num == 3) return "Yellow";
+    if (num == 4) return "Green";
+    return " ";
+}

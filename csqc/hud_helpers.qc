@@ -329,3 +329,22 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
     pos = [pos_x + offset, pos_y, 0];
     Hud_DrawStringLMP(pos, val, 24 * DrawPanel.Scale);
 }
+
+
+vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
+{
+    float len, offset;
+    len = strlen(msg);
+    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    pos = [basepos_x + offset, newline ? pos_y + 2 + fontSize_y : pos_y, 0];
+
+    return pos;
+}
+
+vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline, vector colour)
+{
+    pos = GetStringOffsetPos(msg, size, fontSize, pos, basepos, newline);
+    drawstring(pos, msg, fontSize, colour, 1, 0);
+
+    return pos;
+}

@@ -1246,15 +1246,6 @@ float GetClipSize(entity pl)
     }
 }
 
-string(float num) TeamToString =
-{
-    if (num == 1) return "Blue";
-    if (num == 2) return "Red";
-    if (num == 3) return "Yellow";
-    if (num == 4) return "Green";
-    return " ";
-};
-
 string(entity pl) DisguiseToString =
 {
     local string st = "";
