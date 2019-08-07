@@ -590,7 +590,7 @@ void (entity Player, float index, entity Item, float icon) InitClientFlagStatus 
         WriteFloat(MSG_MULTICAST, Item.skin);
         WriteFloat(MSG_MULTICAST, Item.owned_by);
         WriteFloat(MSG_MULTICAST, icon);
-        multicast('0 0 0', MULTICAST_ONE_R); 
+        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
     }
 }
 float laststate;
@@ -621,7 +621,7 @@ void (entity Player, entity Goal) UpdateClientButtonStatus = {
     } else {
         WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
     }
-    multicast('0 0 0', MULTICAST_ONE);    
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);    
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
@@ -662,7 +662,7 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
             WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
         }
     }
-    multicast('0 0 0', MULTICAST_ONE); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
 float(entity playerent, float changedflags) SendClientFlagStatus = {
@@ -927,7 +927,7 @@ void UpdateClientStatusBar(entity pl)
             break;
     }
 
-    multicast('0 0 0', MULTICAST_ONE); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
 void (entity pl) RefreshStatusBar = {
@@ -1149,8 +1149,6 @@ void (entity pl) RefreshStatusBar = {
 
         // status line 3 column 4 - grenade 2 count
         st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
-    
-        
 
         // status line 3
         s3 = strcat(st1, st2);
