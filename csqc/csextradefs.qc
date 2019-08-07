@@ -14,11 +14,6 @@ typedef struct
 MouseStruct Mouse;
 
 typedef struct {
-    string filename;
-    vector colour;
-} HUDIcon;
-
-typedef struct {
     float id;
     string message;
     //string model;
@@ -28,7 +23,6 @@ typedef struct {
     vector loc;
     string carrier;
     string locname;
-    HUDIcon icon;
 } FlagInfoLine;
 
 FlagInfoLine FlagInfoLines[10];

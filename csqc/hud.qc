@@ -134,8 +134,6 @@ void Hud_DrawFlagStatusBar(float width)
         if (flagInfoCount > 0)
         {
             firstrun = FALSE;
-            pos = HudSettings.FlagIcon.Position;
-            //pos_y = pos_y - 4;// - 24 * (flagInfoCount - 2);
             pos_y = pos_y - 4 - sizey * (flagInfoCount - 2);
             HudSettings.FlagIcon.Position = pos;
         }
@@ -156,20 +154,26 @@ void Hud_DrawFlagStatusBar(float width)
     {
 		if (FlagInfoLines[i].id) 
         {
-	    alpha = FlagInfoLines[i].state == FLAGINFO_HOME ? 0.3 : 1;
-	    string icon = FlagInfoLines[i].icon.filename;
-	    vector iconcolour = FlagInfoLines[i].icon.colour;
-        float yoffset = 24;
+			string icon = "sb_key1";
+			vector iconcolour = '1 1 1';
+			alpha = FlagInfoLines[i].state == FLAGINFO_HOME ? 0.3 : 1;
+			if (FlagInfoLines[i].model) {
+                switch (FlagInfoLines[i].model.owned_by) 
+                {
+                    case 2:
+                    icon = "sb_key2";
+                    break;
+                    case 3:
+                    iconcolour = '1 1 0';
+                    break;
+                    case 4:
+                    icon = "sb_key2";
+                    iconcolour = '0 1 0';
+                    break;
+                }
+			}
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-//			    drawstring([pos_x + 28, pos_y + 8 + 24 * (i - 1) + yoffset, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
-//			} 
-//            else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
-//            {
-//			    drawstring([pos_x + 28, pos_y + 8 + 24 * (i - 1) + yoffset, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
-//			}
-			
-//            drawpic([pos_x, pos_y + 24 * (i - 1) + yoffset, 0], icon, '24 24 0', iconcolour, alpha, 1);
 			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
@@ -182,7 +186,6 @@ void Hud_DrawFlagStatusBar(float width)
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-//			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 + 24 * (i - 1) + yoffset, 0], stime, '6 6', '1 1 1', 1, 0);
 			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			}
 		}
