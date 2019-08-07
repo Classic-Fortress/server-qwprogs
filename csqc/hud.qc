@@ -290,7 +290,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         {
             case PC_SCOUT:
                 msg = SBAR.ScannerOn ? "Scanning" : "Offline";
-                DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.ScannerOn)
                 {
                     msg = SBAR.ScannerRange ? strcat("Dist: ", ftos(SBAR.ScannerRange)) : "No targets";
@@ -307,7 +307,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 if (SBAR.SniperDam)
                 {
                     msg = strcat("Dam: ", ftos(SBAR.SniperDam));
-                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                    pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                     
                     if (SBAR.SniperMax)
                     {
@@ -321,7 +321,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 if (SBAR.IsDetpacking)
                 {
                     msg = "Setting";
-                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                    pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
 
                     msg = strcat(ftos(SBAR.DetpackLeft), " (", ftos(SBAR.IsDetpacking), ") secs left");
                     DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
@@ -334,7 +334,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 break;
             case PC_MEDIC:
                 msg = SBAR.AuraActive ? "On" : "Off";
-                DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.AuraActive)
                 {
                     if (SBAR.HealCount)
@@ -378,7 +378,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                     else
                     {
                         msg = "Undercover";
-                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                         msg = strcat(TeamToString(SBAR.UndercoverTeam), " ", ClassToString(SBAR.UndercoverSkin));
                         DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
@@ -388,14 +388,14 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                     if (SBAR.InvisOnly)
                     {
                         msg = "Invisible";
-                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                         msg = strcat("In ", ftos(SBAR.UndercoverTimer), " secs");
                         DrawOffsetString(msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                     else
                     {
                         msg = "Disguising";
-                        DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                         if (SBAR.DisguiseTeam)
                         {
                             msg = strcat("(", TeamToString(SBAR.DisguiseTeam), SBAR.QueueSkin ? "" : ") ");
@@ -450,7 +450,6 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 break;
         }
-        
     }
 }
 

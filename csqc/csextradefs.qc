@@ -140,7 +140,7 @@ FO_Hud_Icons HudIcons[16] = {
 float team_no;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
-vector FO_Hud_Icon_Font_Size = [24, 24, 0];
+vector FO_Hud_Icon_Font_Size = [8, 8, 0];
 
 #pragma noref 1
 #pragma warning error Q101 /*too many parms*/

@@ -335,8 +335,8 @@ vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, 
 {
     float len, offset;
     len = strlen(msg);
-    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
-    pos = [basepos_x + offset, newline ? pos_y + 2 + fontSize_y : pos_y, 0];
+    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
+    pos = [basepos_x + offset, newline ? pos_y + 2 + ((size_y - fontSize_y) * .5) : pos_y + ((size_y - fontSize_y) * .5), 0];
 
     return pos;
 }
