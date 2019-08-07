@@ -580,7 +580,7 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
 
 string getLocationName(vector location);
 
-void (entity Player, float index, entity Item) InitClientFlagStatus = {
+void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
     float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     if(csqcactive) {
         msg_entity = Player;
@@ -591,8 +591,39 @@ void (entity Player, float index, entity Item) InitClientFlagStatus = {
         WriteString(MSG_MULTICAST, Item.mdl);
         WriteFloat(MSG_MULTICAST, Item.skin);
         WriteFloat(MSG_MULTICAST, Item.owned_by);
+        WriteFloat(MSG_MULTICAST, icon);
         multicast('0 0 0', MULTICAST_ONE_R); 
     }
+}
+float laststate;
+void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
+    WriteFloat(MSG_MULTICAST, Goal.goal_no);
+    if(Goal.goal_no == 11) {
+        if(Goal.goal_state != laststate) {
+            laststate = Goal.goal_state;
+        }
+    }
+    if(Goal.goal_state == TFGS_DELAYED) {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
+        WriteFloat(MSG_MULTICAST, rint(Goal.bubble_count - time));
+        //WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
+        WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+        WriteCoord(MSG_MULTICAST, Goal.origin_x);
+        WriteCoord(MSG_MULTICAST, Goal.origin_y);
+        WriteCoord(MSG_MULTICAST, Goal.origin_z);
+        //WriteString(MSG_MULTICAST, getLocationName(Item.origin));
+        if(Goal.team_str_moved) {
+            WriteString(MSG_MULTICAST, Goal.team_str_moved);
+        } else {
+            WriteString(MSG_MULTICAST,"\sOffline\s");
+        }
+    } else {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
+    }
+    multicast('0 0 0', MULTICAST_ONE);    
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
@@ -732,6 +763,7 @@ void (entity pl) RefreshStatusBar = {
     local entity tfdet;  //info_tfdetect entity
     local entity te, tg;
     local string bi; //button info
+    local float csqcactive;
     //By default, show after tips; 0/off = off; 2 = always
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
     /* local float win, sec; */
@@ -761,7 +793,7 @@ void (entity pl) RefreshStatusBar = {
         pad = strcat(pad, "\n");
     pad = strzone(pad);
 
-    float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
 
     // class tip
     if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
@@ -799,6 +831,13 @@ void (entity pl) RefreshStatusBar = {
                 {
                     UpdateClientFlagStatus(pl, te);
                 }
+            }
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.track_goal) {
+                    UpdateClientButtonStatus(pl, tg);
+                }
+                tg = find(tg, classname, "info_tfgoal");
             }
         }
         else // no csqc but has sbflaginfo on
@@ -842,7 +881,7 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
-                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 6) {
+                if (tg.track_goal && i < 6 && tg.goal_state == TFGS_DELAYED) {
                     bi = "";
                     //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
                     if(tg.netname) {
