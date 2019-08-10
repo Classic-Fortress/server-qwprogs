@@ -475,7 +475,23 @@ void Hud_DrawIdentifyPanel(string id, string identify)
     }
 
     vector fontSize = FO_Hud_Icon_Font_Size * DrawPanel.Scale;
-    drawstring(pos, identify, fontSize, '1 1 1', 1, 0);
+
+    float count = tokenizebyseparator(identify, "\n");
+    float msgcount = 0;
+    string msg = "";
+    for (float f = 0; f <= count; f++)
+    {
+        msg = argv(f);
+        // tokenize doesn't handle newlines very well
+        msg = strreplace("\n", "", msg);
+        msg = strtrim(msg);
+        if (strlen(msg) > 0)
+        {
+            pos = pos + [0, (fontSize_y * msgcount), 0];
+            drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+            msgcount++;
+        }
+    }
 }
 
 void Hud_Draw(float width, float height)
