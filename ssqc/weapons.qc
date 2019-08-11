@@ -3405,7 +3405,10 @@ void () W_WeaponFrame = {
     if (cease_fire)
         return;
 
-    if (self.button0 && !self.fire_held_down) {
+    if (self.button0 
+        && (!self.fire_held_down 
+            || 
+            (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400) {

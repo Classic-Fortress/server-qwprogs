@@ -502,9 +502,9 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
 void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
     if (self.count == 1) {
         sound(self, 1, "weapons/asscan3.wav", 0.8, 1);
+        self.heat = 0;
     }
     if (self.count >= 15) {
-        self.heat = 0;
         self.fire_held_down = 0;
         self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
         if (!cannon_move)
