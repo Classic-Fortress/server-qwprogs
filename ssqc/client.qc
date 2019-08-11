@@ -60,6 +60,7 @@ void () PreMatch_Message;
 float () GetLastWeaponImpulse;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
+void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 
 string nextmap;
 
@@ -613,6 +614,8 @@ void () DecodeLevelParms = {
         duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
         // spawn with all possible grenades [0]
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
+        // After a duel round, print the winners' health stats
+        round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -1097,8 +1100,17 @@ void () RemovePlayerOwnedEnts = {
     }  
 }
 
+void (string cn) RemoveAllEntsByClassname = {
+    local entity te = find(world, classname, cn);
+    while (te) {
+        dremove(te);
+        te = find(te, classname, cn);
+    }
+}
+
 void () ResetPlayers = {
     local entity te, oldself, reset_timer;
+    local float teamsleft;
     no_fire_mode = 0;
     reset_timer = find(world, classname, "duel_reset_timer");
     while (reset_timer != world) {
@@ -1108,11 +1120,43 @@ void () ResetPlayers = {
     }
     if(cb_prematch)
         return;
+
+    teamsleft = CountRemainingTeams();
+    if(teamsleft == 1) {
+        if(round_winner) {
+            bprint(PRINT_HIGH, round_winner.netname, " of team ", TeamFortress_TeamGetColorString(round_winner.team_no) ,", wins the round!\n");
+            if(round_winner_print_health && round_winner.health == round_winner.max_health && round_winner.armorvalue == round_winner.maxarmor ) {
+                bprint(PRINT_HIGH, "\t\t\t \sFLAWLESS VICTORY\s \t\t\t\n");
+            }
+        } else {
+            bprint(PRINT_HIGH, TeamFortress_TeamGetColorString(round_winner_team), " team wins the round!\n");
+        }
+        TeamFortress_TeamIncreaseScore(round_winner_team, 1);
+    } else if(teamsleft == 0) {
+        bprint(PRINT_HIGH, "Everybody died! It's a draw.\n");
+    }
+    TeamFortress_TeamShowScores(2);
+    
+    RemoveAllEntsByClassname("proj_bullet");
+    RemoveAllEntsByClassname("proj_rocket");
+    RemoveAllEntsByClassname("grenade");
+    RemoveAllEntsByClassname("pipebomb");
+    RemoveAllEntsByClassname("spike");
+    RemoveAllEntsByClassname("railslug");
+    RemoveAllEntsByClassname("pyro_flame");
+    RemoveAllEntsByClassname("fire");
+    RemoveAllEntsByClassname("flamerflame");
+    RemoveAllEntsByClassname("pyro_rocket");
+    RemoveAllEntsByClassname("proj_tranq");
+   
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
             if(te.health > 0) {
                 stuffcmd(te, "f_respawn\n");
+                if(round_winner_print_health) {
+                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmour:\s " , ftos(te.armorvalue), "\n");
+                }
             }
             oldself = self;
             self = te;
@@ -1157,14 +1201,19 @@ float () CountRemainingTeams = {
     if(teamflags & 16) {
         teamsleft++;
     }
+    round_winner_team = 0;
+    round_winner = world;
     if(teamsleft == 1) {
         if(playersleft == 1) {
-            bprint(PRINT_HIGH, lastplayer.netname, " of team ", TeamFortress_TeamGetColorString(lastplayer.team_no) ,", wins the round!\n");
+            //bprint(PRINT_HIGH, lastplayer.netname, " of team ", TeamFortress_TeamGetColorString(lastplayer.team_no) ,", wins the round!\n");
+            round_winner = lastplayer;
+            round_winner_team = lastplayer.team_no;
         } else {
-            bprint(PRINT_HIGH, TeamFortress_TeamGetColorString(lastplayer.team_no), " team wins the round!\n");
+            //bprint(PRINT_HIGH, TeamFortress_TeamGetColorString(lastplayer.team_no), " team wins the round!\n");
+            round_winner_team = lastplayer.team_no;
         }
-    } else if(teamsleft == 0) {
-        bprint(PRINT_HIGH, "Everybody died! It's a draw.\n");
+    //} else if(teamsleft == 0) {
+        //bprint(PRINT_HIGH, "Everybody died! It's a draw.\n");
     }
     return teamsleft;
 }
@@ -1228,7 +1277,7 @@ void () ClientKill = {
     self.deadflag = DEAD_RESPAWNABLE;
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.takedamage = 0;
-    if(duelmode) {
+    if(duelmode && !cb_prematch) {
         if(CountRemainingTeams() < 2) {
             ResetPlayersWithCountdown();
         }
