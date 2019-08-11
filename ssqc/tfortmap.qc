@@ -2313,18 +2313,19 @@ void () ReturnItem = {
         self.enemy.effects = self.enemy.effects | EF_BLUE;
     }
 
-    if (self.enemy.mdl != string_null) {
+    if (self.enemy.mdl) {
+        bprint(PRINT_HIGH, "enemy mdl set\n");
         setmodel(self.enemy, self.enemy.mdl);
     }
 
+	setsize(self.enemy, VEC_HULL_MIN, VEC_HULL_MAX);
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);
 
     sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
 
     if (self.weapon != 2) {
-        if ((self.enemy.noise3 != string_null) ||
-                (self.enemy.noise4 != string_null)) {
+        if ((self.enemy.noise3) || (self.enemy.noise4)) {
             te = find(world, classname, "player");
             while (te) {
                 if (te.team_no == self.enemy.owned_by)
