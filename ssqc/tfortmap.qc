@@ -232,52 +232,59 @@ void () TF_PlaceItem = {
     item_list_bit = item_list_bit * 2;
 };
 
-void () TF_StartItem = {
+float TF_Item_GetGlow(float team)
+{
+    float ret = 0;
+    switch (team)
+    {
+        case 1:
+            ret = EF_BLUE;
+            break;
+        case 2: 
+            ret = EF_RED;
+            break;
+        case 3:
+            ret = EF_RED + EF_MUZZLEFLASH;
+            break;
+        case 4:
+            ret = EF_MUZZLEFLASH;
+            break;
+        default:
+            ret = EF_DIMLIGHT;
+    }
+
+    return ret;
+}
+
+void TF_Item_ApplyGlow()
+{
     local entity tfdet;  //info_tfdetect entity
     tfdet = find(world, classname, "info_tfdetect");
+
     if (tfdet && (tfdet.display_item_status1 == self.goal_no || tfdet.display_item_status2 == self.goal_no || tfdet.display_item_status3 == self.goal_no || tfdet.display_item_status4 == self.goal_no)) {
-        if (self.owned_by == 1.0) {
-            self.effects = self.effects | EF_BLUE;
-        }
-        if (self.owned_by == 2.0) {
-            self.effects = self.effects | EF_RED;
-        }
-        if (self.owned_by == 3.0) {
-            self.effects = self.effects | EF_RED;
-            self.effects = self.effects | EF_MUZZLEFLASH;
-        }
-        if (self.owned_by == 4.0) {
-            self.effects = self.effects | EF_MUZZLEFLASH;
-        }
+        self.effects = self.effects | TF_Item_GetGlow(self.owned_by);
     } else {
-        if (self.model == "progs/tf_flag.mdl" || self.model == "progs/tf_stan.mdl") {
-            self.effects = self.effects | EF_DIMLIGHT;
-
-            if (self.skin == 1.0) {
-                self.effects = self.effects | EF_BLUE;
+        if (self.model)
+        {
+            switch (self.model)
+            {
+                case "progs/basrkey.bsp":
+                    self.effects = self.effects | EF_DIMLIGHT;
+                    self.effects = self.effects | EF_RED;
+                    break;
+                case "progs/basbkey.bsp":
+                    self.effects = self.effects | EF_DIMLIGHT;
+                    self.effects = self.effects | EF_BLUE;
+                    break;
+                default:
+                    self.effects = self.effects | TF_Item_GetGlow(self.owned_by);
             }
-            if (self.skin == 2.0) {
-                self.effects = self.effects | EF_RED;
-            }
-            if (self.skin == 3.0) {
-                self.effects = self.effects | EF_RED;
-                self.effects = self.effects | EF_MUZZLEFLASH;
-            }
-            if (self.skin == 4.0) {
-                self.effects = self.effects | EF_MUZZLEFLASH;
-            }
-        }
-
-        if (self.model == "progs/basrkey.bsp" ) {
-            self.effects = self.effects | EF_DIMLIGHT;
-            self.effects = self.effects | EF_RED;
-        }
-
-        if (self.model == "progs/basbkey.bsp" ) {
-            self.effects = self.effects | EF_DIMLIGHT;
-            self.effects = self.effects | EF_BLUE;
-        }
+        }       
     }
+}
+
+void () TF_StartItem = {
+    TF_Item_ApplyGlow();
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
@@ -668,36 +675,14 @@ void (entity Goal) RestoreGoal = {
             Goal.nextthink = time + Goal.search_time;
         }
         Goal.goal_state = 2;
-        if (Goal.mdl != string_null) {
+        if (Goal.model) {
             setmodel(Goal, Goal.mdl);
             setsize(Goal, Goal.goal_min, Goal.goal_max);
-        }
-        if (Goal.model == "progs/tf_flag.mdl" || Goal.model == "progs/tf_stan.mdl") {
-            Goal.effects = Goal.effects | EF_DIMLIGHT;
-
-            if (Goal.skin == 1.0) {
-                Goal.effects = Goal.effects | EF_BLUE;
-            }
-            if (Goal.skin == 2.0) {
-                Goal.effects = Goal.effects | EF_RED;
-            }
-            if (Goal.skin == 3.0) {
-                Goal.effects = Goal.effects | EF_RED;
-                Goal.effects = Goal.effects | EF_MUZZLEFLASH;
-            }
-            if (Goal.skin == 4.0) {
-                Goal.effects = Goal.effects | EF_MUZZLEFLASH;
-            }
-        }
-
-        if (Goal.model == "progs/basrkey.bsp" ) {
-            Goal.effects = Goal.effects | EF_DIMLIGHT;
-            Goal.effects = Goal.effects | EF_RED;
-        }
-
-        if (Goal.model == "progs/basbkey.bsp" ) {
-            Goal.effects = Goal.effects | EF_DIMLIGHT;
-            Goal.effects = Goal.effects | EF_BLUE;
+            entity oldself;
+            oldself = self;
+            self = Goal;
+            TF_Item_ApplyGlow();
+            self = oldself;
         }
     }
 };
@@ -2285,36 +2270,13 @@ void () ReturnItem = {
     self.enemy.touch = item_tfgoal_touch;
     self.enemy.origin = self.enemy.oldorigin;
 
-    if (self.enemy.model == "progs/tf_flag.mdl" || self.enemy.model == "progs/tf_stan.mdl") {
-        self.enemy.effects = self.effects | EF_DIMLIGHT;
-
-        if (self.enemy.skin == 1.0) {
-            self.enemy.effects = self.enemy.effects | EF_BLUE;
-        }
-        if (self.enemy.skin == 2.0) {
-            self.enemy.effects = self.enemy.effects | EF_RED;
-        }
-        if (self.enemy.skin == 3.0) {
-            self.enemy.effects = self.enemy.effects | EF_RED;
-            self.enemy.effects = self.enemy.effects | EF_MUZZLEFLASH;
-        }
-        if (self.enemy.skin == 4.0) {
-            self.enemy.effects = self.enemy.effects | EF_MUZZLEFLASH;
-        }
-    }
-
-    if (self.enemy.model == "progs/basrkey.bsp" ) {
-        self.enemy.effects = self.effects | EF_DIMLIGHT;
-        self.enemy.effects = self.enemy.effects | EF_RED;
-    }
-
-    if (self.enemy.model == "progs/basbkey.bsp" ) {
-        self.enemy.effects = self.effects | EF_DIMLIGHT;
-        self.enemy.effects = self.enemy.effects | EF_BLUE;
-    }
-
-    if (self.enemy.mdl) {
-        bprint(PRINT_HIGH, "enemy mdl set\n");
+    if (self.enemy.model)
+    {
+        entity oldself;
+        oldself = self;
+        self = self.enemy;
+        TF_Item_ApplyGlow();
+        self = oldself;
         setmodel(self.enemy, self.enemy.mdl);
     }
 
@@ -2537,33 +2499,11 @@ void () tfgoalitem_droptouch = {
 };
 
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
-    if (Item.model == "progs/tf_flag.mdl" || Item.model == "progs/tf_stan.mdl") {
-        Item.effects = Item.effects | EF_DIMLIGHT;
-
-        if (Item.skin == 1.0) {
-            Item.effects = Item.effects | EF_BLUE;
-        }
-        if (Item.skin == 2.0) {
-            Item.effects = Item.effects | EF_RED;
-        }
-        if (Item.skin == 3.0) {
-            Item.effects = Item.effects | EF_RED;
-            Item.effects = Item.effects | EF_MUZZLEFLASH;
-        }
-        if (Item.skin == 4.0) {
-            Item.effects = Item.effects | EF_MUZZLEFLASH;
-        }
-    }
-
-    if (Item.model == "progs/basrkey.bsp" ) {
-        Item.effects = Item.effects | EF_DIMLIGHT;
-        Item.effects = Item.effects | EF_RED;
-    }
-
-    if (Item.model == "progs/basbkey.bsp" ) {
-        Item.effects = Item.effects | EF_DIMLIGHT;
-        Item.effects = Item.effects | EF_BLUE;
-    }
+    entity oldself;
+    oldself = self;
+    self = Item;
+    TF_Item_ApplyGlow();
+    self = oldself;
 
     Item.origin = Item.owner.origin;
     setorigin(Item, Item.origin);
