@@ -75,21 +75,6 @@ void () StartMatch =
     team3frags = 0;
     team2frags = 0;
     team1frags = 0;
-    te = find(world, classname, "player");
-
-    while (te) {
-        oldself = self;
-        self = te;
-
-        TeamFortress_RemoveTimers();
-        self.frags = 0;
-        self.real_frags = 0;
-        setspawnparms(self);
-        if (!quadmode)
-            PutClientInServer();
-        self = oldself;
-        te = find(te, classname, "player");
-    }
     gren = find(world, classname, "grenade");
     while (gren)
     {
@@ -117,6 +102,20 @@ void () StartMatch =
             }
             te = find (te, classname, "info_tfgoal");
         }
+    }
+    te = find(world, classname, "player");
+    while (te) {
+        oldself = self;
+        self = te;
+
+        TeamFortress_RemoveTimers();
+        self.frags = 0;
+        self.real_frags = 0;
+        setspawnparms(self);
+        if (!quadmode)
+            PutClientInServer();
+        self = oldself;
+        te = find(te, classname, "player");
     }
 
     cb_prematch = 0;
@@ -165,6 +164,9 @@ void () StartMatch =
         if (rounds) {
             StartQuadRound();
         }
+    }
+    if (duelmode) {
+        ResetPlayers();
     }
 };
 

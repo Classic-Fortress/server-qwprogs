@@ -107,6 +107,7 @@ void () W_FireLaser = {
     newmis.nextthink = time + 5;
     newmis.think = SUB_Remove;
     newmis.touch = LaserBolt_Touch;
+    newmis.classname = "railslug";
 };
 
 void () EMPExplode = {

@@ -1097,6 +1097,7 @@ void () W_FireRocket = {
     newmis.think = SUB_Remove;
 
     newmis.weapon = DMSG_ROCKETL;
+    newmis.classname = "proj_rocket";
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');

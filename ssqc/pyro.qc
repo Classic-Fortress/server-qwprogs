@@ -52,6 +52,7 @@ entity(string type, entity p_owner) FlameSpawn =
         setsize(newmis, '0 0 0', '0 0 0');
     }
     newmis.owner = p_owner;
+    newmis.classname = "pyro_flame";
     return (newmis);
 };
 
@@ -714,6 +715,7 @@ void () W_FireIncendiaryCannon = {
     newmis.touch = T_IncendiaryTouch;
     newmis.nextthink = time + 5;
     newmis.weapon = DMSG_INCENDIARY;
+    newmis.classname = "pyro_rocket";
     setmodel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
