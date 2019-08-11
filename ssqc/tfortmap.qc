@@ -2314,7 +2314,6 @@ void () ReturnItem = {
     }
 
     if (self.enemy.mdl) {
-        bprint(PRINT_HIGH, "enemy mdl set\n");
         setmodel(self.enemy, self.enemy.mdl);
     }
 
