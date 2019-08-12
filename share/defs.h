@@ -1322,22 +1322,22 @@
 #define FO_HUD_INSERT_BEFORE	0
 #define FO_HUD_INSERT_AFTER	1
 
-#define ICON_CLIPSIZE "clipsize.png"
-#define ICON_FRAGSTREAK "fragstreak.png"
-#define ICON_CAPS "caps.png"
-#define ICON_IDENTIFY "identify.png"
-#define ICON_GREN1 "gren1.png"
-#define ICON_GREN2 "gren2.png"
-#define ICON_SCOUT "scout.png"
-#define ICON_SNIPER "sniper.png"
-#define ICON_SOLDIER "soldier.png"
-#define ICON_DEMOMAN "demoman.png"
-#define ICON_MEDIC "medic.png"
-#define ICON_HWGUY "hwguy.png"
-#define ICON_PYRO "pyro.png"
-#define ICON_SPY "spy.png"
-#define ICON_ENGINEER_SG "engineer_sg.png"
-#define ICON_ENGINEER_DISP "engineer_disp.png"
+#define ICON_CLIPSIZE "textures/wad/clipsize.png"
+#define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
+#define ICON_CAPS "textures/wad/caps.png"
+#define ICON_IDENTIFY "textures/wad/identify.png"
+#define ICON_GREN1 "textures/wad/gren1.png"
+#define ICON_GREN2 "textures/wad/gren2.png"
+#define ICON_SCOUT "textures/wad/scout.png"
+#define ICON_SNIPER "textures/wad/sniper.png"
+#define ICON_SOLDIER "textures/wad/soldier.png"
+#define ICON_DEMOMAN "textures/wad/demoman.png"
+#define ICON_MEDIC "textures/wad/medic.png"
+#define ICON_HWGUY "textures/wad/hwguy.png"
+#define ICON_PYRO "textures/wad/pyro.png"
+#define ICON_SPY "textures/wad/spy.png"
+#define ICON_ENGINEER_SG "textures/wad/engineer_sg.png"
+#define ICON_ENGINEER_DISP "textures/wad/engineer_disp.png"
 
 // stats
 // first 32 are reserved

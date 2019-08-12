@@ -125,7 +125,7 @@ typedef struct
 {
     string icon;
 } FO_Hud_Icons;
-FO_Hud_Icons HudIcons[16] = {
+FO_Hud_Icons HudIcons[28] = {
     {ICON_SCOUT},
     {ICON_SNIPER},
     {ICON_SOLDIER},
@@ -141,7 +141,19 @@ FO_Hud_Icons HudIcons[16] = {
     {ICON_CAPS},
     {ICON_IDENTIFY},
     {ICON_GREN1},
-    {ICON_GREN2}
+    {ICON_GREN2},
+    {"textures/wad/off_icon_glow_4.png"},
+    {"textures/wad/off_icon_glow_3.png"},
+    {"textures/wad/off_icon_glow_2.png"},
+    {"textures/wad/off_icon_glow_1.png"},
+    {"textures/wad/off_icon_glow_0.png"},
+    {"textures/wad/flag_4.png"},
+    {"textures/wad/flag_3.png"},
+    {"textures/wad/flag_2.png"},
+    {"textures/wad/flag_1.png"},
+    {"textures/wad/flag_0.png"},
+    {"textures/wad/num_percent.png"},
+    {"textures/wad/anum_percent.png"}
 };
 
 float team_no;
