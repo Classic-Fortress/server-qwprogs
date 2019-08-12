@@ -1,12 +1,12 @@
 ../csprogs.dat
 csdefs.qc
 csextradefs.qc
-//fteextensions.qc
 ../share/commondefs.qc
-
-
+../share/common_helpers.qc
 sui_sys.qc
 input.qc
 main.qc
+events.qc
 hud_helpers.qc
 hud.qc
+settings.qc

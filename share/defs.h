@@ -961,6 +961,9 @@
 #define PC_MEDIC_CELL_REGEN_PERCENT 10  // Percentage of max cells regenerated each cell regen.
 #define PC_MEDIC_CELL_REGEN_CD      5   // Seconds to cooldown cell regeneration after healing with medikit.
 #define PC_MEDIC_SAVEME_GRACE       5   // Seconds after which /saveme gives grace period to medikit (no cell regeneration cooldown)
+#define PC_MEDIC_AURA_ACTIVE    1
+#define PC_MEDIC_AURA_RECHARGING    2
+#define PC_MEDIC_AURA_OUTOFPOWER    3
 
 // Class Details for HVYWEAP
 #define PC_HVYWEAP_SKIN			2
@@ -1309,6 +1312,33 @@
 #define FO_HUD_GROW_LEFT	3
 #define FO_HUD_GROW_RIGHT	4
 
-#define FO_HUD_INSERT_AFTER		1
-#define FO_HUD_INSERT_BEFORE	1
-#define FO_HUD_CONFIG_PATH	"fortressone_hud.focfg"
+#define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"
+#define FO_CONFIG_PATH	"fortressone_csqc.cfg"
+
+#define HUD_ICON_SIZE_X   24
+#define HUD_ICON_SIZE_Y   24
+#define FO_HUD_CLIPSIZE_PANEL_X 125
+#define FO_HUD_CLIPSIZE_PANEL_Y 50
+#define FO_HUD_INSERT_BEFORE	0
+#define FO_HUD_INSERT_AFTER	1
+
+#define ICON_CLIPSIZE "clipsize.png"
+#define ICON_FRAGSTREAK "fragstreak.png"
+#define ICON_CAPS "caps.png"
+#define ICON_IDENTIFY "identify.png"
+#define ICON_GREN1 "gren1.png"
+#define ICON_GREN2 "gren2.png"
+#define ICON_SCOUT "scout.png"
+#define ICON_SNIPER "sniper.png"
+#define ICON_SOLDIER "soldier.png"
+#define ICON_DEMOMAN "demoman.png"
+#define ICON_MEDIC "medic.png"
+#define ICON_HWGUY "hwguy.png"
+#define ICON_PYRO "pyro.png"
+#define ICON_SPY "spy.png"
+#define ICON_ENGINEER_SG "engineer_sg.png"
+#define ICON_ENGINEER_DISP "engineer_disp.png"
+
+// stats
+// first 32 are reserved
+#define STAT_TEAMNO    33

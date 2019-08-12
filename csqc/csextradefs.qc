@@ -3,7 +3,6 @@
 .float owned_by;
 float fo_hud_editor;
 float jumptime;
-float fo_autohop;
 
 typedef struct
 {
@@ -12,6 +11,11 @@ typedef struct
 } MouseStruct;
 
 MouseStruct Mouse;
+
+typedef struct {
+    string filename;
+    vector colour;
+} HUDIcon;
 
 typedef struct {
     float id;
@@ -23,22 +27,127 @@ typedef struct {
     vector loc;
     string carrier;
     string locname;
+    HUDIcon icon;
 } FlagInfoLine;
 
 FlagInfoLine FlagInfoLines[10];
+
+// hud stuff
 
 typedef struct {
     vector Position;
     float GrowDirection;
     float NodeInsertLoc;
+    float Scale;
+    float Display;
 } FO_Hud_FlagIcon;
 
 typedef struct {
+    vector Position;
+    vector FillSize;
+    float Scale;
+    float Display;
+    float NodeInsertLoc;
+} FO_Hud_Panel;
+
+FO_Hud_Panel DrawPanel;
+FO_Hud_Panel NewPanel;
+
+typedef struct {
     FO_Hud_FlagIcon FlagIcon;
+    FO_Hud_Panel ClipSize;
+    FO_Hud_Panel FragStreak;
+    FO_Hud_Panel Caps;
+    FO_Hud_Panel Gren1;
+    FO_Hud_Panel Gren2;
+    FO_Hud_Panel PlayerClass;
+    FO_Hud_Panel Identify;
     vector MousePos;
 } FO_Hud_Settings;
-
 FO_Hud_Settings HudSettings;
+
+typedef struct {
+    float Autohop;
+} FO_Settings;
+FO_Settings Settings;
+
+typedef struct {
+    string ClipSize;
+    float FragStreak;
+    float Caps;
+    string Identify;
+    float PlayerClass;
+    float Gren1;
+    float Gren2;
+    // scout
+    float ScannerOn;
+    float ScannerRange;
+    float ScannerTeamNo;
+    float ScannerPlayerClass;
+    float ScannerTFItemsFlags;
+    // sniper
+    float SniperDam;
+    float SniperMax;
+    // demoman
+    float IsDetpacking;
+    float DetpackLeft;
+    // medic
+    float AuraActive;
+    float HealCount;
+    float HealAmount;
+    float AuraStatus;
+    // hwguy
+    float LockedCannon;
+    // spy
+    float IsUndercover;
+    float InvisOnly;
+    float UndercoverTeam;
+    float UndercoverSkin;
+    float UndercoverTimer;
+    float DisguiseTeam;
+    float QueueTeam;
+    float DisguiseSkin;
+    float QueueSkin;
+    // engineer
+    float IsBuilding;
+    float BuildingPercentage;
+    float HasSentry;
+    float SentryLevel;
+    float SentryHealth;
+    float SentryAmmoShells;
+    float SentryAmmoRockets;
+    float HasDispenser;
+    float DispenserHealth;
+} FO_SBAR;
+FO_SBAR SBAR;
+
+typedef struct 
+{
+    string icon;
+} FO_Hud_Icons;
+FO_Hud_Icons HudIcons[16] = {
+    {ICON_SCOUT},
+    {ICON_SNIPER},
+    {ICON_SOLDIER},
+    {ICON_DEMOMAN},
+    {ICON_MEDIC},
+    {ICON_HWGUY},
+    {ICON_PYRO},
+    {ICON_SPY},
+    {ICON_ENGINEER_SG},
+    {ICON_ENGINEER_DISP},
+    {ICON_CLIPSIZE},
+    {ICON_FRAGSTREAK},
+    {ICON_CAPS},
+    {ICON_IDENTIFY},
+    {ICON_GREN1},
+    {ICON_GREN2}
+};
+
+float team_no;
+
+vector FO_Hud_Icon_Size = [24, 24, 0];
+vector FO_Hud_Icon_Font_Size = [8, 8, 0];
 
 #pragma noref 1
 #pragma warning error Q101 /*too many parms*/

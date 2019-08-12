@@ -2103,18 +2103,24 @@ float (entity pl) WeaponReady = {
 }
 
 void () W_PrintWeaponMessage = {
-    if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if (self.weaponmode == GL_NORMAL)
-            sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
-        else if (cb_prematch)
-            sprint(self, PRINT_MEDIUM,
-                   "Pipebomb mode not available in prematch\n");
-        else if (self.weaponmode == GL_PIPEBOMB)
-            sprint(self, PRINT_MEDIUM, "Pipebomb mode\n");
-    } else if (self.current_weapon == WEAP_SNIPER_RIFLE)
-        sprint(self, PRINT_MEDIUM, "Sniper rifle ready\n");
-    else if (self.current_weapon == WEAP_AUTO_RIFLE)
-        sprint(self, PRINT_MEDIUM, "Sniper rifle on fully automatic mode\n");
+    switch (self.current_weapon)
+    {
+        case WEAP_GRENADE_LAUNCHER:
+            if (self.weaponmode == GL_NORMAL)
+                sprint(self, PRINT_HIGH, "Normal grenade mode\n");
+            else if (cb_prematch)
+                sprint(self, PRINT_HIGH,
+                    "Pipebomb mode not available in prematch\n");
+            else if (self.weaponmode == GL_PIPEBOMB)
+                sprint(self, PRINT_HIGH, "Pipebomb mode\n");
+            break;
+        case WEAP_SNIPER_RIFLE:
+            sprint(self, PRINT_HIGH, "Sniper rifle ready\n");
+            break;
+        case WEAP_AUTO_RIFLE:
+            sprint(self, PRINT_HIGH, "Sniper rifle on fully automatic mode\n");
+            break;
+    }
 };
 
 float (float weap) W_GetSlot = {
@@ -3399,7 +3405,10 @@ void () W_WeaponFrame = {
     if (cease_fire)
         return;
 
-    if (self.button0 && !self.fire_held_down) {
+    if (self.button0 
+        && (!self.fire_held_down 
+            || 
+            (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400) {

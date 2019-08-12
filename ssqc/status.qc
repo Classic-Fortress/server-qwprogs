@@ -1,13 +1,11 @@
 float (float tno) TeamFortress_TeamGetScore;
 float () TeamFortress_TeamGetWinner;
 float () TeamFortress_TeamGetSecond;
-string(float num) NumberToString1000;
-
 string(float num) BlueScoreToString;
 string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
-string(entity pl) ClipSizeToString;
+string(entity pl, float csqcactive) ClipSizeToString;
 float(entity pl) GetClipSize;
 string(entity pl) SniperPowerToString;
 string(entity pl) DetpackToString;
@@ -580,7 +578,7 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
 
 string getLocationName(vector location);
 
-void (entity Player, float index, entity Item) InitClientFlagStatus = {
+void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
     float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     if(csqcactive) {
         msg_entity = Player;
@@ -591,8 +589,39 @@ void (entity Player, float index, entity Item) InitClientFlagStatus = {
         WriteString(MSG_MULTICAST, Item.mdl);
         WriteFloat(MSG_MULTICAST, Item.skin);
         WriteFloat(MSG_MULTICAST, Item.owned_by);
-        multicast('0 0 0', MULTICAST_ONE_R); 
+        WriteFloat(MSG_MULTICAST, icon);
+        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
     }
+}
+float laststate;
+void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
+    WriteFloat(MSG_MULTICAST, Goal.goal_no);
+    if(Goal.goal_no == 11) {
+        if(Goal.goal_state != laststate) {
+            laststate = Goal.goal_state;
+        }
+    }
+    if(Goal.goal_state == TFGS_DELAYED) {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
+        WriteFloat(MSG_MULTICAST, rint(Goal.bubble_count - time));
+        //WriteFloat(MSG_MULTICAST, FLAGINFO_NOLOCATION);
+        WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
+        WriteCoord(MSG_MULTICAST, Goal.origin_x);
+        WriteCoord(MSG_MULTICAST, Goal.origin_y);
+        WriteCoord(MSG_MULTICAST, Goal.origin_z);
+        //WriteString(MSG_MULTICAST, getLocationName(Item.origin));
+        if(Goal.team_str_moved) {
+            WriteString(MSG_MULTICAST, Goal.team_str_moved);
+        } else {
+            WriteString(MSG_MULTICAST,"\sOffline\s");
+        }
+    } else {
+        WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
+    }
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);    
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
@@ -633,7 +662,7 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
             WriteFloat(MSG_MULTICAST, FLAGINFO_HOME);
         }
     }
-    multicast('0 0 0', MULTICAST_ONE); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
 float(entity playerent, float changedflags) SendClientFlagStatus = {
@@ -689,6 +718,218 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
     return st;
 }
 
+string GetSBClipString(entity pl, float csqcactive)
+{
+    string msg = "";
+    if (pl.tfstate & TFSTATE_RELOADING) 
+    {
+        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
+            msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
+        } else {
+            if (reload_cliptick)
+                msg = csqcactive ? ftos(pl.reload_clipsize) : strpadl(ftos(pl.reload_clipsize), 2);
+            else
+                msg = csqcactive ? "0" : " 0";
+
+            msg = strcat(msg, "/");
+            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl)) : strpadr(ftos(GetClipSize(pl)), 3)));
+        }
+    } 
+    else 
+    {
+        msg = ClipSizeToString(pl, csqcactive);
+    }
+
+    return msg;
+}
+
+string GetSBClassInfo(entity pl, float csqcactive)
+{
+    string st1 = "";
+    if (pl.playerclass == PC_SCOUT)
+        st1 = ScannerToString(pl);
+    else if (pl.playerclass == PC_SNIPER && (pl.tfstate & TFSTATE_AIMING))
+        st1 = SniperPowerToString(pl);
+    else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
+        st1 = DetpackToString(pl);
+    else if (pl.playerclass == PC_MEDIC)
+        st1 = AuraToString(pl);
+    else if (pl.playerclass == PC_HVYWEAP)
+        st1 = AssaultCannonToString(pl);
+    else if (pl.playerclass == PC_SPY)
+        st1 = DisguiseToString(pl);
+    else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
+        st1 = SentryDetailsToString(pl);
+    if (pl.playerclass == PC_ENGINEER && pl.is_building)
+        st1 = BuildingToString(pl);
+
+    return st1;
+}
+
+void UpdateClientStatusBar(entity pl)
+{
+    // if we ever change to fte only, this could be changed to stats
+    string msg = "";
+    msg_entity = pl;
+
+    string clipMsg = GetSBClipString(pl, TRUE);
+
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_SBAR);
+    WriteString(MSG_MULTICAST, clipMsg);
+    WriteFloat(MSG_MULTICAST, pl.fragstreak);
+    WriteFloat(MSG_MULTICAST, pl.caps);
+    // identify
+    if (pl.ident_string && time < pl.ident_time) {
+        WriteString(MSG_MULTICAST, pl.ident_string);
+    } else {
+        WriteString(MSG_MULTICAST, "");
+    }
+
+    WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
+    if (pl.playerclass)
+    {
+        WriteFloat(MSG_MULTICAST, pl.no_grenades_1);
+        WriteFloat(MSG_MULTICAST, pl.no_grenades_2);
+    }
+
+    // class info
+    switch (pl.playerclass)
+    {
+        case PC_SCOUT:
+            // off, on
+            WriteFloat(MSG_MULTICAST, pl.ScannerOn);
+            
+            if (pl.ScannerOn)
+            {
+                entity te;
+                te = find(world, netname, "scanner");
+                while ((te != world) && (te.owner != pl)) {
+                    te = find(te, netname, "scanner");
+                }
+                WriteFloat(MSG_MULTICAST, te.health); // range to person, 0 or less if no one
+                if (te.health)
+                {
+                    WriteFloat(MSG_MULTICAST, te.team_no);
+                    WriteFloat(MSG_MULTICAST, te.playerclass);
+                    WriteFloat(MSG_MULTICAST, te.tf_items_flags); // nothing, friendly, enemy
+                }
+            }
+            break;
+        case PC_SNIPER:
+            float dam, max;
+            dam = 0;
+            max = FALSE;
+            if (sniperpower)
+            {
+                dam = pl.heat;
+                max = pl.power_full;
+            }
+            
+            WriteFloat(MSG_MULTICAST, dam);
+            WriteFloat(MSG_MULTICAST, max);
+            break;
+        case PC_DEMOMAN:
+            WriteFloat(MSG_MULTICAST, pl.is_detpacking);
+            WriteFloat(MSG_MULTICAST, pl.detpack_left);
+            break;
+        case PC_MEDIC:
+            WriteFloat(MSG_MULTICAST, medicaura);
+
+            if (medicaura)
+            {
+                WriteFloat(MSG_MULTICAST, pl.aura_active);
+
+                if (pl.aura_active) 
+                {
+                    float c, a;
+                    c = (time < pl.aura_healtime) ? pl.aura_healcount : 0;
+                    a = (time < pl.aura_healtime) ? pl.aura_healamount : 0;
+                    WriteFloat(MSG_MULTICAST, c);
+                    WriteFloat(MSG_MULTICAST, a);
+                    // state
+                    float s = PC_MEDIC_AURA_ACTIVE;
+                    if (pl.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2))
+                    {
+                        s = PC_MEDIC_AURA_OUTOFPOWER;
+                    }
+                    else if (pl.ammo_cells < floor(PC_MEDIC_MAXAMMO_CELL * 0.95))
+                    {
+                        s = PC_MEDIC_AURA_RECHARGING;
+                    }
+                    WriteFloat(MSG_MULTICAST, s);
+                }
+            }
+            break;
+        case PC_HVYWEAP:
+            // ass can locked
+            float l = FALSE;
+            if (pl.tfstate & TFSTATE_LOCK)
+            {
+                l = TRUE;
+            }
+
+            WriteFloat(MSG_MULTICAST, l);
+            break;
+        case PC_SPY:
+            WriteFloat(MSG_MULTICAST, pl.is_undercover);
+            
+            if (pl.is_undercover == 1)
+            {
+                WriteFloat(MSG_MULTICAST, invis_only);
+                WriteFloat(MSG_MULTICAST, pl.undercover_team);
+                WriteFloat(MSG_MULTICAST, pl.undercover_skin);
+            }
+            else if (pl.is_undercover == 2)
+            {
+                WriteFloat(MSG_MULTICAST, invis_only);
+                WriteFloat(MSG_MULTICAST, pl.undercover_timer);
+                WriteFloat(MSG_MULTICAST, pl.undercover_team);
+                WriteFloat(MSG_MULTICAST, pl.disguise_team);
+                WriteFloat(MSG_MULTICAST, pl.queue_team);
+                WriteFloat(MSG_MULTICAST, pl.undercover_skin);
+                WriteFloat(MSG_MULTICAST, pl.disguise_skin);
+                WriteFloat(MSG_MULTICAST, pl.queue_skin);
+            }
+            break;
+        case PC_ENGINEER:
+            // building status??
+            WriteFloat(MSG_MULTICAST, pl.is_building);
+            if (pl.is_building)
+            {
+                WriteFloat(MSG_MULTICAST, pl.building_percentage);
+            }
+
+            WriteFloat(MSG_MULTICAST, pl.has_sentry);
+            if (pl.has_sentry)
+            {
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.weapon); // level
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.health);
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.ammo_shells);
+                WriteFloat(MSG_MULTICAST, pl.sentry_ent.ammo_rockets);
+                
+            }
+
+            WriteFloat(MSG_MULTICAST, pl.has_dispenser);
+            if (pl.has_dispenser)
+            {
+                entity disp;
+                disp = find(world, classname, "building_dispenser");
+                while (disp)
+                {
+                    if (disp.real_owner == pl)
+                    {
+                        WriteFloat(MSG_MULTICAST, disp.health);
+                    }
+                    disp = find(disp, classname, "building_dispenser");
+                }
+            }
+            break;
+    }
+
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void (entity pl) RefreshStatusBar = {
     local string pad;
     local string s1; // will be used for grenade timers
@@ -702,10 +943,11 @@ void (entity pl) RefreshStatusBar = {
     local entity tfdet;  //info_tfdetect entity
     local entity te, tg;
     local string bi; //button info
+    local float csqcactive;
     //By default, show after tips; 0/off = off; 2 = always
     local float sbflaginfostate = FO_GetUserSetting(pl, "sbflaginfo", "sbflaginfo", "on"); 
-    /* local float win, sec; */
-
+    tfdet = find(world, classname, "info_tfdetect");
+   
     pad = "";
 
     if (pl.StatusStringLines > 0 && pl.StatusStringTime <= time && !pl.menu_input) {
@@ -731,43 +973,58 @@ void (entity pl) RefreshStatusBar = {
         pad = strcat(pad, "\n");
     pad = strzone(pad);
 
+    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+
     // class tip
     if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
-        tfdet = find(world, classname, "info_tfdetect");
 
-        float csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
         // we get flag info from tfdetect
-        if (!tfdet || (!sbflaginfostate && !csqcactive))
+        if (!tfdet || !sbflaginfostate)
         {
             ct = strzone("\n\n\n\n\n\n");
         }
         else if (csqcactive) // has csqc
         {
-            for (float t = 1; t <= number_of_teams; t++) 
-            {
-                switch (t)
-                {
-                    case 1:
-                        te = Finditem(tfdet.display_item_status1);
-                        break;
-                    case 2:
-                        te = Finditem(tfdet.display_item_status2);
-                        break;
-                    case 3:
-                        te = Finditem(tfdet.display_item_status3);
-                        break;
-                    case 4:
-                        te = Finditem(tfdet.display_item_status4);
-                        break;
-                }
+            //pl.StatusRefreshTime = time + 1;
+            UpdateClientStatusBar(pl);
 
-                if (te)
+            // flag info
+            if (tfdet)
+            {
+                for (float t = 1; t <= number_of_teams; t++) 
                 {
-                    UpdateClientFlagStatus(pl, te);
+                    switch (t)
+                    {
+                        case 1:
+                            te = Finditem(tfdet.display_item_status1);
+                            break;
+                        case 2:
+                            te = Finditem(tfdet.display_item_status2);
+                            break;
+                        case 3:
+                            te = Finditem(tfdet.display_item_status3);
+                            break;
+                        case 4:
+                            te = Finditem(tfdet.display_item_status4);
+                            break;
+                    }
+
+                    if (te)
+                    {
+                        UpdateClientFlagStatus(pl, te);
+                    }
                 }
+            }
+
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.track_goal) {
+                    UpdateClientButtonStatus(pl, tg);
+                }
+                tg = find(tg, classname, "info_tfgoal");
             }
         }
         else // no csqc but has sbflaginfo on
@@ -811,7 +1068,7 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(world, classname, "info_tfgoal");
             while (tg) {
-                if (tg.track_goal && tg.goal_state == TFGS_DELAYED && i < 6) {
+                if (tg.track_goal && i < 6 && tg.goal_state == TFGS_DELAYED) {
                     bi = "";
                     //only do this for named goals, otherwise there's no way to distinguish them (they don't ususally have owned_by or anything)
                     if(tg.netname) {
@@ -836,116 +1093,80 @@ void (entity pl) RefreshStatusBar = {
         }
     }
 
-    // status line 1 column 1 - grenade timer
-    if (pl.StatusGrenTime > 0) {
-        st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
-        if (pl.fragstreak > 1 && pl.caps)
-            st1 = strcat(st1, " sec");
-        else
-            st1 = strcat(st1, " seconds");
-    } else
-        st1 = "";
-    // status line 1 column 3 - kill streak & caps
-    if (pl.fragstreak > 1) {
-        st2 = Q"\sKill Streak\s: ";
-        st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
-    } else
-        st2 = "";
-    if (pl.caps) {
-        if (pl.fragstreak > 1)
-            st2 = strcat(st2, "  ");
-        st3 = Q"\sCaps\s: ";
-        st3 = strcat(st3, strpadl(ftos(pl.caps),2));
-    } else
-        st3 = "";
-    st2 = strcat(st2, st3);
-    // status line 1
-    if (pl.fragstreak > 1 && pl.caps) {
-        st2 = strpadl(st2, 25);
-        s1 = strpadr(st1, 15);
-    } else {
-        st2 = strpadl(st2, 20);
-        s1 = strpadr(st1, 20);
-    }
-    s1 = strcat(s1, st2);
-    s1 = strcat(s1, "\n");
-    s1 = strzone(s1);
-
-    // status line 2 column 1 - class specific information
-    st1 = "";
-    if (pl.playerclass == PC_SCOUT)
-        st1 = ScannerToString(pl);
-    else if (pl.playerclass == PC_SNIPER && (pl.tfstate & TFSTATE_AIMING))
-        st1 = SniperPowerToString(pl);
-    else if (pl.playerclass == PC_DEMOMAN && pl.detpack_left)
-        st1 = DetpackToString(pl);
-    else if (pl.playerclass == PC_MEDIC)
-        st1 = AuraToString(pl);
-    else if (pl.playerclass == PC_HVYWEAP)
-        st1 = AssaultCannonToString(pl);
-    else if (pl.playerclass == PC_SPY)
-        st1 = DisguiseToString(pl);
-    else if (pl.playerclass == PC_ENGINEER && pl.has_sentry)
-        st1 = SentryDetailsToString(pl);
-    if (pl.playerclass == PC_ENGINEER && pl.is_building)
-        st1 = BuildingToString(pl);
-    // status line 2
-    s2 = strpadr(st1, 40);
-    s2 = strcat(s2, "\n");
-    s2 = strzone(s2);
-
-    st1 = "";
-    st2 = "";
-
-    // status line 3 column 2 - clip size
-    if (pl.tfstate & TFSTATE_RELOADING) {
-        st2 = Q"\sClip\s: ";
-        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            st2 = strcat(st2, strpadl(ftos(25 * pl.reload_sniper_ticks), 3));
-            st2 = strcat(st2, "%  ");
-        } else {
-            if (reload_cliptick)
-                st2 = strcat(st2, strpadl(ftos(pl.reload_clipsize), 2));
+    if (!csqcactive)
+    {
+        // status line 1 column 1 - grenade timer
+        if (pl.StatusGrenTime > 0) {
+            st1 = strcat(Q"\sGrenade\s: ", ftos(pl.StatusGrenTime));
+            if (pl.fragstreak > 1 && pl.caps)
+                st1 = strcat(st1, " sec");
             else
-                st2 = strcat(st2, " 0");
-            st2 = strcat(st2, "/");
-            st2 = strcat(st2, strpadr(ftos(GetClipSize(pl)), 3));
+                st1 = strcat(st1, " seconds");
+        } else
+            st1 = "";
+        // status line 1 column 3 - kill streak & caps
+        if (pl.fragstreak > 1) {
+            st2 = Q"\sKill Streak\s: ";
+            st2 = strcat(st2, strpadl(ftos(pl.fragstreak),2));
+        } else
+            st2 = "";
+        if (pl.caps) {
+            if (pl.fragstreak > 1)
+                st2 = strcat(st2, "  ");
+            st3 = Q"\sCaps\s: ";
+            st3 = strcat(st3, strpadl(ftos(pl.caps),2));
+        } else
+            st3 = "";
+        st2 = strcat(st2, st3);
+        // status line 1
+        if (pl.fragstreak > 1 && pl.caps) {
+            st2 = strpadl(st2, 25);
+            s1 = strpadr(st1, 15);
+        } else {
+            st2 = strpadl(st2, 20);
+            s1 = strpadr(st1, 20);
         }
-    } else {
-        st2 = ClipSizeToString(pl);
+        s1 = strcat(s1, st2);
+        s1 = strcat(s1, "\n");
+        s1 = strzone(s1);
+
+        // status line 2 column 1 - class specific information
+        st1 = GetSBClassInfo(pl, csqcactive);
+        
+        // status line 2
+        s2 = strpadr(st1, 40);
+        s2 = strcat(s2, "\n");
+        s2 = strzone(s2);
+
+        st1 = "";
+        st2 = "";
+
+        // status line 3 column 2 - clip size
+        st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
+
+        // status line 3 column 3 - grenade 1 count
+        st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
+
+        // status line 3 column 4 - grenade 2 count
+        st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
+
+        // status line 3
+        s3 = strcat(st1, st2);
+        s3 = strpadr(s3, 19);
+        s3 = strcat(s3, strpadl(strcat(st3, strcat("  ", st4)), 21));
+        s3 = strcat(s3, "\n");
+        s3 = strzone(s3);
+
+        // identify
+        if (pl.ident_string != string_null && time < pl.ident_time) {
+            ident = strcat(pl.ident_string, "\n\n");
+        } else {
+            ident = "\n\n\n\n";
+        }
     }
-
-    // status line 3 column 3 - grenade 1 count
-    st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
-
-    // status line 3 column 4 - grenade 2 count
-    st4 = strcat(Q"\sGren2\s: ", ftos(pl.no_grenades_2));
-
-    // status line 3
-    s3 = strcat(st1, st2);
-    s3 = strpadr(s3, 19);
-    s3 = strcat(s3, strpadl(strcat(st3, strcat("  ", st4)), 21));
-    s3 = strcat(s3, "\n");
-    s3 = strzone(s3);
-
-    // identify
-    if (pl.ident_string != string_null && time < pl.ident_time) {
-        ident = strcat(pl.ident_string, "\n\n");
-    } else {
-        ident = "\n\n\n\n";
-    }
-
     centerprint(pl, pl.StatusString, pad, ident, ct, s1, s2, s3);
     pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(ct); strunzone(s1); strunzone(s2); strunzone(s3);
-};
-
-string(float num) NumberToString1000 =
-{
-    if (num > 999)
-        return "999";
-
-    return strpadl(ftos(floor(num)), 3);
 };
 
 string(float num) BlueScoreToString =
@@ -980,9 +1201,9 @@ string(float num) GreenScoreToString =
     return strcat(Q"\sGren\s:", strpadl(ftos(floor(num)), 3));
 };
 
-string(entity pl) ClipSizeToString =
+string(entity pl, float csqcactive) ClipSizeToString =
 {
-    local string st;
+    local string st = "";
     local float num, max;
 
     max = GetClipSize(pl);
@@ -1021,10 +1242,19 @@ string(entity pl) ClipSizeToString =
     if (num > 999)
         num = 999;
 
-    st = Q"\sClip\s: ";
-    st = strcat(st, strpadl(ftos(floor(num)), 2));
-    st = strcat(st, "/");
-    st = strcat(st, strpadr(ftos(max), 3));
+    if (csqcactive)
+    {
+        st = strcat(ftos(floor(num)), "/", ftos(max));
+    }
+    else
+    {
+        st = Q"\sClip\s: ";
+        st = strcat(st, strpadl(ftos(floor(num)), 2));
+        st = strcat(st, "/");
+        st = strcat(st, strpadr(ftos(max), 3));
+    }
+    
+    
 
     return st;
 };
@@ -1056,33 +1286,6 @@ float GetClipSize(entity pl)
             return 0;
     }
 }
-
-string(float num) TeamToString =
-{
-    if (num == 1) return "Blue";
-    if (num == 2) return "Red";
-    if (num == 3) return "Yellow";
-    if (num == 4) return "Green";
-    return " ";
-};
-
-string(float num) ClassToString =
-{
-    if (num == 1) return "Scout";
-    if (num == 2) return "Sniper";
-    if (num == 3) return "Soldier";
-    if (num == 4) return "Demoman";
-    if (num == 5) return "Medic";
-    if (num == 6) return "HWGuy";
-    if (num == 7) return "Pyro";
-    if (num == 8) return "Spy";
-    if (num == 9) return "Engineer";
-    if (num == 11) return "Civilian";
-    if (num == 13) return "Sentry Gun";
-    if (num == 14) return "Goal Item";
-    return "";
-};
-
 
 string(entity pl) DisguiseToString =
 {
@@ -1254,17 +1457,18 @@ string(entity pl) ScannerToString =
     local string range = "";
     local float pad;
 
+    st = Q"\sScanner\s: ";
+
+    if (pl.ScannerOn != TRUE) {
+        return strcat(st, "off");
+    }
+
     te = find(world, netname, "scanner");
     while ((te != world) && (te.owner != pl)) {
         te = find(te, netname, "scanner");
     }
 
-    if (pl.ScannerOn != 1) {
-        return Q"\sScanner\s: off";
-    }
-
     if (te.health > 0) {
-        st = Q"\sScanner\s: ";
         st = strcat(st, TeamToString(te.team_no));
         st = strcat(st, " ");
         st = strcat(st, ClassToString(te.playerclass));
@@ -1275,7 +1479,7 @@ string(entity pl) ScannerToString =
         st = strpadr(st, pad);
         st = strcat(st, range);
     } else {
-        st = Q"\sScanner\s: on";
+        st = strcat(st, "on");
         st = strcat(st, Q"  \sScanning\s: ");
 
         if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
