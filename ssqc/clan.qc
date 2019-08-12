@@ -166,7 +166,8 @@ void () StartMatch =
         }
     }
     if (duelmode) {
-        ResetPlayers();
+        //ResetPlayers();
+        CountMatchPlayersAndReset();
     }
 };
 
@@ -852,7 +853,7 @@ float () CheckAllPlayersReady = {
         
     f1 = TeamFortress_GetNoPlayers ();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
-    if (v_ready == f1 ) {
+    if (v_ready == f1 && v_ready > 0) {
         if(cease_fire) {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
