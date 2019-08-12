@@ -1292,61 +1292,6 @@ void () TeamFortress_SetHealth = {
     self.health = self.max_health;
 };
 
-float (float pc) TeamFortress_GetMaxHealth = {
-    if (pc == PC_SCOUT) {
-        if (old_hp_armor)
-            return 75;
-        else
-            return PC_SCOUT_MAXHEALTH;
-    } else if (pc == PC_SNIPER) {
-        if (old_hp_armor)
-            return 90;
-        else
-            return PC_SNIPER_MAXHEALTH;
-    } else if (pc == PC_SOLDIER) {
-        if (old_hp_armor)
-            return 100;
-        else
-            return PC_SOLDIER_MAXHEALTH;
-    } else if (pc == PC_DEMOMAN) {
-        if (old_hp_armor)
-            return 90;
-        else
-            return PC_DEMOMAN_MAXHEALTH;
-    } else if (pc == PC_MEDIC) {
-        if (old_hp_armor)
-            return 90;
-        else
-            return PC_MEDIC_MAXHEALTH;
-    } else if (pc == PC_HVYWEAP) {
-        if (old_hp_armor)
-            return 100;
-        else
-            return PC_HVYWEAP_MAXHEALTH;
-    } else if (pc == PC_PYRO) {
-        if (old_hp_armor)
-            return 100;
-        else
-            return PC_PYRO_MAXHEALTH;
-    } else if (pc == PC_CIVILIAN) {
-        if (old_hp_armor)
-            return 50;
-        else
-            return PC_CIVILIAN_MAXHEALTH;
-    } else if (pc == PC_SPY) {
-        if (old_hp_armor)
-            return 90;
-        else
-            return PC_SPY_MAXHEALTH;
-    } else if (pc == PC_ENGINEER) {
-        if (old_hp_armor)
-            return 80;
-        else
-            return PC_ENGINEER_MAXHEALTH;
-    }
-    return 1;
-};
-
 string (float tn) TeamFortress_GetColorSkin = {
     string s;
     s = "";
