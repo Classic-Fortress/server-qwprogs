@@ -14,10 +14,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     precache_model("progs/weapons/v_rock.mdl");
 
-	for (float i = 0; i < HudIcons.length; i++)
-	{
-		precache_pic(HudIcons[i].icon);
-	}
+	precache_file("fo_hud.pk3");
 
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
