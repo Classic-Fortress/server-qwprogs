@@ -2107,18 +2107,18 @@ void () W_PrintWeaponMessage = {
     {
         case WEAP_GRENADE_LAUNCHER:
             if (self.weaponmode == GL_NORMAL)
-                sprint(self, PRINT_HIGH, "Normal grenade mode\n");
+                sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
             else if (cb_prematch)
-                sprint(self, PRINT_HIGH,
+                sprint(self, PRINT_MEDIUM,
                     "Pipebomb mode not available in prematch\n");
             else if (self.weaponmode == GL_PIPEBOMB)
-                sprint(self, PRINT_HIGH, "Pipebomb mode\n");
+                sprint(self, PRINT_MEDIUM, "Pipebomb mode\n");
             break;
         case WEAP_SNIPER_RIFLE:
-            sprint(self, PRINT_HIGH, "Sniper rifle ready\n");
+            sprint(self, PRINT_MEDIUM, "Sniper rifle ready\n");
             break;
         case WEAP_AUTO_RIFLE:
-            sprint(self, PRINT_HIGH, "Sniper rifle on fully automatic mode\n");
+            sprint(self, PRINT_MEDIUM, "Sniper rifle on fully automatic mode\n");
             break;
     }
 };
