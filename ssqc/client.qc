@@ -2397,6 +2397,23 @@ void (optional float csqcactive) ClientConnect = {
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
 
+void () CountMatchPlayersAndReset = {
+    local float playersleft = 0;
+    local entity te = find (world, classname, "player");
+    while (te) {
+        if (!te.has_disconnected) {
+            playersleft = playersleft + 1;
+        }
+        te = find (te, classname, "player");
+    }
+    if (!playersleft) {
+        bprint(PRINT_HIGH, "Match \sabandoned\s, resetting to prematch\n");
+        InitPrematch();
+    } else if(CountRemainingTeams() < 2) {
+        ResetPlayersWithCountdown();
+    }
+}
+
 void () ClientDisconnect = {
     local string st;
     local float fr;
@@ -2411,21 +2428,7 @@ void () ClientDisconnect = {
 
     if (duelmode && clanbattle && !cb_prematch) {
         //In duelmode, reset back to prematch if everyone leaves half-way through a round
-        local float playersleft = 0;
-        local entity te = find (world, classname, "player");
-        while (te) {
-            if (!te.has_disconnected) {
-                playersleft = playersleft + 1;
-            }
-            te = find (te, classname, "player");
-        }
-        if (!playersleft) {
-            bprint(PRINT_HIGH, "Match \sabandoned\s, resetting to prematch\n");
-            InitPrematch();
-        } else if(CountRemainingTeams() < 2) {
-            ResetPlayersWithCountdown();
-        }
-
+        CountMatchPlayersAndReset();
     }
     set_suicide_frame();
     self.netname = string_null;
