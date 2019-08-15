@@ -1132,8 +1132,19 @@ void () Menu_Admin =
             break;
         case ADMIN_MENU_TYPE_QUAD_ROUNDTL:
             s_menu1 = "Round Time Input Menu:               \n\n";
-            s_menu1 = strcat(s_menu1, "Enter a number between 1 and 10      \n");
-            s_menu1 = strcat(s_menu1, "\n\n");
+            //s_menu1 = strcat(s_menu1, "Enter a number between 1 and 10      \n");
+            //s_menu1 = strcat(s_menu1, "\n\n");
+            
+            s_menu1 = strcat(s_menu1, Q"\s[1]\s 1 minute                     \n");
+            s_menu1 = strcat(s_menu1, Q"\s[2]\s 5 minutes                    \n");
+            s_menu1 = strcat(s_menu1, Q"\s[3]\s 10 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[4]\s 25 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[5]\s 20 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[6]\s 25 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[7]\s 30 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[8]\s 35 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[9]\s 45 minutes                   \n");
+            s_menu1 = strcat(s_menu1, Q"\s[0]\s 60 minutes                   \n");
 
             Status_Menu(self, Menu_Admin_Input, s_menu1);
             break;
@@ -1604,9 +1615,21 @@ void (float inp) Menu_Admin_Input =
     else if (self.current_menu_type == ADMIN_MENU_TYPE_QUAD_ROUNDTL)
     {
         local string d;
-        d = strcat("localinfo round_time ", ftos(inp), "\n");
+        local float rt = (inp - 1) * 5;
+        switch(inp) {
+            case 1:
+                rt = 1;
+                break;
+            case 9:
+                rt = 45;
+                break;
+            case 10:
+                rt = 60;
+                break;
+        }
+        d = strcat("localinfo round_time ", ftos(rt), "\n");
         localcmd(d);
-        bprint(2, "Quad Round Timelimit changed to ", ftos(inp), "\n");
+        bprint(2, "Quad Round Timelimit changed to ", ftos(rt), "\n");
         self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
         self.current_menu_page = 1;
         Menu_Admin();
