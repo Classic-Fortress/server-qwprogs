@@ -320,7 +320,7 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
 
     vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
-    drawpic(pos, icon, size, '1 1 1', 1, 1);
+    drawpic(pos, icon, size, '1 1 1', 1, 0);
 
     float len;
     len = strlen(val);

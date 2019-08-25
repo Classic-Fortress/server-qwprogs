@@ -239,7 +239,7 @@ void Hud_DrawFlagStatusBar(float width)
 			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - sizex * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 1);
+            drawpic([pos_x, pos_y - sizex * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
@@ -286,7 +286,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         string msg = "";
 
         icon = HudIcons[playerclass-1].icon;
-        drawpic(pos, icon, size, '1 1 1', 1, 1);
+        drawpic(pos, icon, size, '1 1 1', 1, 0);
 
         float len = 0, offset = 0;
         
@@ -446,7 +446,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 pos = [pos_x, pos_y - size_y - 2];
                 basepos = pos;
                 icon = HudIcons[playerclass].icon;
-                drawpic(pos, icon, size, '1 1 1', 1, 1);
+                drawpic(pos, icon, size, '1 1 1', 1, 0);
                 if (SBAR.HasDispenser)
                 {
                     msg = strcat("H: ", ftos(SBAR.DispenserHealth));
