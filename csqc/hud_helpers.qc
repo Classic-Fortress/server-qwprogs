@@ -15,7 +15,7 @@ vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
 void Hud_WriteCfg(string path);
-void GetDrawPanel(string id);
+float GetDrawPanel(string id);
 void SetDrawPanel(string id);
 
 void FO_Hud_Editor()
@@ -53,22 +53,23 @@ float(string id, vector pos, vector size, string text) hud_button =
 vector UpdatePos(string id, vector mousepos)
 {
     vector pos;
-    switch (id)
-    {
-        case "flagiconpanel":
-            if (HudSettings.MousePos != [0, 0])
-            {
-                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
-                HudSettings.FlagIcon.Position = pos;
-            }
-            break;
-        default:
+//    switch (id)
+//    {
+//        case "flagiconpanel":
+//            if (HudSettings.MousePos != [0, 0])
+//            {
+//                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
+//                HudSettings.FlagIcon.Position = pos;
+//            }
+//            break;
+
+//        default:
             GetDrawPanel(id);
             pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
             DrawPanel.Position = pos;
             SetDrawPanel(id);
-            break;
-    }
+//            break;
+//    }
 
     return pos;
 }
@@ -79,6 +80,7 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
 
     if (fo_hud_editor)
     {
+        sui_border_box(pos, size, 1, MENU_BORDER, 0.4, 0);
         if (sui_is_last_clicked(id))
         {
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
@@ -104,15 +106,15 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
         }
     }
 
-	sui_push_frame(pos, size);
-    
-	sui_fill([0, 0], size, basecolor, alpha, 0);
-    
-	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-	sui_action_element([0, 0], size, id, sui_noop);
-	sui_pop_frame();
-	
-	return sui_is_clicked(id);
+    sui_push_frame(pos, size);
+
+    sui_fill([0, 0], size, basecolor, alpha, 0);
+
+    sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+    sui_action_element([0, 0], size, id, sui_noop);
+    sui_pop_frame();
+
+    return sui_is_clicked(id);
 };
 
 // this draws backwards, haven't bothered to change as we don't use it
@@ -229,6 +231,7 @@ void FO_Hud_Editor_LoadSettings()
 
                 switch(field)
                 {
+/*
                     case "hudflagicon.position":
                         count = tokenizebyseparator(val, ",");
                         x = stof(argv(0));
@@ -247,6 +250,7 @@ void FO_Hud_Editor_LoadSettings()
                     case "hudflagicon.display":
                         HudSettings.FlagIcon.Display = stof(val);
                         break;
+*/
                     default:
                         count = tokenizebyseparator(field, ".");
                         string pnl;
@@ -287,7 +291,7 @@ void FO_Hud_Editor_LoadSettings()
     }    
 }
 
-void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc)
+void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc, string name)
 {
     FO_Hud_Panel pnl;
 
@@ -296,6 +300,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
     pnl.Scale = scale;
     pnl.Display = display;
     pnl.NodeInsertLoc = nodeInsertLoc;
+    pnl.Name = name;
 
     NewPanel = pnl;
 }
@@ -303,7 +308,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 // draws value string using lmps
 void Hud_DrawPanelLMP(string id, string val, string icon)
 {
-    if (!DrawPanel.Display)
+    if (!DrawPanel.Display && !fo_hud_editor)
         return;
 
     vector pos;
@@ -320,7 +325,7 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
 
     vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
-    drawpic(pos, icon, size, '1 1 1', 1, 1);
+    drawpic(pos, icon, size, '1 1 1', 1, 0);
 
     float len;
     len = strlen(val);

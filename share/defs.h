@@ -1322,6 +1322,17 @@
 #define FO_HUD_INSERT_BEFORE	0
 #define FO_HUD_INSERT_AFTER	1
 
+#define FO_HUD_CLIPSIZE_NAME "Clip Size"
+#define FO_HUD_FRAGSTREAK_NAME "Frag Streak"
+#define FO_HUD_CAPS_NAME "Caps"
+#define FO_HUD_IDENTIFY_NAME "ID"
+#define FO_HUD_GREN1_NAME "Gren 1"
+#define FO_HUD_GREN2_NAME "Gren 2"
+#define FO_HUD_SPECIAL_NAME "Class Special"
+#define FO_HUD_GRENTIMER_NAME "Grenade Timer"
+#define FO_HUD_OPTIONS_NAME "Options"
+#define FO_HUD_FLAGINFO_NAME "Flag Status"
+
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
 #define ICON_CAPS "textures/wad/caps.png"
@@ -1338,6 +1349,16 @@
 #define ICON_SPY "textures/wad/spy.png"
 #define ICON_ENGINEER_SG "textures/wad/engineer_sg.png"
 #define ICON_ENGINEER_DISP "textures/wad/engineer_disp.png"
+#define ICON_SECURITY_BUTTON_ANY "textures/wad/off_icon_glow_0.png"
+#define ICON_SECURITY_BUTTON_BLUE "textures/wad/off_icon_glow_1.png"
+#define ICON_SECURITY_BUTTON_RED "textures/wad/off_icon_glow_2.png"
+#define ICON_SECURITY_BUTTON_YELLOW "textures/wad/off_icon_glow_3.png"
+#define ICON_SECURITY_BUTTON_GREEN "textures/wad/off_icon_glow_4.png"
+#define ICON_FLAG_ANY "textures/wad/flag_0.png"
+#define ICON_FLAG_BLUE "textures/wad/flag_1.png"
+#define ICON_FLAG_RED "textures/wad/flag_2.png"
+#define ICON_FLAG_YELLOW "textures/wad/flag_3.png"
+#define ICON_FLAG_GREEN "textures/wad/flag_4.png"
 
 // stats
 // first 32 are reserved
