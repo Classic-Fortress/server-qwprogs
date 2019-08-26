@@ -1248,8 +1248,7 @@ string(entity pl, float csqcactive) ClipSizeToString =
     }
     else
     {
-        st = Q"\sClip\s: ";
-        st = strcat(st, strpadl(ftos(floor(num)), 2));
+        st = strpadl(ftos(floor(num)), 2);
         st = strcat(st, "/");
         st = strcat(st, strpadr(ftos(max), 3));
     }
