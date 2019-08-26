@@ -231,17 +231,17 @@ void () PreMatch_Think = {
                     calltimeofday();
 
                     localcmd("record \"");
-                    localcmd(ftos (tod_day)); // day
+                    localcmd(tod_year); // year
                     localcmd("-");
-                    localcmd(ftos (tod_mon)); // month
+                    localcmd(tod_mon); // month
                     localcmd("-");
-                    localcmd(ftos (tod_year)); // year
+                    localcmd(tod_day); // day
                     localcmd("_");
-                    localcmd(ftos (tod_hour)); // hour
+                    localcmd(tod_hour); // hour
                     localcmd("-");
-                    localcmd(ftos (tod_min)); // minute
+                    localcmd(tod_min); // minute
                     localcmd("-");
-                    localcmd(ftos (tod_sec)); // second
+                    localcmd(tod_sec); // second
 
                     localcmd("_[");
                     localcmd(mapname);
