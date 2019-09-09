@@ -435,11 +435,16 @@ void() calltimeofday						                        = #231;  // force server to ca
 
 
 //In order to make it more useful, this header includes a timeofday function which just grabs the values for you to use in your qc code straight after calling calltimeofday.
-float tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;
+string tod_sec, tod_min, tod_hour, tod_day, tod_mon, tod_year;
 
 //This function is to facilitate use, and need not be modified.
+string zeropad(float val)
+{
+    return (val < 10 ? strcat("0", ftos(val)) : ftos(val));
+}
+
 void(float s, float mi, float h, float d, float mo, float y, string tmp_timeofday) timeofday =
-{ tod_sec = s; tod_min = mi; tod_hour = h; tod_day = d; tod_mon = (mo + 1); tod_year = y; };
+{ tod_sec = zeropad(s); tod_min = zeropad(mi); tod_hour = zeropad(h); tod_day = zeropad(d); tod_mon = zeropad((mo + 1)); tod_year = zeropad(y); };
 
 //============================================================================
 
