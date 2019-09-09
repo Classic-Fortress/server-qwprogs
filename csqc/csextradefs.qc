@@ -126,15 +126,6 @@ typedef struct {
 FlagInfoLine FlagInfoLines[10];
 
 // hud stuff
-/*
-typedef struct {
-    vector Position;
-    float GrowDirection;
-    float NodeInsertLoc;
-    float Scale;
-    float Display;
-} FO_Hud_FlagIcon;
-*/
 typedef struct {
     string id;
     string Name;
@@ -149,20 +140,9 @@ typedef struct {
 
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
-FO_Hud_Panel Editor_SelectedPanel;
 float Editor_SelectedPanel_Index;
 
 typedef struct {
-//    FO_Hud_FlagIcon FlagIcon;
-//    FO_Hud_Panel ClipSize;
-//    FO_Hud_Panel FragStreak;
-//    FO_Hud_Panel Caps;
-//    FO_Hud_Panel Gren1;
-//    FO_Hud_Panel Gren2;
-//    FO_Hud_Panel PlayerClass;
-//    FO_Hud_Panel Identify;
-//    FO_Hud_Panel GrenTimer;
-//    FO_Hud_Panel HudOptions;
     vector MousePos;
 } FO_Hud_Settings;
 

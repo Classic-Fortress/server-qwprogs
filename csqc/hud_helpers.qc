@@ -253,26 +253,7 @@ void FO_Hud_Editor_LoadSettings()
 
                 switch(field)
                 {
-/*
-                    case "hudflagicon.position":
-                        count = tokenizebyseparator(val, ",");
-                        x = stof(argv(0));
-                        y = stof(argv(1));
-                        HudSettings.FlagIcon.Position = [x, y];
-                        break;
-                    case "hudflagicon.scale":
-                        HudSettings.FlagIcon.Scale = stof(val);
-                        break;
-                    case "hudflagicon.growdirection":
-                        HudSettings.FlagIcon.GrowDirection = stof(val);
-                        break;
-                    case "hudflagicon.nodeinsertloc":
-                        HudSettings.FlagIcon.NodeInsertLoc = stof(val);
-                        break;
-                    case "hudflagicon.display":
-                        HudSettings.FlagIcon.Display = stof(val);
-                        break;
-*/
+
                     default:
                         count = tokenizebyseparator(field, ".");
                         string pnl;

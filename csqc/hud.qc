@@ -7,43 +7,6 @@ float GetDrawPanel(string id)
         }
     }
     return -1;
-/*    
-    switch (id)
-    {
-        //case "hudclipsize":
-        case "clipsizepanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_CLIPSIZE];
-            break;    
-        //case "hudfragstreak":
-        case "fragstreakpanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_FRAGSTREAK];
-            break;
-        //case "hudcaps":
-        case "capspanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_CAPS];
-            break;
-        //case "hudgren1":
-        case "gren1panel":
-            DrawPanel = Hud_Panels[HUD_PANEL_GREN1];
-            break;
-        //case "hudgren2":
-        case "gren2panel":
-            DrawPanel = Hud_Panels[HUD_PANEL_GREN2];
-            break;
-        //case "hudplayerclass":
-        case "playerclasspanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_PLAYERCLASS];
-            break;
-        //case "hudidentify":
-        case "identifypanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_IDENTIFY];
-            break;
-        //case "hudoptions":
-        case "hudoptionspanel":
-            DrawPanel = Hud_Panels[HUD_PANEL_HUDOPTIONS];
-            break;
-    }
-*/
 }
 
 void SetDrawPanel(string id)
@@ -53,43 +16,6 @@ void SetDrawPanel(string id)
             Hud_Panels[i] = DrawPanel;
         }
     }
-/*
-    switch (id)
-    {
-        //case "hudclipsize":
-        case "clipsizepanel":
-            Hud_Panels[HUD_PANEL_CLIPSIZE] = DrawPanel;
-            break;    
-        //case "hudfragstreak":
-        case "fragstreakpanel":
-            Hud_Panels[HUD_PANEL_FRAGSTREAK] = DrawPanel;
-            break;
-        //case "hudcaps":
-        case "capspanel":
-            Hud_Panels[HUD_PANEL_CAPS] = DrawPanel;
-            break;
-        //case "hudgren1":
-        case "gren1panel":
-            Hud_Panels[HUD_PANEL_GREN1] = DrawPanel;
-            break;
-        //case "hudgren2":
-        case "gren2panel":
-            Hud_Panels[HUD_PANEL_GREN2] = DrawPanel;
-            break;
-        //case "hudplayerclass":
-        case "playerclasspanel":
-            Hud_Panels[HUD_PANEL_PLAYERCLASS]= DrawPanel;
-            break;
-        //case "hudidentify":
-        case "identifypanel":
-            Hud_Panels[HUD_PANEL_IDENTIFY] = DrawPanel;
-            break;
-        //case "hudoptions":
-        case "hudoptionspanel":
-            Hud_Panels[HUD_PANEL_HUDOPTIONS] = DrawPanel;
-            break;
-    }
-*/
 }
 
 float GetPanelById(string id) = {
@@ -108,40 +34,11 @@ void Hud_WriteCfg(string path)
     filehandle = fopen(path, FILE_WRITE);
     string line;
 
-//    line = FormatCfgString(line, "hudflagicon.growdirection", ftos(HudSettings.FlagIcon.GrowDirection));
-//    line = FormatCfgString(line, "hudflagicon.nodeinsertloc", ftos(HudSettings.FlagIcon.NodeInsertLoc));
-//    line = FormatCfgVector(line, "hudflagicon.position", HudSettings.FlagIcon.Position);
-//    line = FormatCfgString(line, "hudflagicon.scale", ftos(HudSettings.FlagIcon.Scale));
-//    line = FormatCfgString(line, "hudflagicon.display", ftos(HudSettings.FlagIcon.Display));
-
     for(float i = 0; i < Hud_Panels.length; i++) {
         DrawPanel = Hud_Panels[i];
         line = GetPanelString(line, Hud_Panels[i].id);
     }
-/*
-    DrawPanel = HudSettings.ClipSize;
-    line = GetPanelString(line, "clipsizepanel");
 
-    DrawPanel = HudSettings.FragStreak;
-    line = GetPanelString(line, "fragstreakpanel");
-
-    DrawPanel = HudSettings.Caps;
-    line = GetPanelString(line, "capspanel");
-
-    DrawPanel = HudSettings.Gren1;
-    line = GetPanelString(line, "gren1panel");
-    DrawPanel = HudSettings.Gren2;
-    line = GetPanelString(line, "gren2panel");
-
-    DrawPanel = HudSettings.PlayerClass;
-    line = GetPanelString(line, "playerclasspanel");
-
-    DrawPanel = HudSettings.Identify;
-    line = GetPanelString(line, "identifypanel");
-
-    DrawPanel = HudSettings.HudOptions;
-    line = GetPanelString(line, "hudoptionspanel");
-*/
     fputs(filehandle, line);
     fclose(filehandle);
 }
@@ -154,15 +51,8 @@ void FO_Hud_Editor_LoadDefaultSettings()
 
     // check struct, put defaults in
     float yoffset = height - 64;
-//    FO_Hud_FlagIcon HudFlagIcon;
-//    HudFlagIcon.Position = [8, yoffset];
 
     // TODO - maybe implement these to allow for pivoting of items
-//    HudFlagIcon.GrowDirection = FO_HUD_GROW_UP;
-//    HudFlagIcon.NodeInsertLoc = FO_HUD_INSERT_AFTER;
-//    HudFlagIcon.Scale = 1;
-//    HudFlagIcon.Display = 1;
-//    HudSettings.FlagIcon = HudFlagIcon;
 
     vector pos, fill;
     float scale, display, nodeInsertLoc;
@@ -181,69 +71,10 @@ void FO_Hud_Editor_LoadDefaultSettings()
         Hud_Panels[i].NodeInsertLoc = nodeInsertLoc;
         //pnl.Name = name;
     }
-
-/*
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_CLIPSIZE_NAME);
-    FO_Hud_Panel HudClipSize = NewPanel;
-    HudSettings.ClipSize = HudClipSize;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_FRAGSTREAK_NAME);
-    FO_Hud_Panel HudFragStreak = NewPanel;
-    HudSettings.FragStreak = HudFragStreak;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_CAPS_NAME);
-    FO_Hud_Panel HudCaps = NewPanel;
-    HudSettings.Caps = HudCaps;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_GREN1_NAME);
-    FO_Hud_Panel HudGren1 = NewPanel;
-    HudSettings.Gren1 = HudGren1;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_GREN2_NAME);
-    FO_Hud_Panel HudGren2 = NewPanel;
-    HudSettings.Gren2 = HudGren2;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-    nodeInsertLoc = FO_HUD_INSERT_AFTER;
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_SPECIAL_NAME);
-    FO_Hud_Panel HudPlayerClass = NewPanel;
-    HudSettings.PlayerClass = HudPlayerClass;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [50, 26];
-
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_IDENTIFY_NAME);
-    FO_Hud_Panel HudIdentify = NewPanel;
-    HudSettings.Identify = HudIdentify;
-
-    pos = [pos_x, pos_y - 2 - 24];
-    fill = [150, 260];
-    GetNewPanel(pos, fill, scale, display, nodeInsertLoc, FO_HUD_OPTIONS_NAME);
-    FO_Hud_Panel HudOptions = NewPanel;
-    HudSettings.HudOptions = HudOptions;
-*/
-
 }
 
 void Hud_DrawFlagStatusBar(string panelid)
 {
-//    if (!HudSettings.FlagIcon.Display && !fo_hud_editor)
-//        return;
-
     vector pos;
     pos = Hud_Panels[HUD_PANEL_FLAGINFO].Position;
     float sizey, sizex;
@@ -259,19 +90,6 @@ void Hud_DrawFlagStatusBar(string panelid)
         }
     }
     
-    /*
-    if (firstrun)
-    {
-        if (flagInfoCount > 0)
-        {
-            firstrun = FALSE;
-            pos = Hud_Panels[HUD_PANEL_FLAGINFO].Position;
-            pos_y = pos_y - 4 - sizey * (flagInfoCount - 2);
-            Hud_Panels[HUD_PANEL_FLAGINFO].Position = pos;
-        }
-    }
-    */
-
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))
@@ -293,23 +111,19 @@ void Hud_DrawFlagStatusBar(string panelid)
         float yoffset = 24;
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    //drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    //drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            //drawpic([pos_x, pos_y - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
             drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
                 float smallfont = 6 * Hud_Panels[HUD_PANEL_FLAGINFO].Scale;
-			    //drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
 			    drawstring([pos_x + sizex - stringwidth(stime, 1, [smallfont, smallfont]), pos_y + sizey * (i + 1) - smallfont, 0], stime, [smallfont, smallfont], '1 1 1', 1, 0);
 			}
 		}
@@ -326,13 +140,6 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
     {
         // click event
     }
-    //drawfill(pos, Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale, MENU_HIGHLIGHT, 0, 0);
-
-    
-    
-    //float selectedPanelIndex = Hud_GetSelectedPanel();
-    //if(selectedPanelIndex < 0)
-    //    return;
         
     FO_Hud_Panel selectedPanel = Hud_Panels[Editor_SelectedPanel_Index];
     
@@ -599,54 +406,13 @@ void Hud_DrawIdentifyPanel(string id, string identify)
 
 void Hud_Draw(float width, float height)
 {
-    //Hud_DrawFlagStatusBar(width);
 
     for(float i = 0; i < Hud_Panels.length; i++) {
         Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
         if(sui_is_last_clicked(Hud_Panels[i].id)) {
-            Editor_SelectedPanel = Hud_Panels[i];
             Editor_SelectedPanel_Index = i;
         }
     }
-/*
-    if (SBAR.ClipSize || fo_hud_editor)
-    {
-        GetDrawPanel("clipsizepanel");
-        Hud_DrawPanelLMP("clipsizepanel", SBAR.ClipSize, HudIcons[10].icon);
-    }
-    GetDrawPanel("fragstreakpanel");
-    Hud_DrawPanelLMP("fragstreakpanel", ftos(SBAR.FragStreak), HudIcons[11].icon);
-
-    GetDrawPanel("capspanel");
-    Hud_DrawPanelLMP("capspanel", ftos(SBAR.Caps), HudIcons[12].icon);
-
-    // identify
-    if (strlen(SBAR.Identify) > 0 || fo_hud_editor)
-    {
-        GetDrawPanel("identifypanel");
-        Hud_DrawIdentifyPanel("identifypanel", SBAR.Identify);
-    }
-
-    GetDrawPanel("gren1panel");
-    Hud_DrawPanelLMP("gren1panel", ftos(SBAR.Gren1), HudIcons[13].icon);
-
-    GetDrawPanel("gren2panel");
-    Hud_DrawPanelLMP("gren2panel", ftos(SBAR.Gren2), HudIcons[14].icon);
-
-    if (SBAR.PlayerClass || fo_hud_editor)
-    {
-        GetDrawPanel("playerclasspanel");
-        Hud_DrawClassInfoPanel("playerclasspanel", SBAR.PlayerClass);
-    }
-
-    if (fo_hud_editor)
-    {
-        //GetDrawPanel("hudoptionspanel");
-        //Hud_DrawPanelLMP("hudoptionspanel", ftos(SBAR.Gren2), HudIcons[14].icon);
-        //Hud_DrawHudOptionsPanel();
-
-    }
-*/   
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
