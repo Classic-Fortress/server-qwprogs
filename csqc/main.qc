@@ -12,7 +12,7 @@ void GetSelf() = {
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
-    precache_model("progs/weapons/v_rock.mdl");
+//    precache_model("progs/weapons/v_rock.mdl");
 
 	for (float i = 0; i < HudIcons.length; i++)
 	{

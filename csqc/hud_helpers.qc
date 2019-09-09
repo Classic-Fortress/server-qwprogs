@@ -2,6 +2,7 @@ vector MENU_BG = '0.2 0.3 0.4';
 vector MENU_BG_DARK = '0.1 0.15 0.2';
 vector MENU_BORDER = '0.3 0.4 0.5';
 vector MENU_SELECTED = '0 1 0';
+vector MENU_UNSELECTED = '1 0 0';
 vector MENU_BUTTON = '0.3 0.4 0.5';
 vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
 vector MENU_TEXT_1 = '1 1 1';
@@ -17,6 +18,7 @@ float MENU_START_CONTENT = 32;
 void Hud_WriteCfg(string path);
 float GetDrawPanel(string id);
 void SetDrawPanel(string id);
+float GetPanelById(string id);
 
 void FO_Hud_Editor()
 {
@@ -50,6 +52,23 @@ float(string id, vector pos, vector size, string text) hud_button =
 	return sui_is_clicked(id);
 };
 
+void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
+{
+	sui_push_frame(pos, size);
+	
+	value = sui_slidercontrol(id, [0, 0], size, minmaxsteps, value, sui_slider_noop);
+	float maxval = minmaxsteps[1];
+	float sliderx = (value / maxval) * size_x;
+	sui_fill([0, size_y * 0.25], [size_x, size_y * 0.5], MENU_BG_DARK, 1.0, 0);
+	
+	float is_active = sui_is_held(id) || (sui_is_hovered(id) && !sui_click_held());
+	vector slider_ctrl_color = is_active ? MENU_BUTTON + MENU_HIGHLIGHT * 0.1 : MENU_BUTTON;
+	sui_fill([sliderx - 2, 0], [4, size_y], slider_ctrl_color, 1.0, 0);
+	
+	sui_pop_frame();
+};
+
+
 vector UpdatePos(string id, vector mousepos)
 {
     vector pos;
@@ -74,13 +93,14 @@ vector UpdatePos(string id, vector mousepos)
     return pos;
 }
 
-float(string id, vector pos, vector size, float alpha) hud_panel =
+float(string id, vector pos, vector size, float alpha, float enabled) hud_panel =
 {
     vector basecolor = MENU_BG;
+    vector outlinecolour = enabled ? MENU_BORDER : MENU_UNSELECTED;
 
     if (fo_hud_editor)
     {
-        sui_border_box(pos, size, 1, MENU_BORDER, 0.4, 0);
+        sui_border_box(pos, size, 1, outlinecolour, 0.4, 0);
         if (sui_is_last_clicked(id))
         {
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
@@ -96,7 +116,9 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
         if (sui_is_hovered(id))
         {
             alpha = 0.6;
-            basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1; 
+            basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1;
+            //FO_Hud_Panel hoverpanel = GetPanelById(id);
+            //drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
         }
         
         if (sui_is_held(id))
@@ -314,7 +336,7 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
     vector pos;
     pos = DrawPanel.Position;
 
-    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
     {
         // click event
         if (fo_hud_editor)

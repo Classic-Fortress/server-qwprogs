@@ -15,7 +15,8 @@ typedef struct
 {
     string icon;
 } FO_Hud_Icons;
-FO_Hud_Icons HudIcons[28] = {
+FO_Hud_Icons HudIcons[29] = {
+    {""},
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -148,6 +149,8 @@ typedef struct {
 
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
+FO_Hud_Panel Editor_SelectedPanel;
+float Editor_SelectedPanel_Index;
 
 typedef struct {
 //    FO_Hud_FlagIcon FlagIcon;
@@ -207,6 +210,7 @@ FO_Hud_Settings HudSettings;
 void(string panelid, float display, string text, string icon) doNothing = {};
 
 enum {
+    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -214,12 +218,12 @@ enum {
     HUD_PANEL_GREN2,
     HUD_PANEL_PLAYERCLASS,
     HUD_PANEL_IDENTIFY,
-    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_FLAGINFO,
     HUD_PANEL_GRENTIMER
 };
 
 var FO_Hud_Panel Hud_Panels[] = {
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 150',1,1,0, doNothing, {return DrawPanel.id;}},
     {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'0 0','50 26',1,1,0, drawClipSize, { return SBAR.ClipSize; }},
     {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
     {"capspanel",FO_HUD_CAPS_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
@@ -227,7 +231,6 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
     {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
     {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,1,0, drawIdentify, {return "";}},
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 260',1,1,0, doNothing, {return DrawPanel.id;}},
     {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,1,0, drawFlagInfo, {return DrawPanel.id;}} //,
     //{"grentimerpanel","Grenade Timer",'0 0','50 26',1,1,0, doNothing, {return "";}}
 };

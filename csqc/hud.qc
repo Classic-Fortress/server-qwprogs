@@ -92,6 +92,14 @@ void SetDrawPanel(string id)
 */
 }
 
+float GetPanelById(string id) = {
+    for(float i = 0; i < Hud_Panels.length; i++) {
+        if(Hud_Panels[i].id == id) {
+            return i;
+        }
+    }
+    return 0;
+}
 
 void Hud_WriteCfg(string path)
 {
@@ -251,6 +259,7 @@ void Hud_DrawFlagStatusBar(string panelid)
         }
     }
     
+    /*
     if (firstrun)
     {
         if (flagInfoCount > 0)
@@ -261,10 +270,11 @@ void Hud_DrawFlagStatusBar(string panelid)
             Hud_Panels[HUD_PANEL_FLAGINFO].Position = pos;
         }
     }
+    */
 
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
-    if (hud_panel(panelid, pos, fillsize, alpha))
+    if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))
     {
         // click event
         if (fo_hud_editor)
@@ -273,7 +283,7 @@ void Hud_DrawFlagStatusBar(string panelid)
         }
     }
     
-    for (float i = FlagInfoLines.length - 1; i >= 0; i--) 
+    for (float i = 0; i < flagInfoCount; i++) 
     {
 		if (FlagInfoLines[i].id) 
         {
@@ -283,51 +293,64 @@ void Hud_DrawFlagStatusBar(string panelid)
         float yoffset = 24;
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    //drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    //drawstring([pos_x + sizex, pos_y + 4 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
 			}
 			
-            drawpic([pos_x, pos_y - sizex * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
+            //drawpic([pos_x, pos_y - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
+            drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
 			
             if (FlagInfoLines[i].timeleft >= 0) 
             {
 			    string stime = ftos(FlagInfoLines[i].timeleft);
-			    drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
+                float smallfont = 6 * Hud_Panels[HUD_PANEL_FLAGINFO].Scale;
+			    //drawstring([pos_x + 22 - stringwidth(stime, 1, '6 6'), pos_y + 18 - sizey * (i - 1) + sizey * (flagInfoCount - 2), 0], stime, '6 6', '1 1 1', 1, 0);
+			    drawstring([pos_x + sizex - stringwidth(stime, 1, [smallfont, smallfont]), pos_y + sizey * (i + 1) - smallfont, 0], stime, [smallfont, smallfont], '1 1 1', 1, 0);
 			}
 		}
     }
 }
 
-float Hud_GetSelectedPanel() {
-    for(float i = 0; i < Hud_Panels.length; i++) {
-        if(sui_is_last_clicked(Hud_Panels[i].id)) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string icon)
 {
-    if(!fo_hud_editor)
+    if(!fo_hud_editor || !Editor_SelectedPanel_Index)
         return;
     
     vector pos = Hud_Panels[HUD_PANEL_HUDOPTIONS].Position;
-    if (hud_panel(Hud_Panels[HUD_PANEL_HUDOPTIONS].id, pos, Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale, 0))
+    if (hud_panel(Hud_Panels[HUD_PANEL_HUDOPTIONS].id, pos, Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale, 0, Hud_Panels[HUD_PANEL_HUDOPTIONS].Display))
     {
         // click event
     }
-    float selectedPanelIndex = Hud_GetSelectedPanel();
-    if(selectedPanelIndex < 0)
-        return;
+    //drawfill(pos, Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale, MENU_HIGHLIGHT, 0, 0);
+
+    
+    
+    //float selectedPanelIndex = Hud_GetSelectedPanel();
+    //if(selectedPanelIndex < 0)
+    //    return;
         
-    FO_Hud_Panel selectedPanel = Hud_Panels[selectedPanelIndex];
+    FO_Hud_Panel selectedPanel = Hud_Panels[Editor_SelectedPanel_Index];
     
     drawstring(pos + [4,4], selectedPanel.Name, [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [4,12], strcat("Scale: ",ftos(selectedPanel.Scale)), [8,8], MENU_SELECTED, 1, 0);
     
+    float fval = selectedPanel.Scale;
+    hud_slider("hud_option_scale_scroll", pos + [4,24], [140,8], [0.2,5.0,24], fval);
+    if(fval != selectedPanel.Scale) {
+        Hud_Panels[Editor_SelectedPanel_Index].Scale = fval;
+    }
+    if(hud_button("hud_option_show_hide_toggle", pos + [4,34], [140, 20], selectedPanel.Display ? "Hide" : "Show")) {
+        Hud_Panels[Editor_SelectedPanel_Index].Display = !selectedPanel.Display;
+    }
+    drawstring(pos + [4,64],"Position: ", [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [10,72], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [10,80], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
+
 }
 
 void Hud_DrawClassInfoPanel(string id, float playerclass)
@@ -347,7 +370,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         vector pos;
         pos = DrawPanel.Position;
 
-        if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+        if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
         {
             // click event
             if (fo_hud_editor)
@@ -545,7 +568,7 @@ void Hud_DrawIdentifyPanel(string id, string identify)
     vector pos;
     pos = DrawPanel.Position;
 
-    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
     {
         // click event
         if (fo_hud_editor)
@@ -580,6 +603,10 @@ void Hud_Draw(float width, float height)
 
     for(float i = 0; i < Hud_Panels.length; i++) {
         Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
+        if(sui_is_last_clicked(Hud_Panels[i].id)) {
+            Editor_SelectedPanel = Hud_Panels[i];
+            Editor_SelectedPanel_Index = i;
+        }
     }
 /*
     if (SBAR.ClipSize || fo_hud_editor)
