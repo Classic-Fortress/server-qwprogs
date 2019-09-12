@@ -2,6 +2,7 @@ vector MENU_BG = '0.2 0.3 0.4';
 vector MENU_BG_DARK = '0.1 0.15 0.2';
 vector MENU_BORDER = '0.3 0.4 0.5';
 vector MENU_SELECTED = '0 1 0';
+vector MENU_UNSELECTED = '1 0 0';
 vector MENU_BUTTON = '0.3 0.4 0.5';
 vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
 vector MENU_TEXT_1 = '1 1 1';
@@ -15,8 +16,9 @@ vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
 void Hud_WriteCfg(string path);
-void GetDrawPanel(string id);
+float GetDrawPanel(string id);
 void SetDrawPanel(string id);
+float GetPanelById(string id);
 
 void FO_Hud_Editor()
 {
@@ -50,35 +52,55 @@ float(string id, vector pos, vector size, string text) hud_button =
 	return sui_is_clicked(id);
 };
 
+void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
+{
+	sui_push_frame(pos, size);
+	
+	value = sui_slidercontrol(id, [0, 0], size, minmaxsteps, value, sui_slider_noop);
+	float maxval = minmaxsteps[1];
+	float sliderx = (value / maxval) * size_x;
+	sui_fill([0, size_y * 0.25], [size_x, size_y * 0.5], MENU_BG_DARK, 1.0, 0);
+	
+	float is_active = sui_is_held(id) || (sui_is_hovered(id) && !sui_click_held());
+	vector slider_ctrl_color = is_active ? MENU_BUTTON + MENU_HIGHLIGHT * 0.1 : MENU_BUTTON;
+	sui_fill([sliderx - 2, 0], [4, size_y], slider_ctrl_color, 1.0, 0);
+	
+	sui_pop_frame();
+};
+
+
 vector UpdatePos(string id, vector mousepos)
 {
     vector pos;
-    switch (id)
-    {
-        case "flagiconpanel":
-            if (HudSettings.MousePos != [0, 0])
-            {
-                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
-                HudSettings.FlagIcon.Position = pos;
-            }
-            break;
-        default:
+//    switch (id)
+//    {
+//        case "flagiconpanel":
+//            if (HudSettings.MousePos != [0, 0])
+//            {
+//                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
+//                HudSettings.FlagIcon.Position = pos;
+//            }
+//            break;
+
+//        default:
             GetDrawPanel(id);
             pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
             DrawPanel.Position = pos;
             SetDrawPanel(id);
-            break;
-    }
+//            break;
+//    }
 
     return pos;
 }
 
-float(string id, vector pos, vector size, float alpha) hud_panel =
+float(string id, vector pos, vector size, float alpha, float enabled) hud_panel =
 {
     vector basecolor = MENU_BG;
+    vector outlinecolour = enabled ? MENU_BORDER : MENU_UNSELECTED;
 
     if (fo_hud_editor)
     {
+        sui_border_box(pos, size, 1, outlinecolour, 0.4, 0);
         if (sui_is_last_clicked(id))
         {
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
@@ -94,7 +116,9 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
         if (sui_is_hovered(id))
         {
             alpha = 0.6;
-            basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1; 
+            basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1;
+            //FO_Hud_Panel hoverpanel = GetPanelById(id);
+            //drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
         }
         
         if (sui_is_held(id))
@@ -104,15 +128,15 @@ float(string id, vector pos, vector size, float alpha) hud_panel =
         }
     }
 
-	sui_push_frame(pos, size);
-    
-	sui_fill([0, 0], size, basecolor, alpha, 0);
-    
-	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-	sui_action_element([0, 0], size, id, sui_noop);
-	sui_pop_frame();
-	
-	return sui_is_clicked(id);
+    sui_push_frame(pos, size);
+
+    sui_fill([0, 0], size, basecolor, alpha, 0);
+
+    sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+    sui_action_element([0, 0], size, id, sui_noop);
+    sui_pop_frame();
+
+    return sui_is_clicked(id);
 };
 
 // this draws backwards, haven't bothered to change as we don't use it
@@ -229,24 +253,7 @@ void FO_Hud_Editor_LoadSettings()
 
                 switch(field)
                 {
-                    case "hudflagicon.position":
-                        count = tokenizebyseparator(val, ",");
-                        x = stof(argv(0));
-                        y = stof(argv(1));
-                        HudSettings.FlagIcon.Position = [x, y];
-                        break;
-                    case "hudflagicon.scale":
-                        HudSettings.FlagIcon.Scale = stof(val);
-                        break;
-                    case "hudflagicon.growdirection":
-                        HudSettings.FlagIcon.GrowDirection = stof(val);
-                        break;
-                    case "hudflagicon.nodeinsertloc":
-                        HudSettings.FlagIcon.NodeInsertLoc = stof(val);
-                        break;
-                    case "hudflagicon.display":
-                        HudSettings.FlagIcon.Display = stof(val);
-                        break;
+
                     default:
                         count = tokenizebyseparator(field, ".");
                         string pnl;
@@ -287,7 +294,7 @@ void FO_Hud_Editor_LoadSettings()
     }    
 }
 
-void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc)
+void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc, string name)
 {
     FO_Hud_Panel pnl;
 
@@ -296,6 +303,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
     pnl.Scale = scale;
     pnl.Display = display;
     pnl.NodeInsertLoc = nodeInsertLoc;
+    pnl.Name = name;
 
     NewPanel = pnl;
 }
@@ -303,13 +311,13 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 // draws value string using lmps
 void Hud_DrawPanelLMP(string id, string val, string icon)
 {
-    if (!DrawPanel.Display)
+    if (!DrawPanel.Display && !fo_hud_editor)
         return;
 
     vector pos;
     pos = DrawPanel.Position;
 
-    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0))
+    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
     {
         // click event
         if (fo_hud_editor)
