@@ -1,4 +1,4 @@
-float (string arg1, string arg2) ParseCmds = {
+float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd;
     local string tmp;
     processedCmd = FALSE;
@@ -7,23 +7,45 @@ float (string arg1, string arg2) ParseCmds = {
         arg_num = 1;
     if (arg2)
         arg_num = 2;
-    
-    if (arg1 == "adminpwd")
+
+    switch (arg1)
     {
-        processedCmd = TRUE;
-        if (arg_num == 2) {
-            Admin_Check(arg2);
-            if (self.is_admin) {
-                Admin_Aliases();
+        case "adminpwd":
+            processedCmd = TRUE;
+            if (arg_num == 2) {
+                Admin_Check(arg2);
+                if (self.is_admin) {
+                    Admin_Aliases();
+                }
             }
-        }
-        if (arg_num == 1) {
-            sprint(self, PRINT_HIGH, "usage: cmd adminpwd password, where password is the admin password\n");
-            sprint(self, PRINT_HIGH, "\n");
-        }
-        return processedCmd;
+            if (arg_num == 1) {
+                sprint(self, PRINT_HIGH, "usage: cmd adminpwd password, where password is the admin password\n");
+                sprint(self, PRINT_HIGH, "\n");
+            }
+            break;
+        case "setinfo":
+            if (arg2)
+            {
+                if (arg2 == "topcolor" || arg2 == "bottomcolor")
+                {
+                    float arg3f = stof(arg3);
+                    if ((self.team_no > 0) && (teamplay > 0)) {
+                        if (arg3f != (TeamFortress_TeamGetColor(self.team_no) - 1)) {
+                            arg3f = TeamFortress_TeamGetColor(self.team_no) - 1;
+                            string st;
+                            st = ftos(arg3f);
+                            //forceinfokey(self, "topcolor", st);
+                            stuffcmd(self, strcat("color ", st, "\n"));
+                            sprint(self, PRINT_HIGH,
+                                    "Your color has been changed to your team color\n");
+                            processedCmd = TRUE;
+                        }
+                    }
+                }
+            }
+            break;
     }
-    
+   
     if (self.is_admin)
     {
         switch (arg1)
@@ -214,7 +236,7 @@ void (string cmd) SV_ParseClientCommand = {
     float isProcessed;
     tokenize(cmd);
 
-    isProcessed = ParseCmds(argv(0), argv(1));
+    isProcessed = ParseCmds(argv(0), argv(1), argv(2));
     
     if (!isProcessed)
     {
