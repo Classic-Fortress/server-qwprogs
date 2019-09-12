@@ -1,11 +1,12 @@
 float () UserCmd =
 {
     float isProcessed;
-    string arg1, arg2;
+    string arg1, arg2, arg3;
     arg1 = argv_mvdsv(0);
     arg2 = argv_mvdsv(1);
+    arg3 = argv_mvdsv(2);
 
-    isProcessed = ParseCmds(arg1, arg2);
+    isProcessed = ParseCmds(arg1, arg2, arg3);
     return (isProcessed);
 };
 
