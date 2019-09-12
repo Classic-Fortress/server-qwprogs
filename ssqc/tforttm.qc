@@ -279,11 +279,11 @@ void () TeamFortress_CheckTeamCheats = {
             st = ftos(tc);
             stuffcmd(self, st);
             stuffcmd(self, "\n");
-            bprint2(PRINT_MEDIUM, self.netname,
+            /*bprint2(PRINT_MEDIUM, self.netname,
                     " has been kicked for changing color\n");
             sprint(self, PRINT_HIGH,
                     "You have been kicked for changing your pants color\n");
-            KickCheater(self);
+            KickCheater(self);*/
             return;
         }
         if (self.playerclass != 0) {
