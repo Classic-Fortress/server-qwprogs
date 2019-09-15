@@ -211,6 +211,7 @@ string GetPanelString(string line, string name)
 {
     line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
     line = FormatCfgString(line, strcat(name, ".scale"), ftos(DrawPanel.Scale));
+    line = FormatCfgString(line, strcat(name, ".textscale"), ftos(DrawPanel.TextScale));
     line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
     line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.NodeInsertLoc));
 
@@ -270,6 +271,9 @@ void FO_Hud_Editor_LoadSettings()
                                 break;
                             case "scale":
                                 DrawPanel.Scale = stof(val);
+                                break;
+                            case "textscale":
+                                DrawPanel.TextScale = stof(val);
                                 break;
                             case "display":
                                 DrawPanel.Display = stof(val);
@@ -335,7 +339,8 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
     float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
 
     pos = [pos_x + offset, pos_y, 0];
-    Hud_DrawStringLMP(pos, val, 24 * DrawPanel.Scale);
+    float textScale = DrawPanel.TextScale ? DrawPanel.TextScale : DrawPanel.Scale;
+    Hud_DrawStringLMP(pos, val, 24 * textScale);
 }
 
 
