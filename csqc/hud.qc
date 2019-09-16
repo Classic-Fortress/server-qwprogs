@@ -73,6 +73,13 @@ void FO_Hud_Editor_LoadDefaultSettings()
     }
 }
 
+float GetTextAlignOffset(float pos, float iconsize, string text, float textsize, float align)  {
+    if(align == FO_HUD_INSERT_AFTER) {
+        return pos - strlen(text) * textsize;
+    }
+    return pos + iconsize;
+}
+
 void Hud_DrawFlagStatusBar(string panelid)
 {
     vector pos;
@@ -108,14 +115,17 @@ void Hud_DrawFlagStatusBar(string panelid)
 	    alpha = FlagInfoLines[i].state == FLAGINFO_HOME ? 0.3 : 1;
 	    string icon = FlagInfoLines[i].icon.filename;
 	    vector iconcolour = FlagInfoLines[i].icon.colour;
-        float yoffset = 24;
+        float bigfont = 8 * (Hud_Panels[HUD_PANEL_FLAGINFO].TextScale ? Hud_Panels[HUD_PANEL_FLAGINFO].TextScale : Hud_Panels[HUD_PANEL_FLAGINFO].Scale);
+        float bigfontvoffset = sizey / 2 - bigfont / 2; //Center text against the icon
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].carrier, '8 8', '1 0 0', 1, 0);
+			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].carrier,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-			    drawstring([pos_x + sizex, pos_y + 4 + sizey * i, 0], FlagInfoLines[i].locname, '8 8', '1 1 1', 1, 0);
+			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].locname,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
 			}
 			
             drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
@@ -136,7 +146,8 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
         return;
     
     vector pos = Hud_Panels[HUD_PANEL_HUDOPTIONS].Position;
-    if (hud_panel(Hud_Panels[HUD_PANEL_HUDOPTIONS].id, pos, Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale, 0, Hud_Panels[HUD_PANEL_HUDOPTIONS].Display))
+    vector size = Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale;
+    if (hud_panel(Hud_Panels[HUD_PANEL_HUDOPTIONS].id, pos, size, 0, Hud_Panels[HUD_PANEL_HUDOPTIONS].Display))
     {
         // click event
     }
@@ -144,25 +155,47 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
     FO_Hud_Panel selectedPanel = Hud_Panels[Editor_SelectedPanel_Index];
     
     drawstring(pos + [4,4], selectedPanel.Name, [8,8], MENU_SELECTED, 1, 0);
-    drawstring(pos + [4,12], strcat("Scale: ",ftos(selectedPanel.Scale)), [8,8], MENU_SELECTED, 1, 0);
     
-    float fval = selectedPanel.Scale;
-    hud_slider("hud_option_scale_scroll", pos + [4,24], [140,8], [0.2,5.0,24], fval);
-    if(fval != selectedPanel.Scale) {
-        Hud_Panels[Editor_SelectedPanel_Index].Scale = fval;
+    float fscale = selectedPanel.Scale;
+    drawstring(pos + [4,12], strcat("Scale: ",ftos(rint(fscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
+    hud_slider("hud_option_scale_scroll", pos + [8,24], [136,8], [0.2,5.0,24], fscale);
+    if(fscale != selectedPanel.Scale) {
+        Hud_Panels[Editor_SelectedPanel_Index].Scale = fscale;
     }
-    if(hud_button("hud_option_show_hide_toggle", pos + [4,34], [140, 20], selectedPanel.Display ? "Hide" : "Show")) {
+    float ftscale = selectedPanel.TextScale;
+    drawstring(pos + [4,34], strcat("Text Scale: ",ftos(rint(ftscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
+    hud_slider("hud_option_textscale_scroll", pos + [8,44], [136,8], [0,5.0,25], ftscale);
+    if(ftscale != selectedPanel.TextScale) {
+        Hud_Panels[Editor_SelectedPanel_Index].TextScale = ftscale;
+    }    
+    float ftextalign = selectedPanel.NodeInsertLoc;
+    //drawstring(pos + [4,54], strcat("Text Pos: ", selectedPanel.NodeInsertLoc ? "Left" : "Right"), [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [4,60], "Text Pos: ", [8,8], MENU_SELECTED, 1, 0);
+    if(hud_button("hud_option_textalign_toggle", pos + [size.x - 6 - 48,56], [48, 16], selectedPanel.NodeInsertLoc ? "Left" : "Right")) {
+        Hud_Panels[Editor_SelectedPanel_Index].NodeInsertLoc = !selectedPanel.NodeInsertLoc;
+    }
+    //hud_slider("hud_option_textalign_scroll", pos + [8,64], [32,8], [0,1,1], ftextalign);
+    //if(ftextalign != selectedPanel.NodeInsertLoc) {
+    //    Hud_Panels[Editor_SelectedPanel_Index].NodeInsertLoc = ftextalign;
+    //}    
+    if(hud_button("hud_option_show_hide_toggle", pos + [4,74], [140, 20], selectedPanel.Display ? "Hide Panel" : "Show Panel")) {
         Hud_Panels[Editor_SelectedPanel_Index].Display = !selectedPanel.Display;
     }
-    drawstring(pos + [4,64],"Position: ", [8,8], MENU_SELECTED, 1, 0);
-    drawstring(pos + [10,72], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
-    drawstring(pos + [10,80], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [4,96],"Position: ", [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [10,106], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
+    drawstring(pos + [10,116], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
 
 }
 
 void Hud_DrawClassInfoPanel(string id, float playerclass)
 {
-    if (!DrawPanel.Display && !fo_hud_editor)
+    if(fo_hud_editor && !SBAR.PlayerClass) {
+        hud_panel(id, DrawPanel.Position, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display);
+
+        return;
+    }
+    
+    if (!fo_hud_editor && !DrawPanel.Display)
         return;
 
     switch (SBAR.PlayerClass)
@@ -188,14 +221,15 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
 
         float val;
         vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
-        vector fontSize = FO_Hud_Icon_Font_Size * DrawPanel.Scale;
+        vector fontSize = FO_Hud_Icon_Font_Size * (DrawPanel.TextScale ? DrawPanel.TextScale : DrawPanel.Scale);
         pos = [pos_x + 2, pos_y + 2, 0];
         vector basepos = pos;
         vector colour = '1 1 1';
         string icon = "";
         string msg = "";
 
-        icon = HudIcons[playerclass-1].icon;
+        //icon = HudIcons[playerclass-1].icon;
+        icon = HudIcons[playerclass+6].icon;
         drawpic(pos, icon, size, '1 1 1', 1, 0);
 
         float len = 0, offset = 0;
@@ -343,7 +377,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_ENGINEER:
                 if (SBAR.HasSentry)
                 {
-                    msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(SBAR.SentryHealth), " S: ", ftos(SBAR.SentryAmmoShells), " R: ", ftos(SBAR.SentryAmmoRockets));
+                    msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 else if (SBAR.IsBuilding)
@@ -355,11 +389,11 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 // disp
                 pos = [pos_x, pos_y - size_y - 2];
                 basepos = pos;
-                icon = HudIcons[playerclass].icon;
+                icon = HudIcons[playerclass + 7].icon;
                 drawpic(pos, icon, size, '1 1 1', 1, 0);
                 if (SBAR.HasDispenser)
                 {
-                    msg = strcat("H: ", ftos(SBAR.DispenserHealth));
+                    msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 break;

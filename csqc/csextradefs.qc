@@ -132,6 +132,7 @@ typedef struct {
     vector Position;
     vector FillSize;
     float Scale;
+    float TextScale;
     float Display;
     float NodeInsertLoc;
     void(string panelid, float display, string text, string icon) drawPanel;
@@ -203,16 +204,16 @@ enum {
 };
 
 var FO_Hud_Panel Hud_Panels[] = {
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 150',1,1,0, doNothing, {return DrawPanel.id;}},
-    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'0 0','50 26',1,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
-    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,1,0, drawIdentify, {return "";}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,1,0, drawFlagInfo, {return DrawPanel.id;}} //,
-    //{"grentimerpanel","Grenade Timer",'0 0','50 26',1,1,0, doNothing, {return "";}}
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'0 0','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
+    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
+    {"capspanel",FO_HUD_CAPS_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
+    {"gren1panel",FO_HUD_GREN1_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
+    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,0,1,0, drawIdentify, {return "";}},
+    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,0,1,0, drawFlagInfo, {return DrawPanel.id;}} //,
+    //{"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, doNothing, {return "";}}
 };
 
 
