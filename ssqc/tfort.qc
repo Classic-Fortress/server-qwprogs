@@ -1362,6 +1362,7 @@ void (entity p) TeamFortress_SetSkin = {
     local string st;
 
     p.immune_to_check = time + 10;
+    
     if (p.playerclass == PC_SPY || p.last_playerclass == PC_SPY)
     {
         if (!p.is_undercover)
@@ -1370,6 +1371,8 @@ void (entity p) TeamFortress_SetSkin = {
             st = TeamFortress_GetSkin(p.team_no, p.playerclass);
             stuffcmd(p, st);
             stuffcmd(p, "\n");
+            // please fix mvd recording
+            forceinfokey(p, "skin", st);
         }
         Spy_SetClientSkins(p);
     }
@@ -1382,6 +1385,9 @@ void (entity p) TeamFortress_SetSkin = {
             st = TeamFortress_GetSkin(p.team_no, p.playerclass);
             stuffcmd(p, st);
             stuffcmd(p, "\n");
+
+            // please fix mvd recording
+            forceinfokey(p, "skin", st);
         } 
         else
         {
