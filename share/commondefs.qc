@@ -4,6 +4,7 @@
 #define MSG_FLAGINFO        2
 
 #define MSG_SBAR        4
+#define MSG_GRENPRIMED      5
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

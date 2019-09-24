@@ -909,6 +909,10 @@ void (float inp) TeamFortress_PrimeGrenade = {
             if (!notimers) {
                 stuffcmd(self, "play grentimer\n");
             }
+            local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+            if (csqcactive) {
+                UpdateClientGrenadePrimed(self, gtype);
+            }
         }
     }
 

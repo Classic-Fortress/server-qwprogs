@@ -126,6 +126,10 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel 
             alpha = 0.6;
             basecolor = MENU_BG - MENU_DARKEN * 0.1;
         }
+        // Make options panel switch back to last selected element after dragging
+        if(sui_is_released(id) && id == "hudoptionspanel") {
+            _last_clicked_actions[0] = Hud_Panels[Editor_SelectedPanel_Index].id;
+        }
     }
 
     sui_push_frame(pos, size);
@@ -360,4 +364,15 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
     drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
+}
+
+void AddGrenTimer(float grentype) {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if(FO_Hud_Grentimers[i].grentype == 0) {
+            FO_Hud_Grentimers[i].grentype = grentype;
+            FO_Hud_Grentimers[i].expires = time + 3.8;
+            FO_Hud_Grentimers[i].icon_index = 4;
+            break;
+        }
+    }
 }
