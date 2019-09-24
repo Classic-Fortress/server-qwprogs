@@ -30,6 +30,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
+    localcmd("menu_restart");
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
