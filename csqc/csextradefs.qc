@@ -147,6 +147,14 @@ typedef struct {
     vector MousePos;
 } FO_Hud_Settings;
 
+typedef struct {
+    float grentype;
+    float expires;
+    float icon_index;
+} FO_Hud_Grentimer;
+
+FO_Hud_Grentimer FO_Hud_Grentimers[5];
+
 void(string panelid, float display, string text, string icon) drawClipSize = {
     if (SBAR.ClipSize || fo_hud_editor)
     {
@@ -185,6 +193,41 @@ void(string panelid, float display, string text, string icon) drawSpecial = {
         Hud_DrawClassInfoPanel(panelid, SBAR.PlayerClass);
     }
 };
+void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
+    local float timeleft;
+    if (display || fo_hud_editor)
+    {
+        GetDrawPanel(panelid);
+        float Scale = DrawPanel.Scale;
+        float TextScale = DrawPanel.TextScale;
+        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+            if(FO_Hud_Grentimers[i].grentype > 0) {
+                timeleft = floor(FO_Hud_Grentimers[i].expires - time);
+                if(timeleft < 0) {
+                    //Expire and fill the gap if there are any active grentimers afterwards
+                    FO_Hud_Grentimers[i].grentype = 0;
+                    for(float j = i + 1; j < FO_Hud_Grentimers.length; j++) {
+                        FO_Hud_Grentimers[j - 1].grentype = FO_Hud_Grentimers[j].grentype;
+                        FO_Hud_Grentimers[j - 1].expires = FO_Hud_Grentimers[j].expires;
+                        FO_Hud_Grentimers[j - 1].icon_index = FO_Hud_Grentimers[j].icon_index;
+                    }
+                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].grentype = 0;
+                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].expires = 0;
+                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].icon_index = 0;
+                    continue;
+                }
+                DrawPanel.Position = DrawPanel.Position + [0, 24 * DrawPanel.Scale];
+                if(i) {
+                    DrawPanel.Scale = Scale * 0.8;
+                    DrawPanel.TextScale = TextScale * 0.8;
+                }
+                Hud_DrawPanelLMP(panelid, ftos(timeleft), HudIcons[FO_Hud_Grentimers[i].icon_index].icon);
+            }
+        }
+    }
+};
+
+
 FO_Hud_Settings HudSettings;
 
 
@@ -211,9 +254,9 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"gren1panel",FO_HUD_GREN1_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
     {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
     {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,0,1,0, drawIdentify, {return "";}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,0,1,0, drawFlagInfo, {return DrawPanel.id;}} //,
-    //{"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, doNothing, {return "";}}
+    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
+    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,0,1,0, drawFlagInfo, {return "";}},
+    {"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}}
 };
 
 

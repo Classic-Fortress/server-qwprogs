@@ -446,6 +446,10 @@ void Hud_Draw(float width, float height)
         if(sui_is_last_clicked(Hud_Panels[i].id)) {
             Editor_SelectedPanel_Index = i;
         }
+        //Draw panel names when editing
+        if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
+            drawstring(Hud_Panels[i].Position + [2,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
+        }
     }
 
     HudSettings.MousePos = [Mouse.x, Mouse.y];

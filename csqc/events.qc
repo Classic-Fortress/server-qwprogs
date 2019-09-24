@@ -1,4 +1,5 @@
 void ParseSBAR();
+void AddGrenTimer(float grentype);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -92,6 +93,11 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_SBAR:
             ParseSBAR();
+            break;
+        case MSG_GRENPRIMED:
+            float grentype = readfloat();
+            print("Grenade Primed type ", ftos(grentype) ,"\n");
+            AddGrenTimer(grentype);
             break;
     }
 }
