@@ -98,6 +98,7 @@ void() CSQC_Parse_Event = {
             float grentype = readfloat();
             AddGrenTimer(grentype);
             if(Settings.Grentimer == 1) {
+                print("playing grentimer!\n");
                 localcmd("play grentimer.wav\n");
             } 
             break;
