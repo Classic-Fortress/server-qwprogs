@@ -28,6 +28,8 @@ const static struct
 //	{_("Keyboard Look"),		"+klook"},
 	{_("Strafe"),			"+strafe"},
 	{_("Run"),			"+speed"},
+	{0,				0},
+	{0,				0},
 	{_(""),			"Weapons"},
 	{_("Primary Weapon"),			"weapon 1"},
 	{_("Secondary Weapon"),			"weapon 2"},
