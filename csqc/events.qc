@@ -96,8 +96,10 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENPRIMED:
             float grentype = readfloat();
-            print("Grenade Primed type ", ftos(grentype) ,"\n");
             AddGrenTimer(grentype);
+            if(Settings.Grentimer == 1) {
+                localcmd("play grentimer.wav\n");
+            } 
             break;
     }
 }

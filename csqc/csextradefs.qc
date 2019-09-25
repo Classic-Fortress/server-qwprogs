@@ -259,11 +259,12 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}}
 };
 
-
-
+#define FOCMD_AUTOHOP "fo_autohop"
+#define FOCMD_GRENTIMER "fo_grentimer"
 
 typedef struct {
     float Autohop;
+    float Grentimer;
 } FO_Settings;
 FO_Settings Settings;
 

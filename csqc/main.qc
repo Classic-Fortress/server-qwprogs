@@ -81,6 +81,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			}
 			FO_WriteSettings();
 			break;
+		case FOCMD_GRENTIMER:
+			val = stof(argv(1));
+			if(val == 1) {
+			    Settings.Grentimer = 1;
+			} else if(val == 0) {
+			    Settings.Grentimer = 0;
+			}
+			FO_WriteSettings();
+			break;
     }	
     return FALSE;
 };
