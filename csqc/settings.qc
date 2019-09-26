@@ -3,8 +3,8 @@ void FO_WriteSettings()
     // this overwrites
     float filehandle;
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
-    string line = FormatCfgString("", "fo_autohop", ftos(Settings.Autohop));
-
+    string line = FormatCfgString("", FOCMD_AUTOHOP, ftos(Settings.Autohop));
+    line = FormatCfgString(line, FOCMD_GRENTIMER, ftos(Settings.Grentimer));
     fputs(filehandle, line);
     fclose(filehandle);
 }
@@ -41,8 +41,11 @@ void FO_LoadSettings()
 
                 switch(field)
                 {
-                    case "fo_autohop":
+                    case FOCMD_AUTOHOP:
                         Settings.Autohop = stof(val);
+                        break;
+                    case FOCMD_GRENTIMER:
+                        Settings.Grentimer = stof(val);
                         break;
                 }
             }

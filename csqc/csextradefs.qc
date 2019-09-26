@@ -195,8 +195,8 @@ void(string panelid, float display, string text, string icon) drawSpecial = {
 };
 void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
     local float timeleft;
-    if (display || fo_hud_editor)
-    {
+    local float timercount = 0;
+    if (display) {
         GetDrawPanel(panelid);
         float Scale = DrawPanel.Scale;
         float TextScale = DrawPanel.TextScale;
@@ -216,14 +216,19 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
                         FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].icon_index = 0;
                     continue;
                 }
-                DrawPanel.Position = DrawPanel.Position + [0, 24 * DrawPanel.Scale];
                 if(i) {
                     DrawPanel.Scale = Scale * 0.8;
                     DrawPanel.TextScale = TextScale * 0.8;
                 }
                 Hud_DrawPanelLMP(panelid, ftos(timeleft), HudIcons[FO_Hud_Grentimers[i].icon_index].icon);
+                DrawPanel.Position = DrawPanel.Position + [0, 24 * DrawPanel.Scale];
+                timercount++;
             }
         }
+    }
+    if(fo_hud_editor && (!display || !timercount)) {
+        GetDrawPanel(panelid);
+        Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
     }
 };
 
@@ -259,11 +264,12 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}}
 };
 
-
-
+#define FOCMD_AUTOHOP "fo_autohop"
+#define FOCMD_GRENTIMER "fo_grentimer"
 
 typedef struct {
     float Autohop;
+    float Grentimer;
 } FO_Settings;
 FO_Settings Settings;
 
