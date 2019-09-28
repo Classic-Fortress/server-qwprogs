@@ -3326,20 +3326,15 @@ void () W_WeaponFrame = {
 
     // change weapon if queue_weaponslot has been set
     } else if (self.queue_weaponslot > 0) {
-
         W_ChangeWeapon(self.queue_weaponslot);
-
     // load weapon state
     } else if (self.queue_weaponstate && WeaponReady(self)) {
-
         // load weaponstate saved from before quick fire started
         if (self.queue_weaponstate == 1)
             W_WeaponState_Load(self, 0);
-
         // load swapped weaponstate
         else
             W_WeaponState_Load(self, 1);
-
     }
 
     if (self.impulse == TF_CHANGETEAM) {
@@ -3383,16 +3378,31 @@ void () W_WeaponFrame = {
         }
     }
 
-    // class specials and grenade impulses always possible, also detpipe
-    if (self.impulse == TF_SPECIAL_SKILL ||(self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)
-            || self.impulse == TF_PB_DETONATE) {
-        ImpulseCommands();
-        return;
+    // whitelist of commands that can be used even when reloading
+    switch (self.impulse)
+    {
+        case TF_SPECIAL_SKILL:
+        case TF_PB_DETONATE:
+        case TF_MEDIC_HELPME:
+        case TF_DASH:
+        case TF_DISCARD:
+        case TF_DROPFLAG:
+        case TF_CHANGEPC_SCOUT:
+        case TF_CHANGEPC_SNIPER:
+        case TF_CHANGEPC_SOLDIER:
+        case TF_CHANGEPC_DEMOMAN:
+        case TF_CHANGEPC_MEDIC:
+        case TF_CHANGEPC_HVYWEAP:
+        case TF_CHANGEPC_PYRO:
+        case TF_CHANGEPC_SPY:
+        case TF_CHANGEPC_ENGINEER:
+        case TF_CHANGEPC_RANDOM:
+            ImpulseCommands();
+            return;
     }
 
-    // /saveme, /dash, /discard, /dropflag
-    if (self.impulse == TF_MEDIC_HELPME || self.impulse == TF_DASH || self.impulse == TF_DISCARD
-                || self.impulse == TF_DROPFLAG) {
+    //  grenade impulses always possible
+    if ((self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
         ImpulseCommands();
         return;
     }
