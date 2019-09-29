@@ -22,8 +22,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
 	registercommand("fo_hud_reset");
-	registercommand("fo_autohop");
-	registercommand(FOCMD_GRENTIMER);
+	//registercommand("fo_autohop");
+	registercvar(FOCMD_AUTOHOP, "0");
+	//registercommand(FOCMD_GRENTIMER);
+	registercvar(FOCMD_GRENTIMER, "1");
 
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
@@ -69,6 +71,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 		case "fo_hud_reset":
 			FO_Hud_Editor_LoadDefaultSettings();
 			break;
+/*
 		case "fo_autohop":
 			if(!argv(1)) {
 			    print("Autohop is ",Settings.Autohop?"on":"off","\n");
@@ -100,6 +103,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			    FO_WriteSettings();
 			}
 			break;
+*/
     }	
     return FALSE;
 };
@@ -125,7 +129,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame()
 {
-	if (Settings.Autohop == 1)
+	if (cvar(FOCMD_AUTOHOP) == 1)
 	{
 		if (input_buttons&2)
 		{
@@ -137,4 +141,8 @@ noref void CSQC_Input_Frame()
 			}
 		}	
 	}
+}
+
+void CSQC_Shutdown() = {
+    FO_WriteSettings();
 }

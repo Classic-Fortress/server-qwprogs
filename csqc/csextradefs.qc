@@ -267,11 +267,11 @@ var FO_Hud_Panel Hud_Panels[] = {
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 
-typedef struct {
-    float Autohop;
-    float Grentimer;
-} FO_Settings;
-FO_Settings Settings;
+//typedef struct {
+//    float Autohop;
+//    float Grentimer;
+//} FO_Settings;
+//FO_Settings Settings;
 
 
 

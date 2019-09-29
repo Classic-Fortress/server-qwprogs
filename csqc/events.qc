@@ -97,7 +97,7 @@ void() CSQC_Parse_Event = {
         case MSG_GRENPRIMED:
             float grentype = readfloat();
             AddGrenTimer(grentype);
-            if(Settings.Grentimer == 1) {
+            if(cvar(FOCMD_GRENTIMER) == 1) {
                 print("playing grentimer!\n");
                 localcmd("play grentimer.wav\n");
             } 
