@@ -202,8 +202,8 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
         float TextScale = DrawPanel.TextScale;
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
-                timeleft = floor(FO_Hud_Grentimers[i].expires - time);
-                if(timeleft < 0) {
+                timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
+                if(timeleft < 1) {
                     //Expire and fill the gap if there are any active grentimers afterwards
                     FO_Hud_Grentimers[i].grentype = 0;
                     for(float j = i + 1; j < FO_Hud_Grentimers.length; j++) {
