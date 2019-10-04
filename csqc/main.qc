@@ -26,9 +26,15 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercvar(FOCMD_AUTOHOP, "0");
 	//registercommand(FOCMD_GRENTIMER);
 	registercvar(FOCMD_GRENTIMER, "1");
+	registercvar("fo_menu_test", "0");
+    registercommand("fo_menu_game");
+    registercommand("fo_menu_team");
+    registercommand("fo_menu_class");
 
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
+
+    CurrentMenu = FO_MENU_TEAM;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -37,7 +43,8 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-	team_no = getstatf(STAT_TEAMNO);
+	ScreenSize = [width, height, menushown];
+    team_no = getstatf(STAT_TEAMNO);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -53,9 +60,16 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
-	sui_begin(width, height);
-	Hud_Draw(width, height);
-	sui_end();
+    sui_begin(width, height);
+    //if(cvar("fo_menu_test")) {
+    //    FO_MENU_TEST.active = 1;
+    //} else {
+    //    FO_MENU_TEST.active = 0;
+    //}
+    //fo_hud_menu_active = cvar("fo_menu_test");
+    Menu_Draw(width, height, menushown);
+    Hud_Draw(width, height);
+    sui_end();
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -71,6 +85,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 		case "fo_hud_reset":
 			FO_Hud_Editor_LoadDefaultSettings();
 			break;
+        case "fo_menu_game":
+            FO_Menu_Game(TRUE);
+            break;
+        case "fo_menu_team":
+            FO_Menu_Team(TRUE);
+            break;
+        case "fo_menu_class":
+            FO_Menu_Class(TRUE);
+            break;
 /*
 		case "fo_autohop":
 			if(!argv(1)) {

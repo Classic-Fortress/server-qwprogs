@@ -96,7 +96,9 @@ void Hud_DrawFlagStatusBar(string panelid)
             flagInfoCount++;
         }
     }
-    
+    if(fo_hud_editor && !flagInfoCount) {
+        flagInfoCount = 1;
+    }
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))

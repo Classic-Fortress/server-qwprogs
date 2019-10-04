@@ -15,23 +15,35 @@ void () TeamFortress_MOTD = {
     local string st1;
     local string st2;
     local string ya;
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+    
+    if(csqcactive) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        //return;
+    }
 
     if (self.motd == 5) {
-        sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
-
-        st1 = infokey(world, "motd1");
-        if (st1 != string_null) {
-            st2 = infokey(world, "motd2");
-            if (st2 != string_null) {
-                st1 = strcat(strcat(st1, "\n"), st2);
-            }
+        if(csqcactive) {
+            UpdateClientMenu_Team(self);
         } else {
-            st1 = "Welcome to FortressOne\n==================================\nwww.github.com/FortressOne";
-        }
+            sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
 
-        sprint(self, PRINT_HIGH, st1);
-        sprint(self, PRINT_HIGH, "\n\n\n");
-        Status_Menu(self, MOTD_Input, st1);
+            st1 = infokey(world, "motd1");
+            if (st1 != string_null) {
+                st2 = infokey(world, "motd2");
+                if (st2 != string_null) {
+                    st1 = strcat(strcat(st1, "\n"), st2);
+                }
+            } else {
+                st1 = "Welcome to FortressOne\n==================================\nwww.github.com/FortressOne";
+            }
+
+            sprint(self, PRINT_HIGH, st1);
+            sprint(self, PRINT_HIGH, "\n\n\n");
+            Status_Menu(self, MOTD_Input, st1);
+        }
     }
 
     if (self.motd == 20) {

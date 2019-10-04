@@ -96,32 +96,41 @@ nonstatic void(mitem_desktop desktop) M_Main =
 #if 1//def CSQC
 	//spinny quad/pent, for the luls
 	//local string it = (random()<0.9)?"progs/quaddama.mdl":"progs/invulner.mdl";
-	local string skin = "tf_sold";
+	local string skin = "sol";
 	local float r = random(), col = 13; //Blue
-	if(r > 0.89)
-		skin = "tf_scout";
-	else if(r > 0.78)
-		skin = "tf_snipe";
-	else if(r > 0.67)
-		skin = "tf_demo";
-	else if(r > 0.56)
-		skin = "tf_medic";
-	else if(r > 0.45)
-		skin = "tf_hwguy";
-	else if(r > 0.34)
-		skin = "tf_pyro";
-	else if(r > 0.23)
-		skin = "tf_spy";
-	else if(r > 0.12)
-		skin = "tf_eng";
 
-	r = random();
-	if(r > 0.95)
-		col = 11; //Green
-	else if(r > 0.9)
-		col = 12; //Yellow
+	if(r > 0.89)
+		skin = "sco";
+	else if(r > 0.78)
+		skin = "sni";
+	else if(r > 0.67)
+		skin = "dem";
+	else if(r > 0.56)
+		skin = "med";
 	else if(r > 0.45)
+		skin = "hwg";
+	else if(r > 0.34)
+		skin = "pyr";
+	else if(r > 0.23)
+		skin = "spy";
+	else if(r > 0.12)
+		skin = "eng";
+
+    //skin = "player_red";
+                
+	r = random();
+	if(r > 0.95) {
+		col = 11; //Green
+        skin = strcat("gren_", skin);
+    } else if(r > 0.9) {
+		col = 12; //Yellow
+        skin = strcat("yell_", skin);
+    } else if(r > 0.45) {
 		col = 4; //Red
+        skin = strcat("red_", skin);
+    } else {
+        skin = strcat("blue_", skin);
+    }
 	
 	//m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, 12*-16/2], [0, 12*16/2]);
 	m.add(spawn (mitem_spinnymodel, 
