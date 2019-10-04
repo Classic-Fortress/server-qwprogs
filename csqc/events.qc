@@ -107,7 +107,7 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_TEAM:
                     number_of_teams = readfloat();
                     for(float i = 0; i < 4; i++) {
-                        if(i < number_of_teams) {
+                        if(i < number_of_teams && (i + 1) != team_no) {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
                         } else {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;

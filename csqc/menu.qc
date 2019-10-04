@@ -34,13 +34,15 @@ fo_menu CurrentMenu;
 
 var fo_menu FO_MENU_GAME = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER, {
-        {"1","Change Team", "","",FO_MENU_STATE_NORMAL,{FO_Menu_Team(TRUE); },MENU_BUTTON},
-        {"2","Change Class","","",FO_MENU_STATE_NORMAL,{localcmd("changeclass\n"); Menu_Cancel(); },MENU_BUTTON},
-        {"3","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
-        {"4","Join",  "","",FO_MENU_STATE_NORMAL,{localcmd("join!\n"); Menu_Cancel();},MENU_BUTTON},
+        {"1","Select Team", "","",FO_MENU_STATE_NORMAL,{FO_Menu_Team(TRUE); },MENU_BUTTON},
+        {"2","Select Class","","",FO_MENU_STATE_NORMAL,{localcmd("changeclass\n"); Menu_Cancel(); },MENU_BUTTON},
+        {"3","Ready",  "","",FO_MENU_STATE_NORMAL,{localcmd("ready\n"); Menu_Cancel();},MENU_BUTTON},
+        {},
+        {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         {},
         {"5","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 6, TRUE
+        {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 8, TRUE
 };
 var fo_menu FO_MENU_TEAM = {
     [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER, {
@@ -146,7 +148,7 @@ vector fo_menu_draw(fo_menu menu) = {
     sui_pop_frame();
     
     drawstring(
-        position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding], 
+        position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding*2], 
         menu.title, 
         mediumtext, 
         MENU_TEXT_2, 
@@ -174,7 +176,7 @@ vector fo_menu_draw(fo_menu menu) = {
             
         } else if(menu.options[i].state & FO_MENU_STATE_DISABLED) {
             if(menu.options[i].name) {
-                sui_border_box(position + [padding, titleoffset + i * (buttonsize.y + padding)], buttonsize, 1, MENU_BG_DARK, 0.4, 0);
+                sui_border_box(position + [padding, titleoffset + i * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
                 drawstring(
                     position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                     menu.options[i].name, 
