@@ -45,6 +45,7 @@ void Hud_WriteCfg(string path)
 
 void FO_Hud_Editor_LoadDefaultSettings()
 {
+    Hud_Panels[HUD_PANEL_HUDOPTIONS].drawPanel = Hud_DrawHudOptionsPanel;
     vector vsize = (vector)getproperty(VF_SCREENVSIZE);
     float width = vsize_x;
     float height = vsize_y;

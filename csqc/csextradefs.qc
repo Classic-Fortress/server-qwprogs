@@ -284,17 +284,17 @@ void(string panelid, float display, string text, string icon) drawSimplePanel = 
 }
 
 var FO_Hud_Panel Hud_Panels[] = {
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
-    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'0 0','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
-    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,0,1,0, drawFlagInfo, {return "";}},
-    {"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
-    {"menupanel","Menu",'0 0','200 200',1,0,1,0, drawSimplePanel, {return "";}}
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
+    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 30','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
+    {"capspanel",FO_HUD_CAPS_NAME,'10 40','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
+    {"gren1panel",FO_HUD_GREN1_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'10 60','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
+    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 70','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 80','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
+    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 90','150 260',1,0,1,0, drawFlagInfo, {return "";}},
+    {"grentimerpanel","Grenade Timer",'10 100','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
+    {"menupanel","Menu",'10 110','200 200',1,0,1,0, drawSimplePanel, {return "";}}
 };
 
 vector(float panelid) getPosition = {

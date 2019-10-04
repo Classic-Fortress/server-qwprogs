@@ -122,13 +122,19 @@ vector fo_menu_draw(fo_menu menu) = {
         setcursormode(TRUE);
         //fo_hud_menu_active = TRUE;
     }
+    local float scale = Hud_Panels[HUD_PANEL_MENU].Scale, textscale = Hud_Panels[HUD_PANEL_MENU].TextScale;
+    if(!textscale) {
+        textscale = scale;
+    }
 
-    local float padding = 4, titleoffset = 36;
-    local vector buttonsize = [menu.size.x - padding * 2, 24];
+    local float padding = 4 * scale, titleoffset = 36 * scale;
+    local vector menusize = menu.size * scale;
+    local vector buttonsize = [menusize.x - padding * 2, 24];
+    local vector smalltext = MENU_TEXT_SMALL * textscale, mediumtext = MENU_TEXT_MEDIUM * textscale;
     local string id = strcat("fo_menu_",menu.title);
     local vector tempcolour;
     
-    menu.size.y = titleoffset + menu.num_opts * (buttonsize.y + padding);
+    menusize.y = titleoffset + menu.num_opts * (buttonsize.y + padding);
     
     if (sui_is_held(id)) {
         position = position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
@@ -136,19 +142,19 @@ vector fo_menu_draw(fo_menu menu) = {
     }
 
     
-    sui_border_box(position, menu.size, 1, MENU_BORDER, 0.4, 0);
-    sui_push_frame(position, menu.size);
+    sui_border_box(position, menusize, 1, MENU_BORDER, 0.4, 0);
+    sui_push_frame(position, menusize);
 
-    sui_fill([0, 0], menu.size, MENU_BG, 0.4, 0);
+    sui_fill([0, 0], menusize, MENU_BG, 0.4, 0);
 
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-    sui_action_element([0, 0], menu.size, id, sui_noop);
+    sui_action_element([0, 0], menusize, id, sui_noop);
     sui_pop_frame();
     
     drawstring(
-        position + [menu.size.x / 2 - stringwidth(menu.title,1,MENU_TEXT_MEDIUM)/2,padding], 
+        position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding], 
         menu.title, 
-        MENU_TEXT_MEDIUM, 
+        mediumtext, 
         MENU_TEXT_2, 
         1, 
         0
@@ -157,14 +163,14 @@ vector fo_menu_draw(fo_menu menu) = {
     for(float i = 0; i < menu.num_opts; i++) {
         if(menu.options[i].state & FO_MENU_STATE_NORMAL) {
             if(menu.options[i].name) {
-                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + i * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour)) {
+                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + i * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext)) {
                     menu.options[i].action();
                 }
                 if(menu.options[i].shortcut) {
                     drawstring(
-                        position + [padding*3, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
+                        position + [padding*3, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                         menu.options[i].shortcut, 
-                        MENU_TEXT_SMALL, 
+                        smalltext, 
                         MENU_TEXT_3, 
                         1, 
                         0
@@ -176,9 +182,9 @@ vector fo_menu_draw(fo_menu menu) = {
             if(menu.options[i].name) {
                 sui_border_box(position + [padding, titleoffset + i * (buttonsize.y + padding)], buttonsize, 1, MENU_BG_DARK, 0.4, 0);
                 drawstring(
-                    position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,MENU_TEXT_SMALL) / 2, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
+                    position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                     menu.options[i].name, 
-                    MENU_TEXT_SMALL, 
+                    smalltext, 
                     MENU_TEXT_2, 
                     1, 
                     0
@@ -186,7 +192,7 @@ vector fo_menu_draw(fo_menu menu) = {
             }
             
         }
-   }
+    }
     return position;
 }
 

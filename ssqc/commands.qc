@@ -45,6 +45,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
         case "changeteam":
+            processedCmd = TRUE;
             if(self.classname == "observer") {
                 sprint(self, PRINT_HIGH, "You can't join a team while spectating! Join the game first.\n");
                 break;
@@ -80,6 +81,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
         case "changeclass":
+            processedCmd = TRUE;
             if(self.classname == "observer") {
                 sprint(self, PRINT_HIGH, "You can't pick a class while spectating! Join the game first.\n");
                 break;

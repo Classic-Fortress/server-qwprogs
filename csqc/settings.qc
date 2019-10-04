@@ -17,7 +17,6 @@ void FO_LoadDefaultSettings()
 
 void FO_LoadSettings()
 {
-    Hud_Panels[HUD_PANEL_HUDOPTIONS].drawPanel = Hud_DrawHudOptionsPanel;
     FO_LoadDefaultSettings();
     
 	float filehandle;
