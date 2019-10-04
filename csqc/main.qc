@@ -22,14 +22,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
 	registercommand("fo_hud_reset");
-	//registercommand("fo_autohop");
 	registercvar(FOCMD_AUTOHOP, "0");
-	//registercommand(FOCMD_GRENTIMER);
 	registercvar(FOCMD_GRENTIMER, "1");
-	registercvar("fo_menu_test", "0");
     registercommand("fo_menu_game");
-    registercommand("fo_menu_team");
-    registercommand("fo_menu_class");
 
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
@@ -61,12 +56,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     renderscene();
 
     sui_begin(width, height);
-    //if(cvar("fo_menu_test")) {
-    //    FO_MENU_TEST.active = 1;
-    //} else {
-    //    FO_MENU_TEST.active = 0;
-    //}
-    //fo_hud_menu_active = cvar("fo_menu_test");
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
@@ -88,45 +77,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
             break;
-        case "fo_menu_team":
-            FO_Menu_Team(TRUE);
-            break;
-        case "fo_menu_class":
-            FO_Menu_Class(TRUE);
-            break;
-/*
-		case "fo_autohop":
-			if(!argv(1)) {
-			    print("Autohop is ",Settings.Autohop?"on":"off","\n");
-			} else {
-			    val = stof(argv(1));
-			    if (val == 1)
-			    {
-				    Settings.Autohop = 1;
-				    print("auto bunnyhop has been enabled\n");
-			    }
-			    else if (val == 0)
-			    {
-				    Settings.Autohop = 0;
-				    print("auto bunnyhop has been disabled\n");
-			    }
-			    FO_WriteSettings();
-			}
-			break;
-		case FOCMD_GRENTIMER:
-			if(!argv(1)) {
-			    print("Client-side Grenade timer is ",Settings.Grentimer?"on":"off","\n");
-			} else {
-			    val = stof(argv(1));
-			    if(val == 1) {
-				Settings.Grentimer = 1;
-			    } else if(val == 0) {
-				Settings.Grentimer = 0;
-			    }
-			    FO_WriteSettings();
-			}
-			break;
-*/
     }	
     return FALSE;
 };

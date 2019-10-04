@@ -307,13 +307,6 @@ vector(float panelid) getFillSize = {
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 
-//typedef struct {
-//    float Autohop;
-//    float Grentimer;
-//} FO_Settings;
-//FO_Settings Settings;
-
-
 
 float team_no;
 

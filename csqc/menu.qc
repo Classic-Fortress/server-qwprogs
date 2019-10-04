@@ -101,10 +101,8 @@ void fo_menu_add_option2(string shortcut, string name, string value, string desc
 }
 
 vector fo_menu_draw(fo_menu menu) = {
-    //print("Active? ", ftos(menu.active), "\n");
     vector position;
     if(menu.flags & FO_MENU_FLAG_CENTER) {
-        //position = [ScreenSize.x / 2 - menu.size.x / 2, ScreenSize.y / 2 - menu.size.y / 2];
         position = Hud_Panels[HUD_PANEL_MENU].Position;
     } else {
         position = menu.position;
@@ -113,14 +111,11 @@ vector fo_menu_draw(fo_menu menu) = {
     
     if(fo_hud_editor) return position;
     if(!menu.active) {
-        //print("menu inactive\n");
         setcursormode(FALSE);
-        //fo_hud_menu_active = FALSE;
         return position;
     }
     if(menu.flags & FO_MENU_FLAG_USE_MOUSE) {
         setcursormode(TRUE);
-        //fo_hud_menu_active = TRUE;
     }
     local float scale = Hud_Panels[HUD_PANEL_MENU].Scale, textscale = Hud_Panels[HUD_PANEL_MENU].TextScale;
     if(!textscale) {
@@ -138,7 +133,6 @@ vector fo_menu_draw(fo_menu menu) = {
     
     if (sui_is_held(id)) {
         position = position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
-//        sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
     }
 
     
@@ -217,12 +211,10 @@ void Menu_Cancel() = {
         setcursormode(FALSE);
         fo_hud_menu_active = FALSE;
     }
-    //CurrentMenu.active = FALSE;
 }
 
 void Menu_Draw(float width, float height, float menushown) = {
     if(fo_hud_menu_active) {
-        //CurrentMenu.active = cvar("fo_menu_test");
         CurrentMenu.position = fo_menu_draw(CurrentMenu);
         Hud_Panels[HUD_PANEL_MENU].Position = CurrentMenu.position;
     } else {
