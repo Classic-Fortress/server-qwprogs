@@ -337,6 +337,11 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
 
 void (float update) Menu_Class = {
     local entity timer;
+    if (TeamFortress_TeamIsCivilian(self.team_no)) {
+        Status_Print(self, "Your team can only be civilians\n");
+        Menu_Close(self);
+        return;
+    }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own class menu
@@ -414,9 +419,9 @@ void (float update) Menu_Class = {
 
     // print out class menu
     self.menu_input = nil;
-    if (TeamFortress_TeamIsCivilian(self.team_no))
-        Status_Print(self, "Your team can only be civilians\n");
-    else
+//    if (TeamFortress_TeamIsCivilian(self.team_no))
+//        Status_Print(self, "Your team can only be civilians\n");
+//    else
         Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
 
     strunzone(s_scout); strunzone(s_sniper); strunzone(s_soldier); strunzone(s_demoman); strunzone(s_medic);

@@ -1522,14 +1522,11 @@ void () PutClientInServer = {
 
     DecodeLevelParms();
 
-    if (self.playerclass == 0) {
-        if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            TeamFortress_ChangeClass(11);
-        }
+    if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
+        TeamFortress_ChangeClass(11);
     }
-    if ((deathmatch == 3) && (self.nextpc != 0)) {
+    if (deathmatch == 3) {
         self.playerclass = self.nextpc;
-        self.nextpc = 0;
         if (self.playerclass == PC_RANDOM)
             self.tfstate = self.tfstate | TFSTATE_RANDOMPC;
         else {
@@ -1537,6 +1534,10 @@ void () PutClientInServer = {
                 self.tfstate - (self.tfstate & TFSTATE_RANDOMPC);
             TeamFortress_ExecClassScript(self);
         }
+    }
+    
+    if (self.playerclass == 0 && self.team_no > 0) {
+        Menu_Class(0);
     }
 
     if (self.tfstate & TFSTATE_RANDOMPC) {

@@ -66,7 +66,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 if(arg2 == "auto") {
                     if(self.team_no == 0) {
                         TeamFortress_TeamPutPlayerInTeam();
-                        UpdateClientMenu_Class(self);
+                        //UpdateClientMenu_Class(self);
+                        Menu_Class(0);
                         break;
                     } else {
                         sprint(self, PRINT_HIGH, "You can't auto team when you're already playing!\n");
@@ -78,7 +79,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     if(number_of_teams == 0 || newteam <= number_of_teams) {
                         TeamFortress_TeamSet(newteam);
                         if(!oldteam) {
-                            UpdateClientMenu_Class(self);
+                            //UpdateClientMenu_Class(self);
+                            Menu_Class(0);
                         }
                         break;
                     }
@@ -106,12 +108,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 
                 // keep showing menu if class is invalid
                 if (newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
+                    sprint(self, PRINT_HIGH, "Invalid class for this team!\n");
                     UpdateClientMenu_Class(self);
                     break;
                 }
 
                 // don't try to change class if class is forbidden
                 if ((!IsLegalClass(newclass) && !override_mapclasses) || CF_GetClassRestriction(self.team_no, newclass) == -1) {
+                    sprint(self, PRINT_HIGH, "Forbidden class for this team!\n");
                     break;
                 }
 
