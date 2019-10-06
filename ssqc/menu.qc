@@ -213,6 +213,16 @@ void (float update) Menu_Team = {
         /* Status_Menu(self, Menu_Team_Input, ""); */
         return;
 
+    //If there's only one team, just join it
+    if (number_of_teams == 1 && self.team_no == 0) {
+        Menu_Close(self);
+        TeamFortress_TeamSet(1);
+        if ((self.playerclass == 0) && (self.lives != 0)) {
+            Menu_Class(0);
+        }
+        return;
+    }
+
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it

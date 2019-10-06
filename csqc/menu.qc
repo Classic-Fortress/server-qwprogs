@@ -40,10 +40,20 @@ var fo_menu FO_MENU_GAME = {
         {},
         {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         {},
-        {"5","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+        {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
         {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 8, TRUE
 };
+var fo_menu FO_MENU_GAME_SPECTATOR = {
+    [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER, {
+        {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
+        {"2","Tracking Sidebar",  "","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BUTTON},
+        {},
+        {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+        {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 6, TRUE
+};
+
 var fo_menu FO_MENU_TEAM = {
     [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER, {
         {"1","Blue team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 1\n");Menu_Cancel();},'0.3 0.4 0.7'},
@@ -227,7 +237,13 @@ void Menu_Draw(float width, float height, float menushown) = {
 void FO_Menu_Game(float force) = {
     if(fo_hud_menu_active && !force)
         return;
-    CurrentMenu = FO_MENU_GAME;
+    if(is_spectator) {
+        //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
+        CurrentMenu = FO_MENU_GAME_SPECTATOR;
+    } else {
+        //print(getplayerkeyvalue(player_localnum, "name"), " is playing a game!\n");
+        CurrentMenu = FO_MENU_GAME;
+    }
     fo_hud_menu_active = TRUE;
 }
 
@@ -235,6 +251,9 @@ void FO_Menu_Team(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     if(team_no) {
+        if(number_of_teams < 2) {
+            return;
+        }
         FO_MENU_TEAM.num_opts = number_of_teams;
     } else {
         FO_MENU_TEAM.num_opts = 6;

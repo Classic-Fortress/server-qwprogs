@@ -54,6 +54,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "You can't join a team when teamplay is disabled!\n");
                 break;
             }
+            if(number_of_teams == 1) {
+                if(self.team_no == 0) {
+                    TeamFortress_TeamSet(1);
+                } else {
+                    sprint(self, PRINT_HIGH, "Only one team is available on this map.\n");
+                }
+                break;
+            }
             if (arg2) {
                 if(arg2 == "auto") {
                     if(self.team_no == 0) {

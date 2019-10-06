@@ -309,6 +309,7 @@ vector(float panelid) getFillSize = {
 
 
 float team_no;
+float is_spectator;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
