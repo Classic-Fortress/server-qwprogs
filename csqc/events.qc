@@ -97,10 +97,29 @@ void() CSQC_Parse_Event = {
         case MSG_GRENPRIMED:
             float grentype = readfloat();
             AddGrenTimer(grentype);
-            if(Settings.Grentimer == 1) {
-                print("playing grentimer!\n");
+            if(cvar(FOCMD_GRENTIMER) == 1) {
                 localcmd("play grentimer.wav\n");
             } 
+            break;
+        case MSG_CLIENT_MENU:
+            float menutype = readfloat();
+            switch (menutype) {
+                case CLIENT_MENU_TEAM:
+                    number_of_teams = readfloat();
+                    for(float i = 0; i < 4; i++) {
+                        if(i < number_of_teams && (i + 1) != team_no) {
+                            FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
+                        } else {
+                            FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
+                        } 
+                    }
+                    FO_Menu_Team(FALSE);
+                    break;
+                case CLIENT_MENU_CLASS:
+                    float allowedclasses = readfloat();
+                    FO_Menu_Class(FALSE);
+                    break;
+            }
             break;
     }
 }

@@ -44,6 +44,87 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
             }
             break;
+        case "changeteam":
+            processedCmd = TRUE;
+            if(self.classname == "observer") {
+                sprint(self, PRINT_HIGH, "You can't join a team while spectating! Join the game first.\n");
+                break;
+            }
+            if(teamplay == 0) {
+                sprint(self, PRINT_HIGH, "You can't join a team when teamplay is disabled!\n");
+                break;
+            }
+            if(number_of_teams == 1) {
+                if(self.team_no == 0) {
+                    TeamFortress_TeamSet(1);
+                } else {
+                    sprint(self, PRINT_HIGH, "Only one team is available on this map.\n");
+                }
+                break;
+            }
+            if (arg2) {
+                if(arg2 == "auto") {
+                    if(self.team_no == 0) {
+                        TeamFortress_TeamPutPlayerInTeam();
+                        UpdateClientMenu_Class(self);
+                        break;
+                    } else {
+                        sprint(self, PRINT_HIGH, "You can't auto team when you're already playing!\n");
+                        break;
+                    }
+                }
+                if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
+                    float newteam = stof(arg2), oldteam = self.team_no;
+                    if(number_of_teams == 0 || newteam <= number_of_teams) {
+                        TeamFortress_TeamSet(newteam);
+                        if(!oldteam) {
+                            UpdateClientMenu_Class(self);
+                        }
+                        break;
+                    }
+                }
+                sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-",number_of_teams?ftos(number_of_teams):"4",self.team_no?"":" or 'auto'",".\n");
+            } else {
+                UpdateClientMenu_Team(self);
+            }
+            break;
+        case "changeclass":
+            processedCmd = TRUE;
+            if(self.classname == "observer") {
+                sprint(self, PRINT_HIGH, "You can't pick a class while spectating! Join the game first.\n");
+                break;
+            }
+            if (arg2) {
+                float newclass = stof(arg2);
+                               
+                if (!newclass) {
+                    sprint(self, PRINT_HIGH, "Invalid class choice. Please use values 1-10.\n");
+                    break;
+                }
+                
+                override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+                
+                // keep showing menu if class is invalid
+                if (newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
+                    UpdateClientMenu_Class(self);
+                    break;
+                }
+
+                // don't try to change class if class is forbidden
+                if ((!IsLegalClass(newclass) && !override_mapclasses) || CF_GetClassRestriction(self.team_no, newclass) == -1) {
+                    break;
+                }
+
+                // close menu if selected class is current class
+                //if (self.playerclass == newclass || (newclass == 10 && (self.tfstate & TFSTATE_RANDOMPC))) {
+                //    break;
+                //}
+
+                TeamFortress_ChangeClass(newclass);
+            } else {
+                UpdateClientMenu_Class(self);
+            }
+            break;
     }
    
     if (self.is_admin)

@@ -126,8 +126,9 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	fr.add(menuitemslider_spawn(_("Brightness"),		dp("v_brightness", "brightness"),'0.0 0.5 0.1', '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("Crosshair"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcheck_spawn (_("Show Speed"),		"show_speed", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-    //pos += 8;
-	//fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+    pos += 8;
+	fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcheck_spawn (_("Simple Bunnyhop"),		"fo_autohop", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemslider_spawn(_("TF Status Bar"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemslider_spawn(_("TF Flag Info"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	
@@ -152,7 +153,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 
 	
 	//m.add(spawn (mitem_spinnymodel, item_text: it), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-160, 12*-16/2], [0, 12*16/2]);
-	m.add(spawn (mitem_spinnymodel, item_text: "progs/player.mdl", firstframe:12, framecount:5, shootframe:119, shootframes:6, dontrotate:1, startangle:'0 155 0', customskin:skin, rotatespeed:10), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-300, 16*-16/2], [-40, 16*16/2]);
+	m.add(spawn (mitem_spinnymodel, item_text: "progs/player.mdl", firstframe:12, framecount:5, shootframe:119, shootframes:6, dontrotate:1, startangle:'0 155 0', customskin:skin, rotatespeed:10, topcolour:0, bottomcolour:0), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-300, 16*-16/2], [-40, 16*16/2]);
 //	m.add(spawn (mitem_playerpreview, item_text: "progs/player.mdl", firstframe:0, framecount:6, shootframe:119, shootframes:6), RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MID | RS_X_MAX_PARENT_MID|RS_Y_MAX_PARENT_MID, [-200, 12*-16/2], [-40, 12*16/2]);
 
 	addmenuback(m);

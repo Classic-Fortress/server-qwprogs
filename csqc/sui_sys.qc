@@ -935,5 +935,26 @@ void() sui_draw_bind_overlay =
 	}
 };
 
+float(string id, vector pos, vector size, string text, vector colour, vector textsize) hud_colour_button =
+{
+	sui_push_frame(pos, size);
+	vector basecolor = sui_is_hovered(id) ? colour + MENU_HIGHLIGHT * 0.1 : colour;
+	vector bordercolour = colour + '0.05 0.05 0.05';
+	basecolor = sui_is_held(id) ? colour - MENU_DARKEN * 0.1 : basecolor;
+	sui_fill([0, 0], size, basecolor, 0.6, 0);
+	sui_border_box([0, 0], size, 1, bordercolour, 0.4, 0);
+	
+	sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+	sui_text([0, 0], textsize, text, MENU_TEXT_1, 1, 0);	
+	sui_action_element([0, 0], size, id, sui_noop);
+	sui_pop_frame();
+	
+	return sui_is_clicked(id);
+};
+
+float(string id, vector pos, vector size, string text) hud_button = {
+	return hud_colour_button(id, pos, size, text, MENU_BUTTON, MENU_TEXT_SMALL);
+}
+
 
 // -------------------- END OF SUI SYSTEM STUFF --------------------

@@ -45,6 +45,7 @@ void Hud_WriteCfg(string path)
 
 void FO_Hud_Editor_LoadDefaultSettings()
 {
+    Hud_Panels[HUD_PANEL_HUDOPTIONS].drawPanel = Hud_DrawHudOptionsPanel;
     vector vsize = (vector)getproperty(VF_SCREENVSIZE);
     float width = vsize_x;
     float height = vsize_y;
@@ -96,7 +97,9 @@ void Hud_DrawFlagStatusBar(string panelid)
             flagInfoCount++;
         }
     }
-    
+    if(fo_hud_editor && !flagInfoCount) {
+        flagInfoCount = 1;
+    }
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
     float alpha = 0;
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))

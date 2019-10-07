@@ -3,20 +3,20 @@ void FO_WriteSettings()
     // this overwrites
     float filehandle;
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
-    string line = FormatCfgString("", FOCMD_AUTOHOP, ftos(Settings.Autohop));
-    line = FormatCfgString(line, FOCMD_GRENTIMER, ftos(Settings.Grentimer));
+    string line = FormatCfgString("", FOCMD_AUTOHOP, ftos(cvar(FOCMD_AUTOHOP)));
+    line = FormatCfgString(line, FOCMD_GRENTIMER, ftos(cvar(FOCMD_GRENTIMER)));
     fputs(filehandle, line);
     fclose(filehandle);
 }
 
 void FO_LoadDefaultSettings()
 {
-    Settings.Autohop = 0;
+    cvar_set(FOCMD_AUTOHOP, "0");
+    cvar_set(FOCMD_GRENTIMER, "1");
 }
 
 void FO_LoadSettings()
 {
-    Hud_Panels[HUD_PANEL_HUDOPTIONS].drawPanel = Hud_DrawHudOptionsPanel;
     FO_LoadDefaultSettings();
     
 	float filehandle;
@@ -42,10 +42,10 @@ void FO_LoadSettings()
                 switch(field)
                 {
                     case FOCMD_AUTOHOP:
-                        Settings.Autohop = stof(val);
+                        cvar_set(FOCMD_AUTOHOP, val);
                         break;
                     case FOCMD_GRENTIMER:
-                        Settings.Grentimer = stof(val);
+                        cvar_set(FOCMD_GRENTIMER, val);
                         break;
                 }
             }

@@ -15,23 +15,36 @@ void () TeamFortress_MOTD = {
     local string st1;
     local string st2;
     local string ya;
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+    
+    if(csqcactive) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        //return;
+    }
 
     if (self.motd == 5) {
-        sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
-
-        st1 = infokey(world, "motd1");
-        if (st1 != string_null) {
-            st2 = infokey(world, "motd2");
-            if (st2 != string_null) {
-                st1 = strcat(strcat(st1, "\n"), st2);
-            }
+        if(csqcactive) {
+            //UpdateClientMenu_Team(self);
+            Menu_Team(0);
         } else {
-            st1 = "Welcome to FortressOne\n==================================\nwww.github.com/FortressOne";
-        }
+            sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
 
-        sprint(self, PRINT_HIGH, st1);
-        sprint(self, PRINT_HIGH, "\n\n\n");
-        Status_Menu(self, MOTD_Input, st1);
+            st1 = infokey(world, "motd1");
+            if (st1 != string_null) {
+                st2 = infokey(world, "motd2");
+                if (st2 != string_null) {
+                    st1 = strcat(strcat(st1, "\n"), st2);
+                }
+            } else {
+                st1 = "Welcome to FortressOne\n==================================\nwww.github.com/FortressOne";
+            }
+
+            sprint(self, PRINT_HIGH, st1);
+            sprint(self, PRINT_HIGH, "\n\n\n");
+            Status_Menu(self, MOTD_Input, st1);
+        }
     }
 
     if (self.motd == 20) {
@@ -62,25 +75,44 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("+slot4", "impulse 23;+attack");
         TeamFortress_AliasString("-slot4", "-attack;impulse 24");
     } else if (self.motd == 30) {
-        TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
-        TeamFortress_Alias("teamblue", TF_TEAM_1, 0);
-        TeamFortress_Alias("teamred", TF_TEAM_2, 0);
-        TeamFortress_Alias("teamyellow", TF_TEAM_3, 0);
-        TeamFortress_Alias("teamgreen", TF_TEAM_4, 0);
-        TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
+        if(csqcactive) {
+            TeamFortress_AliasString("changeteam", "cmd changeteam");
+            TeamFortress_AliasString("teamblue", "cmd changeteam 1");
+            TeamFortress_AliasString("teamred", "cmd changeteam 2");
+            TeamFortress_AliasString("teamyellow", "cmd changeteam 3");
+            TeamFortress_AliasString("teamgreen", "cmd changeteam 4");
+            TeamFortress_AliasString("changeclass", "cmd changeclass");
+            TeamFortress_AliasString("scout", "cmd changeclass 1");
+            TeamFortress_AliasString("sniper", "cmd changeclass 2");
+            TeamFortress_AliasString("soldier", "cmd changeclass 3");
+            TeamFortress_AliasString("demoman", "cmd changeclass 4");
+            TeamFortress_AliasString("medic", "cmd changeclass 5");
+            TeamFortress_AliasString("hwguy", "cmd changeclass 6");
+            TeamFortress_AliasString("pyro", "cmd changeclass 7");
+            TeamFortress_AliasString("spy", "cmd changeclass 8");
+            TeamFortress_AliasString("engineer", "cmd changeclass 9");
+            TeamFortress_AliasString("randompc", "cmd changeclass 10");
+        } else {
+            TeamFortress_Alias("changeteam", TF_CHANGETEAM, 0);
+            TeamFortress_Alias("teamblue", TF_TEAM_1, 0);
+            TeamFortress_Alias("teamred", TF_TEAM_2, 0);
+            TeamFortress_Alias("teamyellow", TF_TEAM_3, 0);
+            TeamFortress_Alias("teamgreen", TF_TEAM_4, 0);
+            TeamFortress_Alias("changeclass", TF_CHANGECLASS, 0);
+            TeamFortress_Alias("scout", TF_CHANGEPC_SCOUT, 0);
+            TeamFortress_Alias("sniper", TF_CHANGEPC_SNIPER, 0);
+            TeamFortress_Alias("soldier", TF_CHANGEPC_SOLDIER, 0);
+            TeamFortress_Alias("demoman", TF_CHANGEPC_DEMOMAN, 0);
+            TeamFortress_Alias("medic", TF_CHANGEPC_MEDIC, 0);
+            TeamFortress_Alias("hwguy", TF_CHANGEPC_HVYWEAP, 0);
+            TeamFortress_Alias("pyro", TF_CHANGEPC_PYRO, 0);
+            TeamFortress_Alias("spy", TF_CHANGEPC_SPY, 0);
+            TeamFortress_Alias("engineer", TF_CHANGEPC_ENGINEER, 0);
+            TeamFortress_Alias("randompc", TF_CHANGEPC_RANDOM, 0);
+        }
         TeamFortress_Alias("showclasses", TF_TEAM_CLASSES, 0);
         TeamFortress_Alias("legalclasses", TF_SHOWLEGALCLASSES, 0);
         TeamFortress_Alias("classhelp", TF_CLASSHELP, 0);
-        TeamFortress_Alias("scout", TF_CHANGEPC_SCOUT, 0);
-        TeamFortress_Alias("sniper", TF_CHANGEPC_SNIPER, 0);
-        TeamFortress_Alias("soldier", TF_CHANGEPC_SOLDIER, 0);
-        TeamFortress_Alias("demoman", TF_CHANGEPC_DEMOMAN, 0);
-        TeamFortress_Alias("medic", TF_CHANGEPC_MEDIC, 0);
-        TeamFortress_Alias("hwguy", TF_CHANGEPC_HVYWEAP, 0);
-        TeamFortress_Alias("pyro", TF_CHANGEPC_PYRO, 0);
-        TeamFortress_Alias("spy", TF_CHANGEPC_SPY, 0);
-        TeamFortress_Alias("engineer", TF_CHANGEPC_ENGINEER, 0);
-        TeamFortress_Alias("randompc", TF_CHANGEPC_RANDOM, 0);
     } else if (self.motd == 40) {
         TeamFortress_Alias("query", TF_STATUS_QUERY, 0);
         TeamFortress_Alias("inv", TF_INVENTORY, 0);

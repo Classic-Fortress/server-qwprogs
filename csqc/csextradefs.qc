@@ -1,8 +1,29 @@
 #include "../share/defs.h"
 
+vector MENU_BG = '0.2 0.3 0.4';
+vector MENU_BG_DARK = '0.1 0.15 0.2';
+vector MENU_BORDER = '0.3 0.4 0.5';
+vector MENU_SELECTED = '0 1 0';
+vector MENU_UNSELECTED = '1 0 0';
+vector MENU_BUTTON = '0.3 0.4 0.5';
+//vector MENU_BUTTON_BORDER = '0.35 0.45 0.55';
+vector MENU_TEXT_1 = '1 1 1';
+vector MENU_TEXT_2 = '0.7 0.75 0.75';
+vector MENU_TEXT_3 = '1 1 0';
+vector MENU_HIGHLIGHT = '1 1 1';
+vector MENU_DARKEN = '1 1 1';
+
+vector MENU_TEXT_SMALL = '8 8 0';
+vector MENU_TEXT_MEDIUM = '16 16 0';
+vector MENU_TEXT_LARGE = '24 24 0';
+float MENU_START_CONTENT = 32;
+
 .float owned_by;
 float fo_hud_editor;
+float fo_hud_menu_active;
 float jumptime;
+vector ScreenSize;
+float number_of_teams;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -10,6 +31,9 @@ void(string id, string identify) Hud_DrawIdentifyPanel;
 void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
+float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
+vector(float panelid) getPosition;
+vector(float panelid) getFillSize;
 
 typedef struct 
 {
@@ -202,8 +226,8 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
         float TextScale = DrawPanel.TextScale;
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
-                timeleft = floor(FO_Hud_Grentimers[i].expires - time);
-                if(timeleft < 0) {
+                timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
+                if(timeleft < 1) {
                     //Expire and fill the gap if there are any active grentimers afterwards
                     FO_Hud_Grentimers[i].grentype = 0;
                     for(float j = i + 1; j < FO_Hud_Grentimers.length; j++) {
@@ -232,7 +256,6 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
     }
 };
 
-
 FO_Hud_Settings HudSettings;
 
 
@@ -248,34 +271,45 @@ enum {
     HUD_PANEL_PLAYERCLASS,
     HUD_PANEL_IDENTIFY,
     HUD_PANEL_FLAGINFO,
-    HUD_PANEL_GRENTIMER
+    HUD_PANEL_GRENTIMER,
+    HUD_PANEL_MENU
 };
 
+void(string panelid, float display, string text, string icon) drawSimplePanel = {
+    if (fo_hud_editor) {
+        if (hud_panel(panelid, getPosition(HUD_PANEL_MENU), getFillSize(HUD_PANEL_MENU), 0.3, 1)) {
+            // click event
+        }
+    }
+}
+
 var FO_Hud_Panel Hud_Panels[] = {
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'0 0','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
-    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'0 0','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'0 0','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
-    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'0 0','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'0 0','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'0 0','150 260',1,0,1,0, drawFlagInfo, {return "";}},
-    {"grentimerpanel","Grenade Timer",'0 0','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}}
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
+    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 30','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
+    {"capspanel",FO_HUD_CAPS_NAME,'10 40','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
+    {"gren1panel",FO_HUD_GREN1_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'10 60','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
+    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 70','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 80','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
+    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 90','150 260',1,0,1,0, drawFlagInfo, {return "";}},
+    {"grentimerpanel","Grenade Timer",'10 100','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
+    {"menupanel","Menu",'10 110','200 200',1,0,1,0, drawSimplePanel, {return "";}}
 };
+
+vector(float panelid) getPosition = {
+    return Hud_Panels[panelid].Position;
+}
+vector(float panelid) getFillSize = {
+    return Hud_Panels[panelid].FillSize;
+}
 
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 
-typedef struct {
-    float Autohop;
-    float Grentimer;
-} FO_Settings;
-FO_Settings Settings;
-
-
 
 float team_no;
+float is_spectator;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

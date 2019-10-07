@@ -188,13 +188,49 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
     return strzone(s_string);
 };
 
+void UpdateClientMenu_Team(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_TEAM);
+    WriteFloat(MSG_MULTICAST, number_of_teams);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientMenu_Class(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_CLASS);
+    WriteFloat(MSG_MULTICAST, number_of_teams);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void (float update) Menu_Team = {
     local entity timer;
-
+    
     if (self.classname == "observer")
         /* Status_Menu(self, Menu_Team_Input, ""); */
         return;
 
+    //If there's only one team, just join it
+    if (number_of_teams == 1 && self.team_no == 0) {
+        Menu_Close(self);
+        TeamFortress_TeamSet(1);
+        if ((self.playerclass == 0) && (self.lives != 0)) {
+            Menu_Class(0);
+        }
+        return;
+    }
+
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Team(self);
+        return;
+    }
+    
     // allow toggling team menu using any method to show it
     if (!update && self.menu_input == Menu_Team_Input) {
         Menu_Input(0);
@@ -302,6 +338,13 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
 void (float update) Menu_Class = {
     local entity timer;
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own class menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Class(self);
+        return;
+    }
     // allow toggling team menu using any method to show it
     if (!update && self.menu_input == Menu_Class_Input) {
         Menu_Input(0);
