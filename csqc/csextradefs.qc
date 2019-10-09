@@ -10,6 +10,7 @@ vector MENU_BUTTON = '0.3 0.4 0.5';
 vector MENU_TEXT_1 = '1 1 1';
 vector MENU_TEXT_2 = '0.7 0.75 0.75';
 vector MENU_TEXT_3 = '1 1 0';
+vector MENU_TEXT_4 = '0.8 0.5 0';
 vector MENU_HIGHLIGHT = '1 1 1';
 vector MENU_DARKEN = '1 1 1';
 

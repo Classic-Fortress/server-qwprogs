@@ -194,15 +194,45 @@ void UpdateClientMenu_Team(entity pl) = {
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_TEAM);
     WriteFloat(MSG_MULTICAST, number_of_teams);
+    for(float i = 0; i < number_of_teams; i++) {
+        WriteByte(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(i+1));
+    }
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientClasses(entity pl, float team) = {
+    local float civilian_team = TeamFortress_TeamIsCivilian(pl.team_no);
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLASSES_UPDATE);
+    WriteByte(MSG_MULTICAST, civilian_team);
+    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+    if(!civilian_team) {
+        for(float i = 0; i < 10; i++) {
+            local float f_max = CF_GetClassRestriction(team, i+1);
+            local float f_players = CF_GetClassPlayers(team, i+1);
+
+            if ((IsLegalClass(i+1) || override_mapclasses) && f_max >= 0) {
+                WriteFloat(MSG_MULTICAST, f_max);
+                WriteByte(MSG_MULTICAST, f_players);
+            } else {
+                WriteFloat(MSG_MULTICAST, -1);
+            }
+        }
+    }
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
 void UpdateClientMenu_Class(entity pl) = {
+    //local byte civilian_team = TeamFortress_TeamIsCivilian(pl.team_no);
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_CLASS);
-    WriteFloat(MSG_MULTICAST, number_of_teams);
+    //WriteByte(MSG_MULTICAST, civilian_team);
+    //if(!civilian_team) {
+    //    WriteFloat(MSG_MULTICAST, number_of_teams);
+    //}
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
@@ -222,7 +252,7 @@ void (float update) Menu_Team = {
         }
         return;
     }
-
+    
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
@@ -338,7 +368,7 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
 void (float update) Menu_Class = {
     local entity timer;
     if (TeamFortress_TeamIsCivilian(self.team_no)) {
-        Status_Print(self, "Your team can only be civilians\n");
+        sprint(self, PRINT_HIGH, "Your team can only be civilians\n");
         Menu_Close(self);
         return;
     }
@@ -347,6 +377,7 @@ void (float update) Menu_Class = {
         //fte+csqc has its own class menu
         //ask the client to activate it
         Menu_Close(self);
+        UpdateClientClasses(self, self.team_no);
         UpdateClientMenu_Class(self);
         return;
     }

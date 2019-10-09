@@ -109,7 +109,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 // keep showing menu if class is invalid
                 if (newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
                     sprint(self, PRINT_HIGH, "Invalid class for this team!\n");
-                    UpdateClientMenu_Class(self);
+                    Menu_Class(0);
                     break;
                 }
 
@@ -126,7 +126,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
                 TeamFortress_ChangeClass(newclass);
             } else {
-                UpdateClientMenu_Class(self);
+                Menu_Class(0);
             }
             break;
     }

@@ -7,6 +7,8 @@
 #define MSG_GRENPRIMED      5
 
 #define MSG_CLIENT_MENU     6
+#define MSG_TEAMS_UPDATE    7
+#define MSG_CLASSES_UPDATE  8
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

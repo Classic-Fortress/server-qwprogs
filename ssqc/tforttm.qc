@@ -165,7 +165,7 @@ float (float tno) TeamFortress_TeamSet = {
     if (!CF_TeamIsValid) {
         return 0;
     }
-
+    
     if (tno == 1)
         team = "blue team";
     else if (tno == 2)
@@ -175,6 +175,11 @@ float (float tno) TeamFortress_TeamSet = {
     else
         team = "green team";
 
+    if (tno > 0 && tno == self.team_no) {
+        sprint(self, PRINT_HIGH, "You are already on the ", team, "!\n");
+        return 0;
+    }
+    
     if (TeamFortress_TeamGetColor(tno) == 0) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
