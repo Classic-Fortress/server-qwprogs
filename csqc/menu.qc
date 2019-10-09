@@ -59,7 +59,7 @@ var fo_menu FO_MENU_GAME_SPECTATOR = {
 };
 
 var fo_menu FO_MENU_TEAM = {
-    [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+    [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Blue team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 1\n");Menu_Cancel();},'0.3 0.4 0.7'},
         {"2","Red team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 2\n");Menu_Cancel();},'0.7 0.4 0.3'},
         {"3","Yellow team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 3\n");Menu_Cancel();},'0.7 0.7 0.3'},
@@ -182,7 +182,7 @@ vector fo_menu_draw(fo_menu menu) = {
         }
         
         if(menu.flags & FO_MENU_FLAG_SHOW_SHORTCUTS) {
-            shortcutoffset = [padding * 3 + smalltext.x, 0];
+            shortcutoffset = [padding * 4 + smalltext.x, 0];
         }
         if(menu.flags & FO_MENU_FLAG_SHOW_VALUES) {
             valueoffset = [padding * 4 + smalltext.x * 1, 0];
@@ -190,12 +190,14 @@ vector fo_menu_draw(fo_menu menu) = {
         
         if(menu.options[i].name) {
             if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
-                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_CENTER)) {
+                //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
+                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, shortcutoffset.x)) {
                     menu.options[i].action();
                 }
             } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
                 if(menu.options[i].name) {
-                    sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
+                    //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
+                    sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
                     drawstring(
                         position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                         menu.options[i].name, 
@@ -209,7 +211,7 @@ vector fo_menu_draw(fo_menu menu) = {
             }
             if(menu.options[i].shortcut) {
                 drawstring(
-                    position + [padding*2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                    position + [padding*3, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                     menu.options[i].shortcut, 
                     smalltext, 
                     MENU_TEXT_3, 
@@ -219,7 +221,7 @@ vector fo_menu_draw(fo_menu menu) = {
             }
             if(menu.options[i].value) {
                 drawstring(
-                    position + [menusize.x - padding*4 - smalltext.x , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                    position + [menusize.x - padding*4 - stringwidth(menu.options[i].value,1,smalltext) , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                     menu.options[i].value, 
                     smalltext, 
                     MENU_TEXT_4, 
