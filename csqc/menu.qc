@@ -6,6 +6,7 @@
 #define FO_MENU_STATE_HIDDEN 0
 #define FO_MENU_STATE_NORMAL 1
 #define FO_MENU_STATE_DISABLED 2
+#define FO_MENU_STATE_SPACER 3
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -33,14 +34,16 @@ void Menu_Cancel() ;
 fo_menu InProgressMenu;
 fo_menu CurrentMenu;
 
+fo_menu_option MenuSpacer = {"","","","",FO_MENU_STATE_SPACER};
+
 var fo_menu FO_MENU_GAME = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Select Team", "","",FO_MENU_STATE_NORMAL,{FO_Menu_Team(TRUE); },MENU_BUTTON},
         {"2","Select Class","","",FO_MENU_STATE_NORMAL,{localcmd("changeclass\n"); Menu_Cancel(); },MENU_BUTTON},
-        {"3","Ready",  "","",FO_MENU_STATE_NORMAL,{localcmd("ready\n"); Menu_Cancel();},MENU_BUTTON},
-        {},
+        {"3","Ready","","",FO_MENU_STATE_NORMAL,{localcmd("ready\n"); Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
         {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
-        {},
+        MenuSpacer,
         {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
         {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 8, TRUE
@@ -49,7 +52,7 @@ var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
         {"2","Tracking Sidebar",  "","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BUTTON},
-        {},
+        MenuSpacer,
         {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
         {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE
@@ -61,7 +64,7 @@ var fo_menu FO_MENU_TEAM = {
         {"2","Red team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 2\n");Menu_Cancel();},'0.7 0.4 0.3'},
         {"3","Yellow team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 3\n");Menu_Cancel();},'0.7 0.7 0.3'},
         {"4","Green team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 4\n");Menu_Cancel();},'0.4 0.7 0.3'},
-        {},
+        MenuSpacer,
         {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},'0.4 0.4 0.4'},
     }, 6, TRUE
 };
@@ -166,9 +169,17 @@ vector fo_menu_draw(fo_menu menu) = {
         1, 
         0
     );
-    
+    float row = 0;
     for(float i = 0; i < menu.num_opts; i++) {
         vector shortcutoffset = [0,0], valueoffset = [0,0];
+        
+        if(menu.options[i].state == FO_MENU_STATE_HIDDEN) {
+            continue;
+        }
+        if(menu.options[i].state == FO_MENU_STATE_SPACER) {
+            row++;
+            continue;
+        }
         
         if(menu.flags & FO_MENU_FLAG_SHOW_SHORTCUTS) {
             shortcutoffset = [padding * 3 + smalltext.x, 0];
@@ -177,68 +188,70 @@ vector fo_menu_draw(fo_menu menu) = {
             valueoffset = [padding * 4 + smalltext.x * 1, 0];
         }
         
-        if(menu.options[i].state & FO_MENU_STATE_NORMAL) {
-            if(menu.options[i].name) {
-                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + i * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_CENTER)) {
+        if(menu.options[i].name) {
+            if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
+                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_CENTER)) {
                     menu.options[i].action();
                 }
+            } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
+                if(menu.options[i].name) {
+                    sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
+                    drawstring(
+                        position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
+                        menu.options[i].name, 
+                        smalltext, 
+                        MENU_TEXT_2, 
+                        1, 
+                        0
+                    );
+                }
+                
             }
-            
-        } else if(menu.options[i].state & FO_MENU_STATE_DISABLED) {
-            if(menu.options[i].name) {
-                sui_border_box(position + [padding, titleoffset + i * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
+            if(menu.options[i].shortcut) {
                 drawstring(
-                    position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
-                    menu.options[i].name, 
+                    position + [padding*2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                    menu.options[i].shortcut, 
                     smalltext, 
-                    MENU_TEXT_2, 
+                    MENU_TEXT_3, 
                     1, 
                     0
                 );
             }
-            
+            if(menu.options[i].value) {
+                drawstring(
+                    position + [menusize.x - padding*4 - smalltext.x , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                    menu.options[i].value, 
+                    smalltext, 
+                    MENU_TEXT_4, 
+                    1, 
+                    0
+                );
+            }
         }
-        if(menu.options[i].shortcut) {
-            drawstring(
-                position + [padding*2, titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
-                menu.options[i].shortcut, 
-                smalltext, 
-                MENU_TEXT_3, 
-                1, 
-                0
-            );
-        }
-        if(menu.options[i].value) {
-            drawstring(
-                position + [menusize.x - padding*4 - smalltext.x , titleoffset + i * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
-                menu.options[i].value, 
-                smalltext, 
-                MENU_TEXT_4, 
-                1, 
-                0
-            );
-        }
+        row++;
     }
     return position;
 }
 
 float fo_menu_process_input(fo_menu menu, float scan) = {
     local string button = "";
+    local float found = FALSE;
     if(scan > 47 && scan < 58) {
         button = ftos(scan - 48);
         for(float i = 0; i < menu.num_opts; i++) {
             if(menu.options[i].shortcut == button) {
-                if(menu.options[i].state & FO_MENU_STATE_NORMAL) {
+                if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     menu.options[i].action();
                 }
                 //If a shortcut matches, always absorb it, even if disabled
                 //To avoid weird things like accidentally switching weapons
                 //While trying to pick a disabled option
-                return TRUE;
+                found = TRUE;
             }
         }
     }
-    return FALSE;
+    //Trigger all of them
+    return found;
 }
 
 void Menu_Cancel() = {
