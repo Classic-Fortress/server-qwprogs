@@ -87,7 +87,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-",number_of_teams?ftos(number_of_teams):"4",self.team_no?"":" or 'auto'",".\n");
             } else {
-                UpdateClientMenu_Team(self);
+                //UpdateClientMenu_Team(self);
+                Menu_Team(0);
             }
             break;
         case "changeclass":

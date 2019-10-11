@@ -44,18 +44,16 @@ var fo_menu FO_MENU_GAME = {
         MenuSpacer,
         {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
-        {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
-        {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE
+        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+    }, 7, TRUE
 };
 var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
         {"2","Tracking Sidebar",  "","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BUTTON},
         MenuSpacer,
-        {"9","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
-        {"0","Return to Game","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 5, TRUE
+        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+    }, 4, TRUE
 };
 
 var fo_menu FO_MENU_TEAM = {
@@ -65,8 +63,10 @@ var fo_menu FO_MENU_TEAM = {
         {"3","Yellow team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 3\n");Menu_Cancel();},'0.7 0.7 0.3'},
         {"4","Green team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 4\n");Menu_Cancel();},'0.4 0.7 0.3'},
         MenuSpacer,
-        {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},'0.4 0.4 0.4'},
-    }, 6, TRUE
+        {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"0","Spectate","","",FO_MENU_STATE_NORMAL,{localcmd("observe\n");Menu_Cancel();},MENU_BUTTON},
+    }, 8, TRUE
 };
 var fo_menu FO_MENU_CLASS = {
     [0,0], [300,200], "Select Class", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -174,63 +174,63 @@ vector fo_menu_draw(fo_menu menu) = {
         vector shortcutoffset = [0,0], valueoffset = [0,0];
         
         if(menu.options[i].state == FO_MENU_STATE_HIDDEN) {
-            continue;
-        }
-        if(menu.options[i].state == FO_MENU_STATE_SPACER) {
+            //continue;
+        } else if(menu.options[i].state == FO_MENU_STATE_SPACER) {
             row++;
-            continue;
-        }
-        
-        if(menu.flags & FO_MENU_FLAG_SHOW_SHORTCUTS) {
-            shortcutoffset = [padding * 4 + smalltext.x, 0];
-        }
-        if(menu.flags & FO_MENU_FLAG_SHOW_VALUES) {
-            valueoffset = [padding * 4 + smalltext.x * 1, 0];
-        }
-        
-        if(menu.options[i].name) {
-            if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
-                //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, shortcutoffset.x)) {
-                    menu.options[i].action();
+            //continue;
+        } else {
+            if(menu.flags & FO_MENU_FLAG_SHOW_SHORTCUTS) {
+                shortcutoffset = [padding * 4 + smalltext.x, 0];
+            }
+            if(menu.flags & FO_MENU_FLAG_SHOW_VALUES) {
+                valueoffset = [padding * 4 + smalltext.x * 1, 0];
+            }
+            
+            if(menu.options[i].name) {
+                if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
+                    //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
+                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, shortcutoffset.x)) {
+                        menu.options[i].action();
+                    }
+                } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
+                    if(menu.options[i].name) {
+                        //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
+                        sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
+                        drawstring(
+                            position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
+                            menu.options[i].name, 
+                            smalltext, 
+                            MENU_TEXT_2, 
+                            1, 
+                            0
+                        );
+                    }
+                    
                 }
-            } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
-                if(menu.options[i].name) {
-                    //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
-                    sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
+                if(menu.options[i].shortcut) {
                     drawstring(
-                        position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
-                        menu.options[i].name, 
+                        position + [padding*3, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                        menu.options[i].shortcut, 
                         smalltext, 
-                        MENU_TEXT_2, 
+                        MENU_TEXT_3, 
                         1, 
                         0
                     );
                 }
-                
+                if(menu.options[i].value) {
+                    drawstring(
+                        position + [menusize.x - padding*4 - stringwidth(menu.options[i].value,1,smalltext) , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
+                        menu.options[i].value, 
+                        //strcat(ftos(row),"/",ftos(i)),
+                        smalltext, 
+                        MENU_TEXT_4, 
+                        1, 
+                        0
+                    );
+                }
             }
-            if(menu.options[i].shortcut) {
-                drawstring(
-                    position + [padding*3, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
-                    menu.options[i].shortcut, 
-                    smalltext, 
-                    MENU_TEXT_3, 
-                    1, 
-                    0
-                );
-            }
-            if(menu.options[i].value) {
-                drawstring(
-                    position + [menusize.x - padding*4 - stringwidth(menu.options[i].value,1,smalltext) , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
-                    menu.options[i].value, 
-                    smalltext, 
-                    MENU_TEXT_4, 
-                    1, 
-                    0
-                );
-            }
+            row++;
         }
-        row++;
     }
     return position;
 }
@@ -292,9 +292,15 @@ void FO_Menu_Team(float force) = {
         if(number_of_teams < 2) {
             return;
         }
+        //Hide autoteam option
         FO_MENU_TEAM.num_opts = number_of_teams;
+        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_HIDDEN;
+        //FO_MENU_TEAM.options[5].state = FO_MENU_STATE_HIDDEN;
     } else {
-        FO_MENU_TEAM.num_opts = 6;
+        //Show autoteam option
+        FO_MENU_TEAM.num_opts = 8;
+        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_NORMAL;
+        //FO_MENU_TEAM.options[5].state = FO_MENU_STATE_NORMAL;
     }
     CurrentMenu = FO_MENU_TEAM;
     fo_hud_menu_active = TRUE;

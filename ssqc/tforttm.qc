@@ -154,7 +154,7 @@ float (float tno) CF_TeamIsValid = {
     return 1;
 }
 
-float (float tno) TeamFortress_TeamSet = {
+float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
     local string st;
     local float tc;
     local string team;
@@ -240,24 +240,26 @@ float (float tno) TeamFortress_TeamSet = {
     st = ftos(tc);
     stuffcmd(self, st);
     stuffcmd(self, "\n");
-    if(self.playerclass == PC_CIVILIAN) {
-        if (TeamFortress_TeamIsCivilian(tno)) {
-            self.team_no = tno;
-            TeamFortress_ChangeClass(11);
-        } else {
-            TeamFortress_ChangeClass(0);
-            Menu_Class(0);
-        }
-    } else {
-        if (self.playerclass == 0) {
-        } else {
-            //Make sure the current class is still legal on the new team
-            override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
-            if (CF_GetClassRestriction(tno, self.playerclass) == -1 || CF_ClassIsRestricted(tno, self.playerclass)) {
+    if(!skipclasscheck) {
+        if(self.playerclass == PC_CIVILIAN) {
+            if (TeamFortress_TeamIsCivilian(tno)) {
+                self.team_no = tno;
+                TeamFortress_ChangeClass(11);
+            } else {
                 TeamFortress_ChangeClass(0);
                 Menu_Class(0);
             }
+        } else {
+            if (self.playerclass == 0) {
+            } else {
+                //Make sure the current class is still legal on the new team
+                override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+                if (CF_GetClassRestriction(tno, self.playerclass) == -1 || CF_ClassIsRestricted(tno, self.playerclass)) {
+                    TeamFortress_ChangeClass(0);
+                    Menu_Class(0);
+                }
 
+            }
         }
     }
     self.team_no = tno;
@@ -269,21 +271,27 @@ float (float tno) TeamFortress_TeamSet = {
     }
     TeamFortress_TeamShowMemberClasses(self);
     SetTeamName(self);
-    if (self.playerclass == 0) {
-        if (TeamFortress_TeamIsCivilian(tno)) {
-            self.team_no = tno;
-            TeamFortress_ChangeClass(11);
-        }
-    } else {
-        // force to change class if class is forbidden on the new team
-        if (!IsLegalClass(self.playerclass) && !override_mapclasses) {
-            TeamFortress_ChangeClass(0);
-            Menu_Class(0);
+    if(!skipclasscheck) {
+        if (self.playerclass == 0) {
+            if (TeamFortress_TeamIsCivilian(tno)) {
+                self.team_no = tno;
+                TeamFortress_ChangeClass(11);
+            }
+        } else {
+            // force to change class if class is forbidden on the new team
+            if (!IsLegalClass(self.playerclass) && !override_mapclasses) {
+                TeamFortress_ChangeClass(0);
+                Menu_Class(0);
+            }
         }
     }
 
     return (1);
 };
+
+float (float tno) TeamFortress_TeamSet = {
+    return TeamFortress_TeamSet_Options(tno, FALSE);
+}
 
 void () TeamFortress_CheckTeamCheats = {
     local string st;
