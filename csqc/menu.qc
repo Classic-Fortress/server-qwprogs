@@ -82,6 +82,16 @@ var fo_menu FO_MENU_CLASS = {
         {"0","Random Playerclass","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 10\n");Menu_Cancel();},MENU_BUTTON},
     }, 10, TRUE
 };
+var fo_menu FO_MENU_DROPAMMO = {
+    [0,0], [300,150], "Drop Ammo", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+        {"1","Shells","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dropammo 1\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Nails","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dropammo 2\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Rockets","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dropammo 3\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","Cells","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dropammo 4\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 6, TRUE
+};
 
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
@@ -130,9 +140,7 @@ vector fo_menu_draw(fo_menu menu) = {
         setcursormode(FALSE);
         return position;
     }
-    if(menu.flags & FO_MENU_FLAG_USE_MOUSE) {
-        setcursormode(TRUE);
-    }
+    setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     local float scale = Hud_Panels[HUD_PANEL_MENU].Scale, textscale = Hud_Panels[HUD_PANEL_MENU].TextScale;
     if(!textscale) {
         textscale = scale;
@@ -144,6 +152,7 @@ vector fo_menu_draw(fo_menu menu) = {
     local vector smalltext = MENU_TEXT_SMALL * textscale, mediumtext = MENU_TEXT_MEDIUM * textscale;
     local string id = strcat("fo_menu_",menu.title);
     local vector tempcolour;
+    local float alignment = SUI_ALIGN_START;
     
     menusize.y = titleoffset + menu.num_opts * (buttonsize.y + padding);
     
@@ -189,15 +198,21 @@ vector fo_menu_draw(fo_menu menu) = {
             if(menu.options[i].name) {
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, shortcutoffset.x)) {
+                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, alignment, shortcutoffset.x)) {
                         menu.options[i].action();
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
                     if(menu.options[i].name) {
                         //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
                         sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
+                        float disabledtextoffset = 0;
+                        if(alignment == SUI_ALIGN_START) {
+                            disabledtextoffset = padding + shortcutoffset.x;
+                        } else {
+                            padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2; //Centered
+                        }
                         drawstring(
-                            position + [padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
+                            position + [disabledtextoffset, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                             menu.options[i].name, 
                             smalltext, 
                             MENU_TEXT_2, 
@@ -310,5 +325,39 @@ void FO_Menu_Class(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     CurrentMenu = FO_MENU_CLASS;
+    fo_hud_menu_active = TRUE;
+}
+
+void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
+    if(fo_hud_menu_active && !force)
+        return;
+    if(!ammotypes) {
+        Menu_Cancel();
+    }
+    if(ammomakes) {
+        FO_MENU_DROPAMMO.title = "Drop or Make Ammo";
+    } else {
+        FO_MENU_DROPAMMO.title = "Drop Ammo";
+    }
+    for(float i = 0; i < 4; i++) {
+        if(ammotypes & pow(2,i)) {
+            FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_NORMAL;
+        } else {
+            if(ammomakes & pow(2,i)) {
+                FO_MENU_DROPAMMO.options[i].value = "(make)";
+                FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_NORMAL;
+            } else {
+                FO_MENU_DROPAMMO.options[i].value = "";
+                FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_DISABLED;
+            }
+        }        
+        if(ammomakes & pow(2,i)) {
+            FO_MENU_DROPAMMO.options[i].value = "(make)";
+        } else {
+            FO_MENU_DROPAMMO.options[i].value = "";
+        }
+    }
+
+    CurrentMenu = FO_MENU_DROPAMMO;
     fo_hud_menu_active = TRUE;
 }

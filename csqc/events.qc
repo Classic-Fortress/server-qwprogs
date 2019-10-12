@@ -123,6 +123,12 @@ void() CSQC_Parse_Event = {
                     
                     FO_Menu_Class(FALSE);
                     break;
+                case CLIENT_MENU_DROPAMMO:
+                    float ammotypes = readfloat();
+                    float ammomakes = readfloat();
+                    
+                    FO_Menu_DropAmmo(FALSE, ammotypes, ammomakes);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:

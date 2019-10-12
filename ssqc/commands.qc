@@ -130,6 +130,19 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 Menu_Class(0);
             }
             break;
+        case "dropammo":
+            processedCmd = TRUE;
+            if (arg2) {
+                if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
+                    float inp = stof(arg2);
+                    TeamFortress_DropAmmo(inp);
+                    Menu_Drop();
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-4.\n");
+            }
+            Menu_Drop();
+            break;
     }
    
     if (self.is_admin)

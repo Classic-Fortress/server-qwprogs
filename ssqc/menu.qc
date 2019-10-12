@@ -224,15 +224,20 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
-    //local byte civilian_team = TeamFortress_TeamIsCivilian(pl.team_no);
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_CLASS);
-    //WriteByte(MSG_MULTICAST, civilian_team);
-    //if(!civilian_team) {
-    //    WriteFloat(MSG_MULTICAST, number_of_teams);
-    //}
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_DROPAMMO);
+    WriteFloat(MSG_MULTICAST, ammotypes);
+    WriteFloat(MSG_MULTICAST, ammomakes);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
@@ -479,6 +484,38 @@ void () Menu_Drop = {
         return;
     }
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        float ammotypes = (1 | 2 | 4 | 8), ammomakes = 0;
+        if (self.ammo_shells < DROP_SHELLS)
+            ammotypes -= 1;
+        if (self.ammo_nails < DROP_NAILS)
+            ammotypes -= 2;
+        if (self.ammo_rockets < DROP_ROCKETS)
+            ammotypes -= 4;
+        if (self.ammo_cells < DROP_CELLS)
+            ammotypes -= 8;
+
+        if (self.playerclass == PC_ENGINEER) {
+            ammomakes = 0;
+            if ((self.ammo_shells < DROP_SHELLS) && ((self.ammo_cells / AMMO_COST_SHELLS) >= (DROP_SHELLS - self.ammo_shells)))
+                ammomakes += 1;
+            if ((self.ammo_nails < DROP_NAILS) && ((self.ammo_cells / AMMO_COST_NAILS) >= (DROP_NAILS - self.ammo_nails)))
+                ammomakes += 2;
+            if ((self.ammo_rockets < DROP_ROCKETS) && ((self.ammo_cells / AMMO_COST_ROCKETS) >= (DROP_ROCKETS - self.ammo_rockets)))
+                ammomakes += 4;
+        }
+
+        Menu_Close(self);
+        if(ammotypes) {
+            UpdateClientMenu_DropAmmo(self, ammotypes, ammomakes);
+        } else {
+            sprint(self, PRINT_HIGH, "Not enough ammo\n");
+        }
+        return;
+    }
+    
     if (self.ammo_shells < DROP_SHELLS)
         s_shells  = "\n";
     if (self.ammo_nails < DROP_NAILS)
@@ -501,6 +538,8 @@ void () Menu_Drop = {
 
     if (s_shells == "\n" && s_nails == "\n" && s_rockets == "\n" && s_cells == "\n")
         return;
+
+
 
     self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER)
