@@ -241,6 +241,16 @@ void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientMenu_Scout(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_SCOUT);
+    WriteByte(MSG_MULTICAST, pl.ScannerOn);
+    WriteFloat(MSG_MULTICAST, pl.tf_items_flags);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void (float update) Menu_Team = {
     local entity timer;
     
@@ -567,6 +577,14 @@ void () Menu_Scout = {
     local string s_scan, s_scane, s_scanf, s_scansound;
     local string s_nothing = Q"\n\s[5]\s Nothing                   \n\n";
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Scout(self);
+        return;
+    }
+    
     if (!self.ScannerOn)
         s_scan = Q"\s[1]\s Turn Scanner on           \n";
     else

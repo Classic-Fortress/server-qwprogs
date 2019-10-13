@@ -92,6 +92,16 @@ var fo_menu FO_MENU_DROPAMMO = {
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 6, TRUE
 };
+var fo_menu FO_MENU_SCOUT = {
+    [0,0], [300,150], "Scanner", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+        {"1","Scanner","","",FO_MENU_STATE_NORMAL,{localcmd("cmd autoscan\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Scan for enemies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scane\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Scan for friendlies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scanf\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","Scan sound","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scansound\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 6, TRUE
+};
 
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
@@ -359,5 +369,16 @@ void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
     }
 
     CurrentMenu = FO_MENU_DROPAMMO;
+    fo_hud_menu_active = TRUE;
+}
+
+void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    FO_MENU_SCOUT.options[0].value = (scanner_on?"on":"off");
+    FO_MENU_SCOUT.options[1].value = ((scanner_flags & 1)?"on":"off");
+    FO_MENU_SCOUT.options[2].value = ((scanner_flags & 2)?"on":"off");
+    FO_MENU_SCOUT.options[3].value = ((scanner_flags & 4)?"on":"off");
+    CurrentMenu = FO_MENU_SCOUT;
     fo_hud_menu_active = TRUE;
 }

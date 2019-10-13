@@ -781,7 +781,8 @@
 /*======================================================*/
 #define NIT_SCANNER_ENEMY	1	// Detect enemies
 #define NIT_SCANNER_FRIENDLY	2	// Detect friendlies (team members)
-#define NIT_SCANNER_MOVEMENT	4	// Motion detection. Only report moving entities.
+//#define NIT_SCANNER_MOVEMENT	4	// Motion detection. Only report moving entities.
+#define NIT_SCANNER_SOUND	    4	// Scanner makes a sound
 
 /*======================================================*/
 /* New Item Related Defines				*/

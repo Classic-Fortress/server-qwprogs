@@ -23,3 +23,5 @@
 #define CLIENT_MENU_TEAM      1
 #define CLIENT_MENU_CLASS     2
 #define CLIENT_MENU_DROPAMMO  3
+#define CLIENT_MENU_SCOUT     4
+

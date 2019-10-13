@@ -129,6 +129,12 @@ void() CSQC_Parse_Event = {
                     
                     FO_Menu_DropAmmo(FALSE, ammotypes, ammomakes);
                     break;
+                case CLIENT_MENU_SCOUT:
+                    float scanner_on = readbyte();
+                    float scanner_flags = readfloat();
+                    
+                    FO_Menu_Scout(FALSE, scanner_on, scanner_flags);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:

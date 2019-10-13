@@ -1,5 +1,5 @@
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd;
+    local float arg_num, processedCmd, inp;
     local string tmp;
     processedCmd = FALSE;
     
@@ -134,7 +134,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             processedCmd = TRUE;
             if (arg2) {
                 if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
-                    float inp = stof(arg2);
+                    inp = stof(arg2);
                     TeamFortress_DropAmmo(inp);
                     Menu_Drop();
                     break;
@@ -143,7 +143,47 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             Menu_Drop();
             break;
-    }
+        case "dropammo":
+            processedCmd = TRUE;
+            if (arg2) {
+                if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
+                    inp = stof(arg2);
+                    TeamFortress_DropAmmo(inp);
+                    Menu_Drop();
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-4.\n");
+            }
+            Menu_Drop();
+            break;
+        case "menu":
+            switch(self.playerclass) {
+                case PC_SCOUT:
+                    Menu_Scout();
+                    break;
+            }
+            break;
+        case "autoscan":
+            if(self.playerclass == PC_SCOUT) {
+                ScannerSwitch();
+            }
+            break;
+        case "scansound":
+            if(self.playerclass == PC_SCOUT) {
+                self.impulse = TF_SCAN_SOUND;
+            }
+            break;
+        case "scanf":
+            if(self.playerclass == PC_SCOUT) {
+                self.impulse = TF_SCAN_FRIENDLY;
+            }
+            break;
+        case "scane":
+            if(self.playerclass == PC_SCOUT) {
+                self.impulse = TF_SCAN_ENEMY;
+            }
+            break;
+  }
    
     if (self.is_admin)
     {
