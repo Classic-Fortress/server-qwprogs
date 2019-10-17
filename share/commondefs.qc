@@ -3,7 +3,7 @@
 #define MSG_FLAGINFOINIT    1
 #define MSG_FLAGINFO        2
 
-#define MSG_SBAR        4
+#define MSG_SBAR            4
 #define MSG_GRENPRIMED      5
 
 #define MSG_CLIENT_MENU     6
@@ -20,8 +20,13 @@
 #define FLAGINFO_ICON_FLAG  0
 #define FLAGINFO_ICON_BUTTON 1
 
+#define MSG_MENU_SPY_FLAG_IVIS_ONLY     1
+#define MSG_MENU_SPY_FLAG_UNDERCOVER    2
+#define MSG_MENU_SPY_FLAG_FEIGNING      4
+
 #define CLIENT_MENU_TEAM      1
 #define CLIENT_MENU_CLASS     2
 #define CLIENT_MENU_DROPAMMO  3
 #define CLIENT_MENU_SCOUT     4
+#define CLIENT_MENU_SPY       5
 

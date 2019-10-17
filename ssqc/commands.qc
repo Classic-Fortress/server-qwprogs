@@ -170,17 +170,59 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "scansound":
             if(self.playerclass == PC_SCOUT) {
-                self.impulse = TF_SCAN_SOUND;
+                //self.impulse = TF_SCAN_SOUND;
+                sprint(self, PRINT_HIGH, "Scanner sound: ");
+                if (self.tf_items_flags & 4) {
+                    self.tf_items_flags = self.tf_items_flags - 4;
+                    sprint(self, PRINT_HIGH, "off\n");
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | 4;
+                    sprint(self, PRINT_HIGH, "on\n");
+                }
             }
             break;
         case "scanf":
             if(self.playerclass == PC_SCOUT) {
-                self.impulse = TF_SCAN_FRIENDLY;
+                //self.impulse = TF_SCAN_FRIENDLY;
+                sprint(self, PRINT_HIGH, "Scanning for: ");
+                if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                    self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_FRIENDLY;
+                    if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                        sprint(self, PRINT_HIGH, "Enemies only\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Nothing\n");
+                    }
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_FRIENDLY;
+                    if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                        sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Friendlies only\n");
+                    }
+                }
+                Status_Refresh(self);
             }
             break;
         case "scane":
             if(self.playerclass == PC_SCOUT) {
-                self.impulse = TF_SCAN_ENEMY;
+                //self.impulse = TF_SCAN_ENEMY;
+                sprint(self, PRINT_HIGH, "Scanning for: ");
+                if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                    self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_ENEMY;
+                    if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                        sprint(self, PRINT_HIGH, "Friendlies only\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Nothing\n");
+                    }
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
+                    if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                        sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Enemies only\n");
+                    }
+                    Status_Refresh(self);
+                }
             }
             break;
   }

@@ -114,6 +114,8 @@ void() CSQC_Parse_Event = {
                             } else {
                                 FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                             } 
+                        } else {
+                            FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
                     FO_Menu_Team(FALSE);

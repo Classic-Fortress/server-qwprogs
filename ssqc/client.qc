@@ -1527,7 +1527,8 @@ void () PutClientInServer = {
         TeamFortress_ChangeClass(11);
     }
     if (deathmatch == 3) {
-        if(self.nextpc) {
+        sprint(self, PRINT_HIGH, "MEHT: nextpc: ", ftos(self.nextpc), ", pc: ", ftos(self.playerclass), "\n");
+        if(self.nextpc != self.playerclass) {
             self.playerclass = self.nextpc;
         }
         if (self.playerclass == PC_RANDOM)
@@ -2367,6 +2368,7 @@ void (optional float csqcactive) ClientConnect = {
                         self.frags = self.real_frags;
                     }
                     self.playerclass = te.playerclass;
+                    self.nextpc = te.playerclass;
                     self.tfstate = te.tfstate;
                     dremove(te);
                     te = world;

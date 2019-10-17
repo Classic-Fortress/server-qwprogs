@@ -20,6 +20,7 @@ vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
 .float owned_by;
+.string netname;
 float fo_hud_editor;
 float fo_hud_menu_active;
 float jumptime;

@@ -8,6 +8,28 @@
 #define FO_MENU_STATE_DISABLED 2
 #define FO_MENU_STATE_SPACER 3
 
+class fo_menu_option_2 {
+    string shortcut;    //key to press. if omitted - mouse only
+    string name;        //what to display
+    string value;       //optional - displays current value/state
+    string description; //optional
+    float state;        //active/disabled
+    virtual void() action = {};
+    vector colour;
+    fo_menu_option_2 next;
+};
+
+class fo_menu_2 {
+    vector position;
+    vector size;
+    string title;
+    float flags;
+    fo_menu_option_2 options;
+    float num_opts;
+    float active;
+};
+
+
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
     string name;        //what to display
@@ -55,6 +77,11 @@ var fo_menu FO_MENU_GAME_SPECTATOR = {
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE
 };
+var fo_menu FO_MENU_SPECTATOR_TRACK = {
+    [0,0], [300,200], "Track", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("track 1\n"); },MENU_BUTTON},
+    }, 0, TRUE
+};
 
 var fo_menu FO_MENU_TEAM = {
     [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
@@ -95,6 +122,18 @@ var fo_menu FO_MENU_DROPAMMO = {
 var fo_menu FO_MENU_SCOUT = {
     [0,0], [300,150], "Scanner", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
         {"1","Scanner","","",FO_MENU_STATE_NORMAL,{localcmd("cmd autoscan\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Scan for enemies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scane\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Scan for friendlies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scanf\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","Scan sound","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scansound\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 6, TRUE
+};
+//var fo_menu_option FO_MENU_SPY;
+var fo_menu FO_MENU_SPY = {
+    [0,0], [300,150], "Spy", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+        {"1","Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise\n");Menu_Cancel();},MENU_BUTTON},
+        {"1","Become Invisible","","",FO_MENU_STATE_NORMAL,{localcmd("cmd autoscan\n");Menu_Cancel();},MENU_BUTTON},
         {"2","Scan for enemies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scane\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Scan for friendlies","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scanf\n");Menu_Cancel();},MENU_BUTTON},
         {"4","Scan sound","","",FO_MENU_STATE_NORMAL,{localcmd("cmd scansound\n");Menu_Cancel();},MENU_BUTTON},
@@ -265,6 +304,17 @@ float fo_menu_process_input(fo_menu menu, float scan) = {
     local float found = FALSE;
     if(scan > 47 && scan < 58) {
         button = ftos(scan - 48);
+    } else {
+        switch(scan) {
+            case 45:
+                button = "-";
+                break;
+            case 61:
+                button = "+";
+                break;
+        }
+    }
+    if(button != "") {
         for(float i = 0; i < menu.num_opts; i++) {
             if(menu.options[i].shortcut == button) {
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
@@ -308,6 +358,24 @@ void FO_Menu_Game(float force) = {
         CurrentMenu = FO_MENU_GAME;
     }
     fo_hud_menu_active = TRUE;
+}
+
+void FO_Menu_Track() = {
+    if(!is_spectator)
+        return;
+
+    local float i = 0;
+    local entity e = find(world, classname, "player");
+    while(e) {
+        if(i > 19) break;
+        FO_MENU_SPECTATOR_TRACK.options[i].name = e.netname;
+        FO_MENU_SPECTATOR_TRACK.options[i].shortcut = ftos(i+1);
+        //FO_MENU_SPECTATOR_TRACK.options[i].action = void(){};
+        i++;
+        e = find(e, classname, "player");
+    }
+    FO_MENU_SPECTATOR_TRACK.num_opts = i;
+    FO_MENU_SPECTATOR_TRACK.position = fo_menu_draw(FO_MENU_SPECTATOR_TRACK);
 }
 
 void FO_Menu_Team(float force) = {

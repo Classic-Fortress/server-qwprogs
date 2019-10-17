@@ -251,6 +251,25 @@ void UpdateClientMenu_Scout(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientMenu_Spy(entity pl) = {
+    msg_entity = pl;
+    local float flags = 0;
+    if(invis_only) {
+        flags += MSG_MENU_SPY_FLAG_IVIS_ONLY;
+    }
+    if(pl.is_undercover) {
+        flags += MSG_MENU_SPY_FLAG_UNDERCOVER;
+    }
+    if(pl.is_feigning) {
+        flags += MSG_MENU_SPY_FLAG_FEIGNING;
+    }
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_SPY);
+    WriteFloat(MSG_MULTICAST, flags);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void (float update) Menu_Team = {
     local entity timer;
     
