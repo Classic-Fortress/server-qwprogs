@@ -149,6 +149,9 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_SPY_TEAM:
                     FO_Menu_Spy_Team(FALSE);
                     break;
+                case CLIENT_MENU_DETPACK:
+                    FO_Menu_Detpack(FALSE);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:

@@ -157,11 +157,21 @@ var fo_menu FO_MENU_SPY_SKIN = {
     }, 11, TRUE
 };
 var fo_menu FO_MENU_SPY_TEAM = {
-    [0,0], [300,200], "Disguise as", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+    [0,0], [300,200], "Disguise as", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Blue team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise team 1\n");Menu_Cancel();},'0.3 0.4 0.7'},
         {"2","Red team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise team 2\n");Menu_Cancel();},'0.7 0.4 0.3'},
         {"3","Yellow team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise team 3\n");Menu_Cancel();},'0.7 0.7 0.3'},
         {"4","Green team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise team 4\n");Menu_Cancel();},'0.4 0.7 0.3'},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 6, TRUE
+};
+var fo_menu FO_MENU_DETPACK = {
+    [0,0], [300,200], "Set detpack for", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","5 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 5\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","20 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 20\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","50 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 50\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","255 Seconds","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack 255\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 6, TRUE
@@ -523,5 +533,11 @@ void FO_Menu_Spy_Skin(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     CurrentMenu = FO_MENU_SPY_SKIN;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Detpack(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = FO_MENU_DETPACK;
     fo_hud_menu_active = TRUE;
 }

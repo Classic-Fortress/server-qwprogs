@@ -176,6 +176,9 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 case PC_SPY:
                     Menu_Spy(self);
                     break;
+                case PC_DEMOMAN:
+                    Menu_Demoman();
+                    break;
             }
             break;
         case "autoscan":
@@ -240,7 +243,20 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
             }
             break;
-  }
+        case "detpack":
+            processedCmd = TRUE;
+            if (arg2) {
+                local float farg2 = stof(arg2);
+                if(farg2) {
+                    TeamFortress_SetDetpack(farg2);
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
+            } else {
+                Menu_Demoman();
+            }
+            break;
+    }
    
     if (self.is_admin)
     {

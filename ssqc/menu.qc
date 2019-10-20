@@ -110,6 +110,7 @@ void (entity pl) UpdateClientMenu_Scout;
 void (entity pl) UpdateClientMenu_Spy;
 void (entity pl) UpdateClientMenu_Spy_Skin;
 void (entity pl) UpdateClientMenu_Spy_Team;
+void (entity pl) UpdateClientMenu_Detpack;
 
 void (entity pl) Menu_Close =
 {
@@ -758,6 +759,14 @@ void (float inp) Menu_Demoman_Input = {
 };
 
 void () Menu_Demoman = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Detpack(self);
+        return;
+    }
+    
     local string s_detpack = "Set detpack for:\n\n";
     local string s_5       = Q"\s[1]\s 5 seconds  \n";
     local string s_20      = Q"\s[2]\s 20 seconds \n";

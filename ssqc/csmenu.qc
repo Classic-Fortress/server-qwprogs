@@ -87,4 +87,11 @@ void UpdateClientMenu_Spy_Team(entity pl) = {
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_SPY_TEAM);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
+void UpdateClientMenu_Detpack(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_DETPACK);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
 
