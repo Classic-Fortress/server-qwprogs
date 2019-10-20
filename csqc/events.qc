@@ -150,7 +150,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Spy_Team(FALSE);
                     break;
                 case CLIENT_MENU_DETPACK:
-                    FO_Menu_Detpack(FALSE);
+                    FO_Menu_Detpack(FALSE, readbyte());
                     break;
             }
             break;

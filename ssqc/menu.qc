@@ -110,7 +110,7 @@ void (entity pl) UpdateClientMenu_Scout;
 void (entity pl) UpdateClientMenu_Spy;
 void (entity pl) UpdateClientMenu_Spy_Skin;
 void (entity pl) UpdateClientMenu_Spy_Team;
-void (entity pl) UpdateClientMenu_Detpack;
+void (entity pl, float cancel_detpack) UpdateClientMenu_Detpack;
 
 void (entity pl) Menu_Close =
 {
@@ -763,7 +763,7 @@ void () Menu_Demoman = {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
-        UpdateClientMenu_Detpack(self);
+        UpdateClientMenu_Detpack(self, FALSE);
         return;
     }
     
@@ -785,6 +785,13 @@ void (float inp) Menu_Demoman_Cancel_Input = {
 }
 
 void () Menu_Demoman_Cancel = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Detpack(self, TRUE);
+        return;
+    }
     local string s_detpack = "Setting detpack...\n\n";
     local string s_cancel  = Q"\s[1]\s Cancel!\n\n\n\n\n";
 

@@ -173,11 +173,21 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 case PC_SCOUT:
                     Menu_Scout();
                     break;
+                case PC_DEMOMAN:
+                    if(self.is_detpacking) {
+                        Menu_Demoman_Cancel();
+                        break;
+                    }
+                    Menu_Demoman();
+                    break;
                 case PC_SPY:
                     Menu_Spy(self);
                     break;
-                case PC_DEMOMAN:
-                    Menu_Demoman();
+                case PC_ENGINEER:
+                    Menu_Engineer(self);
+                    break;
+                default:
+                    sprint(self, PRINT_HIGH, "This class doesn't have a menu\n");
                     break;
             }
             break;
@@ -246,6 +256,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "detpack":
             processedCmd = TRUE;
             if (arg2) {
+                if(arg2 == "cancel") {
+                    TeamFortress_DetpackStop();
+                    break;
+                }
+                if(self.is_detpacking) {
+                    Menu_Demoman_Cancel();
+                    break;
+                }
                 local float farg2 = stof(arg2);
                 if(farg2) {
                     TeamFortress_SetDetpack(farg2);
@@ -435,6 +453,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd cancel\n");
                 sprint(self, PRINT_HIGH, "cmd stop\n");
                 sprint(self, PRINT_HIGH, "cmd kick\n");
+                sprint(self, PRINT_HIGH, "cmd ceasefire\n");
                 sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
                 sprint(self, PRINT_HIGH, "\n");
                 break;

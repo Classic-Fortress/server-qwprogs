@@ -176,6 +176,11 @@ var fo_menu FO_MENU_DETPACK = {
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 6, TRUE
 };
+var fo_menu FO_MENU_DETPACK_CANCEL = {
+    [0,0], [300,200], "Setting detpack...", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Cancel","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack cancel\n");Menu_Cancel();},MENU_BUTTON},
+    }, 1, TRUE
+};
 
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
@@ -535,9 +540,13 @@ void FO_Menu_Spy_Skin(float force) = {
     CurrentMenu = FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
 }
-void FO_Menu_Detpack(float force) = {
+void FO_Menu_Detpack(float force, float cancel_detpack) = {
     if(fo_hud_menu_active && !force)
         return;
-    CurrentMenu = FO_MENU_DETPACK;
+    if(cancel_detpack) {
+        CurrentMenu = FO_MENU_DETPACK_CANCEL;
+    } else {
+        CurrentMenu = FO_MENU_DETPACK;
+    }
     fo_hud_menu_active = TRUE;
 }

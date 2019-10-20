@@ -62,7 +62,8 @@ void () TeamFortress_MOTD = {
             return;
         }
 
-        TeamFortress_Alias("menu", TF_CLASSMENU, 0);
+        //TeamFortress_Alias("menu", TF_CLASSMENU, 0);
+        TeamFortress_AliasString("menu", "cmd menu");
         TeamFortress_Alias("slot1", TF_SLOT1, 0);
         TeamFortress_Alias("slot2", TF_SLOT2, 0);
         TeamFortress_Alias("slot3", TF_SLOT3, 0);
