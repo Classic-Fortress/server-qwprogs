@@ -139,27 +139,42 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_Drop();
                     break;
                 }
-                sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-4.\n");
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use values 1-4.\n");
             }
             Menu_Drop();
             break;
-        case "dropammo":
+
+        case "disguise":
             processedCmd = TRUE;
             if (arg2) {
-                if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
-                    inp = stof(arg2);
-                    TeamFortress_DropAmmo(inp);
-                    Menu_Drop();
+                if(arg2 == "last") {
+                    Menu_Spy_Input(2);
                     break;
                 }
-                sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-4.\n");
+                if(arg2 == "none") {
+                    Menu_Spy_Input(4);
+                    break;
+                }
+                if(arg2 == "skin" && arg3) {
+                    Menu_Spy_Skin_Input(stof(arg3));
+                    break;
+                }
+                if(arg2 == "team" && arg3) {
+                    Menu_Spy_Color_Input(stof(arg3));
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use values 'none', 'last', 'skin #' or 'team #'.\n");
+            } else {
+                Menu_Spy_Input(1);
             }
-            Menu_Drop();
             break;
         case "menu":
             switch(self.playerclass) {
                 case PC_SCOUT:
                     Menu_Scout();
+                    break;
+                case PC_SPY:
+                    Menu_Spy(self);
                     break;
             }
             break;

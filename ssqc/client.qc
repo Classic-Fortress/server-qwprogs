@@ -1527,7 +1527,6 @@ void () PutClientInServer = {
         TeamFortress_ChangeClass(11);
     }
     if (deathmatch == 3) {
-        sprint(self, PRINT_HIGH, "MEHT: nextpc: ", ftos(self.nextpc), ", pc: ", ftos(self.playerclass), "\n");
         if(self.nextpc != self.playerclass) {
             self.playerclass = self.nextpc;
         }

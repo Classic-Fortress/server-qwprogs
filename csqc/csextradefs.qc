@@ -26,6 +26,8 @@ float fo_hud_menu_active;
 float jumptime;
 vector ScreenSize;
 float number_of_teams;
+float last_skin;
+float last_team;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;

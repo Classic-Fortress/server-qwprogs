@@ -137,6 +137,18 @@ void() CSQC_Parse_Event = {
                     
                     FO_Menu_Scout(FALSE, scanner_on, scanner_flags);
                     break;
+                case CLIENT_MENU_SPY:
+                    SBAR.InvisOnly = readfloat();
+                    last_skin = readfloat();
+                    last_team = readfloat();
+                    FO_Menu_Spy(FALSE);
+                    break;
+                case CLIENT_MENU_SPY_SKIN:
+                    FO_Menu_Spy_Skin(FALSE);
+                    break;
+                case CLIENT_MENU_SPY_TEAM:
+                    FO_Menu_Spy_Team(FALSE);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:

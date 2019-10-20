@@ -102,6 +102,15 @@ void () StartTimer;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
+void (entity pl) UpdateClientMenu_Team;
+void (entity pl, float team) UpdateClientClasses;
+void (entity pl) UpdateClientMenu_Class;
+void (entity pl, float ammotypes, float ammomakes) UpdateClientMenu_DropAmmo;
+void (entity pl) UpdateClientMenu_Scout;
+void (entity pl) UpdateClientMenu_Spy;
+void (entity pl) UpdateClientMenu_Spy_Skin;
+void (entity pl) UpdateClientMenu_Spy_Team;
+
 void (entity pl) Menu_Close =
 {
     pl.menu_input = nil;
@@ -187,88 +196,6 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
 
     return strzone(s_string);
 };
-
-void UpdateClientMenu_Team(entity pl) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_TEAM);
-    WriteFloat(MSG_MULTICAST, number_of_teams);
-    for(float i = 0; i < number_of_teams; i++) {
-        WriteByte(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(i+1));
-    }
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientClasses(entity pl, float team) = {
-    local float civilian_team = TeamFortress_TeamIsCivilian(pl.team_no);
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLASSES_UPDATE);
-    WriteByte(MSG_MULTICAST, civilian_team);
-    override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
-    if(!civilian_team) {
-        for(float i = 0; i < 10; i++) {
-            local float f_max = CF_GetClassRestriction(team, i+1);
-            local float f_players = CF_GetClassPlayers(team, i+1);
-
-            if ((IsLegalClass(i+1) || override_mapclasses) && f_max >= 0) {
-                WriteFloat(MSG_MULTICAST, f_max);
-                WriteByte(MSG_MULTICAST, f_players);
-            } else {
-                WriteFloat(MSG_MULTICAST, -1);
-            }
-        }
-    }
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientMenu_Class(entity pl) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_CLASS);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_DROPAMMO);
-    WriteFloat(MSG_MULTICAST, ammotypes);
-    WriteFloat(MSG_MULTICAST, ammomakes);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientMenu_Scout(entity pl) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_SCOUT);
-    WriteByte(MSG_MULTICAST, pl.ScannerOn);
-    WriteFloat(MSG_MULTICAST, pl.tf_items_flags);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientMenu_Spy(entity pl) = {
-    msg_entity = pl;
-    local float flags = 0;
-    if(invis_only) {
-        flags += MSG_MENU_SPY_FLAG_IVIS_ONLY;
-    }
-    if(pl.is_undercover) {
-        flags += MSG_MENU_SPY_FLAG_UNDERCOVER;
-    }
-    if(pl.is_feigning) {
-        flags += MSG_MENU_SPY_FLAG_FEIGNING;
-    }
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_SPY);
-    WriteFloat(MSG_MULTICAST, flags);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
 
 void (float update) Menu_Team = {
     local entity timer;
@@ -668,6 +595,13 @@ void (entity pe_player) Menu_Spy = {
     if (pe_player.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT) || pe_player.is_unabletospy == 1) {
         return;
     }
+    if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(pe_player);
+        UpdateClientMenu_Spy(pe_player);
+        return;
+    }
 
     if (invis_only) {
         if (pe_player.is_undercover == 1)
@@ -716,7 +650,9 @@ void (float inp) Menu_Spy_Skin_Input = {
     if (self.skin != inp)
         CF_Spy_ChangeSkin(self, inp);
 
-    if (number_of_teams > 2)
+    if (number_of_teams == 1)
+        sprint(self, PRINT_HIGH, "There is no other team\n");
+    else if (number_of_teams > 2)
         Menu_Spy_Color();
     else if (self.team_no == 1)
         CF_Spy_ChangeColor(self, 2);
@@ -728,6 +664,14 @@ void (float inp) Menu_Spy_Skin_Input = {
 void () Menu_Spy_Skin = {
     if (self.is_unabletospy == 1)
         return;
+
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Spy_Skin(self);
+        return;
+    }
 
     local string s_disguise = "Disguise as enemy:\n\n";
     local string s_scout    = Q"\s[1]\s Scout      \n";
@@ -770,6 +714,14 @@ void () Menu_Spy_Color = {
 
     if (number_of_teams == 0) {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch\n");
+        return;
+    }
+    
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Spy_Team(self);
         return;
     }
 

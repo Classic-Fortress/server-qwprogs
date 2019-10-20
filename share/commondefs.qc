@@ -29,4 +29,6 @@
 #define CLIENT_MENU_DROPAMMO  3
 #define CLIENT_MENU_SCOUT     4
 #define CLIENT_MENU_SPY       5
+#define CLIENT_MENU_SPY_SKIN  6
+#define CLIENT_MENU_SPY_TEAM  7
 
