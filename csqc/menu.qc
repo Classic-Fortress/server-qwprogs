@@ -66,7 +66,7 @@ var fo_menu FO_MENU_GAME = {
         MenuSpacer,
         {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
-        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
     }, 7, TRUE
 };
 var fo_menu FO_MENU_GAME_SPECTATOR = {

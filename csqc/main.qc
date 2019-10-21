@@ -25,6 +25,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercvar(FOCMD_AUTOHOP, "0");
 	registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
+    registercommand("fo_main_menu");
 
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
@@ -77,6 +78,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
+            break;
+        case "fo_main_menu":
+            if(checkcommand("m_main")) {
+                //Use menuqc main menu
+                localcmd("m_main\n");
+            } else {
+                //If menu.dat is missing, fall back to engine menus
+                localcmd("menu_main\n");
+            }
             break;
     }	
     return FALSE;
