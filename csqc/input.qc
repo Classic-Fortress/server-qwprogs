@@ -4,6 +4,7 @@ void FO_Menu_Game(float);
 float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
     float used = sui_input_event(evtype, scanx, chary, devid);
     //if(evtype == IE_KEYUP) print("Key up: ", ftos(scanx), ", char: ", ftos(chary), "\n");
+    float menu_mouse = (fo_hud_menu_active && (CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE));
     if (fo_hud_editor || fo_hud_menu_active)
     {
         switch (evtype)
@@ -49,11 +50,11 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 }
                 break;
             case IE_MOUSEDELTA:
-                return TRUE;
+                return (fo_hud_editor || menu_mouse);
             case IE_MOUSEABS:
                 Mouse.x = scanx;
                 Mouse.y = chary;
-                return TRUE;
+                return (fo_hud_editor || menu_mouse);
             default:
         }
     } else {

@@ -61,6 +61,7 @@ float () GetLastWeaponImpulse;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
+float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
 
 string nextmap;
 
@@ -1094,8 +1095,8 @@ void () RemovePlayerOwnedEnts = {
         te.real_frags = self.real_frags;
         te.netname = self.netname;
         te.playerclass = self.playerclass;
-        if (self.tfstate & 8) {
-            te.tfstate = 8;
+        if (self.tfstate & TFSTATE_RANDOMPC) {
+            te.tfstate = TFSTATE_RANDOMPC;
         }
     }  
 }
@@ -1509,7 +1510,7 @@ void () PutClientInServer = {
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
 
-    if (! self.last_playerclass)
+    if (self.last_playerclass == 0)
         self.last_playerclass = self.playerclass;
 
     // remove prime timers to avoid getting an old grenade in your face
@@ -1522,14 +1523,13 @@ void () PutClientInServer = {
 
     DecodeLevelParms();
 
-    if (self.playerclass == 0) {
-        if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            TeamFortress_ChangeClass(11);
-        }
+    if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
+        TeamFortress_ChangeClass(11);
     }
-    if ((deathmatch == 3) && (self.nextpc != 0)) {
-        self.playerclass = self.nextpc;
-        self.nextpc = 0;
+    if (deathmatch == 3) {
+        if(self.nextpc != self.playerclass) {
+            self.playerclass = self.nextpc;
+        }
         if (self.playerclass == PC_RANDOM)
             self.tfstate = self.tfstate | TFSTATE_RANDOMPC;
         else {
@@ -1537,6 +1537,10 @@ void () PutClientInServer = {
                 self.tfstate - (self.tfstate & TFSTATE_RANDOMPC);
             TeamFortress_ExecClassScript(self);
         }
+    }
+    
+    if (self.playerclass == 0 && self.team_no > 0) {
+        Menu_Class(0);
     }
 
     if (self.tfstate & TFSTATE_RANDOMPC) {
@@ -2355,7 +2359,7 @@ void (optional float csqcactive) ClientConnect = {
             while (te) {
                 if (te.tf_id == self.tf_id) {
                     got_one = 1;
-                    TeamFortress_TeamSet(te.team_no);
+                    TeamFortress_TeamSet_Options(te.team_no, TRUE);
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
                     if (!(toggleflags & TFLAG_TEAMFRAGS) &&
@@ -2363,6 +2367,7 @@ void (optional float csqcactive) ClientConnect = {
                         self.frags = self.real_frags;
                     }
                     self.playerclass = te.playerclass;
+                    self.nextpc = te.playerclass;
                     self.tfstate = te.tfstate;
                     dremove(te);
                     te = world;

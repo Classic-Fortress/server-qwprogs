@@ -107,19 +107,70 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_TEAM:
                     number_of_teams = readfloat();
                     for(float i = 0; i < 4; i++) {
-                        if(i < number_of_teams && (i + 1) != team_no) {
-                            FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
+                        if(i < number_of_teams) {
+                            FO_MENU_TEAM.options[i].value = ftos(readbyte());
+                            if((i + 1) != team_no) {
+                                FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
+                            } else {
+                                FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
+                            } 
                         } else {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
-                        } 
+                        }
                     }
                     FO_Menu_Team(FALSE);
                     break;
                 case CLIENT_MENU_CLASS:
-                    float allowedclasses = readfloat();
+                    //float civonly = readbyte();
+                    
                     FO_Menu_Class(FALSE);
                     break;
+                case CLIENT_MENU_DROPAMMO:
+                    float ammotypes = readfloat();
+                    float ammomakes = readfloat();
+                    
+                    FO_Menu_DropAmmo(FALSE, ammotypes, ammomakes);
+                    break;
+                case CLIENT_MENU_SCOUT:
+                    float scanner_on = readbyte();
+                    float scanner_flags = readfloat();
+                    
+                    FO_Menu_Scout(FALSE, scanner_on, scanner_flags);
+                    break;
+                case CLIENT_MENU_SPY:
+                    SBAR.InvisOnly = readfloat();
+                    last_skin = readfloat();
+                    last_team = readfloat();
+                    FO_Menu_Spy(FALSE);
+                    break;
+                case CLIENT_MENU_SPY_SKIN:
+                    FO_Menu_Spy_Skin(FALSE);
+                    break;
+                case CLIENT_MENU_SPY_TEAM:
+                    FO_Menu_Spy_Team(FALSE);
+                    break;
+                case CLIENT_MENU_DETPACK:
+                    FO_Menu_Detpack(FALSE, readbyte());
+                    break;
             }
+            break;
+        case MSG_CLASSES_UPDATE:
+            float civonly = readbyte();
+            for(float i = 0; i < 10; i++) {
+                if(civonly) {
+                    FO_MENU_CLASS.options[i].value = "-";
+                } else {
+                    float class_max = readfloat();
+                    if(class_max < 0) {
+                        FO_MENU_CLASS.options[i].value = "-";
+                        FO_MENU_CLASS.options[i].state = FO_MENU_STATE_DISABLED;
+                    } else {
+                        FO_MENU_CLASS.options[i].value = strcat(ftos(readbyte()),"/",ftos(class_max));
+                        FO_MENU_CLASS.options[i].state = FO_MENU_STATE_NORMAL;
+                    }
+                }
+            }
+
             break;
     }
 }

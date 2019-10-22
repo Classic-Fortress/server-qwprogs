@@ -11,6 +11,7 @@ debug.qc
 status.qc
 functions.qc
 menu.qc
+csmenu.qc
 vote.qc
 help.qc
 subs.qc

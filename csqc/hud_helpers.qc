@@ -156,6 +156,10 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
             // because i'm dodgy
             drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
         }
+        else if (c == 37) // "%"
+        {
+            drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
+        }
         else
         {
             drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
@@ -266,7 +270,13 @@ void FO_Hud_Editor_LoadSettings()
     {
         // write a new file
         Hud_WriteCfg(FO_HUD_CONFIG_PATH);
-    }    
+    }
+    if(Hud_Panels[HUD_PANEL_MENU].Position.x < 0) Hud_Panels[HUD_PANEL_MENU].Position.x = 10;
+    if(Hud_Panels[HUD_PANEL_MENU].Position.y < 0) Hud_Panels[HUD_PANEL_MENU].Position.y = 10;
+    if(Hud_Panels[HUD_PANEL_MENU].Position.x + Hud_Panels[HUD_PANEL_MENU].FillSize.x > vsize_x) Hud_Panels[HUD_PANEL_MENU].Position.x = vsize_x / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2;
+    if(Hud_Panels[HUD_PANEL_MENU].Position.y + Hud_Panels[HUD_PANEL_MENU].FillSize.y > vsize_y) Hud_Panels[HUD_PANEL_MENU].Position.y = 64;
+
+
 }
 
 void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc, string name)

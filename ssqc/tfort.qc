@@ -145,7 +145,7 @@ void (float inp) TeamFortress_ChangeClass = {
         if ((deathmatch != 3) && (!cb_prematch))
             return;
 
-        if (self.playerclass == inp && !(self.tfstate & TFSTATE_RANDOMPC)) {
+        if (self.playerclass == inp && !(self.tfstate & TFSTATE_RANDOMPC) && self.nextpc == inp) {
             sprint(self, PRINT_HIGH, "You are already playing as a ");
             TeamFortress_PrintClassName(self, inp, 0);
             return;
@@ -154,26 +154,30 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
 
-        if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            sprint(self, PRINT_HIGH, "You cannot change class\n");
-            return;
+        
+        if(inp > 0) {
+            if (TeamFortress_TeamIsCivilian(self.team_no) && self.playerclass == PC_CIVILIAN) {
+                sprint(self, PRINT_HIGH, "You cannot change class\n");
+                return;
+            }
+            if (!IsLegalClass(inp) && !override_mapclasses) {
+                sprint(self, PRINT_HIGH,
+                       "Your team cannot play that class\n");
+                TeamFortress_DisplayLegalClasses();
+                return;
+            }
+            if ((spy_off == 1) && (inp == 8)) {
+                sprint(self, PRINT_HIGH,
+                       "The spy class has been disabled on the server by the administrator\n");
+                return;
+            }
+            if (CF_ClassIsRestricted(self.team_no, inp)) {
+                sprint(self, PRINT_HIGH,
+                       "Your team already has enough of that class\n");
+                return;
+            }
         }
-        if (!IsLegalClass(inp) && !override_mapclasses) {
-            sprint(self, PRINT_HIGH,
-                   "Your team cannot play that class\n");
-            TeamFortress_DisplayLegalClasses();
-            return;
-        }
-        if ((spy_off == 1) && (inp == 8)) {
-            sprint(self, PRINT_HIGH,
-                   "The spy class has been disabled on the server by the administrator\n");
-            return;
-        }
-        if (CF_ClassIsRestricted(self.team_no, inp)) {
-            sprint(self, PRINT_HIGH,
-                   "Your team already has enough of that class\n");
-            return;
-        }
+
         self.nextpc = inp;
         if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint()) {
             self.has_changedclass = 1;
@@ -221,7 +225,8 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_ExecClassScript(self);
     self.playerclass = inp;
 
-    self.nextpc = 0;
+    //self.nextpc = 0;
+    self.nextpc = inp;
     self.takedamage = 2;
     self.movetype = 3;
     self.flags = FL_CLIENT | FL_ONGROUND;

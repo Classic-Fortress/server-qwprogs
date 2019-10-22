@@ -72,6 +72,8 @@ void FO_Hud_Editor_LoadDefaultSettings()
         Hud_Panels[i].NodeInsertLoc = nodeInsertLoc;
         //pnl.Name = name;
     }
+    //Default menus to centre of the screen
+    Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
 }
 
 float GetTextAlignOffset(float pos, float iconsize, string text, float textsize, float align)  {

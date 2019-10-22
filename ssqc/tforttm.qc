@@ -154,7 +154,7 @@ float (float tno) CF_TeamIsValid = {
     return 1;
 }
 
-float (float tno) TeamFortress_TeamSet = {
+float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
     local string st;
     local float tc;
     local string team;
@@ -165,7 +165,7 @@ float (float tno) TeamFortress_TeamSet = {
     if (!CF_TeamIsValid) {
         return 0;
     }
-
+    
     if (tno == 1)
         team = "blue team";
     else if (tno == 2)
@@ -175,6 +175,11 @@ float (float tno) TeamFortress_TeamSet = {
     else
         team = "green team";
 
+    if (tno > 0 && tno == self.team_no) {
+        sprint(self, PRINT_HIGH, "You are already on the ", team, "!\n");
+        return 0;
+    }
+    
     if (TeamFortress_TeamGetColor(tno) == 0) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
@@ -235,6 +240,28 @@ float (float tno) TeamFortress_TeamSet = {
     st = ftos(tc);
     stuffcmd(self, st);
     stuffcmd(self, "\n");
+    if(!skipclasscheck) {
+        if(self.playerclass == PC_CIVILIAN) {
+            if (TeamFortress_TeamIsCivilian(tno)) {
+                self.team_no = tno;
+                TeamFortress_ChangeClass(11);
+            } else {
+                TeamFortress_ChangeClass(0);
+                Menu_Class(0);
+            }
+        } else {
+            if (self.playerclass == 0) {
+            } else {
+                //Make sure the current class is still legal on the new team
+                override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+                if (CF_GetClassRestriction(tno, self.playerclass) == -1 || CF_ClassIsRestricted(tno, self.playerclass)) {
+                    TeamFortress_ChangeClass(0);
+                    Menu_Class(0);
+                }
+
+            }
+        }
+    }
     self.team_no = tno;
     self.immune_to_check = time + 10;
     self.lives = TeamFortress_TeamGetLives(tno);
@@ -244,13 +271,27 @@ float (float tno) TeamFortress_TeamSet = {
     }
     TeamFortress_TeamShowMemberClasses(self);
     SetTeamName(self);
-    if (self.playerclass == 0) {
-        if (TeamFortress_TeamIsCivilian(self.team_no)) {
-            TeamFortress_ChangeClass(11);
+    if(!skipclasscheck) {
+        if (self.playerclass == 0) {
+            if (TeamFortress_TeamIsCivilian(tno)) {
+                self.team_no = tno;
+                TeamFortress_ChangeClass(11);
+            }
+        } else {
+            // force to change class if class is forbidden on the new team
+            if (!IsLegalClass(self.playerclass) && !override_mapclasses) {
+                TeamFortress_ChangeClass(0);
+                Menu_Class(0);
+            }
         }
     }
+
     return (1);
 };
+
+float (float tno) TeamFortress_TeamSet = {
+    return TeamFortress_TeamSet_Options(tno, FALSE);
+}
 
 void () TeamFortress_CheckTeamCheats = {
     local string st;

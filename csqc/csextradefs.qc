@@ -10,6 +10,7 @@ vector MENU_BUTTON = '0.3 0.4 0.5';
 vector MENU_TEXT_1 = '1 1 1';
 vector MENU_TEXT_2 = '0.7 0.75 0.75';
 vector MENU_TEXT_3 = '1 1 0';
+vector MENU_TEXT_4 = '0.8 0.5 0';
 vector MENU_HIGHLIGHT = '1 1 1';
 vector MENU_DARKEN = '1 1 1';
 
@@ -19,11 +20,14 @@ vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
 .float owned_by;
+.string netname;
 float fo_hud_editor;
 float fo_hud_menu_active;
 float jumptime;
 vector ScreenSize;
 float number_of_teams;
+float last_skin;
+float last_team;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;

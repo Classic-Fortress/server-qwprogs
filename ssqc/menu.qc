@@ -102,6 +102,16 @@ void () StartTimer;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
+void (entity pl) UpdateClientMenu_Team;
+void (entity pl, float team) UpdateClientClasses;
+void (entity pl) UpdateClientMenu_Class;
+void (entity pl, float ammotypes, float ammomakes) UpdateClientMenu_DropAmmo;
+void (entity pl) UpdateClientMenu_Scout;
+void (entity pl) UpdateClientMenu_Spy;
+void (entity pl) UpdateClientMenu_Spy_Skin;
+void (entity pl) UpdateClientMenu_Spy_Team;
+void (entity pl, float cancel_detpack) UpdateClientMenu_Detpack;
+
 void (entity pl) Menu_Close =
 {
     pl.menu_input = nil;
@@ -188,24 +198,6 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
     return strzone(s_string);
 };
 
-void UpdateClientMenu_Team(entity pl) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_TEAM);
-    WriteFloat(MSG_MULTICAST, number_of_teams);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
-void UpdateClientMenu_Class(entity pl) = {
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
-    WriteFloat(MSG_MULTICAST, CLIENT_MENU_CLASS);
-    WriteFloat(MSG_MULTICAST, number_of_teams);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
-}
-
 void (float update) Menu_Team = {
     local entity timer;
     
@@ -222,7 +214,7 @@ void (float update) Menu_Team = {
         }
         return;
     }
-
+    
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
@@ -337,11 +329,17 @@ string (float pf_class, string ps_class) Menu_Class_ClassString = {
 
 void (float update) Menu_Class = {
     local entity timer;
+    if (TeamFortress_TeamIsCivilian(self.team_no)) {
+        sprint(self, PRINT_HIGH, "Your team can only be civilians\n");
+        Menu_Close(self);
+        return;
+    }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own class menu
         //ask the client to activate it
         Menu_Close(self);
+        UpdateClientClasses(self, self.team_no);
         UpdateClientMenu_Class(self);
         return;
     }
@@ -414,9 +412,9 @@ void (float update) Menu_Class = {
 
     // print out class menu
     self.menu_input = nil;
-    if (TeamFortress_TeamIsCivilian(self.team_no))
-        Status_Print(self, "Your team can only be civilians\n");
-    else
+//    if (TeamFortress_TeamIsCivilian(self.team_no))
+//        Status_Print(self, "Your team can only be civilians\n");
+//    else
         Status_Menu(self, Menu_Class_Input, s_select, s_scout, s_sniper, s_soldier, s_demoman, s_medic, s_hwguy, s_pyro, s_spy, s_engineer, s_randompc);
 
     strunzone(s_scout); strunzone(s_sniper); strunzone(s_soldier); strunzone(s_demoman); strunzone(s_medic);
@@ -443,6 +441,38 @@ void () Menu_Drop = {
         return;
     }
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        float ammotypes = (1 | 2 | 4 | 8), ammomakes = 0;
+        if (self.ammo_shells < DROP_SHELLS)
+            ammotypes -= 1;
+        if (self.ammo_nails < DROP_NAILS)
+            ammotypes -= 2;
+        if (self.ammo_rockets < DROP_ROCKETS)
+            ammotypes -= 4;
+        if (self.ammo_cells < DROP_CELLS)
+            ammotypes -= 8;
+
+        if (self.playerclass == PC_ENGINEER) {
+            ammomakes = 0;
+            if ((self.ammo_shells < DROP_SHELLS) && ((self.ammo_cells / AMMO_COST_SHELLS) >= (DROP_SHELLS - self.ammo_shells)))
+                ammomakes += 1;
+            if ((self.ammo_nails < DROP_NAILS) && ((self.ammo_cells / AMMO_COST_NAILS) >= (DROP_NAILS - self.ammo_nails)))
+                ammomakes += 2;
+            if ((self.ammo_rockets < DROP_ROCKETS) && ((self.ammo_cells / AMMO_COST_ROCKETS) >= (DROP_ROCKETS - self.ammo_rockets)))
+                ammomakes += 4;
+        }
+
+        Menu_Close(self);
+        if(ammotypes) {
+            UpdateClientMenu_DropAmmo(self, ammotypes, ammomakes);
+        } else {
+            sprint(self, PRINT_HIGH, "Not enough ammo\n");
+        }
+        return;
+    }
+    
     if (self.ammo_shells < DROP_SHELLS)
         s_shells  = "\n";
     if (self.ammo_nails < DROP_NAILS)
@@ -465,6 +495,8 @@ void () Menu_Drop = {
 
     if (s_shells == "\n" && s_nails == "\n" && s_rockets == "\n" && s_cells == "\n")
         return;
+
+
 
     self.menu_input = nil;
     if (self.playerclass == PC_ENGINEER)
@@ -492,6 +524,14 @@ void () Menu_Scout = {
     local string s_scan, s_scane, s_scanf, s_scansound;
     local string s_nothing = Q"\n\s[5]\s Nothing                   \n\n";
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Scout(self);
+        return;
+    }
+    
     if (!self.ScannerOn)
         s_scan = Q"\s[1]\s Turn Scanner on           \n";
     else
@@ -556,6 +596,13 @@ void (entity pe_player) Menu_Spy = {
     if (pe_player.effects & (EF_DIMLIGHT | EF_BRIGHTLIGHT) || pe_player.is_unabletospy == 1) {
         return;
     }
+    if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(pe_player);
+        UpdateClientMenu_Spy(pe_player);
+        return;
+    }
 
     if (invis_only) {
         if (pe_player.is_undercover == 1)
@@ -604,7 +651,9 @@ void (float inp) Menu_Spy_Skin_Input = {
     if (self.skin != inp)
         CF_Spy_ChangeSkin(self, inp);
 
-    if (number_of_teams > 2)
+    if (number_of_teams == 1)
+        sprint(self, PRINT_HIGH, "There is no other team\n");
+    else if (number_of_teams > 2)
         Menu_Spy_Color();
     else if (self.team_no == 1)
         CF_Spy_ChangeColor(self, 2);
@@ -616,6 +665,14 @@ void (float inp) Menu_Spy_Skin_Input = {
 void () Menu_Spy_Skin = {
     if (self.is_unabletospy == 1)
         return;
+
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Spy_Skin(self);
+        return;
+    }
 
     local string s_disguise = "Disguise as enemy:\n\n";
     local string s_scout    = Q"\s[1]\s Scout      \n";
@@ -660,6 +717,14 @@ void () Menu_Spy_Color = {
         sprint(self, PRINT_HIGH, "No color changing allowed in deathmatch\n");
         return;
     }
+    
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Spy_Team(self);
+        return;
+    }
 
     // don't display your own team
     if (color == 13)
@@ -694,6 +759,14 @@ void (float inp) Menu_Demoman_Input = {
 };
 
 void () Menu_Demoman = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Detpack(self, FALSE);
+        return;
+    }
+    
     local string s_detpack = "Set detpack for:\n\n";
     local string s_5       = Q"\s[1]\s 5 seconds  \n";
     local string s_20      = Q"\s[2]\s 20 seconds \n";
@@ -712,6 +785,13 @@ void (float inp) Menu_Demoman_Cancel_Input = {
 }
 
 void () Menu_Demoman_Cancel = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Detpack(self, TRUE);
+        return;
+    }
     local string s_detpack = "Setting detpack...\n\n";
     local string s_cancel  = Q"\s[1]\s Cancel!\n\n\n\n\n";
 

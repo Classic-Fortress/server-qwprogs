@@ -1,5 +1,5 @@
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd;
+    local float arg_num, processedCmd, inp;
     local string tmp;
     processedCmd = FALSE;
     
@@ -66,7 +66,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 if(arg2 == "auto") {
                     if(self.team_no == 0) {
                         TeamFortress_TeamPutPlayerInTeam();
-                        UpdateClientMenu_Class(self);
+                        //UpdateClientMenu_Class(self);
+                        Menu_Class(0);
                         break;
                     } else {
                         sprint(self, PRINT_HIGH, "You can't auto team when you're already playing!\n");
@@ -78,14 +79,16 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     if(number_of_teams == 0 || newteam <= number_of_teams) {
                         TeamFortress_TeamSet(newteam);
                         if(!oldteam) {
-                            UpdateClientMenu_Class(self);
+                            //UpdateClientMenu_Class(self);
+                            Menu_Class(0);
                         }
                         break;
                     }
                 }
                 sprint(self, PRINT_HIGH, "Invalid team choice. Please use values 1-",number_of_teams?ftos(number_of_teams):"4",self.team_no?"":" or 'auto'",".\n");
             } else {
-                UpdateClientMenu_Team(self);
+                //UpdateClientMenu_Team(self);
+                Menu_Team(0);
             }
             break;
         case "changeclass":
@@ -106,12 +109,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 
                 // keep showing menu if class is invalid
                 if (newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
-                    UpdateClientMenu_Class(self);
+                    sprint(self, PRINT_HIGH, "Invalid class for this team!\n");
+                    Menu_Class(0);
                     break;
                 }
 
                 // don't try to change class if class is forbidden
                 if ((!IsLegalClass(newclass) && !override_mapclasses) || CF_GetClassRestriction(self.team_no, newclass) == -1) {
+                    sprint(self, PRINT_HIGH, "Forbidden class for this team!\n");
                     break;
                 }
 
@@ -122,7 +127,151 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
                 TeamFortress_ChangeClass(newclass);
             } else {
-                UpdateClientMenu_Class(self);
+                Menu_Class(0);
+            }
+            break;
+        case "dropammo":
+            processedCmd = TRUE;
+            if (arg2) {
+                if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
+                    inp = stof(arg2);
+                    TeamFortress_DropAmmo(inp);
+                    Menu_Drop();
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use values 1-4.\n");
+            }
+            Menu_Drop();
+            break;
+
+        case "disguise":
+            processedCmd = TRUE;
+            if (arg2) {
+                if(arg2 == "last") {
+                    Menu_Spy_Input(2);
+                    break;
+                }
+                if(arg2 == "none") {
+                    Menu_Spy_Input(4);
+                    break;
+                }
+                if(arg2 == "skin" && arg3) {
+                    Menu_Spy_Skin_Input(stof(arg3));
+                    break;
+                }
+                if(arg2 == "team" && arg3) {
+                    Menu_Spy_Color_Input(stof(arg3));
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use values 'none', 'last', 'skin #' or 'team #'.\n");
+            } else {
+                Menu_Spy_Input(1);
+            }
+            break;
+        case "menu":
+            switch(self.playerclass) {
+                case PC_SCOUT:
+                    Menu_Scout();
+                    break;
+                case PC_DEMOMAN:
+                    if(self.is_detpacking) {
+                        Menu_Demoman_Cancel();
+                        break;
+                    }
+                    Menu_Demoman();
+                    break;
+                case PC_SPY:
+                    Menu_Spy(self);
+                    break;
+                case PC_ENGINEER:
+                    Menu_Engineer(self);
+                    break;
+                default:
+                    sprint(self, PRINT_HIGH, "This class doesn't have a menu\n");
+                    break;
+            }
+            break;
+        case "autoscan":
+            if(self.playerclass == PC_SCOUT) {
+                ScannerSwitch();
+            }
+            break;
+        case "scansound":
+            if(self.playerclass == PC_SCOUT) {
+                //self.impulse = TF_SCAN_SOUND;
+                sprint(self, PRINT_HIGH, "Scanner sound: ");
+                if (self.tf_items_flags & 4) {
+                    self.tf_items_flags = self.tf_items_flags - 4;
+                    sprint(self, PRINT_HIGH, "off\n");
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | 4;
+                    sprint(self, PRINT_HIGH, "on\n");
+                }
+            }
+            break;
+        case "scanf":
+            if(self.playerclass == PC_SCOUT) {
+                //self.impulse = TF_SCAN_FRIENDLY;
+                sprint(self, PRINT_HIGH, "Scanning for: ");
+                if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                    self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_FRIENDLY;
+                    if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                        sprint(self, PRINT_HIGH, "Enemies only\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Nothing\n");
+                    }
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_FRIENDLY;
+                    if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                        sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Friendlies only\n");
+                    }
+                }
+                Status_Refresh(self);
+            }
+            break;
+        case "scane":
+            if(self.playerclass == PC_SCOUT) {
+                //self.impulse = TF_SCAN_ENEMY;
+                sprint(self, PRINT_HIGH, "Scanning for: ");
+                if (self.tf_items_flags & NIT_SCANNER_ENEMY) {
+                    self.tf_items_flags = self.tf_items_flags - NIT_SCANNER_ENEMY;
+                    if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                        sprint(self, PRINT_HIGH, "Friendlies only\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Nothing\n");
+                    }
+                } else {
+                    self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
+                    if (self.tf_items_flags & NIT_SCANNER_FRIENDLY) {
+                        sprint(self, PRINT_HIGH, "Friendlies and enemies\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Enemies only\n");
+                    }
+                    Status_Refresh(self);
+                }
+            }
+            break;
+        case "detpack":
+            processedCmd = TRUE;
+            if (arg2) {
+                if(arg2 == "cancel") {
+                    TeamFortress_DetpackStop();
+                    break;
+                }
+                if(self.is_detpacking) {
+                    Menu_Demoman_Cancel();
+                    break;
+                }
+                local float farg2 = stof(arg2);
+                if(farg2) {
+                    TeamFortress_SetDetpack(farg2);
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
+            } else {
+                Menu_Demoman();
             }
             break;
     }
@@ -304,6 +453,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd cancel\n");
                 sprint(self, PRINT_HIGH, "cmd stop\n");
                 sprint(self, PRINT_HIGH, "cmd kick\n");
+                sprint(self, PRINT_HIGH, "cmd ceasefire\n");
                 sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
                 sprint(self, PRINT_HIGH, "\n");
                 break;
