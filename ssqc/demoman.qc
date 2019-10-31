@@ -133,11 +133,15 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
-    if (!(self.weapons_carried & WEAP_DETPACK))
+    if (!(self.weapons_carried & WEAP_DETPACK)) {
+        sprint(self, PRINT_HIGH, "You don't have a detpack\n");
         return;
+    }
 
-    if (self.ammo_detpack <= 0)
+    if (self.ammo_detpack <= 0) {
+        sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
+    }
 
     at_spot = findradius(self.origin, 65);
     while (at_spot != world) {

@@ -130,8 +130,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 Menu_Class(0);
             }
             break;
+
+//These only work when alive
         case "dropammo":
             processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "You've already dropped all your ammo when you died!\n");
+                break;
+            }
             if (arg2) {
                 if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
                     inp = stof(arg2);
@@ -146,6 +152,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
         case "disguise":
             processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't spy while dead!\n");
+                break;
+            }
             if (arg2) {
                 if(arg2 == "last") {
                     Menu_Spy_Input(2);
@@ -169,6 +179,11 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
         case "menu":
+            processedCmd = TRUE;
+            if(self.health <= 0 && self.playerclass != PC_SCOUT) {
+                sprint(self, PRINT_HIGH, "Menus are for the living!\n");
+                break;
+            }
             switch(self.playerclass) {
                 case PC_SCOUT:
                     Menu_Scout();
@@ -187,16 +202,18 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_Engineer(self);
                     break;
                 default:
-                    sprint(self, PRINT_HIGH, "This class doesn't have a menu\n");
+                    sprint(self, PRINT_HIGH, "This class doesn't have a menu.\n");
                     break;
             }
             break;
         case "autoscan":
+            processedCmd = TRUE;
             if(self.playerclass == PC_SCOUT) {
                 ScannerSwitch();
             }
             break;
         case "scansound":
+            processedCmd = TRUE;
             if(self.playerclass == PC_SCOUT) {
                 //self.impulse = TF_SCAN_SOUND;
                 sprint(self, PRINT_HIGH, "Scanner sound: ");
@@ -210,6 +227,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
         case "scanf":
+            processedCmd = TRUE;
             if(self.playerclass == PC_SCOUT) {
                 //self.impulse = TF_SCAN_FRIENDLY;
                 sprint(self, PRINT_HIGH, "Scanning for: ");
@@ -232,6 +250,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
         case "scane":
+            processedCmd = TRUE;
             if(self.playerclass == PC_SCOUT) {
                 //self.impulse = TF_SCAN_ENEMY;
                 sprint(self, PRINT_HIGH, "Scanning for: ");
@@ -255,6 +274,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "detpack":
             processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
+                break;
+            }
             if (arg2) {
                 if(arg2 == "cancel") {
                     TeamFortress_DetpackStop();
@@ -273,6 +296,95 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             } else {
                 Menu_Demoman();
             }
+            break;
+        case "build":
+            processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+                break;
+            }
+            if (arg2) {
+                if(arg2 == "cancel") {
+                    TeamFortress_EngineerBuildStop();
+                    break;
+                }
+                if(arg2 == "sentry") {
+                    Menu_Engineer_Input(1);
+                    break;
+                }
+                if(arg2 == "dispenser") {
+                    Menu_Engineer_Input(2);
+                    break;
+                }
+                if(arg2 == "destroy" && arg3) {
+                    if(arg3 == "sentry") {
+                        Menu_Engineer_Input(3);
+                        break;
+                    }
+                    if(arg3 == "dispenser") {
+                        Menu_Engineer_Input(4);
+                        break;
+                    }
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice.\n");
+            } else {
+                Menu_Engineer(self);
+            }
+            break;
+        case "sentry":
+            processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
+                break;
+            }
+            if (arg2 && arg3) {
+                if(arg2 == "rotate") {
+                    local float farg3 = stof(arg3);
+                    if(farg3 < 0) {
+                        sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
+                    } else {
+                        sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3)," degrees anticlockwise...\n");
+                    }
+                    self.building.waitmin = anglemod(self.building.waitmin + farg3);
+                    self.building.waitmax = anglemod(self.building.waitmax + farg3);
+                    break;
+                }
+                sprint(self, PRINT_HIGH, "Invalid choice.\n");
+            } else {
+                Menu_EngineerFix_SentryGun_Rotate();
+            }
+            break;
+        case "dispenser":
+            processedCmd = TRUE;
+            if(self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't dispense while dead.\n");
+                break;
+            }
+            if (arg2) {
+                if(arg2 == "ammo") {
+                    Menu_EngineerFix_Dispenser_Input(1);
+                    break;
+                }
+                if(arg2 == "armour" || arg2 == "armor") {
+                    Menu_EngineerFix_Dispenser_Input(2);
+                    break;
+                }
+                if(arg2 == "repair") {
+                    Menu_EngineerFix_Dispenser_Input(3);
+                    break;
+                }
+                if(arg2 == "withdraw" && arg3) {
+                    if(arg3 == "ammo") {
+                        Menu_Dispenser_Input(1);
+                        break;
+                    }
+                    if(arg3 == "armour" || arg3 == "armor") {
+                        Menu_Dispenser_Input(2);
+                        break;
+                    }
+                }
+            }
+            sprint(self, PRINT_HIGH, "Invalid choice. Choices are [ammo|armo[u]r|repair|withdraw ammo|withdraw armo[u]r].\n");
             break;
     }
    
@@ -459,7 +571,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 break;
         }
     }
-
+    
     return processedCmd;
 }
 

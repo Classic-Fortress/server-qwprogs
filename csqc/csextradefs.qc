@@ -28,6 +28,9 @@ vector ScreenSize;
 float number_of_teams;
 float last_skin;
 float last_team;
+vector sentry_pos;
+vector dispenser_pos;
+vector touched_dispenser_pos;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
