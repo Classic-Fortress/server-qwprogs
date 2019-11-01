@@ -877,6 +877,9 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     // prepare disguise
     if (!pe_player.undercover_team)
         sprint(pe_player, PRINT_HIGH, "Going undercover...\n");
+    else if(pe_player.undercover_skin != pf_class)
+         sprint(pe_player, PRINT_HIGH, "Changing costumes...\n");
+       
     pe_player.is_undercover = 2;
     pe_player.disguise_skin = pf_class;
     pe_player.disguise_team = 0;

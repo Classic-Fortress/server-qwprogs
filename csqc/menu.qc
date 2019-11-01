@@ -8,27 +8,7 @@
 #define FO_MENU_STATE_DISABLED 2
 #define FO_MENU_STATE_SPACER 3
 
-class fo_menu_option_2 {
-    string shortcut;    //key to press. if omitted - mouse only
-    string name;        //what to display
-    string value;       //optional - displays current value/state
-    string description; //optional
-    float state;        //active/disabled
-    virtual void() action = {};
-    vector colour;
-    fo_menu_option_2 next;
-};
-
-class fo_menu_2 {
-    vector position;
-    vector size;
-    string title;
-    float flags;
-    fo_menu_option_2 options;
-    float num_opts;
-    float active;
-};
-
+void (float force) FO_Menu_Build;
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -48,13 +28,36 @@ typedef struct {
     fo_menu_option options[20];
     float num_opts;
     float active;
+    void() update;
 } fo_menu;
+
+class fo_menu_option_2 {
+    string shortcut;    //key to press. if omitted - mouse only
+    string name;        //what to display
+    string value;       //optional - displays current value/state
+    string description; //optional
+    float state;        //active/disabled
+    virtual void() action = {};
+    vector colour;
+    fo_menu_option_2 next;
+};
+
+class fo_menu_2 {
+    vector position;
+    vector size;
+    string title;
+    float flags;
+    fo_menu_option_2 options;
+    float num_opts;
+    float active;
+    virtual void() update = {};
+};
 
 void FO_Menu_Team(float);
 void Menu_Cancel() ;
 
-fo_menu InProgressMenu;
-fo_menu CurrentMenu;
+fo_menu* InProgressMenu;
+fo_menu* CurrentMenu;
 
 fo_menu_option MenuSpacer = {"","","","",FO_MENU_STATE_SPACER};
 
@@ -179,7 +182,120 @@ var fo_menu FO_MENU_DETPACK = {
 var fo_menu FO_MENU_DETPACK_CANCEL = {
     [0,0], [300,200], "Setting detpack...", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Cancel","","",FO_MENU_STATE_NORMAL,{localcmd("cmd detpack cancel\n");Menu_Cancel();},MENU_BUTTON},
-    }, 1, TRUE
+    }, 1, TRUE, {
+        if(!SBAR.IsDetpacking) {
+            Menu_Cancel();
+        }
+    }
+};
+var fo_menu FO_MENU_BUILD_CANCEL = {
+    [0,0], [300,200], "Building...", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Cancel","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build cancel\n");Menu_Cancel();},MENU_BUTTON},
+    }, 1, TRUE, {
+        if(!SBAR.IsBuilding) {
+            Menu_Cancel();
+        }
+    }
+};
+var fo_menu FO_MENU_BUILD = {
+    [0,0], [300,200], "Engineering", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Build Sentry Gun","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build sentry\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Build Dispenser","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build dispenser\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Destroy Sentry Gun","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build destroy sentry\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Dismantle Sentry Gun","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build destroy sentry\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","Destroy Dispenser","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build destroy dispenser\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","Dismantle Dispenser","","",FO_MENU_STATE_NORMAL,{localcmd("cmd build destroy dispenser\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 8, TRUE, {
+        if(SBAR.IsBuilding) {
+            Menu_Cancel();
+            //CurrentMenu = &FO_MENU_BUILD_CANCEL;
+            FO_Menu_Build(FALSE);
+            return;
+        }
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(SBAR.HasSentry) {
+            FO_MENU_BUILD.options[0].state = FO_MENU_STATE_HIDDEN;  //Build
+            if(vlen(org - sentry_pos) <= ENG_BUILDING_DISMANGLE_DISTANCE) {
+                FO_MENU_BUILD.options[2].state = FO_MENU_STATE_HIDDEN;  //Destroy
+                FO_MENU_BUILD.options[3].state = FO_MENU_STATE_NORMAL;  //Dismantle
+            } else {
+                FO_MENU_BUILD.options[2].state = FO_MENU_STATE_NORMAL;  //Destroy
+                FO_MENU_BUILD.options[3].state = FO_MENU_STATE_HIDDEN;  //Dismantle
+            }
+        } else {
+            if(getstatf(STAT_CELLS) > ENG_SENTRY_COST) {
+                FO_MENU_BUILD.options[0].state = FO_MENU_STATE_NORMAL;
+            } else {
+                FO_MENU_BUILD.options[0].state = FO_MENU_STATE_DISABLED;
+            }
+            FO_MENU_BUILD.options[2].state = FO_MENU_STATE_HIDDEN;
+            FO_MENU_BUILD.options[3].state = FO_MENU_STATE_HIDDEN;
+        }
+        if(SBAR.HasDispenser) {
+            FO_MENU_BUILD.options[1].state = FO_MENU_STATE_HIDDEN;
+            if(vlen(org - dispenser_pos) <= ENG_BUILDING_DISMANGLE_DISTANCE) {
+                FO_MENU_BUILD.options[4].state = FO_MENU_STATE_HIDDEN;
+                FO_MENU_BUILD.options[5].state = FO_MENU_STATE_NORMAL;
+            } else {
+                FO_MENU_BUILD.options[4].state = FO_MENU_STATE_NORMAL;
+                FO_MENU_BUILD.options[5].state = FO_MENU_STATE_HIDDEN;
+            }
+        } else {
+            if(getstatf(STAT_CELLS) > ENG_DISPENSER_COST) {
+                FO_MENU_BUILD.options[1].state = FO_MENU_STATE_NORMAL;
+            } else {
+                FO_MENU_BUILD.options[1].state = FO_MENU_STATE_DISABLED;
+            }
+            FO_MENU_BUILD.options[4].state = FO_MENU_STATE_HIDDEN;
+            FO_MENU_BUILD.options[5].state = FO_MENU_STATE_HIDDEN;
+        }
+    }
+};
+var fo_menu FO_MENU_SENTRY_ROTATE = {
+    [0,0], [300,200], "Rotate Sentry Gun", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Anticlockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 45\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","180 Degrees","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 180\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Clockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate -45\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 5, TRUE, {
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(vlen(org - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+            Menu_Cancel();
+            return;
+        }
+    }
+};
+var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
+    [0,0], [300,200], "Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Insert Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser ammo\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Insert Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser armour\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Repair","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser repair\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 5, TRUE, {
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(vlen(org - dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+            Menu_Cancel();
+            return;
+        }
+    }
+};
+var fo_menu FO_MENU_DISPENSER_USE = {
+    [0,0], [300,200], "Use Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Withdraw Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw ammo\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Withdraw Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 4, TRUE, {
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(vlen(org - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+            Menu_Cancel();
+            return;
+        }
+    }
 };
 
 void fo_menu_start(vector position, vector size, string title, float flags) = {
@@ -215,7 +331,7 @@ void fo_menu_add_option2(string shortcut, string name, string value, string desc
     }
 }
 
-vector fo_menu_draw(fo_menu menu) = {
+vector fo_menu_draw(fo_menu * menu) = {
     vector position;
     if(menu.flags & FO_MENU_FLAG_CENTER) {
         position = Hud_Panels[HUD_PANEL_MENU].Position;
@@ -229,7 +345,13 @@ vector fo_menu_draw(fo_menu menu) = {
         setcursormode(FALSE);
         return position;
     }
+    
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
+    
+    if(menu.update) {
+        menu.update();
+    }
+    
     local float scale = Hud_Panels[HUD_PANEL_MENU].Scale, textscale = Hud_Panels[HUD_PANEL_MENU].TextScale;
     if(!textscale) {
         textscale = scale;
@@ -339,7 +461,7 @@ vector fo_menu_draw(fo_menu menu) = {
     return position;
 }
 
-float fo_menu_process_input(fo_menu menu, float scan) = {
+float fo_menu_process_input(fo_menu * menu, float scan) = {
     local string button = "";
     local float found = FALSE;
     if(scan > 47 && scan < 58) {
@@ -388,14 +510,18 @@ void Menu_Draw(float width, float height, float menushown) = {
 }
 
 void FO_Menu_Game(float force) = {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_GAME || CurrentMenu == &FO_MENU_GAME_SPECTATOR)) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     if(is_spectator) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
-        CurrentMenu = FO_MENU_GAME_SPECTATOR;
+        CurrentMenu = &FO_MENU_GAME_SPECTATOR;
     } else {
         //print(getplayerkeyvalue(player_localnum, "name"), " is playing a game!\n");
-        CurrentMenu = FO_MENU_GAME;
+        CurrentMenu = &FO_MENU_GAME;
     }
     fo_hud_menu_active = TRUE;
 }
@@ -415,10 +541,14 @@ void FO_Menu_Track() = {
         e = find(e, classname, "player");
     }
     FO_MENU_SPECTATOR_TRACK.num_opts = i;
-    FO_MENU_SPECTATOR_TRACK.position = fo_menu_draw(FO_MENU_SPECTATOR_TRACK);
+    //FO_MENU_SPECTATOR_TRACK.position = fo_menu_draw(FO_MENU_SPECTATOR_TRACK);
 }
 
 void FO_Menu_Team(float force) = {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_TEAM && !force) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     if(team_no) {
@@ -435,18 +565,26 @@ void FO_Menu_Team(float force) = {
         //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_NORMAL;
         //FO_MENU_TEAM.options[5].state = FO_MENU_STATE_NORMAL;
     }
-    CurrentMenu = FO_MENU_TEAM;
+    CurrentMenu = &FO_MENU_TEAM;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_Class(float force) = {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
-    CurrentMenu = FO_MENU_CLASS;
+    CurrentMenu = &FO_MENU_CLASS;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_DROPAMMO) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     if(!ammotypes) {
@@ -476,21 +614,29 @@ void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
         }
     }
 
-    CurrentMenu = FO_MENU_DROPAMMO;
+    CurrentMenu = &FO_MENU_DROPAMMO;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SCOUT) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     FO_MENU_SCOUT.options[0].value = (scanner_on?"on":"off");
     FO_MENU_SCOUT.options[1].value = ((scanner_flags & 1)?"on":"off");
     FO_MENU_SCOUT.options[2].value = ((scanner_flags & 2)?"on":"off");
     FO_MENU_SCOUT.options[3].value = ((scanner_flags & 4)?"on":"off");
-    CurrentMenu = FO_MENU_SCOUT;
+    CurrentMenu = &FO_MENU_SCOUT;
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Spy(float force) = {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     if(SBAR.InvisOnly) {
@@ -510,7 +656,7 @@ void FO_Menu_Spy(float force) = {
         }
         FO_MENU_SPY.options[4].state = (SBAR.IsUndercover?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN);
     }
-    CurrentMenu = FO_MENU_SPY;
+    CurrentMenu = &FO_MENU_SPY;
     fo_hud_menu_active = TRUE;
 }
 
@@ -530,23 +676,72 @@ void FO_Menu_Spy_Team(float force) = {
             
         }
     }
-    CurrentMenu = FO_MENU_SPY_TEAM;
+    CurrentMenu = &FO_MENU_SPY_TEAM;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_Spy_Skin(float force) = {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
-    CurrentMenu = FO_MENU_SPY_SKIN;
+    CurrentMenu = &FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Detpack(float force, float cancel_detpack) = {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK_CANCEL || CurrentMenu == &FO_MENU_DETPACK)) {
+        Menu_Cancel();
+        return;
+    }
     if(fo_hud_menu_active && !force)
         return;
     if(cancel_detpack) {
-        CurrentMenu = FO_MENU_DETPACK_CANCEL;
+        CurrentMenu = &FO_MENU_DETPACK_CANCEL;
     } else {
-        CurrentMenu = FO_MENU_DETPACK;
+        CurrentMenu = &FO_MENU_DETPACK;
+    }
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Build(float force) = {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_BUILD_CANCEL || CurrentMenu == &FO_MENU_BUILD)) {
+        Menu_Cancel();
+        return;
+    }
+    if(fo_hud_menu_active && !force)
+        return;
+    if(SBAR.IsBuilding) {
+        CurrentMenu = &FO_MENU_BUILD_CANCEL;
+    } else {
+        CurrentMenu = &FO_MENU_BUILD;
+    }
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Rotate_Sentry(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    if(SBAR.IsBuilding) {
+        return;
+    } else {
+        CurrentMenu = &FO_MENU_SENTRY_ROTATE;
+    }
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Dispenser_Fix(float force, float old_spanner) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    FO_MENU_DISPENSER_MAINTAIN.options[2].state = (old_spanner?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN);
+    CurrentMenu = &FO_MENU_DISPENSER_MAINTAIN;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Dispenser_Use(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    if(SBAR.IsBuilding) {
+        return;
+    } else {
+        CurrentMenu = &FO_MENU_DISPENSER_USE;
     }
     fo_hud_menu_active = TRUE;
 }

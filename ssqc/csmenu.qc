@@ -96,3 +96,36 @@ void UpdateClientMenu_Detpack(entity pl, float cancel_detpack) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientMenu_Build(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_BUILD);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+void UpdateClientMenu_FixSentry(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_ROTATE_SENTRY);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+void UpdateClientMenu_FixDispenser(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_FIX_DISPENSER);
+    WriteByte(MSG_MULTICAST, old_spanner);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+void UpdateClientMenu_UseDispenser(entity pl, entity disp) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_USE_DISPENSER);
+    WriteFloat(MSG_MULTICAST, disp.origin.x);
+    WriteFloat(MSG_MULTICAST, disp.origin.y);
+    WriteFloat(MSG_MULTICAST, disp.origin.z);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+

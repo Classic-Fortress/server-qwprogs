@@ -152,6 +152,19 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_DETPACK:
                     FO_Menu_Detpack(FALSE, readbyte());
                     break;
+                case CLIENT_MENU_BUILD:
+                    FO_Menu_Build(FALSE);
+                    break;
+                case CLIENT_MENU_ROTATE_SENTRY:
+                    FO_Menu_Rotate_Sentry(FALSE);
+                    break;
+                case CLIENT_MENU_FIX_DISPENSER:
+                    FO_Menu_Dispenser_Fix(FALSE, readbyte());
+                    break;
+                case CLIENT_MENU_USE_DISPENSER:
+                    touched_dispenser_pos = [readfloat(),readfloat(),readfloat()];
+                    FO_Menu_Dispenser_Use(FALSE);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -171,6 +184,12 @@ void() CSQC_Parse_Event = {
                 }
             }
 
+            break;
+        case MSG_SENTRY_POS:
+            sentry_pos = [readfloat(),readfloat(),readfloat()];
+            break;
+        case MSG_DISPENSER_POS:
+            dispenser_pos = [readfloat(),readfloat(),readfloat()];
             break;
     }
 }

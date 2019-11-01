@@ -781,12 +781,36 @@ void () DispenserThink = {
     self.nextthink = time + 0.3;
 };
 
+void UpdateClient_Sentry(entity pl, entity sent) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_SENTRY_POS);
+    WriteFloat(MSG_MULTICAST, sent.origin.x);
+    WriteFloat(MSG_MULTICAST, sent.origin.y);
+    WriteFloat(MSG_MULTICAST, sent.origin.z);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_Dispenser(entity pl, entity disp) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_DISPENSER_POS);
+    WriteFloat(MSG_MULTICAST, disp.origin.x);
+    WriteFloat(MSG_MULTICAST, disp.origin.y);
+    WriteFloat(MSG_MULTICAST, disp.origin.z);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+
 void () TeamFortress_FinishedBuilding = {
     local entity oldself;
 
     if (self.owner.is_building != 1) {
         return;
     }
+    
+    local float csqcactive = infokeyf(self.owner, INFOKEY_P_CSQCACTIVE);
+    
     oldself = self;
     self = self.owner;
     oldself.owner = world;
@@ -804,7 +828,7 @@ void () TeamFortress_FinishedBuilding = {
         sprint(self, PRINT_HIGH, "You finish building the dispenser\n");
         teamsprint(self.team_no, self, self.netname);
         teamsprint(self.team_no, self, " has built a dispenser\n");
-        self.ammo_cells = self.ammo_cells - 100;
+        self.ammo_cells = self.ammo_cells - ENG_DISPENSER_COST;
         oldself.classname = "building_dispenser";
         oldself.netname = "dispenser";
         oldself.blocked = T_Dispenser;
@@ -838,6 +862,9 @@ void () TeamFortress_FinishedBuilding = {
         setmodel(oldself, oldself.mdl);
         setsize(oldself, '-8 -8 0', '8 8 24');
         setorigin(oldself, (oldself.origin + '0 0 8'));
+        if(csqcactive) {
+            UpdateClient_Dispenser(self, oldself);
+        }
     } else if (oldself.weapon == 2) {
         self.has_sentry = TRUE;
         sprint(self, PRINT_HIGH, "You finish building the sentry gun\n");
@@ -848,7 +875,7 @@ void () TeamFortress_FinishedBuilding = {
         oldself.takedamage = DAMAGE_NO;
         oldself.th_die = Sentry_Die;
         oldself.team_no = self.team_no;
-        self.ammo_cells = self.ammo_cells - 130;
+        self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
         setsize(oldself, '-16 -16 0', '16 16 4');
         newmis = spawn();
         newmis.classname = "building_sentrygun";
@@ -894,6 +921,9 @@ void () TeamFortress_FinishedBuilding = {
         newmis.ammo_shells = 25;
         newmis.maxammo_shells = 100;
         newmis.maxammo_rockets = 20;
+        if(csqcactive) {
+            UpdateClient_Sentry(self, oldself);
+        }
     }
     W_SetCurrentAmmo(self);
     self = oldself;
@@ -972,6 +1002,7 @@ void (entity disp) Engineer_UseDispenser = {
         ThrowGib("progs/dgib1.mdl", -30);
         ThrowGib("progs/dgib2.mdl", -50);
         ThrowGib("progs/dgib3.mdl", -50);
+        W_SetCurrentAmmo(self);
         return;
     }
 
@@ -1115,10 +1146,12 @@ void (entity disp) Engineer_Dispenser_Repair = {
 
 void (entity gun) Engineer_UseSentryGun = {
 
+    self.building = gun;
     // automate tasks if old_spanner setting is disabled
     if (!old_spanner) {
         if(gun.team_no > 0 && gun.team_no == self.team_no) {
-            if (gun.weapon < 3 && self.ammo_cells >= 130) {
+            Menu_EngineerFix_SentryGun_Rotate();
+            if (gun.weapon < 3 && self.ammo_cells >= ENG_SENTRY_COST) {
                 Engineer_SentryGun_Upgrade(gun);
                 return;
             } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
@@ -1141,6 +1174,7 @@ void (entity gun) Engineer_UseSentryGun = {
             ThrowGib("progs/tgib1.mdl", -30);
             ThrowGib("progs/tgib2.mdl", -50);
             ThrowGib("progs/tgib3.mdl", -50);
+            W_SetCurrentAmmo(self);
             return;
         }
     }
@@ -1171,7 +1205,6 @@ void (entity gun) Engineer_UseSentryGun = {
     }
     sprint(self, PRINT_HIGH, "\n");
 
-    self.building = gun;
     Engineer_SentryGun_ShowMenu(self.building);
 };
 
@@ -1286,7 +1319,7 @@ void () CheckDistance = {
         return;
     }
     dist = self.enemy.origin - self.owner.origin;
-    if (vlen(dist) > 80) {
+    if (vlen(dist) > ENG_BUILDING_MAINT_DISTANCE) {
         Menu_Close(self.owner);
         self.owner.building = world;
         dremove(self);

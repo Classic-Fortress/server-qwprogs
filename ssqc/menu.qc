@@ -111,6 +111,10 @@ void (entity pl) UpdateClientMenu_Spy;
 void (entity pl) UpdateClientMenu_Spy_Skin;
 void (entity pl) UpdateClientMenu_Spy_Team;
 void (entity pl, float cancel_detpack) UpdateClientMenu_Detpack;
+void (entity pl) UpdateClientMenu_Build;
+void (entity pl) UpdateClientMenu_FixSentry;
+void (entity pl) UpdateClientMenu_FixDispenser;
+void (entity pl, entity disp) UpdateClientMenu_UseDispenser;
 
 void (entity pl) Menu_Close =
 {
@@ -814,14 +818,14 @@ void (float inp) Menu_Engineer_Input = {
     dismantle_sentrygun = 0;
     dismantle_dispenser = 0;
 
-    if (inp == 1 && !self.has_sentry && self.ammo_cells >= 130)
+    if (inp == 1 && !self.has_sentry && self.ammo_cells >= ENG_SENTRY_COST)
         TeamFortress_Build(2);
 
-    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= 100)
+    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= ENG_DISPENSER_COST)
         TeamFortress_Build(1);
 
     if (inp == 3 && self.has_sentry) {
-        te = findradius(self.origin, 100);
+        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
@@ -831,6 +835,7 @@ void (float inp) Menu_Engineer_Input = {
                     dremove (te);
                     self.has_sentry = 0;
                     dismantle_sentrygun = 1;
+                    W_SetCurrentAmmo(self);
                 }
             }
             te = te.chain;
@@ -840,7 +845,7 @@ void (float inp) Menu_Engineer_Input = {
     }
 
     if (inp == 4 && self.has_dispenser) {
-        te = findradius(self.origin, 100);
+        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
@@ -849,6 +854,7 @@ void (float inp) Menu_Engineer_Input = {
                     dremove (te);
                     self.has_dispenser = 0;
                     dismantle_dispenser = 1;
+                    W_SetCurrentAmmo(self);
                 }
             }
             te = te.chain;
@@ -867,6 +873,14 @@ void (entity player) Menu_Engineer = {
     local string s_dsentry = "\n";
     local string s_ddisp   = "\n";
     local string s_nothing = Q"\n\s[5]\s Nothing             ";
+
+    if(infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(player);
+        UpdateClientMenu_Build(player);
+        return;
+    }
 
     if (player.has_sentry) {
         s_sentry = "\n";
@@ -935,6 +949,14 @@ void (float inp) Menu_EngineerFix_Dispenser_Input = {
 };
 
 void () Menu_EngineerFix_Dispenser = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_FixDispenser(self);
+        return;
+    }
+
     local string s_action = "Dispenser maintenance:\n\n";
     local string s_ammo, s_armor, s_repair;
     local string s_nothing = Q"\n\s[5]\s Nothing     \n\n";
@@ -983,10 +1005,20 @@ void () Menu_EngineerFix_SentryGun_Rotate = {
     local string rotr    = Q"\s[3]\s clockwise    \n";
     local string nothing = Q"\n\s[5]\s Nothing      \n";
 
-    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
-                || self.classname != "player" || self.building == world)
-        return;
 
+    if (!self.building.real_owner.has_sentry || self.building.real_owner != self
+                || self.classname != "player" || self.building == world) {
+        return;
+    }
+    
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_FixSentry(self);
+        return;
+    }
+    
     Status_Menu(self, Menu_EngineerFix_SentryGun_Rotate_Input, action, rotl, rot180, rotr, nothing);
 };
 
@@ -1118,6 +1150,14 @@ void () Menu_Dispenser = {
     local string s_ammo, s_armor;
     local string s_nothing = Q"\n\s[5]\s Nothing            \n\n";
 
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_UseDispenser(self, self.building);
+        return;
+    }
+
     if ((self.building.ammo_shells > 0 && self.ammo_shells < self.maxammo_shells)
             || (self.building.ammo_nails > 0 && self.ammo_nails < self.maxammo_nails)
             || (self.building.ammo_rockets > 0 && self.ammo_rockets < self.maxammo_rockets)
@@ -1142,6 +1182,13 @@ void (float inp) Menu_Engineer_Cancel_Input = {
 }
 
 void () Menu_Engineer_Cancel = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Build(self);
+        return;
+    }
     local string s_build = "Building...\n\n";
     local string s_cancel  = Q"\s[1]\s Cancel!\n\n\n\n\n";
 

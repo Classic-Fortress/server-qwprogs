@@ -41,6 +41,9 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         }
                         break;
                     case K_MOUSE1:
+                        if(!fo_hud_editor && fo_hud_menu_active && !(CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE)) {
+                            break;
+                        }
                         // work out if on a button
                         return TRUE;
                         break;

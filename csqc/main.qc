@@ -30,12 +30,12 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
 
-    CurrentMenu = FO_MENU_TEAM;
+    CurrentMenu = &FO_MENU_TEAM;
 };
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
-    localcmd("menu_restart");
+    localcmd("menu_restart\n");
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
@@ -78,6 +78,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
+            break;
+        case "fo_menu_team":
+            FO_Menu_Team(TRUE);
+            break;
+        case "fo_menu_class":
+            FO_Menu_Class(TRUE);
             break;
         case "fo_main_menu":
             if(checkcommand("m_main")) {
