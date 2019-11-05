@@ -142,7 +142,13 @@ var fo_menu FO_MENU_SPY = {
         {"4","Reset Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise none\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 7, TRUE
+        MenuSpacer,
+        {"0","Manual Colour Changes","","",FO_MENU_STATE_NORMAL,{
+            local float smt = !stof(getplayerkeyvalue(player_localnum, "smt"));
+            localcmd("setinfo smt ", ftos(smt), "\n");
+            FO_MENU_SPY.options[8].value = (smt?"on":"off");
+        },MENU_BUTTON},
+    }, 9, TRUE
 };
 var fo_menu FO_MENU_SPY_SKIN = {
     [0,0], [300,200], "Disguise as enemy", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -217,7 +223,7 @@ var fo_menu FO_MENU_BUILD = {
         vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
         if(SBAR.HasSentry) {
             FO_MENU_BUILD.options[0].state = FO_MENU_STATE_HIDDEN;  //Build
-            if(vlen(org - sentry_pos) <= ENG_BUILDING_DISMANGLE_DISTANCE) {
+            if(vlen(org - sentry_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[2].state = FO_MENU_STATE_HIDDEN;  //Destroy
                 FO_MENU_BUILD.options[3].state = FO_MENU_STATE_NORMAL;  //Dismantle
             } else {
@@ -235,7 +241,7 @@ var fo_menu FO_MENU_BUILD = {
         }
         if(SBAR.HasDispenser) {
             FO_MENU_BUILD.options[1].state = FO_MENU_STATE_HIDDEN;
-            if(vlen(org - dispenser_pos) <= ENG_BUILDING_DISMANGLE_DISTANCE) {
+            if(vlen(org - dispenser_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[4].state = FO_MENU_STATE_HIDDEN;
                 FO_MENU_BUILD.options[5].state = FO_MENU_STATE_NORMAL;
             } else {
@@ -253,6 +259,22 @@ var fo_menu FO_MENU_BUILD = {
         }
     }
 };
+var fo_menu FO_MENU_SENTRY_MAINTAIN = {
+    [0,0], [300,200], "Sentry Gun", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Anticlockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 45\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","180 Degrees","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 180\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","Clockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate -45\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 5, TRUE, {
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(vlen(org - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+            Menu_Cancel();
+            return;
+        }
+    }
+};
+
 var fo_menu FO_MENU_SENTRY_ROTATE = {
     [0,0], [300,200], "Rotate Sentry Gun", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Anticlockwise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd sentry rotate 45\n");Menu_Cancel();},MENU_BUTTON},
@@ -287,6 +309,21 @@ var fo_menu FO_MENU_DISPENSER_USE = {
     [0,0], [300,200], "Use Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Withdraw Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw ammo\n");Menu_Cancel();},MENU_BUTTON},
         {"2","Withdraw Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 4, TRUE, {
+        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
+        if(vlen(org - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+            Menu_Cancel();
+            return;
+        }
+    }
+};
+var fo_menu FO_MENU_ADMIN_MAIN = {
+    [0,0], [300,200], "Server Admin", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
+        {"1","Ceasefire","","",FO_MENU_STATE_NORMAL,{localcmd("cmd ceasefire\n");Menu_Cancel();},MENU_BUTTON},
+        {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");},MENU_BUTTON},
+        {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE, {
@@ -656,20 +693,24 @@ void FO_Menu_Spy(float force) = {
         }
         FO_MENU_SPY.options[4].state = (SBAR.IsUndercover?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN);
     }
+    local float smt = stof(getplayerkeyvalue(player_localnum, "smt"));
+    FO_MENU_SPY.options[8].value = (smt?"on":"off");
     CurrentMenu = &FO_MENU_SPY;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_Spy_Team(float force) = {
+    print("MEHT: client-side spy team menu\n");
     if(fo_hud_menu_active && !force)
         return;
     if(team_no) {
-        if(number_of_teams < 2 || team_no >= number_of_teams) {
+        if(number_of_teams < 2 || team_no > number_of_teams) {
             return;
         }
         for(float i = 0; i < 4; i++) {
-            if((i + 1) == team_no) {
-                FO_MENU_SPY_TEAM.options[i].state = FO_MENU_STATE_HIDDEN;
+            //if((i + 1) == SBAR.DisguiseTeam || i >= number_of_teams) {
+            if(i >= number_of_teams) {
+                FO_MENU_SPY_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
             } else {
                 FO_MENU_SPY_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
             }

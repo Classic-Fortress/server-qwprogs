@@ -216,7 +216,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
-    } else if (self.motd == 400 && self.team_no == 0) {
+    } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         Menu_Team(1);
     }
 

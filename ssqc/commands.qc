@@ -1,6 +1,7 @@
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd, inp;
     local string tmp;
+    local float farg3;
     processedCmd = FALSE;
     
     if (arg1)
@@ -165,13 +166,27 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_Spy_Input(4);
                     break;
                 }
-                if(arg2 == "skin" && arg3) {
-                    Menu_Spy_Skin_Input(stof(arg3));
+                if(arg2 == "skin") {
+                    if(arg3) {
+                        Menu_Spy_Skin_Input(stof(arg3));
+                    } else {
+                        Menu_Spy_Skin();
+                    }
                     break;
                 }
-                if(arg2 == "team" && arg3) {
-                    Menu_Spy_Color_Input(stof(arg3));
-                    break;
+                if(arg2 == "team") {
+                    if(arg3) {
+                        //Menu_Spy_Color_Input(stof(arg3));
+                        farg3 = stof(arg3);
+                        if (farg3 > 0 && farg3 <= number_of_teams)
+                            CF_Spy_ChangeColor(self, farg3);
+                        else
+                            Menu_Spy_Input(1);
+                        break;
+                    } else {
+                        Menu_Spy_Color();
+                        break;
+                    }
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use values 'none', 'last', 'skin #' or 'team #'.\n");
             } else {
@@ -339,7 +354,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
-                    local float farg3 = stof(arg3);
+                    farg3 = stof(arg3);
                     if(farg3 < 0) {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
                     } else {

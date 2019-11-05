@@ -655,14 +655,19 @@ void (float inp) Menu_Spy_Skin_Input = {
     if (self.skin != inp)
         CF_Spy_ChangeSkin(self, inp);
 
-    if (number_of_teams == 1)
-        sprint(self, PRINT_HIGH, "There is no other team\n");
-    else if (number_of_teams > 2)
+    if(infokeyf(self, "smt")) {
+        sprint(self, PRINT_HIGH, "MEHT: smt set, forcing colour menu\n");
         Menu_Spy_Color();
-    else if (self.team_no == 1)
-        CF_Spy_ChangeColor(self, 2);
-    else
-        CF_Spy_ChangeColor(self, 1);
+    } else {
+        if (number_of_teams == 1)
+            sprint(self, PRINT_HIGH, "There is no other team\n");
+        else if (number_of_teams > 2)
+            Menu_Spy_Color();
+        else if (self.team_no == 1)
+            CF_Spy_ChangeColor(self, 2);
+        else
+            CF_Spy_ChangeColor(self, 1);
+    }
 
 };
 
@@ -722,7 +727,9 @@ void () Menu_Spy_Color = {
         return;
     }
     
+    sprint(self, PRINT_HIGH, "MEHT: showing colour menu\n");
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        sprint(self, PRINT_HIGH, "MEHT: csqc active\n");
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
@@ -825,7 +832,7 @@ void (float inp) Menu_Engineer_Input = {
         TeamFortress_Build(1);
 
     if (inp == 3 && self.has_sentry) {
-        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
+        te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
@@ -845,7 +852,7 @@ void (float inp) Menu_Engineer_Input = {
     }
 
     if (inp == 4 && self.has_dispenser) {
-        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
+        te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
