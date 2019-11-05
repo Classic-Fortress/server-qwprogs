@@ -157,6 +157,4 @@ void () target_kill = {
 }
 
 void () target_position = {
-    self.classname = "info_notnull";
-    info_notnull();
 };
