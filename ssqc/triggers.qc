@@ -502,45 +502,13 @@ void () trigger_push_touch = {
         return;
     }
 
-    if (self.target)
+    if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
     {
-        float height, gravity, airtime;
-        vector org, targorg, dist, forward, origin2;
-
-        entity ent = find(world, targetname, self.target);
-        if (!ent)
+        if (other.classname == "grenade" || other.health > 0)
         {
-            dprint("no targ found\n");
-            return;
+            sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+            other.velocity = self.movedir;
         }
-        org = self.origin;
-        org_x = 0;
-        org_y = 0;
-        targorg = ent.origin;
-        targorg_x = 0;
-        targorg_y = 0;
-        height = vlen(org - targorg);
-        gravity = cvar("sv_gravity");
-        airtime = sqrt(height / (.5 * gravity));
-
-        if (!airtime)
-        {
-            dprint("airtime is 0\n");
-            return;
-        }
-
-        origin2 = ent.origin - self.origin;
-        origin2_z = 0;
-        dist = normalize(origin2);
-
-        forward = dist / airtime;       
-        // scale forward direction to velocity???
-        origin2_x = origin2_x * forward_x;
-        origin2_y = origin2_y * forward_y;
-        origin2_z = airtime * gravity;
-
-        other.velocity = origin2;
-
     }
     else
     {
@@ -551,8 +519,7 @@ void () trigger_push_touch = {
             if (other.classname == "player") {
                 if (other.fly_sound < time) {
                     other.fly_sound = time + 1.5;
-                    sound(other, CHAN_AUTO, "ambience/windfly.wav", 1,
-                        ATTN_NORM);
+                    sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
                 }
             }
         }
@@ -562,6 +529,45 @@ void () trigger_push_touch = {
         dremove(self);
 };
 
+void trigger_push_setup()
+{
+    /*
+    this is based off of ioq3 gpl code
+    https://github.com/ioquake/ioq3
+    void AimAtTarget( gentity_t *self )
+    */
+    float height, gravity, airtime, dist, forward;
+    vector org, targorg, origin2;
+
+    org = (self.absmin + self.absmax) * .5;
+
+    entity ent = find(world, targetname, self.target);
+    if (!ent)
+    {
+        return;
+    }
+
+    targorg = ent.origin;
+    height = targorg_z - org_z;        
+    gravity = cvar("sv_gravity");
+    airtime = sqrt(height / (.5 * gravity));
+
+    if (!airtime)
+    {
+        return;
+    }
+
+    origin2 = ent.origin - org;
+    origin2_z = 0;
+    dist = vlen(origin2);
+    origin2 = normalize(origin2);
+
+    forward = dist / airtime;       
+    origin2 = origin2 * forward;
+    origin2_z = airtime * gravity;
+    self.movedir = origin2;
+}
+
 void () trigger_push = {
     if (CheckExistence() == FALSE) {
         dremove(self);
@@ -569,11 +575,33 @@ void () trigger_push = {
     }
     InitTrigger();
 
-    precache_sound("ambience/windfly.wav");
-    self.touch = trigger_push_touch;
+    if (self.target)
+    {
+        // the target ent might not be processed yet, so we do setup after map starts
+        self.think = trigger_push_setup;
+        self.nextthink = time + 1;
+    }
+    else
+    {
+        if (!self.speed)
+            self.speed = 1000;
+    }
+    
+    if (!self.noise)
+    {
+        if (self.target)
+        {
+            // bound pads
+            self.noise = "world/bouncepad.wav";
+        }
+        else
+        {
+            self.noise = "ambience/windfly.wav";
+        }
+    }
 
-    if (!self.speed)
-        self.speed = 1000;
+    precache_sound(self.noise);    
+    self.touch = trigger_push_touch;    
 };
 
 void () trigger_monsterjump_touch = {
