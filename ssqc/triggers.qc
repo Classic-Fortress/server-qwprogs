@@ -501,18 +501,63 @@ void () trigger_push_touch = {
         }
         return;
     }
-    if (other.classname == "grenade")
-        other.velocity = self.speed * self.movedir * 10;
-    else if (other.health > 0) {
-        other.velocity = self.speed * self.movedir * 10;
-        if (other.classname == "player") {
-            if (other.fly_sound < time) {
-                other.fly_sound = time + 1.5;
-                sound(other, CHAN_AUTO, "ambience/windfly.wav", 1,
-                      ATTN_NORM);
+
+    if (self.target)
+    {
+        float height, gravity, airtime;
+        vector org, targorg, dist, forward, origin2;
+
+        entity ent = find(world, targetname, self.target);
+        if (!ent)
+        {
+            dprint("no targ found\n");
+            return;
+        }
+        org = self.origin;
+        org_x = 0;
+        org_y = 0;
+        targorg = ent.origin;
+        targorg_x = 0;
+        targorg_y = 0;
+        height = vlen(org - targorg);
+        gravity = cvar("sv_gravity");
+        airtime = sqrt(height / (.5 * gravity));
+
+        if (!airtime)
+        {
+            dprint("airtime is 0\n");
+            return;
+        }
+
+        origin2 = ent.origin - self.origin;
+        origin2_z = 0;
+        dist = normalize(origin2);
+
+        forward = dist / airtime;       
+        // scale forward direction to velocity???
+        origin2_x = origin2_x * forward_x;
+        origin2_y = origin2_y * forward_y;
+        origin2_z = airtime * gravity;
+
+        other.velocity = origin2;
+
+    }
+    else
+    {
+        if (other.classname == "grenade")
+            other.velocity = self.speed * self.movedir * 10;
+        else if (other.health > 0) {
+            other.velocity = self.speed * self.movedir * 10;
+            if (other.classname == "player") {
+                if (other.fly_sound < time) {
+                    other.fly_sound = time + 1.5;
+                    sound(other, CHAN_AUTO, "ambience/windfly.wav", 1,
+                        ATTN_NORM);
+                }
             }
         }
     }
+    
     if (self.spawnflags & PUSH_ONCE)
         dremove(self);
 };
