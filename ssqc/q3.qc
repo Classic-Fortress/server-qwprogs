@@ -156,8 +156,5 @@ void () target_kill = {
     info_tfgoal();
 }
 
-/*
 void () target_position = {
-    self.classname = "info_notnull";
-    info_notnull();
-};*/
+};

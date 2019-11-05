@@ -501,21 +501,72 @@ void () trigger_push_touch = {
         }
         return;
     }
-    if (other.classname == "grenade")
-        other.velocity = self.speed * self.movedir * 10;
-    else if (other.health > 0) {
-        other.velocity = self.speed * self.movedir * 10;
-        if (other.classname == "player") {
-            if (other.fly_sound < time) {
-                other.fly_sound = time + 1.5;
-                sound(other, CHAN_AUTO, "ambience/windfly.wav", 1,
-                      ATTN_NORM);
+
+    if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
+    {
+        if (other.classname == "grenade" || other.health > 0)
+        {
+            sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+            other.velocity = self.movedir;
+        }
+    }
+    else
+    {
+        if (other.classname == "grenade")
+            other.velocity = self.speed * self.movedir * 10;
+        else if (other.health > 0) {
+            other.velocity = self.speed * self.movedir * 10;
+            if (other.classname == "player") {
+                if (other.fly_sound < time) {
+                    other.fly_sound = time + 1.5;
+                    sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                }
             }
         }
     }
+    
     if (self.spawnflags & PUSH_ONCE)
         dremove(self);
 };
+
+void trigger_push_setup()
+{
+    /*
+    this is based off of ioq3 gpl code
+    https://github.com/ioquake/ioq3
+    void AimAtTarget( gentity_t *self )
+    */
+    float height, gravity, airtime, dist, forward;
+    vector org, targorg, origin2;
+
+    org = (self.absmin + self.absmax) * .5;
+
+    entity ent = find(world, targetname, self.target);
+    if (!ent)
+    {
+        return;
+    }
+
+    targorg = ent.origin;
+    height = targorg_z - org_z;        
+    gravity = cvar("sv_gravity");
+    airtime = sqrt(height / (.5 * gravity));
+
+    if (!airtime)
+    {
+        return;
+    }
+
+    origin2 = ent.origin - org;
+    origin2_z = 0;
+    dist = vlen(origin2);
+    origin2 = normalize(origin2);
+
+    forward = dist / airtime;       
+    origin2 = origin2 * forward;
+    origin2_z = airtime * gravity;
+    self.movedir = origin2;
+}
 
 void () trigger_push = {
     if (CheckExistence() == FALSE) {
@@ -524,11 +575,33 @@ void () trigger_push = {
     }
     InitTrigger();
 
-    precache_sound("ambience/windfly.wav");
-    self.touch = trigger_push_touch;
+    if (self.target)
+    {
+        // the target ent might not be processed yet, so we do setup after map starts
+        self.think = trigger_push_setup;
+        self.nextthink = time + 1;
+    }
+    else
+    {
+        if (!self.speed)
+            self.speed = 1000;
+    }
+    
+    if (!self.noise)
+    {
+        if (self.target)
+        {
+            // bound pads
+            self.noise = "world/bouncepad.wav";
+        }
+        else
+        {
+            self.noise = "ambience/windfly.wav";
+        }
+    }
 
-    if (!self.speed)
-        self.speed = 1000;
+    precache_sound(self.noise);    
+    self.touch = trigger_push_touch;    
 };
 
 void () trigger_monsterjump_touch = {
