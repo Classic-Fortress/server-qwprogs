@@ -1,9 +1,26 @@
+float GetQ3State(string st);
 
 void () info_null = {
     dremove(self);
 };
 
 void () info_notnull = {
+    self.state = GetQ3State(self.initialstate);
+    
+    for (int i = 1; i < (tokenize(__fullspawndata) - 1); i += 2) {
+    switch (argv(i)) {
+            case "flags":
+                string s = argv(i + 1);
+                if (s == "chargeable")
+                {
+                    self.flagsq3 = s;
+                    self.flags = FL_FINDABLE_NONSOLID;
+                }
+                break;
+            default:
+                break;
+        }
+    }
 };
 
 void () light_use = {

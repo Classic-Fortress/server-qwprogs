@@ -12,6 +12,113 @@ string (string s) prepq3fstring = {
     return (ret);
 }
 
+float GetQ3State(string st)
+{
+    float stf = 0;
+    st = strtrim(prepq3fstring(st));
+
+    switch (st)
+    {
+        case "disabled":
+            stf = STATE_DISABLED;
+            break;
+        case "inactive":
+            stf = STATE_INACTIVE;
+            break;
+        case "active":
+            stf = STATE_ACTIVE;
+            break;
+        case "invisible":
+            stf = STATE_INVISIBLE;
+            break;
+    }
+    return stf;
+}
+
+void ActivateQ3Goal(entity trig, float active)
+{
+    string msg = "";
+    string targets = "";
+    if (active)
+    {
+        msg = prepq3fstring(trig.active_all_message);
+        targets = trig.activetarget;
+    }
+    else
+    {
+        //msg = prepq3fstring(trig.active_all_message);
+        targets = trig.failtarget;
+    }
+    if (msg != "")
+        bprint(PRINT_HIGH, msg, "\n");
+    
+    float count = tokenizebyseparator(targets, ",");
+    for (float i = 0; i <= count; i++)
+    {
+        string s = argv(i);
+        float count2 = tokenizebyseparator(s, "=");
+        if (count2 >= 2)
+        {
+            string gname = argv(0);
+            float chkstate = GetQ3State(argv(1));
+            entity targ = find(world, groupname, gname);
+            while (targ)
+            {
+                if (targ.state == STATE_INVISIBLE && targ.state != chkstate)
+                {
+                    setmodel(targ, targ.mdl);
+                }
+                targ.state = chkstate;
+                msg = "";
+                switch(chkstate)
+                {
+                    case STATE_INVISIBLE:
+                        targ.mdl = targ.model;                       
+                        setmodel(targ, "");
+                        break;
+                    case STATE_DISABLED:
+                        msg = prepq3fstring(targ.disabled_all_message);
+                        break;
+                }
+                if (msg != "")
+                {
+                    bprint(PRINT_HIGH, msg, "\n");
+                }
+                targ = find(targ, groupname, gname);
+            }
+        }
+        tokenizebyseparator(targets, ",");
+    }
+}
+
+void CheckStateQ3Goal(entity trig)
+{
+    float count = tokenizebyseparator(trig.checkstate, ",");
+    float triggered = TRUE;
+    for (float i = 0; i <= count; i++)
+    {
+        string s = argv(i);
+        float count2 = tokenizebyseparator(s, "=");
+        if (count2 >= 2)
+        {
+            string gname = argv(0);
+            float chkstate = GetQ3State(argv(1));
+
+            entity targ = find(world, groupname, gname);
+            if (!targ)
+                continue;
+
+            if (targ.state != chkstate)
+            {
+                triggered = FALSE;
+            }
+        }
+    }
+
+    ActivateQ3Goal(trig, triggered);
+}
+
+
 // backpacks, cap points etc
 void () func_goalinfo = {
     self.classname = "info_tfgoal";
@@ -60,6 +167,8 @@ void () func_goalinfo = {
         loc = strstrofs(s, "=");
 
         gtype = substring(s, 0, loc);
+        if (gtype == "")
+            continue;
         gop = substring(s, loc, loc + 1);
         gamt = substring(s, loc + 1, slen);
         if (gop == "-") {
@@ -67,38 +176,41 @@ void () func_goalinfo = {
         } else {
             val = stof(gamt);
         }
-        dprint(gtype);
-        dprint(gop);
-        dprint(gamt);
 
         switch (gtype) 
         {
             case "health":
                 self.health = val;
-            break;
+                break;
             case "armor":
                 self.armorvalue = val;
-            break;
+                break;
             case "ammo_shells":
                 self.ammo_shells = val;
-            break;
-            case "ammo_bullets":
+                break;
+            case "ammo_nails":
                 self.ammo_nails = val;
-            break;
+                break;
             case "ammo_rockets":
                 self.ammo_rockets = val;
-            break;
+                break;
             case "ammo_cells":
                 self.ammo_cells = val;
-            break;
+                break;
             case "gren1":
                 self.no_grenades_1 = val;
-            break;
+                break;
             case "gren2":
                 self.no_grenades_2 = val;
-            break;
+                break;
+            case "ammo_medikit":
+                self.ammo_medikit = val;
+                break;
             default:
                 dprint("gtype not found, discarding\n");
+                dprint("gtype: ", gtype, "\n");
+                dprint("gop: ", gop, "\n");
+                dprint("gamt: ", gamt, "\n");
         }
     }
 

@@ -114,6 +114,13 @@
 #define STATE_UP	2
 #define STATE_DOWN	3
 
+// q3 states
+#define STATE_NONE		0
+#define STATE_DISABLED	4
+#define STATE_INACTIVE	5
+#define	STATE_ACTIVE	6
+#define STATE_INVISIBLE	7
+
 #define VEC_ORIGIN	'0 0 0'
 #define VEC_HULL_MIN	'-16 -16 -24'
 #define VEC_HULL_MAX	'16 16 32'

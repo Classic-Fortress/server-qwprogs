@@ -16,6 +16,7 @@ void () TeamFortress_DetpackExplode;
 void () TeamFortress_DetpackTouch;
 void () TeamFortress_DetpackDisarm;
 void () TeamFortress_DetpackCountDown;
+void CheckStateQ3Goal(entity trig);
 
 float (float force) TeamFortress_DetonatePipebombs = {
     local entity e;
@@ -322,11 +323,9 @@ void () TeamFortress_DetpackExplode = {
     self.owner.detpack_left = 0;
     bprint(PRINT_MEDIUM, "FIRE IN THE HOLE!\n");
     sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
-
     pos = pointcontents(self.origin);
     if ((pos != CONTENT_SOLID) && (pos != CONTENT_SKY) &&
         (self.owner.has_disconnected != 1)) {
-
         deathmsg = DMSG_DETPACK;
         head = findradius(self.origin, 1500);
         while (head) {
@@ -344,8 +343,22 @@ void () TeamFortress_DetpackExplode = {
                         }
                     }
                 }
-            } else if (head.takedamage &&
-                       (vlen((head.origin - self.origin)) <= 700)) {
+            }
+            else if (head.classname == "info_notnull")
+            {
+                // q3 detpackable goals
+                if (strstrofs(head.flagsq3, "chargeable") >= 0)
+                {
+                    traceline(self.origin, head.origin, 1, self);
+                    if (trace_fraction == 1) 
+                    {
+                        CheckStateQ3Goal(head);
+                    }
+                }
+            }
+            else if (head.takedamage &&
+                       (vlen((head.origin - self.origin)) <= 700)) 
+            {
                 org = head.origin + (head.mins + head.maxs) * 0.5;
                 points = 0.5 * vlen(self.origin - org);
                 if (points < 0)

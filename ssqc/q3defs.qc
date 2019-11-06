@@ -6,7 +6,6 @@
 .float teamscore;
 .string active_all_message;
 .string holding;
-.string give;
 .string groupname;
 .string carried_all_message;
 .string carried_message;
@@ -15,3 +14,9 @@
 .string activetarget;
 .string checkstate;
 .float active;
+.string initialstate;
+.string flagsq3; // .float flags already exists and q3 uses it as a string
+.string failtarget;
+.string disabled_all_message;
+
+string __fullspawndata; // due to flags/flagsq3
