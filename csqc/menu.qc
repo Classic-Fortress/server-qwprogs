@@ -2,13 +2,19 @@
 #define FO_MENU_FLAG_CENTER 2
 #define FO_MENU_FLAG_SHOW_SHORTCUTS 4
 #define FO_MENU_FLAG_SHOW_VALUES 8
+#define FO_MENU_FLAG_WARNING 16
 
 #define FO_MENU_STATE_HIDDEN 0
 #define FO_MENU_STATE_NORMAL 1
 #define FO_MENU_STATE_DISABLED 2
 #define FO_MENU_STATE_SPACER 3
 
+#define FO_MENU_TRANSPARENCY 0.2
+
 void (float force) FO_Menu_Build;
+void (float force) FO_Menu_Admin_Main;
+void (float force) FO_Menu_Admin_Modes;
+void (float force) FO_Menu_Admin_Settings;
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -320,21 +326,54 @@ var fo_menu FO_MENU_DISPENSER_USE = {
     }
 };
 var fo_menu FO_MENU_ADMIN_MAIN = {
-    [0,0], [300,200], "Server Admin", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
-        {"1","Ceasefire","","",FO_MENU_STATE_NORMAL,{localcmd("cmd ceasefire\n");Menu_Cancel();},MENU_BUTTON},
-        {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");},MENU_BUTTON},
-        {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");Menu_Cancel();},MENU_BUTTON},
+    [0,0], [300,300], "Server Admin [1/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","Ceasefire","","",FO_MENU_STATE_NORMAL,{localcmd("cmd ceasefire\n");},MENU_BORDER_WARNING},
+        {"2","Kick...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"3","Ban...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"4","Force Spectate...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
+        {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         MenuSpacer,
-        {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 4, TRUE, {
-        vector org = (vector)getentity(player_localentnum, GE_ORIGIN);
-        if(vlen(org - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
-            Menu_Cancel();
-            return;
-        }
+        {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
+        {"-","Prev - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
+    }, 11, TRUE, {
+        FO_MENU_ADMIN_MAIN.options[0].value = SERVER_ADMIN.ceasefire?"on":"off";
     }
 };
-
+var fo_menu FO_MENU_ADMIN_MODES = {
+    [0,0], [300,300], "Server Modes [2/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","Pub Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd pubmode\n");},MENU_BORDER_WARNING},
+        {"2","Clan Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd clanmode\n");},MENU_BORDER_WARNING},
+        {"3","Quad Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd quadmode\n");},MENU_BORDER_WARNING},
+        {"4","Duel Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
+        {"5","Quad Rounds...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"6","Quad Round Time...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"7","Captains Mode","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"8","Force Start","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
+        MenuSpacer,
+        {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"+","Next - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
+        {"-","Prev - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+    }, 13, TRUE
+};
+var fo_menu FO_MENU_ADMIN_SETTINGS = {
+    [0,0], [300,300], "Settings [3/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","Timelimit","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"2","Fraglimit","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"3","Override Classes","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"4","Class Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"5","Spurs","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"6","Spur Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        MenuSpacer,
+        {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"+","Next - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"-","Prev - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
+    }, 11, TRUE
+};
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
     InProgressMenu.size = size;
@@ -401,6 +440,8 @@ vector fo_menu_draw(fo_menu * menu) = {
     local string id = strcat("fo_menu_",menu.title);
     local vector tempcolour;
     local float alignment = SUI_ALIGN_START;
+    local vector bgcolour = (menu.flags & FO_MENU_FLAG_WARNING)?MENU_BG_WARNING:MENU_BG;
+    local vector bordercolour = (menu.flags & FO_MENU_FLAG_WARNING)?MENU_BORDER_WARNING:MENU_BORDER;
     
     menusize.y = titleoffset + menu.num_opts * (buttonsize.y + padding);
     
@@ -409,10 +450,10 @@ vector fo_menu_draw(fo_menu * menu) = {
     }
 
     
-    sui_border_box(position, menusize, 1, MENU_BORDER, 0.4, 0);
+    sui_border_box(position, menusize, 1, bordercolour, FO_MENU_TRANSPARENCY, 0);
     sui_push_frame(position, menusize);
 
-    sui_fill([0, 0], menusize, MENU_BG, 0.4, 0);
+    sui_fill([0, 0], menusize, bgcolour, FO_MENU_TRANSPARENCY, 0);
 
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
     sui_action_element([0, 0], menusize, id, sui_noop);
@@ -422,7 +463,7 @@ vector fo_menu_draw(fo_menu * menu) = {
         position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding*2], 
         menu.title, 
         mediumtext, 
-        MENU_TEXT_2, 
+        (menu.flags & FO_MENU_FLAG_WARNING)?MENU_TEXT_WARNING:MENU_TEXT_2, 
         1, 
         0
     );
@@ -451,8 +492,8 @@ vector fo_menu_draw(fo_menu * menu) = {
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
                     if(menu.options[i].name) {
-                        //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, MENU_BG, 0.4, 0);
-                        sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, MENU_BG, 0.4, 0);
+                        //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, bgcolour, 0.4, 0);
+                        sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, bgcolour, 0.4, 0);
                         float disabledtextoffset = 0;
                         if(alignment == SUI_ALIGN_START) {
                             disabledtextoffset = padding + shortcutoffset.x;
@@ -700,7 +741,6 @@ void FO_Menu_Spy(float force) = {
 }
 
 void FO_Menu_Spy_Team(float force) = {
-    print("MEHT: client-side spy team menu\n");
     if(fo_hud_menu_active && !force)
         return;
     if(team_no) {
@@ -784,5 +824,28 @@ void FO_Menu_Dispenser_Use(float force) = {
     } else {
         CurrentMenu = &FO_MENU_DISPENSER_USE;
     }
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Main(float force) = {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_ADMIN_MAIN || CurrentMenu == &FO_MENU_ADMIN_MODES || CurrentMenu == &FO_MENU_ADMIN_SETTINGS)) {
+        Menu_Cancel();
+        return;
+    }
+    if(fo_hud_menu_active && !force)
+        return;
+    localcmd("cmd adminrefresh\n");
+    CurrentMenu = &FO_MENU_ADMIN_MAIN;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Modes(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_MODES;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Settings(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_SETTINGS;
     fo_hud_menu_active = TRUE;
 }

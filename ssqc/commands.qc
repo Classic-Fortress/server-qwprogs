@@ -1,3 +1,84 @@
+void () RestartMap = {
+    bprint(PRINT_HIGH, self.netname);
+    bprint(PRINT_HIGH, " Has restarted the map.\n");
+
+    localcmd ("map ");
+    localcmd (mapname);
+    localcmd ("\n");
+}
+
+void () ForceStartMatch = {
+    if (clanbattle == 1 && cb_prematch == 1) {
+        bprint(PRINT_HIGH, self.netname);
+        bprint(PRINT_HIGH, " has forced the match start.\n");
+        StartTimer();
+    }
+}
+
+void () QuadMode =
+{
+    localcmd ("localinfo clan on\n");
+    localcmd ("localinfo quadmode on\n");
+    localcmd ("localinfo duelmode off\n");
+    localcmd ("localinfo rounds 2\n");
+    localcmd ("timelimit 0\n");
+    localcmd ("localinfo round_time 10\n");
+    localcmd ("localinfo round_delay_time 30\n");
+    localcmd ("localinfo teamfrags on\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd ("fraglimit 0\n");
+    localcmd ("localinfo rd 0\n"); 
+    localcmd ("exec fo_quadmode.cfg\n");
+	bprint (PRINT_HIGH, "Quad Mode set to on\n");
+    bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
+};
+
+void () ClanMode =
+{
+    localcmd("localinfo clan on\n");
+    localcmd ("localinfo rd 0\n"); 
+    localcmd ("exec fo_clanmode.cfg\n");
+    bprint(PRINT_HIGH, "Clan Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+};
+
+void () PubMode = 
+{
+    localcmd ("localinfo clan off\n");
+    localcmd ("localinfo quadmode off\n");
+    localcmd ("localinfo duelmode off\n");
+    localcmd ("localinfo teamfrags off\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd ("password none\n");
+    localcmd ("localinfo rounds 0\n");
+    localcmd ("timelimit 20\n");
+    localcmd ("fraglimit 0\n");
+    localcmd ("localinfo round_time 0\n");
+    localcmd ("localinfo rd 0\n"); 
+    localcmd ("exec fo_pubmode.cfg\n");
+    bprint(PRINT_HIGH, "Pub Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+}
+
+void () DuelMode =
+{
+    localcmd ("localinfo teamfrags off\n");
+    localcmd ("localinfo fullteamscore off\n");
+    localcmd ("localinfo clan on\n");
+    localcmd ("localinfo quadmode off\n");
+    localcmd ("localinfo duelmode on\n");
+    localcmd ("localinfo sf on\n"); // spawnfull, ie spawn fully stocked
+    localcmd ("localinfo drd 3.9\n"); // wait before resetting the winner long enough for grens to go off
+    localcmd ("localinfo rd 9999\n"); // wait before respawning the loser
+    localcmd ("localinfo dph 1\n"); // print health of duel survivors 
+    localcmd ("password none\n");
+    localcmd ("timelimit 0\n");
+    localcmd ("fraglimit 30\n");
+    localcmd ("exec fo_duelmode.cfg\n");
+    bprint(PRINT_HIGH, "Duel Mode set to on\n");
+	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+}
+
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd, inp;
     local string tmp;
@@ -407,6 +488,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     {
         switch (arg1)
         {
+            case "adminmenu":
+                processedCmd = TRUE;
+                Menu_Admin();
+                break;
             case "timelimit":
                 processedCmd = TRUE;
                 if (arg_num == 2) {
@@ -563,6 +648,30 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     sprint (self, PRINT_HIGH, "\n");
                 }
                 break;
+            case "restart":
+                RestartMap();
+                break;
+            case "randomise":
+                randomizeTeams();
+                break;
+            case "adminrefresh":
+                Update_ServerAdminInfo(self);
+                break;
+            case "pubmode":
+                PubMode();
+                break;
+            case "clanmode":
+                ClanMode();
+                break;
+            case "quadmode":
+                QuadMode();
+                break;
+            case "duelmode":
+                DuelMode();
+                break;
+            case "forcestart":
+                ForceStartMatch();
+                break;
             case "help":
             case "list":
                 processedCmd = TRUE;
@@ -581,6 +690,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd stop\n");
                 sprint(self, PRINT_HIGH, "cmd kick\n");
                 sprint(self, PRINT_HIGH, "cmd ceasefire\n");
+                sprint(self, PRINT_HIGH, "cmd restart\n");
+                sprint(self, PRINT_HIGH, "cmd randomise\n");
                 sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
                 sprint(self, PRINT_HIGH, "\n");
                 break;
@@ -602,66 +713,3 @@ void (string cmd) SV_ParseClientCommand = {
     }
 }
 
-void () QuadMode =
-{
-    localcmd ("localinfo clan on\n");
-    localcmd ("localinfo quadmode on\n");
-    localcmd ("localinfo duelmode off\n");
-    localcmd ("localinfo rounds 2\n");
-    localcmd ("timelimit 0\n");
-    localcmd ("localinfo round_time 10\n");
-    localcmd ("localinfo round_delay_time 30\n");
-    localcmd ("localinfo teamfrags on\n");
-    localcmd ("localinfo fullteamscore off\n");
-    localcmd ("fraglimit 0\n");
-    localcmd ("localinfo rd 0\n"); 
-    localcmd ("exec fo_quadmode.cfg\n");
-	bprint (PRINT_HIGH, "Quad Mode set to on\n");
-    bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
-};
-
-void () ClanMode =
-{
-    localcmd("localinfo clan on\n");
-    localcmd ("localinfo rd 0\n"); 
-    localcmd ("exec fo_clanmode.cfg\n");
-    bprint(PRINT_HIGH, "Clan Mode set to on\n");
-	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
-};
-
-void () PubMode = 
-{
-    localcmd ("localinfo clan off\n");
-    localcmd ("localinfo quadmode off\n");
-    localcmd ("localinfo duelmode off\n");
-    localcmd ("localinfo teamfrags off\n");
-    localcmd ("localinfo fullteamscore off\n");
-    localcmd ("password none\n");
-    localcmd ("localinfo rounds 0\n");
-    localcmd ("timelimit 20\n");
-    localcmd ("fraglimit 0\n");
-    localcmd ("localinfo round_time 0\n");
-    localcmd ("localinfo rd 0\n"); 
-    localcmd ("exec fo_pubmode.cfg\n");
-    bprint(PRINT_HIGH, "Pub Mode set to on\n");
-	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
-}
-
-void () DuelMode =
-{
-    localcmd ("localinfo teamfrags off\n");
-    localcmd ("localinfo fullteamscore off\n");
-    localcmd ("localinfo clan on\n");
-    localcmd ("localinfo quadmode off\n");
-    localcmd ("localinfo duelmode on\n");
-    localcmd ("localinfo sf on\n"); // spawnfull, ie spawn fully stocked
-    localcmd ("localinfo drd 3.9\n"); // wait before resetting the winner long enough for grens to go off
-    localcmd ("localinfo rd 9999\n"); // wait before respawning the loser
-    localcmd ("localinfo dph 1\n"); // print health of duel survivors 
-    localcmd ("password none\n");
-    localcmd ("timelimit 0\n");
-    localcmd ("fraglimit 30\n");
-    localcmd ("exec fo_duelmode.cfg\n");
-    bprint(PRINT_HIGH, "Duel Mode set to on\n");
-	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
-}

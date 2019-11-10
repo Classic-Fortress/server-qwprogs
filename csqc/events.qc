@@ -96,8 +96,11 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENPRIMED:
             float grentype = readfloat();
-            AddGrenTimer(grentype);
-            if(cvar(FOCMD_GRENTIMER) == 1) {
+            float timertype = cvar(FOCMD_GRENTIMER);
+            if(timertype != 2) {
+                AddGrenTimer(grentype);
+            }
+            if(timertype == 1) {
                 localcmd("play grentimer.wav\n");
             } 
             break;
@@ -165,6 +168,9 @@ void() CSQC_Parse_Event = {
                     touched_dispenser_pos = [readfloat(),readfloat(),readfloat()];
                     FO_Menu_Dispenser_Use(FALSE);
                     break;
+                case CLIENT_MENU_ADMIN:
+                    FO_Menu_Admin_Main(TRUE);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -190,6 +196,9 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_DISPENSER_POS:
             dispenser_pos = [readfloat(),readfloat(),readfloat()];
+            break;
+        case MSG_SERVER_ADMIN_INFO:
+            SERVER_ADMIN.ceasefire = readbyte();
             break;
     }
 }

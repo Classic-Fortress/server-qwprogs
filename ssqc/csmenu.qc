@@ -128,4 +128,18 @@ void UpdateClientMenu_UseDispenser(entity pl, entity disp) = {
     WriteFloat(MSG_MULTICAST, disp.origin.z);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
+void UpdateClientMenu_Admin(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_ADMIN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+void Update_ServerAdminInfo(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_SERVER_ADMIN_INFO);
+    WriteByte(MSG_MULTICAST, is_paused || cease_fire);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
 

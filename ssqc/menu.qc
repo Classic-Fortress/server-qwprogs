@@ -99,6 +99,7 @@ void () Admin_Pause;
 void () Admin_CeaseFire;
 void () Broadcast_Players_NotReady;
 void () StartTimer;
+void () ForceStartMatch;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
@@ -115,6 +116,7 @@ void (entity pl) UpdateClientMenu_Build;
 void (entity pl) UpdateClientMenu_FixSentry;
 void (entity pl) UpdateClientMenu_FixDispenser;
 void (entity pl, entity disp) UpdateClientMenu_UseDispenser;
+void (entity pl) UpdateClientMenu_Admin;
 
 void (entity pl) Menu_Close =
 {
@@ -656,7 +658,6 @@ void (float inp) Menu_Spy_Skin_Input = {
         CF_Spy_ChangeSkin(self, inp);
 
     if(infokeyf(self, "smt")) {
-        sprint(self, PRINT_HIGH, "MEHT: smt set, forcing colour menu\n");
         Menu_Spy_Color();
     } else {
         if (number_of_teams == 1)
@@ -727,9 +728,7 @@ void () Menu_Spy_Color = {
         return;
     }
     
-    sprint(self, PRINT_HIGH, "MEHT: showing colour menu\n");
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        sprint(self, PRINT_HIGH, "MEHT: csqc active\n");
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(self);
@@ -1206,8 +1205,16 @@ void () ClanMode;
 void () QuadMode;
 void () PubMode;
 void () DuelMode;
+void () RestartMap;
 void () Menu_Admin =
 {
+//    if(self.is_admin && infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+//        //fte+csqc has its own team menu
+//        //ask the client to activate it
+//        Menu_Close(self);
+//        UpdateClientMenu_Admin(self);
+//        return;
+//    }
     local string s_menu1;
     local string s_menu2;
     local string override;
@@ -1562,12 +1569,7 @@ void (float inp) Menu_Admin_Input =
                     break;
 
                 case 7: // Restart Current Map Option
-                    bprint(2, self.netname);
-                    bprint(2, " Has restarted the map.\n");
-
-                    localcmd ("map ");
-                    localcmd (mapname);
-                    localcmd ("\n");
+                    RestartMap();
                     break;
             }
         } 
@@ -1609,11 +1611,7 @@ void (float inp) Menu_Admin_Input =
                     Menu_Close(self);
                     return;
                 case 7: // force match start
-                    if (clanbattle == 1 && cb_prematch == 1) {
-                        bprint(PRINT_HIGH, self.netname);
-                        bprint(PRINT_HIGH, " has forced the match start.\n");
-                        StartTimer();
-                    }
+                    ForceStartMatch();
                     Menu_Close(self);
                     return;
             }
