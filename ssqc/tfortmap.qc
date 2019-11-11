@@ -1404,9 +1404,8 @@ void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate = {
     if (cb_prematch)
         return;
 
-    
     // q3f support
-    if (Goal.checkstate != string_null) {
+    if (Goal.checkstate != "") {
         string cname, cstate;
         float slen, idx;
         entity targ;
@@ -1715,7 +1714,7 @@ void () DelayedResult = {
     dremove(self);
 };
 
-void (entity Goal, entity AP, float addb) DoResults = {
+void (entity Goal, entity AP, float addb) DoResults = {   
     local entity te;
     local float winners;
     local float gotone;
@@ -1933,7 +1932,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
         if ((Goal.broadcast != string_null) && (CTF_Map == 0)) {
             CenterPrint2(te, "\n\n\n", Goal.broadcast);
         }
-        if ((Goal.netname_broadcast != string_null) && (CTF_Map == 0)) {
+        if ((strtrim(Goal.netname_broadcast) != "") && (CTF_Map == 0)) {
             sprint(te, PRINT_HIGH, AP.netname, Goal.netname_broadcast);
         }
         if (AP == te) {
