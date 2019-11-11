@@ -4,6 +4,7 @@ void FO_Hud_Editor_LoadSettings();
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_LoadSettings();
 void FO_WriteSettings();
+void AddGrenTimer(float grentype);
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -26,7 +27,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
+    registercommand("fo_menu_admin");
 
+    registercommand("primeone");
+    registercommand("primetwo");
+    registercommand("gren1");
+    registercommand("gren2");
+    
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
 
@@ -93,6 +100,37 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 //If menu.dat is missing, fall back to engine menus
                 localcmd("menu_main\n");
             }
+            break;
+        case "fo_menu_admin":
+            FO_Menu_Admin_Main(TRUE);
+            break;
+        case "primeone":
+            if(cvar(FOCMD_GRENTIMER) == 2) {
+                localcmd("play grentimer.wav\n");
+                AddGrenTimer(1);
+            } 
+            localcmd("primeone_server");
+            break;
+        case "primetwo":
+            if(cvar(FOCMD_GRENTIMER) == 2) {
+                localcmd("play grentimer.wav\n");
+                AddGrenTimer(2);
+            } 
+            localcmd("primetwo_server");
+            break;
+        case "gren1":
+            if(cvar(FOCMD_GRENTIMER) == 2) {
+                localcmd("play grentimer.wav\n");
+                AddGrenTimer(1);
+            } 
+            localcmd("gren1_server");
+            break;
+        case "gren2":
+            if(cvar(FOCMD_GRENTIMER) == 2) {
+                localcmd("play grentimer.wav\n");
+                AddGrenTimer(2);
+            } 
+            localcmd("gren2_server");
             break;
     }	
     return FALSE;

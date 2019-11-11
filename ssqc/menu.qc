@@ -99,6 +99,7 @@ void () Admin_Pause;
 void () Admin_CeaseFire;
 void () Broadcast_Players_NotReady;
 void () StartTimer;
+void () ForceStartMatch;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
@@ -115,6 +116,7 @@ void (entity pl) UpdateClientMenu_Build;
 void (entity pl) UpdateClientMenu_FixSentry;
 void (entity pl) UpdateClientMenu_FixDispenser;
 void (entity pl, entity disp) UpdateClientMenu_UseDispenser;
+void (entity pl) UpdateClientMenu_Admin;
 
 void (entity pl) Menu_Close =
 {
@@ -655,14 +657,18 @@ void (float inp) Menu_Spy_Skin_Input = {
     if (self.skin != inp)
         CF_Spy_ChangeSkin(self, inp);
 
-    if (number_of_teams == 1)
-        sprint(self, PRINT_HIGH, "There is no other team\n");
-    else if (number_of_teams > 2)
+    if(infokeyf(self, "smt")) {
         Menu_Spy_Color();
-    else if (self.team_no == 1)
-        CF_Spy_ChangeColor(self, 2);
-    else
-        CF_Spy_ChangeColor(self, 1);
+    } else {
+        if (number_of_teams == 1)
+            sprint(self, PRINT_HIGH, "There is no other team\n");
+        else if (number_of_teams > 2)
+            Menu_Spy_Color();
+        else if (self.team_no == 1)
+            CF_Spy_ChangeColor(self, 2);
+        else
+            CF_Spy_ChangeColor(self, 1);
+    }
 
 };
 
@@ -825,7 +831,7 @@ void (float inp) Menu_Engineer_Input = {
         TeamFortress_Build(1);
 
     if (inp == 3 && self.has_sentry) {
-        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
+        te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
         while (te) {
             if (te.classname == "building_sentrygun") {
                 if (te.real_owner == self){
@@ -845,7 +851,7 @@ void (float inp) Menu_Engineer_Input = {
     }
 
     if (inp == 4 && self.has_dispenser) {
-        te = findradius(self.origin, ENG_BUILDING_DISMANGLE_DISTANCE);
+        te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
         while (te) {
             if (te.classname == "building_dispenser") {
                 if (te.real_owner == self) {
@@ -1199,8 +1205,16 @@ void () ClanMode;
 void () QuadMode;
 void () PubMode;
 void () DuelMode;
+void () RestartMap;
 void () Menu_Admin =
 {
+//    if(self.is_admin && infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+//        //fte+csqc has its own team menu
+//        //ask the client to activate it
+//        Menu_Close(self);
+//        UpdateClientMenu_Admin(self);
+//        return;
+//    }
     local string s_menu1;
     local string s_menu2;
     local string override;
@@ -1555,12 +1569,7 @@ void (float inp) Menu_Admin_Input =
                     break;
 
                 case 7: // Restart Current Map Option
-                    bprint(2, self.netname);
-                    bprint(2, " Has restarted the map.\n");
-
-                    localcmd ("map ");
-                    localcmd (mapname);
-                    localcmd ("\n");
+                    RestartMap();
                     break;
             }
         } 
@@ -1602,11 +1611,7 @@ void (float inp) Menu_Admin_Input =
                     Menu_Close(self);
                     return;
                 case 7: // force match start
-                    if (clanbattle == 1 && cb_prematch == 1) {
-                        bprint(PRINT_HIGH, self.netname);
-                        bprint(PRINT_HIGH, " has forced the match start.\n");
-                        StartTimer();
-                    }
+                    ForceStartMatch();
                     Menu_Close(self);
                     return;
             }

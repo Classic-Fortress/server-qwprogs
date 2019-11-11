@@ -3,6 +3,8 @@
 vector MENU_BG = '0.2 0.3 0.4';
 vector MENU_BG_DARK = '0.1 0.15 0.2';
 vector MENU_BORDER = '0.3 0.4 0.5';
+vector MENU_BG_WARNING = '0.4 0.3 0.2';
+vector MENU_BORDER_WARNING = '0.5 0.4 0.3';
 vector MENU_SELECTED = '0 1 0';
 vector MENU_UNSELECTED = '1 0 0';
 vector MENU_BUTTON = '0.3 0.4 0.5';
@@ -12,6 +14,7 @@ vector MENU_TEXT_2 = '0.7 0.75 0.75';
 vector MENU_TEXT_3 = '1 1 0';
 vector MENU_TEXT_4 = '0.8 0.5 0';
 vector MENU_HIGHLIGHT = '1 1 1';
+vector MENU_TEXT_WARNING = '0.8 0 0';
 vector MENU_DARKEN = '1 1 1';
 
 vector MENU_TEXT_SMALL = '8 8 0';
@@ -127,6 +130,38 @@ typedef struct {
     float DispenserHealth;
 } FO_SBAR;
 FO_SBAR SBAR;
+
+typedef struct {
+    float ceasefire;
+    float pubmode;
+    float clanmode;
+    float quadmode;
+    float duelmode;
+    float quad_rounds;
+    float quad_round_time;
+    float captainmode;
+    float timelimit;
+    float fraglimit;
+    float class_override;
+    float class_limit_scout;
+    float class_limit_sniper;
+    float class_limit_soldier;
+    float class_limit_demoman;
+    float class_limit_medic;
+    float class_limit_hwguy;
+    float class_limit_pyro;
+    float class_limit_spy;
+    float class_limit_engineer;
+    float spurs_on;
+    float spurs_scout;
+    float spurs_spy;
+    float spurs_engineer;
+    float spurs_duration;
+    float spurs_boost;
+    float spurs_consume;
+    float spurs_flag;
+} SERVER_SETTINGS;
+SERVER_SETTINGS SERVER_ADMIN;
 
 typedef struct
 {

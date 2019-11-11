@@ -127,7 +127,12 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	fr.add(menuitemslider_spawn(_("Crosshair"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcheck_spawn (_("Show Speed"),		"show_speed", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
     pos += 8;
-	fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	//fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcombo_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8', _(
+																		"0	\"None\" "
+																		"1	\"Server\" "
+																		"2	\"Immediate\" "
+															)),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcheck_spawn (_("Simple Bunnyhop"),		"fo_autohop", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemslider_spawn(_("TF Status Bar"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemslider_spawn(_("TF Flag Info"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;

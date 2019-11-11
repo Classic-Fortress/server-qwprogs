@@ -1,5 +1,6 @@
 
 void (entity p) BanCheater;
+void (string halias, string commands) TeamFortress_AliasString;
 
 void () Admin_CountPlayers = {
     local string st;
@@ -286,7 +287,8 @@ void () Admin_Aliases =
     TeamFortress_Alias("listips", TF_ADMIN_LISTIPS, 0);
     TeamFortress_Alias("clan", TF_ADMIN_CLANMODE, 0);
     TeamFortress_Alias("quadmode", TF_ADMIN_QUADMODE, 0);
-    TeamFortress_Alias("adminmenu", TF_ADMIN_ADMINMENU, 0);
+    //TeamFortress_Alias("adminmenu", TF_ADMIN_ADMINMENU, 0);
+    TeamFortress_AliasString("adminmenu", "cmd adminmenu");
     TeamFortress_Alias("startmatch", TF_ADMIN_FORCESTARTMATCH, 0);
     TeamFortress_Alias("readystatus", TF_ADMIN_READYSTATUS, 0);
     stuffcmd(self,"alias ceasefire \"cmd ceasefire\"\n");

@@ -153,16 +153,26 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("reload3", TF_RELOAD_SLOT3, 0);
         TeamFortress_Alias("reloadnext", TF_RELOAD_NEXT, 0);
     } else if (self.motd == 70) {
-        TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
-        TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
-        TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
         TeamFortress_Alias("grenswitch", TF_GRENADE_SWITCH, 0);
-        TeamFortress_Alias("+gren1", TF_GRENADE_1, 0);
-        TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
+        TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
         TeamFortress_Alias("-gren1", TF_GRENADE_T, 0);
         TeamFortress_Alias("-gren2", TF_GRENADE_T, 0);
-        TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
-        TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
+        //Don't send to fte - these are handled client-side
+        if(!csqcactive) {
+            TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
+            TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
+            TeamFortress_Alias("+gren1", TF_GRENADE_1, 0);
+            TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
+            TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
+            TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
+        } else {
+            TeamFortress_Alias("primeone_server", TF_GRENADE_1, 0);
+            TeamFortress_Alias("primetwo_server", TF_GRENADE_2, 0);
+            TeamFortress_Alias("gren1_server", TF_GRENADE_PT_1, 0);
+            TeamFortress_Alias("gren2_server", TF_GRENADE_PT_2, 0);
+            TeamFortress_AliasString("+gren1", "primeone");
+            TeamFortress_AliasString("+gren2", "primetwo");
+        }
     } else if (self.motd == 80) {
         TeamFortress_Alias("dash", TF_DASH, 0);
         TeamFortress_Alias("autoscan", TF_SCAN, 0);
@@ -216,7 +226,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
-    } else if (self.motd == 400 && self.team_no == 0) {
+    } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         Menu_Team(1);
     }
 

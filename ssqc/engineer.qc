@@ -945,12 +945,14 @@ void () T_Dispenser = {
 
     if ((other.building == world) && (other.building_wait < time)) {
         other.building = self;
-        dist_checker = spawn();
-        dist_checker.classname = "timer";
-        dist_checker.owner = other;
-        dist_checker.enemy = self;
-        dist_checker.think = CheckDistance;
-        dist_checker.nextthink = time + 0.3;
+        if(!infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+            dist_checker = spawn();
+            dist_checker.classname = "timer";
+            dist_checker.owner = other;
+            dist_checker.enemy = self;
+            dist_checker.think = CheckDistance;
+            dist_checker.nextthink = time + 0.3;
+        }
         oldself = self;
         self = other;
         Menu_Dispenser();
@@ -1028,12 +1030,14 @@ void (entity disp) Engineer_UseDispenser = {
 
     self.building = disp;
     Menu_EngineerFix_Dispenser();
-    dist_checker = spawn();
-    dist_checker.classname = "timer";
-    dist_checker.owner = self;
-    dist_checker.enemy = disp;
-    dist_checker.think = CheckDistance;
-    dist_checker.nextthink = time + 0.3;
+    if(!infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        dist_checker = spawn();
+        dist_checker.classname = "timer";
+        dist_checker.owner = self;
+        dist_checker.enemy = disp;
+        dist_checker.think = CheckDistance;
+        dist_checker.nextthink = time + 0.3;
+    }
 };
 
 void (entity disp) Engineer_Dispenser_InsertAmmo = {
@@ -1150,7 +1154,8 @@ void (entity gun) Engineer_UseSentryGun = {
     // automate tasks if old_spanner setting is disabled
     if (!old_spanner) {
         if(gun.team_no > 0 && gun.team_no == self.team_no) {
-            Menu_EngineerFix_SentryGun_Rotate();
+            //Menu_EngineerFix_SentryGun_Rotate();
+            Engineer_SentryGun_ShowMenu(self.building);
             if (gun.weapon < 3 && self.ammo_cells >= ENG_SENTRY_COST) {
                 Engineer_SentryGun_Upgrade(gun);
                 return;
@@ -1211,12 +1216,14 @@ void (entity gun) Engineer_UseSentryGun = {
 void (entity gun) Engineer_SentryGun_ShowMenu = {
     local entity dist_checker;
 
-    dist_checker = spawn();
-    dist_checker.classname = "timer";
-    dist_checker.owner = self;
-    dist_checker.enemy = gun;
-    dist_checker.think = CheckDistance;
-    dist_checker.nextthink = time + 0.3;
+    if(!infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        dist_checker = spawn();
+        dist_checker.classname = "timer";
+        dist_checker.owner = self;
+        dist_checker.enemy = gun;
+        dist_checker.think = CheckDistance;
+        dist_checker.nextthink = time + 0.3;
+    }
     Menu_EngineerFix_SentryGun();
 };
 

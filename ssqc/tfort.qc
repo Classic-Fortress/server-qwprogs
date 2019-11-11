@@ -912,7 +912,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             timer.heat = 4;
             timer.owner = self;
             timer.classname = "gtimer";
-            if (!notimers) {
+            if (!notimers && !csqcactive) {
                 stuffcmd(self, "play grentimer\n");
             }
         }
