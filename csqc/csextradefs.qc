@@ -24,6 +24,7 @@ float MENU_START_CONTENT = 32;
 
 .float owned_by;
 .string netname;
+.float playerid;
 float fo_hud_editor;
 float fo_hud_menu_active;
 float jumptime;
@@ -34,6 +35,8 @@ float last_team;
 vector sentry_pos;
 vector dispenser_pos;
 vector touched_dispenser_pos;
+//entity player_list_head;
+float player_menu_type;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;

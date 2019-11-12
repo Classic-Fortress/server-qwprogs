@@ -3,6 +3,12 @@ FortressOne Server v0.1.0
 
 New features
 ------
+* CSQC - fo_main_menu main menu - either from menu.dat or engine
+* CSQC - fo_menu_game in-game menu
+* CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
+* CSQC - fo_autohop 0/1 enable bunnyhop assist
+* CSQC - fo_hud_reset resets HUD to defaults
+* CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.

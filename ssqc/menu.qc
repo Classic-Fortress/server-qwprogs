@@ -1208,13 +1208,13 @@ void () DuelMode;
 void () RestartMap;
 void () Menu_Admin =
 {
-//    if(self.is_admin && infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-//        //fte+csqc has its own team menu
-//        //ask the client to activate it
-//        Menu_Close(self);
-//        UpdateClientMenu_Admin(self);
-//        return;
-//    }
+    if(self.is_admin && infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(self);
+        UpdateClientMenu_Admin(self);
+        return;
+    }
     local string s_menu1;
     local string s_menu2;
     local string override;

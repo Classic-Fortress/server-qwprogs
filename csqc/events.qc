@@ -171,6 +171,9 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_ADMIN:
                     FO_Menu_Admin_Main(TRUE);
                     break;
+                case CLIENT_MENU_ADMIN_KICK:
+                    FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:

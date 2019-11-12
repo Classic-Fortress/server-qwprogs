@@ -143,3 +143,11 @@ void Update_ServerAdminInfo(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientMenu_Admin_Kick(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_ADMIN_KICK);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+

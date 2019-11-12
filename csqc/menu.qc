@@ -15,6 +15,7 @@ void (float force) FO_Menu_Build;
 void (float force) FO_Menu_Admin_Main;
 void (float force) FO_Menu_Admin_Modes;
 void (float force) FO_Menu_Admin_Settings;
+void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -35,6 +36,7 @@ typedef struct {
     float num_opts;
     float active;
     void() update;
+    float page;
 } fo_menu;
 
 class fo_menu_option_2 {
@@ -328,9 +330,9 @@ var fo_menu FO_MENU_DISPENSER_USE = {
 var fo_menu FO_MENU_ADMIN_MAIN = {
     [0,0], [300,300], "Server Admin [1/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","Ceasefire","","",FO_MENU_STATE_NORMAL,{localcmd("cmd ceasefire\n");},MENU_BORDER_WARNING},
-        {"2","Kick...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"3","Ban...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"4","Force Spectate...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"2","Kick...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);},MENU_BORDER_WARNING},
+        {"3","Ban...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_BAN, 0);},MENU_BORDER_WARNING},
+        {"4","Force Spectate...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_FORCE_SPEC, 0);},MENU_BORDER_WARNING},
         {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
         {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         MenuSpacer,
@@ -373,6 +375,48 @@ var fo_menu FO_MENU_ADMIN_SETTINGS = {
         {"+","Next - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"-","Prev - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
     }, 11, TRUE
+};
+var void execute_admin_players(float choice, float page) {
+    print("not implemented ", ftos(choice + (page * 9)),"\n");
+}
+void execute_admin_players_unknown(float choice, float page) {
+    print("not implemented ", ftos(choice + (page * 9)),"\n");
+}
+void execute_admin_players_kick(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    localcmd("cmd kick ", userid, "\n");
+    Menu_Cancel();
+    FO_Menu_Admin_Main(TRUE);
+}
+void execute_admin_players_ban(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    localcmd("cmd ban ", userid, "\n");
+    Menu_Cancel();
+    FO_Menu_Admin_Main(TRUE);
+}
+void execute_admin_players_force_spec(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    localcmd("cmd forcespec ", userid, "\n");
+    Menu_Cancel();
+    FO_Menu_Admin_Main(TRUE);
+}
+var fo_menu FO_MENU_ADMIN_PLAYERS = {
+    [0,0], [300,300], "Players", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(0, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"2","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(1, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"3","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(2, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"4","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(3, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"5","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(4, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"6","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(5, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"7","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(6, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"8","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(7, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        {"9","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(8, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        MenuSpacer,
+        {"+","Next","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page + 1);},MENU_BUTTON},
+        {"-","Prev","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page - 1);},MENU_BUTTON},
+    }, 14, TRUE
 };
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
@@ -847,5 +891,79 @@ void FO_Menu_Admin_Settings(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     CurrentMenu = &FO_MENU_ADMIN_SETTINGS;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Players(float force, float type, float page) = {
+    print("MEHT: FO_Menu_Admin_Players(", ftos(force), ", ", ftos(type), ", ", ftos(page), "\n");
+    if(fo_hud_menu_active && !force)
+        return;
+    if(page < 0) {
+        //or(float i = 0; i < 100; i++) {
+        //    if(!getplayerkeyvalue(i,"name")) {
+        //        page = floor(i / 9);
+        //        break;
+        //    }
+        //}
+        page = 0;
+    }
+    //if(!(getplayerkeyvalue(page * 9,"name"))) page = 0;
+    if(page < 0) page = 4;
+    if(page > 4) page = 0;
+    FO_MENU_ADMIN_PLAYERS.page = page;
+    player_menu_type = type;
+    if(type == CLIENT_MENU_ADMIN_KICK) {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Kick ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_kick;
+    } else if(type == CLIENT_MENU_ADMIN_BAN) {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Ban ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_ban;
+    } else if(type == CLIENT_MENU_ADMIN_FORCE_SPEC) {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Force Spec ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_force_spec;
+    } else {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Page ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_unknown;
+    }
+    string n;
+    float c = 0, p = 0, spec = 0;
+/*
+ *     for(float i = 0; i < 32, c < 9; i++) {
+        n = getplayerkeyvalue(i,"name");
+        if(n) {
+            p++;
+        }
+        if(p > page * 9 && p <= (page + 1) * 9) {
+            spec = stof(getplayerkeyvalue(i, "*spectator"));
+            //print("MEHT: found player: ", n, " id: ", ftos(i) , " userid: ",getplayerkeyvalue(i + (page * 9), "userid"),"\n");
+            FO_MENU_ADMIN_PLAYERS.options[c].state = FO_MENU_STATE_NORMAL;
+            FO_MENU_ADMIN_PLAYERS.options[c].name = n;
+            FO_MENU_ADMIN_PLAYERS.options[c].value = spec?"Spectator":"";
+            c++;
+        }
+    }
+    for(float i = c; i < 9; i++) {
+        FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_HIDDEN;
+    }
+*/
+    for(float i = 0; i < 9; i++) {
+        n = getplayerkeyvalue(i + (page * 9),"name");
+        spec = stof(getplayerkeyvalue(i + (page * 9), "*spectator"));
+        if(n && (type != CLIENT_MENU_ADMIN_FORCE_SPEC || !spec)) {
+            //print("MEHT: found player: ", n, " id: ", ftos(i) , " userid: ",getplayerkeyvalue(i + (page * 9), "userid"),"\n");
+            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
+            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
+            FO_MENU_ADMIN_PLAYERS.options[i].value = spec?"Spectator":"";
+            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_WARNING;
+            c++;
+        } else {
+            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_DISABLED;
+            FO_MENU_ADMIN_PLAYERS.options[i].name = "";
+            FO_MENU_ADMIN_PLAYERS.options[i].value = "";
+            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_DARK;
+        }
+    }
+    //FO_MENU_ADMIN_PLAYERS.num_opts = c + 5;
+
+    CurrentMenu = &FO_MENU_ADMIN_PLAYERS;
     fo_hud_menu_active = TRUE;
 }

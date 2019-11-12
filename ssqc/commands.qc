@@ -83,6 +83,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num, processedCmd, inp;
     local string tmp;
     local float farg3;
+    local entity ent;
     processedCmd = FALSE;
     
     if (arg1)
@@ -622,8 +623,59 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 processedCmd = TRUE;
                 break;
             case "kick":
-                Admin_CycleDeal();
                 processedCmd = TRUE;
+                if(arg2) {
+                    //make sure it's a number so there's no funny business
+                    farg2 = stof(arg2);
+                    if(farg2) {
+                        localcmd("kick ", ftos(farg2), "\n");
+                    }
+                } else {
+                    Admin_CycleDeal();
+                } 
+                break;
+            case "ban":
+                processedCmd = TRUE;
+                if(arg2) {
+                    //make sure it's a number so there's no funny business
+                    farg2 = stof(arg2);
+                    if(farg2) {
+                        ent = find(world, classname, "player");
+                        while(ent) {
+                            if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
+                                bprint4(PRINT_HIGH, ent, " was banned by ", self.netname, ".\n");
+                                localcmd("addip ");
+                                localcmd(infokey(ent, INFOKEY_P_IP));
+                                localcmd("\n");
+                                break;
+                            }
+                            ent = find(ent, classname, "player");
+                        }
+                        localcmd("kick ", ftos(farg2), "\n");
+                    }
+                } else {
+                    sprint(self, PRINT_HIGH, "ban requires a userid parameter\n");
+                } 
+                break;
+            case "forcespec":
+                processedCmd = TRUE;
+                if(arg2) {
+                    //make sure it's a number so there's no funny business
+                    farg2 = stof(arg2);
+                    if(farg2) {
+                        ent = find(world, classname, "player");
+                        while(ent) {
+                            if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
+                                bprint4(PRINT_HIGH, ent, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+                                stuffcmd(ent, "observe\n");
+                                break;
+                            }
+                            ent = find(ent, classname, "player");
+                        }
+                    }
+                } else {
+                    sprint(self, PRINT_HIGH, "forcespec requires a userid parameter\n");
+                } 
                 break;
             case "ceasefire":
                 if (ceasefire_type) 
@@ -649,29 +701,42 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 break;
             case "restart":
+                processedCmd = TRUE;
                 RestartMap();
                 break;
             case "randomise":
+                processedCmd = TRUE;
                 randomizeTeams();
                 break;
             case "adminrefresh":
+                processedCmd = TRUE;
                 Update_ServerAdminInfo(self);
                 break;
             case "pubmode":
+                processedCmd = TRUE;
                 PubMode();
                 break;
             case "clanmode":
+                processedCmd = TRUE;
                 ClanMode();
                 break;
             case "quadmode":
+                processedCmd = TRUE;
                 QuadMode();
                 break;
             case "duelmode":
+                processedCmd = TRUE;
                 DuelMode();
                 break;
             case "forcestart":
+                processedCmd = TRUE;
                 ForceStartMatch();
                 break;
+            //case "kicklist":
+                //processedCmd = TRUE;
+                //Update_ServerAdmin_Players(self);
+                //UpdateClientMenu_Admin_Kick(self);
+                //break;
             case "help":
             case "list":
                 processedCmd = TRUE;
@@ -688,7 +753,9 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd autorecord\n");
                 sprint(self, PRINT_HIGH, "cmd cancel\n");
                 sprint(self, PRINT_HIGH, "cmd stop\n");
-                sprint(self, PRINT_HIGH, "cmd kick\n");
+                sprint(self, PRINT_HIGH, "cmd kick [userid]\n");
+                sprint(self, PRINT_HIGH, "cmd ban <userid>\n");
+                sprint(self, PRINT_HIGH, "cmd forcespec <userid>\n");
                 sprint(self, PRINT_HIGH, "cmd ceasefire\n");
                 sprint(self, PRINT_HIGH, "cmd restart\n");
                 sprint(self, PRINT_HIGH, "cmd randomise\n");
