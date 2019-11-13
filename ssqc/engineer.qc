@@ -185,18 +185,8 @@ void () EMPGrenadeExplode = {
         }
         te2 = find(te2, classname, "info_empblock");
     }
-
-    float emprange;
-    if (new_emp)
-    {
-        emprange = PC_ENGINEER_GRENADE_TYPE_2_NEWRANGE;
-    }
-    else
-    {
-        emprange = PC_ENGINEER_GRENADE_TYPE_2_OLDRANGE;
-    }
-    
-    te = findradius(self.origin, emprange);
+   
+    te = findradius(self.origin, PC_ENGINEER_GRENADE_TYPE_2_RANGE);
     while (te) {
         te.chain2 = te.chain;
         candamage = TRUE;
