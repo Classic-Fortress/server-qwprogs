@@ -29,6 +29,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_main_menu");
     registercommand("fo_menu_admin");
     registercommand("meht_test");
+	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
     registercommand("primetwo");

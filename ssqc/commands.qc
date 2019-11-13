@@ -1,3 +1,20 @@
+void () UpdateAllAdmins = {
+    local entity ent = find(world, classname, "player");
+    while(ent) {
+        if(ent.is_admin) {
+            Update_ServerAdminInfo(ent);
+        }
+        ent = find(ent, classname, "player");
+    }
+    ent = find(world, classname, "observer");
+    while(ent) {
+        if(ent.is_admin) {
+            Update_ServerAdminInfo(ent);
+        }
+        ent = find(ent, classname, "observer");
+    }
+}
+
 void () RestartMap = {
     bprint(PRINT_HIGH, self.netname);
     bprint(PRINT_HIGH, " Has restarted the map.\n");
@@ -14,6 +31,16 @@ void () ForceStartMatch = {
         StartTimer();
     }
 }
+
+void (float inp) SetQuadRounds = {
+    rounds = inp;
+    local string cmd;
+    cmd = strcat("localinfo rounds ", ftos(inp), "\n");
+    localcmd(cmd);
+    bprint(2, "Quad Round Number changed to ", ftos(inp), "\n");
+    UpdateAllAdmins();
+}
+
 
 void () QuadMode =
 {
@@ -732,11 +759,27 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 processedCmd = TRUE;
                 ForceStartMatch();
                 break;
-            //case "kicklist":
-                //processedCmd = TRUE;
-                //Update_ServerAdmin_Players(self);
-                //UpdateClientMenu_Admin_Kick(self);
-                //break;
+            case "rounds":
+                processedCmd = TRUE;
+                if(arg2) {
+                    //make sure it's a number so there's no funny business
+                    farg2 = stof(arg2);
+                    if(farg2) {
+                        SetQuadRounds(farg2);
+                    }
+                }
+                break;
+            case "roundtime":
+                processedCmd = TRUE;
+                if(arg2) {
+                    //make sure it's a number so there's no funny business
+                    farg2 = stof(arg2);
+                    if(farg2) {
+                        localcmd ("localinfo round_time ",farg2,"\n");
+                        UpdateAllAdmins();
+                    }
+                }
+                break;
             case "help":
             case "list":
                 processedCmd = TRUE;

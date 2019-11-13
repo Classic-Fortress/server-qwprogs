@@ -202,6 +202,11 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_SERVER_ADMIN_INFO:
             SERVER_ADMIN.ceasefire = readbyte();
+            SERVER_ADMIN.quad_rounds = readfloat();
+            SERVER_ADMIN.quad_round_time = readfloat();
+            SERVER_ADMIN.timelimit = readfloat();
+            SERVER_ADMIN.fraglimit = readfloat();
+            //print("MEHT: updated: rounds ", ftos(SERVER_ADMIN.quad_rounds), "\n");
             break;
     }
 }

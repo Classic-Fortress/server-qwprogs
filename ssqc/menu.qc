@@ -100,6 +100,7 @@ void () Admin_CeaseFire;
 void () Broadcast_Players_NotReady;
 void () StartTimer;
 void () ForceStartMatch;
+void (float inp) SetQuadRounds;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
@@ -1779,10 +1780,7 @@ void (float inp) Menu_Admin_Input =
     }
     else if (self.current_menu_type == ADMIN_MENU_TYPE_QUAD_ROUNDNUM)
     {
-        local string cmd;
-        cmd = strcat("localinfo rounds ", ftos(inp), "\n");
-        localcmd(cmd);
-        bprint(2, "Quad Round Number changed to ", ftos(inp), "\n");
+        SetQuadRounds(inp);
         self.current_menu_type = ADMIN_MENU_TYPE_QUADMODE;
         self.current_menu_page = 1;
         Menu_Admin();

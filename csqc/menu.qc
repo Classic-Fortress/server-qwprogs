@@ -15,6 +15,9 @@ void (float force) FO_Menu_Build;
 void (float force) FO_Menu_Admin_Main;
 void (float force) FO_Menu_Admin_Modes;
 void (float force) FO_Menu_Admin_Settings;
+void (float force) FO_Menu_Admin_Rounds;
+void (float force) FO_Menu_Admin_Timelimit;
+void (float force) FO_Menu_Admin_Fraglimit;
 void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
@@ -327,6 +330,14 @@ var fo_menu FO_MENU_DISPENSER_USE = {
         }
     }
 };
+
+void updateAdminMenuInfo() = {
+    if(admin_menu_next_update < time) {
+        localcmd("cmd adminrefresh\n");
+        admin_menu_next_update = time + cvar(FOCMD_ADMIN_MENU_UPDATE_TIME);
+    }
+}
+
 var fo_menu FO_MENU_ADMIN_MAIN = {
     [0,0], [300,300], "Server Admin [1/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","Ceasefire","","",FO_MENU_STATE_NORMAL,{localcmd("cmd ceasefire\n");},MENU_BORDER_WARNING},
@@ -341,6 +352,7 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
         {"-","Prev - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
     }, 11, TRUE, {
+        updateAdminMenuInfo();
         FO_MENU_ADMIN_MAIN.options[0].value = SERVER_ADMIN.ceasefire?"on":"off";
     }
 };
@@ -350,7 +362,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"2","Clan Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd clanmode\n");},MENU_BORDER_WARNING},
         {"3","Quad Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd quadmode\n");},MENU_BORDER_WARNING},
         {"4","Duel Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
-        {"5","Quad Rounds...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"5","Quad Rounds...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Rounds(TRUE);},MENU_BORDER_WARNING},
         {"6","Quad Round Time...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         {"7","Captains Mode","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         {"8","Force Start","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
@@ -359,12 +371,17 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         MenuSpacer,
         {"+","Next - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
         {"-","Prev - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
-    }, 13, TRUE
+    }, 13, TRUE, {
+        updateAdminMenuInfo();
+        FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
+        FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
+        //print("MEHT: updating stuff: ", FO_MENU_ADMIN_MODES.options[4].value, " should be ", ftos(SERVER_ADMIN.quad_rounds), "\n");
+    }
 };
 var fo_menu FO_MENU_ADMIN_SETTINGS = {
     [0,0], [300,300], "Settings [3/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
-        {"1","Timelimit","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"2","Fraglimit","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"1","Timelimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Timelimit(TRUE);},MENU_BORDER_WARNING},
+        {"2","Fraglimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Fraglimit(TRUE);},MENU_BORDER_WARNING},
         {"3","Override Classes","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         {"4","Class Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         {"5","Spurs","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
@@ -374,7 +391,11 @@ var fo_menu FO_MENU_ADMIN_SETTINGS = {
         MenuSpacer,
         {"+","Next - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"-","Prev - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
-    }, 11, TRUE
+    }, 11, TRUE, {
+        updateAdminMenuInfo();
+        FO_MENU_ADMIN_SETTINGS.options[0].value = ftos(SERVER_ADMIN.timelimit);
+        FO_MENU_ADMIN_SETTINGS.options[1].value = ftos(SERVER_ADMIN.fraglimit);
+    }
 };
 var void execute_admin_players(float choice, float page) {
     print("not implemented ", ftos(choice + (page * 9)),"\n");
@@ -418,6 +439,67 @@ var fo_menu FO_MENU_ADMIN_PLAYERS = {
         {"-","Prev","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page - 1);},MENU_BUTTON},
     }, 14, TRUE
 };
+var fo_menu FO_MENU_ADMIN_ROUNDS = {
+    [0,0], [300,300], "Quad Rounds", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","1","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"2","2","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 2\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"3","3","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 3\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"4","4","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 4\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"5","5","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 5\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"6","6","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 6\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"7","7","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 7\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"8","8","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 8\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"9","9","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 9\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
+    }, 11, TRUE
+};
+var fo_menu FO_MENU_ADMIN_QUAD_TIMELIMIT = {
+    [0,0], [300,200], "Quad Timelimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","1","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"2","5","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 5\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"3","10","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 10\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"4","15","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 15\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"5","20","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 20\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"6","25","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 25\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"7","30","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 30\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"8","45","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 45\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"9","60","","",FO_MENU_STATE_NORMAL,{localcmd("cmd roundtime 60\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
+    }, 11, TRUE
+};
+var fo_menu FO_MENU_ADMIN_TIMELIMIT = {
+    [0,0], [300,200], "Set Timelimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","0 (infinite)","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 0\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"2","5","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 5\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"3","10","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 10\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"4","15","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 15\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"5","20","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 20\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"6","30","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 30\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"7","45","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 45\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"8","60","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 60\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"9","120","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 120\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
+    }, 11, TRUE
+};
+var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
+    [0,0], [300,200], "Set Fraglimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
+        {"1","0 (infinite)","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 0\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"2","5","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 5\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"3","10","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 10\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"4","15","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 15\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"5","20","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 20\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"6","30","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 30\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"7","50","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 50\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"8","100","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 100\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        {"9","200","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 200\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
+    }, 11, TRUE
+};
+
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
     InProgressMenu.size = size;
@@ -884,15 +966,36 @@ void FO_Menu_Admin_Main(float force) = {
 void FO_Menu_Admin_Modes(float force) = {
     if(fo_hud_menu_active && !force)
         return;
+    localcmd("cmd adminrefresh\n");
     CurrentMenu = &FO_MENU_ADMIN_MODES;
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Admin_Settings(float force) = {
     if(fo_hud_menu_active && !force)
         return;
+    localcmd("cmd adminrefresh\n");
     CurrentMenu = &FO_MENU_ADMIN_SETTINGS;
     fo_hud_menu_active = TRUE;
 }
+void FO_Menu_Admin_Rounds(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_ROUNDS;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Timelimit(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_TIMELIMIT;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_Fraglimit(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_FRAGLIMIT;
+    fo_hud_menu_active = TRUE;
+}
+
 void FO_Menu_Admin_Players(float force, float type, float page) = {
     print("MEHT: FO_Menu_Admin_Players(", ftos(force), ", ", ftos(type), ", ", ftos(page), "\n");
     if(fo_hud_menu_active && !force)
