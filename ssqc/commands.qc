@@ -775,7 +775,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     //make sure it's a number so there's no funny business
                     farg2 = stof(arg2);
                     if(farg2) {
-                        localcmd ("localinfo round_time ",farg2,"\n");
+                        localcmd ("localinfo round_time ",arg2,"\n");
                         UpdateAllAdmins();
                     }
                 }

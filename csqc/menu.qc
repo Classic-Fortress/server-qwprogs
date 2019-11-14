@@ -18,6 +18,7 @@ void (float force) FO_Menu_Admin_Settings;
 void (float force) FO_Menu_Admin_Rounds;
 void (float force) FO_Menu_Admin_Timelimit;
 void (float force) FO_Menu_Admin_Fraglimit;
+void (float force) FO_Menu_Admin_QuadTimelimit;
 void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
@@ -354,6 +355,7 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
     }, 11, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_MAIN.options[0].value = SERVER_ADMIN.ceasefire?"on":"off";
+        FO_MENU_ADMIN_MAIN.options[6].value = mapname;
     }
 };
 var fo_menu FO_MENU_ADMIN_MODES = {
@@ -363,7 +365,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"3","Quad Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd quadmode\n");},MENU_BORDER_WARNING},
         {"4","Duel Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
         {"5","Quad Rounds...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Rounds(TRUE);},MENU_BORDER_WARNING},
-        {"6","Quad Round Time...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"6","Quad Round Time...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_QuadTimelimit(TRUE);},MENU_BORDER_WARNING},
         {"7","Captains Mode","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         {"8","Force Start","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
         MenuSpacer,
@@ -373,6 +375,10 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"-","Prev - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
     }, 13, TRUE, {
         updateAdminMenuInfo();
+        FO_MENU_ADMIN_MODES.options[0].value = SERVER_ADMIN.pubmode?"on":"off";
+        FO_MENU_ADMIN_MODES.options[1].value = SERVER_ADMIN.clanmode?"on":"off";
+        FO_MENU_ADMIN_MODES.options[2].value = SERVER_ADMIN.quadmode?"on":"off";
+        FO_MENU_ADMIN_MODES.options[3].value = SERVER_ADMIN.duelmode?"on":"off";
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
         //print("MEHT: updating stuff: ", FO_MENU_ADMIN_MODES.options[4].value, " should be ", ftos(SERVER_ADMIN.quad_rounds), "\n");
@@ -382,16 +388,16 @@ var fo_menu FO_MENU_ADMIN_SETTINGS = {
     [0,0], [300,300], "Settings [3/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","Timelimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Timelimit(TRUE);},MENU_BORDER_WARNING},
         {"2","Fraglimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Fraglimit(TRUE);},MENU_BORDER_WARNING},
-        {"3","Override Classes","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"4","Class Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"5","Spurs","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-        {"6","Spur Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+//        {"3","Override Classes","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+//        {"4","Class Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+//        {"5","Spurs","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+//        {"6","Spur Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
         MenuSpacer,
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"+","Next - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"-","Prev - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
-    }, 11, TRUE, {
+    }, 7, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_SETTINGS.options[0].value = ftos(SERVER_ADMIN.timelimit);
         FO_MENU_ADMIN_SETTINGS.options[1].value = ftos(SERVER_ADMIN.fraglimit);
@@ -981,6 +987,12 @@ void FO_Menu_Admin_Rounds(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     CurrentMenu = &FO_MENU_ADMIN_ROUNDS;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Admin_QuadTimelimit(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_QUAD_TIMELIMIT;
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Admin_Timelimit(float force) = {

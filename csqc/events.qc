@@ -206,6 +206,10 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.quad_round_time = readfloat();
             SERVER_ADMIN.timelimit = readfloat();
             SERVER_ADMIN.fraglimit = readfloat();
+            SERVER_ADMIN.clanmode = readfloat();
+            SERVER_ADMIN.quadmode = readfloat();
+            SERVER_ADMIN.duelmode = readfloat();
+            SERVER_ADMIN.pubmode = !SERVER_ADMIN.clanmode && SERVER_ADMIN.quadmode && !SERVER_ADMIN.duelmode;
             //print("MEHT: updated: rounds ", ftos(SERVER_ADMIN.quad_rounds), "\n");
             break;
     }
