@@ -28,7 +28,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_admin");
-    registercommand("meht_test");
 	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -134,26 +133,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 AddGrenTimer(2);
             } 
             localcmd("gren2_server");
-            break;
-        case "meht_test":
-            float c = 0;
-            entity e = find(world, classname, "player");
-            string n = "";
-            while(e) {
-                print("MEHT: found player: ", ftos(e.entnum), "\n");
-                c++;
-                e = find(e, classname, "player");
-            }
-            print("MEHT: total players: ", ftos(c), "\n");
-            c = 0;
-            for(float i = 0; i < 100; i++) {
-                n = getplayerkeyvalue(i,"name");
-                if(n) {
-                    print("MEHT: found player: ", n, " id: ", ftos(i) , " userid: ",getplayerkeyvalue(i, "userid"),"\n");
-                    c++;
-                }
-            }
-            print("MEHT: other total players: ", ftos(c), "\n");
             break;
     }	
     return FALSE;

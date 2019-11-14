@@ -381,7 +381,6 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         FO_MENU_ADMIN_MODES.options[3].value = SERVER_ADMIN.duelmode?"on":"off";
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
-        //print("MEHT: updating stuff: ", FO_MENU_ADMIN_MODES.options[4].value, " should be ", ftos(SERVER_ADMIN.quad_rounds), "\n");
     }
 };
 var fo_menu FO_MENU_ADMIN_SETTINGS = {
@@ -1009,7 +1008,6 @@ void FO_Menu_Admin_Fraglimit(float force) = {
 }
 
 void FO_Menu_Admin_Players(float force, float type, float page) = {
-    print("MEHT: FO_Menu_Admin_Players(", ftos(force), ", ", ftos(type), ", ", ftos(page), "\n");
     if(fo_hud_menu_active && !force)
         return;
     if(page < 0) {
@@ -1049,7 +1047,6 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
         }
         if(p > page * 9 && p <= (page + 1) * 9) {
             spec = stof(getplayerkeyvalue(i, "*spectator"));
-            //print("MEHT: found player: ", n, " id: ", ftos(i) , " userid: ",getplayerkeyvalue(i + (page * 9), "userid"),"\n");
             FO_MENU_ADMIN_PLAYERS.options[c].state = FO_MENU_STATE_NORMAL;
             FO_MENU_ADMIN_PLAYERS.options[c].name = n;
             FO_MENU_ADMIN_PLAYERS.options[c].value = spec?"Spectator":"";
@@ -1064,7 +1061,6 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
         n = getplayerkeyvalue(i + (page * 9),"name");
         spec = stof(getplayerkeyvalue(i + (page * 9), "*spectator"));
         if(n && (type != CLIENT_MENU_ADMIN_FORCE_SPEC || !spec)) {
-            //print("MEHT: found player: ", n, " id: ", ftos(i) , " userid: ",getplayerkeyvalue(i + (page * 9), "userid"),"\n");
             FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
             FO_MENU_ADMIN_PLAYERS.options[i].name = n;
             FO_MENU_ADMIN_PLAYERS.options[i].value = spec?"Spectator":"";
@@ -1077,7 +1073,6 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
             FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_DARK;
         }
     }
-    //FO_MENU_ADMIN_PLAYERS.num_opts = c + 5;
 
     CurrentMenu = &FO_MENU_ADMIN_PLAYERS;
     fo_hud_menu_active = TRUE;

@@ -210,7 +210,6 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.quadmode = readfloat();
             SERVER_ADMIN.duelmode = readfloat();
             SERVER_ADMIN.pubmode = !SERVER_ADMIN.clanmode && SERVER_ADMIN.quadmode && !SERVER_ADMIN.duelmode;
-            //print("MEHT: updated: rounds ", ftos(SERVER_ADMIN.quad_rounds), "\n");
             break;
     }
 }
