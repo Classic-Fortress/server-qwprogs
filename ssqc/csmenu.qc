@@ -140,6 +140,22 @@ void Update_ServerAdminInfo(entity pl) = {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SERVER_ADMIN_INFO);
     WriteByte(MSG_MULTICAST, is_paused || cease_fire);
+    //WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
+    WriteFloat(MSG_MULTICAST, rounds);
+    WriteFloat(MSG_MULTICAST, infokeyf(world, "round_time"));
+    WriteFloat(MSG_MULTICAST, infokeyf(world, "timelimit"));
+    WriteFloat(MSG_MULTICAST, infokeyf(world, "fraglimit"));
+    WriteFloat(MSG_MULTICAST, clanbattle);
+    WriteFloat(MSG_MULTICAST, quadmode);
+    WriteFloat(MSG_MULTICAST, duelmode);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientMenu_Admin_Kick(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_ADMIN_KICK);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

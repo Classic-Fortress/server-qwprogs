@@ -24,6 +24,7 @@ float MENU_START_CONTENT = 32;
 
 .float owned_by;
 .string netname;
+.float playerid;
 float fo_hud_editor;
 float fo_hud_menu_active;
 float jumptime;
@@ -34,6 +35,9 @@ float last_team;
 vector sentry_pos;
 vector dispenser_pos;
 vector touched_dispenser_pos;
+//entity player_list_head;
+float player_menu_type;
+float admin_menu_next_update;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -348,7 +352,7 @@ vector(float panelid) getFillSize = {
 
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
-
+#define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 
 float team_no;
 float is_spectator;

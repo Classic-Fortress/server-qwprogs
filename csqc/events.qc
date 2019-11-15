@@ -171,6 +171,9 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_ADMIN:
                     FO_Menu_Admin_Main(TRUE);
                     break;
+                case CLIENT_MENU_ADMIN_KICK:
+                    FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -199,6 +202,14 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_SERVER_ADMIN_INFO:
             SERVER_ADMIN.ceasefire = readbyte();
+            SERVER_ADMIN.quad_rounds = readfloat();
+            SERVER_ADMIN.quad_round_time = readfloat();
+            SERVER_ADMIN.timelimit = readfloat();
+            SERVER_ADMIN.fraglimit = readfloat();
+            SERVER_ADMIN.clanmode = readfloat();
+            SERVER_ADMIN.quadmode = readfloat();
+            SERVER_ADMIN.duelmode = readfloat();
+            SERVER_ADMIN.pubmode = !SERVER_ADMIN.clanmode && SERVER_ADMIN.quadmode && !SERVER_ADMIN.duelmode;
             break;
     }
 }

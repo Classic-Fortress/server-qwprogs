@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_admin");
+	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
     registercommand("primetwo");
@@ -38,6 +39,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	FO_LoadSettings();
 
     CurrentMenu = &FO_MENU_TEAM;
+    player_menu_type = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
