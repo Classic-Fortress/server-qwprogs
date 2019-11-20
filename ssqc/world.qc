@@ -116,13 +116,21 @@ void () main = {
 
 entity lastspawn;
 
+// use this for post world being setup (and entities loaded)
+void WorldSpawnPost() 
+{
+    loadloc();
+
+    dremove(self);
+}
+
 void () worldspawn = {
     // Set this variable on connect so the client knows it has access to
     // FortressOne aliases.
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
-    loadloc(); 
+    
 
     local string st;
 
@@ -315,6 +323,11 @@ void () worldspawn = {
     lightstyle(63, "a");
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
+
+    entity worldspawnent;
+    worldspawnent = spawn();
+    worldspawnent.think = WorldSpawnPost;
+    worldspawnent.nextthink = time + 2;
 };
 
 void () StartFrame = {
