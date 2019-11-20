@@ -174,6 +174,23 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_ADMIN_KICK:
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);
                     break;
+                case CLIENT_MENU_VOTE:
+                    FO_MENU_VOTE.title = strcat("Map Vote (", ftos(readfloat()), "s left)");
+                    FO_MENU_VOTE.options[0].name = readstring();
+                    FO_MENU_VOTE.options[0].value = ftos(readfloat());
+                    FO_MENU_VOTE.options[1].name = readstring();
+                    FO_MENU_VOTE.options[1].value = ftos(readfloat());
+                    FO_MENU_VOTE.options[2].name = readstring();
+                    FO_MENU_VOTE.options[2].value = ftos(readfloat());
+                    FO_MENU_VOTE.options[3].name = readstring();
+                    FO_MENU_VOTE.options[3].value = ftos(readfloat());
+                    FO_MENU_VOTE.options[4].name = readstring();
+                    FO_MENU_VOTE.options[4].value = ftos(readfloat());
+                    FO_Menu_Vote(FALSE);
+                    break;
+                case CLIENT_MENU_CAPTAIN_PICK:
+                    FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -201,6 +218,7 @@ void() CSQC_Parse_Event = {
             dispenser_pos = [readfloat(),readfloat(),readfloat()];
             break;
         case MSG_SERVER_ADMIN_INFO:
+            is_admin = TRUE;
             SERVER_ADMIN.ceasefire = readbyte();
             SERVER_ADMIN.quad_rounds = readfloat();
             SERVER_ADMIN.quad_round_time = readfloat();
@@ -210,6 +228,11 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.quadmode = readfloat();
             SERVER_ADMIN.duelmode = readfloat();
             SERVER_ADMIN.pubmode = !SERVER_ADMIN.clanmode && SERVER_ADMIN.quadmode && !SERVER_ADMIN.duelmode;
+            SERVER_ADMIN.captainmode = readfloat();
+            break;
+        case MSG_CAPTAINS:
+            captain1 = readfloat();
+            captain2 = readfloat();
             break;
     }
 }

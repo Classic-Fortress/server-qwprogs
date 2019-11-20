@@ -148,6 +148,7 @@ void Update_ServerAdminInfo(entity pl) = {
     WriteFloat(MSG_MULTICAST, clanbattle);
     WriteFloat(MSG_MULTICAST, quadmode);
     WriteFloat(MSG_MULTICAST, duelmode);
+    WriteFloat(MSG_MULTICAST, captainmode);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
@@ -156,6 +157,41 @@ void UpdateClientMenu_Admin_Kick(entity pl) = {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
     WriteFloat(MSG_MULTICAST, CLIENT_MENU_ADMIN_KICK);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+void UpdateClientMenu_Vote(entity pl, float timeleft) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_VOTE);
+    WriteFloat(MSG_MULTICAST, timeleft);
+    WriteString(MSG_MULTICAST, vote1_map);
+    WriteFloat(MSG_MULTICAST, vote1_cnt);
+    WriteString(MSG_MULTICAST, vote2_map);
+    WriteFloat(MSG_MULTICAST, vote2_cnt);
+    WriteString(MSG_MULTICAST, vote3_map);
+    WriteFloat(MSG_MULTICAST, vote3_cnt);
+    WriteString(MSG_MULTICAST, vote4_map);
+    WriteFloat(MSG_MULTICAST, vote4_cnt);
+    WriteString(MSG_MULTICAST, vote5_map);
+    WriteFloat(MSG_MULTICAST, vote5_cnt);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientMenu_Captain(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_CAPTAIN_PICK);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_Captains(entity pl, float cap1, float cap2) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CAPTAINS);
+    WriteFloat(MSG_MULTICAST, cap1);
+    WriteFloat(MSG_MULTICAST, cap2);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

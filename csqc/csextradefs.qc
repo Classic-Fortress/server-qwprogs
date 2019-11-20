@@ -38,6 +38,11 @@ vector touched_dispenser_pos;
 //entity player_list_head;
 float player_menu_type;
 float admin_menu_next_update;
+float captain1;
+float captain2;
+float captain1_temp;
+float captain2_temp;
+float is_admin;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;

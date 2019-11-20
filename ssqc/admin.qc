@@ -118,7 +118,9 @@ void () Admin_DoBan = {
 
 void () Admin_ForceSpectator = {
     bprint4(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-    stuffcmd(self.admin_use, "observe\n");
+    //stuffcmd(self.admin_use, "observe\n");
+    forceinfokey(self.admin_use, "*spectator", "1");
+    //clientcommand(player, "observe")
     self.admin_mode = 0;
     self.admin_use = world;
 };

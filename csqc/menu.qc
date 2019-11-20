@@ -9,6 +9,8 @@
 #define FO_MENU_STATE_DISABLED 2
 #define FO_MENU_STATE_SPACER 3
 
+#define FO_MENU_MAX_OPTIONS 20
+
 #define FO_MENU_TRANSPARENCY 0.2
 
 void (float force) FO_Menu_Build;
@@ -36,7 +38,7 @@ typedef struct {
     vector size;
     string title;
     float flags;
-    fo_menu_option options[20];
+    fo_menu_option options[FO_MENU_MAX_OPTIONS];
     float num_opts;
     float active;
     void() update;
@@ -80,17 +82,21 @@ var fo_menu FO_MENU_GAME = {
         {"3","Ready","","",FO_MENU_STATE_NORMAL,{localcmd("ready\n"); Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"4","Spectate", "","",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
+        {"5","Server Admin", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"6","Captain's Menu", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 7, TRUE
+    }, 9, TRUE
 };
 var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
-        {"2","Tracking Sidebar",  "","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BUTTON},
+        {"2","Tracking Sidebar",  "","",FO_MENU_STATE_HIDDEN,{print("not implemented\n");},MENU_BUTTON},
+        MenuSpacer,
+        {"3","Server Admin", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 4, TRUE
+    }, 6, TRUE
 };
 var fo_menu FO_MENU_SPECTATOR_TRACK = {
     [0,0], [300,200], "Track", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
@@ -366,7 +372,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"4","Duel Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
         {"5","Quad Rounds...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Rounds(TRUE);},MENU_BORDER_WARNING},
         {"6","Quad Round Time...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_QuadTimelimit(TRUE);},MENU_BORDER_WARNING},
-        {"7","Captains Mode","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        {"7","Captains Mode","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_1, 0);},MENU_BG_DARK},
         {"8","Force Start","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
         MenuSpacer,
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
@@ -381,6 +387,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         FO_MENU_ADMIN_MODES.options[3].value = SERVER_ADMIN.duelmode?"on":"off";
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
+        FO_MENU_ADMIN_MODES.options[6].value = ftos(SERVER_ADMIN.captainmode);
     }
 };
 var fo_menu FO_MENU_ADMIN_SETTINGS = {
@@ -426,6 +433,27 @@ void execute_admin_players_force_spec(float choice, float page) {
     Menu_Cancel();
     FO_Menu_Admin_Main(TRUE);
 }
+void execute_admin_players_captain1(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    captain1_temp = stof(userid);
+    print("MEHT captain 1: ", ftos(choice + (page * 9)),"\n");
+    FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_2, 0);
+}
+void execute_admin_players_captain2(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    captain2_temp = stof(userid);
+    print("MEHT captain 2: ", ftos(choice + (page * 9)),"\n");
+    //Send server cmd setting captains; reset everyone to observer; spam out captains set message
+    localcmd("cmd captainmode ", ftos(captain1_temp), " ", userid, "\n");
+    FO_Menu_Admin_Main(TRUE);
+}
+void execute_admin_players_captain_pick(float choice, float page) {
+    string userid = getplayerkeyvalue(choice + (page * 9), "userid");
+    localcmd("cmd captainpick ", userid, "\n");
+    //print("not implemented ", ftos(choice + (page * 9)),"\n");
+    //Menu_Cancel();
+}
+
 var fo_menu FO_MENU_ADMIN_PLAYERS = {
     [0,0], [300,300], "Players", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(0, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
@@ -504,7 +532,18 @@ var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
     }, 11, TRUE
 };
-
+var fo_menu FO_MENU_VOTE = {
+    [0,0], [300,200], "Map Vote", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+        {"1","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[0].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[1].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        {"4","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[3].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"5","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[4].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+    }, 8, TRUE
+};
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
     InProgressMenu.size = size;
@@ -599,7 +638,7 @@ vector fo_menu_draw(fo_menu * menu) = {
         0
     );
     float row = 0;
-    for(float i = 0; i < menu.num_opts; i++) {
+    for(float i = 0; i < FO_MENU_MAX_OPTIONS; i++) {
         vector shortcutoffset = [0,0], valueoffset = [0,0];
         
         if(menu.options[i].state == FO_MENU_STATE_HIDDEN) {
@@ -727,9 +766,17 @@ void FO_Menu_Game(float force) = {
         return;
     if(is_spectator) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
-        CurrentMenu = &FO_MENU_GAME_SPECTATOR;
+        FO_MENU_GAME_SPECTATOR.num_opts = 3;
+        FO_MENU_GAME_SPECTATOR.options[3].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        if(is_admin) FO_MENU_GAME_SPECTATOR.num_opts++;
+       CurrentMenu = &FO_MENU_GAME_SPECTATOR;
     } else {
         //print(getplayerkeyvalue(player_localnum, "name"), " is playing a game!\n");
+        FO_MENU_GAME.num_opts = 7;
+        FO_MENU_GAME.options[5].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        if(is_admin) FO_MENU_GAME.num_opts++;
+        FO_MENU_GAME.options[6].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        if(is_admin) FO_MENU_GAME.num_opts++;
         CurrentMenu = &FO_MENU_GAME;
     }
     fo_hud_menu_active = TRUE;
@@ -1033,12 +1080,23 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
     } else if(type == CLIENT_MENU_ADMIN_FORCE_SPEC) {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Force Spec ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_force_spec;
+    } else if(type == CLIENT_MENU_CAPTAIN_1) {
+        captain1_temp = 0;
+        captain2_temp = 0;
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Select Captain 1 ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_captain1;
+    } else if(type == CLIENT_MENU_CAPTAIN_2) {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Select Captain 2 ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_captain2;
+    } else if(type == CLIENT_MENU_CAPTAIN_PICK) {
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Pick teammate ", ftos(page + 1), "/5");
+        execute_admin_players = execute_admin_players_captain_pick;
     } else {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Page ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_unknown;
     }
-    string n;
-    float c = 0, p = 0, spec = 0;
+    string n, team;
+    float c = 0, p = 0, spec = 0, userid = 0, enable = FALSE;
 /*
  *     for(float i = 0; i < 32, c < 9; i++) {
         n = getplayerkeyvalue(i,"name");
@@ -1060,7 +1118,12 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
     for(float i = 0; i < 9; i++) {
         n = getplayerkeyvalue(i + (page * 9),"name");
         spec = stof(getplayerkeyvalue(i + (page * 9), "*spectator"));
-        if(n && (type != CLIENT_MENU_ADMIN_FORCE_SPEC || !spec)) {
+        team = getplayerkeyvalue(i + (page * 9), "team");
+        userid = stof(getplayerkeyvalue(i + (page * 9), "userid"));
+        if(n && (
+            type != CLIENT_MENU_ADMIN_FORCE_SPEC || 
+            !spec
+        ) && !(type == CLIENT_MENU_CAPTAIN_PICK && (team || i + (page * 9) == player_localnum || (userid && (userid == captain1_temp || userid == captain2_temp))))) {
             FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
             FO_MENU_ADMIN_PLAYERS.options[i].name = n;
             FO_MENU_ADMIN_PLAYERS.options[i].value = spec?"Spectator":"";
@@ -1068,12 +1131,18 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
             c++;
         } else {
             FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_DISABLED;
-            FO_MENU_ADMIN_PLAYERS.options[i].name = "";
+            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
             FO_MENU_ADMIN_PLAYERS.options[i].value = "";
             FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_DARK;
         }
     }
 
     CurrentMenu = &FO_MENU_ADMIN_PLAYERS;
+    fo_hud_menu_active = TRUE;
+}
+void FO_Menu_Vote(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_VOTE;
     fo_hud_menu_active = TRUE;
 }
