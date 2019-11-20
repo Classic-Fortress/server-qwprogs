@@ -130,8 +130,6 @@ void () worldspawn = {
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
-    
-
     local string st;
 
     lastspawn = world;
@@ -327,7 +325,7 @@ void () worldspawn = {
     entity worldspawnent;
     worldspawnent = spawn();
     worldspawnent.think = WorldSpawnPost;
-    worldspawnent.nextthink = time + 2;
+    worldspawnent.nextthink = time + .01;
 };
 
 void () StartFrame = {
