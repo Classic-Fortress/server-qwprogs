@@ -1,4 +1,5 @@
-string (string s) prepq3fstring = {
+string prepq3fstring (string s)
+{
     string ret;
 
     ret = strireplace("%n", "", s);
@@ -118,6 +119,8 @@ void CheckStateQ3Goal(entity trig)
     ActivateQ3Goal(trig, triggered);
 }
 
+void () target_location = {
+}
 
 // backpacks, cap points etc
 void () func_goalinfo = {
