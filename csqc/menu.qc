@@ -472,6 +472,69 @@ var fo_menu FO_MENU_ADMIN_PLAYERS = {
         {"-","Prev","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page - 1);},MENU_BUTTON},
     }, 14, TRUE
 };
+void action_admin_players(float type) = {
+    string n, team;
+    float c = 0, p = 0, spec = 0, userid = 0, enable;
+    float page = FO_MENU_ADMIN_PLAYERS.page;
+    for(float i = 0; i < 9; i++) {
+        n = getplayerkeyvalue(i + (page * 9),"name");
+        spec = stof(getplayerkeyvalue(i + (page * 9), "*spectator"));
+        team = getplayerkeyvalue(i + (page * 9), "team");
+        userid = stof(getplayerkeyvalue(i + (page * 9), "userid"));
+        enable = TRUE;
+        if(!n){
+            enable = FALSE;
+            print("MEHT: disable ", n ," - no name\n");
+        }
+        if(type == CLIENT_MENU_ADMIN_FORCE_SPEC && spec){
+            enable = FALSE;
+            print("MEHT: disable ", n ," - spectator (force spec)\n");
+        }
+        if(type == CLIENT_MENU_CAPTAIN_PICK) {
+            if(spec) {
+                enable = FALSE;
+                print("MEHT: disable ", n ," - spectator (capt pick)\n");
+            }
+            if(team) {
+                enable = FALSE;
+                print("MEHT: disable ", n ," - already picked\n");
+            }
+            if(i + (page * 9) == player_localnum) {
+                enable = FALSE;
+                print("MEHT: disable ", n ," - yourself\n");
+            }
+        }
+        if(type == CLIENT_MENU_CAPTAIN_1 || type == CLIENT_MENU_CAPTAIN_2) {
+            if(spec) {
+                enable = FALSE;
+                print("MEHT: disable ", n ," - spectator (capt select)\n");
+            }
+            if(userid == captain1_temp) {
+                enable = FALSE;
+                print("MEHT: disable ", n ," - first captain\n");
+            }
+        }
+       //if(n && (
+        //    type != CLIENT_MENU_ADMIN_FORCE_SPEC || 
+        //    !spec
+        //) && !(type == CLIENT_MENU_CAPTAIN_PICK && (team || i + (page * 9) == player_localnum || (userid && (userid == captain1_temp || userid == captain2_temp))))) {
+        if(enable) {
+            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
+            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
+            FO_MENU_ADMIN_PLAYERS.options[i].value = spec?"Spectator":"";
+            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_WARNING;
+            c++;
+        } else {
+            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_DISABLED;
+            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
+            FO_MENU_ADMIN_PLAYERS.options[i].value = "";
+            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_DARK;
+        }
+    }
+}
+void action_admin_players_captain_pick() = {
+    action_admin_players(CLIENT_MENU_CAPTAIN_PICK);
+}
 var fo_menu FO_MENU_ADMIN_ROUNDS = {
     [0,0], [300,300], "Quad Rounds", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","1","","",FO_MENU_STATE_NORMAL,{localcmd("cmd rounds 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
@@ -1071,6 +1134,7 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
     if(page > 4) page = 0;
     FO_MENU_ADMIN_PLAYERS.page = page;
     player_menu_type = type;
+    FO_MENU_ADMIN_PLAYERS.update = SUB_Null;
     if(type == CLIENT_MENU_ADMIN_KICK) {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Kick ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_kick;
@@ -1091,52 +1155,12 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
     } else if(type == CLIENT_MENU_CAPTAIN_PICK) {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Pick teammate ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_captain_pick;
+        FO_MENU_ADMIN_PLAYERS.update = action_admin_players_captain_pick;
     } else {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Page ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_unknown;
     }
-    string n, team;
-    float c = 0, p = 0, spec = 0, userid = 0, enable = FALSE;
-/*
- *     for(float i = 0; i < 32, c < 9; i++) {
-        n = getplayerkeyvalue(i,"name");
-        if(n) {
-            p++;
-        }
-        if(p > page * 9 && p <= (page + 1) * 9) {
-            spec = stof(getplayerkeyvalue(i, "*spectator"));
-            FO_MENU_ADMIN_PLAYERS.options[c].state = FO_MENU_STATE_NORMAL;
-            FO_MENU_ADMIN_PLAYERS.options[c].name = n;
-            FO_MENU_ADMIN_PLAYERS.options[c].value = spec?"Spectator":"";
-            c++;
-        }
-    }
-    for(float i = c; i < 9; i++) {
-        FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_HIDDEN;
-    }
-*/
-    for(float i = 0; i < 9; i++) {
-        n = getplayerkeyvalue(i + (page * 9),"name");
-        spec = stof(getplayerkeyvalue(i + (page * 9), "*spectator"));
-        team = getplayerkeyvalue(i + (page * 9), "team");
-        userid = stof(getplayerkeyvalue(i + (page * 9), "userid"));
-        if(n && (
-            type != CLIENT_MENU_ADMIN_FORCE_SPEC || 
-            !spec
-        ) && !(type == CLIENT_MENU_CAPTAIN_PICK && (team || i + (page * 9) == player_localnum || (userid && (userid == captain1_temp || userid == captain2_temp))))) {
-            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
-            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
-            FO_MENU_ADMIN_PLAYERS.options[i].value = spec?"Spectator":"";
-            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_WARNING;
-            c++;
-        } else {
-            FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_DISABLED;
-            FO_MENU_ADMIN_PLAYERS.options[i].name = n;
-            FO_MENU_ADMIN_PLAYERS.options[i].value = "";
-            FO_MENU_ADMIN_PLAYERS.options[i].colour = MENU_BG_DARK;
-        }
-    }
-
+    action_admin_players(type);
     CurrentMenu = &FO_MENU_ADMIN_PLAYERS;
     fo_hud_menu_active = TRUE;
 }

@@ -54,6 +54,9 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
 vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
 
+void () SUB_Null = {
+};
+
 typedef struct 
 {
     string icon;
