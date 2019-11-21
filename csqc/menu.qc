@@ -819,11 +819,12 @@ void FO_Menu_Game(float force) = {
         if(is_admin) FO_MENU_GAME_SPECTATOR.num_opts++;
        CurrentMenu = &FO_MENU_GAME_SPECTATOR;
     } else {
-        //print(getplayerkeyvalue(player_localnum, "name"), " is playing a game!\n");
+        float userid = stof(getplayerkeyvalue(player_localnum, "userid"));
+        
         FO_MENU_GAME.num_opts = 7;
         FO_MENU_GAME.options[5].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
         if(is_admin) FO_MENU_GAME.num_opts++;
-        FO_MENU_GAME.options[6].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        FO_MENU_GAME.options[6].state = (userid == captain1 || userid == captain2)?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
         if(is_admin) FO_MENU_GAME.num_opts++;
         CurrentMenu = &FO_MENU_GAME;
     }
@@ -1132,10 +1133,10 @@ void FO_Menu_Admin_Players(float force, float type, float page) = {
     } else if(type == CLIENT_MENU_CAPTAIN_1) {
         captain1_temp = 0;
         captain2_temp = 0;
-        FO_MENU_ADMIN_PLAYERS.title = strcat("Select Captain 1 ", ftos(page + 1), "/5");
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Captain 1 ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_captain1;
     } else if(type == CLIENT_MENU_CAPTAIN_2) {
-        FO_MENU_ADMIN_PLAYERS.title = strcat("Select Captain 2 ", ftos(page + 1), "/5");
+        FO_MENU_ADMIN_PLAYERS.title = strcat("Captain 2 ", ftos(page + 1), "/5");
         execute_admin_players = execute_admin_players_captain2;
     } else if(type == CLIENT_MENU_CAPTAIN_PICK) {
         FO_MENU_ADMIN_PLAYERS.title = strcat("Pick teammate ", ftos(page + 1), "/5");
