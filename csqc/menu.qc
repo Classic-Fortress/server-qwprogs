@@ -436,13 +436,11 @@ void execute_admin_players_force_spec(float choice, float page) {
 void execute_admin_players_captain1(float choice, float page) {
     string userid = getplayerkeyvalue(choice + (page * 9), "userid");
     captain1_temp = stof(userid);
-    print("MEHT captain 1: ", ftos(choice + (page * 9)),"\n");
     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_2, 0);
 }
 void execute_admin_players_captain2(float choice, float page) {
     string userid = getplayerkeyvalue(choice + (page * 9), "userid");
     captain2_temp = stof(userid);
-    print("MEHT captain 2: ", ftos(choice + (page * 9)),"\n");
     //Send server cmd setting captains; reset everyone to observer; spam out captains set message
     localcmd("cmd captainmode ", ftos(captain1_temp), " ", userid, "\n");
     FO_Menu_Admin_Main(TRUE);
@@ -450,8 +448,6 @@ void execute_admin_players_captain2(float choice, float page) {
 void execute_admin_players_captain_pick(float choice, float page) {
     string userid = getplayerkeyvalue(choice + (page * 9), "userid");
     localcmd("cmd captainpick ", userid, "\n");
-    //print("not implemented ", ftos(choice + (page * 9)),"\n");
-    //Menu_Cancel();
 }
 
 var fo_menu FO_MENU_ADMIN_PLAYERS = {
@@ -484,40 +480,29 @@ void action_admin_players(float type) = {
         enable = TRUE;
         if(!n){
             enable = FALSE;
-            print("MEHT: disable ", n ," - no name\n");
         }
         if(type == CLIENT_MENU_ADMIN_FORCE_SPEC && spec){
             enable = FALSE;
-            print("MEHT: disable ", n ," - spectator (force spec)\n");
         }
         if(type == CLIENT_MENU_CAPTAIN_PICK) {
             if(spec) {
                 enable = FALSE;
-                print("MEHT: disable ", n ," - spectator (capt pick)\n");
             }
             if(team) {
                 enable = FALSE;
-                print("MEHT: disable ", n ," - already picked\n");
             }
             if(i + (page * 9) == player_localnum) {
                 enable = FALSE;
-                print("MEHT: disable ", n ," - yourself\n");
             }
         }
         if(type == CLIENT_MENU_CAPTAIN_1 || type == CLIENT_MENU_CAPTAIN_2) {
             if(spec) {
                 enable = FALSE;
-                print("MEHT: disable ", n ," - spectator (capt select)\n");
             }
             if(userid == captain1_temp) {
                 enable = FALSE;
-                print("MEHT: disable ", n ," - first captain\n");
             }
         }
-       //if(n && (
-        //    type != CLIENT_MENU_ADMIN_FORCE_SPEC || 
-        //    !spec
-        //) && !(type == CLIENT_MENU_CAPTAIN_PICK && (team || i + (page * 9) == player_localnum || (userid && (userid == captain1_temp || userid == captain2_temp))))) {
         if(enable) {
             FO_MENU_ADMIN_PLAYERS.options[i].state = FO_MENU_STATE_NORMAL;
             FO_MENU_ADMIN_PLAYERS.options[i].name = n;

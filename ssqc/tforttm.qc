@@ -159,14 +159,12 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     local float tc;
     local string team;
 
-    bprint(PRINT_HIGH, "MEHT: Setting team to ", ftos(tno), "\n");
     if ((intermission_running != 0) || (intermission_exittime > time))
         return (0);
 
     if (!CF_TeamIsValid) {
         return 0;
     }
-    bprint(PRINT_HIGH, "MEHT: team is valid\n");
     
     if (tno == 1)
         team = "blue team";
@@ -182,7 +180,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         return 0;
     }
     
-    bprint(PRINT_HIGH, "MEHT: Team colour is ", ftos(TeamFortress_TeamGetColor(tno)), "\n");
     if (TeamFortress_TeamGetColor(tno) == 0 && !teamplay) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
@@ -214,7 +211,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         }
         return (1);
     }
-    bprint(PRINT_HIGH, "MEHT: Checking deadflag\n");
     if (!pe.deadflag) {
         if (pe.health == pe.max_health && (pe.spawn_time + 10) > time && CloseToSpawnPoint() && pe.suicide_time <= time) {
             pe.has_changedteam = 1;
@@ -290,7 +286,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         }
     }
 
-    bprint(PRINT_HIGH, "MEHT: Tdone\n");
     return (1);
 };
 

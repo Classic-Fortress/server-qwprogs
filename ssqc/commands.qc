@@ -190,7 +190,6 @@ void (float cap1, float cap2) CaptainMode = {
 
             te.current_menu = 0;
             te.impulse = 0;
-            bprint(PRINT_HIGH, "MEHT: Setting ", te.netname, " to observer\n");
         }
         if(csqcactive) {
             UpdateClient_Captains(te, cap1, cap2);
