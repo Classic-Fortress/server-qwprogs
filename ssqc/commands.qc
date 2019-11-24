@@ -33,7 +33,8 @@ void () ForceStartMatch = {
 }
 
 void (float inp) SetQuadRounds = {
-    rounds = inp;
+    //No idea - for some reason quad rounds have a +1 count to the actual number
+    rounds = inp + 1;
     local string cmd;
     cmd = strcat("localinfo rounds ", ftos(inp), "\n");
     localcmd(cmd);
