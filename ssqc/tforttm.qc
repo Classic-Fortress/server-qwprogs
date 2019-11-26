@@ -48,7 +48,7 @@ float (float tno) TeamFortress_TeamGetColor = {
         return (YELLOW);
     if (tno == 4)
         return (DARKGREEN);
-    return (0);
+    return (1);
 };
 
 void (float tno) TeamFortress_TeamSetColor = {
@@ -154,7 +154,7 @@ float (float tno) CF_TeamIsValid = {
     return 1;
 }
 
-float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
+float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
     local string st;
     local float tc;
     local string team;
@@ -175,82 +175,82 @@ float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
     else
         team = "green team";
 
-    if (tno > 0 && tno == self.team_no) {
-        sprint(self, PRINT_HIGH, "You are already on the ", team, "!\n");
+    if (tno > 0 && tno == pe.team_no) {
+        sprint(pe, PRINT_HIGH, "You are already on the ", team, "!\n");
         return 0;
     }
     
-    if (TeamFortress_TeamGetColor(tno) == 0) {
+    if (TeamFortress_TeamGetColor(tno) == 0 && !teamplay) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
-            sprint(self, PRINT_HIGH,
+            sprint(pe, PRINT_HIGH,
                    "You cannot start a new team with your color, since another ");
-            sprint(self, PRINT_HIGH,
+            sprint(pe, PRINT_HIGH,
                    "already using that color. Change your pants color, then try again.\n");
             return (0);
         }
-        bprint(PRINT_HIGH, self.netname, " has started the ");
+        bprint(PRINT_HIGH, pe.netname, " has started the ");
         bprint(PRINT_HIGH, team, "\n");
-        self.immune_to_check = time + 10;
+        pe.immune_to_check = time + 10;
         if ((toggleflags & TFLAG_TEAMFRAGS) ||
             (toggleflags & TFLAG_FULLTEAMSCORE)) {
-            self.frags = TeamFortress_TeamGetScore(tno);
+            pe.frags = TeamFortress_TeamGetScore(tno);
         }
-        stuffcmd(self, "color ");
+        stuffcmd(pe, "color ");
         tc = TeamFortress_TeamGetColor(tno) - 1;
         st = ftos(tc);
-        stuffcmd(self, st);
-        stuffcmd(self, "\n");
-        self.team_no = tno;
-        self.lives = TeamFortress_TeamGetLives(tno);
-        SetTeamName(self);
-        if (self.playerclass == 0) {
-            if (TeamFortress_TeamIsCivilian(self.team_no)) {
+        stuffcmd(pe, st);
+        stuffcmd(pe, "\n");
+        pe.team_no = tno;
+        pe.lives = TeamFortress_TeamGetLives(tno);
+        SetTeamName(pe);
+        if (pe.playerclass == 0) {
+            if (TeamFortress_TeamIsCivilian(pe.team_no)) {
                 TeamFortress_ChangeClass(11);
             }
         }
         return (1);
     }
-    if (!self.deadflag) {
-        if (self.health == self.max_health && (self.spawn_time + 10) > time && CloseToSpawnPoint() && self.suicide_time <= time) {
-            self.has_changedteam = 1;
-            self.clientkillforce = 1;
-            self.clientkillfree = 1;
+    if (!pe.deadflag) {
+        if (pe.health == pe.max_health && (pe.spawn_time + 10) > time && CloseToSpawnPoint() && pe.suicide_time <= time) {
+            pe.has_changedteam = 1;
+            pe.clientkillforce = 1;
+            pe.clientkillfree = 1;
             ClientKill();
-            self.has_changedteam = 0;
+            pe.has_changedteam = 0;
         } else
         {
-            self.clientkillforce = 1;
-            self.clientkillfree = 0; 
+            pe.clientkillforce = 1;
+            pe.clientkillfree = 0; 
             ClientKill();  
         }
     }
     // remove engineer buildings
-    if (self.playerclass == PC_ENGINEER)
-        Engineer_RemoveBuildings(self);
+    if (pe.playerclass == PC_ENGINEER)
+        Engineer_RemoveBuildings(pe);
     // swap colors for spy last disguise
-    if (self.playerclass == PC_SPY && self.undercover_team == tno)
-        self.last_team = self.team_no;
+    if (pe.playerclass == PC_SPY && pe.undercover_team == tno)
+        pe.last_team = pe.team_no;
     // remove existing gas grenades
     RemoveGasTimers();
-    bprint(PRINT_HIGH, self.netname, " has joined the ");
+    bprint(PRINT_HIGH, pe.netname, " has joined the ");
     bprint(PRINT_HIGH, team, "\n");
-    stuffcmd(self, "color ");
+    stuffcmd(pe, "color ");
     tc = TeamFortress_TeamGetColor(tno) - 1;
     st = ftos(tc);
-    stuffcmd(self, st);
-    stuffcmd(self, "\n");
+    stuffcmd(pe, st);
+    stuffcmd(pe, "\n");
     if(!skipclasscheck) {
-        if(self.playerclass == PC_CIVILIAN) {
+        if(pe.playerclass == PC_CIVILIAN) {
             if (TeamFortress_TeamIsCivilian(tno)) {
-                self.team_no = tno;
+                pe.team_no = tno;
                 TeamFortress_ChangeClass(11);
             } else {
                 TeamFortress_ChangeClass(0);
                 Menu_Class(0);
             }
         } else {
-            if (self.playerclass == 0) {
+            if (pe.playerclass == 0) {
             } else {
                 //Make sure the current class is still legal on the new team
                 override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
@@ -262,24 +262,24 @@ float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
             }
         }
     }
-    self.team_no = tno;
-    self.immune_to_check = time + 10;
-    self.lives = TeamFortress_TeamGetLives(tno);
+    pe.team_no = tno;
+    pe.immune_to_check = time + 10;
+    pe.lives = TeamFortress_TeamGetLives(tno);
     if ((toggleflags & TFLAG_TEAMFRAGS) ||
         (toggleflags & TFLAG_FULLTEAMSCORE)) {
-        self.frags = TeamFortress_TeamGetScore(tno);
+        pe.frags = TeamFortress_TeamGetScore(tno);
     }
-    TeamFortress_TeamShowMemberClasses(self);
-    SetTeamName(self);
+    TeamFortress_TeamShowMemberClasses(pe);
+    SetTeamName(pe);
     if(!skipclasscheck) {
-        if (self.playerclass == 0) {
+        if (pe.playerclass == 0) {
             if (TeamFortress_TeamIsCivilian(tno)) {
-                self.team_no = tno;
+                pe.team_no = tno;
                 TeamFortress_ChangeClass(11);
             }
         } else {
             // force to change class if class is forbidden on the new team
-            if (!IsLegalClass(self.playerclass) && !override_mapclasses) {
+            if (!IsLegalClass(pe.playerclass) && !override_mapclasses) {
                 TeamFortress_ChangeClass(0);
                 Menu_Class(0);
             }
@@ -290,7 +290,7 @@ float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options = {
 };
 
 float (float tno) TeamFortress_TeamSet = {
-    return TeamFortress_TeamSet_Options(tno, FALSE);
+    return TeamFortress_TeamSet_Options(self, tno, FALSE);
 }
 
 void () TeamFortress_CheckTeamCheats = {

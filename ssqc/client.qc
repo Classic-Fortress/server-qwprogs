@@ -61,7 +61,7 @@ float () GetLastWeaponImpulse;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
-float (float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
+float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
 
 string nextmap;
 
@@ -2359,7 +2359,7 @@ void (optional float csqcactive) ClientConnect = {
             while (te) {
                 if (te.tf_id == self.tf_id) {
                     got_one = 1;
-                    TeamFortress_TeamSet_Options(te.team_no, TRUE);
+                    TeamFortress_TeamSet_Options(te, te.team_no, TRUE);
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
                     if (!(toggleflags & TFLAG_TEAMFRAGS) &&
