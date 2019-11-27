@@ -17,13 +17,6 @@ void () TeamFortress_MOTD = {
     local string ya;
     local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
     
-    if(csqcactive) {
-        //fte+csqc has its own team menu
-        //ask the client to activate it
-        Menu_Close(self);
-        //return;
-    }
-
     if (self.motd == 5) {
         if(csqcactive) {
             if(self.team_no == 0) {

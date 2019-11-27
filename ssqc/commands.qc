@@ -33,7 +33,8 @@ void () ForceStartMatch = {
 }
 
 void (float inp) SetQuadRounds = {
-    rounds = inp;
+    //No idea - for some reason quad rounds have a +1 count to the actual number
+    rounds = inp + 1;
     local string cmd;
     cmd = strcat("localinfo rounds ", ftos(inp), "\n");
     localcmd(cmd);
@@ -104,6 +105,166 @@ void () DuelMode =
     localcmd ("exec fo_duelmode.cfg\n");
     bprint(PRINT_HIGH, "Duel Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+}
+
+void (entity pe) SetEquipmentForPlayer = {
+    entity oldself = self;
+    self = pe;
+    TeamFortress_SetEquipment();
+    //self.immune_to_check = time + 10;
+    //self.undercover_team = 0;
+    stuffcmd(self, "color ");
+    string st = ftos(TeamFortress_TeamGetColor(self.team_no) - 1);
+    stuffcmd(self, st);
+    stuffcmd(self, "\n");
+
+    self = oldself;
+}
+
+void (float cap1, float cap2) CaptainMode = {
+    captainmode = 1;
+    bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+    local string st = 0;
+    local float userid = 0, csqcactive = 0;
+    local entity oldself;// = self;
+    local entity te = find (world, classname, "player");
+    while (te != world) {
+        userid = infokeyf(te, INFOKEY_P_USERID);
+        csqcactive = infokeyf(te, INFOKEY_P_CSQCACTIVE);
+        //te.immune_to_check = time + 10;
+        if(userid == cap1 || userid == cap2) {
+            te.captain = 9;
+            te.playerclass = 0;
+            if(userid == cap1) {
+                //playerSetTeam(1);
+                te.team_no = 1;
+                SetTeamName(te);
+                TeamFortress_TeamSet_Options(te, 1, TRUE);
+                //stuffcmd(self, "color ");
+                //st = ftos(TeamFortress_TeamGetColor (1) - 1);
+                //stuffcmd(self, st);
+                //stuffcmd(self, "\n");
+                //SetTeamName(self);
+            }
+            if(userid == cap2) {
+                //playerSetTeam(2);
+                te.team_no = 2;
+                SetTeamName(te);
+                TeamFortress_TeamSet_Options(te, 2, TRUE);
+                //stuffcmd(self, "color ");
+                //st = ftos(TeamFortress_TeamGetColor (2) - 1);
+                //stuffcmd(self, st);
+                //stuffcmd(self, "\n");
+                //SetTeamName(self);
+            }
+            bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s ");
+            bprint(PRINT_HIGH, te.netname);
+            bprint(PRINT_HIGH, " \bis the captain for team\b ");
+            bprint(PRINT_HIGH, TeamToString(te.team_no));
+            bprint(PRINT_HIGH, "\b.\b\n");
+            if(csqcactive) {
+                //fte+csqc has its own team menu
+                //ask the client to activate it
+                Menu_Close(te);
+                UpdateClientMenu_Captain(te);
+            } else {
+                //self = te;
+                Menu_Close(te);
+                te.current_menu_type = ADMIN_MENU_TYPE_CAPTAINSELECT;
+                te.current_menu_page = 1;
+                //Menu_Admin();
+            }
+        } else {
+            te.captain = 0;
+            //self = te;
+            //playerSetTeam(-1);
+            te.team_no = 0;
+            te.playerclass = 0;
+            oldself = self;
+            self = te;
+            TeamFortress_ChangeClass(0);
+            self = oldself;
+            SetTeamName(te);
+            //TeamFortress_TeamSet_Options(te, 0, TRUE);
+            //stuffcmd(te, "color 0 0\n");
+            //SetTeamName(te);
+
+            te.current_menu = 0;
+            te.impulse = 0;
+        }
+        if(csqcactive) {
+            UpdateClient_Captains(te, cap1, cap2);
+        }
+        SetEquipmentForPlayer(te);
+        te = find (te, classname, "player");
+    }
+    //self = oldself;
+}
+
+void (entity cap1, entity cap2) StopCaptainMode = {
+    if(captainmode){
+        local entity oldself = self;
+        self = cap1;
+        TeamFortress_TeamSet(cap1.team_no);
+        self = cap2;
+        TeamFortress_TeamSet(cap2.team_no);
+        captainmode = 0;
+        self = oldself;
+    }
+}
+
+void (entity cap, float pick) CaptainPick = {
+    if(!cap.captain) {
+        sprint(self, PRINT_HIGH, "You are not a captain, sorry\n");
+        return;
+    }
+    local float countleft = 0, userid = 0;
+    local entity picked = world, othercap = world, oldself;
+    local entity te = find (world, classname, "player");
+    while (te != world) {
+        userid = infokeyf(te, INFOKEY_P_USERID);
+        if(userid == pick) {
+            picked = te;
+        }
+        if(!te.team_no) {
+            countleft++;
+        }
+        if(te != cap && te.captain) {
+            othercap = te;
+        }
+        te = find (te, classname, "player");
+    }
+    if(picked != world) {
+        if(picked == cap) {
+            sprint(self, PRINT_HIGH, "You don't have to pick yourself, it's implied...\n");
+            return;
+        }
+        if(picked.captain) {
+            sprint(self, PRINT_HIGH, picked.netname ," is a captain, thus unpickable!\n");
+            return;
+        }
+        if(picked.team_no) {
+            sprint(self, PRINT_HIGH, picked.netname ," has already been picked!\n");
+            return;
+        }
+        bprint(PRINT_HIGH, "\[\bCaptain Mode\b\]\b:\b ");
+        bprint(PRINT_HIGH, picked.netname);
+        bprint(PRINT_HIGH, " \bcalled\b ");
+        bprint(PRINT_HIGH, cap.netname);
+        bprint(PRINT_HIGH, " \bfor team\b ");
+        bprint(PRINT_HIGH, TeamToString(cap.team_no));
+        bprint(PRINT_HIGH, "\b.\b\n");
+        oldself = self;
+        self = picked;
+        TeamFortress_TeamSet(cap.team_no);
+        self = oldself;
+    } else {
+        sprint(self, PRINT_HIGH, "Sorry, couldn't pick ", picked.netname ,"\n");
+    }
+    if(!countleft) {
+        bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+        StopCaptainMode(cap, othercap);
+    }
 }
 
 float (string arg1, string arg2, string arg3) ParseCmds = {
@@ -510,6 +671,36 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             sprint(self, PRINT_HIGH, "Invalid choice. Choices are [ammo|armo[u]r|repair|withdraw ammo|withdraw armo[u]r].\n");
             break;
+        case "votemap":
+            processedCmd = TRUE;
+            switch(arg2) {
+                case vote1_map:
+                    Vote_Input(1);
+                    break;
+                case vote2_map:
+                    Vote_Input(2);
+                    break;
+                case vote3_map:
+                    Vote_Input(3);
+                    break;
+                case vote4_map:
+                    Vote_Input(4);
+                    break;
+                case vote5_map:
+                    Vote_Input(5);
+                    break;
+                default: 
+                    Vote_Menu(self);
+                    break;
+            }
+            break;
+        case "captainpick":
+            processedCmd = TRUE;
+            if(arg2) {
+                farg2 = stof(arg2);
+                CaptainPick(self, farg2);
+            }
+            break;
     }
    
     if (self.is_admin)
@@ -518,6 +709,9 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         {
             case "adminmenu":
                 processedCmd = TRUE;
+                Menu_Close(self);
+                self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
+                self.current_menu_page = 1;
                 Menu_Admin();
                 break;
             case "timelimit":
@@ -694,7 +888,9 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
                                 bprint4(PRINT_HIGH, ent, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-                                stuffcmd(ent, "observe\n");
+                                //stuffcmd(ent, "observe\n");
+                                //forceinfokey(ent, "*spectator", "1");
+                                clientcommand(ent, "observe");
                                 break;
                             }
                             ent = find(ent, classname, "player");
@@ -779,6 +975,26 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         UpdateAllAdmins();
                     }
                 }
+                break;
+            case "captainmode":
+                processedCmd = TRUE;
+                if(arg2 && arg3) {
+                    farg2 = stof(arg2);
+                    farg3 = stof(arg3);
+                    if(farg2 && farg3) {
+                        CaptainMode(farg2, farg3);
+                    } else {
+                        sprint(self, PRINT_HIGH, "Captain mode requires 2 userids\n");
+                    }
+                    break;
+                }
+                if(arg2 == "stop") {
+                    local entity cap1 = findfloat(world, captain, 1);
+                    local entity cap2 = findfloat(cap1, captain, 1);
+                    StopCaptainMode(cap1, cap2);
+                    break;
+                }
+                Menu_Admin();
                 break;
             case "help":
             case "list":

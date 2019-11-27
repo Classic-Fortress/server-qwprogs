@@ -36,11 +36,6 @@ void () Vote_DropLosers;
 float (string ps_list) List_Count;
 string (string ps_list, float pf_idx) List_Index;
 
-// global variables
-float vote1_cnt, vote2_cnt, vote3_cnt, vote4_cnt, vote5_cnt;
-string vote1_map, vote2_map, vote3_map, vote4_map, vote5_map, vote_result;
-float vote_started, vote_update, vote_winnercount, vote_decider, vote_abort;
-
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_NextMap = {
@@ -532,6 +527,14 @@ void (entity pe_player) Vote_Menu = {
         f_timeleft = CF_MAPVOTE_FORCESHOW - (time - pe_player.menu_time);
     else if (time - pe_player.menu_time < CF_MAPVOTE_FORCESHOW)
         f_timeleft = CF_MAPVOTE_FORCESHOW - (time - pe_player.menu_time);
+
+    if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+        //fte+csqc has its own team menu
+        //ask the client to activate it
+        Menu_Close(pe_player);
+        UpdateClientMenu_Vote(pe_player, floor(f_timeleft - 0.1));
+        return;
+    }
 
     s_choose = strzone(strcat("Vote for next map (closes in ", strcat(ftos(floor(f_timeleft - 0.1)), "s):\n\n")));
     s_tmp1 = strzone("");
