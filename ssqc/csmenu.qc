@@ -140,9 +140,6 @@ void Update_ServerAdminInfo(entity pl) = {
     local float cm = CF_GetSetting("c", "clan", "off"), 
                 qm = CF_GetSetting("quadmode", "quadmode", "off"), 
                 dm = CF_GetSetting("duelmode", "duelmode", "off");
-    sprint(pl, PRINT_HIGH, "MEHT: clanmode: ", ftos(cm), "\n");
-    sprint(pl, PRINT_HIGH, "MEHT: quadmode: ", ftos(qm), "\n");
-    sprint(pl, PRINT_HIGH, "MEHT: duelmode: ", ftos(dm), "\n");
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SERVER_ADMIN_INFO);
     WriteByte(MSG_MULTICAST, is_paused || cease_fire);

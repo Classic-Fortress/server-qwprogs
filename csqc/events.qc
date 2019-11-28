@@ -227,15 +227,10 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.clanmode = readfloat();
             SERVER_ADMIN.quadmode = readfloat();
             SERVER_ADMIN.duelmode = readfloat();
-            //SERVER_ADMIN.pubmode = !SERVER_ADMIN.clanmode && !SERVER_ADMIN.quadmode && !SERVER_ADMIN.duelmode;
             SERVER_ADMIN.pubmode =  (((SERVER_ADMIN.clanmode & 1) || (SERVER_ADMIN.quadmode & 1) || (SERVER_ADMIN.duelmode & 1))?1:0) + 
                                     (((SERVER_ADMIN.clanmode & 2) || (SERVER_ADMIN.quadmode & 2) || (SERVER_ADMIN.duelmode & 2))?2:0);
             SERVER_ADMIN.pubmode = 3 - SERVER_ADMIN.pubmode; //Invert
             SERVER_ADMIN.captainmode = readfloat();
-            print("MEHT: client clanmode: ", ftos(SERVER_ADMIN.clanmode), "\n");
-            print("MEHT: client quadmode: ", ftos(SERVER_ADMIN.quadmode), "\n");
-            print("MEHT: client duelmode: ", ftos(SERVER_ADMIN.duelmode), "\n");
-            print("MEHT: client pub: ", ftos(SERVER_ADMIN.pubmode), "\n");
             break;
         case MSG_CAPTAINS:
             captain1 = readfloat();
