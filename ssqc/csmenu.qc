@@ -137,6 +137,12 @@ void UpdateClientMenu_Admin(entity pl) = {
 }
 void Update_ServerAdminInfo(entity pl) = {
     msg_entity = pl;
+    local float cm = CF_GetSetting("c", "clan", "off"), 
+                qm = CF_GetSetting("quadmode", "quadmode", "off"), 
+                dm = CF_GetSetting("duelmode", "duelmode", "off");
+    sprint(pl, PRINT_HIGH, "MEHT: clanmode: ", ftos(cm), "\n");
+    sprint(pl, PRINT_HIGH, "MEHT: quadmode: ", ftos(qm), "\n");
+    sprint(pl, PRINT_HIGH, "MEHT: duelmode: ", ftos(dm), "\n");
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SERVER_ADMIN_INFO);
     WriteByte(MSG_MULTICAST, is_paused || cease_fire);
@@ -144,9 +150,9 @@ void Update_ServerAdminInfo(entity pl) = {
     WriteFloat(MSG_MULTICAST, infokeyf(world, "round_time"));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "timelimit"));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "fraglimit"));
-    WriteFloat(MSG_MULTICAST, clanbattle);
-    WriteFloat(MSG_MULTICAST, quadmode);
-    WriteFloat(MSG_MULTICAST, duelmode);
+    WriteFloat(MSG_MULTICAST, (clanbattle?1:0) + (cm?2:0));
+    WriteFloat(MSG_MULTICAST, (quadmode?1:0) + (qm?2:0));
+    WriteFloat(MSG_MULTICAST, (duelmode?1:0) + (dm?2:0));
     WriteFloat(MSG_MULTICAST, captainmode);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }

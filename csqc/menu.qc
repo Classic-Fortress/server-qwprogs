@@ -364,6 +364,22 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         FO_MENU_ADMIN_MAIN.options[6].value = mapname;
     }
 };
+
+//Basically bitfields - bit 1 is what the server is currently at, bit 2 what is requested
+string (float m) modeStatus = {
+    switch(m) {
+        case 0:
+            return "off";
+        case 1:
+            return "pending off";
+        case 2:
+            return "pending on";
+        case 3:
+            return "on";
+    }
+    return "";
+}
+
 var fo_menu FO_MENU_ADMIN_MODES = {
     [0,0], [300,300], "Server Modes [2/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING, {
         {"1","Pub Mode","","",FO_MENU_STATE_NORMAL,{localcmd("cmd pubmode\n");},MENU_BORDER_WARNING},
@@ -381,13 +397,13 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"-","Prev - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
     }, 13, TRUE, {
         updateAdminMenuInfo();
-        FO_MENU_ADMIN_MODES.options[0].value = SERVER_ADMIN.pubmode?"on":"off";
-        FO_MENU_ADMIN_MODES.options[1].value = SERVER_ADMIN.clanmode?"on":"off";
-        FO_MENU_ADMIN_MODES.options[2].value = SERVER_ADMIN.quadmode?"on":"off";
-        FO_MENU_ADMIN_MODES.options[3].value = SERVER_ADMIN.duelmode?"on":"off";
+        FO_MENU_ADMIN_MODES.options[0].value = modeStatus(SERVER_ADMIN.pubmode);
+        FO_MENU_ADMIN_MODES.options[1].value = modeStatus(SERVER_ADMIN.clanmode);
+        FO_MENU_ADMIN_MODES.options[2].value = modeStatus(SERVER_ADMIN.quadmode);
+        FO_MENU_ADMIN_MODES.options[3].value = modeStatus(SERVER_ADMIN.duelmode);
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
-        FO_MENU_ADMIN_MODES.options[6].value = ftos(SERVER_ADMIN.captainmode);
+        FO_MENU_ADMIN_MODES.options[6].value = SERVER_ADMIN.captainmode?"on":"off";
     }
 };
 var fo_menu FO_MENU_ADMIN_SETTINGS = {
@@ -654,6 +670,8 @@ vector fo_menu_draw(fo_menu * menu) = {
     local float padding = 4 * scale, titleoffset = 36 * scale;
     local vector menusize = menu.size * scale;
     local vector buttonsize = [menusize.x - padding * 2, 24];
+    local vector buttonpos = position;
+    local float buttonhover = FALSE;
     local vector smalltext = MENU_TEXT_SMALL * textscale, mediumtext = MENU_TEXT_MEDIUM * textscale;
     local string id = strcat("fo_menu_",menu.title);
     local vector tempcolour;
@@ -703,15 +721,23 @@ vector fo_menu_draw(fo_menu * menu) = {
             }
             
             if(menu.options[i].name) {
+                buttonpos = position + [padding, titleoffset + row * (buttonsize.y + padding)];
+                buttonhover = (Mouse.x > buttonpos.x && Mouse.y > buttonpos.y && Mouse.x < (buttonpos.x + buttonsize.x) && Mouse.y < (buttonpos.y + buttonsize.y));
+                if(buttonhover) {
+                    SBAR.Hint = "Hover!!";
+                } else {
+                    SBAR.Hint = "";
+                }
+
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, alignment, shortcutoffset.x)) {
+                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, alignment, shortcutoffset.x)) {
                         menu.options[i].action();
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
                     if(menu.options[i].name) {
                         //sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, 1, bgcolour, 0.4, 0);
-                        sui_border_box(position + [padding, titleoffset + row * (buttonsize.y + padding)], buttonsize, 1, bgcolour, 0.4, 0);
+                        sui_border_box(buttonpos, buttonsize, 1, bgcolour, 0.4, 0);
                         float disabledtextoffset = 0;
                         if(alignment == SUI_ALIGN_START) {
                             disabledtextoffset = padding + shortcutoffset.x;

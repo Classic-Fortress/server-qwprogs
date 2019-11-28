@@ -57,6 +57,18 @@ vector(float panelid) getFillSize;
 void () SUB_Null = {
 };
 
+enum {
+    HUD_ALIGN_RIGHT,
+    HUD_ALIGN_LEFT,
+    HUD_ALIGN_CENTER
+};
+
+string HUD_ALIGN[] = {
+    "Right",
+    "Left",
+    "Center"
+};
+
 typedef struct 
 {
     string icon;
