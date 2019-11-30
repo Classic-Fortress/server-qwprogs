@@ -22,6 +22,8 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+#define MOTD_TIME 30
+
 .float owned_by;
 .string netname;
 .float playerid;
@@ -43,6 +45,7 @@ float captain2;
 float captain1_temp;
 float captain2_temp;
 float is_admin;
+float motd_expiry;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -115,6 +118,7 @@ typedef struct {
     float Gren2;
     string MOTD;
     string Hint;
+    float GameMode;
     // scout
     float ScannerOn;
     float ScannerRange;

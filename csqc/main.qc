@@ -52,6 +52,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 	ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
+    SBAR.Hint = "";
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!

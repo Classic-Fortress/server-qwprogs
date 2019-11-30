@@ -17,6 +17,7 @@
 #define MSG_DISPENSER_POS   10
 #define MSG_SERVER_ADMIN_INFO   11
 #define MSG_CAPTAINS        12
+#define MSG_MOTD            13
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

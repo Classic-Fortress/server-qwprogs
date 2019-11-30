@@ -98,7 +98,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     
     vector position = getPosition(id);
     vector size = getFillSize(id);
-    vector mediumtext = MENU_TEXT_MEDIUM * panel.Scale;
+    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
     if (fo_hud_editor) {
@@ -106,23 +106,84 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
             // click event
         }
     } else {
-        if(text) {
-            sui_border_box(position, size, 1, MENU_BORDER, transparency, 0);
-            sui_push_frame(position, size);
+        if(text && text != "") {
+            //sui_border_box(position, size, 1, MENU_BORDER, transparency, 0);
+            //sui_push_frame(position, size);
 
-            sui_fill([0, 0], size, MENU_BG, transparency, 0);
+            //sui_fill([0, 0], size, MENU_BG, transparency, 0);
 
-            sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-            sui_action_element([0, 0], size, panelid, sui_noop);
-            sui_pop_frame();
-            drawstring(
-                position + [size.x / 2 - stringwidth(text,1,mediumtext)/2,padding*2], 
-                text, 
-                mediumtext, 
-                MENU_TEXT_2, 
-                1, 
-                0
-            );
+            //sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
+            //sui_action_element([0, 0], size, panelid, sui_noop);
+            //sui_pop_frame();
+            if(id == HUD_PANEL_MOTD) {
+                if(!intermission && time < motd_expiry && !team_no) {
+                    local string motd = serverkey("hostname");
+                    drawstring(
+                        position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2], 
+                        motd, 
+                        mediumtext*1.5, 
+                        MENU_TEXT_4, 
+                        1, 
+                        0
+                    );
+                    if(strlen(SBAR.MOTD) <= 1) {
+                        motd = "Welcome to FortressOne";
+                        drawstring(
+                            position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*2], 
+                            motd, 
+                            mediumtext, 
+                            MENU_TEXT_1, 
+                            1, 
+                            0
+                        );
+                        motd = "www.github.com/FortressOne";
+                        drawstring(
+                            position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*3], 
+                            motd, 
+                            mediumtext, 
+                            MENU_TEXT_1, 
+                            1, 
+                            0
+                        );
+                        motd = "FortressOne.org";
+                        drawstring(
+                            position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*4], 
+                            motd, 
+                            mediumtext, 
+                            MENU_TEXT_1, 
+                            1, 
+                            0
+                        );
+                    } else {
+                        local float lines = tokenizebyseparator(SBAR.MOTD, "\n");
+                        for (float i = 0; i <= lines; i++) {
+                            motd = argv(i);
+                            // tokenize doesn't handle newlines very well
+                            motd = strreplace("\n", "", motd);
+                            motd = strtrim(motd);
+                            if (strlen(motd) > 0) {
+                                drawstring(
+                                    position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(i+2)], 
+                                    motd, 
+                                    mediumtext, 
+                                    MENU_TEXT_1, 
+                                    1, 
+                                    0
+                                );
+                            }
+                        }
+                    }
+                }
+            } else {
+                drawstring(
+                    position + [size.x / 2 - stringwidth(text,1,mediumtext)/2,padding*2], 
+                    text, 
+                    mediumtext, 
+                    MENU_TEXT_1, 
+                    1, 
+                    0
+                );
+            }
         }
     }
 }

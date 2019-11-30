@@ -197,3 +197,12 @@ void UpdateClient_Captains(entity pl, float cap1, float cap2) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientMOTD(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_MOTD);
+    WriteString(MSG_MULTICAST, infokey(world, "motd1"));
+    WriteString(MSG_MULTICAST, infokey(world, "motd2"));
+    WriteFloat(MSG_MULTICAST, (clanbattle?1:0) + (quadmode?2:0) + (duelmode?4:0));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}

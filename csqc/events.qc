@@ -236,6 +236,11 @@ void() CSQC_Parse_Event = {
             captain1 = readfloat();
             captain2 = readfloat();
             break;
+        case MSG_MOTD:
+            SBAR.MOTD = strcat(readstring(), "\n", readstring());
+            SBAR.GameMode = readfloat();
+            motd_expiry = time + MOTD_TIME;
+            break;
     }
 }
 
