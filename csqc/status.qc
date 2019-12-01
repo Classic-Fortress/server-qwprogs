@@ -101,6 +101,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
+    local float lines;
     if (fo_hud_editor) {
         if (hud_panel(panelid, position, size, 0.3, 1)) {
             // click event
@@ -155,7 +156,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                             0
                         );
                     } else {
-                        local float lines = tokenizebyseparator(SBAR.MOTD, "\n");
+                        lines = tokenizebyseparator(SBAR.MOTD, "\n");
                         for (float i = 0; i <= lines; i++) {
                             motd = argv(i);
                             // tokenize doesn't handle newlines very well
@@ -175,14 +176,24 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                     }
                 }
             } else {
-                drawstring(
-                    position + [size.x / 2 - stringwidth(text,1,mediumtext)/2,padding*2], 
-                    text, 
-                    mediumtext, 
-                    MENU_TEXT_1, 
-                    1, 
-                    0
-                );
+                lines = tokenizebyseparator(text, "\n");
+                local string line;
+                for (float i = 0; i <= lines; i++) {
+                    line = argv(i);
+                    // tokenize doesn't handle newlines very well
+                    line = strreplace("\n", "", line);
+                    line = strtrim(line);
+                    if (strlen(line) > 0) {
+                        drawstring(
+                            position + [size.x / 2 - stringwidth(line,1,mediumtext)/2,padding*2 + mediumtext.y*i], 
+                            line, 
+                            mediumtext, 
+                            MENU_TEXT_1, 
+                            1, 
+                            0
+                        );
+                    }
+                }
             }
         }
     }
