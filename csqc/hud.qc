@@ -157,7 +157,7 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
         // click event
     }
         
-    FO_Hud_Panel selectedPanel = Hud_Panels[Editor_SelectedPanel_Index];
+    FO_Hud_Panel* selectedPanel = &Hud_Panels[Editor_SelectedPanel_Index];
     
     drawstring(pos + [4,4], selectedPanel.Name, [8,8], MENU_SELECTED, 1, 0);
     
@@ -176,8 +176,8 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
     float ftextalign = selectedPanel.NodeInsertLoc;
     //drawstring(pos + [4,54], strcat("Text Pos: ", selectedPanel.NodeInsertLoc ? "Left" : "Right"), [8,8], MENU_SELECTED, 1, 0);
     drawstring(pos + [4,60], "Text Pos: ", [8,8], MENU_SELECTED, 1, 0);
-    if(hud_button("hud_option_textalign_toggle", pos + [size.x - 6 - 48,56], [48, 16], selectedPanel.NodeInsertLoc ? "Left" : "Right")) {
-        Hud_Panels[Editor_SelectedPanel_Index].NodeInsertLoc = !selectedPanel.NodeInsertLoc;
+    if(hud_button("hud_option_textalign_toggle", pos + [size.x - 6 - 56,56], [56, 16], HUD_ALIGN[selectedPanel.NodeInsertLoc])) {
+        Hud_Panels[Editor_SelectedPanel_Index].NodeInsertLoc = (selectedPanel.NodeInsertLoc + 1) % 3;
     }
     //hud_slider("hud_option_textalign_scroll", pos + [8,64], [32,8], [0,1,1], ftextalign);
     //if(ftextalign != selectedPanel.NodeInsertLoc) {

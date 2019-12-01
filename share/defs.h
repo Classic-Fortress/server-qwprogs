@@ -1340,6 +1340,8 @@
 #define FO_HUD_GRENTIMER_NAME "Grenade Timer"
 #define FO_HUD_OPTIONS_NAME "Options"
 #define FO_HUD_FLAGINFO_NAME "Flag Status"
+#define FO_HUD_MOTD_NAME "MOTD"
+#define FO_HUD_MENU_HINT_NAME "Menu Hints"
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"

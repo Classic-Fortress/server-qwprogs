@@ -4,6 +4,7 @@ csextradefs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 sui_sys.qc
+status.qc
 menu.qc
 main.qc
 events.qc

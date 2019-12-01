@@ -22,6 +22,8 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+#define MOTD_TIME 30
+
 .float owned_by;
 .string netname;
 .float playerid;
@@ -43,6 +45,7 @@ float captain2;
 float captain1_temp;
 float captain2_temp;
 float is_admin;
+float motd_expiry;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -55,6 +58,18 @@ vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
 
 void () SUB_Null = {
+};
+
+enum {
+    HUD_ALIGN_RIGHT,
+    HUD_ALIGN_LEFT,
+    HUD_ALIGN_CENTER
+};
+
+string HUD_ALIGN[] = {
+    "Right",
+    "Left",
+    "Center"
 };
 
 typedef struct 
@@ -101,6 +116,9 @@ typedef struct {
     float PlayerClass;
     float Gren1;
     float Gren2;
+    string MOTD;
+    string Hint;
+    float GameMode;
     // scout
     float ScannerOn;
     float ScannerRange;
@@ -224,6 +242,7 @@ float Editor_SelectedPanel_Index;
 typedef struct {
     vector MousePos;
 } FO_Hud_Settings;
+FO_Hud_Settings HudSettings;
 
 typedef struct {
     float grentype;
@@ -232,88 +251,6 @@ typedef struct {
 } FO_Hud_Grentimer;
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];
-
-void(string panelid, float display, string text, string icon) drawClipSize = {
-    if (SBAR.ClipSize || fo_hud_editor)
-    {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, text, icon);
-    }
-};
-
-void(string panelid, float display, string text, string icon) drawIdentify = {
-    if (strlen(SBAR.Identify) > 0 || fo_hud_editor)
-    {
-        GetDrawPanel(panelid);
-        Hud_DrawIdentifyPanel(panelid, text);
-    }
-};
-
-void(string panelid, float display, string text, string icon) drawFlagInfo = {
-    if (display || fo_hud_editor)
-    {
-        GetDrawPanel(panelid);
-        Hud_DrawFlagStatusBar(panelid);
-    }
-};
-
-void(string panelid, float display, string text, string icon) drawIconPanel = {
-    if (display || fo_hud_editor)
-    {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, text, icon);
-    }
-};
-void(string panelid, float display, string text, string icon) drawSpecial = {
-    if (SBAR.PlayerClass || fo_hud_editor)
-    {
-        GetDrawPanel(panelid);
-        Hud_DrawClassInfoPanel(panelid, SBAR.PlayerClass);
-    }
-};
-void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
-    local float timeleft;
-    local float timercount = 0;
-    if (display) {
-        GetDrawPanel(panelid);
-        float Scale = DrawPanel.Scale;
-        float TextScale = DrawPanel.TextScale;
-        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-            if(FO_Hud_Grentimers[i].grentype > 0) {
-                timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
-                if(timeleft < 1) {
-                    //Expire and fill the gap if there are any active grentimers afterwards
-                    FO_Hud_Grentimers[i].grentype = 0;
-                    for(float j = i + 1; j < FO_Hud_Grentimers.length; j++) {
-                        FO_Hud_Grentimers[j - 1].grentype = FO_Hud_Grentimers[j].grentype;
-                        FO_Hud_Grentimers[j - 1].expires = FO_Hud_Grentimers[j].expires;
-                        FO_Hud_Grentimers[j - 1].icon_index = FO_Hud_Grentimers[j].icon_index;
-                    }
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].grentype = 0;
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].expires = 0;
-                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].icon_index = 0;
-                    continue;
-                }
-                if(i) {
-                    DrawPanel.Scale = Scale * 0.8;
-                    DrawPanel.TextScale = TextScale * 0.8;
-                }
-                Hud_DrawPanelLMP(panelid, ftos(timeleft), HudIcons[FO_Hud_Grentimers[i].icon_index].icon);
-                DrawPanel.Position = DrawPanel.Position + [0, 24 * DrawPanel.Scale];
-                timercount++;
-            }
-        }
-    }
-    if(fo_hud_editor && (!display || !timercount)) {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
-    }
-};
-
-FO_Hud_Settings HudSettings;
-
-
-void(string panelid, float display, string text, string icon) doNothing = {};
 
 enum {
     HUD_PANEL_HUDOPTIONS,
@@ -326,37 +263,10 @@ enum {
     HUD_PANEL_IDENTIFY,
     HUD_PANEL_FLAGINFO,
     HUD_PANEL_GRENTIMER,
-    HUD_PANEL_MENU
+    HUD_PANEL_MENU,
+    HUD_PANEL_MOTD,
+    HUD_PANEL_MENU_HINT
 };
-
-void(string panelid, float display, string text, string icon) drawSimplePanel = {
-    if (fo_hud_editor) {
-        if (hud_panel(panelid, getPosition(HUD_PANEL_MENU), getFillSize(HUD_PANEL_MENU), 0.3, 1)) {
-            // click event
-        }
-    }
-}
-
-var FO_Hud_Panel Hud_Panels[] = {
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
-    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 30','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'10 40','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'10 60','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
-    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 70','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 80','50 26',1,0,1,0, drawIdentify, {return SBAR.Identify;}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 90','150 260',1,0,1,0, drawFlagInfo, {return "";}},
-    {"grentimerpanel","Grenade Timer",'10 100','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
-    {"menupanel","Menu",'10 110','200 200',1,0,1,0, drawSimplePanel, {return "";}}
-};
-
-vector(float panelid) getPosition = {
-    return Hud_Panels[panelid].Position;
-}
-vector(float panelid) getFillSize = {
-    return Hud_Panels[panelid].FillSize;
-}
 
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
