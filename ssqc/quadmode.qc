@@ -143,6 +143,9 @@ void () QuadRoundBegin = {
 		TeamFortress_RemoveTimers();
 		setspawnparms(self);
 		PutClientInServer();
+        if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(self, TRUE);
+        }
 		self = oldself;
 		te = find (te, classname, "player");
 	}
@@ -245,6 +248,9 @@ void () StartQuadRound =
 			p.movetype = MOVETYPE_NONE;
 			p.modelindex = 0;
 			p.model = string_null;
+            if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientPrematch(p, TRUE);
+            }
 		}
 		p = find(p, classname, "player");
 	}

@@ -102,6 +102,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
     local float lines;
+    local string gamemode;
     if (fo_hud_editor) {
         if (hud_panel(panelid, position, size, 0.3, 1)) {
             // click event
@@ -155,6 +156,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                             1, 
                             0
                         );
+                        lines = 3;
                     } else {
                         lines = tokenizebyseparator(SBAR.MOTD, "\n");
                         for (float i = 0; i <= lines; i++) {
@@ -172,6 +174,57 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                                     0
                                 );
                             }
+                        }
+                    }
+                }
+                //Prematch
+                if(SBAR.GameMode & 8) {
+                    if(SBAR.GameMode & 4) {
+                        gamemode = "^4Duel^7";
+                    } else if(SBAR.GameMode & 2) {
+                        gamemode = "^3Quad^7";
+                    } else if(SBAR.GameMode & 1) {
+                        gamemode = "^1Clan Battle^7";
+                    }
+                    motd = strcat("This Server is set to ", gamemode, " Mode (prematch)");
+                    drawstring(
+                        position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(lines+3)], 
+                        motd, 
+                        mediumtext, 
+                        MENU_TEXT_1, 
+                        1, 
+                        0
+                    );
+                    if(team_no && !SBAR.CountdownStarted) {
+                        motd = "You are";
+                        drawstring(
+                            position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(lines+4)], 
+                            motd, 
+                            mediumtext, 
+                            MENU_TEXT_1, 
+                            1, 
+                            0
+                        );
+                        if(SBAR.Ready) {
+                            motd = "Ready";
+                            drawstring(
+                                position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2 + mediumtext.y*(lines+5)], 
+                                motd, 
+                                mediumtext*1.5, 
+                                MENU_TEXT_GREEN, 
+                                1, 
+                                0
+                            );
+                        } else {
+                            motd = "NOT Ready";
+                            drawstring(
+                                position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2 + mediumtext.y*(lines+5)], 
+                                motd, 
+                                mediumtext*1.5, 
+                                MENU_TEXT_WARNING, 
+                                1, 
+                                0
+                            );
                         }
                     }
                 }

@@ -203,6 +203,15 @@ void UpdateClientMOTD(entity pl) = {
     WriteByte(MSG_MULTICAST, MSG_MOTD);
     WriteString(MSG_MULTICAST, infokey(world, "motd1"));
     WriteString(MSG_MULTICAST, infokey(world, "motd2"));
-    WriteFloat(MSG_MULTICAST, (clanbattle?1:0) + (quadmode?2:0) + (duelmode?4:0));
+    WriteFloat(MSG_MULTICAST, ((clanbattle?1:0) + (quadmode?2:0) + (duelmode?4:0) + (cb_prematch?8:0)));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientPrematch(entity pl, float countdownstarted) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_PREMATCH);
+    WriteByte(MSG_MULTICAST, cb_prematch?1:0);
+    WriteByte(MSG_MULTICAST, countdownstarted);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }

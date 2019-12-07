@@ -15,6 +15,7 @@ vector MENU_TEXT_3 = '1 1 0';
 vector MENU_TEXT_4 = '0.8 0.5 0';
 vector MENU_HIGHLIGHT = '1 1 1';
 vector MENU_TEXT_WARNING = '0.8 0 0';
+vector MENU_TEXT_GREEN = '0 0.8 0';
 vector MENU_DARKEN = '1 1 1';
 
 vector MENU_TEXT_SMALL = '8 8 0';
@@ -118,7 +119,10 @@ typedef struct {
     float Gren2;
     string MOTD;
     string Hint;
+    //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch
     float GameMode;
+    float Ready;
+    float CountdownStarted;
     // scout
     float ScannerOn;
     float ScannerRange;

@@ -51,6 +51,7 @@ noref void() CSQC_WorldLoaded = {
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
 	ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
+    SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     SBAR.Hint = "";
     clearscene();

@@ -103,6 +103,9 @@ void () StartMatch =
             te = find (te, classname, "info_tfgoal");
         }
     }
+    cb_prematch = 0;
+    cease_fire = 0;
+
     te = find(world, classname, "player");
     while (te) {
         oldself = self;
@@ -114,12 +117,12 @@ void () StartMatch =
         setspawnparms(self);
         if (!quadmode)
             PutClientInServer();
+        if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(self, TRUE);
+        }
         self = oldself;
         te = find(te, classname, "player");
     }
-
-    cb_prematch = 0;
-    cease_fire = 0;
 
     te = find(world, classname, "prematch");
     te.classname = "match";
@@ -287,6 +290,9 @@ void () ResetBreakAndReady = {
         te.is_ready = 0;
         v_break = 0;
         v_ready = 0;
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
         te = find (te, classname, "player");
     }
 }
@@ -924,6 +930,9 @@ void () PreMatch_Message = {
                 else
                     sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");
                 stuffcmd(p, "play buttons/switch04.wav\n");
+                if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+                    UpdateClientPrematch(p, FALSE);
+                }
             }
             p = find(p, classname, "player");
         }
