@@ -239,6 +239,13 @@ void() CSQC_Parse_Event = {
         case MSG_MOTD:
             SBAR.MOTD = strcat(readstring(), "\n", readstring());
             SBAR.GameMode = readfloat();
+            SBAR.CountdownStarted = FALSE;
+            motd_expiry = time + MOTD_TIME;
+            break;
+        case MSG_PREMATCH:
+            float prematch = readbyte();
+            SBAR.CountdownStarted = readbyte();
+            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + (prematch?8:0);
             motd_expiry = time + MOTD_TIME;
             break;
     }

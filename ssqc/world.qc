@@ -321,6 +321,7 @@ void () worldspawn = {
     lightstyle(63, "a");
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
+    clientstat(STAT_READY, EV_FLOAT, is_ready);
 
     entity worldspawnent;
     worldspawnent = spawn();

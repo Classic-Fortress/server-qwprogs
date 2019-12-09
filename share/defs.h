@@ -1373,3 +1373,4 @@
 // stats
 // first 32 are reserved
 #define STAT_TEAMNO    33
+#define STAT_READY     34

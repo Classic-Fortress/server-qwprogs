@@ -188,7 +188,7 @@ void InitPrematch()
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
-
+    
 }
 
 void (entity goalitem) SetFlagSendMethod = {
@@ -767,6 +767,16 @@ void () DecodeLevelParms = {
         self.playerclass = parm12;
     if (parm15)
         self.is_admin = parm15;
+
+    local entity p = find(world, classname, "player");
+    while (p != world) {
+        if (p.netname != "") {
+            if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientMOTD(p);
+            }
+        }
+        p = find(p, classname, "player");
+    }
 };
 
 entity() FindIntermission =
@@ -2313,6 +2323,7 @@ void () PlayerPostThink = {
     }
 };
 
+//do not rely on csqcactive - it may misbehave when using `join` from spectator
 void (optional float csqcactive) ClientConnect = {
     local entity te;
     local string st;
@@ -2359,7 +2370,7 @@ void (optional float csqcactive) ClientConnect = {
             while (te) {
                 if (te.tf_id == self.tf_id) {
                     got_one = 1;
-                    TeamFortress_TeamSet_Options(te, te.team_no, TRUE);
+                    TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
                     if (!(toggleflags & TFLAG_TEAMFRAGS) &&
@@ -2398,7 +2409,7 @@ void (optional float csqcactive) ClientConnect = {
         InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
         InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
     }
-    if(csqcactive) {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         tfdet = find(world, classname, "info_tfgoal");
         while (tfdet) {
             if (tfdet.track_goal) {
@@ -2407,6 +2418,7 @@ void (optional float csqcactive) ClientConnect = {
             tfdet = find(tfdet, classname, "info_tfgoal");
         }
         UpdateClientMOTD(self);
+        //UpdateClientPrematch(self);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
