@@ -54,6 +54,15 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     SBAR.Hint = "";
+    //stop grentimer on death
+    if(getstatf(STAT_HEALTH) <= 0) {
+        //localcmd("stopsound\n");
+        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+            FO_Hud_Grentimers[i].grentype = 0;
+            FO_Hud_Grentimers[i].expires = 0;
+            FO_Hud_Grentimers[i].icon_index = 0;
+        }
+    }
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -110,28 +119,28 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Admin_Main(TRUE);
             break;
         case "primeone":
-            if(cvar(FOCMD_GRENTIMER) == 2) {
+            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                 localcmd("play grentimer.wav\n");
                 AddGrenTimer(1);
             } 
             localcmd("primeone_server");
             break;
         case "primetwo":
-            if(cvar(FOCMD_GRENTIMER) == 2) {
+            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                 localcmd("play grentimer.wav\n");
                 AddGrenTimer(2);
             } 
             localcmd("primetwo_server");
             break;
         case "gren1":
-            if(cvar(FOCMD_GRENTIMER) == 2) {
+            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                 localcmd("play grentimer.wav\n");
                 AddGrenTimer(1);
             } 
             localcmd("gren1_server");
             break;
         case "gren2":
-            if(cvar(FOCMD_GRENTIMER) == 2) {
+            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                 localcmd("play grentimer.wav\n");
                 AddGrenTimer(2);
             } 
