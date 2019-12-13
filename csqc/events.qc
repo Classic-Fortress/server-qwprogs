@@ -241,12 +241,16 @@ void() CSQC_Parse_Event = {
             SBAR.GameMode = readfloat();
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
+            quad_rounds_total = readfloat();
             break;
         case MSG_PREMATCH:
             float prematch = readbyte();
             SBAR.CountdownStarted = readbyte();
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + (prematch?8:0);
+            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
+            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
+            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
             motd_expiry = time + MOTD_TIME;
+            quad_round = readfloat();
             break;
     }
 }

@@ -137,6 +137,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             } 
             localcmd("gren2_server");
             break;
+        case "+showscores":
+            showingscores = TRUE;
+            break;
+        case "-showscores":
+            showingscores = FALSE;
+            break;
     }	
     return FALSE;
 };

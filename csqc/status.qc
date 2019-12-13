@@ -108,6 +108,27 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
             // click event
         }
     } else {
+        if(showingscores) {
+            return;
+        }
+        /*
+        drawstring(
+            [50,350], 
+            strcat("MEHT: Prematch: ", ftos(SBAR.GameMode & 8), ", Round Active: ", ftos(SBAR.GameMode & 16), ", Round Over: ", ftos(SBAR.GameMode & 32), ", CountdownStarted: ", ftos(SBAR.CountdownStarted)), 
+            mediumtext, 
+            MENU_TEXT_1, 
+            1, 
+            0
+        );
+        drawstring(
+            [50,370], 
+            strcat("MEHT: Round: ", ftos(quad_round), "/", ftos(quad_rounds_total)), 
+            mediumtext, 
+            MENU_TEXT_1, 
+            1, 
+            0
+        );
+        */
         if(text && text != "") {
             //sui_border_box(position, size, 1, MENU_BORDER, transparency, 0);
             //sui_push_frame(position, size);
@@ -186,7 +207,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                     } else if(SBAR.GameMode & 1) {
                         gamemode = "^1Clan Battle^7";
                     }
-                    motd = strcat("This Server is set to ", gamemode, " Mode (prematch)");
+                    motd = strcat("This Server is set to ", gamemode, " Mode", (((SBAR.GameMode & 8) && !(SBAR.GameMode & 16))?" (prematch)":""));
                     drawstring(
                         position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(lines+3)], 
                         motd, 
@@ -195,7 +216,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                         1, 
                         0
                     );
-                    if(team_no && !SBAR.CountdownStarted) {
+                    if(team_no && !SBAR.CountdownStarted && !(SBAR.GameMode & 16)) {
                         motd = "You are";
                         drawstring(
                             position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(lines+4)], 
@@ -222,6 +243,32 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                                 motd, 
                                 mediumtext*1.5, 
                                 MENU_TEXT_WARNING, 
+                                1, 
+                                0
+                            );
+                        }
+                    }
+                }
+                //Quad mode only
+                if(SBAR.GameMode & 2) {
+                    if(SBAR.CountdownStarted) {
+                        if(quad_round <= 1) {
+                            motd = "Match over";
+                            drawstring(
+                                position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.2)/2,padding*2 + mediumtext.y*(lines+7)], 
+                                motd, 
+                                mediumtext*1.2, 
+                                MENU_TEXT_2, 
+                                1, 
+                                0
+                            );
+                        } else {
+                            motd = strcat("Starting Round ", ftos(quad_rounds_total + 2 - quad_round), " of ", ftos(quad_rounds_total));
+                            drawstring(
+                                position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.2)/2,padding*2 + mediumtext.y*(lines+7)], 
+                                motd, 
+                                mediumtext*1.2, 
+                                MENU_TEXT_2, 
                                 1, 
                                 0
                             );

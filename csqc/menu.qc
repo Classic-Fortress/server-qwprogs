@@ -96,7 +96,7 @@ var fo_menu FO_MENU_GAME_SPECTATOR = {
         MenuSpacer,
         {"3","Server Admin", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         MenuSpacer,
-        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("m_main\n"); Menu_Cancel();},MENU_BUTTON},
+        {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
     }, 6, TRUE
 };
 var fo_menu FO_MENU_SPECTATOR_TRACK = {
@@ -652,11 +652,11 @@ vector fo_menu_draw(fo_menu * menu) = {
     
     
     if(fo_hud_editor) return position;
-    if(!menu.active) {
+    if(!menu.active || showingscores) {
         setcursormode(FALSE);
         return position;
     }
-    
+
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
     if(menu.update) {
@@ -840,18 +840,18 @@ void FO_Menu_Game(float force) = {
         return;
     if(is_spectator) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
-        FO_MENU_GAME_SPECTATOR.num_opts = 3;
+        //FO_MENU_GAME_SPECTATOR.num_opts = 3;
         FO_MENU_GAME_SPECTATOR.options[3].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
-        if(is_admin) FO_MENU_GAME_SPECTATOR.num_opts++;
+        //if(is_admin) FO_MENU_GAME_SPECTATOR.num_opts++;
        CurrentMenu = &FO_MENU_GAME_SPECTATOR;
     } else {
         float userid = stof(getplayerkeyvalue(player_localnum, "userid"));
         
-        FO_MENU_GAME.num_opts = 7;
+        //FO_MENU_GAME.num_opts = 7;
         FO_MENU_GAME.options[5].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
-        if(is_admin) FO_MENU_GAME.num_opts++;
+        //if(is_admin) FO_MENU_GAME.num_opts++;
         FO_MENU_GAME.options[6].state = (userid == captain1 || userid == captain2)?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
-        if(is_admin) FO_MENU_GAME.num_opts++;
+        //if(is_admin) FO_MENU_GAME.num_opts++;
         CurrentMenu = &FO_MENU_GAME;
     }
     fo_hud_menu_active = TRUE;

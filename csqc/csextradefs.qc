@@ -47,6 +47,9 @@ float captain1_temp;
 float captain2_temp;
 float is_admin;
 float motd_expiry;
+float quad_round;
+float quad_rounds_total;
+float showingscores;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
