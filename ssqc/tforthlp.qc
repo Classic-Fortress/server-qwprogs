@@ -19,7 +19,7 @@ void () TeamFortress_MOTD = {
     
     if (self.motd == 5) {
         if(csqcactive) {
-            if(self.team_no == 0) {
+            if(self.team_no == 0 && !intermission_running) {
                 Menu_Team(0);
             }
         } else {

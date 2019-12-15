@@ -2418,7 +2418,8 @@ void (optional float csqcactive) ClientConnect = {
             tfdet = find(tfdet, classname, "info_tfgoal");
         }
         UpdateClientMOTD(self);
-        //UpdateClientPrematch(self);
+        if(quadmode)
+            UpdateClientPrematch(self, !cb_prematch);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

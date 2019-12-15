@@ -183,7 +183,7 @@ void () PreMatch_Think = {
     if (self.cnt2 == 1) {
         p = find(world, classname, "player");
         while (p != world) {
-            if (p.netname != "") {
+            if (p.netname != "" && p.team_no && p.playerclass) {
                 p.respawn_time = (time + 2);
                 p.takedamage = 0;
                 p.solid = 0;
@@ -201,7 +201,7 @@ void () PreMatch_Think = {
             self.think = SUB_Remove;
             p = find(world, classname, "player");
             while (p != world) {
-                if (p.netname != "") {
+                if (p.netname != "" && p.team_no && p.playerclass) {
                     p.takedamage = 2;
                     p.solid = 3;
                     p.movetype = 3;

@@ -132,19 +132,23 @@ void () QuadRoundBegin = {
 		te = find(te, classname, "func_breakable");
 	}
 	cb_prematch = 0;
+ 	round_active = 1;
+	round_over = 0;
 
 	te = find(world, classname, "player");
 	while (te != world) {
 		oldself = self;
 		self = te;
-		self.takedamage = DAMAGE_AIM;
-		self.solid = SOLID_SLIDEBOX;
-		self.movetype = MOVETYPE_WALK;
-		TeamFortress_RemoveTimers();
-		setspawnparms(self);
-		PutClientInServer();
+        if(self.team_no && self.playerclass) {
+            self.takedamage = DAMAGE_AIM;
+            self.solid = SOLID_SLIDEBOX;
+            self.movetype = MOVETYPE_WALK;
+            TeamFortress_RemoveTimers();
+            setspawnparms(self);
+            PutClientInServer();
+        }
         if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-            UpdateClientPrematch(self, TRUE);
+            UpdateClientPrematch(self, FALSE);
         }
 		self = oldself;
 		te = find (te, classname, "player");
@@ -152,8 +156,7 @@ void () QuadRoundBegin = {
 //	lightstyle (0, "m");
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
- 	round_active = 1;
-	round_over = 0;
+
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
@@ -198,7 +201,7 @@ void () QuadRoundInit = {
 			self.think = QuadRoundBegin;
 			p = find(world, classname, "player");
 			while (p != world) {
-				if (p.netname != "") {
+				if (p.netname != "" && p.team_no && p.playerclass) {
 					p.takedamage = DAMAGE_AIM;
 					p.solid = SOLID_SLIDEBOX;
 					p.movetype = MOVETYPE_WALK;
@@ -237,23 +240,25 @@ void () StartQuadRound =
 	local entity p;
 
 	lightstyle(0, "m");
-	cb_prematch = 1;
     cease_fire = 0;
 
 	p = find(world, classname, "player");
 	while (p != world) {
-		if (p.netname != "") {
+		if (p.netname != "" && p.team_no && p.playerclass) {
 			p.takedamage = DAMAGE_NO;
 			p.solid = SOLID_NOT;
 			p.movetype = MOVETYPE_NONE;
 			p.modelindex = 0;
 			p.model = string_null;
-            if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
-                UpdateClientPrematch(p, TRUE);
-            }
 		}
+        if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(p, TRUE);
+        }
 		p = find(p, classname, "player");
 	}
+
+	cb_prematch = 1;
+	round_over = 1;
 
 	if (rounds == 1) {
 		quad_winner = CheckWinningTeam();
@@ -269,13 +274,16 @@ void () StartQuadRound =
 			bprint(2, "Green Team Wins!\n");
 		p = find (world, classname, "player");
 		while (p != world) {
-			if (p.netname != "") {
+			if (p.netname != "" && p.team_no && p.playerclass) {
 				p.takedamage = DAMAGE_NO;
 				p.solid = SOLID_NOT;
 				p.movetype = MOVETYPE_NONE;
 				p.modelindex = 0;
 				p.model = string_null;
 			}
+            if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientPrematch(p, TRUE);
+            }
 			p = find(p, classname, "player");
 		}
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
@@ -286,8 +294,6 @@ void () StartQuadRound =
 		rounds = (rounds - 1);
 	if (intermission_running)
 		return;
-
-	round_over = 1;
 
 	te = find(world, classname, "door");
 	while (te != world) {
