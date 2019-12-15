@@ -379,28 +379,23 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
                 
                 // close menu if selected class is current class
-                if ((newclass == self.playerclass && !(self.tfstate & TFSTATE_RANDOMPC)) || (newclass == 10 && (self.tfstate & TFSTATE_RANDOMPC))) {
-                    sprint(self, PRINT_HIGH, "You're already playing that class!\n");
+                if (newclass == self.nextpc) {
+                    sprint(self, PRINT_HIGH, "You're already going to play that class!\n");
                     break;
                 }
                 
                 // keep showing menu if class is invalid
-                if (newclass < 1 || newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
+                if (newclass < 1 || newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || (self.playerclass != newclass && CF_ClassIsRestricted(self.team_no, newclass))) {                    
                     sprint(self, PRINT_HIGH, "Invalid class for this team!\n");
                     Menu_Class(0);
                     break;
                 }
 
                 // don't try to change class if class is forbidden
-                if ((!IsLegalClass(newclass) && !override_mapclasses) || CF_GetClassRestriction(self.team_no, newclass) == -1) {
+                if ((!IsLegalClass(newclass) && !override_mapclasses) || (self.playerclass != newclass && CF_GetClassRestriction(self.team_no, newclass) == -1)) {
                     sprint(self, PRINT_HIGH, "Forbidden class for this team!\n");
                     break;
                 }
-
-                // close menu if selected class is current class
-                //if (self.playerclass == newclass || (newclass == 10 && (self.tfstate & TFSTATE_RANDOMPC))) {
-                //    break;
-                //}
 
                 TeamFortress_ChangeClass(newclass);
             } else {
