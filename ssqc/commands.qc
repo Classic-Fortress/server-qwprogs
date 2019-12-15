@@ -378,8 +378,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 
                 override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
                 
+                // close menu if selected class is current class
+                if ((newclass == self.playerclass && !(self.tfstate & TFSTATE_RANDOMPC)) || (newclass == 10 && (self.tfstate & TFSTATE_RANDOMPC))) {
+                    sprint(self, PRINT_HIGH, "You're already playing that class!\n");
+                    break;
+                }
+                
                 // keep showing menu if class is invalid
-                if (newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
+                if (newclass < 1 || newclass > 10 || (!IsLegalClass(newclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, newclass)) {                    
                     sprint(self, PRINT_HIGH, "Invalid class for this team!\n");
                     Menu_Class(0);
                     break;
