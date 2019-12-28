@@ -15,7 +15,6 @@ jobs:
       run: |
         wget http://fte.triptohell.info/moodles/linux_amd64/fteqcc64
         chmod +x fteqcc64
-        mv fteqcc64 /bin
         make
         mkdir -p dats/${{ github.ref }}
         cp *.dat dats/${{ github.ref }}
