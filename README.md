@@ -1,4 +1,4 @@
-FortressOne Server v0.1.0
+FortressOne Server v1.0.0
 ==========================
 
 New features
