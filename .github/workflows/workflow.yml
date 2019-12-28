@@ -15,10 +15,7 @@ jobs:
       run: |
         wget http://fte.triptohell.info/moodles/linux_amd64/fteqcc64
         chmod +x fteqcc64
-        echo $PATH
-        echo $GITHUB_WORKSPACE
         export PATH=$GITHUB_WORKSPACE:$PATH
-        echo $PATH
         make
         mkdir -p dats/${{ github.ref }}
         cp *.dat dats/${{ github.ref }}
@@ -30,4 +27,4 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'ap-southeast-2'
-        SOURCE_DIR: 'dats/'
+        SOURCE_DIR: 'dats/refs/heads/'
