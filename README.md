@@ -1,5 +1,5 @@
 FortressOne Server
-==========================
+==================
 
 New features
 ------
