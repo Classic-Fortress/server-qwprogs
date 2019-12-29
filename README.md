@@ -22,7 +22,7 @@ New features
 * Option for maximum grenades for all classes. `localinfo max_gren1_<class> <number>`, short `localinfo mg1_<classnum> <number>`. Works for gren1s and gren2s. Eg `localinfo max_gren1_scout 0` to remove caltrops or `localinfo mg2_9 2` to reduce max EMPs to 2.
 * Option to fully restock player's clip and finish reload immediately if in progress. `localinfo stock_reload 1` (`localinfo srd 1`) will trigger only on flag capture (with stock_on_cap enabled). `2` will trigger whenever any tfgoal gives you the appropriate ammo.
 * Option for statusbar flaginfo. `setinfo sbflaginfo 1` (default). Setting it to `2` will skip the tf tips on respawn and show flag info all the time.
-* Admin system created to allow for easy setup of pub/pug/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
+* Admin system created to allow for easy setup of pub/clan/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
 * Loc support added to server, show locations for dropped flag.
 * Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
