@@ -145,10 +145,10 @@ void () worldspawn = {
     cvar_set("sv_waterfriction", "1");
     if (teamplay == 0)
         cvar_set("teamplay", "1");
-    localcmd("serverinfo cf_rev \"");
+    localcmd("serverinfo fo_rev \"");
     localcmd(REV);
     localcmd("\"\n");
-    localcmd("serverinfo gametype \"cfortress\"\n");
+    localcmd("serverinfo gametype \"fortressone\"\n");
 
     st = infokey(world, "*sv_gamedir");
     if ((st != string_null) && (st != "fortress"))
