@@ -164,6 +164,8 @@ void end_sys_globals;
 
 .string target;
 .string targetname;
+.string targetsequence;
+.float lasttarget;
 
 // damage is accumulated through a frame. and sent as one single
 // message, so the super shotgun doesn't generate huge messages
