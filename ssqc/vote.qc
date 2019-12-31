@@ -532,6 +532,7 @@ void (entity pe_player) Vote_Menu = {
         //fte+csqc has its own team menu
         //ask the client to activate it
         Menu_Close(pe_player);
+        pe_player.vote_close = 1;
         UpdateClientMenu_Vote(pe_player, floor(f_timeleft - 0.1));
         return;
     }

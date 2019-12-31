@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_admin");
+    registercommand("fo_menu_vote");
 	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -117,6 +118,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_admin":
             FO_Menu_Admin_Main(TRUE);
+            break;
+        case "fo_menu_vote":
+            FO_Menu_Vote(TRUE);
             break;
         case "primeone":
             if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
