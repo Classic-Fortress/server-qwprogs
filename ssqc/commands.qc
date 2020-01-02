@@ -674,26 +674,41 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "votemap":
             processedCmd = TRUE;
-            switch(arg2) {
-                case vote1_map:
-                    Vote_Input(1);
-                    break;
-                case vote2_map:
-                    Vote_Input(2);
-                    break;
-                case vote3_map:
-                    Vote_Input(3);
-                    break;
-                case vote4_map:
-                    Vote_Input(4);
-                    break;
-                case vote5_map:
-                    Vote_Input(5);
-                    break;
-                default: 
-                    Vote_Menu(self);
-                    break;
+            if(votemode) {
+                if(arg2) {
+                    VoteForMap(self, arg2);
+                }
+            } else {
+                switch(arg2) {
+                    case vote1_map:
+                        Vote_Input(1);
+                        break;
+                    case vote2_map:
+                        Vote_Input(2);
+                        break;
+                    case vote3_map:
+                        Vote_Input(3);
+                        break;
+                    case vote4_map:
+                        Vote_Input(4);
+                        break;
+                    case vote5_map:
+                        Vote_Input(5);
+                        break;
+                    default: 
+                        Vote_Menu(self);
+                        break;
+                }
             }
+            break;
+        case "showvotes":
+            processedCmd = TRUE;
+            PrintVoting(self);
+            break;
+        case "listmaps":
+        case "maplist":
+            processedCmd = TRUE;
+            ListVoteMaps(self);
             break;
         case "captainpick":
             processedCmd = TRUE;

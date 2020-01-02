@@ -1,4 +1,5 @@
 void () InitBodyQue;
+string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
     dprint("main function\n");
@@ -327,6 +328,18 @@ void () worldspawn = {
     worldspawnent = spawn();
     worldspawnent.think = WorldSpawnPost;
     worldspawnent.nextthink = time + .01;
+    votemode = CF_GetSetting("vm", "votemode", "off");
+    /*
+    if(votemode) {
+        string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+        if(world.model != strcat("maps/",votemap,".bsp")) {
+            bprint(PRINT_HIGH, "MEHT: need to change to se2!\n");
+            changelevel(votemap);
+        } else {
+            bprint(PRINT_HIGH, "MEHT: already se2, carry on.\n");
+        }
+    }
+    */
 };
 
 void () StartFrame = {
@@ -335,7 +348,10 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
-    Vote_Check();
+    if(!votemode) {
+        //TODO: make this optional
+        Vote_Check();
+    }
 };
 
 entity bodyque_head;
