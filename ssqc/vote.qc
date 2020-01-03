@@ -12,6 +12,7 @@ float () Vote_GetTrickVotes;
 float () Vote_GetRaceVotes;
 void (entity pe_player) Vote_ForceNext;
 void () GotoNextMap;
+void () execute_changelevel;
 float () Vote_GetForceNextVotes;
 void () Vote_Check;
 void (float pf_decider) Vote_SetupVote;
@@ -1082,4 +1083,295 @@ string (string ps_list, float pf_idx) List_Index = {
         return strzone(substr(ps_list, f_start, i - f_start));
 
     return strzone(string_null);
+};
+
+
+/* ====== Vote Ball ======= */
+
+float() crandom;
+
+void (vector o, float z) ball_kick = {
+
+    local vector v;
+
+    v_x = ((o_x * 1.65) + (random() * 20) );
+    v_y = ((o_y * 1.65) + (random() * 20) );
+
+    if (o_x < 0.000) {
+        o_x = o_x * -1.000;
+    }
+    if (o_y < 0.000) {
+        o_y = o_y * -1.000;
+    }
+
+    v_z = ((100 + (random() * 30))  + ((o_y + o_x) * 0.20) + (z * 2.5)  );
+
+
+    self.flags = self.flags - ( self.flags & 512.000);
+    self.velocity = v;
+
+};
+
+void (vector o) ball_fly = {
+    local vector v;
+
+    v_x = (o_x * 0.600) + (crandom() * 40);
+    v_y = (o_y * 0.600) + (crandom() * 40);
+
+    if (o_x < 0.000) {
+        o_x = o_x * -1.000;
+    }
+    if (o_y < 0.000) {
+        o_y = o_y * -1.000;
+    }
+
+
+    v_z = (140 + (crandom() * 40))  + ((o_y + o_x) * 0.20);
+
+    self.flags = self.flags - ( self.flags & 512.000);
+    self.velocity = v;
+      
+
+};
+
+void () ball_touch = {
+    if (self.watertype == CONTENT_LAVA) {
+        /*self.velocity_x = 0;
+        self.velocity_y = 100;
+        self.velocity_z = 0;*/
+        setorigin (self,self.oldorigin);
+        return;
+    }
+
+    if (other.classname == "worldspawn") {
+        return;
+    }
+
+    if (other.classname == "player") {
+        self.oldenemy = other;
+        ball_kick(other.velocity, (other.v_angle_x * -1.000));
+        return;
+
+    }
+    self.oldenemy = other.owner;
+    ball_fly(other.velocity);
+    return;
+};
+
+void () item_ball = {
+   self.solid = 1.000;
+   self.movetype = 10.000;
+   //self.flags= 256.000;
+
+   if ( self.mdl ) {
+      precache_model (self.mdl);
+      precache_model2 (self.mdl);
+      setmodel (self,self.mdl);
+
+   } else {
+      self.mdl = "progs/lavaball.mdl";
+      setmodel (self,self.mdl);
+   }
+
+   if ( !self.netname ) {
+      self.netname = "ball";
+   }
+   setsize (self,'-0.000 -0.000 -0.000','24.000 24.000 24.000');
+   setorigin (self,self.origin);
+   self.oldorigin = self.origin;
+   self.touch = ball_touch;
+};
+
+/* ====== Vote System ======= */
+
+void() map_candidate = {};
+
+/*
+"netname" "amth1" //map name
+"broadcast" "Duel arena, ctf and Sniper War" //description
+"team_broadcast" "Duel/Arena" //group
+"ex_skill_min" "2" //min players
+"ex_skill_max" "8" //max players
+"team_no" "4" //supported teams
+ 
+.cnt = number of current votes
+*/
+void (entity p) ListVoteMaps = {
+    sprint(p, PRINT_HIGH, "Maps eligible for voting:\n");
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", mc.broadcast, "\n");
+        mc = find(mc, classname, "map_candidate");
+    }
+    sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to cast your vote.\n");
+};
+
+void () AnarchyMode = {
+    if(vote_anarchy_mode)
+        return;
+    vote_anarchy_mode = TRUE;
+    local entity e = find(world, classname, "player");
+    while(e) {
+        e.items_allowed = IT_AXE | IT_QUAD;
+        e.items = IT_AXE;
+        e.weapons_carried = IT_AXE;
+        e.current_weapon = WEAP_AXE;
+        W_SetCurrentAmmo(e);
+        if(e.vote_map) {
+            e.items |= IT_QUAD;
+            e.tfstate &= 128;
+            e.super_damage_finished = time + 666;
+        }
+        e = find(e, classname, "player");
+    }
+    bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
+};
+
+void () StartVoting = {
+    voting_started = TRUE;
+    vote_anarchy_mode = FALSE;
+    bprint(PRINT_HIGH, "Voting has started!\n");
+};
+
+void () EndVoting = {
+    voting_started = FALSE;
+    vote_anarchy_mode = FALSE;
+    local entity e = find(world, classname, "vote_timer");
+    if(e) {
+        dremove(e);
+    }
+
+    e = find(world, classname, "player");
+    while(e) {
+        e.vote_map = world;
+        e.items = 0;
+        e.weapons_carried = 0;
+        e.current_weapon = 0;
+        W_SetCurrentAmmo(e);
+        e = find(e, classname, "player");
+    }
+    e = find(world, classname, "map_candidate");
+    while(e) {
+        e.cnt = 0;
+        e = find(e, classname, "map_candidate");
+    }
+};
+
+void (string map_name) ChangeToVotedMap = {
+    vote_result = map_name;
+    EndVoting();
+    //GotoNextMap();
+    execute_changelevel();
+};
+
+void () CheckVoting = {
+    local float numplayers = 0, votedplayers = 0;
+    local entity e = find(world, classname, "player");
+    while(e) {
+        if((e.health > 0 || !vote_anarchy_mode) && !e.has_disconnected) {
+            numplayers++;
+            if(e.vote_map) {
+                votedplayers++;
+            }
+        }
+        e = find(e, classname, "player");
+    }
+    
+    if(numplayers <= 0 || votedplayers <= 0) {
+        bprint(PRINT_HIGH, "\bVoting reset...\b\n");
+        EndVoting();
+        return;
+    }
+    
+    e = find(world, classname, "map_candidate");
+    while(e) {
+        //unanimous - change immediately
+        if(e.cnt >= numplayers) {
+            bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
+            ChangeToVotedMap(e.netname);
+            break;
+        } else if(voting_expires < time) {
+            if(e.cnt > (numplayers/2)) {
+                bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
+                ChangeToVotedMap(e.netname);
+            } else {
+                AnarchyMode();
+            }
+        }
+        e = find(e, classname, "map_candidate");
+    }
+};
+
+void (entity p) PrintVoting = {
+    if(!voting_started) {
+        sprint(p, PRINT_HIGH, "No votes.\n");
+        return;
+    }
+    sprint(p, PRINT_HIGH, ftos(rint(voting_expires - time)), " seconds remain. \bCurrent votes:\b\n");
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(mc.cnt > 0) {
+            if(p.vote_map == mc) {
+                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), " (Your vote)\n");
+            } else {
+                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), "\n");
+            }
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+};
+
+void() vote_think = {
+    CheckVoting();
+    self.nextthink = time + 1;
+};
+
+void (entity p, string vote) VoteForMap = {
+    local float expires = CF_GetSetting("votetime", "vote_time", "60");
+    entity te;
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(mc.netname == vote) {
+            if(!voting_started) {
+                StartVoting();
+                bprint(PRINT_HIGH, p.netname, " suggests \b", vote, "\b\n");
+                if(expires) {
+                    bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
+                    voting_expires = time + expires;
+                    te = spawn();
+                    te.think = vote_think;
+                    te.classname = "vote_timer";
+                    te.nextthink = time + 1;
+                } else {
+                    bprint(PRINT_HIGH, "No voting timelimit configured, so will require unanimous decision\n");
+                }
+
+            } else {
+                if(p.vote_map) {
+                    bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
+                    p.vote_map.cnt--;
+                } else {
+                    bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
+                }
+            }
+            p.vote_map = mc;
+            mc.cnt++;
+            CheckVoting();
+            return;
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+    sprint(p, PRINT_HIGH, "\bUnfortunately, \b", vote, "\b doesn't appear to be a valid map.\nUse \bcmd listmaps\b to for a list of valid maps.\b\n");
+};
+
+void (entity p) UnvoteForMap = {
+    if(p.vote_map) {
+        if(vote_anarchy_mode) {
+            bprint(PRINT_HIGH, p.netname, " \brecinds vote for\b ", p.vote_map.netname, " \bin battle\b\n");
+        } else {
+            bprint(PRINT_HIGH, p.netname, " \babandons vote for\b ", p.vote_map.netname, "\n");
+        }
+        p.vote_map.cnt--;
+    }
+    CheckVoting();
 };

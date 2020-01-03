@@ -453,6 +453,11 @@ float duel_reset_timer;
 float no_fire_mode;
 float duel_all_grens;
 float duel_no_packs;
+float votemode;
+float voting_started;
+float voting_expires;
+.entity vote_map;
+float vote_anarchy_mode;
 
 .float tf_id;
 

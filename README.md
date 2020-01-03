@@ -3,6 +3,9 @@ FortressOne Server
 
 New features
 ------
+* localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.
+* localinfo vote_map <map> - map to designate for voting
+* localinfo vote_style 1 - got to voting map after round is over instead of asking using menus
 * CSQC - fo_main_menu main menu - either from menu.dat or engine
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press

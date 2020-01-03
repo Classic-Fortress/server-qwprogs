@@ -9,7 +9,7 @@ void (float inp) MOTD_Input = {
 };
 
 void () TeamFortress_MOTD = {
-    if (self.classname == "observer")
+    if (self.classname == "observer" || votemode)
         return;
 
     local string st1;

@@ -136,6 +136,9 @@ void (entity targ, entity attacker) Killed = {
             }
         }
     }
+    if(vote_anarchy_mode) {
+        UnvoteForMap(targ);
+    }
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {

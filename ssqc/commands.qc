@@ -56,6 +56,7 @@ void () QuadMode =
     localcmd ("localinfo fullteamscore off\n");
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
     localcmd ("exec fo_quadmode.cfg\n");
 	bprint (PRINT_HIGH, "Quad Mode set to on\n");
     bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -65,6 +66,7 @@ void () ClanMode =
 {
     localcmd("localinfo clan on\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -102,6 +104,7 @@ void () DuelMode =
     localcmd ("password none\n");
     localcmd ("timelimit 0\n");
     localcmd ("fraglimit 30\n");
+    localcmd ("localinfo votemode 0\n"); 
     localcmd ("exec fo_duelmode.cfg\n");
     bprint(PRINT_HIGH, "Duel Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -674,26 +677,41 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "votemap":
             processedCmd = TRUE;
-            switch(arg2) {
-                case vote1_map:
-                    Vote_Input(1);
-                    break;
-                case vote2_map:
-                    Vote_Input(2);
-                    break;
-                case vote3_map:
-                    Vote_Input(3);
-                    break;
-                case vote4_map:
-                    Vote_Input(4);
-                    break;
-                case vote5_map:
-                    Vote_Input(5);
-                    break;
-                default: 
-                    Vote_Menu(self);
-                    break;
+            if(votemode) {
+                if(arg2) {
+                    VoteForMap(self, arg2);
+                }
+            } else {
+                switch(arg2) {
+                    case vote1_map:
+                        Vote_Input(1);
+                        break;
+                    case vote2_map:
+                        Vote_Input(2);
+                        break;
+                    case vote3_map:
+                        Vote_Input(3);
+                        break;
+                    case vote4_map:
+                        Vote_Input(4);
+                        break;
+                    case vote5_map:
+                        Vote_Input(5);
+                        break;
+                    default: 
+                        Vote_Menu(self);
+                        break;
+                }
             }
+            break;
+        case "showvotes":
+            processedCmd = TRUE;
+            PrintVoting(self);
+            break;
+        case "listmaps":
+        case "maplist":
+            processedCmd = TRUE;
+            ListVoteMaps(self);
             break;
         case "captainpick":
             processedCmd = TRUE;
