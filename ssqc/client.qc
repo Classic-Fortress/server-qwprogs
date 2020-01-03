@@ -1513,6 +1513,9 @@ void () player_touch;
 
 
 void (entity p) SetVoteParams = {
+    sprint(p, PRINT_HIGH, "Voting time! Use \bcmd listmaps\b to see available maps\n");
+    sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to state your preference\n");
+    sprint(p, PRINT_HIGH, "Use \bcmd showvotes\b to see the current voting status\n");
     p.items = 0;
     p.health = 100;
     p.armorvalue = 0;

@@ -1303,7 +1303,11 @@ void () CheckVoting = {
 };
 
 void (entity p) PrintVoting = {
-    sprint(p, PRINT_HIGH, "Current votes:\n");
+    if(!voting_started) {
+        sprint(p, PRINT_HIGH, "No votes.\n");
+        return;
+    }
+    sprint(p, PRINT_HIGH, ftos(rint(voting_expires - time)), " seconds remain. \bCurrent votes:\b\n");
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.cnt > 0) {
