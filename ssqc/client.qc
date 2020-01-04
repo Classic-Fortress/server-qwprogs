@@ -961,7 +961,7 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", "0")){
+    if (!clanbattle && CF_GetSetting("vs", "vote_style", "1")){
         if(votemode && vote_result) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
@@ -1858,7 +1858,7 @@ void () NextLevel = {
         return;
 
     already_cycled = 1;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", "0")){
+    if (!clanbattle && CF_GetSetting("vs", "vote_style", "1")){
         intermission_running = 0;
         if(votemode && vote_result) {
             localcmd ("localinfo votemode off\n");
