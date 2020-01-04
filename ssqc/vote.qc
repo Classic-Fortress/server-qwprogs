@@ -1147,6 +1147,9 @@ void () ball_touch = {
         return;
     }
 
+    if (round_over) {
+        return;
+    }
     if (other.classname == "player") {
         self.oldenemy = other;
         ball_kick(other.velocity, (other.v_angle_x * -1.000));
@@ -1176,11 +1179,62 @@ void () item_ball = {
    if ( !self.netname ) {
       self.netname = "ball";
    }
-   setsize (self,'-0.000 -0.000 -0.000','24.000 24.000 24.000');
+   
+   if ( (self.goal_min == '0.000 0.000 0.000') ) {
+      self.goal_min = '-12.000 -12.000 -12.000';
+   }
+   if ( (self.goal_max == '0.000 0.000 0.000') ) {
+      self.goal_max = '12.000 12.000 12.000';
+   }
+   setsize (self,self.goal_min,self.goal_max);
+
+   //setsize (self,'-0.000 -0.000 -0.000','24.000 24.000 24.000');
    setorigin (self,self.origin);
    self.oldorigin = self.origin;
    self.touch = ball_touch;
 };
+
+void () soccer_goal_touch = {
+   if (round_over)  return;
+
+   if (cb_prematch) return;
+
+     if (other.classname == "item_ball") {
+        if (other.solid) {
+           TeamFortress_TeamIncreaseScore (self.owned_by,self.count);
+           TeamFortress_TeamShowScores (2.000);
+           sound (self,2.000,self.noise,1.000,0.000);
+           //round_winner = self.pteam;
+           other.solid = 0.000;
+        }
+        return;
+     }
+};
+
+void () info_soccer_goal = {
+   if (!self.noise ) {
+      self.noise = "items/tf2kfgc.wav";
+   }
+
+   precache_sound (self.noise);
+  
+    if (self.owned_by == 1) {
+        //self.pteam = pteam1;
+    }
+    else if (self.owned_by == 2) {
+        //self.pteam = pteam2;
+    }
+    else if (self.owned_by == 3) {
+        //self.pteam = pteam3;
+    }
+    else if (self.owned_by == 4) {
+        //self.pteam = pteam4;
+    }
+   InitTrigger();
+
+   self.touch = soccer_goal_touch;
+
+ };
 
 /* ====== Vote System ======= */
 
