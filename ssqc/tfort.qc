@@ -2359,7 +2359,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
     else
         restime = 0;
 
-    if (!cb_prematch) {
+    if (!cb_prematch && !votemode) {
         if (Suicided) {
             if (self.lives > 0)
                 self.lives = self.lives - 1;

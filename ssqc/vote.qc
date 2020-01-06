@@ -1120,21 +1120,17 @@ void () AnarchyMode = {
         e.items = IT_AXE;
         e.weapons_carried = IT_AXE;
         e.current_weapon = WEAP_AXE;
-        W_SetCurrentAmmo(e);
         if(e.vote_map) {
             e.items |= IT_QUAD;
             e.tfstate &= 128;
             e.super_damage_finished = time + 666;
+            //e.effects = e.effects | EF_BLUE;
         }
+        W_SetCurrentAmmo(e);
         e = find(e, classname, "player");
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
-};
-
-void () StartVoting = {
-    voting_started = TRUE;
-    vote_anarchy_mode = FALSE;
-    bprint(PRINT_HIGH, "Voting has started!\n");
+    sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
 };
 
 void () EndVoting = {
@@ -1151,6 +1147,8 @@ void () EndVoting = {
         e.items = 0;
         e.weapons_carried = 0;
         e.current_weapon = 0;
+        e.super_damage_finished = 0;
+        //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
         W_SetCurrentAmmo(e);
         e = find(e, classname, "player");
     }
@@ -1168,10 +1166,14 @@ void (string map_name) ChangeToVotedMap = {
     execute_changelevel();
 };
 
-void () CheckVoting = {
-    local float numplayers = 0, votedplayers = 0;
+float () CheckVoting = {
+    if(intermission_running) {
+        return FALSE;
+    }
+    local float totalplayers = 0, numplayers = 0, votedplayers = 0;
     local entity e = find(world, classname, "player");
     while(e) {
+        totalplayers++;
         if((e.health > 0 || !vote_anarchy_mode) && !e.has_disconnected) {
             numplayers++;
             if(e.vote_map) {
@@ -1184,13 +1186,13 @@ void () CheckVoting = {
     if(numplayers <= 0 || votedplayers <= 0) {
         bprint(PRINT_HIGH, "\bVoting reset...\b\n");
         EndVoting();
-        return;
+        return FALSE;
     }
     
     e = find(world, classname, "map_candidate");
     while(e) {
         //unanimous - change immediately
-        if(e.cnt >= numplayers) {
+        if(e.cnt >= totalplayers) {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
             ChangeToVotedMap(e.netname);
             break;
@@ -1204,6 +1206,7 @@ void () CheckVoting = {
         }
         e = find(e, classname, "map_candidate");
     }
+    return TRUE;
 };
 
 void (entity p) PrintVoting = {
@@ -1211,7 +1214,14 @@ void (entity p) PrintVoting = {
         sprint(p, PRINT_HIGH, "No votes.\n");
         return;
     }
-    sprint(p, PRINT_HIGH, ftos(rint(voting_expires - time)), " seconds remain. \bCurrent votes:\b\n");
+    local float expires = rint(voting_expires - time);
+    if(expires > 0) {
+        sprint(p, PRINT_HIGH, ftos(expires), " seconds remain. ");
+    }
+    if(vote_anarchy_mode) {
+        sprint(p, PRINT_HIGH, "\bANRACHY MODE!\b ");
+    }
+    sprint(p, PRINT_HIGH, "\bCurrent votes:\b\n");
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.cnt > 0) {
@@ -1226,30 +1236,51 @@ void (entity p) PrintVoting = {
 };
 
 void() vote_think = {
-    CheckVoting();
-    self.nextthink = time + 1;
+    if(CheckVoting()) {
+        if(vote_anarchy_mode) {
+            bprint(PRINT_HIGH, "\bANARCHY MODE!\b\n");
+            sound(self, CHAN_AUTO, "items/damage.wav", 1, ATTN_NONE);
+            self.nextthink = time + 5;
+        } else {
+            local float expires = floor(voting_expires - time);
+            if(expires < 10 || expires % 30 == 0) {
+                bprint(PRINT_HIGH, "\x10",ftos(expires),"\x11 seconds left\n");
+                sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
+            }
+            self.nextthink = time + 1;
+        }
+    }
 };
 
-void (entity p, string vote) VoteForMap = {
+void () StartVoting = {
+    if(voting_started)
+        return;
     local float expires = CF_GetSetting("votetime", "vote_time", "60");
-    entity te;
+    local entity te;
+    voting_started = TRUE;
+    vote_anarchy_mode = FALSE;
+    bprint(PRINT_HIGH, "Voting has started!\n");
+    sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
+    if(expires) {
+        bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
+        voting_expires = time + expires;
+        te = spawn();
+        te.think = vote_think;
+        te.classname = "vote_timer";
+        te.nextthink = time + 1;
+    } else {
+        bprint(PRINT_HIGH, "No voting timelimit configured, so will require unanimous decision\n");
+    }
+};
+
+
+void (entity p, string vote) VoteForMap = {
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.netname == vote) {
             if(!voting_started) {
                 StartVoting();
                 bprint(PRINT_HIGH, p.netname, " suggests \b", vote, "\b\n");
-                if(expires) {
-                    bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
-                    voting_expires = time + expires;
-                    te = spawn();
-                    te.think = vote_think;
-                    te.classname = "vote_timer";
-                    te.nextthink = time + 1;
-                } else {
-                    bprint(PRINT_HIGH, "No voting timelimit configured, so will require unanimous decision\n");
-                }
-
             } else {
                 if(p.vote_map) {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
@@ -1276,6 +1307,7 @@ void (entity p) UnvoteForMap = {
             bprint(PRINT_HIGH, p.netname, " \babandons vote for\b ", p.vote_map.netname, "\n");
         }
         p.vote_map.cnt--;
+        p.vote_map = world;
     }
     CheckVoting();
 };

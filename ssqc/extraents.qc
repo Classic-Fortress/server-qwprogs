@@ -77,10 +77,25 @@ void () ball_touch = {
     return;
 };
 
-void () item_ball = {
+void () ball_reset = {
    self.solid = 1.000;
-   self.movetype = 10.000;
-   //self.flags= 256.000;
+   self.velocity = '0 0 0';
+   self.origin = self.oldorigin;
+   setorigin (self,self.origin);
+
+   if ( !droptofloor () ) {
+         dprint ("GoalItem (ball) fell out of level at ");
+         dprint (vtos (self.origin));
+         dprint ("\n");
+         dremove (self);
+         return ;
+   }
+};
+
+void () item_ball = {
+   self.solid = SOLID_TRIGGER;
+   self.movetype = MOVETYPE_BOUNCE;
+   //self.flags= FL_ITEM;
 
    if ( self.mdl ) {
       precache_model (self.mdl);
@@ -96,15 +111,15 @@ void () item_ball = {
       self.netname = "ball";
    }
    
-   if ( (self.goal_min == '0.000 0.000 0.000') ) {
-      self.goal_min = '-12.000 -12.000 -12.000';
+   if ( (self.goal_min == '0 0 0') ) {
+      self.goal_min = '-12 -12 -12';
    }
-   if ( (self.goal_max == '0.000 0.000 0.000') ) {
-      self.goal_max = '12.000 12.000 12.000';
+   if ( (self.goal_max == '0 0 0') ) {
+      self.goal_max = '12 12 12';
    }
    setsize (self,self.goal_min,self.goal_max);
 
-   //setsize (self,'-0.000 -0.000 -0.000','24.000 24.000 24.000');
+   //setsize (self,'-0 -0 -0','24 24 24');
    setorigin (self,self.origin);
    self.oldorigin = self.origin;
    self.touch = ball_touch;
@@ -118,10 +133,12 @@ void () soccer_goal_touch = {
      if (other.classname == "item_ball") {
         if (other.solid) {
            TeamFortress_TeamIncreaseScore (self.owned_by,self.count);
-           TeamFortress_TeamShowScores (2.000);
-           sound (self,2.000,self.noise,1.000,0.000);
+           TeamFortress_TeamShowScores (2);
+           sound (self,FL_ITEM,self.noise,1,ATTN_NONE);
            //round_winner = self.pteam;
-           other.solid = 0.000;
+           other.solid = SOLID_NOT;
+           other.nextthink = (time + 0.3);
+           other.think = ball_reset;
         }
         return;
      }
