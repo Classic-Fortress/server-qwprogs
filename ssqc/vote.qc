@@ -1232,6 +1232,7 @@ float () CheckVoting = {
                 ChangeToVotedMap(e.netname);
             }
         } else if(voting_expires < time) {
+            // do we want this to trigger during anarchy too when hitting majority?
             if(e.cnt > (numplayers/2)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
                 ChangeToVotedMap(e.netname);
