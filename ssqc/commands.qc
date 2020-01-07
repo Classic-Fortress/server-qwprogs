@@ -722,7 +722,13 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "break":
             processedCmd = TRUE;
             if(votemode) {
-                UnvoteForMap(self);
+                if(self.vote_map) {
+                    UnvoteForMap(self);
+                } else {
+                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
+                }
+            } else {
+                VoteToEndMap(self);
             }
             break;
         case "captainpick":

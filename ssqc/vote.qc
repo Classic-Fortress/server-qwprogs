@@ -36,6 +36,7 @@ float (float pf_from, float pf_to) RandomRange;
 void () Vote_DropLosers;
 float (string ps_list) List_Count;
 string (string ps_list, float pf_idx) List_Index;
+string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
@@ -1100,6 +1101,34 @@ void() map_candidate = {};
  
 .cnt = number of current votes
 */
+
+void (string name, string desc, string votemap) AddVoteMap = {
+    if(!name || name == votemap) {
+        return;
+    }
+    local entity mc = spawn();
+    mc.classname = "map_candidate";
+    mc.netname = name;
+    mc.broadcast = desc;
+};
+
+void () InitVoteMaps = {
+    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+    //No point adding the vote map if it is the current one, and thus known to be missing the ents
+    if(votemap != mapname) {
+        //Otherwise, assume we somehow ended up on the wrong map and offer to vote for the correct one
+        local entity mc = spawn();
+        mc.classname = "map_candidate";
+        mc.netname = votemap;
+        mc.broadcast = "Currently configured vote map";
+    }
+    AddVoteMap("2fort5r", "Basic CTF", votemap);
+    AddVoteMap("1on1r", "Basic Duel", votemap);
+    AddVoteMap("2fort5r", "Basic CTF", votemap);
+    AddVoteMap("2fort5r", "Basic CTF", votemap);
+    AddVoteMap("2fort5r", "Basic CTF", votemap);
+};
+
 void (entity p) ListVoteMaps = {
     sprint(p, PRINT_HIGH, "Maps eligible for voting:\n");
     local entity mc = find(world, classname, "map_candidate");
@@ -1167,7 +1196,7 @@ void (string map_name) ChangeToVotedMap = {
 };
 
 float () CheckVoting = {
-    if(intermission_running) {
+    if(intermission_running || vote_result) {
         return FALSE;
     }
     local float totalplayers = 0, numplayers = 0, votedplayers = 0;
@@ -1185,6 +1214,7 @@ float () CheckVoting = {
     
     if(numplayers <= 0 || votedplayers <= 0) {
         bprint(PRINT_HIGH, "\bVoting reset...\b\n");
+        sound(self, CHAN_AUTO, "items/qpi2.wav", 1, ATTN_NONE);
         EndVoting();
         return FALSE;
     }
@@ -1196,6 +1226,11 @@ float () CheckVoting = {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
             ChangeToVotedMap(e.netname);
             break;
+        } else if(vote_anarchy_mode) {
+            if(e.cnt >= numplayers) {
+                bprint(PRINT_HIGH, "\bAnarchy succeeded!\b Winner by combat: ", e.netname, "\n");
+                ChangeToVotedMap(e.netname);
+            }
         } else if(voting_expires < time) {
             if(e.cnt > (numplayers/2)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
@@ -1242,13 +1277,15 @@ void() vote_think = {
             sound(self, CHAN_AUTO, "items/damage.wav", 1, ATTN_NONE);
             self.nextthink = time + 5;
         } else {
-            local float expires = floor(voting_expires - time);
+            local float expires = ceil(voting_expires - time);
             if(expires < 10 || expires % 30 == 0) {
                 bprint(PRINT_HIGH, "\x10",ftos(expires),"\x11 seconds left\n");
                 sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
             }
             self.nextthink = time + 1;
         }
+    } else {
+        dremove(self);
     }
 };
 
@@ -1310,4 +1347,35 @@ void (entity p) UnvoteForMap = {
         p.vote_map = world;
     }
     CheckVoting();
+};
+
+void (entity p) VoteToEndMap = {
+    if(CF_GetSetting("vs", "vote_style", ftos(!clanbattle))) {
+        if(p.vote_next) {
+            bprint(PRINT_HIGH, p.netname, " desides to keep playing.\n");
+        } else {
+            bprint(PRINT_HIGH, p.netname, " \bvotes to end the current map.\b.\n");
+        }
+        p.vote_next = !p.vote_next;
+        local float numplayers = 0, numvoted = 0;
+        local entity te = find (world, classname, "player");
+        while (te) {
+            if (!te.has_disconnected) {
+                numplayers = numplayers + 1;
+                if(te.vote_next) {
+                    numvoted++;
+                }
+            }
+            te = find (te, classname, "player");
+        }
+        if(numvoted > (numplayers / 2)) {
+            bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            votemode = 2;
+            execute_changelevel();
+        } else {
+            bprint(PRINT_HIGH, "\x10",ftos((floor(numplayers/2) + 1) - numvoted),"\x11 more votes required to end the current map.\n");
+            bprint(PRINT_HIGH, "Type \bbreak\b to toggle your vote.\n");
+        }
+    }
 };

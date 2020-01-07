@@ -961,14 +961,17 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", ftos(!clanbattle))){
-        if(votemode && vote_result) {
+    local float vote_style = CF_GetSetting("vs", "vote_style", ftos(!clanbattle));
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && vote_result) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else {
+        } else if(vote_style == 1 || votemode == 2) {
             vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+        } else {
+            vote_result = mapname;
         }
     }
     //if(!votemode) {
@@ -1865,14 +1868,17 @@ void () NextLevel = {
         return;
 
     already_cycled = 1;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", ftos(!clanbattle))){
-        intermission_running = 0;
-        if(votemode && vote_result) {
+    local float vote_style = CF_GetSetting("vs", "vote_style", ftos(!clanbattle));
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && nextmap) {
             localcmd ("localinfo votemode off\n");
-            nextmap = vote_result;
-        } else {
-            localcmd ("localinfo votemode on\n");
+            //changelevel(vote_result);
+        } else if(vote_style == 1 || votemode == 2) {
             nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            localcmd ("localinfo votemode on\n");
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+        } else {
+            nextmap = mapname;
         }
     }
     o = spawn();
