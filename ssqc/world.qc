@@ -307,6 +307,9 @@ void () worldspawn = {
     precache_model2("progs/grenade3.mdl");
     precache_model2(MODEL_PROJ_DIAM2);
     precache_sound("grentimer.wav");
+    precache_sound("buttons/switch04.wav");
+    precache_sound("boss2/pop2.wav");
+    precache_sound("items/qpi2.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -329,17 +332,21 @@ void () worldspawn = {
     worldspawnent.think = WorldSpawnPost;
     worldspawnent.nextthink = time + .01;
     votemode = CF_GetSetting("vm", "votemode", "off");
-    /*
+    
     if(votemode) {
+        //No map candidates in map! Add some defaults...
+        if(!find(world, classname, "map_candidate")) {
+            InitVoteMaps();
+        }
         string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
         if(world.model != strcat("maps/",votemap,".bsp")) {
-            bprint(PRINT_HIGH, "MEHT: need to change to se2!\n");
-            changelevel(votemap);
+            bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
+            //changelevel(votemap);
+            localcmd ("localinfo votemode 0\n"); 
+            votemode = FALSE;
         } else {
-            bprint(PRINT_HIGH, "MEHT: already se2, carry on.\n");
         }
     }
-    */
 };
 
 void () StartFrame = {

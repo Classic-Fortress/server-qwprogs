@@ -961,14 +961,17 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", "0")){
-        if(votemode && vote_result) {
+    local float vote_style = CF_GetSetting("vs", "vote_style", "2");
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && vote_result) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else {
+        } else if(vote_style == 1 || votemode == 2) {
             vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+        } else {
+            vote_result = mapname;
         }
     }
     //if(!votemode) {
@@ -1270,13 +1273,15 @@ void () ClientKill = {
         return;
     if (self.deadflag)
         return;
-    if (self.playerclass == PC_UNDEFINED)
-        return;
+    if(!votemode) {
+        if (self.playerclass == PC_UNDEFINED)
+            return;
 
-    if (self.suicide_time > time && self.clientkillforce == 0) {
-        timeleft = self.suicide_time - time;
-        sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
-        return;
+        if (self.suicide_time > time && self.clientkillforce == 0) {
+            timeleft = self.suicide_time - time;
+            sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
+            return;
+        }
     }
 
     Sniper_ZoomReset(self);
@@ -1325,6 +1330,9 @@ void () ClientKill = {
         if(CountRemainingTeams() < 2) {
             ResetPlayersWithCountdown();
         }
+    }
+    if(votemode && vote_anarchy_mode) {
+        CheckVoting();
     }
 };
 
@@ -1526,6 +1534,7 @@ void (entity p) SetVoteParams = {
     p.armortype = 0;
     p.team_no = 0;
     p.playerclass = 0;
+    p.flags |= FL_ONGROUND;
     p.skin = rint(random() * 9); //self.playerclass;
     stuffcmd(p, strcat("color ", ftos(rint(random() * 12)), " ", ftos(rint(random() * 12)), "\n"));
 
@@ -1549,6 +1558,7 @@ void (entity p) SetVoteParams = {
     p.fixangle = 1;
     
     setmodel(p, "progs/player.mdl");
+    p.modelindex = modelindex_player;
     setsize(p, VEC_HULL_MIN, VEC_HULL_MAX);
     
     p.view_ofs = '0 0 22';
@@ -1858,14 +1868,17 @@ void () NextLevel = {
         return;
 
     already_cycled = 1;
-    if (!clanbattle && CF_GetSetting("vs", "vote_style", "0")){
-        intermission_running = 0;
-        if(votemode && vote_result) {
+    local float vote_style = CF_GetSetting("vs", "vote_style", "2");
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && nextmap) {
             localcmd ("localinfo votemode off\n");
-            nextmap = vote_result;
-        } else {
-            localcmd ("localinfo votemode on\n");
+            //changelevel(vote_result);
+        } else if(vote_style == 1 || votemode == 2) {
             nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            localcmd ("localinfo votemode on\n");
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+        } else {
+            nextmap = mapname;
         }
     }
     o = spawn();
@@ -2147,7 +2160,7 @@ void () PlayerPreThink = {
     }
 
     // Check if timelimit/fraglimit has been met
-    CheckRules();
+    if(!votemode) CheckRules();
 
     if (self.playerclass != 0 || votemode) {
         WaterMove();
@@ -2217,7 +2230,7 @@ void () CheckPowerups = {
     if (self.health <= 0) {
         return;
     }
-    if (self.playerclass == 0) {
+    if (self.playerclass == 0 && !votemode) {
         self.modelindex = modelindex_null;
     } else {
         if ((self.is_undercover == 1) && (invis_only == 1)) {
@@ -2415,6 +2428,7 @@ void () PlayerPostThink = {
         if (time >= self.StatusRefreshTime)
             RefreshStatusBar(self);
 
+        CheckPowerups();
         W_WeaponFrame();
     } else {
         CheckPowerups();

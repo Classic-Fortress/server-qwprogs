@@ -114,7 +114,11 @@ var fo_menu FO_MENU_TEAM = {
         {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"0","Spectate","","",FO_MENU_STATE_NORMAL,{localcmd("observe\n");Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE
+    }, 8, TRUE, {
+        if(intermission) {
+            Menu_Cancel();
+        }
+    }
 };
 var fo_menu FO_MENU_CLASS = {
     [0,0], [300,200], "Select Class", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -128,7 +132,11 @@ var fo_menu FO_MENU_CLASS = {
         {"8","Spy","","Can disguise as the enemy and feign death",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 8\n");Menu_Cancel();},MENU_BUTTON},
         {"9","Engineer","","Can build sentry guns and ammo dispensers. Also has powerful EMP grenades as secondaries",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 9\n");Menu_Cancel();},MENU_BUTTON},
         {"0","Random Playerclass","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 10\n");Menu_Cancel();},MENU_BUTTON},
-    }, 10, TRUE
+    }, 10, TRUE, {
+        if(intermission) {
+            Menu_Cancel();
+        }
+    }
 };
 var fo_menu FO_MENU_DROPAMMO = {
     [0,0], [300,150], "Drop Ammo", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -656,7 +664,7 @@ vector fo_menu_draw(fo_menu * menu) = {
     
     
     if(fo_hud_editor) return position;
-    if(!menu.active || showingscores) {
+    if(!menu.active || showingscores || (intermission && !(menu.flags & FO_MENU_FLAG_USE_MOUSE))) {
         setcursormode(FALSE);
         return position;
     }

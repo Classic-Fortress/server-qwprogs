@@ -57,6 +57,7 @@ void () QuadMode =
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_quadmode.cfg\n");
 	bprint (PRINT_HIGH, "Quad Mode set to on\n");
     bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -67,6 +68,7 @@ void () ClanMode =
     localcmd("localinfo clan on\n");
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -85,6 +87,8 @@ void () PubMode =
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo round_time 0\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 1\n"); 
     localcmd ("exec fo_pubmode.cfg\n");
     bprint(PRINT_HIGH, "Pub Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -101,10 +105,12 @@ void () DuelMode =
     localcmd ("localinfo drd 3.9\n"); // wait before resetting the winner long enough for grens to go off
     localcmd ("localinfo rd 9999\n"); // wait before respawning the loser
     localcmd ("localinfo dph 1\n"); // print health of duel survivors 
-    localcmd ("password none\n");
+    localcmd ("localinfo stockfull on\n"); // all packs fully restock
+    localcmd ("localinfo stock_reload on\n"); // all packs insta-reload
     localcmd ("timelimit 0\n");
     localcmd ("fraglimit 30\n");
     localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_duelmode.cfg\n");
     bprint(PRINT_HIGH, "Duel Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -713,12 +719,28 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             processedCmd = TRUE;
             ListVoteMaps(self);
             break;
+        case "break":
+            processedCmd = TRUE;
+            if(votemode) {
+                if(self.vote_map) {
+                    UnvoteForMap(self);
+                } else {
+                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
+                }
+            } else {
+                VoteToEndMap(self);
+            }
+            break;
         case "captainpick":
             processedCmd = TRUE;
             if(arg2) {
                 farg2 = stof(arg2);
                 CaptainPick(self, farg2);
             }
+            break;
+        case "reportmodel":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
             break;
     }
    
