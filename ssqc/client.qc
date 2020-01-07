@@ -961,7 +961,7 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
-    local float vote_style = CF_GetSetting("vs", "vote_style", ftos(!clanbattle));
+    local float vote_style = CF_GetSetting("vs", "vote_style", "2");
     if (vote_style || votemode == 2){
         if(votemode == 1 && vote_result) {
             localcmd ("localinfo votemode off\n");
@@ -1868,7 +1868,7 @@ void () NextLevel = {
         return;
 
     already_cycled = 1;
-    local float vote_style = CF_GetSetting("vs", "vote_style", ftos(!clanbattle));
+    local float vote_style = CF_GetSetting("vs", "vote_style", "2");
     if (vote_style || votemode == 2){
         if(votemode == 1 && nextmap) {
             localcmd ("localinfo votemode off\n");

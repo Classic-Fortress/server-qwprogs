@@ -1350,7 +1350,7 @@ void (entity p) UnvoteForMap = {
 };
 
 void (entity p) VoteToEndMap = {
-    if(CF_GetSetting("vs", "vote_style", ftos(!clanbattle))) {
+    if(CF_GetSetting("vs", "vote_style", "0")) {
         if(p.vote_next) {
             bprint(PRINT_HIGH, p.netname, " desides to keep playing.\n");
         } else {

@@ -57,7 +57,7 @@ void () QuadMode =
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
-    localcmd ("localinfo vote_style 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_quadmode.cfg\n");
 	bprint (PRINT_HIGH, "Quad Mode set to on\n");
     bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -68,7 +68,7 @@ void () ClanMode =
     localcmd("localinfo clan on\n");
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
-    localcmd ("localinfo vote_style 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -110,7 +110,7 @@ void () DuelMode =
     localcmd ("timelimit 0\n");
     localcmd ("fraglimit 30\n");
     localcmd ("localinfo votemode 0\n"); 
-    localcmd ("localinfo vote_style 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_duelmode.cfg\n");
     bprint(PRINT_HIGH, "Duel Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
