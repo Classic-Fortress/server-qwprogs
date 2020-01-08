@@ -971,7 +971,7 @@ void (entity pl) RefreshStatusBar = {
     height = height - pl.StatusStringLines - 13;
 
     // no sbar can be displayed
-    if (height <= 0 || pl.playerclass == PC_UNDEFINED) {
+    if (height <= 0 || (pl.playerclass == PC_UNDEFINED && !votemode)) {
         centerprint(pl, pl.StatusString);
         pl.StatusRefreshTime = time + 1.5;
         return;
@@ -994,7 +994,8 @@ void (entity pl) RefreshStatusBar = {
         {
             ct = strzone("\n\n\n\n\n\n");
         }
-        else if (csqcactive) // has csqc
+        //else 
+        if (csqcactive) // has csqc
         {
             //pl.StatusRefreshTime = time + 1;
             UpdateClientStatusBar(pl);

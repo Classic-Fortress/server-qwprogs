@@ -361,15 +361,16 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         {"4","Force Spectate...","","Force someone to be a spectator",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_FORCE_SPEC, 0);},MENU_BORDER_WARNING},
         {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
         {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
+        {"8","End Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcebreak\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         MenuSpacer,
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
         {"-","Prev - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE, {
+    }, 12, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_MAIN.options[0].value = SERVER_ADMIN.ceasefire?"on":"off";
-        FO_MENU_ADMIN_MAIN.options[6].value = mapname;
+        FO_MENU_ADMIN_MAIN.options[5].value = mapname;
     }
 };
 

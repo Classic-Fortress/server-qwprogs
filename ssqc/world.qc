@@ -310,6 +310,9 @@ void () worldspawn = {
     precache_sound("buttons/switch04.wav");
     precache_sound("boss2/pop2.wav");
     precache_sound("items/qpi2.wav");
+    precache_sound("shalrath/death.wav");
+    precache_sound("shalrath/attack2.wav");
+    precache_sound("blob/sight1.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");

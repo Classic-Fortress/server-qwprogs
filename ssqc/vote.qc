@@ -1224,20 +1224,27 @@ float () CheckVoting = {
         //unanimous - change immediately
         if(e.cnt >= totalplayers) {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
+            sound(self, CHAN_AUTO, "shalrath/death.wav", 1, ATTN_NONE);
             ChangeToVotedMap(e.netname);
-            break;
+            return FALSE;
         } else if(vote_anarchy_mode) {
             if(e.cnt >= numplayers) {
                 bprint(PRINT_HIGH, "\bAnarchy succeeded!\b Winner by combat: ", e.netname, "\n");
+                sound(self, CHAN_AUTO, "shalrath/attack2.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
+                return FALSE;
             }
         } else if(voting_expires < time) {
+            // do we want this to trigger during anarchy too when hitting majority?
             if(e.cnt > (numplayers/2)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
+                sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
+                return FALSE;
             } else {
                 AnarchyMode();
             }
+            break;
         }
         e = find(e, classname, "map_candidate");
     }
@@ -1323,6 +1330,7 @@ void (entity p, string vote) VoteForMap = {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
                     p.vote_map.cnt--;
                 } else {
+                    sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
                 }
             }
