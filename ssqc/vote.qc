@@ -37,6 +37,8 @@ void () Vote_DropLosers;
 float (string ps_list) List_Count;
 string (string ps_list, float pf_idx) List_Index;
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
+void (entity ent) TeamFortress_SetSpeed;
+
 
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
@@ -1113,7 +1115,7 @@ void (string name, string desc, string votemap) AddVoteMap = {
 };
 
 void () InitVoteMaps = {
-    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     //No point adding the vote map if it is the current one, and thus known to be missing the ents
     if(votemap != mapname) {
         //Otherwise, assume we somehow ended up on the wrong map and offer to vote for the correct one
@@ -1124,9 +1126,12 @@ void () InitVoteMaps = {
     }
     AddVoteMap("2fort5r", "Basic CTF", votemap);
     AddVoteMap("1on1r", "Basic Duel", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
+    AddVoteMap("sq1", "Basic Arena", votemap);
+    AddVoteMap("mbasesr", "Futuristic CTF", votemap);
+    AddVoteMap("amth1", "Basic Everything", votemap);
+    AddVoteMap("well6", "CTF", votemap);
+    AddVoteMap("genders2", "Small CTF", votemap);
+    AddVoteMap("frozen1", "CTF with buttons", votemap);
 };
 
 void (entity p) ListVoteMaps = {
@@ -1156,6 +1161,7 @@ void () AnarchyMode = {
             //e.effects = e.effects | EF_BLUE;
         }
         W_SetCurrentAmmo(e);
+        TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
@@ -1179,6 +1185,7 @@ void () EndVoting = {
         e.super_damage_finished = 0;
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
         W_SetCurrentAmmo(e);
+        TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
     e = find(world, classname, "map_candidate");
@@ -1268,9 +1275,9 @@ void (entity p) PrintVoting = {
     while(mc) {
         if(mc.cnt > 0) {
             if(p.vote_map == mc) {
-                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), " (Your vote)\n");
+                sprint(p, PRINT_HIGH, "", mc.netname, ": ", ftos(mc.cnt), " \b(Your vote)\b\n");
             } else {
-                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), "\n");
+                sprint(p, PRINT_HIGH, "", mc.netname, ": ", ftos(mc.cnt), "\n");
             }
         }
         mc = find(mc, classname, "map_candidate");
@@ -1373,12 +1380,12 @@ void (entity p) VoteToEndMap = {
                 if(te.vote_next) {
                     numvoted++;
                 }
-            }
+            }          
             te = find (te, classname, "player");
         }
         if(numvoted > (numplayers / 2)) {
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             votemode = 2;
             execute_changelevel();
         } else {

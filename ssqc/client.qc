@@ -967,15 +967,15 @@ void () execute_changelevel = {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             vote_result = mapname;
         }
     }
     //if(!votemode) {
-    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     //    nextmapstring = strcat(vote_result, " \b(voting)\b");
     //}
 
@@ -1874,9 +1874,9 @@ void () NextLevel = {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             nextmap = mapname;
         }
