@@ -11,6 +11,7 @@ float modelindex_null;
 float (entity pe_player) Spy_CheckArea;
 
 void () TeamFortress_CheckTeamCheats;
+void () TeamFortress_CheckforCheats;
 void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName;
 void () TeamFortress_RemoveTimers;
 void (float Suicided) TeamFortress_SetupRespawn;
@@ -2430,6 +2431,8 @@ void () PlayerPostThink = {
 
         CheckPowerups();
         W_WeaponFrame();
+        //TeamFortress_CheckforCheats();
+        TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();

@@ -335,6 +335,7 @@ void () worldspawn = {
     worldspawnent.think = WorldSpawnPost;
     worldspawnent.nextthink = time + .01;
     votemode = CF_GetSetting("vm", "votemode", "off");
+    vote_total_votes = 0;    
     
     if(votemode) {
         //No map candidates in map! Add some defaults...

@@ -1144,8 +1144,22 @@ void (entity p) ListVoteMaps = {
     sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to cast your vote.\n");
 };
 
+void () anarchy_timer_think = {
+    local entity e = find(world, classname, "player");
+    while(e) {
+        if(e.vote_map) {
+            e.items |= IT_QUAD;
+            e.tfstate &= 128;
+            e.super_damage_finished = time + 666;
+            //e.effects = e.effects | EF_BLUE;
+        }
+        TeamFortress_SetSpeed(e);
+        e = find(e, classname, "player");
+    }
+};
+
 void () AnarchyMode = {
-    if(vote_anarchy_mode)
+    if(vote_anarchy_mode || !voting_started || vote_total_votes <= 0)
         return;
     vote_anarchy_mode = TRUE;
     local entity e = find(world, classname, "player");
@@ -1166,16 +1180,24 @@ void () AnarchyMode = {
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
     sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
+    //e = spawn();
+    //e.classname = "anarchy_timer";
+    //e.think = anarchy_timer_think;
+    //e.nextthink = time + 1;
 };
 
 void () EndVoting = {
     voting_started = FALSE;
     vote_anarchy_mode = FALSE;
+    vote_total_votes = 0;
     local entity e = find(world, classname, "vote_timer");
     if(e) {
         dremove(e);
     }
-
+    e = find(world, classname, "anarchy_timer");
+    if(e) {
+        dremove(e);
+    }
     e = find(world, classname, "player");
     while(e) {
         e.vote_map = world;
@@ -1209,11 +1231,13 @@ float () CheckVoting = {
     local float totalplayers = 0, numplayers = 0, votedplayers = 0;
     local entity e = find(world, classname, "player");
     while(e) {
-        totalplayers++;
-        if((e.health > 0 || !vote_anarchy_mode) && !e.has_disconnected) {
-            numplayers++;
-            if(e.vote_map) {
-                votedplayers++;
+        if(!e.has_disconnected) {
+            totalplayers++;
+            if(e.health > 0 || !vote_anarchy_mode) {
+                numplayers++;
+                if(e.vote_map) {
+                    votedplayers++;
+                }
             }
         }
         e = find(e, classname, "player");
@@ -1310,6 +1334,7 @@ void () StartVoting = {
     local entity te;
     voting_started = TRUE;
     vote_anarchy_mode = FALSE;
+    vote_total_votes = 0;
     bprint(PRINT_HIGH, "Voting has started!\n");
     sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
     if(expires) {
@@ -1332,6 +1357,7 @@ void (entity p, string vote) VoteForMap = {
             if(!voting_started) {
                 StartVoting();
                 bprint(PRINT_HIGH, p.netname, " suggests \b", vote, "\b\n");
+                vote_total_votes++;
             } else {
                 if(p.vote_map) {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
@@ -1339,6 +1365,7 @@ void (entity p, string vote) VoteForMap = {
                 } else {
                     sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
+                    vote_total_votes++;
                 }
             }
             p.vote_map = mc;
@@ -1360,6 +1387,7 @@ void (entity p) UnvoteForMap = {
         }
         p.vote_map.cnt--;
         p.vote_map = world;
+        vote_total_votes--;
     }
     CheckVoting();
 };
