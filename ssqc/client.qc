@@ -2605,7 +2605,9 @@ void () ClientDisconnect = {
         }
     }
     
-    UnvoteForMap(self);
+    if(votemode) {
+        UnvoteForMap(self);
+    }
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {
