@@ -11,6 +11,7 @@ float modelindex_null;
 float (entity pe_player) Spy_CheckArea;
 
 void () TeamFortress_CheckTeamCheats;
+void () TeamFortress_CheckforCheats;
 void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName;
 void () TeamFortress_RemoveTimers;
 void (float Suicided) TeamFortress_SetupRespawn;
@@ -967,15 +968,15 @@ void () execute_changelevel = {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             vote_result = mapname;
         }
     }
     //if(!votemode) {
-    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     //    nextmapstring = strcat(vote_result, " \b(voting)\b");
     //}
 
@@ -1874,9 +1875,9 @@ void () NextLevel = {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "start"));
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             nextmap = mapname;
         }
@@ -2430,6 +2431,8 @@ void () PlayerPostThink = {
 
         CheckPowerups();
         W_WeaponFrame();
+        //TeamFortress_CheckforCheats();
+        TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();

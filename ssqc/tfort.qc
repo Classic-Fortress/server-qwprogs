@@ -1181,7 +1181,7 @@ void (entity p) TeamFortress_SetSpeed = {
     } else if (p.playerclass == PC_PYRO) {
         p.maxfbspeed = PC_PYRO_MAXSPEED;
         p.maxstrafespeed = PC_PYRO_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_CIVILIAN) {
+    } else if (p.playerclass == PC_CIVILIAN || votemode) {
         p.maxfbspeed = PC_CIVILIAN_MAXSPEED;
         p.maxstrafespeed = PC_CIVILIAN_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_SPY) {

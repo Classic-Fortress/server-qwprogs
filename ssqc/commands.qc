@@ -1070,7 +1070,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             case "forcebreak":
                 processedCmd = TRUE;
                 bprint(PRINT_HIGH, "\bMap ended by admin\b ",self.netname,".\n");
-                vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+                vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
                 votemode = 2;
                 execute_changelevel();
                 break;

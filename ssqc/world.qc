@@ -335,13 +335,14 @@ void () worldspawn = {
     worldspawnent.think = WorldSpawnPost;
     worldspawnent.nextthink = time + .01;
     votemode = CF_GetSetting("vm", "votemode", "off");
+    vote_total_votes = 0;    
     
     if(votemode) {
         //No map candidates in map! Add some defaults...
         if(!find(world, classname, "map_candidate")) {
             InitVoteMaps();
         }
-        string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+        string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
         if(world.model != strcat("maps/",votemap,".bsp")) {
             bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
             //changelevel(votemap);

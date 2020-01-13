@@ -37,6 +37,8 @@ void () Vote_DropLosers;
 float (string ps_list) List_Count;
 string (string ps_list, float pf_idx) List_Index;
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
+void (entity ent) TeamFortress_SetSpeed;
+
 
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
@@ -1113,7 +1115,7 @@ void (string name, string desc, string votemap) AddVoteMap = {
 };
 
 void () InitVoteMaps = {
-    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     //No point adding the vote map if it is the current one, and thus known to be missing the ents
     if(votemap != mapname) {
         //Otherwise, assume we somehow ended up on the wrong map and offer to vote for the correct one
@@ -1124,9 +1126,12 @@ void () InitVoteMaps = {
     }
     AddVoteMap("2fort5r", "Basic CTF", votemap);
     AddVoteMap("1on1r", "Basic Duel", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
+    AddVoteMap("sq1", "Basic Arena", votemap);
+    AddVoteMap("mbasesr", "Futuristic CTF", votemap);
+    AddVoteMap("amth1", "Basic Everything", votemap);
+    AddVoteMap("well6", "CTF", votemap);
+    AddVoteMap("genders2", "Small CTF", votemap);
+    AddVoteMap("frozen1", "CTF with buttons", votemap);
 };
 
 void (entity p) ListVoteMaps = {
@@ -1139,8 +1144,22 @@ void (entity p) ListVoteMaps = {
     sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to cast your vote.\n");
 };
 
+void () anarchy_timer_think = {
+    local entity e = find(world, classname, "player");
+    while(e) {
+        if(e.vote_map) {
+            e.items |= IT_QUAD;
+            e.tfstate &= 128;
+            e.super_damage_finished = time + 666;
+            //e.effects = e.effects | EF_BLUE;
+        }
+        TeamFortress_SetSpeed(e);
+        e = find(e, classname, "player");
+    }
+};
+
 void () AnarchyMode = {
-    if(vote_anarchy_mode)
+    if(vote_anarchy_mode || !voting_started || vote_total_votes <= 0)
         return;
     vote_anarchy_mode = TRUE;
     local entity e = find(world, classname, "player");
@@ -1156,20 +1175,29 @@ void () AnarchyMode = {
             //e.effects = e.effects | EF_BLUE;
         }
         W_SetCurrentAmmo(e);
+        TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
     sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
+    //e = spawn();
+    //e.classname = "anarchy_timer";
+    //e.think = anarchy_timer_think;
+    //e.nextthink = time + 1;
 };
 
 void () EndVoting = {
     voting_started = FALSE;
     vote_anarchy_mode = FALSE;
+    vote_total_votes = 0;
     local entity e = find(world, classname, "vote_timer");
     if(e) {
         dremove(e);
     }
-
+    e = find(world, classname, "anarchy_timer");
+    if(e) {
+        dremove(e);
+    }
     e = find(world, classname, "player");
     while(e) {
         e.vote_map = world;
@@ -1179,6 +1207,7 @@ void () EndVoting = {
         e.super_damage_finished = 0;
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
         W_SetCurrentAmmo(e);
+        TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
     e = find(world, classname, "map_candidate");
@@ -1202,11 +1231,13 @@ float () CheckVoting = {
     local float totalplayers = 0, numplayers = 0, votedplayers = 0;
     local entity e = find(world, classname, "player");
     while(e) {
-        totalplayers++;
-        if((e.health > 0 || !vote_anarchy_mode) && !e.has_disconnected) {
-            numplayers++;
-            if(e.vote_map) {
-                votedplayers++;
+        if(!e.has_disconnected) {
+            totalplayers++;
+            if(e.health > 0 || !vote_anarchy_mode) {
+                numplayers++;
+                if(e.vote_map) {
+                    votedplayers++;
+                }
             }
         }
         e = find(e, classname, "player");
@@ -1268,9 +1299,9 @@ void (entity p) PrintVoting = {
     while(mc) {
         if(mc.cnt > 0) {
             if(p.vote_map == mc) {
-                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), " (Your vote)\n");
+                sprint(p, PRINT_HIGH, "", mc.netname, ": ", ftos(mc.cnt), " \b(Your vote)\b\n");
             } else {
-                sprint(p, PRINT_HIGH, "\b", mc.netname, "\b: ", ftos(mc.cnt), "\n");
+                sprint(p, PRINT_HIGH, "", mc.netname, ": ", ftos(mc.cnt), "\n");
             }
         }
         mc = find(mc, classname, "map_candidate");
@@ -1303,6 +1334,7 @@ void () StartVoting = {
     local entity te;
     voting_started = TRUE;
     vote_anarchy_mode = FALSE;
+    vote_total_votes = 0;
     bprint(PRINT_HIGH, "Voting has started!\n");
     sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
     if(expires) {
@@ -1325,6 +1357,7 @@ void (entity p, string vote) VoteForMap = {
             if(!voting_started) {
                 StartVoting();
                 bprint(PRINT_HIGH, p.netname, " suggests \b", vote, "\b\n");
+                vote_total_votes++;
             } else {
                 if(p.vote_map) {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
@@ -1332,6 +1365,7 @@ void (entity p, string vote) VoteForMap = {
                 } else {
                     sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
+                    vote_total_votes++;
                 }
             }
             p.vote_map = mc;
@@ -1353,6 +1387,7 @@ void (entity p) UnvoteForMap = {
         }
         p.vote_map.cnt--;
         p.vote_map = world;
+        vote_total_votes--;
     }
     CheckVoting();
 };
@@ -1373,12 +1408,12 @@ void (entity p) VoteToEndMap = {
                 if(te.vote_next) {
                     numvoted++;
                 }
-            }
+            }          
             te = find (te, classname, "player");
         }
         if(numvoted > (numplayers / 2)) {
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "start");
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             votemode = 2;
             execute_changelevel();
         } else {
