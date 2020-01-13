@@ -424,6 +424,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
         case "disguise":
             processedCmd = TRUE;
+            if(self.playerclass != PC_SPY) {
+                sprint(self, PRINT_HIGH, "Only spies can disguise!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't spy while dead!\n");
                 break;
@@ -560,6 +564,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "detpack":
             processedCmd = TRUE;
+            if(self.playerclass != PC_DEMOMAN) {
+                sprint(self, PRINT_HIGH, "Only demomen are entrusted with such power!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
                 break;
@@ -585,6 +593,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "build":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "You are not qualified to build anything!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't build while dead.\n");
                 break;
@@ -619,6 +631,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "sentry":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "Only engineers can do that!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
@@ -642,6 +658,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "dispenser":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "Only engineers can do that!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't dispense while dead.\n");
                 break;
