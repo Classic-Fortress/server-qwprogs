@@ -459,6 +459,7 @@ float voting_expires;
 .entity vote_map;
 float vote_anarchy_mode;
 float vote_total_votes;
+float vote_style;
 
 .float tf_id;
 

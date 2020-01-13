@@ -45,7 +45,7 @@ void (entity ent) TeamFortress_SetSpeed;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
@@ -86,7 +86,7 @@ void (entity pe_player) Vote_NextMap = {
 void (entity pe_player) Vote_TrickMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
@@ -127,7 +127,7 @@ void (entity pe_player) Vote_TrickMap = {
 void (entity pe_player) Vote_RaceMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
@@ -167,7 +167,7 @@ void (entity pe_player) Vote_RaceMap = {
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ToggleMenu = {
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     if (vote_started > 0 && !vote_abort) {
@@ -239,7 +239,7 @@ float () Vote_GetRaceVotes = {
 void (entity pe_player) Vote_ForceNext = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass)
@@ -290,7 +290,7 @@ float () Vote_GetForceNextVotes = {
 // called from world.qc:StartFrame()
 void () Vote_Check = {
 
-    if (clanbattle)
+    if (clanbattle || vote_style)
         return;
 
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
@@ -1208,6 +1208,7 @@ void () EndVoting = {
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
         W_SetCurrentAmmo(e);
         TeamFortress_SetSpeed(e);
+        e.health = 100;
         e = find(e, classname, "player");
     }
     e = find(world, classname, "map_candidate");
@@ -1393,7 +1394,7 @@ void (entity p) UnvoteForMap = {
 };
 
 void (entity p) VoteToEndMap = {
-    if(CF_GetSetting("vs", "vote_style", "0")) {
+    if(CF_GetSetting("vs", "vote_style", "1")) {
         if(p.vote_next) {
             bprint(PRINT_HIGH, p.netname, " desides to keep playing.\n");
         } else {
