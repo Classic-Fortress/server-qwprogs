@@ -717,8 +717,8 @@ void (entity own) Spy_SetClientSkins = {
     skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
     dskin = TeamFortress_GetSkin(dteam, dpc);
 
-    pteam = infokey(world, strcat("team", ftos(own.team_no)));
-    dsteam = infokey(world, strcat("team", ftos(dteam)));
+    pteam = GetTeamName(own.team_no);
+    dsteam = GetTeamName(dteam);
 
     te = find(world, classname, "player");
     while (te)
