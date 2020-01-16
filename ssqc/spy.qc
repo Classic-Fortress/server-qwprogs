@@ -706,7 +706,7 @@ void () CF_Spy_DisguiseLast = {
 
 void (entity own) Spy_SetClientSkins = {
     entity te;
-    string color, dcolor, skin, dskin, sendcolor, sendskin;
+    string color, dcolor, skin, dskin, sendcolor, sendskin, pteam, dsteam, sendteam;
     float dteam, dpc;
 
     dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
@@ -716,6 +716,9 @@ void (entity own) Spy_SetClientSkins = {
 
     skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
     dskin = TeamFortress_GetSkin(dteam, dpc);
+
+    pteam = infokey(world, strcat("team", ftos(own.team_no)));
+    dsteam = infokey(world, strcat("team", ftos(dteam)));
 
     te = find(world, classname, "player");
     while (te)
@@ -727,11 +730,13 @@ void (entity own) Spy_SetClientSkins = {
                 // on same team, send them spy/team (initial spawn etc)
                 sendcolor = color;
                 sendskin = skin;
+                sendteam = pteam;
             }
             else // not on same team, send them disguise
             {
                 sendcolor = dcolor;
                 sendskin = dskin;
+                sendteam = dsteam;
             }
 
             msg_entity = te;
@@ -753,6 +758,12 @@ void (entity own) Spy_SetClientSkins = {
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "bottomcolor");
             WriteString(MSG_ONE, sendcolor);
+
+            // set team to fix r_enemyskincolor cheat in clients
+            WriteByte(MSG_ONE, SVC_SETINFO);
+            WriteByte(MSG_ONE, own.colormap-1);
+            WriteString(MSG_ONE, "team");
+            WriteString(MSG_ONE, sendteam);
         }
 
         te = find(te, classname, "player");
