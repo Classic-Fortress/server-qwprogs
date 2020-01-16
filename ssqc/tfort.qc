@@ -2586,7 +2586,7 @@ void () TeamFortress_AmmoboxTouch = {
     took = 0;
     if ((other == self.enemy) && (time < (self.health + 2)))
         return;
-    if ((other.tfstate & 65536) || (other.tfstate & 2048))
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
     if (other.classname != "player")
         return;

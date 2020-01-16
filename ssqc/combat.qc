@@ -468,7 +468,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     }
     if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) &&
-        !(targ.tfstate & 65536)) {
+        !(targ.tfstate & TFSTATE_CANT_MOVE)) {
 
         if (deathmsg != DMSG_GREN_NAIL) {
 
@@ -568,17 +568,17 @@ void (entity targ, entity inflictor, entity attacker, float damage,
             if (T_AttackType & TF_TD_EXPLOSION) {
 
                 deathmsg = DMSG_TEAMKILL;
-                if (teamplay & 16384)
+                if (teamplay & TP_FULLMIRRORAOE)
                     TF_T_Damage(attacker, world, world, take, 1, 0);
-                else if (teamplay & 8192)
+                else if (teamplay & TP_HALFMIRRORAOE)
                     TF_T_Damage(attacker, world, world, take / 2, 1, 0);
 
             } else {
 
                 deathmsg = DMSG_TEAMKILL;
-                if (teamplay & 4096)
+                if (teamplay & TP_FULLMIRRORDIRECT)
                     TF_T_Damage(attacker, world, world, take, 1, 0);
-                else if (teamplay & 2048)
+                else if (teamplay & TP_HALFMIRRORDIRECT)
                     TF_T_Damage(attacker, world, world, take / 2, 1, 0);
             }
             deathmsg = olddmsg;

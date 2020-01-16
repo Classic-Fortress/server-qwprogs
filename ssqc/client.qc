@@ -2262,7 +2262,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_finished < time) {
-                    self.items = self.items - 524288;
+                    self.items = self.items - IT_INVISIBILITY;
                     self.invisible_finished = 0;
                     self.invisible_time = 0;
                 }
@@ -2336,7 +2336,7 @@ void () CheckPowerups = {
             }
         }
         if (self.super_damage_finished < time) {
-            self.items = self.items - 4194304;
+            self.items = self.items - IT_QUAD;
             self.super_damage_finished = 0;
             self.super_time = 0;
         }
