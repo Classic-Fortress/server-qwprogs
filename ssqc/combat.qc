@@ -182,9 +182,6 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                 if ((inflictor.weapon == DMSG_INCENDIARY) && (damage >= 40)) {
                     crit = 1;
                 }
-                
-                local float sameteam;
-                sameteam = 0;
 
                 if (targ.playerclass == PC_SPY)
                 {
@@ -192,17 +189,12 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                     {
                         return;
                     }
-                    if (targ.undercover_team == attacker.team_no)
-                    {
-                        sameteam = 1;
-                    }
-                } 
-                else if (attacker.team_no == targ.team_no)
-                {
-                    sameteam = 1;
                 }
+
+                float targteam;
+                targteam = (targ.undercover_team == 0) ? targ.team_no : targ.undercover_team;
                 
-                if (sameteam == 0) {
+                if (targteam != attacker.team_no) {
                     if (crit == 1){
                         stuffcmd(trueattacker, "play misc/hitsoundcrit.wav\n");		//sounds precached in weapons.qc
                     }
