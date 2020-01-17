@@ -83,8 +83,8 @@ var fo_menu FO_MENU_GAME = {
         {"3","Ready","","Only applies to organised games",FO_MENU_STATE_NORMAL,{localcmd("ready\n"); Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"4","Spectate", "","Do not participate in the game, but observe as a ghost",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
-        {"5","Server Admin", "","Admin options for the server",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
-        {"6","Captain's Menu", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);},MENU_BUTTON},
+        {"5","Server Admin", "","Admin options for the server",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"6","Captain's Menu", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
     }, 9, TRUE
@@ -92,12 +92,11 @@ var fo_menu FO_MENU_GAME = {
 var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
-        {"2","Tracking Sidebar",  "","",FO_MENU_STATE_HIDDEN,{print("not implemented\n");},MENU_BUTTON},
         MenuSpacer,
-        {"3","Server Admin", "","",FO_MENU_STATE_HIDDEN,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"3","Server Admin", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 6, TRUE
+    }, 5, TRUE
 };
 var fo_menu FO_MENU_SPECTATOR_TRACK = {
     [0,0], [300,200], "Track", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
@@ -115,7 +114,11 @@ var fo_menu FO_MENU_TEAM = {
         {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"0","Spectate","","",FO_MENU_STATE_NORMAL,{localcmd("observe\n");Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE
+    }, 8, TRUE, {
+        if(intermission) {
+            Menu_Cancel();
+        }
+    }
 };
 var fo_menu FO_MENU_CLASS = {
     [0,0], [300,200], "Select Class", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -129,7 +132,11 @@ var fo_menu FO_MENU_CLASS = {
         {"8","Spy","","Can disguise as the enemy and feign death",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 8\n");Menu_Cancel();},MENU_BUTTON},
         {"9","Engineer","","Can build sentry guns and ammo dispensers. Also has powerful EMP grenades as secondaries",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 9\n");Menu_Cancel();},MENU_BUTTON},
         {"0","Random Playerclass","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeclass 10\n");Menu_Cancel();},MENU_BUTTON},
-    }, 10, TRUE
+    }, 10, TRUE, {
+        if(intermission) {
+            Menu_Cancel();
+        }
+    }
 };
 var fo_menu FO_MENU_DROPAMMO = {
     [0,0], [300,150], "Drop Ammo", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -354,15 +361,16 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         {"4","Force Spectate...","","Force someone to be a spectator",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_FORCE_SPEC, 0);},MENU_BORDER_WARNING},
         {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
         {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
+        {"8","End Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcebreak\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         MenuSpacer,
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
         {"-","Prev - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE, {
+    }, 12, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_MAIN.options[0].value = SERVER_ADMIN.ceasefire?"on":"off";
-        FO_MENU_ADMIN_MAIN.options[6].value = mapname;
+        FO_MENU_ADMIN_MAIN.options[5].value = mapname;
     }
 };
 
@@ -604,10 +612,15 @@ var fo_menu FO_MENU_VOTE = {
         {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"4","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[3].name,"\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
-        {"5","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[4].name,"\n");Menu_Cancel();},MENU_BUTTON},
+        {"5","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[5].name,"\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE
+    }, 8, TRUE, {
+        FO_MENU_VOTE.title = strcat("Map Vote (", ftos(ceil(mapvote_expiry - time)), "s left)");
+        if((mapvote_expiry - time) < 0) {
+            Menu_Cancel();
+        }
+    }
 };
 void fo_menu_start(vector position, vector size, string title, float flags) = {
     InProgressMenu.position = position;
@@ -652,7 +665,7 @@ vector fo_menu_draw(fo_menu * menu) = {
     
     
     if(fo_hud_editor) return position;
-    if(!menu.active || showingscores) {
+    if(!menu.active || showingscores || (intermission && !(menu.flags & FO_MENU_FLAG_USE_MOUSE))) {
         setcursormode(FALSE);
         return position;
     }
@@ -841,16 +854,16 @@ void FO_Menu_Game(float force) = {
     if(is_spectator) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
         //FO_MENU_GAME_SPECTATOR.num_opts = 3;
-        FO_MENU_GAME_SPECTATOR.options[3].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        FO_MENU_GAME_SPECTATOR.options[2].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED;
         //if(is_admin) FO_MENU_GAME_SPECTATOR.num_opts++;
        CurrentMenu = &FO_MENU_GAME_SPECTATOR;
     } else {
         float userid = stof(getplayerkeyvalue(player_localnum, "userid"));
         
         //FO_MENU_GAME.num_opts = 7;
-        FO_MENU_GAME.options[5].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        FO_MENU_GAME.options[5].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED;
         //if(is_admin) FO_MENU_GAME.num_opts++;
-        FO_MENU_GAME.options[6].state = (userid == captain1 || userid == captain2)?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN;
+        FO_MENU_GAME.options[6].state = (userid == captain1 || userid == captain2)?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED;
         //if(is_admin) FO_MENU_GAME.num_opts++;
         CurrentMenu = &FO_MENU_GAME;
     }

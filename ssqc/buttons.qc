@@ -117,7 +117,7 @@ void () func_button = {
         precache_sound("buttons/switch02.wav");
         self.noise = "buttons/switch02.wav";
     } else if (self.sounds == 3) {
-        precache_sound("buttons/switch04.wav");
+        //precache_sound("buttons/switch04.wav");
         self.noise = "buttons/switch04.wav";
     }
 

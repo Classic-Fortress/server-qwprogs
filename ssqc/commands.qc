@@ -56,6 +56,8 @@ void () QuadMode =
     localcmd ("localinfo fullteamscore off\n");
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_quadmode.cfg\n");
 	bprint (PRINT_HIGH, "Quad Mode set to on\n");
     bprint (PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -65,6 +67,8 @@ void () ClanMode =
 {
     localcmd("localinfo clan on\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -83,6 +87,8 @@ void () PubMode =
     localcmd ("fraglimit 0\n");
     localcmd ("localinfo round_time 0\n");
     localcmd ("localinfo rd 0\n"); 
+    localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 1\n"); 
     localcmd ("exec fo_pubmode.cfg\n");
     bprint(PRINT_HIGH, "Pub Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -99,9 +105,12 @@ void () DuelMode =
     localcmd ("localinfo drd 3.9\n"); // wait before resetting the winner long enough for grens to go off
     localcmd ("localinfo rd 9999\n"); // wait before respawning the loser
     localcmd ("localinfo dph 1\n"); // print health of duel survivors 
-    localcmd ("password none\n");
+    localcmd ("localinfo stockfull on\n"); // all packs fully restock
+    localcmd ("localinfo stock_reload on\n"); // all packs insta-reload
     localcmd ("timelimit 0\n");
     localcmd ("fraglimit 30\n");
+    localcmd ("localinfo votemode 0\n"); 
+    localcmd ("localinfo vote_style 2\n"); 
     localcmd ("exec fo_duelmode.cfg\n");
     bprint(PRINT_HIGH, "Duel Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -424,6 +433,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
         case "disguise":
             processedCmd = TRUE;
+            if(self.playerclass != PC_SPY) {
+                sprint(self, PRINT_HIGH, "Only spies can disguise!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't spy while dead!\n");
                 break;
@@ -560,6 +573,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "detpack":
             processedCmd = TRUE;
+            if(self.playerclass != PC_DEMOMAN) {
+                sprint(self, PRINT_HIGH, "Only demomen are entrusted with such power!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
                 break;
@@ -585,6 +602,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "build":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "You are not qualified to build anything!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't build while dead.\n");
                 break;
@@ -619,6 +640,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "sentry":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "Only engineers can do that!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
@@ -642,6 +667,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "dispenser":
             processedCmd = TRUE;
+            if(self.playerclass != PC_ENGINEER) {
+                sprint(self, PRINT_HIGH, "Only engineers can do that!\n");
+                break;
+            }
             if(self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't dispense while dead.\n");
                 break;
@@ -674,25 +703,52 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "votemap":
             processedCmd = TRUE;
-            switch(arg2) {
-                case vote1_map:
-                    Vote_Input(1);
-                    break;
-                case vote2_map:
-                    Vote_Input(2);
-                    break;
-                case vote3_map:
-                    Vote_Input(3);
-                    break;
-                case vote4_map:
-                    Vote_Input(4);
-                    break;
-                case vote5_map:
-                    Vote_Input(5);
-                    break;
-                default: 
-                    Vote_Menu(self);
-                    break;
+            if(votemode) {
+                if(arg2) {
+                    VoteForMap(self, arg2);
+                }
+            } else {
+                switch(arg2) {
+                    case vote1_map:
+                        Vote_Input(1);
+                        break;
+                    case vote2_map:
+                        Vote_Input(2);
+                        break;
+                    case vote3_map:
+                        Vote_Input(3);
+                        break;
+                    case vote4_map:
+                        Vote_Input(4);
+                        break;
+                    case vote5_map:
+                        Vote_Input(5);
+                        break;
+                    default: 
+                        Vote_Menu(self);
+                        break;
+                }
+            }
+            break;
+        case "showvotes":
+            processedCmd = TRUE;
+            PrintVoting(self);
+            break;
+        case "listmaps":
+        case "maplist":
+            processedCmd = TRUE;
+            ListVoteMaps(self);
+            break;
+        case "break":
+            processedCmd = TRUE;
+            if(votemode) {
+                if(self.vote_map) {
+                    UnvoteForMap(self);
+                } else {
+                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
+                }
+            } else {
+                VoteToEndMap(self);
             }
             break;
         case "captainpick":
@@ -701,6 +757,40 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 farg2 = stof(arg2);
                 CaptainPick(self, farg2);
             }
+            break;
+        case "reportmodel":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
+            break;
+        case "help":
+        case "list":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "\bUser Commands list:\b\n");
+            sprint(self, PRINT_HIGH, "cmd adminpwd <password>\n");
+            if(votemode) {
+                sprint(self, PRINT_HIGH, "cmd listmaps\b: list votable maps\b\n");
+                sprint(self, PRINT_HIGH, "cmd votemap <map>\b: vote for the specified map\b\n");
+                sprint(self, PRINT_HIGH, "cmd showvotes\b: List current voting summary\b\n");
+                sprint(self, PRINT_HIGH, "cmd break\b: Cancel current vote\b\n");
+            } else {
+                sprint(self, PRINT_HIGH, "cmd changeteam [#|auto]\n");
+                sprint(self, PRINT_HIGH, "cmd changeclass [#]\n");
+                sprint(self, PRINT_HIGH, "cmd dropammo [1-4]\n");
+                sprint(self, PRINT_HIGH, "cmd disguise [last|none|skin #|team #]\n");
+                sprint(self, PRINT_HIGH, "cmd menu\n");
+                sprint(self, PRINT_HIGH, "cmd autoscan\n");
+                sprint(self, PRINT_HIGH, "cmd scansound\n");
+                sprint(self, PRINT_HIGH, "cmd scanf\n");
+                sprint(self, PRINT_HIGH, "cmd scane\n");
+                sprint(self, PRINT_HIGH, "cmd detpack [#|cancel]\n");
+                sprint(self, PRINT_HIGH, "cmd build [cancel|sentry|dispenser|destroy {sentry|dispenser}]\n");
+                sprint(self, PRINT_HIGH, "cmd sentry [rotate #]\n");
+                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armour|repair|withdraw {ammo|armour}]\n");
+                sprint(self, PRINT_HIGH, "cmd captainpick #\n");
+                sprint(self, PRINT_HIGH, "cmd break\b: end current map\b\n");
+            }
+            sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
+            sprint(self, PRINT_HIGH, "\n");
             break;
     }
    
@@ -997,20 +1087,26 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 Menu_Admin();
                 break;
+            case "forcebreak":
+                processedCmd = TRUE;
+                bprint(PRINT_HIGH, "\bMap ended by admin\b ",self.netname,".\n");
+                vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+                votemode = 2;
+                execute_changelevel();
+                break;
             case "help":
             case "list":
                 processedCmd = TRUE;
-                sprint(self, PRINT_HIGH, "Commands list:\n");
-                sprint(self, PRINT_HIGH, "cmd adminpwd\n");
+                sprint(self, PRINT_HIGH, "\bAdmin Commands list:\b\n");
                 sprint(self, PRINT_HIGH, "cmd timelimit\n");
-                sprint(self, PRINT_HIGH, "cmd prematch\n");
-                sprint(self, PRINT_HIGH, "cmd fraglimit\n");
-                sprint(self, PRINT_HIGH, "cmd teamplay\n");
-                sprint(self, PRINT_HIGH, "cmd password\n");
-                sprint(self, PRINT_HIGH, "cmd map\n");
-                sprint(self, PRINT_HIGH, "cmd record\n");
-                sprint(self, PRINT_HIGH, "cmd easyrecord\n");
-                sprint(self, PRINT_HIGH, "cmd autorecord\n");
+                sprint(self, PRINT_HIGH, "cmd prematch [#]\n");
+                sprint(self, PRINT_HIGH, "cmd fraglimit [#]\n");
+                sprint(self, PRINT_HIGH, "cmd teamplay [#]\n");
+                sprint(self, PRINT_HIGH, "cmd password {<password>|none}\n");
+                sprint(self, PRINT_HIGH, "cmd map <map>\n");
+                sprint(self, PRINT_HIGH, "cmd record <demoname>\n");
+                sprint(self, PRINT_HIGH, "cmd easyrecord [<demoname>]\n");
+                sprint(self, PRINT_HIGH, "cmd autorecord [0|1]\n");
                 sprint(self, PRINT_HIGH, "cmd cancel\n");
                 sprint(self, PRINT_HIGH, "cmd stop\n");
                 sprint(self, PRINT_HIGH, "cmd kick [userid]\n");
@@ -1019,7 +1115,15 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd ceasefire\n");
                 sprint(self, PRINT_HIGH, "cmd restart\n");
                 sprint(self, PRINT_HIGH, "cmd randomise\n");
-                sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
+                sprint(self, PRINT_HIGH, "cmd pubmode\n");
+                sprint(self, PRINT_HIGH, "cmd clanmode\n");
+                sprint(self, PRINT_HIGH, "cmd quaddmode\n");
+                sprint(self, PRINT_HIGH, "cmd duelmode\n");
+                sprint(self, PRINT_HIGH, "cmd forcestart\n");
+                sprint(self, PRINT_HIGH, "cmd rounds #\b: Set number of Quad rounds\b\n");
+                sprint(self, PRINT_HIGH, "cmd roundtime #\b: Set Quad round time\b\n");
+                sprint(self, PRINT_HIGH, "cmd captainmode {<userid1> <userid2> | stop} \n");
+                sprint(self, PRINT_HIGH, "cmd forcebreak\b: End current map\b\n");
                 sprint(self, PRINT_HIGH, "\n");
                 break;
         }

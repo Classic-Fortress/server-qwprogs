@@ -122,8 +122,8 @@ void () SpectatorThink = {
     if (self.impulse)
         SpectatorImpulseCommand();
 
-    if (self.motd <= 400)
-        TeamFortress_MOTD();
+    //if (self.motd <= 400)
+    //    TeamFortress_MOTD();
     if (time >= self.StatusRefreshTime)
         RefreshStatusBar(self);
 };

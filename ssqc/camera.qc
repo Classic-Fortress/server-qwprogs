@@ -22,12 +22,12 @@ void () CamLock = {
 };
 
 void () CamDistLock = {
-    if (self.tfstate & 4096) {
+    if (self.tfstate & TFSTATE_LOCK) {
         sprint(self, PRINT_HIGH, "Distance lock off\n");
-        self.tfstate = self.tfstate - (self.tfstate & 4096);
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
     } else {
         sprint(self, PRINT_HIGH, "Distance lock on\n");
-        self.tfstate = self.tfstate | 4096;
+        self.tfstate = self.tfstate | TFSTATE_LOCK;
         if (self.enemy) {
             self.camdist = vlen((self.enemy.origin - self.origin));
         }

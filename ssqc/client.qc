@@ -11,6 +11,7 @@ float modelindex_null;
 float (entity pe_player) Spy_CheckArea;
 
 void () TeamFortress_CheckTeamCheats;
+void () TeamFortress_CheckforCheats;
 void (entity Viewer, float pc, float rpc) TeamFortress_PrintClassName;
 void () TeamFortress_RemoveTimers;
 void (float Suicided) TeamFortress_SetupRespawn;
@@ -147,6 +148,19 @@ void () autokick_think = {
     dremove(self);
 };
 
+string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString = {
+    local string st;
+
+    st = infokey(ent, ps_short);
+    if (st == string_null) {
+        st = infokey(ent, ps_setting);
+        if (st == string_null) {
+            st = ps_default;
+        }
+    }
+
+    return st;
+};
 //if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
 float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting = {
     local string st;
@@ -767,7 +781,7 @@ void () DecodeLevelParms = {
         self.playerclass = parm12;
     if (parm15)
         self.is_admin = parm15;
-
+/*
     local entity p = find(world, classname, "player");
     while (p != world) {
         if (p.netname != "") {
@@ -777,6 +791,7 @@ void () DecodeLevelParms = {
         }
         p = find(p, classname, "player");
     }
+*/
 };
 
 entity() FindIntermission =
@@ -946,10 +961,29 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_y);
     WriteAngle(MSG_ALL, pos.mangle_z);
 
+    local string nextmapstring = vote_result;
+    vote_style = CF_GetSetting("vs", "vote_style", "2");
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && vote_result) {
+            localcmd ("localinfo votemode off\n");
+            //changelevel(vote_result);
+        } else if(vote_style == 1 || votemode == 2) {
+            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+            localcmd ("localinfo votemode on\n");
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
+        } else {
+            vote_result = mapname;
+        }
+    }
+    //if(!votemode) {
+    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+    //    nextmapstring = strcat(vote_result, " \b(voting)\b");
+    //}
+
     other = find(world, classname, "player");
     while (other != world) {
         if (vote_result != string_null)
-            sprint(other, PRINT_HIGH, "Next up: ", vote_result, "\n");
+            sprint(other, PRINT_HIGH, "Next up: ", nextmapstring, "\n");
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
         other.movetype = MOVETYPE_NONE;
@@ -1004,6 +1038,9 @@ void () respawn = {
         return;
     if (cease_fire)
         return;
+    if (votemode && vote_anarchy_mode) {
+        return;
+    }
 
     if (coop) {
         CopyToBodyQue(self);
@@ -1237,13 +1274,15 @@ void () ClientKill = {
         return;
     if (self.deadflag)
         return;
-    if (self.playerclass == PC_UNDEFINED)
-        return;
+    if(!votemode) {
+        if (self.playerclass == PC_UNDEFINED)
+            return;
 
-    if (self.suicide_time > time && self.clientkillforce == 0) {
-        timeleft = self.suicide_time - time;
-        sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
-        return;
+        if (self.suicide_time > time && self.clientkillforce == 0) {
+            timeleft = self.suicide_time - time;
+            sprint(self, PRINT_HIGH, "You have to wait ", ftos(ceil(timeleft)), " more seconds to suicide\n");
+            return;
+        }
     }
 
     Sniper_ZoomReset(self);
@@ -1292,6 +1331,9 @@ void () ClientKill = {
         if(CountRemainingTeams() < 2) {
             ResetPlayersWithCountdown();
         }
+    }
+    if(votemode && vote_anarchy_mode) {
+        CheckVoting();
     }
 };
 
@@ -1478,6 +1520,56 @@ void () TeamFortress_SetEquipment;
 void () TeamFortress_StartTimers;
 void () player_touch;
 
+
+void (entity p) SetVoteParams = {
+    sprint(p, PRINT_HIGH, "Voting time! Use \bcmd listmaps\b to see available maps\n");
+    sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to state your preference\n");
+    sprint(p, PRINT_HIGH, "Use \bcmd showvotes\b to see the current voting status\n");
+    p.items = 0;
+    p.health = 100;
+    p.armorvalue = 0;
+    p.ammo_shells = 0;
+    p.ammo_nails = 0;
+    p.ammo_rockets = 0;
+    p.ammo_cells = 0;
+    p.armortype = 0;
+    p.team_no = 0;
+    p.playerclass = 0;
+    p.flags |= FL_ONGROUND;
+    p.skin = rint(random() * 9); //self.playerclass;
+    stuffcmd(p, strcat("color ", ftos(rint(random() * 12)), " ", ftos(rint(random() * 12)), "\n"));
+
+    p.takedamage = DAMAGE_AIM; //DAMAGE_YES;
+    p.attack_finished = time + 0.3;
+    p.th_pain = player_pain;
+    p.th_die = PlayerDie;
+    p.height = 0;
+    Sniper_ZoomReset(p);
+
+    p.deadflag = 0;
+    p.pausetime = 0;
+
+    TeamFortress_StartTimers();
+
+    local entity spot = SelectSpawnPoint();
+
+    p.observer_list = spot;
+    p.origin = spot.origin + '0 0 1';
+    p.angles = spot.angles;
+    p.fixangle = 1;
+    
+    setmodel(p, "progs/player.mdl");
+    p.modelindex = modelindex_player;
+    setsize(p, VEC_HULL_MIN, VEC_HULL_MAX);
+    
+    p.view_ofs = '0 0 22';
+    p.velocity = '0 0 0';
+    player_stand1();
+
+    makevectors(p.angles);
+    spawn_tfog(p.origin + v_forward * 20);
+}
+
 void () PutClientInServer = {
     local float oldclass;
     local entity spot;
@@ -1519,6 +1611,20 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
+    
+    setmodel(self, string_null);
+    modelindex_null = self.modelindex;
+
+    setmodel(self, "progs/eyes.mdl");
+    modelindex_eyes = self.modelindex;
+
+    setmodel(self, "progs/player.mdl");
+    modelindex_player = self.modelindex;
+
+    if(votemode) {
+        SetVoteParams(self);
+        return;
+    }
 
     if (self.last_playerclass == 0)
         self.last_playerclass = self.playerclass;
@@ -1638,14 +1744,6 @@ void () PutClientInServer = {
             spot.think = SUB_Remove;
         }
     }
-    setmodel(self, string_null);
-    modelindex_null = self.modelindex;
-
-    setmodel(self, "progs/eyes.mdl");
-    modelindex_eyes = self.modelindex;
-
-    setmodel(self, "progs/player.mdl");
-    modelindex_player = self.modelindex;
 
     if (self.playerclass == 0) {
         self.modelindex = modelindex_null;
@@ -1771,6 +1869,19 @@ void () NextLevel = {
         return;
 
     already_cycled = 1;
+    vote_style = CF_GetSetting("vs", "vote_style", "1");
+    if (vote_style || votemode == 2){
+        if(votemode == 1 && nextmap) {
+            localcmd ("localinfo votemode off\n");
+            //changelevel(vote_result);
+        } else if(vote_style == 1 || votemode == 2) {
+            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+            localcmd ("localinfo votemode on\n");
+            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
+        } else {
+            nextmap = mapname;
+        }
+    }
     o = spawn();
     o.map = nextmap;
     o.think = execute_changelevel;
@@ -1957,16 +2068,24 @@ void () WaterMove = {
     }
     if (self.watertype == -5) {
         if (self.dmgtime < time) {
-            if (self.radsuit_finished > time)
-                self.dmgtime = time + 1;
-            else
-                self.dmgtime = time + 0.2;
-            TF_T_Damage(self, world, world, (10 * self.waterlevel), 0, 16);
+            if(votemode && !vote_anarchy_mode) {
+                respawn();
+            } else {
+                if (self.radsuit_finished > time)
+                    self.dmgtime = time + 1;
+                else
+                    self.dmgtime = time + 0.2;
+                TF_T_Damage(self, world, world, (10 * self.waterlevel), 0, 16);
+            }
         }
     } else if (self.watertype == -4) {
         if ((self.dmgtime < time) && (self.radsuit_finished < time)) {
-            self.dmgtime = time + 1;
-            T_Damage(self, world, world, (4 * self.waterlevel));
+            if(votemode && !vote_anarchy_mode) {
+                respawn();
+            } else {
+                self.dmgtime = time + 1;
+                T_Damage(self, world, world, (4 * self.waterlevel));
+            }
         }
     }
     if (!(self.flags & 16)) {
@@ -2042,9 +2161,9 @@ void () PlayerPreThink = {
     }
 
     // Check if timelimit/fraglimit has been met
-    CheckRules();
+    if(!votemode) CheckRules();
 
-    if (self.playerclass != 0) {
+    if (self.playerclass != 0 || votemode) {
         WaterMove();
     }
     if (self.deadflag >= 2) {
@@ -2112,7 +2231,7 @@ void () CheckPowerups = {
     if (self.health <= 0) {
         return;
     }
-    if (self.playerclass == 0) {
+    if (self.playerclass == 0 && !votemode) {
         self.modelindex = modelindex_null;
     } else {
         if ((self.is_undercover == 1) && (invis_only == 1)) {
@@ -2143,7 +2262,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_finished < time) {
-                    self.items = self.items - 524288;
+                    self.items = self.items - IT_INVISIBILITY;
                     self.invisible_finished = 0;
                     self.invisible_time = 0;
                 }
@@ -2217,7 +2336,7 @@ void () CheckPowerups = {
             }
         }
         if (self.super_damage_finished < time) {
-            self.items = self.items - 4194304;
+            self.items = self.items - IT_QUAD;
             self.super_damage_finished = 0;
             self.super_time = 0;
         }
@@ -2306,20 +2425,30 @@ void () PlayerPostThink = {
     }
     self.jump_flag = self.velocity_z;
     
-    CheckPowerups();
-    W_WeaponFrame();
-    if (self.motd <= 400) {
-        TeamFortress_MOTD();
+    if(votemode) {
+        if (time >= self.StatusRefreshTime)
+            RefreshStatusBar(self);
+
+        CheckPowerups();
+        W_WeaponFrame();
+        //TeamFortress_CheckforCheats();
+        TeamFortress_SetSpeed(self);
     } else {
-        if (self.cheat_check == 0) {
-            self.cheat_check = time + 5;
+        CheckPowerups();
+        W_WeaponFrame();
+        if (self.motd <= 400) {
+            TeamFortress_MOTD();
+        } else {
+            if (self.cheat_check == 0) {
+                self.cheat_check = time + 5;
+            }
         }
-    }
-    if (time >= self.StatusRefreshTime)
-        RefreshStatusBar(self);
-    if (self.cheat_check <= time) {
-        TeamFortress_CheckTeamCheats();
-        self.cheat_check = time + 3;
+        if (time >= self.StatusRefreshTime)
+            RefreshStatusBar(self);
+        if (self.cheat_check <= time) {
+            TeamFortress_CheckTeamCheats();
+            self.cheat_check = time + 3;
+        }
     }
 };
 
@@ -2474,6 +2603,10 @@ void () ClientDisconnect = {
         } else {
             CheckAllPlayersReady();
         }
+    }
+    
+    if(votemode) {
+        UnvoteForMap(self);
     }
 };
 

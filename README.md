@@ -3,6 +3,11 @@ FortressOne Server
 
 New features
 ------
+* `cmd forcebreak` - new admin command to end the map (and go to vote)
+* `break` will vote to end the current map or recind your vote in a vote map
+* localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.
+* localinfo vote_map <map> - map to designate for voting
+* localinfo vote_style 1 - got to voting map after round is over instead of asking using menus, 2 - maps restart upon time/frag limit, but a `break` concensus will exit them to the votemap.
 * CSQC - fo_main_menu main menu - either from menu.dat or engine
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press

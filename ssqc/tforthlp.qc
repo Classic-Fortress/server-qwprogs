@@ -9,7 +9,7 @@ void (float inp) MOTD_Input = {
 };
 
 void () TeamFortress_MOTD = {
-    if (self.classname == "observer")
+    if (self.classname == "observer" || votemode)
         return;
 
     local string st1;
@@ -219,6 +219,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
+        TeamFortress_AliasString("break", "cmd break");
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         Menu_Team(1);
     }

@@ -291,8 +291,9 @@ void (vector org, entity death_owner) spawn_tdeath = {
 };
 
 void () teleport_touch = {
-    local entity t, te;
+    local entity t = world, te;
     local vector org;
+    local float targetcount;
 
     if (self.targetname) {
         if (self.nextthink < time) {
@@ -320,10 +321,17 @@ void () teleport_touch = {
     // put a tfog where the player was
     spawn_tfog(other.origin);
 
-    t = find(world, targetname, self.target);
+    if(self.targetsequence && self.targetsequence != "") {
+        targetcount = tokenizebyseparator(self.targetsequence, ",");
+        self.lasttarget = (self.lasttarget + 1) % targetcount;
+        t = find(world, targetname, argv(self.lasttarget));
+    }
+    if(!t) {
+        t = find(world, targetname, self.target);
+    }
     if (!t)
         objerror("couldn't find target");
-
+    
     // spawn a tfog flash in front of the destination
     makevectors(t.mangle);
     org = t.origin + 32 * v_forward;
@@ -389,6 +397,7 @@ void () trigger_teleport = {
         o = (self.mins + self.maxs) * 0.5;
         ambientsound(o, "ambience/hum1.wav", 0.5, ATTN_STATIC);
     }
+    self.lasttarget = -1;
 };
 
 void () trigger_skill_touch = {

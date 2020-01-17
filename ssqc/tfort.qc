@@ -1181,7 +1181,7 @@ void (entity p) TeamFortress_SetSpeed = {
     } else if (p.playerclass == PC_PYRO) {
         p.maxfbspeed = PC_PYRO_MAXSPEED;
         p.maxstrafespeed = PC_PYRO_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_CIVILIAN) {
+    } else if (p.playerclass == PC_CIVILIAN || votemode) {
         p.maxfbspeed = PC_CIVILIAN_MAXSPEED;
         p.maxstrafespeed = PC_CIVILIAN_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_SPY) {
@@ -2359,7 +2359,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
     else
         restime = 0;
 
-    if (!cb_prematch) {
+    if (!cb_prematch && !votemode) {
         if (Suicided) {
             if (self.lives > 0)
                 self.lives = self.lives - 1;
@@ -2586,7 +2586,7 @@ void () TeamFortress_AmmoboxTouch = {
     took = 0;
     if ((other == self.enemy) && (time < (self.health + 2)))
         return;
-    if ((other.tfstate & 65536) || (other.tfstate & 2048))
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
     if (other.classname != "player")
         return;
