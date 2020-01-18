@@ -13,6 +13,7 @@ functions.qc
 menu.qc
 csmenu.qc
 vote.qc
+extraents.qc
 help.qc
 subs.qc
 combat.qc

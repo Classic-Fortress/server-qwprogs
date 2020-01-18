@@ -175,7 +175,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);
                     break;
                 case CLIENT_MENU_VOTE:
-                    FO_MENU_VOTE.title = strcat("Map Vote (", ftos(readfloat()), "s left)");
+                    mapvote_expiry = time + readfloat();
                     FO_MENU_VOTE.options[0].name = readstring();
                     FO_MENU_VOTE.options[0].value = ftos(readfloat());
                     FO_MENU_VOTE.options[1].name = readstring();
@@ -184,8 +184,8 @@ void() CSQC_Parse_Event = {
                     FO_MENU_VOTE.options[2].value = ftos(readfloat());
                     FO_MENU_VOTE.options[3].name = readstring();
                     FO_MENU_VOTE.options[3].value = ftos(readfloat());
-                    FO_MENU_VOTE.options[4].name = readstring();
-                    FO_MENU_VOTE.options[4].value = ftos(readfloat());
+                    FO_MENU_VOTE.options[5].name = readstring();
+                    FO_MENU_VOTE.options[5].value = ftos(readfloat());
                     FO_Menu_Vote(FALSE);
                     break;
                 case CLIENT_MENU_CAPTAIN_PICK:

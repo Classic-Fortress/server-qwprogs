@@ -210,38 +210,46 @@ void (entity pe_player, float f_type) CF_Identify = {
 
         // alive player is found
         if (trace_ent.classname == "player" && trace_ent.health) {
-
-            // set class and name
-            s_class = TeamFortress_GetClassName(trace_ent.playerclass);
+            
             s_name = trace_ent.netname;
+            if(votemode) {
+                if(trace_ent.vote_map) {
+                    s_class = trace_ent.vote_map.netname;
+                } else {
+                    s_class = "Has not voted";
+                }
+            } else {
+                // set class and name
+                s_class = TeamFortress_GetClassName(trace_ent.playerclass);
 
-            // set health if you're a medic
-            if (pe_player.playerclass == PC_MEDIC) {
-                f_health = trace_ent.health;
-                f_maxhealth = trace_ent.max_health;
-            }
+                // set health if you're a medic
+                if (pe_player.playerclass == PC_MEDIC) {
+                    f_health = trace_ent.health;
+                    f_maxhealth = trace_ent.max_health;
+                }
 
-            // set armor if you're an engineer
-            else if (pe_player.playerclass == PC_ENGINEER) {
-                f_armor = trace_ent.armorvalue;
-                f_maxarmor = trace_ent.maxarmor;
-            }
+                // set armor if you're an engineer
+                else if (pe_player.playerclass == PC_ENGINEER) {
+                    f_armor = trace_ent.armorvalue;
+                    f_maxarmor = trace_ent.maxarmor;
+                }
 
-            // target is an enemy spy
-            if (trace_ent.playerclass == PC_SPY && !f_friendly) {
+                // target is an enemy spy
+                if (trace_ent.playerclass == PC_SPY && !f_friendly) {
 
-                // don't identify feigning enemy spies
-                if (trace_ent.is_feigning)
-                    return;
+                    // don't identify feigning enemy spies
+                    if (trace_ent.is_feigning)
+                        return;
 
-                // use undercover name if available
-                if (trace_ent.undercover_name != string_null)
-                    s_name = trace_ent.undercover_name;
+                    // use undercover name if available
+                    if (trace_ent.undercover_name != string_null)
+                        s_name = trace_ent.undercover_name;
 
-                // set class to undercover skin
-                if (trace_ent.undercover_skin)
-                    s_class = TeamFortress_GetClassName(trace_ent.undercover_skin);
+                    // set class to undercover skin
+                    if (trace_ent.undercover_skin)
+                        s_class = TeamFortress_GetClassName(trace_ent.undercover_skin);
 
+                }
             }
 
         // dispenser is found
@@ -309,12 +317,23 @@ void (entity pe_player, float f_type) CF_Identify = {
             s_id_string = strcat(s_id_string, "\n");
         }
 
-        // set friendly/enemy
-        if (f_friendly || f_fakefriendly)
-            s_id_string = strcat(s_id_string, "Friendly");
-        else
-            s_id_string = strcat(s_id_string, "Hostile");
-
+        if (votemode) {
+            // in a voting scenario, set same vs different vote indicator
+            if(pe_player.vote_map && trace_ent.vote_map) {
+                if(pe_player.vote_map == trace_ent.vote_map) {
+                    s_id_string = strcat(s_id_string, "\bComrade\b\n");
+                } else {
+                    s_id_string = strcat(s_id_string, "\bOpposition\b\n");
+                }
+            }
+        } else {
+            // set friendly/enemy
+            if (f_friendly || f_fakefriendly)
+                s_id_string = strcat(s_id_string, "Friendly");
+            else
+                s_id_string = strcat(s_id_string, "Hostile");
+        }
+        
         // set class
         if (s_class != "") {
             s_id_string = strcat(s_id_string, " ");

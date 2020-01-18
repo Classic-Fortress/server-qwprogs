@@ -706,7 +706,7 @@ void () CF_Spy_DisguiseLast = {
 
 void (entity own) Spy_SetClientSkins = {
     entity te;
-    string color, dcolor, skin, dskin, sendcolor, sendskin;
+    string color, dcolor, skin, dskin, sendcolor, sendskin, pteam, dsteam, sendteam;
     float dteam, dpc;
 
     dteam = own.undercover_team == 0 ? own.team_no : own.undercover_team;
@@ -716,6 +716,9 @@ void (entity own) Spy_SetClientSkins = {
 
     skin = TeamFortress_GetSkin(own.team_no, own.playerclass);
     dskin = TeamFortress_GetSkin(dteam, dpc);
+
+    pteam = GetTeamName(own.team_no);
+    dsteam = GetTeamName(dteam);
 
     te = find(world, classname, "player");
     while (te)
@@ -727,11 +730,13 @@ void (entity own) Spy_SetClientSkins = {
                 // on same team, send them spy/team (initial spawn etc)
                 sendcolor = color;
                 sendskin = skin;
+                sendteam = pteam;
             }
             else // not on same team, send them disguise
             {
                 sendcolor = dcolor;
                 sendskin = dskin;
+                sendteam = dsteam;
             }
 
             msg_entity = te;
@@ -753,6 +758,12 @@ void (entity own) Spy_SetClientSkins = {
             WriteByte(MSG_ONE, own.colormap-1);
             WriteString(MSG_ONE, "bottomcolor");
             WriteString(MSG_ONE, sendcolor);
+
+            // set team to fix r_enemyskincolor cheat in clients
+            WriteByte(MSG_ONE, SVC_SETINFO);
+            WriteByte(MSG_ONE, own.colormap-1);
+            WriteString(MSG_ONE, "team");
+            WriteString(MSG_ONE, sendteam);
         }
 
         te = find(te, classname, "player");
@@ -1051,7 +1062,7 @@ void () GasGrenadeMakeGas = {
                 (te.has_disconnected != 1)) {
                 deathmsg = 24;
                 TF_T_Damage(te, world, self.owner, 10, (1 | 2), 0);
-                if (te.tfstate & 16384) {
+                if (te.tfstate & TFSTATE_HALLUCINATING) {
                     timer = find(world, classname, "timer");
                     while (((timer.owner != te) ||
                             (timer.think != HallucinationTimer)) &&
@@ -1140,13 +1151,13 @@ void () HallucinationTimer = {
     if (((self.health <= 0) || (self.owner.deadflag != 0)) ||
         (self.owner.has_disconnected == 1)) {
         self.owner.tfstate =
-            self.owner.tfstate - (self.owner.tfstate & 16384);
+            self.owner.tfstate - (self.owner.tfstate & TFSTATE_HALLUCINATING);
     }
     if ((self.owner.deadflag != 0) || (self.owner.has_disconnected == 1)) {
         dremove(self);
         return;
     }
-    if (!(self.owner.tfstate & 16384)) {
+    if (!(self.owner.tfstate & TFSTATE_HALLUCINATING)) {
         if (old_grens == 1)
             stuffcmd(self.owner, "v_cshift; wait; bf\n");
         sprint(self.owner, 2, "You feel a little better now\n");
@@ -1406,10 +1417,10 @@ void (entity spy) Spy_RemoveDisguise = {
         coverblown = 1;
         spy.is_undercover = 0;
         spy.modelindex = modelindex_player;
-        if (spy.items & 524288) {
+        if (spy.items & IT_INVISIBILITY) {
             spy.invisible_finished = 0;
             spy.invisible_time = 0;
-            spy.items = spy.items - 524288;
+            spy.items = spy.items - IT_INVISIBILITY;
         }
         Status_Refresh(self);
     }

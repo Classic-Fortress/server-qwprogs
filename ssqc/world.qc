@@ -1,4 +1,5 @@
 void () InitBodyQue;
+string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
     dprint("main function\n");
@@ -306,6 +307,12 @@ void () worldspawn = {
     precache_model2("progs/grenade3.mdl");
     precache_model2(MODEL_PROJ_DIAM2);
     precache_sound("grentimer.wav");
+    precache_sound("buttons/switch04.wav");
+    precache_sound("boss2/pop2.wav");
+    precache_sound("items/qpi2.wav");
+    precache_sound("shalrath/death.wav");
+    precache_sound("shalrath/attack2.wav");
+    precache_sound("blob/sight1.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -327,6 +334,24 @@ void () worldspawn = {
     worldspawnent = spawn();
     worldspawnent.think = WorldSpawnPost;
     worldspawnent.nextthink = time + .01;
+    votemode = CF_GetSetting("vm", "votemode", "off");
+    vote_total_votes = 0;
+    vote_style = CF_GetSetting("vs", "vote_style", "1"); 
+    
+    if(votemode) {
+        //No map candidates in map! Add some defaults...
+        if(!find(world, classname, "map_candidate")) {
+            InitVoteMaps();
+        }
+        string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        if(world.model != strcat("maps/",votemap,".bsp")) {
+            bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
+            //changelevel(votemap);
+            localcmd ("localinfo votemode 0\n"); 
+            votemode = FALSE;
+        } else {
+        }
+    }
 };
 
 void () StartFrame = {
@@ -335,7 +360,10 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
-    Vote_Check();
+    if(!votemode) {
+        //TODO: make this optional
+        Vote_Check();
+    }
 };
 
 entity bodyque_head;
