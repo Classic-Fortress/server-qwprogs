@@ -705,6 +705,23 @@ void () CF_Spy_DisguiseLast = {
 };
 
 void (entity own) Spy_SetClientSkins = {
+    entity icon, ownicon;
+    icon = find(world, classname, "spyicon");
+    while (icon)
+    {
+        if (icon.owner == own)
+            ownicon = icon;
+        icon = find(icon, classname, "spyicon");
+    }
+    
+    if (!ownicon)
+    {
+        ownicon = spawn();
+        ownicon.owner = own;
+        ownicon.classname = "spyicon";
+        ownicon.movetype = MOVETYPE_FOLLOW;
+    }
+
     entity te;
     string color, dcolor, skin, dskin, sendcolor, sendskin, pteam, dsteam, sendteam;
     float dteam, dpc;
