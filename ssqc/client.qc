@@ -1745,6 +1745,15 @@ void () PutClientInServer = {
         }
     }
 
+    setmodel(self, string_null);
+    modelindex_null = self.modelindex;
+
+    setmodel(self, "progs/eyes.mdl");
+    modelindex_eyes = self.modelindex;
+
+    setmodel(self, "progs/player.mdl");
+    modelindex_player = self.modelindex;
+
     if (self.playerclass == 0) {
         self.modelindex = modelindex_null;
         self.menu_input = nil;
