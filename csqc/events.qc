@@ -353,4 +353,7 @@ void ParseSBAR()
             }
             break;
     }
+    if(!readfloat()) {
+        grentimer_waiting = FALSE;
+    }
 }

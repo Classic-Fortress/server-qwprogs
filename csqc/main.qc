@@ -42,6 +42,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
+    grentimer_waiting = FALSE;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -123,31 +124,43 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Vote(TRUE);
             break;
         case "primeone":
-            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                localcmd("play grentimer.wav\n");
-                AddGrenTimer(1);
-            } 
+            if(!grentimer_waiting) {
+                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                    localcmd("play grentimer.wav\n");
+                    AddGrenTimer(1);
+                }
+                grentimer_waiting = TRUE;
+            }
             localcmd("primeone_server");
             break;
         case "primetwo":
-            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                localcmd("play grentimer.wav\n");
-                AddGrenTimer(2);
-            } 
+            if(!grentimer_waiting) {
+                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                    localcmd("play grentimer.wav\n");
+                    AddGrenTimer(2);
+                } 
+                grentimer_waiting = TRUE;
+            }
             localcmd("primetwo_server");
             break;
         case "gren1":
-            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                localcmd("play grentimer.wav\n");
-                AddGrenTimer(1);
-            } 
+            if(!grentimer_waiting) {
+                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                    localcmd("play grentimer.wav\n");
+                    AddGrenTimer(1);
+                } 
+                grentimer_waiting = TRUE;
+            }
             localcmd("gren1_server");
             break;
         case "gren2":
-            if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                localcmd("play grentimer.wav\n");
-                AddGrenTimer(2);
-            } 
+            if(!grentimer_waiting) {
+                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                    localcmd("play grentimer.wav\n");
+                    AddGrenTimer(2);
+                } 
+                grentimer_waiting = TRUE;
+            }
             localcmd("gren2_server");
             break;
         case "+showscores":

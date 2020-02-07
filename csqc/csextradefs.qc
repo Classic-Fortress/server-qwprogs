@@ -51,6 +51,7 @@ float quad_round;
 float quad_rounds_total;
 float showingscores;
 float mapvote_expiry;
+float grentimer_waiting; //grenade primed, but not thrown
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
