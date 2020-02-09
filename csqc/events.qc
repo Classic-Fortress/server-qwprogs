@@ -147,7 +147,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Spy(FALSE);
                     break;
                 case CLIENT_MENU_SPY_SKIN:
-                    FO_Menu_Spy_Skin(FALSE);
+                    FO_Menu_Spy_Skin(2);
                     break;
                 case CLIENT_MENU_SPY_TEAM:
                     FO_Menu_Spy_Team(FALSE);

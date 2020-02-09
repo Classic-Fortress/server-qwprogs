@@ -29,6 +29,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_main_menu");
     registercommand("fo_menu_admin");
     registercommand("fo_menu_vote");
+    registercommand("fo_menu_special");
 	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -122,6 +123,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_vote":
             FO_Menu_Vote(TRUE);
+            break;
+        case "fo_menu_special":
+            FO_Menu_Special(TRUE);
             break;
         case "primeone":
             if(!grentimer_waiting) {
