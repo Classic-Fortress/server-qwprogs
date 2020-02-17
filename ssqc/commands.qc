@@ -19,7 +19,7 @@ void () RestartMap = {
     bprint(PRINT_HIGH, self.netname);
     bprint(PRINT_HIGH, " Has restarted the map.\n");
 
-    localcmd ("map ");
+    localcmd ("changelevel ");
     localcmd (mapname);
     localcmd ("\n");
 }
@@ -1005,7 +1005,16 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
-                    localcmd("map ");
+                    if (!clan_scores_dumped) {
+                        if (quadmode) {
+                            rounds = 1;
+                            QuadRoundOver();
+                        }
+                        DumpClanScores();
+                        MapEndSequence();
+                        clan_scores_dumped = 1;
+                    }
+                    localcmd("changelevel ");
                     localcmd(arg2);
                     localcmd("\n");
                 }

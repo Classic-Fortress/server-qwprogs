@@ -755,6 +755,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player == AP) {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
+                LogEventGoal(Player);
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
@@ -1769,6 +1770,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     }
     if (winners == 1) {
         TeamFortress_TeamShowScores(2);
+        LogEventGoal(AP);
     }
     if (CTF_Map == 1) {
         if (AP != world) {
@@ -2318,6 +2320,10 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
             RemoveResults(Item, te);
         te = find(te, classname, "player");
     }
+    //Flag
+    if ((Item.goal_activation & 1))
+        LogEventFumble(AP);
+    
     if ((method == 0) || (method == 2)) {
         te = find(world, classname, "player");
         while (te != world) {
