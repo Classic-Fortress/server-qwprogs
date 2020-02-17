@@ -2255,6 +2255,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
+    AP.goalrunningtime = gametime;
+    LogEventPickupGoal(AP);
 };
 
 void () ReturnItem = {
@@ -2321,9 +2323,11 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
         te = find(te, classname, "player");
     }
     //Flag
-    if ((Item.goal_activation & 1))
-        LogEventFumble(AP);
-    
+    if ((Item.goal_activation & 1)) {
+        local float timecarried = gametime - self.goalrunningtime;
+        LogEventFumble(AP, timecarried);
+    }
+
     if ((method == 0) || (method == 2)) {
         te = find(world, classname, "player");
         while (te != world) {

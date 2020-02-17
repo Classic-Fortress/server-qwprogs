@@ -676,3 +676,4 @@ float logfilehandle;
 float canlog;
 .string grenadename;
 .float classtime;
+.float goalrunningtime;

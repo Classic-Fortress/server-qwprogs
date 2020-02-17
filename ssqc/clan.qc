@@ -66,7 +66,8 @@ void () StartMatch =
     local entity gren;
 
     lightstyle(0, "m");
-    bprint(2, "MATCH BEGINS NOW\n");    
+    bprint(2, "MATCH BEGINS NOW\n");
+
     team4score = 0;
     team3score = 0;
     team2score = 0;
@@ -119,7 +120,7 @@ void () StartMatch =
             PutClientInServer();
         if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
             UpdateClientPrematch(self, TRUE);
-        }        
+        }
         self = oldself;
         te = find(te, classname, "player");
     }
