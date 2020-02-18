@@ -2324,7 +2324,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     }
     //Flag
     if ((Item.goal_activation & 1)) {
-        local float timecarried = gametime - self.goalrunningtime;
+        local float timecarried = gametime - AP.goalrunningtime;
         LogEventFumble(AP, timecarried);
     }
 
@@ -2888,6 +2888,7 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
+    local float timecarried;
     
     newmis = spawn();
     makevectors(self.v_angle);
@@ -2903,6 +2904,8 @@ void () DropGoalItems = {
             }
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+                timecarried = gametime - self.goalrunningtime;
+                LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);
