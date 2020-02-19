@@ -85,6 +85,13 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+    
+    //reset grentimer status if all there are no more active grentimers
+    if(grentimer_waiting) {
+        if(FO_Hud_Grentimers[0].grentype == 0) {
+            grentimer_waiting = FALSE;
+        }
+    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -173,6 +180,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
+        /*
         case "impulse":
             print("MEHT impulsing ", argv(1) ,"\n");
             if(argv(1) == "5") {
@@ -181,6 +189,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 return TRUE;
             }
             break;
+        */
     }	
     return FALSE;
 };

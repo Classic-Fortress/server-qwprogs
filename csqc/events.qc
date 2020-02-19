@@ -252,6 +252,9 @@ void() CSQC_Parse_Event = {
             motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
             break;
+        case MSG_GRENTHROWN:
+            grentimer_waiting = FALSE;
+            break;
     }
 }
 

@@ -943,6 +943,10 @@ void () TeamFortress_GrenadePrimed = {
 
     user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENPRIMED);
     user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENTHROWING);
+    if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientGrenadeThrown(user);
+    }
+
     sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
     KickPlayer(-1, user);
     newmis = spawn();
