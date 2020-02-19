@@ -4,6 +4,7 @@ void () CF_Spy_UndercoverThink;
 void () GasGrenadeMakeGas;
 void () T_TranqDartTouch;
 void () Spy_DropBackpack;
+void (entity targ, entity attacker) KillSound;
 
 void () spy_diea1 =[50, spy_diea2] {
 };
@@ -555,6 +556,7 @@ void (float issilent) CF_Spy_FeignDeath = {
             if (feign_msg) {
                 deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
                 bprint(PRINT_MEDIUM, deathstring);
+                KillSound(self, self.attacked_by);
             }
 
             // set movement speed to 0 if currently in the air to disable manipulation of trajectory

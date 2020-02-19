@@ -2,7 +2,7 @@ void () T_MissileTouch;
 void () info_player_start;
 void (entity targ, entity attacker) ClientObituary;
 void () ResetPlayers;
-
+void (entity targ, entity attacker) KillSound;
 void (entity Goal, entity AP, float addb) DoResults;
 float (entity Goal, entity AP) Activated;
 float (entity targ, entity attacker, float damage) TeamEqualiseDamage;
@@ -90,7 +90,7 @@ void () ResetPlayersWithCountdown = {
 
 void (entity targ, entity attacker) Killed = {
     local entity oself;
-
+	KillSound(targ, attacker);
     if (attacker == world && (targ.classname == "building_dispenser" || targ.classname == "building_sentrygun"))
         attacker = targ;
 
@@ -139,6 +139,8 @@ void (entity targ, entity attacker) Killed = {
     if(vote_anarchy_mode) {
         UnvoteForMap(targ);
     }
+    
+    
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
@@ -208,6 +210,47 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                     }
                 }	
             }
+		}
+	}
+};
+
+void (entity targ, entity attacker) KillSound = {
+
+	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) {
+		if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) {
+		
+			local entity trueattacker;
+			if (attacker.classname == "building_sentrygun") {
+				trueattacker = attacker.real_owner;
+			}
+			else {
+				trueattacker = attacker;
+			}
+			
+			local string killsound = infokey(trueattacker, "killsound");
+
+			if (killsound == "1" || killsound == "2" || killsound == "3"){
+			
+				if (targ.team_no != trueattacker.team_no) {
+					stuffcmd(trueattacker, "play misc/killsound.wav\n");
+					return;
+				}
+				else {
+				
+					if (trueattacker == targ) {
+						if(killsound == "3") {
+							stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");	
+						}
+						return;
+					}
+					
+					if (killsound == "2" || killsound == "3")
+					{
+						stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");
+					}
+				
+				}
+			}
 		}
 	}
 };
