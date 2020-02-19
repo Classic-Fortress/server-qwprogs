@@ -164,8 +164,7 @@ var fo_menu FO_MENU_SCOUT = {
 //var fo_menu_option FO_MENU_SPY;
 var fo_menu FO_MENU_SPY = {
     [0,0], [300,150], "Spy", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
-        {"1","Disguise","","",FO_MENU_STATE_NORMAL,{FO_Menu_Spy_Skin(TRUE);localcmd("cmd disguise\n");},MENU_BUTTON},
-        {"1","Invisibility","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise\n");Menu_Cancel();},MENU_BUTTON},
+        {"1","Disguise","","",FO_MENU_STATE_NORMAL,{ if(SBAR.IsUndercover) { FO_Menu_Spy_Skin(TRUE); } localcmd("cmd disguise\n");},MENU_BUTTON},
         {"2","Last Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise last\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Feign","","",FO_MENU_STATE_NORMAL,{localcmd("feign\n");Menu_Cancel();},MENU_BUTTON},
         {"4","Reset Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise none\n");Menu_Cancel();},MENU_BUTTON},
@@ -177,7 +176,7 @@ var fo_menu FO_MENU_SPY = {
             localcmd("setinfo smt ", ftos(smt), "\n");
             FO_MENU_SPY.options[8].value = (smt?"on":"off");
         },MENU_BUTTON},
-    }, 9, TRUE
+    }, 8, TRUE
 };
 
 void sendDisguiseCommand(float skinno) = {
@@ -998,24 +997,26 @@ void FO_Menu_Spy(float force) = {
     if(fo_hud_menu_active && !force)
         return;
     if(SBAR.InvisOnly) {
-        FO_MENU_SPY.options[0].state = FO_MENU_STATE_HIDDEN;
-        FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
-        FO_MENU_SPY.options[1].value = (SBAR.IsUndercover?"on":"off");
-        FO_MENU_SPY.options[2].state = FO_MENU_STATE_HIDDEN;
+        //FO_MENU_SPY.options[0].state = FO_MENU_STATE_HIDDEN;
+        //FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
+        FO_MENU_SPY.options[0].name = "Invisibility";
+        FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
+        FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
     } else {
-        FO_MENU_SPY.options[0].state = FO_MENU_STATE_NORMAL;
-        FO_MENU_SPY.options[1].state = FO_MENU_STATE_HIDDEN;
+        //FO_MENU_SPY.options[0].state = FO_MENU_STATE_NORMAL;
+        //FO_MENU_SPY.options[1].state = FO_MENU_STATE_HIDDEN;
+        FO_MENU_SPY.options[0].name = "Disguise";
         FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
         if(last_skin || last_team) {
-            FO_MENU_SPY.options[2].state = FO_MENU_STATE_NORMAL;
-            FO_MENU_SPY.options[2].value = strcat(TeamToString(last_team)," ",ClassToString(last_skin));
+            FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
+            FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_skin));
         } else {
-            FO_MENU_SPY.options[2].state = FO_MENU_STATE_HIDDEN;
+            FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
         }
-        FO_MENU_SPY.options[4].state = (SBAR.IsUndercover?FO_MENU_STATE_NORMAL:FO_MENU_STATE_HIDDEN);
+        FO_MENU_SPY.options[3].state = (SBAR.IsUndercover?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED);
     }
     local float smt = stof(getplayerkeyvalue(player_localnum, "smt"));
-    FO_MENU_SPY.options[8].value = (smt?"on":"off");
+    FO_MENU_SPY.options[7].value = (smt?"on":"off");
     CurrentMenu = &FO_MENU_SPY;
     fo_hud_menu_active = TRUE;
 }
