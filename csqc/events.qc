@@ -124,9 +124,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Team(FALSE);
                     break;
                 case CLIENT_MENU_CLASS:
-                    //float civonly = readbyte();
-                    
-                    FO_Menu_Class(FALSE);
+                    FO_Menu_Class(2);
                     break;
                 case CLIENT_MENU_DROPAMMO:
                     float ammotypes = readfloat();

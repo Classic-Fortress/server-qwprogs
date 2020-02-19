@@ -24,6 +24,7 @@ void (float force) FO_Menu_Admin_Fraglimit;
 void (float force) FO_Menu_Admin_QuadTimelimit;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
+void (float force) FO_Menu_Class;
 void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
@@ -107,14 +108,23 @@ var fo_menu FO_MENU_SPECTATOR_TRACK = {
     }, 0, TRUE
 };
 
+void teamChosen(string team) = {
+    localcmd("cmd changeteam ", team, "\n");
+    if(player_class) {
+        Menu_Cancel();
+    } else {
+        FO_Menu_Class(TRUE);
+    }
+};
+
 var fo_menu FO_MENU_TEAM = {
     [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
-        {"1","Blue team","","Known for cunning and strategy, Blues like to attack first",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 1\n");Menu_Cancel();},'0.3 0.4 0.7'},
-        {"2","Red team","","Excellent at standing their ground, Reds won't stand for being attacked",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 2\n");Menu_Cancel();},'0.7 0.4 0.3'},
-        {"3","Yellow team","","The best team",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 3\n");Menu_Cancel();},'0.7 0.7 0.3'},
-        {"4","Green team","","Also okay",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam 4\n");Menu_Cancel();},'0.4 0.7 0.3'},
+        {"1","Blue team","","Known for cunning and strategy, Blues like to attack first",FO_MENU_STATE_NORMAL,{teamChosen("1");},'0.3 0.4 0.7'},
+        {"2","Red team","","Excellent at standing their ground, Reds won't stand for being attacked",FO_MENU_STATE_NORMAL,{teamChosen("2");},'0.7 0.4 0.3'},
+        {"3","Yellow team","","The best team",FO_MENU_STATE_NORMAL,{teamChosen("3");},'0.7 0.7 0.3'},
+        {"4","Green team","","Also okay",FO_MENU_STATE_NORMAL,{teamChosen("4");},'0.4 0.7 0.3'},
         MenuSpacer,
-        {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{localcmd("cmd changeteam auto\n");Menu_Cancel();},MENU_BUTTON},
+        {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{teamChosen("auto");},MENU_BUTTON},
         MenuSpacer,
         {"0","Spectate","","",FO_MENU_STATE_NORMAL,{localcmd("observe\n");Menu_Cancel();},MENU_BUTTON},
     }, 8, TRUE, {
