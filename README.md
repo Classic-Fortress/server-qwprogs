@@ -1,17 +1,33 @@
-FortressOne Server v0.1.0
-==========================
+FortressOne Server
+==================
 
 New features
 ------
+* `cmd forcebreak` - new admin command to end the map (and go to vote)
+* `break` will vote to end the current map or recind your vote in a vote map
+* localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.
+* localinfo vote_map <map> - map to designate for voting
+* localinfo vote_style 1 - got to voting map after round is over instead of asking using menus, 2 - maps restart upon time/frag limit, but a `break` concensus will exit them to the votemap.
+* CSQC - fo_main_menu main menu - either from menu.dat or engine
+* CSQC - fo_menu_game in-game menu
+* CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
+* CSQC - fo_autohop 0/1 enable bunnyhop assist
+* CSQC - fo_hud_reset resets HUD to defaults
+* CSQC - fo_hud_reload reloads last-saved hud configuration
+* CSQC - fo_hud_editor to move panels and save to config
+* `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
+* New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
+* Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
+* Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)
-* Admin option to enable duel mode. Will auto-reset/resup the not dead player.
+* Admin option to enable duel mode. Will auto-reset/resup the not dead player. Main option - `localinfo duelmode on`
 * Server option for making all walls block EMP. Off by default. `localinfo walls_block_emp 1` or `localinfo wbe 1`. (SPAWNFLAG_BLOCK_EMP 4096 will work regardless)
 * Server option for setting detpack to solid (blocking). Off by default. `localinfo solid_detpack 1` or `localinfo sdp 1`.
 * Server option for overriding map class restrictions (except civilian). `serverinfo override_mapclasses 1` or `serverinfo omc 1`.
 * Option for maximum grenades for all classes. `localinfo max_gren1_<class> <number>`, short `localinfo mg1_<classnum> <number>`. Works for gren1s and gren2s. Eg `localinfo max_gren1_scout 0` to remove caltrops or `localinfo mg2_9 2` to reduce max EMPs to 2.
 * Option to fully restock player's clip and finish reload immediately if in progress. `localinfo stock_reload 1` (`localinfo srd 1`) will trigger only on flag capture (with stock_on_cap enabled). `2` will trigger whenever any tfgoal gives you the appropriate ammo.
 * Option for statusbar flaginfo. `setinfo sbflaginfo 1` (default). Setting it to `2` will skip the tf tips on respawn and show flag info all the time.
-* Admin system created to allow for easy setup of pub/pug/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
+* Admin system created to allow for easy setup of pub/clan/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
 * Loc support added to server, show locations for dropped flag.
 * Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
@@ -136,7 +152,6 @@ Engineer
 * Upgrade/repair/restock Sentry Gun on spanner hit.
 * Dispenser automatically stocks nearby team members.
 * Dispenser restock rate increases with more players on team.
-* Rocket ammo in Dispenser increase explosions more than before.
 * Repair Dispenser on spanner hit.
 * Dismantle Sentry Gun/Dispenser using build menu when standing close.
 * Stop building by pressing last weapon key.
@@ -144,7 +159,6 @@ Engineer
 * Added dismantle message to show how many cells were returned to Engineer.
 * Changed class special to detonate dispenser.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
-* Railgun no longer penetrates targets.
 
 
 Compilation
