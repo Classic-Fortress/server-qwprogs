@@ -226,7 +226,7 @@ void (entity targ, entity attacker) KillSound = {
 			else {
 				trueattacker = attacker;
 			}
-			
+
 			local string killsound = infokey(trueattacker, "killsound");
 
 			if (killsound == "1" || killsound == "2" || killsound == "3"){
@@ -244,12 +244,19 @@ void (entity targ, entity attacker) KillSound = {
 						return;
 					}
 					
-					if (killsound == "2" || killsound == "3")
-					{
+					if (killsound == "2" || killsound == "3") {
 						stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");
 					}
 				
 				}
+			}
+		}
+	}
+	else {
+		if (targ.classname == "player") {
+			local string targkillsound = infokey(targ, "killsound");
+			if (targkillsound == "3") {
+				stuffcmd(targ, "play misc/killsoundteam.wav\n");
 			}
 		}
 	}
