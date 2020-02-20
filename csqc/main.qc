@@ -27,6 +27,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
+    registercommand("fo_menu_team");
+    registercommand("fo_menu_class");
     registercommand("fo_menu_admin");
     registercommand("fo_menu_vote");
     registercommand("fo_menu_special");
@@ -54,6 +56,7 @@ noref void() CSQC_WorldLoaded = {
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
 	ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
+    player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     SBAR.Hint = "";

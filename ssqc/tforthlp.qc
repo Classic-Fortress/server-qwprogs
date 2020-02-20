@@ -71,12 +71,12 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("-slot4", "-attack;impulse 24");
     } else if (self.motd == 30) {
         if(csqcactive) {
-            TeamFortress_AliasString("changeteam", "cmd changeteam");
+            TeamFortress_AliasString("changeteam", "fo_menu_team");
             TeamFortress_AliasString("teamblue", "cmd changeteam 1");
             TeamFortress_AliasString("teamred", "cmd changeteam 2");
             TeamFortress_AliasString("teamyellow", "cmd changeteam 3");
             TeamFortress_AliasString("teamgreen", "cmd changeteam 4");
-            TeamFortress_AliasString("changeclass", "cmd changeclass");
+            TeamFortress_AliasString("changeclass", "fo_menu_class");
             TeamFortress_AliasString("scout", "cmd changeclass 1");
             TeamFortress_AliasString("sniper", "cmd changeclass 2");
             TeamFortress_AliasString("soldier", "cmd changeclass 3");
