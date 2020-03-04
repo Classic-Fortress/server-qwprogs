@@ -142,7 +142,7 @@ void() CSQC_Parse_Event = {
                     SBAR.InvisOnly = readfloat();
                     last_skin = readfloat();
                     last_team = readfloat();
-                    FO_Menu_Spy(FALSE);
+                    FO_Menu_Spy(2);
                     break;
                 case CLIENT_MENU_SPY_SKIN:
                     FO_Menu_Spy_Skin(2);
