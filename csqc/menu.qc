@@ -22,6 +22,7 @@ void (float force) FO_Menu_Admin_Rounds;
 void (float force) FO_Menu_Admin_Timelimit;
 void (float force) FO_Menu_Admin_Fraglimit;
 void (float force) FO_Menu_Admin_QuadTimelimit;
+void (float force) FO_Menu_Spy;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
 void (float force) FO_Menu_Class;
@@ -174,7 +175,7 @@ var fo_menu FO_MENU_SCOUT = {
 //var fo_menu_option FO_MENU_SPY;
 var fo_menu FO_MENU_SPY = {
     [0,0], [300,150], "Spy", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
-        {"1","Disguise","","",FO_MENU_STATE_NORMAL,{ if(SBAR.IsUndercover) { FO_Menu_Spy_Skin(TRUE); } localcmd("cmd disguise\n");},MENU_BUTTON},
+        {"1","Disguise","","",FO_MENU_STATE_NORMAL,{ FO_Menu_Spy_Skin(TRUE); localcmd("cmd disguise\n");},MENU_BUTTON},
         {"2","Last Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise last\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Feign","","",FO_MENU_STATE_NORMAL,{localcmd("feign\n");Menu_Cancel();},MENU_BUTTON},
         {"4","Reset Disguise","","",FO_MENU_STATE_NORMAL,{localcmd("cmd disguise none\n");Menu_Cancel();},MENU_BUTTON},
@@ -184,14 +185,30 @@ var fo_menu FO_MENU_SPY = {
         {"0","Manual Colour Changes","","",FO_MENU_STATE_NORMAL,{
             local float smt = !stof(getplayerkeyvalue(player_localnum, "smt"));
             localcmd("setinfo smt ", ftos(smt), "\n");
-            FO_MENU_SPY.options[8].value = (smt?"on":"off");
         },MENU_BUTTON},
-    }, 8, TRUE
+    }, 8, TRUE, {
+        if(SBAR.InvisOnly) {
+            FO_MENU_SPY.options[0].name = "Invisibility";
+            FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
+            FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
+        } else {
+            FO_MENU_SPY.options[0].name = "Disguise";
+            FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
+            if(last_skin || last_team) {
+                FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
+                FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_skin));
+            } else {
+                FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
+            }
+            FO_MENU_SPY.options[3].state = (SBAR.IsUndercover?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED);
+        }
+        FO_MENU_SPY.options[7].value = (stof(getplayerkeyvalue(player_localnum, "smt"))?"on":"off");
+    }
 };
 
 void sendDisguiseCommand(float skinno) = {
     localcmd("cmd disguise skin ",ftos(skinno),"\n");
-    local float smt = !stof(getplayerkeyvalue(player_localnum, "smt"));
+    local float smt = stof(getplayerkeyvalue(player_localnum, "smt"));
     if (smt) {
         FO_Menu_Spy_Team(TRUE);
     } else {
@@ -1000,11 +1017,11 @@ void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Spy(float force) = {
-    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY) {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1)
         return;
     if(SBAR.InvisOnly) {
         //FO_MENU_SPY.options[0].state = FO_MENU_STATE_HIDDEN;
@@ -1058,6 +1075,8 @@ void FO_Menu_Spy_Skin(float force) = {
         return;
     }
     if(fo_hud_menu_active && force != 1)
+        return;
+    if(!fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN && force == 2)
         return;
     CurrentMenu = &FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
@@ -1226,18 +1245,23 @@ void FO_Menu_Special(float force) = {
         return;
     
     fo_menu* NewMenu;
+    //void(float) nm;
     switch (SBAR.PlayerClass) {
         case PC_SCOUT:
             NewMenu = &FO_MENU_SCOUT;
+            //nm = FO_Menu_Scout;
             break;
         case PC_DEMOMAN:
             NewMenu = &FO_MENU_DETPACK;
+            //nm = FO_Menu_Detpack;
             break;
         case PC_SPY:
             NewMenu = &FO_MENU_SPY;
+            //nm = FO_Menu_Spy;
             break;
         case PC_ENGINEER:
             NewMenu = &FO_MENU_BUILD;
+            //nm = FO_Menu_Build;
             break;
         default:
             //no class menu
@@ -1248,6 +1272,24 @@ void FO_Menu_Special(float force) = {
         Menu_Cancel();
         return;
     }
-    CurrentMenu = NewMenu;
-    fo_hud_menu_active = TRUE;
+    //CurrentMenu = NewMenu;
+    switch (SBAR.PlayerClass) {
+        case PC_SCOUT:
+            FO_Menu_Scout(force, FALSE, FALSE); //TODO: fix scanner settings
+            break;
+        case PC_DEMOMAN:
+            FO_Menu_Detpack(force, FALSE); //TODO: fix cancel
+            break;
+        case PC_SPY:
+            FO_Menu_Spy(force);
+            break;
+        case PC_ENGINEER:
+            FO_Menu_Build(force);
+            break;
+        default:
+            //no class menu
+            return;
+    }
+    localcmd("cmd menu\n");
+    //fo_hud_menu_active = TRUE;
 };
