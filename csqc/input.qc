@@ -83,5 +83,24 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
             default:
         }
     }
+/*
+ * better not
+    if(evtype == IE_KEYUP) {
+        tokenize(findkeysforcommand("impulse 5"));
+        float imp5_1 = stof(argv(0));
+        float imp5_2 = stof(argv(1));
+        tokenize(findkeysforcommand("menu"));
+        float menucmd_1 = stof(argv(0));
+        float menucmd_2 = stof(argv(1));
+        switch (scanx) {
+            case imp5_1:
+            case imp5_2:
+            case menucmd_1:
+            case menucmd_2:
+                FO_Menu_Special(TRUE);
+                return TRUE;
+        }
+    }
+*/
     return FALSE;
 }

@@ -774,6 +774,13 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientGrenadeThrown(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void UpdateClientStatusBar(entity pl)
 {
     // if we ever change to fte only, this could be changed to stats
@@ -934,7 +941,7 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
     }
-
+    WriteFloat(MSG_MULTICAST, ((pl.tfstate & TFSTATE_GRENPRIMED) == TFSTATE_GRENPRIMED));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
