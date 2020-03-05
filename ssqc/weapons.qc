@@ -1937,7 +1937,7 @@ void () W_Attack = {
     if (self.has_disconnected == TRUE)
         return;
 
-    if (self.tfstate & TFSTATE_RELOADING)
+    if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
     
     if(no_fire_mode)
