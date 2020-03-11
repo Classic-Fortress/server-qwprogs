@@ -50,6 +50,7 @@ quadmode.qc
 tfort.qc
 tforthlp.qc
 tfortmap.qc
+login.qc
 commands.qc
 ctf.qc
 coop.qc

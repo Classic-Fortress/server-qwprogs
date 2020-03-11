@@ -641,8 +641,9 @@ void () DecodeLevelParms = {
         // server webpage address (required for login to work)
         webpageUrl = infokey(world, "webpageurl");
 
-        if (loginRequired && (!loginUrl || !webpageUrl))
+        if (loginRequired && (!loginUrl || !webpageUrl)) {
             loginRequired = 0;
+        }
 
         st = infokey(world, "default");
         if (st == "on") {
