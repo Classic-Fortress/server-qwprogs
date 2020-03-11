@@ -124,9 +124,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Team(FALSE);
                     break;
                 case CLIENT_MENU_CLASS:
-                    //float civonly = readbyte();
-                    
-                    FO_Menu_Class(FALSE);
+                    FO_Menu_Class(2);
                     break;
                 case CLIENT_MENU_DROPAMMO:
                     float ammotypes = readfloat();
@@ -144,10 +142,10 @@ void() CSQC_Parse_Event = {
                     SBAR.InvisOnly = readfloat();
                     last_skin = readfloat();
                     last_team = readfloat();
-                    FO_Menu_Spy(FALSE);
+                    FO_Menu_Spy(2);
                     break;
                 case CLIENT_MENU_SPY_SKIN:
-                    FO_Menu_Spy_Skin(FALSE);
+                    FO_Menu_Spy_Skin(2);
                     break;
                 case CLIENT_MENU_SPY_TEAM:
                     FO_Menu_Spy_Team(FALSE);
@@ -252,6 +250,9 @@ void() CSQC_Parse_Event = {
             motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
             break;
+        case MSG_GRENTHROWN:
+            grentimer_waiting = FALSE;
+            break;
     }
 }
 
@@ -352,5 +353,8 @@ void ParseSBAR()
                 SBAR.DispenserHealth = readfloat();
             }
             break;
+    }
+    if(!readfloat()) {
+        grentimer_waiting = FALSE;
     }
 }

@@ -51,6 +51,7 @@ float quad_round;
 float quad_rounds_total;
 float showingscores;
 float mapvote_expiry;
+float grentimer_waiting; //grenade primed, but not thrown
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -282,6 +283,7 @@ enum {
 
 float team_no;
 float is_spectator;
+float player_class;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
