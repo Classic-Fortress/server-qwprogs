@@ -2497,6 +2497,11 @@ void (optional float csqcactive) ClientConnect = {
     if (self.netname == string_null)
         KickCheater(self);
 
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (self.login == string_null)
+        sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
+
     TeamFortress_Alias("id", TF_ID, 0);
 
     TeamFortress_ExecMapScript(self);
