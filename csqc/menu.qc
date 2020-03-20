@@ -1003,11 +1003,11 @@ void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
 }
 
 void FO_Menu_Scout(float force, float scanner_on, float scanner_flags) = {
-    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SCOUT) {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_SCOUT && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1)
         return;
     FO_MENU_SCOUT.options[0].value = (scanner_on?"on":"off");
     FO_MENU_SCOUT.options[1].value = ((scanner_flags & 1)?"on":"off");
@@ -1082,11 +1082,11 @@ void FO_Menu_Spy_Skin(float force) = {
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Detpack(float force, float cancel_detpack) = {
-    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK_CANCEL || CurrentMenu == &FO_MENU_DETPACK)) {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_DETPACK_CANCEL || CurrentMenu == &FO_MENU_DETPACK) && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1)
         return;
     if(cancel_detpack) {
         CurrentMenu = &FO_MENU_DETPACK_CANCEL;
@@ -1096,11 +1096,11 @@ void FO_Menu_Detpack(float force, float cancel_detpack) = {
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Build(float force) = {
-    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_BUILD_CANCEL || CurrentMenu == &FO_MENU_BUILD)) {
+    if(fo_hud_menu_active && (CurrentMenu == &FO_MENU_BUILD_CANCEL || CurrentMenu == &FO_MENU_BUILD) && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1)
         return;
     if(SBAR.IsBuilding) {
         CurrentMenu = &FO_MENU_BUILD_CANCEL;
