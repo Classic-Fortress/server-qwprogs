@@ -19,8 +19,11 @@ void () TeamFortress_MOTD = {
     
     if (self.motd == 5) {
         if(csqcactive) {
-            if(self.team_no == 0 && !intermission_running) {
-                Menu_Team(0);
+            if(self.team_no == 0 && !intermission_running ) {
+                if (loginRequired && !self.login)
+                    Menu_Login();
+                else
+                    Menu_Team(0);
             }
         } else {
             sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
@@ -71,12 +74,12 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("-slot4", "-attack;impulse 24");
     } else if (self.motd == 30) {
         if(csqcactive) {
-            TeamFortress_AliasString("changeteam", "cmd changeteam");
+            TeamFortress_AliasString("changeteam", "fo_menu_team");
             TeamFortress_AliasString("teamblue", "cmd changeteam 1");
             TeamFortress_AliasString("teamred", "cmd changeteam 2");
             TeamFortress_AliasString("teamyellow", "cmd changeteam 3");
             TeamFortress_AliasString("teamgreen", "cmd changeteam 4");
-            TeamFortress_AliasString("changeclass", "cmd changeclass");
+            TeamFortress_AliasString("changeclass", "fo_menu_class");
             TeamFortress_AliasString("scout", "cmd changeclass 1");
             TeamFortress_AliasString("sniper", "cmd changeclass 2");
             TeamFortress_AliasString("soldier", "cmd changeclass 3");
@@ -221,7 +224,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
-        Menu_Team(1);
+        if (loginRequired && !self.login)
+            Menu_Login();
+        else
+            Menu_Team(1);
     }
 
     self.motd = self.motd + 1;

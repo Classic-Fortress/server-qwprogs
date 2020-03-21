@@ -576,6 +576,10 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
     Status_Print(pl, s1, s2, s3, s4, s5);
 };
 
+void (entity pl, string s1, string s2, string s3, string s4, string s5, string s6) CenterPrint6 = {
+    Status_Print(pl, s1, s2, s3, s4, s5, s6);
+};
+
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
@@ -774,6 +778,13 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientGrenadeThrown(entity pl) = {
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
 void UpdateClientStatusBar(entity pl)
 {
     // if we ever change to fte only, this could be changed to stats
@@ -934,7 +945,7 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
     }
-
+    WriteFloat(MSG_MULTICAST, ((pl.tfstate & TFSTATE_GRENPRIMED) == TFSTATE_GRENPRIMED));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

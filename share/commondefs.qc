@@ -19,6 +19,7 @@
 #define MSG_CAPTAINS        12
 #define MSG_MOTD            13
 #define MSG_PREMATCH    14
+#define MSG_GRENTHROWN      15
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

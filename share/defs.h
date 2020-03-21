@@ -268,6 +268,16 @@
 #define CF_MAPVOTE_DURATION         180     // Seconds to show map vote menu
 #define CF_MAPVOTE_DURATION_DECIDER 90      // Seconds to show map decider menu
 
+// team play vals
+#define TP_HALFDIRECT   128
+#define TP_NODIRECT     256
+#define TP_HALFAOE      512
+#define TP_NOAOE        1024
+#define TP_HALFMIRRORDIRECT 2048
+#define TP_FULLMIRRORDIRECT 4096
+#define TP_HALFMIRRORAOE    8192
+#define TP_FULLMIRRORAOE    16384
+
 /*======================================================*/
 /* Toggleable Game Settings				*/
 /*======================================================*/
@@ -1374,3 +1384,4 @@
 // first 32 are reserved
 #define STAT_TEAMNO    33
 #define STAT_READY     34
+#define STAT_CLASS     35
