@@ -2461,7 +2461,7 @@ void () PlayerPostThink = {
         CheckPowerups();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        TeamFortress_SetSpeed(self);
+        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();
