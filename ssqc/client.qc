@@ -582,6 +582,10 @@ void () DecodeLevelParms = {
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
+        // pyro setting to rocketjump like soldier
+        pyro_soldiercannon = CF_GetSetting("pyrosold", "pyro_soldiercannon", "off");
+
+
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
 

@@ -64,6 +64,7 @@ New features
 * Dropping flag now possible on all maps using /dropflag.
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
+* Option for pyro to rocket jump with incendiary cannnon rockets like soldier `localinfo pyro_soldiercannon on`.
 
 
 == Removed ===
