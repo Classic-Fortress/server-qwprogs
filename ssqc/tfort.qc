@@ -467,7 +467,7 @@ void () TeamFortress_Inventory = {
     if (fl > 0) {
         string g2 = strcat(ftos(fl), " ", GetGrenName(self.tp_grenades_2));
         if (fl > 1)
-            g2 = strcat(g1, "s");
+            g2 = strcat(g2, "s");
 
         g2 = strcat(g2, "\n");
         sprint(self, PRINT_HIGH, g2);
