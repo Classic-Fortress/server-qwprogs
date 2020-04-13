@@ -240,15 +240,21 @@ void() CSQC_Parse_Event = {
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
             quad_rounds_total = readfloat();
+            print("MEHT: MOTD Event: Game Mode: ", ftos(SBAR.GameMode), ", Round Total: ", ftos(quad_rounds_total), ", CountdownStarted: ", ftos(SBAR.CountdownStarted), "\n"); 
             break;
         case MSG_PREMATCH:
-            float prematch = readbyte();
+            prematch = readbyte();
+            round_active = readbyte();
+            round_over = readbyte();
             SBAR.CountdownStarted = readbyte();
             SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
             SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
             SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
-            motd_expiry = time + MOTD_TIME;
+            //motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
+            //game_started = readbyte();
+            print("MEHT: Prematch Event: ", ftos(prematch), ", Round Active: ", ftos(round_active), ", Round Over: ", ftos(round_over));
+            print(", Quad Round: ", ftos(quad_round), ", CountdownStarted: ", ftos(SBAR.CountdownStarted), "\n");
             break;
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;

@@ -123,6 +123,13 @@ void () StartMatch =
         self = oldself;
         te = find(te, classname, "player");
     }
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
+    }
 
     te = find(world, classname, "prematch");
     te.classname = "match";
@@ -294,6 +301,13 @@ void () ResetBreakAndReady = {
             UpdateClientPrematch(te, TRUE);
         }
         te = find (te, classname, "player");
+    }
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
     }
 }
 
