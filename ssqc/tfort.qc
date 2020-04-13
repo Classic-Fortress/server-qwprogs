@@ -394,6 +394,43 @@ void () TeamFortress_DisplayLegalClasses = {
     sprint(self, PRINT_HIGH, "\n");
 };
 
+string GetGrenName(float type)
+{
+    string s = "";
+    switch (type)
+    {
+        case GR_TYPE_NORMAL:
+            s = "normal grenade";
+            break;
+        case GR_TYPE_NAIL:
+            s = (nailgren_type == NGR_TYPE_LASER) ? "shock grenade" : "nail grenade";
+            break;
+        case GR_TYPE_MIRV:
+            s = "mirv grenade";
+            break;
+        case GR_TYPE_NAPALM:
+            s = "napalm grenade";
+            break;
+        case GR_TYPE_FLARE:
+            s = "flare";
+            break;
+        case GR_TYPE_GAS:
+            s = "hallucinogenic grenade";
+            break;
+        case GR_TYPE_EMP:
+            s = "EMP grenade";
+            break;
+        case GR_TYPE_CALTROP:
+            s = "caltrop canister";
+            break;
+        case GR_TYPE_FLASH:
+            s = "flash grenade";
+            break;
+    }
+
+    return s;
+}
+
 void () TeamFortress_Inventory = {
     local entity en;
     local string st;
@@ -418,65 +455,24 @@ void () TeamFortress_Inventory = {
 
     fl = self.no_grenades_1;
     if (fl > 0) {
-        sprint(self, PRINT_HIGH, ftos(fl));
-        if (self.tp_grenades_1 == GR_TYPE_NORMAL)
-            sprint(self, PRINT_HIGH, " normal grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_NAIL) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                sprint(self, PRINT_HIGH, " shock grenade");
-            } else {
-                sprint(self, PRINT_HIGH, " nail grenade");
-            }
-        } else if (self.tp_grenades_1 == GR_TYPE_MIRV)
-            sprint(self, PRINT_HIGH, " mirv grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_NAPALM)
-            sprint(self, PRINT_HIGH, " napalm grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_FLARE)
-            sprint(self, PRINT_HIGH, " flare");
-        else if (self.tp_grenades_1 == GR_TYPE_GAS)
-            sprint(self, PRINT_HIGH, " hallucinogenic grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_EMP)
-            sprint(self, PRINT_HIGH, " EMP grenade");
-        else if (self.tp_grenades_1 == GR_TYPE_CALTROP)
-            sprint(self, PRINT_HIGH, " caltrop canister");
-        else if (self.tp_grenades_1 == GR_TYPE_FLASH)
-            sprint(self, PRINT_HIGH, " flash grenade");
-
+        string g1 = strcat(ftos(fl), " ", GetGrenName(self.tp_grenades_1));
         if (fl > 1)
-            sprint(self, PRINT_HIGH, "s");
-        sprint(self, PRINT_HIGH, "\n");
+            g1 = strcat(g1, "s");
+
+        g1 = strcat(g1, "\n");
+        sprint(self, PRINT_HIGH, g1);
     }
 
     fl = self.no_grenades_2;
     if (fl > 0) {
-        sprint(self, PRINT_HIGH, ftos(fl));
-        if (self.tp_grenades_2 == GR_TYPE_NORMAL)
-            sprint(self, PRINT_HIGH, " normal grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_CONCUSSION)
-            sprint(self, PRINT_HIGH, " concussion grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_NAIL) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                sprint(self, PRINT_HIGH, " shock grenade");
-            } else {
-                sprint(self, PRINT_HIGH, " nail grenade");
-            }
-        } else if (self.tp_grenades_2 == GR_TYPE_MIRV)
-            sprint(self, PRINT_HIGH, " mirv grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_NAPALM)
-            sprint(self, PRINT_HIGH, " napalm grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_FLARE)
-            sprint(self, PRINT_HIGH, " flare");
-        else if (self.tp_grenades_2 == GR_TYPE_GAS)
-            sprint(self, PRINT_HIGH, " hallucinogenic grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_EMP)
-            sprint(self, PRINT_HIGH, " EMP grenade");
-        else if (self.tp_grenades_2 == GR_TYPE_FLASH)
-            sprint(self, PRINT_HIGH, " flash grenade");
-
+        string g2 = strcat(ftos(fl), " ", GetGrenName(self.tp_grenades_2));
         if (fl > 1)
-            sprint(self, PRINT_HIGH, "s");
-        sprint(self, PRINT_HIGH, "\n");
+            g2 = strcat(g1, "s");
+
+        g2 = strcat(g2, "\n");
+        sprint(self, PRINT_HIGH, g2);
     }
+
     if (self.tf_items & NIT_SCANNER)
         sprint(self, PRINT_HIGH, "Scanner\n");
 
