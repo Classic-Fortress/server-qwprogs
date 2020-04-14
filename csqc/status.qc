@@ -1,7 +1,7 @@
 float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align);
 
 void(string panelid, float display, string text, string icon) drawClipSize = {
-    if (SBAR.ClipSize || fo_hud_editor)
+    if (SBAR.ClipSize != "" || fo_hud_editor)
     {
         GetDrawPanel(panelid);
         Hud_DrawPanelLMP(panelid, text, icon);
@@ -271,26 +271,30 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
         if(showingscores || !panel.Display) {
             return;
         }
-        if(SBAR.GameMode & 4) {
-            message = "^4Duel Mode^7";
-        } else if(SBAR.GameMode & 2) {
-            message = "^3Quad Mode^7";
-        } else if(SBAR.GameMode & 1) {
-            message = "^1Clan Battle^7";
-        }
-        if(prematch && !round_over) {
-            message = strcat(message, " (prematch)");
+        if(SBAR.GameMode & GAMEMODE_VOTE) {
+            message = "^5Vote Mode^7";
         } else {
-            //Quad mode only
-            if(SBAR.GameMode & 2) {
-                if(round_over) {
-                    if(prematch) {
-                        message = strcat(message, " (Match over)");
-                    } else {
-                        message = strcat(message, " (Intermission)");
+            if(SBAR.GameMode & GAMEMODE_DUEL) {
+                message = "^4Duel Mode^7";
+            } else if(SBAR.GameMode & GAMEMODE_QUAD) {
+                message = "^3Quad Mode^7";
+            } else if(SBAR.GameMode & GAMEMODE_CLAN) {
+                message = "^1Clan Battle^7";
+            }
+            if(prematch && !round_over) {
+                message = strcat(message, " (prematch)");
+            } else {
+                //Quad mode only
+                if(SBAR.GameMode & 2) {
+                    if(round_over) {
+                        if(prematch) {
+                            message = strcat(message, " (Match over)");
+                        } else {
+                            message = strcat(message, " (Intermission)");
+                        }
+                    } else if(quad_round > 0) {
+                        message = strcat(message, " Round ", ftos(quad_rounds_total + 1 - quad_round), "/", ftos(quad_rounds_total));
                     }
-                } else if(quad_round > 0) {
-                    message = strcat(message, " Round ", ftos(quad_rounds_total + 1 - quad_round), "/", ftos(quad_rounds_total));
                 }
             }
         }

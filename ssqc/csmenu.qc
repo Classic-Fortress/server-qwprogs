@@ -206,7 +206,12 @@ void UpdateClientMOTD(entity pl) = {
     WriteByte(MSG_MULTICAST, MSG_MOTD);
     WriteString(MSG_MULTICAST, infokey(world, "motd1"));
     WriteString(MSG_MULTICAST, infokey(world, "motd2"));
-    WriteFloat(MSG_MULTICAST, ((clanbattle?1:0) + (quadmode?2:0) + (duelmode?4:0) + (cb_prematch?8:0) + (round_active?16:0) + (round_over?32:0)));
+    WriteFloat(MSG_MULTICAST, (
+        (clanbattle?GAMEMODE_CLAN:0) + 
+        (quadmode?GAMEMODE_QUAD:0) + 
+        (duelmode?GAMEMODE_DUEL:0) + 
+        (votemode?GAMEMODE_VOTE:0)
+    ));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }

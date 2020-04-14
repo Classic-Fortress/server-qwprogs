@@ -38,6 +38,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
+    registercommand("tracktarget");
     
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
@@ -182,6 +183,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-showscores":
             showingscores = FALSE;
+            break;
+        case "tracktarget":
+            localcmd("cmd tracktarget\n");
             break;
     }	
     return FALSE;
