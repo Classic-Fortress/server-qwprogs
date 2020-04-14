@@ -202,8 +202,10 @@ void InitPrematch()
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
-    UpdateClientPrematch(self, !cb_prematch);
-    UpdateClientMOTD(self);
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(self, !cb_prematch);
+        UpdateClientMOTD(self);
+    }
 }
 
 void (entity goalitem) SetFlagSendMethod = {
