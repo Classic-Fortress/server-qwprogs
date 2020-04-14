@@ -240,7 +240,6 @@ void() CSQC_Parse_Event = {
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
             quad_rounds_total = readfloat();
-            print("MEHT: MOTD Event: Game Mode: ", ftos(SBAR.GameMode), ", Round Total: ", ftos(quad_rounds_total), ", CountdownStarted: ", ftos(SBAR.CountdownStarted), "\n"); 
             break;
         case MSG_PREMATCH:
             prematch = readbyte();
@@ -253,8 +252,6 @@ void() CSQC_Parse_Event = {
             //motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
             //game_started = readbyte();
-            print("MEHT: Prematch Event: ", ftos(prematch), ", Round Active: ", ftos(round_active), ", Round Over: ", ftos(round_over));
-            print(", Quad Round: ", ftos(quad_round), ", CountdownStarted: ", ftos(SBAR.CountdownStarted), "\n");
             break;
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
