@@ -202,7 +202,8 @@ void InitPrematch()
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
-    
+    UpdateClientPrematch(self, !cb_prematch);
+    UpdateClientMOTD(self);
 }
 
 void (entity goalitem) SetFlagSendMethod = {
@@ -2581,7 +2582,7 @@ void (optional float csqcactive) ClientConnect = {
             tfdet = find(tfdet, classname, "info_tfgoal");
         }
         UpdateClientMOTD(self);
-        if(quadmode)
+        //if(quadmode)
             UpdateClientPrematch(self, !cb_prematch);
     }
     if (cb_prematch)

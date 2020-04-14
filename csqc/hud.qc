@@ -54,7 +54,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     float yoffset = height - 64;
 
     // TODO - maybe implement these to allow for pivoting of items
-
+/*
     vector pos, fill;
     float scale, display, nodeInsertLoc;
     pos = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
@@ -72,13 +72,26 @@ void FO_Hud_Editor_LoadDefaultSettings()
         Hud_Panels[i].NodeInsertLoc = nodeInsertLoc;
         //pnl.Name = name;
     }
-    //Default menus to centre of the screen
+*/
+    //Default menus, id, ready and MOTD to centre of the screen
     Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
+    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2 + Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.y];
+    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
+    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
 }
-
-float GetTextAlignOffset(float pos, float iconsize, string text, float textsize, float align)  {
+/*
+ * pos = x coord of the UI box
+ * width = x width of the UI box
+ * iconsize = x width of the icon (text will start before/after it); offset
+ * text = actual text to display
+ * textsize = fontsize
+ * align = alignment
+ */
+float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align)  {
     if(align == FO_HUD_INSERT_AFTER) {
-        return pos - strlen(text) * textsize;
+        return pos - strlen(text) * textsize + width - iconsize;
+    } else if(align == FO_HUD_INSERT_MIDDLE) {
+        return pos + (width / 2) - ((strlen(text) * textsize) / 2);
     }
     return pos + iconsize;
 }
@@ -125,12 +138,12 @@ void Hud_DrawFlagStatusBar(string panelid)
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
 			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
-			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].carrier,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].carrier,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
 			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
-			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].locname,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].locname,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
 			}
 			
             drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
@@ -194,9 +207,9 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
 
 void Hud_DrawClassInfoPanel(string id, float playerclass)
 {
-    if(fo_hud_editor && !SBAR.PlayerClass) {
+    if(fo_hud_editor) {
         hud_panel(id, DrawPanel.Position, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display);
-
+        drawpic(DrawPanel.Position, "textures/wad/face1.png", FO_Hud_Icon_Size * DrawPanel.Scale, '1 1 1', 1, 0);
         return;
     }
     
@@ -410,6 +423,10 @@ void Hud_DrawIdentifyPanel(string id, string identify)
 {
     if (!DrawPanel.Display && !fo_hud_editor)
         return;
+        
+    if(fo_hud_editor && !identify) {
+        identify = "<Player Name>\n<Player Class>";
+    }
 
     vector pos;
     pos = DrawPanel.Position;

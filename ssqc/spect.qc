@@ -44,6 +44,10 @@ void () SpectatorConnect = {
         stuffcmd(self, ".cfg\n");
     }
     self.motd = 0;
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientMOTD(self);
+        UpdateClientPrematch(self, !cb_prematch);
+    }
 };
 
 void () SpectatorDisconnect = {

@@ -215,8 +215,11 @@ void UpdateClientPrematch(entity pl, float countdownstarted) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_PREMATCH);
-    WriteByte(MSG_MULTICAST, ((cb_prematch?1:0 + (round_active?2:0) + (round_over?4:0))));
+    WriteByte(MSG_MULTICAST, cb_prematch);
+    WriteByte(MSG_MULTICAST, round_active);
+    WriteByte(MSG_MULTICAST, round_over);
     WriteByte(MSG_MULTICAST, countdownstarted);
     WriteFloat(MSG_MULTICAST, rounds);
+    //WriteByte(MSG_MULTICAST, countdownstarted);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
