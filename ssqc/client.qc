@@ -2568,24 +2568,12 @@ void (optional float csqcactive) ClientConnect = {
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
-    entity tfdet = find(world, classname, "info_tfdetect");
-    if(tfdet) {
-        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
-    }
+
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        tfdet = find(world, classname, "info_tfgoal");
-        while (tfdet) {
-            if (tfdet.track_goal) {
-                InitClientFlagStatus(self, -1, tfdet, FLAGINFO_ICON_BUTTON);
-            }
-            tfdet = find(tfdet, classname, "info_tfgoal");
-        }
+        InitAllStatuses(self);
         UpdateClientMOTD(self);
         //if(quadmode)
-            UpdateClientPrematch(self, !cb_prematch);
+        UpdateClientPrematch(self, !cb_prematch);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
