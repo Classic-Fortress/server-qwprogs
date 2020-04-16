@@ -13,7 +13,7 @@ void () NailGrenadeTouch = {
         return;
 
     // If the Nail Grenade hits a player, it just bounces off
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -141,7 +141,7 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
 	TF_T_Damage(trace_ent, self, self.real_owner, lasergren_damage, TF_TD_NOTTEAM, TF_TD_ELECTRICITY);
 	}
     if (self.t_width < time) {
-        sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
         self.t_width = time + 0.8;
     }
     

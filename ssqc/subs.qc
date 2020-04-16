@@ -1,6 +1,22 @@
 void (entity Goal, entity AP) DoGoalWork;
 void (entity Goal, entity AP) DoGroupWork;
 
+void FO_SetModel(entity e, string fomdl)
+{
+    //e.dimension_seen = e.dimension_seen - (e.dimension_seen & DMN_FLASH);
+    e.dimension_seen = DMN_NOFLASH;
+    setmodel(e, fomdl);
+}
+
+void FO_Sound(entity e, float chan, string samp, float vol, float atten)
+{
+    float olddimens = e.dimension_seen;
+    // make the sound go to no flash, so it isn't heard by those that are flashed
+    e.dimension_seen = DMN_NOFLASH;
+    sound(e, chan, samp, vol, atten);
+    e.dimension_seen = olddimens;
+}
+
 void () SUB_Null = {
 };
 
@@ -148,7 +164,7 @@ void () SUB_UseTargets = {
 
         CenterPrint(activator, self.message);
         if (!self.noise)
-            sound(activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
+            FO_Sound(activator, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
     }
 
     if (activator.classname == "player") {

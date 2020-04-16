@@ -488,6 +488,7 @@ float burstgren_interval;
 float burstgren_range;
 
 float old_grens;
+float fo_flash;
 float invis_only;
 float flagem_checked;
 float cease_fire;
@@ -678,3 +679,6 @@ float canlog;
 .string grenadename;
 .float classtime;
 .float goalrunningtime;
+
+// flash stuff
+float FO_FlashDimension;

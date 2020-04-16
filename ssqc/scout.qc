@@ -28,12 +28,12 @@ void () CF_Scout_Dash = {
         makevectors(self.angles);
         self.velocity = v_forward * 540;
         self.velocity_z = 181;
-        sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
 }
 
 void () CanisterTouch =
 {
-    sound(self, 1, "weapons/tink1.wav", 1, 1);
+    FO_Sound(self, CHAN_WEAPON, "weapons/tink1.wav", 1, 1);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -66,7 +66,7 @@ void () CaltropScatterThink = {
             self.movetype = MOVETYPE_TOSS;
             self.touch = CaltropTouch;
             self.angles = '90 90 90';
-            sound(self, CHAN_AUTO, "weapons/tink1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_AUTO, "weapons/tink1.wav", 1, ATTN_NORM);
             setorigin(self, self.origin);
             return;
         } else {
@@ -104,7 +104,7 @@ void () ScatterCaltrops = {
         e.weapon = 10;
         e.owner = self.owner;
         e.team_no = self.owner.team_no;
-        setmodel(e, "progs/caltrop.mdl");
+        FO_SetModel(e, "progs/caltrop.mdl");
         e.mins = '-4 -4 -8';
         e.maxs = '4 4 4';
         e.angles = '0 0 0';
@@ -128,39 +128,51 @@ void () ScatterCaltrops = {
 };
 
 void () FlashGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
 
+void StuffFlash(entity te, float amt)
+{
+    string st = ftos(amt * 10);
+    string cmd = strcat("v_cshift ", st, " ", st);
+    cmd = strcat(cmd, " ", st, " ", st, "\n");
+    stuffcmd(te, cmd);
+}
+
 void () FlashTimer = {
     local entity te;
-    local string st;
 
     te = self.owner;
     te.FlashTime = te.FlashTime - 0.6;
     if (te.FlashTime < 5) {
-        te.FlashTime = 0;
+        te.FlashTime = 1;
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
+        te.dimension_see = DMN_NOFLASH;
+        te.dimension_seen = DMN_NOFLASH;
         return;
     }
-    st = ftos(te.FlashTime * 10);
-    stuffcmd(te, "v_cshift ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, "\n");
+
+    StuffFlash(te, te.FlashTime);
+
     self.nextthink = time + 0.6;
 };
 
+void SetFlashDimension(entity te)
+{
+    FO_FlashDimension = ((FO_FlashDimension + 1) == 8) ? DMN_FLASH : FO_FlashDimension + 1;
+    
+    float playerdimension = 1<<FO_FlashDimension;
+
+    // i hate bitflags and i'm bad so this is probably wrong
+    te.dimension_see = DMN_FLASH | playerdimension;
+    te.dimension_seen = playerdimension | DMN_NOFLASH;
+}
+
 void () FlashGrenadeExplode = {
     local entity te;
-    local string st;
 
     self.effects = self.effects | EF_BRIGHTLIGHT;
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -180,7 +192,23 @@ void () FlashGrenadeExplode = {
                     TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
                 }
                 if (te.health > 0) {
-                    if (te.FlashTime == 0) {
+                    entity ft;
+                    ft = find(world, classname, "flashtimer");
+                    float found;
+                    found = FALSE;
+                    
+                    while (ft)
+                    {
+                        if (ft.owner == te)
+                        {
+                            found = TRUE;
+                            ft.nextthink = time + 1;
+                        }
+                        ft = find(ft, classname, "flashtimer");
+                    }
+
+                    if (!found)
+                    {
                         newmis = spawn();
                         newmis.classname = "timer";
                         newmis.netname = "flashtimer";
@@ -189,21 +217,17 @@ void () FlashGrenadeExplode = {
                         newmis.think = FlashTimer;
                         newmis.nextthink = time + 1;
                     }
-                    if (te == self.owner)
+                    
+                    if (fo_flash)
+                        te.FlashTime = 10;
+                    else if (te != self.owner)
                         te.FlashTime = 16;
                     else
                         te.FlashTime = 24;
 
-                    st = ftos(te.FlashTime * 10);
-                    stuffcmd(te, "v_cshift ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, "\n");
+                    StuffFlash(te, te.FlashTime);
+
+                    SetFlashDimension(te);
                 }
             }
         }
@@ -213,7 +237,7 @@ void () FlashGrenadeExplode = {
 };
 
 void () ConcussionGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -238,7 +262,7 @@ void () OldConcussionGrenadeTimer = {
         return;
     }
     newmis = spawn();
-    setmodel(newmis, "progs/s_bubble.spr");
+    FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, self.owner.origin);
     newmis.movetype = 8;
     newmis.solid = 0;
@@ -293,7 +317,7 @@ void () ConcussionGrenadeTimer = {
         (self.health == 600)
         || (self.health == 800) || (self.health == 1000)) {
         newmis = spawn();
-        setmodel(newmis, "progs/s_bubble.spr");
+        FO_SetModel(newmis, "progs/s_bubble.spr");
         setorigin(newmis, self.owner.origin);
         newmis.movetype = MOVETYPE_NOCLIP;
         newmis.solid = SOLID_NOT;

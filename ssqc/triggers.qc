@@ -29,7 +29,7 @@ void () multi_trigger = {
         WriteByte(MSG_ALL, SVC_FOUNDSECRET);
     }
     if (self.noise) {
-        sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
     }
     self.takedamage = DAMAGE_NO;
     activator = self.enemy;
@@ -229,7 +229,7 @@ void () play_teleport = {
     else
         tmpstr = "misc/r_tele5.wav";
 
-    sound(self, CHAN_VOICE, tmpstr, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, tmpstr, 1, ATTN_NORM);
     remove(self);
 };
 
@@ -446,7 +446,7 @@ void () trigger_onlyregistered_touch = {
         remove(self);
     } else if (self.message != "") {
         CenterPrint(other, self.message);
-        sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
+        FO_Sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
     }
 };
 
@@ -515,7 +515,7 @@ void () trigger_push_touch = {
     {
         if (other.classname == "grenade" || other.health > 0)
         {
-            sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+            FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
             other.velocity = self.movedir;
         }
     }
@@ -528,7 +528,7 @@ void () trigger_push_touch = {
             if (other.classname == "player") {
                 if (other.fly_sound < time) {
                     other.fly_sound = time + 1.5;
-                    sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                    FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
                 }
             }
         }
