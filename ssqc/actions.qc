@@ -164,6 +164,23 @@ void () TeamFortress_SaveMe = {
     self.saveme_time = time;
 };
 
+void (entity pe_player) FO_SpecTrackPoint = {
+    if(pe_player.classname != "observer") {
+        return;
+    }
+    local vector v_source;
+    
+    makevectors(pe_player.v_angle);
+    v_source = pe_player.origin + v_forward * 10;
+    traceline(pe_player.origin, pe_player.origin + v_forward * 2048, 0, pe_player);
+    
+    if (trace_ent != world) {
+        if(trace_ent.classname == "player") {
+            stuffcmd(pe_player, strcat("track ", trace_ent.netname, "\n"));
+        }
+    }
+}
+
 void (entity pe_player, float f_type) CF_Identify = {
     local vector v_source;
 

@@ -623,7 +623,11 @@ void () IncendiaryRadius =
 {
     local float damg;
 
-    damg = 72;
+    if(pyro_soldiercannon)
+        damg = 92;
+    else
+        damg = 72;
+		
     deathmsg = 15;
     T_RadiusDamage(self, self.owner, damg, other);
     self.origin = (self.origin - (8 * normalize (self.velocity)));

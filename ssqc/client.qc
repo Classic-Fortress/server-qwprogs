@@ -202,7 +202,10 @@ void InitPrematch()
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
-    
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(self, !cb_prematch);
+        UpdateClientMOTD(self);
+    }
 }
 
 void (entity goalitem) SetFlagSendMethod = {
@@ -584,6 +587,10 @@ void () DecodeLevelParms = {
 
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
+
+        // pyro setting to rocketjump like soldier
+        pyro_soldiercannon = CF_GetSetting("pyrosold", "pyro_soldiercannon", "off");
+
 
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
@@ -2466,7 +2473,7 @@ void () PlayerPostThink = {
         CheckPowerups();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        TeamFortress_SetSpeed(self);
+        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();
@@ -2570,24 +2577,12 @@ void (optional float csqcactive) ClientConnect = {
             sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
-    entity tfdet = find(world, classname, "info_tfdetect");
-    if(tfdet) {
-        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
-    }
+
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        tfdet = find(world, classname, "info_tfgoal");
-        while (tfdet) {
-            if (tfdet.track_goal) {
-                InitClientFlagStatus(self, -1, tfdet, FLAGINFO_ICON_BUTTON);
-            }
-            tfdet = find(tfdet, classname, "info_tfgoal");
-        }
+        InitAllStatuses(self);
         UpdateClientMOTD(self);
-        if(quadmode)
-            UpdateClientPrematch(self, !cb_prematch);
+        //if(quadmode)
+        UpdateClientPrematch(self, !cb_prematch);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
