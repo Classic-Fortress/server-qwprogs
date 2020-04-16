@@ -10,6 +10,7 @@ void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
 void () ConcussionGrenadeExplode;
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
@@ -219,7 +220,11 @@ void () FlashGrenadeExplode = {
                     }
                     
                     if (fo_flash)
-                        te.FlashTime = 10;
+                    {
+                        float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "10");
+                        te.FlashTime = fo_flashtime;
+                    }
+                        
                     else if (te != self.owner)
                         te.FlashTime = 16;
                     else
