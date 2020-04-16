@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* hud commands: `fo_hud [element] [setting] [value]` lets you manually configure the extra hud elements' settings and `fo_hud_save` saves them.
 * new spectator command `tracktarget` lets you track whoever you're pointing at
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map

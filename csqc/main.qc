@@ -2,6 +2,11 @@ void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings();
 void FO_Hud_Editor_LoadDefaultSettings();
+void FO_Hud_Editor_List_Panels();
+void FO_Hud_Editor_Show_Panel(string panelid);
+void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
+void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
+void Hud_WriteCfg(string path)
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
@@ -23,6 +28,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 	registercommand("fo_hud_editor");
 	registercommand("fo_hud_reload");
 	registercommand("fo_hud_reset");
+	registercommand("fo_hud");
+	registercommand("fo_hud_save");
 	registercvar(FOCMD_AUTOHOP, "0");
 	registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
@@ -110,6 +117,35 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 			break;
 		case "fo_hud_reset":
 			FO_Hud_Editor_LoadDefaultSettings();
+			break;
+		case "fo_hud":
+            if(argv(1) == "") {
+                FO_Hud_Editor_List_Panels();
+            } else if(argv(3) == "") {
+                FO_Hud_Editor_Print_Panel_Setting(argv(1), argv(2));
+            } else {
+                FO_Hud_Editor_Set_Panel_Setting(argv(1), argv(2), argv(3));
+            }
+            /*
+            switch(argv(1)) {
+                case "list":
+                    FO_Hud_Editor_List_Panels();
+                    break;
+                case "show":
+                case "get":
+                    FO_Hud_Editor_Print_Panel_Setting(argv(2), argv(3));
+                    break;
+                case "set":
+                    FO_Hud_Editor_Set_Panel_Setting(argv(2), argv(3), argv(4));
+                    break;
+                default:
+                    print("^1Usage:^7 fo_hud [<element> | <element> <property> | <element> <property> <value>]\n");
+                    break;
+            }
+            */
+			break;
+		case "fo_hud_save":
+			Hud_WriteCfg(FO_HUD_CONFIG_PATH);
 			break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
