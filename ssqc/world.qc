@@ -121,6 +121,7 @@ entity lastspawn;
 void WorldSpawnPost() 
 {
     loadloc();
+    FO_FlashDimension = -1;
 
     dremove(self);
 }
@@ -353,6 +354,8 @@ void () worldspawn = {
         } else {
         }
     }
+
+    dimension_send = DMN_NOFLASH;
 };
 
 void () StartFrame = {
@@ -401,4 +404,19 @@ void (entity ent) CopyToBodyQue = {
     setorigin(bodyque_head, ent.origin);
     setsize(bodyque_head, ent.mins, ent.maxs);
     bodyque_head = bodyque_head.owner;
+};
+
+
+// this is used for spawning world objects on map load.. not player, projectiles etc - also disables the engine's conditional spawning based on spawnflags, you're expected to do that part yourself
+void(void() fnc)CheckSpawn = {
+    if(fnc)
+    {
+        self.dimension_seen = DMN_NOFLASH | DMN_FLASH;
+        //bprint(PRINT_HIGH, strcat("spawning: ", self.classname, "\n"));
+        fnc();
+    }
+    else 
+    {
+        remove(self);
+    }
 };

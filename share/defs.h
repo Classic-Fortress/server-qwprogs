@@ -1385,3 +1385,7 @@
 #define STAT_TEAMNO    33
 #define STAT_READY     34
 #define STAT_CLASS     35
+
+// Dimensions
+#define DMN_FLASH 1 // when flashed, we set dimension see to this
+#define DMN_NOFLASH	256	// see all the things

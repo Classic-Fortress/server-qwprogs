@@ -28,27 +28,27 @@ entity(string type, entity p_owner) FlameSpawn =
         newmis.solid = SOLID_BBOX;
         newmis.effects = EF_DIMLIGHT;
         newmis.flame_id = "1";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "2") {
         newmis.movetype = MOVETYPE_BOUNCE;
         newmis.solid = SOLID_BBOX;
         newmis.flame_id = "2";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         newmis.frame = 1;
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "3") {
         newmis.movetype = MOVETYPE_FLYMISSILE;
         newmis.solid = SOLID_BBOX;
         newmis.flame_id = "3";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "4") {
         newmis.movetype = MOVETYPE_FLYMISSILE;
         newmis.flame_id = "4";
         newmis.frame = 1;
         newmis.solid = SOLID_BBOX;
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     }
     newmis.owner = p_owner;
@@ -103,7 +103,7 @@ void () Remove = {
 void () NapalmGrenadeFollow = {
     traceline(self.origin, self.origin, TRUE, self);
     if (trace_inwater == 1) {
-        sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
         FlameDestroy(self);
     }
     if (self.velocity == '0 0 0') {
@@ -113,7 +113,7 @@ void () NapalmGrenadeFollow = {
 };
 
 void () NapalmGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -144,7 +144,7 @@ void () NapalmGrenadeNetThink = {
     makevectors(self.v_angle);
     traceline(self.origin, self.origin, 1, self);
     if (trace_inwater == 1) {
-        sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
         RemoveGrenade();
         return;
     }
@@ -177,7 +177,7 @@ void () NapalmGrenadeNetThink = {
 void () NapalmGrenadeExplode = {
     local entity head;
 
-    sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
     traceline(self.origin, self.origin, 1, self);
     if (trace_inwater == 1) {
         dremove(self);
@@ -283,7 +283,7 @@ void () FlameFollow = {
         setorigin(self, vtemp);
         if (self.model != "progs/flame2.mdl") {
             self.model = "progs/flame2.mdl";
-            setmodel(self, self.model);
+            FO_SetModel(self, self.model);
         }
     } else {
         if (self.model == "progs/flame2.mdl") {
@@ -292,7 +292,7 @@ void () FlameFollow = {
         }
     }
     if ((self.enemy.waterlevel > 1) || (self.enemy.classname != "player" && self.enemy.waterlevel > 0)) {
-        sound(self, 2, "misc/vapeur2.wav", 1, 1);
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, 1);
         self.enemy.numflames = self.enemy.numflames - 1;
         FlameDestroy(self);
         return;
@@ -336,7 +336,7 @@ void () OnPlayerFlame_touch = {
         }
         if (other.numflames < 1) {
             flame = FlameSpawn("1", other);
-            sound(flame, 2, "ambience/fire1.wav", 1, 1);
+            FO_Sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1, 1);
         } else {
             flame = FlameSpawn("3", other);
             if (flame == world) {
@@ -394,7 +394,7 @@ void () WorldFlame_touch = {
         }
         if (other.numflames < 1) {
             flame = FlameSpawn("1", other);
-            sound(flame, 2, "ambience/fire1.wav", 1, 1);
+            FO_Sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1, 1);
         } else {
             flame = FlameSpawn("3", other);
             if (flame == world) {
@@ -455,7 +455,7 @@ void () Flamer_stream_touch = {
             }
             if (other.numflames < 1) {
                 flame = FlameSpawn("1", other);
-                sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1,
+                FO_Sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1,
                       ATTN_NORM);
             } else {
                 flame = FlameSpawn("3", other);
@@ -523,7 +523,7 @@ void () Napalm_touch = {
                     (other.team_no == self.owner.team_no)) {
                     return;
                 }
-                sound(other, CHAN_VOICE, "ambience/fire1.wav", 1, ATTN_NORM);
+                FO_Sound(other, CHAN_VOICE, "ambience/fire1.wav", 1, ATTN_NORM);
                 CenterPrint(other, "You are on fire!\n");
                 stuffcmd(other, "bf\n");
             }
@@ -594,15 +594,15 @@ void () W_FireFlame = {
         NewBubbles(2, self.origin + v_forward * 64);
         rn = random();
         if (rn < 0.5) {
-            sound(self, CHAN_WEAPON, "misc/water1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "misc/water1.wav", 1, ATTN_NORM);
         } else {
-            sound(self, CHAN_WEAPON, "misc/water2.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "misc/water2.wav", 1, ATTN_NORM);
         }
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
     self.currentammo = self.ammo_cells;
-    sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
     flame = spawn();
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
@@ -614,7 +614,7 @@ void () W_FireFlame = {
     flame.touch = Flamer_stream_touch;
     flame.think = s_explode1;
     flame.nextthink = time + 0.15;
-    setmodel(flame, "progs/s_explod.spr");
+    FO_SetModel(flame, "progs/s_explod.spr");
     setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 };
@@ -696,7 +696,7 @@ void () W_FireIncendiaryCannon = {
     }
     self.ammo_rockets = self.ammo_rockets - 3;
     self.currentammo = self.ammo_rockets;
-    sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-3, self);
     newmis = spawn();
     newmis.owner = self;
@@ -717,7 +717,7 @@ void () W_FireIncendiaryCannon = {
     newmis.nextthink = time + 5;
     newmis.weapon = DMSG_INCENDIARY;
     newmis.classname = "pyro_rocket";
-    setmodel(newmis, "progs/missile.mdl");
+    FO_SetModel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 };
