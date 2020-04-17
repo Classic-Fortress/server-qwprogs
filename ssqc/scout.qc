@@ -206,7 +206,7 @@ void FO_FlashExplode()
                 frac = (rad - vlen(self.origin - org)) / rad;
                 dam = 60 * frac;
                 deathmsg = DMSG_GREN_FLASH;
-                TF_T_Damage(te, self, self.owner, dam, 0, TF_TD_OTHER);
+                TF_T_Damage(te, self, self.owner, dam, 2, 16 | 4);
                 
                 if (te.health > 0) {
                     entity ft;
