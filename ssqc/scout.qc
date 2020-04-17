@@ -136,7 +136,7 @@ void () FlashGrenadeTouch = {
 
 void StuffFlash(entity te, float amt)
 {
-    string st = ftos(amt * 10);
+    string st = ftos(amt);
     string cmd = strcat("v_cshift ", st, " ", st);
     cmd = strcat(cmd, " ", st, " ", st, "\n");
     stuffcmd(te, cmd);
@@ -156,10 +156,29 @@ void () FlashTimer = {
         return;
     }
 
-    StuffFlash(te, te.FlashTime);
+    StuffFlash(te, (te.FlashTime*10));
 
     self.nextthink = time + 0.6;
 };
+
+void FO_FlashTimer()
+{
+    local entity te;
+
+    te = self.owner;
+    te.FlashTime = te.FlashTime - .1;
+    if (te.FlashTime <= 0) {
+        stuffcmd(te, "v_cshift; wait; bf\n");
+        remove(self);
+        te.dimension_see = DMN_NOFLASH;
+        te.dimension_seen = DMN_NOFLASH;
+        return;
+    }
+
+    StuffFlash(te, (te.FlashTime*10));
+
+    self.nextthink = time + .1;
+}
 
 void SetFlashDimension(entity te)
 {
@@ -170,6 +189,63 @@ void SetFlashDimension(entity te)
     // i hate bitflags and i'm bad so this is probably wrong
     te.dimension_see = DMN_FLASH | playerdimension;
     te.dimension_seen = playerdimension | DMN_NOFLASH;
+}
+
+void FO_FlashExplode()
+{
+    vector org;
+    float dam, frac;
+    entity te;
+    float rad = 300;
+    te = findradius(self.origin, rad);
+    while (te) {
+        if (te.classname == "player") {
+            traceline(self.origin, te.origin, 1, self);
+            if (trace_fraction == 1) {
+                org = te.origin + (te.mins + te.maxs) * 0.5;
+                frac = (rad - vlen(self.origin - org)) / rad;
+                dam = 60 * frac;
+                TF_T_Damage(te, self, self.owner, dam, 0, TF_TD_OTHER);
+                
+                if (te.health > 0) {
+                    entity ft;
+                    ft = find(world, classname, "flashtimer");
+                    float found;
+                    found = FALSE;
+                    
+                    while (ft)
+                    {
+                        if (ft.owner == te)
+                        {
+                            found = TRUE;
+                            ft.nextthink = time + .1;
+                        }
+                        ft = find(ft, classname, "flashtimer");
+                    }
+
+                    if (!found)
+                    {
+                        newmis = spawn();
+                        newmis.classname = "timer";
+                        newmis.netname = "flashtimer";
+                        newmis.team_no = self.owner.team_no;
+                        newmis.owner = te;
+                        newmis.think = FO_FlashTimer;
+                        newmis.nextthink = time + .1;
+                    }
+                    
+                    float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+                    fo_flashtime = fo_flashtime * (frac + frac * 0.5); // fall off is awful, let's half it
+                    te.FlashTime = fo_flashtime;
+
+                    StuffFlash(te, (te.FlashTime * 10));
+
+                    SetFlashDimension(te);
+                }
+            }
+        }
+        te = te.chain;
+    }
 }
 
 void () FlashGrenadeExplode = {
@@ -183,61 +259,62 @@ void () FlashGrenadeExplode = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    te = findradius(self.origin, 300);
-    while (te) {
-        if (te.classname == "player") {
-            traceline(self.origin, te.origin, 1, self);
-            if (trace_fraction == 1) {
-                if (vlen(self.origin - te.origin) <= 200) {
-                    deathmsg = DMSG_GREN_FLASH;
-                    TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
-                }
-                if (te.health > 0) {
-                    entity ft;
-                    ft = find(world, classname, "flashtimer");
-                    float found;
-                    found = FALSE;
-                    
-                    while (ft)
-                    {
-                        if (ft.owner == te)
-                        {
-                            found = TRUE;
-                            ft.nextthink = time + 1;
-                        }
-                        ft = find(ft, classname, "flashtimer");
+    if (fo_flash)
+    {
+        FO_FlashExplode();
+    }
+    else
+    {
+        te = findradius(self.origin, 300);
+        while (te) {
+            if (te.classname == "player") {
+                traceline(self.origin, te.origin, 1, self);
+                if (trace_fraction == 1) {
+                    if (vlen(self.origin - te.origin) <= 200) {
+                        TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
                     }
-
-                    if (!found)
-                    {
-                        newmis = spawn();
-                        newmis.classname = "timer";
-                        newmis.netname = "flashtimer";
-                        newmis.team_no = self.owner.team_no;
-                        newmis.owner = te;
-                        newmis.think = FlashTimer;
-                        newmis.nextthink = time + 1;
-                    }
-                    
-                    if (fo_flash)
-                    {
-                        float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "10");
-                        te.FlashTime = fo_flashtime;
-                    }
+                    if (te.health > 0) {
+                        entity ft;
+                        ft = find(world, classname, "flashtimer");
+                        float found;
+                        found = FALSE;
                         
-                    else if (te != self.owner)
-                        te.FlashTime = 16;
-                    else
-                        te.FlashTime = 24;
+                        while (ft)
+                        {
+                            if (ft.owner == te)
+                            {
+                                found = TRUE;
+                                ft.nextthink = time + 1;
+                            }
+                            ft = find(ft, classname, "flashtimer");
+                        }
 
-                    StuffFlash(te, te.FlashTime);
+                        if (!found)
+                        {
+                            newmis = spawn();
+                            newmis.classname = "timer";
+                            newmis.netname = "flashtimer";
+                            newmis.team_no = self.owner.team_no;
+                            newmis.owner = te;
+                            newmis.think = FlashTimer;
+                            newmis.nextthink = time + 1;
+                        }
+                        
+                        if (te != self.owner)
+                            te.FlashTime = 16;
+                        else
+                            te.FlashTime = 24;
 
-                    SetFlashDimension(te);
+                        StuffFlash(te, (te.FlashTime * 10));
+
+                        SetFlashDimension(te);
+                    }
                 }
             }
+            te = te.chain;
         }
-        te = te.chain;
     }
+
     dremove(self);
 };
 
