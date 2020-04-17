@@ -136,7 +136,7 @@ void () FlashGrenadeTouch = {
 
 void StuffFlash(entity te, float amt)
 {
-    string st = ftos(amt * 10);
+    string st = ftos(amt);
     string cmd = strcat("v_cshift ", st, " ", st);
     cmd = strcat(cmd, " ", st, " ", st, "\n");
     stuffcmd(te, cmd);
@@ -156,10 +156,29 @@ void () FlashTimer = {
         return;
     }
 
-    StuffFlash(te, te.FlashTime);
+    StuffFlash(te, (te.FlashTime*10));
 
     self.nextthink = time + 0.6;
 };
+
+void FO_FlashTimer()
+{
+    local entity te;
+
+    te = self.owner;
+    te.FlashTime = te.FlashTime - .1;
+    if (te.FlashTime <= 0) {
+        stuffcmd(te, "v_cshift; wait; bf\n");
+        remove(self);
+        te.dimension_see = DMN_NOFLASH;
+        te.dimension_seen = DMN_NOFLASH;
+        return;
+    }
+
+    StuffFlash(te, (te.FlashTime*10));
+
+    self.nextthink = time + .1;
+}
 
 void SetFlashDimension(entity te)
 {
@@ -199,7 +218,7 @@ void FO_FlashExplode()
                         if (ft.owner == te)
                         {
                             found = TRUE;
-                            ft.nextthink = time + 1;
+                            ft.nextthink = time + .1;
                         }
                         ft = find(ft, classname, "flashtimer");
                     }
@@ -211,15 +230,15 @@ void FO_FlashExplode()
                         newmis.netname = "flashtimer";
                         newmis.team_no = self.owner.team_no;
                         newmis.owner = te;
-                        newmis.think = FlashTimer;
-                        newmis.nextthink = time + 1;
+                        newmis.think = FO_FlashTimer;
+                        newmis.nextthink = time + .1;
                     }
                     
-                    float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "10");
-                    fo_flashtime = fo_flashtime * frac;
+                    float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+                    fo_flashtime = fo_flashtime * (frac + frac * 0.5); // fall off is awful, let's half it
                     te.FlashTime = fo_flashtime;
 
-                    StuffFlash(te, te.FlashTime);
+                    StuffFlash(te, (te.FlashTime * 10));
 
                     SetFlashDimension(te);
                 }
@@ -286,7 +305,7 @@ void () FlashGrenadeExplode = {
                         else
                             te.FlashTime = 24;
 
-                        StuffFlash(te, te.FlashTime);
+                        StuffFlash(te, (te.FlashTime * 10));
 
                         SetFlashDimension(te);
                     }
