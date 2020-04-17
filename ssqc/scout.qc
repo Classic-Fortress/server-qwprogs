@@ -172,26 +172,22 @@ void SetFlashDimension(entity te)
     te.dimension_seen = playerdimension | DMN_NOFLASH;
 }
 
-void () FlashGrenadeExplode = {
-    local entity te;
-
-    self.effects = self.effects | EF_BRIGHTLIGHT;
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
-
-    te = findradius(self.origin, 300);
+void FO_FlashExplode()
+{
+    vector org;
+    float dam, frac;
+    entity te;
+    float rad = 300;
+    te = findradius(self.origin, rad);
     while (te) {
         if (te.classname == "player") {
             traceline(self.origin, te.origin, 1, self);
             if (trace_fraction == 1) {
-                if (vlen(self.origin - te.origin) <= 200) {
-                    deathmsg = DMSG_GREN_FLASH;
-                    TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
-                }
+                org = te.origin + (te.mins + te.maxs) * 0.5;
+                frac = (rad - vlen(self.origin - org)) / rad;
+                dam = 60 * frac;
+                TF_T_Damage(te, self, self.owner, dam, 0, TF_TD_OTHER);
+                
                 if (te.health > 0) {
                     entity ft;
                     ft = find(world, classname, "flashtimer");
@@ -219,16 +215,9 @@ void () FlashGrenadeExplode = {
                         newmis.nextthink = time + 1;
                     }
                     
-                    if (fo_flash)
-                    {
-                        float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "10");
-                        te.FlashTime = fo_flashtime;
-                    }
-                        
-                    else if (te != self.owner)
-                        te.FlashTime = 16;
-                    else
-                        te.FlashTime = 24;
+                    float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "10");
+                    fo_flashtime = fo_flashtime * frac;
+                    te.FlashTime = fo_flashtime;
 
                     StuffFlash(te, te.FlashTime);
 
@@ -238,6 +227,75 @@ void () FlashGrenadeExplode = {
         }
         te = te.chain;
     }
+}
+
+void () FlashGrenadeExplode = {
+    local entity te;
+
+    self.effects = self.effects | EF_BRIGHTLIGHT;
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, TE_TAREXPLOSION);
+    WriteCoord(MSG_MULTICAST, self.origin_x);
+    WriteCoord(MSG_MULTICAST, self.origin_y);
+    WriteCoord(MSG_MULTICAST, self.origin_z);
+    multicast(self.origin, MULTICAST_PHS);
+
+    if (fo_flash)
+    {
+        FO_FlashExplode();
+    }
+    else
+    {
+        te = findradius(self.origin, 300);
+        while (te) {
+            if (te.classname == "player") {
+                traceline(self.origin, te.origin, 1, self);
+                if (trace_fraction == 1) {
+                    if (vlen(self.origin - te.origin) <= 200) {
+                        TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
+                    }
+                    if (te.health > 0) {
+                        entity ft;
+                        ft = find(world, classname, "flashtimer");
+                        float found;
+                        found = FALSE;
+                        
+                        while (ft)
+                        {
+                            if (ft.owner == te)
+                            {
+                                found = TRUE;
+                                ft.nextthink = time + 1;
+                            }
+                            ft = find(ft, classname, "flashtimer");
+                        }
+
+                        if (!found)
+                        {
+                            newmis = spawn();
+                            newmis.classname = "timer";
+                            newmis.netname = "flashtimer";
+                            newmis.team_no = self.owner.team_no;
+                            newmis.owner = te;
+                            newmis.think = FlashTimer;
+                            newmis.nextthink = time + 1;
+                        }
+                        
+                        if (te != self.owner)
+                            te.FlashTime = 16;
+                        else
+                            te.FlashTime = 24;
+
+                        StuffFlash(te, te.FlashTime);
+
+                        SetFlashDimension(te);
+                    }
+                }
+            }
+            te = te.chain;
+        }
+    }
+
     dremove(self);
 };
 
