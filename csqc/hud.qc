@@ -79,6 +79,111 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
     Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
 }
+
+void FO_Hud_Editor_List_Panels() = {
+    print("^1Available HUD Elements:^7\n");
+    for(float i = 0; i < Hud_Panels.length; i++) {
+        print(Hud_Panels[i].id, ": ", Hud_Panels[i].Name, "\n");
+    }
+}
+
+string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return "";
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    switch (setting) {
+        case "id":
+            return panel.id;
+        case "name":
+            return panel.Name;
+        case "position":
+            return vtos(panel.Position);
+        case "size":
+            return vtos(panel.FillSize);
+        case "scale":
+            return ftos(panel.Scale);
+        case "textscale":
+            return ftos(panel.TextScale);
+        case "show":
+            return ftos(panel.Display);
+        case "orientation":
+            return ftos(panel.NodeInsertLoc);
+        default:
+            print("^1Setting^7 '", setting, "' does not exist!\n");
+            break;
+    }
+    return "";
+}
+
+void FO_Hud_Editor_Show_Panel(string panelid) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    print("^1id^7: ", panel.id, "\n");
+    print("\tname: ", panel.Name, "\n");
+    print("\tposition: ", vtos(panel.Position), "\n");
+    print("\tsize: ", vtos(panel.FillSize), "\n");
+    print("\tscale: ", ftos(panel.Scale), "\n");
+    print("\ttextscale: ", ftos(panel.TextScale), "\n");
+    print("\tshow: ", ftos(panel.Display), "\n");
+    print("\torientation: ", ftos(panel.NodeInsertLoc), "\n");
+}
+
+void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting) = {
+    if(setting == "") {
+        FO_Hud_Editor_Show_Panel(panelid);
+    } else {
+        print(FO_Hud_Editor_Get_Panel_Setting(panelid, setting), "\n");
+    }
+}
+
+void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    switch (setting) {
+        case "id":
+            print("^5id ^1can't be changed^7!\n");
+            break;
+        case "name":
+            print("^5name ^1can't be changed^7!\n");
+            break;
+        case "position":
+            panel.Position = stov(value);
+            break;
+        case "size":
+            panel.FillSize = stov(value);
+            break;
+        case "scale":
+            panel.Scale = stof(value);
+            break;
+        case "textscale":
+            panel.TextScale = stof(value);
+            break;
+        case "show":
+            panel.Display = stof(value);
+            break;
+        case "orientation":
+            panel.NodeInsertLoc = stof(value);
+            break;
+        default:
+            print("^1Setting^7 '", setting, "' does not exist!\n");
+            break;
+    }
+}
+
 /*
  * pos = x coord of the UI box
  * width = x width of the UI box
