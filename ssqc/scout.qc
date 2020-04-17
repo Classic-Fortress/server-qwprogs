@@ -205,6 +205,7 @@ void FO_FlashExplode()
                 org = te.origin + (te.mins + te.maxs) * 0.5;
                 frac = (rad - vlen(self.origin - org)) / rad;
                 dam = 60 * frac;
+                deathmsg = DMSG_GREN_FLASH;
                 TF_T_Damage(te, self, self.owner, dam, 0, TF_TD_OTHER);
                 
                 if (te.health > 0) {
@@ -271,6 +272,7 @@ void () FlashGrenadeExplode = {
                 traceline(self.origin, te.origin, 1, self);
                 if (trace_fraction == 1) {
                     if (vlen(self.origin - te.origin) <= 200) {
+                        deathmsg = DMSG_GREN_FLASH;
                         TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
                     }
                     if (te.health > 0) {
