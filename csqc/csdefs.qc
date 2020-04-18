@@ -54,7 +54,6 @@ float input_buttons;
 float input_impulse;
 void end_sys_globals;
 float pmove_onground;
-float waterlevel;
 .float modelindex;
 .vector absmin;
 .vector absmax;
