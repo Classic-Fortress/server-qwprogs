@@ -15,8 +15,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-    for (float i = 0; i < HudIcons.length; i++)
-    {
+    for (float i = 0; i < HudIcons.length; i++) {
         precache_pic(HudIcons[i].icon);
     }
 
@@ -194,8 +193,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-fo_jump":
             jump_counter = jump_counter - 1;
-            if (jump_counter <= 0)
-            {
+            if (jump_counter <= 0) {
                 localcmd("-jump");
             }
             break;
