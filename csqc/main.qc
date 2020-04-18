@@ -250,14 +250,9 @@ noref void CSQC_Input_Frame()
 {
 	if (cvar(FOCMD_AUTOHOP) == 1)
 	{
-		if (input_buttons&2)
+		if (input_buttons&2 && !pmove_onground)
 		{
-			// jump is held
-			if (jumptime <= time)
-			{
-				input_buttons &= ~2;
-				jumptime = time + .3;
-			}
+                        input_buttons &= ~2;
 		}	
 	}
 }
