@@ -99,17 +99,17 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
-	float val;
+    float val;
     switch(argv(0)) {
-		case "fo_hud_editor":
-			FO_Hud_Editor();
-			break;
-		case "fo_hud_reload":
-			FO_Hud_Editor_LoadSettings();
-			break;
-		case "fo_hud_reset":
-			FO_Hud_Editor_LoadDefaultSettings();
-			break;
+        case "fo_hud_editor":
+            FO_Hud_Editor();
+            break;
+        case "fo_hud_reload":
+            FO_Hud_Editor_LoadSettings();
+            break;
+        case "fo_hud_reset":
+            FO_Hud_Editor_LoadDefaultSettings();
+            break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
             break;
@@ -138,44 +138,52 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
                 }
-                grentimer_waiting = TRUE;
+                localcmd("primeone_server");
             }
-            localcmd("primeone_server");
             break;
         case "primetwo":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("primetwo_server");
             }
-            localcmd("primetwo_server");
             break;
         case "gren1":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren1_server");
             }
-            localcmd("gren1_server");
             break;
         case "gren2":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren2_server");
             }
-            localcmd("gren2_server");
             break;
         case "+showscores":
             showingscores = TRUE;
@@ -183,16 +191,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
-        /*
-        case "impulse":
-            print("MEHT impulsing ", argv(1) ,"\n");
-            if(argv(1) == "5") {
-                print("MEHT impulsing the menu\n");
-                FO_Menu_Special(TRUE);
-                return TRUE;
-            }
-            break;
-        */
     }	
     return FALSE;
 };
