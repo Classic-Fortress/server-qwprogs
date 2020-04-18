@@ -161,6 +161,15 @@ void () FlashTimer = {
     self.nextthink = time + 0.6;
 };
 
+float FO_CalcFlash(float timeleft)
+{
+    float flashAmt = 240;
+    float perc = timeleft / fo_flashtime;
+
+    flashAmt = flashAmt * perc;
+    return flashAmt;
+}
+
 void FO_FlashTimer()
 {
     local entity te;
@@ -168,6 +177,7 @@ void FO_FlashTimer()
     te = self.owner;
     te.FlashTime = te.FlashTime - .1;
     if (te.FlashTime <= 0) {
+        sprint(te, PRINT_HIGH, "Flash has worn off\n");
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
         te.dimension_see = DMN_NOFLASH;
@@ -175,7 +185,8 @@ void FO_FlashTimer()
         return;
     }
 
-    StuffFlash(te, (te.FlashTime*10));
+    float flashamount = FO_CalcFlash(te.FlashTime);
+    StuffFlash(te, flashamount);
 
     self.nextthink = time + .1;
 }
@@ -202,11 +213,14 @@ void FO_FlashExplode()
         if (te.classname == "player") {
             traceline(self.origin, te.origin, 1, self);
             if (trace_fraction == 1) {
+                sprint(te, PRINT_HIGH, "You have been flashed!\n");
                 org = te.origin + (te.mins + te.maxs) * 0.5;
                 frac = (rad - vlen(self.origin - org)) / rad;
                 dam = 60 * frac;
                 deathmsg = DMSG_GREN_FLASH;
                 TF_T_Damage(te, self, self.owner, dam, 2, 16 | 4);
+
+                stuffcmd(te, "play weapons/flashgren.wav\n");
                 
                 if (te.health > 0) {
                     entity ft;
@@ -235,11 +249,12 @@ void FO_FlashExplode()
                         newmis.nextthink = time + .1;
                     }
                     
-                    float fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
                     fo_flashtime = fo_flashtime * (frac + frac * 0.5); // fall off is awful, let's half it
                     te.FlashTime = fo_flashtime;
 
-                    StuffFlash(te, (te.FlashTime * 10));
+                    float flashamount = FO_CalcFlash(te.FlashTime);
+
+                    StuffFlash(te, flashamount);
 
                     SetFlashDimension(te);
                 }

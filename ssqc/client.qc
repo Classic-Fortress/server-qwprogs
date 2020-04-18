@@ -655,6 +655,9 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
+        // fortress one flash time in seconds
+        fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
