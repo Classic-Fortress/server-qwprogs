@@ -48,6 +48,10 @@ float is_admin;
 float motd_expiry;
 float quad_round;
 float quad_rounds_total;
+//float game_started;
+float prematch;
+float round_active;
+float round_over;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
@@ -274,7 +278,9 @@ enum {
     HUD_PANEL_GRENTIMER,
     HUD_PANEL_MENU,
     HUD_PANEL_MOTD,
-    HUD_PANEL_MENU_HINT
+    HUD_PANEL_MENU_HINT,
+    HUD_PANEL_GAME_MODE,
+    HUD_PANEL_READY
 };
 
 #define FOCMD_AUTOHOP "fo_autohop"

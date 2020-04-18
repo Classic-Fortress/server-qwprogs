@@ -15,15 +15,15 @@ void () DropKey = {
             self.items = self.items - (self.items & IT_KEY1);
             newmis.items = IT_KEY1;
             if (world.worldtype == 0) {
-                setmodel(newmis, "progs/w_s_key.mdl");
+                FO_SetModel(newmis, "progs/w_s_key.mdl");
                 newmis.netname = "silver key";
                 newmis.noise = "misc/medkey.wav";
             } else if (world.worldtype == 1) {
-                setmodel(newmis, "progs/m_s_key.mdl");
+                FO_SetModel(newmis, "progs/m_s_key.mdl");
                 newmis.netname = "silver runekey";
                 newmis.noise = "misc/runekey.wav";
             } else if (world.worldtype == 2) {
-                setmodel(newmis, "progs/b_s_key.mdl");
+                FO_SetModel(newmis, "progs/b_s_key.mdl");
                 newmis.netname = "silver keycard";
                 newmis.noise = "misc/basekey.wav";
             }
@@ -31,15 +31,15 @@ void () DropKey = {
             self.items = self.items - (self.items & IT_KEY2);
             newmis.items = IT_KEY2;
             if (world.worldtype == 0) {
-                setmodel(newmis, "progs/w_g_key.mdl");
+                FO_SetModel(newmis, "progs/w_g_key.mdl");
                 newmis.netname = "gold key";
                 newmis.noise = "misc/medkey.wav";
             } else if (world.worldtype == 1) {
-                setmodel(newmis, "progs/m_g_key.mdl");
+                FO_SetModel(newmis, "progs/m_g_key.mdl");
                 newmis.netname = "gold runekey";
                 newmis.noise = "misc/runekey.wav";
             } else if (world.worldtype == 2) {
-                setmodel(newmis, "progs/b_g_key.mdl");
+                FO_SetModel(newmis, "progs/b_g_key.mdl");
                 newmis.netname = "gold keycard";
                 newmis.noise = "misc/basekey.wav";
             }

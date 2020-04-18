@@ -9,18 +9,28 @@ void (float inp) MOTD_Input = {
 };
 
 void () TeamFortress_MOTD = {
-    if (self.classname == "observer" || votemode)
+    if (votemode) {
         return;
+    }
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+    if (self.classname == "observer") {
+        if(!csqcactive) {
+            TeamFortress_AliasString("tracktarget", "cmd tracktarget");
+        }
+        return;
+    }
 
     local string st1;
     local string st2;
     local string ya;
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
     
     if (self.motd == 5) {
         if(csqcactive) {
-            if(self.team_no == 0 && !intermission_running) {
-                Menu_Team(0);
+            if(self.team_no == 0 && !intermission_running ) {
+                if (loginRequired && !self.login)
+                    Menu_Login();
+                else
+                    Menu_Team(0);
             }
         } else {
             sprint(self, PRINT_HIGH, "\nFortressOne ", VER, "\n\n");
@@ -221,7 +231,10 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
-        Menu_Team(1);
+        if (loginRequired && !self.login)
+            Menu_Login();
+        else
+            Menu_Team(1);
     }
 
     self.motd = self.motd + 1;
