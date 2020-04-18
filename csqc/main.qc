@@ -130,23 +130,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             } else {
                 FO_Hud_Editor_Set_Panel_Setting(argv(1), argv(2), argv(3));
             }
-            /*
-               switch(argv(1)) {
-               case "list":
-               FO_Hud_Editor_List_Panels();
-               break;
-               case "show":
-               case "get":
-               FO_Hud_Editor_Print_Panel_Setting(argv(2), argv(3));
-               break;
-               case "set":
-               FO_Hud_Editor_Set_Panel_Setting(argv(2), argv(3), argv(4));
-               break;
-               default:
-               print("^1Usage:^7 fo_hud [<element> | <element> <property> | <element> <property> <value>]\n");
-               break;
-               }
-             */
             break;
         case "fo_hud_save":
             Hud_WriteCfg(FO_HUD_CONFIG_PATH);
@@ -179,44 +162,52 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
                 }
-                grentimer_waiting = TRUE;
+                localcmd("primeone_server");
             }
-            localcmd("primeone_server");
             break;
         case "primetwo":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("primetwo_server");
             }
-            localcmd("primetwo_server");
             break;
         case "gren1":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren1_server");
             }
-            localcmd("gren1_server");
             break;
         case "gren2":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren2_server");
             }
-            localcmd("gren2_server");
             break;
         case "+showscores":
             showingscores = TRUE;
@@ -224,16 +215,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
-            /*
-               case "impulse":
-               print("MEHT impulsing ", argv(1) ,"\n");
-               if(argv(1) == "5") {
-               print("MEHT impulsing the menu\n");
-               FO_Menu_Special(TRUE);
-               return TRUE;
-               }
-               break;
-             */
         case "tracktarget":
             localcmd("cmd tracktarget\n");
             break;
