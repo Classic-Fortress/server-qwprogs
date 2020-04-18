@@ -39,13 +39,15 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_admin");
     registercommand("fo_menu_vote");
     registercommand("fo_menu_special");
-	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
+    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
     registercommand("tracktarget");
+    registercommand("+fo_jump");
+    registercommand("-fo_jump");
     
 	FO_Hud_Editor_LoadSettings();
 	FO_LoadSettings();
@@ -54,6 +56,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     player_menu_type = 0;
     is_admin = FALSE;
     grentimer_waiting = FALSE;
+    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -62,7 +65,7 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-	ScreenSize = [width, height, menushown];
+    ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
@@ -96,7 +99,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
-    
+
     //reset grentimer status if all there are no more active grentimers
     if(grentimer_waiting) {
         if(FO_Hud_Grentimers[0].grentype == 0) {
@@ -107,7 +110,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
-	float val;
+    float val;
     switch(argv(0)) {
 		case "fo_hud_editor":
 			FO_Hud_Editor();
@@ -220,8 +223,29 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
+            /*
+               case "impulse":
+               print("MEHT impulsing ", argv(1) ,"\n");
+               if(argv(1) == "5") {
+               print("MEHT impulsing the menu\n");
+               FO_Menu_Special(TRUE);
+               return TRUE;
+               }
+               break;
+             */
         case "tracktarget":
             localcmd("cmd tracktarget\n");
+            break;
+        case "+fo_jump":
+            jump_counter = jump_counter + 1;
+            localcmd("+jump");
+            break;
+        case "-fo_jump":
+            jump_counter = jump_counter - 1;
+            if (jump_counter <= 0)
+            {
+                localcmd("-jump");
+            }
             break;
     }	
     return FALSE;
@@ -232,13 +256,13 @@ void(float isnew) CSQC_Ent_Update = {
     float etype = readbyte();
     string s;
     switch (etype) {
-	case MSG_FLAGINFO:
-	    s = readstring();
-	    print("CSQC_Ent_Update, Flag info: ", s, "\n");
-	    break;
-	default:
-	    error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
-	    return;
+        case MSG_FLAGINFO:
+            s = readstring();
+            print("CSQC_Ent_Update, Flag info: ", s, "\n");
+            break;
+        default:
+            error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
+            return;
     }
 };
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
@@ -248,13 +272,13 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame()
 {
-	if (cvar(FOCMD_AUTOHOP) == 1)
-	{
-		if (input_buttons&2 && !pmove_onground)
-		{
-                        input_buttons &= ~2;
-		}	
-	}
+    if (cvar(FOCMD_AUTOHOP) == 1)
+    {
+        if (!pmove_onground)
+        {
+            input_buttons &= ~2;
+        }
+    }
 }
 
 void CSQC_Shutdown() = {
