@@ -248,9 +248,9 @@ void FO_FlashExplode()
                         newmis.think = FO_FlashTimer;
                         newmis.nextthink = time + .1;
                     }
-                    
-                    fo_flashtime = fo_flashtime * (frac + frac * 0.5); // fall off is awful, let's half it
-                    te.FlashTime = fo_flashtime;
+                    float ftime = fo_flashtime;
+                    ftime = ftime * (frac + frac * 0.5); // fall off is awful, let's half it
+                    te.FlashTime = ftime;
 
                     float flashamount = FO_CalcFlash(te.FlashTime);
 
