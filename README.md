@@ -11,7 +11,7 @@ New features
 * CSQC - fo_main_menu main menu - either from menu.dat or engine
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
-* CSQC - fo_autohop 0/1 enable bunnyhop assist
+* CSQC - fo_autohop 0/1 enable bunnyhop assist (use `+fo_jump` to use with rj scripts)
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config

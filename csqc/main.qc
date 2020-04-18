@@ -38,6 +38,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
+    registercommand("+fo_jump");
+    registercommand("-fo_jump");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -46,6 +48,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     player_menu_type = 0;
     is_admin = FALSE;
     grentimer_waiting = FALSE;
+    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -182,6 +185,17 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-showscores":
             showingscores = FALSE;
+            break;
+        case "+fo_jump":
+            jump_counter = jump_counter + 1;
+            localcmd("+jump");
+            break;
+        case "-fo_jump":
+            jump_counter = jump_counter - 1;
+            if (jump_counter <= 0)
+            {
+                localcmd("-jump");
+            }
             break;
             /*
                case "impulse":
