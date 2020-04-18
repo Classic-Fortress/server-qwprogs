@@ -53,6 +53,7 @@ vector input_movevalues;
 float input_buttons;
 float input_impulse;
 void end_sys_globals;
+float pmove_onground;
 .float modelindex;
 .vector absmin;
 .vector absmax;
