@@ -49,6 +49,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
+    onground_last_frame = 1;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -234,8 +235,12 @@ noref void CSQC_Input_Frame()
 {
     if (cvar(FOCMD_AUTOHOP) == 1)
     {
-        if (!pmove_onground)
+        if (pmove_onground && !onground_last_frame) {
+            onground_last_frame = 1;
+        }
+        if (!pmove_onground && onground_last_frame)
         {
+            onground_last_frame = 0;
             input_buttons &= ~2;
         }
     }
