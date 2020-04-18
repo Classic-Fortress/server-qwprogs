@@ -6,7 +6,7 @@ void FO_Hud_Editor_List_Panels();
 void FO_Hud_Editor_Show_Panel(string panelid);
 void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
 void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
-void Hud_WriteCfg(string path)
+void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
@@ -18,20 +18,19 @@ void GetSelf() = {
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
-//    precache_model("progs/weapons/v_rock.mdl");
+    //    precache_model("progs/weapons/v_rock.mdl");
 
-	for (float i = 0; i < HudIcons.length; i++)
-	{
-		precache_pic(HudIcons[i].icon);
-	}
+    for (float i = 0; i < HudIcons.length; i++) {
+        precache_pic(HudIcons[i].icon);
+    }
 
-	registercommand("fo_hud_editor");
-	registercommand("fo_hud_reload");
-	registercommand("fo_hud_reset");
-	registercommand("fo_hud");
-	registercommand("fo_hud_save");
-	registercvar(FOCMD_AUTOHOP, "0");
-	registercvar(FOCMD_GRENTIMER, "1");
+    registercommand("fo_hud_editor");
+    registercommand("fo_hud_reload");
+    registercommand("fo_hud_reset");
+    registercommand("fo_hud");
+    registercommand("fo_hud_save");
+    registercvar(FOCMD_AUTOHOP, "0");
+    registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -48,9 +47,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("tracktarget");
     registercommand("+fo_jump");
     registercommand("-fo_jump");
-    
-	FO_Hud_Editor_LoadSettings();
-	FO_LoadSettings();
+
+    FO_Hud_Editor_LoadSettings();
+    FO_LoadSettings();
 
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
@@ -114,16 +113,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
     float val;
     switch(argv(0)) {
-		case "fo_hud_editor":
-			FO_Hud_Editor();
-			break;
-		case "fo_hud_reload":
-			FO_Hud_Editor_LoadSettings();
-			break;
-		case "fo_hud_reset":
-			FO_Hud_Editor_LoadDefaultSettings();
-			break;
-		case "fo_hud":
+        case "fo_hud_editor":
+            FO_Hud_Editor();
+            break;
+        case "fo_hud_reload":
+            FO_Hud_Editor_LoadSettings();
+            break;
+        case "fo_hud_reset":
+            FO_Hud_Editor_LoadDefaultSettings();
+            break;
+        case "fo_hud":
             if(argv(1) == "") {
                 FO_Hud_Editor_List_Panels();
             } else if(argv(3) == "") {
@@ -132,26 +131,26 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 FO_Hud_Editor_Set_Panel_Setting(argv(1), argv(2), argv(3));
             }
             /*
-            switch(argv(1)) {
-                case "list":
-                    FO_Hud_Editor_List_Panels();
-                    break;
-                case "show":
-                case "get":
-                    FO_Hud_Editor_Print_Panel_Setting(argv(2), argv(3));
-                    break;
-                case "set":
-                    FO_Hud_Editor_Set_Panel_Setting(argv(2), argv(3), argv(4));
-                    break;
-                default:
-                    print("^1Usage:^7 fo_hud [<element> | <element> <property> | <element> <property> <value>]\n");
-                    break;
-            }
-            */
-			break;
-		case "fo_hud_save":
-			Hud_WriteCfg(FO_HUD_CONFIG_PATH);
-			break;
+               switch(argv(1)) {
+               case "list":
+               FO_Hud_Editor_List_Panels();
+               break;
+               case "show":
+               case "get":
+               FO_Hud_Editor_Print_Panel_Setting(argv(2), argv(3));
+               break;
+               case "set":
+               FO_Hud_Editor_Set_Panel_Setting(argv(2), argv(3), argv(4));
+               break;
+               default:
+               print("^1Usage:^7 fo_hud [<element> | <element> <property> | <element> <property> <value>]\n");
+               break;
+               }
+             */
+            break;
+        case "fo_hud_save":
+            Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
             break;
@@ -244,8 +243,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-fo_jump":
             jump_counter = jump_counter - 1;
-            if (jump_counter <= 0)
-            {
+            if (jump_counter <= 0) {
                 localcmd("-jump");
             }
             break;
