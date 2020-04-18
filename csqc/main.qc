@@ -272,15 +272,14 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-noref void CSQC_Input_Frame()
-{
-    if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2)
-    {
+noref void CSQC_Input_Frame() {
+    if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2) {
+        // frame after landing
         if (pmove_onground && !onground_last_frame) {
             onground_last_frame = 1;
         }
-        if (!pmove_onground && onground_last_frame)
-        {
+        // frame after jumping
+        if (!pmove_onground && onground_last_frame) {
             input_buttons &= ~2;
             onground_last_frame = 0;
         }
