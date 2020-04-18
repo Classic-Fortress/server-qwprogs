@@ -65,6 +65,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     SBAR.Hint = "";
     //stop grentimer on death
+
     if(getstatf(STAT_HEALTH) <= 0) {
         //localcmd("stopsound\n");
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
@@ -233,15 +234,15 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame()
 {
-    if (cvar(FOCMD_AUTOHOP) == 1)
+    if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2)
     {
         if (pmove_onground && !onground_last_frame) {
             onground_last_frame = 1;
         }
         if (!pmove_onground && onground_last_frame)
         {
-            onground_last_frame = 0;
             input_buttons &= ~2;
+            onground_last_frame = 0;
         }
     }
 }
