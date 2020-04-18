@@ -655,6 +655,9 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
+        // fortress one flash time in seconds
+        fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -1636,6 +1639,8 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
+    self.dimension_see = DMN_NOFLASH;
+    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
     
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -1783,8 +1788,6 @@ void () PutClientInServer = {
 
     setmodel(self, "progs/player.mdl");
     modelindex_player = self.modelindex;
-    self.dimension_see = DMN_NOFLASH;
-    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
 
     if (self.playerclass == 0) {
         self.modelindex = modelindex_null;

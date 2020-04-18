@@ -158,6 +158,7 @@ void () W_Precache = {
     precache_sound("misc/hitsound.wav");
     precache_sound("misc/hitsoundcrit.wav");
     precache_sound("misc/hitsoundteam.wav");
+    precache_sound("weapons/flashgren.wav");
 };
 
 float () crandom = {

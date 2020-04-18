@@ -1039,9 +1039,9 @@ void () TeamFortress_GrenadePrimed = {
         newmis.touch = FlashGrenadeTouch;
         newmis.think = FlashGrenadeExplode;
         newmis.grenadename = "flashgrenade";
-        newmis.skin = 2;
+        newmis.skin = 0;
         newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
+        FO_SetModel(newmis, "progs/flashgren.mdl");
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
@@ -2828,9 +2828,9 @@ void () TeamFortress_ExplodePerson = {
         newmis.touch = FlashGrenadeTouch;
         newmis.think = FlashGrenadeExplode;
         newmis.grenadename = "flashgrenade";
-        newmis.skin = 1;
+        newmis.skin = 0;
         newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
+        FO_SetModel(newmis, "progs/flashgren.mdl");
     }
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
