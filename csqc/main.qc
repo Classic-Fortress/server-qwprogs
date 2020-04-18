@@ -236,9 +236,12 @@ noref void CSQC_Input_Frame()
 {
     if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2)
     {
+        // frame after landing
         if (pmove_onground && !onground_last_frame) {
             onground_last_frame = 1;
         }
+
+        // frame after jumping
         if (!pmove_onground && onground_last_frame)
         {
             input_buttons &= ~2;
