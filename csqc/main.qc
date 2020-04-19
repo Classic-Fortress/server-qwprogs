@@ -13,18 +13,17 @@ void GetSelf() = {
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
-//    precache_model("progs/weapons/v_rock.mdl");
+    //    precache_model("progs/weapons/v_rock.mdl");
 
-	for (float i = 0; i < HudIcons.length; i++)
-	{
-		precache_pic(HudIcons[i].icon);
-	}
+    for (float i = 0; i < HudIcons.length; i++) {
+        precache_pic(HudIcons[i].icon);
+    }
 
-	registercommand("fo_hud_editor");
-	registercommand("fo_hud_reload");
-	registercommand("fo_hud_reset");
-	registercvar(FOCMD_AUTOHOP, "0");
-	registercvar(FOCMD_GRENTIMER, "1");
+    registercommand("fo_hud_editor");
+    registercommand("fo_hud_reload");
+    registercommand("fo_hud_reset");
+    registercvar(FOCMD_AUTOHOP, "0");
+    registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -32,20 +31,23 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_admin");
     registercommand("fo_menu_vote");
     registercommand("fo_menu_special");
-	registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
+    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
-    
-	FO_Hud_Editor_LoadSettings();
-	FO_LoadSettings();
+    registercommand("+aux_jump");
+    registercommand("-aux_jump");
+
+    FO_Hud_Editor_LoadSettings();
+    FO_LoadSettings();
 
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
     grentimer_waiting = FALSE;
+    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -54,13 +56,14 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-	ScreenSize = [width, height, menushown];
+    ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     SBAR.Hint = "";
     //stop grentimer on death
+
     if(getstatf(STAT_HEALTH) <= 0) {
         //localcmd("stopsound\n");
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
@@ -88,7 +91,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
-    
+
     //reset grentimer status if all there are no more active grentimers
     if(grentimer_waiting) {
         if(FO_Hud_Grentimers[0].grentype == 0) {
@@ -99,17 +102,17 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
-	float val;
+    float val;
     switch(argv(0)) {
-		case "fo_hud_editor":
-			FO_Hud_Editor();
-			break;
-		case "fo_hud_reload":
-			FO_Hud_Editor_LoadSettings();
-			break;
-		case "fo_hud_reset":
-			FO_Hud_Editor_LoadDefaultSettings();
-			break;
+        case "fo_hud_editor":
+            FO_Hud_Editor();
+            break;
+        case "fo_hud_reload":
+            FO_Hud_Editor_LoadSettings();
+            break;
+        case "fo_hud_reset":
+            FO_Hud_Editor_LoadDefaultSettings();
+            break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
             break;
@@ -183,16 +186,27 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
-        /*
-        case "impulse":
-            print("MEHT impulsing ", argv(1) ,"\n");
-            if(argv(1) == "5") {
-                print("MEHT impulsing the menu\n");
-                FO_Menu_Special(TRUE);
-                return TRUE;
+        case "+aux_jump":
+            jump_counter = jump_counter + 1;
+            localcmd("+jump");
+            break;
+        case "-aux_jump":
+            jump_counter = jump_counter - 1;
+            if (jump_counter <= 0) {
+                jump_counter = 0;
+                localcmd("-jump");
             }
             break;
-        */
+            /*
+               case "impulse":
+               print("MEHT impulsing ", argv(1) ,"\n");
+               if(argv(1) == "5") {
+               print("MEHT impulsing the menu\n");
+               FO_Menu_Special(TRUE);
+               return TRUE;
+               }
+               break;
+             */
     }	
     return FALSE;
 };
@@ -202,13 +216,13 @@ void(float isnew) CSQC_Ent_Update = {
     float etype = readbyte();
     string s;
     switch (etype) {
-	case MSG_FLAGINFO:
-	    s = readstring();
-	    print("CSQC_Ent_Update, Flag info: ", s, "\n");
-	    break;
-	default:
-	    error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
-	    return;
+        case MSG_FLAGINFO:
+            s = readstring();
+            print("CSQC_Ent_Update, Flag info: ", s, "\n");
+            break;
+        default:
+            error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
+            return;
     }
 };
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
@@ -216,20 +230,23 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-noref void CSQC_Input_Frame()
-{
-	if (cvar(FOCMD_AUTOHOP) == 1)
-	{
-		if (input_buttons&2)
-		{
-			// jump is held
-			if (jumptime <= time)
-			{
-				input_buttons &= ~2;
-				jumptime = time + .3;
-			}
-		}	
-	}
+noref void CSQC_Input_Frame() {
+    if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
+        if (pmove_onground) {
+            frames_since_onground = 0;
+        } else {
+
+            // next two frames after leaving ground
+            if (frames_since_onground <= 2) {
+                frames_since_onground = frames_since_onground + 1;
+
+            // third frame after leaving ground
+            } else if (frames_since_onground == 3) {
+                input_buttons &= ~2;
+                frames_since_onground = frames_since_onground + 1;
+            }
+        }
+    }
 }
 
 void CSQC_Shutdown() = {

@@ -30,7 +30,6 @@ float MENU_START_CONTENT = 32;
 .float playerid;
 float fo_hud_editor;
 float fo_hud_menu_active;
-float jumptime;
 vector ScreenSize;
 float number_of_teams;
 float last_skin;
@@ -52,6 +51,8 @@ float quad_rounds_total;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
+float jump_counter;
+float frames_since_onground;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
