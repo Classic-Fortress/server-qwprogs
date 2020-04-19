@@ -240,7 +240,7 @@ noref void CSQC_Input_Frame() {
                 frames_since_onground = frames_since_onground + 1;
 
             // third frame after leaving ground
-            } else if (frames_since_onground = 3) {
+            } else if (frames_since_onground == 3) {
                 input_buttons &= ~2;
                 frames_since_onground = frames_since_onground + 1;
             }
