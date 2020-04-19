@@ -56,7 +56,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
-    onground_last_frame = 1;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -253,14 +252,19 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame() {
     if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
-        // frame after landing
-        if (pmove_onground && !onground_last_frame) {
-            onground_last_frame = 1;
-        }
-        // frame after jumping
-        if (!pmove_onground && onground_last_frame) {
-            input_buttons &= ~2;
-            onground_last_frame = 0;
+        if (pmove_onground) {
+            frames_since_onground = 0;
+        } else {
+
+            // next two frames after leaving ground
+            if (frames_since_onground <= 2) {
+                frames_since_onground = frames_since_onground + 1;
+
+            // third frame after leaving ground
+            } else if (frames_since_onground = 3) {
+                input_buttons &= ~2;
+                frames_since_onground = frames_since_onground + 1;
+            }
         }
     }
 }
