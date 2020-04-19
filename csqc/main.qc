@@ -37,8 +37,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
-    registercommand("+fo_jump");
-    registercommand("-fo_jump");
+    registercommand("+aux_jump");
+    registercommand("-aux_jump");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -186,13 +186,14 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-showscores":
             showingscores = FALSE;
             break;
-        case "+fo_jump":
+        case "+aux_jump":
             jump_counter = jump_counter + 1;
             localcmd("+jump");
             break;
-        case "-fo_jump":
+        case "-aux_jump":
             jump_counter = jump_counter - 1;
             if (jump_counter <= 0) {
+                jump_counter = 0;
                 localcmd("-jump");
             }
             break;
