@@ -44,6 +44,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
+    registercommand("+aux_jump");
+    registercommand("-aux_jump");
     registercommand("tracktarget");
     registercommand("+fo_jump");
     registercommand("-fo_jump");
@@ -217,13 +219,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "tracktarget":
             localcmd("cmd tracktarget\n");
             break;
+        case "+aux_jump":
         case "+fo_jump":
             jump_counter = jump_counter + 1;
             localcmd("+jump");
             break;
-        case "-fo_jump":
+        case "-aux_jump":
             jump_counter = jump_counter - 1;
             if (jump_counter <= 0) {
+                jump_counter = 0;
                 localcmd("-jump");
             }
             break;
@@ -261,7 +265,7 @@ noref void CSQC_Input_Frame() {
                 frames_since_onground = frames_since_onground + 1;
 
             // third frame after leaving ground
-            } else if (frames_since_onground = 3) {
+            } else if (frames_since_onground == 3) {
                 input_buttons &= ~2;
                 frames_since_onground = frames_since_onground + 1;
             }

@@ -929,12 +929,13 @@ void FO_Menu_Track() = {
 }
 
 void FO_Menu_Team(float force) = {
-    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_TEAM && !force) {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_TEAM && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1) {
         return;
+    }
     if(team_no) {
         if(number_of_teams < 2) {
             return;
@@ -949,16 +950,29 @@ void FO_Menu_Team(float force) = {
         //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_NORMAL;
         FO_MENU_TEAM.options[5].state = FO_MENU_STATE_NORMAL;
     }
+    for(float i = 0; i < 4; i++) {
+        if(i < number_of_teams) {
+            //FO_MENU_TEAM.options[i].value = ftos(readbyte());
+            if((i + 1) != team_no) {
+                FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
+            } else {
+                FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
+            } 
+        } else {
+            FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
+        }
+    }
+    localcmd("cmd changeteam\n");
     CurrentMenu = &FO_MENU_TEAM;
     fo_hud_menu_active = TRUE;
 }
 
 void FO_Menu_Class(float force) = {
-    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS) {
+    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS && force != 2) {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && !force)
+    if(fo_hud_menu_active && force != 1)
         return;
     CurrentMenu = &FO_MENU_CLASS;
     fo_hud_menu_active = TRUE;
