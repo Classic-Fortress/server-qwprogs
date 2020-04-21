@@ -1,3 +1,5 @@
+void (entity pe_player) FO_SpecTrackPoint;
+
 void () UpdateAllAdmins = {
     local entity ent = find(world, classname, "player");
     while(ent) {
@@ -761,6 +763,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "reportmodel":
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
+            break;
+        case "tracktarget":
+            processedCmd = TRUE;
+            FO_SpecTrackPoint(self);
             break;
         case "help":
         case "list":

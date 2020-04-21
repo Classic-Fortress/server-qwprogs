@@ -9,13 +9,20 @@ void (float inp) MOTD_Input = {
 };
 
 void () TeamFortress_MOTD = {
-    if (self.classname == "observer" || votemode)
+    if (votemode) {
         return;
+    }
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+    if (self.classname == "observer") {
+        if(!csqcactive) {
+            TeamFortress_AliasString("tracktarget", "cmd tracktarget");
+        }
+        return;
+    }
 
     local string st1;
     local string st2;
     local string ya;
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
     
     if (self.motd == 5) {
         if(csqcactive) {

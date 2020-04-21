@@ -579,8 +579,8 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
-    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
-    if(csqcactive) {
+    //float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
+    //if(csqcactive) {
         msg_entity = Player;
         WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
         WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
@@ -591,8 +591,26 @@ void (entity Player, float index, entity Item, float icon) InitClientFlagStatus 
         WriteFloat(MSG_MULTICAST, Item.owned_by);
         WriteFloat(MSG_MULTICAST, icon);
         multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
-    }
+    //}
 }
+
+void (entity Player) InitAllStatuses = {
+    entity tfdet = find(world, classname, "info_tfdetect");
+    if(tfdet) {
+        InitClientFlagStatus(Player, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
+    }
+    tfdet = find(world, classname, "info_tfgoal");
+    while (tfdet) {
+        if (tfdet.track_goal) {
+            InitClientFlagStatus(Player, -1, tfdet, FLAGINFO_ICON_BUTTON);
+        }
+        tfdet = find(tfdet, classname, "info_tfgoal");
+    }
+};
+
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
     msg_entity = Player;
@@ -977,6 +995,45 @@ void (entity pl) RefreshStatusBar = {
         height = 300;
     height = height - pl.StatusStringLines - 13;
 
+    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+    if(pl.classname == "observer" && csqcactive) {
+        if (tfdet)
+        {
+            for (float t = 1; t <= number_of_teams; t++) 
+            {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    UpdateClientFlagStatus(pl, te);
+                }
+            }
+        }
+        tg = find(world, classname, "info_tfgoal");
+        while (tg) {
+            if (tg.track_goal) {
+                UpdateClientButtonStatus(pl, tg);
+            }
+            tg = find(tg, classname, "info_tfgoal");
+        }
+
+        return;
+    }
+
     // no sbar can be displayed
     if (height <= 0 || (pl.playerclass == PC_UNDEFINED && !votemode)) {
         centerprint(pl, pl.StatusString);
@@ -988,7 +1045,6 @@ void (entity pl) RefreshStatusBar = {
         pad = strcat(pad, "\n");
     pad = strzone(pad);
 
-    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
 
     // class tip
     if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
