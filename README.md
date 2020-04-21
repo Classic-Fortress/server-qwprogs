@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
 * hud commands: `fo_hud [element] [setting] [value]` lets you manually configure the extra hud elements' settings and `fo_hud_save` saves them.
 * new spectator command `tracktarget` lets you track whoever you're pointing at
 * `setinfo killsound 1/2/3` 1 enemies, 2 enemies and teammates, 3 enemies teammates and self

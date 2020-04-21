@@ -44,13 +44,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("primetwo");
     registercommand("gren1");
     registercommand("gren2");
-    registercommand("tracktarget");
-    registercommand("+fo_jump");
-    registercommand("-fo_jump");
+    registercommand("+aux_jump");
+    registercommand("-aux_jump");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
-
+    registercommand("tracktarget");
+    
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -114,9 +114,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     switch(argv(0)) {
         case "fo_hud_editor":
             FO_Hud_Editor();
-            break;
-        case "fo_hud_reload":
-            FO_Hud_Editor_LoadSettings();
             break;
         case "fo_hud_reset":
             FO_Hud_Editor_LoadDefaultSettings();
@@ -217,16 +214,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "tracktarget":
             localcmd("cmd tracktarget\n");
             break;
-        case "+fo_jump":
+        case "+aux_jump":
             jump_counter = jump_counter + 1;
             localcmd("+jump");
             break;
-        case "-fo_jump":
+        case "-aux_jump":
             jump_counter = jump_counter - 1;
             if (jump_counter <= 0) {
                 localcmd("-jump");
             }
-            break;
     }	
     return FALSE;
 };
@@ -261,7 +257,7 @@ noref void CSQC_Input_Frame() {
                 frames_since_onground = frames_since_onground + 1;
 
             // third frame after leaving ground
-            } else if (frames_since_onground = 3) {
+            } else if (frames_since_onground == 3) {
                 input_buttons &= ~2;
                 frames_since_onground = frames_since_onground + 1;
             }
