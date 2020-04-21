@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map
 * localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.

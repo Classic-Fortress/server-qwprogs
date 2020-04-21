@@ -34,9 +34,6 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
-    if(!pl.playerclass) {
-        return;
-    }
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -208,6 +205,7 @@ void UpdateClientMOTD(entity pl) = {
     WriteString(MSG_MULTICAST, infokey(world, "motd2"));
     WriteFloat(MSG_MULTICAST, ((clanbattle?1:0) + (quadmode?2:0) + (duelmode?4:0) + (cb_prematch?8:0) + (round_active?16:0) + (round_over?32:0)));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
+    WriteFloat(MSG_MULTICAST, number_of_teams);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

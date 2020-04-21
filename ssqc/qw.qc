@@ -576,6 +576,7 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float cb_keepteams;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;

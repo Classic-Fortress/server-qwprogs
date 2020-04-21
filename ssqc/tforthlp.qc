@@ -37,7 +37,9 @@ void () TeamFortress_MOTD = {
 
             sprint(self, PRINT_HIGH, st1);
             sprint(self, PRINT_HIGH, "\n\n\n");
-            Status_Menu(self, MOTD_Input, st1);
+            if(self.team_no == 0 && !intermission_running) {
+                Status_Menu(self, MOTD_Input, st1);
+            }
         }
     }
 
