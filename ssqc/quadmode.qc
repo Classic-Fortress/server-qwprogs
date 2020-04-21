@@ -154,9 +154,15 @@ void () QuadRoundBegin = {
 		te = find (te, classname, "player");
 	}
 //	lightstyle (0, "m");
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, FALSE);
+        }
+        te = find(te, classname, "observer");
+    }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
-
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
@@ -256,6 +262,13 @@ void () StartQuadRound =
         }
 		p = find(p, classname, "player");
 	}
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
+    }
 
 	cb_prematch = 1;
 	round_over = 1;
@@ -286,7 +299,19 @@ void () StartQuadRound =
             }
 			p = find(p, classname, "player");
 		}
+        te = find(world, classname, "observer");
+        while (te) {
+            if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientPrematch(te, TRUE);
+            }
+            te = find(te, classname, "observer");
+        }
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
+		if (!clan_scores_dumped) {
+            DumpClanScores();
+            MapEndSequence();
+            clan_scores_dumped = 1;
+ 		}
 		localcmd("stop\n");
 		return;
 	}

@@ -44,6 +44,11 @@ void () SpectatorConnect = {
         stuffcmd(self, ".cfg\n");
     }
     self.motd = 0;
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        InitAllStatuses(self);
+        UpdateClientMOTD(self);
+        UpdateClientPrematch(self, !cb_prematch);
+    }
 };
 
 void () SpectatorDisconnect = {
@@ -119,11 +124,15 @@ void () SpectatorImpulseCommand = {
 };
 
 void () SpectatorThink = {
+    
+    self.dimension_see = DMN_NOFLASH;
+
     if (self.impulse)
         SpectatorImpulseCommand();
 
     //if (self.motd <= 400)
     //    TeamFortress_MOTD();
-    if (time >= self.StatusRefreshTime)
+    if (time >= self.StatusRefreshTime) {
         RefreshStatusBar(self);
+    }
 };

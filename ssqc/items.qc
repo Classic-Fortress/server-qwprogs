@@ -9,7 +9,7 @@ void () tfgoal_touch;
 void () SUB_regen = {
     self.model = self.mdl;
     self.solid = SOLID_TRIGGER;
-    sound(self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, "items/itembk2.wav", 1, ATTN_NORM);
     setorigin(self, self.origin);
 };
 
@@ -30,7 +30,7 @@ void () q_touch = {
         return;
 
     self.mdl = self.model;
-    sound(other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+    FO_Sound(other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     self.solid = SOLID_NOT;
     other.items = other.items | IT_QUAD;
@@ -56,7 +56,7 @@ void (float timeleft) DropQuad = {
     item.solid = SOLID_TRIGGER;
     item.movetype = MOVETYPE_TOSS;
     item.noise = "items/damage.wav";
-    setmodel(item, "progs/quaddama.mdl");
+    FO_SetModel(item, "progs/quaddama.mdl");
     setsize(item, VEC_HULL_MIN, VEC_HULL_MAX);
     item.cnt = time + timeleft;
     item.touch = q_touch;
@@ -74,7 +74,7 @@ void () r_touch = {
         return;
 
     self.mdl = self.model;
-    sound(other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+    FO_Sound(other, CHAN_VOICE, self.noise, 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     self.solid = 0;
     other.items = other.items | IT_INVISIBILITY;
@@ -100,7 +100,7 @@ void (float timeleft) DropRing = {
     item.solid = SOLID_TRIGGER;
     item.movetype = MOVETYPE_TOSS;
     item.noise = "items/inv1.wav";
-    setmodel(item, "progs/invisibl.mdl");
+    FO_SetModel(item, "progs/invisibl.mdl");
     setsize(item, VEC_HULL_MIN, VEC_HULL_MAX);
     item.cnt = time + timeleft;
     item.touch = r_touch;
@@ -190,21 +190,21 @@ void () item_health = {
     if (self.spawnflags & H_ROTTEN) {
         precache_model("maps/b_bh10.bsp");
         precache_sound("items/r_item1.wav");
-        setmodel(self, "maps/b_bh10.bsp");
+        FO_SetModel(self, "maps/b_bh10.bsp");
         self.noise = "items/r_item1.wav";
         self.healamount = 15;
         self.healtype = 0;
     } else if (self.spawnflags & H_MEGA) {
         precache_model("maps/b_bh100.bsp");
         precache_sound("items/r_item2.wav");
-        setmodel(self, "maps/b_bh100.bsp");
+        FO_SetModel(self, "maps/b_bh100.bsp");
         self.noise = "items/r_item2.wav";
         self.healamount = 100;
         self.healtype = 2;
     } else {
         precache_model("maps/b_bh25.bsp");
         precache_sound("items/health1.wav");
-        setmodel(self, "maps/b_bh25.bsp");
+        FO_SetModel(self, "maps/b_bh25.bsp");
         self.noise = "items/health1.wav";
         self.healamount = 25;
         self.healtype = 1;
@@ -251,7 +251,7 @@ void () health_touch = {
                     s = ftos(self.healamount);
                     sprint(other, PRINT_LOW, "You gather ", s,
                            " medikit ammo\n");
-                    sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
+                    FO_Sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
                     stuffcmd(other, "bf\n");
                     self.model = string_null;
                     self.solid = 0;
@@ -277,7 +277,7 @@ void () health_touch = {
         s = ftos(self.healamount);
         sprint(other, PRINT_LOW, "You receive ", s, " health\n");
     }
-    sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
+    FO_Sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     self.model = string_null;
     self.solid = 0;
@@ -421,7 +421,7 @@ void () armor_touch = {
         self.nextthink = time + 40;
     }
     self.think = SUB_regen;
-    sound(other, 3, "items/armor1.wav", 1, 1);
+    FO_Sound(other, CHAN_ITEM, "items/armor1.wav", 1, 1);
     stuffcmd(other, "bf\n");
     activator = other;
     SUB_UseTargets();
@@ -434,7 +434,7 @@ void () item_armor1 = {
     }
     self.touch = armor_touch;
     precache_model("progs/armor.mdl");
-    setmodel(self, "progs/armor.mdl");
+    FO_SetModel(self, "progs/armor.mdl");
     self.skin = 0;
     setsize(self, '-16 -16 0', '16 16 56');
     StartItem();
@@ -447,7 +447,7 @@ void () item_armor2 = {
     }
     self.touch = armor_touch;
     precache_model("progs/armor.mdl");
-    setmodel(self, "progs/armor.mdl");
+    FO_SetModel(self, "progs/armor.mdl");
     self.skin = 1;
     setsize(self, '-16 -16 0', '16 16 56');
     StartItem();
@@ -460,7 +460,7 @@ void () item_armorInv = {
     }
     self.touch = armor_touch;
     precache_model("progs/armor.mdl");
-    setmodel(self, "progs/armor.mdl");
+    FO_SetModel(self, "progs/armor.mdl");
     self.skin = 2;
     setsize(self, '-16 -16 0', '16 16 56');
     StartItem();
@@ -636,7 +636,7 @@ void () weapon_touch = {
         }
     }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
-    sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
+    FO_Sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     bound_other_ammo(other);
     old = other.weapons_carried;
@@ -657,7 +657,7 @@ void () weapon_supershotgun = {
         return;
     }
     precache_model("progs/g_shot.mdl");
-    setmodel(self, "progs/g_shot.mdl");
+    FO_SetModel(self, "progs/g_shot.mdl");
     self.weapon = WEAP_SUPER_SHOTGUN;
     self.netname = "Double-barrelled Shotgun";
     self.touch = weapon_touch;
@@ -671,7 +671,7 @@ void () weapon_nailgun = {
         return;
     }
     precache_model("progs/g_nail.mdl");
-    setmodel(self, "progs/g_nail.mdl");
+    FO_SetModel(self, "progs/g_nail.mdl");
     self.weapon = 512;
     self.netname = "nailgun";
     self.touch = weapon_touch;
@@ -685,7 +685,7 @@ void () weapon_supernailgun = {
         return;
     }
     precache_model("progs/g_nail2.mdl");
-    setmodel(self, "progs/g_nail2.mdl");
+    FO_SetModel(self, "progs/g_nail2.mdl");
     self.weapon = 1024;
     self.netname = "Super Nailgun";
     self.touch = weapon_touch;
@@ -699,7 +699,7 @@ void () weapon_grenadelauncher = {
         return;
     }
     precache_model("progs/g_rock.mdl");
-    setmodel(self, "progs/g_rock.mdl");
+    FO_SetModel(self, "progs/g_rock.mdl");
     self.weapon = 3;
     self.netname = "Grenade Launcher";
     self.touch = weapon_touch;
@@ -713,7 +713,7 @@ void () weapon_rocketlauncher = {
         return;
     }
     precache_model("progs/g_rock2.mdl");
-    setmodel(self, "progs/g_rock2.mdl");
+    FO_SetModel(self, "progs/g_rock2.mdl");
     self.weapon = 3;
     self.netname = "Rocket Launcher";
     self.touch = weapon_touch;
@@ -727,7 +727,7 @@ void () weapon_lightning = {
         return;
     }
     precache_model("progs/g_light.mdl");
-    setmodel(self, "progs/g_light.mdl");
+    FO_SetModel(self, "progs/g_light.mdl");
     self.weapon = 3;
     self.netname = "Thunderbolt";
     self.touch = weapon_touch;
@@ -870,7 +870,7 @@ void () ammo_touch = {
     if (!gotbox && !gotgren) {
         return;
     }
-    sound(other, 3, "weapons/lock4.wav", 1, 1);
+    FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, 1);
     stuffcmd(other, "bf\n");
     if (gotbox) {
         bound_other_ammo(other);
@@ -891,11 +891,11 @@ void () item_shells = {
     self.touch = ammo_touch;
     if (self.spawnflags & 1) {
         precache_model("maps/b_shell1.bsp");
-        setmodel(self, "maps/b_shell1.bsp");
+        FO_SetModel(self, "maps/b_shell1.bsp");
         self.aflag = 40;
     } else {
         precache_model("maps/b_shell0.bsp");
-        setmodel(self, "maps/b_shell0.bsp");
+        FO_SetModel(self, "maps/b_shell0.bsp");
         self.aflag = 20;
     }
     self.weapon = 1;
@@ -912,11 +912,11 @@ void () item_spikes = {
     self.touch = ammo_touch;
     if (self.spawnflags & 1) {
         precache_model("maps/b_nail1.bsp");
-        setmodel(self, "maps/b_nail1.bsp");
+        FO_SetModel(self, "maps/b_nail1.bsp");
         self.aflag = 50;
     } else {
         precache_model("maps/b_nail0.bsp");
-        setmodel(self, "maps/b_nail0.bsp");
+        FO_SetModel(self, "maps/b_nail0.bsp");
         self.aflag = 25;
     }
     self.weapon = 2;
@@ -933,11 +933,11 @@ void () item_rockets = {
     self.touch = ammo_touch;
     if (self.spawnflags & 1) {
         precache_model("maps/b_rock1.bsp");
-        setmodel(self, "maps/b_rock1.bsp");
+        FO_SetModel(self, "maps/b_rock1.bsp");
         self.aflag = 10;
     } else {
         precache_model("maps/b_rock0.bsp");
-        setmodel(self, "maps/b_rock0.bsp");
+        FO_SetModel(self, "maps/b_rock0.bsp");
         self.aflag = 5;
     }
     self.weapon = 3;
@@ -954,11 +954,11 @@ void () item_cells = {
     self.touch = ammo_touch;
     if (self.spawnflags & 1) {
         precache_model("maps/b_batt1.bsp");
-        setmodel(self, "maps/b_batt1.bsp");
+        FO_SetModel(self, "maps/b_batt1.bsp");
         self.aflag = 12;
     } else {
         precache_model("maps/b_batt0.bsp");
-        setmodel(self, "maps/b_batt0.bsp");
+        FO_SetModel(self, "maps/b_batt0.bsp");
         self.aflag = 6;
     }
     self.weapon = 4;
@@ -976,11 +976,11 @@ void () item_weapon = {
     if (self.spawnflags & 1) {
         if (self.spawnflags & 8) {
             precache_model("maps/b_shell1.bsp");
-            setmodel(self, "maps/b_shell1.bsp");
+            FO_SetModel(self, "maps/b_shell1.bsp");
             self.aflag = 40;
         } else {
             precache_model("maps/b_shell0.bsp");
-            setmodel(self, "maps/b_shell0.bsp");
+            FO_SetModel(self, "maps/b_shell0.bsp");
             self.aflag = 20;
         }
         self.weapon = 1;
@@ -989,11 +989,11 @@ void () item_weapon = {
     if (self.spawnflags & 4) {
         if (self.spawnflags & 8) {
             precache_model("maps/b_nail1.bsp");
-            setmodel(self, "maps/b_nail1.bsp");
+            FO_SetModel(self, "maps/b_nail1.bsp");
             self.aflag = 40;
         } else {
             precache_model("maps/b_nail0.bsp");
-            setmodel(self, "maps/b_nail0.bsp");
+            FO_SetModel(self, "maps/b_nail0.bsp");
             self.aflag = 20;
         }
         self.weapon = 2;
@@ -1002,11 +1002,11 @@ void () item_weapon = {
     if (self.spawnflags & 2) {
         if (self.spawnflags & 8) {
             precache_model("maps/b_rock1.bsp");
-            setmodel(self, "maps/b_rock1.bsp");
+            FO_SetModel(self, "maps/b_rock1.bsp");
             self.aflag = 10;
         } else {
             precache_model("maps/b_rock0.bsp");
-            setmodel(self, "maps/b_rock0.bsp");
+            FO_SetModel(self, "maps/b_rock0.bsp");
             self.aflag = 5;
         }
         self.weapon = 3;
@@ -1036,7 +1036,7 @@ void () key_touch = {
         return;
     }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
-    sound(other, 3, self.noise, 1, 1);
+    FO_Sound(other, CHAN_ITEM, self.noise, 1, 1);
     stuffcmd(other, "bf\n");
     other.items = other.items | self.items;
     if (!coop) {
@@ -1074,17 +1074,17 @@ void () item_key1 = {
     }
     if (world.worldtype == 0) {
         precache_model("progs/w_s_key.mdl");
-        setmodel(self, "progs/w_s_key.mdl");
+        FO_SetModel(self, "progs/w_s_key.mdl");
         self.netname = "silver key";
     } else {
         if (world.worldtype == 1) {
             precache_model("progs/m_s_key.mdl");
-            setmodel(self, "progs/m_s_key.mdl");
+            FO_SetModel(self, "progs/m_s_key.mdl");
             self.netname = "silver runekey";
         } else {
             if (world.worldtype == 2) {
                 precache_model2("progs/b_s_key.mdl");
-                setmodel(self, "progs/b_s_key.mdl");
+                FO_SetModel(self, "progs/b_s_key.mdl");
                 self.netname = "silver keycard";
             }
         }
@@ -1103,17 +1103,17 @@ void () item_key2 = {
     }
     if (world.worldtype == 0) {
         precache_model("progs/w_g_key.mdl");
-        setmodel(self, "progs/w_g_key.mdl");
+        FO_SetModel(self, "progs/w_g_key.mdl");
         self.netname = "gold key";
     }
     if (world.worldtype == 1) {
         precache_model("progs/m_g_key.mdl");
-        setmodel(self, "progs/m_g_key.mdl");
+        FO_SetModel(self, "progs/m_g_key.mdl");
         self.netname = "gold runekey";
     }
     if (world.worldtype == 2) {
         precache_model2("progs/b_g_key.mdl");
-        setmodel(self, "progs/b_g_key.mdl");
+        FO_SetModel(self, "progs/b_g_key.mdl");
         self.netname = "gold keycard";
     }
     key_setsounds();
@@ -1135,7 +1135,7 @@ void () sigil_touch = {
     if (cb_prematch == 1)
         return;
 
-    sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
+    FO_Sound(other, CHAN_ITEM, self.noise, 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     self.solid = SOLID_NOT;
     self.model = string_null;
@@ -1157,19 +1157,19 @@ void () item_sigil = {
     self.noise = "misc/runekey.wav";
     if (self.spawnflags & 1) {
         precache_model("progs/end1.mdl");
-        setmodel(self, "progs/end1.mdl");
+        FO_SetModel(self, "progs/end1.mdl");
     }
     if (self.spawnflags & 2) {
         precache_model2("progs/end2.mdl");
-        setmodel(self, "progs/end2.mdl");
+        FO_SetModel(self, "progs/end2.mdl");
     }
     if (self.spawnflags & 4) {
         precache_model2("progs/end3.mdl");
-        setmodel(self, "progs/end3.mdl");
+        FO_SetModel(self, "progs/end3.mdl");
     }
     if (self.spawnflags & 8) {
         precache_model2("progs/end4.mdl");
-        setmodel(self, "progs/end4.mdl");
+        FO_SetModel(self, "progs/end4.mdl");
     }
     self.touch = sigil_touch;
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
@@ -1210,7 +1210,7 @@ void () powerup_touch = {
             self.think = SUB_regen;
         }
     }
-    sound(other, 2, self.noise, 1, 1);
+    FO_Sound(other, CHAN_VOICE, self.noise, 1, 1);
     stuffcmd(other, "bf\n");
     self.solid = 0;
     other.items = other.items | self.items;
@@ -1246,7 +1246,7 @@ void () item_artifact_invulnerability = {
     precache_sound("items/protect2.wav");
     precache_sound("items/protect3.wav");
     self.noise = "items/protect.wav";
-    setmodel(self, "progs/invulner.mdl");
+    FO_SetModel(self, "progs/invulner.mdl");
     self.effects = self.effects | EF_RED;
     self.netname = "Pentagram of Protection";
     self.items = IT_INVULNERABILITY;
@@ -1264,7 +1264,7 @@ void () item_artifact_envirosuit = {
     precache_sound("items/suit.wav");
     precache_sound("items/suit2.wav");
     self.noise = "items/suit.wav";
-    setmodel(self, "progs/suit.mdl");
+    FO_SetModel(self, "progs/suit.mdl");
     self.netname = "Biosuit";
     self.items = IT_SUIT;
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
@@ -1282,7 +1282,7 @@ void () item_artifact_invisibility = {
     precache_sound("items/inv2.wav");
     precache_sound("items/inv3.wav");
     self.noise = "items/inv1.wav";
-    setmodel(self, "progs/invisibl.mdl");
+    FO_SetModel(self, "progs/invisibl.mdl");
     self.netname = "Ring of Shadows";
     self.items = IT_INVISIBILITY;
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
@@ -1300,7 +1300,7 @@ void () item_artifact_super_damage = {
     precache_sound("items/damage2.wav");
     precache_sound("items/damage3.wav");
     self.noise = "items/damage.wav";
-    setmodel(self, "progs/quaddama.mdl");
+    FO_SetModel(self, "progs/quaddama.mdl");
     self.effects = self.effects | EF_BLUE;
     self.netname = "Quad Damage";
     self.items = IT_QUAD;
@@ -1372,7 +1372,7 @@ void () BackpackTouch = {
         }
     }
     sprint(other, PRINT_LOW, "\n");
-    sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+    FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     dremove(self);
     self = other;
@@ -1423,7 +1423,7 @@ void () DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    setmodel(newmis, "progs/backpack.mdl");
+    FO_SetModel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
     newmis.classname = "backpack";

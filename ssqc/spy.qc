@@ -990,7 +990,7 @@ void (entity spy) TeamFortress_SpyCalcName = {
 };
 
 void () GasGrenadeTouch = {
-    sound(self, 1, "weapons/bounce.wav", 1, 1);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, 1);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -1015,7 +1015,7 @@ void () GasGrenadeExplode = {
         pos = 0;
         while (pos < 10) {
             newmis = spawn();
-            setmodel(newmis, "progs/s_bubble.spr");
+            FO_SetModel(newmis, "progs/s_bubble.spr");
             setorigin(newmis, self.origin);
             newmis.movetype = 8;
             newmis.solid = 0;
@@ -1320,7 +1320,7 @@ void () W_FireTranq = {
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
     newmis.classname = "proj_tranq";
-    setmodel(newmis, "progs/spike.mdl");
+    FO_SetModel(newmis, "progs/spike.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 };
@@ -1449,7 +1449,7 @@ void () Spy_DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    setmodel(newmis, "progs/backpack.mdl");
+    FO_SetModel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
     newmis.classname = "backpack";

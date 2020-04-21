@@ -488,6 +488,7 @@ float burstgren_interval;
 float burstgren_range;
 
 float old_grens;
+float fo_flash;
 float invis_only;
 float flagem_checked;
 float cease_fire;
@@ -577,6 +578,7 @@ float solid_detpack;
 float walls_block_emp;
 float new_emp;
 float cb_keepteams;
+float fo_flashtime;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -661,3 +663,24 @@ string (string s, float width) strpadr =
 
 float captainmode;
 .float captain;
+
+
+//Player ID
+float loginRequired;
+string loginUrl;
+string webpageUrl;
+.string login;
+.float login_in_progress;
+
+
+//Logging fields
+float gametime;
+string gametimestamp;
+float logfilehandle;
+float canlog;
+.string grenadename;
+.float classtime;
+.float goalrunningtime;
+
+// flash stuff
+float FO_FlashDimension;

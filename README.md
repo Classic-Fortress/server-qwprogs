@@ -4,6 +4,8 @@ FortressOne Server
 New features
 ------
 * localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
+* hud commands: `fo_hud [element] [setting] [value]` lets you manually configure the extra hud elements' settings and `fo_hud_save` saves them.
+* new spectator command `tracktarget` lets you track whoever you're pointing at
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map
 * localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.
