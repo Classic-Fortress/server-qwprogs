@@ -63,7 +63,6 @@ float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
-float (float tno) TeamFortress_TeamGetLives;
 
 string nextmap;
 
@@ -85,7 +84,7 @@ void () info_player_intermission =
 };
 
 void () SetChangeParms = {
-    if (self.health <= 0 && !cb_keepteams) {
+    if (self.health <= 0) {
         SetNewParms();
         return;
     }
@@ -115,8 +114,8 @@ void () SetChangeParms = {
     parm9 = self.armortype * 100;
     parm10 = 0;
     parm11 = 0;
-    parm12 = cb_keepteams?self.playerclass:0;
-    parm13 = self.team_no;
+    parm12 = 0;
+    parm13 = 0;
     parm14 = 0;
     parm15 = self.is_admin;
 };
@@ -413,6 +412,9 @@ void () DecodeLevelParms = {
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
+        // use fortress one flash
+        fo_flash = CF_GetSetting("ff", "fo_flash", "off");
+
         // drop primed hand grenades to ground when dying [on]
         drop_grenades = CF_GetSetting("dg", "drop_grenades", "on");
 
@@ -640,8 +642,21 @@ void () DecodeLevelParms = {
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
-        // keep teams on map change [on]
-        cb_keepteams = CF_GetSetting("kt", "keep_teams", "2");
+        // enforces login
+        loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
+
+        // login request https endpoint
+        loginUrl = infokey(world, "loginurl");
+
+        // server webpage address (required for login to work)
+        webpageUrl = infokey(world, "webpageurl");
+
+        if (loginRequired && (!loginUrl || !webpageUrl)) {
+            loginRequired = 0;
+        }
+
+        // fortress one flash time in seconds
+        fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -788,25 +803,10 @@ void () DecodeLevelParms = {
 
     if (parm11)
         self.tfstate = parm11;
-    if (cb_keepteams && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
-        // 1 = same, 2+ = rotate
-        if(cb_keepteams == 1) {
-            //self.team_no = parm13;
-            TeamFortress_TeamSet(parm13);
-        } else {
-            //self.team_no = (parm13 % number_of_teams) + 1;
-            TeamFortress_TeamSet((parm13 % number_of_teams) + 1);
-        }
-        self.lives = TeamFortress_TeamGetLives(parm13);
-        //Menu_Class(0);
-    }
-    if (self.playerclass == 0 && self.team_no) {
-        TeamFortress_ChangeClass(parm12);
-    }
+    if (self.playerclass == 0)
+        self.playerclass = parm12;
     if (parm15)
         self.is_admin = parm15;
-    
-        
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
@@ -936,7 +936,8 @@ void () IntermissionThink = {
         return;
     if ((!self.button0 && !self.button1) && !self.button2)
         return;
-
+    if (logfilehandle > 0)
+        fclose(logfilehandle);
     dprint("Intermission think\n");
     GotoNextMap();
 };
@@ -1019,6 +1020,7 @@ void () execute_changelevel = {
     }
     if (!clan_scores_dumped) {
         DumpClanScores();
+        MapEndSequence();
         clan_scores_dumped = 1;
     }
 };
@@ -1584,7 +1586,7 @@ void (entity p) SetVoteParams = {
     p.angles = spot.angles;
     p.fixangle = 1;
     
-    setmodel(p, "progs/player.mdl");
+    FO_SetModel(p, "progs/player.mdl");
     p.modelindex = modelindex_player;
     setsize(p, VEC_HULL_MIN, VEC_HULL_MAX);
     
@@ -1637,6 +1639,8 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
+    self.dimension_see = DMN_NOFLASH;
+    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
     
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -1670,6 +1674,11 @@ void () PutClientInServer = {
     }
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
+            if (self.playerclass != 0) {
+                local float timeplayed = gametime - self.classtime;
+                LogEventChangeClass(self, self.playerclass, self.nextpc, timeplayed);
+                self.classtime = gametime; 
+            }
             self.playerclass = self.nextpc;
         }
         if (self.playerclass == PC_RANDOM)
@@ -1681,12 +1690,10 @@ void () PutClientInServer = {
         }
     }
     
-/*
-    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
-        TeamFortress_ChangeClass(0);
+    if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
-*/
+
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -1807,10 +1814,6 @@ void () PutClientInServer = {
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
-    }
-    
-    if (self.playerclass == 0 && self.team_no > 0) {
-        Menu_Class(0);
     }
 };
 
@@ -2010,9 +2013,9 @@ void () PlayerJump = {
         if (self.swim_flag < time) {
             self.swim_flag = time + 1;
             if (random() < 0.5)
-                sound(self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM);
             else
-                sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
         if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
@@ -2034,7 +2037,7 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
-    sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         if (!cannon_air) {
@@ -2085,9 +2088,9 @@ void () WaterMove = {
 
     if (self.waterlevel != 3) {
         if (self.air_finished < time) {
-            sound(self, 2, "player/gasp2.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/gasp2.wav", 1, 1);
         } else if (self.air_finished < (time + 9)) {
-            sound(self, 2, "player/gasp1.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/gasp1.wav", 1, 1);
         }
         self.air_finished = time + 12;
         self.dmg = 2;
@@ -2102,7 +2105,7 @@ void () WaterMove = {
     }
     if (!self.waterlevel) {
         if (self.flags & 16) {
-            sound(self, 4, "misc/outwater.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "misc/outwater.wav", 1, 1);
             self.flags = self.flags - 16;
         }
         return;
@@ -2131,13 +2134,13 @@ void () WaterMove = {
     }
     if (!(self.flags & 16)) {
         if (self.watertype == -5) {
-            sound(self, 4, "player/inlava.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
         }
         if (self.watertype == -3) {
-            sound(self, 4, "player/inh2o.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "player/inh2o.wav", 1, 1);
         }
         if (self.watertype == -4) {
-            sound(self, 4, "player/slimbrn2.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "player/slimbrn2.wav", 1, 1);
         }
         self.flags = self.flags + 16;
         self.dmgtime = 0;
@@ -2286,7 +2289,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_sound < time) {
-                    sound(self, 0, "items/inv3.wav", 0.5, 2);
+                    FO_Sound(self, CHAN_AUTO, "items/inv3.wav", 0.5, 2);
                     self.invisible_sound = time + ((random() * 3) + 1);
                 }
                 if (self.invisible_finished < (time + 3)) {
@@ -2294,7 +2297,7 @@ void () CheckPowerups = {
                         sprint(self, PRINT_HIGH,
                                "Ring of shadows magic is fading\n");
                         stuffcmd(self, "bf\n");
-                        sound(self, 0, "items/inv2.wav", 1, 1);
+                        FO_Sound(self, CHAN_AUTO, "items/inv2.wav", 1, 1);
                         self.invisible_time = time + 1;
                     }
                     if (self.invisible_time < time) {
@@ -2325,7 +2328,7 @@ void () CheckPowerups = {
                 sprint(self, PRINT_HIGH,
                        "Protection is almost burned out\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/protect2.wav", 1, 1);
+                FO_Sound(self, CHAN_AUTO, "items/protect2.wav", 1, 1);
                 self.invincible_time = time + 1;
             }
             if (self.invincible_time < time) {
@@ -2368,7 +2371,7 @@ void () CheckPowerups = {
             if (self.super_time == 1) {
                 sprint(self, PRINT_HIGH, "Quad damage is wearing off\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/damage2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM);
                 self.super_time = time + 1;
             }
             if (self.super_time < time) {
@@ -2412,7 +2415,7 @@ void () CheckPowerups = {
                 sprint(self, PRINT_HIGH,
                        "Air supply in biosuit expiring\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/suit2.wav", 1, 1);
+                FO_Sound(self, CHAN_AUTO, "items/suit2.wav", 1, 1);
                 self.rad_time = time + 1;
             }
             if (self.rad_time < time) {
@@ -2443,7 +2446,7 @@ void () PlayerPostThink = {
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
-            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
                 fdmg = 5;
@@ -2457,10 +2460,10 @@ void () PlayerPostThink = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
-                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
             }
         }
     }
@@ -2473,7 +2476,7 @@ void () PlayerPostThink = {
         CheckPowerups();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        TeamFortress_SetSpeed(self);
+        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();
@@ -2508,6 +2511,11 @@ void (optional float csqcactive) ClientConnect = {
 
     if (self.netname == string_null)
         KickCheater(self);
+
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (self.login == string_null)
+        sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
     TeamFortress_Alias("id", TF_ID, 0);
 
@@ -2606,9 +2614,14 @@ void () ClientDisconnect = {
 
     fr = rint(self.frags);
     st = ftos(fr);
+
+    local float timeplayed = gametime - self.classtime;
+    LogEventChangeClass(self, self.playerclass, 0, timeplayed);
+    self.classtime = gametime;
+
     bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
-    sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
     RemovePlayerOwnedEnts();
 
@@ -3237,7 +3250,7 @@ void() SV_RunClientCommand = {
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
-            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
                 fdmg = 5;
@@ -3251,10 +3264,10 @@ void() SV_RunClientCommand = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
-                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
             }
         }
     }

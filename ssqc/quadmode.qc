@@ -163,7 +163,6 @@ void () QuadRoundBegin = {
     }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
-
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
@@ -308,6 +307,11 @@ void () StartQuadRound =
             te = find(te, classname, "observer");
         }
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
+		if (!clan_scores_dumped) {
+            DumpClanScores();
+            MapEndSequence();
+            clan_scores_dumped = 1;
+ 		}
 		localcmd("stop\n");
 		return;
 	}

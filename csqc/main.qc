@@ -6,7 +6,7 @@ void FO_Hud_Editor_List_Panels();
 void FO_Hud_Editor_Show_Panel(string panelid);
 void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
 void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
-void Hud_WriteCfg(string path)
+void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
@@ -18,10 +18,9 @@ void GetSelf() = {
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
-//    precache_model("progs/weapons/v_rock.mdl");
+    //    precache_model("progs/weapons/v_rock.mdl");
 
-    for (float i = 0; i < HudIcons.length; i++)
-    {
+    for (float i = 0; i < HudIcons.length; i++) {
         precache_pic(HudIcons[i].icon);
     }
 
@@ -52,7 +51,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_LoadSettings();
     registercommand("tracktarget");
     
-
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -114,6 +112,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
     float val;
     switch(argv(0)) {
+        case "fo_hud_editor":
+            FO_Hud_Editor();
+            break;
+        case "fo_hud_reset":
+            FO_Hud_Editor_LoadDefaultSettings();
+            break;
         case "fo_hud":
             if(argv(1) == "") {
                 FO_Hud_Editor_List_Panels();
@@ -122,23 +126,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             } else {
                 FO_Hud_Editor_Set_Panel_Setting(argv(1), argv(2), argv(3));
             }
-            /*
-            switch(argv(1)) {
-                case "list":
-                    FO_Hud_Editor_List_Panels();
-                    break;
-                case "show":
-                case "get":
-                    FO_Hud_Editor_Print_Panel_Setting(argv(2), argv(3));
-                    break;
-                case "set":
-                    FO_Hud_Editor_Set_Panel_Setting(argv(2), argv(3), argv(4));
-                    break;
-                default:
-                    print("^1Usage:^7 fo_hud [<element> | <element> <property> | <element> <property> <value>]\n");
-                    break;
-            }
-            */
             break;
         case "fo_hud_save":
             Hud_WriteCfg(FO_HUD_CONFIG_PATH);
@@ -171,50 +158,61 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
                 }
-                grentimer_waiting = TRUE;
+                localcmd("primeone_server");
             }
-            localcmd("primeone_server");
             break;
         case "primetwo":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("primetwo_server");
             }
-            localcmd("primetwo_server");
             break;
         case "gren1":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren1_server");
             }
-            localcmd("gren1_server");
             break;
         case "gren2":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren2_server");
             }
-            localcmd("gren2_server");
             break;
         case "+showscores":
             showingscores = TRUE;
             break;
         case "-showscores":
             showingscores = FALSE;
+            break;
+        case "tracktarget":
+            localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
             jump_counter = jump_counter + 1;
@@ -223,12 +221,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-aux_jump":
             jump_counter = jump_counter - 1;
             if (jump_counter <= 0) {
-                jump_counter = 0;
                 localcmd("-jump");
             }
-        case "tracktarget":
-            localcmd("cmd tracktarget\n");
-            break;
     }	
     return FALSE;
 };

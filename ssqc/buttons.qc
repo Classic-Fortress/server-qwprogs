@@ -51,7 +51,7 @@ void () button_fire = {
     targ = find(targ, targetname, targname);   
     targ.active = TFGS_ACTIVE;
 
-    sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
     self.state = STATE_UP;
     SUB_CalcMove(self.pos2, self.speed, button_wait);

@@ -124,6 +124,9 @@ void () SpectatorImpulseCommand = {
 };
 
 void () SpectatorThink = {
+    
+    self.dimension_see = DMN_NOFLASH;
+
     if (self.impulse)
         SpectatorImpulseCommand();
 

@@ -53,7 +53,7 @@ void () TeamFortress_Discard = {
         self.ammo_cells = 0;
     }
     W_SetCurrentAmmo(self);
-    sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
     newmis.enemy = self;
     newmis.health = time;
     newmis.weapon = 0;
@@ -75,7 +75,7 @@ void () TeamFortress_Discard = {
     newmis.nextthink = time + 30;
     newmis.think = SUB_Remove;
     newmis.touch = TeamFortress_AmmoboxTouch;
-    setmodel(newmis, "progs/backpack.mdl");
+    FO_SetModel(newmis, "progs/backpack.mdl");
 };
 
 void () TeamFortress_Discard_DropAmmo = {
@@ -127,9 +127,9 @@ void () TeamFortress_SaveMe = {
 
     if (self.last_saveme_sound < time) {
         if (random() < 0.8)
-            sound(self, CHAN_WEAPON, "speech/saveme1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "speech/saveme1.wav", 1, ATTN_NORM);
         else
-            sound(self, CHAN_WEAPON, "speech/saveme2.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "speech/saveme2.wav", 1, ATTN_NORM);
 
         self.last_saveme_sound = time + 4;
     }

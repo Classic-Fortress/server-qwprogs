@@ -67,7 +67,7 @@ void ActivateQ3Goal(entity trig, float active)
             {
                 if (targ.state == STATE_INVISIBLE && targ.state != chkstate)
                 {
-                    setmodel(targ, targ.mdl);
+                    FO_SetModel(targ, targ.mdl);
                 }
                 targ.state = chkstate;
                 msg = "";

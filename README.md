@@ -6,6 +6,7 @@ New features
 * localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
 * hud commands: `fo_hud [element] [setting] [value]` lets you manually configure the extra hud elements' settings and `fo_hud_save` saves them.
 * new spectator command `tracktarget` lets you track whoever you're pointing at
+* `setinfo killsound 1/2/3` 1 enemies, 2 enemies and teammates, 3 enemies teammates and self
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map
 * localinfo vote_time 60 - seconds since the first vote is cast until voting is decided. 0 means majority vote only.
@@ -14,7 +15,7 @@ New features
 * CSQC - fo_main_menu main menu - either from menu.dat or engine
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
-* CSQC - fo_autohop 0/1 enable bunnyhop assist (use `+aux_jump` to use with rj scripts)
+* CSQC - fo_autohop 0/1 enable bunnyhop assist (use `+fo_jump` to use with rj scripts)
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
