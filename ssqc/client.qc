@@ -63,7 +63,6 @@ float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
-float (float tno) TeamFortress_TeamGetLives;
 
 string nextmap;
 
@@ -85,7 +84,7 @@ void () info_player_intermission =
 };
 
 void () SetChangeParms = {
-    if (self.health <= 0 && !cb_keepteams) {
+    if (self.health <= 0) {
         SetNewParms();
         return;
     }
@@ -115,8 +114,8 @@ void () SetChangeParms = {
     parm9 = self.armortype * 100;
     parm10 = 0;
     parm11 = 0;
-    parm12 = cb_keepteams?self.playerclass:0;
-    parm13 = self.team_no;
+    parm12 = 0;
+    parm13 = 0;
     parm14 = 0;
     parm15 = self.is_admin;
 };
@@ -643,9 +642,6 @@ void () DecodeLevelParms = {
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
-        // keep teams on map change [on]
-        cb_keepteams = CF_GetSetting("kt", "keep_teams", "2");
-
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 
@@ -807,25 +803,10 @@ void () DecodeLevelParms = {
 
     if (parm11)
         self.tfstate = parm11;
-    if (cb_keepteams && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
-        // 1 = same, 2+ = rotate
-        if(cb_keepteams == 1) {
-            //self.team_no = parm13;
-            TeamFortress_TeamSet(parm13);
-        } else {
-            //self.team_no = (parm13 % number_of_teams) + 1;
-            TeamFortress_TeamSet((parm13 % number_of_teams) + 1);
-        }
-        self.lives = TeamFortress_TeamGetLives(parm13);
-        //Menu_Class(0);
-    }
-    if (self.playerclass == 0 && self.team_no) {
-        TeamFortress_ChangeClass(parm12);
-    }
+    if (self.playerclass == 0)
+        self.playerclass = parm12;
     if (parm15)
         self.is_admin = parm15;
-    
-        
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
@@ -1709,12 +1690,10 @@ void () PutClientInServer = {
         }
     }
     
-/*
-    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
-        TeamFortress_ChangeClass(0);
+    if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
-*/
+
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -1835,10 +1814,6 @@ void () PutClientInServer = {
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
-    }
-    
-    if (self.playerclass == 0 && self.team_no > 0) {
-        Menu_Class(0);
     }
 };
 

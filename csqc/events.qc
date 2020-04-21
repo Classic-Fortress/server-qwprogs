@@ -121,7 +121,7 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
-                    FO_Menu_Team(2);
+                    FO_Menu_Team(FALSE);
                     break;
                 case CLIENT_MENU_CLASS:
                     FO_Menu_Class(2);
@@ -240,7 +240,6 @@ void() CSQC_Parse_Event = {
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
             quad_rounds_total = readfloat();
-            number_of_teams = readfloat();
             break;
         case MSG_PREMATCH:
             prematch = readbyte();
