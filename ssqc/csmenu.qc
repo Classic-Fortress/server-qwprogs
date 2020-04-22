@@ -34,9 +34,6 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
-    if(!pl.playerclass) {
-        return;
-    }
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -213,6 +210,7 @@ void UpdateClientMOTD(entity pl) = {
         (votemode?GAMEMODE_VOTE:0)
     ));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
+    WriteFloat(MSG_MULTICAST, number_of_teams);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
