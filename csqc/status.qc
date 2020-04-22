@@ -105,11 +105,6 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     local float transparency = 0.3;
     local float lines;
     if (fo_hud_editor) {
-        if (hud_panel(panelid, position, size, 0.3, 1)) {
-            // click event
-        }
-    } else {
-        if(showingscores) {
         drawstring(
             [GetTextAlignOffset(position.x,size.x,padding,panelid,mediumtext.x,panel.NodeInsertLoc), padding*2 + position.y],
             panelid, 

@@ -50,7 +50,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
-    registercommand("tracktarget");
     
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
