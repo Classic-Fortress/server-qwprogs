@@ -46,10 +46,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("gren2");
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("tracktarget");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
-    registercommand("tracktarget");
     
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
@@ -221,6 +221,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-aux_jump":
             jump_counter = jump_counter - 1;
             if (jump_counter <= 0) {
+                jump_counter = 0;
                 localcmd("-jump");
             }
     }	
