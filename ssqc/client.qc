@@ -644,7 +644,7 @@ void () DecodeLevelParms = {
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
         // keep teams on map change [on]
-        cb_keepteams = CF_GetSetting("kt", "keep_teams", "1");
+        cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
 
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
