@@ -161,12 +161,23 @@ void () FlashTimer = {
     self.nextthink = time + 0.6;
 };
 
-float FO_CalcFlash(float timeleft)
+float FO_CalcFlash(entity te)
 {
-    float flashAmt = 240;
+    float timeleft = te.FlashTime;
+    float flashAmtMax = 240;
+    float flashAmtMin = 100;
+    float flashAmtMaxMult = stof(infokey(te, "maxflash"));
+    float flashAmtMinMult = stof(infokey(te, "minflash"));
+    float flashAmt;
+    
+    
+    flashAmt = (flashAmtMaxMult > 0) ? flashAmtMax * flashAmtMaxMult : flashAmtMax;
+    flashAmtMin = (flashAmtMinMult > 0) ? flashAmtMin * flashAmtMinMult : flashAmtMin;
+    
     float perc = timeleft / fo_flashtime;
 
     flashAmt = flashAmt * perc;
+    flashAmt = flashAmt < flashAmtMin ? flashAmtMin : flashAmt;
     return flashAmt;
 }
 
@@ -185,7 +196,7 @@ void FO_FlashTimer()
         return;
     }
 
-    float flashamount = FO_CalcFlash(te.FlashTime);
+    float flashamount = FO_CalcFlash(te);
     StuffFlash(te, flashamount);
 
     self.nextthink = time + .1;
@@ -220,7 +231,7 @@ void FO_FlashExplode()
                 deathmsg = DMSG_GREN_FLASH;
                 TF_T_Damage(te, self, self.owner, dam, 2, 16 | 4);
 
-                stuffcmd(te, "play weapons/flashgren.wav\n");
+                stuffcmd(te, "play weapons/flashgrenburst.wav\n");
                 
                 if (te.health > 0) {
                     entity ft;
@@ -252,7 +263,7 @@ void FO_FlashExplode()
                     ftime = ftime * (frac + frac * 0.5); // fall off is awful, let's half it
                     te.FlashTime = ftime;
 
-                    float flashamount = FO_CalcFlash(te.FlashTime);
+                    float flashamount = FO_CalcFlash(te);
 
                     StuffFlash(te, flashamount);
 
