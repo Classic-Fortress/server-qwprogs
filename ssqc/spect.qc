@@ -15,6 +15,10 @@ void () SpectatorThink;
 void () Admin_Aliases;
 
 void () SpectatorConnect = {
+
+    self.dimension_see = DMN_NOFLASH;
+    self.dimension_seen = DMN_NOFLASH;
+
     local string st;
 
     self.playerclass = PC_UNDEFINED;
@@ -125,8 +129,6 @@ void () SpectatorImpulseCommand = {
 
 void () SpectatorThink = {
     
-    self.dimension_see = DMN_NOFLASH;
-
     if (self.impulse)
         SpectatorImpulseCommand();
 
