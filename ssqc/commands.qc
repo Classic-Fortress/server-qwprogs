@@ -762,6 +762,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
             break;
+        case "showroles":
+            processedCmd = TRUE;
+            PrintRoleStatus(self);
+            PrintRole(self, &Role_None);
+            PrintRole(self, &Role_Attack);
+            PrintRole(self, &Role_Defence);
+            PrintTeamRoles(self);
+            break;
         case "help":
         case "list":
             processedCmd = TRUE;

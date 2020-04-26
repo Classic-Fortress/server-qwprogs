@@ -396,6 +396,15 @@ void () StartQuadRound =
 		te.think = QuadRoundInit;
 		te.nextthink = (time + 1);
 	}
+    if(quad_roles) {
+        if(rounds % 2) {
+            Team1_Role = &Role_Defence;
+            Team2_Role = &Role_Attack;
+        } else {
+            Team1_Role = &Role_Attack;
+            Team2_Role = &Role_Defence;
+        }
+    }
 };
 
 void () EndQuadRound = {

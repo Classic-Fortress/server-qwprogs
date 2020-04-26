@@ -570,7 +570,7 @@ void () TeamFortress_ShowTF = {
 
     sprint(self, PRINT_HIGH, "Respawn delay                           ");
     if (toggleflags & TFLAG_RESPAWNDELAY) {
-        st = ftos(respawn_delay_time);
+        st = ftos(Role_None.respawn_delay_time);
     } else {
         st = "off";
     }
@@ -612,25 +612,25 @@ void () TeamFortress_ShowTF = {
     }
     CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
-    CF_PrintSetting("Scout max grenades type 1 (caltrops)", max_gren1_scout, "", PC_SCOUT_GRENADE_MAX_1);
-    CF_PrintSetting("Sniper max grenades type 1 (normal)", max_gren1_sniper, "", PC_SNIPER_GRENADE_MAX_1);
-    CF_PrintSetting("Soldier max grenades type 1 (normal)", max_gren1_soldier, "", PC_SOLDIER_GRENADE_MAX_1);
-    CF_PrintSetting("Demoman max grenades type 1 (normal)", max_gren1_demoman, "", PC_DEMOMAN_GRENADE_MAX_1);
-    CF_PrintSetting("Medic max grenades type 1 (normal)", max_gren1_medic, "", PC_MEDIC_GRENADE_MAX_1);
-    CF_PrintSetting("Heavy Weapons max grenades type 1 (normal)", max_gren1_hwguy, "", PC_HVYWEAP_GRENADE_MAX_1);
-    CF_PrintSetting("Pyro max grenades type 1 (normal)", max_gren1_pyro, "", PC_PYRO_GRENADE_MAX_1);
-    CF_PrintSetting("Spy max grenades type 1 (normal)", max_gren1_spy, "", PC_SPY_GRENADE_MAX_1);
-    CF_PrintSetting("Engineer max grenades type 1 (normal)", max_gren1_engineer, "", PC_ENGINEER_GRENADE_MAX_1);
+    CF_PrintSetting("Scout max grenades type 1 (caltrops)", Role_None.gren1_limits[1], "", PC_SCOUT_GRENADE_MAX_1);
+    CF_PrintSetting("Sniper max grenades type 1 (normal)", Role_None.gren1_limits[2], "", PC_SNIPER_GRENADE_MAX_1);
+    CF_PrintSetting("Soldier max grenades type 1 (normal)", Role_None.gren1_limits[3], "", PC_SOLDIER_GRENADE_MAX_1);
+    CF_PrintSetting("Demoman max grenades type 1 (normal)", Role_None.gren1_limits[4], "", PC_DEMOMAN_GRENADE_MAX_1);
+    CF_PrintSetting("Medic max grenades type 1 (normal)", Role_None.gren1_limits[5], "", PC_MEDIC_GRENADE_MAX_1);
+    CF_PrintSetting("Heavy Weapons max grenades type 1 (normal)", Role_None.gren1_limits[6], "", PC_HVYWEAP_GRENADE_MAX_1);
+    CF_PrintSetting("Pyro max grenades type 1 (normal)", Role_None.gren1_limits[7], "", PC_PYRO_GRENADE_MAX_1);
+    CF_PrintSetting("Spy max grenades type 1 (normal)", Role_None.gren1_limits[8], "", PC_SPY_GRENADE_MAX_1);
+    CF_PrintSetting("Engineer max grenades type 1 (normal)", Role_None.gren1_limits[9], "", PC_ENGINEER_GRENADE_MAX_1);
 
-    CF_PrintSetting("Scout max grenades type 2 (concussion)", max_gren2_scout, "", PC_SCOUT_GRENADE_MAX_2);
-    CF_PrintSetting("Sniper max grenades type 2 (flare)", max_gren2_sniper, "", PC_SNIPER_GRENADE_MAX_2);
-    CF_PrintSetting("Soldier max grenades type 2 (nail/shock)", max_gren2_soldier, "", PC_SOLDIER_GRENADE_MAX_2);
-    CF_PrintSetting("Demoman max grenades type 2 (mirv)", max_gren2_demoman, "", PC_DEMOMAN_GRENADE_MAX_2);
-    CF_PrintSetting("Medic max grenades type 2 (concussion)", max_gren2_medic, "", PC_MEDIC_GRENADE_MAX_2);
-    CF_PrintSetting("Heavy Weapons max grenades type 2 (mirv)", max_gren2_hwguy, "", PC_HVYWEAP_GRENADE_MAX_2);
-    CF_PrintSetting("Pyro max grenades type 2 (napalm)", max_gren2_pyro, "", PC_PYRO_GRENADE_MAX_2);
-    CF_PrintSetting("Spy max grenades type 2 (gas)", max_gren2_spy, "", PC_SPY_GRENADE_MAX_2);
-    CF_PrintSetting("Engineer max grenades type 2 (emp)", max_gren2_engineer, "", PC_ENGINEER_GRENADE_MAX_2);
+    CF_PrintSetting("Scout max grenades type 2 (concussion)", Role_None.gren2_limits[1], "", PC_SCOUT_GRENADE_MAX_2);
+    CF_PrintSetting("Sniper max grenades type 2 (flare)", Role_None.gren2_limits[2], "", PC_SNIPER_GRENADE_MAX_2);
+    CF_PrintSetting("Soldier max grenades type 2 (nail/shock)", Role_None.gren2_limits[3], "", PC_SOLDIER_GRENADE_MAX_2);
+    CF_PrintSetting("Demoman max grenades type 2 (mirv)", Role_None.gren2_limits[4], "", PC_DEMOMAN_GRENADE_MAX_2);
+    CF_PrintSetting("Medic max grenades type 2 (concussion)", Role_None.gren2_limits[5], "", PC_MEDIC_GRENADE_MAX_2);
+    CF_PrintSetting("Heavy Weapons max grenades type 2 (mirv)", Role_None.gren2_limits[6], "", PC_HVYWEAP_GRENADE_MAX_2);
+    CF_PrintSetting("Pyro max grenades type 2 (napalm)", Role_None.gren2_limits[7], "", PC_PYRO_GRENADE_MAX_2);
+    CF_PrintSetting("Spy max grenades type 2 (gas)", Role_None.gren2_limits[8], "", PC_SPY_GRENADE_MAX_2);
+    CF_PrintSetting("Engineer max grenades type 2 (emp)", Role_None.gren2_limits[9], "", PC_ENGINEER_GRENADE_MAX_2);
     
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
     sprint(self, PRINT_HIGH, ftos(cussgrentime));
@@ -649,9 +649,9 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Medic immune to concussion grenade", medicnocuss, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Demolitions Man ==\n");
-    if (detpipe_limit > 0) {
-        CF_PrintSetting("Pipebomb limit (per demoman)", detpipe_limit, "", 0);
-    } else if (detpipe_limit == 0) {
+    if (Role_None.detpipe_limit > 0) {
+        CF_PrintSetting("Pipebomb limit (per demoman)", Role_None.detpipe_limit, "", 0);
+    } else if (Role_None.detpipe_limit == 0) {
         sprint(self, PRINT_HIGH, "Pipebomb limit (per demoman):           0 (disallow)\n");
     } else {
         sprint(self, PRINT_HIGH, "Pipebomb limit (per demoman):           unlimited\n");
@@ -1417,6 +1417,8 @@ void () TeamFortress_SetEquipment = {
     if (self.classname != "player")
         return;
 
+    Team_Role * role = GetTeamRole(self.team_no);
+    
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
 
     self.items = 0;
@@ -1487,8 +1489,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SCOUT_MAXAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_MAXAMMO_CELL;
             self.armortype = PC_SCOUT_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_scout;
-            self.no_grenades_2 = max_gren2_scout;
+            self.no_grenades_1 = role.gren1_limits[1];
+            self.no_grenades_2 = role.gren2_limits[1];
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1499,8 +1501,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SCOUT_INITAMMO_SHOT;
             self.ammo_cells = PC_SCOUT_INITAMMO_CELL;
             self.armortype = PC_SCOUT_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_SCOUT_GRENADE_INIT_1,max_gren1_scout);
-            self.no_grenades_2 = min(PC_SCOUT_GRENADE_INIT_2,max_gren2_scout);
+            self.no_grenades_1 = min(PC_SCOUT_GRENADE_INIT_1,role.gren1_limits[1]);
+            self.no_grenades_2 = min(PC_SCOUT_GRENADE_INIT_2,role.gren2_limits[1]);
 
             if (old_hp_armor)
                 self.armorvalue = 25;
@@ -1518,8 +1520,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SCOUT_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SCOUT_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SCOUT_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_scout;
-        self.max_grenades_2 = max_gren2_scout;
+        self.max_grenades_1 = role.gren1_limits[1];
+        self.max_grenades_2 = role.gren2_limits[1];
 
         if (old_grens == 1)
             self.tp_grenades_1 = GR_TYPE_FLASH;
@@ -1554,8 +1556,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SNIPER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_MAXAMMO_CELL;
             self.armortype = PC_SNIPER_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_sniper;
-            self.no_grenades_2 = max_gren2_sniper;
+            self.no_grenades_1 = role.gren1_limits[2];
+            self.no_grenades_2 = role.gren2_limits[2];
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1566,8 +1568,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SNIPER_INITAMMO_SHOT;
             self.ammo_cells = PC_SNIPER_INITAMMO_CELL;
             self.armortype = PC_SNIPER_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_SNIPER_GRENADE_INIT_1,max_gren1_sniper);
-            self.no_grenades_2 = min(PC_SNIPER_GRENADE_INIT_2,max_gren2_sniper);
+            self.no_grenades_1 = min(PC_SNIPER_GRENADE_INIT_1,role.gren1_limits[2]);
+            self.no_grenades_2 = min(PC_SNIPER_GRENADE_INIT_2,role.gren2_limits[2]);
             if (old_hp_armor)
                 self.armorvalue = 0;
             else
@@ -1584,8 +1586,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SNIPER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SNIPER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SNIPER_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_sniper;
-        self.max_grenades_2 = max_gren2_sniper;
+        self.max_grenades_1 = role.gren1_limits[2];
+        self.max_grenades_2 = role.gren2_limits[2];
         
         self.tp_grenades_1 = PC_SNIPER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SNIPER_GRENADE_TYPE_2;
@@ -1612,8 +1614,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_MAXAMMO_CELL;
             self.armortype = PC_SOLDIER_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_soldier;
-            self.no_grenades_2 = max_gren2_soldier;
+            self.no_grenades_1 = role.gren1_limits[3];
+            self.no_grenades_2 = role.gren2_limits[3];
             if (old_hp_armor)
                 self.armorvalue = 200;
             else
@@ -1624,8 +1626,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SOLDIER_INITAMMO_SHOT;
             self.ammo_cells = PC_SOLDIER_INITAMMO_CELL;
             self.armortype = PC_SOLDIER_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_SOLDIER_GRENADE_INIT_1,max_gren1_soldier);
-            self.no_grenades_2 = min(PC_SOLDIER_GRENADE_INIT_2,max_gren2_soldier);
+            self.no_grenades_1 = min(PC_SOLDIER_GRENADE_INIT_1,role.gren1_limits[3]);
+            self.no_grenades_2 = min(PC_SOLDIER_GRENADE_INIT_2,role.gren2_limits[3]);
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -1642,8 +1644,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SOLDIER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SOLDIER_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_soldier;
-        self.max_grenades_2 = max_gren2_soldier;
+        self.max_grenades_1 = role.gren1_limits[3];
+        self.max_grenades_2 = role.gren2_limits[3];
 
         self.tp_grenades_1 = PC_SOLDIER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SOLDIER_GRENADE_TYPE_2;
@@ -1671,8 +1673,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
             self.armortype = PC_DEMOMAN_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_demoman;
-            self.no_grenades_2 = max_gren2_demoman;
+            self.no_grenades_1 = role.gren1_limits[4];
+            self.no_grenades_2 = role.gren2_limits[4];
             if (old_hp_armor)
                 self.armorvalue = 120;
             else
@@ -1683,8 +1685,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_DEMOMAN_INITAMMO_SHOT;
             self.ammo_cells = PC_DEMOMAN_INITAMMO_CELL;
             self.armortype = PC_DEMOMAN_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_DEMOMAN_GRENADE_INIT_1,max_gren1_demoman);
-            self.no_grenades_2 = min(PC_DEMOMAN_GRENADE_INIT_2,max_gren2_demoman);
+            self.no_grenades_1 = min(PC_DEMOMAN_GRENADE_INIT_1,role.gren1_limits[4]);
+            self.no_grenades_2 = min(PC_DEMOMAN_GRENADE_INIT_2,role.gren2_limits[4]);
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1701,8 +1703,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
         self.maxammo_shells = PC_DEMOMAN_MAXAMMO_SHOT;
         self.maxammo_cells = PC_DEMOMAN_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_demoman;
-        self.max_grenades_2 = max_gren2_demoman;
+        self.max_grenades_1 = role.gren1_limits[4];
+        self.max_grenades_2 = role.gren2_limits[4];
 
         self.tp_grenades_1 = PC_DEMOMAN_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_DEMOMAN_GRENADE_TYPE_2;
@@ -1731,8 +1733,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_MEDIC_MAXAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_MAXAMMO_CELL;
             self.armortype = PC_MEDIC_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_medic;
-            self.no_grenades_2 = max_gren2_medic;
+            self.no_grenades_1 = role.gren1_limits[5];
+            self.no_grenades_2 = role.gren2_limits[5];
             if (old_hp_armor)
                 self.armorvalue = 100;
             else
@@ -1743,8 +1745,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_MEDIC_INITAMMO_SHOT;
             self.ammo_cells = PC_MEDIC_INITAMMO_CELL;
             self.armortype = PC_MEDIC_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_MEDIC_GRENADE_INIT_1,max_gren1_medic);
-            self.no_grenades_2 = min(PC_MEDIC_GRENADE_INIT_2,max_gren2_medic);
+            self.no_grenades_1 = min(PC_MEDIC_GRENADE_INIT_1,role.gren1_limits[5]);
+            self.no_grenades_2 = min(PC_MEDIC_GRENADE_INIT_2,role.gren2_limits[5]);
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1761,8 +1763,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_MEDIC_MAXAMMO_NAIL;
         self.maxammo_shells = PC_MEDIC_MAXAMMO_SHOT;
         self.maxammo_cells = PC_MEDIC_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_medic;
-        self.max_grenades_2 = max_gren2_medic;
+        self.max_grenades_1 = role.gren1_limits[5];
+        self.max_grenades_2 = role.gren2_limits[5];
 
         self.tp_grenades_1 = PC_MEDIC_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_MEDIC_GRENADE_TYPE_2;
@@ -1810,8 +1812,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
             self.armortype = PC_HVYWEAP_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_hwguy;
-            self.no_grenades_2 = max_gren2_hwguy;
+            self.no_grenades_1 = role.gren1_limits[6];
+            self.no_grenades_2 = role.gren2_limits[6];
 
             if (old_hp_armor)
                 self.armorvalue = 300;
@@ -1823,8 +1825,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_HVYWEAP_INITAMMO_SHOT;
             self.ammo_cells = PC_HVYWEAP_INITAMMO_CELL;
             self.armortype = PC_HVYWEAP_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_HVYWEAP_GRENADE_INIT_1,max_gren1_hwguy);
-            self.no_grenades_2 = min(PC_HVYWEAP_GRENADE_INIT_2,max_gren2_hwguy);
+            self.no_grenades_1 = min(PC_HVYWEAP_GRENADE_INIT_1,role.gren1_limits[6]);
+            self.no_grenades_2 = min(PC_HVYWEAP_GRENADE_INIT_2,role.gren2_limits[6]);
 
             if (old_hp_armor)
                 self.armorvalue = 150;
@@ -1842,8 +1844,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
         self.maxammo_shells = PC_HVYWEAP_MAXAMMO_SHOT;
         self.maxammo_cells = PC_HVYWEAP_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_hwguy;
-        self.max_grenades_2 = max_gren2_hwguy;
+        self.max_grenades_1 = role.gren1_limits[6];
+        self.max_grenades_2 = role.gren2_limits[6];
 
         self.tp_grenades_1 = PC_HVYWEAP_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_HVYWEAP_GRENADE_TYPE_2;
@@ -1871,8 +1873,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_PYRO_MAXAMMO_SHOT;
             self.ammo_cells = PC_PYRO_MAXAMMO_CELL;
             self.armortype = PC_PYRO_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_pyro;
-            self.no_grenades_2 = max_gren2_pyro;
+            self.no_grenades_1 = role.gren1_limits[7];
+            self.no_grenades_2 = role.gren2_limits[7];
             if (old_hp_armor)
                 self.armorvalue = 150;
             else
@@ -1883,8 +1885,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_PYRO_INITAMMO_SHOT;
             self.ammo_cells = PC_PYRO_INITAMMO_CELL;
             self.armortype = PC_PYRO_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_PYRO_GRENADE_INIT_1,max_gren1_pyro);
-            self.no_grenades_2 = min(PC_PYRO_GRENADE_INIT_2,max_gren2_pyro);
+            self.no_grenades_1 = min(PC_PYRO_GRENADE_INIT_1,role.gren1_limits[7]);
+            self.no_grenades_2 = min(PC_PYRO_GRENADE_INIT_2,role.gren2_limits[7]);
             if (old_hp_armor)
                 self.armorvalue = 50;
             else
@@ -1901,8 +1903,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_PYRO_MAXAMMO_NAIL;
         self.maxammo_shells = PC_PYRO_MAXAMMO_SHOT;
         self.maxammo_cells = PC_PYRO_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_pyro;
-        self.max_grenades_2 = max_gren2_pyro;
+        self.max_grenades_1 = role.gren1_limits[7];
+        self.max_grenades_2 = role.gren2_limits[7];
 
         self.tp_grenades_1 = PC_PYRO_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_PYRO_GRENADE_TYPE_2;
@@ -1987,8 +1989,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SPY_MAXAMMO_SHOT;
             self.ammo_cells = PC_SPY_MAXAMMO_CELL;
             self.armortype = PC_SPY_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_spy;
-            self.no_grenades_2 = max_gren2_spy;
+            self.no_grenades_1 = role.gren1_limits[8];
+            self.no_grenades_2 = role.gren2_limits[8];
 
             if (old_hp_armor)
                 self.armorvalue = 100;
@@ -2000,8 +2002,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_SPY_INITAMMO_SHOT;
             self.ammo_cells = PC_SPY_INITAMMO_CELL;
             self.armortype = PC_SPY_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_SPY_GRENADE_INIT_1,max_gren1_spy);
-            self.no_grenades_2 = min(PC_SPY_GRENADE_INIT_2,max_gren2_spy);
+            self.no_grenades_1 = min(PC_SPY_GRENADE_INIT_1,role.gren1_limits[8]);
+            self.no_grenades_2 = min(PC_SPY_GRENADE_INIT_2,role.gren2_limits[8]);
 
             if (old_hp_armor)
                 self.armorvalue = 25;
@@ -2019,8 +2021,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_SPY_MAXAMMO_NAIL;
         self.maxammo_shells = PC_SPY_MAXAMMO_SHOT;
         self.maxammo_cells = PC_SPY_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_spy;
-        self.max_grenades_2 = max_gren2_spy;
+        self.max_grenades_1 = role.gren1_limits[8];
+        self.max_grenades_2 = role.gren2_limits[8];
         
         self.tp_grenades_1 = PC_SPY_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_SPY_GRENADE_TYPE_2;
@@ -2055,8 +2057,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_MAXAMMO_CELL;
             self.armortype = PC_ENGINEER_MAXARMORTYPE;
-            self.no_grenades_1 = max_gren1_engineer;
-            self.no_grenades_2 = max_gren2_engineer;
+            self.no_grenades_1 = role.gren1_limits[9];
+            self.no_grenades_2 = role.gren2_limits[9];
 
             if (old_hp_armor)
                 self.armorvalue = 50;
@@ -2068,8 +2070,8 @@ void () TeamFortress_SetEquipment = {
             self.ammo_shells = PC_ENGINEER_INITAMMO_SHOT;
             self.ammo_cells = PC_ENGINEER_INITAMMO_CELL;
             self.armortype = PC_ENGINEER_INITARMORTYPE;
-            self.no_grenades_1 = min(PC_ENGINEER_GRENADE_INIT_1,max_gren1_engineer);
-            self.no_grenades_2 = min(PC_ENGINEER_GRENADE_INIT_2,max_gren2_engineer);
+            self.no_grenades_1 = min(PC_ENGINEER_GRENADE_INIT_1,role.gren1_limits[9]);
+            self.no_grenades_2 = min(PC_ENGINEER_GRENADE_INIT_2,role.gren2_limits[9]);
             if (old_hp_armor)
                 self.armorvalue = 25;
             else
@@ -2086,8 +2088,8 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
         self.maxammo_shells = PC_ENGINEER_MAXAMMO_SHOT;
         self.maxammo_cells = PC_ENGINEER_MAXAMMO_CELL;
-        self.max_grenades_1 = max_gren1_engineer;
-        self.max_grenades_2 = max_gren2_engineer;
+        self.max_grenades_1 = role.gren1_limits[9];
+        self.max_grenades_2 = role.gren2_limits[9];
 
         self.tp_grenades_1 = PC_ENGINEER_GRENADE_TYPE_1;
         self.tp_grenades_2 = PC_ENGINEER_GRENADE_TYPE_2;
@@ -2359,7 +2361,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
         return;
 
     if (toggleflags & TFLAG_RESPAWNDELAY)
-        restime = respawn_delay_time;
+        restime = GetTeamRole(self.team_no).respawn_delay_time;
     else
         restime = 0;
 

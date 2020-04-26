@@ -6,6 +6,7 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+roles.qc
 q3defs.qc
 debug.qc
 status.qc

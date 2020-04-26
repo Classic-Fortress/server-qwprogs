@@ -1247,7 +1247,9 @@ void () ExplodeOldestPipebomb = {
     local entity oldest = world;
     local float numpipes = 0;
     local float numpipes_total = 0;
-
+    local float detpipe_limit = rint(GetTeamRole(self.team_no)->detpipe_limit);
+    Team_Role * r = GetTeamRole(self.team_no);
+    
     pipe = find(world, classname, "pipebomb");
     while (pipe != world) {
         if (pipe.owner == self) {
