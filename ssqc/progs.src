@@ -7,6 +7,7 @@ defs.qc
 ../share/common_helpers.qc
 qw.qc
 events.qc
+roles.qc
 q3defs.qc
 debug.qc
 status.qc
