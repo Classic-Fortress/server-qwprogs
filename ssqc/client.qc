@@ -807,7 +807,7 @@ void () DecodeLevelParms = {
 
     if (parm11)
         self.tfstate = parm11;
-    if (cb_keepteams && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
+    if (!self.team_no && cb_keepteams && clanbattle  && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
         // 1 = same, 2+ = rotate
         if(cb_keepteams == 1) {
             //self.team_no = parm13;
