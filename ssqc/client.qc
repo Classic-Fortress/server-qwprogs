@@ -628,7 +628,7 @@ void () DecodeLevelParms = {
         new_emp = CF_GetSetting("nemp", "new_emp", "1");
 
         // For duelmode, how soon to reset the winning player (allows for double KOs)
-        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
+        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "3");
         // remove packs in duelmode [1]
         duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
         // spawn with all possible grenades [0]
