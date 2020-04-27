@@ -123,6 +123,7 @@ void () QuadRoundBegin = {
 
 	local entity te;
 	local entity oldself;
+    //local entity tfdet;
 	local float counter;
 	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
 	te = find(world, classname, "func_breakable");
@@ -134,6 +135,39 @@ void () QuadRoundBegin = {
 	cb_prematch = 0;
  	round_active = 1;
 	round_over = 0;
+    
+    if(quad_roles) {
+        //tfdet = find(world, classname, "info_tfdetect");
+        if(rounds % 2) {
+            Team1_Role = &Role_Defence;
+            Team2_Role = &Role_Attack;
+            //te = Finditem(tfdet.display_item_status1);
+            //if(te && te.owned_by == 1) {
+                //Quad_HideFlag(te);
+            //}
+            //te = Finditem(tfdet.display_item_status2);
+        } else {
+            Team1_Role = &Role_Attack;
+            Team2_Role = &Role_Defence;
+        }
+        te = find(world, classname, "item_tfgoal");
+        while (te) {
+            if(rounds % 2) {
+                if(te.team_no == 2 && te.owned_by == 1) {
+                    Quad_UnHideFlag(te);
+                } else if(te.team_no == 1 && te.owned_by == 2) {
+                    Quad_HideFlag(te);
+                }
+            } else {
+                if(te.team_no == 2 && te.owned_by == 1) {
+                    Quad_HideFlag(te);
+                } else if(te.team_no == 1 && te.owned_by == 2) {
+                    Quad_UnHideFlag(te);
+                }
+            } 
+            te = find(te, classname, "item_tfgoal");
+        }
+    }
 
 	te = find(world, classname, "player");
 	while (te != world) {
@@ -396,15 +430,6 @@ void () StartQuadRound =
 		te.think = QuadRoundInit;
 		te.nextthink = (time + 1);
 	}
-    if(quad_roles) {
-        if(rounds % 2) {
-            Team1_Role = &Role_Defence;
-            Team2_Role = &Role_Attack;
-        } else {
-            Team1_Role = &Role_Attack;
-            Team2_Role = &Role_Defence;
-        }
-    }
 };
 
 void () EndQuadRound = {

@@ -1,5 +1,13 @@
 #pragma target fte
 
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+string(float tno) GetTeamName;
+void () item_tfgoal_touch;
+void CenterPrint(entity, string);
+
+
+float quad_roles;
+
 typedef struct {
     string name;
     string prefix;
@@ -10,7 +18,6 @@ typedef struct {
     float class_limits[11];
 } Team_Role;
 
-float quad_roles;
 var Team_Role Role_None = {"Default", "", 6};
 var Team_Role Role_Attack = {"Attack", "att_", 6};
 var Team_Role Role_Defence = {"Defence", "def_", 6};
@@ -32,8 +39,6 @@ const string CLASSES [11] = {
     "engineer",
     "randompc"
 };
-
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (Team_Role * role) LoadRole = {
     role.detpipe_limit = CF_GetSetting(strcat(role.prefix,"dl"), strcat(role.prefix,"detpipe_limit"), ftos(Role_None.detpipe_limit));
@@ -81,8 +86,6 @@ void () InitTeamRoles = {
     Team4_Role = &Role_None;
 };
 
-string(float tno) GetTeamName;
-
 void (entity e) PrintTeamRoles = {
     sprint(e, PRINT_HIGH, "\sTeam Roles:\s\n");
     if(number_of_teams > 0) {
@@ -111,4 +114,41 @@ Team_Role* (float tno) GetTeamRole = {
             return Team4_Role;
     }
     return &Role_None;
+};
+
+void () item_tfgoal_hidden_touch = {
+
+    if (other.classname != "player")
+        return;
+    if (other.health <= 0)
+        return;
+    if (cb_prematch)
+        return;
+    if (other.is_feigning)
+        return;
+    if (other == self.owner)
+        return;
+
+    // check if a wall or something is in the way of the flag
+    traceline(other.origin, self.origin, TRUE, world);
+    if (trace_fraction < 1)
+        return;
+    
+    if(self.owned_by == other.team_no) {
+        CenterPrint(other, "Unfortunately, your flag is in another castle\n\nYou are Attacking the other base\n");
+    } else {
+        CenterPrint(other, "You are defending the wrong flag!\n\nGet back to your base quickly\n");
+    }
+}
+
+void Quad_HideFlag(entity flag) = {
+    flag.touch = item_tfgoal_hidden_touch;
+    setmodel(flag, "");
+    setsize(flag, flag.goal_min, flag.goal_max);
+};
+
+void Quad_UnHideFlag(entity flag) = {
+    flag.touch = item_tfgoal_touch;
+    setmodel(flag, flag.mdl);
+    setsize(flag, flag.goal_min, flag.goal_max);
 };
