@@ -3,6 +3,10 @@ FortressOne Server
 
 New features
 ------
+* localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.
+    These roles can be configured by adding the "att_" and "def_" prefix to localinfo settings. Only detpipe_limit, respawn_time, gren limits and class limits are currently supported.
+    Use `cmd showroles` to see the current configuration.
+    The team with the "attack" role also has its flag hidden to avoid confusion.
 * localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map
