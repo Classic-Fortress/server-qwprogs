@@ -767,6 +767,13 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "tracktarget":
             processedCmd = TRUE;
             FO_SpecTrackPoint(self);
+        case "showroles":
+            processedCmd = TRUE;
+            PrintRoleStatus(self);
+            PrintRole(self, &Role_None);
+            PrintRole(self, &Role_Attack);
+            PrintRole(self, &Role_Defence);
+            PrintTeamRoles(self);
             break;
         case "help":
         case "list":

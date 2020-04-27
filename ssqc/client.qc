@@ -450,7 +450,7 @@ void () DecodeLevelParms = {
         old_sniperrange = CF_GetSetting("os", "old_sniperrange", "off");
 
         // maximum amount of pipebombs per demoman [6]
-        detpipe_limit = CF_GetSetting("dl", "detpipe_limit", "6");
+        Role_None.detpipe_limit = CF_GetSetting("dl", "detpipe_limit", "6");
 
         // maximum amount of pipebombs in game [unlimited]
         detpipe_limit_world = CF_GetSetting("dw", "detpipe_limit_world", "-1");
@@ -558,12 +558,12 @@ void () DecodeLevelParms = {
         old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
 
         // delay respawning by this many seconds [0]
-        respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
-        if (respawn_delay_time) {
+        Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
+        if (Role_None.respawn_delay_time) {
             toggleflags = toggleflags | TFLAG_RESPAWNDELAY;
         }
-        if ((toggleflags & TFLAG_RESPAWNDELAY) && !respawn_delay_time) {
-            respawn_delay_time = RESPAWN_DELAY_TIME;
+        if ((toggleflags & TFLAG_RESPAWNDELAY) && !Role_None.respawn_delay_time) {
+            Role_None.respawn_delay_time = RESPAWN_DELAY_TIME;
         }
 
         if (toggleflags & TFLAG_AUTOTEAM) {
@@ -605,6 +605,7 @@ void () DecodeLevelParms = {
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
         // Maximum number of primary grenades per class
+        /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
         max_gren1_sniper = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
         max_gren1_soldier = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
@@ -614,17 +615,28 @@ void () DecodeLevelParms = {
         max_gren1_pyro = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
         max_gren1_spy = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
         max_gren1_engineer = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
+        */
+        Role_None.gren1_limits[0] = 0; 
+        Role_None.gren1_limits[1] = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
+        Role_None.gren1_limits[2]  = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
+        Role_None.gren1_limits[3]  = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
+        Role_None.gren1_limits[4]  = CF_GetSetting("mg1_4", "max_gren1_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_1));
+        Role_None.gren1_limits[5]  = CF_GetSetting("mg1_5", "max_gren1_medic", ftos(PC_MEDIC_GRENADE_MAX_1));
+        Role_None.gren1_limits[6]  = CF_GetSetting("mg1_6", "max_gren1_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_1));
+        Role_None.gren1_limits[7]  = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
+        Role_None.gren1_limits[8]  = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
+        Role_None.gren1_limits[9]  = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
 
         // Maximum number of secondary grenades per class
-        max_gren2_scout = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
-        max_gren2_sniper = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
-        max_gren2_soldier = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
-        max_gren2_demoman = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
-        max_gren2_medic = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
-        max_gren2_hwguy = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
-        max_gren2_pyro = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
-        max_gren2_spy = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
-        max_gren2_engineer = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
+        Role_None.gren2_limits[1] = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
+        Role_None.gren2_limits[2] = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
+        Role_None.gren2_limits[3] = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
+        Role_None.gren2_limits[4] = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
+        Role_None.gren2_limits[5] = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
+        Role_None.gren2_limits[6] = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
+        Role_None.gren2_limits[7] = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
+        Role_None.gren2_limits[8] = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
+        Role_None.gren2_limits[9] = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
 
         // solid detpack toggle [0]
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
@@ -643,9 +655,6 @@ void () DecodeLevelParms = {
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
 
-        // keep teams on map change [on]
-        cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
-
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 
@@ -661,6 +670,16 @@ void () DecodeLevelParms = {
 
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+
+        // keep teams on map change [off]
+        cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
+
+        // use att/def roles in quad mode [off]
+        quad_roles = CF_GetSetting("qr", "quad_roles", "0");
+        
+        LoadRole(&Role_Attack);
+        LoadRole(&Role_Defence);
+        InitTeamRoles();
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -680,7 +699,7 @@ void () DecodeLevelParms = {
             scoutdash = TRUE;
             sniperreload = TRUE;
             old_sniperrange = FALSE;
-            detpipe_limit = 6;
+            Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
             old_pipecooldown = FALSE;
             medicaura = TRUE;
@@ -711,24 +730,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             pyro_type = 1;
-            max_gren1_scout = PC_SCOUT_GRENADE_MAX_1;
-            max_gren1_sniper = PC_SNIPER_GRENADE_MAX_1;
-            max_gren1_soldier = PC_SOLDIER_GRENADE_MAX_1;
-            max_gren1_demoman = PC_DEMOMAN_GRENADE_MAX_1;
-            max_gren1_medic = PC_MEDIC_GRENADE_MAX_1;
-            max_gren1_hwguy = PC_HVYWEAP_GRENADE_MAX_1;
-            max_gren1_pyro = PC_PYRO_GRENADE_MAX_1;
-            max_gren1_spy = PC_SPY_GRENADE_MAX_1;
-            max_gren1_engineer = PC_ENGINEER_GRENADE_MAX_1;
-            max_gren2_scout = PC_SCOUT_GRENADE_MAX_2;
-            max_gren2_sniper = PC_SNIPER_GRENADE_MAX_2;
-            max_gren2_soldier = PC_SOLDIER_GRENADE_MAX_2;
-            max_gren2_demoman = PC_DEMOMAN_GRENADE_MAX_2;
-            max_gren2_medic = PC_MEDIC_GRENADE_MAX_2;
-            max_gren2_hwguy = PC_HVYWEAP_GRENADE_MAX_2;
-            max_gren2_pyro = PC_PYRO_GRENADE_MAX_2;
-            max_gren2_spy = PC_SPY_GRENADE_MAX_2;
-            max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
+            Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
+            Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
+            Role_None.gren1_limits[3] = PC_SOLDIER_GRENADE_MAX_1;
+            Role_None.gren1_limits[4] = PC_DEMOMAN_GRENADE_MAX_1;
+            Role_None.gren1_limits[5] = PC_MEDIC_GRENADE_MAX_1;
+            Role_None.gren1_limits[6] = PC_HVYWEAP_GRENADE_MAX_1;
+            Role_None.gren1_limits[7] = PC_PYRO_GRENADE_MAX_1;
+            Role_None.gren1_limits[8] = PC_SPY_GRENADE_MAX_1;
+            Role_None.gren1_limits[9] = PC_ENGINEER_GRENADE_MAX_1;
+            Role_None.gren2_limits[1] = PC_SCOUT_GRENADE_MAX_2;
+            Role_None.gren2_limits[2] = PC_SNIPER_GRENADE_MAX_2;
+            Role_None.gren2_limits[3] = PC_SOLDIER_GRENADE_MAX_2;
+            Role_None.gren2_limits[4] = PC_DEMOMAN_GRENADE_MAX_2;
+            Role_None.gren2_limits[5] = PC_MEDIC_GRENADE_MAX_2;
+            Role_None.gren2_limits[6] = PC_HVYWEAP_GRENADE_MAX_2;
+            Role_None.gren2_limits[7] = PC_PYRO_GRENADE_MAX_2;
+            Role_None.gren2_limits[8] = PC_SPY_GRENADE_MAX_2;
+            Role_None.gren2_limits[9] = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
         }
@@ -750,7 +769,7 @@ void () DecodeLevelParms = {
             scoutdash = FALSE;
             sniperreload = FALSE;
             old_sniperrange = TRUE;
-            detpipe_limit = 7;
+            Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
             old_pipecooldown = TRUE;
             medicaura = FALSE;
@@ -781,24 +800,24 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             old_ng_rof = TRUE;
             pyro_type = 0;
-            max_gren1_scout = 4;
-            max_gren1_sniper = 4;
-            max_gren1_soldier = 4;
-            max_gren1_demoman = 4;
-            max_gren1_medic = 4;
-            max_gren1_hwguy = 4;
-            max_gren1_pyro = 4;
-            max_gren1_spy = 4;
-            max_gren1_engineer = 4;
-            max_gren2_scout = 3;
-            max_gren2_sniper = 4;
-            max_gren2_soldier = 3;
-            max_gren2_demoman = 4;
-            max_gren2_medic = 3;
-            max_gren2_hwguy = 4;
-            max_gren2_pyro = 4;
-            max_gren2_spy = 4;
-            max_gren2_engineer = 4;
+            Role_None.gren1_limits[1] = 4;
+            Role_None.gren1_limits[2] = 4;
+            Role_None.gren1_limits[3] = 4;
+            Role_None.gren1_limits[4] = 4;
+            Role_None.gren1_limits[5] = 4;
+            Role_None.gren1_limits[6] = 4;
+            Role_None.gren1_limits[7] = 4;
+            Role_None.gren1_limits[8] = 4;
+            Role_None.gren1_limits[9] = 4;
+            Role_None.gren2_limits[1] = 3;
+            Role_None.gren2_limits[2] = 4;
+            Role_None.gren2_limits[3] = 3;
+            Role_None.gren2_limits[4] = 4;
+            Role_None.gren2_limits[5] = 3;
+            Role_None.gren2_limits[6] = 4;
+            Role_None.gren2_limits[7] = 4;
+            Role_None.gren2_limits[8] = 4;
+            Role_None.gren2_limits[9] = 4;
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
         }
@@ -807,7 +826,7 @@ void () DecodeLevelParms = {
 
     if (parm11)
         self.tfstate = parm11;
-    if (!self.team_no && cb_keepteams && clanbattle  && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
+    if (!self.team_no && cb_keepteams && clanbattle && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
         // 1 = same, 2+ = rotate
         if(cb_keepteams == 1) {
             //self.team_no = parm13;
@@ -1742,6 +1761,10 @@ void () PutClientInServer = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_StartTimers();
+    
+    if(quadmode && quad_roles) {
+        sprint(self, PRINT_HIGH, "\sRole:\s ", GetTeamRole(self.team_no).name, "\n");
+    }
 
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
