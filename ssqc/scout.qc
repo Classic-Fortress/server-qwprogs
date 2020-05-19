@@ -227,8 +227,12 @@ void FO_FlashExplode()
                 sprint(te, PRINT_HIGH, "You have been flashed!\n");
                 org = te.origin + (te.mins + te.maxs) * 0.5;
                 frac = (rad - vlen(self.origin - org)) / rad;
-                dam = 60 * frac;
+                dam = 10 * frac;
                 deathmsg = DMSG_GREN_FLASH;
+                if (dam < 1)
+                {
+                    dam = 1;
+                }
                 TF_T_Damage(te, self, self.owner, dam, 2, 16 | 4);
 
                 stuffcmd(te, "play weapons/flashgrenburst.wav\n");
