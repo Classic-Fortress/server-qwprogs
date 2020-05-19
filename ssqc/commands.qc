@@ -1031,7 +1031,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         ent = find(world, classname, "player");
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
-                                bprint4(PRINT_HIGH, ent, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
+                                bprint4(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
                                 //stuffcmd(ent, "observe\n");
                                 //forceinfokey(ent, "*spectator", "1");
                                 clientcommand(ent, "observe");
