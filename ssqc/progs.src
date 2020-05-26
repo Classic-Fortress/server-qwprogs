@@ -12,6 +12,7 @@ status.qc
 functions.qc
 menu.qc
 csmenu.qc
+../share/common_vote.qc
 vote.qc
 extraents.qc
 help.qc

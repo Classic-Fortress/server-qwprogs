@@ -758,6 +758,11 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 CaptainPick(self, farg2);
             }
             break;
+        case "mapmenu":
+            processedCmd = TRUE;
+            self.current_menu_page = 1;
+            Vote_Menu_Map(0);
+            break;
         case "reportmodel":
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");

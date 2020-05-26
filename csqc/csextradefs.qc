@@ -54,6 +54,15 @@ float grentimer_waiting; //grenade primed, but not thrown
 float jump_counter;
 float frames_since_onground;
 
+.string name;
+.string description;
+.string groupname;
+.entity group;
+.float team_num;
+.float min_val;
+.float max_val;
+.float cnt;
+
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
 void(string id, string identify) Hud_DrawIdentifyPanel;

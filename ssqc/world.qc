@@ -313,6 +313,7 @@ void () worldspawn = {
     precache_sound("shalrath/death.wav");
     precache_sound("shalrath/attack2.wav");
     precache_sound("blob/sight1.wav");
+    precache_sound("misc/secret.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -339,11 +340,11 @@ void () worldspawn = {
     vote_total_votes = 0;
     vote_style = CF_GetSetting("vs", "vote_style", "1"); 
     
+    //No map candidates in map! Add some defaults...
+    if(!find(world, classname, "map_candidate")) {
+        InitVoteMaps();
+    }
     if(votemode) {
-        //No map candidates in map! Add some defaults...
-        if(!find(world, classname, "map_candidate")) {
-            InitVoteMaps();
-        }
         string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
         if(world.model != strcat("maps/",votemap,".bsp")) {
             bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
