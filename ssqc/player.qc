@@ -363,7 +363,7 @@ void () player_assaultcannonup1 =[103, player_assaultcannonup2] {
     }
     self.fire_held_down = 1;
     if (self.heat == 1) {
-        sound(self, 1, "weapons/asscan1.wav", 1, 1);
+        FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
     }
     SuperDamageSound();
     Attack_Finished(0.2);
@@ -424,7 +424,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
     if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) <= 30)
                 && !(self.tfstate & TFSTATE_LOCK)) {
         muzzleflash();
-        sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
 
         if (self.weaponframe == 2)
             self.weaponframe = 4;
@@ -440,7 +440,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 
         W_FireAssaultCannon();
     } else {
-        sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
 
         if (self.weaponframe == 2)
             self.weaponframe = 0;
@@ -501,7 +501,7 @@ void () player_assaultcannon2 =[104, player_assaultcannon1] {
 
 void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
     if (self.count == 1) {
-        sound(self, 1, "weapons/asscan3.wav", 0.8, 1);
+        FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
         self.heat = 0;
     }
     if (self.count >= 15) {
@@ -595,31 +595,31 @@ void () PainSound = {
         return;
     }
     if (damage_attacker.classname == "teledeath") {
-        sound(self, 2, "player/teledth1.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/teledth1.wav", 1, 0);
         return;
     }
     if ((self.watertype == -3) && (self.waterlevel == 3)) {
         DeathBubbles(1);
         if (random() > 0.5) {
-            sound(self, 2, "player/drown1.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/drown1.wav", 1, 1);
         } else {
-            sound(self, 2, "player/drown2.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/drown2.wav", 1, 1);
         }
         return;
     }
     if (self.watertype == -4) {
         if (random() > 0.5) {
-            sound(self, 2, "player/lburn1.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/lburn1.wav", 1, 1);
         } else {
-            sound(self, 2, "player/lburn2.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/lburn2.wav", 1, 1);
         }
         return;
     }
     if (self.watertype == -5) {
         if (random() > 0.5) {
-            sound(self, 2, "player/lburn1.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/lburn1.wav", 1, 1);
         } else {
-            sound(self, 2, "player/lburn2.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/lburn2.wav", 1, 1);
         }
         return;
     }
@@ -630,7 +630,7 @@ void () PainSound = {
     self.pain_finished = time + 0.5;
     if (self.axhitme == 1) {
         self.axhitme = 0;
-        sound(self, 2, "player/axhit1.wav", 1, 1);
+        FO_Sound(self, CHAN_VOICE, "player/axhit1.wav", 1, 1);
         return;
     }
     rs = rint(((random() * 5) + 1));
@@ -656,7 +656,7 @@ void () PainSound = {
             }
         }
     }
-    sound(self, 2, self.noise, 1, 1);
+    FO_Sound(self, CHAN_VOICE, self.noise, 1, 1);
     return;
 };
 
@@ -734,7 +734,7 @@ void () DeathBubblesSpawn = {
         return;
 
     newmis = spawn();
-    setmodel(newmis, "progs/s_bubble.spr");
+    FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, (self.owner.origin + '0 0 24'));
     newmis.movetype = 8;
     newmis.solid = 0;
@@ -776,7 +776,7 @@ void () DeathSound = {
         else
             DeathBubbles(10);
 
-        sound(self, 2, "player/h2odeath.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/h2odeath.wav", 1, 0);
         return;
     }
     rs = rint(random() * 4 + 1);
@@ -791,7 +791,7 @@ void () DeathSound = {
     else
         self.noise = "player/death5.wav";
 
-    sound(self, 2, self.noise, 1, 0);
+    FO_Sound(self, CHAN_VOICE, self.noise, 1, 0);
     return;
 };
 
@@ -820,7 +820,7 @@ void (string gibname, float dm) ThrowGib = {
     newmis = spawn();
     newmis.origin = self.origin;
 
-    setmodel(newmis, gibname);
+    FO_SetModel(newmis, gibname);
 
     setsize(newmis, '0 0 0', '0 0 0');
     newmis.velocity = VelocityForDamage(dm);
@@ -840,7 +840,7 @@ void (string gibname, float dm) ThrowGib = {
 };
 
 void (string gibname, float dm) ThrowHead = {
-    setmodel(self, gibname);
+    FO_SetModel(self, gibname);
     self.skin = 0;
     self.frame = 0;
     self.nextthink = -1;
@@ -858,7 +858,7 @@ void (string gibname, float dm) ThrowHead = {
 };
 
 void (string gibname) HeadShotThrowHead = {
-    setmodel(self, gibname);
+    FO_SetModel(self, gibname);
     self.frame = 0;
     self.nextthink = -1;
 
@@ -894,19 +894,19 @@ void () GibPlayer = {
     }
     TeamFortress_SetupRespawn(0);
     if (damage_attacker.classname == "teledeath") {
-        sound(self, 2, "player/teledth1.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/teledth1.wav", 1, 0);
         self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
     }
     if (damage_attacker.classname == "teledeath2") {
-        sound(self, 2, "player/teledth1.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/teledth1.wav", 1, 0);
         self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
     }
     if (random() < 0.5) {
-        sound(self, 2, "player/gib.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/gib.wav", 1, 0);
     } else {
-        sound(self, 2, "player/udeath.wav", 1, 0);
+        FO_Sound(self, CHAN_VOICE, "player/udeath.wav", 1, 0);
     }
 };
 

@@ -166,7 +166,7 @@ void () fire_fly = {
     newmis.velocity_y = random() * 100 - 50;
     newmis.velocity_z = self.speed + random() * 200;
     newmis.classname = "fireball";
-    setmodel(newmis, "progs/lavaball.mdl");
+    FO_SetModel(newmis, "progs/lavaball.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
     newmis.nextthink = time + 5;
@@ -206,7 +206,7 @@ void () misc_explobox = {
     self.solid = 2;
     self.movetype = 0;
     precache_model("maps/b_explob.bsp");
-    setmodel(self, "maps/b_explob.bsp");
+    FO_SetModel(self, "maps/b_explob.bsp");
     setsize(self, '0 0 0', '32 32 64');
     precache_sound("weapons/r_exp3.wav");
     self.health = 20;
@@ -234,7 +234,7 @@ void () misc_explobox2 = {
     self.solid = 2;
     self.movetype = 0;
     precache_model2("maps/b_exbox2.bsp");
-    setmodel(self, "maps/b_exbox2.bsp");
+    FO_SetModel(self, "maps/b_exbox2.bsp");
     setsize(self, '0 0 0', '32 32 32');
     precache_sound("weapons/r_exp3.wav");
     self.health = 20;
@@ -264,7 +264,7 @@ void () Laser_Touch = {
         dremove(self);
         return;
     }
-    sound(self, CHAN_WEAPON, "enforcer/enfstop.wav", 1, ATTN_STATIC);
+    FO_Sound(self, CHAN_WEAPON, "enforcer/enfstop.wav", 1, ATTN_STATIC);
     org = self.origin - 8 * normalize(self.velocity);
     if (other.health) {
         SpawnBlood(org, 15);
@@ -283,7 +283,7 @@ void () Laser_Touch = {
 
 void (vector org, vector vec) LaunchLaser = {
     if (self.classname == "monster_enforcer")
-        sound(self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM);
 
     vec = normalize(vec);
     newmis = spawn();
@@ -291,7 +291,7 @@ void (vector org, vector vec) LaunchLaser = {
     newmis.movetype = MOVETYPE_FLY;
     newmis.solid = SOLID_BBOX;
     newmis.effects = EF_DIMLIGHT;
-    setmodel(newmis, "progs/laser.mdl");
+    FO_SetModel(newmis, "progs/laser.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, org);
     newmis.velocity = vec * 600;
@@ -303,10 +303,10 @@ void (vector org, vector vec) LaunchLaser = {
 
 void () spikeshooter_use = {
     if (self.spawnflags & 2) {
-        sound(self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
         LaunchLaser(self.origin, self.movedir);
     } else {
-        sound(self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "weapons/spike2.wav", 1, ATTN_NORM);
 
         launch_spike(self.origin, self.movedir);
         newmis.velocity = self.movedir * 500;
@@ -365,7 +365,7 @@ void () air_bubbles = {
 
 void () make_bubbles = {
     newmis = spawn();
-    setmodel(newmis, "progs/s_bubble.spr");
+    FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, self.origin);
     newmis.movetype = MOVETYPE_NOCLIP;
     newmis.solid = SOLID_NOT;
@@ -383,7 +383,7 @@ void () make_bubbles = {
 
 void () bubble_split = {
     newmis = spawn();
-    setmodel(newmis, "progs/s_bubble.spr");
+    FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, self.origin);
     newmis.movetype = MOVETYPE_NOCLIP;
     newmis.solid = SOLID_NOT;
@@ -453,7 +453,7 @@ void () viewthing = {
     self.movetype = MOVETYPE_NONE;
     self.solid = SOLID_NOT;
     precache_model("progs/player.mdl");
-    setmodel(self, "progs/player.mdl");
+    FO_SetModel(self, "progs/player.mdl");
 };
 
 void () func_wall_use = {
@@ -598,13 +598,13 @@ void () ambient_swamp2 = {
 
 void () noise_think = {
     self.nextthink = time + 0.5;
-    sound(self, 1, "enforcer/enfire.wav", 1, ATTN_NORM);
-    sound(self, 2, "enforcer/enfstop.wav", 1, ATTN_NORM);
-    sound(self, 3, "enforcer/sight1.wav", 1, ATTN_NORM);
-    sound(self, 4, "enforcer/sight2.wav", 1, ATTN_NORM);
-    sound(self, 5, "enforcer/sight3.wav", 1, ATTN_NORM);
-    sound(self, 6, "enforcer/sight4.wav", 1, ATTN_NORM);
-    sound(self, 7, "enforcer/pain1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, "enforcer/enfstop.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_ITEM, "enforcer/sight1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_BODY, "enforcer/sight2.wav", 1, ATTN_NORM);
+    FO_Sound(self, 5, "enforcer/sight3.wav", 1, ATTN_NORM);
+    FO_Sound(self, 6, "enforcer/sight4.wav", 1, ATTN_NORM);
+    FO_Sound(self, 7, "enforcer/pain1.wav", 1, ATTN_NORM);
 
 };
 
@@ -633,13 +633,13 @@ void() blocker_use =
 	{
 		self.state = 1;
 		setorigin(self, self.origin - '8000 8000 8000');
-		sound(self, 2, self.noise1, 1, 1);
+		sound(self, CHAN_VOICE, self.noise1, 1, 1);
 	}
 	else
 	{
 		self.state = 0;
 		setorigin(self, self.origin + '8000 8000 8000');
-		sound(self, 2, self.noise, 1, 1);
+		sound(self, CHAN_VOICE, self.noise, 1, 1);
 	}
 };
 
@@ -661,11 +661,11 @@ void() glass_die =
 		new.origin = self.origin;
 		if (random() < 0.5)
 		{
-			setmodel(new, "progs/glass2.mdl");
+			FO_SetModel(new, "progs/glass2.mdl");
 		}
 		else
 		{
-			setmodel(new, "progs/glass1.mdl");
+			FO_SetModel(new, "progs/glass1.mdl");
 		}
 		setsize(new, '0 0 0', '0 0 0');
 		if (self.height != 100)
@@ -699,11 +699,11 @@ void() glass_die =
 	{
 		if (pointcontents(self.origin) == -3)
 		{
-			sound(self, 2, "effects/rcksplsh.wav", 1, 1);
+			sound(self, CHAN_VOICE, "effects/rcksplsh.wav", 1, 1);
 		}
 		else
 		{
-			sound(self, 2, self.noise2, 1, 1);
+			sound(self, CHAN_VOICE, self.noise2, 1, 1);
 		}
 	}
 	remove(self);
@@ -806,7 +806,7 @@ void() func_glass =
 			self.state = 1;
 			if (self.noise1)
 			{
-				sound(self, 2, self.noise1, 1, 1);
+				sound(self, CHAN_VOICE, self.noise1, 1, 1);
 			}
 		}
 	}

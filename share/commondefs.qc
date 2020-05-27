@@ -4,6 +4,11 @@
 #define ENG_DISPENSER_COST 100
 #define ENG_SENTRY_COST 130
 
+#define GAMEMODE_CLAN       1
+#define GAMEMODE_QUAD       2
+#define GAMEMODE_DUEL       4
+#define GAMEMODE_VOTE       8
+
 #define MSG_FLAGINFOINIT    1
 #define MSG_FLAGINFO        2
 

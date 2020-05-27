@@ -61,7 +61,7 @@ void () ResetPlayersDelayed = {
         dremove(self);
     } else {
         bprint(PRINT_HIGH, Q"\sReset in \x10", ftos(duel_reset_timer), "\x11\s\n");
-        sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
+        FO_Sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
         //stuffcmd (p, "play buttons/switch04.wav\n");
         duel_reset_timer--;
         self.nextthink = time + 1;
@@ -341,7 +341,7 @@ void (entity targ, entity inflictor, entity attacker,
     if (targ.invincible_finished >= time) {
         if (self.invincible_sound < time) {
 
-            sound(targ, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
+            FO_Sound(targ, CHAN_ITEM, "items/protect3.wav", 1, ATTN_NORM);
             self.invincible_sound = time + 2;
         }
         return;
@@ -368,7 +368,11 @@ void (entity targ, entity inflictor, entity attacker,
         targ.armorclass = 0;
         targ.armorvalue = 0;
     }
+    if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
+        LogEventDamage(attacker, targ, inflictor, take + save);
+    }
     if (targ.health <= 0) {
+        LogEventKill(attacker, targ, inflictor);
         Killed(targ, attacker);
         return;
     }
@@ -549,7 +553,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     if (targ.invincible_finished >= time) {
         if (self.invincible_sound < time) {
-            sound(targ, 3, "items/protect3.wav", 1, 1);
+            FO_Sound(targ, CHAN_ITEM, "items/protect3.wav", 1, 1);
             self.invincible_sound = time + 2;
         }
         return;
@@ -629,7 +633,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     if (no_damage == TRUE)
         return;
-
+    if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
+        LogEventDamage(attacker, targ, inflictor, take + save);
+    }
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;
         targ.armorvalue = 0;
@@ -640,7 +646,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         if ((inflictor.classname == "detpack")
             && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
             deathmsg = DMSG_DETPACK_DIS;
-
+        LogEventKill(attacker, targ, inflictor);
         Killed(targ, attacker);
         return;
     }
