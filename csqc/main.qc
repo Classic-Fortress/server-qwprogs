@@ -29,6 +29,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_hud_reset");
     registercommand("fo_hud");
     registercommand("fo_hud_save");
+
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
@@ -115,9 +116,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_hud_editor":
             FO_Hud_Editor();
             break;
-        case "fo_hud_reset":
-            FO_Hud_Editor_LoadDefaultSettings();
-            break;
         case "fo_hud":
             if(argv(1) == "") {
                 FO_Hud_Editor_List_Panels();
@@ -129,6 +127,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_hud_save":
             Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            break;
+        case "fo_hud_reload":
+            FO_Hud_Editor_LoadSettings();
+            break;
+        case "fo_hud_reset":
+            FO_Hud_Editor_LoadDefaultSettings();
             break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);

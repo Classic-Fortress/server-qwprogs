@@ -34,6 +34,9 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
+    if(!pl.playerclass) {
+        return;
+    }
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
