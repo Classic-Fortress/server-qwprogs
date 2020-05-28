@@ -36,13 +36,13 @@ float (float force) TeamFortress_DetonatePipebombs = {
 };
 
 void () PipebombTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
 
 void () MirvGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -85,6 +85,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     newmis.solid = SOLID_BBOX;
 
     newmis.classname = "grenade";
+    newmis.grenadename = "mirvsinglegrenade";
     newmis.weapon = DMSG_GREN_MIRV;
     newmis.touch = NormalGrenadeTouch;
     newmis.think = NormalGrenadeExplode;
@@ -95,7 +96,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     newmis.velocity_z = zdir * 15;
     newmis.avelocity = '250 300 400';
 
-    setmodel(newmis, "progs/grenade2.mdl");
+    FO_SetModel(newmis, "progs/grenade2.mdl");
 
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
@@ -260,7 +261,7 @@ void () TeamFortress_DetpackSet = {
     Menu_Close(self.owner);
     self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
     TeamFortress_SetSpeed(self.owner);
-    sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
+    FO_Sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
     self = self.owner;
     self.is_detpacking = 0;
@@ -287,7 +288,7 @@ void () TeamFortress_DetpackSet = {
     newmis.weaponmode = 0;
     newmis.touch = TeamFortress_DetpackTouch;
 
-    setmodel(newmis, "progs/detpack.mdl");
+    FO_SetModel(newmis, "progs/detpack.mdl");
 
     setsize(newmis, '-16 -16 0', '16 16 8');
     setorigin(newmis, self.owner.origin);
@@ -322,7 +323,7 @@ void () TeamFortress_DetpackExplode = {
 
     self.owner.detpack_left = 0;
     bprint(PRINT_MEDIUM, "FIRE IN THE HOLE!\n");
-    sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_WEAPON, "weapons/detpack.wav", 1, ATTN_NONE);
     pos = pointcontents(self.origin);
     if ((pos != CONTENT_SOLID) && (pos != CONTENT_SKY) &&
         (self.owner.has_disconnected != 1)) {
@@ -472,7 +473,7 @@ void () TeamFortress_DetpackCountDown = {
         sprint(self.owner, PRINT_HIGH, cd, "...\n");
 
         if ((self.health < 5) && (self.has_disconnected == 0)) {
-            sound(self.enemy, CHAN_VOICE, "doors/baseuse.wav", 1,
+            FO_Sound(self.enemy, CHAN_VOICE, "doors/baseuse.wav", 1,
                   ATTN_NORM);
             self.has_disconnected = 1;
         }

@@ -120,7 +120,7 @@ typedef void (float n) f_void_float;
 
 float toggleflags;              // toggleable flags
 
-float respawn_delay_time;
+//float respawn_delay_time;
 
 //
 // FortressMap stuff
@@ -489,6 +489,7 @@ float burstgren_interval;
 float burstgren_range;
 
 float old_grens;
+float fo_flash;
 float invis_only;
 float flagem_checked;
 float cease_fire;
@@ -496,6 +497,7 @@ float drop_grenades;
 float drop_grenpack;
 float drop_gren1;
 float drop_gren2;
+/*
 float max_gren1_scout;
 float max_gren1_sniper;
 float max_gren1_soldier;
@@ -514,6 +516,7 @@ float max_gren2_hwguy;
 float max_gren2_pyro;
 float max_gren2_spy;
 float max_gren2_engineer;
+*/
 float grentimers;
 float id_extended;
 float remember_weapon;
@@ -521,7 +524,7 @@ float discammo_pickup;
 float old_dropflag;
 float reload_cliptick;
 float old_sniperrange;
-float detpipe_limit;
+//float detpipe_limit;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
@@ -577,6 +580,8 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float cb_keepteams;
+float fo_flashtime;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -661,3 +666,24 @@ string (string s, float width) strpadr =
 
 float captainmode;
 .float captain;
+
+
+//Player ID
+float loginRequired;
+string loginUrl;
+string webpageUrl;
+.string login;
+.float login_in_progress;
+
+
+//Logging fields
+float gametime;
+string gametimestamp;
+float logfilehandle;
+float canlog;
+.string grenadename;
+.float classtime;
+.float goalrunningtime;
+
+// flash stuff
+float FO_FlashDimension;

@@ -2,6 +2,11 @@ void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings();
 void FO_Hud_Editor_LoadDefaultSettings();
+void FO_Hud_Editor_List_Panels();
+void FO_Hud_Editor_Show_Panel(string panelid);
+void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
+void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
+void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
@@ -22,6 +27,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
+    registercommand("fo_hud");
+    registercommand("fo_hud_save");
+
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercommand("fo_menu_game");
@@ -39,10 +47,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("gren2");
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("tracktarget");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
-
+    
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -107,6 +116,18 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_hud_editor":
             FO_Hud_Editor();
             break;
+        case "fo_hud":
+            if(argv(1) == "") {
+                FO_Hud_Editor_List_Panels();
+            } else if(argv(3) == "") {
+                FO_Hud_Editor_Print_Panel_Setting(argv(1), argv(2));
+            } else {
+                FO_Hud_Editor_Set_Panel_Setting(argv(1), argv(2), argv(3));
+            }
+            break;
+        case "fo_hud_save":
+            Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            break;
         case "fo_hud_reload":
             FO_Hud_Editor_LoadSettings();
             break;
@@ -141,50 +162,61 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
                 }
-                grentimer_waiting = TRUE;
+                localcmd("primeone_server");
             }
-            localcmd("primeone_server");
             break;
         case "primetwo":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("primetwo_server");
             }
-            localcmd("primetwo_server");
             break;
         case "gren1":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(1);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(1);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren1_server");
             }
-            localcmd("gren1_server");
             break;
         case "gren2":
-            if(!grentimer_waiting) {
-                if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                    localcmd("play grentimer.wav\n");
-                    AddGrenTimer(2);
-                } 
-                grentimer_waiting = TRUE;
+            if(getstatf(STAT_HEALTH) > 0) {
+                if(!grentimer_waiting) {
+                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
+                        localcmd("play grentimer.wav\n");
+                        AddGrenTimer(2);
+                    }
+                    grentimer_waiting = TRUE;
+                }
+                localcmd("gren2_server");
             }
-            localcmd("gren2_server");
             break;
         case "+showscores":
             showingscores = TRUE;
             break;
         case "-showscores":
             showingscores = FALSE;
+            break;
+        case "tracktarget":
+            localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
             jump_counter = jump_counter + 1;
@@ -197,7 +229,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-jump");
             }
             break;
-    }	
+    }
     return FALSE;
 };
 

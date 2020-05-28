@@ -121,7 +121,7 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
-                    FO_Menu_Team(FALSE);
+                    FO_Menu_Team(2);
                     break;
                 case CLIENT_MENU_CLASS:
                     FO_Menu_Class(2);
@@ -240,15 +240,22 @@ void() CSQC_Parse_Event = {
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
             quad_rounds_total = readfloat();
+            number_of_teams = readfloat();
             break;
         case MSG_PREMATCH:
-            float prematch = readbyte();
+            prematch = readbyte();
+            round_active = readbyte();
+            round_over = readbyte();
             SBAR.CountdownStarted = readbyte();
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
-            motd_expiry = time + MOTD_TIME;
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
+            //motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
+            //game_started = readbyte();
+            break;
+        case MSG_GRENTHROWN:
+            grentimer_waiting = FALSE;
             break;
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;

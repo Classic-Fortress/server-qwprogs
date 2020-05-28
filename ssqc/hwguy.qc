@@ -74,7 +74,7 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	newmis.nextthink = time + 5;	            // Stop projectile going forever
 
 	newmis.mdl = MODEL_PROJ_DIAM2;
-	setmodel(newmis, newmis.mdl);				// Diamond model
+	FO_SetModel(newmis, newmis.mdl);				// Diamond model
 	newmis.frame = random()*15;					// Full range of sizes
 	newmis.skin = 16 + random()*7;				// Bright colours
     newmis.weapon = DMSG_ASSAULTCANNON;

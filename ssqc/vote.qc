@@ -38,6 +38,7 @@ float (string ps_list) List_Count;
 string (string ps_list, float pf_idx) List_Index;
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 void (entity ent) TeamFortress_SetSpeed;
+void FO_Sound(entity e, float chan, string samp, float vol, float atten);
 
 
 // opens the map voting early
@@ -1230,7 +1231,7 @@ void () AnarchyMode = {
         e = find(e, classname, "player");
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
-    sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
     //e = spawn();
     //e.classname = "anarchy_timer";
     //e.think = anarchy_timer_think;
@@ -1300,7 +1301,7 @@ float () CheckVoting = {
     
     if(numplayers <= 0 || votedplayers <= 0) {
         bprint(PRINT_HIGH, "\bVoting reset...\b\n");
-        sound(self, CHAN_AUTO, "items/qpi2.wav", 1, ATTN_NONE);
+        FO_Sound(self, CHAN_AUTO, "items/qpi2.wav", 1, ATTN_NONE);
         EndVoting();
         return FALSE;
     }
@@ -1320,13 +1321,13 @@ float () CheckVoting = {
         //unanimous - change immediately
         if(e.cnt >= totalplayers) {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
-            sound(self, CHAN_AUTO, "shalrath/death.wav", 1, ATTN_NONE);
+            FO_Sound(self, CHAN_AUTO, "shalrath/death.wav", 1, ATTN_NONE);
             ChangeToVotedMap(e.netname);
             return FALSE;
         } else if(vote_anarchy_mode) {
             if(e.cnt >= numplayers) {
                 bprint(PRINT_HIGH, "\bAnarchy succeeded!\b Winner by combat: ", e.netname, "\n");
-                sound(self, CHAN_AUTO, "shalrath/attack2.wav", 1, ATTN_NONE);
+                FO_Sound(self, CHAN_AUTO, "shalrath/attack2.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
                 return FALSE;
             }
@@ -1334,7 +1335,7 @@ float () CheckVoting = {
             // do we want this to trigger during anarchy too when hitting majority?
             if(e.cnt > (numplayers * vote_threshold)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
-                sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
+                FO_Sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
                 return FALSE;
             } else if(votemode) {
@@ -1377,13 +1378,13 @@ void() vote_think = {
     if(CheckVoting()) {
         if(vote_anarchy_mode) {
             bprint(PRINT_HIGH, "\bANARCHY MODE!\b\n");
-            sound(self, CHAN_AUTO, "items/damage.wav", 1, ATTN_NONE);
+            FO_Sound(self, CHAN_AUTO, "items/damage.wav", 1, ATTN_NONE);
             self.nextthink = time + 5;
         } else {
             local float expires = ceil(voting_expires - time);
             if(expires < 10 || expires % 30 == 0) {
                 bprint(PRINT_HIGH, "\x10",ftos(expires),"\x11 seconds left\n");
-                sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
+                FO_Sound(self, CHAN_AUTO, "buttons/switch04.wav", 1, ATTN_NONE);
             }
             self.nextthink = time + 1;
         }
@@ -1404,7 +1405,7 @@ void () StartVoting = {
     if(!votemode) {
         return;
     }
-    sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
     if(expires) {
         bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
         voting_expires = time + expires;
@@ -1431,7 +1432,7 @@ void (entity p, string vote) VoteForMap = {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
                     p.vote_map.cnt--;
                 } else {
-                    sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
+                    FO_Sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
                     vote_total_votes++;
                 }

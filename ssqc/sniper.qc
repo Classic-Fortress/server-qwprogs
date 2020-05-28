@@ -157,7 +157,7 @@ void () SniperSight_Create = {
     sight.movetype = MOVETYPE_NOCLIP;
     sight.solid = SOLID_NOT;
 
-    setmodel(sight, "progs/sight.spr");
+    FO_SetModel(sight, "progs/sight.spr");
 
     sight.classname = "timer";
 

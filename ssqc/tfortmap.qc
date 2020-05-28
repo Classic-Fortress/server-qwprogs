@@ -411,7 +411,7 @@ void () info_tfgoal = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     }
     if (self.noise) {
         precache_sound(self.noise);
@@ -457,7 +457,7 @@ void () info_tfgoal_timer = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     }
     if (self.noise) {
         precache_sound(self.noise);
@@ -494,7 +494,7 @@ void () item_tfgoal = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     } else {
         self.mdl = "";
         setmodel(self, "");
@@ -657,7 +657,7 @@ void (entity Goal) InactivateGoal = {
         }
         Goal.goal_state = 2;
         if (Goal.mdl != string_null && !(duelmode && duel_no_packs)) {
-            setmodel(Goal, Goal.mdl);
+            FO_SetModel(Goal, Goal.mdl);
         }
     }
 };
@@ -676,7 +676,7 @@ void (entity Goal) RestoreGoal = {
         }
         Goal.goal_state = 2;
         if (Goal.model) {
-            setmodel(Goal, Goal.mdl);
+            FO_SetModel(Goal, Goal.mdl);
             setsize(Goal, Goal.goal_min, Goal.goal_max);
             entity oldself;
             oldself = self;
@@ -691,7 +691,7 @@ void (entity Goal) RemoveGoal = {
     Goal.solid = 0;
     Goal.goal_state = 3;
     if (Goal.mdl != string_null)
-        setmodel(Goal, string_null);
+        FO_SetModel(Goal, string_null);
 };
 
 float (entity Goal, entity Player, entity AP) IsAffectedBy = {
@@ -755,6 +755,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player == AP) {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
+                LogEventGoal(Player);
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
                 Player.caps = Player.caps + 1;
@@ -1017,7 +1018,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         }
 
                         if (Player.numflames > 0) {
-                            sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                            FO_Sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                             Player.numflames = 0;
                         }
 
@@ -1745,9 +1746,9 @@ void (entity Goal, entity AP, float addb) DoResults = {
 
     if (Goal.noise) {
         if (other == world) {
-            sound(Goal, 3, Goal.noise, 1, 1);
+            FO_Sound(Goal, CHAN_ITEM, Goal.noise, 1, 1);
         } else {
-            sound(other, 3, Goal.noise, 1, 1);
+            FO_Sound(other, CHAN_ITEM, Goal.noise, 1, 1);
         }
     }
     winners = 0;
@@ -1769,6 +1770,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     }
     if (winners == 1) {
         TeamFortress_TeamShowScores(2);
+        LogEventGoal(AP);
     }
     if (CTF_Map == 1) {
         if (AP != world) {
@@ -2076,7 +2078,7 @@ void () CF_FlagFollowPlayer = {
             self.owner.origin_z = self.owner.origin_z - 6;
         }
         setorigin(self.owner, self.owner.origin);
-        setmodel(self.owner, self.owner.mdl);
+        FO_SetModel(self.owner, self.owner.mdl);
         self.nextthink = time + 0.1;
     } else {
         dremove(self);
@@ -2127,9 +2129,9 @@ void () item_tfgoal_touch = {
                     self.solid = 1;
                     self.touch = item_tfgoal_touch;
                     self.origin = self.oldorigin;
-                    setmodel(self, self.mdl);
+                    FO_SetModel(self, self.mdl);
                     setorigin(self, self.origin);
-                   sound(self, 2, "items/itembk2.wav", 1, 1);
+                   FO_Sound(self, CHAN_VOICE, "items/itembk2.wav", 1, 1);
                     return;
                 }
             } else {
@@ -2158,9 +2160,9 @@ void () item_tfgoal_touch = {
                         self.solid = 1;
                         self.touch = item_tfgoal_touch;
                         self.origin = self.oldorigin;
-                        setmodel(self, self.mdl);
+                        FO_SetModel(self, self.mdl);
                         setorigin(self, self.origin);
-                        sound(self, 2, "items/itembk2.wav", 1, 1);
+                        FO_Sound(self, CHAN_VOICE, "items/itembk2.wav", 1, 1);
                         return;
                     }
                 } else {
@@ -2253,6 +2255,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
+    AP.goalrunningtime = gametime;
+    LogEventPickupGoal(AP);
 };
 
 void () ReturnItem = {
@@ -2276,14 +2280,14 @@ void () ReturnItem = {
         self = self.enemy;
         TF_Item_ApplyGlow();
         self = oldself;
-        setmodel(self.enemy, self.enemy.mdl);
+        FO_SetModel(self.enemy, self.enemy.mdl);
     }
 
 	setsize(self.enemy, VEC_HULL_MIN, VEC_HULL_MAX);
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);
 
-    sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
+    FO_Sound(self.enemy, CHAN_VOICE, "items/itembk2.wav", 1, 1);
 
     if (self.weapon != 2) {
         if ((self.enemy.noise3) || (self.enemy.noise4)) {
@@ -2318,6 +2322,12 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
             RemoveResults(Item, te);
         te = find(te, classname, "player");
     }
+    //Flag
+    if ((Item.goal_activation & 1)) {
+        local float timecarried = gametime - AP.goalrunningtime;
+        LogEventFumble(AP, timecarried);
+    }
+
     if ((method == 0) || (method == 2)) {
         te = find(world, classname, "player");
         while (te != world) {
@@ -2472,7 +2482,7 @@ void () tfgoalitem_dropthink = {
                             self.solid = 1;
                         }
                         if (self.mdl != string_null) {
-                            setmodel(self, self.mdl);
+                            FO_SetModel(self, self.mdl);
                         }
                         setsize(self, self.goal_min, self.goal_max);
                         self.camdist = self.camdist + 1;
@@ -2519,7 +2529,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.solid = 1;
     }
     if (Item.mdl != string_null) {
-        setmodel(Item, Item.mdl);
+        FO_SetModel(Item, Item.mdl);
     }
     setsize(Item, Item.goal_min, Item.goal_max);
     if (PAlive == 1) {
@@ -2654,7 +2664,7 @@ void () item_flag_team2 = {
     }
 
     self.skin = 0;
-    setmodel(self, self.mdl);
+    FO_SetModel(self, self.mdl);
     self.goal_no = 1;
     self.goal_activation =
         TFGI_GLOW | TFGI_DROP | TFGI_REMOVE | TFGI_RETURN_REMOVE |
@@ -2730,7 +2740,7 @@ void () item_flag_team1 = {
         self.origin_z = self.origin_z + 6;
     }
 
-    setmodel(self, self.mdl);
+    FO_SetModel(self, self.mdl);
     self.skin = 1;
     self.goal_no = 2;
     self.goal_activation = 1 | 4 | 128 | 32 | 16 | 512;
@@ -2878,6 +2888,7 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
+    local float timecarried;
     
     newmis = spawn();
     makevectors(self.v_angle);
@@ -2893,6 +2904,8 @@ void () DropGoalItems = {
             }
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+                timecarried = gametime - self.goalrunningtime;
+                LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);

@@ -27,7 +27,7 @@ void () door_blocked = {
 };
 
 void () door_hit_top = {
-    sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
     self.state = 0;
     if (self.spawnflags & 32)
         return;
@@ -38,7 +38,7 @@ void () door_hit_top = {
 
 void () door_hit_bottom = {
     self.goal_state = 2;
-    sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
     self.state = 1;
 };
 
@@ -52,7 +52,7 @@ void () door_go_down_silent = {
 }
 
 void () door_go_down = {
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
     door_go_down_silent();
 };
 
@@ -64,7 +64,7 @@ void () door_go_up = {
         self.nextthink = self.ltime + self.wait;
         return;
     }
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
     self.state = STATE_UP;
     SUB_CalcMove(self.pos2, self.speed, door_hit_top);
     SUB_UseTargets();
@@ -78,7 +78,7 @@ void () door_fire = {
         objerror("door_fire: self.owner != self");
     }
     if (self.items) {
-        sound(self, CHAN_VOICE, self.noise4, 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, self.noise4, 1, ATTN_NORM);
     }
     self.message = string_null;
     oself = self;
@@ -173,7 +173,7 @@ void () door_touch = {
     self.owner.attack_finished = time + 2;
     if (self.owner.message != "") {
         CenterPrint(other, self.owner.message);
-        sound(other, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
+        FO_Sound(other, CHAN_VOICE, "misc/talk.wav", 1, ATTN_NORM);
     }
     if (!self.items)
         return;
@@ -182,23 +182,23 @@ void () door_touch = {
         if (self.owner.items == IT_KEY1) {
             if (world.worldtype == 2) {
                 CenterPrint(other, "You need the silver keycard");
-                sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
             } else if (world.worldtype == 1) {
                 CenterPrint(other, "You need the silver runekey");
-                sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
             } else if (world.worldtype == 0) {
                 CenterPrint(other, "You need the silver key");
-                sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
             }
         } else if (world.worldtype == 2) {
             CenterPrint(other, "You need the gold keycard\n");
-            sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+            FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
         } else if (world.worldtype == 1) {
             CenterPrint(other, "You need the gold runekey");
-            sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+            FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
         } else if (world.worldtype == 0) {
             CenterPrint(other, "You need the gold key");
-            sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+            FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
         }
         return;
     }
@@ -464,7 +464,7 @@ void () fd_secret_use = {
         self.takedamage = 0;
     }
     self.velocity = '0 0 0';
-    sound(self, 2, self.noise1, 1, 1);
+    FO_Sound(self, CHAN_VOICE, self.noise1, 1, 1);
     self.nextthink = self.ltime + 0.1;
     temp = 1 - (self.spawnflags & 2);
     makevectors(self.mangle);
@@ -485,7 +485,7 @@ void () fd_secret_use = {
     }
     self.dest2 = self.dest1 + (v_forward * self.t_length);
     SUB_CalcMove(self.dest1, self.speed, fd_secret_move1);
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
 };
 
 void (entity e, float f) fd_secret_pain = {
@@ -495,16 +495,16 @@ void (entity e, float f) fd_secret_pain = {
 void () fd_secret_move1 = {
     self.nextthink = self.ltime + 1;
     self.think = fd_secret_move2;
-    sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
 };
 
 void () fd_secret_move2 = {
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
     SUB_CalcMove(self.dest2, self.speed, fd_secret_move3);
 };
 
 void () fd_secret_move3 = {
-    sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
     if (!(self.spawnflags & 1)) {
         self.nextthink = self.ltime + self.wait;
         self.think = fd_secret_move4;
@@ -512,18 +512,18 @@ void () fd_secret_move3 = {
 };
 
 void () fd_secret_move4 = {
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
     SUB_CalcMove(self.dest1, self.speed, fd_secret_move5);
 };
 
 void () fd_secret_move5 = {
     self.nextthink = self.ltime + 1;
     self.think = fd_secret_move6;
-    sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
 };
 
 void () fd_secret_move6 = {
-    sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise2, 1, ATTN_NORM);
     SUB_CalcMove(self.oldorigin, self.speed, fd_secret_done);
 };
 
@@ -534,7 +534,7 @@ void () fd_secret_done = {
         self.th_pain = fd_secret_pain;
         self.th_die = fd_secret_use;
     }
-    sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, self.noise3, 1, ATTN_NORM);
 };
 
 void () secret_blocked = {
@@ -560,7 +560,7 @@ void () secret_touch = {
     self.attack_finished = time + 2;
     if (self.message) {
         CenterPrint(other, self.message);
-        sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
+        FO_Sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
     }
 };
 
