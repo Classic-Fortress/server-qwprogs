@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* scout has "new" flash grenades - localinfo fo_flash on (default off)
 * localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.
     These roles can be configured by adding the "att_" and "def_" prefix to localinfo settings. Only detpipe_limit, respawn_time, gren limits and class limits are currently supported.
     Use `cmd showroles` to see the current configuration.
