@@ -1166,7 +1166,6 @@ void() map_candidate = {
 };
 
 void () InitVoteMaps = {
-    dprint("MEHT: InitVoteMaps\n");
     string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     //No point adding the vote map if it is the current one, and thus known to be missing the ents
     if(votemap != mapname) {
@@ -1272,6 +1271,9 @@ void () EndVoting = {
 
 void (string map_name) ChangeToVotedMap = {
     vote_result = map_name;
+//    if(!votemode) {
+//        votemode = 2;
+//    }
     EndVoting();
     //GotoNextMap();
     execute_changelevel();
@@ -1281,7 +1283,7 @@ float () CheckVoting = {
     if(intermission_running || vote_result) {
         return FALSE;
     }
-    local float totalplayers = 0, numplayers = 0, votedplayers = 0;
+    local float totalplayers = 0, numplayers = 0, votedplayers = 0, prettythreshold = 0;
     local entity e = find(world, classname, "player");
     while(e) {
         if(!e.has_disconnected) {
@@ -1303,8 +1305,18 @@ float () CheckVoting = {
         return FALSE;
     }
     
+    prettythreshold = ceil(numplayers * vote_threshold);
+    if(prettythreshold == (numplayers * vote_threshold)) {
+        //divides evenly, but need a strict excess, but written in integers
+        prettythreshold++;
+    }
+    
+    if(!votemode) bprint(PRINT_HIGH, "\bCurrent votes (total of \b",ftos(prettythreshold),"\b needed to change):\b\n");
     e = find(world, classname, "map_candidate");
     while(e) {
+        if(e.cnt > 0 && !votemode) {
+            bprint(PRINT_HIGH, "", e.netname, ": ", ftos(e.cnt), "\n");
+        }
         //unanimous - change immediately
         if(e.cnt >= totalplayers) {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
@@ -1318,17 +1330,17 @@ float () CheckVoting = {
                 ChangeToVotedMap(e.netname);
                 return FALSE;
             }
-        } else if(voting_expires < time) {
+        } else if(voting_expires < time || (vote_style && !votemode)) {
             // do we want this to trigger during anarchy too when hitting majority?
-            if(e.cnt > (numplayers/2)) {
+            if(e.cnt > (numplayers * vote_threshold)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
                 sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
                 return FALSE;
-            } else {
+            } else if(votemode) {
                 AnarchyMode();
             }
-            break;
+            if(votemode) break;
         }
         e = find(e, classname, "map_candidate");
     }
@@ -1389,6 +1401,9 @@ void () StartVoting = {
     vote_anarchy_mode = FALSE;
     vote_total_votes = 0;
     bprint(PRINT_HIGH, "Voting has started!\n");
+    if(!votemode) {
+        return;
+    }
     sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
     if(expires) {
         bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
@@ -1464,7 +1479,7 @@ void (entity p) VoteToEndMap = {
             }          
             te = find (te, classname, "player");
         }
-        if(numvoted > (numplayers / 2)) {
+        if(numvoted > (numplayers * vote_threshold)) {
             sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
             vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
@@ -1472,7 +1487,7 @@ void (entity p) VoteToEndMap = {
             execute_changelevel();
         } else {
             sound(self, CHAN_AUTO, "misc/secret.wav", 1, ATTN_NONE);
-            bprint(PRINT_HIGH, "\x10",ftos((floor(numplayers/2) + 1) - numvoted),"\x11 more votes required to end the current map.\n");
+            bprint(PRINT_HIGH, "\x10",ftos((floor(numplayers * vote_threshold) + 1) - numvoted),"\x11 more votes required to end the current map.\n");
             bprint(PRINT_HIGH, "Type \bbreak\b to toggle your vote.\n");
         }
     }
@@ -1492,9 +1507,56 @@ entity (float index) Vote_Menu_Map_GetMapCandidate = {
 };
 
 void (float update) Vote_Menu_Map;
+void (float update) Vote_Menu_Map_Action;
+void (float inp) Vote_Menu_Map_Action_Input = {
+    switch (inp) {
+        case 1:
+            Menu_Close(self);
+            VoteForMap(self, self.admin_use.netname);
+            return;
+        case 2:
+            Menu_Close(self);
+            bprint(PRINT_HIGH, self.netname, " is changing the map to ", self.admin_use.netname, "\n");
+            if(self.is_admin) {
+                ChangeToVotedMap(self.admin_use.netname);
+            } else {
+                //rcon, but only from clientside to make sure it's allowed
+                stuffcmd(self, strcat("rcon map ", self.admin_use.netname,"\n"));
+            }
+            return;
+        case 10:
+            Vote_Menu_Map(0);
+            return;
+    }
+};
+void (float update) Vote_Menu_Map_Action = {    
+    // allow toggling team menu using any method to show it
+    if (!update && self.menu_input == Vote_Menu_Map_Action_Input) {
+        Menu_Input(0);
+        return;
+    }
+    
+    //self.admin_use is a map_candidate
+    if(self.admin_use) {
+        // prepare menu strings
+        local string s_title = strcat("\sActions for map\s\n", self.admin_use.netname ,"\n\n");
+        local string s_1   = Q"\s[1]\s Vote          \n";
+        local string s_2   = Q"\s[2]\s Change (Admin)\n";
+        local string s_0   = Q"\s[0]\s Back          \n";
+
+        Status_Menu(self, Vote_Menu_Map_Action_Input, s_title, s_1, s_2, "\n", s_0);
+
+        strunzone(s_title);
+    } else {
+        sprint(self, PRINT_HIGH, "Something went wrong in the map menu\n");
+        Vote_Menu_Map(0);
+    }
+
+
+};
+
 void (float inp) Vote_Menu_Map_Input = {
-    sprint(self, PRINT_HIGH, "MEHT: You have chosen... ", ftos(inp), "\n");
-    if(inp < 0 || inp > 9) {
+    if(inp < 0 || inp > 10) {
         Vote_Menu_Map(1);
         return;
     }
@@ -1511,17 +1573,14 @@ void (float inp) Vote_Menu_Map_Input = {
             Vote_Menu_Map(0);
             return;
         case 0:
+        case 10:
+            Menu_Close(self);
             return;
     }
     local entity mc = Vote_Menu_Map_GetMapCandidate((self.current_menu_page - 1) * 7 + inp);
     if(mc) {
-        bprint(PRINT_HIGH, self.netname, " is changing the map to ", mc.netname, "\n");
-        if(mc.is_admin) {
-            ChangeToVotedMap(mc.netname);
-        } else {
-            //rcon, but only from clientside to make sure it's allowed
-            stuffcmd(self, strcat("rcon map ", mc.netname,"\n"));
-        }
+        self.admin_use = mc;
+        Vote_Menu_Map_Action(0);
     }
 };
 void (float update) Vote_Menu_Map = {    
@@ -1532,10 +1591,10 @@ void (float update) Vote_Menu_Map = {
     }
 
     // prepare menu strings
-    local string s_title = strcat("Equations, page ",ftos(self.current_menu_page),"\n\n");
-    local string s_8   = Q"\s[8]\s Previous\n";
-    local string s_9   = Q"\s[9]\s Next\n";
-    local string s_0   = Q"\s[0]\s Exit\n";
+    local string s_title = strcat("\sEquations\s\nPage ",ftos(self.current_menu_page),"\n\n");
+    local string s_8   = Q"\s[8]\s Previous            \n";
+    local string s_9   = Q"\s[9]\s Next                \n";
+    local string s_0   = Q"\s[0]\s Exit                \n";
     local string s_choices = "";
     local float count = 0, remainder = 0, page = 0;
     local entity mc = find(world, classname, "map_candidate");
@@ -1543,7 +1602,7 @@ void (float update) Vote_Menu_Map = {
         page = floor(count / 7);
         if(page == (self.current_menu_page - 1)) {
             remainder = count % 7;
-            s_choices = strcat(s_choices, "\s[\s", ftos(remainder + 1), "\s]\s ", mc.netname, "\n");
+            s_choices = strcat(s_choices, "\s[\s", ftos(remainder + 1), "\s]\s ", strpadr(mc.netname, 20), "\n");
         } else if(page >= self.current_menu_page) {
             break;
         }

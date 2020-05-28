@@ -36,8 +36,6 @@ float (string cmd) ConsoleCmd {
         arg_val2 = argv_mvdsv(2);
         arg_num = argc();
     }
-    dprint("MEHT: ConsoleCmd: ",ftos(arg_num),", ", arg_val0, ", ", arg_val1, "\n");
-    dprint("MEHT: ConsoleCmd 2: ", cmd, "\n");
     if (arg_num == 0) {
         return (0);
     }

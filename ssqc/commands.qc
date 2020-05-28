@@ -703,7 +703,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "votemap":
             processedCmd = TRUE;
-            if(votemode) {
+            if(vote_style) {
                 if(arg2) {
                     VoteForMap(self, arg2);
                 }
@@ -741,14 +741,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "break":
             processedCmd = TRUE;
-            if(votemode) {
-                if(self.vote_map) {
-                    UnvoteForMap(self);
-                } else {
-                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
-                }
+            if(self.vote_map) {
+                UnvoteForMap(self);
             } else {
-                VoteToEndMap(self);
+                if(votemode) {
+                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
+                } else {
+                    VoteToEndMap(self);
+                }
             }
             break;
         case "captainpick":
@@ -772,6 +772,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "\bUser Commands list:\b\n");
             sprint(self, PRINT_HIGH, "cmd adminpwd <password>\n");
+            sprint(self, PRINT_HIGH, "cmd mapmenu\b: menu for changing maps\b\n");
             if(votemode) {
                 sprint(self, PRINT_HIGH, "cmd listmaps\b: list votable maps\b\n");
                 sprint(self, PRINT_HIGH, "cmd votemap <map>\b: vote for the specified map\b\n");

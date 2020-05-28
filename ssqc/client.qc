@@ -635,7 +635,14 @@ void () DecodeLevelParms = {
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
-
+        
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+        
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -947,8 +954,6 @@ void () PutClientInIntermission =
 void () execute_changelevel = {
     local entity pos;
 
-    dprint("execute_changelevel()\n");
-
     intermission_running = 1;
     intermission_exittime = time + 5;
 
@@ -966,16 +971,17 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     vote_style = CF_GetSetting("vs", "vote_style", "2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result) {
+        if(votemode == 1 && vote_result && vote_result != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else if(vote_style == 1 || votemode == 2) {
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+            vote_result = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else {
+        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
             vote_result = mapname;
         }
     }
@@ -1526,6 +1532,18 @@ void () player_touch;
 
 
 void (entity p) SetVoteParams = {
+    if (!(toggleflags & TFLAG_FIRSTENTRY)) {
+        toggleflags = parm10;
+        toggleflags = (toggleflags | TFLAG_FIRSTENTRY);
+
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+    }
+
     sprint(p, PRINT_HIGH, "Voting time! Use \bcmd listmaps\b to see available maps\n");
     sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to state your preference\n");
     sprint(p, PRINT_HIGH, "Use \bcmd showvotes\b to see the current voting status\n");
@@ -1880,15 +1898,16 @@ void () NextLevel = {
 
     if (already_cycled)
         return;
-
+    
     already_cycled = 1;
     vote_style = CF_GetSetting("vs", "vote_style", "1");
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && nextmap) {
+        if(votemode == 1 && nextmap && nextmap != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+            nextmap = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {

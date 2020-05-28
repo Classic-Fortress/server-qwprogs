@@ -197,16 +197,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-jump");
             }
             break;
-            /*
-               case "impulse":
-               print("MEHT impulsing ", argv(1) ,"\n");
-               if(argv(1) == "5") {
-               print("MEHT impulsing the menu\n");
-               FO_Menu_Special(TRUE);
-               return TRUE;
-               }
-               break;
-             */
     }	
     return FALSE;
 };

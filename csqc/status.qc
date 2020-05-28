@@ -111,24 +111,6 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
         if(showingscores) {
             return;
         }
-        /*
-        drawstring(
-            [50,350], 
-            strcat("MEHT: Prematch: ", ftos(SBAR.GameMode & 8), ", Round Active: ", ftos(SBAR.GameMode & 16), ", Round Over: ", ftos(SBAR.GameMode & 32), ", CountdownStarted: ", ftos(SBAR.CountdownStarted)), 
-            mediumtext, 
-            MENU_TEXT_1, 
-            1, 
-            0
-        );
-        drawstring(
-            [50,370], 
-            strcat("MEHT: Round: ", ftos(quad_round), "/", ftos(quad_rounds_total)), 
-            mediumtext, 
-            MENU_TEXT_1, 
-            1, 
-            0
-        );
-        */
         if(text && text != "") {
             //sui_border_box(position, size, 1, MENU_BORDER, transparency, 0);
             //sui_push_frame(position, size);
