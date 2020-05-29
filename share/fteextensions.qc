@@ -2706,7 +2706,7 @@ void(vector pos, vector sz, string pic, vector srcpos, vector srcsz, vector rgb,
 void(entity e, string s) clientcommand = #440; /* Part of KRIMZON_SV_PARSECLIENTCOMMAND*/
 #endif
 #if defined(CSQC) || defined(SSQC)
-float(string s) tokenize = #441; /* Part of KRIMZON_SV_PARSECLIENTCOMMAND*/
+float(string s) tokenize = #441; /* Part of KRIMZON_SV_PARSECLIENTCOMMAND*/ /* return value is the number of parts created, ie argc */
 string(float n) argv = #442; /* Part of KRIMZON_SV_PARSECLIENTCOMMAND*/
 void(entity e, entity tagentity, string tagname) setattachment = #443; /* Part of DP_GFX_QUAKE3MODELTAGS*/
 searchhandle(string pattern, float caseinsensitive, float quiet) search_begin = #444; /* Part of DP_QC_FS_SEARCH

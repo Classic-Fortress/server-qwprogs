@@ -10,23 +10,44 @@ float () UserCmd =
     return (isProcessed);
 };
 
-float () ConsoleCmd {
+float (string cmd) ConsoleCmd {
     local float arg_num;
+    local string arg_val0, arg_val1, arg_val2;
     local string tmp;
 
-    arg_num = argc();
+    if(cmd) {
+        //FTESV implementation
+        arg_num = tokenize(cmd);
+        arg_val0 = argv(0);
+        arg_val1 = argv(1);
+        arg_val2 = argv(2);
+        switch(argv(0)) {
+            case "vote_addmap":
+                AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)));
+                return TRUE;
+            case "vote_removemap":
+                RemoveVoteMap(argv(1));
+                return TRUE;
+        }
+    } else {
+        //MVDSV implementation
+        arg_val0 = argv_mvdsv(0);
+        arg_val1 = argv_mvdsv(1);
+        arg_val2 = argv_mvdsv(2);
+        arg_num = argc();
+    }
     if (arg_num == 0) {
         return (0);
     }
-    if (argv_mvdsv(0) == "prematch") {
+    if (arg_val0 == "prematch") {
         if (arg_num == 2) {
             localcmd("localinfo prematch ");
-            localcmd(argv_mvdsv(1));
+            localcmd(arg_val1);
             localcmd("\n");
             return (1);
         }
         if (arg_num == 1) {
-            tmp = infokey (world, argv_mvdsv(0));
+            tmp = infokey (world, arg_val0);
             dprint("prematch is ");
             dprint("\"");
             dprint(tmp);
@@ -34,11 +55,11 @@ float () ConsoleCmd {
             return (1);
         }
     }
-    else if (argv_mvdsv(0) == "autorecord")
+    else if (arg_val0 == "autorecord")
     {
         if (arg_num == 2) {
             localcmd("localinfo demo_auto_left ");
-            localcmd(argv_mvdsv(1));
+            localcmd(arg_val1);
             localcmd("\n");
             return (1);
         }
@@ -56,17 +77,17 @@ float () ConsoleCmd {
             }
         }
     } 
-    else if (argv_mvdsv(0) == "clan")
+    else if (arg_val0 == "clan")
     {
         ClanMode();
         return (1);
     }
-    else if (argv_mvdsv (0) == "quadmode")
+    else if (arg_val0 == "quadmode")
     {
         QuadMode();
         return (1);
     }
-    else if (argv_mvdsv (0) == "duelmode")
+    else if (arg_val0 == "duelmode")
     {
         DuelMode();
         return (1);

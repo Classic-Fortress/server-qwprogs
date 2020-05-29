@@ -460,6 +460,7 @@ float voting_expires;
 float vote_anarchy_mode;
 float vote_total_votes;
 float vote_style;
+float vote_threshold;
 
 .float tf_id;
 
