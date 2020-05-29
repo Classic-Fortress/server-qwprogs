@@ -688,6 +688,12 @@ void () DecodeLevelParms = {
         LoadRole(&Role_Defence);
         InitTeamRoles();
 
+        // never return the goalitems [off]
+        noreturn = CF_GetSetting("nr", "noreturn", "0");
+
+        // disable hit sounds [off]
+        nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;

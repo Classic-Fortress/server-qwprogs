@@ -3,6 +3,10 @@ FortressOne Server
 
 New features
 ------
+* localinfo nohitsounds 1 - disables hitsounds server-wide
+* localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
+* scout has "new" flash grenades - localinfo fo_flash on (default off)
+* ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
 * `cmd votemap`/`cmd showvotes`/`cmd listmaps` can now be used at any time and are part of the same system
 * new server command `vote_removemap <name>` removes them
 * new server command `vote_addmap <name> <desc> [mapgroup] [num_teams] [min_players] [max_players]` can be used to add maps to the below menu
