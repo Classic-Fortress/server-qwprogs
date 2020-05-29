@@ -2466,6 +2466,8 @@ void () tfgoalitem_dropthink = {
         } else {
             if (pos == -5) { //CONTENT_LAVA
                 self.nextthink = time + 5;
+                self.think = tfgoalitem_remove;
+                return;
             } else {
                 if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
                     if (self.camdist < 3) {
@@ -2497,7 +2499,9 @@ void () tfgoalitem_dropthink = {
                 }
             }
         }
-        self.think = tfgoalitem_remove;
+        if(!noreturn) {
+            self.think = tfgoalitem_remove;
+        }
     }
 };
 

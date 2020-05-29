@@ -3,6 +3,8 @@ FortressOne Server
 
 New features
 ------
+* localinfo nohitsounds 1 - disables hitsounds server-wide
+* localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
 * scout has "new" flash grenades - localinfo fo_flash on (default off)
 * ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
 * localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.

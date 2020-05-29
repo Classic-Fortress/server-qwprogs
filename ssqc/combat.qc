@@ -144,6 +144,9 @@ void (entity targ, entity attacker) Killed = {
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
+    if(nohitsounds) {
+        return;
+    }
 
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
     {
