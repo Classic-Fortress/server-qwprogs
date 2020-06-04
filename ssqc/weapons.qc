@@ -2523,8 +2523,10 @@ void (float inp) W_OldWeaponSlot = {
         if (self.next_weapon == WEAP_GRENADE_LAUNCHER)
             self.next_weaponmode = 1;
     }
-    if (self.next_weapon == 0)
+    if (self.next_weapon == 0) {
+        self.next_weapon = self.current_weapon;
         sprint(self, PRINT_HIGH, "No weapon\n"); 
+    }
 }
 
 float (float newSlot) W_OldImpulseFromNewSlot = {
