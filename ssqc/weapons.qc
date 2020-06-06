@@ -3432,6 +3432,16 @@ void () W_WeaponFrame = {
         case FLAG_INFO:
             ImpulseCommands();
             return;
+        // allows setting detpack while reloading on toggle, defaults to off        
+        case TF_DEMOMAN_DETPACK:
+        case TF_DETPACK:
+        case TF_DETPACK_STOP:
+        case TF_DETPACK_5:
+        case TF_DETPACK_20:
+        case TF_DETPACK_50:
+            if (detpack_when_reloading)
+                ImpulseCommands();
+            return;
     }
 
     //  grenade impulses always possible

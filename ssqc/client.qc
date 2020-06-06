@@ -586,6 +586,9 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // whitelists detpack impulses on the list of commands that you're allowed to use while reloading [off]
+        detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
+
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
