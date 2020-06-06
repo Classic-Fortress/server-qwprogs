@@ -566,6 +566,7 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float impulse_queue;
+float detpack_when_reloading;
 float pyro_type;
 float pyro_soldiercannon;
 float flag_follow;
