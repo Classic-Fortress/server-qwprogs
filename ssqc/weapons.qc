@@ -3428,6 +3428,8 @@ void () W_WeaponFrame = {
         case TF_CHANGEPC_SPY:
         case TF_CHANGEPC_ENGINEER:
         case TF_CHANGEPC_RANDOM:
+        case TF_INVENTORY:
+        case FLAG_INFO:
             ImpulseCommands();
             return;
     }
