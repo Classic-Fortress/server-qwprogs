@@ -3439,9 +3439,10 @@ void () W_WeaponFrame = {
         case TF_DETPACK_5:
         case TF_DETPACK_20:
         case TF_DETPACK_50:
-            if (detpack_when_reloading)
+            if (detpack_when_reloading) {
                 ImpulseCommands();
-            return;
+                return;
+            }
     }
 
     //  grenade impulses always possible
