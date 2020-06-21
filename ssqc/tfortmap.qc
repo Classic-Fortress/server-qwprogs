@@ -2067,30 +2067,8 @@ void () tfgoal_timer_tick = {
     }
 };
 
-void () CF_FlagFollowPlayer = {
-    if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
-        makevectors(self.real_owner.angles);
-        self.owner.origin = self.real_owner.origin - v_forward * 25 - v_right * 0 + v_up * 10;
-        self.owner.angles = self.real_owner.angles + '0 90 16';
-        if (self.owner.mdl == "progs/tf_flag.mdl") {
-            self.owner.origin_z = self.owner.origin_z + 6;
-        } else {
-            self.owner.origin_z = self.owner.origin_z - 6;
-        }
-        setorigin(self.owner, self.owner.origin);
-        FO_SetModel(self.owner, self.owner.mdl);
-        self.nextthink = time + 0.1;
-    } else {
-        dremove(self);
-    }
-};
-
-void () idle_think = {
-    self.nextthink = time + 0.1;
-}
-
 void () item_tfgoal_touch = {
-    local entity te, flw;
+    local entity te;
 
     if (other.classname != "player")
         return;
@@ -2191,16 +2169,38 @@ void () item_tfgoal_touch = {
     }
     
     if (flag_follow) {
-        flw = spawn();
-        flw.real_owner = other;
-        flw.owner = self;
-        flw.think = CF_FlagFollowPlayer;
-        //flw.solid = SOLID_NOT;
-        //self.solid = SOLID_NOT;
-        self.think = idle_think;
-        flw.nextthink = time + 0.1;
+        newmis = spawn();
+        newmis.owner = other;
+        newmis.classname = "flagfollow";
+        newmis.solid = SOLID_NOT;
+        newmis.mdl = self.mdl;
+        FO_SetModel(newmis, self.mdl);
+        setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);
+        vector org;
+        org = other.origin + '-25 0 10';
+        setorigin (newmis, org);
+        newmis.skin = self.skin;
+        newmis.movetype = MOVETYPE_FOLLOW;
+        newmis.aiment = other;
+        newmis.view_ofs = newmis.origin - other.origin;
     }
 };
+
+void RemoveFlagFollow(entity player)
+{
+    if (flag_follow)
+    {
+        entity ff = find(world, classname, "flagfollow");
+        while (ff)
+        {
+            if (ff.owner == player)
+            {
+                dremove(ff);
+            }
+            ff = find(ff, classname, "flagfollow");
+        }
+    }
+}
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Item.effects = 0;
@@ -2325,6 +2325,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     //Flag
     if ((Item.goal_activation & 1)) {
         local float timecarried = gametime - AP.goalrunningtime;
+        RemoveFlagFollow(AP);
         LogEventFumble(AP, timecarried);
     }
 
@@ -2909,6 +2910,7 @@ void () DropGoalItems = {
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
                 timecarried = gametime - self.goalrunningtime;
+                RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
