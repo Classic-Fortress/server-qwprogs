@@ -690,3 +690,7 @@ float canlog;
 
 // flash stuff
 float FO_FlashDimension;
+
+
+// allow for default goal state
+.float default_group_no;
