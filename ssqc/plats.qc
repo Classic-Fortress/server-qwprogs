@@ -81,6 +81,14 @@ void () plat_center_touch = {
     if (other.classname != "player")
         return;
 
+    if (self.team_no != 0)
+    {
+        if (other.team_no != self.team_no)
+        {
+            return;
+        }
+    }
+
     if (other.playerclass == 0)
         return;
 
@@ -197,6 +205,17 @@ void () func_plat = {
     setorigin(self, self.origin);
     setmodel(self, self.model);
     setsize(self, self.mins, self.maxs);
+
+    switch(self.allowteams)
+    {
+        case "blue":
+            self.team_no = 1;
+            break;
+        case "red":
+            self.team_no = 2;
+            break;
+        default:
+    }
 
     self.blocked = plat_crush;
 
