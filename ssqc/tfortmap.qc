@@ -288,7 +288,7 @@ void () TF_StartItem = {
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -328,7 +328,7 @@ void () TF_StartGoal = {
     self.nextthink = time + 0.2;
     self.think = TF_PlaceGoal;
     self.use = info_tfgoal_use;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -647,7 +647,7 @@ entity(float gno) Findteamspawn =
 };
 
 void (entity Goal) InactivateGoal = {
-    if (Goal.goal_state == 1) {
+    if (Goal.goal_state == TFGS_ACTIVE) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal"))
@@ -655,26 +655,37 @@ void (entity Goal) InactivateGoal = {
             else
                 Goal.solid = SOLID_TRIGGER;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.mdl != string_null && !(duelmode && duel_no_packs)) {
             FO_SetModel(Goal, Goal.mdl);
         }
     }
 };
 
+void DefaultGoalState (entity Goal)
+{
+    if ((Goal.goal_activation & 8192) &&
+            (Goal.classname == "item_tfgoal")) {
+        Goal.solid = SOLID_BBOX;
+    } else {
+        Goal.solid = SOLID_TRIGGER;
+    }
+    Goal.goal_state = TFGS_NONE;
+}
+
 void (entity Goal) RestoreGoal = {
-    if (Goal.goal_state == 3) {
+    if (Goal.goal_state == TFGS_REMOVED) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal")) {
-                Goal.solid = 2;
+                Goal.solid = SOLID_BBOX;
             } else {
-                Goal.solid = 1;
+                Goal.solid = SOLID_TRIGGER;
             }
         } else {
             Goal.nextthink = time + Goal.search_time;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.model) {
             FO_SetModel(Goal, Goal.mdl);
             setsize(Goal, Goal.goal_min, Goal.goal_max);
@@ -689,7 +700,7 @@ void (entity Goal) RestoreGoal = {
 
 void (entity Goal) RemoveGoal = {
     Goal.solid = 0;
-    Goal.goal_state = 3;
+    Goal.goal_state = TFGS_REMOVED;
     if (Goal.mdl != string_null)
         FO_SetModel(Goal, string_null);
 };
@@ -1556,6 +1567,14 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.inactivate_group_no) {
+                InactivateGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
     if (Goal.remove_group_no != 0) {
         tg = find(world, classname, "info_tfgoal");
@@ -1564,6 +1583,14 @@ void (entity Goal, entity AP) DoGroupWork = {
                 RemoveGoal(tg);
             }
             tg = find(tg, classname, "info_tfgoal");
+        }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.remove_group_no) {
+                RemoveGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
         }
     }
     if (Goal.restore_group_no != 0) {
@@ -1574,7 +1601,32 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.restore_group_no) {
+                RestoreGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
+    if (Goal.default_group_no != 0)
+    {
+        tg = find(world, classname, "info_tfgoal");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "info_tfgoal");
+        }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
+    }
+
     if (Goal.remove_spawngroup != 0) {
         tg = find(world, classname, "info_player_teamspawn");
         while (tg) {
