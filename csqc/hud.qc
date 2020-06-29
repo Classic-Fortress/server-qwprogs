@@ -78,6 +78,10 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2 + Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.y];
     Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
     Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
+    Hud_Panels[HUD_PANEL_CLIPSIZE].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_CLIPSIZE].FillSize.x / 2), height - 50];
+    Hud_Panels[HUD_PANEL_GREN1].Position = [0, height - 320];
+    Hud_Panels[HUD_PANEL_GREN2].Position = [0, height - 320 + Hud_Panels[HUD_PANEL_GREN1].FillSize.y];
+    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_GRENTIMER].FillSize.x / 2), height - 100];
 }
 
 void FO_Hud_Editor_List_Panels() = {
