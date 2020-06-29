@@ -75,13 +75,33 @@ void FO_Hud_Editor_LoadDefaultSettings()
 */
     //Default menus, id, ready and MOTD to centre of the screen
     Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
-    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2 + Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.y];
+    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2];
     Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
     Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
-    Hud_Panels[HUD_PANEL_CLIPSIZE].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_CLIPSIZE].FillSize.x / 2), height - 50];
-    Hud_Panels[HUD_PANEL_GREN1].Position = [0, height - 320];
-    Hud_Panels[HUD_PANEL_GREN2].Position = [0, height - 320 + Hud_Panels[HUD_PANEL_GREN1].FillSize.y];
-    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_GRENTIMER].FillSize.x / 2), height - 100];
+    Hud_Panels[HUD_PANEL_CLIPSIZE].Position = [(width / 2) + 16, height - 50];
+    Hud_Panels[HUD_PANEL_GREN2].Position = [(width / 2) - 16 - Hud_Panels[HUD_PANEL_GREN2].FillSize.x * 0.75, height - 50];
+    Hud_Panels[HUD_PANEL_GREN1].Position = [(width / 2) - 16 - (Hud_Panels[HUD_PANEL_GREN1].FillSize.x * 2), height - 50];
+    Hud_Panels[HUD_PANEL_CLIPSIZE].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GREN1].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GREN2].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) + 16, height - 224];
+    Hud_Panels[HUD_PANEL_FRAGSTREAK].Display = 0;
+    Hud_Panels[HUD_PANEL_CAPS].Display = 0;
+    /* HUD_PANEL_HUDOPTIONS, */
+    /* HUD_PANEL_CLIPSIZE, */
+    /* HUD_PANEL_FRAGSTREAK, */
+    /* HUD_PANEL_CAPS, */
+    /* HUD_PANEL_GREN1, */
+    /* HUD_PANEL_GREN2, */
+    /* HUD_PANEL_PLAYERCLASS, */
+    /* HUD_PANEL_IDENTIFY, */
+    /* HUD_PANEL_FLAGINFO, */
+    /* HUD_PANEL_GRENTIMER, */
+    /* HUD_PANEL_MENU, */
+    /* HUD_PANEL_MOTD, */
+    /* HUD_PANEL_MENU_HINT, */
+    /* HUD_PANEL_GAME_MODE, */
+    /* HUD_PANEL_READY */
 }
 
 void FO_Hud_Editor_List_Panels() = {
