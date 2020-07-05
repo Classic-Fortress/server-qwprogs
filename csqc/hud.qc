@@ -86,25 +86,11 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_GREN2].Scale = 0.75;
     Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) + 16, height - 224];
     Hud_Panels[HUD_PANEL_GRENTIMER].Scale = 0.75;
-    Hud_Panels[HUD_PANEL_FLAGINFO].Position = [0, height - 150];
+    Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc = FO_HUD_INSERT_AFTER;
+    Hud_Panels[HUD_PANEL_FLAGINFO].Position = [width - 24, 246];
     Hud_Panels[HUD_PANEL_FRAGSTREAK].Display = 0;
     Hud_Panels[HUD_PANEL_CAPS].Display = 0;
     Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
-    /* HUD_PANEL_HUDOPTIONS, */
-    /* HUD_PANEL_CLIPSIZE, */
-    /* HUD_PANEL_FRAGSTREAK, */
-    /* HUD_PANEL_CAPS, */
-    /* HUD_PANEL_GREN1, */
-    /* HUD_PANEL_GREN2, */
-    /* HUD_PANEL_PLAYERCLASS, */
-    /* HUD_PANEL_IDENTIFY, */
-    /* HUD_PANEL_FLAGINFO, */
-    /* HUD_PANEL_GRENTIMER, */
-    /* HUD_PANEL_MENU, */
-    /* HUD_PANEL_MOTD, */
-    /* HUD_PANEL_MENU_HINT, */
-    /* HUD_PANEL_GAME_MODE, */
-    /* HUD_PANEL_READY */
 }
 
 void FO_Hud_Editor_List_Panels() = {
