@@ -84,7 +84,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_GREN1].Scale = 0.75;
     Hud_Panels[HUD_PANEL_GREN2].Position = [(width / 2) - 16 - Hud_Panels[HUD_PANEL_GREN2].FillSize.x * 0.75, height - 50];
     Hud_Panels[HUD_PANEL_GREN2].Scale = 0.75;
-    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) + 16, height - 224];
+    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) + 16, (height / 2) + 32];
     Hud_Panels[HUD_PANEL_GRENTIMER].Scale = 0.75;
     Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc = FO_HUD_INSERT_AFTER;
     Hud_Panels[HUD_PANEL_FLAGINFO].Position = [width - 24, (height / 2) - 8];
