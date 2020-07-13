@@ -1055,7 +1055,7 @@ void (entity pl) RefreshStatusBar = {
 
 
     // class tip
-    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2 && !csqcactive) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
