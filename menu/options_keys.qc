@@ -48,6 +48,8 @@ const static struct
 	{0,				0},
 	{0,				0},
 	{_(""),			"Actions"},
+	{_("Reload"),			"reload"},
+	{_("Reload Next"),			"reloadnext"},
 	{_("Change Class"),			"changeclass"},
 	{_("Change Team"),			"changeteam"},
 	{_("Drop Flag"),			"dropitems"},
