@@ -335,7 +335,7 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
         if(showingscores || !panel.Display) {
             return;
         }
-        if(prematch && team_no && !SBAR.CountdownStarted && !is_spectator) {
+        if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
             if(SBAR.Ready) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
