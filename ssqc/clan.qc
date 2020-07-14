@@ -921,7 +921,10 @@ void () CenterPrint_Players_NotReady = {
     te = find(world, classname, "player");
     while (te)
     {
-        CenterPrint(te, players_not_ready);
+        if(!infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            CenterPrint(te, players_not_ready);
+        }
+
         te = find(te, classname, "player");
     }
 }
