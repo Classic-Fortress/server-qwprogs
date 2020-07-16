@@ -228,7 +228,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 jump_counter = 0;
                 localcmd("-jump");
             }
-    }	
+            break;
+    }
     return FALSE;
 };
 

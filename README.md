@@ -3,8 +3,16 @@ FortressOne Server
 
 New features
 ------
+* optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
+* localinfo nohitsounds 1 - disables hitsounds server-wide
+* localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
 * scout has "new" flash grenades - localinfo fo_flash on (default off)
 * ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
+* `cmd votemap`/`cmd showvotes`/`cmd listmaps` can now be used at any time and are part of the same system
+* new server command `vote_removemap <name>` removes them
+* new server command `vote_addmap <name> <desc> [mapgroup] [num_teams] [min_players] [max_players]` can be used to add maps to the below menu
+* `cmd mapmenu` brings up a map selection menu, which can then either be voted for or changed immediately, provided you have adminpwd/rcon set up
+* localinfo vote_threshold 0.5 will set the portion of players required to win a vote
 * localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.
     These roles can be configured by adding the "att_" and "def_" prefix to localinfo settings. Only detpipe_limit, respawn_time, gren limits and class limits are currently supported.
     Use `cmd showroles` to see the current configuration.
@@ -75,6 +83,7 @@ New features
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
 * Option for pyro to rocket jump with incendiary cannnon rockets like soldier `localinfo pyro_soldiercannon on`.
+* Option to allow a demoman to place a detpack while reloading his weapon `localinfo detreload on`
 
 
 == Removed ===

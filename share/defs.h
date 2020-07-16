@@ -1187,6 +1187,7 @@
 #define TFSP_REMOVESELF		1  // Remove itself after being spawned on
 
 // Defines for Goal States
+#define TFGS_NONE	0
 #define TFGS_ACTIVE		1
 #define TFGS_INACTIVE		2
 #define TFGS_REMOVED		3

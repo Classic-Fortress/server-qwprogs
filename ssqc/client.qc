@@ -586,6 +586,9 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // whitelists detpack impulses on the list of commands that you're allowed to use while reloading [off]
+        detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
+
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
@@ -654,7 +657,14 @@ void () DecodeLevelParms = {
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
-
+        
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+        
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 
@@ -680,6 +690,16 @@ void () DecodeLevelParms = {
         LoadRole(&Role_Attack);
         LoadRole(&Role_Defence);
         InitTeamRoles();
+
+
+        // whether the nailgren can be jumped off of
+        solid_nailgren = CF_GetSetting("sng", "solid_nailgren", "1");
+
+        // never return the goalitems [off]
+        noreturn = CF_GetSetting("nr", "noreturn", "0");
+
+        // disable hit sounds [off]
+        nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -750,6 +770,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
+            solid_nailgren = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -820,6 +841,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = 4;
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
+            solid_nailgren = TRUE;
         }
 
     }
@@ -1008,8 +1030,6 @@ void () PutClientInIntermission =
 void () execute_changelevel = {
     local entity pos;
 
-    dprint("execute_changelevel()\n");
-
     intermission_running = 1;
     intermission_exittime = time + 5;
 
@@ -1027,16 +1047,17 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     vote_style = CF_GetSetting("vs", "vote_style", "2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result) {
+        if(votemode == 1 && vote_result && vote_result != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else if(vote_style == 1 || votemode == 2) {
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+            vote_result = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else {
+        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
             vote_result = mapname;
         }
     }
@@ -1588,6 +1609,18 @@ void () player_touch;
 
 
 void (entity p) SetVoteParams = {
+    if (!(toggleflags & TFLAG_FIRSTENTRY)) {
+        toggleflags = parm10;
+        toggleflags = (toggleflags | TFLAG_FIRSTENTRY);
+
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+    }
+
     sprint(p, PRINT_HIGH, "Voting time! Use \bcmd listmaps\b to see available maps\n");
     sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to state your preference\n");
     sprint(p, PRINT_HIGH, "Use \bcmd showvotes\b to see the current voting status\n");
@@ -1959,15 +1992,16 @@ void () NextLevel = {
 
     if (already_cycled)
         return;
-
+    
     already_cycled = 1;
     vote_style = CF_GetSetting("vs", "vote_style", "1");
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && nextmap) {
+        if(votemode == 1 && nextmap && nextmap != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+            nextmap = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
