@@ -618,10 +618,18 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     break;
                 }
                 if(arg2 == "sentry") {
+                    if(self.is_building) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(1);
                     break;
                 }
                 if(arg2 == "dispenser") {
+                    if(self.is_building) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(2);
                     break;
                 }
