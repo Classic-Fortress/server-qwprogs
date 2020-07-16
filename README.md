@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * scout has "new" flash grenades - localinfo fo_flash on (default off)
 * ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
 * localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.

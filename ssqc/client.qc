@@ -681,6 +681,9 @@ void () DecodeLevelParms = {
         LoadRole(&Role_Defence);
         InitTeamRoles();
 
+        // whether the nailgren can be jumped off of
+        solid_nailgren = CF_GetSetting("sng", "solid_nailgren", "1");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;
@@ -750,6 +753,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
+            solid_nailgren = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -820,6 +824,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = 4;
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
+            solid_nailgren = TRUE;
         }
 
     }

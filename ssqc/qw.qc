@@ -581,6 +581,7 @@ float walls_block_emp;
 float new_emp;
 float cb_keepteams;
 float fo_flashtime;
+float solid_nailgren;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
