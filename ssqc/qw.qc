@@ -89,6 +89,7 @@ typedef void (float n) f_void_float;
 
 // Identify variables
 .string ident_string;           // Status bar string for identify
+.string last_ident_string;      // Last Status bar string for identify
 .float ident_time;              // The time when last identify found a player
 .float autoid_type;             // 0 = ignore noone, 1 = ignore teammates, 2 = ignore enemies
 .float autoid_time;             // Time when autoid settings were last checked

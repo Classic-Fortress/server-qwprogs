@@ -168,21 +168,73 @@ void (entity pe_player) FO_SpecTrackPoint = {
     if(pe_player.classname != "observer") {
         return;
     }
-    local vector v_source;
     
     makevectors(pe_player.v_angle);
-    v_source = pe_player.origin + v_forward * 10;
-    v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
-    traceline(v_source, v_source + v_forward * 2048, 0, pe_player);
+    traceline(pe_player.origin, pe_player.origin + v_forward * 4096, 0, pe_player);
     
     if (trace_ent != world) {
         if(trace_ent.classname == "player") {
-            stuffcmd(pe_player, strcat("track ", trace_ent.netname, "\n"));
+            stuffcmd(pe_player, strcat("track \"", trace_ent.netname, "\"\n"));
+        }
+    }
+}
+
+void (entity pe_player) FO_Spectator_Identify = {
+    if(pe_player.classname != "observer") {
+        return;
+    }
+    
+    makevectors(pe_player.v_angle);
+    traceline(pe_player.origin, pe_player.origin + v_forward * 4096, MOVE_EVERYTHING, pe_player);
+    
+    if (trace_ent != world) {
+        local string s_id_string = "";
+        if(trace_ent.classname == "player") {
+            s_id_string = strcat(trace_ent.netname, "\n", TeamFortress_TeamGetColorString(trace_ent.team_no), " ", TeamFortress_GetClassName(trace_ent.playerclass), "\n");
+            if(trace_ent.playerclass == PC_SPY) {
+                if (trace_ent.undercover_team || trace_ent.undercover_skin) {
+                    s_id_string = strcat(s_id_string, "\sDisguised as: \s ");
+                    if (trace_ent.undercover_team != 0)
+                        s_id_string = strcat(s_id_string, TeamFortress_TeamGetColorString(trace_ent.undercover_team));
+                    if (trace_ent.undercover_skin != 0)
+                        s_id_string = strcat(s_id_string, " ", TeamFortress_GetClassName(trace_ent.undercover_skin));
+                    s_id_string = strcat(s_id_string, "\n");
+                }
+            }
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health), "/", ftos(trace_ent.max_health));
+            s_id_string = strcat(s_id_string, " \sA:\s ", ftos(trace_ent.armorvalue), "/", ftos(trace_ent.maxarmor), "\n");
+        } else if(trace_ent.classname == "building_sentrygun") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.weapon), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health), "/", ftos(trace_ent.max_health), "\n");
+        } else if(trace_ent.classname == "building_sentrygun_base") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.oldenemy.weapon), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.oldenemy.health), "/", ftos(trace_ent.oldenemy.max_health), "\n");
+        } else if(trace_ent.classname == "building_dispenser") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Dispenser (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health), "/", ftos(trace_ent.max_health), "\n");
+        } else if(trace_ent.classname == "detpack") {
+            s_id_string = strcat(trace_ent.owner.netname, "'s Detpack (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sTime Left:\s ", ftos(trace_ent.detpack_left), " seconds\n");
+        }
+
+       // refresh status bar
+        pe_player.ident_time = time + 0.5;
+        if(pe_player.ident_string != s_id_string) {
+            pe_player.ident_string = s_id_string;
+            //Status_Refresh(pe_player);
+            UpdateClientIDString(pe_player);
         }
     }
 }
 
 void (entity pe_player, float f_type) CF_Identify = {
+    if(pe_player.classname == "observer") {
+        FO_Spectator_Identify(pe_player);
+        return;
+    }
+    
     local vector v_source;
     
     makevectors(pe_player.v_angle);
