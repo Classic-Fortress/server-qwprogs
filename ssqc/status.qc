@@ -807,6 +807,23 @@ void UpdateClientGrenadeThrown(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientIDString(entity pl) {
+    // only send updates
+    //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
+    //    return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_ID);
+    // identify
+    if (pl.ident_string && time < pl.ident_time) {
+        WriteString(MSG_MULTICAST, pl.ident_string);
+    } else {
+        WriteString(MSG_MULTICAST, "");
+    }
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    pl.last_ident_string = pl.ident_string;
+}
+
 void UpdateClientStatusBar(entity pl)
 {
     // if we ever change to fte only, this could be changed to stats
@@ -820,12 +837,6 @@ void UpdateClientStatusBar(entity pl)
     WriteString(MSG_MULTICAST, clipMsg);
     WriteFloat(MSG_MULTICAST, pl.fragstreak);
     WriteFloat(MSG_MULTICAST, pl.caps);
-    // identify
-    if (pl.ident_string && time < pl.ident_time) {
-        WriteString(MSG_MULTICAST, pl.ident_string);
-    } else {
-        WriteString(MSG_MULTICAST, "");
-    }
 
     WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
     if (pl.playerclass)
@@ -1038,7 +1049,8 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
-
+        UpdateClientIDString(pl);
+        
         return;
     }
 
@@ -1070,7 +1082,8 @@ void (entity pl) RefreshStatusBar = {
         {
             //pl.StatusRefreshTime = time + 1;
             UpdateClientStatusBar(pl);
-
+            UpdateClientIDString(pl);
+            
             // flag info
             if (tfdet)
             {

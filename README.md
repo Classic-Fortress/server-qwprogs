@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide
 * localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
 * scout has "new" flash grenades - localinfo fo_flash on (default off)

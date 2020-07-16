@@ -53,9 +53,12 @@ void () SpectatorConnect = {
         UpdateClientMOTD(self);
         UpdateClientPrematch(self, !cb_prematch);
     }
+
+    TeamFortress_StartTimers();
 };
 
 void () SpectatorDisconnect = {
+    RemoveAutoIdTimer();
 };
 
 void () SpectatorImpulseCommand = {
