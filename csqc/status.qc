@@ -340,7 +340,8 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
             } else {
-                message = "NOT Ready";
+                tokenize(findkeysforcommand("ready"));
+                message = strcat("Press ", keynumtostring(stof(argv(0))), " to ready up");
                 textcolour = MENU_TEXT_WARNING;
             }
         }

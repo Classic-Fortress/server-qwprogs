@@ -288,7 +288,7 @@ void () TF_StartItem = {
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -328,7 +328,7 @@ void () TF_StartGoal = {
     self.nextthink = time + 0.2;
     self.think = TF_PlaceGoal;
     self.use = info_tfgoal_use;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -647,7 +647,7 @@ entity(float gno) Findteamspawn =
 };
 
 void (entity Goal) InactivateGoal = {
-    if (Goal.goal_state == 1) {
+    if (Goal.goal_state == TFGS_ACTIVE) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal"))
@@ -655,26 +655,37 @@ void (entity Goal) InactivateGoal = {
             else
                 Goal.solid = SOLID_TRIGGER;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.mdl != string_null && !(duelmode && duel_no_packs)) {
             FO_SetModel(Goal, Goal.mdl);
         }
     }
 };
 
+void DefaultGoalState (entity Goal)
+{
+    if ((Goal.goal_activation & 8192) &&
+            (Goal.classname == "item_tfgoal")) {
+        Goal.solid = SOLID_BBOX;
+    } else {
+        Goal.solid = SOLID_TRIGGER;
+    }
+    Goal.goal_state = TFGS_NONE;
+}
+
 void (entity Goal) RestoreGoal = {
-    if (Goal.goal_state == 3) {
+    if (Goal.goal_state == TFGS_REMOVED) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal")) {
-                Goal.solid = 2;
+                Goal.solid = SOLID_BBOX;
             } else {
-                Goal.solid = 1;
+                Goal.solid = SOLID_TRIGGER;
             }
         } else {
             Goal.nextthink = time + Goal.search_time;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.model) {
             FO_SetModel(Goal, Goal.mdl);
             setsize(Goal, Goal.goal_min, Goal.goal_max);
@@ -689,7 +700,7 @@ void (entity Goal) RestoreGoal = {
 
 void (entity Goal) RemoveGoal = {
     Goal.solid = 0;
-    Goal.goal_state = 3;
+    Goal.goal_state = TFGS_REMOVED;
     if (Goal.mdl != string_null)
         FO_SetModel(Goal, string_null);
 };
@@ -1556,6 +1567,14 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.inactivate_group_no) {
+                InactivateGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
     if (Goal.remove_group_no != 0) {
         tg = find(world, classname, "info_tfgoal");
@@ -1564,6 +1583,14 @@ void (entity Goal, entity AP) DoGroupWork = {
                 RemoveGoal(tg);
             }
             tg = find(tg, classname, "info_tfgoal");
+        }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.remove_group_no) {
+                RemoveGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
         }
     }
     if (Goal.restore_group_no != 0) {
@@ -1574,7 +1601,32 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.restore_group_no) {
+                RestoreGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
+    if (Goal.default_group_no != 0)
+    {
+        tg = find(world, classname, "info_tfgoal");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "info_tfgoal");
+        }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
+    }
+
     if (Goal.remove_spawngroup != 0) {
         tg = find(world, classname, "info_player_teamspawn");
         while (tg) {
@@ -2067,30 +2119,8 @@ void () tfgoal_timer_tick = {
     }
 };
 
-void () CF_FlagFollowPlayer = {
-    if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
-        makevectors(self.real_owner.angles);
-        self.owner.origin = self.real_owner.origin - v_forward * 25 - v_right * 0 + v_up * 10;
-        self.owner.angles = self.real_owner.angles + '0 90 16';
-        if (self.owner.mdl == "progs/tf_flag.mdl") {
-            self.owner.origin_z = self.owner.origin_z + 6;
-        } else {
-            self.owner.origin_z = self.owner.origin_z - 6;
-        }
-        setorigin(self.owner, self.owner.origin);
-        FO_SetModel(self.owner, self.owner.mdl);
-        self.nextthink = time + 0.1;
-    } else {
-        dremove(self);
-    }
-};
-
-void () idle_think = {
-    self.nextthink = time + 0.1;
-}
-
 void () item_tfgoal_touch = {
-    local entity te, flw;
+    local entity te;
 
     if (other.classname != "player")
         return;
@@ -2191,16 +2221,38 @@ void () item_tfgoal_touch = {
     }
     
     if (flag_follow) {
-        flw = spawn();
-        flw.real_owner = other;
-        flw.owner = self;
-        flw.think = CF_FlagFollowPlayer;
-        //flw.solid = SOLID_NOT;
-        //self.solid = SOLID_NOT;
-        self.think = idle_think;
-        flw.nextthink = time + 0.1;
+        newmis = spawn();
+        newmis.owner = other;
+        newmis.classname = "flagfollow";
+        newmis.solid = SOLID_NOT;
+        newmis.mdl = self.mdl;
+        FO_SetModel(newmis, self.mdl);
+        setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);
+        vector org;
+        org = other.origin + '-25 0 10';
+        setorigin (newmis, org);
+        newmis.skin = self.skin;
+        newmis.movetype = MOVETYPE_FOLLOW;
+        newmis.aiment = other;
+        newmis.view_ofs = newmis.origin - other.origin;
     }
 };
+
+void RemoveFlagFollow(entity player)
+{
+    if (flag_follow)
+    {
+        entity ff = find(world, classname, "flagfollow");
+        while (ff)
+        {
+            if (ff.owner == player)
+            {
+                dremove(ff);
+            }
+            ff = find(ff, classname, "flagfollow");
+        }
+    }
+}
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Item.effects = 0;
@@ -2325,6 +2377,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     //Flag
     if ((Item.goal_activation & 1)) {
         local float timecarried = gametime - AP.goalrunningtime;
+        RemoveFlagFollow(AP);
         LogEventFumble(AP, timecarried);
     }
 
@@ -2466,6 +2519,8 @@ void () tfgoalitem_dropthink = {
         } else {
             if (pos == -5) { //CONTENT_LAVA
                 self.nextthink = time + 5;
+                self.think = tfgoalitem_remove;
+                return;
             } else {
                 if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
                     if (self.camdist < 3) {
@@ -2497,7 +2552,9 @@ void () tfgoalitem_dropthink = {
                 }
             }
         }
-        self.think = tfgoalitem_remove;
+        if(!noreturn) {
+            self.think = tfgoalitem_remove;
+        }
     }
 };
 
@@ -2905,6 +2962,7 @@ void () DropGoalItems = {
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
                 timecarried = gametime - self.goalrunningtime;
+                RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);

@@ -2523,8 +2523,10 @@ void (float inp) W_OldWeaponSlot = {
         if (self.next_weapon == WEAP_GRENADE_LAUNCHER)
             self.next_weaponmode = 1;
     }
-    if (self.next_weapon == 0)
+    if (self.next_weapon == 0) {
+        self.next_weapon = self.current_weapon;
         sprint(self, PRINT_HIGH, "No weapon\n"); 
+    }
 }
 
 float (float newSlot) W_OldImpulseFromNewSlot = {
@@ -3426,8 +3428,21 @@ void () W_WeaponFrame = {
         case TF_CHANGEPC_SPY:
         case TF_CHANGEPC_ENGINEER:
         case TF_CHANGEPC_RANDOM:
+        case TF_INVENTORY:
+        case FLAG_INFO:
             ImpulseCommands();
             return;
+        // allows setting detpack while reloading on toggle, defaults to off        
+        case TF_DEMOMAN_DETPACK:
+        case TF_DETPACK:
+        case TF_DETPACK_STOP:
+        case TF_DETPACK_5:
+        case TF_DETPACK_20:
+        case TF_DETPACK_50:
+            if (detpack_when_reloading) {
+                ImpulseCommands();
+                return;
+            }
     }
 
     //  grenade impulses always possible

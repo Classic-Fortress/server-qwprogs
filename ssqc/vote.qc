@@ -1092,8 +1092,6 @@ string (string ps_list, float pf_idx) List_Index = {
 
 /* ====== New Vote System ======= */
 
-void() map_candidate = {};
-
 /*
 "netname" "amth1" //map name
 "broadcast" "Duel arena, ctf and Sniper War" //description
@@ -1105,14 +1103,67 @@ void() map_candidate = {};
 .cnt = number of current votes
 */
 
-void (string name, string desc, string votemap) AddVoteMap = {
-    if(!name || name == votemap) {
-        return;
+entity (string name) AddVoteMapGroup = {
+    if(!name) {
+        return world;
     }
-    local entity mc = spawn();
+    local entity mg = find(world, classname, "map_group");
+    while(mg) {
+        if(mg.netname == name) {
+            return mg;
+        }
+        mg = find(mg, classname, "map_group");
+    }
+    
+    mg = spawn();
+    mg.classname = "map_group";
+    mg.netname = name;
+    return mg;
+};
+
+entity (string name, string desc, string mapgroup, float num_teams, float min_players, float max_players) AddVoteMap = {
+    if(!name) {
+        return world;
+    }
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(mc.netname == name) {
+            return mc;
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+
+    mc = spawn();
     mc.classname = "map_candidate";
     mc.netname = name;
     mc.broadcast = desc;
+    mc.team_broadcast = mapgroup;
+    mc.owner = AddVoteMapGroup(mapgroup);
+    mc.team_no = num_teams?num_teams:2;
+    mc.ex_skill_min = min_players?min_players:6;
+    mc.ex_skill_max = max_players?max_players:16;
+    return mc;
+};
+
+float (string name) RemoveVoteMap = {
+    if(!name) {
+        return FALSE;
+    }
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(mc.netname == name) {
+            dremove(mc);
+            return TRUE;
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+    return FALSE;
+}
+
+void() map_candidate = {
+    if(self.team_broadcast && self.team_broadcast != "") {
+        self.owner = AddVoteMapGroup(self.team_broadcast);
+    }
 };
 
 void () InitVoteMaps = {
@@ -1125,14 +1176,14 @@ void () InitVoteMaps = {
         mc.netname = votemap;
         mc.broadcast = "Currently configured vote map";
     }
-    AddVoteMap("2fort5r", "Basic CTF", votemap);
-    AddVoteMap("1on1r", "Basic Duel", votemap);
-    AddVoteMap("sq1", "Basic Arena", votemap);
-    AddVoteMap("mbasesr", "Futuristic CTF", votemap);
-    AddVoteMap("amth1", "Basic Everything", votemap);
-    AddVoteMap("well6", "CTF", votemap);
-    AddVoteMap("genders2", "Small CTF", votemap);
-    AddVoteMap("frozen1", "CTF with buttons", votemap);
+    AddVoteMap("2fort5r", "Basic CTF", "CTF", 2, 8, 20);
+    AddVoteMap("1on1r", "Basic Duel", "Duel", 2, 2, 2);
+    AddVoteMap("sq1", "Basic Arena", "Arena", 2, 2, 8);
+    AddVoteMap("mbasesr", "Futuristic CTF", "CTF", 2, 6, 16);
+    AddVoteMap("amth1", "Basic Everything", "Duel", 4, 2, 8);
+    AddVoteMap("well6", "The Well (6)", "CTF", 2, 6, 20);
+    AddVoteMap("genders2", "Small CTF", "CTF", 2, 6, 20);
+    AddVoteMap("frozen1", "CTF with buttons", "CTF", 2, 6, 16);
 };
 
 void (entity p) ListVoteMaps = {
@@ -1221,6 +1272,9 @@ void () EndVoting = {
 
 void (string map_name) ChangeToVotedMap = {
     vote_result = map_name;
+//    if(!votemode) {
+//        votemode = 2;
+//    }
     EndVoting();
     //GotoNextMap();
     execute_changelevel();
@@ -1230,7 +1284,7 @@ float () CheckVoting = {
     if(intermission_running || vote_result) {
         return FALSE;
     }
-    local float totalplayers = 0, numplayers = 0, votedplayers = 0;
+    local float totalplayers = 0, numplayers = 0, votedplayers = 0, prettythreshold = 0;
     local entity e = find(world, classname, "player");
     while(e) {
         if(!e.has_disconnected) {
@@ -1252,8 +1306,18 @@ float () CheckVoting = {
         return FALSE;
     }
     
+    prettythreshold = ceil(numplayers * vote_threshold);
+    if(prettythreshold == (numplayers * vote_threshold)) {
+        //divides evenly, but need a strict excess, but written in integers
+        prettythreshold++;
+    }
+    
+    if(!votemode) bprint(PRINT_HIGH, "\bCurrent votes (total of \b",ftos(prettythreshold),"\b needed to change):\b\n");
     e = find(world, classname, "map_candidate");
     while(e) {
+        if(e.cnt > 0 && !votemode) {
+            bprint(PRINT_HIGH, "", e.netname, ": ", ftos(e.cnt), "\n");
+        }
         //unanimous - change immediately
         if(e.cnt >= totalplayers) {
             bprint(PRINT_HIGH, "\bUnanimous choice:\b ", e.netname, "\n");
@@ -1267,17 +1331,17 @@ float () CheckVoting = {
                 ChangeToVotedMap(e.netname);
                 return FALSE;
             }
-        } else if(voting_expires < time) {
+        } else if(voting_expires < time || (vote_style && !votemode)) {
             // do we want this to trigger during anarchy too when hitting majority?
-            if(e.cnt > (numplayers/2)) {
+            if(e.cnt > (numplayers * vote_threshold)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
                 FO_Sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
                 return FALSE;
-            } else {
+            } else if(votemode) {
                 AnarchyMode();
             }
-            break;
+            if(votemode) break;
         }
         e = find(e, classname, "map_candidate");
     }
@@ -1338,6 +1402,9 @@ void () StartVoting = {
     vote_anarchy_mode = FALSE;
     vote_total_votes = 0;
     bprint(PRINT_HIGH, "Voting has started!\n");
+    if(!votemode) {
+        return;
+    }
     FO_Sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
     if(expires) {
         bprint(PRINT_HIGH, "Voting closes in ", ftos(expires), " seconds. \bBe quick!\b\n");
@@ -1413,14 +1480,139 @@ void (entity p) VoteToEndMap = {
             }          
             te = find (te, classname, "player");
         }
-        if(numvoted > (numplayers / 2)) {
+        if(numvoted > (numplayers * vote_threshold)) {
+            sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
             vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             votemode = 2;
             execute_changelevel();
         } else {
-            bprint(PRINT_HIGH, "\x10",ftos((floor(numplayers/2) + 1) - numvoted),"\x11 more votes required to end the current map.\n");
+            sound(self, CHAN_AUTO, "misc/secret.wav", 1, ATTN_NONE);
+            bprint(PRINT_HIGH, "\x10",ftos((floor(numplayers * vote_threshold) + 1) - numvoted),"\x11 more votes required to end the current map.\n");
             bprint(PRINT_HIGH, "Type \bbreak\b to toggle your vote.\n");
         }
     }
+};
+
+entity (float index) Vote_Menu_Map_GetMapCandidate = {
+    local float count = 1;
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(count == index) {
+            return mc;
+        }
+        count++;
+        mc = find(mc, classname, "map_candidate");
+    }
+    return world;
+};
+
+void (float update) Vote_Menu_Map;
+void (float update) Vote_Menu_Map_Action;
+void (float inp) Vote_Menu_Map_Action_Input = {
+    switch (inp) {
+        case 1:
+            Menu_Close(self);
+            VoteForMap(self, self.admin_use.netname);
+            return;
+        case 2:
+            Menu_Close(self);
+            bprint(PRINT_HIGH, self.netname, " is changing the map to ", self.admin_use.netname, "\n");
+            if(self.is_admin) {
+                ChangeToVotedMap(self.admin_use.netname);
+            } else {
+                //rcon, but only from clientside to make sure it's allowed
+                stuffcmd(self, strcat("rcon map ", self.admin_use.netname,"\n"));
+            }
+            return;
+        case 10:
+            Vote_Menu_Map(0);
+            return;
+    }
+};
+void (float update) Vote_Menu_Map_Action = {    
+    // allow toggling team menu using any method to show it
+    if (!update && self.menu_input == Vote_Menu_Map_Action_Input) {
+        Menu_Input(0);
+        return;
+    }
+    
+    //self.admin_use is a map_candidate
+    if(self.admin_use) {
+        // prepare menu strings
+        local string s_title = strcat("\sActions for map\s\n", self.admin_use.netname ,"\n\n");
+        local string s_1   = Q"\s[1]\s Vote          \n";
+        local string s_2   = Q"\s[2]\s Change (Admin)\n";
+        local string s_0   = Q"\s[0]\s Back          \n";
+
+        Status_Menu(self, Vote_Menu_Map_Action_Input, s_title, s_1, s_2, "\n", s_0);
+
+        strunzone(s_title);
+    } else {
+        sprint(self, PRINT_HIGH, "Something went wrong in the map menu\n");
+        Vote_Menu_Map(0);
+    }
+
+
+};
+
+void (float inp) Vote_Menu_Map_Input = {
+    if(inp < 0 || inp > 10) {
+        Vote_Menu_Map(1);
+        return;
+    }
+    switch (inp) {
+        case 8:
+            self.current_menu_page--;
+            if(self.current_menu_page < 1) {
+                self.current_menu_page = 1;
+            }
+            Vote_Menu_Map(0);
+            return;
+        case 9:
+            self.current_menu_page++;
+            Vote_Menu_Map(0);
+            return;
+        case 0:
+        case 10:
+            Menu_Close(self);
+            return;
+    }
+    local entity mc = Vote_Menu_Map_GetMapCandidate((self.current_menu_page - 1) * 7 + inp);
+    if(mc) {
+        self.admin_use = mc;
+        Vote_Menu_Map_Action(0);
+    }
+};
+void (float update) Vote_Menu_Map = {    
+    // allow toggling team menu using any method to show it
+    if (!update && self.menu_input == Vote_Menu_Map_Input) {
+        Menu_Input(0);
+        return;
+    }
+
+    // prepare menu strings
+    local string s_title = strcat("\sEquations\s\nPage ",ftos(self.current_menu_page),"\n\n");
+    local string s_8   = Q"\s[8]\s Previous            \n";
+    local string s_9   = Q"\s[9]\s Next                \n";
+    local string s_0   = Q"\s[0]\s Exit                \n";
+    local string s_choices = "";
+    local float count = 0, remainder = 0, page = 0;
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        page = floor(count / 7);
+        if(page == (self.current_menu_page - 1)) {
+            remainder = count % 7;
+            s_choices = strcat(s_choices, "\s[\s", ftos(remainder + 1), "\s]\s ", strpadr(mc.netname, 20), "\n");
+        } else if(page >= self.current_menu_page) {
+            break;
+        }
+        count++;
+        mc = find(mc, classname, "map_candidate");
+    }
+
+    Status_Menu(self, Vote_Menu_Map_Input, s_title, s_choices, "\n", s_8, s_9, s_0);
+    //self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
+
+    strunzone(s_choices); strunzone(s_title);
 };

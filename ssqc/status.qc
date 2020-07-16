@@ -663,7 +663,11 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
             if((Item.nextthink - time) >= 0) {
                 WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
                 if(Item.think != tfgoalitem_droptouch) {
-                    WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    if(noreturn) {
+                        WriteFloat(MSG_MULTICAST, -1);
+                    } else {
+                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    }
                     if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
                         WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
                         WriteCoord(MSG_MULTICAST, Item.origin_x);
@@ -724,7 +728,7 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                if(Item.think != tfgoalitem_droptouch) {
+                if(Item.think != tfgoalitem_droptouch && !noreturn) {
                     st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
                     st = strcat(st, Q"\s: Dropped\s");
@@ -1063,7 +1067,7 @@ void (entity pl) RefreshStatusBar = {
 
 
     // class tip
-    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2 && !csqcactive) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;

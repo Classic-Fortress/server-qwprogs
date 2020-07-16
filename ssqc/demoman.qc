@@ -197,6 +197,7 @@ void (float timer) TeamFortress_SetDetpack = {
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
     self.weapon = self.current_weapon;
+    self.next_weapon = self.current_weapon;
     self.current_weapon = 0;
     self.weaponmodel = "";
     self.weaponframe = 0;
@@ -238,7 +239,7 @@ void () TeamFortress_DetpackStop = {
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     self.is_detpacking = 0;
     self.detpack_left = 0;
-    self.current_weapon = self.weapon;
+    self.current_weapon = self.next_weapon;
 
     Status_Refresh(self);
     W_SetCurrentAmmo(self);
@@ -265,7 +266,7 @@ void () TeamFortress_DetpackSet = {
     oldself = self;
     self = self.owner;
     self.is_detpacking = 0;
-    self.current_weapon = self.weapon;
+    self.current_weapon = self.next_weapon;
     Status_Refresh(self);
     W_SetCurrentAmmo(self);
     self = oldself;

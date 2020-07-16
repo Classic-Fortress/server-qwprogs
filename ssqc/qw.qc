@@ -461,6 +461,7 @@ float voting_expires;
 float vote_anarchy_mode;
 float vote_total_votes;
 float vote_style;
+float vote_threshold;
 
 .float tf_id;
 
@@ -566,6 +567,7 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float impulse_queue;
+float detpack_when_reloading;
 float pyro_type;
 float pyro_soldiercannon;
 float flag_follow;
@@ -583,6 +585,8 @@ float new_emp;
 float cb_keepteams;
 float fo_flashtime;
 float solid_nailgren;
+float noreturn;
+float nohitsounds;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -688,3 +692,7 @@ float canlog;
 
 // flash stuff
 float FO_FlashDimension;
+
+
+// allow for default goal state
+.float default_group_no;
