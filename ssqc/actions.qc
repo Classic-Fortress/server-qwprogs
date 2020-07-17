@@ -185,7 +185,8 @@ void (entity pe_player) FO_Spectator_Identify = {
     }
     
     makevectors(pe_player.v_angle);
-    traceline(pe_player.origin, pe_player.origin + v_forward * 4096, MOVE_EVERYTHING, pe_player);
+    //start just forward of the player in case you're speccing someone
+    traceline(pe_player.origin + v_forward * 32, pe_player.origin + v_forward * 4096, MOVE_EVERYTHING, pe_player);
     
     if (trace_ent != world) {
         local string s_id_string = "";
@@ -223,8 +224,11 @@ void (entity pe_player) FO_Spectator_Identify = {
         pe_player.ident_time = time + 0.5;
         if(pe_player.ident_string != s_id_string) {
             pe_player.ident_string = s_id_string;
-            //Status_Refresh(pe_player);
-            UpdateClientIDString(pe_player);
+            if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientIDString(pe_player);
+            } else {
+                Status_Refresh(pe_player);
+            }
         }
     }
 }
