@@ -204,7 +204,7 @@ void(string panelid, float display, string text, string icon) drawMOTDPanel = {
                         1, 
                         0
                     );
-                    motd = "www.github.com/FortressOne";
+                    motd = "www.fortressone.org";
                     drawstring(
                         position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*3], 
                         motd, 
@@ -213,16 +213,7 @@ void(string panelid, float display, string text, string icon) drawMOTDPanel = {
                         1, 
                         0
                     );
-                    motd = "FortressOne.org";
-                    drawstring(
-                        position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*4], 
-                        motd, 
-                        mediumtext, 
-                        MENU_TEXT_1, 
-                        1, 
-                        0
-                    );
-                    lines = 3;
+                    lines = 2;
                 } else {
                     lines = tokenizebyseparator(SBAR.MOTD, "\n");
                     for (float i = 0; i <= lines; i++) {
@@ -272,28 +263,28 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
             return;
         }
         if(SBAR.GameMode & GAMEMODE_VOTE) {
-            message = "^5Vote Mode^7";
+            message = "Vote Mode";
         } else {
             if(SBAR.GameMode & GAMEMODE_DUEL) {
-                message = "^4Duel Mode^7";
+                message = "Duel Mode";
             } else if(SBAR.GameMode & GAMEMODE_QUAD) {
-                message = "^3Quad Mode^7";
+                message = "Quad Mode";
             } else if(SBAR.GameMode & GAMEMODE_CLAN) {
-                message = "^1Clan Battle^7";
+                message = "Clan Battle";
             }
             if(prematch && !round_over) {
-                message = strcat(message, " (prematch)");
+                message = strcat(message, ": prematch");
             } else {
                 //Quad mode only
                 if(SBAR.GameMode & 2) {
                     if(round_over) {
                         if(prematch) {
-                            message = strcat(message, " (Match over)");
+                            message = strcat(message, ": match over");
                         } else {
-                            message = strcat(message, " (Intermission)");
+                            message = strcat(message, ": intermission");
                         }
                     } else if(quad_round > 0) {
-                        message = strcat(message, " Round ", ftos(quad_rounds_total + 1 - quad_round), "/", ftos(quad_rounds_total));
+                        message = strcat(message, ": round ", ftos(quad_rounds_total + 1 - quad_round), "/", ftos(quad_rounds_total));
                     }
                 }
             }
@@ -375,9 +366,9 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
     {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 230','150 260',1,0,1,0, drawFlagInfo, {return "";}},
     {"grentimerpanel",FO_HUD_GRENTIMER_NAME,'100 110','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
-    {"menupanel","Menu",'10 110','200 200',1,0,1,0, drawSimplePanel, {return "";}},
+    {"menupanel","Menu",'10 110','300 200',1,0,1,0, drawSimplePanel, {return "";}},
     {"motdpanel",FO_HUD_MOTD_NAME,'150 100','100 24',1,0,1,0, drawMOTDPanel, {return SBAR.MOTD;}},
-    {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','100 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
+    {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
     {"gamemodepanel",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
 };
