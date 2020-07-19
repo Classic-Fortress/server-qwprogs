@@ -335,12 +335,18 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
         if(showingscores || !panel.Display) {
             return;
         }
-        if(prematch && team_no && !SBAR.CountdownStarted && !is_spectator) {
+        if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
             if(SBAR.Ready) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
             } else {
-                message = "NOT Ready";
+                tokenize(findkeysforcommand("ready"));
+                string keynum = argv(0);
+                if(keynum != "-1") {
+                    message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                } else {
+                    message = "Type 'ready' in the console to ready up";
+                }
                 textcolour = MENU_TEXT_WARNING;
             }
         }
