@@ -73,11 +73,16 @@ void FO_Hud_Editor_LoadDefaultSettings()
         //pnl.Name = name;
     }
 */
+
     //Default menus, id, ready and MOTD to centre of the screen
-    Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
-    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2];
-    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
-    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
+    Hud_Panels[HUD_PANEL_GAME_MODE].Position = [width - Hud_Panels[HUD_PANEL_GAME_MODE].FillSize.x, 30];
+    Hud_Panels[HUD_PANEL_GAME_MODE].NodeInsertLoc = FO_HUD_INSERT_AFTER;
+    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 30];
+    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 30];
+    Hud_Panels[HUD_PANEL_MENU_HINT].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), 80];
+    Hud_Panels[HUD_PANEL_MENU_HINT].NodeInsertLoc = FO_HUD_INSERT_MIDDLE;
+    Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), 120];
+    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height - 100];
     Hud_Panels[HUD_PANEL_CLIPSIZE].Position = [(width / 2) + 16, height - 50];
     Hud_Panels[HUD_PANEL_CLIPSIZE].Scale = 0.75;
     Hud_Panels[HUD_PANEL_GREN1].Position = [(width / 2) - 16 - (Hud_Panels[HUD_PANEL_GREN1].FillSize.x * 2), height - 50];
