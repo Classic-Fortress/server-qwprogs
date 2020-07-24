@@ -162,7 +162,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(getstatf(STAT_HEALTH) > 0 && !prematch) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -174,7 +174,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "primetwo":
-            if(getstatf(STAT_HEALTH) > 0 && !prematch) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
@@ -186,7 +186,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren1":
-            if(getstatf(STAT_HEALTH) > 0 && !prematch) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -198,7 +198,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren2":
-            if(getstatf(STAT_HEALTH) > 0 && !prematch) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
