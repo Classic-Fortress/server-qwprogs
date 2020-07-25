@@ -3080,6 +3080,20 @@ void () PreMatchImpulses = {
             TeamFortress_DisplayDetectionItems();
     } else if (self.impulse == TF_DISPLAYLOCATION)
         display_location();
+
+    if (self.impulse == TF_SPECIAL_SKILL) {
+        if(self.tfstate & TFSTATE_INVINCIBLE) {
+            self.items = self.items - (self.items & IT_INVULNERABILITY);
+            self.invincible_time = 0;
+            self.invincible_finished = 0;
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
+        } else {
+            self.items = self.items | IT_INVULNERABILITY;
+            self.invincible_time = 1;
+            self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+            self.invincible_finished = time + 666;
+        }
+    }
 };
 
 void () DeadImpulses = {
