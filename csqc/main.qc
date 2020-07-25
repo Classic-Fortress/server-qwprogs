@@ -210,9 +210,11 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "+showscores":
+        case "+showteamscores":
             showingscores = TRUE;
             break;
         case "-showscores":
+        case "-showteamscores":
             showingscores = FALSE;
             break;
         case "tracktarget":
