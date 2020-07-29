@@ -658,6 +658,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
             }
+            if (!self.building.real_owner.has_sentry || self.building.real_owner != self
+                        || self.classname != "player" || self.building == world) {
+                break;
+            }
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
                     farg3 = stof(arg3);
@@ -776,6 +780,11 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "reportmodel":
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
+            break;
+        case "reportloc":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "Origin: ", vtos(self.origin), " OldOrigin: ", vtos(self.oldorigin));
+            sprint(self, PRINT_HIGH, " view_ofs: ", vtos(self.view_ofs), "\n");
             break;
         case "tracktarget":
             processedCmd = TRUE;
