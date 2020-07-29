@@ -96,6 +96,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_FRAGSTREAK].Display = 0;
     Hud_Panels[HUD_PANEL_CAPS].Display = 0;
     Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
+    Hud_Panels[HUD_PANEL_SHOWSCORES].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_SHOWSCORES].FillSize.x / 2), 30];
 }
 
 void FO_Hud_Editor_List_Panels() = {

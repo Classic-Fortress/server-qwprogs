@@ -672,14 +672,12 @@ string (string s, float width) strpadr =
 float captainmode;
 .float captain;
 
-
 //Player ID
 float loginRequired;
 string loginUrl;
 string webpageUrl;
 .string login;
 .float login_in_progress;
-
 
 //Logging fields
 float gametime;
@@ -690,9 +688,19 @@ float canlog;
 .float classtime;
 .float goalrunningtime;
 
+// csqc scoreboard fields
+.float caps;
+.float touches;
+.float kills;
+.float teamkills;
+.float deaths;
+.float afflicted;
+.float teamafflicted;
+.float damagegiven;
+.float damagetaken;
+
 // flash stuff
 float FO_FlashDimension;
-
 
 // allow for default goal state
 .float default_group_no;

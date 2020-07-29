@@ -1355,6 +1355,8 @@
 #define FO_HUD_MENU_HINT_NAME "Menu Hints"
 #define FO_HUD_GAME_MODE_NAME "Game Mode"
 #define FO_HUD_READY_NAME "Ready Status"
+#define FO_HUD_SHOWSCORES_NAME "Show Scores"
+
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"

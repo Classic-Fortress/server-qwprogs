@@ -23,6 +23,22 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+#define FO_MENU_FLAG_USE_MOUSE 1
+#define FO_MENU_FLAG_CENTER 2
+#define FO_MENU_FLAG_SHOW_SHORTCUTS 4
+#define FO_MENU_FLAG_SHOW_VALUES 8
+#define FO_MENU_FLAG_WARNING 16
+#define FO_MENU_FLAG_ALLOW_INTERMISSION 32
+
+#define FO_MENU_STATE_HIDDEN 0
+#define FO_MENU_STATE_NORMAL 1
+#define FO_MENU_STATE_DISABLED 2
+#define FO_MENU_STATE_SPACER 3
+
+#define FO_MENU_MAX_OPTIONS 20
+
+#define FO_MENU_TRANSPARENCY 0.2
+
 #define MOTD_TIME 30
 
 .float owned_by;
@@ -275,6 +291,30 @@ typedef struct {
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];
 
+// scoreboard stuff
+typedef struct {
+    float ping;
+    float pl;
+    string classtext;
+    string name;
+    float team_no;
+    float score;
+    float caps;
+    float touches;
+    float kills;
+    float teamkills;
+    float deaths;
+    float afflicted;
+    float teamafflicted;
+    float damagegiven;
+    float damagetaken;
+} FO_ScoreBoardLine;
+
+// fte maxclients is 255, right?
+#define FO_SCOREBOARDLINES_LENGTH 32
+
+string FO_ScoreBoardColumns[14];
+
 enum {
     HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
@@ -290,7 +330,8 @@ enum {
     HUD_PANEL_MOTD,
     HUD_PANEL_MENU_HINT,
     HUD_PANEL_GAME_MODE,
-    HUD_PANEL_READY
+    HUD_PANEL_READY,
+    HUD_PANEL_SHOWSCORES
 };
 
 #define FOCMD_AUTOHOP "fo_autohop"

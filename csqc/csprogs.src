@@ -1,6 +1,9 @@
 ../csprogs.dat
 csdefs.qc
+//csqcdefs.qc
+../share/fteextensions.qc
 csextradefs.qc
+
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc

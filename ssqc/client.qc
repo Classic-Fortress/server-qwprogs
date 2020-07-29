@@ -1787,6 +1787,8 @@ void () PutClientInServer = {
 
     self.takedamage = 2;
 
+    forceinfokey(self, "playerclass", ftos(self.playerclass));
+
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
     TeamFortress_SetEquipment();

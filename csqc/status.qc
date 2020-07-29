@@ -301,6 +301,7 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
         );
     }
 }
+
 void(string panelid, float display, string text, string icon) drawReadyPanel = {
     float id = getHudPanel(panelid);
     if(id < 0) {
@@ -355,6 +356,274 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
     }
 }
 
+void (vector position, vector size, string val, vector textcolour, float alpha
+    , float flags, string colname, optional float padright = FALSE) drawShowScoresColumnVal = {
+    float valwidth, colwidth;
+    
+    colwidth = strlen(colname);
+    if (padright == TRUE)
+    {
+        val = strpad(colwidth, val);
+    }
+    else
+    {
+        val = strpad(colwidth * -1, val);
+    }
+    
+    sui_text(position, size, val, textcolour, 1, 0);
+};
+void (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
+    , float padding, vector columnColour) drawShowScoresTeamPanel = {
+
+    vector textcolour = MENU_TEXT_1;
+    vector smalltext = MENU_TEXT_SMALL * panel.Scale;
+    vector yspacer = [0, 20];
+    vector position = [0, 0];
+    vector size = getFillSize(id);
+
+    position += yspacer;
+    size_y = smalltext_y;
+    
+    sui_push_frame(position, size);
+    position = [0,0];
+    sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
+    size = [size_x, smalltext_y];
+    sui_fill(position, size, MENU_BG, 1, 0);
+
+    for (float i = 0; i < FO_ScoreBoardColumns.length; i++)
+    {
+        string colname = FO_ScoreBoardColumns[i];
+        sui_text(position, smalltext, colname, columnColour, .7, 0);
+        float txtlength = strlen(colname) * smalltext.x;
+        position_x += txtlength + padding;
+    }
+
+    position = [0, smalltext.y];
+    float lineCount = 1;
+    for (float i = 0; i < FO_SCOREBOARDLINES_LENGTH; i++)
+    {
+        string name = lines[i].name;
+        if (!name)
+            continue;
+
+        lineCount++;
+        float trans = 1;
+        if (i % 2 == 0)
+        {
+            trans = .7;
+        }
+        else
+        {
+            trans = .3;
+        }
+        
+        sui_fill(position, size, columnColour, trans, 0);
+
+        float col = 0, alpha = 1, flags = 0;
+        string val = ftos(lines[i].ping);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].pl);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        sui_text(position, smalltext, lines[i].classtext, textcolour, 1, 0);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].score);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        sui_text(position, smalltext, lines[i].name, textcolour, 1, 0);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].caps);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].touches);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].kills);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].teamkills);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].deaths);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].afflicted);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].teamafflicted);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].damagegiven);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        val = ftos(lines[i].damagetaken);
+        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
+
+        position_x = 0;
+        position_y += smalltext_y;
+    }
+    
+    position = [0,0];
+    size_y = smalltext.y * lineCount;
+    sui_border_box(position, size, 1, MENU_BORDER, FO_MENU_TRANSPARENCY, 0);
+};
+
+void(string panelid, float display, string text, string icon) drawShowScoresPanel = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    
+    vector position = getPosition(id);
+    vector size = getFillSize(id);
+    vector mediumtext = MENU_TEXT_SMALL * panel.Scale * 2;
+    vector textcolour = MENU_TEXT_1;
+    float padding = 4 * panel.Scale;
+
+    if (fo_hud_editor) {
+        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+            // click event
+        }
+    } else {
+        if(!panel.Display) {
+            return;
+        }       
+        // columns
+        FO_ScoreBoardColumns[0] = "ping";
+        FO_ScoreBoardColumns[1] = "pl";
+        FO_ScoreBoardColumns[2] = "class";
+        FO_ScoreBoardColumns[3] = "score";
+        FO_ScoreBoardColumns[4] = "name";
+        FO_ScoreBoardColumns[5] = "caps";
+        FO_ScoreBoardColumns[6] = "tchs";
+        FO_ScoreBoardColumns[7] = "kils";
+        FO_ScoreBoardColumns[8] = "tkil";
+        FO_ScoreBoardColumns[9] = "dths";
+        FO_ScoreBoardColumns[10] = "affl";
+        FO_ScoreBoardColumns[11] = "taffl";
+        FO_ScoreBoardColumns[12] = "dmgg";
+        FO_ScoreBoardColumns[13] = "dmgt";
+
+        FO_ScoreBoardLine FO_ScoreBoardLines_Blue[FO_SCOREBOARDLINES_LENGTH];
+        FO_ScoreBoardLine FO_ScoreBoardLines_Red[FO_SCOREBOARDLINES_LENGTH];
+        FO_ScoreBoardLine FO_ScoreBoardLines_Yellow[FO_SCOREBOARDLINES_LENGTH];
+        FO_ScoreBoardLine FO_ScoreBoardLines_Green[FO_SCOREBOARDLINES_LENGTH];
+        FO_ScoreBoardLine FO_ScoreBoardLines_Specs[FO_SCOREBOARDLINES_LENGTH];
+
+        sui_push_frame(position, [size.x, 1]);     
+        sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_START]);
+        position = [0,0];
+        sui_text(position, mediumtext, "Scoreboard", textcolour, 1, 0);
+
+        float bluecount = 0, redcount = 0, yellowcount = 0, greencount = 0, speccount = 0;
+        for (float i = 0; i < FO_SCOREBOARDLINES_LENGTH; i++)
+        {            
+            FO_ScoreBoardLine sbl;
+            sbl.ping = getplayerkeyfloat(i, INFOKEY_P_PING);
+            sbl.pl = getplayerkeyfloat(i, INFOKEY_P_PACKETLOSS);
+            float class = getplayerkeyfloat(i, "playerclass");
+            sbl.classtext = ClassToString(class);
+            sbl.name = getplayerkeyvalue(i, INFOKEY_P_NAME);
+            sbl.score = getplayerkeyfloat(i, INFOKEY_P_FRAGS);
+            sbl.caps = getplayerkeyfloat(i, "caps");
+            sbl.touches = getplayerkeyfloat(i, "touches");
+            sbl.kills = getplayerkeyfloat(i, "kills");
+            sbl.teamkills = getplayerkeyfloat(i, "teamkills");
+            sbl.deaths = getplayerkeyfloat(i, "deaths");
+            sbl.afflicted = getplayerkeyfloat(i, "afflicted");
+            sbl.teamafflicted = getplayerkeyfloat(i, "teamafflicted");
+            sbl.damagegiven = getplayerkeyfloat(i, "damagegiven");
+            sbl.damagetaken = getplayerkeyfloat(i, "damagetaken");
+            sbl.team_no = getplayerkeyfloat(i, "team_no");
+
+            switch (sbl.team_no)
+            {
+                case 1:
+                    FO_ScoreBoardLines_Blue[bluecount++] = sbl;
+                    break;
+                case 2:
+                    FO_ScoreBoardLines_Red[redcount++] = sbl;
+                    break;
+                case 3:
+                    FO_ScoreBoardLines_Yellow[yellowcount++] = sbl;
+                    break;
+                case 4:
+                    FO_ScoreBoardLines_Green[greencount++] = sbl;
+                    break;
+                default:
+                    float spec = getplayerkeyfloat(i, "*spectator");
+                    sbl.team_no = (spec == 1) ? 9 : 99; // TODO - use defines...
+                    FO_ScoreBoardLines_Specs[speccount++] = sbl;
+                    break;
+            }
+        }
+
+        vector red = '0.7 0.4 0.3';
+        vector blue = '0.3 0.4 0.7';
+        vector yellow = '0.7 0.7 0.3';
+        vector green = '0.4 0.7 0.3';
+        vector spec = '0.1 0.1 0.1';
+        float sbCount = 0;
+        if (FO_ScoreBoardLines_Blue[0].name)
+        {
+            drawShowScoresTeamPanel(FO_ScoreBoardLines_Blue, panel, id, padding, blue);
+            sbCount++;
+        }
+            
+        if (FO_ScoreBoardLines_Red[0].name)
+        {
+            drawShowScoresTeamPanel(FO_ScoreBoardLines_Red, panel, id, padding, red);
+            sbCount++;
+        }
+            
+        if (FO_ScoreBoardLines_Yellow[0].name)
+        {
+            drawShowScoresTeamPanel(FO_ScoreBoardLines_Yellow, panel, id, padding, yellow);
+            sbCount++;
+        }
+            
+        if (FO_ScoreBoardLines_Green[0].name)
+        {
+            drawShowScoresTeamPanel(FO_ScoreBoardLines_Green, panel, id, padding, green);
+            sbCount++;
+        }
+
+        if (FO_ScoreBoardLines_Specs[0].name)
+        {
+            drawShowScoresTeamPanel(FO_ScoreBoardLines_Specs, panel, id, padding, spec);
+            sbCount++;
+        }
+            
+        for (float i = 0; i < sbCount; i++)
+        {
+            sui_pop_frame();
+        }
+        
+        // FIXME - reset damage numbers etc on map change
+        // FIXME - class isn't set on first spawn
+        // FIXME - specs/observers aren't shown
+        // FIXME - afflictions aren't implemented
+        sui_pop_frame();
+    }
+}
+
 var FO_Hud_Panel Hud_Panels[] = {
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
     {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
@@ -371,6 +640,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
     {"gamemodepanel",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
+    {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',2,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
 };
 
 float(string panelid) getHudPanel = {

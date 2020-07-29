@@ -48,6 +48,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("tracktarget");
+    registercommand("+fo_showscores");
+    registercommand("-fo_showscores");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -63,6 +65,40 @@ noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
     localcmd("menu_restart\n");
 }
+
+void(vector viewsize, float scoresshown) CSQC_DrawScores = {
+    print("showing scores\n");
+    string panelid = "showscorespanel";
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    
+    vector position = getPosition(id);
+    vector size = getFillSize(id);
+    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
+    vector textcolour = MENU_TEXT_4;
+    local float padding = 4 * panel.Scale;
+    local float lines;
+    local float pos_aligned;
+    local string message;
+    if (fo_hud_editor) {
+        message = "Show Scores";
+        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+            // click event
+        }
+    } else {
+        if(!panel.Display) {
+            return;
+        }
+        message = "draw";
+        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+            // click event
+        }
+    }
+};
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     ScreenSize = [width, height, menushown];
@@ -209,11 +245,29 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("gren2_server");
             }
             break;
+        case "+fo_showscores":
+        case "+showteamscores":
         case "+showscores":
             showingscores = TRUE;
+            float id = getHudPanel("showscorespanel");
+            if(id < 0) {
+                return FALSE;
+            }
+            
+            FO_Hud_Panel* panel = getHudPanelPointer(id);
+            panel.Display = TRUE;
             break;
+        case "-fo_showscores":
+        case "-showteamscores":
         case "-showscores":
             showingscores = FALSE;
+            float id = getHudPanel("showscorespanel");
+            if(id < 0) {
+                return FALSE;
+            }
+            
+            FO_Hud_Panel* panel = getHudPanelPointer(id);
+            panel.Display = FALSE;
             break;
         case "tracktarget":
             localcmd("cmd tracktarget\n");
