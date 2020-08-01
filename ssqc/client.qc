@@ -1669,6 +1669,30 @@ void (entity p) SetVoteParams = {
     spawn_tfog(p.origin + v_forward * 20);
 }
 
+void (entity player, string field, float fieldval) CheckSetInfoKey =
+{
+    float val;
+    val = infokeyf(player, field);
+
+    if (val != fieldval)
+        forceinfokey(player, field, ftos(fieldval));
+};
+
+void (entity player) UpdateScoreboardInfo = {
+
+    CheckSetInfoKey(player, "afflicted", player.afflicted);
+    CheckSetInfoKey(player, "teamafflicted", player.teamafflicted);
+    CheckSetInfoKey(player, "damagegiven", player.damagegiven);
+    CheckSetInfoKey(player, "damagetaken", player.damagetaken);
+    CheckSetInfoKey(player, "kills", player.kills);
+    CheckSetInfoKey(player, "deaths", player.deaths);
+    CheckSetInfoKey(player, "caps", player.caps);
+    CheckSetInfoKey(player, "touches", player.touches);
+    CheckSetInfoKey(player, "team_no", player.team_no);
+    CheckSetInfoKey(player, "playerclass", player.playerclass);
+    CheckSetInfoKey(player, "ready", player.is_ready);
+};
+
 void () PutClientInServer = {
     local float oldclass;
     local entity spot;
@@ -2514,6 +2538,8 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
+    UpdateScoreboardInfo(self);
+
     if (self.view_ofs == '0 0 0') {
         return;
     }

@@ -148,8 +148,34 @@ string (float code, float mode) GetWeaponName = {
 		return "undefined";
 }
 
+void (entity attacker, entity target, string afflictionType) LogAffliction = {
+	if (attacker.classname == "player" && target.classname == "player")
+	{
+		if (attacker.team_no == target.team_no)
+		{
+			attacker.afflicted = attacker.afflicted + 1;
+		}
+		else
+		{
+			attacker.teamafflicted = attacker.teamafflicted + 1;
+		}
+	}
+}
 
-void (entity attacker, entity target, entity inflictor, float damage) LogEventDamage = {
+void (entity attacker, entity target, entity inflictor, float damage, float truedam) LogEventDamage = {
+	if (attacker)
+	{
+		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		{
+			attacker.damagegiven = attacker.damagegiven + truedam;
+		}
+	}
+	
+	if (target.classname == "player")
+	{
+		target.damagetaken = target.damagetaken + truedam;
+	}
+
 	if (canlog == 0)
 		return;
 
@@ -230,12 +256,32 @@ void (entity attacker, entity target, entity inflictor, float damage) LogEventDa
 }
 
 void (entity attacker, entity target, entity inflictor) LogEventKill = {
+	if (attacker)
+	{
+		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		{
+			if (attacker.team_no == target.team_no)
+			{
+				attacker.teamkills = attacker.teamkills + 1;
+			}
+			else
+			{
+				attacker.kills = attacker.kills + 1;
+			}
+		}
+	}
+	
+	if (target.classname == "player")
+	{
+		target.deaths = target.deaths + 1;
+	}
+
 	if (canlog == 0)
 		return;
 
 	if ((target.classname != "player") && (target.classname != "building_sentrygun"))
 		return;
-	
+
 	local string killKind;
 	local string attackername;
 	local string targetname;
@@ -267,7 +313,6 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
 			inflictorId = inflictor.grenadename;
 	}
-
 
 	local string event;
 	local string attackEvent;
@@ -303,8 +348,22 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	logevent(event);
 }
 
+void (entity attacker, entity target, float tfstate) LogEventAffliction = {
+	if (attacker != target)
+	{
+		if (attacker.team_no == target.team_no)
+		{
+			attacker.teamafflicted = attacker.teamafflicted + 1;
+		}
+		else
+		{
+			attacker.afflicted = attacker.afflicted + 1;
+		}
+	}
+};
 
 void (entity player) LogEventGoal = {
+	player.caps = player.caps + 1;
 	if (canlog == 0)
 		return;
 	local string event;
@@ -319,6 +378,7 @@ void (entity player) LogEventGoal = {
 
 
 void (entity player) LogEventPickupGoal = {
+	player.touches = player.touches + 1;
 	if (canlog == 0)
 		return;
 	local string event;

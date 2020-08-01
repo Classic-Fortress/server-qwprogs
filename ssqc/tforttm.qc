@@ -286,6 +286,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         }
     }
 
+    forceinfokey(pe, "team_no", ftos(tno));
     return (1);
 };
 

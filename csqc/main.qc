@@ -32,6 +32,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
+    registercvar(FOCMD_OLDSCOREBOARD, "0");
+    
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -48,6 +50,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("tracktarget");
+    registercommand("+fo_showscores");
+    registercommand("-fo_showscores");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -63,6 +67,40 @@ noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
     localcmd("menu_restart\n");
 }
+
+void(vector viewsize, float scoresshown) CSQC_DrawScores = {
+    print("showing scores\n");
+    string panelid = "showscorespanel";
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    
+    vector position = getPosition(id);
+    vector size = getFillSize(id);
+    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
+    vector textcolour = MENU_TEXT_4;
+    local float padding = 4 * panel.Scale;
+    local float lines;
+    local float pos_aligned;
+    local string message;
+    if (fo_hud_editor) {
+        message = "Show Scores";
+        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+            // click event
+        }
+    } else {
+        if(!panel.Display) {
+            return;
+        }
+        message = "draw";
+        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+            // click event
+        }
+    }
+};
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     ScreenSize = [width, height, menushown];
@@ -209,10 +247,42 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("gren2_server");
             }
             break;
+        case "+fo_showscores":
+            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                string kn = keynumtostring(stof(argv(0)));
+                string akn = keynumtostring(stof(argv(1)));
+                localcmd(sprintf("unbind %s\n", kn));
+                localcmd(sprintf("unbind %s\n", akn));
+
+                localcmd(sprintf("bind %s +showscores\n", kn));
+                localcmd(sprintf("bind %s +showscores\n", akn));
+            }
+            FO_Show_Scores(TRUE);
+            break;
+        case "-fo_showscores":
+            FO_Show_Scores(FALSE);
+            break;
+        case "+showteamscores":
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
+            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                string keyname = keynumtostring(stof(argv(0)));
+                string altkeyname = keynumtostring(stof(argv(1)));
+                localcmd(sprintf("unbind %s\n", keyname));
+                localcmd(sprintf("unbind %s\n", altkeyname));
+
+                localcmd(sprintf("bind %s +fo_showscores\n", keyname));
+                localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
+            }
             break;
+        case "-showteamscores":
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;

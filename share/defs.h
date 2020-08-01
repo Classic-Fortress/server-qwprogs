@@ -248,6 +248,9 @@
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
+// FIXME - concussion and flash states aren't set or tested...
+#define TFSTATE_CONCUSSED			131072
+#define TFSTATE_FLASHED			262144
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
@@ -1355,6 +1358,8 @@
 #define FO_HUD_MENU_HINT_NAME "Menu Hints"
 #define FO_HUD_GAME_MODE_NAME "Game Mode"
 #define FO_HUD_READY_NAME "Ready Status"
+#define FO_HUD_SHOWSCORES_NAME "Show Scores"
+
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"

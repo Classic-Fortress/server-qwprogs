@@ -1,19 +1,3 @@
-#define FO_MENU_FLAG_USE_MOUSE 1
-#define FO_MENU_FLAG_CENTER 2
-#define FO_MENU_FLAG_SHOW_SHORTCUTS 4
-#define FO_MENU_FLAG_SHOW_VALUES 8
-#define FO_MENU_FLAG_WARNING 16
-#define FO_MENU_FLAG_ALLOW_INTERMISSION 32
-
-#define FO_MENU_STATE_HIDDEN 0
-#define FO_MENU_STATE_NORMAL 1
-#define FO_MENU_STATE_DISABLED 2
-#define FO_MENU_STATE_SPACER 3
-
-#define FO_MENU_MAX_OPTIONS 20
-
-#define FO_MENU_TRANSPARENCY 0.2
-
 void (float force) FO_Menu_Build;
 void (float force) FO_Menu_Admin_Main;
 void (float force) FO_Menu_Admin_Modes;
@@ -703,7 +687,6 @@ vector fo_menu_draw(fo_menu * menu) = {
         position = menu.position;
     }
     
-    
     if(fo_hud_editor) return position;
     if(!menu.active || showingscores || (intermission && !(menu.flags & FO_MENU_FLAG_ALLOW_INTERMISSION))) {
         setcursormode(FALSE);
@@ -738,7 +721,6 @@ vector fo_menu_draw(fo_menu * menu) = {
     if (sui_is_held(id)) {
         position = position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
     }
-
     
     sui_border_box(position, menusize, 1, bordercolour, FO_MENU_TRANSPARENCY, 0);
     sui_push_frame(position, menusize);

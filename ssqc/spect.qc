@@ -132,6 +132,18 @@ void () SpectatorImpulseCommand = {
 
 void () SpectatorThink = {
     
+    self.playerclass = 0;
+    self.afflicted = 0;
+    self.teamafflicted = 0;
+    self.damagegiven = 0;
+    self.damagetaken = 0;
+    self.kills = 0;
+    self.deaths = 0;
+    self.caps = 0;
+    self.touches = 0;
+    self.team_no = 0;
+    UpdateScoreboardInfo(self);
+
     if (self.impulse)
         SpectatorImpulseCommand();
 

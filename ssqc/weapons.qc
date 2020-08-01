@@ -594,6 +594,7 @@ void () W_FireMedikit = {
                 BioInfection.nextthink = time + 1;
                 BioInfection.think = BioInfection_Decay;
                 BioInfection.enemy = self;
+                LogEventAffliction(self, trace_ent, TFSTATE_INFECTED);
                 trace_ent.infection_team_no = self.team_no;
             }
         } else {

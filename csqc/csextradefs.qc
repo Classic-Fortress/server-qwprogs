@@ -23,7 +23,32 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+vector MENU_TEXT_BLUE_FO = '0.3 0.4 0.7';
+vector MENU_TEXT_RED_FO = '0.7 0.4 0.3';
+vector MENU_TEXT_YELLOW_FO = '0.7 0.7 0.3';
+vector MENU_TEXT_GREEN_FO = '0.4 0.7 0.3';
+vector MENU_TEXT_SPEC_FO = '0.1 0.1 0.1';
+
+#define FO_MENU_FLAG_USE_MOUSE 1
+#define FO_MENU_FLAG_CENTER 2
+#define FO_MENU_FLAG_SHOW_SHORTCUTS 4
+#define FO_MENU_FLAG_SHOW_VALUES 8
+#define FO_MENU_FLAG_WARNING 16
+#define FO_MENU_FLAG_ALLOW_INTERMISSION 32
+
+#define FO_MENU_STATE_HIDDEN 0
+#define FO_MENU_STATE_NORMAL 1
+#define FO_MENU_STATE_DISABLED 2
+#define FO_MENU_STATE_SPACER 3
+
+#define FO_MENU_MAX_OPTIONS 20
+
+#define FO_MENU_TRANSPARENCY 0.2
+
 #define MOTD_TIME 30
+
+#define TEAM_SPECTATOR 9
+#define TEAM_OBSERVER 99
 
 .float owned_by;
 .string netname;
@@ -275,6 +300,46 @@ typedef struct {
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];
 
+// scoreboard stuff
+typedef struct {
+    float ping;
+    float pl;
+    string classtext;
+    string name;
+    float team_no;
+    float score;
+    float caps;
+    float touches;
+    float kills;
+    float teamkills;
+    float deaths;
+    float afflicted;
+    float teamafflicted;
+    float damagegiven;
+    float damagetaken;
+    float ready;
+} FO_ScoreBoardLine;
+
+// fte maxclients is 255, right?
+#define FO_SCOREBOARDLINES_LENGTH 32
+
+string FO_ScoreBoardColumns[] = {
+    "ping",
+    "pl",
+    "class",
+    "score",
+    "name",
+    "caps",
+    "tchs",
+    "kils",
+    "tkil",
+    "dths",
+    "affl",
+    "tafl",
+    "dmgg",
+    "dmgt"
+};
+
 enum {
     HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
@@ -290,9 +355,11 @@ enum {
     HUD_PANEL_MOTD,
     HUD_PANEL_MENU_HINT,
     HUD_PANEL_GAME_MODE,
-    HUD_PANEL_READY
+    HUD_PANEL_READY,
+    HUD_PANEL_SHOWSCORES
 };
 
+#define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
@@ -316,3 +383,5 @@ vector FO_Hud_Icon_Font_Size = [8, 8, 0];
 
 string(string s) strtrim = #0:strtrim; /*
 		Trims the whitespace from the start+end of the string. */
+float(float playernum, string keyname, optional float assumevalue) getplayerkeyfloat = #0:getplayerkeyfloat; /*
+		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */

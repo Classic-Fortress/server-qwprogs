@@ -316,7 +316,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                             arg3f = TeamFortress_TeamGetColor(self.team_no) - 1;
                             string st;
                             st = ftos(arg3f);
-                            //forceinfokey(self, "topcolor", st);
                             stuffcmd(self, strcat("color ", st, "\n"));
                             sprint(self, PRINT_HIGH,
                                     "Your color has been changed to your team color\n");
@@ -1075,8 +1074,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
                                 bprint4(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-                                //stuffcmd(ent, "observe\n");
-                                //forceinfokey(ent, "*spectator", "1");
                                 clientcommand(ent, "observe");
                                 break;
                             }
