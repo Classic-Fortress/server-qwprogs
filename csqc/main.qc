@@ -231,7 +231,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-fo_showscores":
             FO_Show_Scores(FALSE);
             break;
-        case "+showteamscores":
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
@@ -248,7 +247,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
             }
             break;
-        case "-showteamscores":
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
