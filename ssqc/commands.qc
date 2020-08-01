@@ -650,20 +650,35 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
             }
-            if (!self.building.real_owner.has_sentry || self.building.real_owner != self
-                        || self.classname != "player" || self.building == world) {
+            
+            //find sentry first
+            ent = findradius(self.origin, ENG_BUILDING_MAINT_DISTANCE);
+            while (ent) {
+                if (ent.classname == "building_sentrygun") {
+                    if (ent.real_owner == self)
+                        break;
+                }
+                ent = ent.chain;
+            }
+            if (!ent) {
+                sprint(self, PRINT_HIGH, "No sentry in range\n");
                 break;
             }
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
                     farg3 = stof(arg3);
+                    if (!ent.real_owner.has_sentry || ent.real_owner != self
+                                || self.classname != "player" || ent == world) {
+                        sprint(self, PRINT_HIGH, "Sentry detection issue!\n");
+                        break;
+                    }
                     if(farg3 < 0) {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
                     } else {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3)," degrees anticlockwise...\n");
                     }
-                    self.building.waitmin = anglemod(self.building.waitmin + farg3);
-                    self.building.waitmax = anglemod(self.building.waitmax + farg3);
+                    ent.waitmin = anglemod(ent.waitmin + farg3);
+                    ent.waitmax = anglemod(ent.waitmax + farg3);
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
