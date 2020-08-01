@@ -68,40 +68,6 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
-void(vector viewsize, float scoresshown) CSQC_DrawScores = {
-    print("showing scores\n");
-    string panelid = "showscorespanel";
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
-    
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
-    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
-    vector textcolour = MENU_TEXT_4;
-    local float padding = 4 * panel.Scale;
-    local float lines;
-    local float pos_aligned;
-    local string message;
-    if (fo_hud_editor) {
-        message = "Show Scores";
-        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
-            // click event
-        }
-    } else {
-        if(!panel.Display) {
-            return;
-        }
-        message = "draw";
-        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
-            // click event
-        }
-    }
-};
-
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
