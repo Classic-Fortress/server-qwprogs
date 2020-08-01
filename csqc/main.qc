@@ -213,7 +213,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("gren2_server");
             }
             break;
-        case "+fo_showscores":
+        /*case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
@@ -230,12 +230,11 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-fo_showscores":
             FO_Show_Scores(FALSE);
-            break;
-        case "+showteamscores":
+            break;*/
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            /*if (cvar(FOCMD_OLDSCOREBOARD) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -246,9 +245,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
                 localcmd(sprintf("bind %s +fo_showscores\n", keyname));
                 localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
-            }
+            }*/
             break;
-        case "-showteamscores":
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
