@@ -32,6 +32,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
+    registercvar(FOCMD_OLDSCOREBOARD, "0");
+    
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -246,28 +248,42 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "+fo_showscores":
+            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                string kn = keynumtostring(stof(argv(0)));
+                string akn = keynumtostring(stof(argv(1)));
+                localcmd(sprintf("unbind %s\n", kn));
+                localcmd(sprintf("unbind %s\n", akn));
+
+                localcmd(sprintf("bind %s +showscores\n", kn));
+                localcmd(sprintf("bind %s +showscores\n", akn));
+            }
+            FO_Show_Scores(TRUE);
+            break;
+        case "-fo_showscores":
+            FO_Show_Scores(FALSE);
+            break;
         case "+showteamscores":
         case "+showscores":
             showingscores = TRUE;
-            float id = getHudPanel("showscorespanel");
-            if(id < 0) {
-                return FALSE;
+            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                string keyname = keynumtostring(stof(argv(0)));
+                string altkeyname = keynumtostring(stof(argv(1)));
+                localcmd(sprintf("unbind %s\n", keyname));
+                localcmd(sprintf("unbind %s\n", altkeyname));
+
+                localcmd(sprintf("bind %s +fo_showscores\n", keyname));
+                localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
             }
-            
-            FO_Hud_Panel* panel = getHudPanelPointer(id);
-            panel.Display = TRUE;
             break;
-        case "-fo_showscores":
         case "-showteamscores":
         case "-showscores":
             showingscores = FALSE;
-            float id = getHudPanel("showscorespanel");
-            if(id < 0) {
-                return FALSE;
-            }
-            
-            FO_Hud_Panel* panel = getHudPanelPointer(id);
-            panel.Display = FALSE;
             break;
         case "tracktarget":
             localcmd("cmd tracktarget\n");

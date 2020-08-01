@@ -154,30 +154,26 @@ void (entity attacker, entity target, string afflictionType) LogAffliction = {
 		if (attacker.team_no == target.team_no)
 		{
 			attacker.afflicted = attacker.afflicted + 1;
-			forceinfokey(attacker, "afflicted", ftos(attacker.afflicted));
 		}
 		else
 		{
 			attacker.teamafflicted = attacker.teamafflicted + 1;
-			forceinfokey(attacker, "teamafflicted", ftos(attacker.teamafflicted));
 		}
 	}
 }
 
-void (entity attacker, entity target, entity inflictor, float damage) LogEventDamage = {
+void (entity attacker, entity target, entity inflictor, float damage, float truedam) LogEventDamage = {
 	if (attacker)
 	{
 		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
 		{
-			attacker.damagegiven = attacker.damagegiven + damage;
-			forceinfokey(attacker, "damagegiven", ftos(attacker.damagegiven));
+			attacker.damagegiven = attacker.damagegiven + truedam;
 		}
 	}
 	
 	if (target.classname == "player")
 	{
-		target.damagetaken = target.damagetaken + damage;
-		forceinfokey(target, "damagetaken", ftos(target.damagetaken));
+		target.damagetaken = target.damagetaken + truedam;
 	}
 
 	if (canlog == 0)
@@ -271,7 +267,6 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 			else
 			{
 				attacker.kills = attacker.kills + 1;
-				forceinfokey(attacker, "kills", ftos(attacker.kills));
 			}
 		}
 	}
@@ -279,7 +274,6 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	if (target.classname == "player")
 	{
 		target.deaths = target.deaths + 1;
-		forceinfokey(target, "deaths", ftos(target.deaths));
 	}
 
 	if (canlog == 0)
@@ -354,10 +348,22 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	logevent(event);
 }
 
+void (entity attacker, entity target, float tfstate) LogEventAffliction = {
+	if (attacker != target)
+	{
+		if (attacker.team_no == target.team_no)
+		{
+			attacker.teamafflicted = attacker.teamafflicted + 1;
+		}
+		else
+		{
+			attacker.afflicted = attacker.afflicted + 1;
+		}
+	}
+};
 
 void (entity player) LogEventGoal = {
 	player.caps = player.caps + 1;
-	forceinfokey(player, "caps", ftos(player.caps));
 	if (canlog == 0)
 		return;
 	local string event;
@@ -373,7 +379,6 @@ void (entity player) LogEventGoal = {
 
 void (entity player) LogEventPickupGoal = {
 	player.touches = player.touches + 1;
-	forceinfokey(player, "touches", ftos(player.touches));
 	if (canlog == 0)
 		return;
 	local string event;

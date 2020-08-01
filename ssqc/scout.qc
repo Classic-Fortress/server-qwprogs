@@ -224,6 +224,7 @@ void FO_FlashExplode()
         if (te.classname == "player") {
             traceline(self.origin, te.origin, 1, self);
             if (trace_fraction == 1) {
+                LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
                 sprint(te, PRINT_HIGH, "You have been flashed!\n");
                 org = te.origin + (te.mins + te.maxs) * 0.5;
                 frac = (rad - vlen(self.origin - org)) / rad;
@@ -301,6 +302,7 @@ void () FlashGrenadeExplode = {
             if (te.classname == "player") {
                 traceline(self.origin, te.origin, 1, self);
                 if (trace_fraction == 1) {
+                    LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
                     if (vlen(self.origin - te.origin) <= 200) {
                         deathmsg = DMSG_GREN_FLASH;
                         TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
@@ -771,6 +773,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
+                            LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
                             if (old_grens == TRUE) {
                                 stuffcmd(head, "v_idlescale 100\n");
                                 stuffcmd(head, "fov 130\n");

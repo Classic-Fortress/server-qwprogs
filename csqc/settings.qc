@@ -5,6 +5,7 @@ void FO_WriteSettings()
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
     string line = FormatCfgString("", FOCMD_AUTOHOP, ftos(cvar(FOCMD_AUTOHOP)));
     line = FormatCfgString(line, FOCMD_GRENTIMER, ftos(cvar(FOCMD_GRENTIMER)));
+    line = FormatCfgString(line, FOCMD_OLDSCOREBOARD, ftos(cvar(FOCMD_OLDSCOREBOARD)));
     fputs(filehandle, line);
     fclose(filehandle);
 }
@@ -13,6 +14,7 @@ void FO_LoadDefaultSettings()
 {
     cvar_set(FOCMD_AUTOHOP, "0");
     cvar_set(FOCMD_GRENTIMER, "1");
+    cvar_set(FOCMD_OLDSCOREBOARD, "0");
 }
 
 void FO_LoadSettings()
@@ -46,6 +48,9 @@ void FO_LoadSettings()
                         break;
                     case FOCMD_GRENTIMER:
                         cvar_set(FOCMD_GRENTIMER, val);
+                        break;
+                    case FOCMD_OLDSCOREBOARD:
+                        cvar_set(FOCMD_OLDSCOREBOARD, val);
                         break;
                 }
             }

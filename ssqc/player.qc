@@ -44,9 +44,9 @@ void () player_touch = {
             }
         }
     }
-    if ((self.tfstate & 16) && (!cb_prematch)) {
+    if ((self.tfstate & TFSTATE_INFECTED) && (!cb_prematch)) {
         if ((other.classname == "player") && (te.playerclass != 0)) {
-            if (!(other.tfstate & 16)) {
+            if (!(other.tfstate & TFSTATE_INFECTED)) {
                 if (other.playerclass != 5) {
                     if (!((teamplay & 16)
                           && (self.owner.team_no == self.enemy.team_no)
@@ -67,8 +67,10 @@ void () player_touch = {
                         Bio.owner = other;
                         Bio.classname = "timer";
                         Bio.enemy = te.enemy;
-                        other.tfstate = other.tfstate | 16;
+                        other.tfstate = other.tfstate | TFSTATE_INFECTED;
                         other.infection_team_no = self.infection_team_no;
+                        LogEventAffliction(te.enemy, other, TFSTATE_INFECTED);
+                        LogEventAffliction(self, other, TFSTATE_INFECTED);
                         sprint(other, PRINT_MEDIUM,
                                "You have been infected by ", self.netname,
                                "\n");
