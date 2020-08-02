@@ -414,7 +414,7 @@ void () DecodeLevelParms = {
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
         // use fortress one flash
-        fo_flash = CF_GetSetting("ff", "fo_flash", "off");
+        fo_flash = CF_GetSetting("ff", "fo_flash", "on");
 
         // drop primed hand grenades to ground when dying [on]
         drop_grenades = CF_GetSetting("dg", "drop_grenades", "on");
