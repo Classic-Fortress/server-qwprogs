@@ -220,11 +220,17 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
                 string kn = keynumtostring(stof(argv(0)));
                 string akn = keynumtostring(stof(argv(1)));
-                localcmd(sprintf("unbind %s\n", kn));
-                localcmd(sprintf("unbind %s\n", akn));
+                if (kn != "")
+                {
+                    localcmd(sprintf("unbind %s\n", kn));
+                    localcmd(sprintf("bind %s +showscores\n", kn));
+                }
 
-                localcmd(sprintf("bind %s +showscores\n", kn));
-                localcmd(sprintf("bind %s +showscores\n", akn));
+                if (akn != "")
+                {
+                    localcmd(sprintf("unbind %s\n", akn));
+                    localcmd(sprintf("bind %s +showscores\n", akn));
+                }                
             }
             FO_Show_Scores(TRUE);
             break;
@@ -240,11 +246,17 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
                 string keyname = keynumtostring(stof(argv(0)));
                 string altkeyname = keynumtostring(stof(argv(1)));
-                localcmd(sprintf("unbind %s\n", keyname));
-                localcmd(sprintf("unbind %s\n", altkeyname));
+                if (keyname != "")
+                {
+                    localcmd(sprintf("unbind %s\n", keyname));
+                    localcmd(sprintf("bind %s +fo_showscores\n", keyname));
+                }
 
-                localcmd(sprintf("bind %s +fo_showscores\n", keyname));
-                localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
+                if (altkeyname != "")
+                {
+                    localcmd(sprintf("unbind %s\n", altkeyname));
+                    localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
+                }
             }
             break;
         case "-showscores":
