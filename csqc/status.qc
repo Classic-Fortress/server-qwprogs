@@ -686,7 +686,6 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
             sui_pop_frame();
         }
         
-        // TODO - Width - make adjustable?? we have panel scaling which is used
         sui_pop_frame();
     }
 }
@@ -718,7 +717,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
     {"gamemodepanel",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
-    {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',2,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
+    {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
 };
 
 float(string panelid) getHudPanel = {
