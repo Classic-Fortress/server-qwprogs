@@ -116,6 +116,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
     float val;
+    string key1, key2;
     switch(argv(0)) {
         case "fo_hud_editor":
             FO_Hud_Editor();
@@ -218,18 +219,21 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             {
                 tokenize(findkeysforcommand(argv(0)));
 
-                string kn = keynumtostring(stof(argv(0)));
-                string akn = keynumtostring(stof(argv(1)));
-                if (kn != "")
+                key1 = argv(0);
+                key2 = argv(1);
+                if (key1 != "") key1 = (key1=="-1")?"":keynumtostring(stof(key1));
+                if (key2 != "") key2 = (key2=="-1")?"":keynumtostring(stof(key2));
+
+                if (key1 != "")
                 {
-                    localcmd(sprintf("unbind %s\n", kn));
-                    localcmd(sprintf("bind %s +showscores\n", kn));
+                    localcmd(sprintf("unbind %s\n", key1));
+                    localcmd(sprintf("bind %s +showscores\n", key1));
                 }
 
-                if (akn != "")
+                if (key2 != "")
                 {
-                    localcmd(sprintf("unbind %s\n", akn));
-                    localcmd(sprintf("bind %s +showscores\n", akn));
+                    localcmd(sprintf("unbind %s\n", key2));
+                    localcmd(sprintf("bind %s +showscores\n", key2));                   
                 }                
             }
             FO_Show_Scores(TRUE);
@@ -244,18 +248,21 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             {
                 tokenize(findkeysforcommand(argv(0)));
 
-                string keyname = keynumtostring(stof(argv(0)));
-                string altkeyname = keynumtostring(stof(argv(1)));
-                if (keyname != "")
+                key1 = argv(0);
+                key2 = argv(1);
+                if (key1 != "") key1 = (key1=="-1")?"":keynumtostring(stof(key1));
+                if (key2 != "") key2 = (key2=="-1")?"":keynumtostring(stof(key2));
+
+                if (key1 != "")
                 {
-                    localcmd(sprintf("unbind %s\n", keyname));
-                    localcmd(sprintf("bind %s +fo_showscores\n", keyname));
+                    localcmd(sprintf("unbind %s\n", key1));
+                    localcmd(sprintf("bind %s +fo_showscores\n", key1));
                 }
 
-                if (altkeyname != "")
+                if (key2 != "")
                 {
-                    localcmd(sprintf("unbind %s\n", altkeyname));
-                    localcmd(sprintf("bind %s +fo_showscores\n", altkeyname));
+                    localcmd(sprintf("unbind %s\n", key2));
+                    localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
             break;
