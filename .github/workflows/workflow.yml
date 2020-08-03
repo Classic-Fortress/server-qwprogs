@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v1
     - name: Compile
       run: |
-        wget http://fte.triptohell.info/moodles/linux_amd64/fteqcc64
+        wget http://fte.triptohell.info/moodles/autoup/linux_amd64/fteqcc64
         chmod +x fteqcc64
         export PATH=$GITHUB_WORKSPACE:$PATH
         make
