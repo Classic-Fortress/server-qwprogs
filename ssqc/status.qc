@@ -583,6 +583,8 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5, string s
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     //float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     //if(csqcactive) {
         msg_entity = Player;
@@ -617,6 +619,8 @@ void (entity Player) InitAllStatuses = {
 
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -647,6 +651,8 @@ void (entity Player, entity Goal) UpdateClientButtonStatus = {
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -793,6 +799,8 @@ string GetSBClassInfo(entity pl, float csqcactive)
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype) = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
@@ -801,6 +809,8 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
@@ -808,6 +818,8 @@ void UpdateClientGrenadeThrown(entity pl) = {
 }
 
 void UpdateClientIDString(entity pl) {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     // only send updates
     //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
     //    return;
@@ -826,6 +838,8 @@ void UpdateClientIDString(entity pl) {
 
 void UpdateClientStatusBar(entity pl)
 {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     // if we ever change to fte only, this could be changed to stats
     string msg = "";
     msg_entity = pl;
