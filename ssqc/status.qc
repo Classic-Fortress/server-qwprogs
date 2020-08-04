@@ -799,7 +799,7 @@ string GetSBClassInfo(entity pl, float csqcactive)
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype) = {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
@@ -809,7 +809,7 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
@@ -818,7 +818,7 @@ void UpdateClientGrenadeThrown(entity pl) = {
 }
 
 void UpdateClientIDString(entity pl) {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     // only send updates
     //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
@@ -838,7 +838,7 @@ void UpdateClientIDString(entity pl) {
 
 void UpdateClientStatusBar(entity pl)
 {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     // if we ever change to fte only, this could be changed to stats
     string msg = "";
