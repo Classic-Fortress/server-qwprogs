@@ -258,8 +258,13 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	if (attacker)
 	{
-		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		if (attacker.classname == "player" || attacker.classname == "building_sentrygun" && (target.classname == "player" || target.classname == "building_sentrygun"))
 		{
+			if (attacker.classname == "building_sentrygun")
+			{
+				attacker = attacker.real_owner;
+			}
+			
 			if (attacker.team_no == target.team_no)
 			{
 				attacker.teamkills = attacker.teamkills + 1;
