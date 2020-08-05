@@ -165,9 +165,13 @@ void (entity attacker, entity target, string afflictionType) LogAffliction = {
 void (entity attacker, entity target, entity inflictor, float damage, float truedam) LogEventDamage = {
 	if (attacker)
 	{
-		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		entity realattacker = attacker;
+		if (attacker.classname == "building_sentrygun")
+			realattacker = attacker.real_owner;
+
+		if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
 		{
-			attacker.damagegiven = attacker.damagegiven + truedam;
+			realattacker.damagegiven = realattacker.damagegiven + truedam;
 		}
 	}
 	
@@ -258,20 +262,24 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	if (attacker)
 	{
-		if (attacker.classname == "player" || attacker.classname == "building_sentrygun" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		entity realattacker = attacker;
+		if (attacker.classname == "building_sentrygun")
+			realattacker = attacker.real_owner;
+
+		if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
 		{
-			if (attacker.classname == "building_sentrygun")
+			if (realattacker.classname == "building_sentrygun")
 			{
-				attacker = attacker.real_owner;
+				realattacker = attacker.real_owner;
 			}
-			
-			if (attacker.team_no == target.team_no)
+
+			if (realattacker.team_no == target.team_no)
 			{
-				attacker.teamkills = attacker.teamkills + 1;
+				realattacker.teamkills = realattacker.teamkills + 1;
 			}
 			else
 			{
-				attacker.kills = attacker.kills + 1;
+				realattacker.kills = realattacker.kills + 1;
 			}
 		}
 	}
