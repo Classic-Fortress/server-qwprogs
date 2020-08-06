@@ -356,6 +356,39 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
     }
 }
 
+float (float val) AbbreviateNumber = {
+    val = val / 1000;
+    val = rint(val);
+    return val;
+};
+
+string (float val) AbbreviateNumberToString = {
+    string abbr = "";
+
+    int count = 0;
+    while (val >= 1000)
+    {
+        val = AbbreviateNumber(val);
+        count++;
+    }
+
+    switch (count)
+    {
+        case 1:
+            abbr = "k";
+            break;
+        case 2:
+            abbr = "m";
+            break;
+        case 3:
+            abbr = "b";
+            break;
+    }
+    
+    string s = strcat(ftos(val), abbr);
+    return s;
+};
+
 void (vector position, vector size, string val, vector textcolour, float alpha
     , float flags, string colname, optional float padright = FALSE) drawShowScoresColumnVal = {
     float valwidth, colwidth;
@@ -372,6 +405,7 @@ void (vector position, vector size, string val, vector textcolour, float alpha
     
     sui_text(position, size, val, textcolour, 1, 0);
 };
+
 vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
     , float padding, vector columnColour) drawShowScoresTeamPanel = {
 
@@ -461,11 +495,11 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
         }
 
         float col = 0, alpha = 1, flags = 0;
-        string val = ftos(lines[i].ping);
+        string val = AbbreviateNumberToString(lines[i].ping);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].pl);
+        val = AbbreviateNumberToString(lines[i].pl);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
@@ -490,7 +524,7 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
 
         if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER)
         {
-            val = ftos(lines[i].score);
+            val = AbbreviateNumberToString(lines[i].score);
             drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         }
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
@@ -511,39 +545,39 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
             continue;
         }
 
-        val = ftos(lines[i].caps);
+        val = AbbreviateNumberToString(lines[i].caps);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].touches);
+        val = AbbreviateNumberToString(lines[i].touches);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].kills);
+        val = AbbreviateNumberToString(lines[i].kills);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].teamkills);
+        val = AbbreviateNumberToString(lines[i].teamkills);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].deaths);
+        val = AbbreviateNumberToString(lines[i].deaths);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].afflicted);
+        val = AbbreviateNumberToString(lines[i].afflicted);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].teamafflicted);
+        val = AbbreviateNumberToString(lines[i].teamafflicted);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].damagegiven);
+        val = AbbreviateNumberToString(lines[i].damagegiven);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        val = ftos(lines[i].damagetaken);
+        val = AbbreviateNumberToString(lines[i].damagetaken);
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
@@ -680,6 +714,22 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
             position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Specs, panel, id, padding, MENU_TEXT_SPEC_FO);
             sbCount++;
         }
+
+       
+        /*
+        // FIXME
+        maybe some colours on some columns to help differentiate them
+        cloudy and 32s gives credit for 2 caps...`
+        
+        Sometimes specs/observers seem to disappear, possibly after client disconnect that is on a team
+        If possible, have AFK/msg indicators
+        Reset between rounds
+        Make a summary one for end of game too
+        allow specs to see all classes of both teams
+        show who you are on scoreboard
+        show who you are speccing
+        when player comes in after caps occur, they aren't getting team score
+        */
 
         for (float i = 0; i < sbCount; i++)
         {

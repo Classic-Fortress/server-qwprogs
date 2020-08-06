@@ -692,7 +692,7 @@ float canlog;
 .float caps;
 .float touches;
 .float kills;
-.float teamkills;
+.float sbteamkills;
 .float deaths;
 .float afflicted;
 .float teamafflicted;
