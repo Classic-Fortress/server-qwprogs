@@ -163,19 +163,32 @@ void (entity attacker, entity target, string afflictionType) LogAffliction = {
 }
 
 void (entity attacker, entity target, entity inflictor, float damage, float truedam) LogEventDamage = {
-	if (attacker)
+	if (!cb_prematch)
 	{
-		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		entity realattacker = attacker;
+		if (attacker.classname == "building_sentrygun" || attacker.classname == "building_dispenser")
 		{
-			attacker.damagegiven = attacker.damagegiven + truedam;
+			realattacker = attacker.real_owner;
+		}
+
+		if (realattacker.team_no != target.team_no)
+		{
+			// superfluous
+			if (realattacker != target && realattacker != target.real_owner)
+			{
+				if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+				{
+					realattacker.damagegiven = realattacker.damagegiven + truedam;
+				}
+				
+				if (target.classname == "player")
+				{
+					target.damagetaken = target.damagetaken + truedam;
+				}
+			}
 		}
 	}
 	
-	if (target.classname == "player")
-	{
-		target.damagetaken = target.damagetaken + truedam;
-	}
-
 	if (canlog == 0)
 		return;
 
@@ -256,24 +269,28 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 }
 
 void (entity attacker, entity target, entity inflictor) LogEventKill = {
-	if (attacker)
+	if (!cb_prematch)
 	{
-		if (attacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		bprint(PRINT_HIGH, "logeventkill\n");
+		entity realattacker = attacker;
+		if (attacker.classname == "building_sentrygun" || attacker.classname == "building_dispenser")
 		{
-			if (attacker.team_no == target.team_no)
+			realattacker = attacker.real_owner;
+		}
+
+		if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
+		{
+			if (realattacker.team_no == target.team_no)
 			{
-				attacker.teamkills = attacker.teamkills + 1;
+				realattacker.sbteamkills = realattacker.sbteamkills + 1;
 			}
 			else
 			{
-				attacker.kills = attacker.kills + 1;
+				realattacker.kills = realattacker.kills + 1;
 			}
+
+			target.deaths = target.deaths + 1;
 		}
-	}
-	
-	if (target.classname == "player")
-	{
-		target.deaths = target.deaths + 1;
 	}
 
 	if (canlog == 0)

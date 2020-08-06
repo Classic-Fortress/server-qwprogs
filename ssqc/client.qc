@@ -1685,6 +1685,7 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "damagegiven", player.damagegiven);
     CheckSetInfoKey(player, "damagetaken", player.damagetaken);
     CheckSetInfoKey(player, "kills", player.kills);
+    CheckSetInfoKey(player, "teamkills", player.sbteamkills);
     CheckSetInfoKey(player, "deaths", player.deaths);
     CheckSetInfoKey(player, "caps", player.caps);
     CheckSetInfoKey(player, "touches", player.touches);
