@@ -271,7 +271,6 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 void (entity attacker, entity target, entity inflictor) LogEventKill = {
 	if (!cb_prematch)
 	{
-		bprint(PRINT_HIGH, "logeventkill\n");
 		entity realattacker = attacker;
 		if (attacker.classname == "building_sentrygun" || attacker.classname == "building_dispenser")
 		{
