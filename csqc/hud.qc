@@ -73,11 +73,29 @@ void FO_Hud_Editor_LoadDefaultSettings()
         //pnl.Name = name;
     }
 */
+
     //Default menus, id, ready and MOTD to centre of the screen
-    Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
-    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2 + Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.y];
-    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
-    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
+    Hud_Panels[HUD_PANEL_GAME_MODE].Position = [width - Hud_Panels[HUD_PANEL_GAME_MODE].FillSize.x, 30];
+    Hud_Panels[HUD_PANEL_GAME_MODE].NodeInsertLoc = FO_HUD_INSERT_AFTER;
+    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 30];
+    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 30];
+    Hud_Panels[HUD_PANEL_MENU_HINT].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), 80];
+    Hud_Panels[HUD_PANEL_MENU_HINT].NodeInsertLoc = FO_HUD_INSERT_MIDDLE;
+    Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), 120];
+    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height - 100];
+    Hud_Panels[HUD_PANEL_CLIPSIZE].Position = [(width / 2) + 16, height - 50];
+    Hud_Panels[HUD_PANEL_CLIPSIZE].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GREN1].Position = [(width / 2) - 16 - (Hud_Panels[HUD_PANEL_GREN1].FillSize.x * 2), height - 50];
+    Hud_Panels[HUD_PANEL_GREN1].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GREN2].Position = [(width / 2) - 16 - Hud_Panels[HUD_PANEL_GREN2].FillSize.x * 0.75, height - 50];
+    Hud_Panels[HUD_PANEL_GREN2].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_GRENTIMER].Position = [(width / 2) + 16, (height / 2) + 32];
+    Hud_Panels[HUD_PANEL_GRENTIMER].Scale = 0.75;
+    Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc = FO_HUD_INSERT_AFTER;
+    Hud_Panels[HUD_PANEL_FLAGINFO].Position = [width - 24, (height / 2) - 8];
+    Hud_Panels[HUD_PANEL_FRAGSTREAK].Display = 0;
+    Hud_Panels[HUD_PANEL_CAPS].Display = 0;
+    Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
 }
 
 void FO_Hud_Editor_List_Panels() = {
@@ -352,14 +370,17 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         string msg = "";
 
         //icon = HudIcons[playerclass-1].icon;
-        icon = HudIcons[playerclass+6].icon;
-        drawpic(pos, icon, size, '1 1 1', 1, 0);
+        /* icon = HudIcons[playerclass+6].icon; */
+        /* drawpic(pos, icon, size, '1 1 1', 1, 0); */
 
         float len = 0, offset = 0;
         
         switch (playerclass)
         {
             case PC_SCOUT:
+                icon = HudIcons[playerclass+6].icon;
+                drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                 msg = SBAR.ScannerOn ? "Scanning" : "Offline";
                 pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.ScannerOn)
@@ -377,6 +398,9 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_SNIPER:
                 if (SBAR.SniperDam)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = strcat("Dam: ", ftos(SBAR.SniperDam));
                     pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                     
@@ -391,6 +415,9 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_DEMOMAN:
                 if (SBAR.IsDetpacking)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = "Setting";
                     pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
 
@@ -399,11 +426,17 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 else if (SBAR.DetpackLeft)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 break;
             case PC_MEDIC:
+                icon = HudIcons[playerclass+6].icon;
+                drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                 msg = SBAR.AuraActive ? "On" : "Off";
                 pos = DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.AuraActive)
@@ -434,6 +467,9 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_HVYWEAP:
                 if (SBAR.LockedCannon)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = "Assault Cannon Locked";
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
@@ -441,6 +477,9 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_SPY:
                 if (SBAR.IsUndercover == 1)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     if (SBAR.InvisOnly)
                     {
                         msg = "Invisible";
@@ -456,6 +495,9 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 else if (SBAR.IsUndercover == 2)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     if (SBAR.InvisOnly)
                     {
                         msg = "Invisible";
@@ -500,22 +542,29 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_ENGINEER:
                 if (SBAR.HasSentry)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 else if (SBAR.IsBuilding)
                 {
+                    icon = HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = strcat(ftos(SBAR.BuildingPercentage), "%");
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 
                 // disp
-                pos = [pos_x, pos_y - size_y - 2];
+                pos = [pos_x, pos_y + size_y + 2];
                 basepos = pos;
-                icon = HudIcons[playerclass + 7].icon;
-                drawpic(pos, icon, size, '1 1 1', 1, 0);
                 if (SBAR.HasDispenser)
                 {
+                    icon = HudIcons[playerclass + 7].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
                     msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
