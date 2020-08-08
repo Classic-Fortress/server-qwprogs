@@ -953,9 +953,11 @@ float (float tno) TeamFortress_TeamIsCivilian = {
 
 float (float pf_team_no, float pf_class) CF_GetClassRestriction = {
     local float f_max = 0, f_players = TeamFortress_TeamGetNoPlayers(pf_team_no);
-    local string s_string;
+    //local string s_string;
+    Team_Role * role = GetTeamRole(pf_team_no);
 
     // set maximum number based on settings
+/*
     if (pf_class == PC_SCOUT) {
         s_string = infokey(world, "cr_scout");
         f_max = stof(s_string);
@@ -989,7 +991,10 @@ float (float pf_team_no, float pf_class) CF_GetClassRestriction = {
         s_string = infokey(world, "cr_randompc");
         f_max = stof(s_string);
     }
-
+*/
+    if (pf_class == PC_SPY && spy_off) return -1;
+        
+    f_max = rint(role.class_limits[pf_class]);
     if (f_max == 0 || f_players < f_max)
         return f_players;
 

@@ -123,6 +123,7 @@ void () QuadRoundBegin = {
 
 	local entity te;
 	local entity oldself;
+    //local entity tfdet;
 	local float counter;
 	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
 	te = find(world, classname, "func_breakable");
@@ -134,6 +135,39 @@ void () QuadRoundBegin = {
 	cb_prematch = 0;
  	round_active = 1;
 	round_over = 0;
+    
+    if(quad_roles) {
+        //tfdet = find(world, classname, "info_tfdetect");
+        if(rounds % 2) {
+            Team1_Role = &Role_Defence;
+            Team2_Role = &Role_Attack;
+            //te = Finditem(tfdet.display_item_status1);
+            //if(te && te.owned_by == 1) {
+                //Quad_HideFlag(te);
+            //}
+            //te = Finditem(tfdet.display_item_status2);
+        } else {
+            Team1_Role = &Role_Attack;
+            Team2_Role = &Role_Defence;
+        }
+        te = find(world, classname, "item_tfgoal");
+        while (te) {
+            if(rounds % 2) {
+                if(te.team_no == 2 && te.owned_by == 1) {
+                    Quad_UnHideFlag(te);
+                } else if(te.team_no == 1 && te.owned_by == 2) {
+                    Quad_HideFlag(te);
+                }
+            } else {
+                if(te.team_no == 2 && te.owned_by == 1) {
+                    Quad_HideFlag(te);
+                } else if(te.team_no == 1 && te.owned_by == 2) {
+                    Quad_UnHideFlag(te);
+                }
+            } 
+            te = find(te, classname, "item_tfgoal");
+        }
+    }
 
 	te = find(world, classname, "player");
 	while (te != world) {
@@ -154,9 +188,15 @@ void () QuadRoundBegin = {
 		te = find (te, classname, "player");
 	}
 //	lightstyle (0, "m");
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, FALSE);
+        }
+        te = find(te, classname, "observer");
+    }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
-
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
@@ -256,6 +296,13 @@ void () StartQuadRound =
         }
 		p = find(p, classname, "player");
 	}
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
+    }
 
 	cb_prematch = 1;
 	round_over = 1;
@@ -286,7 +333,19 @@ void () StartQuadRound =
             }
 			p = find(p, classname, "player");
 		}
+        te = find(world, classname, "observer");
+        while (te) {
+            if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientPrematch(te, TRUE);
+            }
+            te = find(te, classname, "observer");
+        }
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
+		if (!clan_scores_dumped) {
+            DumpClanScores();
+            MapEndSequence();
+            clan_scores_dumped = 1;
+ 		}
 		localcmd("stop\n");
 		return;
 	}

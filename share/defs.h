@@ -1352,6 +1352,8 @@
 #define FO_HUD_FLAGINFO_NAME "Flag Status"
 #define FO_HUD_MOTD_NAME "MOTD"
 #define FO_HUD_MENU_HINT_NAME "Menu Hints"
+#define FO_HUD_GAME_MODE_NAME "Game Mode"
+#define FO_HUD_READY_NAME "Ready Status"
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
@@ -1385,3 +1387,8 @@
 #define STAT_TEAMNO    33
 #define STAT_READY     34
 #define STAT_CLASS     35
+
+// Dimensions
+#define DMN_FLASH 1 // when flashed, we set dimension see to this
+#define DMN_NOFLASH	256	// see all the things
+

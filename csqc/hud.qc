@@ -54,7 +54,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     float yoffset = height - 64;
 
     // TODO - maybe implement these to allow for pivoting of items
-
+/*
     vector pos, fill;
     float scale, display, nodeInsertLoc;
     pos = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
@@ -72,13 +72,131 @@ void FO_Hud_Editor_LoadDefaultSettings()
         Hud_Panels[i].NodeInsertLoc = nodeInsertLoc;
         //pnl.Name = name;
     }
-    //Default menus to centre of the screen
+*/
+    //Default menus, id, ready and MOTD to centre of the screen
     Hud_Panels[HUD_PANEL_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2), height / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.y / 2];
+    Hud_Panels[HUD_PANEL_IDENTIFY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.x / 2), height / 2 + Hud_Panels[HUD_PANEL_IDENTIFY].FillSize.y];
+    Hud_Panels[HUD_PANEL_MOTD].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MOTD].FillSize.x / 2), 130];
+    Hud_Panels[HUD_PANEL_READY].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_READY].FillSize.x / 2), 200];
 }
 
-float GetTextAlignOffset(float pos, float iconsize, string text, float textsize, float align)  {
+void FO_Hud_Editor_List_Panels() = {
+    print("^1Available HUD Elements:^7\n");
+    for(float i = 0; i < Hud_Panels.length; i++) {
+        print(Hud_Panels[i].id, ": ", Hud_Panels[i].Name, "\n");
+    }
+}
+
+string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return "";
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    switch (setting) {
+        case "id":
+            return panel.id;
+        case "name":
+            return panel.Name;
+        case "position":
+            return vtos(panel.Position);
+        case "size":
+            return vtos(panel.FillSize);
+        case "scale":
+            return ftos(panel.Scale);
+        case "textscale":
+            return ftos(panel.TextScale);
+        case "show":
+            return ftos(panel.Display);
+        case "orientation":
+            return ftos(panel.NodeInsertLoc);
+        default:
+            print("^1Setting^7 '", setting, "' does not exist!\n");
+            break;
+    }
+    return "";
+}
+
+void FO_Hud_Editor_Show_Panel(string panelid) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    print("^1id^7: ", panel.id, "\n");
+    print("\tname: ", panel.Name, "\n");
+    print("\tposition: ", vtos(panel.Position), "\n");
+    print("\tsize: ", vtos(panel.FillSize), "\n");
+    print("\tscale: ", ftos(panel.Scale), "\n");
+    print("\ttextscale: ", ftos(panel.TextScale), "\n");
+    print("\tshow: ", ftos(panel.Display), "\n");
+    print("\torientation: ", ftos(panel.NodeInsertLoc), "\n");
+}
+
+void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting) = {
+    if(setting == "") {
+        FO_Hud_Editor_Show_Panel(panelid);
+    } else {
+        print(FO_Hud_Editor_Get_Panel_Setting(panelid, setting), "\n");
+    }
+}
+
+void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value) = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
+    
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    switch (setting) {
+        case "id":
+            print("^5id ^1can't be changed^7!\n");
+            break;
+        case "name":
+            print("^5name ^1can't be changed^7!\n");
+            break;
+        case "position":
+            panel.Position = stov(value);
+            break;
+        case "size":
+            panel.FillSize = stov(value);
+            break;
+        case "scale":
+            panel.Scale = stof(value);
+            break;
+        case "textscale":
+            panel.TextScale = stof(value);
+            break;
+        case "show":
+            panel.Display = stof(value);
+            break;
+        case "orientation":
+            panel.NodeInsertLoc = stof(value);
+            break;
+        default:
+            print("^1Setting^7 '", setting, "' does not exist!\n");
+            break;
+    }
+}
+
+/*
+ * pos = x coord of the UI box
+ * width = x width of the UI box
+ * iconsize = x width of the icon (text will start before/after it); offset
+ * text = actual text to display
+ * textsize = fontsize
+ * align = alignment
+ */
+float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align)  {
     if(align == FO_HUD_INSERT_AFTER) {
-        return pos - strlen(text) * textsize;
+        return pos - strlen(text) * textsize + width - iconsize;
+    } else if(align == FO_HUD_INSERT_MIDDLE) {
+        return pos + (width / 2) - ((strlen(text) * textsize) / 2);
     }
     return pos + iconsize;
 }
@@ -125,12 +243,12 @@ void Hud_DrawFlagStatusBar(string panelid)
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
 			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
-			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].carrier,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].carrier,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
 			} 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
 			    // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
-			    drawstring([GetTextAlignOffset(pos_x,sizex,FlagInfoLines[i].locname,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
+			    drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].locname,bigfont,Hud_Panels[HUD_PANEL_FLAGINFO].NodeInsertLoc), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
 			}
 			
             drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
@@ -194,9 +312,9 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
 
 void Hud_DrawClassInfoPanel(string id, float playerclass)
 {
-    if(fo_hud_editor && !SBAR.PlayerClass) {
+    if(fo_hud_editor) {
         hud_panel(id, DrawPanel.Position, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display);
-
+        drawpic(DrawPanel.Position, "textures/wad/face1.png", FO_Hud_Icon_Size * DrawPanel.Scale, '1 1 1', 1, 0);
         return;
     }
     
@@ -410,6 +528,10 @@ void Hud_DrawIdentifyPanel(string id, string identify)
 {
     if (!DrawPanel.Display && !fo_hud_editor)
         return;
+        
+    if(fo_hud_editor && !identify) {
+        identify = "<Player Name>\n<Player Class>";
+    }
 
     vector pos;
     pos = DrawPanel.Position;

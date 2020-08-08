@@ -57,7 +57,7 @@ void () CF_Medic_AuraFindPlayers = {
     }
 
     if (f_healtotal) {
-        sound(self.owner, 3, "items/r_item2.wav", 1, 1);
+        FO_Sound(self.owner, CHAN_ITEM, "items/r_item2.wav", 1, 1);
         if (time < self.owner.aura_healtime)
             self.owner.aura_healamount = self.owner.aura_healamount + f_healtotal;
         else

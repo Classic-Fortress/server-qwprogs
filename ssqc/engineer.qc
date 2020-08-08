@@ -25,7 +25,7 @@ void () LaserBolt_Think = {
     self.movetype = MOVETYPE_FLYMISSILE;
     self.velocity = self.oldorigin;
     self.touch = LaserBolt_Touch;
-    setmodel(self, "progs/e_spike2.mdl");
+    FO_SetModel(self, "progs/e_spike2.mdl");
     self.nextthink = time + 1;
     self.think = SUB_Remove;
 };
@@ -95,7 +95,7 @@ void () W_FireLaser = {
     newmis.movetype = MOVETYPE_FLYMISSILE;
     newmis.solid = SOLID_TRIGGER;
 
-    setmodel(newmis, "progs/e_spike1.mdl");
+    FO_SetModel(newmis, "progs/e_spike1.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
 
     setorigin(newmis, org + '0 0 16');
@@ -146,7 +146,7 @@ void () EMPExplode = {
 };
 
 void () EMPGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0') {
         self.avelocity = '0 0 0';
     }
@@ -527,7 +527,7 @@ void (float objtobuild) TeamFortress_Build = {
     newmis.velocity = '0 0 8';
     newmis.movetype = 6;
     newmis.solid = 2;
-    setmodel(newmis, newmis.mdl);
+    FO_SetModel(newmis, newmis.mdl);
     setsize(newmis, tmp1, tmp2);
     setorigin(newmis, newmis.origin);
     newmis.flags = newmis.flags - (newmis.flags & 512);
@@ -757,7 +757,7 @@ void (entity disp, entity pl) Dispenser_StockPlayer = {
 
     // only play dispenser restock sound if something was given
     if ((shells + nails + rockets + cells + armor) > 0)
-        sound(pl, 3, "items/r_item1.wav", 0.7, 1);
+        FO_Sound(pl, CHAN_ITEM, "items/r_item1.wav", 0.7, 1);
 
     pl.duse = time;
 };
@@ -859,7 +859,7 @@ void () TeamFortress_FinishedBuilding = {
         self.ammo_cells = ceil(self.ammo_cells * 0.75);
         self.armorvalue = ceil(self.armorvalue * 0.75);
         oldself.solid = SOLID_BBOX;
-        setmodel(oldself, oldself.mdl);
+        FO_SetModel(oldself, oldself.mdl);
         setsize(oldself, '-8 -8 0', '8 8 24');
         setorigin(oldself, (oldself.origin + '0 0 8'));
         if(csqcactive) {
@@ -886,9 +886,9 @@ void () TeamFortress_FinishedBuilding = {
         newmis.th_pain = Sentry_Pain;
         newmis.mdl = "progs/turrgun.mdl";
         self.sentry_ent = newmis;
-        sound(oldself, 3, "weapons/turrset.wav", 1, 1);
+        FO_Sound(oldself, CHAN_ITEM, "weapons/turrset.wav", 1, 1);
         newmis.solid = SOLID_BBOX;
-        setmodel(newmis, newmis.mdl);
+        FO_SetModel(newmis, newmis.mdl);
         setsize(newmis, '-16 -16 0', '16 16 48');
         setorigin(newmis, oldself.origin + '0 0 8');
         newmis.view_ofs = '0 0 22';
@@ -1144,7 +1144,7 @@ void (entity disp) Engineer_Dispenser_Repair = {
 
     if (metalcost > 0) {
         Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
-        sound(self, 3, "items/r_item2.wav", 1, 1);
+        FO_Sound(self, CHAN_ITEM, "items/r_item2.wav", 1, 1);
     }
 };
 
@@ -1261,7 +1261,7 @@ void (entity gun) Engineer_SentryGun_InsertAmmo = {
         }
         ammo = strcat(ammo, " into sentry gun");
         Status_Print(self, "\n\n\n\n\n\n\n", ammo);
-        sound(self, 3, "edge/backpack.wav", 1, 1);
+        FO_Sound(self, CHAN_ITEM, "edge/backpack.wav", 1, 1);
     }
 };
 
@@ -1275,11 +1275,11 @@ void (entity gun) Engineer_SentryGun_Upgrade = {
     gun.health = gun.max_health;
     gun.maxammo_shells = gun.maxammo_shells * 1.2;
     if (gun.weapon == 2) {
-        sound(gun, 3, "weapons/turrset.wav", 1, 1);
+        FO_Sound(gun, CHAN_ITEM, "weapons/turrset.wav", 1, 1);
         gun.think = lvl2_sentry_stand;
         gun.skin = 1;
     } else {
-        sound(gun, 3, "weapons/turrset.wav", 1, 1);
+        FO_Sound(gun, CHAN_ITEM, "weapons/turrset.wav", 1, 1);
         gun.think = lvl3_sentry_stand;
         gun.skin = 2;
     }
@@ -1302,7 +1302,7 @@ void (entity gun) Engineer_SentryGun_Repair = {
 
     if (metalcost > 0) {
         Status_Print(self, "\n\n\n\n\n\n\n", ftos(healamount), " hp repaired");
-        sound(self, 3, "items/r_item2.wav", 1, 1);
+        FO_Sound(self, CHAN_ITEM, "items/r_item2.wav", 1, 1);
     }
 };
 

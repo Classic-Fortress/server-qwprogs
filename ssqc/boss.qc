@@ -14,11 +14,11 @@ void () boss_face = {
 };
 
 void () boss_rise1 =[0, boss_rise2] {
-    sound(self, CHAN_WEAPON, "boss1/out1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "boss1/out1.wav", 1, ATTN_NORM);
 };
 
 void () boss_rise2 =[1, boss_rise3] {
-    sound(self, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, "boss1/sight1.wav", 1, ATTN_NORM);
 };
 
 void () boss_rise3 =[2, boss_rise4] {
@@ -374,7 +374,7 @@ void () boss_shockc10 =[105, boss_death1] {
 };
 
 void () boss_death1 =[48, boss_death2] {
-    sound(self, CHAN_VOICE, "boss1/death.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, "boss1/death.wav", 1, ATTN_NORM);
 };
 
 void () boss_death2 =[49, boss_death3] {
@@ -399,7 +399,7 @@ void () boss_death8 =[55, boss_death9] {
 };
 
 void () boss_death9 =[56, boss_death10] {
-    sound(self, CHAN_BODY, "boss1/out1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_BODY, "boss1/out1.wav", 1, ATTN_NORM);
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_LAVASPLASH);
     WriteCoord(MSG_MULTICAST, self.origin_x);
@@ -436,14 +436,14 @@ void (vector p) boss_missile = {
     vec = normalize(d - org);
     launch_spike(org, vec);
 
-    setmodel(newmis, "progs/lavaball.mdl");
+    FO_SetModel(newmis, "progs/lavaball.mdl");
     newmis.avelocity = '200 100 300';
     setsize(newmis, '0 0 0', '0 0 0');
 
     newmis.velocity = vec * 300;
     newmis.touch = T_MissileTouch;
 
-    sound(self, CHAN_WEAPON, "boss1/throw.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "boss1/throw.wav", 1, ATTN_NORM);
 
     if (self.enemy.health <= 0)
         boss_idle1();
@@ -454,7 +454,7 @@ void () boss_awake = {
     self.movetype = MOVETYPE_STEP;
     self.takedamage = DAMAGE_NO;
 
-    setmodel(self, "progs/boss.mdl");
+    FO_SetModel(self, "progs/boss.mdl");
     setsize(self, '-128 -128 -24', '128 128 256');
 
     if (skill == 0)
@@ -552,7 +552,7 @@ void () lightning_use = {
 
     lightning_end = time + 1;
 
-    sound(self, CHAN_VOICE, "misc/power.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, "misc/power.wav", 1, ATTN_NORM);
     lightning_fire();
 
     self = find(world, classname, "monster_boss");
@@ -561,7 +561,7 @@ void () lightning_use = {
 
     self.enemy = activator;
     if ((le1.state == 0) && (self.health > 0)) {
-        sound(self, CHAN_VOICE, "boss1/pain.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "boss1/pain.wav", 1, ATTN_NORM);
         self.health = self.health - 1;
 
         if (self.health >= 2) {

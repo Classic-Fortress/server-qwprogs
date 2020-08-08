@@ -1,6 +1,7 @@
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 void (float all) TeamFortress_TeamShowScores;
 void () InitTrigger;
+void FO_SetModel(entity e, string fomdl);
 
 /* ====== Vote Ball ======= */
 
@@ -100,11 +101,10 @@ void () item_ball = {
    if ( self.mdl ) {
       precache_model (self.mdl);
       precache_model2 (self.mdl);
-      setmodel (self,self.mdl);
-
+      FO_SetModel (self,self.mdl);
    } else {
       self.mdl = "progs/lavaball.mdl";
-      setmodel (self,self.mdl);
+      FO_SetModel (self,self.mdl);
    }
 
    if ( !self.netname ) {
