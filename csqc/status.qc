@@ -718,9 +718,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
        
         /*
         // FIXME
-        maybe some colours on some columns to help differentiate them
-        cloudy and 32s gives credit for 2 caps...`
-        
+        maybe some colours on some columns to help differentiate them       
         Sometimes specs/observers seem to disappear, possibly after client disconnect that is on a team
         If possible, have AFK/msg indicators
         Reset between rounds
