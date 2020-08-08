@@ -173,7 +173,6 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 
 		if (realattacker.team_no != target.team_no)
 		{
-			// superfluous
 			if (realattacker != target && realattacker != target.real_owner)
 			{
 				if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
@@ -279,13 +278,16 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 
 		if (realattacker.classname == "player" && (target.classname == "player" || target.classname == "building_sentrygun"))
 		{
-			if (realattacker.team_no == target.team_no)
+			if (realattacker != target && realattacker != target.real_owner)
 			{
-				realattacker.sbteamkills = realattacker.sbteamkills + 1;
-			}
-			else
-			{
-				realattacker.kills = realattacker.kills + 1;
+				if (realattacker.team_no == target.team_no)
+				{
+					realattacker.sbteamkills = realattacker.sbteamkills + 1;
+				}
+				else
+				{
+					realattacker.kills = realattacker.kills + 1;
+				}
 			}
 
 			target.deaths = target.deaths + 1;
