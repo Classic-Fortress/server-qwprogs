@@ -71,9 +71,14 @@ noref void() CSQC_WorldLoaded = {
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
+    is_observer = FALSE;
+    if (team_no == 0)
+        is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
+    if (is_spectator)
+        is_observer = FALSE;
     SBAR.Hint = "";
     //stop grentimer on death
 

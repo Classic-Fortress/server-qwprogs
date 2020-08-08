@@ -1674,6 +1674,7 @@ void (entity player, string field, float fieldval) CheckSetInfoKey =
     float val;
     val = infokeyf(player, field);
 
+    // TODO - this isn't needed on later versions of fte, we can spam set the value
     if (val != fieldval)
         forceinfokey(player, field, ftos(fieldval));
 };
