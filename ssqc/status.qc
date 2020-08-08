@@ -583,6 +583,8 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5, string s
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     //float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     //if(csqcactive) {
         msg_entity = Player;
@@ -617,6 +619,8 @@ void (entity Player) InitAllStatuses = {
 
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -647,6 +651,8 @@ void (entity Player, entity Goal) UpdateClientButtonStatus = {
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -663,7 +669,11 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
             if((Item.nextthink - time) >= 0) {
                 WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
                 if(Item.think != tfgoalitem_droptouch) {
-                    WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    if(noreturn) {
+                        WriteFloat(MSG_MULTICAST, -1);
+                    } else {
+                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    }
                     if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
                         WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
                         WriteCoord(MSG_MULTICAST, Item.origin_x);
@@ -724,7 +734,7 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                if(Item.think != tfgoalitem_droptouch) {
+                if(Item.think != tfgoalitem_droptouch && !noreturn) {
                     st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
                     st = strcat(st, Q"\s: Dropped\s");
@@ -789,6 +799,8 @@ string GetSBClassInfo(entity pl, float csqcactive)
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
@@ -797,14 +809,37 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientIDString(entity pl) {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    // only send updates
+    //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
+    //    return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_ID);
+    // identify
+    if (pl.ident_string && time < pl.ident_time) {
+        WriteString(MSG_MULTICAST, pl.ident_string);
+    } else {
+        WriteString(MSG_MULTICAST, "");
+    }
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    pl.last_ident_string = pl.ident_string;
+}
+
 void UpdateClientStatusBar(entity pl)
 {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     // if we ever change to fte only, this could be changed to stats
     string msg = "";
     msg_entity = pl;
@@ -816,12 +851,6 @@ void UpdateClientStatusBar(entity pl)
     WriteString(MSG_MULTICAST, clipMsg);
     WriteFloat(MSG_MULTICAST, pl.fragstreak);
     WriteFloat(MSG_MULTICAST, pl.caps);
-    // identify
-    if (pl.ident_string && time < pl.ident_time) {
-        WriteString(MSG_MULTICAST, pl.ident_string);
-    } else {
-        WriteString(MSG_MULTICAST, "");
-    }
 
     WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
     if (pl.playerclass)
@@ -1034,7 +1063,8 @@ void (entity pl) RefreshStatusBar = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
-
+        UpdateClientIDString(pl);
+        
         return;
     }
 
@@ -1051,7 +1081,7 @@ void (entity pl) RefreshStatusBar = {
 
 
     // class tip
-    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2 && !csqcactive) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
@@ -1066,7 +1096,8 @@ void (entity pl) RefreshStatusBar = {
         {
             //pl.StatusRefreshTime = time + 1;
             UpdateClientStatusBar(pl);
-
+            UpdateClientIDString(pl);
+            
             // flag info
             if (tfdet)
             {

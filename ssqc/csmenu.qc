@@ -1,4 +1,6 @@
 void UpdateClientMenu_Team(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -11,6 +13,8 @@ void UpdateClientMenu_Team(entity pl) = {
 }
 
 void UpdateClientClasses(entity pl, float team) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     local float civilian_team = TeamFortress_TeamIsCivilian(pl.team_no);
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
@@ -34,6 +38,8 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     if(!pl.playerclass) {
         return;
     }
@@ -45,6 +51,8 @@ void UpdateClientMenu_Class(entity pl) = {
 }
 
 void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -55,6 +63,8 @@ void UpdateClientMenu_DropAmmo(entity pl, float ammotypes, float ammomakes) = {
 }
 
 void UpdateClientMenu_Scout(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -65,6 +75,8 @@ void UpdateClientMenu_Scout(entity pl) = {
 }
 
 void UpdateClientMenu_Spy(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -76,6 +88,8 @@ void UpdateClientMenu_Spy(entity pl) = {
 }
 
 void UpdateClientMenu_Spy_Skin(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -84,6 +98,8 @@ void UpdateClientMenu_Spy_Skin(entity pl) = {
 }
 
 void UpdateClientMenu_Spy_Team(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -91,6 +107,8 @@ void UpdateClientMenu_Spy_Team(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_Detpack(entity pl, float cancel_detpack) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -100,6 +118,8 @@ void UpdateClientMenu_Detpack(entity pl, float cancel_detpack) = {
 }
 
 void UpdateClientMenu_Build(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -107,6 +127,8 @@ void UpdateClientMenu_Build(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_FixSentry(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -114,6 +136,8 @@ void UpdateClientMenu_FixSentry(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_FixDispenser(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -122,6 +146,8 @@ void UpdateClientMenu_FixDispenser(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_UseDispenser(entity pl, entity disp) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -132,6 +158,8 @@ void UpdateClientMenu_UseDispenser(entity pl, entity disp) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_Admin(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -139,6 +167,8 @@ void UpdateClientMenu_Admin(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void Update_ServerAdminInfo(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     local float cm = CF_GetSetting("c", "clan", "off"), 
                 qm = CF_GetSetting("quadmode", "quadmode", "off"), 
@@ -158,6 +188,8 @@ void Update_ServerAdminInfo(entity pl) = {
 }
 
 void UpdateClientMenu_Admin_Kick(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -165,6 +197,8 @@ void UpdateClientMenu_Admin_Kick(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 void UpdateClientMenu_Vote(entity pl, float timeleft) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -184,6 +218,8 @@ void UpdateClientMenu_Vote(entity pl, float timeleft) = {
 }
 
 void UpdateClientMenu_Captain(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
@@ -192,6 +228,8 @@ void UpdateClientMenu_Captain(entity pl) = {
 }
 
 void UpdateClient_Captains(entity pl, float cap1, float cap2) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_CAPTAINS);
@@ -201,6 +239,8 @@ void UpdateClient_Captains(entity pl, float cap1, float cap2) = {
 }
 
 void UpdateClientMOTD(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_MOTD);
@@ -218,6 +258,8 @@ void UpdateClientMOTD(entity pl) = {
 }
 
 void UpdateClientPrematch(entity pl, float countdownstarted) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_PREMATCH);

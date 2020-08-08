@@ -1,8 +1,10 @@
 ../csprogs.dat
 csdefs.qc
 csextradefs.qc
+
 ../share/commondefs.qc
 ../share/common_helpers.qc
+../share/common_vote.qc
 sui_sys.qc
 status.qc
 menu.qc
@@ -12,3 +14,4 @@ hud_helpers.qc
 hud.qc
 settings.qc
 input.qc
+vote.qc

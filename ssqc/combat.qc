@@ -144,6 +144,9 @@ void (entity targ, entity attacker) Killed = {
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
+    if(nohitsounds) {
+        return;
+    }
 
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
     {
@@ -362,6 +365,7 @@ void (entity targ, entity inflictor, entity attacker,
     if ((take < 1) && (take != 0))
         take = 1;
 
+    float damh = (take > targ.health) ? targ.health : take;
     targ.health = targ.health - take;
 
     if (targ.armorvalue < 1) {
@@ -369,7 +373,7 @@ void (entity targ, entity inflictor, entity attacker,
         targ.armorvalue = 0;
     }
     if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
-        LogEventDamage(attacker, targ, inflictor, take + save);
+        LogEventDamage(attacker, targ, inflictor, take + save, damh + save);
     }
     if (targ.health <= 0) {
         LogEventKill(attacker, targ, inflictor);
@@ -596,6 +600,8 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     take = rint(take);
 
+    float damh = (take > targ.health) ? targ.health : take;
+
     if (no_damage == 0)
         targ.health = (targ.health - take);
 
@@ -633,8 +639,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     if (no_damage == TRUE)
         return;
+    
     if ((attacker.classname == "player" || targ.classname == "player") && (take + save > 0)) {
-        LogEventDamage(attacker, targ, inflictor, take + save);
+        LogEventDamage(attacker, targ, inflictor, take + save, damh + save);
     }
     if (targ.armorvalue < 1) {
         targ.armorclass = 0;

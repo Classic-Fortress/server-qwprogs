@@ -223,6 +223,8 @@ void (float inp) TeamFortress_ChangeClass = {
         return;
     }
     TeamFortress_ExecClassScript(self);
+
+    // FIXME - should this be using putclientinserver instead?
     self.playerclass = inp;
 
     //self.nextpc = 0;
@@ -425,6 +427,12 @@ string GetGrenName(float type)
             break;
         case GR_TYPE_FLASH:
             s = "flash grenade";
+            break;
+        case GR_TYPE_CONCUSSION:
+            s = "concussion grenade";
+            break;
+        case GR_TYPE_NONE:
+            s = "no grenade";
             break;
     }
 
