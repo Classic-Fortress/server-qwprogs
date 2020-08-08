@@ -57,8 +57,6 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	m.add(spawn (
 		mitem_spinnymodel, 
 		item_text: "progs/tf_stan.mdl", 
-		customskin:"skin2",
-		trueskin:"skin2",
 		dontrotate:0, 
 		startangle:'0 192 0', 
 		firstframe:0, 
