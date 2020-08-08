@@ -503,7 +503,8 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
         drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
-        if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER)
+        if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
+            || is_spectator || is_observer)
         {
             string c = lines[i].classtext;
             if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER)
@@ -629,6 +630,10 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {            
             FO_ScoreBoardLine sbl;
             sbl.ping = getplayerkeyfloat(i, INFOKEY_P_PING);
+            if (!sbl.ping)
+            {
+                continue;
+            }
             sbl.pl = getplayerkeyfloat(i, INFOKEY_P_PACKETLOSS);
             float class = getplayerkeyfloat(i, "playerclass");
             sbl.classtext = ClassToString(class);
@@ -723,10 +728,10 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         If possible, have AFK/msg indicators
         Reset between rounds
         Make a summary one for end of game too
-        allow specs to see all classes of both teams
         show who you are on scoreboard
         show who you are speccing
         when player comes in after caps occur, they aren't getting team score
+
         */
 
         for (float i = 0; i < sbCount; i++)
