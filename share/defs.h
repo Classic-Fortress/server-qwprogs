@@ -1398,3 +1398,8 @@
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
 #define DMN_NOFLASH	256	// see all the things
 
+// trigger_push
+#define PUSH_ONCE	1
+#define PUSH_INCLUDETFITEM	2
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_NONOISE	8
