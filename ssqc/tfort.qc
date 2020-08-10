@@ -3109,6 +3109,12 @@ void (entity pl, float fr) TF_AddFrags = {
     if (toggleflags & TFLAG_FULLTEAMSCORE) {
         e = find(world, classname, "player");
         while (e) {
+            msg_entity = e;
+            WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+            WriteByte(MSG_MULTICAST, MSG_TEAM_ONE_SCORE);
+            WriteFloat(MSG_MULTICAST, team1score);
+            multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+
             if (e.team_no == pl.team_no)
                 e.frags = TeamFortress_TeamGetScore(e.team_no);
             e = find(e, classname, "player");

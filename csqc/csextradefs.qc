@@ -80,6 +80,7 @@ float round_over;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
+float team1score;
 float jump_counter;
 float frames_since_onground;
 
@@ -356,7 +357,8 @@ enum {
     HUD_PANEL_MENU_HINT,
     HUD_PANEL_GAME_MODE,
     HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES
+    HUD_PANEL_SHOWSCORES,
+    HUD_PANEL_TEAM_SCORE
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
