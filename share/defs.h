@@ -1208,6 +1208,9 @@
 #define TF_ILL_SPY		256
 #define TF_ILL_ENGINEER		512
 
+// spawnflags
+#define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
+
 /*======================================================================*/
 /* Flamethrower								*/
 /*======================================================================*/
