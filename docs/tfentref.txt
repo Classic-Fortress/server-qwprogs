@@ -843,6 +843,8 @@ netname_non_team_drop   Broadcast to all members not in the team that own this i
 
 broadcast               Message centerprinted to everyone except the AP.
                         e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
+                        e.g. "Clean-up on isle 4!"
 
 message                 Message centerprinted to AP.
                         e.g. "You activated this goal!"
