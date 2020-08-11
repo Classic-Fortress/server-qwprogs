@@ -515,7 +515,7 @@ void () trigger_push_touch = {
     }
 
     float push = FALSE;
-    if (other.classname == "item_tfgoal")
+    if (other.classname == "item_tfgoal" || other.classname == "info_tfgoal")
     {
         if (self.spawnflags & PUSH_INCLUDETFITEM)
         {
