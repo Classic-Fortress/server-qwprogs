@@ -374,6 +374,8 @@ return_item_no          Return this GoalItem, if it's not being carried.
 
 broadcast               Message centerprinted to everyone except the AP.
                         e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
+                        e.g. "Clean-up on isle 4!"
 
 message                 Message centerprinted to AP.
                         e.g. "You activated this goal!"
