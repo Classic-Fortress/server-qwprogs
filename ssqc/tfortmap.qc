@@ -1985,6 +1985,9 @@ void (entity Goal, entity AP, float addb) DoResults = {
         if ((Goal.broadcast != string_null) && (CTF_Map == 0)) {
             CenterPrint2(te, "\n\n\n", Goal.broadcast);
         }
+        if ((strtrim(Goal.broadcast_high) != "") && (CTF_Map == 0)) {
+            bprint(PRINT_HIGH, Goal.broadcast_high);
+        }
         if ((strtrim(Goal.netname_broadcast) != "") && (CTF_Map == 0)) {
             sprint(te, PRINT_HIGH, AP.netname, Goal.netname_broadcast);
         }
