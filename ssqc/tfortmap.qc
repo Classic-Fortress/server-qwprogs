@@ -258,6 +258,9 @@ float TF_Item_GetGlow(float team)
 
 void TF_Item_ApplyGlow()
 {
+    if (self.spawnflags & TFGI_NOGLOW)
+        return;
+        
     local entity tfdet;  //info_tfdetect entity
     tfdet = find(world, classname, "info_tfdetect");
 
