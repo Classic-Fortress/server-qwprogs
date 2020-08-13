@@ -252,7 +252,7 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
     local float lines;
-    local string message;
+    local string message = "";
     if (fo_hud_editor) {
         message = "Game Mode";
         if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
@@ -317,7 +317,7 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
     local float padding = 4 * panel.Scale;
     local float lines;
     local float pos_aligned;
-    local string message;
+    local string message = "";
     if (fo_hud_editor) {
         message = "Ready Status";
         if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
