@@ -263,22 +263,10 @@ void UpdateClientTeamScores(entity pl) = {
 
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TEAM_ONE_SCORE);
+    WriteByte(MSG_MULTICAST, MSG_TEAM_SCORES);
     WriteFloat(MSG_MULTICAST, team1score);
-    multicast('0 0 0', MULTICAST_ONE_R);
-
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TEAM_TWO_SCORE);
     WriteFloat(MSG_MULTICAST, team2score);
-    multicast('0 0 0', MULTICAST_ONE_R);
-
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TEAM_THREE_SCORE);
     WriteFloat(MSG_MULTICAST, team3score);
-    multicast('0 0 0', MULTICAST_ONE_R);
-
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TEAM_FOUR_SCORE);
     WriteFloat(MSG_MULTICAST, team4score);
     multicast('0 0 0', MULTICAST_ONE_R);
 }

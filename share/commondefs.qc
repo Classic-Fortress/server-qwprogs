@@ -26,10 +26,7 @@
 #define MSG_PREMATCH    14
 #define MSG_GRENTHROWN      15
 #define MSG_ID              16
-#define MSG_TEAM_ONE_SCORE  17
-#define MSG_TEAM_TWO_SCORE  18
-#define MSG_TEAM_THREE_SCORE  19
-#define MSG_TEAM_FOUR_SCORE  20
+#define MSG_TEAM_SCORES     17
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
