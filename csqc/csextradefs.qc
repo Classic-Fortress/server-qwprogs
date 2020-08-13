@@ -270,6 +270,10 @@ typedef struct {
 FlagInfoLine FlagInfoLines[10];
 
 typedef struct {
+    float team1nump;
+    float team2nump;
+    float team3nump;
+    float team4nump;
     float team1score;
     float team2score;
     float team3score;

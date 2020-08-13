@@ -2659,6 +2659,13 @@ void (optional float csqcactive) ClientConnect = {
                 if (te.tf_id == self.tf_id) {
                     got_one = 1;
                     TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
+
+                    local entity pl = find(world, classname, "player");
+                    while (pl) {
+                        UpdateClientTeamScores(pl);
+                        pl = find(pl, classname, "player");
+                    }
+
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
                     if (!(toggleflags & TFLAG_TEAMFRAGS) &&

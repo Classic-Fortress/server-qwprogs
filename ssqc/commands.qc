@@ -151,6 +151,13 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+
+                local entity pl = find(world, classname, "player");
+                while (pl) {
+                    UpdateClientTeamScores(pl);
+                    pl = find(pl, classname, "player");
+                }
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (1) - 1);
                 //stuffcmd(self, st);
@@ -162,6 +169,13 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 2;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 2, TRUE);
+
+                local entity pl2 = find(world, classname, "player");
+                while (pl2) {
+                    UpdateClientTeamScores(pl2);
+                    pl2 = find(pl, classname, "player");
+                }
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (2) - 1);
                 //stuffcmd(self, st);

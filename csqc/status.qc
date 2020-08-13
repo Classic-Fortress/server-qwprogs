@@ -766,7 +766,17 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
     vector size = getFillSize(id);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
-    local string message = strcat(ftos(TS.team1score), " - ", ftos(TS.team2score));
+
+    local string message = "";
+
+    if (TS.team1nump || TS.team1score)
+        message = strcat(message, ftos(TS.team1score), " ");
+    if (TS.team2nump || TS.team2score)
+        message = strcat(message, ftos(TS.team2score), " ");
+    if (TS.team3nump || TS.team3score)
+        message = strcat(message, ftos(TS.team3score), " ");
+    if (TS.team4nump || TS.team4score)
+        message = strcat(message, ftos(TS.team4score));
 
     /* drawfill( */
     /*     position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2], */

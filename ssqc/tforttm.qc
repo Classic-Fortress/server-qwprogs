@@ -240,6 +240,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     st = ftos(tc);
     stuffcmd(pe, st);
     stuffcmd(pe, "\n");
+
     if(!skipclasscheck) {
         if(pe.playerclass == PC_CIVILIAN) {
             if (TeamFortress_TeamIsCivilian(tno)) {
@@ -291,7 +292,15 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 };
 
 float (float tno) TeamFortress_TeamSet = {
-    return TeamFortress_TeamSet_Options(self, tno, FALSE);
+    local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
+
+    local entity pl = find(world, classname, "player");
+    while (pl) {
+        UpdateClientTeamScores(pl);
+        pl = find(pl, classname, "player");
+    }
+
+    return (tftso);
 }
 
 void () TeamFortress_CheckTeamCheats = {
