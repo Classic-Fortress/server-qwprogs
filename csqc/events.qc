@@ -260,9 +260,6 @@ void() CSQC_Parse_Event = {
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
             break;
-        case MSG_GRENTHROWN:
-            grentimer_waiting = FALSE;
-            break;
     }
 }
 
