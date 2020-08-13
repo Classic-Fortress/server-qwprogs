@@ -41,6 +41,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_admin");
     registercommand("fo_menu_vote");
     registercommand("fo_menu_special");
+    registercommand("fo_menu_disguise");
+    registercommand("fo_menu_build");
+    registercommand("fo_menu_dropammo");
     registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -170,6 +173,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);
+            break;
+        case "fo_menu_disguise":
+            FO_Menu_Spy_Skin(TRUE);
+            break;
+        case "fo_menu_build":
+            FO_Menu_Build(TRUE);
+            break;
+        case "fo_menu_dropammo":
+            FO_Menu_DropAmmo(TRUE, 1, (player_class == PC_ENGINEER));
             break;
         case "primeone":
             if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
