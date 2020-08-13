@@ -374,7 +374,7 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
 
     if (tno == 1)
         team1score = team1score + scoretoadd;
-    
+
     if (tno == 2)
         team2score = team2score + scoretoadd;
 
