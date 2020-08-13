@@ -260,11 +260,17 @@ void() CSQC_Parse_Event = {
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
             break;
-        case MSG_GRENTHROWN:
-            grentimer_waiting = FALSE;
-            break;
         case MSG_TEAM_ONE_SCORE:
-            team1score = readfloat();
+            TS.team1score = readfloat();
+            break;
+        case MSG_TEAM_TWO_SCORE:
+            TS.team2score = readfloat();
+            break;
+        case MSG_TEAM_THREE_SCORE:
+            TS.team3score = readfloat();
+            break;
+        case MSG_TEAM_FOUR_SCORE:
+            TS.team4score = readfloat();
             break;
     }
 }

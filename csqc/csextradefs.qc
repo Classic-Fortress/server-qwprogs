@@ -80,7 +80,6 @@ float round_over;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
-float team1score;
 float jump_counter;
 float frames_since_onground;
 
@@ -269,6 +268,15 @@ typedef struct {
 } FlagInfoLine;
 
 FlagInfoLine FlagInfoLines[10];
+
+typedef struct {
+    float team1score;
+    float team2score;
+    float team3score;
+    float team4score;
+} FO_TeamScores;
+
+FO_TeamScores TS;
 
 // hud stuff
 typedef struct {
