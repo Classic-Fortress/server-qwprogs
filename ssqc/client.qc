@@ -2694,6 +2694,7 @@ void (optional float csqcactive) ClientConnect = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
+        UpdateClientTeamScores(self);
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
     }
