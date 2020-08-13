@@ -360,71 +360,28 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
     local entity e;
     local entity pl;
 
-    if ((tno == 0) || (scoretoadd == 0)) {
+    if ((tno == 0) || (scoretoadd == 0))
         return;
-    }
 
-    if (tno == 1) {
+    if (tno == 1)
         team1score = team1score + scoretoadd;
-
-        pl = find(world, classname, "player");
-        while (pl) {
-            if (infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
-                msg_entity = pl;
-                WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-                WriteByte(MSG_MULTICAST, MSG_TEAM_ONE_SCORE);
-                WriteFloat(MSG_MULTICAST, team1score);
-                multicast('0 0 0', MULTICAST_ONE_R);
-            }
-            pl = find(pl, classname, "player");
-        }
-    }
-    if (tno == 2) {
+    
+    if (tno == 2)
         team2score = team2score + scoretoadd;
 
-        pl = find(world, classname, "player");
-        while (pl) {
-            if (infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
-                msg_entity = pl;
-                WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-                WriteByte(MSG_MULTICAST, MSG_TEAM_TWO_SCORE);
-                WriteFloat(MSG_MULTICAST, team2score);
-                multicast('0 0 0', MULTICAST_ONE_R);
-            }
-            pl = find(pl, classname, "player");
-        }
-    }
-
-    if (tno == 3) {
+    if (tno == 3)
         team3score = team3score + scoretoadd;
 
-        pl = find(world, classname, "player");
-        while (pl) {
-            if (infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
-                msg_entity = pl;
-                WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-                WriteByte(MSG_MULTICAST, MSG_TEAM_THREE_SCORE);
-                WriteFloat(MSG_MULTICAST, team3score);
-                multicast('0 0 0', MULTICAST_ONE_R);
-            }
-            pl = find(pl, classname, "player");
-        }
-    }
-
-    if (tno == 4) {
+    if (tno == 4)
         team4score = team4score + scoretoadd;
 
+    if ((tno == 1) || (tno == 2) || (tno == 3) || (tno == 4)) {
         pl = find(world, classname, "player");
         while (pl) {
-            if (infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
-                msg_entity = pl;
-                WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-                WriteByte(MSG_MULTICAST, MSG_TEAM_FOUR_SCORE);
-                WriteFloat(MSG_MULTICAST, team4score);
-                multicast('0 0 0', MULTICAST_ONE_R);
-            }
+            UpdateClientTeamScores(pl);
             pl = find(pl, classname, "player");
         }
+
     }
 
     if ((toggleflags & TFLAG_TEAMFRAGS) || (toggleflags & TFLAG_FULLTEAMSCORE)) {
