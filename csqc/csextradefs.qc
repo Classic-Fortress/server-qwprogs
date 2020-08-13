@@ -269,6 +269,19 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+typedef struct {
+    float team1nump;
+    float team2nump;
+    float team3nump;
+    float team4nump;
+    float team1score;
+    float team2score;
+    float team3score;
+    float team4score;
+} FO_TeamScores;
+
+FO_TeamScores TS;
+
 // hud stuff
 typedef struct {
     string id;
@@ -356,7 +369,8 @@ enum {
     HUD_PANEL_MENU_HINT,
     HUD_PANEL_GAME_MODE,
     HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES
+    HUD_PANEL_SHOWSCORES,
+    HUD_PANEL_TEAM_SCORE
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"

@@ -151,6 +151,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (1) - 1);
                 //stuffcmd(self, st);
@@ -162,6 +164,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 2;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 2, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (2) - 1);
                 //stuffcmd(self, st);

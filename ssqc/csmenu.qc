@@ -254,7 +254,25 @@ void UpdateClientMOTD(entity pl) = {
     ));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
     WriteFloat(MSG_MULTICAST, number_of_teams);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
+void UpdateClientTeamScores(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_TEAM_SCORES);
+    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(1));
+    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(2));
+    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(3));
+    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(4));
+    WriteFloat(MSG_MULTICAST, team1score);
+    WriteFloat(MSG_MULTICAST, team2score);
+    WriteFloat(MSG_MULTICAST, team3score);
+    WriteFloat(MSG_MULTICAST, team4score);
+    multicast('0 0 0', MULTICAST_ONE_R);
 }
 
 void UpdateClientPrematch(entity pl, float countdownstarted) = {
