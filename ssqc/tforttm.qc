@@ -293,13 +293,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 
 float (float tno) TeamFortress_TeamSet = {
     local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
-
-    local entity pl = find(world, classname, "player");
-    while (pl) {
-        UpdateClientTeamScores(pl);
-        pl = find(pl, classname, "player");
-    }
-
+    UpdateAllClientsTeamScores();
     return (tftso);
 }
 
@@ -367,7 +361,6 @@ void () TeamFortress_CheckTeamCheats = {
 
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
     local entity e;
-    local entity pl;
 
     if ((tno == 0) || (scoretoadd == 0))
         return;
@@ -385,11 +378,7 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
         team4score = team4score + scoretoadd;
 
     if ((tno == 1) || (tno == 2) || (tno == 3) || (tno == 4)) {
-        pl = find(world, classname, "player");
-        while (pl) {
-            UpdateClientTeamScores(pl);
-            pl = find(pl, classname, "player");
-        }
+        UpdateAllClientsTeamScores();
     }
 
     if ((toggleflags & TFLAG_TEAMFRAGS) || (toggleflags & TFLAG_FULLTEAMSCORE)) {
