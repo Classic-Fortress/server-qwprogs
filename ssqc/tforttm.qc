@@ -381,7 +381,6 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
             UpdateClientTeamScores(pl);
             pl = find(pl, classname, "player");
         }
-
     }
 
     if ((toggleflags & TFLAG_TEAMFRAGS) || (toggleflags & TFLAG_FULLTEAMSCORE)) {
