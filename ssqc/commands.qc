@@ -279,7 +279,7 @@ void (entity cap, float pick) CaptainPick = {
 }
 
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd, inp;
+    local float arg_num = 0, processedCmd, inp;
     local string tmp;
     local float farg3;
     local entity ent, pl;
