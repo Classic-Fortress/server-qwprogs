@@ -769,14 +769,17 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
 
     local string message = "";
 
-    if (TS.team1nump || TS.team1score)
-        message = strcat(message, ftos(TS.team1score), " ");
-    if (TS.team2nump || TS.team2score)
-        message = strcat(message, ftos(TS.team2score), " ");
-    if (TS.team3nump || TS.team3score)
-        message = strcat(message, ftos(TS.team3score), " ");
-    if (TS.team4nump || TS.team4score)
-        message = strcat(message, ftos(TS.team4score));
+    if (number_of_teams >= 1)
+      message = strcat(message, ftos(TS.team1score), " ");
+
+    if (number_of_teams >= 2)
+      message = strcat(message, ftos(TS.team2score), " ");
+
+    if (number_of_teams >= 3)
+      message = strcat(message, ftos(TS.team3score), " ");
+
+    if (number_of_teams >= 4)
+      message = strcat(message, ftos(TS.team4score));
 
     /* drawfill( */
     /*     position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2], */

@@ -261,10 +261,6 @@ void() CSQC_Parse_Event = {
             grentimer_waiting = FALSE;
             break;
         case MSG_TEAM_SCORES:
-            TS.team1nump = readfloat();
-            TS.team2nump = readfloat();
-            TS.team3nump = readfloat();
-            TS.team4nump = readfloat();
             TS.team1score = readfloat();
             TS.team2score = readfloat();
             TS.team3score = readfloat();
