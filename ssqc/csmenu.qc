@@ -272,7 +272,7 @@ void UpdateClientTeamScores(entity pl) = {
     WriteFloat(MSG_MULTICAST, team2score);
     WriteFloat(MSG_MULTICAST, team3score);
     WriteFloat(MSG_MULTICAST, team4score);
-    multicast('0 0 0', MULTICAST_ONE_R);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientPrematch(entity pl, float countdownstarted) = {
