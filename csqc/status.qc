@@ -107,7 +107,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     local float lines;
     if (fo_hud_editor) {
         drawstring(
-            [GetTextAlignOffset(position.x,size.x,padding,panelid,mediumtext.x,panel.NodeInsertLoc), padding*2 + position.y],
+            [GetTextAlignOffset(position.x,size.x,padding,panelid,mediumtext.x,panel.Orientation), padding*2 + position.y],
             panelid, 
             mediumtext, 
             MENU_TEXT_1, 
@@ -139,7 +139,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
                 line = strtrim(line);
                 if (strlen(line) > 0) {
                     drawstring(
-                        [GetTextAlignOffset(position.x,size.x,padding,line,mediumtext.x,panel.NodeInsertLoc), position.y + padding + mediumtext.y*i],
+                        [GetTextAlignOffset(position.x,size.x,padding,line,mediumtext.x,panel.Orientation), position.y + padding + mediumtext.y*i],
                         line, 
                         mediumtext, 
                         MENU_TEXT_1, 
@@ -293,7 +293,7 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
     }
     if(message) {
         drawstring(
-            [GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.NodeInsertLoc), position.y],
+            [GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.Orientation), position.y],
             message, 
             mediumtext, 
             MENU_TEXT_1, 
@@ -345,7 +345,7 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
         }
     }
     if(message) {
-        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.NodeInsertLoc);
+        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.Orientation);
         drawstring(
             [pos_aligned, position.y],
             message, 
@@ -806,7 +806,11 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
 
 
 var FO_Hud_Panel Hud_Panels[] = {
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
+//  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
+//  void drawPanel(string panelid, float display, string text, string icon),
+//  string getValue(),
+//  Icon, Snap, Status
+
     {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
     {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
     {"capspanel",FO_HUD_CAPS_NAME,'10 80','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
@@ -823,6 +827,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
     {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawTeamScorePanel, {return "";}},
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 
 float(string panelid) getHudPanel = {
