@@ -68,7 +68,11 @@ void () TeamFortress_MOTD = {
         }
 
         //TeamFortress_Alias("menu", TF_CLASSMENU, 0);
-        TeamFortress_AliasString("menu", "cmd menu");
+        if(csqcactive) {
+            TeamFortress_AliasString("menu", "fo_menu_special");
+        } else {
+            TeamFortress_AliasString("menu", "cmd menu");
+        }
         TeamFortress_Alias("slot1", TF_SLOT1, 0);
         TeamFortress_Alias("slot2", TF_SLOT2, 0);
         TeamFortress_Alias("slot3", TF_SLOT3, 0);
@@ -140,7 +144,11 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("forcenext", TF_FORCENEXT, 0);
         TeamFortress_Alias("togglevote", TF_TOGGLEVOTE, 0);
         TeamFortress_Alias("dropkey", TF_DROPKEY, 0);
-        TeamFortress_Alias("dropammo", TF_DROP_AMMO, 0);
+        if(csqcactive) {
+            TeamFortress_AliasString("dropammo", "fo_menu_dropammo");
+        } else {
+            TeamFortress_Alias("dropammo", TF_DROP_AMMO, 0);
+        }
         TeamFortress_Alias("dropflag", TF_DROPFLAG, 0);
         TeamFortress_Alias("dropitems", TF_DROPFLAG, 0);
         TeamFortress_Alias("showloc", TF_DISPLAYLOCATION, 0);
@@ -203,7 +211,11 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("unlock", TF_LOCKOFF, 0);
         TeamFortress_Alias("+lock", TF_LOCKON, 0);
         TeamFortress_Alias("-lock", TF_LOCKOFF, 0);
-        TeamFortress_Alias("disguise", TF_SPY_SPY, 0);
+        if(csqcactive) {
+            TeamFortress_AliasString("disguise", "fo_menu_disguise");
+        } else {
+            TeamFortress_Alias("disguise", TF_SPY_SPY, 0);
+        }
         TeamFortress_Alias("feign", TF_SPY_DIE, 0);
         TeamFortress_Alias("sfeign", TF_SPY_SILENT_DIE, 0);
     } else if (self.motd == 110) {
@@ -223,7 +235,11 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dgreen", TF_DISGUISE_GREEN, 0);
         TeamFortress_Alias("denemy", TF_DISGUISE_ENEMY, 0);
         TeamFortress_Alias("dlast", TF_DISGUISE_LAST, 0);
-        TeamFortress_Alias("build", TF_ENGINEER_BUILD, 0);
+        if(csqcactive) {
+            TeamFortress_AliasString("build", "fo_menu_build");
+        } else {
+            TeamFortress_Alias("build", TF_ENGINEER_BUILD, 0);
+        }
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
     } else if (self.motd == 130) {

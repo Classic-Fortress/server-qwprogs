@@ -646,38 +646,6 @@ var fo_menu FO_MENU_VOTE = {
         }
     }
 };
-void fo_menu_start(vector position, vector size, string title, float flags) = {
-    InProgressMenu.position = position;
-    InProgressMenu.size = size;
-    InProgressMenu.title = title;
-    InProgressMenu.flags = flags;
-    InProgressMenu.active = 0;
-    //InProgressMenu.alpha = 0.6;
-    fo_menu_option fmo;
-    for(float i = 0; i < InProgressMenu.options.length; i++) {
-        InProgressMenu.options[i] = fmo;
-    }
-    InProgressMenu.num_opts = 0;
-}
-
-void fo_menu_add_option(fo_menu_option option) {
-    if(InProgressMenu.num_opts < InProgressMenu.options.length) {
-        InProgressMenu.options[InProgressMenu.num_opts] = option;
-        InProgressMenu.num_opts++;
-    } else {
-        print("Ran out of room to add option #", ftos(InProgressMenu.num_opts), " to menu\n");
-    }
-}
-
-void fo_menu_add_option2(string shortcut, string name, string value, string description, float state, void() action) {
-    fo_menu_option option = {shortcut, name, value, description, state, action };
-    if(InProgressMenu.num_opts < InProgressMenu.options.length) {
-        InProgressMenu.options[InProgressMenu.num_opts] = option;
-        InProgressMenu.num_opts++;
-    } else {
-        print("Ran out of room to add option #", ftos(InProgressMenu.num_opts), " to menu\n");
-    }
-}
 
 vector fo_menu_draw(fo_menu * menu) = {
     vector position;
@@ -1070,10 +1038,12 @@ void FO_Menu_Spy_Skin(float force) = {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && force != 1)
+    if(fo_hud_menu_active && force != 1) {
         return;
-    if(!fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN && force == 2)
+    }
+    if(!fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN && force == 2) {
         return;
+    }
     CurrentMenu = &FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
 }
@@ -1240,7 +1210,7 @@ void FO_Menu_Special(float force) = {
     if(fo_hud_menu_active && force != 1)
         return;
     
-    fo_menu* NewMenu;
+    fo_menu* NewMenu = __NULL__;
     //void(float) nm;
     switch (SBAR.PlayerClass) {
         case PC_SCOUT:

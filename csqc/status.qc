@@ -38,6 +38,7 @@ void(string panelid, float display, string text, string icon) drawSpecial = {
         Hud_DrawClassInfoPanel(panelid, SBAR.PlayerClass);
     }
 };
+
 void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
     local float timeleft;
     local float timercount = 0;
@@ -252,7 +253,7 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
     local float lines;
-    local string message;
+    local string message = "";
     if (fo_hud_editor) {
         message = "Game Mode";
         if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
@@ -317,7 +318,7 @@ void(string panelid, float display, string text, string icon) drawReadyPanel = {
     local float padding = 4 * panel.Scale;
     local float lines;
     local float pos_aligned;
-    local string message;
+    local string message = "";
     if (fo_hud_editor) {
         message = "Ready Status";
         if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
@@ -753,6 +754,57 @@ void (float show) FO_Show_Scores = {
     panel.Display = show;
 };
 
+void(string panelid, float display, string text, string icon) drawTeamScorePanel = {
+    float id = getHudPanel(panelid);
+    if(id < 0) {
+        return;
+    }
+
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+
+    vector position = getPosition(id);
+    vector size = getFillSize(id);
+    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
+    local float padding = 4 * panel.Scale;
+
+    local string message = "";
+
+    if (TS.team1nump || TS.team1score)
+        message = strcat(message, ftos(TS.team1score), " ");
+    if (TS.team2nump || TS.team2score)
+        message = strcat(message, ftos(TS.team2score), " ");
+    if (TS.team3nump || TS.team3score)
+        message = strcat(message, ftos(TS.team3score), " ");
+    if (TS.team4nump || TS.team4score)
+        message = strcat(message, ftos(TS.team4score));
+
+    /* drawfill( */
+    /*     position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2], */
+    /*     mediumtext, */
+    /*     '0 0 255', */
+    /*     1, */
+    /*     0 */
+    /*     ); */
+
+    /* drawfill( */
+    /*     position + [size.x / 2,padding*2 + mediumtext.y*2], */
+    /*     mediumtext, */
+    /*     '255 0 0', */
+    /*     1, */
+    /*     0 */
+    /*     ); */
+
+    drawstring(
+        position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2],
+        message,
+        mediumtext,
+        MENU_TEXT_1,
+        1,
+        0
+        );
+};
+
+
 var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(string panelid, float display, string text, string icon),
@@ -774,6 +826,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"gamemodepanel",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
+    {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawTeamScorePanel, {return "";}},
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 

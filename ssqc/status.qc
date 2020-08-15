@@ -998,16 +998,16 @@ void UpdateClientStatusBar(entity pl)
 
 void (entity pl) RefreshStatusBar = {
     local string pad;
-    local string s1; // will be used for grenade timers
-    local string s2; // class line
-    local string s3; // score & clip
-    local string ct; // class tip
+    local string s1 = ""; // will be used for grenade timers
+    local string s2 = ""; // class line
+    local string s3 = ""; // score & clip
+    local string ct = ""; // class tip
     local string st1, st2, st3, st4; // status bar columns 1-4
-    local string ident;
+    local string ident = "";
     local float height;
     local float i;
     local entity tfdet;  //info_tfdetect entity
-    local entity te, tg;
+    local entity te = world, tg;
     local string bi; //button info
     local float csqcactive;
     //By default, show after tips; 0/off = off; 2 = always
@@ -1311,7 +1311,7 @@ string(float num) GreenScoreToString =
 string(entity pl, float csqcactive) ClipSizeToString =
 {
     local string st = "";
-    local float num, max;
+    local float num = 0, max;
 
     max = GetClipSize(pl);
     if (pl.current_weapon == WEAP_SHOTGUN) {

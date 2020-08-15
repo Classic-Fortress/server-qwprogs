@@ -1208,6 +1208,9 @@
 #define TF_ILL_SPY		256
 #define TF_ILL_ENGINEER		512
 
+// spawnflags
+#define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
+
 /*======================================================================*/
 /* Flamethrower								*/
 /*======================================================================*/
@@ -1359,6 +1362,7 @@
 #define FO_HUD_GAME_MODE_NAME "Game Mode"
 #define FO_HUD_READY_NAME "Ready Status"
 #define FO_HUD_SHOWSCORES_NAME "Show Scores"
+#define FO_HUD_TEAM_SCORE_NAME "Team Score"
 
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
@@ -1398,3 +1402,8 @@
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
 #define DMN_NOFLASH	256	// see all the things
 
+// trigger_push
+#define PUSH_ONCE	1
+#define PUSH_INCLUDETFITEM	2
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_NONOISE	8

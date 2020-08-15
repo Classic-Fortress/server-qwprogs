@@ -32,7 +32,7 @@ void Hud_WriteCfg(string path)
     // this overwrites
     float filehandle;
     filehandle = fopen(path, FILE_WRITE);
-    string line;
+    string line = "";
 
     for(float i = 0; i < Hud_Panels.length; i++) {
         DrawPanel = Hud_Panels[i];

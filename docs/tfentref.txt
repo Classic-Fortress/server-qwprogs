@@ -344,6 +344,9 @@ playerclass             AP must be this playerclass to meet this Goal's criteria
                                 7 : Only allow a Pyro to activate
                                 8 : Only allow a Spy to activate
                                 9 : Only allow an Engineer to activate
+                                
+spawnflags              1 :     By default, when a GoalItem has a .mdl set, it will glow based on team_no.  
+                                This spawnflag will stop that glow.
 
 if_goal_is_active       This Goal must be in ACTIVE state.
 if_goal_is_inactive     This Goal must be in INACTIVE state.
@@ -373,6 +376,8 @@ up, the following variables may be executed
 return_item_no          Return this GoalItem, if it's not being carried.
 
 broadcast               Message centerprinted to everyone except the AP.
+                        e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
                         e.g. "Clean-up on isle 4!"
 
 message                 Message centerprinted to AP.
@@ -715,6 +720,9 @@ goal_effects            Determines what players are affected. If nothing is spec
                                         in the group and then applies it's results
                                         invididually to any of them that pass.
 
+spawnflags              1 :     By default, when a GoalItem has a .mdl set, it will glow based on team_no.  
+                                This spawnflag will stop that glow.
+
 maxammo_shells          All members of this team are affected.
 
 maxammo_nails           All members not of this team are affected.
@@ -840,6 +848,8 @@ netname_non_team_drop   Broadcast to all members not in the team that own this i
                         e.g. <player's_name> " lost the enemy flag!\n"
 
 broadcast               Message centerprinted to everyone except the AP.
+                        e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
                         e.g. "Clean-up on isle 4!"
 
 message                 Message centerprinted to AP.
