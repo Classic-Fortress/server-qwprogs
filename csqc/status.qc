@@ -779,7 +779,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
         offset = fillsize_x * 0;
         score_position_x = score_position_x + offset;
         message = strcat(message, strpad(-3, ftos(TS.team1score)));
-        drawfill(score_position, fillsize, '0 0 255', 0.5, 0);
+        drawfill(score_position, fillsize, '0.3 0.4 0.7', 0.5, 0);
     }
 
     if (number_of_teams >= 2) {
@@ -787,7 +787,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
         offset = fillsize_x * 1;
         score_position_x = score_position_x + offset;
         message = strcat(message, strpad(-3, ftos(TS.team2score)));
-        drawfill(score_position, fillsize, '255 0 0', 0.5, 0);
+        drawfill(score_position, fillsize, '0.7 0.4 0.3', 0.5, 0);
     }
 
     if (number_of_teams >= 3) {
@@ -795,7 +795,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
         offset = fillsize_x * 2;
         score_position_x = score_position_x + offset;
         message = strcat(message, strpad(-3, ftos(TS.team3score)));
-        drawfill(score_position, fillsize, '255 255 0', 0.5, 0);
+        drawfill(score_position, fillsize, '0.7 0.7 0.3', 0.5, 0);
     }
 
     if (number_of_teams >= 4) {
@@ -803,7 +803,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
         offset = fillsize_x * 3;
         score_position_x = score_position_x + offset;
         message = strcat(message, strpad(-3, ftos(TS.team4score)));
-        drawfill(score_position, fillsize, '0 255 0', 0.5, 0);
+        drawfill(score_position, fillsize, '0.4 0.7 0.3', 0.5, 0);
     }
 
     /* drawfill( */
