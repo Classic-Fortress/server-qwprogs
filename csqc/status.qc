@@ -767,27 +767,44 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
 
+    local vector fillsize = mediumtext;
+    fillsize_x = fillsize_x * 3;
+
+    local float offset;
+    local vector score_position;
     local string message = "";
 
-    if (number_of_teams >= 1)
-      message = strcat(message, ftos(TS.team1score), " ");
+    if (number_of_teams >= 1) {
+        score_position = position;
+        offset = fillsize_x * 0;
+        score_position_x = score_position_x + offset;
+        message = strcat(message, strpad(-3, ftos(TS.team1score)));
+        drawfill(score_position, fillsize, '0 0 255', 0.5, 0);
+    }
 
-    if (number_of_teams >= 2)
-      message = strcat(message, ftos(TS.team2score), " ");
+    if (number_of_teams >= 2) {
+        score_position = position;
+        offset = fillsize_x * 1;
+        score_position_x = score_position_x + offset;
+        message = strcat(message, strpad(-3, ftos(TS.team2score)));
+        drawfill(score_position, fillsize, '255 0 0', 0.5, 0);
+    }
 
-    if (number_of_teams >= 3)
-      message = strcat(message, ftos(TS.team3score), " ");
+    if (number_of_teams >= 3) {
+        score_position = position;
+        offset = fillsize_x * 2;
+        score_position_x = score_position_x + offset;
+        message = strcat(message, strpad(-3, ftos(TS.team3score)));
+        drawfill(score_position, fillsize, '255 255 0', 0.5, 0);
+    }
 
-    if (number_of_teams >= 4)
-      message = strcat(message, ftos(TS.team4score));
-
-    /* drawfill( */
-    /*     position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2], */
-    /*     mediumtext, */
-    /*     '0 0 255', */
-    /*     1, */
-    /*     0 */
-    /*     ); */
+    if (number_of_teams >= 4) {
+        score_position = position;
+        offset = fillsize_x * 3;
+        score_position_x = score_position_x + offset;
+        message = strcat(message, strpad(-3, ftos(TS.team4score)));
+        drawfill(score_position, fillsize, '0 255 0', 0.5, 0);
+    }
 
     /* drawfill( */
     /*     position + [size.x / 2,padding*2 + mediumtext.y*2], */
@@ -798,7 +815,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
     /*     ); */
 
     drawstring(
-        position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2],
+        position,
         message,
         mediumtext,
         MENU_TEXT_1,
