@@ -98,6 +98,7 @@ void(string id, string identify) Hud_DrawIdentifyPanel;
 void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
+void (string panelid) Hud_DrawTeamScorePanel;
 float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
 vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
