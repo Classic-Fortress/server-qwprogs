@@ -264,10 +264,6 @@ void UpdateClientTeamScores(entity pl) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_TEAM_SCORES);
-    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(1));
-    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(2));
-    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(3));
-    WriteFloat(MSG_MULTICAST, TeamFortress_TeamGetNoPlayers(4));
     WriteFloat(MSG_MULTICAST, team1score);
     WriteFloat(MSG_MULTICAST, team2score);
     WriteFloat(MSG_MULTICAST, team3score);
