@@ -2615,7 +2615,7 @@ void () UpdateAllClientsTeamScores = {
         e = find(e, classname, "player");
     }
 
-    e = find(world, classname, "player");
+    e = find(world, classname, "observer");
     while (e) {
         UpdateClientTeamScores(e);
         e = find(e, classname, "observer");
