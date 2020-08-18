@@ -2607,10 +2607,18 @@ void () PlayerPostThink = {
 };
 
 void () UpdateAllClientsTeamScores = {
-    local entity pl = find(world, classname, "player");
-    while (pl) {
-        UpdateClientTeamScores(pl);
-        pl = find(pl, classname, "player");
+    local entity e;
+
+    e = find(world, classname, "player");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "player");
+    }
+
+    e = find(world, classname, "observer");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "observer");
     }
 }
 

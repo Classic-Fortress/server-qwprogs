@@ -223,13 +223,13 @@ float GetTextAlignOffset(float pos, float width, float iconsize, string text, fl
 
 void(string panelid) Hud_DrawTeamScorePanel = {
     float id = getHudPanel(panelid);
+
     if(id < 0) {
         return;
     }
 
     vector pos;
     pos = Hud_Panels[HUD_PANEL_TEAM_SCORE].Position;
-
 
     float alpha = 0;
     FO_Hud_Panel* panel = getHudPanelPointer(id);
