@@ -257,11 +257,11 @@ void UpdateClientMOTD(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS);
 }
 
-void UpdateClientTeamScores(entity pl) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+void UpdateClientTeamScores(entity e) = {
+    if(!infokeyf(e, INFOKEY_P_CSQCACTIVE))
         return;
 
-    msg_entity = pl;
+    msg_entity = e;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_TEAM_SCORES);
     WriteFloat(MSG_MULTICAST, team1score);
