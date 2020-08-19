@@ -32,6 +32,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
+    registercvar(FOCMD_OLDSCOREBOARD, "0");
+    
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -48,6 +50,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("tracktarget");
+    registercommand("+fo_showscores");
+    registercommand("-fo_showscores");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -67,9 +71,14 @@ noref void() CSQC_WorldLoaded = {
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     ScreenSize = [width, height, menushown];
     team_no = getstatf(STAT_TEAMNO);
+    is_observer = FALSE;
+    if (team_no == 0)
+        is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
+    if (is_spectator)
+        is_observer = FALSE;
     SBAR.Hint = "";
     //stop grentimer on death
 
@@ -112,6 +121,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize(cmd);
     float val;
+    string key1, key2;
     switch(argv(0)) {
         case "fo_hud_editor":
             FO_Hud_Editor();
@@ -162,7 +172,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "primeone":
-            if(getstatf(STAT_HEALTH) > 0) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -174,7 +184,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "primetwo":
-            if(getstatf(STAT_HEALTH) > 0) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
@@ -186,7 +196,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren1":
-            if(getstatf(STAT_HEALTH) > 0) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -198,7 +208,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren2":
-            if(getstatf(STAT_HEALTH) > 0) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
@@ -209,10 +219,60 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("gren2_server");
             }
             break;
+        case "+fo_showscores":
+            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                key1 = argv(0);
+                key2 = argv(1);
+                if (key1 != "") key1 = (key1=="-1")?"":keynumtostring(stof(key1));
+                if (key2 != "") key2 = (key2=="-1")?"":keynumtostring(stof(key2));
+
+                if (key1 != "")
+                {
+                    localcmd(sprintf("unbind %s\n", key1));
+                    localcmd(sprintf("bind %s +showscores\n", key1));
+                }
+
+                if (key2 != "")
+                {
+                    localcmd(sprintf("unbind %s\n", key2));
+                    localcmd(sprintf("bind %s +showscores\n", key2));                   
+                }                
+            }
+            FO_Show_Scores(TRUE);
+            break;
+        case "-fo_showscores":
+            FO_Show_Scores(FALSE);
+            break;
         case "+showscores":
+        case "+showteamscores":
             showingscores = TRUE;
+            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            {
+                tokenize(findkeysforcommand(argv(0)));
+
+                key1 = argv(0);
+                key2 = argv(1);
+                if (key1 != "") key1 = (key1=="-1")?"":keynumtostring(stof(key1));
+                if (key2 != "") key2 = (key2=="-1")?"":keynumtostring(stof(key2));
+
+                if (key1 != "")
+                {
+                    localcmd(sprintf("unbind %s\n", key1));
+                    localcmd(sprintf("bind %s +fo_showscores\n", key1));
+                }
+
+                if (key2 != "")
+                {
+                    localcmd(sprintf("unbind %s\n", key2));
+                    localcmd(sprintf("bind %s +fo_showscores\n", key2));
+                }
+            }
             break;
         case "-showscores":
+        case "-showteamscores":
             showingscores = FALSE;
             break;
         case "tracktarget":

@@ -316,7 +316,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                             arg3f = TeamFortress_TeamGetColor(self.team_no) - 1;
                             string st;
                             st = ftos(arg3f);
-                            //forceinfokey(self, "topcolor", st);
                             stuffcmd(self, strcat("color ", st, "\n"));
                             sprint(self, PRINT_HIGH,
                                     "Your color has been changed to your team color\n");
@@ -618,10 +617,18 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     break;
                 }
                 if(arg2 == "sentry") {
+                    if(self.is_building) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(1);
                     break;
                 }
                 if(arg2 == "dispenser") {
+                    if(self.is_building) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(2);
                     break;
                 }
@@ -650,16 +657,35 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
             }
+            
+            //find sentry first
+            ent = findradius(self.origin, ENG_BUILDING_MAINT_DISTANCE);
+            while (ent) {
+                if (ent.classname == "building_sentrygun") {
+                    if (ent.real_owner == self)
+                        break;
+                }
+                ent = ent.chain;
+            }
+            if (!ent) {
+                sprint(self, PRINT_HIGH, "No sentry in range\n");
+                break;
+            }
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
                     farg3 = stof(arg3);
+                    if (!ent.real_owner.has_sentry || ent.real_owner != self
+                                || self.classname != "player" || ent == world) {
+                        sprint(self, PRINT_HIGH, "Sentry detection issue!\n");
+                        break;
+                    }
                     if(farg3 < 0) {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
                     } else {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3)," degrees anticlockwise...\n");
                     }
-                    self.building.waitmin = anglemod(self.building.waitmin + farg3);
-                    self.building.waitmax = anglemod(self.building.waitmax + farg3);
+                    ent.waitmin = anglemod(ent.waitmin + farg3);
+                    ent.waitmax = anglemod(ent.waitmax + farg3);
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
@@ -769,9 +795,19 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
             break;
+        case "reportloc":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "Origin: ", vtos(self.origin), " OldOrigin: ", vtos(self.oldorigin));
+            sprint(self, PRINT_HIGH, " view_ofs: ", vtos(self.view_ofs), "\n");
+            break;
         case "tracktarget":
             processedCmd = TRUE;
             FO_SpecTrackPoint(self);
+            break;
+        case "id":
+            processedCmd = TRUE;
+            CF_Identify(self, 0);
+            break;
         case "showroles":
             processedCmd = TRUE;
             PrintRoleStatus(self);
@@ -1038,8 +1074,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
                                 bprint4(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-                                //stuffcmd(ent, "observe\n");
-                                //forceinfokey(ent, "*spectator", "1");
                                 clientcommand(ent, "observe");
                                 break;
                             }

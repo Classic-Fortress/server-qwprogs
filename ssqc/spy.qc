@@ -1086,6 +1086,7 @@ void () GasGrenadeMakeGas = {
                         }
                     }
                 } else {
+                    LogEventAffliction(self.owner, te, TFSTATE_HALLUCINATING);
                     if (old_grens == 1) {
                         stuffcmd(te, "v_cshift 50 25 50 -50\n");
                         sprint(te, PRINT_HIGH, "Far out man!\n");
@@ -1341,7 +1342,10 @@ void () T_TranqDartTouch = {
         if ((other.classname == "player") &&
             !((other.team_no == self.owner.team_no) &&
               (teamplay & (2 | 4)))) {
-            if (other.tfstate & 32768) {
+
+            LogEventAffliction(self.owner, other, TFSTATE_TRANQUILISED);
+
+            if (other.tfstate & TFSTATE_TRANQUILISED) {
                 timer = find(world, classname, "timer");
                 while (((timer.owner != other) ||
                         (timer.think != TranquiliserTimer)) &&
@@ -1353,7 +1357,7 @@ void () T_TranqDartTouch = {
                 }
             } else {
                 sprint(other, 2, "You feel tired...\n");
-                other.tfstate = other.tfstate | 32768;
+                other.tfstate = other.tfstate | TFSTATE_TRANQUILISED;
                 timer = spawn();
                 timer.nextthink = time + 15;
                 timer.think = TranquiliserTimer;
@@ -1386,7 +1390,7 @@ void () T_TranqDartTouch = {
 };
 
 void () TranquiliserTimer = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 32768);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_TRANQUILISED);
     TeamFortress_SetSpeed(self.owner);
     sprint(self.owner, PRINT_HIGH, "You feel more alert now\n");
     dremove(self);

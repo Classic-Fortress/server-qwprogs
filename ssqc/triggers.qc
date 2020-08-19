@@ -312,6 +312,11 @@ void () teleport_touch = {
         }
         return;
     }
+
+    
+    if (self.goal_state == TFGS_REMOVED)
+        return;
+
     // only teleport living creatures
     if ((other.health <= 0) || (other.solid != 3))
         return;

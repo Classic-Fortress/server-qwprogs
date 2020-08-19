@@ -94,6 +94,9 @@ void() CSQC_Parse_Event = {
         case MSG_SBAR:
             ParseSBAR();
             break;
+        case MSG_ID:
+            SBAR.Identify = readstring();
+            break;
         case MSG_GRENPRIMED:
             float grentype = readfloat();
             float timertype = cvar(FOCMD_GRENTIMER);
@@ -257,9 +260,6 @@ void() CSQC_Parse_Event = {
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
             break;
-        case MSG_GRENTHROWN:
-            grentimer_waiting = FALSE;
-            break;
     }
 }
 
@@ -268,7 +268,6 @@ void ParseSBAR()
     SBAR.ClipSize = readstring();
     SBAR.FragStreak = readfloat();
     SBAR.Caps = readfloat();
-    SBAR.Identify = readstring();
     SBAR.PlayerClass = readfloat();
 
     if (SBAR.PlayerClass)

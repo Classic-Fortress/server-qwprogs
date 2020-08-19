@@ -37,6 +37,9 @@ void () NailGrenadeExplode = {
     self.no_active_nail_grens = self.owner.no_active_nail_grens;
     self.movetype = MOVETYPE_FLY;
     setorigin(self, self.origin + '0 0 32');
+    if(solid_nailgren) {
+        setsize(self, '-1 -1 -1', '1 1 1');
+    }
     self.avelocity = '0 500 0';
     self.nextthink = time + 0.7;
     if (nailgren_type == NGR_TYPE_LASER)		

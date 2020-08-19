@@ -89,6 +89,7 @@ typedef void (float n) f_void_float;
 
 // Identify variables
 .string ident_string;           // Status bar string for identify
+.string last_ident_string;      // Last Status bar string for identify
 .float ident_time;              // The time when last identify found a player
 .float autoid_type;             // 0 = ignore noone, 1 = ignore teammates, 2 = ignore enemies
 .float autoid_time;             // Time when autoid settings were last checked
@@ -566,6 +567,7 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float impulse_queue;
+float detpack_when_reloading;
 float pyro_type;
 float pyro_soldiercannon;
 float flag_follow;
@@ -582,6 +584,9 @@ float walls_block_emp;
 float new_emp;
 float cb_keepteams;
 float fo_flashtime;
+float solid_nailgren;
+float noreturn;
+float nohitsounds;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -667,14 +672,12 @@ string (string s, float width) strpadr =
 float captainmode;
 .float captain;
 
-
 //Player ID
 float loginRequired;
 string loginUrl;
 string webpageUrl;
 .string login;
 .float login_in_progress;
-
 
 //Logging fields
 float gametime;
@@ -685,5 +688,19 @@ float canlog;
 .float classtime;
 .float goalrunningtime;
 
+// csqc scoreboard fields
+.float caps;
+.float touches;
+.float kills;
+.float sbteamkills;
+.float deaths;
+.float afflicted;
+.float teamafflicted;
+.float damagegiven;
+.float damagetaken;
+
 // flash stuff
 float FO_FlashDimension;
+
+// allow for default goal state
+.float default_group_no;

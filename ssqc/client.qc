@@ -414,7 +414,7 @@ void () DecodeLevelParms = {
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
         // use fortress one flash
-        fo_flash = CF_GetSetting("ff", "fo_flash", "off");
+        fo_flash = CF_GetSetting("ff", "fo_flash", "on");
 
         // drop primed hand grenades to ground when dying [on]
         drop_grenades = CF_GetSetting("dg", "drop_grenades", "on");
@@ -586,6 +586,9 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // whitelists detpack impulses on the list of commands that you're allowed to use while reloading [off]
+        detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
+
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
@@ -647,7 +650,7 @@ void () DecodeLevelParms = {
         new_emp = CF_GetSetting("nemp", "new_emp", "1");
 
         // For duelmode, how soon to reset the winning player (allows for double KOs)
-        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
+        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "3.9");
         // remove packs in duelmode [1]
         duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
         // spawn with all possible grenades [0]
@@ -687,6 +690,16 @@ void () DecodeLevelParms = {
         LoadRole(&Role_Attack);
         LoadRole(&Role_Defence);
         InitTeamRoles();
+
+
+        // whether the nailgren can be jumped off of
+        solid_nailgren = CF_GetSetting("sng", "solid_nailgren", "1");
+
+        // never return the goalitems [off]
+        noreturn = CF_GetSetting("nr", "noreturn", "0");
+
+        // disable hit sounds [off]
+        nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -757,6 +770,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
+            solid_nailgren = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -827,6 +841,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[9] = 4;
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
+            solid_nailgren = TRUE;
         }
 
     }
@@ -1653,6 +1668,32 @@ void (entity p) SetVoteParams = {
     makevectors(p.angles);
     spawn_tfog(p.origin + v_forward * 20);
 }
+
+void (entity player, string field, float fieldval) CheckSetInfoKey =
+{
+    float val;
+    val = infokeyf(player, field);
+
+    // TODO - this isn't needed on later versions of fte, we can spam set the value
+    if (val != fieldval)
+        forceinfokey(player, field, ftos(fieldval));
+};
+
+void (entity player) UpdateScoreboardInfo = {
+
+    CheckSetInfoKey(player, "afflicted", player.afflicted);
+    CheckSetInfoKey(player, "teamafflicted", player.teamafflicted);
+    CheckSetInfoKey(player, "damagegiven", player.damagegiven);
+    CheckSetInfoKey(player, "damagetaken", player.damagetaken);
+    CheckSetInfoKey(player, "kills", player.kills);
+    CheckSetInfoKey(player, "teamkills", player.sbteamkills);
+    CheckSetInfoKey(player, "deaths", player.deaths);
+    CheckSetInfoKey(player, "caps", player.caps);
+    CheckSetInfoKey(player, "touches", player.touches);
+    CheckSetInfoKey(player, "team_no", player.team_no);
+    CheckSetInfoKey(player, "playerclass", player.playerclass);
+    CheckSetInfoKey(player, "ready", player.is_ready);
+};
 
 void () PutClientInServer = {
     local float oldclass;
@@ -2499,6 +2540,8 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
+    UpdateScoreboardInfo(self);
+
     if (self.view_ofs == '0 0 0') {
         return;
     }

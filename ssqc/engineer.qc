@@ -782,6 +782,8 @@ void () DispenserThink = {
 };
 
 void UpdateClient_Sentry(entity pl, entity sent) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SENTRY_POS);
@@ -792,6 +794,8 @@ void UpdateClient_Sentry(entity pl, entity sent) = {
 }
 
 void UpdateClient_Dispenser(entity pl, entity disp) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_DISPENSER_POS);
