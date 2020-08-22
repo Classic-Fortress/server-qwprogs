@@ -155,15 +155,7 @@ void () StartMatch =
             te.nextthink = (time + 1);
         }
     }
-    st = infokey(world, "spectalk");
-    f2 = stof(st);
-    if (!f2)
-    {
-        st = "0";
-    }
-    localcmd("sv_spectalk ");
-    localcmd(st);
-    localcmd("\n");
+
     f1 = stof(infokey(world, "fpd"));
     f1 = (f1 - (f1 & 64)) + (f2 * 64);
     localcmd("serverinfo fpd ");
