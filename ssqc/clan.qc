@@ -59,8 +59,6 @@ void () MatchThink =
 void () StartMatch =
 {
     local string st;
-    local float f1;
-    local float f2;
     local entity te;
     local entity oldself;
     local entity gren;
@@ -155,13 +153,6 @@ void () StartMatch =
             te.nextthink = (time + 1);
         }
     }
-
-    f1 = stof(infokey(world, "fpd"));
-    f1 = (f1 - (f1 & 64)) + (f2 * 64);
-    localcmd("serverinfo fpd ");
-    st = ftos(f1);
-    localcmd(st);
-    localcmd("\n");
 
     if (quadmode) {
         if (rounds) {
