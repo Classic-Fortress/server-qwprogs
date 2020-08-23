@@ -2520,15 +2520,15 @@ void () tfgoalitem_dropthink = {
     self.movetype = 6;
     if (self.pausetime != 0) {
         pos = pointcontents(self.origin);
-        if (pos == -4) { //CONTENT_SLIME
+        if (pos == CONTENT_SLIME) { 
             self.nextthink = time + (self.pausetime / 4);
         } else {
-            if (pos == -5) { //CONTENT_LAVA
+            if (pos == CONTENT_LAVA) { 
                 self.nextthink = time + 5;
                 self.think = tfgoalitem_remove;
                 return;
             } else {
-                if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
+                if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) { 
                     if (self.camdist < 3) {
                         self.origin = self.camangle;
                         setorigin(self, self.origin);

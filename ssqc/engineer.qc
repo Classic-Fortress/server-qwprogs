@@ -778,6 +778,8 @@ void () DispenserThink = {
     if (!old_dispenser)
         Dispenser_FindPlayers(self);
 
+    CheckPyroLava();
+
     self.nextthink = time + 0.3;
 };
 
@@ -879,6 +881,8 @@ void () TeamFortress_FinishedBuilding = {
         oldself.takedamage = DAMAGE_NO;
         oldself.th_die = Sentry_Die;
         oldself.team_no = self.team_no;
+        oldself.think = CheckPyroLava;
+        oldself.nextthink = time + .1;
         self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
         setsize(oldself, '-16 -16 0', '16 16 4');
         newmis = spawn();
@@ -1395,3 +1399,5 @@ void () info_empblock = {
     self.weapon = 512;
     self.netname = "EMP Block";
 };
+// fixme
+// combat.qc tf_t_damage everything doing true damage

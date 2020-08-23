@@ -316,6 +316,8 @@ void () worldspawn = {
     precache_sound("shalrath/attack2.wav");
     precache_sound("blob/sight1.wav");
     precache_sound("misc/secret.wav");
+    precache_model("maps/b_nail0.bsp");
+    precache_sound("weapons/airblast.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");

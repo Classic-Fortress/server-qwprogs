@@ -83,8 +83,8 @@ New features
 * Dropping flag now possible on all maps using /dropflag.
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
-* Option for pyro to rocket jump with incendiary cannnon rockets like soldier `localinfo pyro_soldiercannon on`.
 * Option to allow a demoman to place a detpack while reloading his weapon `localinfo detreload on`
+* Pyro types - `localinfo pyro_type val` - 0 = original tf2.9, 1 = oztf pyro style, 2 = FO pyro style
 
 
 == Removed ===
