@@ -1399,5 +1399,3 @@ void () info_empblock = {
     self.weapon = 512;
     self.netname = "EMP Block";
 };
-// fixme
-// combat.qc tf_t_damage everything doing true damage
