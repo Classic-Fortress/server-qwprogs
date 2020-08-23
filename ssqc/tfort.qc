@@ -43,44 +43,57 @@ void () UseSpecialSkill = {
     local vector src;
 
     self.impulse = 0;
-    if (self.playerclass == PC_SCOUT)
-        self.impulse = TF_DASH;
-    else if (self.playerclass == PC_SNIPER)
-        self.impulse = TF_ZOOMTOGGLE;
-    else if (self.playerclass == PC_DEMOMAN)
-        self.impulse = TF_PB_DETONATE;
-    else if (self.playerclass == PC_MEDIC)
-        self.impulse = TF_MEDIC_AURA_TOGGLE;
-    else if (self.playerclass == PC_HVYWEAP) {
-        if (self.tfstate & TFSTATE_LOCK)
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
-        else
-            self.tfstate = self.tfstate | TFSTATE_LOCK;
-        Status_Refresh(self);
-        self.impulse = 0;
-        return;
-    } else if (self.playerclass == PC_SPY)
-        self.impulse = TF_SPY_DIE;
-    else if (self.playerclass == PC_ENGINEER)
-        self.impulse = TF_ENGINEER_DETDISP;
-    else if (self.playerclass == PC_UNDEFINED) {
-        if (self.enemy == world) {
-            src = self.origin + v_forward * 10;
-            src_z = self.absmin_z + self.size_z * 0.7;
-            traceline(src, src + v_forward * 2048, 0, self);
-            if ((trace_ent != world) && (trace_ent.origin != world.origin)) {
-                sprint3(self, PRINT_HIGH, "Locked onto ",
-                        trace_ent.classname, "\n");
-                self.enemy = trace_ent;
-                self.camdist = vlen(self.enemy.origin - self.origin);
-                self.camangle = self.origin - self.enemy.origin;
-                self.camangle_z = 0 - self.camangle_z;
-                self.camangle = vectoangles(self.camangle);
+    switch (self.playerclass)
+    {
+        case PC_SCOUT:
+            self.impulse = TF_DASH;
+            break;
+        case PC_SNIPER:
+            self.impulse = TF_ZOOMTOGGLE;
+            break;
+        case PC_DEMOMAN:
+            self.impulse = TF_PB_DETONATE;
+            break;
+        case PC_MEDIC:
+            self.impulse = TF_MEDIC_AURA_TOGGLE;
+            break;
+        case PC_HVYWEAP:
+            if (self.tfstate & TFSTATE_LOCK)
+                self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+            else
+                self.tfstate = self.tfstate | TFSTATE_LOCK;
+            Status_Refresh(self);
+            self.impulse = 0;
+            return;
+        case PC_PYRO:
+            if (pyro_type == PYRO_FO)
+                UseAirBlast();
+            break;
+        case PC_SPY:
+            self.impulse = TF_SPY_DIE;
+            break;
+        case PC_ENGINEER:
+            self.impulse = TF_ENGINEER_DETDISP;
+            break;
+        case PC_UNDEFINED:
+            if (self.enemy == world) {
+                src = self.origin + v_forward * 10;
+                src_z = self.absmin_z + self.size_z * 0.7;
+                traceline(src, src + v_forward * 2048, 0, self);
+                if ((trace_ent != world) && (trace_ent.origin != world.origin)) {
+                    sprint3(self, PRINT_HIGH, "Locked onto ",
+                            trace_ent.classname, "\n");
+                    self.enemy = trace_ent;
+                    self.camdist = vlen(self.enemy.origin - self.origin);
+                    self.camangle = self.origin - self.enemy.origin;
+                    self.camangle_z = 0 - self.camangle_z;
+                    self.camangle = vectoangles(self.camangle);
+                }
+            } else {
+                sprint(self, PRINT_HIGH, "Removed lock\n");
+                self.enemy = world;
             }
-        } else {
-            sprint(self, PRINT_HIGH, "Removed lock\n");
-            self.enemy = world;
-        }
+            break;
     }
 };
 

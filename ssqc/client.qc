@@ -592,10 +592,6 @@ void () DecodeLevelParms = {
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
         pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
 
-        // pyro setting to rocketjump like soldier
-        pyro_soldiercannon = CF_GetSetting("pyrosold", "pyro_soldiercannon", "off");
-
-
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
 
@@ -749,7 +745,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
-            pyro_type = 1;
+            pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
             Role_None.gren1_limits[3] = PC_SOLDIER_GRENADE_MAX_1;
@@ -820,7 +816,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             old_ng_rof = TRUE;
-            pyro_type = 0;
+            pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
             Role_None.gren1_limits[2] = 4;
             Role_None.gren1_limits[3] = 4;
@@ -2218,7 +2214,7 @@ void () WaterMove = {
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (self.dmgtime < time) {
             if(votemode && !vote_anarchy_mode) {
                 respawn();
@@ -2241,7 +2237,7 @@ void () WaterMove = {
         }
     }
     if (!(self.flags & 16)) {
-        if (self.watertype == -5) {
+        if (self.watertype == CONTENT_LAVA) {
             FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
         }
         if (self.watertype == -3) {
@@ -3209,7 +3205,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gulped a load of slime\n";
                 else
                     s_deathstring = " can't exist on slime alone\n";
-            } else if (rnum == -5) {
+            } else if (rnum == CONTENT_LAVA) {
                 if (pe_target.health < -15)
                     s_deathstring = " burst into flames\n";
                 else if (random() < 0.5)
