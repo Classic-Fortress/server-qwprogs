@@ -792,7 +792,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
     {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawTeamScorePanel, {return "";}},
-    {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
+    //{"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 

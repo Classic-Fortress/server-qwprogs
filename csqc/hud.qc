@@ -227,6 +227,16 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     if(id < 0) {
         return;
     }
+
+    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    local vector fillsize = panel.FillSize * panel.Scale;
+    local float alpha = 0.2;
+    if (hud_panel(panelid, panel.Position, fillsize, alpha, panel.Display)) {
+        // click event
+        if (fo_hud_editor) {
+            
+        }
+    }
 }
 
 void(string panelid) Hud_DrawTeamScorePanel = {
@@ -535,7 +545,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         switch (playerclass)
         {
             case PC_SCOUT:
-                icon = HudIcons[playerclass+6].icon;
+                icon = ICON_SCOUT; //HudIcons[playerclass+6].icon;
                 drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                 msg = SBAR.ScannerOn ? "Scanning" : "Offline";
@@ -555,7 +565,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_SNIPER:
                 if (SBAR.SniperDam)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_SNIPER; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("Dam: ", ftos(SBAR.SniperDam));
@@ -572,7 +582,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_DEMOMAN:
                 if (SBAR.IsDetpacking)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Setting";
@@ -583,7 +593,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 else if (SBAR.DetpackLeft)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
@@ -591,7 +601,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 break;
             case PC_MEDIC:
-                icon = HudIcons[playerclass+6].icon;
+                icon = ICON_MEDIC; //HudIcons[playerclass+6].icon;
                 drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                 msg = SBAR.AuraActive ? "On" : "Off";
@@ -624,7 +634,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_HVYWEAP:
                 if (SBAR.LockedCannon)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_HWGUY; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Assault Cannon Locked";
@@ -634,7 +644,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_SPY:
                 if (SBAR.IsUndercover == 1)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_SPY; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     if (SBAR.InvisOnly)
@@ -652,7 +662,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 else if (SBAR.IsUndercover == 2)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_SPY; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     if (SBAR.InvisOnly)
@@ -699,7 +709,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
             case PC_ENGINEER:
                 if (SBAR.HasSentry)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
@@ -707,7 +717,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 else if (SBAR.IsBuilding)
                 {
-                    icon = HudIcons[playerclass+6].icon;
+                    icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat(ftos(SBAR.BuildingPercentage), "%");
@@ -719,7 +729,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 basepos = pos;
                 if (SBAR.HasDispenser)
                 {
-                    icon = HudIcons[playerclass + 7].icon;
+                    icon = ICON_ENGINEER_DISP; //HudIcons[playerclass + 7].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
