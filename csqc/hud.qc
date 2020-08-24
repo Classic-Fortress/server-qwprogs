@@ -221,6 +221,14 @@ float GetTextAlignOffset(float pos, float width, float iconsize, string text, fl
     return pos + iconsize;
 }
 
+void(string panelid) Hud_DrawMapMenuPanel = {
+    float id = getHudPanel(panelid);
+
+    if(id < 0) {
+        return;
+    }
+}
+
 void(string panelid) Hud_DrawTeamScorePanel = {
     float id = getHudPanel(panelid);
 
@@ -258,6 +266,9 @@ void(string panelid) Hud_DrawTeamScorePanel = {
     local float offset;
     local vector score_position;
     local string message = "";
+    if(panel.Orientation == FO_HUD_INSERT_AFTER) {
+        position_x = position_x - ((number_of_teams - 1) * fillsize_x);
+    }
 
     if (number_of_teams >= 1) {
         score_position = position;
@@ -762,7 +773,7 @@ void Hud_DrawIdentifyPanel(string id, string identify)
 
 void Hud_Draw(float width, float height)
 {
-
+    float offset = 0;
     for(float i = 0; i < Hud_Panels.length; i++) {
         Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
         if(sui_is_last_clicked(Hud_Panels[i].id)) {
@@ -770,7 +781,18 @@ void Hud_Draw(float width, float height)
         }
         //Draw panel names when editing
         if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
-            drawstring(Hud_Panels[i].Position + [2,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
+            switch (Hud_Panels[i].Orientation) {
+                case FO_HUD_INSERT_BEFORE:
+                    offset = 2;
+                    break;
+                case FO_HUD_INSERT_AFTER:
+                    offset = Hud_Panels[i].FillSize.x - (strlen(Hud_Panels[i].Name) * 6) - 2;
+                    break;
+                case FO_HUD_INSERT_MIDDLE:
+                    offset = (Hud_Panels[i].FillSize.x / 2) - (strlen(Hud_Panels[i].Name) * 3); //because 3 = 6/2
+                    break;
+            }
+            drawstring(Hud_Panels[i].Position + [offset,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
         }
     }
 

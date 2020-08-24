@@ -99,6 +99,7 @@ void (string panelid, float display, string text, string icon) Hud_DrawHudOption
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
 void (string panelid) Hud_DrawTeamScorePanel;
+void (string panelid) Hud_DrawMapMenuPanel;
 float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
 vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
@@ -370,6 +371,7 @@ enum {
     HUD_PANEL_READY,
     HUD_PANEL_SHOWSCORES,
     HUD_PANEL_TEAM_SCORE,
+    HUD_PANEL_MAP_MENU,
     HUD_PANEL_HUDOPTIONS,
 };
 
