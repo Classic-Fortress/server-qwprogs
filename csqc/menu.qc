@@ -1070,10 +1070,12 @@ void FO_Menu_Spy_Skin(float force) = {
         Menu_Cancel();
         return;
     }
-    if(fo_hud_menu_active && force != 1)
+    if(fo_hud_menu_active && force != 1) {
         return;
-    if(!fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN && force == 2)
+    }
+    if(!fo_hud_menu_active && CurrentMenu == &FO_MENU_SPY_SKIN && force == 2) {
         return;
+    }
     CurrentMenu = &FO_MENU_SPY_SKIN;
     fo_hud_menu_active = TRUE;
 }
