@@ -16,6 +16,14 @@ void(string panelid, float display, string text, string icon) drawIdentify = {
     }
 };
 
+void(string panelid, float display, string text, string icon) drawTeamScorePanel = {
+    if (display || fo_hud_editor)
+    {
+        GetDrawPanel(panelid);
+        Hud_DrawTeamScorePanel(panelid);
+    }
+};
+
 void(string panelid, float display, string text, string icon) drawFlagInfo = {
     if (display || fo_hud_editor)
     {
@@ -753,57 +761,6 @@ void (float show) FO_Show_Scores = {
     FO_Hud_Panel* panel = getHudPanelPointer(id);
     panel.Display = show;
 };
-
-void(string panelid, float display, string text, string icon) drawTeamScorePanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
-
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
-    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
-    local float padding = 4 * panel.Scale;
-
-    local string message = "";
-
-    if (TS.team1nump || TS.team1score)
-        message = strcat(message, ftos(TS.team1score), " ");
-    if (TS.team2nump || TS.team2score)
-        message = strcat(message, ftos(TS.team2score), " ");
-    if (TS.team3nump || TS.team3score)
-        message = strcat(message, ftos(TS.team3score), " ");
-    if (TS.team4nump || TS.team4score)
-        message = strcat(message, ftos(TS.team4score));
-
-    /* drawfill( */
-    /*     position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2], */
-    /*     mediumtext, */
-    /*     '0 0 255', */
-    /*     1, */
-    /*     0 */
-    /*     ); */
-
-    /* drawfill( */
-    /*     position + [size.x / 2,padding*2 + mediumtext.y*2], */
-    /*     mediumtext, */
-    /*     '255 0 0', */
-    /*     1, */
-    /*     0 */
-    /*     ); */
-
-    drawstring(
-        position + [size.x / 2 - stringwidth(message,1,mediumtext)/2,padding*2 + mediumtext.y*2],
-        message,
-        mediumtext,
-        MENU_TEXT_1,
-        1,
-        0
-        );
-};
-
 
 var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
