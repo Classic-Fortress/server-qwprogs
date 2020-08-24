@@ -356,6 +356,7 @@ void (float update) Menu_Class = {
     local entity timer;
     if (TeamFortress_TeamIsCivilian(self.team_no)) {
         sprint(self, PRINT_HIGH, "Your team can only be civilians\n");
+        UpdateClientClasses(self, self.team_no);
         Menu_Close(self);
         return;
     }
