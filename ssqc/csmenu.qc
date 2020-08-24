@@ -38,7 +38,6 @@ void UpdateClientClasses(entity pl, float team) = {
 }
 
 void UpdateClientMenu_Class(entity pl) = {
-    sprint(pl, PRINT_HIGH, "ssendidng class menu\n"); //MEHT
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     if(!pl.playerclass) {

@@ -199,6 +199,9 @@ void() CSQC_Parse_Event = {
             for(float i = 0; i < 10; i++) {
                 if(civonly) {
                     FO_MENU_CLASS.options[i].value = "-";
+                    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS) {
+                        Menu_Cancel();
+                    }
                 } else {
                     float class_max = readfloat();
                     if(class_max < 0) {
