@@ -382,9 +382,11 @@ float item_list_bit;            // Global, used to determine what the bit of
 
 //============================================================================
 
+// pyro
 float num_world_flames;
 .float numflames;               // number of flames on entity
 .string flame_id;               // has to be string so that the C function find() can be used
+.float icdmgtime;
 
 // Spy variables
 .float undercover_team;
@@ -569,7 +571,6 @@ float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
 float pyro_type;
-float pyro_soldiercannon;
 float flag_follow;
 float ceasefire_type;
 float is_paused;
@@ -706,3 +707,6 @@ float FO_FlashDimension;
 .float default_group_no;
 
 .string broadcast_high;
+
+.float special_cooldown;
+

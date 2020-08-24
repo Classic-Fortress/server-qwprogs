@@ -2070,10 +2070,18 @@ void () W_Attack = {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            if (pyro_type == 1)
-                Attack_Finished(0.9);
-            else 
-                Attack_Finished(1.2);
+            switch (pyro_type)
+            {
+                case PYRO_ORIGINAL:
+                    Attack_Finished(1.2);
+                    break;
+                case PYRO_OZTF:
+                    Attack_Finished(0.9);
+                    break;
+                case PYRO_FO:
+                    Attack_Finished(PC_PYRO_LAVA_RETICK);
+                    break;
+            }
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;

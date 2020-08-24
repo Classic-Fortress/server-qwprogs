@@ -617,7 +617,7 @@ void () PainSound = {
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (random() > 0.5) {
             FO_Sound(self, CHAN_VOICE, "player/lburn1.wav", 1, 1);
         } else {
