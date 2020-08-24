@@ -2606,6 +2606,14 @@ void () PlayerPostThink = {
     }
 };
 
+void () UpdateAllClientsTeamScores = {
+    local entity pl = find(world, classname, "player");
+    while (pl) {
+        UpdateClientTeamScores(pl);
+        pl = find(pl, classname, "player");
+    }
+}
+
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void (optional float csqcactive) ClientConnect = {
     local entity te;
@@ -2659,6 +2667,8 @@ void (optional float csqcactive) ClientConnect = {
                 if (te.tf_id == self.tf_id) {
                     got_one = 1;
                     TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
+                    UpdateAllClientsTeamScores();
+
                     self.frags = te.frags;
                     self.real_frags = te.real_frags;
                     if (!(toggleflags & TFLAG_TEAMFRAGS) &&
@@ -2694,6 +2704,7 @@ void (optional float csqcactive) ClientConnect = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
+        UpdateClientTeamScores(self);
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
     }

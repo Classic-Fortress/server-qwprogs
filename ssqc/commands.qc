@@ -151,6 +151,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (1) - 1);
                 //stuffcmd(self, st);
@@ -162,6 +164,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 2;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 2, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (2) - 1);
                 //stuffcmd(self, st);
@@ -279,7 +283,7 @@ void (entity cap, float pick) CaptainPick = {
 }
 
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd, inp;
+    local float arg_num = 0, processedCmd, inp;
     local string tmp;
     local float farg3;
     local entity ent, pl;

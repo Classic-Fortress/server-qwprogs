@@ -173,7 +173,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
             
             if (hitsound == "1" || hitsound == "2")
             {
-                local float crit;
+                local float crit = 0;
 
                 if((inflictor.weapon == DMSG_ROCKETL) && (damage >= 80)) {
                     crit = 1;

@@ -122,7 +122,7 @@ typedef struct
     string icon;
 } FO_Hud_Icons;
 FO_Hud_Icons HudIcons[29] = {
-    {""},
+//    {""},
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -269,6 +269,19 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+typedef struct {
+    float team1nump;
+    float team2nump;
+    float team3nump;
+    float team4nump;
+    float team1score;
+    float team2score;
+    float team3score;
+    float team4score;
+} FO_TeamScores;
+
+FO_TeamScores TS;
+
 // hud stuff
 typedef struct {
     string id;
@@ -278,9 +291,12 @@ typedef struct {
     float Scale;
     float TextScale;
     float Display;
-    float NodeInsertLoc;
+    float Orientation;
     void(string panelid, float display, string text, string icon) drawPanel;
     string() getValue;
+    FO_Hud_Icons * Icon;
+    float Snap;
+    float Status;
 } FO_Hud_Panel;
 
 FO_Hud_Panel DrawPanel;
@@ -341,7 +357,6 @@ string FO_ScoreBoardColumns[] = {
 };
 
 enum {
-    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -356,7 +371,9 @@ enum {
     HUD_PANEL_MENU_HINT,
     HUD_PANEL_GAME_MODE,
     HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES
+    HUD_PANEL_SHOWSCORES,
+    HUD_PANEL_TEAM_SCORE,
+    HUD_PANEL_HUDOPTIONS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"

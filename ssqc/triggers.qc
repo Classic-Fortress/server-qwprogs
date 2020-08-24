@@ -502,8 +502,6 @@ void () trigger_hurt = {
         self.dmg = 5;
 };
 
-#define PUSH_ONCE	1
-
 void () trigger_push_touch = {
     local entity te;
 
@@ -516,24 +514,42 @@ void () trigger_push_touch = {
         return;
     }
 
-    if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
+    float push = FALSE;
+    if (other.classname == "item_tfgoal" || other.classname == "info_tfgoal")
     {
-        if (other.classname == "grenade" || other.health > 0)
+        if (self.spawnflags & PUSH_INCLUDETFITEM)
         {
-            FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
-            other.velocity = self.movedir;
+            push = TRUE;
         }
+    }
+    else if (self.spawnflags & PUSH_EXCLUDEOTHER)
+    {
+        return;
     }
     else
     {
-        if (other.classname == "grenade")
-            other.velocity = self.speed * self.movedir * 10;
-        else if (other.health > 0) {
+        if (other.classname == "grenade" || other.health > 0)
+        {
+            push = TRUE;
+        }
+    }
+    
+    if (push)
+    {
+        if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
+        {
+            if (!(self.spawnflags & PUSH_NONOISE))
+                FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+            other.velocity = self.movedir;
+        }
+        else
+        {
             other.velocity = self.speed * self.movedir * 10;
             if (other.classname == "player") {
                 if (other.fly_sound < time) {
                     other.fly_sound = time + 1.5;
-                    FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                    if (!(self.spawnflags & PUSH_NONOISE))
+                        FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
                 }
             }
         }
@@ -601,20 +617,24 @@ void () trigger_push = {
             self.speed = 1000;
     }
     
-    if (!self.noise)
+    if (!(self.spawnflags & PUSH_NONOISE))
     {
-        if (self.target)
+        if (!self.noise)
         {
-            // bound pads
-            self.noise = "world/bouncepad.wav";
+            if (self.target)
+            {
+                // bound pads
+                self.noise = "world/bouncepad.wav";
+            }
+            else
+            {
+                self.noise = "ambience/windfly.wav";
+            }
         }
-        else
-        {
-            self.noise = "ambience/windfly.wav";
-        }
-    }
 
-    precache_sound(self.noise);    
+        precache_sound(self.noise); 
+    }   
+
     self.touch = trigger_push_touch;    
 };
 
