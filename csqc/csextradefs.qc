@@ -155,6 +155,12 @@ FO_Hud_Icons HudIcons[29] = {
     {"textures/wad/anum_percent.png"}
 };
 
+FO_Hud_Icons GrenadeIcons[3] = {
+    {ICON_GREN1},
+    {ICON_GREN1},
+    {ICON_GREN2},
+};
+
 typedef struct {
     string ClipSize;
     float FragStreak;
