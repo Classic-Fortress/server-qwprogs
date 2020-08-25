@@ -483,12 +483,16 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
     //if(ftextalign != selectedPanel.Orientation) {
     //    Hud_Panels[Editor_SelectedPanel_Index].Orientation = ftextalign;
     //}    
-    if(hud_button("hud_option_show_hide_toggle", pos + [4,74], [140, 20], selectedPanel.Display ? "Hide Panel" : "Show Panel")) {
+    if(hud_button("hud_option_show_hide_toggle", pos + [4,74], [140, 16], selectedPanel.Display ? "Hide Panel" : "Show Panel")) {
         Hud_Panels[Editor_SelectedPanel_Index].Display = !selectedPanel.Display;
     }
     drawstring(pos + [4,96],"Position: ", [8,8], MENU_SELECTED, 1, 0);
     drawstring(pos + [10,106], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
     drawstring(pos + [10,116], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
+
+    if(hud_button("hud_option_show_all_toggle", pos + [4,126], [140, 16], Hud_Panels[HUD_PANEL_HUDOPTIONS].Style ? "Show All" : "Hide Disabled")) {
+        Hud_Panels[HUD_PANEL_HUDOPTIONS].Style = !Hud_Panels[HUD_PANEL_HUDOPTIONS].Style;
+    }
     
     if(Hud_Panels[HUD_PANEL_HUDOPTIONS].Status) {
         Hud_DrawHudOptionsPanelSelector();
@@ -785,24 +789,26 @@ void Hud_Draw(float width, float height)
 {
     float offset = 0;
     for(float i = 0; i < Hud_Panels.length; i++) {
-        Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
         if(sui_is_last_clicked(Hud_Panels[i].id)) {
             Editor_SelectedPanel_Index = i;
         }
-        //Draw panel names when editing
-        if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
-            switch (Hud_Panels[i].Orientation) {
-                case FO_HUD_INSERT_BEFORE:
-                    offset = 2;
-                    break;
-                case FO_HUD_INSERT_AFTER:
-                    offset = Hud_Panels[i].FillSize.x - (strlen(Hud_Panels[i].Name) * 6) - 2;
-                    break;
-                case FO_HUD_INSERT_MIDDLE:
-                    offset = (Hud_Panels[i].FillSize.x / 2) - (strlen(Hud_Panels[i].Name) * 3); //because 3 = 6/2
-                    break;
+        if(!Hud_Panels[HUD_PANEL_HUDOPTIONS].Style || Hud_Panels[i].Display) {
+            Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
+            //Draw panel names when editing
+            if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
+                switch (Hud_Panels[i].Orientation) {
+                    case FO_HUD_INSERT_BEFORE:
+                        offset = 2;
+                        break;
+                    case FO_HUD_INSERT_AFTER:
+                        offset = Hud_Panels[i].FillSize.x - (strlen(Hud_Panels[i].Name) * 6) - 2;
+                        break;
+                    case FO_HUD_INSERT_MIDDLE:
+                        offset = (Hud_Panels[i].FillSize.x / 2) - (strlen(Hud_Panels[i].Name) * 3); //because 3 = 6/2
+                        break;
+                }
+                drawstring(Hud_Panels[i].Position + [offset,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
             }
-            drawstring(Hud_Panels[i].Position + [offset,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
         }
     }
 
