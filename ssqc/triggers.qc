@@ -582,11 +582,6 @@ void trigger_push_setup()
     self.movedir = origin2;
 }
 
-void () trigger_jumppad = {
-    self.classname = "trigger_push";
-    trigger_push();
-};
-
 void () trigger_push = {
     if (CheckExistence() == FALSE) {
         dremove(self);
@@ -621,6 +616,11 @@ void () trigger_push = {
 
     precache_sound(self.noise);    
     self.touch = trigger_push_touch;    
+};
+
+void () trigger_jumppad = {
+    self.classname = "trigger_push";
+    trigger_push();
 };
 
 void () trigger_monsterjump_touch = {
