@@ -826,63 +826,63 @@ void () UseAirBlast = {
             if (ent.movetype == MOVETYPE_NONE)
                 continue;
 
-            if (ent == self)
-                continue;
-                
-            if (visible(ent))
-            {
-                switch (ent.classname)
+            if (ent != self)
+            {                
+                if (visible(ent))
                 {
-                    case "player":
-                    case "pyro_rocket":
-                    case "flamerflame":
-                    case "proj_tranq":
-                    case "proj_bullet":
-                    case "proj_rocket":
-                    case "grenade":
-                    case "spike":
-                    case "pipebomb":
-                        vector targorg;
-                        targorg = ent.origin;
-                        float pushval = 1000;
-                        if (ent == self)
-                        {
-                            pushval = 500;
-                            traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
-                            if (trace_fraction < 1)
+                    switch (ent.classname)
+                    {
+                        case "player":
+                        case "pyro_rocket":
+                        case "flamerflame":
+                        case "proj_tranq":
+                        case "proj_bullet":
+                        case "proj_rocket":
+                        case "grenade":
+                        case "spike":
+                        case "pipebomb":
+                            vector targorg;
+                            targorg = ent.origin;
+                            float pushval = 1000;
+                            if (ent == self)
                             {
-                                targorg = self.origin - (v_forward * 200 * trace_fraction);
+                                pushval = 500;
+                                traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
+                                if (trace_fraction < 1)
+                                {
+                                    targorg = self.origin - (v_forward * 200 * trace_fraction);
+                                }
                             }
-                        }
-                        
-                        vector delta = targorg - self.origin;
-                        float dist = vlen(delta);
-                        float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+                            
+                            vector delta = targorg - self.origin;
+                            float dist = vlen(delta);
+                            float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
 
-                        if (ent.flags & FL_ONGROUND)
-                        {
-                            if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
+                            if (ent.flags & FL_ONGROUND)
                             {
-                                setorigin(ent, ent.origin + '0 0 1');
+                                if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
+                                {
+                                    setorigin(ent, ent.origin + '0 0 1');
+                                }
                             }
-                        }
-                        
-                        delta = normalize(delta);
-                        delta = delta * percent * pushval;
+                            
+                            delta = normalize(delta);
+                            delta = delta * percent * pushval;
 
-                        if (ent.movetype == MOVETYPE_FLYMISSILE)
-                        {
-                            float speed = vlen(ent.velocity);
-                            ent.velocity = normalize(delta) * speed;
-                        }
-                        else
-                        {
-                            ent.velocity = ent.velocity + delta;
-                        }
-                        
-                        break;
-                }
-            }       
+                            if (ent.movetype == MOVETYPE_FLYMISSILE)
+                            {
+                                float speed = vlen(ent.velocity);
+                                ent.velocity = normalize(delta) * speed;
+                            }
+                            else
+                            {
+                                ent.velocity = ent.velocity + delta;
+                            }
+                            
+                            break;
+                    }
+                }     
+            }  
             
             ent = ent.chain;
         }
