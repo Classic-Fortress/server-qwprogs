@@ -2079,7 +2079,8 @@ void () W_Attack = {
                     Attack_Finished(0.9);
                     break;
                 case PYRO_FO:
-                    Attack_Finished(PC_PYRO_LAVA_RETICK);
+                    //Attack_Finished(PC_PYRO_LAVA_RETICK);
+                    Attack_Finished(0.9);
                     break;
             }
         } else if (time >= self.antispam_incendiary_cannon) {
