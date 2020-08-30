@@ -823,10 +823,7 @@ void () UseAirBlast = {
         ent = findradius(self.origin, PC_PYRO_AIRBLAST_RANGE);
         while (ent)
         {
-            if (ent.movetype == MOVETYPE_NONE)
-                continue;
-
-            if (ent != self)
+            if (ent.movetype != MOVETYPE_NONE && ent != self)
             {                
                 if (visible(ent))
                 {
