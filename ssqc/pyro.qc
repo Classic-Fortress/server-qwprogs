@@ -740,7 +740,8 @@ void () T_IncendiaryTouch = {
             IncendiaryRadius_OZTF();
             break;
         case PYRO_FO:
-            IncendiaryRadius_FO();
+            //IncendiaryRadius_FO();
+            IncendiaryRadius_OZTF();
             break;
     }
 };
@@ -823,6 +824,9 @@ void () UseAirBlast = {
         while (ent)
         {
             if (ent.movetype == MOVETYPE_NONE)
+                continue;
+
+            if (ent == self)
                 continue;
                 
             if (visible(ent))
