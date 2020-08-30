@@ -709,3 +709,4 @@ float FO_FlashDimension;
 .string broadcast_high;
 
 .float special_cooldown;
+

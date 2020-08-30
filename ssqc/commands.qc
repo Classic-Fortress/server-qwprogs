@@ -586,13 +586,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
                 break;
             }
-            if (arg2) {
+           if (arg2) {
                 if(arg2 == "cancel") {
                     TeamFortress_DetpackStop();
                     break;
                 }
                 if(self.is_detpacking) {
-                    Menu_Demoman_Cancel();
+                    TeamFortress_DetpackStop();
+//                    Menu_Demoman_Cancel();
                     break;
                 }
                 local float farg2 = stof(arg2);
@@ -602,6 +603,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
             } else {
+                if(self.is_detpacking) {
+                    Menu_Demoman_Cancel();
+                    break;
+                }
                 Menu_Demoman();
             }
             break;

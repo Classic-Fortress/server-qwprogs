@@ -638,6 +638,11 @@ void () trigger_push = {
     self.touch = trigger_push_touch;    
 };
 
+void () trigger_jumppad = {
+    self.classname = "trigger_push";
+    trigger_push();
+};
+
 void () trigger_monsterjump_touch = {
     if ((other.flags & (FL_MONSTER | FL_FLY | FL_SWIM)) != FL_MONSTER)
         return;

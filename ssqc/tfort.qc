@@ -3108,6 +3108,7 @@ void (entity pl, float fr) TF_AddFrags = {
             team3score = team3score + fr;
         else if (pl.team_no == 4)
             team4score = team4score + fr;
+        UpdateAllClientsTeamScores(); //Update scoreboard for indi frags
     }
 
     if (pl.team_no == 1)

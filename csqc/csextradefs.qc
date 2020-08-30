@@ -99,6 +99,7 @@ void (string panelid, float display, string text, string icon) Hud_DrawHudOption
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
 void (string panelid) Hud_DrawTeamScorePanel;
+void (string panelid) Hud_DrawMapMenuPanel;
 float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
 vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
@@ -152,6 +153,12 @@ FO_Hud_Icons HudIcons[29] = {
     {ICON_FLAG_GREEN},
     {"textures/wad/num_percent.png"},
     {"textures/wad/anum_percent.png"}
+};
+
+FO_Hud_Icons GrenadeIcons[3] = {
+    {ICON_GREN1},
+    {ICON_GREN1},
+    {ICON_GREN2},
 };
 
 typedef struct {
@@ -291,6 +298,7 @@ typedef struct {
     float Orientation;
     void(string panelid, float display, string text, string icon) drawPanel;
     string() getValue;
+    float Style;
     FO_Hud_Icons * Icon;
     float Snap;
     float Status;
@@ -370,6 +378,7 @@ enum {
     HUD_PANEL_READY,
     HUD_PANEL_SHOWSCORES,
     HUD_PANEL_TEAM_SCORE,
+    HUD_PANEL_MAP_MENU,
     HUD_PANEL_HUDOPTIONS,
 };
 

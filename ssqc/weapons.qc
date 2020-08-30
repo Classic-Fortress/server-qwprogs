@@ -2713,6 +2713,9 @@ float (entity pl) W_WeaponState_Check = {
 }
 
 void (float inp) W_ChangeWeapon = {
+    if(self.playerclass == PC_CIVILIAN) {
+        inp = 4;
+    }
     if (inp < 1 || inp > GetLastWeaponImpulse())
         return;
 
@@ -2728,6 +2731,9 @@ void (float inp) W_ChangeWeapon = {
         return;
     
     if (IsUsingOldImpulses()) {
+        if(self.playerclass == PC_CIVILIAN) {
+            inp = 1;
+        }
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
             W_AmmoError();
