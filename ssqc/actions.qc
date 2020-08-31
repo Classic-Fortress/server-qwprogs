@@ -209,14 +209,14 @@ void (entity pe_player) FO_Spectator_Identify = {
         } else if(trace_ent.classname == "building_sentrygun") {
             s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
             s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.weapon), "\n");
-            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.health)), "\n");
         } else if(trace_ent.classname == "building_sentrygun_base") {
             s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
             s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.oldenemy.weapon), "\n");
-            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.oldenemy.health), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.oldenemy.health)), "\n");
         } else if(trace_ent.classname == "building_dispenser") {
             s_id_string = strcat(trace_ent.real_owner.netname, "'s Dispenser (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
-            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.health)), "\n");
         } else if(trace_ent.classname == "detpack") {
             s_id_string = strcat(trace_ent.owner.netname, "'s Detpack (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
             s_id_string = strcat(s_id_string, "\sTime Left:\s ", ftos(trace_ent.detpack_left), " seconds\n");
