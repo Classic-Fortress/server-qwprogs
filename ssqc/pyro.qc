@@ -427,6 +427,7 @@ void () Flamer_stream_touch = {
 
             float flamehealth = 45;
             SetOnFire(other, self.owner, self.origin, flamehealth);
+            dremove(self);
         }
     } else {
         if ((random() < 0.3) ||
