@@ -697,6 +697,9 @@ void () DecodeLevelParms = {
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
 
+        // enable server-side flaginfo on statusbar [on]
+        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+
         st = infokey(world, "default");
         if (st == "on") {
             impulse_queue = FALSE;

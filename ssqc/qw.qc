@@ -588,6 +588,7 @@ float fo_flashtime;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+float server_sbflaginfo;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;

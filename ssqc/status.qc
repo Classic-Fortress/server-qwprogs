@@ -1099,42 +1099,45 @@ void (entity pl) RefreshStatusBar = {
             UpdateClientIDString(pl);
             
             // flag info
-            if (tfdet)
+            if (server_sbflaginfo)
             {
-                for (float t = 1; t <= number_of_teams; t++) 
+                if (tfdet)
                 {
-                    switch (t)
+                    for (float t = 1; t <= number_of_teams; t++) 
                     {
-                        case 1:
-                            te = Finditem(tfdet.display_item_status1);
-                            break;
-                        case 2:
-                            te = Finditem(tfdet.display_item_status2);
-                            break;
-                        case 3:
-                            te = Finditem(tfdet.display_item_status3);
-                            break;
-                        case 4:
-                            te = Finditem(tfdet.display_item_status4);
-                            break;
-                    }
+                        switch (t)
+                        {
+                            case 1:
+                                te = Finditem(tfdet.display_item_status1);
+                                break;
+                            case 2:
+                                te = Finditem(tfdet.display_item_status2);
+                                break;
+                            case 3:
+                                te = Finditem(tfdet.display_item_status3);
+                                break;
+                            case 4:
+                                te = Finditem(tfdet.display_item_status4);
+                                break;
+                        }
 
-                    if (te)
-                    {
-                        UpdateClientFlagStatus(pl, te);
+                        if (te)
+                        {
+                            UpdateClientFlagStatus(pl, te);
+                        }
                     }
                 }
-            }
 
-            tg = find(world, classname, "info_tfgoal");
-            while (tg) {
-                if (tg.track_goal) {
-                    UpdateClientButtonStatus(pl, tg);
+                tg = find(world, classname, "info_tfgoal");
+                while (tg) {
+                    if (tg.track_goal) {
+                        UpdateClientButtonStatus(pl, tg);
+                    }
+                    tg = find(tg, classname, "info_tfgoal");
                 }
-                tg = find(tg, classname, "info_tfgoal");
             }
         }
-        else // no csqc but has sbflaginfo on
+        else if (server_sbflaginfo) // no csqc but has sbflaginfo on and server_sbflaginfo is enabled
         {
             ct = "";
             i = number_of_teams; // Extra newlines
@@ -1197,6 +1200,9 @@ void (entity pl) RefreshStatusBar = {
                 ct = strcat(ct, "\n");
             
             ct = strzone(ct);
+        }
+        else {
+            ct = strzone("\n\n\n\n\n\n");
         }
     }
 
