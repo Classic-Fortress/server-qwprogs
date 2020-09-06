@@ -583,7 +583,7 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5, string s
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE) || !server_sbflaginfo)
         return;
     //float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
     //if(csqcactive) {
