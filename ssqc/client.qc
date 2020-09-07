@@ -220,7 +220,8 @@ void () DecodeLevelParms = {
     local string st;
     local entity ent;
 
-    local entity te;
+    local entity te, tg;
+    local vector teoriginbkp;
 
     if (serverflags)
         if (world.model == "maps/start.bsp")
@@ -699,6 +700,49 @@ void () DecodeLevelParms = {
 
         // enable server-side flaginfo on statusbar [on]
         server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+
+        reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
+
+        if (reverse_cap) {
+            te = world;
+            ent = find(world, classname, "info_tfdetect");
+            for (float t = 1; t <= number_of_teams; t++) {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(ent.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(ent.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(ent.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(ent.display_item_status4);
+                        break;
+                }
+
+                if (te) {
+                    tg = find(world, classname, "info_tfgoal");
+                    while (tg) {
+                        if (tg.items_allowed == te.goal_no) {
+                           teoriginbkp = te.origin;
+
+                           te.oldorigin = tg.origin;
+                           te.origin = tg.origin;
+                           setsize(te, te.goal_min, te.goal_max);
+
+                           tg.oldorigin = teoriginbkp;
+                           tg.origin = teoriginbkp;
+                           setsize(tg, tg.mins, tg.maxs);
+                        }
+                        tg = find(tg, classname, "info_tfgoal");
+                    }
+                }
+            }
+        }
+
 
         st = infokey(world, "default");
         if (st == "on") {
