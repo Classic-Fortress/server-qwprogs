@@ -87,6 +87,7 @@ New features
 * Option to allow a demoman to place a detpack while reloading his weapon `localinfo detreload on`
 * Pyro types - `localinfo pyro_type val` - 0 = original tf2.9, 1 = oztf pyro style, 2 = FO pyro style
 * localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
+* localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
 
 == Removed ===
 * Removed weapon messages for weapons without weapon modes.
