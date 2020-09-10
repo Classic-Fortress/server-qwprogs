@@ -1216,6 +1216,16 @@ func_button / func_door
                         This works the same as info_tfgoal except for obvious
                         variables such as "model".  Additional Bitfields:
         goal_activation         8 : only activated when hit by an engineer's spanner
+        forcecloseonblock       1 : when blocked by a player or item, keep attempting to close
+
+trigger_push
+        This can now be paired with a targetname of a point entity called target_position - this will create Q3 style jumppads
+        spawnflags:     2 : include TFItems (So flags can be affected)
+                        4 : exclude "other" (So only TFItems are affected)
+                        8 : "no noise" make sure no default noise is added
+
+trigger_jumppad
+        Rename of trigger_push, can be used to allow for "Fortress One" only trigger_push entities that won't be misinterpreted by other fortress mods
 
 
 OTHER ENTITIES          Most Quake entities work the same as info_tfgoal except
