@@ -662,6 +662,9 @@ void () DecodeLevelParms = {
             vote_threshold = 0.5;
         }
         
+        //default round interval for quadmode (seconds)
+        localcmd ("localinfo round_delay_time 30\n");
+
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 
@@ -852,6 +855,47 @@ void () DecodeLevelParms = {
             solid_nailgren = TRUE;
         }
 
+        st = infokey(world, "huetf");
+        if (st == "on") {
+            server_huetf = TRUE;
+            impulse_queue = TRUE;
+            chweap_wait_attfinished = FALSE;
+            flag_follow = FALSE;
+            ng_velocity = 1000;
+            ng_damage = 18;
+            sng_damage = 26;
+            old_ng_rof = TRUE;
+            scoutdash = FALSE;
+            fo_flash = FALSE;
+            nailgren_type = NGR_TYPE_DEFAULT;
+            Role_None.detpipe_limit = 7;
+            detpipe_limit_world = 7;
+            medicaura = FALSE;
+            medicnocuss = FALSE;
+            pyro_type = 1;
+            drop_grenades = FALSE;
+            drop_grenpack = FALSE;
+            drop_gren1 = 0;
+            drop_gren2 = 0;
+            cussgrentime = 19;
+            spawnfull = FALSE;
+            stockfull = FALSE;
+            stock_on_cap = FALSE;
+            stock_reload = FALSE;
+            classtips = FALSE;
+            nohitsounds = TRUE;
+            detpack_when_reloading = TRUE;
+            old_hp_armor = TRUE;
+            server_sbflaginfo = FALSE;
+            solid_detpack = TRUE;
+            walls_block_emp = FALSE;
+            grentimers = FALSE;
+            Role_None.gren2_limits[1] = 3;
+            Role_None.gren2_limits[3] = 2;
+            Role_None.gren2_limits[4] = 4;
+            Role_None.gren2_limits[5] = 3;
+            Role_None.gren2_limits[8] = 3;
+        }
     }
 
     if (parm11)

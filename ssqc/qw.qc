@@ -559,6 +559,7 @@ float sniperreloadpercent;
 float buildstatus;
 float server_default;
 float server_faithful;
+float server_huetf;
 
 float old_spanner;
 float old_dispenser;

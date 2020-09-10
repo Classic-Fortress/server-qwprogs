@@ -53,7 +53,6 @@ void () QuadMode =
     localcmd ("localinfo rounds 2\n");
     localcmd ("timelimit 0\n");
     localcmd ("localinfo round_time 10\n");
-    localcmd ("localinfo round_delay_time 30\n");
     localcmd ("localinfo teamfrags on\n");
     localcmd ("localinfo fullteamscore off\n");
     localcmd ("fraglimit 0\n");
@@ -71,6 +70,7 @@ void () ClanMode =
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
     localcmd ("localinfo vote_style 2\n"); 
+    localcmd ("localinfo rounds 0\n");
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
