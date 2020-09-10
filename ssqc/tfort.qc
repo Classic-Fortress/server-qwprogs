@@ -724,6 +724,9 @@ void () TeamFortress_ShowTF = {
     } else if (server_default) {
         sprint(self, PRINT_HIGH, "\nThis server is running default FortressOne Server settings.\n");
     }
+    else if (server_huetf) {
+        sprint(self, PRINT_HIGH, "\nThis server is running HueTF FortressOne Server settings.\n");
+    }
 };
 
 void () TeamFortress_GrenadePrimed;
