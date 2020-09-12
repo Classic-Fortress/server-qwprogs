@@ -589,7 +589,7 @@ float fo_flashtime;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
-float server_sbflaginfo;
+//float server_sbflaginfo;
 float reverse_cap;
 
 float numlocs;
