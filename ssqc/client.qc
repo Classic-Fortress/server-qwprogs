@@ -702,8 +702,8 @@ void () DecodeLevelParms = {
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
 
         // enable server-side flaginfo on statusbar [on]
-        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
-
+//        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+        
         reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
 
         if (reverse_cap) 
@@ -886,7 +886,8 @@ void () DecodeLevelParms = {
             nohitsounds = TRUE;
             detpack_when_reloading = TRUE;
             old_hp_armor = TRUE;
-            server_sbflaginfo = FALSE;
+            //server_sbflaginfo = FALSE;
+            localcmd("localinfo server_sbflaginfo 0\n");
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             grentimers = FALSE;

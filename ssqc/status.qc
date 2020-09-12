@@ -583,21 +583,19 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5, string s
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
-    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE) || !server_sbflaginfo)
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE) || !CF_GetSetting("ssbfi", "server_sbflaginfo", "1")) {
         return;
-    //float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
-    //if(csqcactive) {
-        msg_entity = Player;
-        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-        WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
-        WriteFloat(MSG_MULTICAST, index);
-        WriteFloat(MSG_MULTICAST, Item.goal_no);
-        WriteString(MSG_MULTICAST, Item.mdl);
-        WriteFloat(MSG_MULTICAST, Item.skin);
-        WriteFloat(MSG_MULTICAST, Item.owned_by);
-        WriteFloat(MSG_MULTICAST, icon);
-        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
-    //}
+    }
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
+    WriteFloat(MSG_MULTICAST, index);
+    WriteFloat(MSG_MULTICAST, Item.goal_no);
+    WriteString(MSG_MULTICAST, Item.mdl);
+    WriteFloat(MSG_MULTICAST, Item.skin);
+    WriteFloat(MSG_MULTICAST, Item.owned_by);
+    WriteFloat(MSG_MULTICAST, icon);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
 }
 
 void (entity Player) InitAllStatuses = {
@@ -1099,7 +1097,7 @@ void (entity pl) RefreshStatusBar = {
             UpdateClientIDString(pl);
             
             // flag info
-            if (server_sbflaginfo)
+            if (CF_GetSetting("ssbfi", "server_sbflaginfo", "1"))
             {
                 if (tfdet)
                 {
@@ -1137,7 +1135,7 @@ void (entity pl) RefreshStatusBar = {
                 }
             }
         }
-        else if (server_sbflaginfo) // no csqc but has sbflaginfo on and server_sbflaginfo is enabled
+        else if (CF_GetSetting("ssbfi", "server_sbflaginfo", "1")) // no csqc but has sbflaginfo on and server_sbflaginfo is enabled
         {
             ct = "";
             i = number_of_teams; // Extra newlines
