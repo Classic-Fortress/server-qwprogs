@@ -1420,6 +1420,14 @@ void () StartVoting = {
 
 
 void (entity p, string vote) VoteForMap = {
+    float filehandle;
+    filehandle = fopen(strcat("maps/",vote,".bsp"), FILE_READ);
+    if (filehandle >= 0) {
+        AddVoteMap(vote,"Custom vote","Custom Vote",0,0,0);
+        fclose(filehandle);
+    } else {
+        sprint(p, PRINT_HIGH, "\bUnfortunately, \b", vote, "\b doesn't appear to be a valid map.\nUse \bcmd listmaps\b to for a list of valid maps.\b\n");
+    }
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.netname == vote) {
@@ -1444,7 +1452,6 @@ void (entity p, string vote) VoteForMap = {
         }
         mc = find(mc, classname, "map_candidate");
     }
-    sprint(p, PRINT_HIGH, "\bUnfortunately, \b", vote, "\b doesn't appear to be a valid map.\nUse \bcmd listmaps\b to for a list of valid maps.\b\n");
 };
 
 void (entity p) UnvoteForMap = {
