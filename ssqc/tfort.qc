@@ -3124,7 +3124,7 @@ void (entity p) TeamFortress_ExecClassScript = {
     if (st == string_null)
         st = infokey(p, "exec_class");
 
-    if (st == "1") {
+    if (st == "1" || st == "on") {
         if (p.playerclass == PC_SCOUT)
             stuffcmd(p, "exec scout.cfg\n");
         else if (p.playerclass == PC_SNIPER)
