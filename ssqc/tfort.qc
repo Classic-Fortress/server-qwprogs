@@ -3118,13 +3118,9 @@ void (entity pl, float fr) TF_AddFrags = {
 };
 
 void (entity p) TeamFortress_ExecClassScript = {
-    local string st;
+    local float st = FO_GetUserSetting(p, "ec", "exec_class", "off");
 
-    st = infokey(p, "ec");
-    if (st == string_null)
-        st = infokey(p, "exec_class");
-
-    if (st == "1" || st == "on") {
+    if (st) {
         if (p.playerclass == PC_SCOUT)
             stuffcmd(p, "exec scout.cfg\n");
         else if (p.playerclass == PC_SNIPER)
@@ -3147,13 +3143,9 @@ void (entity p) TeamFortress_ExecClassScript = {
 };
 
 void (entity p) TeamFortress_ExecMapScript = {
-    local string st;
+    local float st = FO_GetUserSetting(p, "em", "exec_map", "off");
 
-    st = infokey(p, "em");
-    if (st == string_null)
-        st = infokey(p, "exec_map");
-
-    if (st == "1") {
+    if (st) {
         stuffcmd(p, "exec maps/default.cfg\n");
         stuffcmd(p, "exec maps/");
         stuffcmd(p, mapname);
