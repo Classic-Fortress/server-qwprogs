@@ -134,7 +134,7 @@ void (entity pe) SetEquipmentForPlayer = {
 
 void (float cap1, float cap2) CaptainMode = {
     captainmode = 1;
-    bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+    bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s All available players are now Observers\n");
     local string st = 0;
     local float userid = 0, csqcactive = 0;
     local entity oldself;// = self;
@@ -172,7 +172,7 @@ void (float cap1, float cap2) CaptainMode = {
                 //stuffcmd(self, "\n");
                 //SetTeamName(self);
             }
-            bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s ");
+            bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s ");
             bprint(PRINT_HIGH, te.netname);
             bprint(PRINT_HIGH, " \bis the captain for team\b ");
             bprint(PRINT_HIGH, TeamToString(te.team_no));
@@ -262,7 +262,7 @@ void (entity cap, float pick) CaptainPick = {
             sprint(self, PRINT_HIGH, picked.netname ," has already been picked!\n");
             return;
         }
-        bprint(PRINT_HIGH, "\[\bCaptain Mode\b\]\b:\b ");
+        bprint(PRINT_HIGH, "\x10\bCaptain Mode\b\x11\b:\b ");
         bprint(PRINT_HIGH, picked.netname);
         bprint(PRINT_HIGH, " \bcalled\b ");
         bprint(PRINT_HIGH, cap.netname);
@@ -277,7 +277,7 @@ void (entity cap, float pick) CaptainPick = {
         sprint(self, PRINT_HIGH, "Sorry, couldn't pick ", picked.netname ,"\n");
     }
     if(!countleft) {
-        bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+        bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s \sTeams are set,  let's start the game!\s\n");
         StopCaptainMode(cap, othercap);
     }
 }

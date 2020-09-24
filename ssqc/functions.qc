@@ -58,7 +58,7 @@ void () nextCaptain = {
 
 void () disableCaptain = {
 	captainmode = 0;
-	bprint(2, "\[\sCaptain Mode\s\]\s:\s Captain Mode Disabled!\n");	
+	bprint(2, "\x10\sCaptain Mode\s\x11\s:\s Captain Mode Disabled!\n");	
 };
 
 void () randomizeCaptains = {
