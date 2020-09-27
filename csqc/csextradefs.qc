@@ -82,6 +82,7 @@ float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
 float jump_counter;
 float frames_since_onground;
+//float hud_idle_alpha;
 
 .string name;
 .string description;

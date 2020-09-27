@@ -130,7 +130,7 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
             1, 
             0
         );
-        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+        if (hud_panel(panelid, position, size, transparency, panel.Display)) {
             // click event
         }
     } else {
@@ -193,7 +193,7 @@ void(string panelid, float display, string text, string icon) drawMOTDPanel = {
             0
         );
 
-        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+        if (hud_panel(panelid, position, size, transparency, panel.Display)) {
             // click event
         }
     } else {
@@ -272,7 +272,7 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
     local string message = "";
     if (fo_hud_editor) {
         message = "Game Mode";
-        if (hud_panel(panelid, position, size, 0.3, panel.Display)) {
+        if (hud_panel(panelid, position, size, transparency, panel.Display)) {
             // click event
         }
     } else {
