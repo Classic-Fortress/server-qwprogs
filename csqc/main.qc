@@ -56,6 +56,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
 
+    registercommand("vote_addmap");
+    registercommand("vote_removemap");
+    registercvar("fo_hud_idle_alpha", "0.3");
+
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
     
@@ -64,6 +68,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
+//    hud_idle_alpha = 0.3;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -122,7 +127,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
-    tokenize(cmd);
+    tokenize_console(cmd);
     float val;
     string key1, key2;
     switch(argv(0)) {
@@ -184,7 +189,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_DropAmmo(TRUE, 1, (player_class == PC_ENGINEER));
             break;
         case "primeone":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -196,7 +201,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "primetwo":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
@@ -208,7 +213,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren1":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
@@ -220,7 +225,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren2":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || round_active)) {
+            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
@@ -300,6 +305,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 jump_counter = 0;
                 localcmd("-jump");
             }
+            break;
+        case "vote_addmap":
+            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)));
+            break;
+        case "vote_removemap":
+            RemoveVoteMap(argv(1));
             break;
     }
     return FALSE;
