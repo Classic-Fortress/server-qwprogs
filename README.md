@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* new cvar for zut ``fo_hud_idle_alpha`` - sets the minimum transparency for flaginfo inactive items
 * optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide
 * localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
