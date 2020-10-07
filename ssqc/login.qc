@@ -14,6 +14,7 @@ void (entity player, string login, string secret) performLogin = {
 }
 
 void(float reqid, float responsecode, string resourcebody) URI_Get_Callback = {
+	local float got_one = 0;
 	self.login_in_progress = 0;	
 	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 	if (!responsecode) {		
@@ -38,12 +39,23 @@ void(float reqid, float responsecode, string resourcebody) URI_Get_Callback = {
 				sprint (self, 2, "Type \scommands\s for admin commands.\n");
 			}
 		}
-		if(self.team_no == 0 && !intermission_running ) {
-			if (csqcactive)
-            	Menu_Team(0);
-            else
-            	Menu_Team(1);
-        }
+		if(self.team_no == 0 && !intermission_running) {
+			if (clanbattle && (self.has_disconnected != 1)) {
+				if (self.tf_id != 0) {
+					got_one = RejoinWithTfId();
+					ResetAndRespawnPlayer(self);
+				}
+				if (!got_one) {
+					CreateTfIdAndJoin();
+			    }
+			}
+			if (!got_one) {
+				if (csqcactive)
+					Menu_Team(0);
+				else
+					Menu_Team(1);
+			}
+		}
 	}
 	else {
 		dprint(infokey(self,"name"));

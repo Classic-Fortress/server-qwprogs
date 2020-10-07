@@ -65,6 +65,8 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
 float (float tno) TeamFortress_TeamGetLives;
 void () InitReverseCap;
+float () RejoinWithTfId;
+void () CreateTfIdAndJoin;
 
 string nextmap;
 
@@ -2677,7 +2679,6 @@ void () UpdateAllClientsTeamScores = {
 
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void (optional float csqcactive) ClientConnect = {
-    local entity te;
     local string st;
     local float got_one;
 
@@ -2721,44 +2722,13 @@ void (optional float csqcactive) ClientConnect = {
         got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
-        if ((st != string_null) && (self.tf_id != 0)) {
-            sprint(self, PRINT_HIGH, "Welcome back!\n");
-            te = find(world, classname, "ghost");
-            while (te) {
-                if (te.tf_id == self.tf_id) {
-                    got_one = 1;
-                    TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
-                    UpdateAllClientsTeamScores();
-
-                    self.frags = te.frags;
-                    self.real_frags = te.real_frags;
-                    if (!(toggleflags & TFLAG_TEAMFRAGS) &&
-                        !(toggleflags & TFLAG_FULLTEAMSCORE)) {
-                        self.frags = self.real_frags;
-                    }
-                    self.playerclass = te.playerclass;
-                    self.nextpc = te.playerclass;
-                    self.tfstate = te.tfstate;
-                    dremove(te);
-                    te = world;
-                } else
-                    te = find(te, classname, "ghost");
+        if (!loginRequired) {
+            if ((st != string_null) && (self.tf_id != 0)) {
+                got_one = RejoinWithTfId();
             }
-        }
-        if (!got_one) {
-            if (game_locked && (!cb_prematch)) {
-                sprint(self, PRINT_HIGH,
-                       "Closed server. Clan battle in progress.\n");
-                KickCheater(self);
-                return;
+            if (!got_one) {
+                CreateTfIdAndJoin();
             }
-            last_id = last_id + 20 + random() * 10;
-            self.tf_id = rint(random() * 10 + last_id);
-            st = ftos(self.tf_id);
-            stuffcmd(self, "setinfo tf_id ");
-            stuffcmd(self, st);
-            stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
 
@@ -2772,6 +2742,65 @@ void (optional float csqcactive) ClientConnect = {
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
+
+float () RejoinWithTfId = {
+    local entity te;
+    sprint(self, PRINT_HIGH, "Welcome back!\n");
+    te = find(world, classname, "ghost");
+    while (te) {
+        if (te.tf_id == self.tf_id) {
+            TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
+            UpdateAllClientsTeamScores();
+
+            self.frags = te.frags;
+            self.real_frags = te.real_frags;
+            if (!(toggleflags & TFLAG_TEAMFRAGS) &&
+                !(toggleflags & TFLAG_FULLTEAMSCORE)) {
+                self.frags = self.real_frags;
+            }
+            self.playerclass = te.playerclass;
+            self.nextpc = te.playerclass;
+            self.tfstate = te.tfstate;
+            dremove(te);
+            te = world;
+            return 1;
+        } else
+            te = find(te, classname, "ghost");
+    }
+    return 0;
+}
+
+void () CreateTfIdAndJoin = {
+    local string st;
+    if (game_locked && (!cb_prematch)) {
+        sprint(self, PRINT_HIGH,
+               "Closed server. Clan battle in progress.\n");
+        KickCheater(self);
+        return;
+    }
+    last_id = last_id + 20 + random() * 10;
+    self.tf_id = rint(random() * 10 + last_id);
+    st = ftos(self.tf_id);
+    stuffcmd(self, "setinfo tf_id ");
+    stuffcmd(self, st);
+    stuffcmd(self, "\n");
+    sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
+}
+
+void (entity pl) ResetAndRespawnPlayer = {
+    if(pl.team_no && pl.playerclass) {
+        pl.classname = "player";
+        pl.takedamage = DAMAGE_AIM;
+        pl.solid = SOLID_SLIDEBOX;
+        pl.movetype = MOVETYPE_WALK;
+        TeamFortress_RemoveTimers();
+        setspawnparms(pl);
+        PutClientInServer();
+    }
+    if(infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(pl, FALSE);
+    }
+}
 
 void () CountMatchPlayersAndReset = {
     local float playersleft = 0;
