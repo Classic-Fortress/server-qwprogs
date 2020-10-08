@@ -8,6 +8,20 @@ void (vector org, entity shooter) NapalmGrenadeLaunch;
 void () Napalm_touch;
 float (string id_flame) RemoveFlameFromQueue;
 
+void (entity ent, float num) SetFlameCount = {
+    ent.numflames = num;
+
+    if (num == 0)
+    {
+        ent.tfstate = ent.tfstate - (ent.tfstate & TFSTATE_BURNING);
+    }
+    else
+    {
+        ent.tfstate = ent.tfstate | TFSTATE_BURNING;
+    }
+    
+};
+
 entity(string type, entity p_owner) FlameSpawn =
 {
     if (cb_prematch) {
@@ -124,6 +138,21 @@ void () NapalmGrenadeNetThink = {
     local entity head;
     local entity te;
 
+    // TODO - make a settings struct and put these in on world spawn
+    float explodeDam = 0;
+    float maxExplosions = 0;
+    switch (pyro_type)
+    {
+        case PYRO_FO:
+            explodeDam = PC_PYRO_NAPALM_INIT_DAM_FO;
+            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_FO;
+            break;
+        default:
+            explodeDam = PC_PYRO_NAPALM_INIT_DAM_ORIG;
+            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_ORIG;
+            break;
+    }
+
     if (self.heat == 0) {
         self.owner.no_active_napalm_grens =
             self.owner.no_active_napalm_grens + 1;
@@ -154,7 +183,8 @@ void () NapalmGrenadeNetThink = {
     while (head) {
         if (head.takedamage) {
             deathmsg = DMSG_FLAME;
-            TF_T_Damage(head, self, self.owner, 20, TF_TD_NOTTEAM,
+            
+            TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
             other = head;
             Napalm_touch();
@@ -172,7 +202,8 @@ void () NapalmGrenadeNetThink = {
     multicast(self.origin, MULTICAST_PHS);
 
     self.heat = self.heat + 1;
-    if (self.heat > 7)
+    
+    if (self.heat >= maxExplosions)
         RemoveGrenade();
 };
 
@@ -256,7 +287,7 @@ void () FlameFollow = {
     if (self.enemy.health < 1) {
         deathmsg = 15;
         T_RadiusDamage(self, self, 10, self);
-        self.enemy.numflames = 0;
+        SetFlameCount(self.enemy, 0);
         FlameDestroy(self);
         return;
     }
@@ -270,8 +301,7 @@ void () FlameFollow = {
     }
     if (self.health < 1) {
         if ((self.effects != 8) || (self.enemy.numflames <= 1)) {
-            self.enemy.numflames = self.enemy.numflames - 1;
-            self.enemy.numflames = 0;
+            SetFlameCount(self.enemy, (self.enemy.numflames - 1));
             FlameDestroy(self);
             return;
         }
@@ -295,13 +325,23 @@ void () FlameFollow = {
     }
     if ((self.enemy.waterlevel > 1) || (self.enemy.classname != "player" && self.enemy.waterlevel > 0)) {
         FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, 1);
-        self.enemy.numflames = self.enemy.numflames - 1;
+        SetFlameCount(self.enemy, self.enemy.numflames - 1);
         FlameDestroy(self);
         return;
     }
     self.nextthink = time + 0.1;
     if ((self.effects == 8) && (self.heat >= 3)) {
-        damage = self.enemy.numflames * 0.3 * 3;
+        damage = 0;
+        switch (pyro_type)
+        {
+            case PYRO_FO:
+                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_FO * 3;
+                break;
+            default:
+                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_ORIG * 3;
+                break;
+        }
+        
         if (damage < 1) {
             damage = 1;
         }
@@ -361,7 +401,7 @@ void (entity player, entity fireowner, vector org
     
     flame.classname = "fire";
     flame.health = flamehealth;
-    player.numflames = player.numflames + 1;
+    SetFlameCount(player, (player.numflames + 1));
     flame.velocity = player.velocity;
     flame.enemy = player;
     flame.touch = OnPlayerFlame_touch;
@@ -457,8 +497,18 @@ void () Napalm_touch = {
     }
     if (other != world) {
         if ((other.takedamage == 2) && (other.health > 0)) {
+            float dam = 0;
+            switch (pyro_type)
+            {
+                case PYRO_FO:
+                    dam = PC_PYRO_INIT_BURN_DAM_FO;
+                    break;
+                default:
+                    dam = PC_PYRO_INIT_BURN_DAM_ORIG;
+                    break;
+            }
             deathmsg = DMSG_FLAME;
-            TF_T_Damage(other, self, self.owner, 6, TF_TD_NOTTEAM,
+            TF_T_Damage(other, self, self.owner, dam, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
 
             float flamehealth = 45;
@@ -593,119 +643,6 @@ void () IncendiaryRadius_OZTF = {
     dremove(self);
 };
 
-void (entity targ, entity lava) ForceIncendiaryLavaTouch = {
-    if (targ.classname == "building_sentrygun_base")
-    {
-        targ = targ.oldenemy; // set other to sentrygun turret
-    }
-    if (targ.takedamage)
-    {
-        if (targ.icdmgtime < time)
-        {
-            targ.icdmgtime = time + PC_PYRO_LAVA_RETICK;
-            deathmsg = DMSG_FLAME;
-            TF_T_Damage(targ, lava, lava.owner, 40, TF_TD_NOTTEAM, TF_TD_NOMOMENTUM | TF_TD_FIRE);
-
-            if (random() > 0.5) {
-                FO_Sound(targ, CHAN_VOICE, "player/lburn1.wav", 1, 1);
-            } else {
-                FO_Sound(targ, CHAN_VOICE, "player/lburn2.wav", 1, 1);
-            }
-        }
-        SetOnFire(targ, lava.owner, lava.origin, 15);
-    }
-};
-
-// used by sentrygun and dispenser to see if they are standing on "lava", touch events not being set off
-void () CheckPyroLava = {
-    vector org = self.origin;
-    org_z = org_z - self.mins_z;
-    if (self.classname == "building_sentrygun_base")
-    {
-        self.nextthink = time + .3;       
-    }
-    else if (self.classname == "building_dispenser")
-    {
-        // nothing for now
-    }
-    else
-    {
-        // spam everyone, get this bug fixed
-        bprint(PRINT_HIGH, "CheckPyroLava returning for ", self.classname, "\n");
-        return;
-    }
-
-    // FIXME - do dodgy radius, means disp and sentry can catch on fire when not "touching" edge of pool
-    // fix later if we keep these changes
-    entity lava;
-    lava = findradius(org, 5);
-    while (lava)
-    {
-        if (lava.classname == "pyrolava")
-        {
-            ForceIncendiaryLavaTouch(self, lava);
-            return;
-        }
-        lava = lava.chain;
-    }
-};
-
-void () IncendiaryLavaThink = {
-    dremove(self);
-};
-
-void () IncendiaryLavaTouch = {
-    ForceIncendiaryLavaTouch(other, self);
-};
-
-entity (vector org) SpawnLavaSprite = {
-    entity lava;
-    lava = spawn();
-    lava.mdl = "progs/s_explod.spr";
-    lava.owner = self.owner;
-    lava.movetype = MOVETYPE_TOSS;
-    lava.solid = SOLID_TRIGGER;
-    lava.touch = IncendiaryLavaTouch;
-    lava.classname = "pyrolava";
-    
-    FO_SetModel(lava, lava.mdl);
-    setorigin(lava, org);
-    setsize(lava, VEC_ORIGIN, VEC_ORIGIN);
-
-    lava.think = IncendiaryLavaThink;
-    lava.nextthink = time + PC_PYRO_LAVA_LIFETIME;
-
-    return lava;
-};
-
-void () IncendiaryRadius_FO = {
-    
-    vector org;
-    org = self.origin;
-    entity lava = SpawnLavaSprite(org);
-    
-    for (float i = -5; i < 5; i++)
-    {
-        org = self.origin;
-        org_x = org_x + 10 * i;
-
-        float yval = org_y;
-        for (float i2 = -5; i2 < 5; i2++)
-        {
-            if (i2 == 0 && i == 0)
-                continue;
-
-            org_y = yval + 10 * i2;
-            SpawnLavaSprite(org);
-        }
-        
-    }
-    
-    FO_Sound(self, CHAN_AUTO, "player/inlava.wav", 1, ATTN_NORM);
-
-    dremove(self);
-};
-
 void () T_IncendiaryTouch = {
     local float damg;
 
@@ -741,7 +678,6 @@ void () T_IncendiaryTouch = {
             IncendiaryRadius_OZTF();
             break;
         case PYRO_FO:
-            //IncendiaryRadius_FO();
             IncendiaryRadius_OZTF();
             break;
     }

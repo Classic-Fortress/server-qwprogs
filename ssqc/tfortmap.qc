@@ -1032,7 +1032,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
 
                         if (Player.numflames > 0) {
                             FO_Sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
-                            Player.numflames = 0;
+                            SetFlameCount(Player, 0);
                         }
 
                         if (Player.FlashTime > 0) {
