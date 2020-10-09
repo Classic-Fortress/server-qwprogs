@@ -136,7 +136,7 @@ void () MapEndSequence = {
 	player = find (world, classname, "player");	
 	while (player) 
 	{
-		if (player.playerclass != 0) {
+		if (player.playerclass != 0 && self.has_disconnected != 1) {
 			local float timeplayed = gametime - player.classtime;
 			LogEventChangeClass(player, player.playerclass, 0, timeplayed);
 			player.classtime = gametime;

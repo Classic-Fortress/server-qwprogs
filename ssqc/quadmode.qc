@@ -173,17 +173,7 @@ void () QuadRoundBegin = {
 	while (te != world) {
 		oldself = self;
 		self = te;
-        if(self.team_no && self.playerclass) {
-            self.takedamage = DAMAGE_AIM;
-            self.solid = SOLID_SLIDEBOX;
-            self.movetype = MOVETYPE_WALK;
-            TeamFortress_RemoveTimers();
-            setspawnparms(self);
-            PutClientInServer();
-        }
-        if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-            UpdateClientPrematch(self, FALSE);
-        }
+		ResetAndRespawnPlayer(self);
 		self = oldself;
 		te = find (te, classname, "player");
 	}

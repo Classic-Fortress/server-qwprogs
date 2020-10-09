@@ -282,6 +282,23 @@ void (entity cap, float pick) CaptainPick = {
     }
 }
 
+void (entity pl) PrintWho = {
+    local string msg;
+    msg = strzone(string_null);
+    msg = strcat(msg, infokey(pl,"name"));
+    msg = strcat(msg, " - ");
+    if (pl.login != string_null)
+        msg = strcat(msg, pl.login);
+    else
+        msg = strcat(msg, "NOT LOGGED IN");
+    if (pl.is_admin) {
+        msg = strcat(msg, " (admin)");
+    }
+    msg = strcat(msg, "\n");
+    sprint(self, PRINT_HIGH, msg);
+    strunzone(msg);
+}
+
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num = 0, processedCmd, inp;
     local string tmp;
@@ -879,21 +896,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "who":
             processedCmd = TRUE;
             pl = find (world, classname, "player");
-            string msg;
             while (pl) {
-                msg = string_null;
-                msg = strcat(msg, infokey(pl,"name"));
-                msg = strcat(msg, " - ");
-                if (pl.login != string_null)
-                    msg = strcat(msg, pl.login);
-                else
-                    msg = strcat(msg, "NOT LOGGED IN");
-                if (pl.is_admin) {
-                    msg = strcat(msg, " (admin)");
-                }
-                msg = strcat(msg, "\n");
-                sprint(self, PRINT_HIGH, msg);
+                PrintWho(pl);
                 pl = find (pl, classname, "player");
+            }
+            pl = find (world, classname, "observer");
+            while (pl) {
+                PrintWho(pl);
+                pl = find (pl, classname, "observer");
             }
             break;
     }
