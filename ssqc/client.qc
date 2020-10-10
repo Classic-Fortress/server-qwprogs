@@ -64,6 +64,9 @@ string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
 float (float tno) TeamFortress_TeamGetLives;
+void () InitReverseCap;
+float () RejoinWithTfId;
+void () CreateTfIdAndJoin;
 
 string nextmap;
 
@@ -590,11 +593,7 @@ void () DecodeLevelParms = {
         detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
 
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
-        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
-
-        // pyro setting to rocketjump like soldier
-        pyro_soldiercannon = CF_GetSetting("pyrosold", "pyro_soldiercannon", "off");
-
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "2");
 
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
@@ -665,6 +664,9 @@ void () DecodeLevelParms = {
             vote_threshold = 0.5;
         }
         
+        //default round interval for quadmode (seconds)
+        localcmd ("localinfo round_delay_time 30\n");
+
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 
@@ -700,6 +702,17 @@ void () DecodeLevelParms = {
 
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+
+        // enable server-side flaginfo on statusbar [on]
+//        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+        
+        reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
+
+        if (reverse_cap) 
+        {
+           InitReverseCap();
+        }
+
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -749,7 +762,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
-            pyro_type = 1;
+            pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
             Role_None.gren1_limits[3] = PC_SOLDIER_GRENADE_MAX_1;
@@ -820,7 +833,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             old_ng_rof = TRUE;
-            pyro_type = 0;
+            pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
             Role_None.gren1_limits[2] = 4;
             Role_None.gren1_limits[3] = 4;
@@ -844,6 +857,48 @@ void () DecodeLevelParms = {
             solid_nailgren = TRUE;
         }
 
+        st = infokey(world, "huetf");
+        if (st == "on") {
+            server_huetf = TRUE;
+            impulse_queue = TRUE;
+            chweap_wait_attfinished = FALSE;
+            flag_follow = FALSE;
+            ng_velocity = 1000;
+            ng_damage = 18;
+            sng_damage = 26;
+            old_ng_rof = TRUE;
+            scoutdash = FALSE;
+            fo_flash = FALSE;
+            nailgren_type = NGR_TYPE_DEFAULT;
+            Role_None.detpipe_limit = 7;
+            detpipe_limit_world = 7;
+            medicaura = FALSE;
+            medicnocuss = FALSE;
+            pyro_type = 1;
+            drop_grenades = FALSE;
+            drop_grenpack = FALSE;
+            drop_gren1 = 0;
+            drop_gren2 = 0;
+            cussgrentime = 19;
+            spawnfull = FALSE;
+            stockfull = FALSE;
+            stock_on_cap = FALSE;
+            stock_reload = FALSE;
+            classtips = FALSE;
+            nohitsounds = TRUE;
+            detpack_when_reloading = TRUE;
+            old_hp_armor = TRUE;
+            //server_sbflaginfo = FALSE;
+            localcmd("localinfo server_sbflaginfo 0\n");
+            solid_detpack = TRUE;
+            walls_block_emp = FALSE;
+            grentimers = FALSE;
+            Role_None.gren2_limits[1] = 3;
+            Role_None.gren2_limits[3] = 2;
+            Role_None.gren2_limits[4] = 4;
+            Role_None.gren2_limits[5] = 3;
+            Role_None.gren2_limits[8] = 3;
+        }
     }
 
     if (parm11)
@@ -2218,7 +2273,7 @@ void () WaterMove = {
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (self.dmgtime < time) {
             if(votemode && !vote_anarchy_mode) {
                 respawn();
@@ -2241,7 +2296,7 @@ void () WaterMove = {
         }
     }
     if (!(self.flags & 16)) {
-        if (self.watertype == -5) {
+        if (self.watertype == CONTENT_LAVA) {
             FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
         }
         if (self.watertype == -3) {
@@ -2606,9 +2661,24 @@ void () PlayerPostThink = {
     }
 };
 
+void () UpdateAllClientsTeamScores = {
+    local entity e;
+
+    e = find(world, classname, "player");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "player");
+    }
+
+    e = find(world, classname, "observer");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "observer");
+    }
+}
+
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void (optional float csqcactive) ClientConnect = {
-    local entity te;
     local string st;
     local float got_one;
 
@@ -2652,54 +2722,85 @@ void (optional float csqcactive) ClientConnect = {
         got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
-        if ((st != string_null) && (self.tf_id != 0)) {
-            sprint(self, PRINT_HIGH, "Welcome back!\n");
-            te = find(world, classname, "ghost");
-            while (te) {
-                if (te.tf_id == self.tf_id) {
-                    got_one = 1;
-                    TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
-                    self.frags = te.frags;
-                    self.real_frags = te.real_frags;
-                    if (!(toggleflags & TFLAG_TEAMFRAGS) &&
-                        !(toggleflags & TFLAG_FULLTEAMSCORE)) {
-                        self.frags = self.real_frags;
-                    }
-                    self.playerclass = te.playerclass;
-                    self.nextpc = te.playerclass;
-                    self.tfstate = te.tfstate;
-                    dremove(te);
-                    te = world;
-                } else
-                    te = find(te, classname, "ghost");
+        if (!loginRequired) {
+            if ((st != string_null) && (self.tf_id != 0)) {
+                got_one = RejoinWithTfId();
             }
-        }
-        if (!got_one) {
-            if (game_locked && (!cb_prematch)) {
-                sprint(self, PRINT_HIGH,
-                       "Closed server. Clan battle in progress.\n");
-                KickCheater(self);
-                return;
+            if (!got_one) {
+                CreateTfIdAndJoin();
             }
-            last_id = last_id + 20 + random() * 10;
-            self.tf_id = rint(random() * 10 + last_id);
-            st = ftos(self.tf_id);
-            stuffcmd(self, "setinfo tf_id ");
-            stuffcmd(self, st);
-            stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
         }
     }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
+        UpdateClientTeamScores(self);
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
+
+float () RejoinWithTfId = {
+    local entity te;
+    sprint(self, PRINT_HIGH, "Welcome back!\n");
+    te = find(world, classname, "ghost");
+    while (te) {
+        if (te.tf_id == self.tf_id) {
+            TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
+            UpdateAllClientsTeamScores();
+
+            self.frags = te.frags;
+            self.real_frags = te.real_frags;
+            if (!(toggleflags & TFLAG_TEAMFRAGS) &&
+                !(toggleflags & TFLAG_FULLTEAMSCORE)) {
+                self.frags = self.real_frags;
+            }
+            self.playerclass = te.playerclass;
+            self.nextpc = te.playerclass;
+            self.tfstate = te.tfstate;
+            dremove(te);
+            te = world;
+            return 1;
+        } else
+            te = find(te, classname, "ghost");
+    }
+    return 0;
+}
+
+void () CreateTfIdAndJoin = {
+    local string st;
+    if (game_locked && (!cb_prematch)) {
+        sprint(self, PRINT_HIGH,
+               "Closed server. Clan battle in progress.\n");
+        KickCheater(self);
+        return;
+    }
+    last_id = last_id + 20 + random() * 10;
+    self.tf_id = rint(random() * 10 + last_id);
+    st = ftos(self.tf_id);
+    stuffcmd(self, "setinfo tf_id ");
+    stuffcmd(self, st);
+    stuffcmd(self, "\n");
+    sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
+}
+
+void (entity pl) ResetAndRespawnPlayer = {
+    if(pl.team_no && pl.playerclass) {
+        pl.classname = "player";
+        pl.takedamage = DAMAGE_AIM;
+        pl.solid = SOLID_SLIDEBOX;
+        pl.movetype = MOVETYPE_WALK;
+        TeamFortress_RemoveTimers();
+        setspawnparms(pl);
+        PutClientInServer();
+    }
+    if(infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(pl, FALSE);
+    }
+}
 
 void () CountMatchPlayersAndReset = {
     local float playersleft = 0;
@@ -3190,7 +3291,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gulped a load of slime\n";
                 else
                     s_deathstring = " can't exist on slime alone\n";
-            } else if (rnum == -5) {
+            } else if (rnum == CONTENT_LAVA) {
                 if (pe_target.health < -15)
                     s_deathstring = " burst into flames\n";
                 else if (random() < 0.5)
@@ -3347,6 +3448,50 @@ float () GetLastWeaponImpulse = {
         return 7;
     else 
         return 4;
+}
+
+void () InitReverseCap = {
+    local entity te = world, tg, tfdet;
+    local vector originbkp;
+
+    te = world;
+    tfdet = find(world, classname, "info_tfdetect");
+    for (float t = 1; t <= number_of_teams; t++) {
+        switch (t)
+        {
+            case 1:
+                te = Finditem(tfdet.display_item_status1);
+                break;
+            case 2:
+                te = Finditem(tfdet.display_item_status2);
+                break;
+            case 3:
+                te = Finditem(tfdet.display_item_status3);
+                break;
+            case 4:
+                te = Finditem(tfdet.display_item_status4);
+                break;
+        }
+
+        if (te) {
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.items_allowed == te.goal_no) {
+                   originbkp = te.origin;
+
+                   te.oldorigin = tg.origin;
+                   te.origin = tg.origin;
+                   setsize(te, te.goal_min, te.goal_max);
+
+                   tg.oldorigin = originbkp;
+                   tg.origin = originbkp;
+                   setsize(tg, tg.mins, tg.maxs);
+                }
+                tg = find(tg, classname, "info_tfgoal");
+            }
+        }
+    }
+
 }
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep

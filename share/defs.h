@@ -249,8 +249,9 @@
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
 // FIXME - concussion and flash states aren't set or tested...
-#define TFSTATE_CONCUSSED			131072
+#define TFSTATE_FLAMES_MAX		131072
 #define TFSTATE_FLASHED			262144
+#define TFSTATE_CONCUSSED		524288
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
@@ -264,6 +265,7 @@
 #define TF_TD_ELECTRICITY	8  // Electric damage
 #define TF_TD_FIRE		16  // Fire damage
 #define TF_TD_NOSOUND		256 // Special damage. Makes no sound/painframe, etc
+#define TF_TD_NOMOMENTUM	512	// Special damage, don't change momentum
 
 // Classic Fortress stuff
 #define CF_MAPVOTE_FORCESHOW        10      // Seconds to force the mapvote menu to be open
@@ -1011,7 +1013,7 @@
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
 #define PC_HVYWEAP_GRENADE_MAX_1	4
-#define PC_HVYWEAP_GRENADE_MAX_2	2
+#define PC_HVYWEAP_GRENADE_MAX_2	1
 #define PC_HVYWEAP_TF_ITEMS		0
 #define PC_HVYWEAP_PROJSPEED	3000
 #define PC_HVYWEAP_ASSCAN_CLIPSIZE		100
@@ -1045,6 +1047,18 @@
 #define PC_PYRO_GRENADE_MAX_1		4
 #define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
+#define PC_PYRO_AIRBLAST_RANGE	400
+#define PC_PYRO_AIRBLAST_COOLDOWN	5
+#define PC_PYRO_LAVA_LIFETIME	3
+#define PC_PYRO_LAVA_RETICK		1.2
+#define PC_PYRO_FLAMETHROWER_DAM_FO	15
+#define PC_PYRO_FLAMETHROWER_DAM_ORIG	10
+
+
+// pyro types
+#define PYRO_ORIGINAL	0
+#define PYRO_OZTF		1
+#define PYRO_FO			2
 
 // Class Details for SPY
 #define PC_SPY_SKIN			22
@@ -1208,6 +1222,9 @@
 #define TF_ILL_SPY		256
 #define TF_ILL_ENGINEER		512
 
+// spawnflags
+#define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
+
 /*======================================================================*/
 /* Flamethrower								*/
 /*======================================================================*/
@@ -1359,6 +1376,8 @@
 #define FO_HUD_GAME_MODE_NAME "Game Mode"
 #define FO_HUD_READY_NAME "Ready Status"
 #define FO_HUD_SHOWSCORES_NAME "Show Scores"
+#define FO_HUD_MAP_MENU_NAME "Map Menu"
+#define FO_HUD_TEAM_SCORE_NAME "Team Score"
 
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
@@ -1397,4 +1416,10 @@
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
 #define DMN_NOFLASH	256	// see all the things
+
+// trigger_push
+#define PUSH_ONCE	1
+#define PUSH_INCLUDETFITEM	2
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_NONOISE	8
 

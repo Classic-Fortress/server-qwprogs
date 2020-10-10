@@ -382,9 +382,11 @@ float item_list_bit;            // Global, used to determine what the bit of
 
 //============================================================================
 
+// pyro
 float num_world_flames;
 .float numflames;               // number of flames on entity
 .string flame_id;               // has to be string so that the C function find() can be used
+.float icdmgtime;
 
 // Spy variables
 .float undercover_team;
@@ -557,6 +559,7 @@ float sniperreloadpercent;
 float buildstatus;
 float server_default;
 float server_faithful;
+float server_huetf;
 
 float old_spanner;
 float old_dispenser;
@@ -569,7 +572,6 @@ float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
 float pyro_type;
-float pyro_soldiercannon;
 float flag_follow;
 float ceasefire_type;
 float is_paused;
@@ -587,6 +589,8 @@ float fo_flashtime;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+//float server_sbflaginfo;
+float reverse_cap;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -704,3 +708,8 @@ float FO_FlashDimension;
 
 // allow for default goal state
 .float default_group_no;
+
+.string broadcast_high;
+
+.float special_cooldown;
+

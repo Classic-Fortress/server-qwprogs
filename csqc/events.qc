@@ -199,6 +199,9 @@ void() CSQC_Parse_Event = {
             for(float i = 0; i < 10; i++) {
                 if(civonly) {
                     FO_MENU_CLASS.options[i].value = "-";
+                    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS) {
+                        Menu_Cancel();
+                    }
                 } else {
                     float class_max = readfloat();
                     if(class_max < 0) {
@@ -259,6 +262,12 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENTHROWN:
             grentimer_waiting = FALSE;
+            break;
+        case MSG_TEAM_SCORES:
+            TS.team1score = readfloat();
+            TS.team2score = readfloat();
+            TS.team3score = readfloat();
+            TS.team4score = readfloat();
             break;
     }
 }

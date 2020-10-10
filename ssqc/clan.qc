@@ -241,12 +241,6 @@ string () GetGameFileName = {
     str = strcat(str, "_[");
     str = strcat(str, mapname);
     str = strcat(str, "]_");
-    
-    if (GetPlayerCount() < 9) {
-        str = strcat(str, GetPlayersName());
-        str = clearString(str);
-        return str;
-    }
 
     while ((i < number_of_teams))
     {

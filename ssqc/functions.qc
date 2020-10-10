@@ -58,7 +58,7 @@ void () nextCaptain = {
 
 void () disableCaptain = {
 	captainmode = 0;
-	bprint(2, "\[\sCaptain Mode\s\]\s:\s Captain Mode Disabled!\n");	
+	bprint(2, "\x10\sCaptain Mode\s\x11\s:\s Captain Mode Disabled!\n");	
 };
 
 void () randomizeCaptains = {
@@ -136,7 +136,7 @@ void () MapEndSequence = {
 	player = find (world, classname, "player");	
 	while (player) 
 	{
-		if (player.playerclass != 0) {
+		if (player.playerclass != 0 && self.has_disconnected != 1) {
 			local float timeplayed = gametime - player.classtime;
 			LogEventChangeClass(player, player.playerclass, 0, timeplayed);
 			player.classtime = gametime;

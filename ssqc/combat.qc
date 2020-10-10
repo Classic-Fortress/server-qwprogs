@@ -173,7 +173,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
             
             if (hitsound == "1" || hitsound == "2")
             {
-                local float crit;
+                local float crit = 0;
 
                 if((inflictor.weapon == DMSG_ROCKETL) && (damage >= 80)) {
                     crit = 1;
@@ -406,7 +406,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     if (targ.takedamage == 0)
         return;
 
-    if (T_AttackType & 256) {
+    if (T_AttackType & TF_TD_NOSOUND) {
         targ.health = damage;
         return;
     }
@@ -517,41 +517,44 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         targ.dmg_inflictor = inflictor;
 
     }
-    if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) &&
+    if (!(T_AttackType & TF_TD_NOMOMENTUM))
+    {
+        if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) &&
         !(targ.tfstate & TFSTATE_CANT_MOVE)) {
+            if (deathmsg != DMSG_GREN_NAIL) {
 
-        if (deathmsg != DMSG_GREN_NAIL) {
+                targ.immune_to_check = time + damage / 20;
+                dir =
+                    targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
+                dir = normalize(dir);
 
-            targ.immune_to_check = time + damage / 20;
-            dir =
-                targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
-            dir = normalize(dir);
+                if (targ.playerclass == PC_HVYWEAP) {
+                    moment = damage / 4;
+                    if (damage <= 50)
+                        moment = 0;
+                } else
+                    moment = damage;
 
-            if (targ.playerclass == PC_HVYWEAP) {
-                moment = damage / 4;
-                if (damage <= 50)
-                    moment = 0;
-            } else
-                moment = damage;
+                if ((moment < 60)
+                    && (attacker.classname == "player")
+                    && (targ.classname == "player")
+                    && (attacker.netname != targ.netname)) {
 
-            if ((moment < 60)
-                && (attacker.classname == "player")
-                && (targ.classname == "player")
-                && (attacker.netname != targ.netname)) {
+                    targ.velocity = targ.velocity + dir * moment * 11;
 
-                targ.velocity = targ.velocity + dir * moment * 11;
+                } else
+                    targ.velocity = targ.velocity + dir * moment * 8;
 
-            } else
-                targ.velocity = targ.velocity + dir * moment * 8;
+                if ((rj > 1) && (attacker.classname == "player")
+                    && (targ.classname == "player")
+                    && (attacker.netname == targ.netname)) {
 
-            if ((rj > 1) && (attacker.classname == "player")
-                && (targ.classname == "player")
-                && (attacker.netname == targ.netname)) {
-
-                targ.velocity = targ.velocity + dir * moment * rj;
+                    targ.velocity = targ.velocity + dir * moment * rj;
+                }
             }
         }
     }
+    
     if (targ.flags & FL_GODMODE)
         return;
 

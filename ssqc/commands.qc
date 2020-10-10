@@ -53,7 +53,6 @@ void () QuadMode =
     localcmd ("localinfo rounds 2\n");
     localcmd ("timelimit 0\n");
     localcmd ("localinfo round_time 10\n");
-    localcmd ("localinfo round_delay_time 30\n");
     localcmd ("localinfo teamfrags on\n");
     localcmd ("localinfo fullteamscore off\n");
     localcmd ("fraglimit 0\n");
@@ -71,6 +70,7 @@ void () ClanMode =
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
     localcmd ("localinfo vote_style 2\n"); 
+    localcmd ("localinfo rounds 0\n");
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -134,7 +134,7 @@ void (entity pe) SetEquipmentForPlayer = {
 
 void (float cap1, float cap2) CaptainMode = {
     captainmode = 1;
-    bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+    bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s All available players are now Observers\n");
     local string st = 0;
     local float userid = 0, csqcactive = 0;
     local entity oldself;// = self;
@@ -151,6 +151,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (1) - 1);
                 //stuffcmd(self, st);
@@ -162,13 +164,15 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 2;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 2, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (2) - 1);
                 //stuffcmd(self, st);
                 //stuffcmd(self, "\n");
                 //SetTeamName(self);
             }
-            bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s ");
+            bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s ");
             bprint(PRINT_HIGH, te.netname);
             bprint(PRINT_HIGH, " \bis the captain for team\b ");
             bprint(PRINT_HIGH, TeamToString(te.team_no));
@@ -258,7 +262,7 @@ void (entity cap, float pick) CaptainPick = {
             sprint(self, PRINT_HIGH, picked.netname ," has already been picked!\n");
             return;
         }
-        bprint(PRINT_HIGH, "\[\bCaptain Mode\b\]\b:\b ");
+        bprint(PRINT_HIGH, "\x10\bCaptain Mode\b\x11\b:\b ");
         bprint(PRINT_HIGH, picked.netname);
         bprint(PRINT_HIGH, " \bcalled\b ");
         bprint(PRINT_HIGH, cap.netname);
@@ -273,13 +277,30 @@ void (entity cap, float pick) CaptainPick = {
         sprint(self, PRINT_HIGH, "Sorry, couldn't pick ", picked.netname ,"\n");
     }
     if(!countleft) {
-        bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+        bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s \sTeams are set,  let's start the game!\s\n");
         StopCaptainMode(cap, othercap);
     }
 }
 
+void (entity pl) PrintWho = {
+    local string msg;
+    msg = strzone(string_null);
+    msg = strcat(msg, infokey(pl,"name"));
+    msg = strcat(msg, " - ");
+    if (pl.login != string_null)
+        msg = strcat(msg, pl.login);
+    else
+        msg = strcat(msg, "NOT LOGGED IN");
+    if (pl.is_admin) {
+        msg = strcat(msg, " (admin)");
+    }
+    msg = strcat(msg, "\n");
+    sprint(self, PRINT_HIGH, msg);
+    strunzone(msg);
+}
+
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd, inp;
+    local float arg_num = 0, processedCmd, inp;
     local string tmp;
     local float farg3;
     local entity ent, pl;
@@ -582,13 +603,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
                 break;
             }
-            if (arg2) {
+           if (arg2) {
                 if(arg2 == "cancel") {
                     TeamFortress_DetpackStop();
                     break;
                 }
                 if(self.is_detpacking) {
-                    Menu_Demoman_Cancel();
+                    TeamFortress_DetpackStop();
+//                    Menu_Demoman_Cancel();
                     break;
                 }
                 local float farg2 = stof(arg2);
@@ -598,6 +620,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
             } else {
+                if(self.is_detpacking) {
+                    Menu_Demoman_Cancel();
+                    break;
+                }
                 Menu_Demoman();
             }
             break;
@@ -870,21 +896,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "who":
             processedCmd = TRUE;
             pl = find (world, classname, "player");
-            string msg;
             while (pl) {
-                msg = string_null;
-                msg = strcat(msg, infokey(pl,"name"));
-                msg = strcat(msg, " - ");
-                if (pl.login != string_null)
-                    msg = strcat(msg, pl.login);
-                else
-                    msg = strcat(msg, "NOT LOGGED IN");
-                if (pl.is_admin) {
-                    msg = strcat(msg, " (admin)");
-                }
-                msg = strcat(msg, "\n");
-                sprint(self, PRINT_HIGH, msg);
+                PrintWho(pl);
                 pl = find (pl, classname, "player");
+            }
+            pl = find (world, classname, "observer");
+            while (pl) {
+                PrintWho(pl);
+                pl = find (pl, classname, "observer");
             }
             break;
     }

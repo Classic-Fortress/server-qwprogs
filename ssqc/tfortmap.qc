@@ -258,6 +258,9 @@ float TF_Item_GetGlow(float team)
 
 void TF_Item_ApplyGlow()
 {
+    if (self.spawnflags & TFGI_NOGLOW)
+        return;
+        
     local entity tfdet;  //info_tfdetect entity
     tfdet = find(world, classname, "info_tfdetect");
 
@@ -1980,11 +1983,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
         }
     }
     gotone = 0;
+    if ((strtrim(Goal.broadcast_high) != "") && (CTF_Map == 0)) {
+        bprint(PRINT_HIGH, Goal.broadcast_high);
+    }
     te = find(world, classname, "player");
     while (te != world) {
         if ((Goal.broadcast != string_null) && (CTF_Map == 0)) {
             CenterPrint2(te, "\n\n\n", Goal.broadcast);
         }
+        
         if ((strtrim(Goal.netname_broadcast) != "") && (CTF_Map == 0)) {
             sprint(te, PRINT_HIGH, AP.netname, Goal.netname_broadcast);
         }
@@ -2513,15 +2520,15 @@ void () tfgoalitem_dropthink = {
     self.movetype = 6;
     if (self.pausetime != 0) {
         pos = pointcontents(self.origin);
-        if (pos == -4) { //CONTENT_SLIME
+        if (pos == CONTENT_SLIME) { 
             self.nextthink = time + (self.pausetime / 4);
         } else {
-            if (pos == -5) { //CONTENT_LAVA
+            if (pos == CONTENT_LAVA) { 
                 self.nextthink = time + 5;
                 self.think = tfgoalitem_remove;
                 return;
             } else {
-                if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
+                if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) { 
                     if (self.camdist < 3) {
                         self.origin = self.camangle;
                         setorigin(self, self.origin);
