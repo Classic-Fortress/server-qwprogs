@@ -711,6 +711,7 @@ void () DecodeLevelParms = {
            InitReverseCap();
         }
 
+        engineer_move = CF_GetSetting("em","engineer_move", "0");
 
         st = infokey(world, "default");
         if (st == "on") {

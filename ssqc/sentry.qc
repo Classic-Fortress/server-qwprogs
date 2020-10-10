@@ -245,7 +245,7 @@ void () Sentry_Explode = {
     if (self.classname == "building_sentrygun_base") {
         if (self.oldenemy)
             dremove(self.oldenemy);
-    } else
+    } else if (self.trigger_field != world)
         dremove(self.trigger_field);
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);

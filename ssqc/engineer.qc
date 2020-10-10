@@ -337,12 +337,9 @@ void () TeamFortress_EngineerBuildStop = {
     local entity te;
     local vector dist;
 
-    self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
-    self.movetype = MOVETYPE_WALK;
-    TeamFortress_SetSpeed(self);
     te = find(world, netname, "build_timer");
     while (te) {
-        if (te.owner == self) {
+        if (te.owner == self || (engineer_move && te.real_owner == self)) {
             dist = self.origin - te.origin;
             if (vlen(dist) > 128) {
                 sprint(self, PRINT_HIGH, "Your building disappeared\n");
@@ -355,6 +352,9 @@ void () TeamFortress_EngineerBuildStop = {
             } else {
                 sprint(self, PRINT_HIGH, "You stop building\n");
             }
+            if (engineer_move) {
+                self.has_sentry = 0;
+            }
             dremove(te);
             te = world;
         } else {
@@ -364,8 +364,13 @@ void () TeamFortress_EngineerBuildStop = {
     Menu_Close(self);
     self.is_building = 0;
     self.building_percentage = 0;
-    self.current_weapon = self.weapon;
-    W_SetCurrentAmmo(self);
+    if (!engineer_move) {
+        self.current_weapon = self.weapon;
+        self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
+        self.movetype = MOVETYPE_WALK;
+        TeamFortress_SetSpeed(self);
+        W_SetCurrentAmmo(self);
+    }
 }
 
 float (entity obj, entity builder) CheckArea = {
@@ -505,16 +510,18 @@ void (float objtobuild) TeamFortress_Build = {
         }
     }
     self.is_building = 1;
-    self.immune_to_check = time + 5;
-    self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-    self.movetype = MOVETYPE_NONE;
-    self.weapon = self.current_weapon;
-    self.current_weapon = 0;
-    self.weaponmodel = "";
-    self.weaponframe = 0;
-    TeamFortress_SetSpeed(self);
+    if (!engineer_move) {
+        self.immune_to_check = time + 5;
+        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+        self.movetype = MOVETYPE_NONE;
+        self.weapon = self.current_weapon;
+        self.current_weapon = 0;
+        self.weaponmodel = "";
+        self.weaponframe = 0;
+        TeamFortress_SetSpeed(self);
+        Menu_Engineer_Cancel();
+    }
     Status_Refresh(self);
-    Menu_Engineer_Cancel();
 
     newmis.owner = self;
     newmis.classname = "timer";
@@ -532,6 +539,22 @@ void (float objtobuild) TeamFortress_Build = {
     setorigin(newmis, newmis.origin);
     newmis.flags = newmis.flags - (newmis.flags & 512);
 
+    if (engineer_move) {
+        newmis.owner = world;
+        newmis.real_owner = self;
+        self.sentry_ent = newmis;
+        self.has_sentry = TRUE;
+        newmis.health = 50;
+        newmis.max_health = newmis.health;
+        newmis.th_die = Sentry_Die;
+        newmis.th_pain = Sentry_Pain;
+        newmis.takedamage = DAMAGE_AIM;
+        self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
+        newmis.classname = "building_sentrygun";
+        newmis.team_no = self.team_no;
+        newmis.weapon = 0;
+    }
+
     oldmis = newmis;
     newmis = spawn();
     newmis.owner = self;
@@ -543,6 +566,7 @@ void (float objtobuild) TeamFortress_Build = {
 };
 
 void () CF_CheckBuilding = {
+    local float max_dist = BUILD_SENTRYGUN_MAX_DISTANCE;
     local vector dist;
     local entity timer = self;
     local entity building = self.enemy;
@@ -553,8 +577,10 @@ void () CF_CheckBuilding = {
         return;
     }
 
+    if (engineer_move)
+        max_dist = BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE;
     dist = self.origin - building.origin;
-    if (vlen(dist) > 128) {
+    if (vlen(dist) > max_dist) {
         TeamFortress_EngineerBuildStop();
         dremove(timer);
         return;
@@ -811,9 +837,17 @@ void UpdateClient_Dispenser(entity pl, entity disp) = {
 void () TeamFortress_FinishedBuilding = {
     local entity oldself;
 
-    if (self.owner.is_building != 1) {
-        return;
+    if (engineer_move) {
+        if (self.real_owner.is_building != 1) {
+            return;
+        }
     }
+    else {
+        if (self.owner.is_building != 1) {
+            return;
+        }
+    }
+    self.owner = self.real_owner;
     
     local float csqcactive = infokeyf(self.owner, INFOKEY_P_CSQCACTIVE);
     
@@ -823,11 +857,14 @@ void () TeamFortress_FinishedBuilding = {
     oldself.real_owner = self;
     self.is_building = FALSE;
     self.building_percentage = 0;
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-    self.movetype = MOVETYPE_WALK;
-    self.current_weapon = self.weapon;
+    if (!engineer_move) {
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+        self.movetype = MOVETYPE_WALK;
+        self.current_weapon = self.weapon;
+        TeamFortress_SetSpeed(self);
+    }
     Status_Refresh(self);
-    TeamFortress_SetSpeed(self);
+
     Menu_Close(self);
     if (oldself.weapon == 1) {
         self.has_dispenser = TRUE;
@@ -871,7 +908,7 @@ void () TeamFortress_FinishedBuilding = {
         if(csqcactive) {
             UpdateClient_Dispenser(self, oldself);
         }
-    } else if (oldself.weapon == 2) {
+    } else if (oldself.weapon == 2 || (engineer_move && oldself.weapon == 0)) {
         self.has_sentry = TRUE;
         sprint(self, PRINT_HIGH, "You finish building the sentry gun\n");
         teamsprint(self.team_no, self, self.netname);
@@ -883,7 +920,8 @@ void () TeamFortress_FinishedBuilding = {
         oldself.team_no = self.team_no;
         oldself.think = CheckPyroLava;
         oldself.nextthink = time + .1;
-        self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
+        if (!engineer_move)
+            self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
         setsize(oldself, '-16 -16 0', '16 16 4');
         newmis = spawn();
         newmis.classname = "building_sentrygun";
@@ -1162,18 +1200,29 @@ void (entity gun) Engineer_UseSentryGun = {
     // automate tasks if old_spanner setting is disabled
     if (!old_spanner) {
         if(gun.team_no > 0 && gun.team_no == self.team_no) {
-            //Menu_EngineerFix_SentryGun_Rotate();
-            Engineer_SentryGun_ShowMenu(self.building);
-            if (gun.weapon < 3 && self.ammo_cells >= ENG_SENTRY_COST) {
-                Engineer_SentryGun_Upgrade(gun);
-                return;
-            } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
-                Engineer_SentryGun_Repair(gun);
-                return;
-            } else if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
-                        || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
-                        && self.ammo_rockets > 0)) {
-                Engineer_SentryGun_InsertAmmo(gun);
+            if (gun.weapon > 0) {
+                //Menu_EngineerFix_SentryGun_Rotate();
+                Engineer_SentryGun_ShowMenu(self.building);
+                if (gun.weapon < 3 && self.ammo_cells >= ENG_SENTRY_COST) {
+                    Engineer_SentryGun_Upgrade(gun);
+                    return;
+                } else if (gun.health < gun.max_health && self.ammo_cells > 0) {
+                    Engineer_SentryGun_Repair(gun);
+                    return;
+                } else if ((gun.ammo_shells < gun.maxammo_shells && self.ammo_shells > 0)
+                            || (gun.weapon == 3 && gun.ammo_rockets < gun.maxammo_rockets
+                            && self.ammo_rockets > 0)) {
+                    Engineer_SentryGun_InsertAmmo(gun);
+                    return;
+                }
+            } else {
+                sprint (self, PRINT_HIGH, strcat("You stopped building sentry gun and got ", ftos(ENG_SENTRY_COST), " cells back\n"));
+                self.ammo_cells = self.ammo_cells + ENG_SENTRY_COST;
+                if (gun.trigger_field != world)
+                    dremove (gun.trigger_field);
+                dremove (gun);
+                self.has_sentry = 0;
+                W_SetCurrentAmmo(self);
                 return;
             }
         } else { // hit enemy sentry
@@ -1182,7 +1231,8 @@ void (entity gun) Engineer_UseSentryGun = {
             bprint(PRINT_HIGH, self.netname, " dismantled ", gun.real_owner.netname, "'s sentry gun\n");
             TF_AddFrags(self, 1);
             sprint(gun.real_owner, PRINT_HIGH, "Your sentry gun was dismantled by ",self.netname,"\n");
-            dremove (gun.trigger_field);
+            if (gun.trigger_field != world)
+                dremove (gun.trigger_field);
             dremove (gun);
             ThrowGib("progs/tgib1.mdl", -30);
             ThrowGib("progs/tgib2.mdl", -50);
@@ -1371,7 +1421,8 @@ void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
                     te.real_owner.has_dispenser = 0;
                 if(bld == "building_sentrygun") {
                     te.real_owner.has_sentry = 0;
-                    dremove (te.trigger_field);
+                    if (te.trigger_field != world)
+                        dremove (te.trigger_field);
                 }
                 spawn_tfog(te.origin);
                 dremove (te);
