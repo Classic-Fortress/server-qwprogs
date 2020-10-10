@@ -591,6 +591,7 @@ float noreturn;
 float nohitsounds;
 //float server_sbflaginfo;
 float reverse_cap;
+float engineer_move;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
