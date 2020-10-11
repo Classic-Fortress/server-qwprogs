@@ -353,7 +353,10 @@ void () TeamFortress_EngineerBuildStop = {
                 sprint(self, PRINT_HIGH, "You stop building\n");
             }
             if (engineer_move) {
-                self.has_sentry = 0;
+                if (self.has_sentry == 1)
+                    self.has_sentry = 0;
+                else if (self.has_dispenser == 1)
+                    self.has_dispenser = 0;
             }
             dremove(te);
             te = world;
@@ -542,17 +545,29 @@ void (float objtobuild) TeamFortress_Build = {
     if (engineer_move) {
         newmis.owner = world;
         newmis.real_owner = self;
-        self.sentry_ent = newmis;
-        self.has_sentry = TRUE;
         newmis.health = 50;
         newmis.max_health = newmis.health;
-        newmis.th_die = Sentry_Die;
-        newmis.th_pain = Sentry_Pain;
-        newmis.takedamage = DAMAGE_AIM;
-        self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
-        newmis.classname = "building_sentrygun";
-        newmis.team_no = self.team_no;
-        newmis.weapon = 0;
+        if (objtobuild == 1) {
+            self.has_dispenser = TRUE;   
+            newmis.th_die = Dispenser_Die;
+            newmis.team_no = self.team_no;
+            newmis.real_owner = self;
+            newmis.team_no = self.team_no;
+            newmis.takedamage = DAMAGE_AIM;
+            self.ammo_cells = self.ammo_cells - ENG_DISPENSER_COST;
+            newmis.classname = "building_dispenser";
+        }
+        if (objtobuild == 2) {            
+            self.sentry_ent = newmis;
+            self.has_sentry = TRUE;            
+            newmis.th_die = Sentry_Die;
+            newmis.th_pain = Sentry_Pain;
+            newmis.takedamage = DAMAGE_AIM;
+            self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
+            newmis.classname = "building_sentrygun";
+            newmis.team_no = self.team_no;
+            newmis.weapon = 0;
+        }
     }
 
     oldmis = newmis;
@@ -577,13 +592,15 @@ void () CF_CheckBuilding = {
         return;
     }
 
-    if (engineer_move)
-        max_dist = BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE;
-    dist = self.origin - building.origin;
-    if (vlen(dist) > max_dist) {
-        TeamFortress_EngineerBuildStop();
-        dremove(timer);
-        return;
+    if (!engineer_move) { //disabling max_distance for moving engineer
+        if (engineer_move)
+            max_dist = BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE;
+        dist = self.origin - building.origin;
+        if (vlen(dist) > max_dist) {
+            TeamFortress_EngineerBuildStop();
+            dremove(timer);
+            return;
+        }
     }
 
     if (building.weapon == 2) {
@@ -835,8 +852,7 @@ void UpdateClient_Dispenser(entity pl, entity disp) = {
 
 
 void () TeamFortress_FinishedBuilding = {
-    local entity oldself;
-
+    local entity oldself;    
     if (engineer_move) {
         if (self.real_owner.is_building != 1) {
             return;
@@ -1038,7 +1054,6 @@ void () Dispenser_Die = {
 
 void (entity disp) Engineer_UseDispenser = {
     local entity dist_checker;
-
     // engineer hits enemy dispenser - dismantle
     if(!(disp.team_no > 0 && disp.team_no == self.team_no)) {
         self.ammo_cells = self.ammo_cells + 50;
@@ -1052,6 +1067,21 @@ void (entity disp) Engineer_UseDispenser = {
         ThrowGib("progs/dgib3.mdl", -50);
         W_SetCurrentAmmo(self);
         return;
+    }
+
+    if (self.team_no == disp.team_no) {
+        if (disp.real_owner.is_building) {
+            sprint (self, PRINT_HIGH, strcat("You stopped building a dispenser and got ", ftos(ENG_DISPENSER_COST), " cells back\n"));
+            self.ammo_cells = self.ammo_cells + ENG_DISPENSER_COST;
+            if (self.ammo_cells > self.maxammo_cells)
+                self.ammo_cells = self.maxammo_cells;
+            dremove (disp);
+            W_SetCurrentAmmo(self);
+            self = disp.real_owner;
+            self.has_dispenser = 0;         
+            TeamFortress_EngineerBuildStop();
+            return;
+        }
     }
 
     if (disp.health < disp.max_health && !old_spanner) {
@@ -1216,17 +1246,23 @@ void (entity gun) Engineer_UseSentryGun = {
                     return;
                 }
             } else {
-                sprint (self, PRINT_HIGH, strcat("You stopped building sentry gun and got ", ftos(ENG_SENTRY_COST), " cells back\n"));
+                sprint (self, PRINT_HIGH, strcat("You stopped building a sentry gun and got ", ftos(ENG_SENTRY_COST), " cells back\n"));
                 self.ammo_cells = self.ammo_cells + ENG_SENTRY_COST;
+                if (self.ammo_cells > self.maxammo_cells)
+                    self.ammo_cells = self.maxammo_cells;
                 if (gun.trigger_field != world)
                     dremove (gun.trigger_field);
                 dremove (gun);
-                self.has_sentry = 0;
                 W_SetCurrentAmmo(self);
+                self = gun.real_owner;
+                self.has_sentry = 0;                
+                TeamFortress_EngineerBuildStop();
                 return;
             }
         } else { // hit enemy sentry
             self.ammo_cells = self.ammo_cells + 65;
+            if (self.ammo_cells > self.maxammo_cells)
+                    self.ammo_cells = self.maxammo_cells;
             gun.real_owner.has_sentry = 0;
             bprint(PRINT_HIGH, self.netname, " dismantled ", gun.real_owner.netname, "'s sentry gun\n");
             TF_AddFrags(self, 1);
