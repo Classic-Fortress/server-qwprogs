@@ -844,11 +844,19 @@ void (float inp) Menu_Engineer_Input = {
     dismantle_sentrygun = 0;
     dismantle_dispenser = 0;
 
-    if (inp == 1 && !self.has_sentry && self.ammo_cells >= ENG_SENTRY_COST)
-        TeamFortress_Build(2);
-
-    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= ENG_DISPENSER_COST)
-        TeamFortress_Build(1);
+    if (inp == 1 && !self.has_sentry) {
+        if (self.ammo_cells >= ENG_SENTRY_COST)
+            TeamFortress_Build(2);
+        else
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You need ", ftos(ENG_SENTRY_COST), " cells to build a sentry gun"));
+    }
+    
+    if (inp == 2 && !self.has_dispenser) {
+        if (self.ammo_cells >= ENG_DISPENSER_COST)
+            TeamFortress_Build(1);
+        else
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You need ", ftos(ENG_DISPENSER_COST), " cells to build a dispenser"));
+    }
 
     if (inp == 3 && self.has_sentry) {
         te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
