@@ -264,6 +264,11 @@ void () Sentry_Die = {
     self.real_owner.has_sentry = 0;
     self.think = Sentry_Explode;
     self.nextthink = time + 0.1;
+    if (self.real_owner.is_building) {
+        self = self.real_owner;
+        TeamFortress_EngineerBuildStop();
+    }
+    
 };
 
 float () Sentry_Fire = {
