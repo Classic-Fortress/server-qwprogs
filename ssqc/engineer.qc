@@ -353,9 +353,9 @@ void () TeamFortress_EngineerBuildStop = {
                 sprint(self, PRINT_HIGH, "You stop building\n");
             }
             if (engineer_move) {
-                if (self.has_sentry == 1)
+                if (te.classname == "building_sentrygun")
                     self.has_sentry = 0;
-                else if (self.has_dispenser == 1)
+                else if (te.classname == "building_dispenser")
                     self.has_dispenser = 0;
             }
             dremove(te);
@@ -603,7 +603,7 @@ void () CF_CheckBuilding = {
         }
     }
 
-    if (building.weapon == 2) {
+    if (building.weapon == 2 || building.weapon == 0) {
         self.sentry_ticks = self.sentry_ticks + 0.3;
         self.building_percentage = ceil((self.sentry_ticks / 5) * 100);
     } else if (building.weapon == 1) {
