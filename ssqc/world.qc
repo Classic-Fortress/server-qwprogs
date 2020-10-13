@@ -317,6 +317,7 @@ void () worldspawn = {
     precache_sound("blob/sight1.wav");
     precache_sound("misc/secret.wav");
     precache_sound("weapons/airblast.wav");
+    precache_sound("weapons/airblastshoot.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
