@@ -748,12 +748,23 @@ void () TeamFortress_FlameThrower = {
     W_SetCurrentAmmo(self);
 };
 
+void () AirBlastReloadFinished = {
+    sprint(self.owner, PRINT_HIGH, "Airblast ready\n");
+    stuffcmd(self.owner, "play weapons/airblast.wav\n");
+    dremove(self);
+};
+
 void () UseAirBlast = {
     if (self.special_cooldown < time)
     {
         self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        entity timer = spawn();
+        timer.owner = self;
+        timer.classname = "timer";
+        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        timer.think = AirBlastReloadFinished;
 
-        FO_Sound(self, CHAN_WEAPON, "weapons/airblast.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
 
@@ -762,7 +773,7 @@ void () UseAirBlast = {
         {
             if (ent.movetype != MOVETYPE_NONE && ent != self)
             {                
-                if (visible(ent))
+                if (infront(ent))
                 {
                     switch (ent.classname)
                     {
