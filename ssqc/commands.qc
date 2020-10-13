@@ -641,7 +641,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 if(arg2 == "cancel") {
                     TeamFortress_EngineerBuildStop();
                     break;
-                }
+                }                
                 if(arg2 == "sentry") {
                     if(self.is_building && !engineer_move) {
                         TeamFortress_EngineerBuildStop();
@@ -651,7 +651,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     break;
                 }
                 if(arg2 == "dispenser") {
-                    if(self.is_building) {
+                    if(self.is_building && !engineer_move) {
                         TeamFortress_EngineerBuildStop();
                         break;
                     }

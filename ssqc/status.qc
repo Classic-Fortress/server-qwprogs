@@ -1650,7 +1650,7 @@ string(entity pl) BuildingToString ={
     if (engineer_move && self.sentry_ent) {
         hp = strcat(strpadl(ftos(floor(self.sentry_ent.health)), 2), " hp");
         st = strcat(st,strcat(Q"\sSentry\s: ", hp));
-        st = strpadr(st, 14);
+        st = strpadr(st, 15);
     }
 
     if (!buildstatus)
