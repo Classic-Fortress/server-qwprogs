@@ -537,6 +537,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
                         moment = 0;
                 } else
                     moment = damage;
+                if (inflictor.classname == "pyro_rocket") {
+                    moment = damage * 1.4;
+                }
 
                 if ((moment < 60)
                     && (attacker.classname == "player")
