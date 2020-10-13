@@ -869,7 +869,8 @@ void () TeamFortress_FinishedBuilding = {
             return;
         }
     }
-    self.owner = self.real_owner;
+    if (engineer_move)
+        self.owner = self.real_owner;
     
     local float csqcactive = infokeyf(self.owner, INFOKEY_P_CSQCACTIVE);
     
