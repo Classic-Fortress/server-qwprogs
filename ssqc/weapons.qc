@@ -120,6 +120,8 @@ float () IsUsingOldImpulses;
 
 void (float inp) W_OldWeaponSlot;
 
+void (entity ent, float num) SetFlameCount;
+
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
     precache_sound("weapons/rocket1i.wav");
@@ -503,7 +505,7 @@ void () W_FireMedikit = {
 
                     FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
                           ATTN_NORM);
-                    trace_ent.numflames = 0;
+                    SetFlameCount(trace_ent, 0);
 
                     if (self.classname == "player") {
                         bprint(PRINT_MEDIUM, self.netname, " put out ",

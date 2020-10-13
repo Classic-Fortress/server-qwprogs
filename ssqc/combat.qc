@@ -415,6 +415,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
 
     no_damage = 0;
 
+    if (pyro_type == PYRO_FO && (targ.tfstate & TFSTATE_BURNING))
+        damage = damage * PC_PYRO_BURN_DAMAGE_AMP;
+
     if (attacker.classname == "player") {
 
         damage = damage * 0.9;

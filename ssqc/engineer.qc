@@ -827,8 +827,6 @@ void () DispenserThink = {
     if (!old_dispenser)
         Dispenser_FindPlayers(self);
 
-    CheckPyroLava();
-
     self.nextthink = time + 0.3;
 };
 

@@ -1794,6 +1794,7 @@ void () PutClientInServer = {
     self.fire_held_down = 0;
     self.dimension_see = DMN_NOFLASH;
     self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    self.special_cooldown = 0;
     
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
