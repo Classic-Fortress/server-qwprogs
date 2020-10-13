@@ -2303,7 +2303,6 @@ void () TeamFortress_RemoveTimers = {
     self.is_undercover = 0;
 
     if (self.is_building && engineer_move) {
-        bprint(2,"TEST 1\n");
         TeamFortress_EngineerBuildStop();
     }
 
