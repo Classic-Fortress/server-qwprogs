@@ -670,6 +670,9 @@
 #define BUILD_DISPENSER_MAX_CELLS   400
 #define BUILD_DISPENSER_MAX_ARMOR   500
 
+#define BUILD_SENTRYGUN_MAX_DISTANCE 128
+#define BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE 1024
+
 /*======================================================*/
 /* Ammo quantities for dropping				*/
 /*======================================================*/

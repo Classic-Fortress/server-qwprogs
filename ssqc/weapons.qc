@@ -281,7 +281,6 @@ void () W_FireSpanner = {
     if (trace_ent.takedamage) {
 
         if (trace_ent.classname == "building_dispenser") {
-
             Engineer_UseDispenser(trace_ent);
             return;
 
@@ -3332,7 +3331,7 @@ void () W_WeaponFrame = {
 
     // slot 1-4 (or 1-7) binds
     if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
-                && !self.is_building && !self.is_detpacking) {
+                && !(self.is_building && !engineer_move) && !self.is_detpacking) {
 
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             // load weapon state if current state doesn't match stored state

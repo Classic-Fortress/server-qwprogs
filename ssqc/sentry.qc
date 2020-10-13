@@ -245,7 +245,7 @@ void () Sentry_Explode = {
     if (self.classname == "building_sentrygun_base") {
         if (self.oldenemy)
             dremove(self.oldenemy);
-    } else
+    } else if (self.trigger_field != world)
         dremove(self.trigger_field);
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -264,6 +264,11 @@ void () Sentry_Die = {
     self.real_owner.has_sentry = 0;
     self.think = Sentry_Explode;
     self.nextthink = time + 0.1;
+    if (self.real_owner.is_building) {
+        self = self.real_owner;
+        TeamFortress_EngineerBuildStop();
+    }
+    
 };
 
 float () Sentry_Fire = {

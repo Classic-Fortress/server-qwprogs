@@ -2301,6 +2301,11 @@ void () TeamFortress_RemoveTimers = {
     self.leg_damage = 0;
     self.is_concussed = 0;
     self.is_undercover = 0;
+
+    if (self.is_building && engineer_move) {
+        TeamFortress_EngineerBuildStop();
+    }
+
     self.is_building = 0;
     self.building = world;
     if (self.tfstate & TFSTATE_AIMING) {
