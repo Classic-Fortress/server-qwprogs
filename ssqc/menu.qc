@@ -837,6 +837,10 @@ void (float inp) Menu_Engineer_Input = {
         return;
 
     if (self.is_building) {
+        if (engineer_move) {
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You are already building something"));
+            return;
+        }
         Menu_Engineer(self);
         return;
     }
