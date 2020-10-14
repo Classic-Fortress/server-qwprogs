@@ -60,6 +60,52 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 return (fo_hud_editor || menu_mouse);
             default:
         }
+    } else if(Hud_Panels[HUD_PANEL_MAP_MENU].Display) {
+        switch (evtype) {
+            case IE_MOUSEDELTA:
+                return TRUE;
+            case IE_MOUSEABS:
+                Mouse.x = scanx;
+                Mouse.y = chary;
+                return TRUE;
+             case IE_KEYDOWN:
+                switch (scanx) {
+                    case K_ESCAPE:
+                        return TRUE;
+                        break;
+                    case K_MOUSE1:
+                        return TRUE;
+                        break;
+                    case K_UPARROW:
+                        vote_selected_index--;
+                        vote_list_offset--;
+                        return TRUE;
+                        break;
+                    case K_DOWNARROW:
+                        vote_selected_index++;
+                        vote_list_offset++;
+                        return TRUE;
+                        break;
+                    case K_MWHEELUP:
+                        vote_list_offset--;
+                        return TRUE;
+                        break;
+                    case K_MWHEELDOWN:
+                        vote_list_offset++;
+                        return TRUE;
+                        break;
+                }       
+             case IE_KEYUP:
+                switch (scanx) {
+                    case K_ESCAPE:
+                        showVoteMenu(FALSE);
+                        return TRUE;
+                        break;
+                    case K_MOUSE1:
+                        return TRUE;
+                        break;
+                }       
+            }
     } else {
         switch (evtype)
         {

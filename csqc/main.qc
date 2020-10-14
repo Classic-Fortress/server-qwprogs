@@ -68,7 +68,16 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
-//    hud_idle_alpha = 0.3;
+    num_mapvotes = 0;
+    vote_selected_item = world;
+    vote_selected_index = -1;
+    vote_list_offset = 0;
+    AddVoteMap("1on1", "1 on 1, the old one","Duel",2,2,2); //MEHT
+    AddVoteMap("border1", "Cross the border","Civilian Hunt",3,4,20); //MEHT
+    AddVoteMap("2fort5r","2 Freaking Forts 5 R\nR stands for revised","CTF",2,6,16); //MEHT
+    for(float i = 0; i < 50; i++) {
+        AddVoteMap(strcat("2fort", ftos(i)),strcat("Test Map #",ftos(i)),"TEST",4*rint(random() * i),6*rint(random() * i),8*rint(random() * i)); //MEHT
+    }
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -174,7 +183,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Admin_Main(TRUE);
             break;
         case "fo_menu_vote":
-            FO_Menu_Vote(TRUE);
+            //FO_Menu_Vote(TRUE);
+            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);

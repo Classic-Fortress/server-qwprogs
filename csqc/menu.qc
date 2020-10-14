@@ -630,7 +630,7 @@ var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
     }, 11, TRUE
 };
 var fo_menu FO_MENU_VOTE = {
-    [0,0], [300,200], "Map Vote", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+    [0,0], [300,200], "Map Vote", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
         {"1","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[0].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"2","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[1].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
@@ -660,6 +660,8 @@ vector fo_menu_draw(fo_menu * menu) = {
         setcursormode(FALSE);
         return position;
     }
+
+    Hud_Panels[HUD_PANEL_MAP_MENU].Display = FALSE;
 
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
@@ -734,7 +736,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, alignment, shortcutoffset.x)) {
+                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, MENU_TEXT_1, alignment, shortcutoffset.x, 0.6, 1, 0)) {
                         menu.options[i].action();
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
@@ -1258,4 +1260,15 @@ void FO_Menu_Special(float force) = {
     }
     localcmd("cmd menu\n");
     //fo_hud_menu_active = TRUE;
+};
+
+void (float show) showVoteMenu = {
+    if(fo_hud_menu_active) {
+        Menu_Cancel();
+    }
+    setcursormode(show);
+    Hud_Panels[HUD_PANEL_MAP_MENU].Display = show;
+    if(show) {
+        CurrentMenu = &FO_MENU_VOTE;
+    }
 };

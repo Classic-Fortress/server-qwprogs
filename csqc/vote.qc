@@ -3,7 +3,6 @@
 "name" "amth1" //map name
 "description" "Duel arena, ctf and Sniper War" //description
 "groupname" "Duel/Arena" //group
-"group"
 "min_val" "2" //min players
 "max_val" "8" //max players
 "team_num" "4" //supported teams
@@ -50,6 +49,8 @@ entity (string n, string desc, string mapgroup, float num_teams, float min_playe
     mc.team_num = num_teams?num_teams:2;
     mc.min_val = min_players?min_players:6;
     mc.max_val = max_players?max_players:16;
+    
+    num_mapvotes++;
     return mc;
 };
 
@@ -61,6 +62,7 @@ float (string n) RemoveVoteMap = {
     while(mc) {
         if(mc.name == n) {
             remove(mc);
+            num_mapvotes--;
             return TRUE;
         }
         mc = find(mc, classname, "map_candidate");
