@@ -22,7 +22,7 @@ void () NailGrenadeExplode = {
     local entity te;
 
     self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
-    if (self.owner.no_active_nail_grens > max_active_gren2_soldier) {
+    if (self.owner.no_active_nail_grens >= max_active_gren2_soldier) {
 
         te = find(world, classname, "grenade");
         while (te) {
