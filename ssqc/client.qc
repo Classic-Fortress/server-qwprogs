@@ -665,7 +665,7 @@ void () DecodeLevelParms = {
         }
         
         //default round interval for quadmode (seconds)
-        localcmd ("localinfo round_delay_time 30\n");
+        round_delay_time = CF_GetSetting("round_delay_time", "rdt", "30");
 
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
@@ -714,6 +714,8 @@ void () DecodeLevelParms = {
         }
 
         engineer_move = CF_GetSetting("em","engineer_move", "0");
+
+        max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
         st = infokey(world, "default");
         if (st == "on") {
