@@ -25,6 +25,11 @@ void () SpectatorConnect = {
     self.classname = "observer";
     self.flags = 8;
 
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (infokey(self,"*admin"))
+        self.is_admin = stof(infokey(self, "*admin"));
+
     st = infokey(self, "apw");
     if (st == string_null)
         st = infokey(self, "adminpwd");

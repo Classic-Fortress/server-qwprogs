@@ -33,6 +33,7 @@ void(float reqid, float responsecode, string resourcebody) URI_Get_Callback = {
 		if (num_args > 1) {
 			if (argv(1) == "true") {
 				self.is_admin = TRUE;
+				forceinfokey(self,"*admin", ftos(self.is_admin));
 				Admin_Aliases ();
 				bprint2 (2, self.netname, " \sgains full admin status!\s\n");
 //				bprint (3, "\n");

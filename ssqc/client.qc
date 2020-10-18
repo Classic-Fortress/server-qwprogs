@@ -2698,6 +2698,8 @@ void (optional float csqcactive) ClientConnect = {
 
     if (infokey(self,"*login"))
         self.login = infokey(self,"*login");
+    if (infokey(self,"*admin"))
+        self.is_admin = stof(infokey(self, "*admin"));
     if (self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
