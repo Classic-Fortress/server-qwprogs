@@ -901,6 +901,8 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[4] = 4;
             Role_None.gren2_limits[5] = 3;
             Role_None.gren2_limits[8] = 3;
+            max_active_gren2_soldier = 1;
+            round_delay_time = 10;
         }
     }
 
