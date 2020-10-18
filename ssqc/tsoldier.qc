@@ -22,11 +22,13 @@ void () NailGrenadeExplode = {
     local entity te;
 
     self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
-    if (self.owner.no_active_nail_grens > 2) {
+    if (self.owner.no_active_nail_grens >= max_active_gren2_soldier) {
 
         te = find(world, classname, "grenade");
         while (te) {
-            if ((te.owner == self.owner) && (te.no_active_nail_grens == 1)) {
+            if ((te.owner == self.owner || te.real_owner == self.owner) && (te.no_active_nail_grens == 1)) {
+                if (!te.owner)
+                    te.owner = te.real_owner;
                 te.weapon = 9;
                 te.think = GrenadeExplode;
                 te.nextthink = time + 0.1;

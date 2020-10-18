@@ -938,8 +938,7 @@ void () TeamFortress_FinishedBuilding = {
         oldself.netname = "sentry gun";
         oldself.takedamage = DAMAGE_NO;
         oldself.th_die = Sentry_Die;
-        oldself.team_no = self.team_no;
-        oldself.think = CheckPyroLava;
+        oldself.team_no = self.team_no;        
         oldself.nextthink = time + .1;
         if (!engineer_move)
             self.ammo_cells = self.ammo_cells - ENG_SENTRY_COST;
