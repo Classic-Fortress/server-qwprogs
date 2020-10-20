@@ -269,6 +269,7 @@ void (string cl_pwd) Admin_Check =
         stuffcmd(self, "\"\n");
         if (st2 != string_null && cl_pwd == st2) {
             self.is_admin = TRUE;
+            forceinfokey(self,"*admin", ftos(self.is_admin));
             bprint2(2, self.netname, "\s gains full admin status!\s\n");
             sprint(self, 2, "Type \scmd list\s for admin commands.\n");
             sprint(self, 2, "You can also use the \sadminmenu\s command for adjusting some settings.\n");  
