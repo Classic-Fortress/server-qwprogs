@@ -630,7 +630,10 @@ void () IncendiaryRadius = {
 
 void () IncendiaryRadius_OZTF = {
     local float damg;
-    damg = 68;
+    if (pyro_type == 1)
+        damg = 68;
+    else
+        damg = 92;
     deathmsg = 15;
     T_RadiusDamage(self, self.owner, damg, other);
     self.origin = (self.origin - (8 * normalize (self.velocity)));
@@ -660,7 +663,10 @@ void () T_IncendiaryTouch = {
     }
     else
     {
-        damg = 68 + random() * 20;
+        if (pyro_type == 1)
+            damg = 68 + random() * 20;
+        else
+            damg = 42 + random() * 20;
     }
     
     if (other.health) {
