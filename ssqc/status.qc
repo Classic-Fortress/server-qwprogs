@@ -1641,16 +1641,34 @@ string(entity pl) SentryDetailsToString =
     return st;
 };
 
-string(entity pl) BuildingToString =
-{
+string(entity pl) BuildingToString ={
     local string st = "";
+    local int dist_percentage;
+    local string dist_string;
+    local string hp;
+
+    if (engineer_move && self.sentry_ent) {
+        hp = strcat(strpadl(ftos(floor(self.sentry_ent.health)), 2), " hp");
+        st = strcat(st,strcat(Q"\sSentry\s: ", hp));
+        st = strpadr(st, 15);
+    }
 
     if (!buildstatus)
         return "Building...";
 
-    st = Q"\sBuilding\s: ";
+    st = strcat(st, Q"\sReady\s: ");
     st = strcat(st, ftos(pl.building_percentage));
     st = strcat(st, "%");
+    if (!engineer_move) { //disabling max_distance for moving engineer
+        if (engineer_move) {
+            dist_percentage = (vlen(self.origin - self.sentry_ent.origin)/BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE)*100;
+            st = strpadr(st, 26);
+            st = strcat(st, Q"\sDistance\s:");
+            dist_string = strcat(itos(dist_percentage),"%");
+            dist_string = strcat(Q"\x10", dist_string ,Q"\x11");
+            st = strcat(st, dist_string);
+        }
+    }
 
     return st;
 };

@@ -448,6 +448,7 @@ float quad_winner;
 float rounds;
 float round_active;
 float round_over;
+float round_delay_time;
 float gametime;
 float is_countdown;
 float duelmode;
@@ -520,6 +521,7 @@ float max_gren2_pyro;
 float max_gren2_spy;
 float max_gren2_engineer;
 */
+float max_active_gren2_soldier;
 float grentimers;
 float id_extended;
 float remember_weapon;
@@ -591,6 +593,7 @@ float noreturn;
 float nohitsounds;
 //float server_sbflaginfo;
 float reverse_cap;
+float engineer_move;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;

@@ -665,7 +665,7 @@ void () DecodeLevelParms = {
         }
         
         //default round interval for quadmode (seconds)
-        localcmd ("localinfo round_delay_time 30\n");
+        round_delay_time = CF_GetSetting("round_delay_time", "rdt", "30");
 
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
@@ -713,6 +713,9 @@ void () DecodeLevelParms = {
            InitReverseCap();
         }
 
+        engineer_move = CF_GetSetting("em","engineer_move", "0");
+
+        max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -898,6 +901,8 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[4] = 4;
             Role_None.gren2_limits[5] = 3;
             Role_None.gren2_limits[8] = 3;
+            max_active_gren2_soldier = 1;
+            round_delay_time = 10;
         }
     }
 
@@ -1793,6 +1798,7 @@ void () PutClientInServer = {
     self.fire_held_down = 0;
     self.dimension_see = DMN_NOFLASH;
     self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    self.special_cooldown = 0;
     
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -2694,6 +2700,8 @@ void (optional float csqcactive) ClientConnect = {
 
     if (infokey(self,"*login"))
         self.login = infokey(self,"*login");
+    if (infokey(self,"*admin"))
+        self.is_admin = stof(infokey(self, "*admin"));
     if (self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 

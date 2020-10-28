@@ -93,7 +93,7 @@ void () QuadRoundThink = {
 			if (rounds > 1)
             {
                 local string st;
-                st = infokey(world, "round_delay_time");
+                st = ftos(round_delay_time);
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
@@ -430,8 +430,8 @@ void () StartQuadRound =
 	}
 
     local float rdt;
-    st = infokey(world, "round_delay_time");
-    rdt = stof(st);
+    st = ftos(round_delay_time);
+    rdt = round_delay_time;
 	te.cnt2 = rdt;
 	st = infokey (world, "round_time");
 	te.cnt = stof (st);
@@ -452,7 +452,7 @@ void () EndQuadRound = {
 		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
 			if (rounds > 1) {
                 local string st;
-                st = infokey(world, "round_delay_time");
+                st = ftos(round_delay_time);
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
 				lightstyle (0, "e");
 				self.think = QuadRoundOver;
