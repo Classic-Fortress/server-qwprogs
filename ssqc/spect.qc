@@ -57,6 +57,7 @@ void () SpectatorConnect = {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
         UpdateClientPrematch(self, !cb_prematch);
+        UpdateClient_VoteMap_AddAll(self);
     }
 
     TeamFortress_StartTimers();

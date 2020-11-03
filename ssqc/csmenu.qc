@@ -285,3 +285,95 @@ void UpdateClientPrematch(entity pl, float countdownstarted) = {
     //WriteByte(MSG_MULTICAST, countdownstarted);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
+
+void UpdateClientMapVote(entity pl, entity candidate) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE) || !candidate)
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_UPDATE);
+    WriteString(MSG_MULTICAST, candidate.netname);
+    WriteFloat(MSG_MULTICAST, candidate.cnt);
+    WriteByte(MSG_MULTICAST, (pl.vote_map == candidate));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateAllClientMapVotes(entity candidate) {
+    if(!candidate) {
+        return;
+    }
+    entity pl = find(world, classname, "player");
+    while(pl) {
+        if(!pl.has_disconnected) {
+            UpdateClientMapVote(pl, candidate);
+        }
+        pl = find(pl, classname, "player");
+    }
+}
+
+void UpdateClientMenu_Maps(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_MAPS);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_VoteMap_Add(entity pl, entity map_candidate) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_MAP_ADD);
+    WriteString(MSG_MULTICAST, map_candidate.netname);
+    WriteString(MSG_MULTICAST, map_candidate.broadcast);
+    WriteString(MSG_MULTICAST, map_candidate.team_broadcast);
+    WriteFloat(MSG_MULTICAST, map_candidate.team_no);
+    WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_min);
+    WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_max);
+    WriteFloat(MSG_MULTICAST, map_candidate.cnt);
+    WriteByte(MSG_MULTICAST, (pl.vote_map == map_candidate));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_VoteMap_AddAll(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    local entity mc = find(world, classname, "map_candidate");
+    while(mc) {
+        UpdateClient_VoteMap_Add(pl, mc);
+        mc = find(mc, classname, "map_candidate");
+    }
+}
+
+void UpdateClient_VoteMap_Add_Broadcast(entity map_candidate) = {
+    local entity pl = find(world, classname, "map_candidate");
+    while(pl) {
+        if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
+            UpdateClient_VoteMap_Add(pl, map_candidate);
+        }
+        pl = find(pl, classname, "player");
+    }
+}
+
+void UpdateClient_VoteMap_Delete(entity pl, string map) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_MAP_DELETE);
+    WriteString(MSG_MULTICAST, map);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_VoteMap_Delete_Broadcast(entity map_candidate) = {
+    local entity pl = find(world, classname, "map_candidate");
+    while(pl) {
+        if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
+            UpdateClient_VoteMap_Delete(pl, map_candidate.netname);
+        }
+        pl = find(pl, classname, "player");
+    }
+}

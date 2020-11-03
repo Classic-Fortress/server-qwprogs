@@ -3,7 +3,8 @@ void AddGrenTimer(float grentype);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
-    local float goalno; 
+    local float goalno;
+    entity te;
     switch (msgtype) {
         case MSG_FLAGINFOINIT:
             float index = readfloat();
@@ -27,7 +28,7 @@ void() CSQC_Parse_Event = {
                 FlagInfoLines[index].message = "";
                 if(mdl)
                     precache_model(mdl);
-                entity te = spawn();
+                te = spawn();
                 te.renderflags = RF_VIEWMODEL | RF_DEPTHHACK | RF_NOSHADOW;
                 te.origin = [5, 0, 0];
                 te.angles = '-60 0 0';
@@ -192,6 +193,9 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_CAPTAIN_PICK:
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
                     break;
+                case CLIENT_MENU_MAPS:
+                    showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -268,6 +272,23 @@ void() CSQC_Parse_Event = {
             TS.team2score = readfloat();
             TS.team3score = readfloat();
             TS.team4score = readfloat();
+            break;
+        case MSG_VOTE_UPDATE:
+            te = AddVoteMap(readstring(), "","",0,0,0,FALSE);
+            te.votecount = readfloat();
+            if(readbyte()) {
+                current_vote = te;
+            }
+            break;
+        case MSG_VOTE_MAP_ADD:
+            te = AddVoteMap(readstring(), readstring(), readstring(), readfloat(), readfloat(), readfloat(), FALSE);
+            te.votecount = readfloat();
+            if(readbyte()) {
+                current_vote = te;
+            }
+            break;
+        case MSG_VOTE_MAP_DELETE:
+            RemoveVoteMap(readstring(), FALSE);
             break;
     }
 }
