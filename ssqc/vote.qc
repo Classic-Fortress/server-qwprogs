@@ -1142,6 +1142,7 @@ entity (string name, string desc, string mapgroup, float num_teams, float min_pl
     mc.team_no = num_teams?num_teams:2;
     mc.ex_skill_min = min_players?min_players:6;
     mc.ex_skill_max = max_players?max_players:16;
+    UpdateClient_VoteMap_Add_Broadcast(mc);
     return mc;
 };
 
@@ -1152,6 +1153,7 @@ float (string name) RemoveVoteMap = {
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.netname == name) {
+            UpdateClient_VoteMap_Delete_Broadcast(mc);
             dremove(mc);
             return TRUE;
         }
@@ -1447,6 +1449,7 @@ void (entity p, string vote) VoteForMap = {
             }
             p.vote_map = mc;
             mc.cnt++;
+            UpdateAllClientMapVotes(mc);
             CheckVoting();
             return;
         }
@@ -1595,6 +1598,11 @@ void (float update) Vote_Menu_Map = {
     // allow toggling team menu using any method to show it
     if (!update && self.menu_input == Vote_Menu_Map_Input) {
         Menu_Input(0);
+        return;
+    }
+
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)){
+        UpdateClientMenu_Maps(self);
         return;
     }
 

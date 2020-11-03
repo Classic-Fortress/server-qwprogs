@@ -86,6 +86,7 @@ float num_mapvotes;
 entity vote_selected_item;
 float vote_selected_index;
 float vote_list_offset;
+entity current_vote;
 
 .string name;
 .string description;
@@ -94,7 +95,8 @@ float vote_list_offset;
 .float team_num;
 .float min_val;
 .float max_val;
-.float cnt;
+.float votecount;
+.float localmap;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;

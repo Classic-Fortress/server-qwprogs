@@ -299,13 +299,13 @@ void(string panelid) Hud_DrawMapMenuPanel = {
 */
     //sui_scroll_view_begin("scrolltest", panel.Position + [200,4], [100,100], [100,200], listoffset, [2,6]);
     //sui_scroll_view_end();
+    sui_border_box(panel.Position + [padding, padding * 2 + titlesize], listviewsize, 1, MENU_TEXT_SPEC_FO, 0.6, 0);
     if(vote_list_offset > num_mapvotes - visiblelistitems) {
         vote_list_offset = num_mapvotes - visiblelistitems;
     }
     if(vote_list_offset < 0) {
         vote_list_offset = 0;
     }
-    sui_border_box(panel.Position + [padding, padding * 2 + titlesize], listviewsize, 1, MENU_BORDER, 0.6, 0);
     entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(cnt >= vote_list_offset) {
@@ -342,11 +342,23 @@ void(string panelid) Hud_DrawMapMenuPanel = {
             //sui_border_box(listitempos, listitemsize, 1, bgcolour, 0.4, 0);
             //sui_fill(listitempos, listitemsize, bgcolour, alpha, 0);
             //sui_text(listitempos, [listitemsize.y, listitemsize.y], mc.name, textcolour, alpha, 0);
-            if(hud_colour_button(strcat("listitem",ftos(cnt)),listitempos, listitemsize, mc.name, bgcolour, [listitemsize.y, listitemsize.y], textcolour, SUI_ALIGN_START, 2, alpha, alpha, 1)) {
+            sui_push_frame(listitempos, listitemsize);
+            if(mc == current_vote) {
+                textcolour = MENU_TEXT_GREEN;
+            } else if(mc.votecount > 0) {
+                textcolour = MENU_TEXT_WARNING;
+            } else {
+                textcolour = MENU_TEXT_1;
+            }
+            if(hud_colour_button(strcat("listitem",ftos(cnt)),[0,0], listitemsize, mc.name, bgcolour, [listitemsize.y, listitemsize.y], textcolour, SUI_ALIGN_START, 2, alpha, alpha, 1)) {
                 vote_selected_item = mc;
                 vote_selected_index = cnt;
-                print("Selected is now ", mc.name, "\n"); //MEHT
             }
+            if(mc.votecount > 0) {
+                sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+                sui_text([padding * -1, 0], [listitemsize.y, listitemsize.y], ftos(mc.votecount), MENU_TEXT_4, alpha, 0);
+            }
+            sui_pop_frame();
         }
         cnt++;
         mc = find(mc, classname, "map_candidate");
@@ -363,8 +375,12 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     float mapinfowidth = fillsize.x - (mapheadingpos.x - panel.Position.x);
     sui_push_frame(mapheadingpos, [mapinfowidth, titlesize]);
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-    sui_text([padding, 0], [titlesize,titlesize], vote_selected_item.name, MENU_TEXT_2, 1, 0);
+    sui_text([padding, 0], [titlesize,titlesize], (vote_selected_item?vote_selected_item.name:"No map selected"), MENU_TEXT_3, 1, 0);
     sui_pop_frame();
+    
+    if(!vote_selected_item) {
+        return;
+    }
 
     //Map image
     float filehandle;
@@ -378,10 +394,65 @@ void(string panelid) Hud_DrawMapMenuPanel = {
         sui_pic([0,0], levelshotsize, levelshot, [1,1,1], 1, 0);
         sui_border_box([0,0], levelshotsize, 1, MENU_TEXT_GREEN, 0.6, 0);
         sui_pop_frame();
-        //drawstring([200,200],strcat("We found ", levelshot),[8,8],MENU_TEXT_GREEN,1,0); //MEHT
     } else {
-        //drawstring([200,200],strcat("We did not found ", levelshot),[8,8],MENU_TEXT_GREEN,1,0); //MEHT
+        //placeholder maybe?
     }
+
+    //Map details
+    float mapdetailgridindex = 0;
+    sui_push_frame(mapheadingpos + [0,titlesize + padding * 2], [mapinfowidth / 2, titlesize]);
+    if(vote_selected_item.group) {
+        sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+        sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Type:", MENU_TEXT_2, 1, 0);
+        sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.groupname, MENU_TEXT_2, 1, 0);
+        mapdetailgridindex++;
+    }
+    if(vote_selected_item.team_num) {
+        sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+        sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Teams:", MENU_TEXT_2, 1, 0);
+        sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], ftos(vote_selected_item.team_num), MENU_TEXT_2, 1, 0);
+        mapdetailgridindex++;
+    }
+    if(vote_selected_item.min_val || vote_selected_item.max_val) {
+        string playernumstring = "";
+        if(vote_selected_item.min_val && vote_selected_item.max_val) {
+            if(vote_selected_item.min_val == vote_selected_item.max_val) {
+                playernumstring = strcat(ftos(vote_selected_item.min_val));
+            } else {
+                playernumstring = strcat(ftos(vote_selected_item.min_val),"-",ftos(vote_selected_item.max_val));
+            }
+        } else if(vote_selected_item.min_val) {
+            playernumstring = strcat(ftos(vote_selected_item.min_val),"+");
+        } else {
+            playernumstring = strcat(ftos(vote_selected_item.max_val),"-");
+        }
+        sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+        sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Players:", MENU_TEXT_2, 1, 0);
+        sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], playernumstring, MENU_TEXT_2, 1, 0);
+        mapdetailgridindex++;
+    }
+    sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+    sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Client-side:", MENU_TEXT_2, 1, 0);
+    sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+    sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.localmap?"\x10\x8f\x11":"\x10 \x11", MENU_TEXT_2, 1, 0);
+    mapdetailgridindex++;
+    if(vote_selected_item.votecount) {
+        if(mc == current_vote) {
+            textcolour = MENU_TEXT_WARNING;
+        } else {
+            textcolour = MENU_TEXT_GREEN;
+        }
+        sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+        sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Votes:", textcolour, 1, 0);
+        sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.votecount),(mc == current_vote?" (your vote)":"")), textcolour, 1, 0);
+        mapdetailgridindex++;
+    }
+    sui_pop_frame();
+
 
     //Map description
     vector descriptionpos = [mapheadingpos.x,panel.Position.y + fillsize.y - padding * 4 - titlesize - listitemsize.y * 3]
@@ -390,6 +461,21 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     sui_text([padding / 2, padding / 2], [listitemsize.y,listitemsize.y], vote_selected_item.description, MENU_TEXT_1, 1, 0);
     //sui_border_box([0,0], [fillsize.x - (mapheadingpos.x - panel.Position.x), listitemsize.y * 3], 1, MENU_BORDER, 0.6, 0);
     sui_border_box([0,0], [mapinfowidth - padding, listitemsize.y * 3], 1, MENU_BORDER, 0.6, 0);
+    sui_pop_frame();
+    
+    sui_push_frame(descriptionpos + [0, listitemsize.y * 3 + padding], [mapinfowidth - padding * 2, listitemsize.y * 3]);
+    sui_set_align([SUI_ALIGN_END, SUI_ALIGN_START]);
+    if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Vote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
+        localcmd("cmd votemap ", vote_selected_item.name, "\n");
+    }
+    if(hud_colour_button("change_button", [0 - listitemsize.x - padding,0], listitemsize + [0,padding], "Change Now", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_WARNING, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
+        if(is_admin) {
+            localcmd("cmd map ", vote_selected_item.name, "\n");
+        } else {
+            localcmd("rcon map ", vote_selected_item.name, "\n");
+        }
+    }
+
     sui_pop_frame();
     
 }

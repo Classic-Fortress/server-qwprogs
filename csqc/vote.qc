@@ -28,7 +28,7 @@ entity (string n) AddVoteMapGroup = {
     return mg;
 };
 
-entity (string n, string desc, string mapgroup, float num_teams, float min_players, float max_players) AddVoteMap = {
+entity (string n, string desc, string mapgroup, float num_teams, float min_players, float max_players, float islocal) AddVoteMap = {
     if(!n) {
         return world;
     }
@@ -49,21 +49,29 @@ entity (string n, string desc, string mapgroup, float num_teams, float min_playe
     mc.team_num = num_teams?num_teams:2;
     mc.min_val = min_players?min_players:6;
     mc.max_val = max_players?max_players:16;
+    mc.localmap = islocal;
     
     num_mapvotes++;
     return mc;
 };
 
-float (string n) RemoveVoteMap = {
+float (string n, float isLocal) RemoveVoteMap = {
     if(!n) {
         return FALSE;
     }
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.name == n) {
-            remove(mc);
-            num_mapvotes--;
-            return TRUE;
+            if(isLocal || isLocal == mc.localmap) {
+                if(current_vote == mc) {
+                    current_vote = world;
+                }
+                remove(mc);
+                num_mapvotes--;
+                return TRUE;
+            } else {
+                return FALSE;
+            }
         }
         mc = find(mc, classname, "map_candidate");
     }

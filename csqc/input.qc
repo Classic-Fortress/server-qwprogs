@@ -86,6 +86,16 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         vote_list_offset++;
                         return TRUE;
                         break;
+                    case K_PGUP:
+                        vote_selected_index -= 10;
+                        vote_list_offset -= 10;
+                        return TRUE;
+                        break;
+                    case K_PGDN:
+                        vote_selected_index +=10;
+                        vote_list_offset +=10;
+                        return TRUE;
+                        break;
                     case K_MWHEELUP:
                         vote_list_offset--;
                         return TRUE;

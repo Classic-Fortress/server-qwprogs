@@ -72,12 +72,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_selected_item = world;
     vote_selected_index = -1;
     vote_list_offset = 0;
-    AddVoteMap("1on1", "1 on 1, the old one","Duel",2,2,2); //MEHT
-    AddVoteMap("border1", "Cross the border","Civilian Hunt",3,4,20); //MEHT
-    AddVoteMap("2fort5r","2 Freaking Forts 5 R\nR stands for revised","CTF",2,6,16); //MEHT
-    for(float i = 0; i < 50; i++) {
-        AddVoteMap(strcat("2fort", ftos(i)),strcat("Test Map #",ftos(i)),"TEST",4*rint(random() * i),6*rint(random() * i),8*rint(random() * i)); //MEHT
-    }
+    current_vote = world;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -317,10 +312,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "vote_addmap":
-            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)));
+            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
         case "vote_removemap":
-            RemoveVoteMap(argv(1));
+            RemoveVoteMap(argv(1), TRUE);
             break;
     }
     return FALSE;
