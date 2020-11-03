@@ -3,6 +3,8 @@ FortressOne Server
 
 New features
 ------
+* new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
+* ``vote_addmap``\``vote_removemap`` now work client-side
 * new cvar for zut ``fo_hud_idle_alpha`` - sets the minimum transparency for flaginfo inactive items
 * optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide

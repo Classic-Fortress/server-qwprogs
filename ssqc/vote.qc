@@ -1268,6 +1268,7 @@ void () EndVoting = {
     e = find(world, classname, "map_candidate");
     while(e) {
         e.cnt = 0;
+        UpdateAllClientMapVotes(e);
         e = find(e, classname, "map_candidate");
     }
 };
@@ -1441,6 +1442,7 @@ void (entity p, string vote) VoteForMap = {
                 if(p.vote_map) {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
                     p.vote_map.cnt--;
+                    UpdateAllClientMapVotes(p.vote_map);
                 } else {
                     FO_Sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
@@ -1464,6 +1466,7 @@ void (entity p) UnvoteForMap = {
         } else {
             bprint(PRINT_HIGH, p.netname, " \babandons vote for\b ", p.vote_map.netname, "\n");
         }
+        UpdateAllClientMapVotes(p.vote_map);
         p.vote_map.cnt--;
         p.vote_map = world;
         vote_total_votes--;

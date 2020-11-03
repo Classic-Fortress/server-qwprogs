@@ -10,6 +10,7 @@ void (float force) FO_Menu_Spy;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
 void (float force) FO_Menu_Class;
+void (float force) showVoteMenu;
 void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
@@ -74,18 +75,20 @@ var fo_menu FO_MENU_GAME = {
         {"4","Spectate", "","Do not participate in the game, but observe as a ghost",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         {"5","Server Admin", "","Admin options for the server",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"6","Captain's Menu", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);},MENU_BUTTON},
+        {"7","Map Menu", "","",FO_MENU_STATE_NORMAL,{showVoteMenu(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 9, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
         MenuSpacer,
         {"3","Server Admin", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"4","Map Menu", "","",FO_MENU_STATE_NORMAL,{showVoteMenu(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 5, TRUE
+    }, 6, TRUE
 };
 var fo_menu FO_MENU_SPECTATOR_TRACK = {
     [0,0], [300,200], "Track", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {

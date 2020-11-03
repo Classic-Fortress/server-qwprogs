@@ -343,7 +343,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
             //sui_fill(listitempos, listitemsize, bgcolour, alpha, 0);
             //sui_text(listitempos, [listitemsize.y, listitemsize.y], mc.name, textcolour, alpha, 0);
             sui_push_frame(listitempos, listitemsize);
-            if(mc == current_vote) {
+            if(current_vote && mc == current_vote) {
                 textcolour = MENU_TEXT_GREEN;
             } else if(mc.votecount > 0) {
                 textcolour = MENU_TEXT_WARNING;
@@ -380,6 +380,11 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     
     if(!vote_selected_item) {
         return;
+    }
+    
+    float current_vote_selected = FALSE;
+    if(current_vote && current_vote == vote_selected_item) {
+        current_vote_selected = TRUE;
     }
 
     //Map image
@@ -440,15 +445,15 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.localmap?"\x10\x8f\x11":"\x10 \x11", MENU_TEXT_2, 1, 0);
     mapdetailgridindex++;
     if(vote_selected_item.votecount) {
-        if(mc == current_vote) {
-            textcolour = MENU_TEXT_WARNING;
-        } else {
+        if(current_vote_selected) {
             textcolour = MENU_TEXT_GREEN;
+        } else {
+            textcolour = MENU_TEXT_WARNING;
         }
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Votes:", textcolour, 1, 0);
         sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.votecount),(mc == current_vote?" (your vote)":"")), textcolour, 1, 0);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.votecount),(current_vote_selected?" (your vote)":"")), textcolour, 1, 0);
         mapdetailgridindex++;
     }
     sui_pop_frame();
@@ -465,8 +470,15 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     
     sui_push_frame(descriptionpos + [0, listitemsize.y * 3 + padding], [mapinfowidth - padding * 2, listitemsize.y * 3]);
     sui_set_align([SUI_ALIGN_END, SUI_ALIGN_START]);
-    if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Vote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
-        localcmd("cmd votemap ", vote_selected_item.name, "\n");
+    if(current_vote_selected) {
+        if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Unvote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
+            localcmd("cmd break\n");
+            current_vote = world;
+        }
+    } else {
+        if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Vote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
+            localcmd("cmd votemap ", vote_selected_item.name, "\n");
+        }
     }
     if(hud_colour_button("change_button", [0 - listitemsize.x - padding,0], listitemsize + [0,padding], "Change Now", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_WARNING, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
         if(is_admin) {
