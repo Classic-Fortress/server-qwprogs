@@ -349,7 +349,7 @@ void UpdateClient_VoteMap_AddAll(entity pl) = {
 }
 
 void UpdateClient_VoteMap_Add_Broadcast(entity map_candidate) = {
-    local entity pl = find(world, classname, "map_candidate");
+    local entity pl = find(world, classname, "player");
     while(pl) {
         if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
             UpdateClient_VoteMap_Add(pl, map_candidate);
@@ -369,7 +369,7 @@ void UpdateClient_VoteMap_Delete(entity pl, string map) = {
 }
 
 void UpdateClient_VoteMap_Delete_Broadcast(entity map_candidate) = {
-    local entity pl = find(world, classname, "map_candidate");
+    local entity pl = find(world, classname, "player");
     while(pl) {
         if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
             UpdateClient_VoteMap_Delete(pl, map_candidate.netname);
