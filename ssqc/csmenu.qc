@@ -327,25 +327,21 @@ void UpdateClient_VoteMap_Add(entity pl, entity map_candidate) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_VOTE_MAP_ADD);
-    WriteString(MSG_MULTICAST, map_candidate.netname);
+    WriteString(MSG_MULTICAST, substring(map_candidate.netname,0,20));
     WriteString(MSG_MULTICAST, map_candidate.broadcast);
-    WriteString(MSG_MULTICAST, map_candidate.team_broadcast);
+    WriteString(MSG_MULTICAST, substring(map_candidate.team_broadcast,0,10));
     WriteFloat(MSG_MULTICAST, map_candidate.team_no);
     WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_min);
     WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_max);
     WriteFloat(MSG_MULTICAST, map_candidate.cnt);
     WriteByte(MSG_MULTICAST, (pl.vote_map == map_candidate));
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
 }
-
 void UpdateClient_VoteMap_AddAll(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
-    local entity mc = find(world, classname, "map_candidate");
-    while(mc) {
-        UpdateClient_VoteMap_Add(pl, mc);
-        mc = find(mc, classname, "map_candidate");
-    }
+    pl.vote_map_send = find(world, classname, "map_candidate");
+    //Now just let PlayerPreThink handle the rest
 }
 
 void UpdateClient_VoteMap_Add_Broadcast(entity map_candidate) = {

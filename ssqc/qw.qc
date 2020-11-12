@@ -632,6 +632,8 @@ float intermission_exittime;
 
 .entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
 
+.entity vote_map_send;
+
 // global variables for voting
 float vote1_cnt, vote2_cnt, vote3_cnt, vote4_cnt, vote5_cnt;
 string vote1_map, vote2_map, vote3_map, vote4_map, vote5_map, vote_result;
