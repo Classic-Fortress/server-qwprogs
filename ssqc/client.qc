@@ -2364,6 +2364,12 @@ void () PlayerPreThink = {
     if (self.cheat_level > 0) {
         self.cheat_level = self.cheat_level - 1;
     }
+    
+    if (self.vote_map_send) {
+        UpdateClient_VoteMap_Add(self, self.vote_map_send);
+        self.vote_map_send = find(self.vote_map_send, classname, "map_candidate");
+    }
+    
     if (intermission_running) {
         IntermissionThink();
         return;

@@ -270,7 +270,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     listitemsize.y = listitemsize.y * textscale;
     titlesize = titlesize * textscale;
     padding = padding * panel.Scale;
-    listitemsize.x = listitemsize.y * 14; //14 chars of mapname
+    listitemsize.x = listitemsize.y * 20; //20 chars of mapname
 
     local vector listviewsize = [listitemsize.x, fillsize.y - padding * 3 - listitemsize.y];
     local float visiblelistitems = floor(listviewsize.y / listitemsize.y);
@@ -393,8 +393,10 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     filehandle = fopen(levelshot, FILE_READ);
     if (filehandle >= 0) {
         fclose(filehandle);
-        //Make it half the width of the map info area and aspect of 1.25:1 
-        vector levelshotsize = [mapinfowidth / 2, mapinfowidth * 2 / 5];
+        ////Make it half the width of the map info area and aspect of 1.25:1 
+        //vector levelshotsize = [mapinfowidth / 2, mapinfowidth * 2 / 5];
+        //No, make it 16:9 and 2/3 of the width
+        vector levelshotsize = [mapinfowidth * 2 / 3, mapinfowidth * 2 * 9 / (3 * 16)];
         sui_push_frame([mapheadingpos.x + mapinfowidth - levelshotsize.x - padding,mapheadingpos.y + titlesize + padding * 2], levelshotsize);
         sui_pic([0,0], levelshotsize, levelshot, [1,1,1], 1, 0);
         sui_border_box([0,0], levelshotsize, 1, MENU_TEXT_GREEN, 0.6, 0);
@@ -405,7 +407,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
 
     //Map details
     float mapdetailgridindex = 0;
-    sui_push_frame(mapheadingpos + [0,titlesize + padding * 2], [mapinfowidth / 2, titlesize]);
+    sui_push_frame(mapheadingpos + [0,titlesize + padding * 2], [mapinfowidth - levelshotsize.x, titlesize]);
     if(vote_selected_item.group) {
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Type:", MENU_TEXT_2, 1, 0);
