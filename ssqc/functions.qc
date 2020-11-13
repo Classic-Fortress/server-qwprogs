@@ -131,8 +131,16 @@ void () PrintLoginMessage =  {
 	return;	
 }
 
+void () EndGameThink = {
+	localcmd("changelevel ");
+    localcmd(mapname);
+    localcmd("\n");
+    dremove(self);
+}
+
 void () MapEndSequence = {
-	local entity player;	
+	local entity player;
+	local entity maprestarttimer;
 	player = find (world, classname, "player");	
 	while (player) 
 	{
@@ -148,4 +156,10 @@ void () MapEndSequence = {
 	if (logfilehandle > 0)
 		fclose(logfilehandle);
 	canlog = 0;
+
+	maprestarttimer = spawn();
+    maprestarttimer.classname = "timer";
+    maprestarttimer.netname = "maprestarttimer";
+    maprestarttimer.think = EndGameThink;
+    maprestarttimer.nextthink = time + map_restart_time;
 }

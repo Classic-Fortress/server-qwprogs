@@ -667,6 +667,8 @@ void () DecodeLevelParms = {
         //default round interval for quadmode (seconds)
         round_delay_time = CF_GetSetting("round_delay_time", "rdt", "30");
 
+        map_restart_time = CF_GetSetting("map_restart_Time", "mrt", "120");
+
         // enforces login
         loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
 

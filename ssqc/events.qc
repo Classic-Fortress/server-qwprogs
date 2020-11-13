@@ -1,6 +1,17 @@
 string (string text) clearString;
 string (float tno) GetTeamName;
 
+float (entity player) isPlayerValid = {
+	if (player.has_disconnected == 1 
+		|| !infokey(player, INFOKEY_P_USERID)
+        || infokey(player, INFOKEY_P_USERID) == ""
+        || !infokey(player, INFOKEY_P_NAME) 
+        || infokey(player, INFOKEY_P_NAME) == "") {
+		return 0;
+	}
+    return 1;
+}
+
 string () ISOTimemillis = {
 	local string padding = string_null;
     local string timeuse = strftime(0,"%Y-%m-%dT%H:%M:%S.");
@@ -33,6 +44,8 @@ void (string evt) logevent = {
 void (entity player) LogEventPlayerStart = {
  	if (canlog == 0)
 		return;
+	if (isPlayerValid(player) == FALSE)
+		return;
 
 	local string event;
 	event = sprintf(",\n{\"type\": \"playerStart\", \"player\": \"%s\", \"classtime\": %s, \"time\": %s, \"gameTimeStamp\": \"%s\"}", getEntityNameOrLogin(player), ftos(player.classtime), ftos(gametime), gametimestamp);
@@ -50,7 +63,8 @@ void () LogEventGameStart = {
 
 	while (player) 
 	{
-		numplayers++;
+		if (isPlayerValid(player) == TRUE)
+			numplayers++;
 		player = find (player, classname, "player");
 	}
 
@@ -61,9 +75,12 @@ void () LogEventGameStart = {
 void (entity player, float previous, float next, float timeplayed) LogEventChangeClass = {
 	if (canlog == 0)
 		return;
+	if (isPlayerValid(player) == FALSE)
+		return;
 	if (previous == 0) {
 		return;
 	}
+
 	local string event;
 	event = sprintf(",\n{\"type\": \"changeClass\", \"player\": \"%s\", \"playerClass\": %s, \"nextClass\": %s, \"team\": %s, \"timePlayed\": %s, \"time\": %s, \"gameTimeStamp\": \"%s\"}",
 							getEntityNameOrLogin(player),
