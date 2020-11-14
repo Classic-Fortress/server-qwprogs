@@ -254,14 +254,16 @@ void(string panelid) Hud_DrawTeamScorePanel = {
 
     vector position = getPosition(id);
     vector size = getFillSize(id);
+    float textScale = panel.TextScale?panel.TextScale:panel.Scale;
     float sizex, sizey;
     sizex = size_x;
     sizey = size_y;
-    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
-    local float padding = 4 * panel.Scale;
+    vector mediumtext = MENU_TEXT_SMALL * textScale;
+    local float padding = 0.5 * textScale;
 
-    local vector fillsize = mediumtext;
+    local vector fillsize = [12,12] * textScale; //mediumtext;
     fillsize_x = fillsize_x * 3;
+    fillsize_y = fillsize_y + padding * 2;
 
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_TEAM_SCORE].Display))
     {
@@ -274,12 +276,27 @@ void(string panelid) Hud_DrawTeamScorePanel = {
 
 
     local float offset;
-    local vector score_position;
+    local vector score_position = position;
     local string message = "";
     if(panel.Orientation == FO_HUD_INSERT_AFTER) {
         position_x = position_x - ((number_of_teams - 1) * fillsize_x);
     }
+    float len;
+    float textOffset;
+    string val;
 
+    for(float i = 0; i < number_of_teams; i++) {
+        score_position = position;
+        offset = (fillsize_x) * i;
+        score_position_x = score_position_x + offset;
+        //message = strcat(message, strpad(-3, ftos(TS.team1score)));
+        drawfill(score_position, fillsize, TEXT_TEAM_COLOUR[i], 0.5, 0);
+        val = ftos(TeamScore[i]);
+        len = strlen(val);
+        textOffset = (12 * textScale * (3 - len));
+        Hud_DrawStringLMP(score_position + [textOffset,padding], val, 12 * textScale);
+    }
+/*
     if (number_of_teams >= 1) {
         score_position = position;
         offset = fillsize_x * 0;
@@ -311,7 +328,7 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         message = strcat(message, strpad(-3, ftos(TS.team4score)));
         drawfill(score_position, fillsize, '0.4 0.7 0.3', 0.5, 0);
     }
-
+*/
     /* drawfill( */
     /*     position + [size.x / 2,padding*2 + mediumtext.y*2], */
     /*     mediumtext, */
@@ -319,7 +336,7 @@ void(string panelid) Hud_DrawTeamScorePanel = {
     /*     1, */
     /*     0 */
     /*     ); */
-
+/*
     drawstring(
         position,
         message,
@@ -328,6 +345,7 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         1,
         0
         );
+*/
 };
 
 void Hud_DrawFlagStatusBar(string panelid)
