@@ -296,56 +296,6 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         textOffset = (12 * textScale * (3 - len));
         Hud_DrawStringLMP(score_position + [textOffset,padding], val, 12 * textScale);
     }
-/*
-    if (number_of_teams >= 1) {
-        score_position = position;
-        offset = fillsize_x * 0;
-        score_position_x = score_position_x + offset;
-        message = strcat(message, strpad(-3, ftos(TS.team1score)));
-        drawfill(score_position, fillsize, '0.3 0.4 0.7', 0.5, 0);
-    }
-
-    if (number_of_teams >= 2) {
-        score_position = position;
-        offset = fillsize_x * 1;
-        score_position_x = score_position_x + offset;
-        message = strcat(message, strpad(-3, ftos(TS.team2score)));
-        drawfill(score_position, fillsize, '0.7 0.4 0.3', 0.5, 0);
-    }
-
-    if (number_of_teams >= 3) {
-        score_position = position;
-        offset = fillsize_x * 2;
-        score_position_x = score_position_x + offset;
-        message = strcat(message, strpad(-3, ftos(TS.team3score)));
-        drawfill(score_position, fillsize, '0.7 0.7 0.3', 0.5, 0);
-    }
-
-    if (number_of_teams >= 4) {
-        score_position = position;
-        offset = fillsize_x * 3;
-        score_position_x = score_position_x + offset;
-        message = strcat(message, strpad(-3, ftos(TS.team4score)));
-        drawfill(score_position, fillsize, '0.4 0.7 0.3', 0.5, 0);
-    }
-*/
-    /* drawfill( */
-    /*     position + [size.x / 2,padding*2 + mediumtext.y*2], */
-    /*     mediumtext, */
-    /*     '255 0 0', */
-    /*     1, */
-    /*     0 */
-    /*     ); */
-/*
-    drawstring(
-        position,
-        message,
-        mediumtext,
-        MENU_TEXT_1,
-        1,
-        0
-        );
-*/
 };
 
 void Hud_DrawFlagStatusBar(string panelid)
