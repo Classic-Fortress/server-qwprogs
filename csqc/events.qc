@@ -268,10 +268,10 @@ void() CSQC_Parse_Event = {
             grentimer_waiting = FALSE;
             break;
         case MSG_TEAM_SCORES:
-            TS.team1score = readfloat();
-            TS.team2score = readfloat();
-            TS.team3score = readfloat();
-            TS.team4score = readfloat();
+            TeamScore[0] = readfloat();
+            TeamScore[1] = readfloat();
+            TeamScore[2] = readfloat();
+            TeamScore[3] = readfloat();
             break;
         case MSG_VOTE_UPDATE:
             te = AddVoteMap(readstring(), "","",0,0,0,FALSE);

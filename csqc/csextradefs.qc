@@ -29,6 +29,13 @@ vector MENU_TEXT_YELLOW_FO = '0.7 0.7 0.3';
 vector MENU_TEXT_GREEN_FO = '0.4 0.7 0.3';
 vector MENU_TEXT_SPEC_FO = '0.1 0.1 0.1';
 
+vector TEXT_TEAM_COLOUR[] = {
+    MENU_TEXT_BLUE_FO,
+    MENU_TEXT_RED_FO,
+    MENU_TEXT_YELLOW_FO,
+    MENU_TEXT_GREEN_FO
+};
+
 #define FO_MENU_FLAG_USE_MOUSE 1
 #define FO_MENU_FLAG_CENTER 2
 #define FO_MENU_FLAG_SHOW_SHORTCUTS 4
@@ -283,6 +290,7 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+/*
 typedef struct {
     float team1score;
     float team2score;
@@ -291,6 +299,9 @@ typedef struct {
 } FO_TeamScores;
 
 FO_TeamScores TS;
+*/
+
+float TeamScore[4];
 
 // hud stuff
 typedef struct {
@@ -345,6 +356,7 @@ typedef struct {
     float damagegiven;
     float damagetaken;
     float ready;
+    float chat;
 } FO_ScoreBoardLine;
 
 // fte maxclients is 255, right?
