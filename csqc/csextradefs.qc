@@ -351,6 +351,7 @@ typedef struct {
     float damagegiven;
     float damagetaken;
     float ready;
+    float chat;
 } FO_ScoreBoardLine;
 
 // fte maxclients is 255, right?
