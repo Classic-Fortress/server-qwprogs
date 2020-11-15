@@ -1594,7 +1594,11 @@ void (float inp) Vote_Menu_Map_Input = {
     local entity mc = Vote_Menu_Map_GetMapCandidate((self.current_menu_page - 1) * 7 + inp);
     if(mc) {
         self.admin_use = mc;
-        Vote_Menu_Map_Action(0);
+        if(self.classname == "observer") {
+            Vote_Menu_Map_Action_Input(2);
+        } else {
+            Vote_Menu_Map_Action(0);
+        }
     }
 };
 void (float update) Vote_Menu_Map = {    
