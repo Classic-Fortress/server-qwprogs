@@ -90,6 +90,10 @@ void () SpectatorImpulseCommand = {
 
         TeamFortress_TeamShowScores(0);
 
+    if(self.menu_input == Vote_Menu_Map_Input && self.impulse >= 1 && self.impulse <= 10) {
+        Menu_Input(self.impulse);
+    }
+    
     if (!self.is_admin) {
         self.impulse = 0;
         return;
