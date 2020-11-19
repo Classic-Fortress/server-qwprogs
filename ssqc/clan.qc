@@ -317,7 +317,8 @@ void () PreMatch_Think = {
         if (self.cnt2 == 10) {
             is_countdown = 1;
             lightstyle(0, "e");
-
+            //preventing double demo recording
+            localcmd("cancel\n");
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
                     calltimeofday();

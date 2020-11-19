@@ -190,7 +190,7 @@ void () Admin_Pause = {
         setpause(1);
         is_paused = 1;
         pause_actor = self.netname;
-        if (cb_prematch && infokey(world, "status") == "Countdown") {
+        if (cb_prematch && is_countdown) {
             StopTimer();
             bprint2(2, pause_actor, " stops the countdown\n");
             return;
