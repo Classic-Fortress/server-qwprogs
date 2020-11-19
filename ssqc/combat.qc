@@ -531,15 +531,21 @@ void (entity targ, entity inflictor, entity attacker, float damage,
                     targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
                 dir = normalize(dir);
 
+                moment = damage;
+                if (inflictor.classname == "pyro_rocket" && pyro_type == 1) {
+                    moment = damage * 1.25;
+                    if (attacker == targ) {
+                        moment = damage * 1.5;
+                    }
+                    else {
+                        moment = damage * 1.25;
+                    }
+                }
                 if (targ.playerclass == PC_HVYWEAP) {
-                    moment = damage / 4;
+                    moment = moment / 4;
                     if (damage <= 50)
                         moment = 0;
-                } else
-                    moment = damage;
-                if (inflictor.classname == "pyro_rocket" && pyro_type == 1) {
-                    moment = damage * 1.5;
-                }
+                } 
 
                 if ((moment < 60)
                     && (attacker.classname == "player")
