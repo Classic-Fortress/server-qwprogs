@@ -1466,8 +1466,8 @@ void (entity p) UnvoteForMap = {
         } else {
             bprint(PRINT_HIGH, p.netname, " \babandons vote for\b ", p.vote_map.netname, "\n");
         }
-        UpdateAllClientMapVotes(p.vote_map);
         p.vote_map.cnt--;
+        UpdateAllClientMapVotes(p.vote_map);
         p.vote_map = world;
         vote_total_votes--;
     }

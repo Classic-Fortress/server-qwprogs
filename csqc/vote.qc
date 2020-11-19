@@ -1,4 +1,32 @@
 
+void () ApplyMapFilter = {
+    entity mc = find(world, classname, "map_candidate_filtered");
+    entity temp = world;
+    while(mc) {
+        remove(mc);
+        mc = find(mc, classname, "map_candidate_filtered");
+    }
+    num_mapvotes_filtered = 0;
+    mc = find(world, classname, "map_candidate");
+    while(mc) {
+        if(strstrofs(mc.name, vote_list_filter) > -1) {
+            temp = spawn();
+            temp.classname = "map_candidate_filtered";
+            temp.owner = mc;
+            //temp.name = mc.name;
+            //temp.description = mc.description;
+            //temp.groupname = mc.groupname;
+            //temp.group = mc.group;
+            //temp.team_num = mc.team_num;
+            //temp.min_val = mc.min_val;
+            //temp.max_val = mc.max_val;
+            //temp.localmap = mc.localmap;
+            num_mapvotes_filtered++;
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+}
+
 /*
 "name" "amth1" //map name
 "description" "Duel arena, ctf and Sniper War" //description
@@ -52,6 +80,7 @@ entity (string n, string desc, string mapgroup, float num_teams, float min_playe
     mc.localmap = islocal;
     
     num_mapvotes++;
+    ApplyMapFilter();
     return mc;
 };
 
@@ -68,6 +97,7 @@ float (string n, float isLocal) RemoveVoteMap = {
                 }
                 remove(mc);
                 num_mapvotes--;
+                ApplyMapFilter();
                 return TRUE;
             } else {
                 return FALSE;

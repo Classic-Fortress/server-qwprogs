@@ -3,7 +3,7 @@ void FO_Menu_Game(float);
 
 float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
     float used = sui_input_event(evtype, scanx, chary, devid);
-    //if(evtype == IE_KEYUP) print("Key up: ", ftos(scanx), ", char: ", ftos(chary), "\n");
+    //if(evtype == IE_KEYDOWN) print("Key down: ", ftos(scanx), ", char: ", ftos(chary), "\n");
     float menu_mouse = (fo_hud_menu_active && (CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE));
     if (fo_hud_editor || fo_hud_menu_active)
     {
@@ -104,7 +104,39 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         vote_list_offset++;
                         return TRUE;
                         break;
-                }       
+                    case K_ENTER:
+                        if(vote_selected_item && current_vote == vote_selected_item.owner) {
+                            localcmd("cmd break\n");
+                        } else {
+                            localcmd("cmd votemap ", vote_selected_item.owner.name, "\n");
+                        }
+                        return TRUE;
+                        break;
+                    case K_BACKSPACE:
+                         if(strlen(vote_list_filter) > 0) {
+                            vote_list_filter = substring(vote_list_filter, 0, strlen(vote_list_filter) - 1); 
+                            ApplyMapFilter();
+                        }
+                        return TRUE;
+                        break;
+                    case K_DEL: //blank it out
+                        if(strlen(vote_list_filter) > 0) {
+                            vote_list_filter = "";
+                            ApplyMapFilter();
+                        }
+                        return TRUE;
+                    default:
+                        //48 = '0' .. 57 = '9'
+                        //97 = 'a' .. 122 = 'z'
+                        //45 = '-'
+                        if((scanx >= 48 && scanx <= 57) || (scanx >= 97 && scanx <= 122) || scanx == 45) {
+                            if(strlen(vote_list_filter) < MAP_MAX_CHARS) {
+                                vote_list_filter = strcat(vote_list_filter, chr2str(chary));
+                                ApplyMapFilter();
+                            }
+                            return TRUE;
+                        }
+                }     
              case IE_KEYUP:
                 switch (scanx) {
                     case K_ESCAPE:

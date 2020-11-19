@@ -278,6 +278,10 @@ void() CSQC_Parse_Event = {
             te.votecount = readfloat();
             if(readbyte()) {
                 current_vote = te;
+            } else {
+                if(current_vote == te) {
+                    current_vote = world;
+                }
             }
             break;
         case MSG_VOTE_MAP_ADD:
