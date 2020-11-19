@@ -294,7 +294,7 @@ void UpdateClientMapVote(entity pl, entity candidate) = {
     WriteByte(MSG_MULTICAST, MSG_VOTE_UPDATE);
     WriteString(MSG_MULTICAST, candidate.netname);
     WriteFloat(MSG_MULTICAST, candidate.cnt);
-    WriteByte(MSG_MULTICAST, (pl.vote_map == candidate));
+    WriteByte(MSG_MULTICAST, (candidate.cnt > 0 && pl.vote_map == candidate));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

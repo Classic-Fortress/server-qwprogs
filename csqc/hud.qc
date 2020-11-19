@@ -270,7 +270,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     listitemsize.y = listitemsize.y * textscale;
     titlesize = titlesize * textscale;
     padding = padding * panel.Scale;
-    listitemsize.x = listitemsize.y * 20; //20 chars of mapname
+    listitemsize.x = listitemsize.y * MAP_MAX_CHARS; //20 chars of mapname
 
     local vector listviewsize = [listitemsize.x, fillsize.y - padding * 3 - listitemsize.y];
     local float visiblelistitems = floor(listviewsize.y / listitemsize.y);
@@ -281,7 +281,16 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     sui_text([padding, 0], [titlesize,titlesize], "Map Selection", MENU_TEXT_4, 1, 0);
     sui_pop_frame();
 
-    
+    //Filter textbox
+    if(vote_list_filter != "") {
+        sui_push_frame(panel.Position + [padding,padding], listitemsize + [0,padding]);
+        //sui_border_box([0,0], listitemsize, 1, MENU_BG_DARK, 0.6, 0);
+        sui_fill([0,0], listitemsize + [0,padding], MENU_BG_DARK, 0.6, 0);
+        sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
+        sui_text([0, 0], [listitemsize.y, listitemsize.y], vote_list_filter, MENU_TEXT_2, 1, 0);
+        sui_pop_frame();
+    }
+
     vector listoffset;
 /*
 	sui_list_view_begin(strcat("a", "scrl"), panel.Position + [200,4], [100, 150], [94, 10], num_mapvotes, listoffset, [0, 6]);
@@ -300,13 +309,13 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     //sui_scroll_view_begin("scrolltest", panel.Position + [200,4], [100,100], [100,200], listoffset, [2,6]);
     //sui_scroll_view_end();
     sui_border_box(panel.Position + [padding, padding * 2 + titlesize], listviewsize, 1, MENU_TEXT_SPEC_FO, 0.6, 0);
-    if(vote_list_offset > num_mapvotes - visiblelistitems) {
-        vote_list_offset = num_mapvotes - visiblelistitems;
+    if(vote_list_offset > num_mapvotes_filtered - visiblelistitems) {
+        vote_list_offset = num_mapvotes_filtered - visiblelistitems;
     }
     if(vote_list_offset < 0) {
         vote_list_offset = 0;
     }
-    entity mc = find(world, classname, "map_candidate");
+    entity mc = find(world, classname, "map_candidate_filtered");
     while(mc) {
         if(cnt >= vote_list_offset) {
             listitempos = panel.Position + [padding, padding * 2 + titlesize + listitemsize.y * (cnt - vote_list_offset)];
@@ -323,8 +332,8 @@ void(string panelid) Hud_DrawMapMenuPanel = {
             if(vote_selected_index < 0) {
                 vote_selected_index = 0;
             }
-            if(vote_selected_index >= num_mapvotes) {
-                vote_selected_index = num_mapvotes - 1;
+            if(vote_selected_index >= num_mapvotes_filtered) {
+                vote_selected_index = num_mapvotes_filtered - 1;
             }
             if(vote_selected_index == cnt) {
                 vote_selected_item = mc;
@@ -343,27 +352,27 @@ void(string panelid) Hud_DrawMapMenuPanel = {
             //sui_fill(listitempos, listitemsize, bgcolour, alpha, 0);
             //sui_text(listitempos, [listitemsize.y, listitemsize.y], mc.name, textcolour, alpha, 0);
             sui_push_frame(listitempos, listitemsize);
-            if(current_vote && mc == current_vote) {
+            if(current_vote && mc.owner == current_vote) {
                 textcolour = MENU_TEXT_GREEN;
-            } else if(mc.votecount > 0) {
+            } else if(mc.owner.votecount > 0) {
                 textcolour = MENU_TEXT_WARNING;
             } else {
                 textcolour = MENU_TEXT_1;
             }
-            if(hud_colour_button(strcat("listitem",ftos(cnt)),[0,0], listitemsize, mc.name, bgcolour, [listitemsize.y, listitemsize.y], textcolour, SUI_ALIGN_START, 2, alpha, alpha, 1)) {
+            if(hud_colour_button(strcat("listitem",ftos(cnt)),[0,0], listitemsize, mc.owner.name, bgcolour, [listitemsize.y, listitemsize.y], textcolour, SUI_ALIGN_START, 2, alpha, alpha, 1)) {
                 vote_selected_item = mc;
                 vote_selected_index = cnt;
             }
-            if(mc.votecount > 0) {
+            if(mc.owner.votecount > 0) {
                 sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-                sui_text([padding * -1, 0], [listitemsize.y, listitemsize.y], ftos(mc.votecount), MENU_TEXT_4, alpha, 0);
+                sui_text([padding * -1, 0], [listitemsize.y, listitemsize.y], ftos(mc.owner.votecount), MENU_TEXT_4, alpha, 0);
             }
             sui_pop_frame();
         }
         cnt++;
-        mc = find(mc, classname, "map_candidate");
+        mc = find(mc, classname, "map_candidate_filtered");
     }
-    if(cnt < num_mapvotes) {
+    if(cnt < num_mapvotes_filtered) {
         //draw scrollbar here
         //sui_scrollbar("maplist_scrollbar", [listitemsize.x, fillsize.y - padding * 3 - listitemsize.y], [listitemsize.x,listitemsize.y * num_mapvotes], listoffset, [0,6]);
     }
@@ -375,7 +384,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     float mapinfowidth = fillsize.x - (mapheadingpos.x - panel.Position.x);
     sui_push_frame(mapheadingpos, [mapinfowidth, titlesize]);
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-    sui_text([padding, 0], [titlesize,titlesize], (vote_selected_item?vote_selected_item.name:"No map selected"), MENU_TEXT_3, 1, 0);
+    sui_text([padding, 0], [titlesize,titlesize], (vote_selected_item?vote_selected_item.owner.name:"No map selected"), MENU_TEXT_3, 1, 0);
     sui_pop_frame();
     
     if(!vote_selected_item) {
@@ -383,13 +392,13 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     }
     
     float current_vote_selected = FALSE;
-    if(current_vote && current_vote == vote_selected_item) {
+    if(current_vote && current_vote == vote_selected_item.owner) {
         current_vote_selected = TRUE;
     }
 
     //Map image
     float filehandle;
-    string levelshot = strcat("textures/levelshots/",vote_selected_item.name,".jpg"); //need to fix extensions somehow
+    string levelshot = strcat("textures/levelshots/",vote_selected_item.owner.name,".jpg"); //need to fix extensions somehow
     filehandle = fopen(levelshot, FILE_READ);
     if (filehandle >= 0) {
         fclose(filehandle);
@@ -408,32 +417,32 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     //Map details
     float mapdetailgridindex = 0;
     sui_push_frame(mapheadingpos + [0,titlesize + padding * 2], [mapinfowidth - levelshotsize.x, titlesize]);
-    if(vote_selected_item.group) {
+    if(vote_selected_item.owner.group) {
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Type:", MENU_TEXT_2, 1, 0);
         sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.groupname, MENU_TEXT_2, 1, 0);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.owner.groupname, MENU_TEXT_2, 1, 0);
         mapdetailgridindex++;
     }
-    if(vote_selected_item.team_num) {
+    if(vote_selected_item.owner.team_num) {
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Teams:", MENU_TEXT_2, 1, 0);
         sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], ftos(vote_selected_item.team_num), MENU_TEXT_2, 1, 0);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], ftos(vote_selected_item.owner.team_num), MENU_TEXT_2, 1, 0);
         mapdetailgridindex++;
     }
-    if(vote_selected_item.min_val || vote_selected_item.max_val) {
+    if(vote_selected_item.owner.min_val || vote_selected_item.owner.max_val) {
         string playernumstring = "";
-        if(vote_selected_item.min_val && vote_selected_item.max_val) {
-            if(vote_selected_item.min_val == vote_selected_item.max_val) {
-                playernumstring = strcat(ftos(vote_selected_item.min_val));
+        if(vote_selected_item.owner.min_val && vote_selected_item.owner.max_val) {
+            if(vote_selected_item.owner.min_val == vote_selected_item.owner.max_val) {
+                playernumstring = strcat(ftos(vote_selected_item.owner.min_val));
             } else {
-                playernumstring = strcat(ftos(vote_selected_item.min_val),"-",ftos(vote_selected_item.max_val));
+                playernumstring = strcat(ftos(vote_selected_item.owner.min_val),"-",ftos(vote_selected_item.owner.max_val));
             }
-        } else if(vote_selected_item.min_val) {
-            playernumstring = strcat(ftos(vote_selected_item.min_val),"+");
+        } else if(vote_selected_item.owner.min_val) {
+            playernumstring = strcat(ftos(vote_selected_item.owner.min_val),"+");
         } else {
-            playernumstring = strcat(ftos(vote_selected_item.max_val),"-");
+            playernumstring = strcat(ftos(vote_selected_item.owner.max_val),"-");
         }
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Players:", MENU_TEXT_2, 1, 0);
@@ -444,9 +453,9 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
     sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Client-side:", MENU_TEXT_2, 1, 0);
     sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-    sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.localmap?"\x10\x8f\x11":"\x10 \x11", MENU_TEXT_2, 1, 0);
+    sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], vote_selected_item.owner.localmap?"\x10\x8f\x11":"\x10 \x11", MENU_TEXT_2, 1, 0);
     mapdetailgridindex++;
-    if(vote_selected_item.votecount) {
+    if(vote_selected_item.owner.votecount) {
         if(current_vote_selected) {
             textcolour = MENU_TEXT_GREEN;
         } else {
@@ -455,7 +464,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Votes:", textcolour, 1, 0);
         sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.votecount),(current_vote_selected?" (your vote)":"")), textcolour, 1, 0);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.owner.votecount),(current_vote_selected?" (your vote)":"")), textcolour, 1, 0);
         mapdetailgridindex++;
     }
     sui_pop_frame();
@@ -465,7 +474,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     vector descriptionpos = [mapheadingpos.x,panel.Position.y + fillsize.y - padding * 4 - titlesize - listitemsize.y * 3]
     sui_push_frame(descriptionpos, [mapinfowidth - padding * 2, listitemsize.y * 3]);
     sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
-    sui_text([padding / 2, padding / 2], [listitemsize.y,listitemsize.y], vote_selected_item.description, MENU_TEXT_1, 1, 0);
+    sui_text([padding / 2, padding / 2], [listitemsize.y,listitemsize.y], vote_selected_item.owner.description, MENU_TEXT_1, 1, 0);
     //sui_border_box([0,0], [fillsize.x - (mapheadingpos.x - panel.Position.x), listitemsize.y * 3], 1, MENU_BORDER, 0.6, 0);
     sui_border_box([0,0], [mapinfowidth - padding, listitemsize.y * 3], 1, MENU_BORDER, 0.6, 0);
     sui_pop_frame();
@@ -475,18 +484,18 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     if(current_vote_selected) {
         if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Unvote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
             localcmd("cmd break\n");
-            current_vote = world;
+            //current_vote = world;
         }
     } else {
         if(hud_colour_button("vote_button", [0,0], listitemsize + [0,padding], "Vote", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
-            localcmd("cmd votemap ", vote_selected_item.name, "\n");
+            localcmd("cmd votemap ", vote_selected_item.owner.name, "\n");
         }
     }
     if(hud_colour_button("change_button", [0 - listitemsize.x - padding,0], listitemsize + [0,padding], "Change Now", MENU_BUTTON, [listitemsize.y,listitemsize.y], MENU_TEXT_WARNING, SUI_ALIGN_CENTER, 0, 1, 1, 0)) {
         if(is_admin) {
-            localcmd("cmd map ", vote_selected_item.name, "\n");
+            localcmd("cmd map ", vote_selected_item.owner.name, "\n");
         } else {
-            localcmd("rcon map ", vote_selected_item.name, "\n");
+            localcmd("rcon map ", vote_selected_item.owner.name, "\n");
         }
     }
 

@@ -57,6 +57,8 @@ vector TEXT_TEAM_COLOUR[] = {
 #define TEAM_SPECTATOR 9
 #define TEAM_OBSERVER 99
 
+#define MAP_MAX_CHARS 20
+
 .float owned_by;
 .string netname;
 .float playerid;
@@ -90,10 +92,12 @@ float grentimer_waiting; //grenade primed, but not thrown
 float jump_counter;
 float frames_since_onground;
 float num_mapvotes;
+float num_mapvotes_filtered;
 entity vote_selected_item;
 float vote_selected_index;
 float vote_list_offset;
 entity current_vote;
+string vote_list_filter;
 
 .string name;
 .string description;
