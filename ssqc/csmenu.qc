@@ -337,11 +337,29 @@ void UpdateClient_VoteMap_Add(entity pl, entity map_candidate) = {
     WriteByte(MSG_MULTICAST, (pl.vote_map == map_candidate));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS);
 }
+
+void() votemap_sender_think = {
+    if (self.owner.vote_map_send) {
+        UpdateClient_VoteMap_Add(self.owner, self.owner.vote_map_send);
+        self.owner.vote_map_send = find(self.owner.vote_map_send, classname, "map_candidate");
+        self.nextthink = time + 0.1;
+    } else {
+        dremove(self);
+    }
+}
+
 void UpdateClient_VoteMap_AddAll(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
+
+    //PlayerPreThink was too fast. Use a timer to slow down the send rate
+    //Soas to not overflow the message buffers
     pl.vote_map_send = find(world, classname, "map_candidate");
-    //Now just let PlayerPreThink handle the rest
+    local entity sender_timer = spawn();
+    sender_timer.owner = pl;
+    sender_timer.classname = "votemap_sender_timer";
+    sender_timer.nextthink = time + 0.1;
+    sender_timer.think = votemap_sender_think;
 }
 
 void UpdateClient_VoteMap_Add_Broadcast(entity map_candidate) = {
