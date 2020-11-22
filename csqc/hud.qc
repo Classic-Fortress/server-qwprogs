@@ -464,7 +464,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
         sui_text([padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], "Votes:", textcolour, 1, 0);
         sui_set_align([SUI_ALIGN_END, SUI_ALIGN_CENTER]);
-        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.owner.votecount),(current_vote_selected?" (your vote)":"")), textcolour, 1, 0);
+        sui_text([-2 * padding, (titlesize + padding) * mapdetailgridindex], [titlesize,titlesize], strcat(ftos(vote_selected_item.owner.votecount),(current_vote_selected?" (yours)":"")), textcolour, 1, 0);
         mapdetailgridindex++;
     }
     sui_pop_frame();
