@@ -65,8 +65,11 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
             case IE_MOUSEDELTA:
                 return TRUE;
             case IE_MOUSEABS:
+                PrevMouse.x = Mouse.x;
+                PrevMouse.y = Mouse.y;
                 Mouse.x = scanx;
                 Mouse.y = chary;
+                if(MouseDown) Hud_MapMenuPanel_Move(Mouse.x - PrevMouse.x, Mouse.y - PrevMouse.y);
                 return TRUE;
              case IE_KEYDOWN:
                 switch (scanx) {
@@ -74,6 +77,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         return TRUE;
                         break;
                     case K_MOUSE1:
+                        MouseDown = TRUE;
                         return TRUE;
                         break;
                     case K_UPARROW:
@@ -144,6 +148,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         return TRUE;
                         break;
                     case K_MOUSE1:
+                        MouseDown = FALSE;
                         return TRUE;
                         break;
                 }       

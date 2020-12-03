@@ -266,6 +266,8 @@ typedef struct
 } MouseStruct;
 
 MouseStruct Mouse;
+MouseStruct PrevMouse;
+float MouseDown;
 
 typedef struct {
     string filename;
