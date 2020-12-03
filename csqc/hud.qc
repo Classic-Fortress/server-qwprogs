@@ -98,6 +98,8 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_SHOWSCORES].FillSize.x / 2), 30];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Scale = 1.00;
+    Hud_Panels[HUD_PANEL_MAP_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MAP_MENU].FillSize.x / 2), 30];
+    Hud_Panels[HUD_PANEL_MAP_MENU].Scale = 1.00;
 }
 
 void FO_Hud_Editor_List_Panels() = {
@@ -233,6 +235,20 @@ void(string id, vector pos, vector size, string name, string command) bind_butto
 	
 	sui_pop_frame();
 };
+
+void (float dx, float dy) Hud_MapMenuPanel_Move = {
+    FO_Hud_Panel* panel = &Hud_Panels[HUD_PANEL_MAP_MENU];
+    if(
+        Mouse.x > panel.Position.x && 
+        Mouse.y > panel.Position.y && 
+        Mouse.x < (panel.Position.x + panel.FillSize.x * panel.Scale) && 
+        Mouse.y < (panel.Position.y + panel.FillSize.y * panel.Scale)
+    ) {
+        panel.Position.x += dx;
+        panel.Position.y += dy;
+    }
+};
+
 void(string panelid) Hud_DrawMapMenuPanel = {
     float id = getHudPanel(panelid);
 
