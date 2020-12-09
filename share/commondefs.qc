@@ -27,6 +27,10 @@
 #define MSG_GRENTHROWN      15
 #define MSG_ID              16
 #define MSG_TEAM_SCORES     17
+#define MSG_VOTE_MAPS       18
+#define MSG_VOTE_UPDATE     19
+#define MSG_VOTE_MAP_ADD    20
+#define MSG_VOTE_MAP_DELETE 21
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
@@ -65,3 +69,4 @@
 #define CLIENT_MENU_CAPTAIN_1    21
 #define CLIENT_MENU_CAPTAIN_2    22
 #define CLIENT_MENU_CAPTAIN_PICK   23
+#define CLIENT_MENU_MAPS           24

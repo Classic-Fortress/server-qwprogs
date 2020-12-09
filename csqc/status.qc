@@ -499,17 +499,24 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
         
         sui_fill(position, size, columnColour, trans, 0);
 
-        if (prematch && lines[i].team_no && !SBAR.CountdownStarted 
-            && lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER)
-        {
-            float ready = lines[i].ready;
-            if (ready)
+        textcolour = MENU_TEXT_1;
+        if(lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
+            textcolour = MENU_TEXT_4;
+        } else if(lines[i].name == getplayerkeyvalue(player_localentnum - 1, "name")) {
+            textcolour = '0.8 0 0.8';
+        } else {
+            if (prematch && lines[i].team_no && !SBAR.CountdownStarted 
+                && lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER)
             {
-                textcolour = MENU_TEXT_GREEN_FO;
-            }
-            else
-            {
-                textcolour = MENU_TEXT_RED_FO;
+                float ready = lines[i].ready;
+                if (ready)
+                {
+                    textcolour = MENU_TEXT_GREEN_FO;
+                }
+                else
+                {
+                    textcolour = MENU_TEXT_RED_FO;
+                }
             }
         }
 
@@ -557,6 +564,45 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
         }
         sui_text(position, smalltext, n, textcolour, 1, 0);
         position_x += namespace;
+
+        vector iconpos = [size_x, position_y]; 
+        //check for icon files existing, otherwise use fallbacks
+        float filehandle;
+        if(lines[i].ready) {
+            filehandle = fopen(strcat("textures/wad/icon_ready.png"), FILE_READ);
+            if (filehandle >= 0) {
+                fclose(filehandle);
+                sui_pic(iconpos, smalltext, "textures/wad/icon_ready.png", '1 1 1', alpha, flags);
+            } else {
+                sui_text(iconpos, smalltext, "R", MENU_TEXT_GREEN_FO, 1, 0);
+            }
+            iconpos_x += smalltext.x;
+        }
+        if(lines[i].chat & 1) {
+            filehandle = fopen(strcat("textures/wad/icon_chat.png"), FILE_READ);
+            if (filehandle >= 0) {
+                fclose(filehandle);
+                sui_pic(iconpos, smalltext, "textures/wad/icon_chat.png", '1 1 1', alpha, flags);
+            } else {
+                //use ezquake chaticons image. Couldn't get drawsubpic to work, so now we get this instead
+                drawsetcliparea(iconpos_x + panel.Position.x, iconpos_y + panel.Position.y + 20, smalltext.x, smalltext.y);
+                sui_pic(iconpos, [smalltext_x * 4,smalltext_y * 256 / 56 ], "textures/chaticons.png", '1 1 1', alpha, flags);
+                drawresetcliparea();
+            }
+            iconpos_x += smalltext.x;
+        }
+        if(lines[i].chat & 2) {
+            filehandle = fopen(strcat("textures/wad/icon_afk.png"), FILE_READ);
+            if (filehandle >= 0) {
+                fclose(filehandle);
+                sui_pic(iconpos, smalltext, "textures/wad/icon_afk.png", '1 1 1', alpha, flags);
+            } else {
+                drawsetcliparea(iconpos_x + panel.Position.x, iconpos_y + panel.Position.y + 20, smalltext.x, smalltext.y);
+                sui_pic(iconpos - [smalltext_x,0], [smalltext_x * 4,smalltext_y * 256 / 56 ], "textures/chaticons.png", '1 1 1', alpha, flags);
+                drawresetcliparea();
+            }
+            iconpos_x += smalltext.x;
+        }
 
         if (lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER)
         {
@@ -669,6 +715,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
             sbl.damagetaken = getplayerkeyfloat(i, "damagetaken");
             sbl.team_no = getplayerkeyfloat(i, "team_no");
             sbl.ready = getplayerkeyfloat(i, "ready");
+            sbl.chat = getplayerkeyfloat(i, "chat");
 
             switch (sbl.team_no)
             {
@@ -794,7 +841,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
     {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawTeamScorePanel, {return "";}},
-    {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
+    {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 30','800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 

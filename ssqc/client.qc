@@ -2366,6 +2366,7 @@ void () PlayerPreThink = {
     if (self.cheat_level > 0) {
         self.cheat_level = self.cheat_level - 1;
     }
+    
     if (intermission_running) {
         IntermissionThink();
         return;
@@ -2748,6 +2749,7 @@ void (optional float csqcactive) ClientConnect = {
         UpdateClientTeamScores(self);
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
+        UpdateClient_VoteMap_AddAll(self);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

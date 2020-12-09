@@ -68,7 +68,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
-//    hud_idle_alpha = 0.3;
+    num_mapvotes = 0;
+    vote_selected_item = world;
+    vote_selected_index = -1;
+    vote_list_offset = 0;
+    current_vote = world;
+    vote_list_filter = "";
+    MouseDown = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -174,7 +180,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Admin_Main(TRUE);
             break;
         case "fo_menu_vote":
-            FO_Menu_Vote(TRUE);
+            //FO_Menu_Vote(TRUE);
+            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);
@@ -307,10 +314,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "vote_addmap":
-            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)));
+            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
         case "vote_removemap":
-            RemoveVoteMap(argv(1));
+            RemoveVoteMap(argv(1), TRUE);
             break;
     }
     return FALSE;
