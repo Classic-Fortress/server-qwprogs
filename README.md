@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new cvar for zut ``fo_hud_idle_alpha`` - sets the minimum transparency for flaginfo inactive items
 * optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide

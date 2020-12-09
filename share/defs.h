@@ -1434,4 +1434,5 @@
 #define PUSH_INCLUDETFITEM	2
 #define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
 #define PUSH_NONOISE	8
+#define PUSH_MEGAJUMPER	16
 
