@@ -675,3 +675,48 @@ void () trigger_monsterjump = {
     InitTrigger();
     self.touch = trigger_monsterjump_touch;
 };
+
+void () trigger_jumper_touch = {
+    local entity te;
+
+    if(!Activated(self, other)) {
+        if((self.else_goal != 0)) {
+            te = Findgoal(self.else_goal);
+            if(te) {
+                DoResults(te, other, (self.goal_result & TFGR_ADD_BONUSES));
+            }
+        }
+        return;
+    }
+    if(((other.classname == "grenade") || (other.classname != "player"))) {
+        return;
+    } else {
+        if(((other.health > 0) && !self.armorclass)) {
+            other.velocity_z = (self.speed * 7);
+            if((other.classname == "player")) {
+                if((other.fly_sound < time)) {
+                    other.fly_sound = (time + 1.5);
+                    if(!(self.spawnflags & 2.000000)) {
+                        sound(other, 0.000000, "misc/boing.wav", 1.000000, 1.000000);
+                    }
+                }
+            }
+        }
+    }
+    if((self.spawnflags & 1)) {
+        dremove (self);
+    }
+};
+
+void () trigger_jumper = {
+    if((CheckExistence() == 0.000000)) {
+        dremove (self);
+        return;
+    }
+    InitTrigger();
+    precache_sound("misc/boing.wav");
+    self.touch = trigger_jumper_touch;
+    if(!self.speed) {
+        self.speed = 1000;
+    }
+};
