@@ -29,6 +29,13 @@ vector MENU_TEXT_YELLOW_FO = '0.7 0.7 0.3';
 vector MENU_TEXT_GREEN_FO = '0.4 0.7 0.3';
 vector MENU_TEXT_SPEC_FO = '0.1 0.1 0.1';
 
+vector TEXT_TEAM_COLOUR[] = {
+    MENU_TEXT_BLUE_FO,
+    MENU_TEXT_RED_FO,
+    MENU_TEXT_YELLOW_FO,
+    MENU_TEXT_GREEN_FO
+};
+
 #define FO_MENU_FLAG_USE_MOUSE 1
 #define FO_MENU_FLAG_CENTER 2
 #define FO_MENU_FLAG_SHOW_SHORTCUTS 4
@@ -49,6 +56,8 @@ vector MENU_TEXT_SPEC_FO = '0.1 0.1 0.1';
 
 #define TEAM_SPECTATOR 9
 #define TEAM_OBSERVER 99
+
+#define MAP_MAX_CHARS 20
 
 .float owned_by;
 .string netname;
@@ -82,7 +91,13 @@ float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
 float jump_counter;
 float frames_since_onground;
-//float hud_idle_alpha;
+float num_mapvotes;
+float num_mapvotes_filtered;
+entity vote_selected_item;
+float vote_selected_index;
+float vote_list_offset;
+entity current_vote;
+string vote_list_filter;
 
 .string name;
 .string description;
@@ -91,7 +106,8 @@ float frames_since_onground;
 .float team_num;
 .float min_val;
 .float max_val;
-.float cnt;
+.float votecount;
+.float localmap;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -257,6 +273,8 @@ typedef struct
 } MouseStruct;
 
 MouseStruct Mouse;
+MouseStruct PrevMouse;
+float MouseDown;
 
 typedef struct {
     string filename;
@@ -278,6 +296,7 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+/*
 typedef struct {
     float team1score;
     float team2score;
@@ -286,6 +305,9 @@ typedef struct {
 } FO_TeamScores;
 
 FO_TeamScores TS;
+*/
+
+float TeamScore[4];
 
 // hud stuff
 typedef struct {
@@ -340,6 +362,7 @@ typedef struct {
     float damagegiven;
     float damagetaken;
     float ready;
+    float chat;
 } FO_ScoreBoardLine;
 
 // fte maxclients is 255, right?
