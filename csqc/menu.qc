@@ -104,10 +104,10 @@ void teamChosen(string team) = {
 
 var fo_menu FO_MENU_TEAM = {
     [0,0], [300,200], "Select Team", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
-        {"1","Blue team","","Known for cunning and strategy, Blues like to attack first",FO_MENU_STATE_NORMAL,{teamChosen("1");},'0.3 0.4 0.7'},
-        {"2","Red team","","Excellent at standing their ground, Reds won't stand for being attacked",FO_MENU_STATE_NORMAL,{teamChosen("2");},'0.7 0.4 0.3'},
-        {"3","Yellow team","","The best team",FO_MENU_STATE_NORMAL,{teamChosen("3");},'0.7 0.7 0.3'},
-        {"4","Green team","","Also okay",FO_MENU_STATE_NORMAL,{teamChosen("4");},'0.4 0.7 0.3'},
+        {"1","Blue team","","Known for cunning and strategy, Blues like to attack first",FO_MENU_STATE_NORMAL,{teamChosen("1");},MENU_TEXT_BLUE_FO},
+        {"2","Red team","","Excellent at standing their ground, Reds won't stand for being attacked",FO_MENU_STATE_NORMAL,{teamChosen("2");},MENU_TEXT_RED_FO},
+        {"3","Yellow team","","The best team",FO_MENU_STATE_NORMAL,{teamChosen("3");},MENU_TEXT_YELLOW_FO},
+        {"4","Green team","","Also okay",FO_MENU_STATE_NORMAL,{teamChosen("4");},MENU_TEXT_GREEN_FO},
         MenuSpacer,
         {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{teamChosen("auto");},MENU_BUTTON},
         MenuSpacer,
