@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* option to let engineer move while building `localinfo em on`.
 * new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
 * ``vote_addmap``\``vote_removemap`` now work client-side
