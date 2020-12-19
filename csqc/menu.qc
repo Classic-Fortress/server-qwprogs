@@ -794,6 +794,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 float fo_menu_process_input(fo_menu * menu, float scan) = {
     local string button = "";
     local float found = FALSE;
+    /*
     if(scan > 47 && scan < 58) {
         button = ftos(scan - 48);
     } else {
@@ -804,6 +805,14 @@ float fo_menu_process_input(fo_menu * menu, float scan) = {
             case 61:
                 button = "+";
                 break;
+        }
+    }
+    */
+    string prefix = "fo_menu_option_";
+    for(float i = 0; i < MENU_OPTION.length; i++) {
+        if(str2chr(cvar_string(strcat("fo_menu_option_",MENU_OPTION[i])),0) == scan) {
+            button = MENU_OPTION[i];
+            break;
         }
     }
     if(button != "") {

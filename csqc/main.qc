@@ -44,6 +44,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_disguise");
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
+    registercommand("fo_menu_cancel");
     registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -59,6 +60,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_addmap");
     registercommand("vote_removemap");
     registercvar("fo_hud_idle_alpha", "0.3");
+    for(float i = 0; i < MENU_OPTION.length; i++) {
+        registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
+    }
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -194,6 +198,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_dropammo":
             FO_Menu_DropAmmo(TRUE, 1, (player_class == PC_ENGINEER));
+            break;
+        case "fo_menu_cancel":
+            Menu_Cancel();
             break;
         case "primeone":
             if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
