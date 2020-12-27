@@ -60,9 +60,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_addmap");
     registercommand("vote_removemap");
     registercvar("fo_hud_idle_alpha", "0.3");
-    for(float i = 0; i < MENU_OPTION.length; i++) {
+    for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
+    registercvar("fo_menu_option_+", "=");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
