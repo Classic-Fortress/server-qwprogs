@@ -270,7 +270,7 @@ float () FO_Sentry_FindTarget = {
     entity timer = spawn();
     timer.owner = self;
     timer.think = FO_Sentry_Timer_Think;
-    timer.cnt = time + 0.15; // delay
+    timer.cnt = time + 0.25; // delay
     timer.nextthink = time + 0.01;
 
     return TRUE;
