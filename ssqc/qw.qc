@@ -589,6 +589,7 @@ float walls_block_emp;
 float new_emp;
 float cb_keepteams;
 float fo_flashtime;
+float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
