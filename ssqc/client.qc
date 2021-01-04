@@ -687,6 +687,9 @@ void () DecodeLevelParms = {
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
+        // health repair 
+        fo_repair_ratio = CF_GetSetting("forep", "fo_repair_ratio", "2");
+        
         // keep teams on map change [off]
         cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
 

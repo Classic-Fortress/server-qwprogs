@@ -1387,7 +1387,7 @@ void (entity gun) Engineer_SentryGun_Upgrade = {
 void (entity gun) Engineer_SentryGun_Repair = {
     local float metalcost, healamount;
 
-    metalcost = ceil((gun.max_health - gun.health) / 5);
+    metalcost = ceil((gun.max_health - gun.health) / (fo_repair_ratio == 0 ? 5 : fo_repair_ratio));
     if (metalcost > self.ammo_cells)
         metalcost = self.ammo_cells;
     self.ammo_cells = self.ammo_cells - metalcost;
