@@ -377,13 +377,15 @@ void () Sentry_Die = {
     sprint(self.real_owner, PRINT_HIGH,
            "Your sentry gun was destroyed\n");
     self.real_owner.has_sentry = 0;
-    self.think = Sentry_Explode;
-    self.nextthink = time + 0.1;
+    entity oself = self;
+    //self.think = Sentry_Explode;
+    //self.nextthink = time + 0.1;
     if (self.real_owner.is_building) {
         self = self.real_owner;
         TeamFortress_EngineerBuildStop();
     }
-    
+    self = oself;
+    Sentry_Explode();
 };
 
 float () Sentry_Fire = {
