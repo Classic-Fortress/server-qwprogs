@@ -313,7 +313,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
     switch (arg1)
     {
-        case "progsversion"
+        case "progsversion":
             sprint(self, PRINT_HIGH, "sv progs version: 0.1\n");
             break;
         case "adminpwd":
