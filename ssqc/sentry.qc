@@ -329,6 +329,9 @@ void () Sentry_FoundTarget = {
 };
 
 void () Sentry_HuntTarget = {
+    if (self.tfstate & TFSTATE_RESPAWN_READY)
+        return;
+
     self.goalentity = self.enemy;
 
     if (self.weapon == 1)
@@ -377,15 +380,14 @@ void () Sentry_Die = {
     sprint(self.real_owner, PRINT_HIGH,
            "Your sentry gun was destroyed\n");
     self.real_owner.has_sentry = 0;
-    entity oself = self;
-    //self.think = Sentry_Explode;
-    //self.nextthink = time + 0.1;
+    
+    self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
+    self.think = Sentry_Explode;
+    self.nextthink = time + 0.1;
     if (self.real_owner.is_building) {
         self = self.real_owner;
         TeamFortress_EngineerBuildStop();
     }
-    self = oself;
-    Sentry_Explode();
 };
 
 float () Sentry_Fire = {
