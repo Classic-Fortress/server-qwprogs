@@ -221,7 +221,10 @@ void () FO_Sentry_Timer_Think = {
             dremove(oself);
         }
     }
-    
+    else
+    {
+        dremove(oself); // lose tracking when people duck behind walls
+    }
 };
 
 float () FO_Sentry_FindTarget = {
