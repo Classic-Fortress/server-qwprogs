@@ -276,7 +276,7 @@ float () FO_Sentry_FindTarget = {
     float delay = 0.25;
     if (r >= 500) // RANGE_MID, 500 is halfway of sentry targeting distance
     {
-        delay = 0.35;
+        delay = 0.45;
     }
     // attack delay
     entity timer = spawn();
