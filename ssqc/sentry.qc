@@ -270,7 +270,7 @@ float () FO_Sentry_FindTarget = {
     }
 
     vector spot1 = self.origin + self.view_ofs;
-    vector spot2 = targ.origin + targ.view_ofs;
+    vector spot2 = self.enemy.origin + self.enemy.view_ofs;
 
     float r = vlen(spot1 - spot2);
     float delay = 0.25;
