@@ -269,11 +269,20 @@ float () FO_Sentry_FindTarget = {
         }
     }
 
+    vector spot1 = self.origin + self.view_ofs;
+    vector spot2 = targ.origin + targ.view_ofs;
+
+    float r = vlen(spot1 - spot2);
+    float delay = 0.25;
+    if (r >= 500) // RANGE_MID, 500 is halfway of sentry targeting distance
+    {
+        delay = 0.35;
+    }
     // attack delay
     entity timer = spawn();
     timer.owner = self;
     timer.think = FO_Sentry_Timer_Think;
-    timer.cnt = time + 0.25; // delay
+    timer.cnt = time + delay; // delay
     timer.nextthink = time + 0.01;
 
     return TRUE;
