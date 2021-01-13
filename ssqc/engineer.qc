@@ -1212,17 +1212,19 @@ void (entity disp) Engineer_Dispenser_InsertArmor = {
 };
 
 void (entity disp) Engineer_Dispenser_Repair = {
-    local float metalcost, healamount;
+    local float metalcost, healamount, ratio;
 
     if (disp.health == disp.max_health)
         return;
 
-    metalcost = ceil((disp.max_health - disp.health) / 5);
+    ratio = (fo_repair_ratio == 0 ? 5 : fo_repair_ratio);
+
+    metalcost = ceil((disp.max_health - disp.health) / ratio);
     if (metalcost > self.ammo_cells)
         metalcost = self.ammo_cells;
     self.ammo_cells = self.ammo_cells - metalcost;
 
-    healamount = floor(metalcost * 5);
+    healamount = floor(metalcost * ratio);
     disp.health = disp.health + healamount;
 
     if (metalcost > 0) {
@@ -1386,14 +1388,16 @@ void (entity gun) Engineer_SentryGun_Upgrade = {
 };
 
 void (entity gun) Engineer_SentryGun_Repair = {
-    local float metalcost, healamount;
+    local float metalcost, healamount, ratio;
 
-    metalcost = ceil((gun.max_health - gun.health) / 5);
+    ratio = (fo_repair_ratio == 0 ? 5 : fo_repair_ratio);
+
+    metalcost = ceil((gun.max_health - gun.health) / ratio);
     if (metalcost > self.ammo_cells)
         metalcost = self.ammo_cells;
     self.ammo_cells = self.ammo_cells - metalcost;
 
-    healamount = floor(metalcost * 5);
+    healamount = floor(metalcost * ratio);
     gun.health = gun.health + healamount;
 
     if (gun.health > gun.max_health)
