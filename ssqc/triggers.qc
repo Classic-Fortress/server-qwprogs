@@ -714,7 +714,7 @@ void () trigger_monsterjump = {
 
 void () trigger_jumper = {
     if(!self.noise) {
-        self.noise = "misc/boing.wav"; //"world/bouncepad.wav";
+        self.noise = "world/bounce.wav"; //"misc/boing.wav"; //"world/bouncepad.wav";
     }
     self.spawnflags = self.spawnflags | PUSH_MEGAJUMPER;
     trigger_push();

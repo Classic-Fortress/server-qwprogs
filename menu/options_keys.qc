@@ -67,11 +67,12 @@ const static struct
 	{0,				0},
 	{_(""),			"Misc"},
 	{0,				0},
-	{_("Scores"),			"+showscores"},
+	{_("Scores"),			"+fo_showscores"},
 	{_("Ready Up"),			"ready"},
 	{_("Server Chat"),		"messagemode"},
 	{_("Team Chat"),		"messagemode2"},
 	{_("Map Help"),			"maphelp"},
+	{_("Main Menu"),		"togglemenu"},
 	/* {_("Break Match"),		"break"}, */
 	/* {_("Voice Chat"),		"+voip"}, */
 //	{_("Mouse Look"),		"+mlook"},
