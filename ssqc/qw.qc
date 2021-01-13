@@ -587,8 +587,10 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float fo_sentry_targeting; // new improved targeting for sentry guns
 float cb_keepteams;
 float fo_flashtime;
+float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
@@ -635,6 +637,8 @@ float intermission_exittime;
 .float max_grenades_2;
 
 .entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
+
+.entity vote_map_send;
 
 // global variables for voting
 float vote1_cnt, vote2_cnt, vote3_cnt, vote4_cnt, vote5_cnt;

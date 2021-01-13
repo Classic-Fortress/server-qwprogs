@@ -57,6 +57,8 @@ vector TEXT_TEAM_COLOUR[] = {
 #define TEAM_SPECTATOR 9
 #define TEAM_OBSERVER 99
 
+#define MAP_MAX_CHARS 20
+
 .float owned_by;
 .string netname;
 .float playerid;
@@ -89,7 +91,13 @@ float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
 float jump_counter;
 float frames_since_onground;
-//float hud_idle_alpha;
+float num_mapvotes;
+float num_mapvotes_filtered;
+entity vote_selected_item;
+float vote_selected_index;
+float vote_list_offset;
+entity current_vote;
+string vote_list_filter;
 
 .string name;
 .string description;
@@ -98,7 +106,8 @@ float frames_since_onground;
 .float team_num;
 .float min_val;
 .float max_val;
-.float cnt;
+.float votecount;
+.float localmap;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -125,6 +134,10 @@ string HUD_ALIGN[] = {
     "Right",
     "Left",
     "Center"
+};
+
+string MENU_OPTION[] = {
+    "1","2","3","4","5","6","7","8","9","0","-","+"
 };
 
 typedef struct 
@@ -264,6 +277,8 @@ typedef struct
 } MouseStruct;
 
 MouseStruct Mouse;
+MouseStruct PrevMouse;
+float MouseDown;
 
 typedef struct {
     string filename;

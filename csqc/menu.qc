@@ -10,6 +10,7 @@ void (float force) FO_Menu_Spy;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
 void (float force) FO_Menu_Class;
+void (float force) showVoteMenu;
 void FO_Menu_Admin_Players(float force, float type, float page);
 
 typedef struct {
@@ -74,18 +75,20 @@ var fo_menu FO_MENU_GAME = {
         {"4","Spectate", "","Do not participate in the game, but observe as a ghost",FO_MENU_STATE_NORMAL,{localcmd("observe\n"); Menu_Cancel();},MENU_BUTTON},
         {"5","Server Admin", "","Admin options for the server",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"6","Captain's Menu", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);},MENU_BUTTON},
+        {"7","Map Menu", "","",FO_MENU_STATE_NORMAL,{showVoteMenu(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 9, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_GAME_SPECTATOR = {
     [0,0], [300,200], "Fortress One", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Join Game", "","",FO_MENU_STATE_NORMAL,{localcmd("join\n"); Menu_Cancel(); },MENU_BUTTON},
         MenuSpacer,
         {"3","Server Admin", "","",FO_MENU_STATE_DISABLED,{FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
+        {"4","Map Menu", "","",FO_MENU_STATE_NORMAL,{showVoteMenu(TRUE);},MENU_BUTTON},
         MenuSpacer,
         {"0","Main Menu","","",FO_MENU_STATE_NORMAL,{localcmd("fo_main_menu\n"); Menu_Cancel();},MENU_BUTTON},
-    }, 5, TRUE
+    }, 6, TRUE
 };
 var fo_menu FO_MENU_SPECTATOR_TRACK = {
     [0,0], [300,200], "Track", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
@@ -630,7 +633,7 @@ var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
     }, 11, TRUE
 };
 var fo_menu FO_MENU_VOTE = {
-    [0,0], [300,200], "Map Vote", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
+    [0,0], [300,200], "Map Vote", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
         {"1","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[0].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"2","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[1].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
@@ -660,6 +663,8 @@ vector fo_menu_draw(fo_menu * menu) = {
         setcursormode(FALSE);
         return position;
     }
+
+    Hud_Panels[HUD_PANEL_MAP_MENU].Display = FALSE;
 
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
@@ -734,7 +739,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, alignment, shortcutoffset.x)) {
+                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, MENU_TEXT_1, alignment, shortcutoffset.x, 0.6, 1, 0)) {
                         menu.options[i].action();
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
@@ -789,6 +794,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 float fo_menu_process_input(fo_menu * menu, float scan) = {
     local string button = "";
     local float found = FALSE;
+    /*
     if(scan > 47 && scan < 58) {
         button = ftos(scan - 48);
     } else {
@@ -799,6 +805,14 @@ float fo_menu_process_input(fo_menu * menu, float scan) = {
             case 61:
                 button = "+";
                 break;
+        }
+    }
+    */
+    string prefix = "fo_menu_option_";
+    for(float i = 0; i < MENU_OPTION.length; i++) {
+        if(str2chr(cvar_string(strcat("fo_menu_option_",MENU_OPTION[i])),0) == scan) {
+            button = MENU_OPTION[i];
+            break;
         }
     }
     if(button != "") {
@@ -1258,4 +1272,15 @@ void FO_Menu_Special(float force) = {
     }
     localcmd("cmd menu\n");
     //fo_hud_menu_active = TRUE;
+};
+
+void (float show) showVoteMenu = {
+    if(fo_hud_menu_active) {
+        Menu_Cancel();
+    }
+    setcursormode(show);
+    Hud_Panels[HUD_PANEL_MAP_MENU].Display = show;
+    if(show) {
+        CurrentMenu = &FO_MENU_VOTE;
+    }
 };

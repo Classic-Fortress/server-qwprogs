@@ -1142,6 +1142,7 @@ entity (string name, string desc, string mapgroup, float num_teams, float min_pl
     mc.team_no = num_teams?num_teams:2;
     mc.ex_skill_min = min_players?min_players:6;
     mc.ex_skill_max = max_players?max_players:16;
+    UpdateClient_VoteMap_Add_Broadcast(mc);
     return mc;
 };
 
@@ -1152,6 +1153,7 @@ float (string name) RemoveVoteMap = {
     local entity mc = find(world, classname, "map_candidate");
     while(mc) {
         if(mc.netname == name) {
+            UpdateClient_VoteMap_Delete_Broadcast(mc);
             dremove(mc);
             return TRUE;
         }
@@ -1266,6 +1268,7 @@ void () EndVoting = {
     e = find(world, classname, "map_candidate");
     while(e) {
         e.cnt = 0;
+        UpdateAllClientMapVotes(e);
         e = find(e, classname, "map_candidate");
     }
 };
@@ -1439,6 +1442,7 @@ void (entity p, string vote) VoteForMap = {
                 if(p.vote_map) {
                     bprint(PRINT_HIGH, p.netname, " changes vote to \b", vote, "\b\n");
                     p.vote_map.cnt--;
+                    UpdateAllClientMapVotes(p.vote_map);
                 } else {
                     FO_Sound(self, CHAN_AUTO, "items/protect.wav", 1, ATTN_NONE);
                     bprint(PRINT_HIGH, p.netname, " has voted for \b", vote, "\b\n");
@@ -1447,6 +1451,7 @@ void (entity p, string vote) VoteForMap = {
             }
             p.vote_map = mc;
             mc.cnt++;
+            UpdateAllClientMapVotes(mc);
             CheckVoting();
             return;
         }
@@ -1462,6 +1467,7 @@ void (entity p) UnvoteForMap = {
             bprint(PRINT_HIGH, p.netname, " \babandons vote for\b ", p.vote_map.netname, "\n");
         }
         p.vote_map.cnt--;
+        UpdateAllClientMapVotes(p.vote_map);
         p.vote_map = world;
         vote_total_votes--;
     }
@@ -1588,13 +1594,22 @@ void (float inp) Vote_Menu_Map_Input = {
     local entity mc = Vote_Menu_Map_GetMapCandidate((self.current_menu_page - 1) * 7 + inp);
     if(mc) {
         self.admin_use = mc;
-        Vote_Menu_Map_Action(0);
+        if(self.classname == "observer") {
+            Vote_Menu_Map_Action_Input(2);
+        } else {
+            Vote_Menu_Map_Action(0);
+        }
     }
 };
 void (float update) Vote_Menu_Map = {    
     // allow toggling team menu using any method to show it
     if (!update && self.menu_input == Vote_Menu_Map_Input) {
         Menu_Input(0);
+        return;
+    }
+
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)){
+        UpdateClientMenu_Maps(self);
         return;
     }
 
