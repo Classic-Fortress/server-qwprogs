@@ -502,6 +502,38 @@ void () trigger_hurt = {
         self.dmg = 5;
 };
 
+void () trigger_jumper_touch = {
+    local entity te;
+
+    if(!Activated(self, other)) {
+        if((self.else_goal != 0)) {
+            te = Findgoal(self.else_goal);
+            if(te) {
+                DoResults(te, other, (self.goal_result & TFGR_ADD_BONUSES));
+            }
+        }
+        return;
+    }
+    if(((other.classname == "grenade") || (other.classname != "player"))) {
+        return;
+    } else {
+        if(((other.health > 0) && !self.armorclass)) {
+            other.velocity_z = (self.speed * 7);
+            if((other.classname == "player")) {
+                if((other.fly_sound < time)) {
+                    other.fly_sound = (time + 1.5);
+                    if(!(self.spawnflags & 2)) {
+                        FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                    }
+                }
+            }
+        }
+    }
+    if((self.spawnflags & 1)) {
+        dremove (self);
+    }
+};
+
 void () trigger_push_touch = {
     local entity te;
 
@@ -605,6 +637,7 @@ void () trigger_push = {
     }
     InitTrigger();
 
+    self.touch = trigger_push_touch;    
     if (self.target)
     {
         // the target ent might not be processed yet, so we do setup after map starts
@@ -613,8 +646,12 @@ void () trigger_push = {
     }
     else
     {
-        if (!self.speed)
+        if (!self.speed) {
             self.speed = 1000;
+        }
+        if(self.spawnflags & PUSH_MEGAJUMPER) {
+            self.touch = trigger_jumper_touch;
+        }
     }
     
     if (!(self.spawnflags & PUSH_NONOISE))
@@ -635,7 +672,6 @@ void () trigger_push = {
         precache_sound(self.noise); 
     }   
 
-    self.touch = trigger_push_touch;    
 };
 
 void () trigger_jumppad = {
@@ -675,3 +711,11 @@ void () trigger_monsterjump = {
     InitTrigger();
     self.touch = trigger_monsterjump_touch;
 };
+
+void () trigger_jumper = {
+    if(!self.noise) {
+        self.noise = "world/bounce.wav"; //"misc/boing.wav"; //"world/bouncepad.wav";
+    }
+    self.spawnflags = self.spawnflags | PUSH_MEGAJUMPER;
+    trigger_push();
+}

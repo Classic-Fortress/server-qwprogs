@@ -285,3 +285,109 @@ void UpdateClientPrematch(entity pl, float countdownstarted) = {
     //WriteByte(MSG_MULTICAST, countdownstarted);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
+
+void UpdateClientMapVote(entity pl, entity candidate) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE) || !candidate)
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_UPDATE);
+    WriteString(MSG_MULTICAST, candidate.netname);
+    WriteFloat(MSG_MULTICAST, candidate.cnt);
+    WriteByte(MSG_MULTICAST, (candidate.cnt > 0 && pl.vote_map == candidate));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateAllClientMapVotes(entity candidate) {
+    if(!candidate) {
+        return;
+    }
+    entity pl = find(world, classname, "player");
+    while(pl) {
+        if(!pl.has_disconnected) {
+            UpdateClientMapVote(pl, candidate);
+        }
+        pl = find(pl, classname, "player");
+    }
+}
+
+void UpdateClientMenu_Maps(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_CLIENT_MENU);
+    WriteFloat(MSG_MULTICAST, CLIENT_MENU_MAPS);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_VoteMap_Add(entity pl, entity map_candidate) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_MAP_ADD);
+    WriteString(MSG_MULTICAST, substring(map_candidate.netname,0,20));
+    WriteString(MSG_MULTICAST, map_candidate.broadcast);
+    WriteString(MSG_MULTICAST, substring(map_candidate.team_broadcast,0,10));
+    WriteFloat(MSG_MULTICAST, map_candidate.team_no);
+    WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_min);
+    WriteFloat(MSG_MULTICAST, map_candidate.ex_skill_max);
+    WriteFloat(MSG_MULTICAST, map_candidate.cnt);
+    WriteByte(MSG_MULTICAST, (pl.vote_map == map_candidate));
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
+void() votemap_sender_think = {
+    if (self.owner.vote_map_send) {
+        UpdateClient_VoteMap_Add(self.owner, self.owner.vote_map_send);
+        self.owner.vote_map_send = find(self.owner.vote_map_send, classname, "map_candidate");
+        self.nextthink = time + 0.1;
+    } else {
+        dremove(self);
+    }
+}
+
+void UpdateClient_VoteMap_AddAll(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    //PlayerPreThink was too fast. Use a timer to slow down the send rate
+    //Soas to not overflow the message buffers
+    pl.vote_map_send = find(world, classname, "map_candidate");
+    local entity sender_timer = spawn();
+    sender_timer.owner = pl;
+    sender_timer.classname = "votemap_sender_timer";
+    sender_timer.nextthink = time + 0.1;
+    sender_timer.think = votemap_sender_think;
+}
+
+void UpdateClient_VoteMap_Add_Broadcast(entity map_candidate) = {
+    local entity pl = find(world, classname, "player");
+    while(pl) {
+        if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
+            UpdateClient_VoteMap_Add(pl, map_candidate);
+        }
+        pl = find(pl, classname, "player");
+    }
+}
+
+void UpdateClient_VoteMap_Delete(entity pl, string map) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_VOTE_MAP_DELETE);
+    WriteString(MSG_MULTICAST, map);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClient_VoteMap_Delete_Broadcast(entity map_candidate) = {
+    local entity pl = find(world, classname, "player");
+    while(pl) {
+        if(infokeyf(pl, INFOKEY_P_CSQCACTIVE) && !pl.has_disconnected) {
+            UpdateClient_VoteMap_Delete(pl, map_candidate.netname);
+        }
+        pl = find(pl, classname, "player");
+    }
+}

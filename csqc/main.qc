@@ -44,6 +44,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_disguise");
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
+    registercommand("fo_menu_cancel");
     registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("primeone");
@@ -59,6 +60,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_addmap");
     registercommand("vote_removemap");
     registercvar("fo_hud_idle_alpha", "0.3");
+    for(float i = 0; i < MENU_OPTION.length - 1; i++) {
+        registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
+    }
+    registercvar("fo_menu_option_+", "=");
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
@@ -68,7 +73,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
-//    hud_idle_alpha = 0.3;
+    num_mapvotes = 0;
+    vote_selected_item = world;
+    vote_selected_index = -1;
+    vote_list_offset = 0;
+    current_vote = world;
+    vote_list_filter = "";
+    MouseDown = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -174,7 +185,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Admin_Main(TRUE);
             break;
         case "fo_menu_vote":
-            FO_Menu_Vote(TRUE);
+            //FO_Menu_Vote(TRUE);
+            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);
@@ -187,6 +199,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_dropammo":
             FO_Menu_DropAmmo(TRUE, 1, (player_class == PC_ENGINEER));
+            break;
+        case "fo_menu_cancel":
+            Menu_Cancel();
             break;
         case "primeone":
             if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
@@ -307,10 +322,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "vote_addmap":
-            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)));
+            AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
         case "vote_removemap":
-            RemoveVoteMap(argv(1));
+            RemoveVoteMap(argv(1), TRUE);
             break;
     }
     return FALSE;

@@ -6,7 +6,6 @@ void (entity bld) CheckBelowBuilding;
 void (entity gunhead) CheckSentry;
 
 void () Sentry_Rotate;
-float () Sentry_FindTarget;
 void () Sentry_FoundTarget;
 void () Sentry_HuntTarget;
 void (entity e, float f) Sentry_Pain;
@@ -112,38 +111,6 @@ void () lvl3_sentry_atk3 =[6, lvl3_sentry_atk1] {
 };
 
 //===========================
-void () Sentry_Rotate = {
-    local float ay;
-
-    self.effects = self.effects - (self.effects & EF_DIMLIGHT);
-    CheckSentry(self);
-    if (Sentry_FindTarget())
-        return;
-
-    if (self.heat == 0) {
-        self.ideal_yaw = self.waitmin;
-        ChangeYaw();
-        ay = anglemod(self.angles_y);
-        ay = rint(ay);
-        if (ay == rint(self.waitmin)) {
-            CheckBelowBuilding(self.trigger_field);
-            self.heat = 1;
-            if (random() < 0.1)
-                FO_Sound(self, CHAN_ITEM, "weapons/turridle.wav", 1,
-                      ATTN_NORM);
-        }
-    } else {
-        self.ideal_yaw = self.waitmax;
-        ChangeYaw();
-        ay = anglemod(self.angles_y);
-        ay = rint(ay);
-        if (ay == rint(self.waitmax)) {
-            CheckBelowBuilding(self.trigger_field);
-            self.heat = 0;
-        }
-    }
-};
-
 float () Sentry_FindTarget = {
     local entity client;
     local float r;
@@ -202,6 +169,166 @@ float () Sentry_FindTarget = {
     return (1);
 };
 
+float (entity p) FO_Sentry_ValidTarget = {
+    float valid = TRUE;
+
+    if ((p == self.real_owner) || !p.takedamage)
+        valid = FALSE;
+    if (p.has_disconnected == 1)
+        valid = FALSE;
+
+    if (teamplay) {
+        if ((p.team_no == self.team_no) && (self.team_no != 0))
+            valid = FALSE;
+        if ((p.undercover_team == self.team_no) &&
+            (self.team_no != 0))
+            valid = FALSE;
+    }
+    if (p.is_feigning)
+        valid = FALSE;
+    if ((p.flags & FL_NOTARGET) ||
+        (p.items & IT_INVISIBILITY))
+        valid = FALSE;
+    if (!visible(p))
+        valid = FALSE;
+
+    float r = range(p);
+    if (r == RANGE_FAR)
+        valid = FALSE;
+    else if ((r == RANGE_MID) && !infront(p))
+        valid = FALSE;
+
+    return valid;
+};
+
+void () FO_Sentry_Timer_Think = {
+    entity oself = self;
+    oself.nextthink = time + 0.01;
+    oself.cnt2 = oself.cnt2 + 0.01; // rotate speed
+    self = self.owner;
+    
+    if (FO_Sentry_ValidTarget(self.enemy))
+    {
+        if (oself.cnt2 >= 0.1)
+        {
+            ai_face();
+            oself.cnt2 = 0;
+        }
+        
+        if (oself.cnt <= time)
+        {
+            Sentry_FoundTarget();
+            dremove(oself);
+        }
+    }
+    else
+    {
+        dremove(oself); // lose tracking when people duck behind walls
+    }
+};
+
+float () FO_Sentry_FindTarget = {
+    entity p = find(world, classname, "player");
+    float foundTarg = FALSE;
+    float dist = -1;
+    entity targ = world;
+
+    while (p)
+    {
+        // do checks
+        if (FO_Sentry_ValidTarget(p))
+        {
+            // do vlen check
+            if (dist == -1)
+            {
+                dist = vlen(self.origin - p.origin);
+                targ = p;
+            }
+            else if (dist > vlen(self.origin - p.origin))
+            {
+                dist = vlen(self.origin - p.origin);
+                targ = p;
+            }
+        }        
+
+        p = find(p, classname, "player");
+    }
+
+    if (!targ)
+    {
+        self.enemy = world;
+        return FALSE;
+    }
+        
+    self.enemy = targ;
+    if (self.enemy.classname != "player") {
+        self.enemy = self.enemy.enemy;
+        if (self.enemy.classname != "player") {
+            self.enemy = world;
+            return FALSE;
+        }
+    }
+
+    vector spot1 = self.origin + self.view_ofs;
+    vector spot2 = self.enemy.origin + self.enemy.view_ofs;
+
+    float r = vlen(spot1 - spot2);
+    float delay = 0.25;
+    if (r >= 500) // RANGE_MID, 500 is halfway of sentry targeting distance
+    {
+        delay = 0.45;
+    }
+    // attack delay
+    entity timer = spawn();
+    timer.owner = self;
+    timer.think = FO_Sentry_Timer_Think;
+    timer.cnt = time + delay; // delay
+    timer.nextthink = time + 0.01;
+
+    return TRUE;
+};
+
+void () Sentry_Rotate = {
+    local float ay;
+
+    self.effects = self.effects - (self.effects & EF_DIMLIGHT);
+    CheckSentry(self);
+
+    if (fo_sentry_targeting)
+    {
+        if (FO_Sentry_FindTarget())
+            return;
+    }
+    else
+    {
+        if (Sentry_FindTarget())
+            return;
+    }
+
+    if (self.heat == 0) {
+        self.ideal_yaw = self.waitmin;
+        ChangeYaw();
+        ay = anglemod(self.angles_y);
+        ay = rint(ay);
+        if (ay == rint(self.waitmin)) {
+            CheckBelowBuilding(self.trigger_field);
+            self.heat = 1;
+            if (random() < 0.1)
+                FO_Sound(self, CHAN_ITEM, "weapons/turridle.wav", 1,
+                      ATTN_NORM);
+        }
+    } else {
+        self.ideal_yaw = self.waitmax;
+        ChangeYaw();
+        ay = anglemod(self.angles_y);
+        ay = rint(ay);
+        if (ay == rint(self.waitmax)) {
+            CheckBelowBuilding(self.trigger_field);
+            self.heat = 0;
+        }
+    }
+};
+
 void () Sentry_FoundTarget = {
     if ((self.ammo_shells > 0) ||
         ((self.ammo_rockets > 0) && (self.weapon == 3)))
@@ -214,6 +341,9 @@ void () Sentry_FoundTarget = {
 };
 
 void () Sentry_HuntTarget = {
+    if (self.tfstate & TFSTATE_RESPAWN_READY)
+        return;
+
     self.goalentity = self.enemy;
 
     if (self.weapon == 1)
@@ -262,13 +392,14 @@ void () Sentry_Die = {
     sprint(self.real_owner, PRINT_HIGH,
            "Your sentry gun was destroyed\n");
     self.real_owner.has_sentry = 0;
+    
+    self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;
     self.think = Sentry_Explode;
     self.nextthink = time + 0.1;
     if (self.real_owner.is_building) {
         self = self.real_owner;
         TeamFortress_EngineerBuildStop();
     }
-    
 };
 
 float () Sentry_Fire = {
