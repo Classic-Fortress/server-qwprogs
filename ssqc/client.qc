@@ -1990,6 +1990,7 @@ void () PutClientInServer = {
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
+
 };
 
 //void () info_player_start = {
