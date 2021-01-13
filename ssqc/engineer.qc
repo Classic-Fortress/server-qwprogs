@@ -575,6 +575,7 @@ void (float objtobuild) TeamFortress_Build = {
             newmis.classname = "building_sentrygun";
             newmis.weapon = 0;
         }
+        W_SetCurrentAmmo(self);
     }
 
     oldmis = newmis;
