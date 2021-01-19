@@ -1207,6 +1207,9 @@
 #define TFGI_KEEP		256 // Players keep this item even when they die
 #define TFGI_ITEMGLOWS		512	// Item glows when on the ground
 #define TFGI_DONTREMOVERES	1024 // Don't remove results when the item is removed
+#define TFGI_DROPTOFLOOR	2048 // If this bit is set, the GoalItem drops to the ground when it first spawns.
+#define TFGI_ALLOWTHROW	    4096 // Item can be thrown with 'dropitems' command
+#define TFGI_SOLID	        8192 // Item is solid
 
 // Defines for TeamSpawnpoints : goal_activation (in team spawns)
 #define TFSP_MULTIPLEITEMS	1  // Give out the GoalItem multiple times
