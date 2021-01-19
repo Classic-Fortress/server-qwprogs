@@ -398,6 +398,8 @@ void (entity attacker, entity target, float tfstate) LogEventAffliction = {
 };
 
 void (entity player) LogEventGoal = {
+	if(player == world)
+		return;
 	player.caps = player.caps + 1;
 	if (canlog == 0)
 		return;
