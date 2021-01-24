@@ -587,8 +587,10 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float fo_sentry_targeting; // new improved targeting for sentry guns
 float cb_keepteams;
 float fo_flashtime;
+float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;

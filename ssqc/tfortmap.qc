@@ -2614,6 +2614,9 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.think = tfgoalitem_dropthink;
         Item.bubble_count = time + Item.pausetime + 5; //used by the return timer
     }
+    if (Item.goal_activation & TFGI_RETURN_DROP) {
+        Item.think = tfgoalitem_remove;
+    }
     Item.owner = world;
 };
 
@@ -2623,7 +2626,7 @@ void () tfgoalitem_remove = {
     if (self.goal_state == 1) {
         return;
     }
-    if (self.goal_activation & 32) {
+    if (self.goal_activation & 32 || self.goal_activation & TFGI_RETURN_DROP) {
         te = spawn();
         te.enemy = self;
         te.weapon = 3;
@@ -2961,12 +2964,15 @@ void () DropGoalItems = {
     while (te) {
         if (te.owner == self) {
             if (old_dropflag) {
-                if (te.goal_activation & 4096) {
+                if (te.goal_activation & TFGI_ALLOWTHROW) {
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
                 }
             }
+            else if(te.goal_activation & TFGI_RETURN_DROP) {
+                tfgoalitem_RemoveFromPlayer(te, self, 0);
+            }
             //Always allow dropping 4096
-            else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+            else if (self.effects & EF_DIMLIGHT || te.goal_activation & TFGI_ALLOWTHROW) {
                 timecarried = gametime - self.goalrunningtime;
                 RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);

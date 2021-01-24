@@ -244,7 +244,7 @@
 #define TFSTATE_GRENTHROWING		1024  // is throwing a grenade
 #define TFSTATE_AIMING			2048  // is using the laser sight
 #define TFSTATE_LOCK            4096 // this state will stop hwguy from shooting assault cannon
-#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire
+#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire, as sentry gun, indicate it needs to die
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
@@ -1207,6 +1207,9 @@
 #define TFGI_KEEP		256 // Players keep this item even when they die
 #define TFGI_ITEMGLOWS		512	// Item glows when on the ground
 #define TFGI_DONTREMOVERES	1024 // Don't remove results when the item is removed
+#define TFGI_DROPTOFLOOR	2048 // If this bit is set, the GoalItem drops to the ground when it first spawns.
+#define TFGI_ALLOWTHROW	    4096 // Item can be thrown with 'dropitems' command
+#define TFGI_SOLID	        8192 // Item is solid
 
 // Defines for TeamSpawnpoints : goal_activation (in team spawns)
 #define TFSP_MULTIPLEITEMS	1  // Give out the GoalItem multiple times
