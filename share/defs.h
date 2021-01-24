@@ -1432,7 +1432,7 @@
 // trigger_push
 #define PUSH_ONCE	1
 #define PUSH_INCLUDETFITEM	2
-#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder - use in conjunction with includetfitem to exclude all but tfitem
 #define PUSH_NONOISE	8
 #define PUSH_MEGAJUMPER	16
 
