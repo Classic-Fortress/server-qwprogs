@@ -35,7 +35,24 @@ float () CheckWinningTeam = {
 	return winning_team;
 };
 
+void () FO_RoundChange = {
+	entity e = find(world, targetname, "fo_roundchange");
+
+	while (e)
+	{
+		// activate
+		self = e;
+		self.use();
+		SUB_UseTargets();
+		e = find(e, targetname, "fo_roundchange");
+	}
+};
+
 void () QuadRoundOver = {
+	if (rounds != 1)
+	{
+		FO_RoundChange();
+	}
 	round_over = 2;
 	self.think = StartQuadRound;
 	self.nextthink = (time + 0.5);
@@ -452,7 +469,7 @@ void () StartQuadRound =
 void () EndQuadRound = {
 	if (infokey(world, "quadmode") == "on") {
 		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
-			if (rounds > 1) {
+			if (rounds > 1) {			
                 local string st;
                 st = ftos(round_delay_time);
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
@@ -466,3 +483,4 @@ void () EndQuadRound = {
 		}
 	}
 };
+
