@@ -1430,7 +1430,12 @@
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
+// all bits between 1 and 255 are reserved for flash
 #define DMN_NOFLASH	256	// see all the things
+#define DMN_TEAMBLUE	512
+#define DMN_TEAMRED		1024
+#define DMN_TEAMYELL	2048
+#define DMN_TEAMGREN	4096
 
 // trigger_push
 #define PUSH_ONCE	1
@@ -1438,4 +1443,13 @@
 #define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder - use in conjunction with includetfitem to exclude all but tfitem
 #define PUSH_NONOISE	8
 #define PUSH_MEGAJUMPER	16
+#define PUSH_EXCLUDEGRENADE	32
 
+// func_wall
+#define WALL_SOLID_NOT	1
+
+// teams
+#define TEAM_BLUE	1
+#define TEAM_RED	2
+#define TEAM_YELL	3
+#define TEAM_GREN	4
