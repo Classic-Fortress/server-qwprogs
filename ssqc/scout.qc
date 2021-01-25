@@ -151,8 +151,7 @@ void () FlashTimer = {
         te.FlashTime = 1;
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
-        te.dimension_see = DMN_NOFLASH;
-        te.dimension_seen = DMN_NOFLASH;
+        SetDimensions(TRUE);
         return;
     }
 
@@ -191,8 +190,7 @@ void FO_FlashTimer()
         sprint(te, PRINT_HIGH, "Flash has worn off\n");
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
-        te.dimension_see = DMN_NOFLASH;
-        te.dimension_seen = DMN_NOFLASH;
+        SetDimensions(TRUE);
         return;
     }
 

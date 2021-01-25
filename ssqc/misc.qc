@@ -467,8 +467,33 @@ void () func_wall = {
     }
     self.angles = '0 0 0';
     self.movetype = MOVETYPE_PUSH;
-    self.solid = SOLID_BSP;
-    self.use = func_wall_use;
+    self.use = func_wall_use;    
+
+    if (self.spawnflags & WALL_SOLID_NOT)
+    {
+        self.solid = SOLID_NOT;
+    }
+    else
+    {
+        self.solid = SOLID_BSP;
+    }
+    switch (self.team_no)
+    {
+        case TEAM_BLUE:
+            self.dimension_seen = DMN_TEAMBLUE;
+            break;
+        case TEAM_RED:
+            self.dimension_seen = DMN_TEAMRED;
+            break;
+        case TEAM_YELL:
+            self.dimension_seen = DMN_TEAMYELL;
+            break;
+        case TEAM_GREN:
+            self.dimension_seen = DMN_TEAMGREN;
+            break;
+        default:
+            break;
+    }
     setmodel(self, self.model);
 };
 
