@@ -25,7 +25,7 @@ void () button_return = {
     targ = world;
     targname = self.target;
     targ = find(targ, targetname, targname);
-    targ.active = TFGS_INACTIVE;
+    if(targ) targ.active = TFGS_INACTIVE;
 
     self.goal_state = TFGS_INACTIVE;
     self.state = STATE_DOWN;
@@ -49,7 +49,7 @@ void () button_fire = {
     targ = world;
     targname = self.target;
     targ = find(targ, targetname, targname);   
-    targ.active = TFGS_ACTIVE;
+    if(targ) targ.active = TFGS_ACTIVE;
 
     FO_Sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
 
