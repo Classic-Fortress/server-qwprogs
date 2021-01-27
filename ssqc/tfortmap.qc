@@ -1774,7 +1774,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     local float winners;
     local float gotone;
 
-    if (cb_prematch) {
+    if (cb_prematch && !(Goal.spawnflags & TFGI_CB_IGNORE)) {
         return;
     }
     if (Goal.goal_state == 1) {
@@ -2116,8 +2116,17 @@ void () info_tfgoal_use = {
 void () tfgoal_timer_tick = {
     if (self.goal_state != 3) {
         if (APMeetsCriteria(self, world))
+        {
+            //bprint(PRINT_HIGH, "meets criteria, doing results\n");
             DoResults(self, world, 1);
+
+            // redo think here too, as quadmode breaks proper timers 
+            // in DoResults due to return after cb_prematch test
+            self.think = tfgoal_timer_tick;
+            self.nextthink = time + self.search_time;
+        }
         else {
+            bprint(PRINT_HIGH, "inactivating timer\n");
             InactivateGoal(self);
             self.think = tfgoal_timer_tick;
             self.nextthink = time + self.search_time;

@@ -271,6 +271,7 @@ float coop;
 .float inactivate_group_no;
 .float remove_group_no;
 .float restore_group_no;
+.float switch_team_group_no;
 
 .vector goal_min;
 .vector goal_max;

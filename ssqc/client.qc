@@ -1762,6 +1762,32 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "ready", player.is_ready);
 };
 
+void (float all_dimensions) SetDimensions = {
+    if (all_dimensions)
+    {
+        self.dimension_seen = DMN_NOFLASH;
+
+        switch (self.team_no)
+        {
+            case TEAM_BLUE:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMBLUE;
+                break;
+            case TEAM_RED:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMRED;
+                break;
+            case TEAM_YELL:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMYELL;
+                break;
+            case TEAM_GREN:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMGREN;
+                break;
+            default:
+                self.dimension_see = DMN_NOFLASH;
+                break;
+        }
+    }
+};
+
 void () PutClientInServer = {
     local float oldclass;
     local entity spot;
@@ -1803,8 +1829,7 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
-    self.dimension_see = DMN_NOFLASH;
-    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    SetDimensions(TRUE);
     self.special_cooldown = 0;
     
     setmodel(self, string_null);
