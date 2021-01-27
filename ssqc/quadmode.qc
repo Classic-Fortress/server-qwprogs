@@ -1,4 +1,4 @@
-//=-=-=-=-=
+void () info_player_teamspawn;
 
 float () CheckWinningTeam = {
 	local float win_score = 0;
@@ -35,25 +35,135 @@ float () CheckWinningTeam = {
 	return winning_team;
 };
 
+void (entity te) Quad_HideFlags = {
+	if(rounds % 2) {
+		if(te.team_no == 2 && te.owned_by == 1) {
+			Quad_UnHideFlag(te);
+		} else if(te.team_no == 1 && te.owned_by == 2) {
+			Quad_HideFlag(te);
+		}
+	} else {
+		if(te.team_no == 2 && te.owned_by == 1) {
+			Quad_HideFlag(te);
+		} else if(te.team_no == 1 && te.owned_by == 2) {
+			Quad_UnHideFlag(te);
+		}
+	} 
+};
+
 void () FO_RoundChange = {
 	entity e = find(world, targetname, "fo_roundchange");
-
+	entity oldself = self;
 	while (e)
 	{
 		// activate
 		self = e;
-		self.use();
-		SUB_UseTargets();
+		entity c;
+		// initial round, hide the restore items
+		if (rounds == CF_GetSetting("rounds","rounds","on"))
+		{
+			if (e.restore_group_no)
+			{
+				c = findfloat(world, group_no, e.restore_group_no);
+				while (c)
+				{
+					switch (c.classname)
+					{
+						case "item_tfgoal":
+							Quad_HideFlag(c);
+							break;
+					}
+					c = findfloat(c, group_no, e.restore_group_no);
+				}
+			}
+		}
+		else
+		{
+			self.use();
+			//SUB_UseTargets();
+
+			// TF state of removed seems to be broken and ignored all 
+			// throughout the codebase, so we will do the same
+			if (e.remove_group_no)
+			{
+				c = findfloat(world, group_no, e.remove_group_no);
+				while (c)
+				{
+					switch (c.classname)
+					{
+						case "item_tfgoal":
+							Quad_HideFlag(c);
+							break;
+					}
+					c = findfloat(c, group_no, e.remove_group_no);
+				}
+			}
+
+			if (e.restore_group_no)
+			{
+				c = findfloat(world, group_no, e.restore_group_no);
+				while (c)
+				{
+					switch (c.classname)
+					{
+						case "item_tfgoal":
+							Quad_UnHideFlag(c);
+							break;
+					}
+					c = findfloat(c, group_no, e.restore_group_no);
+				}
+			}
+
+			if (e.switch_team_group_no)
+			{
+				c = findfloat(world, group_no, e.switch_team_group_no);
+				while (c)
+				{
+					// this could be abused..?
+					if (c.group_no == e.switch_team_group_no)
+					{
+						switch (c.team_no)
+						{
+							// need another field to denote swaps
+							case TEAM_BLUE:
+								c.team_no = TEAM_RED;
+								break;
+							case TEAM_RED:
+								c.team_no = TEAM_BLUE;
+								break;
+							case TEAM_YELL:
+								c.team_no = TEAM_GREN;
+								break;
+							case TEAM_GREN:
+								c.team_no = TEAM_YELL;
+								break;
+						}
+
+						switch (c.classname)
+						{
+							case "func_wall":
+								self = c;
+								func_wall();
+								break;
+							case "info_player_teamspawn":
+								self = c;
+								info_player_teamspawn();
+								break;
+						}
+					}
+					c = findfloat(c, group_no, e.switch_team_group_no);
+				}
+			}
+		}
+		
 		e = find(e, targetname, "fo_roundchange");
 	}
+	self = oldself;
 };
 
 void () QuadRoundOver = {
-	if (rounds != 1)
-	{
-		FO_RoundChange();
-	}
 	round_over = 2;
+	
 	self.think = StartQuadRound;
 	self.nextthink = (time + 0.5);
 };
@@ -114,9 +224,6 @@ void () QuadRoundThink = {
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
-
-//			lightstyle (0, "e");
-
 			self.think = QuadRoundOver;
 			self.nextthink = (time + 0.1);
 			return;
@@ -169,22 +276,12 @@ void () QuadRoundBegin = {
         }
         te = find(world, classname, "item_tfgoal");
         while (te) {
-            if(rounds % 2) {
-                if(te.team_no == 2 && te.owned_by == 1) {
-                    Quad_UnHideFlag(te);
-                } else if(te.team_no == 1 && te.owned_by == 2) {
-                    Quad_HideFlag(te);
-                }
-            } else {
-                if(te.team_no == 2 && te.owned_by == 1) {
-                    Quad_HideFlag(te);
-                } else if(te.team_no == 1 && te.owned_by == 2) {
-                    Quad_UnHideFlag(te);
-                }
-            } 
+			Quad_HideFlags(te);
             te = find(te, classname, "item_tfgoal");
         }
     }
+
+	FO_RoundChange();
 
 	te = find(world, classname, "player");
 	while (te != world) {

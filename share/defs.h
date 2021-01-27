@@ -1239,6 +1239,7 @@
 
 // spawnflags
 #define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
+#define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
 
 /*======================================================================*/
 /* Flamethrower								*/
@@ -1436,6 +1437,7 @@
 #define DMN_TEAMRED		1024
 #define DMN_TEAMYELL	2048
 #define DMN_TEAMGREN	4096
+#define DMN_INVISIBLE	8192	// special dimension to hide stuff in
 
 // trigger_push
 #define PUSH_ONCE	1
@@ -1447,6 +1449,7 @@
 
 // func_wall
 #define WALL_SOLID_NOT	1
+#define WALL_HIDE_ON_USE	2
 
 // teams
 #define TEAM_BLUE	1

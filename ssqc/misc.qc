@@ -457,7 +457,21 @@ void () viewthing = {
 };
 
 void () func_wall_use = {
-    self.frame = (1 - self.frame);
+    if (self.spawnflags & WALL_HIDE_ON_USE)
+    {
+        if (self.cnt == self.dimension_seen)
+        {
+            self.dimension_seen = DMN_INVISIBLE;
+        }
+        else
+        {
+            self.dimension_seen = self.cnt;
+        }
+    }
+    else
+    {
+        self.frame = (1 - self.frame);
+    }
 };
 
 void () func_wall = {
@@ -494,7 +508,10 @@ void () func_wall = {
         default:
             break;
     }
+    self.cnt = self.dimension_seen;
+    
     setmodel(self, self.model);
+    self.mdl = self.model;
 };
 
 void () func_illusionary = {
