@@ -190,6 +190,7 @@ void FO_FlashTimer()
         sprint(te, PRINT_HIGH, "Flash has worn off\n");
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
+        self = te;
         SetDimensions(TRUE);
         return;
     }
