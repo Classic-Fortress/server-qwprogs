@@ -314,7 +314,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     switch (arg1)
     {
         case "progsversion":
-            sprint(self, PRINT_HIGH, "sv progs version: 0.4\n");
+            // yy.mm.dd.incremented vers
+            sprint(self, PRINT_HIGH, "sv progs version: 20.01.28.1\n");
             break;
         case "adminpwd":
             processedCmd = TRUE;
