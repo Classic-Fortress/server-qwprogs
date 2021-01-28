@@ -121,6 +121,8 @@ typedef void (float n) f_void_float;
 
 float toggleflags;              // toggleable flags
 
+string nextmap;
+
 //float respawn_delay_time;
 
 //

@@ -39,7 +39,7 @@ string (string ps_list, float pf_idx) List_Index;
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 void (entity ent) TeamFortress_SetSpeed;
 void FO_Sound(entity e, float chan, string samp, float vol, float atten);
-
+void (entity p, string vote) VoteForMap;
 
 // opens the map voting early
 // called from weapons.qc:ImpulseCommands()
@@ -1162,10 +1162,17 @@ float (string name) RemoveVoteMap = {
     return FALSE;
 }
 
+void() map_candidate_use = {
+    if(activator && activator.classname == "player") {
+        VoteForMap(activator, self.netname);
+    }
+}
+
 void() map_candidate = {
     if(self.team_broadcast && self.team_broadcast != "") {
         self.owner = AddVoteMapGroup(self.team_broadcast);
     }
+    self.use = map_candidate_use;
 };
 
 void () InitVoteMaps = {
@@ -1275,6 +1282,7 @@ void () EndVoting = {
 
 void (string map_name) ChangeToVotedMap = {
     vote_result = map_name;
+    nextmap = map_name;
 //    if(!votemode) {
 //        votemode = 2;
 //    }

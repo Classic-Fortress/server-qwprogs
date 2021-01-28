@@ -68,8 +68,6 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 
-string nextmap;
-
 void () info_intermission =
 {
     if (CheckExistence() == 0) {
@@ -1020,7 +1018,7 @@ void () TF_MovePlayer = {
 };
 
 void () GotoNextMap = {
-    if (vote_result != string_null)
+    if (vote_result != string_null && (nextmap == string_null || nextmap == ""))
         nextmap = strzone(vote_result);
 
     if (nextmap != mapname || vote_result != string_null) {
@@ -1108,29 +1106,36 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_y);
     WriteAngle(MSG_ALL, pos.mangle_z);
 
-    local string nextmapstring = vote_result;
-    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    vote_style = CF_GetSetting("vs", "vote_style", "2");
-    if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result && vote_result != vm) {
-            localcmd ("localinfo votemode off\n");
-            //changelevel(vote_result);
-        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
-            vote_result = vm;
-            localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
-            vote_result = mapname;
+    local string nextmapstring = nextmap;
+    if((vote_result == string_null || vote_result == "") && (nextmap == string_null || nextmap == "")) {
+        local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        vote_style = CF_GetSetting("vs", "vote_style", "2");
+        if (vote_style || votemode == 2){
+            if(votemode == 1 && vote_result && vote_result != vm) {
+                localcmd ("localinfo votemode off\n");
+                //changelevel(vote_result);
+            } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+                vote_result = vm;
+                localcmd ("localinfo votemode on\n");
+                //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
+            } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
+                vote_result = mapname;
+            }
         }
+        //if(!votemode) {
+        //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        //    nextmapstring = strcat(vote_result, " \b(voting)\b");
+        //}
     }
-    //if(!votemode) {
-    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    //    nextmapstring = strcat(vote_result, " \b(voting)\b");
-    //}
+    if(vote_result != string_null && vote_result != "") {
+        nextmapstring = vote_result;
+        nextmap = vote_result;
+    }
 
+// 
     other = find(world, classname, "player");
     while (other != world) {
-        if (vote_result != string_null)
+        if (nextmapstring != string_null && nextmapstring != "")
             sprint(other, PRINT_HIGH, "Next up: ", nextmapstring, "\n");
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
