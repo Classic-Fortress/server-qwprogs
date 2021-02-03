@@ -142,13 +142,13 @@ void () item_tfgoal_hidden_touch = {
     }*/
 }
 
-void Quad_HideFlag(entity flag) = {
+void (entity flag) Quad_HideFlag = {
     flag.touch = item_tfgoal_hidden_touch;
     setmodel(flag, "");
     setsize(flag, flag.goal_min, flag.goal_max);
 };
 
-void Quad_UnHideFlag(entity flag) = {
+void (entity flag) Quad_UnHideFlag = {
     flag.touch = item_tfgoal_touch;
     setmodel(flag, flag.mdl);
     setsize(flag, flag.goal_min, flag.goal_max);

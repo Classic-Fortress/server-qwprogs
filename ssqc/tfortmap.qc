@@ -2329,6 +2329,9 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 void () ReturnItem = {
     local entity te;
 
+    if (self.enemy.touch == item_tfgoal_hidden_touch)
+        return;
+
     self.enemy.goal_state = 2;
     if ((self.enemy.goal_activation & 8192) &&
             (self.enemy.classname == "item_tfgoal"))
