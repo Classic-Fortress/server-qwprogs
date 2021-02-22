@@ -139,7 +139,7 @@ void () EndGameThink = {
         m = nextmap;
     }
     localcmd("changelevel ");
-    localcmd(mapname);
+    localcmd(m);
     localcmd("\n");
     dremove(self);
 }
