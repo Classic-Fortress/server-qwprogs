@@ -15,11 +15,20 @@ void () SpectatorThink;
 void () Admin_Aliases;
 
 void () SpectatorConnect = {
+
+    self.dimension_see = DMN_NOFLASH;
+    self.dimension_seen = DMN_NOFLASH;
+
     local string st;
 
     self.playerclass = PC_UNDEFINED;
     self.classname = "observer";
     self.flags = 8;
+
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (infokey(self,"*admin"))
+        self.is_admin = stof(infokey(self, "*admin"));
 
     st = infokey(self, "apw");
     if (st == string_null)
@@ -44,9 +53,18 @@ void () SpectatorConnect = {
         stuffcmd(self, ".cfg\n");
     }
     self.motd = 0;
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        InitAllStatuses(self);
+        UpdateClientMOTD(self);
+        UpdateClientPrematch(self, !cb_prematch);
+        UpdateClient_VoteMap_AddAll(self);
+    }
+
+    TeamFortress_StartTimers();
 };
 
 void () SpectatorDisconnect = {
+    RemoveAutoIdTimer();
 };
 
 void () SpectatorImpulseCommand = {
@@ -77,6 +95,10 @@ void () SpectatorImpulseCommand = {
 
         TeamFortress_TeamShowScores(0);
 
+    if(self.menu_input == Vote_Menu_Map_Input && self.impulse >= 1 && self.impulse <= 10) {
+        Menu_Input(self.impulse);
+    }
+    
     if (!self.is_admin) {
         self.impulse = 0;
         return;
@@ -119,11 +141,25 @@ void () SpectatorImpulseCommand = {
 };
 
 void () SpectatorThink = {
+    
+    self.playerclass = 0;
+    self.afflicted = 0;
+    self.teamafflicted = 0;
+    self.damagegiven = 0;
+    self.damagetaken = 0;
+    self.kills = 0;
+    self.deaths = 0;
+    self.caps = 0;
+    self.touches = 0;
+    self.team_no = 0;
+    UpdateScoreboardInfo(self);
+
     if (self.impulse)
         SpectatorImpulseCommand();
 
     //if (self.motd <= 400)
     //    TeamFortress_MOTD();
-    if (time >= self.StatusRefreshTime)
+    if (time >= self.StatusRefreshTime) {
         RefreshStatusBar(self);
+    }
 };

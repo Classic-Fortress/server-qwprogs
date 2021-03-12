@@ -258,6 +258,9 @@ float TF_Item_GetGlow(float team)
 
 void TF_Item_ApplyGlow()
 {
+    if (self.spawnflags & TFGI_NOGLOW)
+        return;
+        
     local entity tfdet;  //info_tfdetect entity
     tfdet = find(world, classname, "info_tfdetect");
 
@@ -288,7 +291,7 @@ void () TF_StartItem = {
     UpdateAbbreviations(self);
     self.nextthink = time + 0.2;
     self.think = TF_PlaceItem;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -328,7 +331,7 @@ void () TF_StartGoal = {
     self.nextthink = time + 0.2;
     self.think = TF_PlaceGoal;
     self.use = info_tfgoal_use;
-    if (self.goal_state == 3)
+    if (self.goal_state == TFGS_REMOVED)
         RemoveGoal(self);
 };
 
@@ -411,7 +414,7 @@ void () info_tfgoal = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     }
     if (self.noise) {
         precache_sound(self.noise);
@@ -457,7 +460,7 @@ void () info_tfgoal_timer = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     }
     if (self.noise) {
         precache_sound(self.noise);
@@ -494,7 +497,7 @@ void () item_tfgoal = {
     if (self.mdl) {
         precache_model(self.mdl);
         precache_model2(self.mdl);
-        setmodel(self, self.mdl);
+        FO_SetModel(self, self.mdl);
     } else {
         self.mdl = "";
         setmodel(self, "");
@@ -647,7 +650,7 @@ entity(float gno) Findteamspawn =
 };
 
 void (entity Goal) InactivateGoal = {
-    if (Goal.goal_state == 1) {
+    if (Goal.goal_state == TFGS_ACTIVE) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal"))
@@ -655,28 +658,39 @@ void (entity Goal) InactivateGoal = {
             else
                 Goal.solid = SOLID_TRIGGER;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.mdl != string_null && !(duelmode && duel_no_packs)) {
-            setmodel(Goal, Goal.mdl);
+            FO_SetModel(Goal, Goal.mdl);
         }
     }
 };
 
+void DefaultGoalState (entity Goal)
+{
+    if ((Goal.goal_activation & 8192) &&
+            (Goal.classname == "item_tfgoal")) {
+        Goal.solid = SOLID_BBOX;
+    } else {
+        Goal.solid = SOLID_TRIGGER;
+    }
+    Goal.goal_state = TFGS_NONE;
+}
+
 void (entity Goal) RestoreGoal = {
-    if (Goal.goal_state == 3) {
+    if (Goal.goal_state == TFGS_REMOVED) {
         if (Goal.search_time == 0) {
             if ((Goal.goal_activation & 8192) &&
                     (Goal.classname == "item_tfgoal")) {
-                Goal.solid = 2;
+                Goal.solid = SOLID_BBOX;
             } else {
-                Goal.solid = 1;
+                Goal.solid = SOLID_TRIGGER;
             }
         } else {
             Goal.nextthink = time + Goal.search_time;
         }
-        Goal.goal_state = 2;
+        Goal.goal_state = TFGS_INACTIVE;
         if (Goal.model) {
-            setmodel(Goal, Goal.mdl);
+            FO_SetModel(Goal, Goal.mdl);
             setsize(Goal, Goal.goal_min, Goal.goal_max);
             entity oldself;
             oldself = self;
@@ -689,9 +703,9 @@ void (entity Goal) RestoreGoal = {
 
 void (entity Goal) RemoveGoal = {
     Goal.solid = 0;
-    Goal.goal_state = 3;
+    Goal.goal_state = TFGS_REMOVED;
     if (Goal.mdl != string_null)
-        setmodel(Goal, string_null);
+        FO_SetModel(Goal, string_null);
 };
 
 float (entity Goal, entity Player, entity AP) IsAffectedBy = {
@@ -755,9 +769,9 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player == AP) {
         if (Goal.count > 0) {
             if (Player.team_no > 0) {
+                LogEventGoal(Player);
                 TeamFortress_TeamIncreaseScore(Player.team_no, Goal.count);
                 TeamFortress_TeamShowScores(2);
-                Player.caps = Player.caps + 1;
             }
         }
     }
@@ -1017,8 +1031,8 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         }
 
                         if (Player.numflames > 0) {
-                            sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
-                            Player.numflames = 0;
+                            FO_Sound(Player, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                            SetFlameCount(Player, 0);
                         }
 
                         if (Player.FlashTime > 0) {
@@ -1555,6 +1569,14 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.inactivate_group_no) {
+                InactivateGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
     if (Goal.remove_group_no != 0) {
         tg = find(world, classname, "info_tfgoal");
@@ -1563,6 +1585,14 @@ void (entity Goal, entity AP) DoGroupWork = {
                 RemoveGoal(tg);
             }
             tg = find(tg, classname, "info_tfgoal");
+        }
+
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.remove_group_no) {
+                RemoveGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
         }
     }
     if (Goal.restore_group_no != 0) {
@@ -1573,7 +1603,32 @@ void (entity Goal, entity AP) DoGroupWork = {
             }
             tg = find(tg, classname, "info_tfgoal");
         }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.restore_group_no) {
+                RestoreGoal(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
     }
+    if (Goal.default_group_no != 0)
+    {
+        tg = find(world, classname, "info_tfgoal");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "info_tfgoal");
+        }
+        tg = find(world, classname, "trigger_teleport");
+        while (tg) {
+            if (tg.group_no == Goal.default_group_no) {
+                DefaultGoalState(tg);
+            }
+            tg = find(tg, classname, "trigger_teleport");
+        }
+    }
+
     if (Goal.remove_spawngroup != 0) {
         tg = find(world, classname, "info_player_teamspawn");
         while (tg) {
@@ -1745,9 +1800,9 @@ void (entity Goal, entity AP, float addb) DoResults = {
 
     if (Goal.noise) {
         if (other == world) {
-            sound(Goal, 3, Goal.noise, 1, 1);
+            FO_Sound(Goal, CHAN_ITEM, Goal.noise, 1, 1);
         } else {
-            sound(other, 3, Goal.noise, 1, 1);
+            FO_Sound(other, CHAN_ITEM, Goal.noise, 1, 1);
         }
     }
     winners = 0;
@@ -1769,6 +1824,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     }
     if (winners == 1) {
         TeamFortress_TeamShowScores(2);
+        LogEventGoal(AP);
     }
     if (CTF_Map == 1) {
         if (AP != world) {
@@ -1927,11 +1983,15 @@ void (entity Goal, entity AP, float addb) DoResults = {
         }
     }
     gotone = 0;
+    if ((strtrim(Goal.broadcast_high) != "") && (CTF_Map == 0)) {
+        bprint(PRINT_HIGH, Goal.broadcast_high);
+    }
     te = find(world, classname, "player");
     while (te != world) {
         if ((Goal.broadcast != string_null) && (CTF_Map == 0)) {
             CenterPrint2(te, "\n\n\n", Goal.broadcast);
         }
+        
         if ((strtrim(Goal.netname_broadcast) != "") && (CTF_Map == 0)) {
             sprint(te, PRINT_HIGH, AP.netname, Goal.netname_broadcast);
         }
@@ -2065,30 +2125,8 @@ void () tfgoal_timer_tick = {
     }
 };
 
-void () CF_FlagFollowPlayer = {
-    if ((self.owner.goal_state == 1) && (self.real_owner.items & (IT_KEY1 | IT_KEY2))) {
-        makevectors(self.real_owner.angles);
-        self.owner.origin = self.real_owner.origin - v_forward * 25 - v_right * 0 + v_up * 10;
-        self.owner.angles = self.real_owner.angles + '0 90 16';
-        if (self.owner.mdl == "progs/tf_flag.mdl") {
-            self.owner.origin_z = self.owner.origin_z + 6;
-        } else {
-            self.owner.origin_z = self.owner.origin_z - 6;
-        }
-        setorigin(self.owner, self.owner.origin);
-        setmodel(self.owner, self.owner.mdl);
-        self.nextthink = time + 0.1;
-    } else {
-        dremove(self);
-    }
-};
-
-void () idle_think = {
-    self.nextthink = time + 0.1;
-}
-
 void () item_tfgoal_touch = {
-    local entity te, flw;
+    local entity te;
 
     if (other.classname != "player")
         return;
@@ -2127,9 +2165,9 @@ void () item_tfgoal_touch = {
                     self.solid = 1;
                     self.touch = item_tfgoal_touch;
                     self.origin = self.oldorigin;
-                    setmodel(self, self.mdl);
+                    FO_SetModel(self, self.mdl);
                     setorigin(self, self.origin);
-                   sound(self, 2, "items/itembk2.wav", 1, 1);
+                   FO_Sound(self, CHAN_VOICE, "items/itembk2.wav", 1, 1);
                     return;
                 }
             } else {
@@ -2158,9 +2196,9 @@ void () item_tfgoal_touch = {
                         self.solid = 1;
                         self.touch = item_tfgoal_touch;
                         self.origin = self.oldorigin;
-                        setmodel(self, self.mdl);
+                        FO_SetModel(self, self.mdl);
                         setorigin(self, self.origin);
-                        sound(self, 2, "items/itembk2.wav", 1, 1);
+                        FO_Sound(self, CHAN_VOICE, "items/itembk2.wav", 1, 1);
                         return;
                     }
                 } else {
@@ -2189,16 +2227,38 @@ void () item_tfgoal_touch = {
     }
     
     if (flag_follow) {
-        flw = spawn();
-        flw.real_owner = other;
-        flw.owner = self;
-        flw.think = CF_FlagFollowPlayer;
-        //flw.solid = SOLID_NOT;
-        //self.solid = SOLID_NOT;
-        self.think = idle_think;
-        flw.nextthink = time + 0.1;
+        newmis = spawn();
+        newmis.owner = other;
+        newmis.classname = "flagfollow";
+        newmis.solid = SOLID_NOT;
+        newmis.mdl = self.mdl;
+        FO_SetModel(newmis, self.mdl);
+        setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);
+        vector org;
+        org = other.origin + '-25 0 10';
+        setorigin (newmis, org);
+        newmis.skin = self.skin;
+        newmis.movetype = MOVETYPE_FOLLOW;
+        newmis.aiment = other;
+        newmis.view_ofs = newmis.origin - other.origin;
     }
 };
+
+void RemoveFlagFollow(entity player)
+{
+    if (flag_follow)
+    {
+        entity ff = find(world, classname, "flagfollow");
+        while (ff)
+        {
+            if (ff.owner == player)
+            {
+                dremove(ff);
+            }
+            ff = find(ff, classname, "flagfollow");
+        }
+    }
+}
 
 void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Item.effects = 0;
@@ -2253,6 +2313,8 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     Status_Refresh(AP);
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
+    AP.goalrunningtime = gametime;
+    LogEventPickupGoal(AP);
 };
 
 void () ReturnItem = {
@@ -2276,14 +2338,14 @@ void () ReturnItem = {
         self = self.enemy;
         TF_Item_ApplyGlow();
         self = oldself;
-        setmodel(self.enemy, self.enemy.mdl);
+        FO_SetModel(self.enemy, self.enemy.mdl);
     }
 
 	setsize(self.enemy, VEC_HULL_MIN, VEC_HULL_MAX);
     setorigin(self.enemy, self.enemy.origin);
     tfgoalitem_checkgoalreturn(self.enemy);
 
-    sound(self.enemy, 2, "items/itembk2.wav", 1, 1);
+    FO_Sound(self.enemy, CHAN_VOICE, "items/itembk2.wav", 1, 1);
 
     if (self.weapon != 2) {
         if ((self.enemy.noise3) || (self.enemy.noise4)) {
@@ -2318,6 +2380,13 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
             RemoveResults(Item, te);
         te = find(te, classname, "player");
     }
+    //Flag
+    if ((Item.goal_activation & 1)) {
+        local float timecarried = gametime - AP.goalrunningtime;
+        RemoveFlagFollow(AP);
+        LogEventFumble(AP, timecarried);
+    }
+
     if ((method == 0) || (method == 2)) {
         te = find(world, classname, "player");
         while (te != world) {
@@ -2451,13 +2520,15 @@ void () tfgoalitem_dropthink = {
     self.movetype = 6;
     if (self.pausetime != 0) {
         pos = pointcontents(self.origin);
-        if (pos == -4) { //CONTENT_SLIME
+        if (pos == CONTENT_SLIME) { 
             self.nextthink = time + (self.pausetime / 4);
         } else {
-            if (pos == -5) { //CONTENT_LAVA
+            if (pos == CONTENT_LAVA) { 
                 self.nextthink = time + 5;
+                self.think = tfgoalitem_remove;
+                return;
             } else {
-                if ((pos == -2) || (pos == -6)) { //CONTENT_SOLID || CONTENT_SKY
+                if ((pos == CONTENT_SOLID) || (pos == CONTENT_SKY)) { 
                     if (self.camdist < 3) {
                         self.origin = self.camangle;
                         setorigin(self, self.origin);
@@ -2472,7 +2543,7 @@ void () tfgoalitem_dropthink = {
                             self.solid = 1;
                         }
                         if (self.mdl != string_null) {
-                            setmodel(self, self.mdl);
+                            FO_SetModel(self, self.mdl);
                         }
                         setsize(self, self.goal_min, self.goal_max);
                         self.camdist = self.camdist + 1;
@@ -2487,7 +2558,9 @@ void () tfgoalitem_dropthink = {
                 }
             }
         }
-        self.think = tfgoalitem_remove;
+        if(!noreturn) {
+            self.think = tfgoalitem_remove;
+        }
     }
 };
 
@@ -2519,7 +2592,7 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.solid = 1;
     }
     if (Item.mdl != string_null) {
-        setmodel(Item, Item.mdl);
+        FO_SetModel(Item, Item.mdl);
     }
     setsize(Item, Item.goal_min, Item.goal_max);
     if (PAlive == 1) {
@@ -2654,7 +2727,7 @@ void () item_flag_team2 = {
     }
 
     self.skin = 0;
-    setmodel(self, self.mdl);
+    FO_SetModel(self, self.mdl);
     self.goal_no = 1;
     self.goal_activation =
         TFGI_GLOW | TFGI_DROP | TFGI_REMOVE | TFGI_RETURN_REMOVE |
@@ -2730,7 +2803,7 @@ void () item_flag_team1 = {
         self.origin_z = self.origin_z + 6;
     }
 
-    setmodel(self, self.mdl);
+    FO_SetModel(self, self.mdl);
     self.skin = 1;
     self.goal_no = 2;
     self.goal_activation = 1 | 4 | 128 | 32 | 16 | 512;
@@ -2878,6 +2951,7 @@ void (entity P) ForceRespawn = {
 
 void () DropGoalItems = {
     local entity te, search;
+    local float timecarried;
     
     newmis = spawn();
     makevectors(self.v_angle);
@@ -2893,6 +2967,9 @@ void () DropGoalItems = {
             }
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+                timecarried = gametime - self.goalrunningtime;
+                RemoveFlagFollow(self);
+                LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';
                 tfgoalitem_RemoveEffectsFromPlayer(te, self);
                 tfgoalitem_drop(te, 1, self);

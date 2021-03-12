@@ -58,7 +58,7 @@ void () nextCaptain = {
 
 void () disableCaptain = {
 	captainmode = 0;
-	bprint(2, "\[\sCaptain Mode\s\]\s:\s Captain Mode Disabled!\n");	
+	bprint(2, "\x10\sCaptain Mode\s\x11\s:\s Captain Mode Disabled!\n");	
 };
 
 void () randomizeCaptains = {
@@ -113,3 +113,53 @@ void () randomizeTeams = {
         te = find(te, classname, "player");
     }
 };
+
+string (string text) clearString = {
+	local float i;
+	string specialChars[60] = {"�", "", "","","","","","","","	","","","","","","","","","",""," ","?","","‚","ƒ","„","…","†","‡","ˆ","‰","Š","‹","Œ","","Ž","","","‘","œ","Å","Å“","","ž","Ÿ", "<", ">", "|", ":", "*", "?", "\\", "/", "\"", "&", "~", "`", ",", " ", "."};
+	text = strconv(1,1,1,text);
+	text = strireplace("__", "_", text);
+	for (i = 0; i < 58; i++) {
+		text = strireplace(specialChars[i], "", text);
+	}
+
+	return text;
+}
+
+void () PrintLoginMessage =  {
+	CenterPrint6(self, "\n\n\n\n\n\nžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n", "Login required, please use\n\s\"cmd login <login> <secret>\"\s \nbefore joining the game\n", "žžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžžŸ\n", "If you don't have an account, visit\n\s", webpageUrl,"\s\n");																
+	return;	
+}
+
+void () EndGameThink = {
+	localcmd("changelevel ");
+    localcmd(mapname);
+    localcmd("\n");
+    dremove(self);
+}
+
+void () MapEndSequence = {
+	local entity player;
+	local entity maprestarttimer;
+	player = find (world, classname, "player");	
+	while (player) 
+	{
+		if (player.playerclass != 0 && self.has_disconnected != 1) {
+			local float timeplayed = gametime - player.classtime;
+			LogEventChangeClass(player, player.playerclass, 0, timeplayed);
+			player.classtime = gametime;
+		}
+		player = find (player, classname, "player");
+	}	
+	LogEventTeamScores();
+	LogEventGameEnd();
+	if (logfilehandle > 0)
+		fclose(logfilehandle);
+	canlog = 0;
+
+	maprestarttimer = spawn();
+    maprestarttimer.classname = "timer";
+    maprestarttimer.netname = "maprestarttimer";
+    maprestarttimer.think = EndGameThink;
+    maprestarttimer.nextthink = time + map_restart_time;
+}

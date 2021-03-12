@@ -10,6 +10,7 @@ void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
 void () ConcussionGrenadeExplode;
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
@@ -28,12 +29,12 @@ void () CF_Scout_Dash = {
         makevectors(self.angles);
         self.velocity = v_forward * 540;
         self.velocity_z = 181;
-        sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
 }
 
 void () CanisterTouch =
 {
-    sound(self, 1, "weapons/tink1.wav", 1, 1);
+    FO_Sound(self, CHAN_WEAPON, "weapons/tink1.wav", 1, 1);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -66,7 +67,7 @@ void () CaltropScatterThink = {
             self.movetype = MOVETYPE_TOSS;
             self.touch = CaltropTouch;
             self.angles = '90 90 90';
-            sound(self, CHAN_AUTO, "weapons/tink1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_AUTO, "weapons/tink1.wav", 1, ATTN_NORM);
             setorigin(self, self.origin);
             return;
         } else {
@@ -100,10 +101,11 @@ void () ScatterCaltrops = {
     while (num > 0) {
         e = spawn();
         e.classname = "grenade";
+        e.grenadename = "caltrop";
         e.weapon = 10;
         e.owner = self.owner;
         e.team_no = self.owner.team_no;
-        setmodel(e, "progs/caltrop.mdl");
+        FO_SetModel(e, "progs/caltrop.mdl");
         e.mins = '-4 -4 -8';
         e.maxs = '4 4 4';
         e.angles = '0 0 0';
@@ -127,39 +129,159 @@ void () ScatterCaltrops = {
 };
 
 void () FlashGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
 
+void StuffFlash(entity te, float amt)
+{
+    string st = ftos(amt);
+    string cmd = strcat("v_cshift ", st, " ", st);
+    cmd = strcat(cmd, " ", st, " ", st, "\n");
+    stuffcmd(te, cmd);
+}
+
 void () FlashTimer = {
     local entity te;
-    local string st;
 
     te = self.owner;
     te.FlashTime = te.FlashTime - 0.6;
     if (te.FlashTime < 5) {
-        te.FlashTime = 0;
+        te.FlashTime = 1;
         stuffcmd(te, "v_cshift; wait; bf\n");
         remove(self);
+        te.dimension_see = DMN_NOFLASH;
+        te.dimension_seen = DMN_NOFLASH;
         return;
     }
-    st = ftos(te.FlashTime * 10);
-    stuffcmd(te, "v_cshift ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, " ");
-    stuffcmd(te, st);
-    stuffcmd(te, "\n");
+
+    StuffFlash(te, (te.FlashTime*10));
+
     self.nextthink = time + 0.6;
 };
 
+float FO_CalcFlash(entity te)
+{
+    float timeleft = te.FlashTime;
+    float flashAmtMax = 240;
+    float flashAmtMin = 100;
+    float flashAmtMaxMult = stof(infokey(te, "maxflash"));
+    float flashAmtMinMult = stof(infokey(te, "minflash"));
+    float flashAmt;
+    
+    
+    flashAmt = (flashAmtMaxMult > 0) ? flashAmtMax * flashAmtMaxMult : flashAmtMax;
+    flashAmtMin = (flashAmtMinMult > 0) ? flashAmtMin * flashAmtMinMult : flashAmtMin;
+    
+    float perc = timeleft / fo_flashtime;
+
+    flashAmt = flashAmt * perc;
+    flashAmt = flashAmt < flashAmtMin ? flashAmtMin : flashAmt;
+    return flashAmt;
+}
+
+void FO_FlashTimer()
+{
+    local entity te;
+
+    te = self.owner;
+    te.FlashTime = te.FlashTime - .1;
+    if (te.FlashTime <= 0) {
+        sprint(te, PRINT_HIGH, "Flash has worn off\n");
+        stuffcmd(te, "v_cshift; wait; bf\n");
+        remove(self);
+        te.dimension_see = DMN_NOFLASH;
+        te.dimension_seen = DMN_NOFLASH;
+        return;
+    }
+
+    float flashamount = FO_CalcFlash(te);
+    StuffFlash(te, flashamount);
+
+    self.nextthink = time + .1;
+}
+
+void SetFlashDimension(entity te)
+{
+    FO_FlashDimension = ((FO_FlashDimension + 1) == 8) ? DMN_FLASH : FO_FlashDimension + 1;
+    
+    float playerdimension = 1<<FO_FlashDimension;
+
+    // i hate bitflags and i'm bad so this is probably wrong
+    te.dimension_see = DMN_FLASH | playerdimension;
+    te.dimension_seen = playerdimension | DMN_NOFLASH;
+}
+
+void FO_FlashExplode()
+{
+    vector org;
+    float dam, frac;
+    entity te;
+    float rad = 300;
+    te = findradius(self.origin, rad);
+    while (te) {
+        if (te.classname == "player") {
+            traceline(self.origin, te.origin, 1, self);
+            if (trace_fraction == 1) {
+                LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
+                sprint(te, PRINT_HIGH, "You have been flashed!\n");
+                org = te.origin + (te.mins + te.maxs) * 0.5;
+                frac = (rad - vlen(self.origin - org)) / rad;
+                dam = 10 * frac;
+                deathmsg = DMSG_GREN_FLASH;
+                if (dam < 1)
+                {
+                    dam = 1;
+                }
+                TF_T_Damage(te, self, self.owner, dam, 2, 16 | 4);
+
+                stuffcmd(te, "play weapons/flashgrenburst.wav\n");
+                
+                if (te.health > 0) {
+                    entity ft;
+                    ft = find(world, classname, "flashtimer");
+                    float found;
+                    found = FALSE;
+                    
+                    while (ft)
+                    {
+                        if (ft.owner == te)
+                        {
+                            found = TRUE;
+                            ft.nextthink = time + .1;
+                        }
+                        ft = find(ft, classname, "flashtimer");
+                    }
+
+                    if (!found)
+                    {
+                        newmis = spawn();
+                        newmis.classname = "timer";
+                        newmis.netname = "flashtimer";
+                        newmis.team_no = self.owner.team_no;
+                        newmis.owner = te;
+                        newmis.think = FO_FlashTimer;
+                        newmis.nextthink = time + .1;
+                    }
+                    float ftime = fo_flashtime;
+                    ftime = ftime * (frac + frac * 0.5); // fall off is awful, let's half it
+                    te.FlashTime = ftime;
+
+                    float flashamount = FO_CalcFlash(te);
+
+                    StuffFlash(te, flashamount);
+
+                    SetFlashDimension(te);
+                }
+            }
+        }
+        te = te.chain;
+    }
+}
+
 void () FlashGrenadeExplode = {
     local entity te;
-    local string st;
 
     self.effects = self.effects | EF_BRIGHTLIGHT;
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -169,50 +291,69 @@ void () FlashGrenadeExplode = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    te = findradius(self.origin, 300);
-    while (te) {
-        if (te.classname == "player") {
-            traceline(self.origin, te.origin, 1, self);
-            if (trace_fraction == 1) {
-                if (vlen(self.origin - te.origin) <= 200) {
-                    deathmsg = DMSG_GREN_FLASH;
-                    TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
-                }
-                if (te.health > 0) {
-                    if (te.FlashTime == 0) {
-                        newmis = spawn();
-                        newmis.classname = "timer";
-                        newmis.netname = "flashtimer";
-                        newmis.team_no = self.owner.team_no;
-                        newmis.owner = te;
-                        newmis.think = FlashTimer;
-                        newmis.nextthink = time + 1;
+    if (fo_flash)
+    {
+        FO_FlashExplode();
+    }
+    else
+    {
+        te = findradius(self.origin, 300);
+        while (te) {
+            if (te.classname == "player") {
+                traceline(self.origin, te.origin, 1, self);
+                if (trace_fraction == 1) {
+                    LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
+                    if (vlen(self.origin - te.origin) <= 200) {
+                        deathmsg = DMSG_GREN_FLASH;
+                        TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
                     }
-                    if (te == self.owner)
-                        te.FlashTime = 16;
-                    else
-                        te.FlashTime = 24;
+                    if (te.health > 0) {
+                        entity ft;
+                        ft = find(world, classname, "flashtimer");
+                        float found;
+                        found = FALSE;
+                        
+                        while (ft)
+                        {
+                            if (ft.owner == te)
+                            {
+                                found = TRUE;
+                                ft.nextthink = time + 1;
+                            }
+                            ft = find(ft, classname, "flashtimer");
+                        }
 
-                    st = ftos(te.FlashTime * 10);
-                    stuffcmd(te, "v_cshift ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, " ");
-                    stuffcmd(te, st);
-                    stuffcmd(te, "\n");
+                        if (!found)
+                        {
+                            newmis = spawn();
+                            newmis.classname = "timer";
+                            newmis.netname = "flashtimer";
+                            newmis.team_no = self.owner.team_no;
+                            newmis.owner = te;
+                            newmis.think = FlashTimer;
+                            newmis.nextthink = time + 1;
+                        }
+                        
+                        if (te != self.owner)
+                            te.FlashTime = 16;
+                        else
+                            te.FlashTime = 24;
+
+                        StuffFlash(te, (te.FlashTime * 10));
+
+                        SetFlashDimension(te);
+                    }
                 }
             }
+            te = te.chain;
         }
-        te = te.chain;
     }
+
     dremove(self);
 };
 
 void () ConcussionGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -237,7 +378,7 @@ void () OldConcussionGrenadeTimer = {
         return;
     }
     newmis = spawn();
-    setmodel(newmis, "progs/s_bubble.spr");
+    FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, self.owner.origin);
     newmis.movetype = 8;
     newmis.solid = 0;
@@ -292,7 +433,7 @@ void () ConcussionGrenadeTimer = {
         (self.health == 600)
         || (self.health == 800) || (self.health == 1000)) {
         newmis = spawn();
-        setmodel(newmis, "progs/s_bubble.spr");
+        FO_SetModel(newmis, "progs/s_bubble.spr");
         setorigin(newmis, self.owner.origin);
         newmis.movetype = MOVETYPE_NOCLIP;
         newmis.solid = SOLID_NOT;
@@ -632,6 +773,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
+                            LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
                             if (old_grens == TRUE) {
                                 stuffcmd(head, "v_idlescale 100\n");
                                 stuffcmd(head, "fov 130\n");

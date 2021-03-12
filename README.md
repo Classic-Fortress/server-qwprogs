@@ -3,6 +3,30 @@ FortressOne Server
 
 New features
 ------
+* option to let engineer move while building `localinfo em on`.
+* new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
+* new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
+* ``vote_addmap``\``vote_removemap`` now work client-side
+* new cvar for zut ``fo_hud_idle_alpha`` - sets the minimum transparency for flaginfo inactive items
+* optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
+* localinfo nohitsounds 1 - disables hitsounds server-wide
+* localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
+* scout has "new" flash grenades - localinfo fo_flash on (default on)
+* ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
+* `cmd votemap`/`cmd showvotes`/`cmd listmaps` can now be used at any time and are part of the same system
+* new server command `vote_removemap <name>` removes them
+* new server command `vote_addmap <name> <desc> [mapgroup] [num_teams] [min_players] [max_players]` can be used to add maps to the below menu
+* `cmd mapmenu` brings up a map selection menu, which can then either be voted for or changed immediately, provided you have adminpwd/rcon set up
+* localinfo vote_threshold 0.5 will set the portion of players required to win a vote
+* scout has "new" flash grenades - localinfo fo_flash on (default off)
+* ability to set client side min and max flash amounts - setinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
+* localinfo quad_roles 1 enables the use of quad roles. Only works in quad mode: Blue gets the "attack" role first and Red gets the "defence" role.
+    These roles can be configured by adding the "att_" and "def_" prefix to localinfo settings. Only detpipe_limit, respawn_time, gren limits and class limits are currently supported.
+    Use `cmd showroles` to see the current configuration.
+    The team with the "attack" role also has its flag hidden to avoid confusion.
+* localinfo keep_teams 1/2 - keeps teams upon map change. 1 = same team. 2 = rotate teams
+* hud commands: `fo_hud [element] [setting] [value]` lets you manually configure the extra hud elements' settings and `fo_hud_save` saves them.
+* new spectator command `tracktarget` lets you track whoever you're pointing at
 * `setinfo killsound 1/2/3` 1 enemies, 2 enemies and teammates, 3 enemies teammates and self
 * `cmd forcebreak` - new admin command to end the map (and go to vote)
 * `break` will vote to end the current map or recind your vote in a vote map
@@ -12,7 +36,7 @@ New features
 * CSQC - fo_main_menu main menu - either from menu.dat or engine
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
-* CSQC - fo_autohop 0/1 enable bunnyhop assist
+* CSQC - fo_autohop 0/1 enable bunnyhop assist (use `+aux_jump` to use with rj scripts)
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
@@ -65,7 +89,13 @@ New features
 * Dropping flag now possible on all maps using /dropflag.
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
-
+* Option to allow a demoman to place a detpack while reloading his weapon `localinfo detreload on`
+* Pyro types - `localinfo pyro_type val` - 0 = original tf2.9, 1 = oztf pyro style, 2 = FO pyro style
+* localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
+* localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
+* localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 0]
+* localinfo round_delay_time : interval time between rounds in quadmode - seconds [default: 30]
+* localinfo max_gren2_soldier : maximum number of active nail/shock grenades (TF 2.8 = 3, OzTF = 1) [default: 3]
 
 == Removed ===
 * Removed weapon messages for weapons without weapon modes.

@@ -188,7 +188,7 @@ string GetPanelString(string line, string name)
     line = FormatCfgString(line, strcat(name, ".scale"), ftos(DrawPanel.Scale));
     line = FormatCfgString(line, strcat(name, ".textscale"), ftos(DrawPanel.TextScale));
     line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
-    line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.NodeInsertLoc));
+    line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.Orientation));
 
     return line;
 }
@@ -254,7 +254,7 @@ void FO_Hud_Editor_LoadSettings()
                                 DrawPanel.Display = stof(val);
                                 break;
                             case "nodeinsertloc":
-                                DrawPanel.NodeInsertLoc = stof(val);
+                                DrawPanel.Orientation = stof(val);
                                 break;
                         }
                         
@@ -279,7 +279,7 @@ void FO_Hud_Editor_LoadSettings()
 
 }
 
-void GetNewPanel(vector pos, vector fillSize, float scale, float display, float nodeInsertLoc, string name)
+void GetNewPanel(vector pos, vector fillSize, float scale, float display, float orientation, string name)
 {
     FO_Hud_Panel pnl;
 
@@ -287,7 +287,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
     pnl.FillSize = fillSize;
     pnl.Scale = scale;
     pnl.Display = display;
-    pnl.NodeInsertLoc = nodeInsertLoc;
+    pnl.Orientation = orientation;
     pnl.Name = name;
 
     NewPanel = pnl;
@@ -317,7 +317,7 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
 
     float len;
     len = strlen(val);
-    float offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    float offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
 
     pos = [pos_x + offset, pos_y, 0];
     float textScale = DrawPanel.TextScale ? DrawPanel.TextScale : DrawPanel.Scale;
@@ -329,7 +329,7 @@ vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, 
 {
     float len, offset;
     len = strlen(msg);
-    offset = (DrawPanel.NodeInsertLoc == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
+    offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
     pos = [basepos_x + offset, newline ? pos_y + 2 + ((size_y - fontSize_y) * .5) : pos_y + ((size_y - fontSize_y) * .5), 0];
 
     return pos;
@@ -349,9 +349,9 @@ void AddGrenTimer(float grentype) {
             FO_Hud_Grentimers[i].grentype = grentype;
             FO_Hud_Grentimers[i].expires = time + 3.8;
             if(grentype == GR_TYPE_NORMAL) {
-                FO_Hud_Grentimers[i].icon_index = 4;
+                FO_Hud_Grentimers[i].icon_index = 1;
             } else {
-                FO_Hud_Grentimers[i].icon_index = 5;
+                FO_Hud_Grentimers[i].icon_index = 2;
             }
             break;
         }

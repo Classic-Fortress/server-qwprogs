@@ -992,7 +992,7 @@ void (entity spy) TeamFortress_SpyCalcName = {
 };
 
 void () GasGrenadeTouch = {
-    sound(self, 1, "weapons/bounce.wav", 1, 1);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, 1);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -1017,7 +1017,7 @@ void () GasGrenadeExplode = {
         pos = 0;
         while (pos < 10) {
             newmis = spawn();
-            setmodel(newmis, "progs/s_bubble.spr");
+            FO_SetModel(newmis, "progs/s_bubble.spr");
             setorigin(newmis, self.origin);
             newmis.movetype = 8;
             newmis.solid = 0;
@@ -1086,6 +1086,7 @@ void () GasGrenadeMakeGas = {
                         }
                     }
                 } else {
+                    LogEventAffliction(self.owner, te, TFSTATE_HALLUCINATING);
                     if (old_grens == 1) {
                         stuffcmd(te, "v_cshift 50 25 50 -50\n");
                         sprint(te, PRINT_HIGH, "Far out man!\n");
@@ -1322,7 +1323,7 @@ void () W_FireTranq = {
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
     newmis.classname = "proj_tranq";
-    setmodel(newmis, "progs/spike.mdl");
+    FO_SetModel(newmis, "progs/spike.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 };
@@ -1341,7 +1342,10 @@ void () T_TranqDartTouch = {
         if ((other.classname == "player") &&
             !((other.team_no == self.owner.team_no) &&
               (teamplay & (2 | 4)))) {
-            if (other.tfstate & 32768) {
+
+            LogEventAffliction(self.owner, other, TFSTATE_TRANQUILISED);
+
+            if (other.tfstate & TFSTATE_TRANQUILISED) {
                 timer = find(world, classname, "timer");
                 while (((timer.owner != other) ||
                         (timer.think != TranquiliserTimer)) &&
@@ -1353,7 +1357,7 @@ void () T_TranqDartTouch = {
                 }
             } else {
                 sprint(other, 2, "You feel tired...\n");
-                other.tfstate = other.tfstate | 32768;
+                other.tfstate = other.tfstate | TFSTATE_TRANQUILISED;
                 timer = spawn();
                 timer.nextthink = time + 15;
                 timer.think = TranquiliserTimer;
@@ -1386,7 +1390,7 @@ void () T_TranqDartTouch = {
 };
 
 void () TranquiliserTimer = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 32768);
+    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_TRANQUILISED);
     TeamFortress_SetSpeed(self.owner);
     sprint(self.owner, PRINT_HIGH, "You feel more alert now\n");
     dremove(self);
@@ -1451,7 +1455,7 @@ void () Spy_DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    setmodel(newmis, "progs/backpack.mdl");
+    FO_SetModel(newmis, "progs/backpack.mdl");
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
     newmis.classname = "backpack";

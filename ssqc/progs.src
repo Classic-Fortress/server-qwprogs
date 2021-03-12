@@ -6,12 +6,15 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+events.qc
+roles.qc
 q3defs.qc
 debug.qc
 status.qc
 functions.qc
 menu.qc
 csmenu.qc
+../share/common_vote.qc
 vote.qc
 extraents.qc
 help.qc
@@ -49,6 +52,7 @@ quadmode.qc
 tfort.qc
 tforthlp.qc
 tfortmap.qc
+login.qc
 commands.qc
 ctf.qc
 coop.qc
@@ -56,3 +60,4 @@ actions.qc
 spect.qc
 q3.qc
 mvdsv.qc
+rotate.qc

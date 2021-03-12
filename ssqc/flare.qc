@@ -4,7 +4,7 @@
 //====================================
 
 void () FlareGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (pointcontents(self.origin) == CONTENT_SKY) {
         dremove(self);
         return;

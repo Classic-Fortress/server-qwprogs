@@ -240,6 +240,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     st = ftos(tc);
     stuffcmd(pe, st);
     stuffcmd(pe, "\n");
+
     if(!skipclasscheck) {
         if(pe.playerclass == PC_CIVILIAN) {
             if (TeamFortress_TeamIsCivilian(tno)) {
@@ -286,11 +287,14 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         }
     }
 
+    forceinfokey(pe, "team_no", ftos(tno));
     return (1);
 };
 
 float (float tno) TeamFortress_TeamSet = {
-    return TeamFortress_TeamSet_Options(self, tno, FALSE);
+    local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
+    UpdateAllClientsTeamScores();
+    return (tftso);
 }
 
 void () TeamFortress_CheckTeamCheats = {
@@ -373,7 +377,11 @@ void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore = {
     if (tno == 4)
         team4score = team4score + scoretoadd;
 
-    if ((toggleflags & TFLAG_TEAMFRAGS) || (toggleflags & 2048)) {
+    if ((tno == 1) || (tno == 2) || (tno == 3) || (tno == 4)) {
+        UpdateAllClientsTeamScores();
+    }
+
+    if ((toggleflags & TFLAG_TEAMFRAGS) || (toggleflags & TFLAG_FULLTEAMSCORE)) {
         e = find(world, classname, "player");
         while (e) {
             if (e.team_no == tno)
@@ -953,9 +961,11 @@ float (float tno) TeamFortress_TeamIsCivilian = {
 
 float (float pf_team_no, float pf_class) CF_GetClassRestriction = {
     local float f_max = 0, f_players = TeamFortress_TeamGetNoPlayers(pf_team_no);
-    local string s_string;
+    //local string s_string;
+    Team_Role * role = GetTeamRole(pf_team_no);
 
     // set maximum number based on settings
+/*
     if (pf_class == PC_SCOUT) {
         s_string = infokey(world, "cr_scout");
         f_max = stof(s_string);
@@ -989,7 +999,10 @@ float (float pf_team_no, float pf_class) CF_GetClassRestriction = {
         s_string = infokey(world, "cr_randompc");
         f_max = stof(s_string);
     }
-
+*/
+    if (pf_class == PC_SPY && spy_off) return -1;
+        
+    f_max = rint(role.class_limits[pf_class]);
     if (f_max == 0 || f_players < f_max)
         return f_players;
 

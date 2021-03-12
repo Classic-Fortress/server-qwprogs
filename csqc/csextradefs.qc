@@ -23,14 +23,47 @@ vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
 float MENU_START_CONTENT = 32;
 
+vector MENU_TEXT_BLUE_FO = '0.3 0.4 0.7';
+vector MENU_TEXT_RED_FO = '0.7 0.4 0.3';
+vector MENU_TEXT_YELLOW_FO = '0.7 0.7 0.3';
+vector MENU_TEXT_GREEN_FO = '0.4 0.7 0.3';
+vector MENU_TEXT_SPEC_FO = '0.1 0.1 0.1';
+
+vector TEXT_TEAM_COLOUR[] = {
+    MENU_TEXT_BLUE_FO,
+    MENU_TEXT_RED_FO,
+    MENU_TEXT_YELLOW_FO,
+    MENU_TEXT_GREEN_FO
+};
+
+#define FO_MENU_FLAG_USE_MOUSE 1
+#define FO_MENU_FLAG_CENTER 2
+#define FO_MENU_FLAG_SHOW_SHORTCUTS 4
+#define FO_MENU_FLAG_SHOW_VALUES 8
+#define FO_MENU_FLAG_WARNING 16
+#define FO_MENU_FLAG_ALLOW_INTERMISSION 32
+
+#define FO_MENU_STATE_HIDDEN 0
+#define FO_MENU_STATE_NORMAL 1
+#define FO_MENU_STATE_DISABLED 2
+#define FO_MENU_STATE_SPACER 3
+
+#define FO_MENU_MAX_OPTIONS 20
+
+#define FO_MENU_TRANSPARENCY 0.2
+
 #define MOTD_TIME 30
+
+#define TEAM_SPECTATOR 9
+#define TEAM_OBSERVER 99
+
+#define MAP_MAX_CHARS 20
 
 .float owned_by;
 .string netname;
 .float playerid;
 float fo_hud_editor;
 float fo_hud_menu_active;
-float jumptime;
 vector ScreenSize;
 float number_of_teams;
 float last_skin;
@@ -49,8 +82,32 @@ float is_admin;
 float motd_expiry;
 float quad_round;
 float quad_rounds_total;
+//float game_started;
+float prematch;
+float round_active;
+float round_over;
 float showingscores;
 float mapvote_expiry;
+float grentimer_waiting; //grenade primed, but not thrown
+float jump_counter;
+float frames_since_onground;
+float num_mapvotes;
+float num_mapvotes_filtered;
+entity vote_selected_item;
+float vote_selected_index;
+float vote_list_offset;
+entity current_vote;
+string vote_list_filter;
+
+.string name;
+.string description;
+.string groupname;
+.entity group;
+.float team_num;
+.float min_val;
+.float max_val;
+.float votecount;
+.float localmap;
 
 float(string) GetDrawPanel;
 void(string, string, string) Hud_DrawPanelLMP;
@@ -58,6 +115,8 @@ void(string id, string identify) Hud_DrawIdentifyPanel;
 void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
+void (string panelid) Hud_DrawTeamScorePanel;
+void (string panelid) Hud_DrawMapMenuPanel;
 float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
 vector(float panelid) getPosition;
 vector(float panelid) getFillSize;
@@ -77,12 +136,16 @@ string HUD_ALIGN[] = {
     "Center"
 };
 
+string MENU_OPTION[] = {
+    "1","2","3","4","5","6","7","8","9","0","-","+"
+};
+
 typedef struct 
 {
     string icon;
 } FO_Hud_Icons;
 FO_Hud_Icons HudIcons[29] = {
-    {""},
+//    {""},
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -111,6 +174,12 @@ FO_Hud_Icons HudIcons[29] = {
     {ICON_FLAG_GREEN},
     {"textures/wad/num_percent.png"},
     {"textures/wad/anum_percent.png"}
+};
+
+FO_Hud_Icons GrenadeIcons[3] = {
+    {ICON_GREN1},
+    {ICON_GREN1},
+    {ICON_GREN2},
 };
 
 typedef struct {
@@ -208,6 +277,8 @@ typedef struct
 } MouseStruct;
 
 MouseStruct Mouse;
+MouseStruct PrevMouse;
+float MouseDown;
 
 typedef struct {
     string filename;
@@ -229,6 +300,19 @@ typedef struct {
 
 FlagInfoLine FlagInfoLines[10];
 
+/*
+typedef struct {
+    float team1score;
+    float team2score;
+    float team3score;
+    float team4score;
+} FO_TeamScores;
+
+FO_TeamScores TS;
+*/
+
+float TeamScore[4];
+
 // hud stuff
 typedef struct {
     string id;
@@ -238,9 +322,13 @@ typedef struct {
     float Scale;
     float TextScale;
     float Display;
-    float NodeInsertLoc;
+    float Orientation;
     void(string panelid, float display, string text, string icon) drawPanel;
     string() getValue;
+    float Style;
+    FO_Hud_Icons * Icon;
+    float Snap;
+    float Status;
 } FO_Hud_Panel;
 
 FO_Hud_Panel DrawPanel;
@@ -260,8 +348,48 @@ typedef struct {
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];
 
+// scoreboard stuff
+typedef struct {
+    float ping;
+    float pl;
+    string classtext;
+    string name;
+    float team_no;
+    float score;
+    float caps;
+    float touches;
+    float kills;
+    float teamkills;
+    float deaths;
+    float afflicted;
+    float teamafflicted;
+    float damagegiven;
+    float damagetaken;
+    float ready;
+    float chat;
+} FO_ScoreBoardLine;
+
+// fte maxclients is 255, right?
+#define FO_SCOREBOARDLINES_LENGTH 32
+
+string FO_ScoreBoardColumns[] = {
+    "ping",
+    "pl",
+    "class",
+    "score",
+    "name",
+    "caps",
+    "tchs",
+    "kils",
+    "tkil",
+    "dths",
+    "affl",
+    "tafl",
+    "dmgg",
+    "dmgt"
+};
+
 enum {
-    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -273,15 +401,24 @@ enum {
     HUD_PANEL_GRENTIMER,
     HUD_PANEL_MENU,
     HUD_PANEL_MOTD,
-    HUD_PANEL_MENU_HINT
+    HUD_PANEL_MENU_HINT,
+    HUD_PANEL_GAME_MODE,
+    HUD_PANEL_READY,
+    HUD_PANEL_SHOWSCORES,
+    HUD_PANEL_TEAM_SCORE,
+    HUD_PANEL_MAP_MENU,
+    HUD_PANEL_HUDOPTIONS,
 };
 
+#define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 
 float team_no;
 float is_spectator;
+float player_class;
+float is_observer;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
@@ -298,3 +435,5 @@ vector FO_Hud_Icon_Font_Size = [8, 8, 0];
 
 string(string s) strtrim = #0:strtrim; /*
 		Trims the whitespace from the start+end of the string. */
+float(float playernum, string keyname, optional float assumevalue) getplayerkeyfloat = #0:getplayerkeyfloat; /*
+		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */

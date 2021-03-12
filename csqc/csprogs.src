@@ -1,9 +1,12 @@
 ../csprogs.dat
 csdefs.qc
 csextradefs.qc
+
 ../share/commondefs.qc
 ../share/common_helpers.qc
+../share/common_vote.qc
 sui_sys.qc
+vote.qc
 status.qc
 menu.qc
 main.qc

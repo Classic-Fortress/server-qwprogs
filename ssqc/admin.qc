@@ -118,8 +118,6 @@ void () Admin_DoBan = {
 
 void () Admin_ForceSpectator = {
     bprint4(PRINT_HIGH, self.admin_use.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-    //stuffcmd(self.admin_use, "observe\n");
-    //forceinfokey(self.admin_use, "*spectator", "1");
     clientcommand(self.admin_use, "observe");
     self.admin_mode = 0;
     self.admin_use = world;
@@ -192,7 +190,7 @@ void () Admin_Pause = {
         setpause(1);
         is_paused = 1;
         pause_actor = self.netname;
-        if (cb_prematch && infokey(world, "status") == "Countdown") {
+        if (cb_prematch && is_countdown) {
             StopTimer();
             bprint2(2, pause_actor, " stops the countdown\n");
             return;
@@ -271,6 +269,7 @@ void (string cl_pwd) Admin_Check =
         stuffcmd(self, "\"\n");
         if (st2 != string_null && cl_pwd == st2) {
             self.is_admin = TRUE;
+            forceinfokey(self,"*admin", ftos(self.is_admin));
             bprint2(2, self.netname, "\s gains full admin status!\s\n");
             sprint(self, 2, "Type \scmd list\s for admin commands.\n");
             sprint(self, 2, "You can also use the \sadminmenu\s command for adjusting some settings.\n");  

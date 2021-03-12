@@ -57,7 +57,7 @@ void () CF_Medic_AuraFindPlayers = {
     }
 
     if (f_healtotal) {
-        sound(self.owner, 3, "items/r_item2.wav", 1, 1);
+        FO_Sound(self.owner, CHAN_ITEM, "items/r_item2.wav", 1, 1);
         if (time < self.owner.aura_healtime)
             self.owner.aura_healamount = self.owner.aura_healamount + f_healtotal;
         else
@@ -183,7 +183,8 @@ void () BioInfection_Decay = {
 
                         te.tfstate = te.tfstate | TFSTATE_INFECTED;
                         te.infection_team_no = self.owner.infection_team_no;
-
+                        LogEventAffliction(self.enemy, te, TFSTATE_INFECTED);
+                        LogEventAffliction(self.owner, te, TFSTATE_INFECTED);
                         sprint(te, PRINT_MEDIUM, "You have been infected by ", self.owner.netname, "\n");
                         sprint(self.owner, PRINT_MEDIUM, "You have infected ", te.netname, "\n");
                     }

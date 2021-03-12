@@ -120,6 +120,8 @@ float () IsUsingOldImpulses;
 
 void (float inp) W_OldWeaponSlot;
 
+void (entity ent, float num) SetFlameCount;
+
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
     precache_sound("weapons/rocket1i.wav");
@@ -158,6 +160,7 @@ void () W_Precache = {
     precache_sound("misc/hitsound.wav");
     precache_sound("misc/hitsoundcrit.wav");
     precache_sound("misc/hitsoundteam.wav");
+    precache_sound("weapons/flashgrenburst.wav");
     precache_sound("misc/killsound.wav");
     precache_sound("misc/killsoundteam.wav");
 };
@@ -217,7 +220,7 @@ void () W_FireAxe = {
             }
         }
     } else {                    // hit wall
-        sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_GUNSHOT);
         WriteByte(MSG_MULTICAST, 3);
@@ -264,7 +267,7 @@ void () W_FireSpanner = {
                 AttemptToActivate(te, self, trace_ent);
 
         } else {
-            sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
             WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
             WriteByte(MSG_MULTICAST, TE_GUNSHOT);
             WriteByte(MSG_MULTICAST, 3);
@@ -278,7 +281,6 @@ void () W_FireSpanner = {
     if (trace_ent.takedamage) {
 
         if (trace_ent.classname == "building_dispenser") {
-
             Engineer_UseDispenser(trace_ent);
             return;
 
@@ -319,7 +321,7 @@ void () W_FireSpanner = {
 
                     self.ammo_cells = self.ammo_cells - healam;
 
-                    sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
+                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
                           ATTN_NORM);
 
                     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -342,7 +344,7 @@ void () W_FireSpanner = {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
     } else {
-        sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_GUNSHOT);
         WriteByte(MSG_MULTICAST, 3);
@@ -501,9 +503,9 @@ void () W_FireMedikit = {
                 }
                 if (trace_ent.numflames > 0) {
 
-                    sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
+                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
                           ATTN_NORM);
-                    trace_ent.numflames = 0;
+                    SetFlameCount(trace_ent, 0);
 
                     if (self.classname == "player") {
                         bprint(PRINT_MEDIUM, self.netname, " put out ",
@@ -515,7 +517,7 @@ void () W_FireMedikit = {
 
                     if (healam > 0 && trace_ent.health < trace_ent.max_health) {
 
-                        sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                        FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                         trace_ent.axhitme = 1;
                         SpawnBlood(org, 20);
                         T_Heal(trace_ent, healam, 0);
@@ -527,7 +529,7 @@ void () W_FireMedikit = {
                             healam = self.ammo_medikit * 5;
 
                         if (healam > 0) {
-                            sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
+                            FO_Sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
                             T_Heal(trace_ent, healam, 1);
                             self.ammo_medikit = self.ammo_medikit - rint(healam / 5);
 
@@ -548,12 +550,12 @@ void () W_FireMedikit = {
                         self.ammo_cells = 0;
                         if (trace_ent.saveme_time <= (time - PC_MEDIC_SAVEME_GRACE))
                             self.regen_cooldown = time + PC_MEDIC_CELL_REGEN_CD;
-                        sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
+                        FO_Sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
                     }
                     else {
                         healam = min(10, ((trace_ent.max_health + 50) - trace_ent.health));
                         self.ammo_cells = self.ammo_cells - min(self.ammo_cells, ceil((PC_MEDIC_MAXAMMO_CELL / 20)));
-                        sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
+                        FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                     }
 
                     if (self.current_weapon == WEAP_MEDIKIT)
@@ -593,6 +595,7 @@ void () W_FireMedikit = {
                 BioInfection.nextthink = time + 1;
                 BioInfection.think = BioInfection_Decay;
                 BioInfection.enemy = self;
+                LogEventAffliction(self, trace_ent, TFSTATE_INFECTED);
                 trace_ent.infection_team_no = self.team_no;
             }
         } else {
@@ -600,7 +603,7 @@ void () W_FireMedikit = {
         }
     } else {
         // hit wall
-        sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         WriteByte(MSG_MULTICAST, TE_GUNSHOT);
         WriteByte(MSG_MULTICAST, 3);
@@ -637,7 +640,7 @@ void (vector org, vector vel) SpawnMeatSpray = {
     missile.avelocity = '3000 1000 2000';
     missile.nextthink = time + 1;
     missile.think = SUB_Remove;
-    setmodel(missile, "progs/zom_gib.mdl");
+    FO_SetModel(missile, "progs/zom_gib.mdl");
     setsize(missile, '0 0 0', '0 0 0');
     setorigin(missile, org);
 };
@@ -779,7 +782,7 @@ void (float shotcount, vector dir, vector spread) FireBullets = {
 void () W_FireShotgun = {
     local vector dir;
 
-    sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
 
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
@@ -796,7 +799,7 @@ void () W_FireSuperShotgun = {
         W_FireShotgun();
         return;
     }
-    sound(self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);
 
     KickPlayer(-4, self);
     self.ammo_shells = self.ammo_shells - 2;
@@ -837,7 +840,7 @@ void () W_FireSniperRifle = {
     local vector h;
     dir = '0 0 0';
 
-    sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
     self.currentammo = self.ammo_shells;
@@ -938,7 +941,7 @@ void () W_FireSniperRifle = {
 void () W_FireAutoRifle = {
     local vector dir;
 
-    sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
 
     KickPlayer(-1, self);
     self.ammo_shells = self.ammo_shells - 1;
@@ -974,6 +977,7 @@ void () W_FireAssaultCannon = {
     {
         FireAssCan(5, dir, '0.04 0.04 0');
     }
+    LogEventAttack(self);
 };
 
 void (entity pe_flame) CF_ExtinguishFlame = {
@@ -981,9 +985,9 @@ void (entity pe_flame) CF_ExtinguishFlame = {
 
     rn = random();
     if (rn < 0.5) {
-        sound(pe_flame, CHAN_VOICE, "misc/water1.wav", 1, ATTN_NORM);
+        FO_Sound(pe_flame, CHAN_VOICE, "misc/water1.wav", 1, ATTN_NORM);
     } else {
-        sound(pe_flame, CHAN_VOICE, "misc/water2.wav", 1, ATTN_NORM);
+        FO_Sound(pe_flame, CHAN_VOICE, "misc/water2.wav", 1, ATTN_NORM);
     }
     dremove(pe_flame);
 };
@@ -1079,7 +1083,7 @@ void () T_MissileTouch = {
 void () W_FireRocket = {
     self.ammo_rockets = self.ammo_rockets - 1;
     self.currentammo = self.ammo_rockets;
-    sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
 
     newmis = spawn();
@@ -1100,7 +1104,7 @@ void () W_FireRocket = {
 
     newmis.weapon = DMSG_ROCKETL;
     newmis.classname = "proj_rocket";
-    setmodel(newmis, "progs/missile.mdl");
+    FO_SetModel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 };
@@ -1167,7 +1171,7 @@ void () W_FireLightning = {
         return;
     }
     if (self.t_width < time) {
-        sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
         self.t_width = time + 0.6;
     }
     KickPlayer(-2, self);
@@ -1238,7 +1242,7 @@ void () GrenadeTouch = {
         GrenadeExplode();
         return;
     }
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
 
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
@@ -1249,7 +1253,9 @@ void () ExplodeOldestPipebomb = {
     local entity oldest = world;
     local float numpipes = 0;
     local float numpipes_total = 0;
-
+    local float detpipe_limit = rint(GetTeamRole(self.team_no)->detpipe_limit);
+    Team_Role * r = GetTeamRole(self.team_no);
+    
     pipe = find(world, classname, "pipebomb");
     while (pipe != world) {
         if (pipe.owner == self) {
@@ -1272,7 +1278,7 @@ void () ExplodeOldestPipebomb = {
 void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
     self.currentammo = self.ammo_rockets;
-    sound(self, 1, "weapons/grenade.wav", 1, 1);
+    FO_Sound(self, CHAN_WEAPON, "weapons/grenade.wav", 1, 1);
     KickPlayer(-2, self);
     newmis = spawn();
     newmis.voided = 0;
@@ -1311,7 +1317,7 @@ void () W_FireGrenade = {
     newmis.avelocity = '300 300 300';
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = GrenadeExplode;
-    setmodel(newmis, "progs/grenade2.mdl");
+    FO_SetModel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
 };
@@ -1332,7 +1338,7 @@ void (vector org, vector dir) launch_spike = {
     newmis.classname = "spike";
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
-    setmodel(newmis, "progs/spike.mdl");
+    FO_SetModel(newmis, "progs/spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
@@ -1342,7 +1348,7 @@ void (vector org, vector dir) launch_spike = {
 void () W_FireSuperSpikes = {
     local vector dir;
 
-    sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
 
     if (old_ng_rof)
         self.ammo_nails = self.ammo_nails - 4;
@@ -1351,9 +1357,10 @@ void () W_FireSuperSpikes = {
     self.currentammo = self.ammo_nails;
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16', dir);
+    LogEventAttack(self);
     newmis.touch = superspike_touch;
     newmis.weapon = DMSG_SNAILGUN;
-    setmodel(newmis, "progs/s_spike.mdl");
+    FO_SetModel(newmis, "progs/s_spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     KickPlayer(-3, self);
 };
@@ -1371,7 +1378,7 @@ void (float ox) W_FireSpikes = {
         W_ChangeToBestWeapon();
         return;
     }
-    sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
     if ((self.ammo_nails == 1) || !old_ng_rof) {
         self.ammo_nails = self.ammo_nails - 1;
         self.currentammo = self.ammo_nails;
@@ -1381,6 +1388,7 @@ void (float ox) W_FireSpikes = {
     }
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
+    LogEventAttack(self);
     KickPlayer(-3, self);
 };
 
@@ -1939,7 +1947,7 @@ void () W_Attack = {
     if (self.has_disconnected == TRUE)
         return;
 
-    if (self.tfstate & TFSTATE_RELOADING)
+    if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
     
     if(no_fire_mode)
@@ -1954,7 +1962,7 @@ void () W_Attack = {
 
     if (self.current_weapon == WEAP_AXE) {
         Attack_Finished(0.5);
-        sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.25)
             player_axe1();
@@ -1966,7 +1974,7 @@ void () W_Attack = {
             player_axed1();
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
-        sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         player_axe1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         if (CheckForReload() == TRUE)
@@ -2011,7 +2019,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_LIGHTNING) {
         player_light1();
         Attack_Finished(0.1);
-        sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         if (self.flags & FL_ONGROUND) {
             if (CheckForReload() == TRUE)
@@ -2063,16 +2071,25 @@ void () W_Attack = {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            if (pyro_type == 1)
-                Attack_Finished(0.9);
-            else 
-                Attack_Finished(1.2);
+            switch (pyro_type)
+            {
+                case PYRO_ORIGINAL:
+                    Attack_Finished(1.2);
+                    break;
+                case PYRO_OZTF:
+                    Attack_Finished(0.9);
+                    break;
+                case PYRO_FO:
+                    //Attack_Finished(PC_PYRO_LAVA_RETICK);
+                    Attack_Finished(0.9);
+                    break;
+            }
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
         }
     } else if (self.current_weapon == WEAP_MEDIKIT) {
-        sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.25)
             player_medikit1();
@@ -2084,16 +2101,22 @@ void () W_Attack = {
             player_medikitd1();
         Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
-        sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireTranq();
         Attack_Finished(1.5);
     } else if (self.current_weapon == WEAP_LASER) {
-        sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireLaser();
         Attack_Finished(0.4);
     }
+
+    //These weapons have to log each projectile launched/bullet fired
+    if (self.current_weapon != WEAP_ASSAULT_CANNON ||
+        self.current_weapon != WEAP_NAILGUN ||
+        self.current_weapon != WEAP_SUPER_NAILGUN)
+        LogEventAttack(self);
 };
 
 float (entity pl) WeaponReady = {
@@ -2511,8 +2534,10 @@ void (float inp) W_OldWeaponSlot = {
         if (self.next_weapon == WEAP_GRENADE_LAUNCHER)
             self.next_weaponmode = 1;
     }
-    if (self.next_weapon == 0)
+    if (self.next_weapon == 0) {
+        self.next_weapon = self.current_weapon;
         sprint(self, PRINT_HIGH, "No weapon\n"); 
+    }
 }
 
 float (float newSlot) W_OldImpulseFromNewSlot = {
@@ -2690,6 +2715,9 @@ float (entity pl) W_WeaponState_Check = {
 }
 
 void (float inp) W_ChangeWeapon = {
+    if(self.playerclass == PC_CIVILIAN) {
+        inp = 4;
+    }
     if (inp < 1 || inp > GetLastWeaponImpulse())
         return;
 
@@ -2705,6 +2733,9 @@ void (float inp) W_ChangeWeapon = {
         return;
     
     if (IsUsingOldImpulses()) {
+        if(self.playerclass == PC_CIVILIAN) {
+            inp = 1;
+        }
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
             W_AmmoError();
@@ -3068,6 +3099,21 @@ void () PreMatchImpulses = {
             TeamFortress_DisplayDetectionItems();
     } else if (self.impulse == TF_DISPLAYLOCATION)
         display_location();
+
+    if (self.impulse == TF_SPECIAL_SKILL) {
+        if(self.tfstate & TFSTATE_INVINCIBLE) {
+            self.items = self.items - (self.items & IT_INVULNERABILITY);
+            self.invincible_time = 0;
+            self.invincible_finished = 0;
+            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
+            self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
+        } else {
+            self.items = self.items | IT_INVULNERABILITY;
+            self.invincible_time = 1;
+            self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+            self.invincible_finished = time + 666;
+        }
+    }
 };
 
 void () DeadImpulses = {
@@ -3081,6 +3127,10 @@ void () DeadImpulses = {
         TeamFortress_ChangeClass(self.impulse - TF_CHANGEPC_SCOUT + 1);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGETEAM)
                && (deathmatch == 3) && (!cb_prematch)) {
+        if (loginRequired && !self.login) {
+            sprint (self, 2, "Login required, please use \"cmd login <login> <secret>\" before joining the game\n");
+            return;
+        }
         Menu_Team(0);
     } else if ((self.playerclass != 0) && (self.impulse == TF_CHANGECLASS)
                && (deathmatch == 3) && (!cb_prematch)) {
@@ -3215,6 +3265,17 @@ void () DeadImpulses = {
 
 
 void () W_WeaponFrame = {
+
+    if (self.login_in_progress) {
+        CenterPrint(self, "Trying to log in...");
+    }
+    
+    if (loginRequired && !self.login) {
+        PrintLoginMessage();
+        self.impulse = 0;
+        return;
+    }
+
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
@@ -3270,7 +3331,7 @@ void () W_WeaponFrame = {
 
     // slot 1-4 (or 1-7) binds
     if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
-                && !self.is_building && !self.is_detpacking) {
+                && !(self.is_building && !engineer_move) && !self.is_detpacking) {
 
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             // load weapon state if current state doesn't match stored state
@@ -3399,8 +3460,21 @@ void () W_WeaponFrame = {
         case TF_CHANGEPC_SPY:
         case TF_CHANGEPC_ENGINEER:
         case TF_CHANGEPC_RANDOM:
+        case TF_INVENTORY:
+        case FLAG_INFO:
             ImpulseCommands();
             return;
+        // allows setting detpack while reloading on toggle, defaults to off        
+        case TF_DEMOMAN_DETPACK:
+        case TF_DETPACK:
+        case TF_DETPACK_STOP:
+        case TF_DETPACK_5:
+        case TF_DETPACK_20:
+        case TF_DETPACK_50:
+            if (detpack_when_reloading) {
+                ImpulseCommands();
+                return;
+            }
     }
 
     //  grenade impulses always possible
@@ -3474,7 +3548,7 @@ void () SuperDamageSound = {
     if (self.super_damage_finished > time) {
         if (self.super_sound < time) {
             self.super_sound = time + 1;
-            sound(self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_BODY, "items/damage3.wav", 1, ATTN_NORM);
         }
     }
     return;

@@ -52,14 +52,13 @@ void () MatchThink =
         }
         bprint(2, " remaining\n");
     }
+    gametime++;
     self.nextthink = (time + 1);
 };
 
 void () StartMatch =
 {
     local string st;
-    local float f1;
-    local float f2;
     local entity te;
     local entity oldself;
     local entity gren;
@@ -123,6 +122,13 @@ void () StartMatch =
         self = oldself;
         te = find(te, classname, "player");
     }
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
+    }
 
     te = find(world, classname, "prematch");
     te.classname = "match";
@@ -147,21 +153,6 @@ void () StartMatch =
             te.nextthink = (time + 1);
         }
     }
-    st = infokey(world, "spectalk");
-    f2 = stof(st);
-    if (!f2)
-    {
-        st = "0";
-    }
-    localcmd("sv_spectalk ");
-    localcmd(st);
-    localcmd("\n");
-    f1 = stof(infokey(world, "fpd"));
-    f1 = (f1 - (f1 & 64)) + (f2 * 64);
-    localcmd("serverinfo fpd ");
-    st = ftos(f1);
-    localcmd(st);
-    localcmd("\n");
 
     if (quadmode) {
         if (rounds) {
@@ -174,9 +165,101 @@ void () StartMatch =
     }
 };
 
+float () GetPlayerCount
+{
+    local entity te;
+    local float tmp = 0;
+    te = find (world, classname, "player");
+    while (te != world) {
+        if (te.playerclass) {
+            tmp = tmp + 1;
+        }
+        te = find (te, classname, "player");
+    }
+    return tmp;
+}
+
+string () GetPlayersName
+{
+    local entity te;
+    local float tmp = 0;
+    local float tmp2 = 0;
+    local string st = "";
+    local string plname;
+
+    while (tmp < number_of_teams) {
+        tmp = tmp + 1;
+        tmp2 = 0;
+        te = find (world, classname, "player");
+        while (te != world) {
+            if (te.team_no == tmp && te.playerclass) {
+                tmp2 = 1;
+                if (loginRequired)
+                    plname = te.login;
+                else
+                    plname = te.netname;
+                st = strcat (st, "_");
+                if (strlen(plname) <= 13) {
+                    st = strcat( st, plname );
+                } else {
+                    st = strcat( st, substr(plname,0,12));
+                }
+            }
+            te = find (te, classname, "player");
+        }
+        if (tmp2 == 1 && tmp != number_of_teams) {
+            st = strcat ( st, "_VS");
+        }
+    }
+        return (st);
+};
+
+string () GetGameFileName = {
+    local float i;
+    local string tmp;
+    local entity t;
+    local string str;
+
+    str = "";
+    i = 0;
+    t = find (world, classname, "prematch");
+    if (t != world)
+    {       
+        calltimeofday ();
+        str = strcat(str, tod_year); // year
+        str = strcat(str, "-");
+        str = strcat(str, tod_mon); // month
+        str = strcat(str, "-");          
+        str = strcat(str, tod_day); // day        
+        str = strcat(str, "_");        
+        str = strcat(str, tod_hour); // hour
+        str = strcat(str, "-");
+        str = strcat(str, tod_min); // minute
+        str = strcat(str, "-");
+        str = strcat(str, tod_sec); // second
+    }
+    str = strcat(str, "_[");
+    str = strcat(str, mapname);
+    str = strcat(str, "]_");
+
+    while ((i < number_of_teams))
+    {
+        i = (i + 1);
+        tmp = GetTeamName (i);
+        str = strcat(str,"_");
+        str = strcat(str,tmp);
+        if ((i < number_of_teams))
+        {
+            str = strcat(str, "_vs");
+        }
+    }
+    str = clearString(str);
+    return str;
+}
+
 void () PreMatch_Think = {
     local entity p;
-    local string num, tmp;
+    local string num, tmp, str;
     local float fl;
 
     self.cnt2 = (self.cnt2 - 1);
@@ -199,6 +282,9 @@ void () PreMatch_Think = {
             is_countdown = 0;
             self.nextthink = (time + 0.1);
             self.think = SUB_Remove;
+            gametime = 0;
+            canlog = 1;
+            LogEventGameStart();
             p = find(world, classname, "player");
             while (p != world) {
                 if (p.netname != "" && p.team_no && p.playerclass) {
@@ -206,12 +292,15 @@ void () PreMatch_Think = {
                     p.solid = 3;
                     p.movetype = 3;
                 }
+                p.classtime = gametime;
+                LogEventPlayerStart(p);
                 p = find(p, classname, "player");
             }
             if (!quadmode)
                 StartMatch();
-            else
+            else {
                 StartQuadRound();
+            }
             return;
         }
     }
@@ -228,28 +317,22 @@ void () PreMatch_Think = {
         if (self.cnt2 == 10) {
             is_countdown = 1;
             lightstyle(0, "e");
-
+            //preventing double demo recording
+            localcmd("cancel\n");
             if (stof(infokey(world, "demo_auto_left")) > 0) {
                 if (infokey(world, "serverdemo") == "on") {
                     calltimeofday();
 
                     localcmd("record \"");
-                    localcmd(tod_year); // year
-                    localcmd("-");
-                    localcmd(tod_mon); // month
-                    localcmd("-");
-                    localcmd(tod_day); // day
-                    localcmd("_");
-                    localcmd(tod_hour); // hour
-                    localcmd("-");
-                    localcmd(tod_min); // minute
-                    localcmd("-");
-                    localcmd(tod_sec); // second
-
-                    localcmd("_[");
-                    localcmd(mapname);
-                    localcmd("]");
+                    str = strzone(GetGameFileName());
+                    localcmd(strzone(str));
                     localcmd("\"\n");
+
+                    str = strcat(str,".json");
+                    str = strcat(str);
+                    fclose(logfilehandle);
+                    logfilehandle = fopen(str,FILE_WRITE);
+                    strunzone(str);
                 }
             }
         }
@@ -294,6 +377,13 @@ void () ResetBreakAndReady = {
             UpdateClientPrematch(te, TRUE);
         }
         te = find (te, classname, "player");
+    }
+    te = find(world, classname, "observer");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientPrematch(te, TRUE);
+        }
+        te = find(te, classname, "observer");
     }
 }
 
@@ -365,6 +455,8 @@ void () StopTimer =
 
     if (infokey(world, "serverdemo") != string_null) {
         localcmd("cancel\n");
+        if (logfilehandle > 0)
+            fclose(logfilehandle);
     }
     if (cb_prematch) {
         t = find(world, classname, "prematch");
@@ -723,6 +815,13 @@ void () DumpClanScores = {
         if (st != string_null) {
             stuffcmd(te, "screenshot\n");
         }
+
+        if (te.playerclass != 0) {
+            local float timeplayed = gametime - te.classtime;
+            LogEventChangeClass(te, te.playerclass, 0, timeplayed);
+            te.classtime = gametime;
+        }
+
         te = find(te, classname, "player");
     }
 };
@@ -800,7 +899,10 @@ void () CenterPrint_Players_NotReady = {
     te = find(world, classname, "player");
     while (te)
     {
-        CenterPrint(te, players_not_ready);
+        if(!infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            CenterPrint(te, players_not_ready);
+        }
+
         te = find(te, classname, "player");
     }
 }

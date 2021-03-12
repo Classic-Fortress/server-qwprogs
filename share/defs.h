@@ -248,6 +248,10 @@
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
+// FIXME - concussion and flash states aren't set or tested...
+#define TFSTATE_FLAMES_MAX		131072
+#define TFSTATE_FLASHED			262144
+#define TFSTATE_CONCUSSED		524288
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
@@ -261,6 +265,7 @@
 #define TF_TD_ELECTRICITY	8  // Electric damage
 #define TF_TD_FIRE		16  // Fire damage
 #define TF_TD_NOSOUND		256 // Special damage. Makes no sound/painframe, etc
+#define TF_TD_NOMOMENTUM	512	// Special damage, don't change momentum
 
 // Classic Fortress stuff
 #define CF_MAPVOTE_FORCESHOW        10      // Seconds to force the mapvote menu to be open
@@ -665,6 +670,9 @@
 #define BUILD_DISPENSER_MAX_CELLS   400
 #define BUILD_DISPENSER_MAX_ARMOR   500
 
+#define BUILD_SENTRYGUN_MAX_DISTANCE 128
+#define BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE 1024
+
 /*======================================================*/
 /* Ammo quantities for dropping				*/
 /*======================================================*/
@@ -1008,7 +1016,7 @@
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
 #define PC_HVYWEAP_GRENADE_MAX_1	4
-#define PC_HVYWEAP_GRENADE_MAX_2	2
+#define PC_HVYWEAP_GRENADE_MAX_2	1
 #define PC_HVYWEAP_TF_ITEMS		0
 #define PC_HVYWEAP_PROJSPEED	3000
 #define PC_HVYWEAP_ASSCAN_CLIPSIZE		100
@@ -1042,6 +1050,27 @@
 #define PC_PYRO_GRENADE_MAX_1		4
 #define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
+#define PC_PYRO_AIRBLAST_RANGE	400
+#define PC_PYRO_AIRBLAST_COOLDOWN	5
+#define PC_PYRO_LAVA_LIFETIME	3
+#define PC_PYRO_LAVA_RETICK		1.2
+#define PC_PYRO_FLAMETHROWER_DAM_FO	15
+#define PC_PYRO_FLAMETHROWER_DAM_ORIG	10
+#define PC_PYRO_NAPALM_INIT_DAM_ORIG	20
+#define PC_PYRO_NAPALM_INIT_DAM_FO		40
+#define PC_PYRO_NAPALM_MAX_EXPLOSIONS_ORIG	8
+#define PC_PYRO_NAPALM_MAX_EXPLOSIONS_FO	4
+#define PC_PYRO_INIT_BURN_DAM_ORIG		6
+#define PC_PYRO_INIT_BURN_DAM_FO		12
+#define PC_PYRO_BURN_MULTIPLIER_ORIG	.3
+#define PC_PYRO_BURN_MULTIPLIER_FO		1
+#define PC_PYRO_BURN_DAMAGE_AMP			1.2
+
+
+// pyro types
+#define PYRO_ORIGINAL	0
+#define PYRO_OZTF		1
+#define PYRO_FO			2
 
 // Class Details for SPY
 #define PC_SPY_SKIN			22
@@ -1187,6 +1216,7 @@
 #define TFSP_REMOVESELF		1  // Remove itself after being spawned on
 
 // Defines for Goal States
+#define TFGS_NONE	0
 #define TFGS_ACTIVE		1
 #define TFGS_INACTIVE		2
 #define TFGS_REMOVED		3
@@ -1203,6 +1233,9 @@
 #define TF_ILL_RANDOMPC		128
 #define TF_ILL_SPY		256
 #define TF_ILL_ENGINEER		512
+
+// spawnflags
+#define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
 
 /*======================================================================*/
 /* Flamethrower								*/
@@ -1352,6 +1385,12 @@
 #define FO_HUD_FLAGINFO_NAME "Flag Status"
 #define FO_HUD_MOTD_NAME "MOTD"
 #define FO_HUD_MENU_HINT_NAME "Menu Hints"
+#define FO_HUD_GAME_MODE_NAME "Game Mode"
+#define FO_HUD_READY_NAME "Ready Status"
+#define FO_HUD_SHOWSCORES_NAME "Show Scores"
+#define FO_HUD_MAP_MENU_NAME "Map Menu"
+#define FO_HUD_TEAM_SCORE_NAME "Team Score"
+
 
 #define ICON_CLIPSIZE "textures/wad/clipsize.png"
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
@@ -1384,3 +1423,16 @@
 // first 32 are reserved
 #define STAT_TEAMNO    33
 #define STAT_READY     34
+#define STAT_CLASS     35
+
+// Dimensions
+#define DMN_FLASH 1 // when flashed, we set dimension see to this
+#define DMN_NOFLASH	256	// see all the things
+
+// trigger_push
+#define PUSH_ONCE	1
+#define PUSH_INCLUDETFITEM	2
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_NONOISE	8
+#define PUSH_MEGAJUMPER	16
+

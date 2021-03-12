@@ -13,7 +13,7 @@ void () NailGrenadeTouch = {
         return;
 
     // If the Nail Grenade hits a player, it just bounces off
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -22,11 +22,13 @@ void () NailGrenadeExplode = {
     local entity te;
 
     self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
-    if (self.owner.no_active_nail_grens > 2) {
+    if (self.owner.no_active_nail_grens >= max_active_gren2_soldier) {
 
         te = find(world, classname, "grenade");
         while (te) {
-            if ((te.owner == self.owner) && (te.no_active_nail_grens == 1)) {
+            if ((te.owner == self.owner || te.real_owner == self.owner) && (te.no_active_nail_grens == 1)) {
+                if (!te.owner)
+                    te.owner = te.real_owner;
                 te.weapon = 9;
                 te.think = GrenadeExplode;
                 te.nextthink = time + 0.1;
@@ -37,6 +39,9 @@ void () NailGrenadeExplode = {
     self.no_active_nail_grens = self.owner.no_active_nail_grens;
     self.movetype = MOVETYPE_FLY;
     setorigin(self, self.origin + '0 0 32');
+    if(solid_nailgren) {
+        setsize(self, '-1 -1 -1', '1 1 1');
+    }
     self.avelocity = '0 500 0';
     self.nextthink = time + 0.7;
     if (nailgren_type == NGR_TYPE_LASER)		
@@ -141,7 +146,7 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
 	TF_T_Damage(trace_ent, self, self.real_owner, lasergren_damage, TF_TD_NOTTEAM, TF_TD_ELECTRICITY);
 	}
     if (self.t_width < time) {
-        sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
         self.t_width = time + 0.8;
     }
     

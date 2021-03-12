@@ -121,6 +121,7 @@ entity lastspawn;
 void WorldSpawnPost() 
 {
     loadloc();
+    FO_FlashDimension = -1;
 
     dremove(self);
 }
@@ -275,6 +276,7 @@ void () worldspawn = {
     precache_model2("progs/tf_stan.mdl");
     precache_model2("progs/v_medi.mdl");
     precache_model2("progs/hgren2.mdl");
+    precache_model2("progs/flashgren.mdl");
     precache_model2("progs/biggren.mdl");
     precache_model2("progs/flare.mdl");
     precache_model2("progs/v_srifle.mdl");
@@ -313,6 +315,9 @@ void () worldspawn = {
     precache_sound("shalrath/death.wav");
     precache_sound("shalrath/attack2.wav");
     precache_sound("blob/sight1.wav");
+    precache_sound("misc/secret.wav");
+    precache_sound("weapons/airblast.wav");
+    precache_sound("weapons/airblastshoot.wav");
     lightstyle(0, "m");
     lightstyle(1, "mmnmmommommnonmmonqnmmo");
     lightstyle(2, "abcdefghijklmnopqrstuvwxyzyxwvutsrqponmlkjihgfedcba");
@@ -329,6 +334,7 @@ void () worldspawn = {
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
     clientstat(STAT_READY, EV_FLOAT, is_ready);
+    clientstat(STAT_CLASS, EV_FLOAT, playerclass);
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -338,11 +344,11 @@ void () worldspawn = {
     vote_total_votes = 0;
     vote_style = CF_GetSetting("vs", "vote_style", "1"); 
     
+    //No map candidates in map! Add some defaults...
+    if(!find(world, classname, "map_candidate")) {
+        InitVoteMaps();
+    }
     if(votemode) {
-        //No map candidates in map! Add some defaults...
-        if(!find(world, classname, "map_candidate")) {
-            InitVoteMaps();
-        }
         string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
         if(world.model != strcat("maps/",votemap,".bsp")) {
             bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
@@ -352,6 +358,8 @@ void () worldspawn = {
         } else {
         }
     }
+
+    dimension_send = DMN_NOFLASH;
 };
 
 void () StartFrame = {
@@ -400,4 +408,19 @@ void (entity ent) CopyToBodyQue = {
     setorigin(bodyque_head, ent.origin);
     setsize(bodyque_head, ent.mins, ent.maxs);
     bodyque_head = bodyque_head.owner;
+};
+
+
+// this is used for spawning world objects on map load.. not player, projectiles etc - also disables the engine's conditional spawning based on spawnflags, you're expected to do that part yourself
+void(void() fnc)CheckSpawn = {
+    if(fnc)
+    {
+        self.dimension_seen = DMN_NOFLASH | DMN_FLASH;
+        //bprint(PRINT_HIGH, strcat("spawning: ", self.classname, "\n"));
+        fnc();
+    }
+    else 
+    {
+        remove(self);
+    }
 };

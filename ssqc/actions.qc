@@ -53,7 +53,7 @@ void () TeamFortress_Discard = {
         self.ammo_cells = 0;
     }
     W_SetCurrentAmmo(self);
-    sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
     newmis.enemy = self;
     newmis.health = time;
     newmis.weapon = 0;
@@ -75,7 +75,7 @@ void () TeamFortress_Discard = {
     newmis.nextthink = time + 30;
     newmis.think = SUB_Remove;
     newmis.touch = TeamFortress_AmmoboxTouch;
-    setmodel(newmis, "progs/backpack.mdl");
+    FO_SetModel(newmis, "progs/backpack.mdl");
 };
 
 void () TeamFortress_Discard_DropAmmo = {
@@ -127,9 +127,9 @@ void () TeamFortress_SaveMe = {
 
     if (self.last_saveme_sound < time) {
         if (random() < 0.8)
-            sound(self, CHAN_WEAPON, "speech/saveme1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "speech/saveme1.wav", 1, ATTN_NORM);
         else
-            sound(self, CHAN_WEAPON, "speech/saveme2.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "speech/saveme2.wav", 1, ATTN_NORM);
 
         self.last_saveme_sound = time + 4;
     }
@@ -164,9 +164,86 @@ void () TeamFortress_SaveMe = {
     self.saveme_time = time;
 };
 
-void (entity pe_player, float f_type) CF_Identify = {
-    local vector v_source;
+void (entity pe_player) FO_SpecTrackPoint = {
+    if(pe_player.classname != "observer") {
+        return;
+    }
+    
+    makevectors(pe_player.v_angle);
+    traceline(pe_player.origin, pe_player.origin + v_forward * 4096, 0, pe_player);
+    
+    if (trace_ent != world) {
+        if(trace_ent.classname == "player") {
+            stuffcmd(pe_player, strcat("track \"", trace_ent.netname, "\"\n"));
+        }
+    }
+}
 
+void (entity pe_player) FO_Spectator_Identify = {
+    //ezquake draws player ids over their heads
+    if(pe_player.classname != "observer" || !infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+        return;
+    }
+    
+    makevectors(pe_player.v_angle);
+    //start just forward of the player in case you're speccing someone
+    traceline(pe_player.origin + v_forward * 96, pe_player.origin + v_forward * 4096, MOVE_EVERYTHING, pe_player);
+    
+    if (trace_ent != world) {
+        local string s_id_string = "";
+        if(trace_ent.classname == "player") {
+            //s_id_string = strcat(trace_ent.netname, "\n", TeamFortress_TeamGetColorString(trace_ent.team_no), " ", TeamFortress_GetClassName(trace_ent.playerclass), "\n");
+            s_id_string = strcat(trace_ent.netname, "\n");
+            if(trace_ent.playerclass == PC_SPY) {
+                if (trace_ent.undercover_team || trace_ent.undercover_skin) {
+                    s_id_string = strcat(s_id_string, "\sDisguised as: \s ");
+                    if (trace_ent.undercover_team != 0)
+                        s_id_string = strcat(s_id_string, TeamFortress_TeamGetColorString(trace_ent.undercover_team));
+                    if (trace_ent.undercover_skin != 0)
+                        s_id_string = strcat(s_id_string, " ", TeamFortress_GetClassName(trace_ent.undercover_skin));
+                    s_id_string = strcat(s_id_string, "\n");
+                }
+            }
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(trace_ent.health));
+            s_id_string = strcat(s_id_string, " \sA:\s ", ftos(trace_ent.armorvalue), "\n");
+        } else if(trace_ent.classname == "building_sentrygun") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.weapon), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.health)), "\n");
+        } else if(trace_ent.classname == "building_sentrygun_base") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Sentry Gun (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sLevel:\s ", ftos(trace_ent.oldenemy.weapon), "\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.oldenemy.health)), "\n");
+        } else if(trace_ent.classname == "building_dispenser") {
+            s_id_string = strcat(trace_ent.real_owner.netname, "'s Dispenser (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sH:\s ", ftos(rint(trace_ent.health)), "\n");
+        } else if(trace_ent.classname == "detpack") {
+            s_id_string = strcat(trace_ent.owner.netname, "'s Detpack (", TeamFortress_TeamGetColorString(trace_ent.team_no), ")\n");
+            s_id_string = strcat(s_id_string, "\sTime Left:\s ", ftos(trace_ent.detpack_left), " seconds\n");
+        }
+
+       // refresh status bar
+        pe_player.ident_time = time + 0.5;
+        if(pe_player.ident_string != s_id_string) {
+            pe_player.ident_string = s_id_string;
+            //if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
+                UpdateClientIDString(pe_player);
+            //} else {
+            //    Status_Refresh(pe_player);
+            //}
+        }
+    }
+}
+
+void (entity pe_player, float f_type) CF_Identify = {
+    if(pe_player.classname == "observer") {
+        FO_Spectator_Identify(pe_player);
+        return;
+    }
+    
+    local vector v_source;
+    
+    makevectors(pe_player.v_angle);
     v_source = pe_player.origin + v_forward * 10;
     v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
 

@@ -576,25 +576,49 @@ void (entity pl, string s1, string s2, string s3, string s4, string s5) CenterPr
     Status_Print(pl, s1, s2, s3, s4, s5);
 };
 
+void (entity pl, string s1, string s2, string s3, string s4, string s5, string s6) CenterPrint6 = {
+    Status_Print(pl, s1, s2, s3, s4, s5, s6);
+};
+
 string getLocationName(vector location);
 
 void (entity Player, float index, entity Item, float icon) InitClientFlagStatus = {
-    float csqcactive = infokeyf(Player, INFOKEY_P_CSQCACTIVE);
-    if(csqcactive) {
-        msg_entity = Player;
-        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
-        WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
-        WriteFloat(MSG_MULTICAST, index);
-        WriteFloat(MSG_MULTICAST, Item.goal_no);
-        WriteString(MSG_MULTICAST, Item.mdl);
-        WriteFloat(MSG_MULTICAST, Item.skin);
-        WriteFloat(MSG_MULTICAST, Item.owned_by);
-        WriteFloat(MSG_MULTICAST, icon);
-        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE) || !CF_GetSetting("ssbfi", "server_sbflaginfo", "1")) {
+        return;
     }
+    msg_entity = Player;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_FLAGINFOINIT);
+    WriteFloat(MSG_MULTICAST, index);
+    WriteFloat(MSG_MULTICAST, Item.goal_no);
+    WriteString(MSG_MULTICAST, Item.mdl);
+    WriteFloat(MSG_MULTICAST, Item.skin);
+    WriteFloat(MSG_MULTICAST, Item.owned_by);
+    WriteFloat(MSG_MULTICAST, icon);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
 }
+
+void (entity Player) InitAllStatuses = {
+    entity tfdet = find(world, classname, "info_tfdetect");
+    if(tfdet) {
+        InitClientFlagStatus(Player, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
+        InitClientFlagStatus(Player, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
+    }
+    tfdet = find(world, classname, "info_tfgoal");
+    while (tfdet) {
+        if (tfdet.track_goal) {
+            InitClientFlagStatus(Player, -1, tfdet, FLAGINFO_ICON_BUTTON);
+        }
+        tfdet = find(tfdet, classname, "info_tfgoal");
+    }
+};
+
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -625,6 +649,8 @@ void (entity Player, entity Goal) UpdateClientButtonStatus = {
 }
 
 void (entity Player, entity Item) UpdateClientFlagStatus = {
+    if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = Player;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_FLAGINFO); 
@@ -641,7 +667,11 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
             if((Item.nextthink - time) >= 0) {
                 WriteFloat(MSG_MULTICAST, FLAGINFO_DROPPED);
                 if(Item.think != tfgoalitem_droptouch) {
-                    WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    if(noreturn) {
+                        WriteFloat(MSG_MULTICAST, -1);
+                    } else {
+                        WriteFloat(MSG_MULTICAST, rint(Item.bubble_count - time));
+                    }
                     if((Item.think == tfgoalitem_dropthink || Item.think == tfgoalitem_remove) && !Item.owner) {
                         WriteFloat(MSG_MULTICAST, FLAGINFO_LOCATION);
                         WriteCoord(MSG_MULTICAST, Item.origin_x);
@@ -702,7 +732,7 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
         if (Item.origin != Item.oldorigin) {
             //When the item is thrown, there is a touch think with a pad of 4.25s before the normal timer kicks in
             if((Item.nextthink - time) >= 0) {
-                if(Item.think != tfgoalitem_droptouch) {
+                if(Item.think != tfgoalitem_droptouch && !noreturn) {
                     st = strcat(st, Q"\s: Return: \s", ftos(rint(Item.bubble_count - time)));
                 } else {
                     st = strcat(st, Q"\s: Dropped\s");
@@ -767,6 +797,8 @@ string GetSBClassInfo(entity pl, float csqcactive)
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
@@ -774,8 +806,38 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientGrenadeThrown(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+}
+
+void UpdateClientIDString(entity pl) {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    // only send updates
+    //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
+    //    return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, MSG_ID);
+    // identify
+    if (pl.ident_string && time < pl.ident_time) {
+        WriteString(MSG_MULTICAST, pl.ident_string);
+    } else {
+        WriteString(MSG_MULTICAST, "");
+    }
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    pl.last_ident_string = pl.ident_string;
+}
+
 void UpdateClientStatusBar(entity pl)
 {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
     // if we ever change to fte only, this could be changed to stats
     string msg = "";
     msg_entity = pl;
@@ -787,12 +849,6 @@ void UpdateClientStatusBar(entity pl)
     WriteString(MSG_MULTICAST, clipMsg);
     WriteFloat(MSG_MULTICAST, pl.fragstreak);
     WriteFloat(MSG_MULTICAST, pl.caps);
-    // identify
-    if (pl.ident_string && time < pl.ident_time) {
-        WriteString(MSG_MULTICAST, pl.ident_string);
-    } else {
-        WriteString(MSG_MULTICAST, "");
-    }
 
     WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
     if (pl.playerclass)
@@ -934,22 +990,22 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
     }
-
+    WriteFloat(MSG_MULTICAST, ((pl.tfstate & TFSTATE_GRENPRIMED) == TFSTATE_GRENPRIMED));
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
 void (entity pl) RefreshStatusBar = {
     local string pad;
-    local string s1; // will be used for grenade timers
-    local string s2; // class line
-    local string s3; // score & clip
-    local string ct; // class tip
+    local string s1 = ""; // will be used for grenade timers
+    local string s2 = ""; // class line
+    local string s3 = ""; // score & clip
+    local string ct = ""; // class tip
     local string st1, st2, st3, st4; // status bar columns 1-4
-    local string ident;
+    local string ident = "";
     local float height;
     local float i;
     local entity tfdet;  //info_tfdetect entity
-    local entity te, tg;
+    local entity te = world, tg;
     local string bi; //button info
     local float csqcactive;
     //By default, show after tips; 0/off = off; 2 = always
@@ -970,6 +1026,46 @@ void (entity pl) RefreshStatusBar = {
         height = 300;
     height = height - pl.StatusStringLines - 13;
 
+    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
+    if(pl.classname == "observer" && csqcactive) {
+        if (tfdet)
+        {
+            for (float t = 1; t <= number_of_teams; t++) 
+            {
+                switch (t)
+                {
+                    case 1:
+                        te = Finditem(tfdet.display_item_status1);
+                        break;
+                    case 2:
+                        te = Finditem(tfdet.display_item_status2);
+                        break;
+                    case 3:
+                        te = Finditem(tfdet.display_item_status3);
+                        break;
+                    case 4:
+                        te = Finditem(tfdet.display_item_status4);
+                        break;
+                }
+
+                if (te)
+                {
+                    UpdateClientFlagStatus(pl, te);
+                }
+            }
+        }
+        tg = find(world, classname, "info_tfgoal");
+        while (tg) {
+            if (tg.track_goal) {
+                UpdateClientButtonStatus(pl, tg);
+            }
+            tg = find(tg, classname, "info_tfgoal");
+        }
+        UpdateClientIDString(pl);
+        
+        return;
+    }
+
     // no sbar can be displayed
     if (height <= 0 || (pl.playerclass == PC_UNDEFINED && !votemode)) {
         centerprint(pl, pl.StatusString);
@@ -981,10 +1077,9 @@ void (entity pl) RefreshStatusBar = {
         pad = strcat(pad, "\n");
     pad = strzone(pad);
 
-    csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
 
     // class tip
-    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2) {
+    if ((((time - 6) < pl.spawn_time) || ((time - 6) < pl.tip_time)) && sbflaginfostate < 2 && !csqcactive) {
         ct = CF_GetRandomClassTip(pl.playerclass);
     } else {
         pl.display_tip = 0;
@@ -999,44 +1094,48 @@ void (entity pl) RefreshStatusBar = {
         {
             //pl.StatusRefreshTime = time + 1;
             UpdateClientStatusBar(pl);
-
+            UpdateClientIDString(pl);
+            
             // flag info
-            if (tfdet)
+            if (CF_GetSetting("ssbfi", "server_sbflaginfo", "1"))
             {
-                for (float t = 1; t <= number_of_teams; t++) 
+                if (tfdet)
                 {
-                    switch (t)
+                    for (float t = 1; t <= number_of_teams; t++) 
                     {
-                        case 1:
-                            te = Finditem(tfdet.display_item_status1);
-                            break;
-                        case 2:
-                            te = Finditem(tfdet.display_item_status2);
-                            break;
-                        case 3:
-                            te = Finditem(tfdet.display_item_status3);
-                            break;
-                        case 4:
-                            te = Finditem(tfdet.display_item_status4);
-                            break;
-                    }
+                        switch (t)
+                        {
+                            case 1:
+                                te = Finditem(tfdet.display_item_status1);
+                                break;
+                            case 2:
+                                te = Finditem(tfdet.display_item_status2);
+                                break;
+                            case 3:
+                                te = Finditem(tfdet.display_item_status3);
+                                break;
+                            case 4:
+                                te = Finditem(tfdet.display_item_status4);
+                                break;
+                        }
 
-                    if (te)
-                    {
-                        UpdateClientFlagStatus(pl, te);
+                        if (te)
+                        {
+                            UpdateClientFlagStatus(pl, te);
+                        }
                     }
                 }
-            }
 
-            tg = find(world, classname, "info_tfgoal");
-            while (tg) {
-                if (tg.track_goal) {
-                    UpdateClientButtonStatus(pl, tg);
+                tg = find(world, classname, "info_tfgoal");
+                while (tg) {
+                    if (tg.track_goal) {
+                        UpdateClientButtonStatus(pl, tg);
+                    }
+                    tg = find(tg, classname, "info_tfgoal");
                 }
-                tg = find(tg, classname, "info_tfgoal");
             }
         }
-        else // no csqc but has sbflaginfo on
+        else if (CF_GetSetting("ssbfi", "server_sbflaginfo", "1")) // no csqc but has sbflaginfo on and server_sbflaginfo is enabled
         {
             ct = "";
             i = number_of_teams; // Extra newlines
@@ -1099,6 +1198,9 @@ void (entity pl) RefreshStatusBar = {
                 ct = strcat(ct, "\n");
             
             ct = strzone(ct);
+        }
+        else {
+            ct = strzone("\n\n\n\n\n\n");
         }
     }
 
@@ -1213,7 +1315,7 @@ string(float num) GreenScoreToString =
 string(entity pl, float csqcactive) ClipSizeToString =
 {
     local string st = "";
-    local float num, max;
+    local float num = 0, max;
 
     max = GetClipSize(pl);
     if (pl.current_weapon == WEAP_SHOTGUN) {
@@ -1539,16 +1641,34 @@ string(entity pl) SentryDetailsToString =
     return st;
 };
 
-string(entity pl) BuildingToString =
-{
+string(entity pl) BuildingToString ={
     local string st = "";
+    local int dist_percentage;
+    local string dist_string;
+    local string hp;
+
+    if (engineer_move && self.sentry_ent) {
+        hp = strcat(strpadl(ftos(floor(self.sentry_ent.health)), 2), " hp");
+        st = strcat(st,strcat(Q"\sSentry\s: ", hp));
+        st = strpadr(st, 15);
+    }
 
     if (!buildstatus)
         return "Building...";
 
-    st = Q"\sBuilding\s: ";
+    st = strcat(st, Q"\sReady\s: ");
     st = strcat(st, ftos(pl.building_percentage));
     st = strcat(st, "%");
+    if (!engineer_move) { //disabling max_distance for moving engineer
+        if (engineer_move) {
+            dist_percentage = (vlen(self.origin - self.sentry_ent.origin)/BUILD_SENTRYGUN_MAX_DISTANCE_ENGMOVE)*100;
+            st = strpadr(st, 26);
+            st = strcat(st, Q"\sDistance\s:");
+            dist_string = strcat(itos(dist_percentage),"%");
+            dist_string = strcat(Q"\x10", dist_string ,Q"\x11");
+            st = strcat(st, dist_string);
+        }
+    }
 
     return st;
 };

@@ -3,7 +3,8 @@ void AddGrenTimer(float grentype);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
-    local float goalno; 
+    local float goalno;
+    entity te;
     switch (msgtype) {
         case MSG_FLAGINFOINIT:
             float index = readfloat();
@@ -27,7 +28,7 @@ void() CSQC_Parse_Event = {
                 FlagInfoLines[index].message = "";
                 if(mdl)
                     precache_model(mdl);
-                entity te = spawn();
+                te = spawn();
                 te.renderflags = RF_VIEWMODEL | RF_DEPTHHACK | RF_NOSHADOW;
                 te.origin = [5, 0, 0];
                 te.angles = '-60 0 0';
@@ -94,6 +95,9 @@ void() CSQC_Parse_Event = {
         case MSG_SBAR:
             ParseSBAR();
             break;
+        case MSG_ID:
+            SBAR.Identify = readstring();
+            break;
         case MSG_GRENPRIMED:
             float grentype = readfloat();
             float timertype = cvar(FOCMD_GRENTIMER);
@@ -121,12 +125,10 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
-                    FO_Menu_Team(FALSE);
+                    FO_Menu_Team(2);
                     break;
                 case CLIENT_MENU_CLASS:
-                    //float civonly = readbyte();
-                    
-                    FO_Menu_Class(FALSE);
+                    FO_Menu_Class(2);
                     break;
                 case CLIENT_MENU_DROPAMMO:
                     float ammotypes = readfloat();
@@ -138,25 +140,25 @@ void() CSQC_Parse_Event = {
                     float scanner_on = readbyte();
                     float scanner_flags = readfloat();
                     
-                    FO_Menu_Scout(FALSE, scanner_on, scanner_flags);
+                    FO_Menu_Scout(2, scanner_on, scanner_flags);
                     break;
                 case CLIENT_MENU_SPY:
                     SBAR.InvisOnly = readfloat();
                     last_skin = readfloat();
                     last_team = readfloat();
-                    FO_Menu_Spy(FALSE);
+                    FO_Menu_Spy(2);
                     break;
                 case CLIENT_MENU_SPY_SKIN:
-                    FO_Menu_Spy_Skin(FALSE);
+                    FO_Menu_Spy_Skin(2);
                     break;
                 case CLIENT_MENU_SPY_TEAM:
                     FO_Menu_Spy_Team(FALSE);
                     break;
                 case CLIENT_MENU_DETPACK:
-                    FO_Menu_Detpack(FALSE, readbyte());
+                    FO_Menu_Detpack(2, readbyte());
                     break;
                 case CLIENT_MENU_BUILD:
-                    FO_Menu_Build(FALSE);
+                    FO_Menu_Build(2);
                     break;
                 case CLIENT_MENU_ROTATE_SENTRY:
                     FO_Menu_Rotate_Sentry(FALSE);
@@ -191,6 +193,9 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_CAPTAIN_PICK:
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
                     break;
+                case CLIENT_MENU_MAPS:
+                    showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+                    break;
             }
             break;
         case MSG_CLASSES_UPDATE:
@@ -198,6 +203,9 @@ void() CSQC_Parse_Event = {
             for(float i = 0; i < 10; i++) {
                 if(civonly) {
                     FO_MENU_CLASS.options[i].value = "-";
+                    if(fo_hud_menu_active && CurrentMenu == &FO_MENU_CLASS) {
+                        Menu_Cancel();
+                    }
                 } else {
                     float class_max = readfloat();
                     if(class_max < 0) {
@@ -242,15 +250,53 @@ void() CSQC_Parse_Event = {
             SBAR.CountdownStarted = FALSE;
             motd_expiry = time + MOTD_TIME;
             quad_rounds_total = readfloat();
+            number_of_teams = readfloat();
             break;
         case MSG_PREMATCH:
-            float prematch = readbyte();
+            prematch = readbyte();
+            round_active = readbyte();
+            round_over = readbyte();
             SBAR.CountdownStarted = readbyte();
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
-            SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
-            motd_expiry = time + MOTD_TIME;
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 8) + ((prematch & 1)?8:0);
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 16) + ((prematch & 2)?16:0);
+            //SBAR.GameMode = SBAR.GameMode - (SBAR.GameMode & 32) + ((prematch & 4)?32:0);
+            //motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
+            //game_started = readbyte();
+            break;
+        case MSG_GRENTHROWN:
+            grentimer_waiting = FALSE;
+            break;
+        case MSG_TEAM_SCORES:
+            TeamScore[0] = readfloat();
+            TeamScore[1] = readfloat();
+            TeamScore[2] = readfloat();
+            TeamScore[3] = readfloat();
+            break;
+        case MSG_VOTE_UPDATE:
+            te = AddVoteMap(readstring(), "","",0,0,0,FALSE);
+            te.votecount = readfloat();
+            if(readbyte()) {
+                current_vote = te;
+            } else {
+                if(current_vote == te) {
+                    current_vote = world;
+                }
+            }
+            break;
+        case MSG_VOTE_MAP_ADD:
+            te = AddVoteMap(readstring(), readstring(), readstring(), readfloat(), readfloat(), readfloat(), FALSE);
+            te.votecount = readfloat();
+            if(readbyte()) {
+                current_vote = te;
+            } else {
+                if(current_vote == te) {
+                    current_vote = world;
+                }
+            }
+            break;
+        case MSG_VOTE_MAP_DELETE:
+            RemoveVoteMap(readstring(), FALSE);
             break;
     }
 }
@@ -260,7 +306,6 @@ void ParseSBAR()
     SBAR.ClipSize = readstring();
     SBAR.FragStreak = readfloat();
     SBAR.Caps = readfloat();
-    SBAR.Identify = readstring();
     SBAR.PlayerClass = readfloat();
 
     if (SBAR.PlayerClass)
@@ -352,5 +397,8 @@ void ParseSBAR()
                 SBAR.DispenserHealth = readfloat();
             }
             break;
+    }
+    if(!readfloat()) {
+        grentimer_waiting = FALSE;
     }
 }

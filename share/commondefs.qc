@@ -4,6 +4,11 @@
 #define ENG_DISPENSER_COST 100
 #define ENG_SENTRY_COST 130
 
+#define GAMEMODE_CLAN       1
+#define GAMEMODE_QUAD       2
+#define GAMEMODE_DUEL       4
+#define GAMEMODE_VOTE       8
+
 #define MSG_FLAGINFOINIT    1
 #define MSG_FLAGINFO        2
 
@@ -19,6 +24,13 @@
 #define MSG_CAPTAINS        12
 #define MSG_MOTD            13
 #define MSG_PREMATCH    14
+#define MSG_GRENTHROWN      15
+#define MSG_ID              16
+#define MSG_TEAM_SCORES     17
+#define MSG_VOTE_MAPS       18
+#define MSG_VOTE_UPDATE     19
+#define MSG_VOTE_MAP_ADD    20
+#define MSG_VOTE_MAP_DELETE 21
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
@@ -57,3 +69,4 @@
 #define CLIENT_MENU_CAPTAIN_1    21
 #define CLIENT_MENU_CAPTAIN_2    22
 #define CLIENT_MENU_CAPTAIN_PICK   23
+#define CLIENT_MENU_MAPS           24

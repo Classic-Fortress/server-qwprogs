@@ -1,3 +1,5 @@
+void (entity pe_player) FO_SpecTrackPoint;
+
 void () UpdateAllAdmins = {
     local entity ent = find(world, classname, "player");
     while(ent) {
@@ -19,7 +21,7 @@ void () RestartMap = {
     bprint(PRINT_HIGH, self.netname);
     bprint(PRINT_HIGH, " Has restarted the map.\n");
 
-    localcmd ("map ");
+    localcmd ("changelevel ");
     localcmd (mapname);
     localcmd ("\n");
 }
@@ -51,7 +53,6 @@ void () QuadMode =
     localcmd ("localinfo rounds 2\n");
     localcmd ("timelimit 0\n");
     localcmd ("localinfo round_time 10\n");
-    localcmd ("localinfo round_delay_time 30\n");
     localcmd ("localinfo teamfrags on\n");
     localcmd ("localinfo fullteamscore off\n");
     localcmd ("fraglimit 0\n");
@@ -69,6 +70,7 @@ void () ClanMode =
     localcmd ("localinfo rd 0\n"); 
     localcmd ("localinfo votemode 0\n"); 
     localcmd ("localinfo vote_style 2\n"); 
+    localcmd ("localinfo rounds 0\n");
     localcmd ("exec fo_clanmode.cfg\n");
     bprint(PRINT_HIGH, "Clan Mode set to on\n");
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
@@ -132,7 +134,7 @@ void (entity pe) SetEquipmentForPlayer = {
 
 void (float cap1, float cap2) CaptainMode = {
     captainmode = 1;
-    bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+    bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s All available players are now Observers\n");
     local string st = 0;
     local float userid = 0, csqcactive = 0;
     local entity oldself;// = self;
@@ -149,6 +151,8 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (1) - 1);
                 //stuffcmd(self, st);
@@ -160,13 +164,15 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 2;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 2, TRUE);
+                UpdateAllClientsTeamScores();
+
                 //stuffcmd(self, "color ");
                 //st = ftos(TeamFortress_TeamGetColor (2) - 1);
                 //stuffcmd(self, st);
                 //stuffcmd(self, "\n");
                 //SetTeamName(self);
             }
-            bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s ");
+            bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s ");
             bprint(PRINT_HIGH, te.netname);
             bprint(PRINT_HIGH, " \bis the captain for team\b ");
             bprint(PRINT_HIGH, TeamToString(te.team_no));
@@ -256,7 +262,7 @@ void (entity cap, float pick) CaptainPick = {
             sprint(self, PRINT_HIGH, picked.netname ," has already been picked!\n");
             return;
         }
-        bprint(PRINT_HIGH, "\[\bCaptain Mode\b\]\b:\b ");
+        bprint(PRINT_HIGH, "\x10\bCaptain Mode\b\x11\b:\b ");
         bprint(PRINT_HIGH, picked.netname);
         bprint(PRINT_HIGH, " \bcalled\b ");
         bprint(PRINT_HIGH, cap.netname);
@@ -271,16 +277,33 @@ void (entity cap, float pick) CaptainPick = {
         sprint(self, PRINT_HIGH, "Sorry, couldn't pick ", picked.netname ,"\n");
     }
     if(!countleft) {
-        bprint(PRINT_HIGH, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+        bprint(PRINT_HIGH, "\x10\sCaptain Mode\s\x11\s:\s \sTeams are set,  let's start the game!\s\n");
         StopCaptainMode(cap, othercap);
     }
 }
 
+void (entity pl) PrintWho = {
+    local string msg;
+    msg = strzone(string_null);
+    msg = strcat(msg, infokey(pl,"name"));
+    msg = strcat(msg, " - ");
+    if (pl.login != string_null)
+        msg = strcat(msg, pl.login);
+    else
+        msg = strcat(msg, "NOT LOGGED IN");
+    if (pl.is_admin) {
+        msg = strcat(msg, " (admin)");
+    }
+    msg = strcat(msg, "\n");
+    sprint(self, PRINT_HIGH, msg);
+    strunzone(msg);
+}
+
 float (string arg1, string arg2, string arg3) ParseCmds = {
-    local float arg_num, processedCmd, inp;
+    local float arg_num = 0, processedCmd, inp;
     local string tmp;
     local float farg3;
-    local entity ent;
+    local entity ent, pl;
     processedCmd = FALSE;
     
     if (arg1)
@@ -314,7 +337,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                             arg3f = TeamFortress_TeamGetColor(self.team_no) - 1;
                             string st;
                             st = ftos(arg3f);
-                            //forceinfokey(self, "topcolor", st);
                             stuffcmd(self, strcat("color ", st, "\n"));
                             sprint(self, PRINT_HIGH,
                                     "Your color has been changed to your team color\n");
@@ -581,13 +603,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't set detpacks while dead.\n");
                 break;
             }
-            if (arg2) {
+           if (arg2) {
                 if(arg2 == "cancel") {
                     TeamFortress_DetpackStop();
                     break;
                 }
                 if(self.is_detpacking) {
-                    Menu_Demoman_Cancel();
+                    TeamFortress_DetpackStop();
+//                    Menu_Demoman_Cancel();
                     break;
                 }
                 local float farg2 = stof(arg2);
@@ -597,6 +620,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use integer values 5+.\n");
             } else {
+                if(self.is_detpacking) {
+                    Menu_Demoman_Cancel();
+                    break;
+                }
                 Menu_Demoman();
             }
             break;
@@ -614,12 +641,20 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 if(arg2 == "cancel") {
                     TeamFortress_EngineerBuildStop();
                     break;
-                }
+                }                
                 if(arg2 == "sentry") {
+                    if(self.is_building && !engineer_move) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(1);
                     break;
                 }
                 if(arg2 == "dispenser") {
+                    if(self.is_building && !engineer_move) {
+                        TeamFortress_EngineerBuildStop();
+                        break;
+                    }
                     Menu_Engineer_Input(2);
                     break;
                 }
@@ -648,16 +683,35 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "Can't maintain while dead.\n");
                 break;
             }
+            
+            //find sentry first
+            ent = findradius(self.origin, ENG_BUILDING_MAINT_DISTANCE);
+            while (ent) {
+                if (ent.classname == "building_sentrygun") {
+                    if (ent.real_owner == self)
+                        break;
+                }
+                ent = ent.chain;
+            }
+            if (!ent) {
+                sprint(self, PRINT_HIGH, "No sentry in range\n");
+                break;
+            }
             if (arg2 && arg3) {
                 if(arg2 == "rotate") {
                     farg3 = stof(arg3);
+                    if (!ent.real_owner.has_sentry || ent.real_owner != self
+                                || self.classname != "player" || ent == world) {
+                        sprint(self, PRINT_HIGH, "Sentry detection issue!\n");
+                        break;
+                    }
                     if(farg3 < 0) {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3 * -1)," degrees clockwise...\n");
                     } else {
                         sprint(self, PRINT_HIGH, "Rotating ",ftos(farg3)," degrees anticlockwise...\n");
                     }
-                    self.building.waitmin = anglemod(self.building.waitmin + farg3);
-                    self.building.waitmax = anglemod(self.building.waitmax + farg3);
+                    ent.waitmin = anglemod(ent.waitmin + farg3);
+                    ent.waitmax = anglemod(ent.waitmax + farg3);
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice.\n");
@@ -703,7 +757,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "votemap":
             processedCmd = TRUE;
-            if(votemode) {
+            if(vote_style) {
                 if(arg2) {
                     VoteForMap(self, arg2);
                 }
@@ -741,14 +795,14 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "break":
             processedCmd = TRUE;
-            if(votemode) {
-                if(self.vote_map) {
-                    UnvoteForMap(self);
-                } else {
-                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
-                }
+            if(self.vote_map) {
+                UnvoteForMap(self);
             } else {
-                VoteToEndMap(self);
+                if(votemode) {
+                    sprint(self, PRINT_HIGH, "You haven't voted yet!\n");
+                } else {
+                    VoteToEndMap(self);
+                }
             }
             break;
         case "captainpick":
@@ -758,15 +812,42 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 CaptainPick(self, farg2);
             }
             break;
+        case "mapmenu":
+            processedCmd = TRUE;
+            self.current_menu_page = 1;
+            Vote_Menu_Map(0);
+            break;
         case "reportmodel":
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "Model: ", self.model, " index: ", ftos(self.modelindex), "\n");
+            break;
+        case "reportloc":
+            processedCmd = TRUE;
+            sprint(self, PRINT_HIGH, "Origin: ", vtos(self.origin), " OldOrigin: ", vtos(self.oldorigin));
+            sprint(self, PRINT_HIGH, " view_ofs: ", vtos(self.view_ofs), "\n");
+            break;
+        case "tracktarget":
+            processedCmd = TRUE;
+            FO_SpecTrackPoint(self);
+            break;
+        case "id":
+            processedCmd = TRUE;
+            CF_Identify(self, 0);
+            break;
+        case "showroles":
+            processedCmd = TRUE;
+            PrintRoleStatus(self);
+            PrintRole(self, &Role_None);
+            PrintRole(self, &Role_Attack);
+            PrintRole(self, &Role_Defence);
+            PrintTeamRoles(self);
             break;
         case "help":
         case "list":
             processedCmd = TRUE;
             sprint(self, PRINT_HIGH, "\bUser Commands list:\b\n");
             sprint(self, PRINT_HIGH, "cmd adminpwd <password>\n");
+            sprint(self, PRINT_HIGH, "cmd mapmenu\b: menu for changing maps\b\n");
             if(votemode) {
                 sprint(self, PRINT_HIGH, "cmd listmaps\b: list votable maps\b\n");
                 sprint(self, PRINT_HIGH, "cmd votemap <map>\b: vote for the specified map\b\n");
@@ -791,6 +872,39 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             sprint(self, PRINT_HIGH, "cmd help || list (this command)\n");
             sprint(self, PRINT_HIGH, "\n");
+            break;
+        case "login":
+            processedCmd = TRUE;
+            if (arg_num == 2) {
+                if (self.login != string_null) {
+                    sprint (self, PRINT_HIGH, "You are already logged in\n");
+                }
+                else {
+                    performLogin(self,arg2,arg3);
+                }
+            }
+            else {
+                sprint (self, PRINT_HIGH, "Missing username/password\n");
+            }
+            break;
+        case "login-silent" :
+            processedCmd = TRUE;
+            if (arg3 != string_null) {
+                performLogin(self,arg2,arg3);
+            }
+            break;
+        case "who":
+            processedCmd = TRUE;
+            pl = find (world, classname, "player");
+            while (pl) {
+                PrintWho(pl);
+                pl = find (pl, classname, "player");
+            }
+            pl = find (world, classname, "observer");
+            while (pl) {
+                PrintWho(pl);
+                pl = find (pl, classname, "observer");
+            }
             break;
     }
    
@@ -978,9 +1092,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         ent = find(world, classname, "player");
                         while(ent) {
                             if(infokeyf(ent, INFOKEY_P_USERID) == farg2) {
-                                bprint4(PRINT_HIGH, ent, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
-                                //stuffcmd(ent, "observe\n");
-                                //forceinfokey(ent, "*spectator", "1");
+                                bprint4(PRINT_HIGH, ent.netname, " was made spectator by ", self.netname, ". There's probably a good reason for this.\n");
                                 clientcommand(ent, "observe");
                                 break;
                             }
@@ -1005,7 +1117,16 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
-                    localcmd("map ");
+                    if (!clan_scores_dumped) {
+                        if (quadmode) {
+                            rounds = 1;
+                            QuadRoundOver();
+                        }
+                        DumpClanScores();
+                        MapEndSequence();
+                        clan_scores_dumped = 1;
+                    }
+                    localcmd("changelevel ");
                     localcmd(arg2);
                     localcmd("\n");
                 }

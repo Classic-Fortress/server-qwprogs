@@ -63,6 +63,10 @@ float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
 float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options;
+float (float tno) TeamFortress_TeamGetLives;
+void () InitReverseCap;
+float () RejoinWithTfId;
+void () CreateTfIdAndJoin;
 
 string nextmap;
 
@@ -84,7 +88,7 @@ void () info_player_intermission =
 };
 
 void () SetChangeParms = {
-    if (self.health <= 0) {
+    if (self.health <= 0 && !cb_keepteams) {
         SetNewParms();
         return;
     }
@@ -114,8 +118,8 @@ void () SetChangeParms = {
     parm9 = self.armortype * 100;
     parm10 = 0;
     parm11 = 0;
-    parm12 = 0;
-    parm13 = 0;
+    parm12 = cb_keepteams?self.playerclass:0;
+    parm13 = self.team_no;
     parm14 = 0;
     parm15 = self.is_admin;
 };
@@ -202,7 +206,10 @@ void InitPrematch()
     pm_message.nextthink = 1;
     
     game_locked = CF_GetSetting("lg", "locked_game", "off");
-    
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(self, !cb_prematch);
+        UpdateClientMOTD(self);
+    }
 }
 
 void (entity goalitem) SetFlagSendMethod = {
@@ -409,6 +416,9 @@ void () DecodeLevelParms = {
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
 
+        // use fortress one flash
+        fo_flash = CF_GetSetting("ff", "fo_flash", "on");
+
         // drop primed hand grenades to ground when dying [on]
         drop_grenades = CF_GetSetting("dg", "drop_grenades", "on");
 
@@ -443,7 +453,7 @@ void () DecodeLevelParms = {
         old_sniperrange = CF_GetSetting("os", "old_sniperrange", "off");
 
         // maximum amount of pipebombs per demoman [6]
-        detpipe_limit = CF_GetSetting("dl", "detpipe_limit", "6");
+        Role_None.detpipe_limit = CF_GetSetting("dl", "detpipe_limit", "6");
 
         // maximum amount of pipebombs in game [unlimited]
         detpipe_limit_world = CF_GetSetting("dw", "detpipe_limit_world", "-1");
@@ -551,12 +561,12 @@ void () DecodeLevelParms = {
         old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
 
         // delay respawning by this many seconds [0]
-        respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
-        if (respawn_delay_time) {
+        Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
+        if (Role_None.respawn_delay_time) {
             toggleflags = toggleflags | TFLAG_RESPAWNDELAY;
         }
-        if ((toggleflags & TFLAG_RESPAWNDELAY) && !respawn_delay_time) {
-            respawn_delay_time = RESPAWN_DELAY_TIME;
+        if ((toggleflags & TFLAG_RESPAWNDELAY) && !Role_None.respawn_delay_time) {
+            Role_None.respawn_delay_time = RESPAWN_DELAY_TIME;
         }
 
         if (toggleflags & TFLAG_AUTOTEAM) {
@@ -579,8 +589,11 @@ void () DecodeLevelParms = {
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
 
+        // whitelists detpack impulses on the list of commands that you're allowed to use while reloading [off]
+        detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
+
         // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
-        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "1");
+        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "2");
 
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
@@ -594,6 +607,7 @@ void () DecodeLevelParms = {
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
         // Maximum number of primary grenades per class
+        /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
         max_gren1_sniper = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
         max_gren1_soldier = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
@@ -603,17 +617,28 @@ void () DecodeLevelParms = {
         max_gren1_pyro = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
         max_gren1_spy = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
         max_gren1_engineer = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
+        */
+        Role_None.gren1_limits[0] = 0; 
+        Role_None.gren1_limits[1] = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
+        Role_None.gren1_limits[2]  = CF_GetSetting("mg1_2", "max_gren1_sniper", ftos(PC_SNIPER_GRENADE_MAX_1));
+        Role_None.gren1_limits[3]  = CF_GetSetting("mg1_3", "max_gren1_soldier", ftos(PC_SOLDIER_GRENADE_MAX_1));
+        Role_None.gren1_limits[4]  = CF_GetSetting("mg1_4", "max_gren1_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_1));
+        Role_None.gren1_limits[5]  = CF_GetSetting("mg1_5", "max_gren1_medic", ftos(PC_MEDIC_GRENADE_MAX_1));
+        Role_None.gren1_limits[6]  = CF_GetSetting("mg1_6", "max_gren1_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_1));
+        Role_None.gren1_limits[7]  = CF_GetSetting("mg1_7", "max_gren1_pyro", ftos(PC_PYRO_GRENADE_MAX_1));
+        Role_None.gren1_limits[8]  = CF_GetSetting("mg1_8", "max_gren1_spy", ftos(PC_SPY_GRENADE_MAX_1));
+        Role_None.gren1_limits[9]  = CF_GetSetting("mg2_9", "max_gren1_engineer", ftos(PC_ENGINEER_GRENADE_MAX_1));
 
         // Maximum number of secondary grenades per class
-        max_gren2_scout = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
-        max_gren2_sniper = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
-        max_gren2_soldier = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
-        max_gren2_demoman = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
-        max_gren2_medic = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
-        max_gren2_hwguy = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
-        max_gren2_pyro = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
-        max_gren2_spy = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
-        max_gren2_engineer = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
+        Role_None.gren2_limits[1] = CF_GetSetting("mg2_1", "max_gren2_scout", ftos(PC_SCOUT_GRENADE_MAX_2));
+        Role_None.gren2_limits[2] = CF_GetSetting("mg2_2", "max_gren2_sniper", ftos(PC_SNIPER_GRENADE_MAX_2));
+        Role_None.gren2_limits[3] = CF_GetSetting("mg2_3", "max_gren2_soldier", ftos(PC_SOLDIER_GRENADE_MAX_2));
+        Role_None.gren2_limits[4] = CF_GetSetting("mg2_4", "max_gren2_demoman", ftos(PC_DEMOMAN_GRENADE_MAX_2));
+        Role_None.gren2_limits[5] = CF_GetSetting("mg2_5", "max_gren2_medic", ftos(PC_MEDIC_GRENADE_MAX_2));
+        Role_None.gren2_limits[6] = CF_GetSetting("mg2_6", "max_gren2_hwguy", ftos(PC_HVYWEAP_GRENADE_MAX_2));
+        Role_None.gren2_limits[7] = CF_GetSetting("mg2_7", "max_gren2_pyro", ftos(PC_PYRO_GRENADE_MAX_2));
+        Role_None.gren2_limits[8] = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
+        Role_None.gren2_limits[9] = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
 
         // solid detpack toggle [0]
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
@@ -624,13 +649,75 @@ void () DecodeLevelParms = {
         new_emp = CF_GetSetting("nemp", "new_emp", "1");
 
         // For duelmode, how soon to reset the winning player (allows for double KOs)
-        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "0");
+        duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "3.9");
         // remove packs in duelmode [1]
         duel_no_packs = CF_GetSetting("dnp", "duel_no_packs", "1");
         // spawn with all possible grenades [0]
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
+        
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+        
+        //default round interval for quadmode (seconds)
+        round_delay_time = CF_GetSetting("round_delay_time", "rdt", "30");
+
+        map_restart_time = CF_GetSetting("map_restart_Time", "mrt", "120");
+
+        // enforces login
+        loginRequired = CF_GetSetting("loginrequired", "logreq", "0");
+
+        // login request https endpoint
+        loginUrl = infokey(world, "loginurl");
+
+        // server webpage address (required for login to work)
+        webpageUrl = infokey(world, "webpageurl");
+
+        if (loginRequired && (!loginUrl || !webpageUrl)) {
+            loginRequired = 0;
+        }
+
+        // fortress one flash time in seconds
+        fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
+
+        // keep teams on map change [off]
+        cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
+
+        // use att/def roles in quad mode [off]
+        quad_roles = CF_GetSetting("qr", "quad_roles", "0");
+        
+        LoadRole(&Role_Attack);
+        LoadRole(&Role_Defence);
+        InitTeamRoles();
+
+
+        // whether the nailgren can be jumped off of
+        solid_nailgren = CF_GetSetting("sng", "solid_nailgren", "1");
+
+        // never return the goalitems [off]
+        noreturn = CF_GetSetting("nr", "noreturn", "0");
+
+        // disable hit sounds [off]
+        nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+
+        // enable server-side flaginfo on statusbar [on]
+//        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+        
+        reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
+
+        if (reverse_cap) 
+        {
+           InitReverseCap();
+        }
+
+        engineer_move = CF_GetSetting("em","engineer_move", "0");
+
+        max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
         st = infokey(world, "default");
         if (st == "on") {
@@ -650,7 +737,7 @@ void () DecodeLevelParms = {
             scoutdash = TRUE;
             sniperreload = TRUE;
             old_sniperrange = FALSE;
-            detpipe_limit = 6;
+            Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
             old_pipecooldown = FALSE;
             medicaura = TRUE;
@@ -680,27 +767,28 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
-            pyro_type = 1;
-            max_gren1_scout = PC_SCOUT_GRENADE_MAX_1;
-            max_gren1_sniper = PC_SNIPER_GRENADE_MAX_1;
-            max_gren1_soldier = PC_SOLDIER_GRENADE_MAX_1;
-            max_gren1_demoman = PC_DEMOMAN_GRENADE_MAX_1;
-            max_gren1_medic = PC_MEDIC_GRENADE_MAX_1;
-            max_gren1_hwguy = PC_HVYWEAP_GRENADE_MAX_1;
-            max_gren1_pyro = PC_PYRO_GRENADE_MAX_1;
-            max_gren1_spy = PC_SPY_GRENADE_MAX_1;
-            max_gren1_engineer = PC_ENGINEER_GRENADE_MAX_1;
-            max_gren2_scout = PC_SCOUT_GRENADE_MAX_2;
-            max_gren2_sniper = PC_SNIPER_GRENADE_MAX_2;
-            max_gren2_soldier = PC_SOLDIER_GRENADE_MAX_2;
-            max_gren2_demoman = PC_DEMOMAN_GRENADE_MAX_2;
-            max_gren2_medic = PC_MEDIC_GRENADE_MAX_2;
-            max_gren2_hwguy = PC_HVYWEAP_GRENADE_MAX_2;
-            max_gren2_pyro = PC_PYRO_GRENADE_MAX_2;
-            max_gren2_spy = PC_SPY_GRENADE_MAX_2;
-            max_gren2_engineer = PC_ENGINEER_GRENADE_MAX_2;
+            pyro_type = PYRO_OZTF;
+            Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
+            Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
+            Role_None.gren1_limits[3] = PC_SOLDIER_GRENADE_MAX_1;
+            Role_None.gren1_limits[4] = PC_DEMOMAN_GRENADE_MAX_1;
+            Role_None.gren1_limits[5] = PC_MEDIC_GRENADE_MAX_1;
+            Role_None.gren1_limits[6] = PC_HVYWEAP_GRENADE_MAX_1;
+            Role_None.gren1_limits[7] = PC_PYRO_GRENADE_MAX_1;
+            Role_None.gren1_limits[8] = PC_SPY_GRENADE_MAX_1;
+            Role_None.gren1_limits[9] = PC_ENGINEER_GRENADE_MAX_1;
+            Role_None.gren2_limits[1] = PC_SCOUT_GRENADE_MAX_2;
+            Role_None.gren2_limits[2] = PC_SNIPER_GRENADE_MAX_2;
+            Role_None.gren2_limits[3] = PC_SOLDIER_GRENADE_MAX_2;
+            Role_None.gren2_limits[4] = PC_DEMOMAN_GRENADE_MAX_2;
+            Role_None.gren2_limits[5] = PC_MEDIC_GRENADE_MAX_2;
+            Role_None.gren2_limits[6] = PC_HVYWEAP_GRENADE_MAX_2;
+            Role_None.gren2_limits[7] = PC_PYRO_GRENADE_MAX_2;
+            Role_None.gren2_limits[8] = PC_SPY_GRENADE_MAX_2;
+            Role_None.gren2_limits[9] = PC_ENGINEER_GRENADE_MAX_2;
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
+            solid_nailgren = FALSE;
         }
 
         st = infokey(world, "faithful");
@@ -720,7 +808,7 @@ void () DecodeLevelParms = {
             scoutdash = FALSE;
             sniperreload = FALSE;
             old_sniperrange = TRUE;
-            detpipe_limit = 7;
+            Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
             old_pipecooldown = TRUE;
             medicaura = FALSE;
@@ -750,37 +838,97 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             old_ng_rof = TRUE;
-            pyro_type = 0;
-            max_gren1_scout = 4;
-            max_gren1_sniper = 4;
-            max_gren1_soldier = 4;
-            max_gren1_demoman = 4;
-            max_gren1_medic = 4;
-            max_gren1_hwguy = 4;
-            max_gren1_pyro = 4;
-            max_gren1_spy = 4;
-            max_gren1_engineer = 4;
-            max_gren2_scout = 3;
-            max_gren2_sniper = 4;
-            max_gren2_soldier = 3;
-            max_gren2_demoman = 4;
-            max_gren2_medic = 3;
-            max_gren2_hwguy = 4;
-            max_gren2_pyro = 4;
-            max_gren2_spy = 4;
-            max_gren2_engineer = 4;
+            pyro_type = PYRO_ORIGINAL;
+            Role_None.gren1_limits[1] = 4;
+            Role_None.gren1_limits[2] = 4;
+            Role_None.gren1_limits[3] = 4;
+            Role_None.gren1_limits[4] = 4;
+            Role_None.gren1_limits[5] = 4;
+            Role_None.gren1_limits[6] = 4;
+            Role_None.gren1_limits[7] = 4;
+            Role_None.gren1_limits[8] = 4;
+            Role_None.gren1_limits[9] = 4;
+            Role_None.gren2_limits[1] = 3;
+            Role_None.gren2_limits[2] = 4;
+            Role_None.gren2_limits[3] = 3;
+            Role_None.gren2_limits[4] = 4;
+            Role_None.gren2_limits[5] = 3;
+            Role_None.gren2_limits[6] = 4;
+            Role_None.gren2_limits[7] = 4;
+            Role_None.gren2_limits[8] = 4;
+            Role_None.gren2_limits[9] = 4;
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
+            solid_nailgren = TRUE;
         }
 
+        st = infokey(world, "huetf");
+        if (st == "on") {
+            server_huetf = TRUE;
+            impulse_queue = TRUE;
+            chweap_wait_attfinished = FALSE;
+            flag_follow = FALSE;
+            ng_velocity = 1000;
+            ng_damage = 18;
+            sng_damage = 26;
+            old_ng_rof = TRUE;
+            scoutdash = FALSE;
+            fo_flash = FALSE;
+            nailgren_type = NGR_TYPE_DEFAULT;
+            Role_None.detpipe_limit = 7;
+            detpipe_limit_world = 7;
+            medicaura = FALSE;
+            medicnocuss = FALSE;
+            pyro_type = 1;
+            drop_grenades = FALSE;
+            drop_grenpack = FALSE;
+            drop_gren1 = 0;
+            drop_gren2 = 0;
+            cussgrentime = 19;
+            spawnfull = FALSE;
+            stockfull = FALSE;
+            stock_on_cap = FALSE;
+            stock_reload = FALSE;
+            classtips = FALSE;
+            nohitsounds = TRUE;
+            detpack_when_reloading = TRUE;
+            old_hp_armor = TRUE;
+            //server_sbflaginfo = FALSE;
+            localcmd("localinfo server_sbflaginfo 0\n");
+            solid_detpack = TRUE;
+            walls_block_emp = FALSE;
+            grentimers = FALSE;
+            Role_None.gren2_limits[1] = 3;
+            Role_None.gren2_limits[3] = 2;
+            Role_None.gren2_limits[4] = 4;
+            Role_None.gren2_limits[5] = 3;
+            Role_None.gren2_limits[8] = 3;
+            max_active_gren2_soldier = 1;
+            round_delay_time = 10;
+        }
     }
 
     if (parm11)
         self.tfstate = parm11;
-    if (self.playerclass == 0)
-        self.playerclass = parm12;
+    if (!self.team_no && cb_keepteams && clanbattle && parm13 && parm13 > 0 && parm13 <= number_of_teams) {
+        // 1 = same, 2+ = rotate
+        if(cb_keepteams == 1) {
+            //self.team_no = parm13;
+            TeamFortress_TeamSet(parm13);
+        } else {
+            //self.team_no = (parm13 % number_of_teams) + 1;
+            TeamFortress_TeamSet((parm13 % number_of_teams) + 1);
+        }
+        self.lives = TeamFortress_TeamGetLives(parm13);
+        //Menu_Class(0);
+    }
+    if (self.playerclass == 0 && self.team_no) {
+        TeamFortress_ChangeClass(parm12);
+    }
     if (parm15)
         self.is_admin = parm15;
+    
+        
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
@@ -910,7 +1058,8 @@ void () IntermissionThink = {
         return;
     if ((!self.button0 && !self.button1) && !self.button2)
         return;
-
+    if (logfilehandle > 0)
+        fclose(logfilehandle);
     dprint("Intermission think\n");
     GotoNextMap();
 };
@@ -943,8 +1092,6 @@ void () PutClientInIntermission =
 void () execute_changelevel = {
     local entity pos;
 
-    dprint("execute_changelevel()\n");
-
     intermission_running = 1;
     intermission_exittime = time + 5;
 
@@ -962,16 +1109,17 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_z);
 
     local string nextmapstring = vote_result;
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     vote_style = CF_GetSetting("vs", "vote_style", "2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result) {
+        if(votemode == 1 && vote_result && vote_result != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else if(vote_style == 1 || votemode == 2) {
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+            vote_result = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else {
+        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
             vote_result = mapname;
         }
     }
@@ -993,6 +1141,7 @@ void () execute_changelevel = {
     }
     if (!clan_scores_dumped) {
         DumpClanScores();
+        MapEndSequence();
         clan_scores_dumped = 1;
     }
 };
@@ -1522,6 +1671,18 @@ void () player_touch;
 
 
 void (entity p) SetVoteParams = {
+    if (!(toggleflags & TFLAG_FIRSTENTRY)) {
+        toggleflags = parm10;
+        toggleflags = (toggleflags | TFLAG_FIRSTENTRY);
+
+        //Proportion required to trigger a map change
+        vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
+        if(vote_threshold <= 0 || vote_threshold > 1) {
+            dprint("localinfo vote_threshold was outside of valid range, defaulting to 0.5\n");
+            vote_threshold = 0.5;
+        }
+    }
+
     sprint(p, PRINT_HIGH, "Voting time! Use \bcmd listmaps\b to see available maps\n");
     sprint(p, PRINT_HIGH, "Use \bcmd votemap <mapname>\b to state your preference\n");
     sprint(p, PRINT_HIGH, "Use \bcmd showvotes\b to see the current voting status\n");
@@ -1558,7 +1719,7 @@ void (entity p) SetVoteParams = {
     p.angles = spot.angles;
     p.fixangle = 1;
     
-    setmodel(p, "progs/player.mdl");
+    FO_SetModel(p, "progs/player.mdl");
     p.modelindex = modelindex_player;
     setsize(p, VEC_HULL_MIN, VEC_HULL_MAX);
     
@@ -1569,6 +1730,32 @@ void (entity p) SetVoteParams = {
     makevectors(p.angles);
     spawn_tfog(p.origin + v_forward * 20);
 }
+
+void (entity player, string field, float fieldval) CheckSetInfoKey =
+{
+    float val;
+    val = infokeyf(player, field);
+
+    // TODO - this isn't needed on later versions of fte, we can spam set the value
+    if (val != fieldval)
+        forceinfokey(player, field, ftos(fieldval));
+};
+
+void (entity player) UpdateScoreboardInfo = {
+
+    CheckSetInfoKey(player, "afflicted", player.afflicted);
+    CheckSetInfoKey(player, "teamafflicted", player.teamafflicted);
+    CheckSetInfoKey(player, "damagegiven", player.damagegiven);
+    CheckSetInfoKey(player, "damagetaken", player.damagetaken);
+    CheckSetInfoKey(player, "kills", player.kills);
+    CheckSetInfoKey(player, "teamkills", player.sbteamkills);
+    CheckSetInfoKey(player, "deaths", player.deaths);
+    CheckSetInfoKey(player, "caps", player.caps);
+    CheckSetInfoKey(player, "touches", player.touches);
+    CheckSetInfoKey(player, "team_no", player.team_no);
+    CheckSetInfoKey(player, "playerclass", player.playerclass);
+    CheckSetInfoKey(player, "ready", player.is_ready);
+};
 
 void () PutClientInServer = {
     local float oldclass;
@@ -1611,6 +1798,9 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
+    self.dimension_see = DMN_NOFLASH;
+    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    self.special_cooldown = 0;
     
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -1644,6 +1834,11 @@ void () PutClientInServer = {
     }
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
+            if (self.playerclass != 0) {
+                local float timeplayed = gametime - self.classtime;
+                LogEventChangeClass(self, self.playerclass, self.nextpc, timeplayed);
+                self.classtime = gametime; 
+            }
             self.playerclass = self.nextpc;
         }
         if (self.playerclass == PC_RANDOM)
@@ -1655,10 +1850,12 @@ void () PutClientInServer = {
         }
     }
     
-    if (self.playerclass == 0 && self.team_no > 0) {
+/*
+    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
+        TeamFortress_ChangeClass(0);
         Menu_Class(0);
     }
-
+*/
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -1686,6 +1883,10 @@ void () PutClientInServer = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_StartTimers();
+    
+    if(quadmode && quad_roles) {
+        sprint(self, PRINT_HIGH, "\sRole:\s ", GetTeamRole(self.team_no).name, "\n");
+    }
 
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
@@ -1779,6 +1980,10 @@ void () PutClientInServer = {
         self.immune_to_check = time + 10;
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
+    }
+    
+    if (self.playerclass == 0 && self.team_no > 0) {
+        Menu_Class(0);
     }
 };
 
@@ -1876,15 +2081,16 @@ void () NextLevel = {
 
     if (already_cycled)
         return;
-
+    
     already_cycled = 1;
     vote_style = CF_GetSetting("vs", "vote_style", "1");
+    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     if (vote_style || votemode == 2){
-        if(votemode == 1 && nextmap) {
+        if(votemode == 1 && nextmap && nextmap != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
         } else if(vote_style == 1 || votemode == 2) {
-            nextmap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+            nextmap = vm;
             localcmd ("localinfo votemode on\n");
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
@@ -1978,9 +2184,9 @@ void () PlayerJump = {
         if (self.swim_flag < time) {
             self.swim_flag = time + 1;
             if (random() < 0.5)
-                sound(self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_BODY, "misc/water1.wav", 1, ATTN_NORM);
             else
-                sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
         if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
@@ -2002,7 +2208,7 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
-    sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         if (!cannon_air) {
@@ -2053,9 +2259,9 @@ void () WaterMove = {
 
     if (self.waterlevel != 3) {
         if (self.air_finished < time) {
-            sound(self, 2, "player/gasp2.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/gasp2.wav", 1, 1);
         } else if (self.air_finished < (time + 9)) {
-            sound(self, 2, "player/gasp1.wav", 1, 1);
+            FO_Sound(self, CHAN_VOICE, "player/gasp1.wav", 1, 1);
         }
         self.air_finished = time + 12;
         self.dmg = 2;
@@ -2070,12 +2276,12 @@ void () WaterMove = {
     }
     if (!self.waterlevel) {
         if (self.flags & 16) {
-            sound(self, 4, "misc/outwater.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "misc/outwater.wav", 1, 1);
             self.flags = self.flags - 16;
         }
         return;
     }
-    if (self.watertype == -5) {
+    if (self.watertype == CONTENT_LAVA) {
         if (self.dmgtime < time) {
             if(votemode && !vote_anarchy_mode) {
                 respawn();
@@ -2098,14 +2304,14 @@ void () WaterMove = {
         }
     }
     if (!(self.flags & 16)) {
-        if (self.watertype == -5) {
-            sound(self, 4, "player/inlava.wav", 1, 1);
+        if (self.watertype == CONTENT_LAVA) {
+            FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
         }
         if (self.watertype == -3) {
-            sound(self, 4, "player/inh2o.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "player/inh2o.wav", 1, 1);
         }
         if (self.watertype == -4) {
-            sound(self, 4, "player/slimbrn2.wav", 1, 1);
+            FO_Sound(self, CHAN_BODY, "player/slimbrn2.wav", 1, 1);
         }
         self.flags = self.flags + 16;
         self.dmgtime = 0;
@@ -2160,6 +2366,7 @@ void () PlayerPreThink = {
     if (self.cheat_level > 0) {
         self.cheat_level = self.cheat_level - 1;
     }
+    
     if (intermission_running) {
         IntermissionThink();
         return;
@@ -2254,7 +2461,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_sound < time) {
-                    sound(self, 0, "items/inv3.wav", 0.5, 2);
+                    FO_Sound(self, CHAN_AUTO, "items/inv3.wav", 0.5, 2);
                     self.invisible_sound = time + ((random() * 3) + 1);
                 }
                 if (self.invisible_finished < (time + 3)) {
@@ -2262,7 +2469,7 @@ void () CheckPowerups = {
                         sprint(self, PRINT_HIGH,
                                "Ring of shadows magic is fading\n");
                         stuffcmd(self, "bf\n");
-                        sound(self, 0, "items/inv2.wav", 1, 1);
+                        FO_Sound(self, CHAN_AUTO, "items/inv2.wav", 1, 1);
                         self.invisible_time = time + 1;
                     }
                     if (self.invisible_time < time) {
@@ -2293,7 +2500,7 @@ void () CheckPowerups = {
                 sprint(self, PRINT_HIGH,
                        "Protection is almost burned out\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/protect2.wav", 1, 1);
+                FO_Sound(self, CHAN_AUTO, "items/protect2.wav", 1, 1);
                 self.invincible_time = time + 1;
             }
             if (self.invincible_time < time) {
@@ -2336,7 +2543,7 @@ void () CheckPowerups = {
             if (self.super_time == 1) {
                 sprint(self, PRINT_HIGH, "Quad damage is wearing off\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/damage2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_AUTO, "items/damage2.wav", 1, ATTN_NORM);
                 self.super_time = time + 1;
             }
             if (self.super_time < time) {
@@ -2380,7 +2587,7 @@ void () CheckPowerups = {
                 sprint(self, PRINT_HIGH,
                        "Air supply in biosuit expiring\n");
                 stuffcmd(self, "bf\n");
-                sound(self, 0, "items/suit2.wav", 1, 1);
+                FO_Sound(self, CHAN_AUTO, "items/suit2.wav", 1, 1);
                 self.rad_time = time + 1;
             }
             if (self.rad_time < time) {
@@ -2397,6 +2604,8 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
+    UpdateScoreboardInfo(self);
+
     if (self.view_ofs == '0 0 0') {
         return;
     }
@@ -2411,7 +2620,7 @@ void () PlayerPostThink = {
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
-            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
                 fdmg = 5;
@@ -2425,10 +2634,10 @@ void () PlayerPostThink = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
-                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
             }
         }
     }
@@ -2441,7 +2650,7 @@ void () PlayerPostThink = {
         CheckPowerups();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        TeamFortress_SetSpeed(self);
+        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         W_WeaponFrame();
@@ -2461,9 +2670,24 @@ void () PlayerPostThink = {
     }
 };
 
+void () UpdateAllClientsTeamScores = {
+    local entity e;
+
+    e = find(world, classname, "player");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "player");
+    }
+
+    e = find(world, classname, "observer");
+    while (e) {
+        UpdateClientTeamScores(e);
+        e = find(e, classname, "observer");
+    }
+}
+
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void (optional float csqcactive) ClientConnect = {
-    local entity te;
     local string st;
     local float got_one;
 
@@ -2476,6 +2700,13 @@ void (optional float csqcactive) ClientConnect = {
 
     if (self.netname == string_null)
         KickCheater(self);
+
+    if (infokey(self,"*login"))
+        self.login = infokey(self,"*login");
+    if (infokey(self,"*admin"))
+        self.is_admin = stof(infokey(self, "*admin"));
+    if (self.login == string_null)
+        sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
     TeamFortress_Alias("id", TF_ID, 0);
 
@@ -2502,66 +2733,86 @@ void (optional float csqcactive) ClientConnect = {
         got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
-        if ((st != string_null) && (self.tf_id != 0)) {
-            sprint(self, PRINT_HIGH, "Welcome back!\n");
-            te = find(world, classname, "ghost");
-            while (te) {
-                if (te.tf_id == self.tf_id) {
-                    got_one = 1;
-                    TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
-                    self.frags = te.frags;
-                    self.real_frags = te.real_frags;
-                    if (!(toggleflags & TFLAG_TEAMFRAGS) &&
-                        !(toggleflags & TFLAG_FULLTEAMSCORE)) {
-                        self.frags = self.real_frags;
-                    }
-                    self.playerclass = te.playerclass;
-                    self.nextpc = te.playerclass;
-                    self.tfstate = te.tfstate;
-                    dremove(te);
-                    te = world;
-                } else
-                    te = find(te, classname, "ghost");
+        if (!loginRequired) {
+            if ((st != string_null) && (self.tf_id != 0)) {
+                got_one = RejoinWithTfId();
+            }
+            if (!got_one) {
+                CreateTfIdAndJoin();
             }
         }
-        if (!got_one) {
-            if (game_locked && (!cb_prematch)) {
-                sprint(self, PRINT_HIGH,
-                       "Closed server. Clan battle in progress.\n");
-                KickCheater(self);
-                return;
-            }
-            last_id = last_id + 20 + random() * 10;
-            self.tf_id = rint(random() * 10 + last_id);
-            st = ftos(self.tf_id);
-            stuffcmd(self, "setinfo tf_id ");
-            stuffcmd(self, st);
-            stuffcmd(self, "\n");
-            sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
-        }
     }
-    entity tfdet = find(world, classname, "info_tfdetect");
-    if(tfdet) {
-        InitClientFlagStatus(self, 0, Finditem(tfdet.display_item_status1), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 1, Finditem(tfdet.display_item_status2), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 2, Finditem(tfdet.display_item_status3), FLAGINFO_ICON_FLAG);
-        InitClientFlagStatus(self, 3, Finditem(tfdet.display_item_status4), FLAGINFO_ICON_FLAG);
-    }
+
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        tfdet = find(world, classname, "info_tfgoal");
-        while (tfdet) {
-            if (tfdet.track_goal) {
-                InitClientFlagStatus(self, -1, tfdet, FLAGINFO_ICON_BUTTON);
-            }
-            tfdet = find(tfdet, classname, "info_tfgoal");
-        }
+        InitAllStatuses(self);
         UpdateClientMOTD(self);
-        if(quadmode)
-            UpdateClientPrematch(self, !cb_prematch);
+        UpdateClientTeamScores(self);
+        //if(quadmode)
+        UpdateClientPrematch(self, !cb_prematch);
+        UpdateClient_VoteMap_AddAll(self);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };
+
+float () RejoinWithTfId = {
+    local entity te;
+    sprint(self, PRINT_HIGH, "Welcome back!\n");
+    te = find(world, classname, "ghost");
+    while (te) {
+        if (te.tf_id == self.tf_id) {
+            TeamFortress_TeamSet_Options(self, te.team_no, TRUE);
+            UpdateAllClientsTeamScores();
+
+            self.frags = te.frags;
+            self.real_frags = te.real_frags;
+            if (!(toggleflags & TFLAG_TEAMFRAGS) &&
+                !(toggleflags & TFLAG_FULLTEAMSCORE)) {
+                self.frags = self.real_frags;
+            }
+            self.playerclass = te.playerclass;
+            self.nextpc = te.playerclass;
+            self.tfstate = te.tfstate;
+            dremove(te);
+            te = world;
+            return 1;
+        } else
+            te = find(te, classname, "ghost");
+    }
+    return 0;
+}
+
+void () CreateTfIdAndJoin = {
+    local string st;
+    if (game_locked && (!cb_prematch)) {
+        sprint(self, PRINT_HIGH,
+               "Closed server. Clan battle in progress.\n");
+        KickCheater(self);
+        return;
+    }
+    last_id = last_id + 20 + random() * 10;
+    self.tf_id = rint(random() * 10 + last_id);
+    st = ftos(self.tf_id);
+    stuffcmd(self, "setinfo tf_id ");
+    stuffcmd(self, st);
+    stuffcmd(self, "\n");
+    sprint(self, PRINT_HIGH, "Your battle ID is ", st, "\n");
+}
+
+void (entity pl) ResetAndRespawnPlayer = {
+    if(pl.team_no && pl.playerclass) {
+        pl.classname = "player";
+        pl.takedamage = DAMAGE_AIM;
+        pl.solid = SOLID_SLIDEBOX;
+        pl.movetype = MOVETYPE_WALK;
+        TeamFortress_RemoveTimers();
+        setspawnparms(pl);
+        PutClientInServer();
+    }
+    if(infokeyf(pl, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientPrematch(pl, FALSE);
+    }
+}
 
 void () CountMatchPlayersAndReset = {
     local float playersleft = 0;
@@ -2586,9 +2837,14 @@ void () ClientDisconnect = {
 
     fr = rint(self.frags);
     st = ftos(fr);
+
+    local float timeplayed = gametime - self.classtime;
+    LogEventChangeClass(self, self.playerclass, 0, timeplayed);
+    self.classtime = gametime;
+
     bprint4(PRINT_HIGH, self.netname, " left the game with ", st,
             " frags\n");
-    sound(self, 4, "player/tornoff2.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
     RemovePlayerOwnedEnts();
 
@@ -3047,7 +3303,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gulped a load of slime\n";
                 else
                     s_deathstring = " can't exist on slime alone\n";
-            } else if (rnum == -5) {
+            } else if (rnum == CONTENT_LAVA) {
                 if (pe_target.health < -15)
                     s_deathstring = " burst into flames\n";
                 else if (random() < 0.5)
@@ -3206,6 +3462,50 @@ float () GetLastWeaponImpulse = {
         return 4;
 }
 
+void () InitReverseCap = {
+    local entity te = world, tg, tfdet;
+    local vector originbkp;
+
+    te = world;
+    tfdet = find(world, classname, "info_tfdetect");
+    for (float t = 1; t <= number_of_teams; t++) {
+        switch (t)
+        {
+            case 1:
+                te = Finditem(tfdet.display_item_status1);
+                break;
+            case 2:
+                te = Finditem(tfdet.display_item_status2);
+                break;
+            case 3:
+                te = Finditem(tfdet.display_item_status3);
+                break;
+            case 4:
+                te = Finditem(tfdet.display_item_status4);
+                break;
+        }
+
+        if (te) {
+            tg = find(world, classname, "info_tfgoal");
+            while (tg) {
+                if (tg.items_allowed == te.goal_no) {
+                   originbkp = te.origin;
+
+                   te.oldorigin = tg.origin;
+                   te.origin = tg.origin;
+                   setsize(te, te.goal_min, te.goal_max);
+
+                   tg.oldorigin = originbkp;
+                   tg.origin = originbkp;
+                   setsize(tg, tg.mins, tg.maxs);
+                }
+                tg = find(tg, classname, "info_tfgoal");
+            }
+        }
+    }
+
+}
+
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*
 void() SV_RunClientCommand = {
@@ -3217,7 +3517,7 @@ void() SV_RunClientCommand = {
     if (((self.jump_flag < -300) && (self.flags & 512)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
-            sound(self, 4, "player/h2ojump.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {
                 fdmg = 5;
@@ -3231,10 +3531,10 @@ void() SV_RunClientCommand = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                sound(self, 2, "player/land2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
-                sound(self, 2, "player/land.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
             }
         }
     }

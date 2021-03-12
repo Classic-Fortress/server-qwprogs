@@ -205,9 +205,27 @@ string (float pf_team_no, string ps_team) Menu_Team_TeamString = {
     return strzone(s_string);
 };
 
+void (float inp) Menu_No_Input = {
+    return;
+}
+
+void () Menu_Login = {
+    local string st1, st2, st3;
+
+    sprint (self, 2, "Login required, please use \"cmd login <login> <secret>\" before joining the game\n");
+    st1 = "Login required, please use\n\s\"cmd login <login> <secret>\"\s \nbefore joining the game\n";
+    st2 =  "If you don't have an account, visit\n\s";
+    st3 = webpageUrl;
+    st3 = strcat(st3, "\s\n");
+    st2 = strcat(st2, st3);
+    st1 = strcat(st1, st2);
+    Status_Menu(self, Menu_No_Input, st1);
+    return;
+}
+
 void (float update) Menu_Team = {
     local entity timer;
-    
+
     if (self.classname == "observer")
         /* Status_Menu(self, Menu_Team_Input, ""); */
         return;
@@ -338,6 +356,7 @@ void (float update) Menu_Class = {
     local entity timer;
     if (TeamFortress_TeamIsCivilian(self.team_no)) {
         sprint(self, PRINT_HIGH, "Your team can only be civilians\n");
+        UpdateClientClasses(self, self.team_no);
         Menu_Close(self);
         return;
     }
@@ -818,6 +837,10 @@ void (float inp) Menu_Engineer_Input = {
         return;
 
     if (self.is_building) {
+        if (engineer_move) {
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You are already building something"));
+            return;
+        }
         Menu_Engineer(self);
         return;
     }
@@ -825,11 +848,19 @@ void (float inp) Menu_Engineer_Input = {
     dismantle_sentrygun = 0;
     dismantle_dispenser = 0;
 
-    if (inp == 1 && !self.has_sentry && self.ammo_cells >= ENG_SENTRY_COST)
-        TeamFortress_Build(2);
-
-    if (inp == 2 && !self.has_dispenser && self.ammo_cells >= ENG_DISPENSER_COST)
-        TeamFortress_Build(1);
+    if (inp == 1 && !self.has_sentry) {
+        if (self.ammo_cells >= ENG_SENTRY_COST)
+            TeamFortress_Build(2);
+        else
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You need ", ftos(ENG_SENTRY_COST), " cells to build a sentry gun"));
+    }
+    
+    if (inp == 2 && !self.has_dispenser) {
+        if (self.ammo_cells >= ENG_DISPENSER_COST)
+            TeamFortress_Build(1);
+        else
+            Status_Print(self, "\n\n\n\n\n\n\n", strcat("You need ", ftos(ENG_DISPENSER_COST), " cells to build a dispenser"));
+    }
 
     if (inp == 3 && self.has_sentry) {
         te = findradius(self.origin, ENG_BUILDING_DISMANTLE_DISTANCE);
@@ -1346,7 +1377,7 @@ void () Menu_Admin =
             s_menu1 = "Captain Team 2 Select Menu:              \n\n";
             break;
         case ADMIN_MENU_TYPE_CAPTAINSELECT:
-            s_menu1 = strcat(Q"\[\sCaptain\s\] Team ", ftos(self.team_no));
+            s_menu1 = strcat(Q"\x10\sCaptain\s\x11 Team ", ftos(self.team_no));
             s_menu1 = strcat(s_menu1, " :              \n\n");
             break;
         case ADMIN_MENU_TYPE_CLASSES:
@@ -1445,7 +1476,7 @@ void () Menu_Admin =
         }
 
         if (f_tmp == 0 &&  ( self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO ) ) {
-                bprint(2, "\[\sCaptain Mode\s\]\s:\s \sTeams are set,  let's start the game!\s\n");
+                bprint(2, "\x10\sCaptain Mode\s\x11\s:\s \sTeams are set,  let's start the game!\s\n");
                 temp = self;
                 te = find (world, classname, "player");
                 while (te != world) {
@@ -1536,10 +1567,10 @@ void (float inp) Menu_Admin_Input =
                         self.current_menu_type = ADMIN_MENU_TYPE_CAPTAINTEAMONE;
                         self.current_menu_page = 1;
 
-                        bprint(2, "\[\sCaptain Mode\s\]\s:\s is now \sON\s.\n");
-                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
-                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
-                        bprint(2, "\[\sCaptain Mode\s\]\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                        bprint(2, "\x10\sCaptain Mode\s\x11\s:\s is now \sON\s.\n");
+                        bprint(2, "\x10\sCaptain Mode\s\x11\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                        bprint(2, "\x10\sCaptain Mode\s\x11\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
+                        bprint(2, "\x10\sCaptain Mode\s\x11\s:\s ONLY CAPTAINS CAN TALK! YOU ARE ALL \sMUTED\s.\n");
 
                         temp = find (world, classname, "player");
                         while (temp != world) {
@@ -1719,7 +1750,7 @@ void (float inp) Menu_Admin_Input =
                                 //TeamFortress_TeamSet(self.team_no);
                                 self.playerclass = 0;
                                 playerSetTeam(self.team_no);
-                                bprint(2, "\[\sCaptain Mode\s\]\s:\s ");
+                                bprint(2, "\x10\sCaptain Mode\s\x11\s:\s ");
                                 bprint(2, self.netname);
                                 bprint(2, " \bIs the captain for team\b ");
                                 bprint(2, TeamToString(self.team_no));
@@ -1728,7 +1759,7 @@ void (float inp) Menu_Admin_Input =
                             te = find (te, classname, "player");
                         }
                         self = temp;
-                        bprint(2, "\[\sCaptain Mode\s\]\s:\s All available players are now Observers\n");
+                        bprint(2, "\x10\sCaptain Mode\s\x11\s:\s All available players are now Observers\n");
                         Menu_Close(self);
                         self.current_menu_type = ADMIN_MENU_TYPE_MAIN;
                         self.current_menu_page = 1;
@@ -1744,7 +1775,7 @@ void (float inp) Menu_Admin_Input =
 
                 playerSetTeam (temp.team_no);
 
-                bprint(2, "\[\bCaptain Mode\b\]\b:\b ");
+                bprint(2, "\x10\bCaptain Mode\b\x11\b:\b ");
                 bprint(2, temp.netname);
                 bprint(2, " \bcalled\b ");
                 bprint(2, self.netname);
@@ -1845,7 +1876,7 @@ void (float inp) Menu_Admin_Input =
     if (inp == 10) {
         if (self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMTWO || self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINSELECT ||  self.current_menu_type == ADMIN_MENU_TYPE_CAPTAINTEAMONE) {
             captainmode = 0;
-            bprint(2, "\[\sCaptain Mode\s\]\s:\s \scanceled by request of\s ");
+            bprint(2, "\x10\sCaptain Mode\s\x11\s:\s \scanceled by request of\s ");
             bprint(2, self.netname);
             bprint(2, ".\n");
             te = self;

@@ -129,7 +129,7 @@ void () Sentry_Rotate = {
             CheckBelowBuilding(self.trigger_field);
             self.heat = 1;
             if (random() < 0.1)
-                sound(self, CHAN_ITEM, "weapons/turridle.wav", 1,
+                FO_Sound(self, CHAN_ITEM, "weapons/turridle.wav", 1,
                       ATTN_NORM);
         }
     } else {
@@ -205,7 +205,7 @@ float () Sentry_FindTarget = {
 void () Sentry_FoundTarget = {
     if ((self.ammo_shells > 0) ||
         ((self.ammo_rockets > 0) && (self.weapon == 3)))
-        sound(self, CHAN_VOICE, "weapons/turrspot.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "weapons/turrspot.wav", 1, ATTN_NORM);
 
     Sentry_HuntTarget();
 
@@ -245,7 +245,7 @@ void () Sentry_Explode = {
     if (self.classname == "building_sentrygun_base") {
         if (self.oldenemy)
             dremove(self.oldenemy);
-    } else
+    } else if (self.trigger_field != world)
         dremove(self.trigger_field);
 
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -264,6 +264,11 @@ void () Sentry_Die = {
     self.real_owner.has_sentry = 0;
     self.think = Sentry_Explode;
     self.nextthink = time + 0.1;
+    if (self.real_owner.is_building) {
+        self = self.real_owner;
+        TeamFortress_EngineerBuildStop();
+    }
+    
 };
 
 float () Sentry_Fire = {
@@ -284,7 +289,7 @@ float () Sentry_Fire = {
     if ((self.weapon == 3) && (self.ammo_rockets > 0) &&
         (self.super_damage_finished < time)) {
         Sentry_MuzzleFlash();
-        sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
 
         newmis = spawn();
         newmis.owner = self;
@@ -299,7 +304,7 @@ float () Sentry_Fire = {
         newmis.nextthink = time + 5;
         newmis.think = SUB_Remove;
 
-        setmodel(newmis, "progs/missile.mdl");
+        FO_SetModel(newmis, "progs/missile.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
         setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
@@ -316,7 +321,7 @@ float () Sentry_Fire = {
         return (0);
     }
     Sentry_MuzzleFlash();
-    sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
 
     deathmsg = DMSG_SENTRYGUN_BULLET;
 

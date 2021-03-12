@@ -8,6 +8,20 @@ void (vector org, entity shooter) NapalmGrenadeLaunch;
 void () Napalm_touch;
 float (string id_flame) RemoveFlameFromQueue;
 
+void (entity ent, float num) SetFlameCount = {
+    ent.numflames = num;
+
+    if (num == 0)
+    {
+        ent.tfstate = ent.tfstate - (ent.tfstate & TFSTATE_BURNING);
+    }
+    else
+    {
+        ent.tfstate = ent.tfstate | TFSTATE_BURNING;
+    }
+    
+};
+
 entity(string type, entity p_owner) FlameSpawn =
 {
     if (cb_prematch) {
@@ -28,27 +42,27 @@ entity(string type, entity p_owner) FlameSpawn =
         newmis.solid = SOLID_BBOX;
         newmis.effects = EF_DIMLIGHT;
         newmis.flame_id = "1";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "2") {
         newmis.movetype = MOVETYPE_BOUNCE;
         newmis.solid = SOLID_BBOX;
         newmis.flame_id = "2";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         newmis.frame = 1;
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "3") {
         newmis.movetype = MOVETYPE_FLYMISSILE;
         newmis.solid = SOLID_BBOX;
         newmis.flame_id = "3";
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     } else if (type == "4") {
         newmis.movetype = MOVETYPE_FLYMISSILE;
         newmis.flame_id = "4";
         newmis.frame = 1;
         newmis.solid = SOLID_BBOX;
-        setmodel(newmis, "progs/flame2.mdl");
+        FO_SetModel(newmis, "progs/flame2.mdl");
         setsize(newmis, '0 0 0', '0 0 0');
     }
     newmis.owner = p_owner;
@@ -96,6 +110,8 @@ float (string id_flame) RemoveFlameFromQueue = {
     return (1);
 };
 
+
+
 void () Remove = {
     FlameDestroy(self);
 };
@@ -103,7 +119,7 @@ void () Remove = {
 void () NapalmGrenadeFollow = {
     traceline(self.origin, self.origin, TRUE, self);
     if (trace_inwater == 1) {
-        sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
         FlameDestroy(self);
     }
     if (self.velocity == '0 0 0') {
@@ -113,7 +129,7 @@ void () NapalmGrenadeFollow = {
 };
 
 void () NapalmGrenadeTouch = {
-    sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
 };
@@ -121,6 +137,21 @@ void () NapalmGrenadeTouch = {
 void () NapalmGrenadeNetThink = {
     local entity head;
     local entity te;
+
+    // TODO - make a settings struct and put these in on world spawn
+    float explodeDam = 0;
+    float maxExplosions = 0;
+    switch (pyro_type)
+    {
+        case PYRO_FO:
+            explodeDam = PC_PYRO_NAPALM_INIT_DAM_FO;
+            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_FO;
+            break;
+        default:
+            explodeDam = PC_PYRO_NAPALM_INIT_DAM_ORIG;
+            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_ORIG;
+            break;
+    }
 
     if (self.heat == 0) {
         self.owner.no_active_napalm_grens =
@@ -144,7 +175,7 @@ void () NapalmGrenadeNetThink = {
     makevectors(self.v_angle);
     traceline(self.origin, self.origin, 1, self);
     if (trace_inwater == 1) {
-        sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, ATTN_NORM);
         RemoveGrenade();
         return;
     }
@@ -152,7 +183,8 @@ void () NapalmGrenadeNetThink = {
     while (head) {
         if (head.takedamage) {
             deathmsg = DMSG_FLAME;
-            TF_T_Damage(head, self, self.owner, 20, TF_TD_NOTTEAM,
+            
+            TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
             other = head;
             Napalm_touch();
@@ -170,14 +202,15 @@ void () NapalmGrenadeNetThink = {
     multicast(self.origin, MULTICAST_PHS);
 
     self.heat = self.heat + 1;
-    if (self.heat > 7)
+    
+    if (self.heat >= maxExplosions)
         RemoveGrenade();
 };
 
 void () NapalmGrenadeExplode = {
     local entity head;
 
-    sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "weapons/flmgrexp.wav", 1, ATTN_NORM);
     traceline(self.origin, self.origin, 1, self);
     if (trace_inwater == 1) {
         dremove(self);
@@ -187,6 +220,7 @@ void () NapalmGrenadeExplode = {
     head = spawn();
     head.think = NapalmGrenadeNetThink;
     head.classname = "grentimer";
+    head.grenadename = "napalmfire";
     head.nextthink = time + 0.1;
     head.heat = 0;
     head.origin = self.origin;
@@ -253,22 +287,21 @@ void () FlameFollow = {
     if (self.enemy.health < 1) {
         deathmsg = 15;
         T_RadiusDamage(self, self, 10, self);
-        self.enemy.numflames = 0;
+        SetFlameCount(self.enemy, 0);
         FlameDestroy(self);
         return;
     }
-    if ((self.enemy.armorclass & 16) && (self.enemy.armorvalue > 0)) {
+    if ((self.enemy.armorclass & AT_SAVEFIRE) && (self.enemy.armorvalue > 0)) {
         self.health = 0;
     }
-    if (self.enemy.tfstate & 131072) {
+    if (self.enemy.tfstate & TFSTATE_FLAMES_MAX) {
         self.health = 45;
         self.enemy.tfstate =
-            self.enemy.tfstate - (self.enemy.tfstate & 131072);
+            self.enemy.tfstate - (self.enemy.tfstate & TFSTATE_FLAMES_MAX);
     }
     if (self.health < 1) {
         if ((self.effects != 8) || (self.enemy.numflames <= 1)) {
-            self.enemy.numflames = self.enemy.numflames - 1;
-            self.enemy.numflames = 0;
+            SetFlameCount(self.enemy, (self.enemy.numflames - 1));
             FlameDestroy(self);
             return;
         }
@@ -282,7 +315,7 @@ void () FlameFollow = {
         setorigin(self, vtemp);
         if (self.model != "progs/flame2.mdl") {
             self.model = "progs/flame2.mdl";
-            setmodel(self, self.model);
+            FO_SetModel(self, self.model);
         }
     } else {
         if (self.model == "progs/flame2.mdl") {
@@ -291,14 +324,24 @@ void () FlameFollow = {
         }
     }
     if ((self.enemy.waterlevel > 1) || (self.enemy.classname != "player" && self.enemy.waterlevel > 0)) {
-        sound(self, 2, "misc/vapeur2.wav", 1, 1);
-        self.enemy.numflames = self.enemy.numflames - 1;
+        FO_Sound(self, CHAN_VOICE, "misc/vapeur2.wav", 1, 1);
+        SetFlameCount(self.enemy, self.enemy.numflames - 1);
         FlameDestroy(self);
         return;
     }
     self.nextthink = time + 0.1;
     if ((self.effects == 8) && (self.heat >= 3)) {
-        damage = self.enemy.numflames * 0.3 * 3;
+        damage = 0;
+        switch (pyro_type)
+        {
+            case PYRO_FO:
+                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_FO * 3;
+                break;
+            default:
+                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_ORIG * 3;
+                break;
+        }
+        
         if (damage < 1) {
             damage = 1;
         }
@@ -313,46 +356,65 @@ void () FlameFollow = {
     }
 };
 
-void () OnPlayerFlame_touch = {
-    local entity flame;
-    local vector vtemp;
+void (entity player, entity fireowner, vector org
+        , float flamehealth) SetOnFire = {    
+    entity flame;
 
+    if (cb_prematch) 
+    {
+        return;
+    }
+
+    if (player.numflames >= 4) 
+    {
+        player.tfstate = player.tfstate | TFSTATE_FLAMES_MAX;
+        return;
+    }
+
+    if ((player.armorclass & AT_SAVEFIRE) && (player.armorvalue > 0)) 
+    {
+        return;
+    }
+
+    if (player.classname == "player") 
+    {
+        if (((teamplay & 16) && (player.team_no > 0)) &&
+            (player.team_no == fireowner.team_no)) {
+            return;
+        }
+        CenterPrint(player, "You are on fire!\n");
+        stuffcmd(player, "bf\n");
+    }
+    
+    if (player.numflames < 1) 
+    {
+        flame = FlameSpawn("1", player);
+        //FO_Sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1, 1); // original tf code, but super annoying and it doesn't stop
+    } 
+    else
+    {
+        flame = FlameSpawn("3", player);
+        if (flame == world) {
+            return;
+        }
+    }
+    
+    flame.classname = "fire";
+    flame.health = flamehealth;
+    SetFlameCount(player, (player.numflames + 1));
+    flame.velocity = player.velocity;
+    flame.enemy = player;
+    flame.touch = OnPlayerFlame_touch;
+    flame.owner = fireowner;
+    setorigin(flame, org);
+    flame.nextthink = time + 0.1;
+    flame.think = FlameFollow;
+};
+
+void () OnPlayerFlame_touch = {
     if (((other != world) && (other.health > 0)) && (other != self.enemy)) {
-        if (cb_prematch) {
-            return;
-        }
-        if (other.numflames >= 4) {
-            other.tfstate = other.tfstate | 131072;
-            return;
-        }
-        if (other.classname == "player") {
-            if (((teamplay & 16) && (other.team_no > 0)) &&
-                (other.team_no == self.owner.team_no)) {
-                return;
-            }
-            CenterPrint(other, "You are on fire!\n");
-            stuffcmd(other, "bf\n");
-        }
-        if (other.numflames < 1) {
-            flame = FlameSpawn("1", other);
-            sound(flame, 2, "ambience/fire1.wav", 1, 1);
-        } else {
-            flame = FlameSpawn("3", other);
-            if (flame == world) {
-                return;
-            }
-        }
-        flame.classname = "fire";
-        flame.health = 45;
-        other.numflames = other.numflames + 1;
-        flame.velocity = other.velocity;
-        flame.enemy = other;
-        flame.touch = OnPlayerFlame_touch;
-        flame.owner = self.owner;
-        vtemp = self.origin;
-        setorigin(flame, vtemp);
-        flame.nextthink = time + 0.1;
-        flame.think = FlameFollow;
+        float flamehealth = 45;
+        SetOnFire(other, self.owner, self.origin, flamehealth);
     }
 };
 
@@ -365,9 +427,6 @@ void () QW_Flame_ResetTouch = {
 };
 
 void () WorldFlame_touch = {
-    local entity flame;
-    local vector vtemp;
-
     deathmsg = DMSG_FLAME;
     TF_T_Damage(other, self, self.enemy, 10, TF_TD_NOTTEAM, TF_TD_FIRE);
     self.touch = SUB_Null;
@@ -376,48 +435,13 @@ void () WorldFlame_touch = {
         self.nextthink = time + 1;
     }
     if (((other != world) && (other.solid != 1)) && (other.health > 0)) {
-        if (cb_prematch) {
-            return;
-        }
-        if (other.numflames >= 4) {
-            other.tfstate = other.tfstate | 131072;
-            return;
-        }
-        if (other.classname == "player") {
-            if (((teamplay & 16) && (other.team_no > 0)) &&
-                (other.team_no == self.owner.team_no)) {
-                return;
-            }
-            CenterPrint(other, "You are on fire!\n");
-            stuffcmd(other, "bf\n");
-        }
-        if (other.numflames < 1) {
-            flame = FlameSpawn("1", other);
-            sound(flame, 2, "ambience/fire1.wav", 1, 1);
-        } else {
-            flame = FlameSpawn("3", other);
-            if (flame == world) {
-                return;
-            }
-        }
-        flame.classname = "fire";
-        flame.health = 0;
-        other.numflames = other.numflames + 1;
-        flame.velocity = other.velocity;
-        flame.enemy = other;
-        flame.touch = OnPlayerFlame_touch;
-        flame.owner = self.owner;
-        vtemp = self.origin + '0 0 10';
-        setorigin(flame, vtemp);
-        flame.nextthink = time + 0.15;
-        flame.think = FlameFollow;
+        vector org = self.origin + '0 0 10';
+        float flamehealth = 0;
+        SetOnFire(other, self.owner, org, flamehealth);
     }
 };
 
 void () Flamer_stream_touch = {
-    local entity flame;
-    local vector vtemp;
-
     if (other.classname == "fire") {
         return;
     }
@@ -432,47 +456,18 @@ void () Flamer_stream_touch = {
                 }
             }
 
-            TF_T_Damage(other, self, self.owner, 10, TF_TD_NOTTEAM,
-                        TF_TD_FIRE);
-            if (cb_prematch) {
-                return;
+            if (pyro_type == PYRO_FO)
+            {
+                TF_T_Damage(other, self, self.owner, PC_PYRO_FLAMETHROWER_DAM_FO, TF_TD_NOTTEAM, TF_TD_FIRE);
             }
-            if (other.numflames >= 4) {
-                other.tfstate = other.tfstate | 131072;
-                return;
+            else
+            {
+                TF_T_Damage(other, self, self.owner, PC_PYRO_FLAMETHROWER_DAM_ORIG, TF_TD_NOTTEAM, TF_TD_FIRE);
             }
-            if ((other.armorclass & 16) && (other.armorvalue > 0)) {
-                return;
-            }
-            if (other.classname == "player") {
-                if (((teamplay & 16) && (other.team_no > 0)) &&
-                    (other.team_no == self.owner.team_no)) {
-                    return;
-                }
-                CenterPrint(other, "You are on fire!\n");
-                stuffcmd(other, "bf\n");
-            }
-            if (other.numflames < 1) {
-                flame = FlameSpawn("1", other);
-                sound(flame, CHAN_VOICE, "ambience/fire1.wav", 1,
-                      ATTN_NORM);
-            } else {
-                flame = FlameSpawn("3", other);
-                if (flame == world) {
-                    return;
-                }
-            }
-            flame.classname = "fire";
-            flame.health = 45;
-            other.numflames = other.numflames + 1;
-            flame.velocity = other.velocity;
-            flame.enemy = other;
-            flame.touch = OnPlayerFlame_touch;
-            flame.owner = self.owner;
-            vtemp = self.origin;
-            setorigin(flame, vtemp);
-            flame.nextthink = time + 0.1;
-            flame.think = FlameFollow;
+
+            float flamehealth = 45;
+            SetOnFire(other, self.owner, self.origin, flamehealth);
+            dremove(self);
         }
     } else {
         if ((random() < 0.3) ||
@@ -480,11 +475,12 @@ void () Flamer_stream_touch = {
             remove(self);
             return;
         }
+        entity flame;
         flame = FlameSpawn("4", other);
         if (flame != world) {
             flame.touch = WorldFlame_touch;
             flame.classname = "fire";
-            vtemp = self.origin + '0 0 10';
+            vector vtemp = self.origin + '0 0 10';
             setorigin(flame, vtemp);
             flame.nextthink = time + 8;
             flame.heat = flame.nextthink;
@@ -496,66 +492,39 @@ void () Flamer_stream_touch = {
 };
 
 void () Napalm_touch = {
-    local entity flame;
-    local vector vtemp;
-
     if (other.classname == "fire") {
         return;
     }
     if (other != world) {
         if ((other.takedamage == 2) && (other.health > 0)) {
+            float dam = 0;
+            switch (pyro_type)
+            {
+                case PYRO_FO:
+                    dam = PC_PYRO_INIT_BURN_DAM_FO;
+                    break;
+                default:
+                    dam = PC_PYRO_INIT_BURN_DAM_ORIG;
+                    break;
+            }
             deathmsg = DMSG_FLAME;
-            TF_T_Damage(other, self, self.owner, 6, TF_TD_NOTTEAM,
+            TF_T_Damage(other, self, self.owner, dam, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
-            if (cb_prematch) {
-                return;
-            }
-            if (other.numflames >= 4) {
-                other.tfstate = other.tfstate | 131072;
-                return;
-            }
-            if ((other.armorclass & 16) && (other.armorvalue > 0)) {
-                return;
-            }
-            if (other.classname == "player") {
-                if (((teamplay & 16) && (other.team_no > 0)) &&
-                    (other.team_no == self.owner.team_no)) {
-                    return;
-                }
-                sound(other, CHAN_VOICE, "ambience/fire1.wav", 1, ATTN_NORM);
-                CenterPrint(other, "You are on fire!\n");
-                stuffcmd(other, "bf\n");
-            }
-            if (other.numflames < 1) {
-                flame = FlameSpawn("1", other);
-            } else {
-                flame = FlameSpawn("3", other);
-                if (flame == world) {
-                    return;
-                }
-            }
-            flame.classname = "fire";
-            flame.health = 45;
-            other.numflames = other.numflames + 1;
-            flame.velocity = other.velocity;
-            flame.enemy = other;
-            flame.touch = OnPlayerFlame_touch;
-            flame.owner = self.owner;
-            vtemp = self.origin;
-            setorigin(flame, vtemp);
-            flame.nextthink = time + 0.1;
-            flame.think = FlameFollow;
+
+            float flamehealth = 45;
+            SetOnFire(other, self.owner, self.origin, flamehealth);
         }
     } else {
         if (pointcontents((self.origin + '0 0 1')) != -1) {
             FlameDestroy(self);
             return;
         }
+        entity flame;
         flame = FlameSpawn("4", other);
         if (flame != world) {
             flame.touch = WorldFlame_touch;
             flame.classname = "fire";
-            vtemp = self.origin + '0 0 10';
+            vector vtemp = self.origin + '0 0 10';
             setorigin(flame, vtemp);
             flame.nextthink = time + 20;
             flame.heat = flame.nextthink;
@@ -593,15 +562,15 @@ void () W_FireFlame = {
         NewBubbles(2, self.origin + v_forward * 64);
         rn = random();
         if (rn < 0.5) {
-            sound(self, CHAN_WEAPON, "misc/water1.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "misc/water1.wav", 1, ATTN_NORM);
         } else {
-            sound(self, CHAN_WEAPON, "misc/water2.wav", 1, ATTN_NORM);
+            FO_Sound(self, CHAN_WEAPON, "misc/water2.wav", 1, ATTN_NORM);
         }
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
     self.currentammo = self.ammo_cells;
-    sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
     flame = spawn();
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
@@ -609,20 +578,62 @@ void () W_FireFlame = {
     flame.classname = "flamerflame";
     makevectors(self.v_angle);
     flame.velocity = aim(self, 10000);
-    flame.velocity = flame.velocity * 600;
+    if (pyro_type == PYRO_FO)
+    {
+        flame.velocity = flame.velocity * 600;
+        flame.nextthink = time + 0.15;
+    }
+    else
+    {
+        flame.velocity = flame.velocity * 600;
+        flame.nextthink = time + 0.15;
+    }
+    
     flame.touch = Flamer_stream_touch;
     flame.think = s_explode1;
-    flame.nextthink = time + 0.15;
-    setmodel(flame, "progs/s_explod.spr");
+    
+    FO_SetModel(flame, "progs/s_explod.spr");
     setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 };
 
-void () IncendiaryRadius =
-{
-    local float damg;
+void () IncendiaryRadius = {
+    entity head;
+    head = findradius(self.origin, 180);
+    while (head) {
+        if (head.takedamage) {
+            traceline(self.origin, head.origin, 1, self);
+            if ((trace_fraction == 1)
+                || ((trace_fraction != 1)
+                    && (vlen(self.origin - head.origin) <= 64))) {
+                deathmsg = DMSG_FLAME;
+                TF_T_Damage(head, self, self.owner, 10, TF_TD_NOTTEAM,
+                            TF_TD_FIRE);
+                other = head;
+                Napalm_touch();
+                if (other.classname == "player") {
+                    stuffcmd(other, "bf\nbf\n");
+                }
+            }
+        }
+        head = head.chain;
+    }
+    self.origin = self.origin - 8 * normalize(self.velocity);
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+    WriteCoord(MSG_MULTICAST, self.origin_x);
+    WriteCoord(MSG_MULTICAST, self.origin_y);
+    WriteCoord(MSG_MULTICAST, self.origin_z);
+    multicast(self.origin, MULTICAST_PHS);
+    dremove(self);
+};
 
-    damg = 72;
+void () IncendiaryRadius_OZTF = {
+    local float damg;
+    if (pyro_type == 1)
+        damg = 68;
+    else
+        damg = 92;
     deathmsg = 15;
     T_RadiusDamage(self, self.owner, damg, other);
     self.origin = (self.origin - (8 * normalize (self.velocity)));
@@ -637,7 +648,6 @@ void () IncendiaryRadius =
 
 void () T_IncendiaryTouch = {
     local float damg;
-    local entity head;
 
     if (other == self.owner) {
         return;
@@ -647,45 +657,35 @@ void () T_IncendiaryTouch = {
         return;
     }
     self.effects = self.effects | 4;
-    if (pyro_type == 1)
-        damg = 42 + random() * 20;
-    else   
+    if (pyro_type == PYRO_ORIGINAL)
+    {
         damg = 30 + random() * 20;
+    }
+    else
+    {
+        if (pyro_type == 1)
+            damg = 68 + random() * 20;
+        else
+            damg = 42 + random() * 20;
+    }
+    
     if (other.health) {
         deathmsg = DMSG_FLAME;
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     }
-    if (pyro_type == 1)
-        IncendiaryRadius();
-    else {
-        head = findradius(self.origin, 180);
-        while (head) {
-            if (head.takedamage) {
-                traceline(self.origin, head.origin, 1, self);
-                if ((trace_fraction == 1)
-                    || ((trace_fraction != 1)
-                        && (vlen(self.origin - head.origin) <= 64))) {
-                    deathmsg = DMSG_FLAME;
-                    TF_T_Damage(head, self, self.owner, 10, TF_TD_NOTTEAM,
-                                TF_TD_FIRE);
-                    other = head;
-                    Napalm_touch();
-                    if (other.classname == "player") {
-                        stuffcmd(other, "bf\nbf\n");
-                    }
-                }
-            }
-            head = head.chain;
-        }
-        self.origin = self.origin - 8 * normalize(self.velocity);
-        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-        WriteCoord(MSG_MULTICAST, self.origin_x);
-        WriteCoord(MSG_MULTICAST, self.origin_y);
-        WriteCoord(MSG_MULTICAST, self.origin_z);
-        multicast(self.origin, MULTICAST_PHS);
-        dremove(self);
+
+    switch (pyro_type)
+    {
+        case PYRO_ORIGINAL:
+            IncendiaryRadius();
+            break;
+        case PYRO_OZTF:
+            IncendiaryRadius_OZTF();
+            break;
+        case PYRO_FO:
+            IncendiaryRadius_OZTF();
+            break;
     }
 };
 
@@ -695,7 +695,7 @@ void () W_FireIncendiaryCannon = {
     }
     self.ammo_rockets = self.ammo_rockets - 3;
     self.currentammo = self.ammo_rockets;
-    sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-3, self);
     newmis = spawn();
     newmis.owner = self;
@@ -703,20 +703,29 @@ void () W_FireIncendiaryCannon = {
     newmis.solid = SOLID_BBOX;
     makevectors(self.v_angle);
     newmis.velocity = aim(self, 1000);
-    if (pyro_type == 1) {
-        newmis.velocity = newmis.velocity * 800;
-        newmis.think = IncendiaryRadius;
-    }
-    else {
+    string rktmdl = "progs/missile.mdl";
+    if (pyro_type == PYRO_ORIGINAL)
+    {
         newmis.velocity = newmis.velocity * 600;
         newmis.think = SUB_Remove;
     }
+    else
+    {
+        newmis.velocity = newmis.velocity * 800;
+        newmis.think = IncendiaryRadius_OZTF;
+
+        if (pyro_type == PYRO_FO)
+        {
+            rktmdl = "progs/lavaball.mdl";
+        }
+    }
+    
     newmis.angles = vectoangles(newmis.velocity);
     newmis.touch = T_IncendiaryTouch;
     newmis.nextthink = time + 5;
     newmis.weapon = DMSG_INCENDIARY;
     newmis.classname = "pyro_rocket";
-    setmodel(newmis, "progs/missile.mdl");
+    FO_SetModel(newmis, rktmdl);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 };
@@ -743,4 +752,94 @@ void () TeamFortress_FlameThrower = {
     }
     self.current_weapon = WEAP_FLAMETHROWER;
     W_SetCurrentAmmo(self);
+};
+
+void () AirBlastReloadFinished = {
+    sprint(self.owner, PRINT_HIGH, "Airblast ready\n");
+    stuffcmd(self.owner, "play weapons/airblast.wav\n");
+    dremove(self);
+};
+
+void () UseAirBlast = {
+    if (self.special_cooldown < time)
+    {
+        self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        entity timer = spawn();
+        timer.owner = self;
+        timer.classname = "timer";
+        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        timer.think = AirBlastReloadFinished;
+
+        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
+        makevectors(self.v_angle);
+        entity ent;
+
+        ent = findradius(self.origin, PC_PYRO_AIRBLAST_RANGE);
+        while (ent)
+        {
+            if (ent.movetype != MOVETYPE_NONE && ent != self)
+            {                
+                if (infront(ent))
+                {
+                    switch (ent.classname)
+                    {
+                        case "player":
+                        case "pyro_rocket":
+                        case "flamerflame":
+                        case "proj_tranq":
+                        case "proj_bullet":
+                        case "proj_rocket":
+                        case "grenade":
+                        case "spike":
+                        case "pipebomb":
+                            vector targorg;
+                            targorg = ent.origin;
+                            float pushval = 1000;
+                            if (ent == self)
+                            {
+                                pushval = 500;
+                                traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
+                                if (trace_fraction < 1)
+                                {
+                                    targorg = self.origin - (v_forward * 200 * trace_fraction);
+                                }
+                            }
+                            
+                            vector delta = targorg - self.origin;
+                            float dist = vlen(delta);
+                            float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+
+                            if (ent.flags & FL_ONGROUND)
+                            {
+                                if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
+                                {
+                                    setorigin(ent, ent.origin + '0 0 1');
+                                }
+                            }
+                            
+                            delta = normalize(delta);
+                            delta = delta * percent * pushval;
+
+                            if (ent.movetype == MOVETYPE_FLYMISSILE)
+                            {
+                                float speed = vlen(ent.velocity);
+                                ent.velocity = normalize(delta) * speed;
+                            }
+                            else
+                            {
+                                ent.velocity = ent.velocity + delta;
+                            }
+                            
+                            break;
+                    }
+                }     
+            }  
+            
+            ent = ent.chain;
+        }
+    }
+    else
+    {
+        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
+    }
 };

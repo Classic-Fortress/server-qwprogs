@@ -89,6 +89,7 @@ typedef void (float n) f_void_float;
 
 // Identify variables
 .string ident_string;           // Status bar string for identify
+.string last_ident_string;      // Last Status bar string for identify
 .float ident_time;              // The time when last identify found a player
 .float autoid_type;             // 0 = ignore noone, 1 = ignore teammates, 2 = ignore enemies
 .float autoid_time;             // Time when autoid settings were last checked
@@ -120,7 +121,7 @@ typedef void (float n) f_void_float;
 
 float toggleflags;              // toggleable flags
 
-float respawn_delay_time;
+//float respawn_delay_time;
 
 //
 // FortressMap stuff
@@ -381,9 +382,11 @@ float item_list_bit;            // Global, used to determine what the bit of
 
 //============================================================================
 
+// pyro
 float num_world_flames;
 .float numflames;               // number of flames on entity
 .string flame_id;               // has to be string so that the C function find() can be used
+.float icdmgtime;
 
 // Spy variables
 .float undercover_team;
@@ -445,6 +448,8 @@ float quad_winner;
 float rounds;
 float round_active;
 float round_over;
+float round_delay_time;
+float map_restart_time;
 float gametime;
 float is_countdown;
 float duelmode;
@@ -460,6 +465,7 @@ float voting_expires;
 float vote_anarchy_mode;
 float vote_total_votes;
 float vote_style;
+float vote_threshold;
 
 .float tf_id;
 
@@ -488,6 +494,7 @@ float burstgren_interval;
 float burstgren_range;
 
 float old_grens;
+float fo_flash;
 float invis_only;
 float flagem_checked;
 float cease_fire;
@@ -495,6 +502,7 @@ float drop_grenades;
 float drop_grenpack;
 float drop_gren1;
 float drop_gren2;
+/*
 float max_gren1_scout;
 float max_gren1_sniper;
 float max_gren1_soldier;
@@ -513,6 +521,8 @@ float max_gren2_hwguy;
 float max_gren2_pyro;
 float max_gren2_spy;
 float max_gren2_engineer;
+*/
+float max_active_gren2_soldier;
 float grentimers;
 float id_extended;
 float remember_weapon;
@@ -520,7 +530,7 @@ float discammo_pickup;
 float old_dropflag;
 float reload_cliptick;
 float old_sniperrange;
-float detpipe_limit;
+//float detpipe_limit;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
@@ -552,6 +562,7 @@ float sniperreloadpercent;
 float buildstatus;
 float server_default;
 float server_faithful;
+float server_huetf;
 
 float old_spanner;
 float old_dispenser;
@@ -562,6 +573,7 @@ float ng_damage;
 float sng_damage;
 float old_ng_rof;
 float impulse_queue;
+float detpack_when_reloading;
 float pyro_type;
 float flag_follow;
 float ceasefire_type;
@@ -575,6 +587,14 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float cb_keepteams;
+float fo_flashtime;
+float solid_nailgren;
+float noreturn;
+float nohitsounds;
+//float server_sbflaginfo;
+float reverse_cap;
+float engineer_move;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -615,6 +635,8 @@ float intermission_exittime;
 .float max_grenades_2;
 
 .entity chain2; // allows for nesting of findradius (use in EMPGrenadeExplode)
+
+.entity vote_map_send;
 
 // global variables for voting
 float vote1_cnt, vote2_cnt, vote3_cnt, vote4_cnt, vote5_cnt;
@@ -659,3 +681,41 @@ string (string s, float width) strpadr =
 
 float captainmode;
 .float captain;
+
+//Player ID
+float loginRequired;
+string loginUrl;
+string webpageUrl;
+.string login;
+.float login_in_progress;
+
+//Logging fields
+float gametime;
+string gametimestamp;
+float logfilehandle;
+float canlog;
+.string grenadename;
+.float classtime;
+.float goalrunningtime;
+
+// csqc scoreboard fields
+.float caps;
+.float touches;
+.float kills;
+.float sbteamkills;
+.float deaths;
+.float afflicted;
+.float teamafflicted;
+.float damagegiven;
+.float damagetaken;
+
+// flash stuff
+float FO_FlashDimension;
+
+// allow for default goal state
+.float default_group_no;
+
+.string broadcast_high;
+
+.float special_cooldown;
+

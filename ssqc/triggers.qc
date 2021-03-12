@@ -29,7 +29,7 @@ void () multi_trigger = {
         WriteByte(MSG_ALL, SVC_FOUNDSECRET);
     }
     if (self.noise) {
-        sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
+        FO_Sound(self, CHAN_VOICE, self.noise, 1, ATTN_NORM);
     }
     self.takedamage = DAMAGE_NO;
     activator = self.enemy;
@@ -229,7 +229,7 @@ void () play_teleport = {
     else
         tmpstr = "misc/r_tele5.wav";
 
-    sound(self, CHAN_VOICE, tmpstr, 1, ATTN_NORM);
+    FO_Sound(self, CHAN_VOICE, tmpstr, 1, ATTN_NORM);
     remove(self);
 };
 
@@ -312,6 +312,11 @@ void () teleport_touch = {
         }
         return;
     }
+
+    
+    if (self.goal_state == TFGS_REMOVED)
+        return;
+
     // only teleport living creatures
     if ((other.health <= 0) || (other.solid != 3))
         return;
@@ -446,7 +451,7 @@ void () trigger_onlyregistered_touch = {
         remove(self);
     } else if (self.message != "") {
         CenterPrint(other, self.message);
-        sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
+        FO_Sound(other, CHAN_BODY, "misc/talk.wav", 1, ATTN_NORM);
     }
 };
 
@@ -497,7 +502,37 @@ void () trigger_hurt = {
         self.dmg = 5;
 };
 
-#define PUSH_ONCE	1
+void () trigger_jumper_touch = {
+    local entity te;
+
+    if(!Activated(self, other)) {
+        if((self.else_goal != 0)) {
+            te = Findgoal(self.else_goal);
+            if(te) {
+                DoResults(te, other, (self.goal_result & TFGR_ADD_BONUSES));
+            }
+        }
+        return;
+    }
+    if(((other.classname == "grenade") || (other.classname != "player"))) {
+        return;
+    } else {
+        if(((other.health > 0) && !self.armorclass)) {
+            other.velocity_z = (self.speed * 7);
+            if((other.classname == "player")) {
+                if((other.fly_sound < time)) {
+                    other.fly_sound = (time + 1.5);
+                    if(!(self.spawnflags & 2)) {
+                        FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                    }
+                }
+            }
+        }
+    }
+    if((self.spawnflags & 1)) {
+        dremove (self);
+    }
+};
 
 void () trigger_push_touch = {
     local entity te;
@@ -511,24 +546,42 @@ void () trigger_push_touch = {
         return;
     }
 
-    if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
+    float push = FALSE;
+    if (other.classname == "item_tfgoal" || other.classname == "info_tfgoal")
     {
-        if (other.classname == "grenade" || other.health > 0)
+        if (self.spawnflags & PUSH_INCLUDETFITEM)
         {
-            sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
-            other.velocity = self.movedir;
+            push = TRUE;
         }
+    }
+    else if (self.spawnflags & PUSH_EXCLUDEOTHER)
+    {
+        return;
     }
     else
     {
-        if (other.classname == "grenade")
-            other.velocity = self.speed * self.movedir * 10;
-        else if (other.health > 0) {
+        if (other.classname == "grenade" || other.health > 0)
+        {
+            push = TRUE;
+        }
+    }
+    
+    if (push)
+    {
+        if (self.target) // this could test for movedir but i want to be explicit, it's a bounce pad
+        {
+            if (!(self.spawnflags & PUSH_NONOISE))
+                FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+            other.velocity = self.movedir;
+        }
+        else
+        {
             other.velocity = self.speed * self.movedir * 10;
             if (other.classname == "player") {
                 if (other.fly_sound < time) {
                     other.fly_sound = time + 1.5;
-                    sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
+                    if (!(self.spawnflags & PUSH_NONOISE))
+                        FO_Sound(other, CHAN_AUTO, self.noise, 1, ATTN_NORM);
                 }
             }
         }
@@ -584,6 +637,7 @@ void () trigger_push = {
     }
     InitTrigger();
 
+    self.touch = trigger_push_touch;    
     if (self.target)
     {
         // the target ent might not be processed yet, so we do setup after map starts
@@ -592,25 +646,37 @@ void () trigger_push = {
     }
     else
     {
-        if (!self.speed)
+        if (!self.speed) {
             self.speed = 1000;
+        }
+        if(self.spawnflags & PUSH_MEGAJUMPER) {
+            self.touch = trigger_jumper_touch;
+        }
     }
     
-    if (!self.noise)
+    if (!(self.spawnflags & PUSH_NONOISE))
     {
-        if (self.target)
+        if (!self.noise)
         {
-            // bound pads
-            self.noise = "world/bouncepad.wav";
+            if (self.target)
+            {
+                // bound pads
+                self.noise = "world/bouncepad.wav";
+            }
+            else
+            {
+                self.noise = "ambience/windfly.wav";
+            }
         }
-        else
-        {
-            self.noise = "ambience/windfly.wav";
-        }
-    }
 
-    precache_sound(self.noise);    
-    self.touch = trigger_push_touch;    
+        precache_sound(self.noise); 
+    }   
+
+};
+
+void () trigger_jumppad = {
+    self.classname = "trigger_push";
+    trigger_push();
 };
 
 void () trigger_monsterjump_touch = {
@@ -645,3 +711,11 @@ void () trigger_monsterjump = {
     InitTrigger();
     self.touch = trigger_monsterjump_touch;
 };
+
+void () trigger_jumper = {
+    if(!self.noise) {
+        self.noise = "world/bounce.wav"; //"misc/boing.wav"; //"world/bouncepad.wav";
+    }
+    self.spawnflags = self.spawnflags | PUSH_MEGAJUMPER;
+    trigger_push();
+}
