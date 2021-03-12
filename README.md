@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* ``setinfo keepcells x`` allows scout/med/pyro/eng/hwguy to discard cells, x is how many they wish to keep. eg. an eng with 200 cells that has setinfo keepcells 50 will discard 150 cells and keep 50 (suggest users put in class configs)
 * option to let engineer move while building `localinfo em on`.
 * new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
