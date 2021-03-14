@@ -7,7 +7,9 @@ void () TeamFortress_ClipTick;
 void () TeamFortress_Discard = {
 	local string s = infokey(self,"keepcells");
 	local float c = stof(s);
-	if (c == 0 && s != "0")
+	if(nokeepcells)			//check if disabled serverside
+		c = -1; 
+	else if (c == 0 && s != "0")
 		c = -1;			//using this to track if player doesnt want to use keepcells setinfo
 	else if (c < 0)
 		c = -1;
