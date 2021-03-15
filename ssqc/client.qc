@@ -707,6 +707,9 @@ void () DecodeLevelParms = {
 
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+        
+        // disable setinfo keepcells [off]
+        nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
 
         // enable server-side flaginfo on statusbar [on]
 //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");

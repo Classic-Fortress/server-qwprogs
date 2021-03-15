@@ -597,6 +597,7 @@ float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+float nokeepcells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
