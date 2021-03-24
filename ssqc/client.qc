@@ -648,6 +648,8 @@ void () DecodeLevelParms = {
         // new emp range and set damage values (so no dropammo to reduce)
         new_emp = CF_GetSetting("nemp", "new_emp", "1");
 
+        fo_sentry_targeting = CF_GetSetting("fosgt", "fo_sentry_targ", "1");
+
         // For duelmode, how soon to reset the winning player (allows for double KOs)
         duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "3.9");
         // remove packs in duelmode [1]
@@ -685,6 +687,9 @@ void () DecodeLevelParms = {
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
+        // health repair 
+        fo_repair_ratio = CF_GetSetting("forep", "fo_repair_ratio", "2");
+        
         // keep teams on map change [off]
         cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
 
