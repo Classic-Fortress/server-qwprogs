@@ -1774,7 +1774,7 @@ void (entity Goal, entity AP, float addb) DoResults = {
     local float winners;
     local float gotone;
 
-    if (cb_prematch) {
+    if (cb_prematch && !(Goal.spawnflags & TFGI_CB_IGNORE)) {
         return;
     }
     if (Goal.goal_state == 1) {
@@ -2116,8 +2116,17 @@ void () info_tfgoal_use = {
 void () tfgoal_timer_tick = {
     if (self.goal_state != 3) {
         if (APMeetsCriteria(self, world))
+        {
+            //bprint(PRINT_HIGH, "meets criteria, doing results\n");
             DoResults(self, world, 1);
+
+            // redo think here too, as quadmode breaks proper timers 
+            // in DoResults due to return after cb_prematch test
+            self.think = tfgoal_timer_tick;
+            self.nextthink = time + self.search_time;
+        }
         else {
+            bprint(PRINT_HIGH, "inactivating timer\n");
             InactivateGoal(self);
             self.think = tfgoal_timer_tick;
             self.nextthink = time + self.search_time;
@@ -2319,6 +2328,9 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
 
 void () ReturnItem = {
     local entity te;
+
+    if (self.enemy.touch == item_tfgoal_hidden_touch)
+        return;
 
     self.enemy.goal_state = 2;
     if ((self.enemy.goal_activation & 8192) &&
@@ -2614,6 +2626,9 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
         Item.think = tfgoalitem_dropthink;
         Item.bubble_count = time + Item.pausetime + 5; //used by the return timer
     }
+    if (Item.goal_activation & TFGI_RETURN_DROP) {
+        Item.think = tfgoalitem_remove;
+    }
     Item.owner = world;
 };
 
@@ -2623,7 +2638,7 @@ void () tfgoalitem_remove = {
     if (self.goal_state == 1) {
         return;
     }
-    if (self.goal_activation & 32) {
+    if (self.goal_activation & 32 || self.goal_activation & TFGI_RETURN_DROP) {
         te = spawn();
         te.enemy = self;
         te.weapon = 3;
@@ -2961,12 +2976,15 @@ void () DropGoalItems = {
     while (te) {
         if (te.owner == self) {
             if (old_dropflag) {
-                if (te.goal_activation & 4096) {
+                if (te.goal_activation & TFGI_ALLOWTHROW) {
                     tfgoalitem_RemoveFromPlayer(te, self, 2);
                 }
             }
+            else if(te.goal_activation & TFGI_RETURN_DROP) {
+                tfgoalitem_RemoveFromPlayer(te, self, 0);
+            }
             //Always allow dropping 4096
-            else if (self.effects & EF_DIMLIGHT || te.goal_activation & 4096) {
+            else if (self.effects & EF_DIMLIGHT || te.goal_activation & TFGI_ALLOWTHROW) {
                 timecarried = gametime - self.goalrunningtime;
                 RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);

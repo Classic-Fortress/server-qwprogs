@@ -558,6 +558,10 @@ void () trigger_push_touch = {
     {
         return;
     }
+    else if ((self.spawnflags & PUSH_EXCLUDEGRENADE) && other.classname == "grenade")
+    {
+        return;
+    }
     else
     {
         if (other.classname == "grenade" || other.health > 0)

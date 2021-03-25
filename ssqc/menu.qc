@@ -107,7 +107,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 void (entity pl) UpdateClientMenu_Team;
 void (entity pl, float team) UpdateClientClasses;
 void (entity pl) UpdateClientMenu_Class;
-void (entity pl, float ammotypes, float ammomakes) UpdateClientMenu_DropAmmo;
+void (entity pl) UpdateClientMenu_DropAmmo;
 void (entity pl) UpdateClientMenu_Scout;
 void (entity pl) UpdateClientMenu_Spy;
 void (entity pl) UpdateClientMenu_Spy_Skin;
@@ -470,32 +470,9 @@ void () Menu_Drop = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         //fte+csqc has its own team menu
         //ask the client to activate it
-        float ammotypes = (1 | 2 | 4 | 8), ammomakes = 0;
-        if (self.ammo_shells < DROP_SHELLS)
-            ammotypes -= 1;
-        if (self.ammo_nails < DROP_NAILS)
-            ammotypes -= 2;
-        if (self.ammo_rockets < DROP_ROCKETS)
-            ammotypes -= 4;
-        if (self.ammo_cells < DROP_CELLS)
-            ammotypes -= 8;
-
-        if (self.playerclass == PC_ENGINEER) {
-            ammomakes = 0;
-            if ((self.ammo_shells < DROP_SHELLS) && ((self.ammo_cells / AMMO_COST_SHELLS) >= (DROP_SHELLS - self.ammo_shells)))
-                ammomakes += 1;
-            if ((self.ammo_nails < DROP_NAILS) && ((self.ammo_cells / AMMO_COST_NAILS) >= (DROP_NAILS - self.ammo_nails)))
-                ammomakes += 2;
-            if ((self.ammo_rockets < DROP_ROCKETS) && ((self.ammo_cells / AMMO_COST_ROCKETS) >= (DROP_ROCKETS - self.ammo_rockets)))
-                ammomakes += 4;
-        }
 
         Menu_Close(self);
-        if(ammotypes) {
-            UpdateClientMenu_DropAmmo(self, ammotypes, ammomakes);
-        } else {
-            sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        }
+        UpdateClientMenu_DropAmmo(self);
         return;
     }
     

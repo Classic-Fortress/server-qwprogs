@@ -242,6 +242,7 @@ entity(vector fmins, vector fmaxs) spawn_field =
     trigger.all_active = self.all_active;
     trigger.last_impulse = self.last_impulse;
     trigger.else_goal = self.else_goal;
+    trigger.group_no = self.group_no;
     t1 = fmins;
     t2 = fmaxs;
     setsize(trigger, t1 - '60 60 8', t2 + '60 60 8');
