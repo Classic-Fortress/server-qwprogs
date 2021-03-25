@@ -2517,7 +2517,7 @@ void (float type) TeamFortress_DropAmmo = {
         ammo = DROP_SHELLS;
         if (self.ammo_shells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_SHELLS) >
+                if ((self.ammo_cells / AMMO_COST_SHELLS) >=
                     (ammo - self.ammo_shells)) {
                     sprint(self, PRINT_HIGH, "You make some shells\n");
                     self.ammo_cells =
@@ -2535,7 +2535,7 @@ void (float type) TeamFortress_DropAmmo = {
         ammo = DROP_NAILS;
         if (self.ammo_nails < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_NAILS) >
+                if ((self.ammo_cells / AMMO_COST_NAILS) >=
                     (ammo - self.ammo_nails)) {
                     sprint(self, PRINT_HIGH, "You make some nails\n");
                     self.ammo_cells =
@@ -2553,7 +2553,7 @@ void (float type) TeamFortress_DropAmmo = {
         ammo = DROP_ROCKETS;
         if (self.ammo_rockets < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_ROCKETS) >
+                if ((self.ammo_cells / AMMO_COST_ROCKETS) >=
                     (ammo - self.ammo_rockets)) {
                     sprint(self, PRINT_HIGH, "You make some rockets\n");
                     self.ammo_cells =
@@ -2571,7 +2571,7 @@ void (float type) TeamFortress_DropAmmo = {
         ammo = DROP_CELLS;
         if (self.ammo_cells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_CELLS) >
+                if ((self.ammo_cells / AMMO_COST_CELLS) >=
                     (ammo - self.ammo_cells)) {
                     sprint(self, PRINT_HIGH, "You make some cells\n");
                     self.ammo_cells =

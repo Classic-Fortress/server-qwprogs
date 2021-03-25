@@ -284,7 +284,7 @@ var fo_menu FO_MENU_BUILD = {
                 FO_MENU_BUILD.options[3].state = FO_MENU_STATE_HIDDEN;  //Dismantle
             }
         } else {
-            if(getstatf(STAT_CELLS) > ENG_SENTRY_COST) {
+            if(getstatf(STAT_CELLS) >= ENG_SENTRY_COST) {
                 FO_MENU_BUILD.options[0].state = FO_MENU_STATE_NORMAL;
             } else {
                 FO_MENU_BUILD.options[0].state = FO_MENU_STATE_DISABLED;
@@ -302,7 +302,7 @@ var fo_menu FO_MENU_BUILD = {
                 FO_MENU_BUILD.options[5].state = FO_MENU_STATE_HIDDEN;
             }
         } else {
-            if(getstatf(STAT_CELLS) > ENG_DISPENSER_COST) {
+            if(getstatf(STAT_CELLS) >= ENG_DISPENSER_COST) {
                 FO_MENU_BUILD.options[1].state = FO_MENU_STATE_NORMAL;
             } else {
                 FO_MENU_BUILD.options[1].state = FO_MENU_STATE_DISABLED;
