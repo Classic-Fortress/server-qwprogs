@@ -204,6 +204,7 @@ float (entity p) FO_Sentry_ValidTarget = {
     return valid;
 };
 
+
 float () FO_Sentry_FindTarget = {
 
     // check for current valid target
@@ -267,7 +268,6 @@ float () FO_Sentry_FindTarget = {
     {
         delay = 0.45;
     }
-
     self.cnt = time + delay; // delay
 
     return TRUE;
