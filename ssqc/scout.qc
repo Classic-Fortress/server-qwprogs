@@ -730,7 +730,6 @@ void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounceNoCuss = {
     local float points;
     local entity head;
-    local entity te;
     local vector org;
 
     head = findradius(inflictor.origin, bounce + 40);

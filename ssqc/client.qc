@@ -386,9 +386,12 @@ void () DecodeLevelParms = {
         spurs_flag	= CF_GetSetting("spf", "spurs_flag" 		, "0");		// can climb with flag
 
 
-	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
+        // nail gren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
         nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
         
+        // medic cuss types 0 = MCGR_TYPE_DEFAULT, 1 = MCGR_TYPE_BLAST
+        mediccussgren_type = CF_GetSetting("mcgt", "mediccussgren_type", ftos(MCGR_TYPE_BLAST));
+
         // how many rotations the nailgren does [2]
         lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
         
@@ -880,6 +883,7 @@ void () DecodeLevelParms = {
             scoutdash = FALSE;
             fo_flash = FALSE;
             nailgren_type = NGR_TYPE_DEFAULT;
+            mediccussgren_type = MCGR_TYPE_BLAST;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
             medicaura = FALSE;

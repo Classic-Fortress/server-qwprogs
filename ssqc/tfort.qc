@@ -445,7 +445,7 @@ string GetGrenName(float type)
             s = "concussion grenade";
             break;
         case GR_TYPE_BLAST:
-            s = "blast grenade";
+            s = (mediccussgren_type == MCGR_TYPE_BLAST) ? "blast grenade" : "concussion grenade";
             break;
         case GR_TYPE_NONE:
             s = "no grenade";
@@ -800,7 +800,11 @@ void (float inp) TeamFortress_PrimeGrenade = {
         else if (self.tp_grenades_1 == 10)
             gs = "Caltrop canister";
         else if (self.tp_grenades_1 == 11)
-            gs = "Blast grenade";
+            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Concussion grenade";
+            }
         else
             gs = "Grenade";
 
@@ -1012,12 +1016,21 @@ void () TeamFortress_GrenadePrimed = {
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_BLAST) {
-        newmis.touch = BlastGrenadeTouch;
-        newmis.think = BlastGrenadeExplode;
-        newmis.grenadename = "blastgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
+        if (mediccussgren_type == MCGR_TYPE_BLAST){
+            newmis.touch = BlastGrenadeTouch;
+            newmis.think = BlastGrenadeExplode;
+            newmis.grenadename = "blastgrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        } else {
+            newmis.touch = ConcussionGrenadeTouch;
+            newmis.think = ConcussionGrenadeExplode;
+            newmis.grenadename = "concussiongrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        }
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
@@ -1115,7 +1128,11 @@ void () TeamFortress_GrenadeSwitch = {
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
         else if (self.tp_grenades_1 == 11)
-            gs = "Blast grenade";
+            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Cuss grenade";
+            }
         else
             gs = "Grenade";
     } else {
@@ -2814,6 +2831,22 @@ void () TeamFortress_ExplodePerson = {
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (self.weapon == GR_TYPE_BLAST) {
+        if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            newmis.touch = BlastGrenadeTouch;
+            newmis.think = BlastGrenadeExplode;
+            newmis.grenadename = "blastgrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        } else {
+            newmis.touch = ConcussionGrenadeTouch;
+            newmis.think = ConcussionGrenadeExplode;
+            newmis.grenadename = "concussiongrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        }
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;

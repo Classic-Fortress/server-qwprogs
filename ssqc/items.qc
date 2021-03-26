@@ -764,7 +764,11 @@ void (entity pl, float typ) PrintGrenadeType = {
     } else if (typ == 9) {
         st = "flash";
     } else if (typ == 11) {
-        st = "blast";
+        if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            st = "blast";
+        } else {
+            st = "concussion";
+        }
     }
     sprint(pl, PRINT_HIGH, st);
 };

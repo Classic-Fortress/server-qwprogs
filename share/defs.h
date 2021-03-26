@@ -772,6 +772,10 @@
 #define NGR_TYPE_LASER		1
 #define NGR_TYPE_BURST		2
 
+// Defines for CussGren Types
+#define MCGR_TYPE_DEFAULT	0
+#define MCGR_TYPE_BLAST		1
+
 // NailGren Default Settings
 #define NGR_LASER_DEFAULT_ROTATIONCOUNT		2
 #define NGR_LASER_DEFAULT_ROTATIONTIME		1
