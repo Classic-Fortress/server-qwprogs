@@ -15,7 +15,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
 void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounceNoCuss;
+      entity ignore) T_RadiusBounceBlast;
 entity(entity scanner, float scanrange, float enemies,
        float friends) T_RadiusScan;
 
@@ -378,7 +378,7 @@ void () BlastGrenadeTouch = {
 };
 
 void () BlastGrenadeExplode = {
-    T_RadiusBounceNoCuss(self, self.owner, 240, world);
+    T_RadiusBounceBlast(self, self.owner, 240, world);
     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
     WriteByte(MSG_MULTICAST, TE_EXPLOSION);
     WriteCoord(MSG_MULTICAST, self.origin_x);
@@ -727,7 +727,7 @@ void CussSpeedBump()
 }
 
 void (entity inflictor, entity attacker, float bounce,
-      entity ignore) T_RadiusBounceNoCuss = {
+      entity ignore) T_RadiusBounceBlast = {
     local float points;
     local entity head;
     local vector org;
