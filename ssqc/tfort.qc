@@ -444,6 +444,9 @@ string GetGrenName(float type)
         case GR_TYPE_CONCUSSION:
             s = "concussion grenade";
             break;
+        case GR_TYPE_BLAST:
+            s = "blast grenade";
+            break;
         case GR_TYPE_NONE:
             s = "no grenade";
             break;
@@ -643,7 +646,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Sniper max grenades type 2 (flare)", Role_None.gren2_limits[2], "", PC_SNIPER_GRENADE_MAX_2);
     CF_PrintSetting("Soldier max grenades type 2 (nail/shock)", Role_None.gren2_limits[3], "", PC_SOLDIER_GRENADE_MAX_2);
     CF_PrintSetting("Demoman max grenades type 2 (mirv)", Role_None.gren2_limits[4], "", PC_DEMOMAN_GRENADE_MAX_2);
-    CF_PrintSetting("Medic max grenades type 2 (concussion)", Role_None.gren2_limits[5], "", PC_MEDIC_GRENADE_MAX_2);
+    CF_PrintSetting("Medic max grenades type 2 (concussion/blast)", Role_None.gren2_limits[5], "", PC_MEDIC_GRENADE_MAX_2);
     CF_PrintSetting("Heavy Weapons max grenades type 2 (mirv)", Role_None.gren2_limits[6], "", PC_HVYWEAP_GRENADE_MAX_2);
     CF_PrintSetting("Pyro max grenades type 2 (napalm)", Role_None.gren2_limits[7], "", PC_PYRO_GRENADE_MAX_2);
     CF_PrintSetting("Spy max grenades type 2 (gas)", Role_None.gren2_limits[8], "", PC_SPY_GRENADE_MAX_2);
@@ -796,6 +799,8 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Flash grenade";
         else if (self.tp_grenades_1 == 10)
             gs = "Caltrop canister";
+        else if (self.tp_grenades_1 == 11)
+            gs = "Blast grenade";
         else
             gs = "Grenade";
 
@@ -1006,6 +1011,13 @@ void () TeamFortress_GrenadePrimed = {
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (self.weapon == GR_TYPE_BLAST) {
+        newmis.touch = BlastGrenadeTouch;
+        newmis.think = BlastGrenadeExplode;
+        newmis.grenadename = "blastgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
@@ -1102,6 +1114,8 @@ void () TeamFortress_GrenadeSwitch = {
             gs = "Gas grenade";
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
+        else if (self.tp_grenades_1 == 11)
+            gs = "Blast grenade";
         else
             gs = "Grenade";
     } else {
@@ -2881,6 +2895,9 @@ void () TeamFortress_ExplodePerson = {
         if (self.weapon == GR_TYPE_CONCUSSION)
             bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
                     ", eating a concussion grenade is bad!\n");
+        else if (self.weapon == GR_TYPE_BLAST)
+            bprint3(PRINT_MEDIUM, "Nice one ", self.owner.netname,
+                    ", you forgot to throw your blast grenade!\n");
         else
             bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
                     "! Assist your own suicide some other time!\n");

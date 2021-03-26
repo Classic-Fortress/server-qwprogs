@@ -110,7 +110,7 @@ void () Help_ShowMedic = {
     sprint(self, PRINT_HIGH, Q"\s2\s      - Equip Super Shotgun\n");
     sprint(self, PRINT_HIGH, Q"\s2\s      - Equip Shotgun\n");
     sprint(self, PRINT_HIGH, Q"\s4\s      - Equip Medikit\n");
-    sprint(self, PRINT_HIGH, Q"\sf\s      - Prime/throw Concussion Grenade\n");
+    sprint(self, PRINT_HIGH, Q"\sf\s      - Prime/throw Blast Grenade\n");
     sprint(self, PRINT_HIGH, Q"\smouse2\s - Prime/throw Hand Grenade\n");
 };
 
