@@ -2925,15 +2925,18 @@ void () TeamFortress_ExplodePerson = {
         bprint3(PRINT_MEDIUM, "Ack! ", self.owner.netname,
                 "! The grenade is your friend for another reason!\n");
     else if (self.owner.playerclass == PC_MEDIC) {
-        if (self.weapon == GR_TYPE_CONCUSSION)
-            bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
-                    ", eating a concussion grenade is bad!\n");
-        else if (self.weapon == GR_TYPE_BLAST)
-            bprint3(PRINT_MEDIUM, "Nice one ", self.owner.netname,
-                    ", you forgot to throw your blast grenade!\n");
-        else
+        if (self.weapon == GR_TYPE_BLAST) {
+            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+                bprint3(PRINT_MEDIUM, "Nice one ", self.owner.netname,
+                        ", you forgot to throw your blast grenade!\n");
+            } else {
+                bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
+                        ", eating a concussion grenade is bad!\n");
+            }
+        } else {
             bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
                     "! Assist your own suicide some other time!\n");
+        }
     }
     else if (self.owner.playerclass == PC_HVYWEAP)
         bprint3(PRINT_MEDIUM, "Hey ", self.owner.netname,
