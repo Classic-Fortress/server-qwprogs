@@ -55,7 +55,7 @@ New features
 * Admin system created to allow for easy setup of pub/clan/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
 * Loc support added to server, show locations for dropped flag.
 * Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
-* Medic cuss grenades changed to "Blast grenades" (no cuss effect) (0 original, 1 blast). `localinfo mediccussgren_type 1` and `nginfo` in game for all configurable settings.
+* Medic cuss grenades changed to "Blast grenades" (no cuss effect, 12.5% weaker, no medic speedhump) (0 original, 1 blast). `localinfo mediccussgren_type 1` and `nginfo` in game for all configurable settings.
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
