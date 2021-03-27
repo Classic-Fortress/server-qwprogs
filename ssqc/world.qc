@@ -276,6 +276,7 @@ void () worldspawn = {
     precache_model2("progs/tf_stan.mdl");
     precache_model2("progs/v_medi.mdl");
     precache_model2("progs/hgren2.mdl");
+    precache_model2("progs/blastgren.mdl");
     precache_model2("progs/flashgren.mdl");
     precache_model2("progs/biggren.mdl");
     precache_model2("progs/flare.mdl");

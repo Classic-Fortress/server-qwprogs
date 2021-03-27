@@ -1028,7 +1028,7 @@ void () TeamFortress_GrenadePrimed = {
             newmis.grenadename = "blastgrenade";
             newmis.skin = 1;
             newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/hgren2.mdl");
+            FO_SetModel(newmis, "progs/blastgren.mdl");
         } else {
             newmis.touch = ConcussionGrenadeTouch;
             newmis.think = ConcussionGrenadeExplode;
@@ -2844,7 +2844,7 @@ void () TeamFortress_ExplodePerson = {
             newmis.grenadename = "blastgrenade";
             newmis.skin = 1;
             newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/hgren2.mdl");
+            FO_SetModel(newmis, "progs/blastgren.mdl");
         } else {
             newmis.touch = ConcussionGrenadeTouch;
             newmis.think = ConcussionGrenadeExplode;
