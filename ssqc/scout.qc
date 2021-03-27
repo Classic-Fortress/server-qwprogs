@@ -736,7 +736,7 @@ void (entity inflictor, entity attacker, float bounce,
         if (head != ignore) {
             if (head.takedamage) {
                 org = head.origin + (head.mins + head.maxs) * 0.5;
-                points = 0.6 * vlen(org - inflictor.origin);
+                points = 0.55 * vlen(org - inflictor.origin);
                 if (points < 0)
                     points = 0;
                 points = bounce - points;
