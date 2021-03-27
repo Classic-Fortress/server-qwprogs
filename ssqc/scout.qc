@@ -14,6 +14,8 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
+void (entity inflictor, entity attacker, float bounce,
+      entity ignore) T_RadiusBounceBlast;
 entity(entity scanner, float scanrange, float enemies,
        float friends) T_RadiusScan;
 
@@ -368,6 +370,23 @@ void () ConcussionGrenadeExplode = {
     dremove(self);
 };
 
+void () BlastGrenadeTouch = {
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    if (self.velocity == '0 0 0')
+        self.avelocity = '0 0 0';
+};
+
+void () BlastGrenadeExplode = {
+    T_RadiusBounceBlast(self, self.owner, 240, world);
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+    WriteCoord(MSG_MULTICAST, self.origin_x);
+    WriteCoord(MSG_MULTICAST, self.origin_y);
+    WriteCoord(MSG_MULTICAST, self.origin_z);
+    multicast(self.origin, MULTICAST_PHS);
+    dremove(self);
+};
+
 void () OldConcussionGrenadeTimer = {
     local string st;
 
@@ -705,6 +724,39 @@ void CussSpeedBump()
         dremove(self);
     }
 }
+
+void (entity inflictor, entity attacker, float bounce,
+      entity ignore) T_RadiusBounceBlast = {
+    local float points;
+    local entity head;
+    local vector org;
+
+    head = findradius(inflictor.origin, bounce + 40);
+    while (head) {
+        if (head != ignore) {
+            if (head.takedamage) {
+                org = head.origin + (head.mins + head.maxs) * 0.5;
+                points = 0.625 * vlen(org - inflictor.origin);
+                if (points < 0)
+                    points = 0;
+                points = bounce - points;
+
+                if ((head.classname != "building_dispenser")
+                    && (head.classname != "building_sentrygun")
+                    && (head.classname != "building_sentrygun_base")
+                    && (points > 0)) {
+                    head.velocity = org - inflictor.origin;
+                    head.velocity = head.velocity * (points / 20);
+                    if (head.classname != "player") {
+                        if (head.flags & FL_ONGROUND)
+                            head.flags = head.flags - FL_ONGROUND;
+                    }
+                }
+            }
+        }
+        head = head.chain;
+    }
+};
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce = {
