@@ -869,6 +869,12 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "EMP grenade";
         else if (self.tp_grenades_2 == 9)
             gs = "Flash grenade";
+        else if (self.tp_grenades_2 == 11)
+            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Concussion grenade";
+            }
         else
             gs = "Grenade";
 
