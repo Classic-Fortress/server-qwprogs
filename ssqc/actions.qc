@@ -288,7 +288,7 @@ void (entity pe_player, float f_type) CF_Identify = {
     v_source = pe_player.origin + v_forward * 10;
     v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
 
-    traceline(v_source, v_source + v_forward * 2048, 0, pe_player);
+    traceline(v_source, v_source + v_forward * 2048, MOVE_LAGGED, pe_player);
     if (trace_ent != world) {
         local string s_id_string = "", s_class = "", s_name = "";
         local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0, f_sentryhealth = 0, f_maxsentryhealth = 0;
