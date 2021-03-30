@@ -493,7 +493,7 @@ float burstgren_count;
 float burstgren_interval;
 float burstgren_range;
 
-float mediccussgren_type;
+float medic_type;
 
 float old_grens;
 float fo_flash;

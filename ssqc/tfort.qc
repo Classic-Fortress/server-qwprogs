@@ -445,7 +445,7 @@ string GetGrenName(float type)
             s = "concussion grenade";
             break;
         case GR_TYPE_BLAST:
-            s = (mediccussgren_type == MCGR_TYPE_BLAST) ? "blast grenade" : "concussion grenade";
+            s = (medic_type == MEDIC_TYPE_BLAST) ? "blast grenade" : "concussion grenade";
             break;
         case GR_TYPE_NONE:
             s = "no grenade";
@@ -800,7 +800,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         else if (self.tp_grenades_1 == 10)
             gs = "Caltrop canister";
         else if (self.tp_grenades_1 == 11)
-            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            if (medic_type == MEDIC_TYPE_BLAST) {
                 gs = "Blast grenade";
             } else {
                 gs = "Concussion grenade";
@@ -870,7 +870,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         else if (self.tp_grenades_2 == 9)
             gs = "Flash grenade";
         else if (self.tp_grenades_2 == 11)
-            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            if (medic_type == MEDIC_TYPE_BLAST) {
                 gs = "Blast grenade";
             } else {
                 gs = "Concussion grenade";
@@ -1022,7 +1022,7 @@ void () TeamFortress_GrenadePrimed = {
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_BLAST) {
-        if (mediccussgren_type == MCGR_TYPE_BLAST){
+        if (medic_type == MEDIC_TYPE_BLAST){
             newmis.touch = BlastGrenadeTouch;
             newmis.think = BlastGrenadeExplode;
             newmis.grenadename = "blastgrenade";
@@ -1134,7 +1134,7 @@ void () TeamFortress_GrenadeSwitch = {
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
         else if (self.tp_grenades_1 == 11)
-            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            if (medic_type == MEDIC_TYPE_BLAST) {
                 gs = "Blast grenade";
             } else {
                 gs = "Cuss grenade";
@@ -1247,7 +1247,7 @@ void (entity p) TeamFortress_SetSpeed = {
         p.maxfbspeed = PC_DEMOMAN_MAXSPEED;
         p.maxstrafespeed = PC_DEMOMAN_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_MEDIC) {
-        if (mediccussgren_type == MCGR_TYPE_BLAST) {
+        if (medic_type == MEDIC_TYPE_BLAST) {
             p.maxfbspeed = PC_BLASTMEDIC_MAXSPEED;
             p.maxstrafespeed = PC_BLASTMEDIC_MAXSTRAFESPEED;
         } else {
@@ -2843,7 +2843,7 @@ void () TeamFortress_ExplodePerson = {
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_BLAST) {
-        if (mediccussgren_type == MCGR_TYPE_BLAST) {
+        if (medic_type == MEDIC_TYPE_BLAST) {
             newmis.touch = BlastGrenadeTouch;
             newmis.think = BlastGrenadeExplode;
             newmis.grenadename = "blastgrenade";
@@ -2937,7 +2937,7 @@ void () TeamFortress_ExplodePerson = {
                 "! The grenade is your friend for another reason!\n");
     else if (self.owner.playerclass == PC_MEDIC) {
         if (self.weapon == GR_TYPE_BLAST) {
-            if (mediccussgren_type == MCGR_TYPE_BLAST) {
+            if (medic_type == MEDIC_TYPE_BLAST) {
                 bprint3(PRINT_MEDIUM, "Nice one ", self.owner.netname,
                         ", you forgot to throw your blast grenade!\n");
             } else {

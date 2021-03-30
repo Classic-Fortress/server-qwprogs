@@ -788,7 +788,7 @@ void (entity inflictor, entity attacker, float bounce,
                     } else {
                         if (head.playerclass == PC_MEDIC)
                         {
-                            if (medicnocuss && (mediccussgren_type != MCGR_TYPE_BLAST))
+                            if (medicnocuss && (medic_type != MEDIC_TYPE_BLAST))
                             {
                                 entity speedbump;
                                 speedbump = spawn();
