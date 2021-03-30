@@ -746,7 +746,7 @@ void (entity inflictor, entity attacker, float bounce,
                     && (head.classname != "building_sentrygun_base")
                     && (points > 0)) {
                     head.velocity = org - inflictor.origin;
-                    head.velocity = head.velocity * (points / 20);
+                    head.velocity = head.velocity * (points / 20) * blastgren_velocity_multiplier;
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
@@ -787,7 +787,7 @@ void (entity inflictor, entity attacker, float bounce,
                     } else {
                         if (head.playerclass == PC_MEDIC)
                         {
-                            if (medicnocuss && (mediccussgren_type != MCGR_TYPE_BLAST))
+                            if (medicnocuss && (medic_type != MEDIC_TYPE_BLAST))
                             {
                                 entity speedbump;
                                 speedbump = spawn();
