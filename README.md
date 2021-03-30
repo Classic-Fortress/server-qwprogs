@@ -56,6 +56,7 @@ New features
 * Loc support added to server, show locations for dropped flag.
 * Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
 * Option for "blast medic". Secondary grenade is repaced with blast gren. It behaves like a concussion grenade, but doesn't apply a concussion effect. The blast medic moves at 280 units (instead of 320), but is not speed capped. `localinfo medic_type 1` (0 for normal, 1 for blast).
+* Blast grenade velocity multiplier `localinfo blastgren_velocity_multiplier`. (default 1 is same as concussion grenade).
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.

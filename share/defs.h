@@ -772,10 +772,6 @@
 #define NGR_TYPE_LASER		1
 #define NGR_TYPE_BURST		2
 
-// Defines for Medic type
-#define MEDIC_TYPE_DEFAULT	0
-#define MEDIC_TYPE_BLAST		1
-
 // NailGren Default Settings
 #define NGR_LASER_DEFAULT_ROTATIONCOUNT		2
 #define NGR_LASER_DEFAULT_ROTATIONTIME		1
@@ -785,6 +781,13 @@
 #define NGR_BURST_DEFAULT_COUNT			2
 #define NGR_BURST_DEFAULT_INTERVAL		0.7
 #define NGR_BURST_DEFAULT_RANGE			0.3
+
+// Defines for Medic type
+#define MEDIC_TYPE_DEFAULT	0
+#define MEDIC_TYPE_BLAST		1
+
+// Defines for BlastGren Settings
+#define BLASTGREN_DEFAULT_VELOCITY_MULTIPLIER	1
 
 // Defines for WeaponMode
 #define GL_NORMAL	0

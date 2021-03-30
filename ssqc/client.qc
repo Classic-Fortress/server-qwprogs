@@ -416,6 +416,9 @@ void () DecodeLevelParms = {
         // time before nail projectile destroys itself [0.3]
         burstgren_range = CF_GetSetting("bgr", "burstgren_range", ftos(NGR_BURST_DEFAULT_RANGE));
 
+        // multiplier to blast gren velocity
+        blastgren_velocity_multiplier = CF_GetSetting("bvm", "blastgren_velocity_multiplier", ftos(BLASTGREN_DEFAULT_VELOCITY_MULTIPLIER));
+
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
 

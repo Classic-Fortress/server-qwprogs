@@ -747,7 +747,7 @@ void (entity inflictor, entity attacker, float bounce,
                     && (head.classname != "building_sentrygun_base")
                     && (points > 0)) {
                     head.velocity = org - inflictor.origin;
-                    head.velocity = head.velocity * (points / 20);
+                    head.velocity = head.velocity * (points / 20) * blastgren_velocity_multiplier;
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
