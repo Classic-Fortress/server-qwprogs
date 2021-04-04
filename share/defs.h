@@ -254,7 +254,7 @@
 #define TFSTATE_CONCUSSED		524288
 
 // Defines used by TF_T_Damage (see combat.qc)
-#define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
+#define TF_TD_IGNOREARMOUR	1  // Bypasses the armor of the target
 #define TF_TD_NOTTEAM		2  // Doesn't damage a team member (indicates direct fire weapon)
 #define TF_TD_NOTSELF		4  // Doesn't damage self
 
