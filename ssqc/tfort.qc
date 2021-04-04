@@ -1892,10 +1892,8 @@ void () TeamFortress_SetEquipment = {
 
             if (old_hp_armor) {
                 self.armorvalue = 300;
-            } else if (max_armor_hwguy) {
-                self.armorvalue = max_armor_hwguy;
             } else {
-                self.armorvalue = PC_HVYWEAP_MAXARMOR;
+                self.armorvalue = max_armor_hwguy;
             }
 
         } else {
@@ -1935,10 +1933,8 @@ void () TeamFortress_SetEquipment = {
 
         if (old_hp_armor) {
             self.maxarmor = 300;
-        } else if (max_armor_hwguy) {
-            self.maxarmor = max_armor_hwguy;
         } else {
-            self.maxarmor = PC_HVYWEAP_MAXARMOR;
+            self.maxarmor = max_armor_hwguy;
         }
 
         if (self.last_playerclass != self.playerclass)
