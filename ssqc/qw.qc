@@ -121,6 +121,8 @@ typedef void (float n) f_void_float;
 
 float toggleflags;              // toggleable flags
 
+string nextmap;
+
 //float respawn_delay_time;
 
 //
@@ -271,6 +273,7 @@ float coop;
 .float inactivate_group_no;
 .float remove_group_no;
 .float restore_group_no;
+.float switch_team_group_no;
 
 .vector goal_min;
 .vector goal_max;
@@ -598,6 +601,7 @@ float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+float nokeepcells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;

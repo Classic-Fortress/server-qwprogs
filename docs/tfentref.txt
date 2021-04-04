@@ -346,8 +346,8 @@ playerclass             AP must be this playerclass to meet this Goal's criteria
                                 9 : Only allow an Engineer to activate
                                 
 spawnflags              1 :     By default, when a GoalItem has a .mdl set, it will glow based on team_no.  
-                                This spawnflag will stop that glow.
-
+                                This spawnflag will stop that glow. (TFGI_NOGLOW)
+                        2 :     Allow this goal to work even in clan battle/quadmode prematch (TFGI_CB_IGNORE)
 if_goal_is_active       This Goal must be in ACTIVE state.
 if_goal_is_inactive     This Goal must be in INACTIVE state.
 if_goal_is_removed      This Goal must be in REMOVED state.
@@ -1224,6 +1224,9 @@ trigger_push
                         4 : exclude "other" (So only TFItems are affected)
                         8 : "no noise" make sure no default noise is added
 
+func_wall
+        spawnflags:     1 : make wall non solid
+                        2 : WALL_HIDE_ON_USE
 trigger_jumppad
         Rename of trigger_push, can be used to allow for "Fortress One" only trigger_push entities that won't be misinterpreted by other fortress mods
 

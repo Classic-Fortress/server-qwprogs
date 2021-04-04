@@ -4,6 +4,7 @@ FortressOne Server
 New features
 ------
 * Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
+* ``setinfo keepcells <number>`` allows scout/med/pyro/eng/hwguy to include cells above ``<number>`` into discards. eg. an eng with 200 cells that has ``setinfo keepcells 50`` will discard 150 cells and keep 50. sold/spy/sniper/demo will throw all cells regardless of ``<number>`` (current behaviour). suggest players using this setinfo use scout/med/pyro/eng/hwguy class configs to set values for each class. ``localinfo nokeepcells 1`` - disables keepcells server-wide
 * option to let engineer move while building `localinfo em on`.
 * new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 

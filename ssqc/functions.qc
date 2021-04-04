@@ -132,8 +132,14 @@ void () PrintLoginMessage =  {
 }
 
 void () EndGameThink = {
-	localcmd("changelevel ");
-    localcmd(mapname);
+	local string m = mapname;
+    if(vote_result != string_null && vote_result != "") {
+        m = vote_result;
+    } else if(nextmap != string_null && nextmap != "") {
+        m = nextmap;
+    }
+    localcmd("changelevel ");
+    localcmd(m);
     localcmd("\n");
     dremove(self);
 }

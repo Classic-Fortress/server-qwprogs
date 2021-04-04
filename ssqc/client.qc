@@ -68,8 +68,6 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 
-string nextmap;
-
 void () info_intermission =
 {
     if (CheckExistence() == 0) {
@@ -718,6 +716,9 @@ void () DecodeLevelParms = {
 
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+        
+        // disable setinfo keepcells [off]
+        nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
 
         // enable server-side flaginfo on statusbar [on]
 //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
@@ -1035,7 +1036,7 @@ void () TF_MovePlayer = {
 };
 
 void () GotoNextMap = {
-    if (vote_result != string_null)
+    if (vote_result != string_null && (nextmap == string_null || nextmap == ""))
         nextmap = strzone(vote_result);
 
     if (nextmap != mapname || vote_result != string_null) {
@@ -1123,29 +1124,36 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_y);
     WriteAngle(MSG_ALL, pos.mangle_z);
 
-    local string nextmapstring = vote_result;
-    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    vote_style = CF_GetSetting("vs", "vote_style", "2");
-    if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result && vote_result != vm) {
-            localcmd ("localinfo votemode off\n");
-            //changelevel(vote_result);
-        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
-            vote_result = vm;
-            localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
-            vote_result = mapname;
+    local string nextmapstring = nextmap;
+    if((vote_result == string_null || vote_result == "") && (nextmap == string_null || nextmap == "")) {
+        local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        vote_style = CF_GetSetting("vs", "vote_style", "2");
+        if (vote_style || votemode == 2){
+            if(votemode == 1 && vote_result && vote_result != vm) {
+                localcmd ("localinfo votemode off\n");
+                //changelevel(vote_result);
+            } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+                vote_result = vm;
+                localcmd ("localinfo votemode on\n");
+                //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
+            } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
+                vote_result = mapname;
+            }
         }
+        //if(!votemode) {
+        //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        //    nextmapstring = strcat(vote_result, " \b(voting)\b");
+        //}
     }
-    //if(!votemode) {
-    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    //    nextmapstring = strcat(vote_result, " \b(voting)\b");
-    //}
+    if(vote_result != string_null && vote_result != "") {
+        nextmapstring = vote_result;
+        nextmap = vote_result;
+    }
 
+// 
     other = find(world, classname, "player");
     while (other != world) {
-        if (vote_result != string_null)
+        if (nextmapstring != string_null && nextmapstring != "")
             sprint(other, PRINT_HIGH, "Next up: ", nextmapstring, "\n");
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
@@ -1772,6 +1780,32 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "ready", player.is_ready);
 };
 
+void (float all_dimensions) SetDimensions = {
+    if (all_dimensions)
+    {
+        self.dimension_seen = DMN_NOFLASH;
+
+        switch (self.team_no)
+        {
+            case TEAM_BLUE:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMBLUE;
+                break;
+            case TEAM_RED:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMRED;
+                break;
+            case TEAM_YELL:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMYELL;
+                break;
+            case TEAM_GREN:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMGREN;
+                break;
+            default:
+                self.dimension_see = DMN_NOFLASH;
+                break;
+        }
+    }
+};
+
 void () PutClientInServer = {
     local float oldclass;
     local entity spot;
@@ -1813,8 +1847,7 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
-    self.dimension_see = DMN_NOFLASH;
-    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    SetDimensions(TRUE);
     self.special_cooldown = 0;
     
     setmodel(self, string_null);
@@ -2000,6 +2033,7 @@ void () PutClientInServer = {
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
+
 };
 
 //void () info_player_start = {

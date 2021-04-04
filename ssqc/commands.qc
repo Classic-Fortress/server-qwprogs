@@ -314,7 +314,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     switch (arg1)
     {
         case "progsversion":
-            sprint(self, PRINT_HIGH, "sv progs version: 0.2\n");
+            // yy.mm.dd.incremented vers
+            sprint(self, PRINT_HIGH, "sv progs version: 21.03.25.1\n");
             break;
         case "adminpwd":
             processedCmd = TRUE;
@@ -1120,6 +1121,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
+                    nextmap = arg2;
                     if (!clan_scores_dumped) {
                         if (quadmode) {
                             rounds = 1;

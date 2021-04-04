@@ -135,20 +135,20 @@ void () item_tfgoal_hidden_touch = {
     if (trace_fraction < 1)
         return;
     
-    if(self.owned_by == other.team_no) {
+    /*if(self.owned_by == other.team_no) {
         CenterPrint(other, "Unfortunately, your flag is in another castle\n\nYou are Attacking the other base\n");
     } else {
         CenterPrint(other, "You are defending the wrong flag!\n\nGet back to your base quickly\n");
-    }
+    }*/
 }
 
-void Quad_HideFlag(entity flag) = {
+void (entity flag) Quad_HideFlag = {
     flag.touch = item_tfgoal_hidden_touch;
     setmodel(flag, "");
     setsize(flag, flag.goal_min, flag.goal_max);
 };
 
-void Quad_UnHideFlag(entity flag) = {
+void (entity flag) Quad_UnHideFlag = {
     flag.touch = item_tfgoal_touch;
     setmodel(flag, flag.mdl);
     setsize(flag, flag.goal_min, flag.goal_max);
