@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+* Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
 * option to let engineer move while building `localinfo em on`.
 * new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
@@ -65,7 +66,7 @@ New features
 * Keys and flags glow their colour.
 * Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
-* Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
+* Option for packs to fully restock health and armor of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
