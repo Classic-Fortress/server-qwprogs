@@ -738,7 +738,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_EngineerFix_Dispenser_Input(1);
                     break;
                 }
-                if(arg2 == "armor" || arg2 == "armor") {
+                if(arg2 == "armor") {
                     Menu_EngineerFix_Dispenser_Input(2);
                     break;
                 }
@@ -751,7 +751,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         Menu_Dispenser_Input(1);
                         break;
                     }
-                    if(arg3 == "armor" || arg3 == "armor") {
+                    if(arg3 == "armor") {
                         Menu_Dispenser_Input(2);
                         break;
                     }
