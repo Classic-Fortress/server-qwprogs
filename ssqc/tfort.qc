@@ -1890,10 +1890,12 @@ void () TeamFortress_SetEquipment = {
             self.no_grenades_1 = role.gren1_limits[6];
             self.no_grenades_2 = role.gren2_limits[6];
 
-            if (old_hp_armor)
+            if (old_hp_armor) {
                 self.armorvalue = 300;
-            else
-                self.armorvalue = PC_HVYWEAP_MAXARMOR;
+            } else {
+                self.armorvalue = max_armor_hwguy;
+            }
+
         } else {
             self.ammo_rockets = PC_HVYWEAP_INITAMMO_ROCKET;
             self.ammo_nails = PC_HVYWEAP_INITAMMO_NAIL;
@@ -1928,10 +1930,13 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_HVYWEAP_INITARMORCLASS;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
-        if (old_hp_armor)
+
+        if (old_hp_armor) {
             self.maxarmor = 300;
-        else
-            self.maxarmor = PC_HVYWEAP_MAXARMOR;
+        } else {
+            self.maxarmor = max_armor_hwguy;
+        }
+
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_SUPER_SHOTGUN;
 

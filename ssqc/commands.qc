@@ -738,7 +738,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_EngineerFix_Dispenser_Input(1);
                     break;
                 }
-                if(arg2 == "armour" || arg2 == "armor") {
+                if(arg2 == "armor") {
                     Menu_EngineerFix_Dispenser_Input(2);
                     break;
                 }
@@ -751,7 +751,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         Menu_Dispenser_Input(1);
                         break;
                     }
-                    if(arg3 == "armour" || arg3 == "armor") {
+                    if(arg3 == "armor") {
                         Menu_Dispenser_Input(2);
                         break;
                     }
@@ -870,7 +870,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd detpack [#|cancel]\n");
                 sprint(self, PRINT_HIGH, "cmd build [cancel|sentry|dispenser|destroy {sentry|dispenser}]\n");
                 sprint(self, PRINT_HIGH, "cmd sentry [rotate #]\n");
-                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armour|repair|withdraw {ammo|armour}]\n");
+                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armor|repair|withdraw {ammo|armor}]\n");
                 sprint(self, PRINT_HIGH, "cmd captainpick #\n");
                 sprint(self, PRINT_HIGH, "cmd break\b: end current map\b\n");
             }

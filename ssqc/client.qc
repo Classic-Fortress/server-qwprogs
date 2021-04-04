@@ -564,6 +564,9 @@ void () DecodeLevelParms = {
         // use old init/max hp/armor [off]
         old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
 
+        // configure max armor of heavy weapons guy [250]
+        max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
+
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (Role_None.respawn_delay_time) {
@@ -1372,7 +1375,7 @@ void () ResetPlayers = {
             if(te.health > 0) {
                 stuffcmd(te, "f_respawn\n");
                 if(round_winner_print_health) {
-                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmour:\s " , ftos(te.armorvalue), "\n");
+                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmor:\s " , ftos(te.armorvalue), "\n");
                 }
             }
             oldself = self;
