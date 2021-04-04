@@ -570,6 +570,7 @@ float server_huetf;
 float old_spanner;
 float old_dispenser;
 float old_hp_armor;
+float max_armor_hwguy;
 
 float ng_velocity;
 float ng_damage;
