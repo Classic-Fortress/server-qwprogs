@@ -346,7 +346,7 @@ var fo_menu FO_MENU_SENTRY_ROTATE = {
 var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
     [0,0], [300,200], "Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Insert Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser ammo\n");Menu_Cancel();},MENU_BUTTON},
-        {"2","Insert Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser armor\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Insert Armor","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser armor\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Repair","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser repair\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
@@ -361,7 +361,7 @@ var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
 var fo_menu FO_MENU_DISPENSER_USE = {
     [0,0], [300,200], "Use Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Withdraw Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw ammo\n");Menu_Cancel();},MENU_BUTTON},
-        {"2","Withdraw Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armor\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Withdraw Armor","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armor\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE, {

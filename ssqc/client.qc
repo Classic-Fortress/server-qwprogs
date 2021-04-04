@@ -1375,7 +1375,7 @@ void () ResetPlayers = {
             if(te.health > 0) {
                 stuffcmd(te, "f_respawn\n");
                 if(round_winner_print_health) {
-                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmour:\s " , ftos(te.armorvalue), "\n");
+                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmor:\s " , ftos(te.armorvalue), "\n");
                 }
             }
             oldself = self;

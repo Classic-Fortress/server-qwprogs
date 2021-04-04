@@ -471,7 +471,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         }
     }
 
-    if (T_flags & TF_TD_IGNOREARMOUR) {
+    if (T_flags & TF_TD_IGNOREARMOR) {
 
         take = damage;
         save = 0;

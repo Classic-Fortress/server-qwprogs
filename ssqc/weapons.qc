@@ -211,7 +211,7 @@ void () W_FireAxe = {
             if (crossproducttf(def, v_forward) > 0) {
                 deathmsg = DMSG_BACKSTAB;
                 TF_T_Damage(trace_ent, self, self, 120,
-                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOUR,
+                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
                             TF_TD_OTHER);
             } else {
                 deathmsg = DMSG_AXE;
