@@ -244,7 +244,7 @@
 #define TFSTATE_GRENTHROWING		1024  // is throwing a grenade
 #define TFSTATE_AIMING			2048  // is using the laser sight
 #define TFSTATE_LOCK            4096 // this state will stop hwguy from shooting assault cannon
-#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire
+#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire, as sentry gun, indicate it needs to die
 #define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
 #define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
 #define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
