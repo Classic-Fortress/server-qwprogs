@@ -56,6 +56,7 @@ void () SpectatorConnect = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
+        UpdateClientTeamScores(self);
         UpdateClientPrematch(self, !cb_prematch);
         UpdateClient_VoteMap_AddAll(self);
     }
