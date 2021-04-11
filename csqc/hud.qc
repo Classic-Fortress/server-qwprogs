@@ -98,6 +98,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_SHOWSCORES].FillSize.x / 2), 30];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Scale = 1.00;
+    Hud_Panels[HUD_PANEL_TEAM_SCORE].Position = [(width - Hud_Panels[HUD_PANEL_TEAM_SCORE].FillSize.x), 0];
     Hud_Panels[HUD_PANEL_MAP_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MAP_MENU].FillSize.x / 2), 30];
     Hud_Panels[HUD_PANEL_MAP_MENU].Scale = 1.00;
 }
@@ -533,8 +534,9 @@ void(string panelid) Hud_DrawTeamScorePanel = {
     FO_Hud_Panel* panel = getHudPanelPointer(id);
 
     vector position = getPosition(id);
+
     vector size = getFillSize(id);
-    float textScale = panel.TextScale?panel.TextScale:panel.Scale;
+    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
     float sizex, sizey;
     sizex = size_x;
     sizey = size_y;
@@ -550,7 +552,6 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         // click event
         if (fo_hud_editor)
         {
-            
         }
     }
 
