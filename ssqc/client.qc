@@ -721,8 +721,8 @@ void () DecodeLevelParms = {
         nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
 
         // enable server-side flaginfo on statusbar [on]
-//        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
-        
+        //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+
         reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
 
         if (reverse_cap) 
@@ -730,7 +730,7 @@ void () DecodeLevelParms = {
            InitReverseCap();
         }
 
-        engineer_move = CF_GetSetting("em","engineer_move", "0");
+        engineer_move = CF_GetSetting("em","engineer_move", "1");
 
         max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
