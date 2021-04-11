@@ -388,7 +388,7 @@ void () DecodeLevelParms = {
         nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
         
         // medic types 0 = MEDIC_TYPE_DEFAULT, 1 = MEDIC_TYPE_BLAST
-        medic_type = CF_GetSetting("mcgt", "medic_type", ftos(MEDIC_TYPE_BLAST));
+        medic_type = CF_GetSetting("mcgt", "medic_type", ftos(MEDIC_TYPE_DEFAULT));
 
         // how many rotations the nailgren does [2]
         lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
