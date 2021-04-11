@@ -15,9 +15,7 @@ void () SpectatorThink;
 void () Admin_Aliases;
 
 void () SpectatorConnect = {
-
-    self.dimension_see = DMN_NOFLASH;
-    self.dimension_seen = DMN_NOFLASH;
+    SetDimensions(TRUE);
 
     local string st;
 
@@ -56,6 +54,7 @@ void () SpectatorConnect = {
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
         InitAllStatuses(self);
         UpdateClientMOTD(self);
+        UpdateClientTeamScores(self);
         UpdateClientPrematch(self, !cb_prematch);
         UpdateClient_VoteMap_AddAll(self);
     }

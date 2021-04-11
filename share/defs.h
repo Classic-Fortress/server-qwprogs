@@ -254,7 +254,7 @@
 #define TFSTATE_CONCUSSED		524288
 
 // Defines used by TF_T_Damage (see combat.qc)
-#define TF_TD_IGNOREARMOUR	1  // Bypasses the armour of the target
+#define TF_TD_IGNOREARMOR	1  // Bypasses the armor of the target
 #define TF_TD_NOTTEAM		2  // Doesn't damage a team member (indicates direct fire weapon)
 #define TF_TD_NOTSELF		4  // Doesn't damage self
 
@@ -765,6 +765,7 @@
 #define GR_TYPE_EMP		8
 #define GR_TYPE_FLASH		9
 #define GR_TYPE_CALTROP		10
+#define GR_TYPE_BLAST	11
 
 // Defines for NailGren Types
 #define NGR_TYPE_DEFAULT	0
@@ -780,6 +781,13 @@
 #define NGR_BURST_DEFAULT_COUNT			2
 #define NGR_BURST_DEFAULT_INTERVAL		0.7
 #define NGR_BURST_DEFAULT_RANGE			0.3
+
+// Defines for Medic type
+#define MEDIC_TYPE_DEFAULT	0
+#define MEDIC_TYPE_BLAST		1
+
+// Defines for BlastGren Settings
+#define BLASTGREN_DEFAULT_VELOCITY_MULTIPLIER	1
 
 // Defines for WeaponMode
 #define GL_NORMAL	0
@@ -954,6 +962,8 @@
 #define PC_MEDIC_MAXHEALTH		100
 #define PC_MEDIC_MAXSPEED		320
 #define PC_MEDIC_MAXSTRAFESPEED		320
+#define PC_BLASTMEDIC_MAXSPEED		280
+#define PC_BLASTMEDIC_MAXSTRAFESPEED		280
 #define PC_MEDIC_MAXARMOR		90
 #define PC_MEDIC_INITARMOR		40
 #define PC_MEDIC_MAXARMORTYPE		0.6
@@ -972,7 +982,7 @@
 #define PC_MEDIC_INITAMMO_ROCKET	0
 #define PC_MEDIC_INITAMMO_MEDIKIT	50
 #define PC_MEDIC_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_MEDIC_GRENADE_TYPE_2		GR_TYPE_CONCUSSION
+#define PC_MEDIC_GRENADE_TYPE_2		GR_TYPE_BLAST
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		2
 #define PC_MEDIC_GRENADE_MAX_1		4
@@ -1207,6 +1217,9 @@
 #define TFGI_KEEP		256 // Players keep this item even when they die
 #define TFGI_ITEMGLOWS		512	// Item glows when on the ground
 #define TFGI_DONTREMOVERES	1024 // Don't remove results when the item is removed
+#define TFGI_DROPTOFLOOR	2048 // If this bit is set, the GoalItem drops to the ground when it first spawns.
+#define TFGI_ALLOWTHROW	    4096 // Item can be thrown with 'dropitems' command
+#define TFGI_SOLID	        8192 // Item is solid
 
 // Defines for TeamSpawnpoints : goal_activation (in team spawns)
 #define TFSP_MULTIPLEITEMS	1  // Give out the GoalItem multiple times
@@ -1236,6 +1249,7 @@
 
 // spawnflags
 #define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
+#define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
 
 /*======================================================================*/
 /* Flamethrower								*/
@@ -1427,12 +1441,28 @@
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
+// all bits between 1 and 255 are reserved for flash
 #define DMN_NOFLASH	256	// see all the things
+#define DMN_TEAMBLUE	512
+#define DMN_TEAMRED		1024
+#define DMN_TEAMYELL	2048
+#define DMN_TEAMGREN	4096
+#define DMN_INVISIBLE	8192	// special dimension to hide stuff in
 
 // trigger_push
 #define PUSH_ONCE	1
 #define PUSH_INCLUDETFITEM	2
-#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder
+#define PUSH_EXCLUDEOTHER	4 // bad names, bad bits, bad coder - use in conjunction with includetfitem to exclude all but tfitem
 #define PUSH_NONOISE	8
 #define PUSH_MEGAJUMPER	16
+#define PUSH_EXCLUDEGRENADE	32
 
+// func_wall
+#define WALL_SOLID_NOT	1
+#define WALL_HIDE_ON_USE	2
+
+// teams
+#define TEAM_BLUE	1
+#define TEAM_RED	2
+#define TEAM_YELL	3
+#define TEAM_GREN	4

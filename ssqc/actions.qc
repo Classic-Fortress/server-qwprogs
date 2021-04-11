@@ -5,24 +5,58 @@
 void () TeamFortress_ClipTick;
 
 void () TeamFortress_Discard = {
+	local string s = infokey(self,"keepcells");
+	local float c = stof(s);
+	if(nokeepcells)			//check if disabled serverside
+		c = -1; 
+	else if (c == 0 && s != "0")
+		c = -1;			//using this to track if player doesnt want to use keepcells setinfo
+	else if (c < 0)
+		c = -1;
+	else 
+	{
+		if(self.ammo_cells > c)			//changing c to track how many cells to include in discard
+			c = self.ammo_cells - c;
+		else
+			c = 0;
+	}
+
+	
     newmis = spawn();
     switch (self.playerclass) {
         case PC_SCOUT:
+		newmis.ammo_rockets = self.ammo_rockets;
+		if(c > 0)
+			newmis.ammo_cells = c;
+		break;
         case PC_ENGINEER:
-            newmis.ammo_rockets = self.ammo_rockets;
+		newmis.ammo_rockets = self.ammo_rockets;
+            	if(c > 0)
+			newmis.ammo_cells = c;
             break;
         case PC_MEDIC:
             newmis.ammo_rockets = self.ammo_rockets;
             if (!medicaura && old_medikit) {
                 newmis.ammo_cells = self.ammo_cells;
             }
+            else
+            {
+		if(c > 0)
+			newmis.ammo_cells = c;
+	     }
             break;
         case PC_SNIPER:
+            newmis.ammo_rockets = self.ammo_rockets;
+            newmis.ammo_cells = self.ammo_cells;
+            break;
         case PC_SPY:
             newmis.ammo_rockets = self.ammo_rockets;
             newmis.ammo_cells = self.ammo_cells;
             break;
         case PC_SOLDIER:
+            newmis.ammo_nails = self.ammo_nails;
+            newmis.ammo_cells = self.ammo_cells;
+            break;
         case PC_DEMOMAN:
             newmis.ammo_cells = self.ammo_cells;
             newmis.ammo_nails = self.ammo_nails;
@@ -30,9 +64,13 @@ void () TeamFortress_Discard = {
         case PC_HVYWEAP:
             newmis.ammo_rockets = self.ammo_rockets;
             newmis.ammo_nails = self.ammo_nails;
+            if(c > 0)
+		newmis.ammo_cells = c;
             break;
         case PC_PYRO:
             newmis.ammo_nails = self.ammo_nails;
+            if(c > 0)
+		newmis.ammo_cells = c;
             break;
         default:
     }
@@ -50,7 +88,10 @@ void () TeamFortress_Discard = {
         self.ammo_rockets = 0;
     }
     if (newmis.ammo_cells) {
-        self.ammo_cells = 0;
+	if(self.playerclass == PC_SCOUT || self.playerclass == PC_MEDIC || self.playerclass == PC_PYRO || self.playerclass == PC_HVYWEAP || self.playerclass == PC_ENGINEER && c > 0)
+		self.ammo_cells = self.ammo_cells - c;
+	else
+		self.ammo_cells = 0;
     }
     W_SetCurrentAmmo(self);
     FO_Sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
@@ -247,7 +288,7 @@ void (entity pe_player, float f_type) CF_Identify = {
     v_source = pe_player.origin + v_forward * 10;
     v_source_z = pe_player.absmin_z + pe_player.size_z * 0.7;
 
-    traceline(v_source, v_source + v_forward * 2048, 0, pe_player);
+    traceline(v_source, v_source + v_forward * 2048, MOVE_LAGGED, pe_player);
     if (trace_ent != world) {
         local string s_id_string = "", s_class = "", s_name = "";
         local float f_health = 0, f_maxhealth = 0, f_armor = 0, f_maxarmor = 0, f_friendly = 0, f_fakefriendly = 0, f_sentryhealth = 0, f_maxsentryhealth = 0;

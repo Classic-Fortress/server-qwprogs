@@ -314,7 +314,8 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     switch (arg1)
     {
         case "progsversion":
-            sprint(self, PRINT_HIGH, "sv progs version: 0.2\n");
+            // yy.mm.dd.incremented vers
+            sprint(self, PRINT_HIGH, "sv progs version: 21.03.25.1\n");
             break;
         case "adminpwd":
             processedCmd = TRUE;
@@ -737,7 +738,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_EngineerFix_Dispenser_Input(1);
                     break;
                 }
-                if(arg2 == "armour" || arg2 == "armor") {
+                if(arg2 == "armor") {
                     Menu_EngineerFix_Dispenser_Input(2);
                     break;
                 }
@@ -750,7 +751,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         Menu_Dispenser_Input(1);
                         break;
                     }
-                    if(arg3 == "armour" || arg3 == "armor") {
+                    if(arg3 == "armor") {
                         Menu_Dispenser_Input(2);
                         break;
                     }
@@ -869,7 +870,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd detpack [#|cancel]\n");
                 sprint(self, PRINT_HIGH, "cmd build [cancel|sentry|dispenser|destroy {sentry|dispenser}]\n");
                 sprint(self, PRINT_HIGH, "cmd sentry [rotate #]\n");
-                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armour|repair|withdraw {ammo|armour}]\n");
+                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armor|repair|withdraw {ammo|armor}]\n");
                 sprint(self, PRINT_HIGH, "cmd captainpick #\n");
                 sprint(self, PRINT_HIGH, "cmd break\b: end current map\b\n");
             }
@@ -1120,6 +1121,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
+                    nextmap = arg2;
                     if (!clan_scores_dumped) {
                         if (quadmode) {
                             rounds = 1;

@@ -484,7 +484,7 @@ void () hurt_touch = {
         }
         self.solid = SOLID_NOT;
         deathmsg = DMSG_TRIGGER;
-        TF_T_Damage(other, self, self, self.dmg, TF_TD_IGNOREARMOUR,
+        TF_T_Damage(other, self, self, self.dmg, TF_TD_IGNOREARMOR,
                     TF_TD_OTHER);
         self.think = hurt_on;
         self.nextthink = time + 1;
@@ -555,6 +555,10 @@ void () trigger_push_touch = {
         }
     }
     else if (self.spawnflags & PUSH_EXCLUDEOTHER)
+    {
+        return;
+    }
+    else if ((self.spawnflags & PUSH_EXCLUDEGRENADE) && other.classname == "grenade")
     {
         return;
     }

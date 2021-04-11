@@ -211,7 +211,7 @@ void () W_FireAxe = {
             if (crossproducttf(def, v_forward) > 0) {
                 deathmsg = DMSG_BACKSTAB;
                 TF_T_Damage(trace_ent, self, self, 120,
-                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOUR,
+                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
                             TF_TD_OTHER);
             } else {
                 deathmsg = DMSG_AXE;
@@ -751,7 +751,7 @@ void (float shotcount, vector dir, vector spread) FireBullets = {
 
     ClearMultiDamage();
 
-    traceline(src, src + dir * 2048, FALSE, self);
+    traceline(src, src + dir * 2048, MOVE_LAGGED, self);
     puff_org = trace_endpos - dir * 4;
 
     while (shotcount > 0) {
@@ -760,7 +760,7 @@ void (float shotcount, vector dir, vector spread) FireBullets = {
             dir + crandom() * spread_x * v_right +
             crandom() * spread_y * v_up;
 
-        traceline(src, (src + (direction * 2048)), 0, self);
+        traceline(src, (src + (direction * 2048)), MOVE_LAGGED, self);
         if (trace_fraction != 1) {
             if (self.current_weapon != WEAP_ASSAULT_CANNON)
                 TraceAttack(4, direction);
@@ -819,7 +819,7 @@ void (vector direction, float damage) FireSniperBullet = {
 
     KickPlayer(-3, self);
 
-    traceline(src, src + direction * 4096, FALSE, self);
+    traceline(src, src + direction * 4096, MOVE_LAGGED, self);
     if (trace_fraction != 1)
         TraceAttack(damage, direction);
 
@@ -852,9 +852,9 @@ void () W_FireSniperRifle = {
     use_this = FALSE;
 
     if (old_sniperrange)
-        traceline(src, src + dir * 8092, FALSE, self);
+        traceline(src, src + dir * 8092, MOVE_LAGGED, self);
     else
-        traceline(src, src + dir * 9192, FALSE, self);
+        traceline(src, src + dir * 9192, MOVE_LAGGED, self);
     if (trace_fraction != 1)
         if (trace_ent != world)
             if (trace_ent.classname == "player")
@@ -865,9 +865,9 @@ void () W_FireSniperRifle = {
     if (!use_this) {
         dir = aim(self, 10000);
         if (old_sniperrange)
-            traceline(src, src + dir * 3072, 0, self);
+            traceline(src, src + dir * 3072, MOVE_LAGGED, self);
         else
-            traceline(src, src + dir * 9192, 0, self);
+            traceline(src, src + dir * 9192, MOVE_LAGGED, self);
     }
     deathmsg = DMSG_SNIPERRIFLE;
     dam_mult = 1;
@@ -3358,8 +3358,7 @@ void () W_WeaponFrame = {
         }
 
     // +slot1-4 quick fire
-    } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4
-                && !self.is_building && !self.is_detpacking) {
+    } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
 
         self.is_quickfiring = 1;
         self.has_quickfired = 0;

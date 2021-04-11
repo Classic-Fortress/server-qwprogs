@@ -172,6 +172,9 @@ float () Sentry_FindTarget = {
 float (entity p) FO_Sentry_ValidTarget = {
     float valid = TRUE;
 
+    if (!p)
+        return FALSE;
+
     if ((p == self.real_owner) || !p.takedamage)
         valid = FALSE;
     if (p.has_disconnected == 1)
@@ -201,33 +204,20 @@ float (entity p) FO_Sentry_ValidTarget = {
     return valid;
 };
 
-void () FO_Sentry_Timer_Think = {
-    entity oself = self;
-    oself.nextthink = time + 0.01;
-    oself.cnt2 = oself.cnt2 + 0.01; // rotate speed
-    self = self.owner;
-    
-    if (FO_Sentry_ValidTarget(self.enemy))
-    {
-        if (oself.cnt2 >= 0.1)
-        {
-            ai_face();
-            oself.cnt2 = 0;
-        }
-        
-        if (oself.cnt <= time)
-        {
-            Sentry_FoundTarget();
-            dremove(oself);
-        }
-    }
-    else
-    {
-        dremove(oself); // lose tracking when people duck behind walls
-    }
-};
 
 float () FO_Sentry_FindTarget = {
+
+    // check for current valid target
+    if (FO_Sentry_ValidTarget(self.enemy))
+    {
+        if (self.cnt <= time)
+        {
+            Sentry_FoundTarget();
+            return TRUE;
+        }
+        return FALSE;
+    }
+
     entity p = find(world, classname, "player");
     float foundTarg = FALSE;
     float dist = -1;
@@ -278,12 +268,7 @@ float () FO_Sentry_FindTarget = {
     {
         delay = 0.45;
     }
-    // attack delay
-    entity timer = spawn();
-    timer.owner = self;
-    timer.think = FO_Sentry_Timer_Think;
-    timer.cnt = time + delay; // delay
-    timer.nextthink = time + 0.01;
+    self.cnt = time + delay; // delay
 
     return TRUE;
 };

@@ -3,6 +3,8 @@ FortressOne Server
 
 New features
 ------
+* Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
+* ``setinfo keepcells <number>`` allows scout/med/pyro/eng/hwguy to include cells above ``<number>`` into discards. eg. an eng with 200 cells that has ``setinfo keepcells 50`` will discard 150 cells and keep 50. sold/spy/sniper/demo will throw all cells regardless of ``<number>`` (current behaviour). suggest players using this setinfo use scout/med/pyro/eng/hwguy class configs to set values for each class. ``localinfo nokeepcells 1`` - disables keepcells server-wide
 * option to let engineer move while building `localinfo em on`.
 * new brush ent ``trigger_jumper`` - an alias for ``trigger_push`` with spawnflags 16 - retains your x/y velocity, only boosting your z by the .speed value.
 * new csqc command ``fo_menu_vote`` shows the list of maps available to vote. 
@@ -55,6 +57,8 @@ New features
 * Admin system created to allow for easy setup of pub/clan/quad/duel games, kick players etc `localinfo adminpwd <password>` and `cmd adminpwd <password>; wait; adminmenu`
 * Loc support added to server, show locations for dropped flag.
 * Nailgrenades changed to "Shock/Laser Grenades" to lower spam/not stop bunnyhopping on hit (0 original, 1 laser, 2 burst). `localinfo nailgren_type 1` and `nginfo` in game for all configurable settings.
+* Option for "blast medic". Secondary grenade is repaced with blast gren. It behaves like a concussion grenade, but doesn't apply a concussion effect. The blast medic moves at 280 units (instead of 320), but is not speed capped. `localinfo medic_type 1` (0 for normal, 1 for blast).
+* Blast grenade velocity multiplier `localinfo blastgren_velocity_multiplier`. (default 1 is same as concussion grenade).
 * Option for hitsounds (1 - enemies only, 2 - enemies and teammates). `setinfo hitsound 2`
 * Option for medic to be immune from concussion effects. `localinfo medicnocuss on`.
 * Option to adjust concussion grenade effect time in seconds. `localinfo cussgrentime n`.
@@ -63,7 +67,7 @@ New features
 * Keys and flags glow their colour.
 * Option to adjust conussion grenade effect time in seconds. `localinfo cussgrentime`.
 * Option to fully restock player on cap. `localinfo stock_on_cap on`.
-* Option for packs to fully restock health and armour of player. `localinfo stockfull on`.
+* Option for packs to fully restock health and armor of player. `localinfo stockfull on`.
 * Automatic server-side mvd recording of clan matches. Requires `localinfo serverdemo on`.
 * Map vote (4 random maps + current map) during last few minutes of game (shown for newly spawned or toggled with /togglevote).
 * Force early map vote using /votenext, /votetrick (trick maps) and /voterace (race maps).
@@ -75,7 +79,7 @@ New features
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
-* Quick attack aliases (+slot1-4).
+* Quick attack aliases (+quick1-4 will switch weapon and fire. +slot1-4 will do the same and switch back).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.
@@ -93,7 +97,7 @@ New features
 * Pyro types - `localinfo pyro_type val` - 0 = original tf2.9, 1 = oztf pyro style, 2 = FO pyro style
 * localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
 * localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
-* localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 0]
+* localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 1]
 * localinfo round_delay_time : interval time between rounds in quadmode - seconds [default: 30]
 * localinfo max_gren2_soldier : maximum number of active nail/shock grenades (TF 2.8 = 3, OzTF = 1) [default: 3]
 
