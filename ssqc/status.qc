@@ -935,6 +935,16 @@ void UpdateClientStatusBar(entity pl)
 
             WriteFloat(MSG_MULTICAST, l);
             break;
+        case PC_PYRO:
+            if(pl.airblast_cooldown == 1)
+            {
+                WriteFloat(MSG_MULTICAST, TRUE);
+            }
+            else if (pl.airblast_cooldown == 0)
+            {
+                WriteFloat(MSG_MULTICAST, FALSE);
+            }
+            break; 
         case PC_SPY:
             WriteFloat(MSG_MULTICAST, pl.is_undercover);
             

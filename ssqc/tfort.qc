@@ -68,6 +68,7 @@ void () UseSpecialSkill = {
         case PC_PYRO:
             if (pyro_type == PYRO_FO)
                 UseAirBlast();
+                Status_Refresh(self);
             break;
         case PC_SPY:
             self.impulse = TF_SPY_DIE;
@@ -1528,6 +1529,7 @@ void () TeamFortress_SetEquipment = {
     }
     self.is_building = 0;
     self.is_detpacking = 0;
+    self.airblast_cooldown = 0;
     self.is_undercover = 0;
     self.is_feigning = 0;
     self.is_unabletospy = 0;

@@ -762,7 +762,6 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
     switch (SBAR.PlayerClass)
     {
         case PC_SOLDIER:
-        case PC_PYRO:
             return;
     }
 
@@ -891,6 +890,24 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Assault Cannon Locked";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
+                }
+                break;
+            case PC_PYRO:
+                if (SBAR.AirBlast)
+                {
+                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                    msg = "Airblast Cooling Down";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
+                }
+                else if (!SBAR.AirBlast)
+                {
+                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                    msg = "Airblast Ready";
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
                 break;
