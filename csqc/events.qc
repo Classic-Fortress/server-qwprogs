@@ -351,6 +351,9 @@ void ParseSBAR()
         case PC_HVYWEAP:
             SBAR.LockedCannon = readfloat();
             break;
+        case PC_PYRO:
+            SBAR.AirBlast = readfloat();
+            break;
         case PC_SPY:
             SBAR.IsUndercover = readfloat();
 
