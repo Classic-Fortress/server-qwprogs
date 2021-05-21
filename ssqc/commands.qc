@@ -448,8 +448,12 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             if (arg2) {
                 if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
                     inp = stof(arg2);
-                    TeamFortress_DropAmmo(inp);
-                    Menu_Drop();
+                    farg3 = stof(arg3);
+                    if(farg3 < 0) {
+                        farg3 = 0;
+                    }
+                    TeamFortress_DropAmmo(inp, farg3);
+                    //Menu_Drop();
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use values 1-4.\n");
@@ -860,7 +864,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             } else {
                 sprint(self, PRINT_HIGH, "cmd changeteam [#|auto]\n");
                 sprint(self, PRINT_HIGH, "cmd changeclass [#]\n");
-                sprint(self, PRINT_HIGH, "cmd dropammo [1-4]\n");
+                sprint(self, PRINT_HIGH, "cmd dropammo [1-4] [amount]\n");
                 sprint(self, PRINT_HIGH, "cmd disguise [last|none|skin #|team #]\n");
                 sprint(self, PRINT_HIGH, "cmd menu\n");
                 sprint(self, PRINT_HIGH, "cmd autoscan\n");
