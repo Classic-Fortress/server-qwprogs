@@ -36,7 +36,7 @@ void (entity p) TeamFortress_SetSkin;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 
-void (float type) TeamFortress_DropAmmo;
+void (float type, float amount) TeamFortress_DropAmmo;
 void (entity disp) Engineer_Dispenser_InsertAmmo;
 void (entity disp) Engineer_Dispenser_InsertArmor;
 void (entity disp) Engineer_Dispenser_Repair;
@@ -449,7 +449,7 @@ void (float update) Menu_Class = {
 
 void (float inp) Menu_Drop_Input = {
     if ((inp > 0) && (inp < 5)) {
-        TeamFortress_DropAmmo(inp);
+        TeamFortress_DropAmmo(inp, 0);
         Menu_Drop();
     }
 };
