@@ -893,7 +893,8 @@ void () TeamFortress_FinishedBuilding = {
         sprint(self, PRINT_HIGH, "You finish building the dispenser\n");
         teamsprint(self.team_no, self, self.netname);
         teamsprint(self.team_no, self, " has built a dispenser\n");
-        self.ammo_cells = self.ammo_cells - ENG_DISPENSER_COST;
+        if (!engineer_move)
+            self.ammo_cells = self.ammo_cells - ENG_DISPENSER_COST;
         oldself.classname = "building_dispenser";
         oldself.netname = "dispenser";
         oldself.blocked = T_Dispenser;
