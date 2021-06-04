@@ -1,4 +1,6 @@
 float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align);
+float fo_to_sui_aligntment(float fo_align);
+vector (FO_Hud_Panel* panel) getPanelPosition;
 
 void(string panelid, float display, string text, string icon) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
@@ -176,83 +178,72 @@ void(string panelid, float display, string text, string icon) drawMOTDPanel = {
     
     FO_Hud_Panel* panel = getHudPanelPointer(id);
     
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
+    //vector position = getPosition(id);
+    //vector size = getFillSize(id);
+    vector position = getPanelPosition(panel); //panel.Position;
+    vector size = panel.FillSize * panel.Scale;
+    
+    float textscale = panel.TextScale;
+    if(!textscale) {
+        textscale = panel.Scale;
+    }
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
     local float lines;
-    local string gamemode;
+    local string tempstr;
     if (fo_hud_editor) {
-        drawstring(
-            position + [size.x / 2 - (22 * mediumtext.x)/2,padding*2 + mediumtext.y*2], 
-            "Welcome to FortressOne", 
-            mediumtext, 
-            MENU_TEXT_4, 
-            1, 
-            0
-        );
-
         if (hud_panel(panelid, position, size, transparency, panel.Display)) {
             // click event
         }
-    } else {
-        if(showingscores || !panel.Display) {
-            return;
-        }
-        if(text && text != "") {
-            if(!intermission && time < motd_expiry && !team_no) {
-                local string motd = serverkey("hostname");
-                drawstring(
-                    position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2], 
-                    motd, 
-                    mediumtext*1.5, 
-                    MENU_TEXT_4, 
-                    1, 
-                    0
-                );
-                if(strlen(SBAR.MOTD) <= 1) {
-                    motd = "Welcome to FortressOne";
+    }
+    if((showingscores || !panel.Display) && !fo_hud_editor) {
+        return;
+    }
+    //if(text && text != "") {
+        if((!intermission && time < motd_expiry && !team_no) || fo_hud_editor) {
+            sui_push_frame(position, size);
+            sui_set_align([fo_to_sui_aligntment(panel.Orientation), SUI_ALIGN_CENTER]);
+            local string motd = serverkey("hostname");
+            sui_text([0,0], mediumtext*textscale*1.5, motd, MENU_TEXT_4, 1, 0);
+            /*
+            drawstring(
+                position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2], 
+                motd, 
+                mediumtext*1.5, 
+                MENU_TEXT_4, 
+                1, tokenizebyseparator
+                0
+            );
+            */
+            if(strlen(SBAR.MOTD) <= 1) {
+                motd = "Welcome to FortressOne\nwww.fortressone.org";
+            } else {
+                motd = SBAR.MOTD;
+            }
+            lines = tokenizebyseparator(motd, "\n");
+            for (float i = 0; i <= lines; i++) {
+                tempstr = argv(i);
+                // tokenize doesn't handle newlines very well
+                tempstr = strreplace("\n", "", tempstr);
+                tempstr = strtrim(tempstr);
+                if (strlen(tempstr) > 0) {
+                    sui_text([0,mediumtext.y*textscale * (i+2)], mediumtext*textscale, tempstr, MENU_TEXT_1, 1, 0);
+                    /*
                     drawstring(
-                        position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*2], 
+                        position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(i+2)], 
                         motd, 
                         mediumtext, 
                         MENU_TEXT_1, 
                         1, 
                         0
                     );
-                    motd = "www.fortressone.org";
-                    drawstring(
-                        position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*3], 
-                        motd, 
-                        mediumtext, 
-                        MENU_TEXT_1, 
-                        1, 
-                        0
-                    );
-                    lines = 2;
-                } else {
-                    lines = tokenizebyseparator(SBAR.MOTD, "\n");
-                    for (float i = 0; i <= lines; i++) {
-                        motd = argv(i);
-                        // tokenize doesn't handle newlines very well
-                        motd = strreplace("\n", "", motd);
-                        motd = strtrim(motd);
-                        if (strlen(motd) > 0) {
-                            drawstring(
-                                position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(i+2)], 
-                                motd, 
-                                mediumtext, 
-                                MENU_TEXT_1, 
-                                1, 
-                                0
-                            );
-                        }
-                    }
+                    */
                 }
             }
+            sui_pop_frame();
         }
-    }
+    //}
 }
 
 void(string panelid, float display, string text, string icon) drawGameModePanel = {
@@ -826,14 +817,14 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  Icon, Snap, Status
 
     {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'10 80','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'10 110','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
+    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
+    {"capspanel",FO_HUD_CAPS_NAME,'10 80','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
+    {"gren1panel",FO_HUD_GREN1_NAME,'10 110','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
     {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 170','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
     {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
     {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 230','150 260',1,0,1,0, drawFlagInfo, {return "";}},
-    {"grentimerpanel",FO_HUD_GRENTIMER_NAME,'100 110','50 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
+    {"grentimerpanel",FO_HUD_GRENTIMER_NAME,'100 110','26 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
     {"menupanel","Menu",'10 110','300 200',1,0,1,0, drawSimplePanel, {return "";}},
     {"motdpanel",FO_HUD_MOTD_NAME,'150 100','100 24',1,0,1,0, drawMOTDPanel, {return SBAR.MOTD;}},
     {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
@@ -842,7 +833,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
     {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'0 0','72 12',2,0,1,FO_HUD_INSERT_AFTER, drawTeamScorePanel, {return "";}},
     {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 30','800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 150',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 182',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 
 float(string panelid) getHudPanel = {
@@ -858,8 +849,27 @@ FO_Hud_Panel* (float panelid) getHudPanelPointer = {
     return &(Hud_Panels[panelid]);
 };
 
+vector (FO_Hud_Panel* panel, float scale) getScaledPanelPosition = {
+    if(panel.Snap == HUD_SNAP_NONE) {
+        return panel.Position; //Hud_Panels[panelid].Position;
+    }
+    vector v = panel.Position;
+    if(panel.Snap & HUD_SNAP_LEFT) v.x;
+    if(panel.Snap & HUD_SNAP_CENTER) v.x += (ScreenSize.x / 2) - ((panel.FillSize.x * scale) / 2);
+    if(panel.Snap & HUD_SNAP_RIGHT) v.x += ScreenSize.x - (panel.FillSize.x * scale);
+    if(panel.Snap & HUD_SNAP_TOP) v.y;
+    if(panel.Snap & HUD_SNAP_VCENTER) v.y += (ScreenSize.y / 2) - ((panel.FillSize.y * scale) / 2);
+    if(panel.Snap & HUD_SNAP_BOTTOM) v.y += ScreenSize.y - (panel.FillSize.y * scale);
+    return v;
+}
+
+vector (FO_Hud_Panel* panel) getPanelPosition = {
+    return getScaledPanelPosition(panel, panel.Scale);
+}
+
 vector(float panelid) getPosition = {
-    return Hud_Panels[panelid].Position;
+    FO_Hud_Panel* panel = getHudPanelPointer(panelid);
+    return getPanelPosition(panel);
 }
 vector(float panelid) getFillSize = {
     return Hud_Panels[panelid].FillSize;
