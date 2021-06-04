@@ -293,6 +293,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 
 float (float tno) TeamFortress_TeamSet = {
     local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
+    SetDimensions(TRUE);
     UpdateAllClientsTeamScores();
     return (tftso);
 }

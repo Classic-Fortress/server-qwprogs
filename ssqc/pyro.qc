@@ -755,6 +755,7 @@ void () TeamFortress_FlameThrower = {
 };
 
 void () AirBlastReloadFinished = {
+    self.owner.airblast_cooldown = 0;
     sprint(self.owner, PRINT_HIGH, "Airblast ready\n");
     stuffcmd(self.owner, "play weapons/airblast.wav\n");
     dremove(self);
@@ -763,6 +764,7 @@ void () AirBlastReloadFinished = {
 void () UseAirBlast = {
     if (self.special_cooldown < time)
     {
+        self.airblast_cooldown = 1;
         self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
         entity timer = spawn();
         timer.owner = self;

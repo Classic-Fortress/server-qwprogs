@@ -68,8 +68,6 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 
-string nextmap;
-
 void () info_intermission =
 {
     if (CheckExistence() == 0) {
@@ -386,9 +384,12 @@ void () DecodeLevelParms = {
         spurs_flag	= CF_GetSetting("spf", "spurs_flag" 		, "0");		// can climb with flag
 
 
-	// nailgren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
+        // nail gren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
         nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
         
+        // medic types 0 = MEDIC_TYPE_DEFAULT, 1 = MEDIC_TYPE_BLAST
+        medic_type = CF_GetSetting("mcgt", "medic_type", ftos(MEDIC_TYPE_DEFAULT));
+
         // how many rotations the nailgren does [2]
         lasergren_rotationcount = CF_GetSetting("lgrc", "lasergren_rotationcount", ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT));
         
@@ -412,6 +413,9 @@ void () DecodeLevelParms = {
         
         // time before nail projectile destroys itself [0.3]
         burstgren_range = CF_GetSetting("bgr", "burstgren_range", ftos(NGR_BURST_DEFAULT_RANGE));
+
+        // multiplier to blast gren velocity
+        blastgren_velocity_multiplier = CF_GetSetting("bvm", "blastgren_velocity_multiplier", ftos(BLASTGREN_DEFAULT_VELOCITY_MULTIPLIER));
 
         // use old concussion, gas and flash grenades [off]
         old_grens = CF_GetSetting("og", "old_grens", "off");
@@ -560,6 +564,9 @@ void () DecodeLevelParms = {
         // use old init/max hp/armor [off]
         old_hp_armor = CF_GetSetting("oh", "old_hp_armor", "off");
 
+        // configure max armor of heavy weapons guy [300]
+        max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
+
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (Role_None.respawn_delay_time) {
@@ -648,6 +655,8 @@ void () DecodeLevelParms = {
         // new emp range and set damage values (so no dropammo to reduce)
         new_emp = CF_GetSetting("nemp", "new_emp", "1");
 
+        fo_sentry_targeting = CF_GetSetting("fosgt", "fo_sentry_targ", "1");
+
         // For duelmode, how soon to reset the winning player (allows for double KOs)
         duel_reset_delay = CF_GetSetting("drd", "duel_reset_delay", "3.9");
         // remove packs in duelmode [1]
@@ -685,6 +694,9 @@ void () DecodeLevelParms = {
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
+        // health repair 
+        fo_repair_ratio = CF_GetSetting("forep", "fo_repair_ratio", "2");
+        
         // keep teams on map change [off]
         cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
 
@@ -704,10 +716,13 @@ void () DecodeLevelParms = {
 
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
+        
+        // disable setinfo keepcells [off]
+        nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
 
         // enable server-side flaginfo on statusbar [on]
-//        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
-        
+        //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
+
         reverse_cap = CF_GetSetting("rcap","reverse_cap", "0");
 
         if (reverse_cap) 
@@ -715,7 +730,7 @@ void () DecodeLevelParms = {
            InitReverseCap();
         }
 
-        engineer_move = CF_GetSetting("em","engineer_move", "0");
+        engineer_move = CF_GetSetting("em","engineer_move", "1");
 
         max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
@@ -875,6 +890,7 @@ void () DecodeLevelParms = {
             scoutdash = FALSE;
             fo_flash = FALSE;
             nailgren_type = NGR_TYPE_DEFAULT;
+            medic_type = MEDIC_TYPE_DEFAULT;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
             medicaura = FALSE;
@@ -1020,7 +1036,7 @@ void () TF_MovePlayer = {
 };
 
 void () GotoNextMap = {
-    if (vote_result != string_null)
+    if (vote_result != string_null && (nextmap == string_null || nextmap == ""))
         nextmap = strzone(vote_result);
 
     if (nextmap != mapname || vote_result != string_null) {
@@ -1108,29 +1124,36 @@ void () execute_changelevel = {
     WriteAngle(MSG_ALL, pos.mangle_y);
     WriteAngle(MSG_ALL, pos.mangle_z);
 
-    local string nextmapstring = vote_result;
-    local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    vote_style = CF_GetSetting("vs", "vote_style", "2");
-    if (vote_style || votemode == 2){
-        if(votemode == 1 && vote_result && vote_result != vm) {
-            localcmd ("localinfo votemode off\n");
-            //changelevel(vote_result);
-        } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
-            vote_result = vm;
-            localcmd ("localinfo votemode on\n");
-            //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
-            vote_result = mapname;
+    local string nextmapstring = nextmap;
+    if((vote_result == string_null || vote_result == "") && (nextmap == string_null || nextmap == "")) {
+        local string vm = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        vote_style = CF_GetSetting("vs", "vote_style", "2");
+        if (vote_style || votemode == 2){
+            if(votemode == 1 && vote_result && vote_result != vm) {
+                localcmd ("localinfo votemode off\n");
+                //changelevel(vote_result);
+            } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+                vote_result = vm;
+                localcmd ("localinfo votemode on\n");
+                //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
+            } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
+                vote_result = mapname;
+            }
         }
+        //if(!votemode) {
+        //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+        //    nextmapstring = strcat(vote_result, " \b(voting)\b");
+        //}
     }
-    //if(!votemode) {
-    //    vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-    //    nextmapstring = strcat(vote_result, " \b(voting)\b");
-    //}
+    if(vote_result != string_null && vote_result != "") {
+        nextmapstring = vote_result;
+        nextmap = vote_result;
+    }
 
+// 
     other = find(world, classname, "player");
     while (other != world) {
-        if (vote_result != string_null)
+        if (nextmapstring != string_null && nextmapstring != "")
             sprint(other, PRINT_HIGH, "Next up: ", nextmapstring, "\n");
         other.takedamage = DAMAGE_NO;
         other.solid = SOLID_NOT;
@@ -1352,7 +1375,7 @@ void () ResetPlayers = {
             if(te.health > 0) {
                 stuffcmd(te, "f_respawn\n");
                 if(round_winner_print_health) {
-                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmour:\s " , ftos(te.armorvalue), "\n");
+                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmor:\s " , ftos(te.armorvalue), "\n");
                 }
             }
             oldself = self;
@@ -1757,6 +1780,32 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "ready", player.is_ready);
 };
 
+void (float all_dimensions) SetDimensions = {
+    if (all_dimensions)
+    {
+        self.dimension_seen = DMN_NOFLASH;
+
+        switch (self.team_no)
+        {
+            case TEAM_BLUE:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMBLUE;
+                break;
+            case TEAM_RED:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMRED;
+                break;
+            case TEAM_YELL:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMYELL;
+                break;
+            case TEAM_GREN:
+                self.dimension_see = DMN_NOFLASH | DMN_TEAMGREN;
+                break;
+            default:
+                self.dimension_see = DMN_NOFLASH;
+                break;
+        }
+    }
+};
+
 void () PutClientInServer = {
     local float oldclass;
     local entity spot;
@@ -1798,8 +1847,7 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;
-    self.dimension_see = DMN_NOFLASH;
-    self.dimension_seen = DMN_NOFLASH - (DMN_NOFLASH & DMN_FLASH);
+    SetDimensions(TRUE);
     self.special_cooldown = 0;
     
     setmodel(self, string_null);
@@ -1985,6 +2033,7 @@ void () PutClientInServer = {
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
+
 };
 
 //void () info_player_start = {

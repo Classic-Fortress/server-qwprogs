@@ -276,6 +276,7 @@ void () worldspawn = {
     precache_model2("progs/tf_stan.mdl");
     precache_model2("progs/v_medi.mdl");
     precache_model2("progs/hgren2.mdl");
+    precache_model2("progs/blastgren.mdl");
     precache_model2("progs/flashgren.mdl");
     precache_model2("progs/biggren.mdl");
     precache_model2("progs/flare.mdl");
@@ -343,13 +344,13 @@ void () worldspawn = {
     votemode = CF_GetSetting("vm", "votemode", "off");
     vote_total_votes = 0;
     vote_style = CF_GetSetting("vs", "vote_style", "1"); 
+    string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
     
     //No map candidates in map! Add some defaults...
     if(!find(world, classname, "map_candidate")) {
         InitVoteMaps();
     }
     if(votemode) {
-        string votemap = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
         if(world.model != strcat("maps/",votemap,".bsp")) {
             bprint(PRINT_HIGH, "\bDisabling vote mode as map is not\b ",votemap,"\n");
             //changelevel(votemap);
@@ -357,6 +358,15 @@ void () worldspawn = {
             votemode = FALSE;
         } else {
         }
+    } else {
+        if(world.model == strcat("maps/",votemap,".bsp")) {
+            bprint(PRINT_HIGH, "\bEnabling vote mode as map is not\b ",votemap,"\n");
+            localcmd ("localinfo votemode on\n"); 
+            votemode = TRUE;
+            //changelevel(votemap);
+        } else {
+        }
+
     }
 
     dimension_send = DMN_NOFLASH;

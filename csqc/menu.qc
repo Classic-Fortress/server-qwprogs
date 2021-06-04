@@ -284,7 +284,7 @@ var fo_menu FO_MENU_BUILD = {
                 FO_MENU_BUILD.options[3].state = FO_MENU_STATE_HIDDEN;  //Dismantle
             }
         } else {
-            if(getstatf(STAT_CELLS) > ENG_SENTRY_COST) {
+            if(getstatf(STAT_CELLS) >= ENG_SENTRY_COST) {
                 FO_MENU_BUILD.options[0].state = FO_MENU_STATE_NORMAL;
             } else {
                 FO_MENU_BUILD.options[0].state = FO_MENU_STATE_DISABLED;
@@ -302,7 +302,7 @@ var fo_menu FO_MENU_BUILD = {
                 FO_MENU_BUILD.options[5].state = FO_MENU_STATE_HIDDEN;
             }
         } else {
-            if(getstatf(STAT_CELLS) > ENG_DISPENSER_COST) {
+            if(getstatf(STAT_CELLS) >= ENG_DISPENSER_COST) {
                 FO_MENU_BUILD.options[1].state = FO_MENU_STATE_NORMAL;
             } else {
                 FO_MENU_BUILD.options[1].state = FO_MENU_STATE_DISABLED;
@@ -346,7 +346,7 @@ var fo_menu FO_MENU_SENTRY_ROTATE = {
 var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
     [0,0], [300,200], "Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Insert Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser ammo\n");Menu_Cancel();},MENU_BUTTON},
-        {"2","Insert Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser armour\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Insert Armor","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser armor\n");Menu_Cancel();},MENU_BUTTON},
         {"3","Repair","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser repair\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
@@ -361,7 +361,7 @@ var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
 var fo_menu FO_MENU_DISPENSER_USE = {
     [0,0], [300,200], "Use Dispenser", FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS, {
         {"1","Withdraw Ammo","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw ammo\n");Menu_Cancel();},MENU_BUTTON},
-        {"2","Withdraw Armour","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armour\n");Menu_Cancel();},MENU_BUTTON},
+        {"2","Withdraw Armor","","",FO_MENU_STATE_NORMAL,{localcmd("cmd dispenser withdraw armor\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE, {
@@ -942,38 +942,67 @@ void FO_Menu_Class(float force) = {
     fo_hud_menu_active = TRUE;
 }
 
-void FO_Menu_DropAmmo(float force, float ammotypes, float ammomakes) {
+void FO_Menu_DropAmmo(float force) {
     if(fo_hud_menu_active && CurrentMenu == &FO_MENU_DROPAMMO) {
         Menu_Cancel();
         return;
     }
     if(fo_hud_menu_active && !force)
         return;
-    if(!ammotypes) {
-        Menu_Cancel();
+
+    float available = 0;
+    FO_MENU_DROPAMMO.options[0].value = "";
+    if(getstatf(STAT_SHELLS) < DROP_SHELLS) {
+        FO_MENU_DROPAMMO.options[0].state = FO_MENU_STATE_DISABLED;
+    } else {
+        FO_MENU_DROPAMMO.options[0].state = FO_MENU_STATE_NORMAL;
+        available++;
+    }        
+    FO_MENU_DROPAMMO.options[1].value = "";
+    if(getstatf(STAT_NAILS) < DROP_NAILS) {
+        FO_MENU_DROPAMMO.options[1].state = FO_MENU_STATE_DISABLED;
+    } else {
+        FO_MENU_DROPAMMO.options[1].state = FO_MENU_STATE_NORMAL;
+        available++;
+    }        
+    FO_MENU_DROPAMMO.options[2].value = "";
+    if(getstatf(STAT_ROCKETS) < DROP_ROCKETS) {
+        FO_MENU_DROPAMMO.options[2].state = FO_MENU_STATE_DISABLED;
+    } else {
+        FO_MENU_DROPAMMO.options[2].state = FO_MENU_STATE_NORMAL;
+        available++;
+    }        
+    FO_MENU_DROPAMMO.options[3].value = "";
+    if(getstatf(STAT_CELLS) < DROP_CELLS) {
+        FO_MENU_DROPAMMO.options[3].state = FO_MENU_STATE_DISABLED;
+    } else {
+        FO_MENU_DROPAMMO.options[3].state = FO_MENU_STATE_NORMAL;
+        available++;
+    }        
+    if(!available) {
+        if(fo_hud_menu_active && CurrentMenu == &FO_MENU_DROPAMMO) {
+            Menu_Cancel();
+        } else {
+            print("Not enough ammo\n");
+        }
+        return;
     }
-    if(ammomakes) {
+    if (player_class == PC_ENGINEER) {
         FO_MENU_DROPAMMO.title = "Drop or Make Ammo";
+        if ((getstatf(STAT_SHELLS) < DROP_SHELLS) && ((getstatf(STAT_CELLS) / AMMO_COST_SHELLS) > (DROP_SHELLS - getstatf(STAT_SHELLS)))) {
+            FO_MENU_DROPAMMO.options[0].value = "(make)";
+            FO_MENU_DROPAMMO.options[0].state = FO_MENU_STATE_NORMAL;
+        }
+        if ((getstatf(STAT_NAILS) < DROP_NAILS) && ((getstatf(STAT_CELLS) / AMMO_COST_NAILS) > (DROP_NAILS - getstatf(STAT_NAILS)))) {
+            FO_MENU_DROPAMMO.options[1].value = "(make)";
+            FO_MENU_DROPAMMO.options[1].state = FO_MENU_STATE_NORMAL;
+        }
+        if ((getstatf(STAT_ROCKETS) < DROP_ROCKETS) && ((getstatf(STAT_CELLS) / AMMO_COST_ROCKETS) > (DROP_ROCKETS - getstatf(STAT_ROCKETS)))) {
+            FO_MENU_DROPAMMO.options[2].value = "(make)";
+            FO_MENU_DROPAMMO.options[2].state = FO_MENU_STATE_NORMAL;
+        }
     } else {
         FO_MENU_DROPAMMO.title = "Drop Ammo";
-    }
-    for(float i = 0; i < 4; i++) {
-        if(ammotypes & pow(2,i)) {
-            FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_NORMAL;
-        } else {
-            if(ammomakes & pow(2,i)) {
-                FO_MENU_DROPAMMO.options[i].value = "(make)";
-                FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_NORMAL;
-            } else {
-                FO_MENU_DROPAMMO.options[i].value = "";
-                FO_MENU_DROPAMMO.options[i].state = FO_MENU_STATE_DISABLED;
-            }
-        }        
-        if(ammomakes & pow(2,i)) {
-            FO_MENU_DROPAMMO.options[i].value = "(make)";
-        } else {
-            FO_MENU_DROPAMMO.options[i].value = "";
-        }
     }
 
     CurrentMenu = &FO_MENU_DROPAMMO;

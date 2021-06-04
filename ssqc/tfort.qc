@@ -68,6 +68,7 @@ void () UseSpecialSkill = {
         case PC_PYRO:
             if (pyro_type == PYRO_FO)
                 UseAirBlast();
+                Status_Refresh(self);
             break;
         case PC_SPY:
             self.impulse = TF_SPY_DIE;
@@ -444,6 +445,9 @@ string GetGrenName(float type)
         case GR_TYPE_CONCUSSION:
             s = "concussion grenade";
             break;
+        case GR_TYPE_BLAST:
+            s = (medic_type == MEDIC_TYPE_BLAST) ? "blast grenade" : "concussion grenade";
+            break;
         case GR_TYPE_NONE:
             s = "no grenade";
             break;
@@ -643,7 +647,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Sniper max grenades type 2 (flare)", Role_None.gren2_limits[2], "", PC_SNIPER_GRENADE_MAX_2);
     CF_PrintSetting("Soldier max grenades type 2 (nail/shock)", Role_None.gren2_limits[3], "", PC_SOLDIER_GRENADE_MAX_2);
     CF_PrintSetting("Demoman max grenades type 2 (mirv)", Role_None.gren2_limits[4], "", PC_DEMOMAN_GRENADE_MAX_2);
-    CF_PrintSetting("Medic max grenades type 2 (concussion)", Role_None.gren2_limits[5], "", PC_MEDIC_GRENADE_MAX_2);
+    CF_PrintSetting("Medic max grenades type 2 (concussion/blast)", Role_None.gren2_limits[5], "", PC_MEDIC_GRENADE_MAX_2);
     CF_PrintSetting("Heavy Weapons max grenades type 2 (mirv)", Role_None.gren2_limits[6], "", PC_HVYWEAP_GRENADE_MAX_2);
     CF_PrintSetting("Pyro max grenades type 2 (napalm)", Role_None.gren2_limits[7], "", PC_PYRO_GRENADE_MAX_2);
     CF_PrintSetting("Spy max grenades type 2 (gas)", Role_None.gren2_limits[8], "", PC_SPY_GRENADE_MAX_2);
@@ -796,6 +800,12 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "Flash grenade";
         else if (self.tp_grenades_1 == 10)
             gs = "Caltrop canister";
+        else if (self.tp_grenades_1 == 11)
+            if (medic_type == MEDIC_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Concussion grenade";
+            }
         else
             gs = "Grenade";
 
@@ -860,6 +870,12 @@ void (float inp) TeamFortress_PrimeGrenade = {
             gs = "EMP grenade";
         else if (self.tp_grenades_2 == 9)
             gs = "Flash grenade";
+        else if (self.tp_grenades_2 == 11)
+            if (medic_type == MEDIC_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Concussion grenade";
+            }
         else
             gs = "Grenade";
 
@@ -1006,6 +1022,22 @@ void () TeamFortress_GrenadePrimed = {
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (self.weapon == GR_TYPE_BLAST) {
+        if (medic_type == MEDIC_TYPE_BLAST){
+            newmis.touch = BlastGrenadeTouch;
+            newmis.think = BlastGrenadeExplode;
+            newmis.grenadename = "blastgrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/blastgren.mdl");
+        } else {
+            newmis.touch = ConcussionGrenadeTouch;
+            newmis.think = ConcussionGrenadeExplode;
+            newmis.grenadename = "concussiongrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        }
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
@@ -1102,6 +1134,12 @@ void () TeamFortress_GrenadeSwitch = {
             gs = "Gas grenade";
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
+        else if (self.tp_grenades_1 == 11)
+            if (medic_type == MEDIC_TYPE_BLAST) {
+                gs = "Blast grenade";
+            } else {
+                gs = "Cuss grenade";
+            }
         else
             gs = "Grenade";
     } else {
@@ -1179,7 +1217,7 @@ void (entity p) TeamFortress_SetSpeed = {
     local entity te;
 
     stuffcmd(p, "cl_movespeedkey 1\n");
-    if (p.tfstate & TFSTATE_CANT_MOVE || p.is_building == 1 || p.is_detpacking > 0) {
+    if (p.tfstate & TFSTATE_CANT_MOVE || (p.is_building == 1 && !engineer_move) || p.is_detpacking > 0) {
 #ifdef STOP_MOUSE_MOVEMENT
         stuffcmd(p, "m_forward 0\n");
         stuffcmd(p, "m_side 0\n");
@@ -1210,8 +1248,13 @@ void (entity p) TeamFortress_SetSpeed = {
         p.maxfbspeed = PC_DEMOMAN_MAXSPEED;
         p.maxstrafespeed = PC_DEMOMAN_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_MEDIC) {
-        p.maxfbspeed = PC_MEDIC_MAXSPEED;
-        p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
+        if (medic_type == MEDIC_TYPE_BLAST) {
+            p.maxfbspeed = PC_BLASTMEDIC_MAXSPEED;
+            p.maxstrafespeed = PC_BLASTMEDIC_MAXSTRAFESPEED;
+        } else {
+            p.maxfbspeed = PC_MEDIC_MAXSPEED;
+            p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
+        }
     } else if (p.playerclass == PC_HVYWEAP) {
         p.maxfbspeed = PC_HVYWEAP_MAXSPEED;
         p.maxstrafespeed = PC_HVYWEAP_MAXSTRAFESPEED;
@@ -1228,8 +1271,8 @@ void (entity p) TeamFortress_SetSpeed = {
         p.maxfbspeed = PC_ENGINEER_MAXSPEED;
         p.maxstrafespeed = PC_ENGINEER_MAXSTRAFESPEED;
     } else if (p.playerclass == PC_UNDEFINED) {
-//      p.maxfbspeed = 320;
-//      p.maxstrafespeed = 320;
+        //      p.maxfbspeed = 320;
+        //      p.maxstrafespeed = 320;
         p.maxfbspeed = 0;
         p.maxstrafespeed = 0;
         p.maxspeed = 0;
@@ -1486,6 +1529,7 @@ void () TeamFortress_SetEquipment = {
     }
     self.is_building = 0;
     self.is_detpacking = 0;
+    self.airblast_cooldown = 0;
     self.is_undercover = 0;
     self.is_feigning = 0;
     self.is_unabletospy = 0;
@@ -1848,10 +1892,12 @@ void () TeamFortress_SetEquipment = {
             self.no_grenades_1 = role.gren1_limits[6];
             self.no_grenades_2 = role.gren2_limits[6];
 
-            if (old_hp_armor)
+            if (old_hp_armor) {
                 self.armorvalue = 300;
-            else
-                self.armorvalue = PC_HVYWEAP_MAXARMOR;
+            } else {
+                self.armorvalue = max_armor_hwguy;
+            }
+
         } else {
             self.ammo_rockets = PC_HVYWEAP_INITAMMO_ROCKET;
             self.ammo_nails = PC_HVYWEAP_INITAMMO_NAIL;
@@ -1886,10 +1932,13 @@ void () TeamFortress_SetEquipment = {
 
         self.armorclass = self.armorclass | PC_HVYWEAP_INITARMORCLASS;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
-        if (old_hp_armor)
+
+        if (old_hp_armor) {
             self.maxarmor = 300;
-        else
-            self.maxarmor = PC_HVYWEAP_MAXARMOR;
+        } else {
+            self.maxarmor = max_armor_hwguy;
+        }
+
         if (self.last_playerclass != self.playerclass)
             self.current_weapon = WEAP_SUPER_SHOTGUN;
 
@@ -2509,15 +2558,15 @@ void () TeamFortress_CheckClassStats = {
         self.items = self.items | IT_ARMOR1;
 };
 
-void (float type) TeamFortress_DropAmmo = {
-    local float ammo;
-    ammo = 0;
+void (float type, float ammo) TeamFortress_DropAmmo = {
+    //local float ammo;
+    //ammo = 0;
 
     if (type == 1) {
-        ammo = DROP_SHELLS;
+        if(!ammo) ammo = DROP_SHELLS;
         if (self.ammo_shells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_SHELLS) >
+                if ((self.ammo_cells / AMMO_COST_SHELLS) >=
                     (ammo - self.ammo_shells)) {
                     sprint(self, PRINT_HIGH, "You make some shells\n");
                     self.ammo_cells =
@@ -2532,10 +2581,10 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_shells = self.ammo_shells - ammo;
     } else if (type == 2) {
-        ammo = DROP_NAILS;
+        if(!ammo) ammo = DROP_NAILS;
         if (self.ammo_nails < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_NAILS) >
+                if ((self.ammo_cells / AMMO_COST_NAILS) >=
                     (ammo - self.ammo_nails)) {
                     sprint(self, PRINT_HIGH, "You make some nails\n");
                     self.ammo_cells =
@@ -2550,10 +2599,10 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_nails = self.ammo_nails - ammo;
     } else if (type == 3) {
-        ammo = DROP_ROCKETS;
+        if(!ammo) ammo = DROP_ROCKETS;
         if (self.ammo_rockets < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_ROCKETS) >
+                if ((self.ammo_cells / AMMO_COST_ROCKETS) >=
                     (ammo - self.ammo_rockets)) {
                     sprint(self, PRINT_HIGH, "You make some rockets\n");
                     self.ammo_cells =
@@ -2568,10 +2617,10 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_rockets = self.ammo_rockets - ammo;
     } else if (type == 4) {
-        ammo = DROP_CELLS;
+        if(!ammo) ammo = DROP_CELLS;
         if (self.ammo_cells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
-                if ((self.ammo_cells / AMMO_COST_CELLS) >
+                if ((self.ammo_cells / AMMO_COST_CELLS) >=
                     (ammo - self.ammo_cells)) {
                     sprint(self, PRINT_HIGH, "You make some cells\n");
                     self.ammo_cells =
@@ -2800,6 +2849,22 @@ void () TeamFortress_ExplodePerson = {
         newmis.skin = 1;
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (self.weapon == GR_TYPE_BLAST) {
+        if (medic_type == MEDIC_TYPE_BLAST) {
+            newmis.touch = BlastGrenadeTouch;
+            newmis.think = BlastGrenadeExplode;
+            newmis.grenadename = "blastgrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/blastgren.mdl");
+        } else {
+            newmis.touch = ConcussionGrenadeTouch;
+            newmis.think = ConcussionGrenadeExplode;
+            newmis.grenadename = "concussiongrenade";
+            newmis.skin = 1;
+            newmis.avelocity = '300 300 300';
+            FO_SetModel(newmis, "progs/hgren2.mdl");
+        }
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
@@ -2878,12 +2943,18 @@ void () TeamFortress_ExplodePerson = {
         bprint3(PRINT_MEDIUM, "Ack! ", self.owner.netname,
                 "! The grenade is your friend for another reason!\n");
     else if (self.owner.playerclass == PC_MEDIC) {
-        if (self.weapon == GR_TYPE_CONCUSSION)
-            bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
-                    ", eating a concussion grenade is bad!\n");
-        else
+        if (self.weapon == GR_TYPE_BLAST) {
+            if (medic_type == MEDIC_TYPE_BLAST) {
+                bprint3(PRINT_MEDIUM, "Nice one ", self.owner.netname,
+                        ", you forgot to throw your blast grenade!\n");
+            } else {
+                bprint3(PRINT_MEDIUM, "Yes ", self.owner.netname,
+                        ", eating a concussion grenade is bad!\n");
+            }
+        } else {
             bprint3(PRINT_MEDIUM, "No ", self.owner.netname,
                     "! Assist your own suicide some other time!\n");
+        }
     }
     else if (self.owner.playerclass == PC_HVYWEAP)
         bprint3(PRINT_MEDIUM, "Hey ", self.owner.netname,

@@ -121,6 +121,8 @@ typedef void (float n) f_void_float;
 
 float toggleflags;              // toggleable flags
 
+string nextmap;
+
 //float respawn_delay_time;
 
 //
@@ -271,6 +273,7 @@ float coop;
 .float inactivate_group_no;
 .float remove_group_no;
 .float restore_group_no;
+.float switch_team_group_no;
 
 .vector goal_min;
 .vector goal_max;
@@ -493,6 +496,9 @@ float burstgren_count;
 float burstgren_interval;
 float burstgren_range;
 
+float medic_type;
+float blastgren_velocity_multiplier;
+
 float old_grens;
 float fo_flash;
 float invis_only;
@@ -567,6 +573,7 @@ float server_huetf;
 float old_spanner;
 float old_dispenser;
 float old_hp_armor;
+float max_armor_hwguy;
 
 float ng_velocity;
 float ng_damage;
@@ -587,11 +594,14 @@ float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
 float new_emp;
+float fo_sentry_targeting; // new improved targeting for sentry guns
 float cb_keepteams;
 float fo_flashtime;
+float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+float nokeepcells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
@@ -718,4 +728,4 @@ float FO_FlashDimension;
 .string broadcast_high;
 
 .float special_cooldown;
-
+.float airblast_cooldown;

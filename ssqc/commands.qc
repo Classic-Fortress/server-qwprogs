@@ -313,6 +313,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
     switch (arg1)
     {
+        case "progsversion":
+            // yy.mm.dd.incremented vers
+            sprint(self, PRINT_HIGH, "sv progs version: 21.03.25.1\n");
+            break;
         case "adminpwd":
             processedCmd = TRUE;
             if (arg_num == 2) {
@@ -444,8 +448,12 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             if (arg2) {
                 if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
                     inp = stof(arg2);
-                    TeamFortress_DropAmmo(inp);
-                    Menu_Drop();
+                    farg3 = stof(arg3);
+                    if(farg3 < 0) {
+                        farg3 = 0;
+                    }
+                    TeamFortress_DropAmmo(inp, farg3);
+                    //Menu_Drop();
                     break;
                 }
                 sprint(self, PRINT_HIGH, "Invalid choice. Please use values 1-4.\n");
@@ -734,7 +742,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Menu_EngineerFix_Dispenser_Input(1);
                     break;
                 }
-                if(arg2 == "armour" || arg2 == "armor") {
+                if(arg2 == "armor") {
                     Menu_EngineerFix_Dispenser_Input(2);
                     break;
                 }
@@ -747,7 +755,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         Menu_Dispenser_Input(1);
                         break;
                     }
-                    if(arg3 == "armour" || arg3 == "armor") {
+                    if(arg3 == "armor") {
                         Menu_Dispenser_Input(2);
                         break;
                     }
@@ -856,7 +864,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             } else {
                 sprint(self, PRINT_HIGH, "cmd changeteam [#|auto]\n");
                 sprint(self, PRINT_HIGH, "cmd changeclass [#]\n");
-                sprint(self, PRINT_HIGH, "cmd dropammo [1-4]\n");
+                sprint(self, PRINT_HIGH, "cmd dropammo [1-4] [amount]\n");
                 sprint(self, PRINT_HIGH, "cmd disguise [last|none|skin #|team #]\n");
                 sprint(self, PRINT_HIGH, "cmd menu\n");
                 sprint(self, PRINT_HIGH, "cmd autoscan\n");
@@ -866,7 +874,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd detpack [#|cancel]\n");
                 sprint(self, PRINT_HIGH, "cmd build [cancel|sentry|dispenser|destroy {sentry|dispenser}]\n");
                 sprint(self, PRINT_HIGH, "cmd sentry [rotate #]\n");
-                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armour|repair|withdraw {ammo|armour}]\n");
+                sprint(self, PRINT_HIGH, "cmd dispenser [ammo|armor|repair|withdraw {ammo|armor}]\n");
                 sprint(self, PRINT_HIGH, "cmd captainpick #\n");
                 sprint(self, PRINT_HIGH, "cmd break\b: end current map\b\n");
             }
@@ -1117,6 +1125,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     bprint(PRINT_HIGH, " has changed the map to ");
                     bprint(PRINT_HIGH, arg2);
                     bprint(PRINT_HIGH, "\n");
+                    nextmap = arg2;
                     if (!clan_scores_dumped) {
                         if (quadmode) {
                             rounds = 1;

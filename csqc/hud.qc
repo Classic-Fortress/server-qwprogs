@@ -98,6 +98,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     Hud_Panels[HUD_PANEL_PLAYERCLASS].Position = [0, 180];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_SHOWSCORES].FillSize.x / 2), 30];
     Hud_Panels[HUD_PANEL_SHOWSCORES].Scale = 1.00;
+    Hud_Panels[HUD_PANEL_TEAM_SCORE].Position = [(width - Hud_Panels[HUD_PANEL_TEAM_SCORE].FillSize.x), 0];
     Hud_Panels[HUD_PANEL_MAP_MENU].Position = [(width / 2) - (Hud_Panels[HUD_PANEL_MAP_MENU].FillSize.x / 2), 30];
     Hud_Panels[HUD_PANEL_MAP_MENU].Scale = 1.00;
 }
@@ -574,7 +575,6 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         // click event
         if (fo_hud_editor)
         {
-            
         }
     }
 
@@ -823,7 +823,6 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
     switch (SBAR.PlayerClass)
     {
         case PC_SOLDIER:
-        case PC_PYRO:
             return;
     }
 
@@ -950,6 +949,24 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Assault Cannon Locked";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
+                }
+                break;
+            case PC_PYRO:
+                if (SBAR.AirBlast)
+                {
+                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                    msg = "Airblast Cooling Down";
+                    DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
+                }
+                else if (!SBAR.AirBlast)
+                {
+                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                    msg = "Airblast Ready";
                     DrawOffsetString(msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
                 break;
