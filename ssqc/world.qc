@@ -358,9 +358,9 @@ void () worldspawn = {
             votemode = FALSE;
         } else {
         }
-    } else {
+    } else if(!(vote_style & 4)) {
         if(world.model == strcat("maps/",votemap,".bsp")) {
-            bprint(PRINT_HIGH, "\bEnabling vote mode as map is not\b ",votemap,"\n");
+            bprint(PRINT_HIGH, "\bEnabling vote mode as map is\b ",votemap,"\n");
             localcmd ("localinfo votemode on\n"); 
             votemode = TRUE;
             //changelevel(votemap);
