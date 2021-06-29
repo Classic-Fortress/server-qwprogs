@@ -144,13 +144,14 @@ typedef struct
 {
     string icon;
 } FO_Hud_Icons;
-FO_Hud_Icons HudIcons[29] = {
+FO_Hud_Icons HudIcons[30] = {
 //    {""},
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
     {ICON_GREN1},
     {ICON_GREN2},
+    {ICON_GREN_EMP},
     {ICON_IDENTIFY},
     {ICON_SCOUT},
     {ICON_SNIPER},
@@ -176,10 +177,11 @@ FO_Hud_Icons HudIcons[29] = {
     {"textures/wad/anum_percent.png"}
 };
 
-FO_Hud_Icons GrenadeIcons[3] = {
+FO_Hud_Icons GrenadeIcons[4] = {
     {ICON_GREN1},
     {ICON_GREN1},
     {ICON_GREN2},
+    {ICON_GREN_EMP},
 };
 
 typedef struct {

@@ -1412,6 +1412,7 @@
 #define ICON_IDENTIFY "textures/wad/identify.png"
 #define ICON_GREN1 "textures/wad/gren1.png"
 #define ICON_GREN2 "textures/wad/gren2.png"
+#define ICON_GREN_EMP "textures/wad/emp.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
 #define ICON_SOLDIER "textures/wad/soldier.png"

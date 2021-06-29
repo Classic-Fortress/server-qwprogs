@@ -47,6 +47,23 @@ void(string panelid, float display, string text, string icon) drawIconPanel = {
         Hud_DrawPanelLMP(panelid, text, icon);
     }
 };
+
+void(string panelid, float display, string text, string icon) drawGren2Panel = {
+    if (display || fo_hud_editor)
+    {
+        switch (SBAR.PlayerClass) {
+            case PC_ENGINEER:
+                icon = ICON_GREN_EMP;
+                break;
+            default:
+                icon = ICON_GREN2;
+        }
+
+        GetDrawPanel(panelid);
+        Hud_DrawPanelLMP(panelid, text, icon);
+    }
+};
+
 void(string panelid, float display, string text, string icon) drawSpecial = {
     if (SBAR.PlayerClass || fo_hud_editor)
     {
@@ -829,7 +846,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
     {"capspanel",FO_HUD_CAPS_NAME,'10 80','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
     {"gren1panel",FO_HUD_GREN1_NAME,'10 110','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','50 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Gren2);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','50 26',1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
     {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 170','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
     {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
     {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 230','150 260',1,0,1,0, drawFlagInfo, {return "";}},
