@@ -1412,6 +1412,8 @@
 #define ICON_IDENTIFY "textures/wad/identify.png"
 #define ICON_GREN_FRAG "textures/wad/gren1.png"
 #define ICON_GREN_NAIL "textures/wad/gren2.png"
+#define ICON_GREN_CUSS "textures/wad/gren_cuss.png"
+#define ICON_GREN_FLASH "textures/wad/gren_flash.png"
 #define ICON_GREN_EMP "textures/wad/emp.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
