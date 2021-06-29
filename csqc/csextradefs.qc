@@ -149,8 +149,8 @@ FO_Hud_Icons HudIcons[30] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
-    {ICON_GREN1},
-    {ICON_GREN2},
+    {ICON_GREN_FRAG},
+    {ICON_GREN_NAIL},
     {ICON_GREN_EMP},
     {ICON_IDENTIFY},
     {ICON_SCOUT},
@@ -178,9 +178,9 @@ FO_Hud_Icons HudIcons[30] = {
 };
 
 FO_Hud_Icons GrenadeIcons[4] = {
-    {ICON_GREN1},
-    {ICON_GREN1},
-    {ICON_GREN2},
+    {ICON_GREN_FRAG},
+    {ICON_GREN_FRAG},
+    {ICON_GREN_NAIL},
     {ICON_GREN_EMP},
 };
 

@@ -56,7 +56,7 @@ void(string panelid, float display, string text, string icon) drawGren2Panel = {
                 icon = ICON_GREN_EMP;
                 break;
             default:
-                icon = ICON_GREN2;
+                icon = ICON_GREN_NAIL;
         }
 
         GetDrawPanel(panelid);
@@ -107,7 +107,7 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
     }
     if(fo_hud_editor && (!display || !timercount)) {
         GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
+        Hud_DrawPanelLMP(panelid, "0", ICON_GREN_FRAG);
     }
 };
 
