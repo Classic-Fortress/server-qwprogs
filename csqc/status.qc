@@ -55,6 +55,30 @@ void(string panelid, float display, string text, string icon) drawGren1Panel = {
             case PC_SCOUT:
                 icon = ICON_GREN_FLASH;
                 break;
+            case PC_SNIPER:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_SOLDIER:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_DEMOMAN:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_MEDIC:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_HVYWEAP:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_PYRO:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_SPY:
+                icon = ICON_GREN_FRAG;
+                break;
+            case PC_ENGINEER:
+                icon = ICON_GREN_FRAG;
+                break;
             default:
                 icon = ICON_GREN_FRAG;
         }
@@ -70,6 +94,27 @@ void(string panelid, float display, string text, string icon) drawGren2Panel = {
         switch (SBAR.PlayerClass) {
             case PC_SCOUT:
                 icon = ICON_GREN_CUSS;
+                break;
+            case PC_SNIPER:
+                icon = ICON_GREN_FLARE;
+                break;
+            case PC_SOLDIER:
+                icon = ICON_GREN_NAIL;
+                break;
+            case PC_DEMOMAN:
+                icon = ICON_GREN_MIRV;
+                break;
+            case PC_MEDIC:
+                icon = ICON_GREN_CUSS;
+                break;
+            case PC_HVYWEAP:
+                icon = ICON_GREN_MIRV;
+                break;
+            case PC_PYRO:
+                icon = ICON_GREN_NAPALM;
+                break;
+            case PC_SPY:
+                icon = ICON_GREN_GAS;
                 break;
             case PC_ENGINEER:
                 icon = ICON_GREN_EMP;
