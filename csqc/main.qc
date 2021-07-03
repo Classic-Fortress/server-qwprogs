@@ -208,8 +208,21 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
-                        AddGrenTimer(1);
+                        float grentype;
+
+                        if(SBAR.PlayerClass == PC_SCOUT) {
+                            if(fo_flash) {
+                                grentype = GR_TYPE_FLASH;
+                            } else {
+                                grentype = GR_TYPE_CALTROP;
+                            }
+                        } else {
+                            grentype = GR_TYPE_NORMAL;
+                        }
+
+                        AddGrenTimer(grentype);
                     }
+
                     grentimer_waiting = TRUE;
                 }
                 localcmd("primeone_server");
@@ -220,7 +233,46 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
-                        AddGrenTimer(2);
+                        float grentype;
+
+                        switch(SBAR.PlayerClass) {
+                            case PC_SCOUT:
+                                grentype = GR_TYPE_CONCUSSION;
+                                break;
+                            case PC_SNIPER:
+                                grentype = GR_TYPE_FLARE;
+                                break;
+                            case PC_SOLDIER:
+                                grentype = GR_TYPE_NAIL;
+                                break;
+                            case PC_DEMOMAN:
+                                grentype = GR_TYPE_MIRV;
+                                break;
+                            case PC_MEDIC:
+                                if(medic_type == MEDIC_TYPE_BLAST) {
+                                    grentype = GR_TYPE_BLAST;
+                                } else {
+                                    grentype = GR_TYPE_CONCUSSION;
+                                }
+                                break;
+                            case PC_HVYWEAP:
+                                grentype = GR_TYPE_MIRV;
+                                break;
+                            case PC_PYRO:
+                                grentype = GR_TYPE_NAPALM;
+                                break;
+                            case PC_SPY:
+                                grentype = GR_TYPE_GAS;
+                                break;
+                            case PC_ENGINEER:
+                                grentype = GR_TYPE_EMP;
+                                break;
+                            default:
+                                grentype = GR_TYPE_NONE;
+                                break;
+                        }
+
+                        AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
                 }
@@ -232,7 +284,19 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
-                        AddGrenTimer(1);
+                        float grentype;
+
+                        if(SBAR.PlayerClass == PC_SCOUT) {
+                            if(fo_flash) {
+                                grentype = GR_TYPE_FLASH;
+                            } else {
+                                grentype = GR_TYPE_CALTROP;
+                            }
+                        } else {
+                            grentype = GR_TYPE_NORMAL;
+                        }
+
+                        AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
                 }
@@ -244,7 +308,46 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
-                        AddGrenTimer(2);
+                        float grentype;
+
+                        switch(SBAR.PlayerClass) {
+                            case PC_SCOUT:
+                                grentype = GR_TYPE_CONCUSSION;
+                                break;
+                            case PC_SNIPER:
+                                grentype = GR_TYPE_FLARE;
+                                break;
+                            case PC_SOLDIER:
+                                grentype = GR_TYPE_NAIL;
+                                break;
+                            case PC_DEMOMAN:
+                                grentype = GR_TYPE_MIRV;
+                                break;
+                            case PC_MEDIC:
+                                if(medic_type == MEDIC_TYPE_BLAST) {
+                                    grentype = GR_TYPE_BLAST;
+                                } else {
+                                    grentype = GR_TYPE_CONCUSSION;
+                                }
+                                break;
+                            case PC_HVYWEAP:
+                                grentype = GR_TYPE_MIRV;
+                                break;
+                            case PC_PYRO:
+                                grentype = GR_TYPE_NAPALM;
+                                break;
+                            case PC_SPY:
+                                grentype = GR_TYPE_GAS;
+                                break;
+                            case PC_ENGINEER:
+                                grentype = GR_TYPE_EMP;
+                                break;
+                            default:
+                                grentype = GR_TYPE_NONE;
+                                break;
+                        }
+
+                        AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
                 }

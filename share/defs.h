@@ -1419,6 +1419,8 @@
 #define ICON_GREN_NAPALM "textures/wad/gren_napalm.png"
 #define ICON_GREN_GAS "textures/wad/gren_gas.png"
 #define ICON_GREN_FLARE "textures/wad/gren_flare.png"
+#define ICON_GREN_CALTROP "textures/wad/gren_caltrop.png"
+#define ICON_GREN_BLAST "textures/wad/gren_blast.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
 #define ICON_SOLDIER "textures/wad/soldier.png"
