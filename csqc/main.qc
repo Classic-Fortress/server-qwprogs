@@ -35,7 +35,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
-    
+
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -69,7 +69,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
-    
+
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -277,8 +277,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if (key2 != "")
                 {
                     localcmd(sprintf("unbind %s\n", key2));
-                    localcmd(sprintf("bind %s +showscores\n", key2));                   
-                }                
+                    localcmd(sprintf("bind %s +showscores\n", key2));
+                }
             }
             FO_Show_Scores(TRUE);
             break;

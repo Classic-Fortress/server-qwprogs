@@ -69,11 +69,23 @@ void(string panelid, float display, string text, string icon) drawIconPanel = {
 };
 
 void(string panelid, float display, string text) drawGren1Panel = {
-    local string icon = GetGrenOneIconForClass(SBAR.PlayerClass);
+    local float playerclass = SBAR.PlayerClass
+
+    if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER) {
+        return;
+    }
+
+    local string icon = GetGrenOneIconForClass(playerclass);
     drawIconPanel(panelid, display, text, icon);
 };
 
 void(string panelid, float display, string text) drawGren2Panel = {
+    local float playerclass = SBAR.PlayerClass
+
+    if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER) {
+        return;
+    }
+
     local string icon = GetGrenTwoIconForClass(SBAR.PlayerClass);
     drawIconPanel(panelid, display, text, icon);
 };
