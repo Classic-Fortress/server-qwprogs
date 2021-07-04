@@ -10,6 +10,8 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+float GetGrenOneTypeForClass(float playerclass);
+float GetGrenTwoTypeForClass(float playerclass);
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -208,44 +210,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
-                        float grentype;
-
-                        switch(SBAR.PlayerClass) {
-                            case PC_SCOUT:
-                                if(fo_flash) {
-                                    grentype = GR_TYPE_FLASH;
-                                } else {
-                                    grentype = GR_TYPE_CALTROP;
-                                }
-                                break;
-                            case PC_SNIPER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_SOLDIER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_DEMOMAN:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_MEDIC:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_HVYWEAP:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_PYRO:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_SPY:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_ENGINEER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            default:
-                                grentype = GR_TYPE_NONE;
-                        }
-
+                        local float grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
 
@@ -259,44 +224,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
-                        float grentype;
-
-                        switch(SBAR.PlayerClass) {
-                            case PC_SCOUT:
-                                grentype = GR_TYPE_CONCUSSION;
-                                break;
-                            case PC_SNIPER:
-                                grentype = GR_TYPE_FLARE;
-                                break;
-                            case PC_SOLDIER:
-                                grentype = GR_TYPE_NAIL;
-                                break;
-                            case PC_DEMOMAN:
-                                grentype = GR_TYPE_MIRV;
-                                break;
-                            case PC_MEDIC:
-                                if(medic_type == MEDIC_TYPE_BLAST) {
-                                    grentype = GR_TYPE_BLAST;
-                                } else {
-                                    grentype = GR_TYPE_CONCUSSION;
-                                }
-                                break;
-                            case PC_HVYWEAP:
-                                grentype = GR_TYPE_MIRV;
-                                break;
-                            case PC_PYRO:
-                                grentype = GR_TYPE_NAPALM;
-                                break;
-                            case PC_SPY:
-                                grentype = GR_TYPE_GAS;
-                                break;
-                            case PC_ENGINEER:
-                                grentype = GR_TYPE_EMP;
-                                break;
-                            default:
-                                grentype = GR_TYPE_NONE;
-                        }
-
+                        local float grentype = GetGrenTwoTypeForClass(SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
@@ -309,44 +237,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
-                        float grentype;
-
-                        switch(SBAR.PlayerClass) {
-                            case PC_SCOUT:
-                                if(fo_flash) {
-                                    grentype = GR_TYPE_FLASH;
-                                } else {
-                                    grentype = GR_TYPE_CALTROP;
-                                }
-                                break;
-                            case PC_SNIPER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_SOLDIER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_DEMOMAN:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_MEDIC:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_HVYWEAP:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_PYRO:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_SPY:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            case PC_ENGINEER:
-                                grentype = GR_TYPE_NORMAL;
-                                break;
-                            default:
-                                grentype = GR_TYPE_NONE;
-                        }
-
+                        local float grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
@@ -359,44 +250,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
-                        float grentype;
-
-                        switch(SBAR.PlayerClass) {
-                            case PC_SCOUT:
-                                grentype = GR_TYPE_CONCUSSION;
-                                break;
-                            case PC_SNIPER:
-                                grentype = GR_TYPE_FLARE;
-                                break;
-                            case PC_SOLDIER:
-                                grentype = GR_TYPE_NAIL;
-                                break;
-                            case PC_DEMOMAN:
-                                grentype = GR_TYPE_MIRV;
-                                break;
-                            case PC_MEDIC:
-                                if(medic_type == MEDIC_TYPE_BLAST) {
-                                    grentype = GR_TYPE_BLAST;
-                                } else {
-                                    grentype = GR_TYPE_CONCUSSION;
-                                }
-                                break;
-                            case PC_HVYWEAP:
-                                grentype = GR_TYPE_MIRV;
-                                break;
-                            case PC_PYRO:
-                                grentype = GR_TYPE_NAPALM;
-                                break;
-                            case PC_SPY:
-                                grentype = GR_TYPE_GAS;
-                                break;
-                            case PC_ENGINEER:
-                                grentype = GR_TYPE_EMP;
-                                break;
-                            default:
-                                grentype = GR_TYPE_NONE;
-                        }
-
+                        local float grentype = GetGrenTwoTypeForClass(SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
@@ -524,4 +378,62 @@ noref void CSQC_Input_Frame() {
 
 void CSQC_Shutdown() = {
     FO_WriteSettings();
+}
+
+float GetGrenOneTypeForClass(float playerclass) {
+    switch(playerclass) {
+        case PC_SCOUT:
+            if(fo_flash) {
+                return GR_TYPE_FLASH;
+            } else {
+                return GR_TYPE_CALTROP;
+            }
+        case PC_SNIPER:
+            return GR_TYPE_NORMAL;
+        case PC_SOLDIER:
+            return GR_TYPE_NORMAL;
+        case PC_DEMOMAN:
+            return GR_TYPE_NORMAL;
+        case PC_MEDIC:
+            return GR_TYPE_NORMAL;
+        case PC_HVYWEAP:
+            return GR_TYPE_NORMAL;
+        case PC_PYRO:
+            return GR_TYPE_NORMAL;
+        case PC_SPY:
+            return GR_TYPE_NORMAL;
+        case PC_ENGINEER:
+            return GR_TYPE_NORMAL;
+        default:
+            return GR_TYPE_NONE;
+    }
+}
+
+float GetGrenTwoTypeForClass(float playerclass) {
+    switch(playerclass) {
+        case PC_SCOUT:
+            return GR_TYPE_CONCUSSION;
+        case PC_SNIPER:
+            return GR_TYPE_FLARE;
+        case PC_SOLDIER:
+            return GR_TYPE_NAIL;
+        case PC_DEMOMAN:
+            return GR_TYPE_MIRV;
+        case PC_MEDIC:
+            if(medic_type == MEDIC_TYPE_BLAST) {
+                return GR_TYPE_BLAST;
+            } else {
+                return GR_TYPE_CONCUSSION;
+            }
+        case PC_HVYWEAP:
+            return GR_TYPE_MIRV;
+        case PC_PYRO:
+            return GR_TYPE_NAPALM;
+        case PC_SPY:
+            return GR_TYPE_GAS;
+        case PC_ENGINEER:
+            return GR_TYPE_EMP;
+        default:
+            return GR_TYPE_NONE;
+    }
 }
