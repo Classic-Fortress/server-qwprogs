@@ -315,21 +315,15 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 }
 
 // draws value string using lmps
-void Hud_DrawPanelLMP(string id, string val, string icon)
+void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
 {
-    if (!DrawPanel.Display && !fo_hud_editor)
+    if (!panel || (!panel.Display && !fo_hud_editor))
         return;
     
-    float fid = getHudPanel(id);
-
-    if(fid < 0) {
-        return;
-    }
-
     vector pos;
-    pos = getPosition(fid); //DrawPanel.Position;
+    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
 
-    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
+    if (hud_panel(panel.id, pos, panel.FillSize * panel.Scale, 0, panel.Display))
     {
         // click event
         if (fo_hud_editor)
@@ -338,19 +332,18 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
         }
     }
 
-    vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
+    vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
     float len;
     len = strlen(val);
-    float offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    float offset = (panel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
 
     pos = [pos_x + offset, pos_y, 0];
-    float textScale = DrawPanel.TextScale ? DrawPanel.TextScale : DrawPanel.Scale;
+    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
     Hud_DrawStringLMP(pos, val, 24 * textScale);
 }
-
 
 vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
 {
