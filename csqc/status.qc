@@ -1,12 +1,21 @@
 float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align);
 float fo_to_sui_aligntment(float fo_align);
 vector (FO_Hud_Panel* panel) getPanelPosition;
+float getHudPanel(string);
+void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
+FO_Hud_Panel* getHudPanelPointer(float);
 
 void(string panelid, float display, string text, string icon) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
     {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, text, icon);
+        //GetDrawPanel(panelid);
+        //Hud_DrawPanelLMP(panelid, text, icon);
+        float id = getHudPanel(panelid);
+
+        if(id < 0) {
+            return;
+        }
+        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
     }
 };
 
@@ -45,8 +54,15 @@ void(string panelid, float display, string text, string icon) drawFlagInfo = {
 void(string panelid, float display, string text, string icon) drawIconPanel = {
     if (display || fo_hud_editor)
     {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, text, icon);
+        //GetDrawPanel(panelid);
+        //Hud_DrawPanelLMP(panelid, text, icon);
+        float id = getHudPanel(panelid);
+
+        if(id < 0) {
+            return;
+        }
+        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
+
     }
 };
 void(string panelid, float display, string text, string icon) drawSpecial = {
@@ -61,9 +77,22 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
     local float timeleft;
     local float timercount = 0;
     if (display) {
-        GetDrawPanel(panelid);
-        float Scale = DrawPanel.Scale;
-        float TextScale = DrawPanel.TextScale;
+        //GetDrawPanel(panelid);
+        float id = getHudPanel(panelid);
+
+        if(id < 0) {
+            return;
+        }
+        
+        FO_Hud_Panel* panel = getHudPanelPointer(id);
+        
+        float Scale = panel.Scale;
+        float TextScale = panel.TextScale;
+        FO_Hud_Panel panel2;
+        panel2.Position = panel.Position;
+        panel2.Scale = panel.Scale;
+        panel2.TextScale = panel.TextScale;
+        panel2.Display = panel.Display;
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
                 timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
@@ -81,18 +110,24 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
                     continue;
                 }
                 if(i) {
-                    DrawPanel.Scale = Scale * 0.8;
-                    DrawPanel.TextScale = TextScale * 0.8;
+                    panel2.Scale = Scale * 0.8;
+                    panel2.TextScale = TextScale * 0.8;
                 }
-                Hud_DrawPanelLMP(panelid, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon);
-                DrawPanel.Position = DrawPanel.Position + [0, 24 * DrawPanel.Scale];
+                Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon);
+                panel2.Position = panel2.Position + [0, 24 * panel2.Scale];
                 timercount++;
             }
         }
     }
     if(fo_hud_editor && (!display || !timercount)) {
-        GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
+        //GetDrawPanel(panelid);
+        //Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
+        float id = getHudPanel(panelid);
+
+        if(id < 0) {
+            return;
+        }
+        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
     }
 };
 
