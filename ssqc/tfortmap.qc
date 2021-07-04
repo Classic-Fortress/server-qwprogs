@@ -222,9 +222,6 @@ void () TF_PlaceItem = {
     self.movetype = 0;
     self.oldorigin = self.origin;
 
-    if (self.goal_activation & TFGI_ITEMGLOWS)
-        self.effects = self.effects | EF_DIMLIGHT;
-
     if (item_list_bit == 0)
         item_list_bit = 1;
 

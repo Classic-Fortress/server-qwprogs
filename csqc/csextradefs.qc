@@ -235,6 +235,8 @@ typedef struct {
     float AuraStatus;
     // hwguy
     float LockedCannon;
+    // pyro
+    float AirBlast;
     // spy
     float IsUndercover;
     float InvisOnly;
