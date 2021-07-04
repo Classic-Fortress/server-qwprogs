@@ -210,14 +210,40 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                         localcmd("play grentimer.wav\n");
                         float grentype;
 
-                        if(SBAR.PlayerClass == PC_SCOUT) {
-                            if(fo_flash) {
-                                grentype = GR_TYPE_FLASH;
-                            } else {
-                                grentype = GR_TYPE_CALTROP;
-                            }
-                        } else {
-                            grentype = GR_TYPE_NORMAL;
+                        switch(SBAR.PlayerClass) {
+                            case PC_SCOUT:
+                                if(fo_flash) {
+                                    grentype = GR_TYPE_FLASH;
+                                } else {
+                                    grentype = GR_TYPE_CALTROP;
+                                }
+                                break;
+                            case PC_SNIPER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_SOLDIER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_DEMOMAN:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_MEDIC:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_HVYWEAP:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_PYRO:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_SPY:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_ENGINEER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            default:
+                                grentype = GR_TYPE_NONE;
                         }
 
                         AddGrenTimer(grentype);
@@ -269,7 +295,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                                 break;
                             default:
                                 grentype = GR_TYPE_NONE;
-                                break;
                         }
 
                         AddGrenTimer(grentype);
@@ -286,14 +311,40 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                         localcmd("play grentimer.wav\n");
                         float grentype;
 
-                        if(SBAR.PlayerClass == PC_SCOUT) {
-                            if(fo_flash) {
-                                grentype = GR_TYPE_FLASH;
-                            } else {
-                                grentype = GR_TYPE_CALTROP;
-                            }
-                        } else {
-                            grentype = GR_TYPE_NORMAL;
+                        switch(SBAR.PlayerClass) {
+                            case PC_SCOUT:
+                                if(fo_flash) {
+                                    grentype = GR_TYPE_FLASH;
+                                } else {
+                                    grentype = GR_TYPE_CALTROP;
+                                }
+                                break;
+                            case PC_SNIPER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_SOLDIER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_DEMOMAN:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_MEDIC:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_HVYWEAP:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_PYRO:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_SPY:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            case PC_ENGINEER:
+                                grentype = GR_TYPE_NORMAL;
+                                break;
+                            default:
+                                grentype = GR_TYPE_NONE;
                         }
 
                         AddGrenTimer(grentype);
@@ -344,7 +395,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                                 break;
                             default:
                                 grentype = GR_TYPE_NONE;
-                                break;
                         }
 
                         AddGrenTimer(grentype);

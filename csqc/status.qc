@@ -48,39 +48,44 @@ void(string panelid, float display, string text, string icon) drawIconPanel = {
     }
 };
 
-void(string panelid, float display, string text, string icon) drawGren1Panel = {
-    if (display || fo_hud_editor)
-    {
-        switch (SBAR.PlayerClass) {
+void(string panelid, float display, string text) drawGren1Panel = {
+    local string icon;
+
+    if (display || fo_hud_editor) {
+        switch(SBAR.PlayerClass) {
             case PC_SCOUT:
-                icon = ICON_GREN_FLASH;
+                if(fo_flash) {
+                    icon = ICON_GREN_FLASH;
+                } else {
+                    icon = ICON_GREN_CALTROP;
+                }
                 break;
             case PC_SNIPER:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_SOLDIER:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_DEMOMAN:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_MEDIC:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_HVYWEAP:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_PYRO:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_SPY:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             case PC_ENGINEER:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NORMAL;
                 break;
             default:
-                icon = ICON_GREN_FRAG;
+                icon = ICON_GREN_NONE;
         }
 
         GetDrawPanel(panelid);
@@ -88,12 +93,13 @@ void(string panelid, float display, string text, string icon) drawGren1Panel = {
     }
 };
 
-void(string panelid, float display, string text, string icon) drawGren2Panel = {
-    if (display || fo_hud_editor)
-    {
-        switch (SBAR.PlayerClass) {
+void(string panelid, float display, string text) drawGren2Panel = {
+    local string icon;
+
+    if (display || fo_hud_editor) {
+        switch(SBAR.PlayerClass) {
             case PC_SCOUT:
-                icon = ICON_GREN_CUSS;
+                icon = ICON_GREN_CONCUSSION;
                 break;
             case PC_SNIPER:
                 icon = ICON_GREN_FLARE;
@@ -105,7 +111,11 @@ void(string panelid, float display, string text, string icon) drawGren2Panel = {
                 icon = ICON_GREN_MIRV;
                 break;
             case PC_MEDIC:
-                icon = ICON_GREN_CUSS;
+                if(medic_type == MEDIC_TYPE_BLAST) {
+                    icon = ICON_GREN_BLAST;
+                } else {
+                    icon = ICON_GREN_CONCUSSION;
+                }
                 break;
             case PC_HVYWEAP:
                 icon = ICON_GREN_MIRV;
@@ -120,7 +130,7 @@ void(string panelid, float display, string text, string icon) drawGren2Panel = {
                 icon = ICON_GREN_EMP;
                 break;
             default:
-                icon = ICON_GREN_NAIL;
+                icon = ICON_GREN_NONE;
         }
 
         GetDrawPanel(panelid);
@@ -171,7 +181,7 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
     }
     if(fo_hud_editor && (!display || !timercount)) {
         GetDrawPanel(panelid);
-        Hud_DrawPanelLMP(panelid, "0", ICON_GREN_FRAG);
+        Hud_DrawPanelLMP(panelid, "0", ICON_GREN_NORMAL);
     }
 };
 

@@ -148,15 +148,16 @@ typedef struct
     string icon;
 } FO_Hud_Icons;
 
-FO_Hud_Icons HudIcons[36] = {
+FO_Hud_Icons HudIcons[37] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
-    {ICON_GREN_FRAG},
+    {ICON_GREN_NONE},
+    {ICON_GREN_NORMAL},
     {ICON_GREN_NAIL},
     {ICON_GREN_EMP},
     {ICON_GREN_GAS},
-    {ICON_GREN_CUSS},
+    {ICON_GREN_CONCUSSION},
     {ICON_GREN_FLASH},
     {ICON_GREN_FLARE},
     {ICON_GREN_NAPALM},
@@ -188,9 +189,9 @@ FO_Hud_Icons HudIcons[36] = {
 };
 
 FO_Hud_Icons GrenadeIcons[12] = {
-    {},
-    {ICON_GREN_FRAG},
-    {ICON_GREN_CUSS},
+    {ICON_GREN_NONE},
+    {ICON_GREN_NORMAL},
+    {ICON_GREN_CONCUSSION},
     {ICON_GREN_NAIL},
     {ICON_GREN_MIRV},
     {ICON_GREN_NAPALM},
