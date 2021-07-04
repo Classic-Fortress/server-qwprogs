@@ -293,7 +293,7 @@ void UpdateClientGrenadeSettings(entity pl) = {
     WriteFloat(MSG_MULTICAST, fo_flash);
     WriteFloat(MSG_MULTICAST, medic_type);
     WriteFloat(MSG_MULTICAST, nailgren_type);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientMapVote(entity pl, entity candidate) = {
