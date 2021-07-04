@@ -19,6 +19,18 @@ void FO_Hud_Editor()
     }
 }
 
+float(float fo_align) fo_to_sui_aligntment = {
+    switch(fo_align) {
+        case HUD_ALIGN_RIGHT:
+            return SUI_ALIGN_END;
+        case HUD_ALIGN_LEFT:
+            return SUI_ALIGN_START;
+        case HUD_ALIGN_CENTER:
+            return SUI_ALIGN_CENTER;
+    }
+    return HUD_ALIGN_CENTER;
+};
+
 void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
 {
 	sui_push_frame(pos, size);
@@ -75,8 +87,9 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel 
 
         if (sui_is_held(id))
         {          
-            pos = [Mouse.x, Mouse.y];
-            pos = UpdatePos(id, pos);
+            //pos = [Mouse.x, Mouse.y];
+            //pos = UpdatePos(id, pos);
+            UpdatePos(id, [Mouse.x, Mouse.y]);
             sui_border_box(pos, size, 1, MENU_SELECTED, 0.4, 0);
         }
         
@@ -189,6 +202,8 @@ string GetPanelString(string line, string name)
     line = FormatCfgString(line, strcat(name, ".textscale"), ftos(DrawPanel.TextScale));
     line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
     line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.Orientation));
+    line = FormatCfgString(line, strcat(name, ".snap"), ftos(DrawPanel.Snap));
+    line = FormatCfgString(line, strcat(name, ".style"), ftos(DrawPanel.Style));
 
     return line;
 }
@@ -256,6 +271,12 @@ void FO_Hud_Editor_LoadSettings()
                             case "nodeinsertloc":
                                 DrawPanel.Orientation = stof(val);
                                 break;
+                            case "snap":
+                                DrawPanel.Snap = stof(val);
+                                break;
+                            case "style":
+                                DrawPanel.Style = stof(val);
+                                break;
                         }
                         
                         SetDrawPanel(pnl);
@@ -294,15 +315,15 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 }
 
 // draws value string using lmps
-void Hud_DrawPanelLMP(string id, string val, string icon)
+void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
 {
-    if (!DrawPanel.Display && !fo_hud_editor)
+    if (!panel || (!panel.Display && !fo_hud_editor))
         return;
-
+    
     vector pos;
-    pos = DrawPanel.Position;
+    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
 
-    if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
+    if (hud_panel(panel.id, pos, panel.FillSize * panel.Scale, 0, panel.Display))
     {
         // click event
         if (fo_hud_editor)
@@ -311,19 +332,18 @@ void Hud_DrawPanelLMP(string id, string val, string icon)
         }
     }
 
-    vector size = FO_Hud_Icon_Size * DrawPanel.Scale;
+    vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
     drawpic(pos, icon, size, '1 1 1', 1, 0);
 
     float len;
     len = strlen(val);
-    float offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    float offset = (panel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
 
     pos = [pos_x + offset, pos_y, 0];
-    float textScale = DrawPanel.TextScale ? DrawPanel.TextScale : DrawPanel.Scale;
+    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
     Hud_DrawStringLMP(pos, val, 24 * textScale);
 }
-
 
 vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
 {
