@@ -1132,11 +1132,15 @@ void () execute_changelevel = {
             if(votemode == 1 && vote_result && vote_result != vm) {
                 localcmd ("localinfo votemode off\n");
                 //changelevel(vote_result);
-            } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+            } 
+            if((vote_style & 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
                 vote_result = vm;
-                localcmd ("localinfo votemode on\n");
+                if(!(vote_style & 4)) {
+                     localcmd ("localinfo votemode on\n");
+                 }
                 //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-            } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
+            } 
+            if(vote_style & 2 && (vote_result == vm || vote_result == "")) {
                 vote_result = mapname;
             }
         }
@@ -2138,9 +2142,11 @@ void () NextLevel = {
         if(votemode == 1 && nextmap && nextmap != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else if(vote_style == 1 || votemode == 2) {
+        } else if(vote_style & 1 || votemode == 2) {
             nextmap = vm;
-            localcmd ("localinfo votemode on\n");
+            if(!(vote_style & 4)) {
+                localcmd ("localinfo votemode on\n");
+            }
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             nextmap = mapname;

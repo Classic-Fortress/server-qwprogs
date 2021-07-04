@@ -136,9 +136,44 @@ string HUD_ALIGN[] = {
     "Center"
 };
 
+string HUD_HORIZONTAL_ALIGN[] = {
+    "Left",
+    "Center",
+    "Right"
+};
+
+string HUD_VERTICAL_ALIGN[] = {
+    "Top",
+    "Middle",
+    "Bottom"
+};
+
 string MENU_OPTION[] = {
     "1","2","3","4","5","6","7","8","9","0","-","+"
 };
+
+const float HUD_SNAP_NONE = 0;
+const float HUD_SNAP_LEFT = 1;
+const float HUD_SNAP_CENTER = 2;
+const float HUD_SNAP_RIGHT = 4;
+const float HUD_SNAP_TOP = 8;
+const float HUD_SNAP_VCENTER = 16;
+const float HUD_SNAP_BOTTOM = 32;
+
+const float HUD_SNAP_TOP_LEFT = 9;
+const float HUD_SNAP_TOP_CENTER = 10;
+const float HUD_SNAP_TOP_RIGHT = 12;
+const float HUD_SNAP_VCENTER_LEFT = 17;
+const float HUD_SNAP_VCENTER_CENTER = 18;
+const float HUD_SNAP_VCENTER_RIGHT = 20;
+const float HUD_SNAP_BOTTOM_LEFT = 33;
+const float HUD_SNAP_BOTTOM_CENTER = 34;
+const float HUD_SNAP_BOTTOM_RIGHT = 36;
+
+const float HUD_SNAP_NORTH = 64;
+const float HUD_SNAP_EAST = 128;
+const float HUD_SNAP_SOUTH = 256;
+const float HUD_SNAP_WEST = 512;
 
 typedef struct 
 {
@@ -331,6 +366,7 @@ typedef struct {
     FO_Hud_Icons * Icon;
     float Snap;
     float Status;
+    float SnapID;
 } FO_Hud_Panel;
 
 FO_Hud_Panel DrawPanel;
