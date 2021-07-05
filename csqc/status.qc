@@ -4,8 +4,8 @@ vector (FO_Hud_Panel* panel) getPanelPosition;
 float getHudPanel(string);
 void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
 FO_Hud_Panel* getHudPanelPointer(float);
-string GetGrenOneIconForClass(float playerclass);
-string GetGrenTwoIconForClass(float playerclass);
+float GetGrenOneTypeForClass(float playerclass);
+float GetGrenTwoTypeForClass(float playerclass);
 
 void(string panelid, float display, string text, string icon) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
@@ -69,24 +69,28 @@ void(string panelid, float display, string text, string icon) drawIconPanel = {
 };
 
 void(string panelid, float display, string text) drawGren1Panel = {
-    local float playerclass = SBAR.PlayerClass
+    local float playerclass = SBAR.PlayerClass;
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER) {
         return;
     }
 
-    local string icon = GetGrenOneIconForClass(playerclass);
+    local float gren_type = GetGrenOneTypeForClass(playerclass);
+    local string icon = GrenadeIcons[gren_type].icon;
+
     drawIconPanel(panelid, display, text, icon);
 };
 
 void(string panelid, float display, string text) drawGren2Panel = {
-    local float playerclass = SBAR.PlayerClass
+    local float playerclass = SBAR.PlayerClass;
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER) {
         return;
     }
 
-    local string icon = GetGrenTwoIconForClass(SBAR.PlayerClass);
+    local float gren_type = GetGrenTwoTypeForClass(playerclass);
+    local string icon = GrenadeIcons[gren_type].icon;
+
     drawIconPanel(panelid, display, text, icon);
 };
 
@@ -101,6 +105,7 @@ void(string panelid, float display, string text, string icon) drawSpecial = {
 void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
     local float timeleft;
     local float timercount = 0;
+
     if (display) {
         //GetDrawPanel(panelid);
         float id = getHudPanel(panelid);
@@ -935,60 +940,60 @@ vector(float panelid) getFillSize = {
     return Hud_Panels[panelid].FillSize;
 }
 
-string GetGrenOneIconForClass(float playerclass) {
+float GetGrenOneTypeForClass(float playerclass) {
     switch(playerclass) {
         case PC_SCOUT:
             if(fo_flash) {
-                return ICON_GREN_FLASH;
+                return GR_TYPE_FLASH;
             } else {
-                return ICON_GREN_CALTROP;
+                return GR_TYPE_CALTROP;
             }
         case PC_SNIPER:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_SOLDIER:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_DEMOMAN:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_MEDIC:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_HVYWEAP:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_PYRO:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_SPY:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         case PC_ENGINEER:
-            return ICON_GREN_NORMAL;
+            return GR_TYPE_NORMAL;
         default:
-            return ICON_GREN_NONE;
+            return GR_TYPE_NONE;
     }
 }
 
-string GetGrenTwoIconForClass(float playerclass) {
+float GetGrenTwoTypeForClass(float playerclass) {
     switch(playerclass) {
         case PC_SCOUT:
-            return ICON_GREN_CONCUSSION;
+            return GR_TYPE_CONCUSSION;
         case PC_SNIPER:
-            return ICON_GREN_FLARE;
+            return GR_TYPE_FLARE;
         case PC_SOLDIER:
-            return ICON_GREN_NAIL;
+            return GR_TYPE_NAIL;
         case PC_DEMOMAN:
-            return ICON_GREN_MIRV;
+            return GR_TYPE_MIRV;
         case PC_MEDIC:
             if(medic_type == MEDIC_TYPE_BLAST) {
-                return ICON_GREN_BLAST;
+                return GR_TYPE_BLAST;
             } else {
-                return ICON_GREN_CONCUSSION;
+                return GR_TYPE_CONCUSSION;
             }
         case PC_HVYWEAP:
-            return ICON_GREN_MIRV;
+            return GR_TYPE_MIRV;
         case PC_PYRO:
-            return ICON_GREN_NAPALM;
+            return GR_TYPE_NAPALM;
         case PC_SPY:
-            return ICON_GREN_GAS;
+            return GR_TYPE_GAS;
         case PC_ENGINEER:
-            return ICON_GREN_EMP;
+            return GR_TYPE_EMP;
         default:
-            return ICON_GREN_NONE;
+            return GR_TYPE_NONE;
     }
 }
