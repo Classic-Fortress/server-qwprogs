@@ -754,6 +754,7 @@
 
 // Grenades
 #define GR_PRIMETIME		3
+
 #define GR_TYPE_NONE		0
 #define GR_TYPE_NORMAL		1
 #define GR_TYPE_CONCUSSION	2
@@ -1410,6 +1411,7 @@
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
 #define ICON_CAPS "textures/wad/caps.png"
 #define ICON_IDENTIFY "textures/wad/identify.png"
+#define ICON_GREN_NONE "textures/wad/gren_none.png"
 #define ICON_GREN_NORMAL "textures/wad/gren_normal.png"
 #define ICON_GREN_NAIL "textures/wad/gren_nail.png"
 #define ICON_GREN_CONCUSSION "textures/wad/gren_concussion.png"
@@ -1421,7 +1423,6 @@
 #define ICON_GREN_FLARE "textures/wad/gren_flare.png"
 #define ICON_GREN_CALTROP "textures/wad/gren_caltrop.png"
 #define ICON_GREN_BLAST "textures/wad/gren_blast.png"
-#define ICON_GREN_NONE "textures/wad/gren_none.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
 #define ICON_SOLDIER "textures/wad/soldier.png"
