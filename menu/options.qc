@@ -43,8 +43,6 @@ nonstatic void(mitem_desktop desktop) M_Options =
 	fr.add(spawn(mitem_text, item_text:"Effects", 				item_command:"m_pop;m_effects", 	item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;
 	if (assumefalsecheckcommand("r_particledesc"))
 		{fr.add(spawn(mitem_text, item_text:"Particles",		item_command:"m_pop;m_particles", 	item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
-	if (assumefalsecheckcommand("ezhud_nquake"))
-		{fr.add(spawn(mitem_text, item_text:"Hud",			item_command:"m_pop;m_hud", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
 	fr.add(spawn(mitem_text, item_text:"Controls", 				item_command:"m_pop;m_keys", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;
 	if (assumefalsecheckcommand("cfg_save"))
 		{fr.add(spawn(mitem_text, item_text:"Save Settings", 		item_command:"cfg_save", 		item_scale:16, item_flags:IF_CENTERALIGN), fl, [0, pos], [0, 16]);	pos += 16;}
