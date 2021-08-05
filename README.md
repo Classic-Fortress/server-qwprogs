@@ -221,3 +221,13 @@ E431: Format error in tags file "tags"
 Before byte 364464
 ```
 I just removed the one line at that byte address and it works fine now.
+
+
+List assets
+-----
+
+Only works in ssqc
+
+```
+fteqcc64 ./ssqc/progs.src -fdumpfilenames
+```
