@@ -196,12 +196,21 @@ Engineer
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 
 
-Compilation
+Development
+------
+
+Compile
 ------
 Compile with [FTEQCC](http://fte.triptohell.info/downloads)
 
 Ensure that `fteqcc64` is available in `$PATH` and:
 
 ```
-$ make
+make
+```
+
+Generate ctags
+------
+```
+./generate_ctags.sh
 ```
