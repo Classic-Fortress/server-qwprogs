@@ -222,6 +222,8 @@ Before byte 364464
 ```
 I just removed the one line at that byte address and it works fine now.
 
+Note: Fixed in fteqcc 6010
+
 
 List assets
 -----
