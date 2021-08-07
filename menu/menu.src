@@ -44,7 +44,6 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_load",		M_Load,			loadsave.qc)		\
 	cmd("m_save",		M_Save,			)				\
 	cmd("m_quit",		M_Quit,			quit.qc)			\
-	cmd("m_newgame",	M_NewGame,		newgame.qc)		\
 	cmd("m_servers",	M_Servers,		servers.qc)		\
 	cmd("m_reset",		M_Reset,		)
 	
