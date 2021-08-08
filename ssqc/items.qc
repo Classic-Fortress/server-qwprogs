@@ -1151,37 +1151,6 @@ void () sigil_touch = {
     SUB_UseTargets();
 };
 
-void () item_sigil = {
-    if (CheckExistence() == 0) {
-        dremove(self);
-        return;
-    }
-    if (!self.spawnflags) {
-        objerror("no spawnflags");
-    }
-    precache_sound("misc/runekey.wav");
-    self.noise = "misc/runekey.wav";
-    if (self.spawnflags & 1) {
-        precache_model("progs/end1.mdl");
-        FO_SetModel(self, "progs/end1.mdl");
-    }
-    if (self.spawnflags & 2) {
-        precache_model2("progs/end2.mdl");
-        FO_SetModel(self, "progs/end2.mdl");
-    }
-    if (self.spawnflags & 4) {
-        precache_model2("progs/end3.mdl");
-        FO_SetModel(self, "progs/end3.mdl");
-    }
-    if (self.spawnflags & 8) {
-        precache_model2("progs/end4.mdl");
-        FO_SetModel(self, "progs/end4.mdl");
-    }
-    self.touch = sigil_touch;
-    setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
-    StartItem();
-};
-
 void () powerup_touch = {
     if (other.classname != "player")
         return;
