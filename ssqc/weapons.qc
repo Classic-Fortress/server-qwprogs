@@ -140,7 +140,6 @@ void () W_Precache = {
     precache_sound("items/r_item2.wav");
     precache_model("progs/flame2.mdl");
     precache_sound("ambience/fire1.wav");
-    precache_sound2("blob/land1.wav");
     precache_model2("progs/v_spike.mdl");
     precache_sound("hknight/hit.wav");
     precache_sound("weapons/detpack.wav");
