@@ -81,7 +81,6 @@ nonstatic void(mitem_desktop desktop) M_Main =
 	if (checkextension("FTE_CSQC_SERVERBROWSER"))
 #endif
  										{menuitemtext_cladd16(m, _("Join Server"),			"m_pop;m_servers",	y); y += 16;}
-	//if (assumetruecheckcommand("map"))					{menuitemtext_cladd16(m, _("New Game"),				"m_pop;m_newgame",	y); y += 16;}
 	if (assumefalsecheckcommand("menu_demo"))				{menuitemtext_cladd16(m, _("Demos"),				"m_pop;menu_demo",	y); y += 16;}
 	//if (assumetruecheckcommand("save") && (isserver()||dp_workarounds))	{menuitemtext_cladd16(m, _("Save"),				"m_pop;m_save",		y); y += 16;}
 	//if (assumetruecheckcommand("load"))					{menuitemtext_cladd16(m, _("Load"),				"m_pop;m_load",		y); y += 16;}

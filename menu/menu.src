@@ -41,16 +41,11 @@ void(mitem_desktop desktop) M_Pop =
 	cmd("m_video",		M_Options_Video,	options_video.qc)		\
 	cmd("m_effects",	M_Options_Effects,	options_effects.qc)	\
 	cmd("m_audio",		M_Options_Audio,	options_audio.qc)		\
-	cmd("m_particles",	M_Options_Particles,	options_particles.qc)	\
-	cmd("m_hud",		M_Options_Hud,		options_hud.qc)		\
 	cmd("m_load",		M_Load,			loadsave.qc)		\
 	cmd("m_save",		M_Save,			)				\
 	cmd("m_quit",		M_Quit,			quit.qc)			\
-	cmd("m_newgame",	M_NewGame,		newgame.qc)		\
 	cmd("m_servers",	M_Servers,		servers.qc)		\
-	cmd("m_configs",	M_Configs,		options_configs.qc)	\
-	cmd("m_reset",		M_Reset,		)				\
-	cmd("m_preset",		M_Preset,		presets.qc)
+	cmd("m_reset",		M_Reset,		)
 	
 
 #if 0

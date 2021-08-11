@@ -1240,7 +1240,7 @@ void () AnarchyMode = {
         e = find(e, classname, "player");
     }
     bprint(PRINT_HIGH, "\bDemocracy has failed!\b Let the result be decided in \bBATTLE\b\n");
-    FO_Sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
+    FO_Sound(self, CHAN_AUTO, "boss1/out1.wav", 1, ATTN_NONE);
     //e = spawn();
     //e.classname = "anarchy_timer";
     //e.think = anarchy_timer_think;
@@ -1346,7 +1346,7 @@ float () CheckVoting = {
             // do we want this to trigger during anarchy too when hitting majority?
             if(e.cnt > (numplayers * vote_threshold)) {
                 bprint(PRINT_HIGH, "\bTime's up!\b Majority choice: ", e.netname, "\n");
-                FO_Sound(self, CHAN_AUTO, "blob/sight1.wav", 1, ATTN_NONE);
+                FO_Sound(self, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NONE);
                 ChangeToVotedMap(e.netname);
                 return FALSE;
             } else if(votemode) {
@@ -1502,7 +1502,7 @@ void (entity p) VoteToEndMap = {
             te = find (te, classname, "player");
         }
         if(numvoted > (numplayers * vote_threshold)) {
-            sound(self, CHAN_AUTO, "boss2/pop2.wav", 1, ATTN_NONE);
+            sound(self, CHAN_AUTO, "boss1/out1.wav", 1, ATTN_NONE);
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
             vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
             votemode = 2;
