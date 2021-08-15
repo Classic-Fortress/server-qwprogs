@@ -10,10 +10,9 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
-void GrenOne();
-void GrenTwo();
-void PrimeOrThrowGren(float gren_number, float remaining_grenades, string server_command);
-void IsValidToPrimeGrenade();
+void PrimeOrThrowGren(float gren_number);
+float RemainingGrenades(float gren_number);
+float IsValidToUseGrenades();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -237,10 +236,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren1":
-            GrenOne();
+            PrimeOrThrowGren(1, SBAR.Gren1);
             break;
         case "gren2":
-            GrenTwo();
+            PrimeOrThrowGren(2, SBAR.Gren2);
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -364,29 +363,31 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
-void GrenOne() = {
-    PrimeOrThrowGren(1, SBAR.Gren1, "gren1_server");
-}
-
-void GrenTwo() = {
-    PrimeOrThrowGren(2, SBAR.Gren2, "gren2_server");
-}
-
-void PrimeOrThrowGren(float gren_number, float remaining_grenades, string server_command) {
-    if !(IsValidToPrimeGrenade())
+void PrimeOrThrowGren(float gren_number) {
+    if !(IsValidToUseGrenades())
         return;
 
-    if (!grentimer_waiting && remaining_grenades) {
+    if (!grentimer_waiting && RemainingGrenades(gren_number)) {
         grentimer_waiting = TRUE;
         localcmd("play grentimer.wav\n");
         local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
         AddGrenTimer(grentype);
     }
 
-    localcmd(server_command);
+    local string command = strcat("gren", ftos(gren_number), "_server");
+    localcmd(command);
 }
 
-void IsValidToPrimeGrenade() {
+float RemainingGrenades(float gren_number) {
+    switch (gren_number) {
+        case 1:
+            return SBAR.Gren1;
+        case 2:
+            return SBAR.Gren2;
+    }
+}
+
+float IsValidToUseGrenades() {
     if (cvar(FOCMD_GRENTIMER) != 2)
         return FALSE;
 
@@ -402,7 +403,7 @@ void IsValidToPrimeGrenade() {
     if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
         return FALSE;
 
-    if (getstatf(STAT_HEALTH <= 0))
+    if (getstatf(STAT_HEALTH) <= 0)
         return FALSE;
 
     return TRUE;
