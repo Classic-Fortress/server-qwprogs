@@ -11,6 +11,8 @@ void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
 void PrimeOrThrowGren(float gren_number);
+void PrimeGren(float gren_number);
+void ShowGrenadeTimer(float gren_number);
 float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
@@ -209,37 +211,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "primeone":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                        localcmd("play grentimer.wav\n");
-                        grentype = GetGrenTypeForClass(1, SBAR.PlayerClass);
-                        AddGrenTimer(grentype);
-                    }
-
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("primeone_server");
-            }
+            PrimeGren(1);
             break;
         case "primetwo":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                        localcmd("play grentimer.wav\n");
-                        grentype = GetGrenTypeForClass(2, SBAR.PlayerClass);
-                        AddGrenTimer(grentype);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("primetwo_server");
-            }
+            PrimeGren(2);
             break;
         case "gren1":
-            PrimeOrThrowGren(1, SBAR.Gren1);
+            PrimeOrThrowGren(1);
             break;
         case "gren2":
-            PrimeOrThrowGren(2, SBAR.Gren2);
+            PrimeOrThrowGren(2);
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -363,7 +344,17 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
+void PrimeGren(float gren_number) {
+    ShowGrenadeTimer(gren_number);
+    localcmd(strcat("prime", ftos(gren_number), "_server"));
+}
+
 void PrimeOrThrowGren(float gren_number) {
+    ShowGrenadeTimer(gren_number);
+    localcmd(strcat("gren", ftos(gren_number), "_server"));
+}
+
+void ShowGrenadeTimer(float gren_number) {
     if !(IsValidToUseGrenades())
         return;
 
@@ -373,9 +364,6 @@ void PrimeOrThrowGren(float gren_number) {
         local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
         AddGrenTimer(grentype);
     }
-
-    local string command = strcat("gren", ftos(gren_number), "_server");
-    localcmd(command);
 }
 
 float RemainingGrenades(float gren_number) {
