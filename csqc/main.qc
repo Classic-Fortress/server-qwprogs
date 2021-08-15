@@ -12,6 +12,7 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype);
 void GrenOne();
 void GrenTwo();
+void PrimeOrThrowGren(float gren_number, float remaining_grenades, string server_command);
 void IsValidToPrimeGrenade();
 
 void GetSelf() = {
@@ -239,7 +240,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             GrenOne();
             break;
         case "gren2":
-            GrenOne();
+            GrenTwo();
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -364,37 +365,25 @@ void CSQC_Shutdown() = {
 }
 
 void GrenOne() = {
-    if !(IsValidToPrimeGrenade())
-        return;
-
-    if (!grentimer_waiting) {
-        if (SBAR.Gren1) {
-            localcmd("play grentimer.wav\n");
-            local float grentype = GetGrenTypeForClass(1, SBAR.PlayerClass);
-            AddGrenTimer(grentype);
-        }
-
-        grentimer_waiting = TRUE;
-    }
-
-    localcmd("gren1_server");
+    PrimeOrThrowGren(1, SBAR.Gren1, "gren1_server");
 }
 
 void GrenTwo() = {
+    PrimeOrThrowGren(2, SBAR.Gren2, "gren2_server");
+}
+
+void PrimeOrThrowGren(float gren_number, float remaining_grenades, string server_command) {
     if !(IsValidToPrimeGrenade())
         return;
 
-    if (!grentimer_waiting) {
-        if (SBAR.Gren2) {
-            localcmd("play grentimer.wav\n");
-            local float grentype = GetGrenTypeForClass(2, SBAR.PlayerClass);
-            AddGrenTimer(grentype);
-        }
-
+    if (!grentimer_waiting && remaining_grenades) {
         grentimer_waiting = TRUE;
+        localcmd("play grentimer.wav\n");
+        local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
+        AddGrenTimer(grentype);
     }
 
-    localcmd("gren2_server");
+    localcmd(server_command);
 }
 
 void IsValidToPrimeGrenade() {
