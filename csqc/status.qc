@@ -4,8 +4,7 @@ vector (FO_Hud_Panel* panel) getPanelPosition;
 float getHudPanel(string);
 void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
 FO_Hud_Panel* getHudPanelPointer(float);
-float GetGrenOneTypeForClass(float playerclass);
-float GetGrenTwoTypeForClass(float playerclass);
+float GetGrenTypeForClass(float gren_number, float playerclass);
 
 void(string panelid, float display, string text, string icon) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
@@ -75,7 +74,7 @@ void(string panelid, float display, string text) drawGren1Panel = {
         return;
     }
 
-    local float gren_type = GetGrenOneTypeForClass(playerclass);
+    local float gren_type = GetGrenTypeForClass(1, playerclass);
     local string icon = GrenadeIcons[gren_type].icon;
 
     drawIconPanel(panelid, display, text, icon);
@@ -88,7 +87,7 @@ void(string panelid, float display, string text) drawGren2Panel = {
         return;
     }
 
-    local float gren_type = GetGrenTwoTypeForClass(playerclass);
+    local float gren_type = GetGrenTypeForClass(2, playerclass);
     local string icon = GrenadeIcons[gren_type].icon;
 
     drawIconPanel(panelid, display, text, icon);
@@ -940,60 +939,61 @@ vector(float panelid) getFillSize = {
     return Hud_Panels[panelid].FillSize;
 }
 
-float GetGrenOneTypeForClass(float playerclass) {
-    switch(playerclass) {
-        case PC_SCOUT:
-            if(fo_flash) {
-                return GR_TYPE_FLASH;
-            } else {
-                return GR_TYPE_CALTROP;
+float GetGrenTypeForClass(float gren_number, float playerclass) {
+    switch(gren_number) {
+        case 1:
+            switch(playerclass) {
+                case PC_SCOUT:
+                    if(fo_flash) {
+                        return GR_TYPE_FLASH;
+                    } else {
+                        return GR_TYPE_CALTROP;
+                    }
+                case PC_SNIPER:
+                    return GR_TYPE_NORMAL;
+                case PC_SOLDIER:
+                    return GR_TYPE_NORMAL;
+                case PC_DEMOMAN:
+                    return GR_TYPE_NORMAL;
+                case PC_MEDIC:
+                    return GR_TYPE_NORMAL;
+                case PC_HVYWEAP:
+                    return GR_TYPE_NORMAL;
+                case PC_PYRO:
+                    return GR_TYPE_NORMAL;
+                case PC_SPY:
+                    return GR_TYPE_NORMAL;
+                case PC_ENGINEER:
+                    return GR_TYPE_NORMAL;
+                default:
+                    return GR_TYPE_NONE;
             }
-        case PC_SNIPER:
-            return GR_TYPE_NORMAL;
-        case PC_SOLDIER:
-            return GR_TYPE_NORMAL;
-        case PC_DEMOMAN:
-            return GR_TYPE_NORMAL;
-        case PC_MEDIC:
-            return GR_TYPE_NORMAL;
-        case PC_HVYWEAP:
-            return GR_TYPE_NORMAL;
-        case PC_PYRO:
-            return GR_TYPE_NORMAL;
-        case PC_SPY:
-            return GR_TYPE_NORMAL;
-        case PC_ENGINEER:
-            return GR_TYPE_NORMAL;
-        default:
-            return GR_TYPE_NONE;
-    }
-}
-
-float GetGrenTwoTypeForClass(float playerclass) {
-    switch(playerclass) {
-        case PC_SCOUT:
-            return GR_TYPE_CONCUSSION;
-        case PC_SNIPER:
-            return GR_TYPE_FLARE;
-        case PC_SOLDIER:
-            return GR_TYPE_NAIL;
-        case PC_DEMOMAN:
-            return GR_TYPE_MIRV;
-        case PC_MEDIC:
-            if(medic_type == MEDIC_TYPE_BLAST) {
-                return GR_TYPE_BLAST;
-            } else {
-                return GR_TYPE_CONCUSSION;
+        case 2:
+            switch(playerclass) {
+                case PC_SCOUT:
+                    return GR_TYPE_CONCUSSION;
+                case PC_SNIPER:
+                    return GR_TYPE_FLARE;
+                case PC_SOLDIER:
+                    return GR_TYPE_NAIL;
+                case PC_DEMOMAN:
+                    return GR_TYPE_MIRV;
+                case PC_MEDIC:
+                    if(medic_type == MEDIC_TYPE_BLAST) {
+                        return GR_TYPE_BLAST;
+                    } else {
+                        return GR_TYPE_CONCUSSION;
+                    }
+                case PC_HVYWEAP:
+                    return GR_TYPE_MIRV;
+                case PC_PYRO:
+                    return GR_TYPE_NAPALM;
+                case PC_SPY:
+                    return GR_TYPE_GAS;
+                case PC_ENGINEER:
+                    return GR_TYPE_EMP;
+                default:
+                    return GR_TYPE_NONE;
             }
-        case PC_HVYWEAP:
-            return GR_TYPE_MIRV;
-        case PC_PYRO:
-            return GR_TYPE_NAPALM;
-        case PC_SPY:
-            return GR_TYPE_GAS;
-        case PC_ENGINEER:
-            return GR_TYPE_EMP;
-        default:
-            return GR_TYPE_NONE;
     }
 }

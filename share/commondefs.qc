@@ -23,7 +23,7 @@
 #define MSG_SERVER_ADMIN_INFO   11
 #define MSG_CAPTAINS        12
 #define MSG_MOTD            13
-#define MSG_PREMATCH    14
+#define MSG_PREMATCH        14
 #define MSG_GRENTHROWN      15
 #define MSG_ID              16
 #define MSG_TEAM_SCORES     17
