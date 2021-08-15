@@ -10,6 +10,7 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+void GrenOne();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -233,17 +234,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "gren1":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                        localcmd("play grentimer.wav\n");
-                        grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
-                        AddGrenTimer(grentype);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("gren1_server");
-            }
+            GrenOne();
             break;
         case "gren2":
             if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
@@ -378,4 +369,36 @@ noref void CSQC_Input_Frame() {
 
 void CSQC_Shutdown() = {
     FO_WriteSettings();
+}
+
+void GrenOne() = {
+    if (cvar(FOCMD_GRENTIMER) != 2)
+        return;
+
+    if (prematch)
+        return;
+
+    if (round_over)
+        return;
+
+    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
+        return;
+
+    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
+        return;
+
+    if (getstatf(STAT_HEALTH <= 0))
+        return;
+
+    if (!grentimer_waiting) {
+        if (SBAR.Gren1) {
+            localcmd("play grentimer.wav\n");
+            local float grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
+            AddGrenTimer(grentype);
+        }
+
+        grentimer_waiting = TRUE;
+    }
+
+    localcmd("gren1_server");
 }
