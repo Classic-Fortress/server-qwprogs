@@ -11,6 +11,8 @@ void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
 void GrenOne();
+void GrenTwo();
+void IsValidToPrimeGrenade();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -211,7 +213,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
                         localcmd("play grentimer.wav\n");
-                        grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
+                        grentype = GetGrenTypeForClass(1, SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
 
@@ -225,7 +227,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if(!grentimer_waiting) {
                     if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
                         localcmd("play grentimer.wav\n");
-                        grentype = GetGrenTwoTypeForClass(SBAR.PlayerClass);
+                        grentype = GetGrenTypeForClass(2, SBAR.PlayerClass);
                         AddGrenTimer(grentype);
                     }
                     grentimer_waiting = TRUE;
@@ -237,17 +239,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             GrenOne();
             break;
         case "gren2":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                        localcmd("play grentimer.wav\n");
-                        grentype = GetGrenTwoTypeForClass(SBAR.PlayerClass);
-                        AddGrenTimer(grentype);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("gren2_server");
-            }
+            GrenOne();
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -372,28 +364,13 @@ void CSQC_Shutdown() = {
 }
 
 void GrenOne() = {
-    if (cvar(FOCMD_GRENTIMER) != 2)
-        return;
-
-    if (prematch)
-        return;
-
-    if (round_over)
-        return;
-
-    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
-        return;
-
-    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
-        return;
-
-    if (getstatf(STAT_HEALTH <= 0))
+    if !(IsValidToPrimeGrenade())
         return;
 
     if (!grentimer_waiting) {
         if (SBAR.Gren1) {
             localcmd("play grentimer.wav\n");
-            local float grentype = GetGrenOneTypeForClass(SBAR.PlayerClass);
+            local float grentype = GetGrenTypeForClass(1, SBAR.PlayerClass);
             AddGrenTimer(grentype);
         }
 
@@ -401,4 +378,43 @@ void GrenOne() = {
     }
 
     localcmd("gren1_server");
+}
+
+void GrenTwo() = {
+    if !(IsValidToPrimeGrenade())
+        return;
+
+    if (!grentimer_waiting) {
+        if (SBAR.Gren2) {
+            localcmd("play grentimer.wav\n");
+            local float grentype = GetGrenTypeForClass(2, SBAR.PlayerClass);
+            AddGrenTimer(grentype);
+        }
+
+        grentimer_waiting = TRUE;
+    }
+
+    localcmd("gren2_server");
+}
+
+void IsValidToPrimeGrenade() {
+    if (cvar(FOCMD_GRENTIMER) != 2)
+        return FALSE;
+
+    if (prematch)
+        return FALSE;
+
+    if (round_over)
+        return FALSE;
+
+    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
+        return FALSE;
+
+    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
+        return FALSE;
+
+    if (getstatf(STAT_HEALTH <= 0))
+        return FALSE;
+
+    return TRUE;
 }
