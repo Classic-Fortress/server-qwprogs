@@ -37,6 +37,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
+    registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
 
     registercommand("fo_menu_game");
@@ -360,7 +361,7 @@ void ShowGrenadeTimer(float gren_number) {
 
     if (!grentimer_waiting && RemainingGrenades(gren_number)) {
         grentimer_waiting = TRUE;
-        localcmd("play grentimer.wav\n");
+        localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
         local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
         AddGrenTimer(grentype);
     }

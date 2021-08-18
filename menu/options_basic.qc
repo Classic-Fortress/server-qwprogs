@@ -136,18 +136,60 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
             RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
             [0, pos],
             [0, 8]
-          );
+          ); pos += 8;
     pos += 8;
+	fr.add(menuitemslider_spawn(_("Type"),		        "crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcolour_spawn(_("Color"), 		    "crosshaircolor", 		'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcheck_spawn (_("Use Team Color"),    "team_color_crosshair", '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
     pos += 8;
-	fr.add(menuitemslider_spawn(_("Type"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcolour_spawn(_("Color"), 		"crosshaircolor", 			'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcheck_spawn (_("Use Team Color"),		"team_color_crosshair", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	//fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	/* fr.add(menuitemcombo_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8', _( */
-	/* 																	"0	\"None\" " */
-	/* 																	"1	\"Server\" " */
-	/* 																	"2	\"Immediate\" " */
-	/* 														)),	fl, [0, pos], [0, 8]); pos += 8; */
+    fr.add(
+            spawn(
+                mitem_text,
+                item_text:strcat("^{e080} ^a","Grenades","^d ^{e082}"),
+                item_command:"",
+                item_scale:8,
+                item_flags:IF_CENTERALIGN
+                ),
+            RS_X_MIN_PARENT_MID|RS_Y_MIN_PARENT_MIN | RS_X_MAX_PARENT_MID|RS_Y_MAX_OWN_MIN,
+            [0, pos],
+            [0, 8]
+          ); pos += 8;
+    pos += 8;
+    fr.add(menuitemcombo_spawn (_("Timer"),		"fo_grentimer", 		'280 8', _(
+                    "2	\"On\" "
+                    "0	\"Silent\" "
+                    )),	fl, [0, pos], [0, 8]); pos += 8;
+    fr.add(menuitemcombo_spawn (_("Sound"),		"fo_grentimersound", 		'280 8', _(
+                    "grentimer.wav          \"Default\" "
+                    "mcp_grentimer1.wav	    \"1\" "
+                    "mcp_grentimer2.wav	    \"2\" "
+                    "mcp_grentimer3.wav	    \"3\" "
+                    "mcp_grentimer4.wav	    \"4\" "
+                    "mcp_grentimer5.wav	    \"5\" "
+                    "mcp_grentimer6.wav	    \"6\" "
+                    "mcp_grentimer7.wav	    \"7\" "
+                    "mcp_grentimer8.wav	    \"8\" "
+                    "mcp_grentimer9.wav 	\"9\" "
+                    "mcp_grentimer10.wav	\"10\" "
+                    "mcp_grentimer11.wav	\"11\" "
+                    "mcp_grentimer12.wav	\"12\" "
+                    "mcp_grentimer13.wav	\"13\" "
+                    "mcp_grentimer14.wav	\"14\" "
+                    "mcp_grentimer15.wav	\"15\" "
+                    "mcp_grentimer16.wav	\"16\" "
+                    "mcp_grentimer17.wav	\"17\" "
+                    "mcp_grentimer18.wav	\"18\" "
+                    "mcp_grentimer19.wav	\"19\" "
+                    "mcp_grentimer20.wav	\"20\" "
+                    "mcp_grentimer21.wav	\"21\" "
+                    "mcp_grentimer22.wav	\"22\" "
+                    "mcp_grentimer23.wav	\"23\" "
+                    "mcp_grentimer24.wav	\"24\" "
+                    "mcp_grentimer25.wav	\"25\" "
+                    "mcp_grentimer26.wav	\"26\" "
+                    )),	fl, [0, pos], [0, 8]); pos += 8;
+
+
 	/* fr.add(menuitemcheck_spawn (_("Simple Bunnyhop"),		"fo_autohop", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8; */
 	//fr.add(menuitemslider_spawn(_("TF Status Bar"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemslider_spawn(_("TF Flag Info"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
