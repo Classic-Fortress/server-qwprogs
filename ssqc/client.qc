@@ -57,7 +57,6 @@ void () StopTimer;
 void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
-void () Quick_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
 float () CheckAllPlayersReady;
