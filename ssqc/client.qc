@@ -57,6 +57,7 @@ void () StopTimer;
 void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
+void () Quick_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
 float () CheckAllPlayersReady;
@@ -2746,8 +2747,6 @@ void () UpdateAllClientsTeamScores = {
 void (optional float csqcactive) ClientConnect = {
     local string st;
     local float got_one;
-
-    stuffcmd(self, "set fortressone 1\n");
 
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
