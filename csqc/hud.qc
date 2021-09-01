@@ -137,6 +137,8 @@ string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
             return ftos(panel.Orientation);
         case "snap":
             return ftos(panel.Snap);
+        case "style":
+            return ftos(panel.Style);
         default:
             print("^1Setting^7 '", setting, "' does not exist!\n");
             break;
@@ -161,6 +163,7 @@ void FO_Hud_Editor_Show_Panel(string panelid) = {
     print("\tshow: ", ftos(panel.Display), "\n");
     print("\torientation: ", ftos(panel.Orientation), "\n");
     print("\tsnap: ", ftos(panel.Snap), "\n");
+    print("\tstyle: ", ftos(panel.Style), "\n");
 }
 
 void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting) = {
@@ -224,6 +227,9 @@ void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string valu
                 panel.Position = getPosition(id);
             }
             panel.Snap = val;
+            break;
+        case "style":
+            panel.Style = stof(value);
             break;
         default:
             print("^1Setting^7 '", setting, "' does not exist!\n");

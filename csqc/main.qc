@@ -33,6 +33,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
+    registercvar(FOCMD_FTE_HUD, "1");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -67,6 +68,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Hud_Editor_LoadSettings();
     FO_LoadSettings();
+    
+    print("There are ", ftos(Hud_Panels.length), " panels\n"); //MEHT
 
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
@@ -95,6 +98,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
+    oldhealth = getstatf(STAT_HEALTH);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
@@ -112,7 +116,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-    setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
+    if(cvar(FOCMD_FTE_HUD) != 1) {
+        setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
+    }
     //setviewprop(VF_ORIGIN, '0 0 0');        //view position of the scene (after view_ofs effects).
     //setviewprop(VF_ANGLES, '0 0 0');        //override the view angles. input will work as normal. other players will see your player as normal. your screen will just be pointing a different direction.
     //setviewprop(VF_DRAWWORLD, 1);            //whether the world entity should be drawn. set to 0 if you want a completely empty scene.
@@ -373,6 +379,14 @@ noref void CSQC_Input_Frame() {
                 frames_since_onground = frames_since_onground + 1;
             }
         }
+    }
+}
+
+float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
+    local float health = getstatf(STAT_HEALTH);
+    //pain face is 0.2 long
+    if(oldhealth > health) {
+        painfinished = time + 0.2;
     }
 }
 

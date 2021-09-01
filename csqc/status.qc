@@ -3,6 +3,7 @@ float fo_to_sui_aligntment(float fo_align);
 vector (FO_Hud_Panel* panel) getPanelPosition;
 float getHudPanel(string);
 void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
+void Hud_DrawLMPThreshold(FO_Hud_Panel*, string, float);
 FO_Hud_Panel* getHudPanelPointer(float);
 float GetGrenOneTypeForClass(float playerclass);
 float GetGrenTwoTypeForClass(float playerclass);
@@ -160,6 +161,115 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
         Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
     }
 };
+
+void(string panelid, float display, string text) drawFacePanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    local float playerclass = SBAR.PlayerClass; //we could add different faces per class?
+
+    local string icon = FaceInvisibleInvulnerableIcon.icon;
+    
+    if(playerclass) {
+        local float health = getstatf(STAT_HEALTH);
+        if(health > 0) {
+            local float items = getstatf(STAT_ITEMS);
+            //we should add all the combos :)
+            if(items & IT_INVULNERABILITY && items & IT_INVISIBILITY) icon = FaceInvisibleInvulnerableIcon.icon;
+            else if(items & IT_INVULNERABILITY) icon = FaceInvulnerableIcon.icon;
+            else if(items & IT_INVISIBILITY) icon = FaceInvisibleIcon.icon;
+            else if(items & IT_QUAD) icon = FaceQuadIcon.icon;
+            else {
+                local float index = 0;
+                if(health >= 80) index = 0;
+                else if(health >= 60) index = 1;
+                else if(health >= 40) index = 2;
+                else if(health >= 20) index = 3;
+                else index = 4;
+                
+                if(time < painfinished) {
+                    index += 5;
+                }
+                
+                icon = FaceIcons[index].icon;
+            }
+        } else {
+            icon = FaceIcons[4].icon;
+        }
+    }
+
+    drawIconPanel(panelid, display, text, icon);
+};
+
+void(string panelid, float display, string text) drawArmourPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    local float playerclass = SBAR.PlayerClass;
+
+    local string icon = fo_hud_editor?ArmourIcons[1].icon:"";
+    
+    if(playerclass) {
+        local float items = getstatf(STAT_ITEMS);
+        if(items & IT_INVULNERABILITY) icon = ArmourIcons[0].icon;
+        else if(items & IT_ARMOR1) icon = ArmourIcons[1].icon;
+        else if(items & IT_ARMOR2) icon = ArmourIcons[2].icon;
+        else if(items & IT_ARMOR3) icon = ArmourIcons[3].icon;
+    }
+
+    if(icon != "") drawIconPanel(panelid, display, text, icon);
+};
+
+void(string panelid, float display, string text) drawAmmoPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    local string icon = fo_hud_editor?AmmoIcons[0].icon:"";
+    
+    local float items = getstatf(STAT_ITEMS);
+    if(items & IT_SHELLS) icon = AmmoIcons[0].icon;
+    else if(items & IT_NAILS) icon = AmmoIcons[1].icon;
+    else if(items & IT_ROCKETS) icon = AmmoIcons[2].icon;
+    else if(items & IT_CELLS) icon = AmmoIcons[3].icon;
+
+    if(icon != "") drawIconPanel(panelid, display, text, icon);
+};
+
+void(string panelid, float display, string text) drawInvShellsPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawIconPanel(panelid, display, text, AmmoIcons[0].icon);
+};
+void(string panelid, float display, string text) drawInvNailsPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawIconPanel(panelid, display, text, AmmoIcons[1].icon);
+};
+void(string panelid, float display, string text) drawInvRocketsPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawIconPanel(panelid, display, text, AmmoIcons[2].icon);
+};
+void(string panelid, float display, string text) drawInvCellsPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawIconPanel(panelid, display, text, AmmoIcons[3].icon);
+};
+
+
+void(string panelid, float display, string text, float threshold) drawBigNumberPanel = {
+    if (display || fo_hud_editor)
+    {
+        float id = getHudPanel(panelid);
+
+        if(id < 0) {
+            return;
+        }
+ 
+        Hud_DrawLMPThreshold(getHudPanelPointer(id), text, threshold);
+    }
+};
+
+void(string panelid, float display, string text) drawHealthTextPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawBigNumberPanel(panelid, display, text, 26);
+};
+
+void(string panelid, float display, string text) drawAmmoTextPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawBigNumberPanel(panelid, display, text, 11);
+};
+
 
 void(string panelid, float display, string text, string icon) doNothing = {};
 
@@ -879,13 +989,13 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(string panelid, float display, string text, string icon),
 //  string getValue(),
-//  Icon, Snap, Status
+//  Snap, Status
 
     {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
     {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
     {"capspanel",FO_HUD_CAPS_NAME,'10 80','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'10 110','50 26',1,0,1,0, drawGren1Panel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','50 26',1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
+    {"gren1panel",FO_HUD_GREN1_NAME,'10 110','26 26',1,0,1,0, drawGren1Panel, {return ftos(SBAR.Gren1);}},
+    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','26 26',1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
     {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 170','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
     {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
     {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 230','150 260',1,0,1,0, drawFlagInfo, {return "";}},
@@ -898,6 +1008,16 @@ var FO_Hud_Panel Hud_Panels[] = {
     {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
     {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'0 0','72 12',2,0,1,FO_HUD_INSERT_AFTER, drawTeamScorePanel, {return "";}},
     {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 30','800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
+    {"healthpanel",FO_HUD_HEALTH_NAME,'-64 0','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_HEALTH));}, 0, 34},
+    {"facepanel",FO_HUD_FACE_NAME,'-64 0','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawFacePanel, {return "";}, 0, 34},
+    {"ammopanel",FO_HUD_AMMO_NAME,'10 30','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawAmmoTextPanel, {return ftos(getstatf(STAT_AMMO));}},
+    {"ammoiconpanel",FO_HUD_AMMO_ICON_NAME,'10 30','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawAmmoPanel, {return "";}},
+    {"armourpanel",FO_HUD_ARMOUR_NAME,'10 30','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_ARMOR));}},
+    {"armouriconpanel",FO_HUD_ARMOUR_ICON_NAME,'10 30','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawArmourPanel, {return "";}},
+//    {"invshellspanel",FO_HUD_INV_SHELLS_NAME,'10 140','26 26',1,1.4,1,0, drawInvShellsPanel, {return ftos(getstatf(STAT_SHELLS));}, 1, 33},
+//    {"invnailspanel",FO_HUD_INV_NAILS_NAME,'10 140','26 26',1,1.4,1,0, drawInvNailsPanel, {return ftos(getstatf(STAT_NAILS));}, 1, 33},
+//    {"invrocketspanel",FO_HUD_INV_ROCKETS_NAME,'10 140','26 26',1,1.4,1,0, drawInvRocketsPanel, {return ftos(getstatf(STAT_ROCKETS));}, 1, 33},
+//    {"invcellspanel",FO_HUD_INV_CELLS_NAME,'10 140','26 26',1,1.4,1,0, drawInvCellsPanel, {return ftos(getstatf(STAT_CELLS));}, 1, 33},
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 182',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
 

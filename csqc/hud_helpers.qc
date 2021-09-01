@@ -181,6 +181,56 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
     }
 }
 
+void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float threshold)
+{
+    float c;
+    float len, i, intval;
+    string s, lmpname;
+    if (!size) size = 24;
+    vector vsize = [size, size, 0];
+    s = value;
+    intval = stof(value);
+    len = strlen(s);
+    i = 0;
+
+    while(i<len) {
+        c = str2chr(s, i);
+        lmpname = "";
+        switch (c) {
+            case 37: // "%"
+            {
+                lmpname = "num_percent";
+                break;
+            }
+            case 45: // "-"
+            {
+                lmpname = "num_minus";
+                break;
+            }
+            case 47: // "/"
+            {
+                lmpname = "num_slash";
+                break;
+            }
+            case 58: // ":"
+            {
+                lmpname = "num_colon";
+                break;
+            }
+            default:
+            {
+                lmpname = sprintf("num_%g", c-'0');
+                break;
+            }
+        }
+        if(intval < threshold) {
+            lmpname = strcat("a", lmpname);
+        }
+        drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
+        i+=1;
+    }
+}
+
 string FormatCfgString(string line, string field, string value)
 {
     line = strcat(line, "\n", field, ":", value);
@@ -322,8 +372,9 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
     
     vector pos;
     pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+    vector scaledFillSize = panel.FillSize * panel.Scale;
 
-    if (hud_panel(panel.id, pos, panel.FillSize * panel.Scale, 0, panel.Display))
+    if (hud_panel(panel.id, pos, scaledFillSize, 0, panel.Display))
     {
         // click event
         if (fo_hud_editor)
@@ -338,11 +389,66 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
 
     float len;
     len = strlen(val);
-    float offset = (panel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+    
+    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
+
+    if(!panel.Style) {
+        float offset = (panel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + (size_x * len)) * -1;
+
+        pos = [pos_x + offset, pos_y, 0];
+        Hud_DrawStringLMP(pos, val, 24 * textScale);
+    } else {
+        float smallfont = 6 * textScale;
+        float len = strlen(val);
+
+        float offset = 0;
+        if(panel.Orientation == FO_HUD_INSERT_BEFORE) {
+            offset = scaledFillSize.x - len * smallfont - 2;
+        } else if(panel.Orientation == FO_HUD_INSERT_MIDDLE) {
+            offset = (scaledFillSize.x) / 2 - ((len * smallfont)/2);
+        }
+        drawstring([pos_x + offset, pos_y + scaledFillSize.y - smallfont - 2, 0], val, [smallfont, smallfont], '1 1 1', 1, 0);
+    }
+}
+
+void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
+{
+    if (!panel || (!panel.Display && !fo_hud_editor))
+        return;
+    
+    vector pos;
+    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+
+    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
+    vector fillScale = panel.FillSize * textScale;
+    if (hud_panel(panel.id, pos, fillScale, 0, panel.Display))
+    {
+        // click event
+        if (fo_hud_editor)
+        {
+
+        }
+    }
+    pos = [pos_x + 2, pos_y + 2, 0];
+/*
+    vector size = FO_Hud_Icon_Size * panel.Scale;
+    //drawpic(pos, icon, size, '1 1 1', 1, 0);
+
 
     pos = [pos_x + offset, pos_y, 0];
-    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
-    Hud_DrawStringLMP(pos, val, 24 * textScale);
+    */
+
+    float len = strlen(val);
+    float textSize = FO_Hud_Icon_Size.x * textScale;
+
+    float offset = 0;
+    if(panel.Orientation == FO_HUD_INSERT_BEFORE) {
+        offset = fillScale_x - len * textSize;
+    } else if(panel.Orientation == FO_HUD_INSERT_MIDDLE) {
+        offset = (fillScale_x) / 2 - ((len * textSize)/2);
+    }
+        
+    Hud_DrawStringLMPThreshold(pos + [offset,0], val, textSize, threshold);
 }
 
 vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)

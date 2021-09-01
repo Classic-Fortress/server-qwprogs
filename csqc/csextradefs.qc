@@ -218,8 +218,8 @@ FO_Hud_Icons HudIcons[37] = {
     {ICON_FLAG_RED},
     {ICON_FLAG_YELLOW},
     {ICON_FLAG_GREEN},
-    {"textures/wad/num_percent.png"},
-    {"textures/wad/anum_percent.png"}
+    {"textures/wad/num_percent"},
+    {"textures/wad/anum_percent"}
 };
 
 FO_Hud_Icons GrenadeIcons[12] = {
@@ -236,6 +236,40 @@ FO_Hud_Icons GrenadeIcons[12] = {
     {ICON_GREN_CALTROP},
     {ICON_GREN_BLAST},
 };
+
+FO_Hud_Icons FaceIcons[] = {
+    //normal
+    {"textures/wad/face1"},
+    {"textures/wad/face2"},
+    {"textures/wad/face3"},
+    {"textures/wad/face4"},
+    {"textures/wad/face5"},
+    //pain
+    {"textures/wad/face_p1"},
+    {"textures/wad/face_p2"},
+    {"textures/wad/face_p3"},
+    {"textures/wad/face_p4"},
+    {"textures/wad/face_p5"},
+};
+
+FO_Hud_Icons FaceInvisibleIcon = {"textures/wad/face_invis"};
+FO_Hud_Icons FaceInvisibleInvulnerableIcon = {"textures/wad/face_inv2"};
+FO_Hud_Icons FaceInvulnerableIcon = {"textures/wad/face_invul2"};
+FO_Hud_Icons FaceQuadIcon = {"textures/wad/face_quad"};
+
+FO_Hud_Icons ArmourIcons[] = {
+    {"textures/wad/disc"},
+    {"textures/wad/sb_armor1"},
+    {"textures/wad/sb_armor2"},
+    {"textures/wad/sb_armor3"},
+};
+FO_Hud_Icons AmmoIcons[] = {
+    {"textures/wad/sb_shells"},
+    {"textures/wad/sb_nails"},
+    {"textures/wad/sb_rocket"},
+    {"textures/wad/sb_cells"},
+};
+
 
 typedef struct {
     string ClipSize;
@@ -383,7 +417,6 @@ typedef struct {
     void(string panelid, float display, string text, string icon) drawPanel;
     string() getValue;
     float Style;
-    FO_Hud_Icons * Icon;
     float Snap;
     float Status;
     float SnapID;
@@ -465,6 +498,12 @@ enum {
     HUD_PANEL_SHOWSCORES,
     HUD_PANEL_TEAM_SCORE,
     HUD_PANEL_MAP_MENU,
+    HUD_PANEL_HEALTH,
+    HUD_PANEL_FACE,
+    HUD_PANEL_AMMO,
+    HUD_PANEL_AMMO_ICON,
+    HUD_PANEL_ARMOUR,
+    HUD_PANEL_ARMOUR_ICON,
     HUD_PANEL_HUDOPTIONS,
 };
 
@@ -472,11 +511,15 @@ enum {
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
+#define FOCMD_FTE_HUD "fo_fte_hud"
 
 float team_no;
 float is_spectator;
 float player_class;
 float is_observer;
+//float health;
+float oldhealth;
+float painfinished;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

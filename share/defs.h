@@ -1404,6 +1404,16 @@
 #define FO_HUD_READY_NAME "Ready Status"
 #define FO_HUD_SHOWSCORES_NAME "Show Scores"
 #define FO_HUD_MAP_MENU_NAME "Map Menu"
+#define FO_HUD_HEALTH_NAME "Health"
+#define FO_HUD_FACE_NAME "Face"
+#define FO_HUD_AMMO_NAME "Ammo"
+#define FO_HUD_AMMO_ICON_NAME "Ammo Icon"
+#define FO_HUD_ARMOUR_NAME "Armour"
+#define FO_HUD_ARMOUR_ICON_NAME "Armour Icon"
+#define FO_HUD_INV_SHELLS_NAME "Shells"
+#define FO_HUD_INV_NAILS_NAME "Nails"
+#define FO_HUD_INV_ROCKETS_NAME "Rockets"
+#define FO_HUD_INV_CELLS_NAME "Cells"
 #define FO_HUD_TEAM_SCORE_NAME "Team Score"
 
 
