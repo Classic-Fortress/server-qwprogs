@@ -422,6 +422,7 @@ typedef struct {
     float SnapID;
 } FO_Hud_Panel;
 
+FO_Hud_Panel NullPanel;
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
 float Editor_SelectedPanel_Index;

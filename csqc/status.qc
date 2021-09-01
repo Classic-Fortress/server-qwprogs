@@ -1020,7 +1020,7 @@ var FO_Hud_Panel Hud_Panels[] = {
 //    {"invcellspanel",FO_HUD_INV_CELLS_NAME,'10 140','26 26',1,1.4,1,0, drawInvCellsPanel, {return ftos(getstatf(STAT_CELLS));}, 1, 33},
     {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 182',1,0,1,0, doNothing, {return DrawPanel.id;}},
 };
-
+/*
 float(string panelid) getHudPanel = {
     for(float i = 0; i < Hud_Panels.length; i++) {
         if(Hud_Panels[i].id == panelid) {
@@ -1029,9 +1029,19 @@ float(string panelid) getHudPanel = {
     }
     return -1;
 };
+*/
 
 FO_Hud_Panel* (float panelid) getHudPanelPointer = {
     return &(Hud_Panels[panelid]);
+};
+
+FO_Hud_Panel* (string panelid) getAnyHudPanelByNamePointer = {
+    for(float i = 0; i < Hud_Panels.length; i++) {
+        if(Hud_Panels[i].id == panelid) {
+            return &(Hud_Panels[i]);
+        }
+    }    
+    return NullPanel;
 };
 
 vector (FO_Hud_Panel* panel, float scale) getScaledPanelPosition = {
