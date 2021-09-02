@@ -1378,7 +1378,7 @@ void () BackpackTouch = {
         }
     }
     sprint(other, PRINT_LOW, "\n");
-    FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+    FO_Sound(other, CHAN_AUTO, "weapons/lock4.wav", 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     dremove(self);
     self = other;
