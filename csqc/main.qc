@@ -39,7 +39,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
-    registercvar(FOCMD_FTE_HUD, "1");
+    registercvar(FOCMD_FTE_HUD, "0");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
