@@ -260,6 +260,10 @@ void() CSQC_Parse_Event = {
             //motd_expiry = time + MOTD_TIME;
             quad_round = readfloat();
             //game_started = readbyte();
+            local float rtr = readfloat();
+            if(rtr) {
+                round_time_remaining = time + rtr;
+            }
             break;
         case MSG_GRENADESETTINGS:
             fo_flash = readfloat();
