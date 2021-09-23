@@ -2123,7 +2123,7 @@ void () tfgoal_timer_tick = {
             self.nextthink = time + self.search_time;
         }
         else {
-            bprint(PRINT_HIGH, "inactivating timer\n");
+            //bprint(PRINT_HIGH, "inactivating timer\n");
             InactivateGoal(self);
             self.think = tfgoal_timer_tick;
             self.nextthink = time + self.search_time;

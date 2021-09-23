@@ -2696,7 +2696,7 @@ void () TeamFortress_AmmoboxTouch = {
             other.ammo_cells = other.ammo_cells + self.ammo_cells;
             dremove(self);
             bound_other_ammo(other);
-            FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, 1);
+            FO_Sound(other, CHAN_AUTO, "weapons/lock4.wav", 1, 1);
             stuffcmd(other, "bf\n");
             self = other;
             W_SetCurrentAmmo(self);
