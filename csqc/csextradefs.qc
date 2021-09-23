@@ -89,6 +89,7 @@ float nailgren_type;
 float prematch;
 float round_active;
 float round_over;
+float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
@@ -114,7 +115,7 @@ string vote_list_filter;
 
 float(string) GetDrawPanel;
 void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
+void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
 void (string panelid) Hud_DrawTeamScorePanel;
@@ -182,7 +183,7 @@ typedef struct
     string icon;
 } FO_Hud_Icons;
 
-FO_Hud_Icons HudIcons[37] = {
+FO_Hud_Icons HudIcons2[37] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -414,7 +415,7 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text, string icon) drawPanel;
+    void(string panelid, float display, string text) drawPanel;
     string() getValue;
     float Style;
     float Snap;
@@ -482,6 +483,7 @@ string FO_ScoreBoardColumns[] = {
 };
 
 enum {
+    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -505,7 +507,10 @@ enum {
     HUD_PANEL_AMMO_ICON,
     HUD_PANEL_ARMOUR,
     HUD_PANEL_ARMOUR_ICON,
-    HUD_PANEL_HUDOPTIONS,
+    HUD_PANEL_INV_SHELLS,
+    HUD_PANEL_INV_NAILS,
+    HUD_PANEL_INV_ROCKETS,
+    HUD_PANEL_INV_CELLS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
@@ -521,6 +526,10 @@ float is_observer;
 //float health;
 float oldhealth;
 float painfinished;
+vector thisorigin;
+vector lastorigin;
+float nextoriginupdate;
+float speed;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

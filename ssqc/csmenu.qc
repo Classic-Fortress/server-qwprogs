@@ -280,6 +280,24 @@ void UpdateClientPrematch(entity pl, float countdownstarted) = {
     WriteByte(MSG_MULTICAST, round_over);
     WriteByte(MSG_MULTICAST, countdownstarted);
     WriteFloat(MSG_MULTICAST, rounds);
+    float timeleft = 0;
+//    if(!cb_prematch && round_active && !round_over) {
+        local entity t = find(world, classname, "match");
+        if (t != world) {
+            timeleft = t.cnt2;
+            
+        }
+        t = find(world, classname, "prematch");
+        if (t != world) {
+            timeleft = t.cnt2;
+            
+        }
+        t = find(world, classname, "round");
+        if (t != world) {
+            timeleft = t.cnt * 60 + t.cnt2;
+        }
+//    }
+    WriteFloat(MSG_MULTICAST, timeleft);
     //WriteByte(MSG_MULTICAST, countdownstarted);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }

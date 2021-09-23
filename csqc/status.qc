@@ -1,28 +1,22 @@
 float GetTextAlignOffset(float pos, float width, float iconsize, string text, float textsize, float align);
 float fo_to_sui_aligntment(float fo_align);
 vector (FO_Hud_Panel* panel) getPanelPosition;
-float getHudPanel(string);
+vector (FO_Hud_Panel* panel) getPanelFillSize;
 void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
 void Hud_DrawLMPThreshold(FO_Hud_Panel*, string, float);
 FO_Hud_Panel* getHudPanelPointer(float);
+FO_Hud_Panel* getAnyHudPanelByNamePointer(string);
 float GetGrenOneTypeForClass(float playerclass);
 float GetGrenTwoTypeForClass(float playerclass);
 
-void(string panelid, float display, string text, string icon) drawClipSize = {
+void(string panelid, float display, string text) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
     {
-        //GetDrawPanel(panelid);
-        //Hud_DrawPanelLMP(panelid, text, icon);
-        float id = getHudPanel(panelid);
-
-        if(id < 0) {
-            return;
-        }
-        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_CLIPSIZE);
     }
 };
 
-void(string panelid, float display, string text, string icon) drawIdentify = {
+void(string panelid, float display, string text) drawIdentify = {
     if (strlen(SBAR.Identify) > 0 || fo_hud_editor)
     {
         GetDrawPanel(panelid);
@@ -30,7 +24,7 @@ void(string panelid, float display, string text, string icon) drawIdentify = {
     }
 };
 
-void(string panelid, float display, string text, string icon) drawTeamScorePanel = {
+void(string panelid, float display, string text) drawTeamScorePanel = {
     if (display || fo_hud_editor)
     {
         GetDrawPanel(panelid);
@@ -38,7 +32,7 @@ void(string panelid, float display, string text, string icon) drawTeamScorePanel
     }
 };
 
-void(string panelid, float display, string text, string icon) drawMapMenuPanel = {
+void(string panelid, float display, string text) drawMapMenuPanel = {
     if (display || fo_hud_editor)
     {
         GetDrawPanel(panelid);
@@ -46,7 +40,7 @@ void(string panelid, float display, string text, string icon) drawMapMenuPanel =
     }
 };
 
-void(string panelid, float display, string text, string icon) drawFlagInfo = {
+void(string panelid, float display, string text) drawFlagInfo = {
     if (display || fo_hud_editor)
     {
         GetDrawPanel(panelid);
@@ -57,16 +51,16 @@ void(string panelid, float display, string text, string icon) drawFlagInfo = {
 void(string panelid, float display, string text, string icon) drawIconPanel = {
     if (display || fo_hud_editor)
     {
-        //GetDrawPanel(panelid);
-        //Hud_DrawPanelLMP(panelid, text, icon);
-        float id = getHudPanel(panelid);
-
-        if(id < 0) {
-            return;
-        }
-        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
-
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, icon);
     }
+};
+
+void(string panelid, float display, string text) drawFragStreakPanel = {
+    drawIconPanel(panelid, display, text, ICON_FRAGSTREAK);
+};
+
+void(string panelid, float display, string text) drawCapsPanel = {
+    drawIconPanel(panelid, display, text, ICON_CAPS);
 };
 
 void(string panelid, float display, string text) drawGren1Panel = {
@@ -95,7 +89,7 @@ void(string panelid, float display, string text) drawGren2Panel = {
     drawIconPanel(panelid, display, text, icon);
 };
 
-void(string panelid, float display, string text, string icon) drawSpecial = {
+void(string panelid, float display, string text) drawSpecial = {
     if (SBAR.PlayerClass || fo_hud_editor)
     {
         GetDrawPanel(panelid);
@@ -103,19 +97,12 @@ void(string panelid, float display, string text, string icon) drawSpecial = {
     }
 };
 
-void(string panelid, float display, string text, string icon) drawGrenTimerPanel = {
+void(string panelid, float display, string text) drawGrenTimerPanel = {
     local float timeleft;
     local float timercount = 0;
 
     if (display) {
-        //GetDrawPanel(panelid);
-        float id = getHudPanel(panelid);
-
-        if(id < 0) {
-            return;
-        }
-        
-        FO_Hud_Panel* panel = getHudPanelPointer(id);
+        FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
         
         float Scale = panel.Scale;
         float TextScale = panel.TextScale;
@@ -124,6 +111,7 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
         panel2.Scale = panel.Scale;
         panel2.TextScale = panel.TextScale;
         panel2.Display = panel.Display;
+        panel2.FillSize = panel.FillSize;
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
                 timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
@@ -145,20 +133,12 @@ void(string panelid, float display, string text, string icon) drawGrenTimerPanel
                     panel2.TextScale = TextScale * 0.8;
                 }
                 Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon);
-                panel2.Position = panel2.Position + [0, 24 * panel2.Scale];
+                panel2.Position = panel2.Position + [0, panel2.FillSize.y * panel2.Scale];
                 timercount++;
             }
         }
-    }
-    if(fo_hud_editor && (!display || !timercount)) {
-        //GetDrawPanel(panelid);
-        //Hud_DrawPanelLMP(panelid, "0", ICON_GREN1);
-        float id = getHudPanel(panelid);
-
-        if(id < 0) {
-            return;
-        }
-        Hud_DrawPanelLMP(getHudPanelPointer(id), text, icon);
+    } else if(fo_hud_editor && (!display || !timercount)) {
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_GREN_NORMAL);
     }
 };
 
@@ -229,6 +209,14 @@ void(string panelid, float display, string text) drawAmmoPanel = {
     if(icon != "") drawIconPanel(panelid, display, text, icon);
 };
 
+void(string panelid, float display, string text) drawInvIconPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    if(text && text != "") {
+        drawIconPanel(panelid, display, "", text);
+    } else if(fo_hud_editor) {
+        drawIconPanel(panelid, display, "", FaceIcons[0].icon);
+    }
+};
 void(string panelid, float display, string text) drawInvShellsPanel = {
     if(!cvar(FOCMD_FTE_HUD)) return;
     drawIconPanel(panelid, display, text, AmmoIcons[0].icon);
@@ -246,17 +234,43 @@ void(string panelid, float display, string text) drawInvCellsPanel = {
     drawIconPanel(panelid, display, text, AmmoIcons[3].icon);
 };
 
+string(float gunnum) getGunIcon = {
+    string retval = "";
+    if(getstatf(STAT_ITEMS) & gunnum) {
+        switch(gunnum) {
+            case IT_SHOTGUN:
+               retval = "shotgun";
+               break;
+            case IT_SUPER_SHOTGUN:
+               retval = "sshotgun";
+               break;
+            case IT_NAILGUN:
+               retval = "nailgun";
+               break;
+            case IT_SUPER_NAILGUN:
+               retval = "snailgun";
+               break;
+            case IT_GRENADE_LAUNCHER:
+               retval = "rlaunch";
+               break;
+            case IT_ROCKET_LAUNCHER:
+               retval = "srlaunch";
+               break;
+            case IT_LIGHTNING:
+               retval = "lightng";
+               break;
+        }
+        if(retval != "") {
+            retval = strcat((getstatf(STAT_ACTIVEWEAPON) == gunnum)?"inv2_":"inv_", retval);
+        }
+    }
+    return retval;
+};
 
 void(string panelid, float display, string text, float threshold) drawBigNumberPanel = {
     if (display || fo_hud_editor)
     {
-        float id = getHudPanel(panelid);
-
-        if(id < 0) {
-            return;
-        }
- 
-        Hud_DrawLMPThreshold(getHudPanelPointer(id), text, threshold);
+        Hud_DrawLMPThreshold(getAnyHudPanelByNamePointer(panelid), text, threshold);
     }
 };
 
@@ -270,30 +284,68 @@ void(string panelid, float display, string text) drawAmmoTextPanel = {
     drawBigNumberPanel(panelid, display, text, 11);
 };
 
+void(string panelid, float display, string text) drawClockPanel = {
+    if(!cvar(FOCMD_FTE_HUD)) return;
+    drawBigNumberPanel(panelid, display, text, 0);
+};
 
-void(string panelid, float display, string text, string icon) doNothing = {};
+string clockString() {
+    float minutes = time/60;
+    float seconds = (float)time - (minutes*60);
 
-void(string panelid, float display, string text, string icon) drawSimplePanel = {
+    //return strcat(ftos(minutes),":", ftos(seconds));  
+    //return "00:00";
+    return ftos(rint(time));
+};
+
+string gameClockString() {
+    float minutes = 0;
+    float seconds = 0;
+    float timelimit = stof(serverkey("timelimit"));
+    
+    if(round_time_remaining) {
+        float t = round_time_remaining - time; 
+        if(t < 0) t = t * -1;
+        minutes = floor(t/60);
+        seconds = floor(t - (minutes*60));
+    } else if(timelimit) {
+        minutes = floor(time/60);
+        seconds = 60 - floor(time - (minutes*60));
+        minutes = timelimit - ceil(time/60);
+        if(minutes < 0) minutes = minutes * -1;
+        if(seconds < 0) seconds = seconds * -1;
+    } else {
+        minutes = floor(time/60);
+        seconds = floor(time - (minutes*60));
+    }
+    
+    string sm = strcat((minutes<10?"0":""),ftos(minutes));
+    string ss = strcat((seconds<10?"0":""),ftos(seconds));
+    
+    string tmp = strcat(sm,":",ss);
+    //if(round_time_remaining) tmp = ftos(floor(round_time_remaining - time));
+    
+    return tmp;  
+};
+
+void(string panelid, float display, string text) doNothing = {};
+
+void(string panelid, float display, string text) drawSimplePanel = {
     if (fo_hud_editor) {
-        if (hud_panel(panelid, getPosition(HUD_PANEL_MENU), getFillSize(HUD_PANEL_MENU), 0.3, 1)) {
-            // click event
+        FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
+        if(panel && &panel != &NullPanel) {
+            if (hud_panel(panelid, getPanelPosition(panel), getPanelFillSize(panel), 0.3, 1)) {
+                // click event
+            }
         }
     }
 }
 
-float(string panelid) getHudPanel;
-FO_Hud_Panel* (float panelid) getHudPanelPointer;
-
-void(string panelid, float display, string text, string icon) drawTextPanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
+void(string panelid, float display, string text) drawTextPanel = {
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
+    vector position = getPanelPosition(panel);
+    vector size = getPanelFillSize(panel);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
@@ -345,13 +397,8 @@ void(string panelid, float display, string text, string icon) drawTextPanel = {
     }
 }
 
-void(string panelid, float display, string text, string icon) drawMOTDPanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
-    
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
+void(string panelid, float display, string text) drawMOTDPanel = {
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     
     //vector position = getPosition(id);
     //vector size = getFillSize(id);
@@ -421,16 +468,11 @@ void(string panelid, float display, string text, string icon) drawMOTDPanel = {
     //}
 }
 
-void(string panelid, float display, string text, string icon) drawGameModePanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
+void(string panelid, float display, string text) drawGameModePanel = {
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
+    vector position = getPanelPosition(panel);
+    vector size = getPanelFillSize(panel);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     local float padding = 4 * panel.Scale;
     local float transparency = 0.3;
@@ -485,16 +527,11 @@ void(string panelid, float display, string text, string icon) drawGameModePanel 
     }
 }
 
-void(string panelid, float display, string text, string icon) drawReadyPanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
+void(string panelid, float display, string text) drawReadyPanel = {
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
+    vector position = getPanelPosition(panel);
+    vector size = getPanelFillSize(panel);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
     vector textcolour = MENU_TEXT_4;
     local float padding = 4 * panel.Scale;
@@ -591,14 +628,13 @@ void (vector position, vector size, string val, vector textcolour, float alpha
     sui_text(position, size, val, textcolour, 1, 0);
 };
 
-vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
+vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel
     , float padding, vector columnColour) drawShowScoresTeamPanel = {
-
     vector textcolour = MENU_TEXT_1;
     vector smalltext = MENU_TEXT_SMALL * panel.Scale;
     vector yspacer = [0, 20];
     vector position = [0, 0];
-    vector size = getFillSize(id);  
+    vector size = getPanelFillSize(panel);
     
     position = [0,0];
     sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
@@ -822,16 +858,11 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel, float id
     return position;
 };
 
-void(string panelid, float display, string text, string icon) drawShowScoresPanel = {
-    float id = getHudPanel(panelid);
-    if(id < 0) {
-        return;
-    }
+void(string panelid, float display, string text) drawShowScoresPanel = {
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    
-    vector position = getPosition(id);
-    vector size = getFillSize(id);
+    vector position = getPanelPosition(panel);
+    vector size = getPanelFillSize(panel);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale * 2;
     vector textcolour = MENU_TEXT_1;
     float padding = 4 * panel.Scale;
@@ -916,7 +947,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {
             position += yspacer;
             sui_push_frame(position, size);
-            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Blue, panel, id, padding, MENU_TEXT_BLUE_FO);
+            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Blue, panel, padding, MENU_TEXT_BLUE_FO);
             sbCount++;
         }
             
@@ -924,7 +955,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {
             position += yspacer;
             sui_push_frame(position, size);
-            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Red, panel, id, padding, MENU_TEXT_RED_FO);
+            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Red, panel, padding, MENU_TEXT_RED_FO);
             sbCount++;
         }
             
@@ -932,7 +963,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {
             position += yspacer;
             sui_push_frame(position, size);
-            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Yellow, panel, id, padding, MENU_TEXT_YELLOW_FO);
+            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Yellow, panel, padding, MENU_TEXT_YELLOW_FO);
             sbCount++;
         }
             
@@ -940,7 +971,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {
             position += yspacer;
             sui_push_frame(position, size);
-            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Green, panel, id, padding, MENU_TEXT_GREEN_FO);
+            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Green, panel, padding, MENU_TEXT_GREEN_FO);
             sbCount++;
         }
 
@@ -948,7 +979,7 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
         {
             position += yspacer;
             sui_push_frame(position, size);
-            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Specs, panel, id, padding, MENU_TEXT_SPEC_FO);
+            position = drawShowScoresTeamPanel(FO_ScoreBoardLines_Specs, panel, padding, MENU_TEXT_SPEC_FO);
             sbCount++;
         }
 
@@ -976,13 +1007,8 @@ void(string panelid, float display, string text, string icon) drawShowScoresPane
 
 void (float show) FO_Show_Scores = {
     showingscores = show;
-    float id = getHudPanel("showscorespanel");
-    if(id < 0) {
-        return FALSE;
-    }
-    
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
-    panel.Display = show;
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer("showscores");
+    if(panel && &panel != &NullPanel) panel.Display = show;
 };
 
 var FO_Hud_Panel Hud_Panels[] = {
@@ -991,45 +1017,57 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  string getValue(),
 //  Snap, Status
 
-    {"clipsizepanel",FO_HUD_CLIPSIZE_NAME,'10 20','50 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
-    {"fragstreakpanel",FO_HUD_FRAGSTREAK_NAME,'10 50','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.FragStreak);}},
-    {"capspanel",FO_HUD_CAPS_NAME,'10 80','26 26',1,0,1,0, drawIconPanel, {return ftos(SBAR.Caps);}},
-    {"gren1panel",FO_HUD_GREN1_NAME,'10 110','26 26',1,0,1,0, drawGren1Panel, {return ftos(SBAR.Gren1);}},
-    {"gren2panel",FO_HUD_GREN2_NAME,'10 140','26 26',1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
-    {"playerclasspanel",FO_HUD_SPECIAL_NAME,'10 170','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {"identifypanel",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
-    {"flaginfopanel",FO_HUD_FLAGINFO_NAME,'10 230','150 260',1,0,1,0, drawFlagInfo, {return "";}},
-    {"grentimerpanel",FO_HUD_GRENTIMER_NAME,'100 110','26 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
-    {"menupanel","Menu",'10 110','300 200',1,0,1,0, drawSimplePanel, {return "";}},
-    {"motdpanel",FO_HUD_MOTD_NAME,'150 100','100 24',1,0,1,0, drawMOTDPanel, {return SBAR.MOTD;}},
-    {"menuhintpanel",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
-    {"gamemodepanel",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
-    {"readypanel",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
-    {"showscorespanel",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
-    {"teamscorepanel",FO_HUD_TEAM_SCORE_NAME,'0 0','72 12',2,0,1,FO_HUD_INSERT_AFTER, drawTeamScorePanel, {return "";}},
-    {"mapmenupanel",FO_HUD_MAP_MENU_NAME,'10 30','800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
-    {"healthpanel",FO_HUD_HEALTH_NAME,'-64 0','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_HEALTH));}, 0, 34},
-    {"facepanel",FO_HUD_FACE_NAME,'-64 0','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawFacePanel, {return "";}, 0, 34},
-    {"ammopanel",FO_HUD_AMMO_NAME,'10 30','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawAmmoTextPanel, {return ftos(getstatf(STAT_AMMO));}},
-    {"ammoiconpanel",FO_HUD_AMMO_ICON_NAME,'10 30','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawAmmoPanel, {return "";}},
-    {"armourpanel",FO_HUD_ARMOUR_NAME,'10 30','72 26',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_ARMOR));}},
-    {"armouriconpanel",FO_HUD_ARMOUR_ICON_NAME,'10 30','26 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawArmourPanel, {return "";}},
-//    {"invshellspanel",FO_HUD_INV_SHELLS_NAME,'10 140','26 26',1,1.4,1,0, drawInvShellsPanel, {return ftos(getstatf(STAT_SHELLS));}, 1, 33},
-//    {"invnailspanel",FO_HUD_INV_NAILS_NAME,'10 140','26 26',1,1.4,1,0, drawInvNailsPanel, {return ftos(getstatf(STAT_NAILS));}, 1, 33},
-//    {"invrocketspanel",FO_HUD_INV_ROCKETS_NAME,'10 140','26 26',1,1.4,1,0, drawInvRocketsPanel, {return ftos(getstatf(STAT_ROCKETS));}, 1, 33},
-//    {"invcellspanel",FO_HUD_INV_CELLS_NAME,'10 140','26 26',1,1.4,1,0, drawInvCellsPanel, {return ftos(getstatf(STAT_CELLS));}, 1, 33},
-    {"hudoptionspanel",FO_HUD_OPTIONS_NAME,'10 10','150 182',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"hudoptions",FO_HUD_OPTIONS_NAME,'10 10','150 182',1,0,1,0, doNothing, {return DrawPanel.id;}},
+    {"clipsize",FO_HUD_CLIPSIZE_NAME,'10 20','26 26',1,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
+    {"fragstreak",FO_HUD_FRAGSTREAK_NAME,'10 50','26 26',1,0,1,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
+    {"caps",FO_HUD_CAPS_NAME,'10 80','26 26',1,0,1,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
+    {"gren1",FO_HUD_GREN1_NAME,'10 110','26 26',1,0,1,0, drawGren1Panel, {return ftos(SBAR.Gren1);}},
+    {"gren2",FO_HUD_GREN2_NAME,'10 140','26 26',1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
+    {"playerclass",FO_HUD_SPECIAL_NAME,'10 170','50 26',1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {"identify",FO_HUD_IDENTIFY_NAME,'10 200','50 26',1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
+    {"flaginfo",FO_HUD_FLAGINFO_NAME,'10 230','26 260',1,0,1,0, drawFlagInfo, {return "";}},
+    {"grentimer",FO_HUD_GRENTIMER_NAME,'100 110','26 26',1,0,1,0, drawGrenTimerPanel, {return "";}},
+    {"menu","Menu",'10 110','300 200',1,0,1,0, drawSimplePanel, {return "";}},
+    {"motd",FO_HUD_MOTD_NAME,'150 100','100 24',1,0,1,0, drawMOTDPanel, {return SBAR.MOTD;}},
+    {"menuhint",FO_HUD_MENU_HINT_NAME,'100 300','300 24',1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
+    {"gamemode",FO_HUD_GAME_MODE_NAME,'100 140','100 10',1,0,1,0, drawGameModePanel, {return "";}},
+    {"ready",FO_HUD_READY_NAME,'10 100','100 10',2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
+    {"showscores",FO_HUD_SHOWSCORES_NAME,'10 100','600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
+    {"teamscore",FO_HUD_TEAM_SCORE_NAME,'0 0','72 12',2,0,1,FO_HUD_INSERT_AFTER, drawTeamScorePanel, {return "";}},
+    {"mapmenu",FO_HUD_MAP_MENU_NAME,'10 30','800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
+    {"health",FO_HUD_HEALTH_NAME,'-64 0','72 24',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_HEALTH));}, 0, 34},
+    {"face",FO_HUD_FACE_NAME,'-64 0','24 24',1,0,1,FO_HUD_INSERT_MIDDLE, drawFacePanel, {return "";}, 0, 34},
+    {"ammo",FO_HUD_AMMO_NAME,'10 30','72 24',1,0,1,FO_HUD_INSERT_AFTER, drawAmmoTextPanel, {return ftos(getstatf(STAT_AMMO));}},
+    {"ammoicon",FO_HUD_AMMO_ICON_NAME,'10 30','24 24',1,0,1,FO_HUD_INSERT_MIDDLE, drawAmmoPanel, {return "";}},
+    {"armour",FO_HUD_ARMOUR_NAME,'10 30','72 24',1,0,1,FO_HUD_INSERT_AFTER, drawHealthTextPanel, {return ftos(getstatf(STAT_ARMOR));}},
+    {"armouricon",FO_HUD_ARMOUR_ICON_NAME,'10 30','24 24',1,0,1,FO_HUD_INSERT_MIDDLE, drawArmourPanel, {return "";}},
+    {"invshells",FO_HUD_INV_SHELLS_NAME,'10 140','24 24',1,1.4,1,0, drawInvShellsPanel, {return ftos(getstatf(STAT_SHELLS));}, 1, 33},
+    {"invnails",FO_HUD_INV_NAILS_NAME,'10 140','24 24',1,1.4,1,0, drawInvNailsPanel, {return ftos(getstatf(STAT_NAILS));}, 1, 33},
+    {"invrockets",FO_HUD_INV_ROCKETS_NAME,'10 140','24 24',1,1.4,1,0, drawInvRocketsPanel, {return ftos(getstatf(STAT_ROCKETS));}, 1, 33},
+    {"invcells",FO_HUD_INV_CELLS_NAME,'10 140','24 24',1,1.4,1,0, drawInvCellsPanel, {return ftos(getstatf(STAT_CELLS));}, 1, 33},
+    {"gameclock","Game Clock",'10 140','108 24',1,1.4,1,0, drawClockPanel, {return gameClockString();}},
+    {"quad","Quad Icon",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_QUAD)?"textures/wad/sb_quad":"";}},
+    {"pent","Pentagram Icon",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVULNERABILITY)?"textures/wad/sb_invuln":"";}},
+    {"ring","Ring Icon",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVISIBILITY)?"textures/wad/sb_invis":"";}},
+    {"suit","Biosuit Icon",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_SUIT)?"textures/wad/sb_suit":"";}},
+    {"key1","Silver Key",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY1)?"textures/wad/sb_key1":"";}},
+    {"key2","Gold Key",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY2)?"textures/wad/sb_key2":"";}},
+    {"rune1","Earth Rune",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 1)?"textures/wad/sb_sigi1":"";}},
+    {"rune2","Black Rune",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 2)?"textures/wad/sb_sigil2":"";}},
+    {"rune3","Hell Rune",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 4)?"textures/wad/sb_sigil3":"";}},
+    {"rune4","Elder Rune",'10 140','26 26',1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 8)?"textures/wad/sb_sigil4":"";}},
+    {"gun2","Shotgun",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SHOTGUN);}},
+    {"gun3","Super Shotgun",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_SHOTGUN);}},
+    {"gun4","Nailgun",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_NAILGUN);}},
+    {"gun5","Super Nailgun",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_NAILGUN);}},
+    {"gun6","Grenade Launcher",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}},
+    {"gun7","Rocket Launcher",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}},
+    {"gun8","Lighning Gun",'10 140','36 24',1,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}},
+    {"speed","Speed",'10 140','26 26',1,1.4,1,0, drawTextPanel, {return sprintf("%3.1f UPS", speed);}},
 };
-/*
-float(string panelid) getHudPanel = {
-    for(float i = 0; i < Hud_Panels.length; i++) {
-        if(Hud_Panels[i].id == panelid) {
-            return i;
-        }
-    }
-    return -1;
-};
-*/
+
+//var FO_Hud_Panel Hud_ExtraPanels[] = {
+//};
 
 FO_Hud_Panel* (float panelid) getHudPanelPointer = {
     return &(Hud_Panels[panelid]);
@@ -1041,7 +1079,12 @@ FO_Hud_Panel* (string panelid) getAnyHudPanelByNamePointer = {
             return &(Hud_Panels[i]);
         }
     }    
-    return NullPanel;
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        if(Hud_ExtraPanels[i].id == panelid) {
+//            return &(Hud_ExtraPanels[i]);
+//        }
+//    }    
+    return &NullPanel;
 };
 
 vector (FO_Hud_Panel* panel, float scale) getScaledPanelPosition = {
@@ -1049,10 +1092,10 @@ vector (FO_Hud_Panel* panel, float scale) getScaledPanelPosition = {
         return panel.Position; //Hud_Panels[panelid].Position;
     }
     vector v = panel.Position;
-    if(panel.Snap & HUD_SNAP_LEFT) v.x;
+    //if(panel.Snap & HUD_SNAP_LEFT) v.x;
     if(panel.Snap & HUD_SNAP_CENTER) v.x += (ScreenSize.x / 2) - ((panel.FillSize.x * scale) / 2);
     if(panel.Snap & HUD_SNAP_RIGHT) v.x += ScreenSize.x - (panel.FillSize.x * scale);
-    if(panel.Snap & HUD_SNAP_TOP) v.y;
+    //if(panel.Snap & HUD_SNAP_TOP) v.y;
     if(panel.Snap & HUD_SNAP_VCENTER) v.y += (ScreenSize.y / 2) - ((panel.FillSize.y * scale) / 2);
     if(panel.Snap & HUD_SNAP_BOTTOM) v.y += ScreenSize.y - (panel.FillSize.y * scale);
     return v;
@@ -1068,6 +1111,14 @@ vector(float panelid) getPosition = {
 }
 vector(float panelid) getFillSize = {
     return Hud_Panels[panelid].FillSize;
+}
+
+vector (FO_Hud_Panel* panel) getPanelFillSize = {
+    return panel.FillSize;
+}
+
+vector (FO_Hud_Panel* panel) getScaledPanelFillSize = {
+    return panel.FillSize * panel.Scale;
 }
 
 float GetGrenOneTypeForClass(float playerclass) {

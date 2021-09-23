@@ -1459,6 +1459,9 @@
 #define STAT_TEAMNO    33
 #define STAT_READY     34
 #define STAT_CLASS     35
+#define STAT_VELOCITY_X  36
+#define STAT_VELOCITY_Y  37
+#define STAT_VELOCITY_Z  38
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

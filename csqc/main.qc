@@ -1,6 +1,6 @@
 void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
-void FO_Hud_Editor_LoadSettings();
+void FO_Hud_Editor_LoadSettings(string);
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_Hud_Editor_List_Panels();
 void FO_Hud_Editor_Show_Panel(string panelid);
@@ -20,15 +20,16 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-    for (float i = 0; i < HudIcons.length; i++) {
-        precache_pic(HudIcons[i].icon);
-    }
+//     for (float i = 0; i < HudIcons.length; i++) {
+//         precache_pic(HudIcons[i].icon);
+//     }
 
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
     registercommand("fo_hud");
     registercommand("fo_hud_save");
+    registercommand("fo_hud_load");
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
@@ -66,7 +67,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
-    FO_Hud_Editor_LoadSettings();
+    FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
     print("There are ", ftos(Hud_Panels.length), " panels\n"); //MEHT
@@ -103,8 +104,16 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (is_spectator)
         is_observer = FALSE;
     SBAR.Hint = "";
-    //stop grentimer on death
+    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
+    //if(nextoriginupdate < time) {
+    //    speed = vlen([thisorigin.x, thisorigin.y] - [lastorigin.x, lastorigin.y]) * 10;
+    //    lastorigin = thisorigin;
+    //    nextoriginupdate = time + 0.1;
+    //}
+    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
+    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
+    //stop grentimer on death
     if(getstatf(STAT_HEALTH) <= 0) {
         //localcmd("stopsound\n");
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
@@ -163,13 +172,22 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "fo_hud_save":
-            Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            if(argv(1) != "") {
+                Hud_WriteCfg(argv(1));
+            } else {
+                Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            }
             break;
         case "fo_hud_reload":
-            FO_Hud_Editor_LoadSettings();
+            FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
             break;
         case "fo_hud_reset":
             FO_Hud_Editor_LoadDefaultSettings();
+            break;
+        case "fo_hud_load":
+            if(argv(1) != "") {
+                FO_Hud_Editor_LoadSettings(argv(1));
+            }
             break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
@@ -315,10 +333,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                     localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
+            if(cvar(FOCMD_FTE_HUD)) {
+                FO_Show_Scores(TRUE);
+            }
             break;
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
+            if(cvar(FOCMD_FTE_HUD)) {
+                FO_Show_Scores(FALSE);
+            }
             break;
         case "tracktarget":
             localcmd("cmd tracktarget\n");
@@ -388,6 +412,7 @@ float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
     if(oldhealth > health) {
         painfinished = time + 0.2;
     }
+    return 0;
 }
 
 void CSQC_Shutdown() = {
