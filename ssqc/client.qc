@@ -1132,11 +1132,15 @@ void () execute_changelevel = {
             if(votemode == 1 && vote_result && vote_result != vm) {
                 localcmd ("localinfo votemode off\n");
                 //changelevel(vote_result);
-            } else if((vote_style == 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
+            } 
+            if((vote_style & 1 && (vote_result == vm || vote_result == "")) || votemode == 2) {
                 vote_result = vm;
-                localcmd ("localinfo votemode on\n");
+                if(!(vote_style & 4)) {
+                     localcmd ("localinfo votemode on\n");
+                 }
                 //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-            } else if(vote_style == 2 && (vote_result == vm || vote_result == "")) {
+            } 
+            if(vote_style & 2 && (vote_result == vm || vote_result == "")) {
                 vote_result = mapname;
             }
         }
@@ -2029,11 +2033,12 @@ void () PutClientInServer = {
         self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
     }
-    
+
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
 
+    UpdateClientGrenadeSettings(self);
 };
 
 //void () info_player_start = {
@@ -2138,9 +2143,11 @@ void () NextLevel = {
         if(votemode == 1 && nextmap && nextmap != vm) {
             localcmd ("localinfo votemode off\n");
             //changelevel(vote_result);
-        } else if(vote_style == 1 || votemode == 2) {
+        } else if(vote_style & 1 || votemode == 2) {
             nextmap = vm;
-            localcmd ("localinfo votemode on\n");
+            if(!(vote_style & 4)) {
+                localcmd ("localinfo votemode on\n");
+            }
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
         } else {
             nextmap = mapname;
@@ -2739,8 +2746,6 @@ void () UpdateAllClientsTeamScores = {
 void (optional float csqcactive) ClientConnect = {
     local string st;
     local float got_one;
-
-    stuffcmd(self, "set fortressone 1\n");
 
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 

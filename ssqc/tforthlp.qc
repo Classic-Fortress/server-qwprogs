@@ -8,6 +8,18 @@ void (float inp) MOTD_Input = {
     Menu_Team_Input(inp);
 };
 
+void () Quick_Aliases =
+{
+    TeamFortress_AliasString("+quick1", "impulse 1;+attack");
+    TeamFortress_AliasString("-quick1", "-attack");
+    TeamFortress_AliasString("+quick2", "impulse 2;+attack");
+    TeamFortress_AliasString("-quick2", "-attack");
+    TeamFortress_AliasString("+quick3", "impulse 3;+attack");
+    TeamFortress_AliasString("-quick3", "-attack");
+    TeamFortress_AliasString("+quick4", "impulse 4;+attack");
+    TeamFortress_AliasString("-quick4", "-attack");
+};
+
 void () TeamFortress_MOTD = {
     if (votemode) {
         return;
@@ -179,8 +191,8 @@ void () TeamFortress_MOTD = {
             TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
             TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
         } else {
-            TeamFortress_Alias("primeone_server", TF_GRENADE_1, 0);
-            TeamFortress_Alias("primetwo_server", TF_GRENADE_2, 0);
+            TeamFortress_Alias("prime1_server", TF_GRENADE_1, 0);
+            TeamFortress_Alias("prime2_server", TF_GRENADE_2, 0);
             TeamFortress_Alias("gren1_server", TF_GRENADE_PT_1, 0);
             TeamFortress_Alias("gren2_server", TF_GRENADE_PT_2, 0);
             TeamFortress_AliasString("+gren1", "primeone");
@@ -248,14 +260,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
-        TeamFortress_AliasString("+quick1", "impulse 1;+attack");
-        TeamFortress_AliasString("-quick1", "-attack");
-        TeamFortress_AliasString("+quick2", "impulse 2;+attack");
-        TeamFortress_AliasString("-quick2", "-attack");
-        TeamFortress_AliasString("+quick3", "impulse 3;+attack");
-        TeamFortress_AliasString("-quick3", "-attack");
-        TeamFortress_AliasString("+quick4", "impulse 4;+attack");
-        TeamFortress_AliasString("-quick4", "-attack");
+        Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
             Menu_Login();

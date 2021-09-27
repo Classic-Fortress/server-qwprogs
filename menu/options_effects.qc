@@ -26,6 +26,10 @@ nonstatic void(mitem_desktop desktop) M_Options_Effects =
 	fr.add(menuitemcheck_spawn(_("Relief Mapping"),			"r_glsl_offsetmapping", 		'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcheck_spawn(_("Realtime Dynamic Lights"),	"r_shadow_realtime_dlight", 		'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcheck_spawn(_("Realtime World Lighting"),	"r_shadow_realtime_world", 		'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcombo_spawn(_("Texture Mode"),			"gl_texturemode",				'280 8', _(
+																		"nll	\"Blocky\" "
+																		"lll	\"Blurry\" "
+															)),	fl, [0, pos], [0, 8]); pos += 8;
 
 
 	fr.add(menuitemslider_spawn(_("Particle Density"),		"r_part_density",	'0.25 4 0.25',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;

@@ -2558,12 +2558,12 @@ void () TeamFortress_CheckClassStats = {
         self.items = self.items | IT_ARMOR1;
 };
 
-void (float type) TeamFortress_DropAmmo = {
-    local float ammo;
-    ammo = 0;
+void (float type, float ammo) TeamFortress_DropAmmo = {
+    //local float ammo;
+    //ammo = 0;
 
     if (type == 1) {
-        ammo = DROP_SHELLS;
+        if(!ammo) ammo = DROP_SHELLS;
         if (self.ammo_shells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_SHELLS) >=
@@ -2581,7 +2581,7 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_shells = self.ammo_shells - ammo;
     } else if (type == 2) {
-        ammo = DROP_NAILS;
+        if(!ammo) ammo = DROP_NAILS;
         if (self.ammo_nails < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_NAILS) >=
@@ -2599,7 +2599,7 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_nails = self.ammo_nails - ammo;
     } else if (type == 3) {
-        ammo = DROP_ROCKETS;
+        if(!ammo) ammo = DROP_ROCKETS;
         if (self.ammo_rockets < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_ROCKETS) >=
@@ -2617,7 +2617,7 @@ void (float type) TeamFortress_DropAmmo = {
         }
         self.ammo_rockets = self.ammo_rockets - ammo;
     } else if (type == 4) {
-        ammo = DROP_CELLS;
+        if(!ammo) ammo = DROP_CELLS;
         if (self.ammo_cells < ammo) {
             if (self.playerclass == PC_ENGINEER) {
                 if ((self.ammo_cells / AMMO_COST_CELLS) >=

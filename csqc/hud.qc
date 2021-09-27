@@ -6,25 +6,27 @@ float GetDrawPanel(string id)
             return i;
         }
     }
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        if(Hud_ExtraPanels[i].id == id) {
+//            DrawPanel = Hud_ExtraPanels[i];
+//            return i;
+//        }
+//    }    
     return -1;
 }
 
 void SetDrawPanel(string id)
 {
-        for(float i = 0; i < Hud_Panels.length; i++) {
+    for(float i = 0; i < Hud_Panels.length; i++) {
         if(Hud_Panels[i].id == id) {
             Hud_Panels[i] = DrawPanel;
         }
     }
-}
-
-float GetPanelById(string id) = {
-    for(float i = 0; i < Hud_Panels.length; i++) {
-        if(Hud_Panels[i].id == id) {
-            return i;
-        }
-    }
-    return 0;
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        if(Hud_ExtraPanels[i].id == id) {
+//            Hud_ExtraPanels[i] = DrawPanel;
+//        }
+//    }
 }
 
 void Hud_WriteCfg(string path)
@@ -38,6 +40,10 @@ void Hud_WriteCfg(string path)
         DrawPanel = Hud_Panels[i];
         line = GetPanelString(line, Hud_Panels[i].id);
     }
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        DrawPanel = Hud_ExtraPanels[i];
+//        line = GetPanelString(line, Hud_ExtraPanels[i].id);
+//    }
 
     fputs(filehandle, line);
     fclose(filehandle);
@@ -108,16 +114,25 @@ void FO_Hud_Editor_List_Panels() = {
     for(float i = 0; i < Hud_Panels.length; i++) {
         print(Hud_Panels[i].id, ": ", Hud_Panels[i].Name, "\n");
     }
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        print(Hud_ExtraPanels[i].id, ": ", Hud_ExtraPanels[i].Name, "\n");
+//    }
 }
 
 string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
+/*
     float id = getHudPanel(panelid);
     if(id < 0) {
         print("^1HUD Element^7 '", panelid, "' does not exist!\n");
         return "";
     }
+*/    
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
+    if(!panel || &panel == &NullPanel) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return "";
+    }
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
     switch (setting) {
         case "id":
             return panel.id;
@@ -135,6 +150,10 @@ string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
             return ftos(panel.Display);
         case "orientation":
             return ftos(panel.Orientation);
+        case "snap":
+            return ftos(panel.Snap);
+        case "style":
+            return ftos(panel.Style);
         default:
             print("^1Setting^7 '", setting, "' does not exist!\n");
             break;
@@ -143,13 +162,18 @@ string FO_Hud_Editor_Get_Panel_Setting(string panelid, string setting) = {
 }
 
 void FO_Hud_Editor_Show_Panel(string panelid) = {
+    /*
     float id = getHudPanel(panelid);
     if(id < 0) {
         print("^1HUD Element^7 '", panelid, "' does not exist!\n");
         return;
     }
-    
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    */
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
+    if(!panel || &panel == &NullPanel) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
     print("^1id^7: ", panel.id, "\n");
     print("\tname: ", panel.Name, "\n");
     print("\tposition: ", vtos(panel.Position), "\n");
@@ -158,9 +182,16 @@ void FO_Hud_Editor_Show_Panel(string panelid) = {
     print("\ttextscale: ", ftos(panel.TextScale), "\n");
     print("\tshow: ", ftos(panel.Display), "\n");
     print("\torientation: ", ftos(panel.Orientation), "\n");
+    print("\tsnap: ", ftos(panel.Snap), "\n");
+    print("\tstyle: ", ftos(panel.Style), "\n");
 }
 
 void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting) = {
+    if(panelid == "help" || panelid == "?") {
+        print("^1orientation^7: Extends from base to the... 0 = Left, 1 = Right, 2 = Middle (where applicable)\n");
+        print("^1snap^7: 0 = None, Horzontal: 1/2/4 = Left/Centre/Right, Vertical: 8/16/32 = Top/Middle/Bottom)\n");
+        return;
+    }
     if(setting == "") {
         FO_Hud_Editor_Show_Panel(panelid);
     } else {
@@ -169,13 +200,20 @@ void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting) = {
 }
 
 void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value) = {
+/*    
     float id = getHudPanel(panelid);
     if(id < 0) {
         print("^1HUD Element^7 '", panelid, "' does not exist!\n");
         return;
     }
+*/  
+    float val = 0;
     
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
+    if(!panel || &panel == &NullPanel) {
+        print("^1HUD Element^7 '", panelid, "' does not exist!\n");
+        return;
+    }
     switch (setting) {
         case "id":
             print("^5id ^1can't be changed^7!\n");
@@ -200,6 +238,23 @@ void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string valu
             break;
         case "orientation":
             panel.Orientation = stof(value);
+            break;
+        case "snap":
+            val = stof(value);
+            if(val) {
+                if(val & 1 || val & 2 || val & 4) {
+                    panel.Position.x = 0;
+                }
+                if(val & 8 || val & 16 || val & 32) {
+                    panel.Position.y = 0;
+                }
+            } else {
+                panel.Position = getPanelPosition(panel);
+            }
+            panel.Snap = val;
+            break;
+        case "style":
+            panel.Style = stof(value);
             break;
         default:
             print("^1Setting^7 '", setting, "' does not exist!\n");
@@ -251,19 +306,14 @@ void (float dx, float dy) Hud_MapMenuPanel_Move = {
 };
 
 void(string panelid) Hud_DrawMapMenuPanel = {
-    float id = getHudPanel(panelid);
-
-    if(id < 0) {
-        return;
-    }
-
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
     local vector fillsize = panel.FillSize * panel.Scale;
     local float alpha = fo_hud_editor?0.2:0.9;
+    local vector position = getPanelPosition(panel);
     if(panel.Display) {
         setcursormode(TRUE);
     }
-    if (hud_panel(panelid, panel.Position, fillsize, alpha, panel.Display)) {
+    if (hud_panel(panelid, position, fillsize, alpha, panel.Display)) {
         // click event
         if (fo_hud_editor) {
             
@@ -293,14 +343,14 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     local float visiblelistitems = floor(listviewsize.y / listitemsize.y);
  
      //Window title
-    sui_push_frame(panel.Position + [padding,padding], [fillsize.x - padding * 2, titlesize]);
+    sui_push_frame(position + [padding,padding], [fillsize.x - padding * 2, titlesize]);
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
     sui_text([padding, 0], [titlesize,titlesize], "Map Selection", MENU_TEXT_4, 1, 0);
     sui_pop_frame();
 
     //Filter textbox
     if(vote_list_filter != "") {
-        sui_push_frame(panel.Position + [padding,padding], listitemsize + [0,padding]);
+        sui_push_frame(position + [padding,padding], listitemsize + [0,padding]);
         //sui_border_box([0,0], listitemsize, 1, MENU_BG_DARK, 0.6, 0);
         sui_fill([0,0], listitemsize + [0,padding], MENU_BG_DARK, 0.6, 0);
         sui_set_align([SUI_ALIGN_START, SUI_ALIGN_CENTER]);
@@ -325,7 +375,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
 */
     //sui_scroll_view_begin("scrolltest", panel.Position + [200,4], [100,100], [100,200], listoffset, [2,6]);
     //sui_scroll_view_end();
-    sui_border_box(panel.Position + [padding, padding * 2 + titlesize], listviewsize, 1, MENU_TEXT_SPEC_FO, 0.6, 0);
+    sui_border_box(position + [padding, padding * 2 + titlesize], listviewsize, 1, MENU_TEXT_SPEC_FO, 0.6, 0);
     if(vote_list_offset > num_mapvotes_filtered - visiblelistitems) {
         vote_list_offset = num_mapvotes_filtered - visiblelistitems;
     }
@@ -335,8 +385,8 @@ void(string panelid) Hud_DrawMapMenuPanel = {
     entity mc = find(world, classname, "map_candidate_filtered");
     while(mc) {
         if(cnt >= vote_list_offset) {
-            listitempos = panel.Position + [padding, padding * 2 + titlesize + listitemsize.y * (cnt - vote_list_offset)];
-            if((listitempos.y + listitemsize.y + padding) > (panel.Position.y + fillsize.y)) {
+            listitempos = position + [padding, padding * 2 + titlesize + listitemsize.y * (cnt - vote_list_offset)];
+            if((listitempos.y + listitemsize.y + padding) > (position.y + fillsize.y)) {
                 //too many to fit
                 break;
             }
@@ -394,11 +444,11 @@ void(string panelid) Hud_DrawMapMenuPanel = {
         //sui_scrollbar("maplist_scrollbar", [listitemsize.x, fillsize.y - padding * 3 - listitemsize.y], [listitemsize.x,listitemsize.y * num_mapvotes], listoffset, [0,6]);
     }
         
-    sui_border_box(panel.Position, fillsize, 1, MENU_BORDER, 0.6, 0);
+    sui_border_box(position, fillsize, 1, MENU_BORDER, 0.6, 0);
 
     //Map heading
-    vector mapheadingpos = [panel.Position.x + padding * 2 + listviewsize.x, panel.Position.y + padding * 2 + titlesize];
-    float mapinfowidth = fillsize.x - (mapheadingpos.x - panel.Position.x);
+    vector mapheadingpos = [position.x + padding * 2 + listviewsize.x, position.y + padding * 2 + titlesize];
+    float mapinfowidth = fillsize.x - (mapheadingpos.x - position.x);
     sui_push_frame(mapheadingpos, [mapinfowidth, titlesize]);
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
     sui_text([padding, 0], [titlesize,titlesize], (vote_selected_item?vote_selected_item.owner.name:"No map selected"), MENU_TEXT_3, 1, 0);
@@ -413,16 +463,17 @@ void(string panelid) Hud_DrawMapMenuPanel = {
         current_vote_selected = TRUE;
     }
 
+    ////Make it half the width of the map info area and aspect of 1.25:1 
+    //vector levelshotsize = [mapinfowidth / 2, mapinfowidth * 2 / 5];
+    //No, make it 16:9 and 2/3 of the width
+    vector levelshotsize = [mapinfowidth * 2 / 3, mapinfowidth * 2 * 9 / (3 * 16)];
+
     //Map image
     float filehandle;
     string levelshot = strcat("textures/levelshots/",vote_selected_item.owner.name,".jpg"); //need to fix extensions somehow
     filehandle = fopen(levelshot, FILE_READ);
     if (filehandle >= 0) {
         fclose(filehandle);
-        ////Make it half the width of the map info area and aspect of 1.25:1 
-        //vector levelshotsize = [mapinfowidth / 2, mapinfowidth * 2 / 5];
-        //No, make it 16:9 and 2/3 of the width
-        vector levelshotsize = [mapinfowidth * 2 / 3, mapinfowidth * 2 * 9 / (3 * 16)];
         sui_push_frame([mapheadingpos.x + mapinfowidth - levelshotsize.x - padding,mapheadingpos.y + titlesize + padding * 2], levelshotsize);
         sui_pic([0,0], levelshotsize, levelshot, [1,1,1], 1, 0);
         sui_border_box([0,0], levelshotsize, 1, MENU_TEXT_GREEN, 0.6, 0);
@@ -488,7 +539,7 @@ void(string panelid) Hud_DrawMapMenuPanel = {
 
 
     //Map description
-    vector descriptionpos = [mapheadingpos.x,panel.Position.y + fillsize.y - padding * 4 - titlesize - listitemsize.y * 3]
+    vector descriptionpos = [mapheadingpos.x,position.y + fillsize.y - padding * 4 - titlesize - listitemsize.y * 3];
     sui_push_frame(descriptionpos, [mapinfowidth - padding * 2, listitemsize.y * 3]);
     sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
     sui_text([padding / 2, padding / 2], [listitemsize.y,listitemsize.y], vote_selected_item.owner.description, MENU_TEXT_1, 1, 0);
@@ -521,33 +572,25 @@ void(string panelid) Hud_DrawMapMenuPanel = {
 }
 
 void(string panelid) Hud_DrawTeamScorePanel = {
-    float id = getHudPanel(panelid);
-
-    if(id < 0) {
-        return;
-    }
-
-    vector pos;
-    pos = Hud_Panels[HUD_PANEL_TEAM_SCORE].Position;
-
     float alpha = 0;
-    FO_Hud_Panel* panel = getHudPanelPointer(id);
+    FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
 
-    vector position = getPosition(id);
+    //vector size = getFillSize(id);
+    float textScale = panel.Scale; //panel.TextScale; //panel.TextScale?panel.TextScale:panel.Scale;
+    //float sizex, sizey;
+    //sizex = size_x;
+    //sizey = size_y;
+    //vector mediumtext = MENU_TEXT_SMALL * textScale;
+    local float padding = 0.5; // * textScale;
 
-    vector size = getFillSize(id);
-    float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
-    float sizex, sizey;
-    sizex = size_x;
-    sizey = size_y;
-    vector mediumtext = MENU_TEXT_SMALL * textScale;
-    local float padding = 0.5 * textScale;
-
-    local vector fillsize = [12,12] * textScale; //mediumtext;
+    local vector fillsize = [12,12]; // * textScale; //mediumtext;
     fillsize_x = fillsize_x * 3;
     fillsize_y = fillsize_y + padding * 2;
+    panel.FillSize = fillsize;
+    fillsize = fillsize * textScale;
+    vector position = getPanelPosition(panel);
 
-    if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_TEAM_SCORE].Display))
+    if (hud_panel(panelid, position, fillsize, alpha, Hud_Panels[HUD_PANEL_TEAM_SCORE].Display))
     {
         // click event
         if (fo_hud_editor)
@@ -555,12 +598,13 @@ void(string panelid) Hud_DrawTeamScorePanel = {
         }
     }
 
-
     local float offset;
     local vector score_position = position;
     local string message = "";
     if(panel.Orientation == FO_HUD_INSERT_AFTER) {
         position_x = position_x - ((number_of_teams - 1) * fillsize_x);
+    } else if(panel.Orientation == FO_HUD_INSERT_MIDDLE) {
+        position_x = position_x - (((number_of_teams - 1) * fillsize_x) / 2);
     }
     float len;
     float textOffset;
@@ -582,7 +626,6 @@ void(string panelid) Hud_DrawTeamScorePanel = {
 void Hud_DrawFlagStatusBar(string panelid)
 {
     vector pos;
-    pos = Hud_Panels[HUD_PANEL_FLAGINFO].Position;
     float sizey, sizex;
     sizey = FO_Hud_Icon_Size_y * Hud_Panels[HUD_PANEL_FLAGINFO].Scale;
     sizex = FO_Hud_Icon_Size_x * Hud_Panels[HUD_PANEL_FLAGINFO].Scale;
@@ -595,10 +638,14 @@ void Hud_DrawFlagStatusBar(string panelid)
             flagInfoCount++;
         }
     }
+    //Show one for reference even on maps without
     if(fo_hud_editor && !flagInfoCount) {
         flagInfoCount = 1;
     }
     vector fillsize = [sizex * 4, sizey * flagInfoCount];
+    Hud_Panels[HUD_PANEL_FLAGINFO].FillSize = fillsize;
+    //pos = getPosition(HUD_PANEL_FLAGINFO); //Hud_Panels[HUD_PANEL_FLAGINFO].Position;
+    pos = getScaledPanelPosition(getHudPanelPointer(HUD_PANEL_FLAGINFO), 1);
     float alpha = 0;
     if (hud_panel(panelid, pos, fillsize, alpha, Hud_Panels[HUD_PANEL_FLAGINFO].Display))
     {
@@ -654,9 +701,9 @@ void Hud_ScrollPanelSelector(float num, float numlines) {
 
 //Draw the list of all panels
 void Hud_DrawHudOptionsPanelSelector() {
-    if(!fo_hud_editor || !Editor_SelectedPanel_Index)
+    if(!fo_hud_editor)
         return;
-    vector pos = Hud_Panels[HUD_PANEL_HUDOPTIONS].Position; //Start with option panel's pos
+    vector pos = getPosition(HUD_PANEL_HUDOPTIONS); //Hud_Panels[HUD_PANEL_HUDOPTIONS].Position; //Start with option panel's pos
     vector size = Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale; //for simplicity, use the same size as options panel
     float textsize = 8 * (Hud_Panels[HUD_PANEL_HUDOPTIONS].TextScale ? Hud_Panels[HUD_PANEL_HUDOPTIONS].TextScale : Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale);
     if((pos.x + (size.x * 2)) < ScreenSize.x) {
@@ -688,14 +735,20 @@ void Hud_DrawHudOptionsPanelSelector() {
             Editor_SelectedPanel_Index = j;
         }
     }
+//    for(float i = 0,j = 0; i < min(numlines, Hud_ExtraPanels.length); i++) {
+//        j = i + Hud_Panels[HUD_PANEL_HUDOPTIONS].Status - 1;
+//        if(hud_button(strcat("hud_option_panel_list_item", ftos(i)), pos + [2, (textsize + 2) * i], [size.x - textsize - 4, textsize + 2], Hud_ExtraPanels[j].Name)) {
+//            Editor_SelectedPanel_Index = j;
+//        }
+//    }
 }
 
-void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string icon)
+void Hud_DrawHudOptionsPanel(string panelid, float display, string text)
 {
-    if(!fo_hud_editor || !Editor_SelectedPanel_Index)
+    if(!fo_hud_editor)
         return;
     
-    vector pos = Hud_Panels[HUD_PANEL_HUDOPTIONS].Position;
+    vector pos = getPosition(HUD_PANEL_HUDOPTIONS); //Hud_Panels[HUD_PANEL_HUDOPTIONS].Position;
     vector size = Hud_Panels[HUD_PANEL_HUDOPTIONS].FillSize * Hud_Panels[HUD_PANEL_HUDOPTIONS].Scale;
     if (hud_panel(Hud_Panels[HUD_PANEL_HUDOPTIONS].id, pos, size, 0, Hud_Panels[HUD_PANEL_HUDOPTIONS].Display))
     {
@@ -739,10 +792,41 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
     drawstring(pos + [10,106], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
     drawstring(pos + [10,116], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
 
-    if(hud_button("hud_option_show_all_toggle", pos + [4,126], [140, 16], Hud_Panels[HUD_PANEL_HUDOPTIONS].Style ? "Show All" : "Hide Disabled")) {
-        Hud_Panels[HUD_PANEL_HUDOPTIONS].Style = !Hud_Panels[HUD_PANEL_HUDOPTIONS].Style;
+    local float snap = 0;
+    local string ssnap;
+    if(Hud_Panels[Editor_SelectedPanel_Index].Snap & 2) {
+        snap = 1;
+    } else if(Hud_Panels[Editor_SelectedPanel_Index].Snap & 4) {
+        snap = 2;
+    } else {
+        snap = 0;
+    }
+    drawstring(pos + [4,130], "Hor. Snap: ", [8,8], MENU_SELECTED, 1, 0);
+    if(hud_button("hud_option_hsnap_toggle", pos + [size.x - 6 - 56,126], [56, 16], HUD_HORIZONTAL_ALIGN[snap])) {
+        snap = (snap + 1) % 3;
+        Hud_Panels[Editor_SelectedPanel_Index].Position.x = 0;
+        Hud_Panels[Editor_SelectedPanel_Index].Snap -= (Hud_Panels[Editor_SelectedPanel_Index].Snap & 7);
+        Hud_Panels[Editor_SelectedPanel_Index].Snap += pow(2,snap);
+    }
+    if(Hud_Panels[Editor_SelectedPanel_Index].Snap & 16) {
+        snap = 1;
+    } else if(Hud_Panels[Editor_SelectedPanel_Index].Snap & 32) {
+        snap = 2;
+    } else {
+        snap = 0;
+    }
+    drawstring(pos + [4,148], "Ver. Snap: ", [8,8], MENU_SELECTED, 1, 0);
+    if(hud_button("hud_option_vsnap_toggle", pos + [size.x - 6 - 56,144], [56, 16], HUD_VERTICAL_ALIGN[snap])) {
+        snap = (snap + 1) % 3;
+        Hud_Panels[Editor_SelectedPanel_Index].Position.y = 0;
+        Hud_Panels[Editor_SelectedPanel_Index].Snap -= (Hud_Panels[Editor_SelectedPanel_Index].Snap & 56);
+        Hud_Panels[Editor_SelectedPanel_Index].Snap += pow(2,(snap + 3));
     }
     
+    if(hud_button("hud_option_show_all_toggle", pos + [4,162], [140, 16], Hud_Panels[HUD_PANEL_HUDOPTIONS].Style ? "Show All" : "Hide Disabled")) {
+        Hud_Panels[HUD_PANEL_HUDOPTIONS].Style = !Hud_Panels[HUD_PANEL_HUDOPTIONS].Style;
+    }
+
     if(Hud_Panels[HUD_PANEL_HUDOPTIONS].Status) {
         Hud_DrawHudOptionsPanelSelector();
     }
@@ -750,9 +834,12 @@ void Hud_DrawHudOptionsPanel(string panelid, float display, string text, string 
 
 void Hud_DrawClassInfoPanel(string id, float playerclass)
 {
+    vector pos;
+    pos = getPosition(HUD_PANEL_PLAYERCLASS); //DrawPanel.Position;
+
     if(fo_hud_editor) {
-        hud_panel(id, DrawPanel.Position, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display);
-        drawpic(DrawPanel.Position, "textures/wad/face1.png", FO_Hud_Icon_Size * DrawPanel.Scale, '1 1 1', 1, 0);
+        hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display);
+        drawpic(pos, "textures/wad/face1", FO_Hud_Icon_Size * DrawPanel.Scale, '1 1 1', 1, 0);
         return;
     }
     
@@ -767,8 +854,6 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
 
     if (SBAR.PlayerClass)
     {
-        vector pos;
-        pos = DrawPanel.Position;
 
         if (hud_panel(id, pos, DrawPanel.FillSize * DrawPanel.Scale, 0, DrawPanel.Display))
         {
@@ -793,7 +878,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
         /* drawpic(pos, icon, size, '1 1 1', 1, 0); */
 
         float len = 0, offset = 0;
-        
+
         switch (playerclass)
         {
             case PC_SCOUT:
@@ -1051,32 +1136,39 @@ void Hud_DrawIdentifyPanel(string id, string identify)
     }
 }
 
+void Hud_DrawPanel(FO_Hud_Panel* panel, float index) {
+    float offset = 0;
+    if(sui_is_last_clicked(panel.id)) {
+        Editor_SelectedPanel_Index = index;
+    }
+    if(!Hud_Panels[HUD_PANEL_HUDOPTIONS].Style || panel.Display || (fo_hud_editor && index == Editor_SelectedPanel_Index)) {
+        panel.drawPanel( panel.id,  panel.Display, panel.getValue());
+        //Draw panel names when editing
+        if(fo_hud_editor && panel.id != "hudoptionspanel") {
+            switch (panel.Orientation) {
+                case FO_HUD_INSERT_BEFORE:
+                    offset = 2;
+                    break;
+                case FO_HUD_INSERT_AFTER:
+                    offset = panel.FillSize.x - (strlen(panel.Name) * 6) - 2;
+                    break;
+                case FO_HUD_INSERT_MIDDLE:
+                    offset = (panel.FillSize.x / 2) - (strlen(panel.Name) * 3); //because 3 = 6/2
+                    break;
+            }
+            //drawstring(Hud_Panels[i].Position + [offset,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
+            drawstring(getScaledPanelPosition(panel,1) + [offset,2], panel.Name, '6 6', '0 1 0', 1, 0);
+        }
+    }   
+}
+
 void Hud_Draw(float width, float height)
 {
-    float offset = 0;
     for(float i = 0; i < Hud_Panels.length; i++) {
-        if(sui_is_last_clicked(Hud_Panels[i].id)) {
-            Editor_SelectedPanel_Index = i;
-        }
-        if(!Hud_Panels[HUD_PANEL_HUDOPTIONS].Style || Hud_Panels[i].Display) {
-            Hud_Panels[i].drawPanel( Hud_Panels[i].id,  Hud_Panels[i].Display, Hud_Panels[i].getValue(), HudIcons[i].icon);
-            //Draw panel names when editing
-            if(fo_hud_editor && Hud_Panels[i].id != "hudoptionspanel") {
-                switch (Hud_Panels[i].Orientation) {
-                    case FO_HUD_INSERT_BEFORE:
-                        offset = 2;
-                        break;
-                    case FO_HUD_INSERT_AFTER:
-                        offset = Hud_Panels[i].FillSize.x - (strlen(Hud_Panels[i].Name) * 6) - 2;
-                        break;
-                    case FO_HUD_INSERT_MIDDLE:
-                        offset = (Hud_Panels[i].FillSize.x / 2) - (strlen(Hud_Panels[i].Name) * 3); //because 3 = 6/2
-                        break;
-                }
-                drawstring(Hud_Panels[i].Position + [offset,2], Hud_Panels[i].Name, '6 6', '0 1 0', 1, 0);
-            }
-        }
+        Hud_DrawPanel(&(Hud_Panels[i]), i);
     }
-
+//    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
+//        Hud_DrawPanel(&(Hud_ExtraPanels[i]), i);
+//    }
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }

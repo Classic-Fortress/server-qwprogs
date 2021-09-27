@@ -82,10 +82,14 @@ float is_admin;
 float motd_expiry;
 float quad_round;
 float quad_rounds_total;
+float fo_flash;
+float medic_type;
+float nailgren_type;
 //float game_started;
 float prematch;
 float round_active;
 float round_over;
+float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
@@ -110,9 +114,8 @@ string vote_list_filter;
 .float localmap;
 
 float(string) GetDrawPanel;
-void(string, string, string) Hud_DrawPanelLMP;
 void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
+void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
 void (string panelid) Hud_DrawTeamScorePanel;
@@ -136,21 +139,65 @@ string HUD_ALIGN[] = {
     "Center"
 };
 
+string HUD_HORIZONTAL_ALIGN[] = {
+    "Left",
+    "Center",
+    "Right"
+};
+
+string HUD_VERTICAL_ALIGN[] = {
+    "Top",
+    "Middle",
+    "Bottom"
+};
+
 string MENU_OPTION[] = {
     "1","2","3","4","5","6","7","8","9","0","-","+"
 };
+
+const float HUD_SNAP_NONE = 0;
+const float HUD_SNAP_LEFT = 1;
+const float HUD_SNAP_CENTER = 2;
+const float HUD_SNAP_RIGHT = 4;
+const float HUD_SNAP_TOP = 8;
+const float HUD_SNAP_VCENTER = 16;
+const float HUD_SNAP_BOTTOM = 32;
+
+const float HUD_SNAP_TOP_LEFT = 9;
+const float HUD_SNAP_TOP_CENTER = 10;
+const float HUD_SNAP_TOP_RIGHT = 12;
+const float HUD_SNAP_VCENTER_LEFT = 17;
+const float HUD_SNAP_VCENTER_CENTER = 18;
+const float HUD_SNAP_VCENTER_RIGHT = 20;
+const float HUD_SNAP_BOTTOM_LEFT = 33;
+const float HUD_SNAP_BOTTOM_CENTER = 34;
+const float HUD_SNAP_BOTTOM_RIGHT = 36;
+
+const float HUD_SNAP_NORTH = 64;
+const float HUD_SNAP_EAST = 128;
+const float HUD_SNAP_SOUTH = 256;
+const float HUD_SNAP_WEST = 512;
 
 typedef struct 
 {
     string icon;
 } FO_Hud_Icons;
-FO_Hud_Icons HudIcons[29] = {
-//    {""},
+
+FO_Hud_Icons HudIcons2[37] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
-    {ICON_GREN1},
-    {ICON_GREN2},
+    {ICON_GREN_NONE},
+    {ICON_GREN_NORMAL},
+    {ICON_GREN_NAIL},
+    {ICON_GREN_EMP},
+    {ICON_GREN_GAS},
+    {ICON_GREN_CONCUSSION},
+    {ICON_GREN_FLASH},
+    {ICON_GREN_FLARE},
+    {ICON_GREN_NAPALM},
+    {ICON_GREN_CALTROP},
+    {ICON_GREN_BLAST},
     {ICON_IDENTIFY},
     {ICON_SCOUT},
     {ICON_SNIPER},
@@ -172,15 +219,58 @@ FO_Hud_Icons HudIcons[29] = {
     {ICON_FLAG_RED},
     {ICON_FLAG_YELLOW},
     {ICON_FLAG_GREEN},
-    {"textures/wad/num_percent.png"},
-    {"textures/wad/anum_percent.png"}
+    {"textures/wad/num_percent"},
+    {"textures/wad/anum_percent"}
 };
 
-FO_Hud_Icons GrenadeIcons[3] = {
-    {ICON_GREN1},
-    {ICON_GREN1},
-    {ICON_GREN2},
+FO_Hud_Icons GrenadeIcons[12] = {
+    {ICON_GREN_NONE},
+    {ICON_GREN_NORMAL},
+    {ICON_GREN_CONCUSSION},
+    {ICON_GREN_NAIL},
+    {ICON_GREN_MIRV},
+    {ICON_GREN_NAPALM},
+    {ICON_GREN_FLARE},
+    {ICON_GREN_GAS},
+    {ICON_GREN_EMP},
+    {ICON_GREN_FLASH},
+    {ICON_GREN_CALTROP},
+    {ICON_GREN_BLAST},
 };
+
+FO_Hud_Icons FaceIcons[] = {
+    //normal
+    {"textures/wad/face1"},
+    {"textures/wad/face2"},
+    {"textures/wad/face3"},
+    {"textures/wad/face4"},
+    {"textures/wad/face5"},
+    //pain
+    {"textures/wad/face_p1"},
+    {"textures/wad/face_p2"},
+    {"textures/wad/face_p3"},
+    {"textures/wad/face_p4"},
+    {"textures/wad/face_p5"},
+};
+
+FO_Hud_Icons FaceInvisibleIcon = {"textures/wad/face_invis"};
+FO_Hud_Icons FaceInvisibleInvulnerableIcon = {"textures/wad/face_inv2"};
+FO_Hud_Icons FaceInvulnerableIcon = {"textures/wad/face_invul2"};
+FO_Hud_Icons FaceQuadIcon = {"textures/wad/face_quad"};
+
+FO_Hud_Icons ArmourIcons[] = {
+    {"textures/wad/disc"},
+    {"textures/wad/sb_armor1"},
+    {"textures/wad/sb_armor2"},
+    {"textures/wad/sb_armor3"},
+};
+FO_Hud_Icons AmmoIcons[] = {
+    {"textures/wad/sb_shells"},
+    {"textures/wad/sb_nails"},
+    {"textures/wad/sb_rocket"},
+    {"textures/wad/sb_cells"},
+};
+
 
 typedef struct {
     string ClipSize;
@@ -325,14 +415,15 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text, string icon) drawPanel;
+    void(string panelid, float display, string text) drawPanel;
     string() getValue;
     float Style;
-    FO_Hud_Icons * Icon;
     float Snap;
     float Status;
+    float SnapID;
 } FO_Hud_Panel;
 
+FO_Hud_Panel NullPanel;
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
 float Editor_SelectedPanel_Index;
@@ -392,6 +483,7 @@ string FO_ScoreBoardColumns[] = {
 };
 
 enum {
+    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -409,18 +501,35 @@ enum {
     HUD_PANEL_SHOWSCORES,
     HUD_PANEL_TEAM_SCORE,
     HUD_PANEL_MAP_MENU,
-    HUD_PANEL_HUDOPTIONS,
+    HUD_PANEL_HEALTH,
+    HUD_PANEL_FACE,
+    HUD_PANEL_AMMO,
+    HUD_PANEL_AMMO_ICON,
+    HUD_PANEL_ARMOUR,
+    HUD_PANEL_ARMOUR_ICON,
+    HUD_PANEL_INV_SHELLS,
+    HUD_PANEL_INV_NAILS,
+    HUD_PANEL_INV_ROCKETS,
+    HUD_PANEL_INV_CELLS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
 #define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
+#define FOCMD_FTE_HUD "fo_fte_hud"
 
 float team_no;
 float is_spectator;
 float player_class;
 float is_observer;
+//float health;
+float oldhealth;
+float painfinished;
+vector thisorigin;
+vector lastorigin;
+float nextoriginupdate;
+float speed;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

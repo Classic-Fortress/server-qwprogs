@@ -1,6 +1,6 @@
 void FO_Hud_Editor();
 void Hud_Draw(float width, float height);
-void FO_Hud_Editor_LoadSettings();
+void FO_Hud_Editor_LoadSettings(string);
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_Hud_Editor_List_Panels();
 void FO_Hud_Editor_Show_Panel(string panelid);
@@ -10,6 +10,11 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+void PrimeOrThrowGren(float gren_number);
+void PrimeGren(float gren_number);
+void ShowGrenadeTimer(float gren_number);
+float RemainingGrenades(float gren_number);
+float IsValidToUseGrenades();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -20,20 +25,22 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-    for (float i = 0; i < HudIcons.length; i++) {
-        precache_pic(HudIcons[i].icon);
-    }
+//     for (float i = 0; i < HudIcons.length; i++) {
+//         precache_pic(HudIcons[i].icon);
+//     }
 
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
     registercommand("fo_hud");
     registercommand("fo_hud_save");
+    registercommand("fo_hud_load");
 
     registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
-    
+    registercvar(FOCMD_FTE_HUD, "0");
+
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -65,9 +72,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
-    FO_Hud_Editor_LoadSettings();
+    FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
+    print("There are ", ftos(Hud_Panels.length), " panels\n"); //MEHT
+
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -95,12 +104,21 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
+    oldhealth = getstatf(STAT_HEALTH);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
     SBAR.Hint = "";
-    //stop grentimer on death
+    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
+    //if(nextoriginupdate < time) {
+    //    speed = vlen([thisorigin.x, thisorigin.y] - [lastorigin.x, lastorigin.y]) * 10;
+    //    lastorigin = thisorigin;
+    //    nextoriginupdate = time + 0.1;
+    //}
+    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
+    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
+    //stop grentimer on death
     if(getstatf(STAT_HEALTH) <= 0) {
         //localcmd("stopsound\n");
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
@@ -112,7 +130,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-    setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
+    if(cvar(FOCMD_FTE_HUD) != 1) {
+        setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
+    }
     //setviewprop(VF_ORIGIN, '0 0 0');        //view position of the scene (after view_ofs effects).
     //setviewprop(VF_ANGLES, '0 0 0');        //override the view angles. input will work as normal. other players will see your player as normal. your screen will just be pointing a different direction.
     //setviewprop(VF_DRAWWORLD, 1);            //whether the world entity should be drawn. set to 0 if you want a completely empty scene.
@@ -141,6 +161,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
     float val;
     string key1, key2;
+    local float grentype;
+
     switch(argv(0)) {
         case "fo_hud_editor":
             FO_Hud_Editor();
@@ -155,13 +177,22 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "fo_hud_save":
-            Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            if(argv(1) != "") {
+                Hud_WriteCfg(argv(1));
+            } else {
+                Hud_WriteCfg(FO_HUD_CONFIG_PATH);
+            }
             break;
         case "fo_hud_reload":
-            FO_Hud_Editor_LoadSettings();
+            FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
             break;
         case "fo_hud_reset":
             FO_Hud_Editor_LoadDefaultSettings();
+            break;
+        case "fo_hud_load":
+            if(argv(1) != "") {
+                FO_Hud_Editor_LoadSettings(argv(1));
+            }
             break;
         case "fo_menu_game":
             FO_Menu_Game(TRUE);
@@ -204,52 +235,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "primeone":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                        localcmd("play grentimer.wav\n");
-                        AddGrenTimer(1);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("primeone_server");
-            }
+            PrimeGren(1);
             break;
         case "primetwo":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                        localcmd("play grentimer.wav\n");
-                        AddGrenTimer(2);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("primetwo_server");
-            }
+            PrimeGren(2);
             break;
         case "gren1":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren1) {
-                        localcmd("play grentimer.wav\n");
-                        AddGrenTimer(1);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("gren1_server");
-            }
+            PrimeOrThrowGren(1);
             break;
         case "gren2":
-            if(getstatf(STAT_HEALTH) > 0 && (!SBAR.GameMode || ((SBAR.GameMode & GAMEMODE_QUAD) && round_active) || (((SBAR.GameMode & GAMEMODE_DUEL) || (SBAR.GameMode & GAMEMODE_CLAN)) && !prematch && !round_over))) {
-                if(!grentimer_waiting) {
-                    if(cvar(FOCMD_GRENTIMER) == 2 && SBAR.Gren2) {
-                        localcmd("play grentimer.wav\n");
-                        AddGrenTimer(2);
-                    }
-                    grentimer_waiting = TRUE;
-                }
-                localcmd("gren2_server");
-            }
+            PrimeOrThrowGren(2);
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -270,8 +265,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 if (key2 != "")
                 {
                     localcmd(sprintf("unbind %s\n", key2));
-                    localcmd(sprintf("bind %s +showscores\n", key2));                   
-                }                
+                    localcmd(sprintf("bind %s +showscores\n", key2));
+                }
             }
             FO_Show_Scores(TRUE);
             break;
@@ -302,10 +297,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                     localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
+            if(cvar(FOCMD_FTE_HUD)) {
+                FO_Show_Scores(TRUE);
+            }
             break;
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
+            if(cvar(FOCMD_FTE_HUD)) {
+                FO_Show_Scores(FALSE);
+            }
             break;
         case "tracktarget":
             localcmd("cmd tracktarget\n");
@@ -369,6 +370,68 @@ noref void CSQC_Input_Frame() {
     }
 }
 
+float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
+    local float health = getstatf(STAT_HEALTH);
+    //pain face is 0.2 long
+    if(oldhealth > health) {
+        painfinished = time + 0.2;
+    }
+    return 0;
+}
+
 void CSQC_Shutdown() = {
     FO_WriteSettings();
+}
+
+void PrimeGren(float gren_number) {
+    ShowGrenadeTimer(gren_number);
+    localcmd(strcat("prime", ftos(gren_number), "_server"));
+}
+
+void PrimeOrThrowGren(float gren_number) {
+    ShowGrenadeTimer(gren_number);
+    localcmd(strcat("gren", ftos(gren_number), "_server"));
+}
+
+void ShowGrenadeTimer(float gren_number) {
+    if !(IsValidToUseGrenades())
+        return;
+
+    if (!grentimer_waiting && RemainingGrenades(gren_number)) {
+        grentimer_waiting = TRUE;
+        localcmd("play grentimer.wav\n");
+        local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
+        AddGrenTimer(grentype);
+    }
+}
+
+float RemainingGrenades(float gren_number) {
+    switch (gren_number) {
+        case 1:
+            return SBAR.Gren1;
+        case 2:
+            return SBAR.Gren2;
+    }
+}
+
+float IsValidToUseGrenades() {
+    if (cvar(FOCMD_GRENTIMER) != 2)
+        return FALSE;
+
+    if (prematch)
+        return FALSE;
+
+    if (round_over)
+        return FALSE;
+
+    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
+        return FALSE;
+
+    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
+        return FALSE;
+
+    if (getstatf(STAT_HEALTH) <= 0)
+        return FALSE;
+
+    return TRUE;
 }

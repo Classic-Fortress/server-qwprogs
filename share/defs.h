@@ -754,6 +754,7 @@
 
 // Grenades
 #define GR_PRIMETIME		3
+
 #define GR_TYPE_NONE		0
 #define GR_TYPE_NORMAL		1
 #define GR_TYPE_CONCUSSION	2
@@ -1408,6 +1409,16 @@
 #define FO_HUD_READY_NAME "Ready Status"
 #define FO_HUD_SHOWSCORES_NAME "Show Scores"
 #define FO_HUD_MAP_MENU_NAME "Map Menu"
+#define FO_HUD_HEALTH_NAME "Health"
+#define FO_HUD_FACE_NAME "Face"
+#define FO_HUD_AMMO_NAME "Ammo"
+#define FO_HUD_AMMO_ICON_NAME "Ammo Icon"
+#define FO_HUD_ARMOUR_NAME "Armour"
+#define FO_HUD_ARMOUR_ICON_NAME "Armour Icon"
+#define FO_HUD_INV_SHELLS_NAME "Shells"
+#define FO_HUD_INV_NAILS_NAME "Nails"
+#define FO_HUD_INV_ROCKETS_NAME "Rockets"
+#define FO_HUD_INV_CELLS_NAME "Cells"
 #define FO_HUD_TEAM_SCORE_NAME "Team Score"
 
 
@@ -1415,8 +1426,18 @@
 #define ICON_FRAGSTREAK "textures/wad/fragstreak.png"
 #define ICON_CAPS "textures/wad/caps.png"
 #define ICON_IDENTIFY "textures/wad/identify.png"
-#define ICON_GREN1 "textures/wad/gren1.png"
-#define ICON_GREN2 "textures/wad/gren2.png"
+#define ICON_GREN_NONE "textures/wad/gren_none.png"
+#define ICON_GREN_NORMAL "textures/wad/gren_normal.png"
+#define ICON_GREN_NAIL "textures/wad/gren_nail.png"
+#define ICON_GREN_CONCUSSION "textures/wad/gren_concussion.png"
+#define ICON_GREN_FLASH "textures/wad/gren_flash.png"
+#define ICON_GREN_EMP "textures/wad/gren_emp.png"
+#define ICON_GREN_MIRV "textures/wad/gren_mirv.png"
+#define ICON_GREN_NAPALM "textures/wad/gren_napalm.png"
+#define ICON_GREN_GAS "textures/wad/gren_gas.png"
+#define ICON_GREN_FLARE "textures/wad/gren_flare.png"
+#define ICON_GREN_CALTROP "textures/wad/gren_caltrop.png"
+#define ICON_GREN_BLAST "textures/wad/gren_blast.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
 #define ICON_SOLDIER "textures/wad/soldier.png"
@@ -1443,6 +1464,9 @@
 #define STAT_TEAMNO    33
 #define STAT_READY     34
 #define STAT_CLASS     35
+#define STAT_VELOCITY_X  36
+#define STAT_VELOCITY_Y  37
+#define STAT_VELOCITY_Z  38
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

@@ -2723,7 +2723,7 @@ void () item_flag_team2 = {
     CTF_Map = 1;
     UpdateAbbreviations(self);
     precache_sound("ogre/ogwake.wav");
-    precache_sound("boss2/pop2.wav");
+    precache_sound("boss1/out1.wav");
     self.classname = "item_tfgoal";
     self.netname = "Blue Flag";
     self.broadcast = Q" \sgot\s the enemy team's flag!\n";
@@ -2765,7 +2765,7 @@ void () item_flag_team2 = {
     dp.goal_effects = 3;
     dp.broadcast = Q" \scaptured\s the enemy flag!\n";
     dp.message = Q"You \scaptured\s the enemy flag!\n";
-    dp.noise = "boss2/pop2.wav";
+    dp.noise = "boss1/out1.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 5;
     dp.axhitme = 2;
@@ -2800,7 +2800,7 @@ void () item_flag_team1 = {
     CTF_Map = 1;
     UpdateAbbreviations(self);
     precache_sound("ogre/ogwake.wav");
-    precache_sound("boss2/pop2.wav");
+    precache_sound("boss1/out1.wav");
     self.classname = "item_tfgoal";
     self.netname = "Red Flag";
     self.broadcast = Q" \sgot\s the enemy team's flag!\n";
@@ -2840,7 +2840,7 @@ void () item_flag_team1 = {
     dp.goal_effects = 3;
     dp.broadcast = Q" \scaptured\s the enemy flag!\n";
     dp.message = Q"You \scaptured\s the enemy flag!\n";
-    dp.noise = "boss2/pop2.wav";
+    dp.noise = "boss1/out1.wav";
     dp.goal_result = 2;
     dp.activate_goal_no = 6;
     dp.axhitme = 1;
