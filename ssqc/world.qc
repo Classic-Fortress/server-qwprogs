@@ -425,7 +425,8 @@ void (entity ent) CopyToBodyQue = {
 void(void() fnc)CheckSpawn = {
     if(fnc)
     {
-        self.dimension_seen = DMN_NOFLASH | DMN_FLASH;
+        if (self.dimension_seen != DMN_INVISIBLE)
+            self.dimension_seen = self.dimension_seen | DMN_NOFLASH | DMN_FLASH;
         //bprint(PRINT_HIGH, strcat("spawning: ", self.classname, "\n"));
         fnc();
     }
