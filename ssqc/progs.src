@@ -61,3 +61,6 @@ spect.qc
 q3.qc
 mvdsv.qc
 rotate.qc
+fo_logic.qc
+fo_math.qc
+fo_misc_info.qc
