@@ -1251,6 +1251,11 @@
 #define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
 #define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
 
+// spawnflags - fo_misc_info
+#define TFGI_NOGLOW	1 // we reuse some tfgi functions, so keep this spawnflag
+#define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
+#define FO_MISC_INFO_NO_Z_TEST	4 // Draw this "through" walls - fake it in ez, csqc do it locally
+
 /*======================================================================*/
 /* Flamethrower								*/
 /*======================================================================*/
@@ -1460,6 +1465,7 @@
 // func_wall
 #define WALL_SOLID_NOT	1
 #define WALL_HIDE_ON_USE	2
+#define WALL_SOLID_NOT_ON_USE 4
 
 // teams
 #define TEAM_BLUE	1
