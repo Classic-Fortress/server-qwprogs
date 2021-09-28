@@ -851,11 +851,6 @@ void UpdateClientStatusBar(entity pl)
     WriteFloat(MSG_MULTICAST, pl.caps);
 
     WriteFloat(MSG_MULTICAST, pl.playerclass); // just in case we get a packet from "last life" after changing playerclass
-    if (pl.playerclass)
-    {
-        WriteFloat(MSG_MULTICAST, pl.no_grenades_1);
-        WriteFloat(MSG_MULTICAST, pl.no_grenades_2);
-    }
 
     // class info
     switch (pl.playerclass)

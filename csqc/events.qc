@@ -314,12 +314,6 @@ void ParseSBAR()
     SBAR.Caps = readfloat();
     SBAR.PlayerClass = readfloat();
 
-    if (SBAR.PlayerClass)
-    {
-        SBAR.Gren1 = readfloat();
-        SBAR.Gren2 = readfloat();
-    }
-    
     switch (SBAR.PlayerClass)
     {
         case PC_SCOUT:

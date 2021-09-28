@@ -292,6 +292,8 @@ void () worldspawn = {
     clientstat(STAT_READY, EV_FLOAT, is_ready);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
+    clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
+    clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
 
     entity worldspawnent;
     worldspawnent = spawn();

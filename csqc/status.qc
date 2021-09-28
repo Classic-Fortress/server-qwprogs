@@ -1014,14 +1014,14 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(string panelid, float display, string text, string icon),
 //  string getValue(),
-//  Snap, Status
 
+//  Snap, Status
     {"hudoptions",FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return DrawPanel.id;}},
     {"clipsize",FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
     {"fragstreak",FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {"caps",FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
-    {"gren1",FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0, drawGren1Panel, {return ftos(SBAR.Gren1);}},
-    {"gren2",FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0, drawGren2Panel, {return ftos(SBAR.Gren2);}},
+    {"gren1",FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
+    {"gren2",FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0, drawGren2Panel, {return ftos(getstatf(STAT_NO_GREN2));}},
     {"playerclass",FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
     {"identify",FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
     {"flaginfo",FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0, drawFlagInfo, {return "";}},
