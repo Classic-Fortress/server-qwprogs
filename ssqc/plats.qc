@@ -16,6 +16,7 @@ void () plat_spawn_inside_trigger = {
     trigger.movetype = MOVETYPE_NONE;
     trigger.solid = SOLID_TRIGGER;
     trigger.enemy = self;
+    self.enemy = trigger;
     trigger.team_no = self.team_no;
     trigger.playerclass = self.playerclass;
     trigger.items_allowed = self.items_allowed;
