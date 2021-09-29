@@ -585,6 +585,7 @@ void () TeamFortress_Scan = {
     local float scen;
     local float scfr;
     local float num;
+    local vector scanvec;
     local vector lightningvec;
     local float enemy_detected;
     local float any_detected;
