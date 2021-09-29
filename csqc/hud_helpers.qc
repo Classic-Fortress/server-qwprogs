@@ -303,8 +303,16 @@ void FO_Hud_Editor_LoadSettings(string filename)
                         pnl = argv(0);
                         panel = getAnyHudPanelByNamePointer(pnl);
                         if(!panel || &panel == &NullPanel) {
-                            ln = fgets(filehandle);
-                            continue;
+                            if(strlen(pnl) < 6) {
+                                ln = fgets(filehandle);
+                                continue;
+                            }
+                            pnl = substring(pnl, 0, strlen(pnl) - 5);
+                            panel = getAnyHudPanelByNamePointer(pnl);
+                            if(!panel || &panel == &NullPanel) {
+                                ln = fgets(filehandle);
+                                continue;
+                            }
                         }
 
                         switch (argv(1))

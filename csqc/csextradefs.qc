@@ -424,6 +424,7 @@ typedef struct {
 FO_Hud_Panel NullPanel;
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
+FO_Hud_Panel* MenuPanel;
 float Editor_SelectedPanel_Index;
 
 typedef struct {

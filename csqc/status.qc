@@ -136,7 +136,8 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
                 timercount++;
             }
         }
-    } else if(fo_hud_editor && (!display || !timercount)) {
+    }
+    if(fo_hud_editor && (!display || !timercount)) {
         Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_GREN_NORMAL);
     }
 };
@@ -1014,9 +1015,9 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(string panelid, float display, string text, string icon),
 //  string getValue(),
+//  Style, Snap, Status
 
-//  Snap, Status
-    {"hudoptions",FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return DrawPanel.id;}},
+    {"hudoptions",FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return DrawPanel.id;}, 1},
     {"clipsize",FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0, drawClipSize, { return SBAR.ClipSize; }},
     {"fragstreak",FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {"caps",FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
