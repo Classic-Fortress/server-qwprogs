@@ -648,7 +648,7 @@ var fo_menu FO_MENU_VOTE = {
 vector fo_menu_draw(fo_menu * menu) = {
     vector position;
     if(menu.flags & FO_MENU_FLAG_CENTER) {
-        position = Hud_Panels[HUD_PANEL_MENU].Position;
+        position = getPanelPosition(MenuPanel);
     } else {
         position = menu.position;
     }
@@ -667,7 +667,7 @@ vector fo_menu_draw(fo_menu * menu) = {
         menu.update();
     }
     
-    local float scale = Hud_Panels[HUD_PANEL_MENU].Scale, textscale = Hud_Panels[HUD_PANEL_MENU].TextScale;
+    local float scale = MenuPanel.Scale, textscale = MenuPanel.TextScale;
     if(!textscale) {
         textscale = scale;
     }
@@ -688,6 +688,7 @@ vector fo_menu_draw(fo_menu * menu) = {
     
     if (sui_is_held(id)) {
         position = position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
+        MenuPanel.Position = MenuPanel.Position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
     }
     
     sui_border_box(position, menusize, 1, bordercolour, FO_MENU_TRANSPARENCY, 0);
@@ -837,7 +838,7 @@ void Menu_Cancel() = {
 void Menu_Draw(float width, float height, float menushown) = {
     if(fo_hud_menu_active) {
         CurrentMenu.position = fo_menu_draw(CurrentMenu);
-        Hud_Panels[HUD_PANEL_MENU].Position = CurrentMenu.position;
+        //MenuPanel.Position = CurrentMenu.position;
     } else {
         Menu_Cancel();
     }

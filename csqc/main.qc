@@ -75,8 +75,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
-    print("There are ", ftos(Hud_Panels.length), " panels\n"); //MEHT
-
+    MenuPanel = getAnyHudPanelByNamePointer("menu");
+    
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
