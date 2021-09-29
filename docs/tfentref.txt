@@ -463,7 +463,7 @@ t_length                Everyone within this radius is affected.  To specify whe
                         in "goal_effects"
 
 
-goal_results            Determines what results are applied to APA. Bitfields:
+goal_result            Determines what results are applied to APA. Bitfields:
                                  1 : Goal is removed after activation.
                                  2 : Goals activated by this one apply their
                                         results to the AP.
@@ -743,7 +743,7 @@ maxammo_shells          All members of this team are affected.
 
 maxammo_nails           All members not of this team are affected.
 
-goal_results            Determines what results are applied to APA. Bitfields:
+goal_result            Determines what results are applied to APA. Bitfields:
                                    1 : Goal is removed after activation.
                                    2 : Goals activated by this one apply their
                                         results to the AP.
@@ -1070,7 +1070,7 @@ ex_skill_max            This entity is removed when the map starts if the game's
                         variable is <= to this value. To specify a skill of 0, use
                         -1 instead.
 
-goal_results            Determines what results are applied to APA. Bitfields:
+goal_result            Determines what results are applied to APA. Bitfields:
                                  1 : Goal is removed after activation.
                                  2 : Goals activated by this one apply their
                                         results to APA.

@@ -278,8 +278,6 @@ typedef struct {
     float Caps;
     string Identify;
     float PlayerClass;
-    float Gren1;
-    float Gren2;
     string MOTD;
     string Hint;
     //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch

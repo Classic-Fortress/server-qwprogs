@@ -408,9 +408,9 @@ void ShowGrenadeTimer(float gren_number) {
 float RemainingGrenades(float gren_number) {
     switch (gren_number) {
         case 1:
-            return SBAR.Gren1;
+            return getstatf(STAT_NO_GREN1);
         case 2:
-            return SBAR.Gren2;
+            return getstatf(STAT_NO_GREN2);
     }
 }
 

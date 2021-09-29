@@ -292,6 +292,8 @@ void () worldspawn = {
     clientstat(STAT_READY, EV_FLOAT, is_ready);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
+    clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
+    clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -381,7 +383,8 @@ void (entity ent) CopyToBodyQue = {
 void(void() fnc)CheckSpawn = {
     if(fnc)
     {
-        self.dimension_seen = DMN_NOFLASH | DMN_FLASH;
+        if (self.dimension_seen != DMN_INVISIBLE)
+            self.dimension_seen = self.dimension_seen | DMN_NOFLASH | DMN_FLASH;
         //bprint(PRINT_HIGH, strcat("spawning: ", self.classname, "\n"));
         fnc();
     }
