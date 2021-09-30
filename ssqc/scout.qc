@@ -675,45 +675,45 @@ void () TeamFortress_Scan = {
             WriteCoord(MSG_ONE, lightningvec_y);
             WriteCoord(MSG_ONE, lightningvec_z + 8);
             
-            // code injected by hz - scanner projectile
-            scanvec = normalize(list.origin - self.owner.origin); 
-            newmis = spawn();
-            newmis.owner = self.owner;
-            newmis.enemy = self.owner;
-            newmis.movetype = MOVETYPE_FLYMISSILE;
-            newmis.solid = SOLID_TRIGGER;
+            if (scoutspikescan) {
+                 scanvec = normalize(list.origin - self.owner.origin); 
+                 newmis = spawn();
+                 newmis.owner = self.owner;
+                 newmis.enemy = self.owner;
+                 newmis.movetype = MOVETYPE_FLYMISSILE;
+                 newmis.solid = SOLID_TRIGGER;
 
-            FO_SetModel(newmis, MODEL_SPIKE_SCAN);
-            setsize(newmis, '0 0 0', '0 0 0');
-            setorigin(newmis, self.owner.origin + v_forward * 8);
+                 FO_SetModel(newmis, MODEL_SPIKE_SCAN);
+                 setsize(newmis, '0 0 0', '0 0 0');
+                 setorigin(newmis, self.owner.origin + v_forward * 8);
 
-            switch (self.owner.team_no)
-            {
-                case TEAM_BLUE:
-                    newmis.dimension_seen = DMN_TEAMBLUE;
-                    break;
-                case TEAM_RED:
-                    newmis.dimension_seen = DMN_TEAMRED;
-                    break;
-                case TEAM_YELL:
-                    newmis.dimension_seen = DMN_TEAMYELL;
-                    break;
-                case TEAM_GREN:
-                    newmis.dimension_seen = DMN_TEAMGREN;
-                    break;
-                default:
-                    newmis.dimension_seen = DMN_NOFLASH;
-                    break;
+                 switch (self.owner.team_no)
+                 {
+                     case TEAM_BLUE:
+                         newmis.dimension_seen = DMN_TEAMBLUE;
+                         break;
+                     case TEAM_RED:
+                         newmis.dimension_seen = DMN_TEAMRED;
+                         break;
+                     case TEAM_YELL:
+                         newmis.dimension_seen = DMN_TEAMYELL;
+                         break;
+                     case TEAM_GREN:
+                         newmis.dimension_seen = DMN_TEAMGREN;
+                         break;
+                     default:
+                         newmis.dimension_seen = DMN_NOFLASH;
+                         break;
+                }
+
+                newmis.velocity = scanvec * 1000;
+                newmis.angles = vectoangles(newmis.velocity);
+                newmis.oldorigin = newmis.velocity;
+                newmis.nextthink = time + 5;
+                newmis.think = SUB_Remove;
+                newmis.touch = ScanBolt_Touch;
+                newmis.classname = "scanspike";
             }
-
-            newmis.velocity = scanvec * 1000;
-            newmis.angles = vectoangles(newmis.velocity);
-            newmis.oldorigin = newmis.velocity;
-            newmis.nextthink = time + 5;
-            newmis.think = SUB_Remove;
-            newmis.touch = ScanBolt_Touch;
-            newmis.classname = "scanspike";
-            //END hz replaced code
 
             if (self.owner.tf_items_flags & 4) {
                 stuffcmd(self.owner, "play misc/basekey.wav\n");
