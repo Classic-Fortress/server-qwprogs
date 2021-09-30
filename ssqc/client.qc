@@ -926,7 +926,6 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[8] = 3;
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
-	    scoutscanspike = FALSE;
         }
     }
 
