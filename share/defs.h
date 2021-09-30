@@ -1032,6 +1032,7 @@
 #define PC_HVYWEAP_PROJSPEED	3000
 #define PC_HVYWEAP_ASSCAN_CLIPSIZE		100
 #define MODEL_PROJ_DIAM2 "progs/proj_diam2.mdl"
+#define MODEL_SPIKE_SCAN "progs/spike_scan.mdl"
 
 
 // Class Details for PYRO
