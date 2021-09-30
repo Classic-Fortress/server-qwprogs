@@ -568,7 +568,7 @@ void () DecodeLevelParms = {
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
 	
 	// Scout Scanner spike on / off
-        scoutscanspike = CF_GetSetting("scp", "scoutscanspike", "on");
+        scoutscanspike = CF_GetSetting("sss", "scoutscanspike", "on");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
