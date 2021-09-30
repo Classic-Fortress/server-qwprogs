@@ -675,7 +675,7 @@ void () TeamFortress_Scan = {
             WriteCoord(MSG_ONE, lightningvec_y);
             WriteCoord(MSG_ONE, lightningvec_z + 8);
             
-            if (scoutspikescan) {
+            if (scoutscanspike) {
                  scanvec = normalize(list.origin - self.owner.origin); 
                  newmis = spawn();
                  newmis.owner = self.owner;
