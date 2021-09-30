@@ -26,7 +26,7 @@ void () ScanBolt_Think = {
     self.movetype = MOVETYPE_FLYMISSILE;
     self.velocity = self.oldorigin;
     self.touch = ScanBolt_Touch;
-    FO_SetModel(self, "progs/spike_scan.mdl");
+    FO_SetModel(self, MODEL_SPIKE_SCAN);
     self.nextthink = time + 1;
     self.think = SUB_Remove;
 };
@@ -683,7 +683,7 @@ void () TeamFortress_Scan = {
             newmis.movetype = MOVETYPE_FLYMISSILE;
             newmis.solid = SOLID_TRIGGER;
 
-            FO_SetModel(newmis, "progs/spike_scan.mdl");
+            FO_SetModel(newmis, MODEL_SPIKE_SCAN);
             setsize(newmis, '0 0 0', '0 0 0');
             setorigin(newmis, self.owner.origin + v_forward * 8);
 
