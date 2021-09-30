@@ -566,6 +566,9 @@ void () DecodeLevelParms = {
 
         // configure max armor of heavy weapons guy [300]
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
+	
+	// Scout Scanner spike on / off
+        scoutscanspike = CF_GetSetting("scp", "scoutscanspike", "on");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -804,6 +807,7 @@ void () DecodeLevelParms = {
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
+	    scoutscanspike = TRUE;
         }
 
         st = infokey(world, "faithful");
@@ -875,6 +879,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
+	    scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
@@ -921,6 +926,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[8] = 3;
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
+	    scoutscanspike = FALSE;
         }
     }
 
