@@ -571,6 +571,7 @@ float server_faithful;
 float server_huetf;
 float scoutscanspike;
 float asscanrange;
+float asscanrangedie;
 
 float old_spanner;
 float old_dispenser;
