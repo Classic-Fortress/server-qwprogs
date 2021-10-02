@@ -1,9 +1,15 @@
 void AssCanBulletThink ()
 {
     self.movetype = MOVETYPE_TOSS;
-    self.think = SUB_Remove;    
-    self.nextthink = time + 3;
+    self.think = SUB_Remove;
+    
+    if (asscanrangedie > 0) {
+        self.nextthink = time + asscanrangedie;
+    } else {
+        self.nextthink = time + 3;
+    }
 }
+
 
 
 void AssCanBulletTouch()
