@@ -69,6 +69,8 @@ vector(float base, float rndmix, float plusminus) vecrand =
 
 void LaunchAssCan(vector org, vector dir, float proj_speed)
 {
+    local float num;
+    
     newmis = spawn();
 	newmis.owner = self;
 	newmis.classname = "proj_bullet";
