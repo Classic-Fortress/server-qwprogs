@@ -569,6 +569,9 @@ void () DecodeLevelParms = {
 	
 	// Scout Scanner spike on / off
         scoutscanspike = CF_GetSetting("sss", "scoutscanspike", "on");
+	
+	// HwGuy Assault Cannon Range default - 500
+	asscanrange = CF_GetSetting("asr", "asscanrange", "500");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
