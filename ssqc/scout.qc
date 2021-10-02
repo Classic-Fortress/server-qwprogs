@@ -21,43 +21,6 @@ void (entity inflictor, entity attacker, float bounce,
 entity(entity scanner, float scanrange, float enemies,
        float friends) T_RadiusScan;
 
-void () ScanBolt_Think = {
-    self.solid = SOLID_TRIGGER;
-    self.movetype = MOVETYPE_FLYMISSILE;
-    self.velocity = self.oldorigin;
-    self.touch = ScanBolt_Touch;
-    FO_SetModel(self, MODEL_SPIKE_SCAN);
-    self.nextthink = time + 1;
-    self.think = SUB_Remove;
-};
-
-// Scanbolt touch function.
-void () ScanBolt_Touch = {
-    local vector org;
-
-    if (other == self.owner) {
-        return;
-    }
-    if ((other == self.enemy) && (self.enemy != world)) {
-        return;
-    }
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
-        return;
-    }
-    org = self.origin - 8 * normalize(self.velocity);
-   
-    msg_entity = self.owner;
-    WriteByte(MSG_ONE, SVC_TEMPENTITY);
-    WriteByte(MSG_ONE, TE_SPIKE);
-    WriteCoord(MSG_ONE, self.origin_x);
-    WriteCoord(MSG_ONE, self.origin_y);
-    WriteCoord(MSG_ONE, self.origin_z + 8);
-      
-    dremove(self);
-};
-
-
 void () CF_Scout_Dash = {
     if (self.playerclass != PC_SCOUT)
         return;
@@ -680,8 +643,8 @@ void () TeamFortress_Scan = {
                  newmis = spawn();
                  newmis.owner = self.owner;
                  newmis.enemy = self.owner;
-                 newmis.movetype = MOVETYPE_FLYMISSILE;
-                 newmis.solid = SOLID_TRIGGER;
+                 newmis.movetype = MOVETYPE_NOCLIP;
+                 newmis.solid = SOLID_NOT;
 
                  FO_SetModel(newmis, MODEL_SPIKE_SCAN);
                  setsize(newmis, '0 0 0', '0 0 0');
@@ -709,9 +672,14 @@ void () TeamFortress_Scan = {
                 newmis.velocity = scanvec * 1000;
                 newmis.angles = vectoangles(newmis.velocity);
                 newmis.oldorigin = newmis.velocity;
-                newmis.nextthink = time + 5;
+                
+                //Remove the scan spike when it reaches list.origin
                 newmis.think = SUB_Remove;
-                newmis.touch = ScanBolt_Touch;
+                num = vlen(list.origin - self.owner.origin);
+                num = num / 1000;
+                newmis.nextthink = time + num;
+                
+                newmis.touch = SUB_Null;
                 newmis.classname = "scanspike";
             }
 
