@@ -572,8 +572,6 @@ void () DecodeLevelParms = {
 	
 	// HwGuy Assault Cannon Range default as 0 to disable
 	asscanrange = CF_GetSetting("acr", "asscanrange", "0");
-	// and adding a die time toggle
-	asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
