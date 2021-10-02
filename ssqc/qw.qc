@@ -570,6 +570,7 @@ float server_default;
 float server_faithful;
 float server_huetf;
 float scoutscanspike;
+float asscanrange;
 
 float old_spanner;
 float old_dispenser;
