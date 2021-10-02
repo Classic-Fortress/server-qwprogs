@@ -2,8 +2,6 @@
 // Functions for the SCOUT class and associated weaponry
 //========================================================
 
-void () ScanBolt_Touch;
-void () ScanBolt_Think;
 void () CaltropTouch;
 void () CaltropScatterThink;
 void () ScatterCaltrops;
