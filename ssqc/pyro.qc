@@ -761,7 +761,6 @@ void () AirBlastReloadFinished = {
     dremove(self);
 };
 
-void () UseAirBlast = {
     if (self.special_cooldown < time)
     {
         self.airblast_cooldown = 1;
@@ -775,8 +774,12 @@ void () UseAirBlast = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
+        vector ab_start  = self.origin + v_forward * 8;
+        vector ab_origin = ab_start + aim(self,1000) * (PC_PYRO_AIRBLAST_RANGE / 2);
+        vector ab_end    = ab_start + aim(self,1000) * PC_PYRO_AIRBLAST_RANGE;
+        ent = findradius(ab_origin, PC_PYRO_AIRBLAST_RANGE);
 
-        ent = findradius(self.origin, PC_PYRO_AIRBLAST_RANGE);
+        ent = findradius(ab_origin, PC_PYRO_AIRBLAST_RANGE);
         while (ent)
         {
             if (ent.movetype != MOVETYPE_NONE && ent != self)
@@ -797,37 +800,43 @@ void () UseAirBlast = {
                             vector targorg;
                             targorg = ent.origin;
                             float pushval = 1000;
-                            if (ent == self)
-                            {
-                                pushval = 500;
-                                traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
-                                if (trace_fraction < 1)
-                                {
-                                    targorg = self.origin - (v_forward * 200 * trace_fraction);
-                                }
-                            }
                             
-                            vector delta = targorg - self.origin;
+                            vector delta = targorg - ab_start;
                             float dist = vlen(delta);
                             float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+                            pushval = pushval * percent;
+
+                            if (pushval < 500)
+                            {
+                                pushval = 500;
+                            } 
+                            else if (pushval > 800) 
+                            {
+                                pushval = 800;
+                            }
+
 
                             if (ent.flags & FL_ONGROUND)
                             {
                                 if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
                                 {
-                                    setorigin(ent, ent.origin + '0 0 1');
+                                    setorigin(ent, ent.origin + '0 0 5');
                                 }
                             }
                             
                             delta = normalize(delta);
-                            delta = delta * percent * pushval;
+                            delta = delta * pushval;
 
                             if (ent.movetype == MOVETYPE_FLYMISSILE)
                             {
                                 float speed = vlen(ent.velocity);
                                 ent.velocity = normalize(delta) * speed;
                             }
-                            else
+                            else if (ent.velocity == '0 0 0')
+                            {
+                              ent.velocity = v_forward * 500;
+                            }
+                            else 
                             {
                                 ent.velocity = ent.velocity + delta;
                             }
