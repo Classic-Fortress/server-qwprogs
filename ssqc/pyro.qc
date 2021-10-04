@@ -807,13 +807,13 @@ void () UseAirBlast = {
                             float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
                             pushval = pushval * percent;
 
-                            if (pushval < 500)
+                            if (pushval < airblastpushmin)
                             {
-                                pushval = 500;
+                                pushval = airblastpushmin;
                             } 
-                            else if (pushval > 800) 
+                            else if (pushval > airblastpushmax) 
                             {
-                                pushval = 800;
+                                pushval = airblastpushmax;
                             }
 
 
