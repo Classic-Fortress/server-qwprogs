@@ -573,6 +573,10 @@ void () DecodeLevelParms = {
 	// HwGuy Assault Cannon Range default as 0 to disable, and die time once range hit.
 	asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
+	
+	// Pyro Airblast pushval min and max
+	airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
+        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -812,6 +816,8 @@ void () DecodeLevelParms = {
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
 	    scoutscanspike = TRUE;
+	    airblastpushmin = 500;
+	    airblastpushmax = 800;
         }
 
         st = infokey(world, "faithful");
