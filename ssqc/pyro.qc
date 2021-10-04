@@ -800,7 +800,7 @@ void () UseAirBlast = {
                         case "pipebomb":
                             vector targorg;
                             targorg = ent.origin;
-                            float pushval = 1000;
+                            float pushval = airblastpushmax / 0.8;
                             
                             vector delta = targorg - ab_start;
                             float dist = vlen(delta);
