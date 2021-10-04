@@ -761,6 +761,7 @@ void () AirBlastReloadFinished = {
     dremove(self);
 };
 
+void () UseAirBlast = {
     if (self.special_cooldown < time)
     {
         self.airblast_cooldown = 1;
