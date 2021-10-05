@@ -575,6 +575,7 @@ void () DecodeLevelParms = {
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
 	
 	// Pyro Airblast pushval min and max
+	airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
 	airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
