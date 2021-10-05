@@ -775,6 +775,91 @@ void () UseAirBlast = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
+
+        ent = findradius(self.origin, PC_PYRO_AIRBLAST_RANGE);
+        while (ent)
+        {
+            if (ent.movetype != MOVETYPE_NONE && ent != self)
+            {                
+                if (infront(ent))
+                {
+                    switch (ent.classname)
+                    {
+                        case "player":
+                        case "pyro_rocket":
+                        case "flamerflame":
+                        case "proj_tranq":
+                        case "proj_bullet":
+                        case "proj_rocket":
+                        case "grenade":
+                        case "spike":
+                        case "pipebomb":
+                            vector targorg;
+                            targorg = ent.origin;
+                            float pushval = 1000;
+                            if (ent == self)
+                            {
+                                pushval = 500;
+                                traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
+                                if (trace_fraction < 1)
+                                {
+                                    targorg = self.origin - (v_forward * 200 * trace_fraction);
+                                }
+                            }
+                            
+                            vector delta = targorg - self.origin;
+                            float dist = vlen(delta);
+                            float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+
+                            if (ent.flags & FL_ONGROUND)
+                            {
+                                if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
+                                {
+                                    setorigin(ent, ent.origin + '0 0 1');
+                                }
+                            }
+                            
+                            delta = normalize(delta);
+                            delta = delta * percent * pushval;
+
+                            if (ent.movetype == MOVETYPE_FLYMISSILE)
+                            {
+                                float speed = vlen(ent.velocity);
+                                ent.velocity = normalize(delta) * speed;
+                            }
+                            else
+                            {
+                                ent.velocity = ent.velocity + delta;
+                            }
+                            
+                            break;
+                    }
+                }     
+            }  
+            
+            ent = ent.chain;
+        }
+    }
+    else
+    {
+        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
+    }
+};
+
+void () UseAirBlastV2 = {
+    if (self.special_cooldown < time)
+    {
+        self.airblast_cooldown = 1;
+        self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        entity timer = spawn();
+        timer.owner = self;
+        timer.classname = "timer";
+        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        timer.think = AirBlastReloadFinished;
+
+        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
+        makevectors(self.v_angle);
+        entity ent;
         vector ab_start  = self.origin + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (PC_PYRO_AIRBLAST_RANGE / 2);
         vector ab_end    = ab_start + aim(self,1000) * PC_PYRO_AIRBLAST_RANGE;
