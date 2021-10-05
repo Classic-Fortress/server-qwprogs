@@ -860,12 +860,13 @@ void () UseAirBlastV2 = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
+        float abrange = PC_PYRO_AIRBLAST_RANGE / 2;
         vector ab_start  = self.origin + v_forward * 8;
-        vector ab_origin = ab_start + aim(self,1000) * (PC_PYRO_AIRBLAST_RANGE / 2);
-        vector ab_end    = ab_start + aim(self,1000) * PC_PYRO_AIRBLAST_RANGE;
-        ent = findradius(ab_origin, PC_PYRO_AIRBLAST_RANGE);
+        vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
+        vector ab_end    = ab_start + aim(self,1000) * abrange;
+        ent = findradius(ab_origin, abrange);
 
-        ent = findradius(ab_origin, PC_PYRO_AIRBLAST_RANGE);
+        ent = findradius(ab_origin, abrange);
         while (ent)
         {
             if (ent.movetype != MOVETYPE_NONE && ent != self)
@@ -886,10 +887,10 @@ void () UseAirBlastV2 = {
                             vector targorg;
                             targorg = ent.origin;
                             float pushval = airblastpushmax / 0.8;
-                            
+                                                        
                             vector delta = targorg - ab_start;
                             float dist = vlen(delta);
-                            float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+                            float percent = (abrange - dist) / abrange;
                             pushval = pushval * percent;
 
                             if (pushval < airblastpushmin)
