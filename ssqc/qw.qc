@@ -572,6 +572,7 @@ float server_huetf;
 float scoutscanspike;
 float asscanrange;
 float asscanrangedie;
+float airblastv2;
 float airblastpushmin;
 float airblastpushmax;
 
