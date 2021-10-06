@@ -1106,6 +1106,30 @@ void () W_FireRocket = {
     FO_SetModel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+
+    if (project_rockets) {
+        // Project rockets player ping forward in time based on ping up to a maximum of 100ms
+        local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
+        if (player_ping_s > 0.1) {
+            player_ping_s = 0.1;
+        }
+        local float rocket_offset = player_ping_s * 450;
+        local vector projected_origin = self.origin + v_forward * (8 + rocket_offset) + '0 0 16';
+
+        local string st;
+
+        st = ftos(rocket_offset);
+        bprint4(PRINT_HIGH, "Offset : ", st, "\n");
+        
+        // Trace projectile? 
+        traceline(newmis.origin, projected_origin, MOVE_LAGGED, self);
+
+        if (trace_fraction < 1) {
+            projected_origin = trace_endpos;
+        }
+
+        setorigin(newmis, projected_origin);
+    }
 };
 
 void (entity from, float damage) LightningHit = {
