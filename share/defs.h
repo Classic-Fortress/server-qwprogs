@@ -872,6 +872,8 @@
 #define PC_SCOUT_MOTION_MIN_I		0.5 	// < Short range
 #define PC_SCOUT_MOTION_MIN_MOVE	50 	// Minimum vlen of player velocity to be picked up by motion detector
 
+#define MODEL_SPIKE_SCAN "progs/spike_scan.mdl"
+
 // Class Details for SNIPER
 #define PC_SNIPER_SKIN			5
 #define PC_SNIPER_MAXHEALTH		100
