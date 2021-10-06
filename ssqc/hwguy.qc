@@ -1,3 +1,15 @@
+void AssCanBulletThink ()
+{
+    self.movetype = MOVETYPE_TOSS;
+    self.think = SUB_Remove;
+
+    if (asscanrangedie > 0) {
+        self.nextthink = time + asscanrangedie;
+    } else {
+        self.nextthink = time + 3;
+    }
+}
+
 void AssCanBulletTouch()
 {
 	if (self.voided) 
@@ -61,6 +73,8 @@ vector(float base, float rndmix, float plusminus) vecrand =
 
 void LaunchAssCan(vector org, vector dir, float proj_speed)
 {
+    local float num;
+    
     newmis = spawn();
 	newmis.owner = self;
 	newmis.classname = "proj_bullet";
@@ -69,9 +83,16 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 
 	newmis.solid = SOLID_BBOX;
 	newmis.touch = AssCanBulletTouch;
-
-	newmis.think = SUB_Remove;
-	newmis.nextthink = time + 5;	            // Stop projectile going forever
+	
+	
+        if (asscanrange > 0) {
+            num = (1 / proj_speed) * asscanrange;
+            newmis.think = AssCanBulletThink;
+            newmis.nextthink = time + num;                  // Projectile range / gravity
+        } else {
+            newmis.think = SUB_Remove;
+            newmis.nextthink = time + 5;	            // Stop projectile going forever
+        }
 
 	newmis.mdl = MODEL_PROJ_DIAM2;
 	FO_SetModel(newmis, newmis.mdl);				// Diamond model
