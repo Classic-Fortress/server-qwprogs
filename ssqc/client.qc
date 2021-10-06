@@ -566,6 +566,18 @@ void () DecodeLevelParms = {
 
         // configure max armor of heavy weapons guy [300]
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
+        
+        // Scout Scanner spike on / off
+        scoutscanspike = CF_GetSetting("sss", "scoutscanspike", "on");
+        
+        // HwGuy Assault Cannon Range default as 0 to disable, and die time once range hit.
+        asscanrange = CF_GetSetting("acr", "asscanrange", "0");
+        asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
+        
+        // Pyro Airblast pushval min and max
+        airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
+        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
+        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -804,6 +816,9 @@ void () DecodeLevelParms = {
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
+            scoutscanspike = TRUE;
+            airblastpushmin = 500;
+            airblastpushmax = 800;
         }
 
         st = infokey(world, "faithful");
@@ -875,6 +890,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
+	    scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
