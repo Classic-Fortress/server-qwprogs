@@ -565,6 +565,9 @@ void () DecodeLevelParms = {
         // concussion grenade effect time [19]
         cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
 
+        // concussion grenade effect time proportional to distance from explosion
+        distance_based_cuss_duration = CF_GetSetting("dbcd", "distance_based_cuss_duration", "off");
+
         // medic immune to concussion grenade effects [on]
         medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
 
@@ -935,6 +938,7 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
             medicnocuss = FALSE;
             project_weapons = FALSE;
+            distance_based_cuss_duration = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;

@@ -563,6 +563,7 @@ float stock_reload;
 float classtips;
 float cussgrentime;
 float medicnocuss;
+float distance_based_cuss_duration;
 float sniperpower;
 float sniperreloadpercent;
 float buildstatus;

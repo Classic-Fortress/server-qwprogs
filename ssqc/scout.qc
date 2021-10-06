@@ -808,6 +808,8 @@ void (entity inflictor, entity attacker, float bounce,
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce = {
+    local float actual_cuss_time = cussgrentime;
+    local float distance;    
     local float points;
     local entity head;
     local entity te;
@@ -818,10 +820,23 @@ void (entity inflictor, entity attacker, float bounce,
         if (head != ignore) {
             if (head.takedamage) {
                 org = head.origin + (head.mins + head.maxs) * 0.5;
-                points = 0.5 * vlen(org - inflictor.origin);
+                distance = vlen(org - inflictor.origin);
+                points = 0.5 * distance;
                 if (points < 0)
                     points = 0;
                 points = bounce - points;
+
+                if (distance_based_cuss_duration) {
+                    // Actual cuss time based on distance from max explosion radius
+                    local float fractional_distance = (1 - (distance / (bounce + 40)));
+                    if (fractional_distance <= 1 && fractional_distance > 0.80) {
+                        actual_cuss_time = cussgrentime;
+                    } else if (fractional_distance <= 0.8 && fractional_distance > 0.2) {
+                        actual_cuss_time = rint((1 - fractional_distance) * cussgrentime);
+                    } else {
+                        actual_cuss_time = rint(actual_cuss_time * 0.05);
+                    }
+                }
 
                 if ((head.classname != "building_dispenser")
                     && (head.classname != "building_sentrygun")
@@ -846,6 +861,15 @@ void (entity inflictor, entity attacker, float bounce,
                                 head = head.chain;
                                 continue;
                             }
+                        }
+
+                        if (distance_based_cuss_duration 
+                            && ((head.playerclass == PC_MEDIC) || (head.playerclass == PC_SCOUT))) {
+                            entity speedbump;
+                            speedbump = spawn();
+                            speedbump.think = CussSpeedBump;
+                            speedbump.nextthink = time + 1;
+                            speedbump.owner = head;
                         }
 
                         te = find(world, classname, "timer");
@@ -891,7 +915,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.team_no = attacker.team_no;
                                 te.classname = "timer";
                                 te.owner = head;
-                                te.health = 40 * cussgrentime;
+                                te.health = 40 * actual_cuss_time;
                                 self.owner.is_concussed = 1;
                             }
                         }
