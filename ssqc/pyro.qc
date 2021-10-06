@@ -864,7 +864,6 @@ void () UseAirBlastV2 = {
         vector ab_start  = self.origin + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_end    = ab_start + aim(self,1000) * abrange;
-        ent = findradius(ab_origin, abrange);
 
         ent = findradius(ab_origin, abrange);
         while (ent)
