@@ -67,7 +67,14 @@ void () UseSpecialSkill = {
             return;
         case PC_PYRO:
             if (pyro_type == PYRO_FO)
-                UseAirBlast();
+                if (airblastv2) {
+                    UseAirBlastV2();
+                }
+                else 
+                {
+                    UseAirBlast();
+                }
+                
                 Status_Refresh(self);
             break;
         case PC_SPY:
