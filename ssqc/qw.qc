@@ -569,6 +569,12 @@ float buildstatus;
 float server_default;
 float server_faithful;
 float server_huetf;
+float scoutscanspike;
+float asscanrange;
+float asscanrangedie;
+float airblastv2;
+float airblastpushmin;
+float airblastpushmax;
 
 float old_spanner;
 float old_dispenser;
