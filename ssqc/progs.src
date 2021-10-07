@@ -22,6 +22,7 @@ subs.qc
 combat.qc
 items.qc
 locfiles.qc
+antilag.qc
 weapons.qc
 world.qc
 client.qc

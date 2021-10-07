@@ -570,6 +570,9 @@ void () DecodeLevelParms = {
         // project rockets by player ping
         project_rockets = CF_GetSetting("pr", "project_rockets", "on");
 
+        // project assault cannon by player ping
+        project_assault_cannon = CF_GetSetting("pac", "project_assault_cannon", "on");
+
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (Role_None.respawn_delay_time) {
@@ -899,6 +902,7 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
             medicnocuss = FALSE;
             project_rockets = FALSE;
+            project_assault_cannon = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;

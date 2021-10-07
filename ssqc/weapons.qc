@@ -1108,30 +1108,7 @@ void () W_FireRocket = {
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
     if (project_rockets) {
-        // Project rockets player ping forward in time based on ping up to a maximum of 100ms
-        local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
-        if (player_ping_s > 0.15) {
-            player_ping_s = 0.15;
-        } else if (player_ping_s < 0.0015) {
-            player_ping_s = 0;
-        }
-                
-        local float rocket_offset = (player_ping_s  / 2) * PC_SOLDIER_ROCKET_SPEED;
-        local vector projected_origin = self.origin + v_forward * (8 + rocket_offset) + '0 0 16';
-
-        local string st;
-
-        st = ftos(rocket_offset);
-        bprint4(PRINT_HIGH, "Offset : ", st, "\n");
-        
-        // Trace projectile?
-        traceline(newmis.origin, projected_origin, MOVE_LAGGED, self);
-
-        if (trace_fraction < 1) {
-            projected_origin = trace_endpos;
-        }
-
-        setorigin(newmis, projected_origin);
+        AL_ProjectProjectile(newmis, PC_SOLDIER_ROCKET_SPEED);
     }
 };
 

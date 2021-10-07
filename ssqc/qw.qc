@@ -576,6 +576,7 @@ float old_hp_armor;
 float max_armor_hwguy;
 
 float project_rockets;
+float project_assault_cannon;
 
 float ng_velocity;
 float ng_damage;
