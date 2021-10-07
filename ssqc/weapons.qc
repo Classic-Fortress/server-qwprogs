@@ -1092,7 +1092,7 @@ void () W_FireRocket = {
 
     makevectors(self.v_angle);
     newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * 900;
+    newmis.velocity = newmis.velocity * PC_SOLDIER_ROCKET_SPEED;
     newmis.angles = vectoangles(newmis.velocity);
 
     newmis.touch = T_MissileTouch;
@@ -1110,10 +1110,13 @@ void () W_FireRocket = {
     if (project_rockets) {
         // Project rockets player ping forward in time based on ping up to a maximum of 100ms
         local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
-        if (player_ping_s > 0.1) {
-            player_ping_s = 0.1;
+        if (player_ping_s > 0.15) {
+            player_ping_s = 0.15;
+        } else if (player_ping_s < 0.0015) {
+            player_ping_s = 0;
         }
-        local float rocket_offset = player_ping_s * 450;
+                
+        local float rocket_offset = (player_ping_s  / 2) * PC_SOLDIER_ROCKET_SPEED;
         local vector projected_origin = self.origin + v_forward * (8 + rocket_offset) + '0 0 16';
 
         local string st;
@@ -1121,7 +1124,7 @@ void () W_FireRocket = {
         st = ftos(rocket_offset);
         bprint4(PRINT_HIGH, "Offset : ", st, "\n");
         
-        // Trace projectile? 
+        // Trace projectile?
         traceline(newmis.origin, projected_origin, MOVE_LAGGED, self);
 
         if (trace_fraction < 1) {
