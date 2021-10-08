@@ -6,8 +6,8 @@ void AL_ProjectProjectile (entity projectile, float velocity) {
       local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
       // Remove 13ms / 1 frame to keep behaviour consistent on low ping
       player_ping_s = player_ping_s - (0.01298701298); // 1/77
-      if (player_ping_s > 0.15) {
-          player_ping_s = 0.15;
+      if (player_ping_s > project_weapons_max_latency) {
+          player_ping_s = project_weapons_max_latency;
       } else if (player_ping_s < 0.0013) {
           player_ping_s = 0;
       }
