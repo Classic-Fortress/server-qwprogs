@@ -1323,6 +1323,10 @@ void () W_FireGrenade = {
     FO_SetModel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, 600);
+    }
 };
 
 void () spike_touch;
