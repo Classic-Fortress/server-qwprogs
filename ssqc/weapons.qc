@@ -1107,7 +1107,7 @@ void () W_FireRocket = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
-    if (project_rockets) {
+    if (project_weapons) {
         AL_ProjectProjectile(newmis, PC_SOLDIER_ROCKET_SPEED);
     }
 };
@@ -1346,6 +1346,10 @@ void (vector org, vector dir) launch_spike = {
     setorigin(newmis, org);
 
     newmis.velocity = dir * ng_velocity;
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, ng_velocity);
+    }
 };
 
 void () W_FireSuperSpikes = {

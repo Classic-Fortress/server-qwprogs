@@ -567,11 +567,8 @@ void () DecodeLevelParms = {
         // configure max armor of heavy weapons guy [300]
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
 
-        // project rockets by player ping
-        project_rockets = CF_GetSetting("pr", "project_rockets", "on");
-
-        // project assault cannon by player ping
-        project_assault_cannon = CF_GetSetting("pac", "project_assault_cannon", "on");
+        // project projectile weapons by player ping
+        project_weapons = CF_GetSetting("pw", "project_weapons", "on");
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -901,8 +898,7 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             medicaura = FALSE;
             medicnocuss = FALSE;
-            project_rockets = FALSE;
-            project_assault_cannon = FALSE;
+            project_weapons = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;

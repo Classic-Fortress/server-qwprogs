@@ -14,10 +14,6 @@ void AL_ProjectProjectile (entity projectile, float velocity) {
               
       local float rocket_offset = (player_ping_s  / 2) * velocity;
       local vector projected_origin = newmis.origin + v_forward * (rocket_offset);
-
-      local string st;
-      st = ftos(rocket_offset);
-      bprint4(PRINT_HIGH, "Offset : ", st, "\n");
       
       // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
       // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
