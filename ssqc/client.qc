@@ -531,8 +531,8 @@ void () DecodeLevelParms = {
 
         // Pyro Airblast pushval min and max
         airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
-        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
-        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
+        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "470");
+        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "600");
 
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");
@@ -828,9 +828,9 @@ void () DecodeLevelParms = {
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
-	    scoutscanspike = TRUE;
-            airblastpushmin = 500;
-            airblastpushmax = 800;
+	        scoutscanspike = TRUE;
+            airblastpushmin = 470;
+            airblastpushmax = 600;
         }
 
         st = infokey(world, "faithful");
