@@ -816,7 +816,7 @@ void () DecodeLevelParms = {
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
-	        scoutscanspike = TRUE;
+            scoutscanspike = TRUE;
             airblastpushmin = 470;
             airblastpushmax = 600;
         }
