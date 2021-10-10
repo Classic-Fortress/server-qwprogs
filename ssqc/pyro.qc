@@ -860,7 +860,7 @@ void () UseAirBlastV2 = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
-        float  abrange = PC_PYRO_AIRBLAST_RANGE / 3;
+        float  abrange = PC_PYRO_AIRBLAST_RANGE / 2;
         vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_end    = ab_start + aim(self,1000) * abrange;
