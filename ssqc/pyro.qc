@@ -860,14 +860,37 @@ void () UseAirBlastV2 = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
-        float abrange = PC_PYRO_AIRBLAST_RANGE / 2;
-        vector ab_start  = self.origin + v_forward * 8;
+        float  abrange = PC_PYRO_AIRBLAST_RANGE / 3;
+        vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_end    = ab_start + aim(self,1000) * abrange;
+        
+        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+
+        /* Work in progress - CSQC for FTE players only?
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+        WriteCoord(MSG_MULTICAST, ab_origin_x);
+        WriteCoord(MSG_MULTICAST, ab_origin_y);
+        WriteCoord(MSG_MULTICAST, ab_origin_z);
+        multicast(ab_origin, MULTICAST_PHS);*/
+        
+
+        vector direction = self.v_angle;
+        if (direction_x > 60) 
+        {
+            if (self.flags & FL_ONGROUND)
+                self.velocity_z = 460;
+            else
+            {
+                self.velocity_z = self.velocity_z + 260;
+            }
+        }
 
         ent = findradius(ab_origin, abrange);
         while (ent)
         {
+
             if (ent.movetype != MOVETYPE_NONE && ent != self)
             {                
                 switch (ent.classname)
@@ -881,50 +904,34 @@ void () UseAirBlastV2 = {
                     case "grenade":
                     case "spike":
                     case "pipebomb":
-                        vector targorg;
-                        targorg = ent.origin;
-                        float pushval = airblastpushmax / 0.8;
-
-                        vector delta = targorg - ab_start;
-                        float dist = vlen(delta);
+                        vector targorg = ent.origin;
+                        float pushval = airblastpushmax;
+                                                        
+                        vector delta  = targorg - ab_start;
+                        float dist    = vlen(delta);
+                        float scale   = airblastpushmax - airblastpushmin;
                         float percent = (abrange - dist) / abrange;
-                        pushval = pushval * percent;
-
-                        if (pushval < airblastpushmin)
+                            
+                        if (ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
                         {
-                            pushval = airblastpushmin;
-                        } 
-                        else if (pushval > airblastpushmax) 
-                        {
-                            pushval = airblastpushmax;
+                            setorigin(ent, ent.origin + '0 0 1');
+                            ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
                         }
-
-                        if (ent.flags & FL_ONGROUND)
+                        else if (ent.owner == self && ent.movetype != MOVETYPE_FLYMISSILE)  // Fine tuning airblast of own items - assuming they are going forward here
                         {
-                            if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
-                            {
-                                setorigin(ent, ent.origin + '0 0 5');
-                            }
+                            if      (percent <= 0.05) { pushval = airblastpushmin; }
+                            else if (percent >= 0.50) { pushval = airblastpushmax; }
+                            else                      { pushval = airblastpushmin + scale * percent; }
+                            
+                            ent.velocity = ent.velocity + pushval * aim(self,1000); //* pushval;
                         }
-
-                        delta = normalize(delta);
-                        delta = delta * pushval;
-
-                        if (ent.movetype == MOVETYPE_FLYMISSILE)
+                        else // otherwise push in the direction of the aim
                         {
-                            float speed = vlen(ent.velocity);
-                            ent.velocity = normalize(delta) * speed;
+                            ent.velocity = vlen(ent.velocity) * aim(self,1000);
                         }
-                        else if (ent.velocity == '0 0 0')
-                        {
-                            ent.velocity = v_forward * 500;
-                        }
-                        else 
-                        {
-                            ent.velocity = ent.velocity + delta;
-                        }
-
-                        break;
+                            
+                    break;
+                    
                 }     
             }  
 

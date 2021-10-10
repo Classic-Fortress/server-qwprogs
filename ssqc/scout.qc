@@ -637,37 +637,39 @@ void () TeamFortress_Scan = {
             WriteCoord(MSG_ONE, lightningvec_z + 8);
             
             if (scoutscanspike) {
-                 scanvec = normalize(list.origin - self.owner.origin); 
-                 newmis = spawn();
-                 newmis.owner = self.owner;
-                 newmis.enemy = self.owner;
-                 newmis.movetype = MOVETYPE_NOCLIP;
-                 newmis.solid = SOLID_NOT;
+                scanvec = normalize(list.origin - self.owner.origin); 
+                newmis = spawn();
+                newmis.owner = self.owner;
+                newmis.enemy = self.owner;
+                newmis.movetype = MOVETYPE_NOCLIP;
+                newmis.solid = SOLID_NOT;
 
-                 FO_SetModel(newmis, MODEL_SPIKE_SCAN);
-                 setsize(newmis, '0 0 0', '0 0 0');
-                 setorigin(newmis, self.owner.origin + v_forward * 8);
+                FO_SetModel(newmis, "progs/spike.mdl");
+                newmis.traileffectnum = particleeffectnum("spike_scan");
 
-                 switch (self.owner.team_no)
-                 {
-                     case TEAM_BLUE:
-                         newmis.dimension_seen = DMN_TEAMBLUE;
-                         break;
-                     case TEAM_RED:
-                         newmis.dimension_seen = DMN_TEAMRED;
-                         break;
-                     case TEAM_YELL:
-                         newmis.dimension_seen = DMN_TEAMYELL;
-                         break;
-                     case TEAM_GREN:
-                         newmis.dimension_seen = DMN_TEAMGREN;
-                         break;
-                     default:
-                         newmis.dimension_seen = DMN_NOFLASH;
-                         break;
+                setsize(newmis, '0 0 0', '0 0 0');
+                setorigin(newmis, self.owner.origin + v_forward * 8);
+
+                switch (self.owner.team_no)
+                {
+                    case TEAM_BLUE:
+                        newmis.dimension_seen = DMN_TEAMBLUE;
+                        break;
+                    case TEAM_RED:
+                        newmis.dimension_seen = DMN_TEAMRED;
+                        break;
+                    case TEAM_YELL:
+                        newmis.dimension_seen = DMN_TEAMYELL;
+                        break;
+                    case TEAM_GREN:
+                        newmis.dimension_seen = DMN_TEAMGREN;
+                        break;
+                    default:
+                        newmis.dimension_seen = DMN_NOFLASH;
+                        break;
                 }
 
-                newmis.velocity = scanvec * 1000;
+                newmis.velocity = scanvec * 2000;
                 newmis.angles = vectoangles(newmis.velocity);
                 newmis.oldorigin = newmis.velocity;
 
