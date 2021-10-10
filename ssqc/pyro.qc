@@ -883,7 +883,7 @@ void () UseAirBlastV2 = {
                 self.velocity_z = 460;
             else
             {
-                self.velocity_z = self.velocity_z + 260;
+                self.velocity_z = self.velocity_z + 300;
             }
         }
 
