@@ -534,6 +534,7 @@ void () DecodeLevelParms = {
         airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "470");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "600");
         airblastjump    = CF_GetSetting("abj", "airblastjump", "off");
+        airblastsize    = CF_GetSetting("abs", "airblastsize", "150");
 
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");
@@ -820,6 +821,7 @@ void () DecodeLevelParms = {
             scoutscanspike = TRUE;
             airblastpushmin = 470;
             airblastpushmax = 600;
+            airblastsize    = 150;
         }
 
         st = infokey(world, "faithful");
@@ -891,7 +893,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
-	    scoutscanspike = FALSE;
+	        scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");

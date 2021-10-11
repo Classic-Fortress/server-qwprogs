@@ -576,6 +576,7 @@ float airblastv2;
 float airblastpushmin;
 float airblastpushmax;
 float airblastjump;
+float airblastsize;
 
 float old_spanner;
 float old_dispenser;
