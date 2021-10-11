@@ -930,6 +930,10 @@ void () UseAirBlastV2 = {
                                 else if (percent >= 0.50) { pushval = airblastpushmax; }
                                 else                      { pushval = airblastpushmin + scale * percent; }
                                 
+                                if (ent.owner != self) 
+                                {
+                                    ent.velocity = '0 0 0';
+                                }
                                 ent.velocity = ent.velocity + pushval * normalize(ent.origin - ab_start);
                             }
                                 
