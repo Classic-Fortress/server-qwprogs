@@ -568,8 +568,9 @@ void () DecodeLevelParms = {
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
 
         // project projectile weapons by player ping
-        project_weapons = CF_GetSetting("pw", "project_weapons", "on");
+        project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
+        // max projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
 
         // delay respawning by this many seconds [0]
