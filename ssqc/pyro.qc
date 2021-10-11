@@ -879,9 +879,9 @@ void () UseAirBlastV2 = {
         vector direction = self.v_angle;
         if (airblastjump && direction_x > 60) 
         {
-            if (self.flags & FL_ONGROUND)
+            if ((airblastjump == 1 || airblastjump == 3) && self.flags & FL_ONGROUND)
                 self.velocity_z = 460;
-            else
+            else if (airblastjump == 1 || airblastjump == 2)
             {
                 self.velocity_z = self.velocity_z + 300;
             }
