@@ -863,7 +863,7 @@ void () UseAirBlastV2 = {
         float  abrange = PC_PYRO_AIRBLAST_RANGE / 2;
         vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
-        vector ab_end    = ab_start + aim(self,1000) * abrange;
+        vector ab_diameter = ab_start + aim(self,1000) * abrange;
         
         pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
 
@@ -874,7 +874,6 @@ void () UseAirBlastV2 = {
         WriteCoord(MSG_MULTICAST, ab_origin_y);
         WriteCoord(MSG_MULTICAST, ab_origin_z);
         multicast(ab_origin, MULTICAST_PHS);*/
-        
 
         vector direction = self.v_angle;
         if (airblastjump && direction_x > 60) 
@@ -890,49 +889,54 @@ void () UseAirBlastV2 = {
         ent = findradius(ab_origin, abrange);
         while (ent)
         {
-
             if (ent.movetype != MOVETYPE_NONE && ent != self)
-            {                
-                switch (ent.classname)
-                {
-                    case "player":
-                    case "pyro_rocket":
-                    case "flamerflame":
-                    case "proj_tranq":
-                    case "proj_bullet":
-                    case "proj_rocket":
-                    case "grenade":
-                    case "spike":
-                    case "pipebomb":
-                        vector targorg = ent.origin;
-                        float pushval = airblastpushmax;
-                                                        
-                        vector delta  = targorg - ab_start;
-                        float dist    = vlen(delta);
-                        float scale   = airblastpushmax - airblastpushmin;
-                        float percent = (abrange - dist) / abrange;
-                            
-                        if (ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
-                        {
-                            setorigin(ent, ent.origin + '0 0 1');
-                            ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
-                        }
-                        else if (ent.owner == self && ent.movetype != MOVETYPE_FLYMISSILE)  // Fine tuning airblast of own items - assuming they are going forward here
-                        {
-                            if      (percent <= 0.05) { pushval = airblastpushmin; }
-                            else if (percent >= 0.50) { pushval = airblastpushmax; }
-                            else                      { pushval = airblastpushmin + scale * percent; }
-                            
-                            ent.velocity = ent.velocity + pushval * aim(self,1000); //* pushval;
-                        }
-                        else // otherwise push in the direction of the aim
-                        {
-                            ent.velocity = vlen(ent.velocity) * aim(self,1000);
-                        }
-                            
-                    break;
-                    
-                }     
+            {
+                vector diameter_pos     = ab_start + aim(self,500) * vlen(ent.origin - ab_start);
+                float  distfromdiameter = vlen(ent.origin - diameter_pos);
+
+                if (distfromdiameter <= airblastsize / 2 && ent != self)
+                {   
+                    switch (ent.classname)
+                    {
+                        case "player":
+                        case "pyro_rocket":
+                        case "flamerflame":
+                        case "proj_tranq":
+                        case "proj_bullet":
+                        case "proj_rocket":
+                        case "grenade":
+                        case "spike":
+                        case "pipebomb":
+                            vector targorg = ent.origin;
+                            float pushval = airblastpushmax;
+                                                            
+                            vector delta  = targorg - ab_start;
+                            float dist    = vlen(delta);
+                            float scale   = airblastpushmax - airblastpushmin;
+                            float percent = (abrange - dist) / abrange;
+
+                            if (ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
+                            {
+                                setorigin(ent, ent.origin + '0 0 1');
+                                ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
+                            }
+                            else if (ent.movetype == MOVETYPE_FLYMISSILE) // return missle at same speed in where aiming
+                            {
+                                ent.velocity = vlen(ent.velocity) * aim(self,1000);
+                            } 
+                            else // All other trajectory is based on ab -> ent and velocity via pushval
+                            {
+                                if      (percent <= 0.05) { pushval = airblastpushmin; }
+                                else if (percent >= 0.50) { pushval = airblastpushmax; }
+                                else                      { pushval = airblastpushmin + scale * percent; }
+                                
+                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - ab_start);
+                            }
+                                
+                        break;
+                        
+                    }     
+                }
             }  
 
             ent = ent.chain;
