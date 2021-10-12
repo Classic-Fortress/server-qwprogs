@@ -728,6 +728,10 @@ void () W_FireIncendiaryCannon = {
     FO_SetModel(newmis, rktmdl);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, pyro_type == PYRO_FO ? PC_PYRO_NEW_PROJSPEED : PC_PYRO_OLD_PROJSPEED);
+    }
 };
 
 void () TeamFortress_IncendiaryCannon = {
@@ -872,6 +876,7 @@ void () UseAirBlastV2 = {
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
+
         float  abrange = PC_PYRO_AIRBLAST_RANGE / 2;
         vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);

@@ -1317,7 +1317,7 @@ void () W_FireTranq = {
     newmis.solid = 2;
     makevectors(self.v_angle);
     newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * 1500;
+    newmis.velocity = newmis.velocity * PC_SPY_TRANQSPEED;
     newmis.angles = vectoangles(newmis.velocity);
     newmis.touch = T_TranqDartTouch;
     newmis.think = SUB_Remove;
@@ -1326,6 +1326,9 @@ void () W_FireTranq = {
     FO_SetModel(newmis, "progs/spike.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, PC_SPY_TRANQSPEED);
+    }
 };
 
 void () T_TranqDartTouch = {

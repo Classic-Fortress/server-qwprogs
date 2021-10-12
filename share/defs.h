@@ -872,6 +872,8 @@
 #define PC_SCOUT_MOTION_MIN_I		0.5 	// < Short range
 #define PC_SCOUT_MOTION_MIN_MOVE	50 	// Minimum vlen of player velocity to be picked up by motion detector
 
+#define MODEL_SPIKE_SCAN "progs/spike_scan.mdl"
+
 // Class Details for SNIPER
 #define PC_SNIPER_SKIN			5
 #define PC_SNIPER_MAXHEALTH		100
@@ -926,6 +928,7 @@
 #define PC_SOLDIER_GRENADE_INIT_2	1
 #define PC_SOLDIER_GRENADE_MAX_1	4
 #define PC_SOLDIER_GRENADE_MAX_2	1
+#define PC_SOLDIER_ROCKET_SPEED 	900
 #define PC_SOLDIER_TF_ITEMS		0
 
 // Class Details for DEMOLITION MAN
@@ -1061,7 +1064,7 @@
 #define PC_PYRO_GRENADE_MAX_1		4
 #define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
-#define PC_PYRO_AIRBLAST_RANGE	400
+#define PC_PYRO_AIRBLAST_RANGE	        400
 #define PC_PYRO_AIRBLAST_COOLDOWN	5
 #define PC_PYRO_AIRBLAST_CELLS			55
 #define PC_PYRO_AIRBLASTJUMP_CELLS		75
@@ -1078,9 +1081,8 @@
 #define PC_PYRO_BURN_MULTIPLIER_ORIG	.3
 #define PC_PYRO_BURN_MULTIPLIER_FO		1
 #define PC_PYRO_BURN_DAMAGE_AMP			1.2
-#define PC_PYRO_BURN_DAMAGE_AMP			1.2
-
-
+#define PC_PYRO_OLD_PROJSPEED			600
+#define PC_PYRO_NEW_PROJSPEED			800
 
 // pyro types
 #define PYRO_ORIGINAL	0
@@ -1118,6 +1120,7 @@
 #define PC_SPY_CELL_REGEN_AMOUNT	1
 #define PC_SPY_CELL_USAGE		3	// Amount of cells spent while invisible
 #define PC_SPY_GO_UNDERCOVER_TIME	4	// Time it takes to go undercover
+#define PC_SPY_TRANQSPEED			1500
 
 // Class Details for ENGINEER
 #define PC_ENGINEER_SKIN		22	// Not used anymore
@@ -1147,6 +1150,7 @@
 #define PC_ENGINEER_GRENADE_MAX_2	4
 #define PC_ENGINEER_TF_ITEMS		0
 #define PC_ENGINEER_GRENADE_TYPE_2_RANGE	240
+#define PC_ENGINEER_RAILSPEED		1500
 
 // Class Details for CIVILIAN
 #define PC_CIVILIAN_SKIN		22
