@@ -1092,7 +1092,7 @@ void () W_FireRocket = {
 
     makevectors(self.v_angle);
     newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * 900;
+    newmis.velocity = newmis.velocity * PC_SOLDIER_ROCKET_SPEED;
     newmis.angles = vectoangles(newmis.velocity);
 
     newmis.touch = T_MissileTouch;
@@ -1106,6 +1106,10 @@ void () W_FireRocket = {
     FO_SetModel(newmis, "progs/missile.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, PC_SOLDIER_ROCKET_SPEED);
+    }
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1319,6 +1323,10 @@ void () W_FireGrenade = {
     FO_SetModel(newmis, "progs/grenade2.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin);
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, 600);
+    }
 };
 
 void () spike_touch;
@@ -1342,6 +1350,10 @@ void (vector org, vector dir) launch_spike = {
     setorigin(newmis, org);
 
     newmis.velocity = dir * ng_velocity;
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, ng_velocity);
+    }
 };
 
 void () W_FireSuperSpikes = {

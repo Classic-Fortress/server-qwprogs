@@ -108,6 +108,10 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	setorigin (newmis, org);					// Move to starting position
 
 	newmis.avelocity = vecrand(100, 200, FALSE);
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, proj_speed);
+    }
 }
 
 void FireAssCan (float shotcount, vector dir, vector spread)

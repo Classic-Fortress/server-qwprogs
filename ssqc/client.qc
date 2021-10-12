@@ -579,6 +579,12 @@ void () DecodeLevelParms = {
         airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
+        // project projectile weapons by player ping
+        project_weapons = CF_GetSetting("pw", "project_weapons", "off");
+
+        // max projection latency (default 100ms)
+        project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
+
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (Role_None.respawn_delay_time) {
@@ -911,6 +917,7 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             medicaura = FALSE;
             medicnocuss = FALSE;
+            project_weapons = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
