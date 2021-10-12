@@ -535,6 +535,8 @@ void () DecodeLevelParms = {
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "600");
         airblastjump    = CF_GetSetting("abj", "airblastjump", "off");
         airblastsize    = CF_GetSetting("abs", "airblastsize", "150");
+        airblastcells     = CF_GetSetting("abc", "airblastcells", ftos(PC_PYRO_AIRBLAST_CELLS));
+        airblastjumpcells = CF_GetSetting("abjc", "airblastjumpcells", ftos(PC_PYRO_AIRBLASTJUMP_CELLS));
 
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");

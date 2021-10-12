@@ -847,8 +847,20 @@ void () UseAirBlast = {
 };
 
 void () UseAirBlastV2 = {
-    if (self.special_cooldown < time)
+    float isabjump = airblastjump && self.v_angle_x > 60;
+
+    if (self.ammo_cells < airblastcells)
     {
+        sprint(self, PRINT_HIGH, "Not enough cells to Airblast\n");
+    }
+    else if (isabjump && airblastcells > 0 && self.ammo_cells < airblastjumpcells)
+    {
+        sprint(self, PRINT_HIGH, "Not enough cells to Airblast jump\n");
+    }
+    else if (self.special_cooldown < time)
+    {
+        float cellcost = airblastcells;
+
         self.airblast_cooldown = 1;
         self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
         entity timer = spawn();
@@ -864,20 +876,14 @@ void () UseAirBlastV2 = {
         vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_diameter = ab_start + aim(self,1000) * abrange;
-        
-        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
 
-        /* Work in progress - CSQC for FTE players only?
-        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-        WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-        WriteCoord(MSG_MULTICAST, ab_origin_x);
-        WriteCoord(MSG_MULTICAST, ab_origin_y);
-        WriteCoord(MSG_MULTICAST, ab_origin_z);
-        multicast(ab_origin, MULTICAST_PHS);*/
-
-        vector direction = self.v_angle;
-        if (airblastjump && direction_x > 60) 
+        if (isabjump) 
         {
+            if (airblastcells > 0 && airblastjumpcells > airblastcells) 
+            {
+                cellcost = cellcost + airblastjumpcells - airblastcells; 
+            }
+
             if ((airblastjump == 1 || airblastjump == 3) && self.flags & FL_ONGROUND)
                 self.velocity_z = 490;
             else if (airblastjump == 1 || airblastjump == 2)
@@ -885,6 +891,9 @@ void () UseAirBlastV2 = {
                 self.velocity_z = self.velocity_z + 260;
             }
         }
+
+        self.ammo_cells = self.ammo_cells - cellcost;
+        W_SetCurrentAmmo(self);
 
         ent = findradius(ab_origin, abrange);
         while (ent)
@@ -943,6 +952,14 @@ void () UseAirBlastV2 = {
             }  
 
             ent = ent.chain;
+        }
+
+        entity te = find(world, classname, "player")
+        while (te)
+        {
+            msg_entity = te;
+            pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+            te = find(te, classname, "player");
         }
     }
     else
