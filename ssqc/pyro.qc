@@ -908,14 +908,13 @@ void () UseAirBlastV2 = {
                         case "spike":
                         case "pipebomb":
                             vector targorg = ent.origin;
-                            float pushval = airblastpushmax;
-                                                            
+                            float pushval = airblastpushmax;                          
                             vector delta  = targorg - ab_start;
                             float dist    = vlen(delta);
                             float scale   = airblastpushmax - airblastpushmin;
                             float percent = (abrange - dist) / abrange;
 
-                            if (ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
+                            if (ent.movetype != MOVETYPE_FLY && ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
                             {
                                 setorigin(ent, ent.origin + '0 0 1');
                                 ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
