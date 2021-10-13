@@ -877,6 +877,8 @@ void () UseAirBlastV2 = {
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_diameter = ab_start + aim(self,1000) * abrange;
 
+        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+
         if (isabjump) 
         {
             if (airblastcells > 0 && airblastjumpcells > airblastcells) 
@@ -954,13 +956,6 @@ void () UseAirBlastV2 = {
             ent = ent.chain;
         }
 
-        entity te = find(world, classname, "player")
-        while (te)
-        {
-            msg_entity = te;
-            pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
-            te = find(te, classname, "player");
-        }
     }
     else
     {
