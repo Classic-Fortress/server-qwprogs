@@ -264,6 +264,7 @@ void () worldspawn = {
     precache_model2("progs/detpack2.mdl");
     precache_model2("progs/grenade3.mdl");
     precache_model2(MODEL_PROJ_DIAM2);
+    precache_model2(MODEL_SPIKE_SCAN);
     precache_sound("grentimer.wav");
     precache_sound("buttons/switch04.wav");
     precache_sound("boss1/out1.wav");

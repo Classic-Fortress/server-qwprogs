@@ -74,7 +74,6 @@ void () UseSpecialSkill = {
                 {
                     UseAirBlast();
                 }
-                
                 Status_Refresh(self);
             break;
         case PC_SPY:

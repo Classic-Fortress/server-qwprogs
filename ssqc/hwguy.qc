@@ -83,16 +83,15 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 
 	newmis.solid = SOLID_BBOX;
 	newmis.touch = AssCanBulletTouch;
-	
-	
-        if (asscanrange > 0) {
-            num = (1 / proj_speed) * asscanrange;
-            newmis.think = AssCanBulletThink;
-            newmis.nextthink = time + num;                  // Projectile range / gravity
-        } else {
-            newmis.think = SUB_Remove;
-            newmis.nextthink = time + 5;	            // Stop projectile going forever
-        }
+
+  if (asscanrange > 0) {
+      num = (1 / proj_speed) * asscanrange;
+      newmis.think = AssCanBulletThink;
+      newmis.nextthink = time + num;      // Projectile range / gravity
+  } else {
+      newmis.think = SUB_Remove;
+      newmis.nextthink = time + 5;	      // Stop projectile going forever
+  }
 
 	newmis.mdl = MODEL_PROJ_DIAM2;
 	FO_SetModel(newmis, newmis.mdl);				// Diamond model
@@ -106,6 +105,10 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	setorigin (newmis, org);					// Move to starting position
 
 	newmis.avelocity = vecrand(100, 200, FALSE);
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis, proj_speed);
+    }
 }
 
 void FireAssCan (float shotcount, vector dir, vector spread)
