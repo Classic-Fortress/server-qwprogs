@@ -575,6 +575,10 @@ float asscanrangedie;
 float airblastv2;
 float airblastpushmin;
 float airblastpushmax;
+float airblastjump;
+float airblastsize;
+float airblastcells;
+float airblastjumpcells;
 
 float old_spanner;
 float old_dispenser;
