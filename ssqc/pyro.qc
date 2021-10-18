@@ -730,7 +730,7 @@ void () W_FireIncendiaryCannon = {
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
     if (project_weapons) {
-        AL_ProjectProjectile(newmis, pyro_type == PYRO_FO ? PC_PYRO_NEW_PROJSPEED : PC_PYRO_OLD_PROJSPEED);
+        AL_ProjectProjectile(newmis);
     }
 };
 

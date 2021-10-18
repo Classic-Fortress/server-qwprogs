@@ -110,7 +110,7 @@ void LaunchAssCan(vector org, vector dir, float proj_speed)
 	newmis.avelocity = vecrand(100, 200, FALSE);
 
     if (project_weapons) {
-        AL_ProjectProjectile(newmis, proj_speed);
+        AL_ProjectProjectile(newmis);
     }
 }
 

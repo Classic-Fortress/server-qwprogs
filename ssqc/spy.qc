@@ -1327,7 +1327,7 @@ void () W_FireTranq = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
     if (project_weapons) {
-        AL_ProjectProjectile(newmis, PC_SPY_TRANQSPEED);
+        AL_ProjectProjectile(newmis);
     }
 };
 
