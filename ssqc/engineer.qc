@@ -110,7 +110,7 @@ void () W_FireLaser = {
     newmis.classname = "railslug";
 
     if (project_weapons) {
-        AL_ProjectProjectile(newmis, PC_ENGINEER_RAILSPEED);
+        AL_ProjectProjectile(newmis);
     }
 };
 

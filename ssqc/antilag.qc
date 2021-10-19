@@ -1,20 +1,19 @@
-void AL_ProjectProjectile (entity projectile, float velocity) {
-      // Project projectiles player ping forward in time based on ping up to a maximum of 150ms      
+void AL_ProjectProjectile (entity projectile) {
+      // Project projectiles forward in time based on ping up to configurable maximum (default 100ms).    
       // Effective projection time is 75ms, because we assume RTT is evenly distributed in both
       // directions - and we want the server to spawn the entity in the position it would have
       // have been if it had received the message (player_ping / 2) ago. 
       local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
-      // Remove 13ms / 1 frame to keep behaviour consistent on low ping
-      player_ping_s = player_ping_s - (0.01298701298); // 1/77
+      
       if (player_ping_s > project_weapons_max_latency) {
           player_ping_s = project_weapons_max_latency;
-      } else if (player_ping_s < 0.0013) {
+      } else if (player_ping_s <= 0.0013) { // Ping 13ms or lower? Don't do anything
           player_ping_s = 0;
       }
               
-      local float rocket_offset = (player_ping_s  / 2) * velocity;
-      local vector projected_origin = newmis.origin + v_forward * (rocket_offset);
-      
+      local float time_offset = (player_ping_s  / 2);
+      local vector projected_origin = newmis.origin + (newmis.velocity * time_offset);
+
       // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
       // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
       // because by tracing between old origin and projected origin we effectively have a single (last) frame 
