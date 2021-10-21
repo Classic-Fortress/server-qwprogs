@@ -905,7 +905,7 @@ void () UseAirBlastV2 = {
         ent = findradius(ab_origin, abrange);
         while (ent)
         {
-            if (ent.movetype != MOVETYPE_NONE && ent != self)
+            if (ent.movetype != MOVETYPE_NONE && ent != self && CanDamage(ent,self))
             {
                 vector diameter_pos     = ab_start + aim(self,500) * vlen(ent.origin - ab_start);
                 float  distfromdiameter = vlen(ent.origin - diameter_pos);
