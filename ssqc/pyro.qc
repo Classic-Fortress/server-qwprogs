@@ -905,7 +905,7 @@ void () UseAirBlastV2 = {
         ent = findradius(ab_origin, abrange);
         while (ent)
         {
-            if (ent.movetype != MOVETYPE_NONE && ent != self)
+            if (ent.movetype != MOVETYPE_NONE && ent != self && CanDamage(ent,self))
             {
                 vector diameter_pos     = ab_start + aim(self,500) * vlen(ent.origin - ab_start);
                 float  distfromdiameter = vlen(ent.origin - diameter_pos);
@@ -949,7 +949,8 @@ void () UseAirBlastV2 = {
                                 {
                                     ent.velocity = '0 0 0';
                                 }
-                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - ab_start);
+                                //self.origin used to avoid downward trajectory
+                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - self.origin);
                             }
                                 
                         break;
