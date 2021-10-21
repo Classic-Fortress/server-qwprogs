@@ -949,7 +949,8 @@ void () UseAirBlastV2 = {
                                 {
                                     ent.velocity = '0 0 0';
                                 }
-                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - ab_start);
+                                //self.origin used to avoid downward trajectory
+                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - self.origin);
                             }
                                 
                         break;
