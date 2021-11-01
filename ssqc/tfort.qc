@@ -658,7 +658,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Pyro max grenades type 2 (napalm)", Role_None.gren2_limits[7], "", PC_PYRO_GRENADE_MAX_2);
     CF_PrintSetting("Spy max grenades type 2 (gas)", Role_None.gren2_limits[8], "", PC_SPY_GRENADE_MAX_2);
     CF_PrintSetting("Engineer max grenades type 2 (emp)", Role_None.gren2_limits[9], "", PC_ENGINEER_GRENADE_MAX_2);
-    
+    CF_PrintSetting("Distance based cuss", distance_based_cuss_duration, "", 1);
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
     sprint(self, PRINT_HIGH, ftos(cussgrentime));
     sprint(self, PRINT_HIGH, " seconds");
