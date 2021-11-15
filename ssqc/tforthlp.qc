@@ -260,6 +260,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
+        TeamFortress_AliasString("voteyes", "cmd voteyes");
+        TeamFortress_AliasString("yes", "cmd voteyes");
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)

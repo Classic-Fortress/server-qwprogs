@@ -1504,8 +1504,10 @@ void (entity p) VoteToEndMap = {
         if(numvoted > (numplayers * vote_threshold)) {
             sound(self, CHAN_AUTO, "boss1/out1.wav", 1, ATTN_NONE);
             bprint(PRINT_HIGH, "\bMap ended by majority vote.\b.\n");
-            vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
-            votemode = 2;
+            if(nextmap == "") {
+                vote_result = FO_GetUserSettingString(world, "vote_map", "votemap", "se2");
+                votemode = 2;
+            }
             execute_changelevel();
         } else {
             sound(self, CHAN_AUTO, "misc/secret.wav", 1, ATTN_NONE);
@@ -1514,6 +1516,35 @@ void (entity p) VoteToEndMap = {
         }
     }
 };
+
+void (entity p) VoteYes = {
+    if(!voting_started) {
+        sprint(p, PRINT_HIGH, "No suggestions so far.\n");
+        return;
+    }
+    if(p.vote_map) {
+        sprint(p, PRINT_HIGH, "You've already voted for (", p.vote_map.netname, ")!\n");
+        return;
+    }
+
+    local entity mc = find(world, classname, "map_candidate");
+    local entity mc2 = world;
+    local float count = 0;
+    while(mc) {
+        if(mc.cnt > 0) {
+            count++;
+            mc2 = mc;
+        }
+        mc = find(mc, classname, "map_candidate");
+    }
+    if(count > 1) {
+        sprint(p, PRINT_HIGH, "There are multiple suggestions. Use 'cmd votemap' to vote!\n");
+        return;
+    }
+    if(count == 1) {
+        VoteForMap(p, mc2.netname);
+    }
+}
 
 entity (float index) Vote_Menu_Map_GetMapCandidate = {
     local float count = 1;

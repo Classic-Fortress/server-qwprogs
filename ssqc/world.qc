@@ -88,6 +88,7 @@ void () worldspawn = {
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
+    vote_started = -1;
     local string st;
 
     lastspawn = world;
@@ -336,10 +337,10 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
-    if(!votemode) {
-        //TODO: make this optional
-        Vote_Check();
-    }
+//    if(!votemode) {
+//        //TODO: make this optional
+//        Vote_Check();
+//    }
 };
 
 entity bodyque_head;

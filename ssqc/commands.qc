@@ -813,6 +813,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
             }
             break;
+        case "voteyes":
+            processedCmd = TRUE;
+            VoteYes(self);
+            break;
         case "captainpick":
             processedCmd = TRUE;
             if(arg2) {

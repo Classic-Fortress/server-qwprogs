@@ -28,6 +28,10 @@ float (string cmd) ConsoleCmd {
             case "vote_removemap":
                 RemoveVoteMap(argv(1));
                 return TRUE;
+            case "nextmap":
+                nextmap = argv(1);
+                bprint(PRINT_HIGH, "Next map set to ", nextmap, "\n");
+                return TRUE;
         }
     } else {
         //MVDSV implementation
