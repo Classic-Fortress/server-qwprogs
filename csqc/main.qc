@@ -30,7 +30,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_hud");
     registercommand("fo_hud_save");
 
-    registercvar(FOCMD_AUTOHOP, "0");
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
 
@@ -72,7 +71,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     player_menu_type = 0;
     is_admin = FALSE;
     grentimer_waiting = FALSE;
-    jump_counter = 0;
     num_mapvotes = 0;
     vote_selected_item = world;
     vote_selected_index = -1;
@@ -318,15 +316,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            jump_counter = jump_counter + 1;
             localcmd("+jump");
             break;
         case "-aux_jump":
-            jump_counter = jump_counter - 1;
-            if (jump_counter <= 0) {
-                jump_counter = 0;
-                localcmd("-jump");
-            }
+            localcmd("-jump");
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -358,22 +351,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    if (cvar(FOCMD_AUTOHOP) == 1 && input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
-        if (pmove_onground) {
-            frames_since_onground = 0;
-        } else {
 
-            // next two frames after leaving ground
-            if (frames_since_onground <= 2) {
-                frames_since_onground = frames_since_onground + 1;
-
-            // third frame after leaving ground
-            } else if (frames_since_onground == 3) {
-                input_buttons &= ~2;
-                frames_since_onground = frames_since_onground + 1;
-            }
-        }
-    }
 }
 
 void CSQC_Shutdown() = {
