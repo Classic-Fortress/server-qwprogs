@@ -3,8 +3,7 @@ void FO_WriteSettings()
     // this overwrites
     float filehandle;
     filehandle = fopen(FO_CONFIG_PATH, FILE_WRITE);
-    string line = FormatCfgString("", FOCMD_AUTOHOP, ftos(cvar(FOCMD_AUTOHOP)));
-    line = FormatCfgString(line, FOCMD_GRENTIMER, ftos(cvar(FOCMD_GRENTIMER)));
+    string line = FormatCfgString("", FOCMD_GRENTIMER, ftos(cvar(FOCMD_GRENTIMER)));
     line = FormatCfgString(line, FOCMD_OLDSCOREBOARD, ftos(cvar(FOCMD_OLDSCOREBOARD)));
     fputs(filehandle, line);
     fclose(filehandle);
@@ -12,7 +11,6 @@ void FO_WriteSettings()
 
 void FO_LoadDefaultSettings()
 {
-    cvar_set(FOCMD_AUTOHOP, "0");
     cvar_set(FOCMD_GRENTIMER, "1");
     cvar_set(FOCMD_OLDSCOREBOARD, "0");
 }
@@ -43,9 +41,6 @@ void FO_LoadSettings()
 
                 switch(field)
                 {
-                    case FOCMD_AUTOHOP:
-                        cvar_set(FOCMD_AUTOHOP, val);
-                        break;
                     case FOCMD_GRENTIMER:
                         cvar_set(FOCMD_GRENTIMER, val);
                         break;
