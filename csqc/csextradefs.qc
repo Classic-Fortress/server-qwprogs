@@ -93,7 +93,6 @@ float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
-float jump_counter;
 float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
@@ -513,7 +512,6 @@ enum {
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
-#define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 #define FOCMD_FTE_HUD "fo_fte_hud"
