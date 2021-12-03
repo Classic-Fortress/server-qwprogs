@@ -245,8 +245,10 @@ void () DecodeLevelParms = {
         if (coop || !deathmatch)
             toggleflags = toggleflags | TFLAG_CLASS_PERSIST;
 
-        nextmap = strzone(mapname);
-
+        if(nextmap == "") {
+            nextmap = strzone(mapname);
+        }
+        
         ent = find(world, classname, "info_tfdetect");
         if (ent != world) {
 
@@ -1149,7 +1151,7 @@ void () execute_changelevel = {
         //    nextmapstring = strcat(vote_result, " \b(voting)\b");
         //}
     }
-    if(vote_result != string_null && vote_result != "") {
+    if(vote_result != string_null && vote_result != "" && vote_result != mapname) {
         nextmapstring = vote_result;
         nextmap = vote_result;
     }
@@ -2149,7 +2151,7 @@ void () NextLevel = {
                 localcmd ("localinfo votemode on\n");
             }
             //changelevel(FO_GetUserSettingString(world, "vote_map", "votemap", "se2"));
-        } else {
+        } else if (nextmap == "" || nextmap == string_null) {
             nextmap = mapname;
         }
     }
