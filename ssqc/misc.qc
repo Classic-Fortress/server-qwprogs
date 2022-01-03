@@ -457,15 +457,23 @@ void () viewthing = {
 };
 
 void () func_wall_use = {
+    if (self.spawnflags & WALL_SOLID_NOT_ON_USE)
+    {
+        self.solid = self.solid ? SOLID_NOT : SOLID_BSP;   
+    }
+    
     if (self.spawnflags & WALL_HIDE_ON_USE)
     {
-        if (self.cnt == self.dimension_seen)
+        if (self.dimension_seen != DMN_INVISIBLE)
         {
+            self.old_dimension_seen = self.dimension_seen;
             self.dimension_seen = DMN_INVISIBLE;
         }
         else
         {
-            self.dimension_seen = self.cnt;
+            float val = self.dimension_seen;
+            self.dimension_seen = self.old_dimension_seen;
+            self.old_dimension_seen = val;
         }
     }
     else
@@ -491,27 +499,34 @@ void () func_wall = {
     {
         self.solid = SOLID_BSP;
     }
+    float team_bit = 0;
     switch (self.team_no)
     {
         case TEAM_BLUE:
-            self.dimension_seen = DMN_TEAMBLUE;
+            team_bit = DMN_TEAMBLUE;
             break;
         case TEAM_RED:
-            self.dimension_seen = DMN_TEAMRED;
+            team_bit = DMN_TEAMRED;
             break;
         case TEAM_YELL:
-            self.dimension_seen = DMN_TEAMYELL;
+            team_bit = DMN_TEAMYELL;
             break;
         case TEAM_GREN:
-            self.dimension_seen = DMN_TEAMGREN;
+            team_bit = DMN_TEAMGREN;
             break;
         default:
             break;
     }
-    self.cnt = self.dimension_seen;
+    self.dimension_seen = self.dimension_seen | team_bit;
+
+    if (self.dimension_seen & DMN_INVISIBLE)
+        self.old_dimension_seen = DMN_NOFLASH | DMN_FLASH | team_bit;
+    else
+        self.old_dimension_seen = self.dimension_seen | DMN_NOFLASH | DMN_FLASH;
     
+
     setmodel(self, self.model);
-    self.mdl = self.model;
+    //self.mdl = self.model;
 };
 
 void () func_illusionary = {

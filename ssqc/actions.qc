@@ -94,7 +94,7 @@ void () TeamFortress_Discard = {
 		self.ammo_cells = 0;
     }
     W_SetCurrentAmmo(self);
-    FO_Sound(self, CHAN_ITEM, "weapons/lock4.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "weapons/lock4.wav", 1, ATTN_NORM);
     newmis.enemy = self;
     newmis.health = time;
     newmis.weapon = 0;

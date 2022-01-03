@@ -523,6 +523,22 @@ void () DecodeLevelParms = {
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
+	
+        // Scout Scanner spike on / off
+        scoutscanspike = CF_GetSetting("sss", "scoutscanspike", "on");
+
+        // HwGuy Assault Cannon Range default as 0 to disable, and die time once range hit.
+        asscanrange = CF_GetSetting("acr", "asscanrange", "0");
+        asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
+
+        // Pyro Airblast pushval min and max
+        airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
+        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "470");
+        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "600");
+        airblastjump    = CF_GetSetting("abj", "airblastjump", "off");
+        airblastsize    = CF_GetSetting("abs", "airblastsize", "150");
+        airblastcells     = CF_GetSetting("abc", "airblastcells", ftos(PC_PYRO_AIRBLAST_CELLS));
+        airblastjumpcells = CF_GetSetting("abjc", "airblastjumpcells", ftos(PC_PYRO_AIRBLASTJUMP_CELLS));
 
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");
@@ -551,6 +567,9 @@ void () DecodeLevelParms = {
         // concussion grenade effect time [19]
         cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
 
+        // concussion grenade effect time proportional to distance from explosion
+        distance_based_cuss_duration = CF_GetSetting("dbcd", "distance_based_cuss_duration", "off");
+
         // medic immune to concussion grenade effects [on]
         medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
 
@@ -568,6 +587,24 @@ void () DecodeLevelParms = {
 
         // configure max armor of heavy weapons guy [300]
         max_armor_hwguy = CF_GetSetting("mah", "max_armor_hwguy", ftos(PC_HVYWEAP_MAXARMOR));
+        
+        // Scout Scanner spike on / off
+        scoutscanspike = CF_GetSetting("sss", "scoutscanspike", "on");
+        
+        // HwGuy Assault Cannon Range default as 0 to disable, and die time once range hit.
+        asscanrange = CF_GetSetting("acr", "asscanrange", "0");
+        asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
+        
+        // Pyro Airblast pushval min and max
+        airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
+        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
+        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
+
+        // project projectile weapons by player ping
+        project_weapons = CF_GetSetting("pw", "project_weapons", "off");
+
+        // max projection latency (default 100ms)
+        project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -806,6 +843,10 @@ void () DecodeLevelParms = {
             solid_detpack = FALSE;
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
+            scoutscanspike = TRUE;
+            airblastpushmin = 470;
+            airblastpushmax = 600;
+            airblastsize    = 150;
         }
 
         st = infokey(world, "faithful");
@@ -877,6 +918,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
+	          scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
@@ -897,6 +939,8 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             medicaura = FALSE;
             medicnocuss = FALSE;
+            project_weapons = FALSE;
+            distance_based_cuss_duration = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;

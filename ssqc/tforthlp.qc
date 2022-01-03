@@ -191,8 +191,8 @@ void () TeamFortress_MOTD = {
             TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
             TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
         } else {
-            TeamFortress_Alias("primeone_server", TF_GRENADE_1, 0);
-            TeamFortress_Alias("primetwo_server", TF_GRENADE_2, 0);
+            TeamFortress_Alias("prime1_server", TF_GRENADE_1, 0);
+            TeamFortress_Alias("prime2_server", TF_GRENADE_2, 0);
             TeamFortress_Alias("gren1_server", TF_GRENADE_PT_1, 0);
             TeamFortress_Alias("gren2_server", TF_GRENADE_PT_2, 0);
             TeamFortress_AliasString("+gren1", "primeone");

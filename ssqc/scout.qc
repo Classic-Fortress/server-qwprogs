@@ -546,6 +546,7 @@ void () TeamFortress_Scan = {
     local float scen;
     local float scfr;
     local float num;
+    local vector scanvec;
     local vector lightningvec;
     local float enemy_detected;
     local float any_detected;
@@ -634,6 +635,53 @@ void () TeamFortress_Scan = {
             WriteCoord(MSG_ONE, lightningvec_x);
             WriteCoord(MSG_ONE, lightningvec_y);
             WriteCoord(MSG_ONE, lightningvec_z + 8);
+            
+            if (scoutscanspike) {
+                scanvec = normalize(list.origin - self.owner.origin); 
+                newmis = spawn();
+                newmis.owner = self.owner;
+                newmis.enemy = self.owner;
+                newmis.movetype = MOVETYPE_NOCLIP;
+                newmis.solid = SOLID_NOT;
+
+                FO_SetModel(newmis, "progs/spike.mdl");
+                newmis.traileffectnum = particleeffectnum("spike_scan");
+
+                setsize(newmis, '0 0 0', '0 0 0');
+                setorigin(newmis, self.owner.origin + v_forward * 8);
+
+                switch (self.owner.team_no)
+                {
+                    case TEAM_BLUE:
+                        newmis.dimension_seen = DMN_TEAMBLUE;
+                        break;
+                    case TEAM_RED:
+                        newmis.dimension_seen = DMN_TEAMRED;
+                        break;
+                    case TEAM_YELL:
+                        newmis.dimension_seen = DMN_TEAMYELL;
+                        break;
+                    case TEAM_GREN:
+                        newmis.dimension_seen = DMN_TEAMGREN;
+                        break;
+                    default:
+                        newmis.dimension_seen = DMN_NOFLASH;
+                        break;
+                }
+
+                newmis.velocity = scanvec * 2000;
+                newmis.angles = vectoangles(newmis.velocity);
+                newmis.oldorigin = newmis.velocity;
+
+                //Remove the scan spike when it reaches list.origin
+                newmis.think = SUB_Remove;
+                num = vlen(list.origin - self.owner.origin);
+                num = num / 1000;
+                newmis.nextthink = time + num;
+
+                newmis.touch = SUB_Null;
+                newmis.classname = "scanspike";
+            }
 
             if (self.owner.tf_items_flags & 4) {
                 stuffcmd(self.owner, "play misc/basekey.wav\n");
@@ -760,6 +808,8 @@ void (entity inflictor, entity attacker, float bounce,
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce = {
+    local float actual_cuss_time = cussgrentime;
+    local float distance;    
     local float points;
     local entity head;
     local entity te;
@@ -770,10 +820,23 @@ void (entity inflictor, entity attacker, float bounce,
         if (head != ignore) {
             if (head.takedamage) {
                 org = head.origin + (head.mins + head.maxs) * 0.5;
-                points = 0.5 * vlen(org - inflictor.origin);
+                distance = vlen(org - inflictor.origin);
+                points = 0.5 * distance;
                 if (points < 0)
                     points = 0;
                 points = bounce - points;
+
+                if (distance_based_cuss_duration) {
+                    // Actual cuss time based on distance from max explosion radius
+                    local float fractional_distance = (1 - (distance / (bounce + 40)));
+                    if (fractional_distance <= 1 && fractional_distance > 0.80) {
+                        actual_cuss_time = cussgrentime;
+                    } else if (fractional_distance <= 0.8 && fractional_distance > 0.2) {
+                        actual_cuss_time = rint((1 - fractional_distance) * cussgrentime);
+                    } else {
+                        actual_cuss_time = rint(actual_cuss_time * 0.05);
+                    }
+                }
 
                 if ((head.classname != "building_dispenser")
                     && (head.classname != "building_sentrygun")
@@ -798,6 +861,15 @@ void (entity inflictor, entity attacker, float bounce,
                                 head = head.chain;
                                 continue;
                             }
+                        }
+
+                        if (distance_based_cuss_duration 
+                            && ((head.playerclass == PC_MEDIC) || (head.playerclass == PC_SCOUT))) {
+                            entity speedbump;
+                            speedbump = spawn();
+                            speedbump.think = CussSpeedBump;
+                            speedbump.nextthink = time + 1;
+                            speedbump.owner = head;
                         }
 
                         te = find(world, classname, "timer");
@@ -843,7 +915,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.team_no = attacker.team_no;
                                 te.classname = "timer";
                                 te.owner = head;
-                                te.health = 40 * cussgrentime;
+                                te.health = 40 * actual_cuss_time;
                                 self.owner.is_concussed = 1;
                             }
                         }

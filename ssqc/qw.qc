@@ -563,17 +563,31 @@ float stock_reload;
 float classtips;
 float cussgrentime;
 float medicnocuss;
+float distance_based_cuss_duration;
 float sniperpower;
 float sniperreloadpercent;
 float buildstatus;
 float server_default;
 float server_faithful;
 float server_huetf;
+float scoutscanspike;
+float asscanrange;
+float asscanrangedie;
+float airblastv2;
+float airblastpushmin;
+float airblastpushmax;
+float airblastjump;
+float airblastsize;
+float airblastcells;
+float airblastjumpcells;
 
 float old_spanner;
 float old_dispenser;
 float old_hp_armor;
 float max_armor_hwguy;
+
+float project_weapons;
+float project_weapons_max_latency;
 
 float ng_velocity;
 float ng_damage;
@@ -721,9 +735,20 @@ float canlog;
 
 // flash stuff
 float FO_FlashDimension;
+.float old_dimension_seen;
 
 // allow for default goal state
 .float default_group_no;
+// classes to search for in goal remove, restore etc
+string goal_class_names[7] = {
+    "info_tfgoal",
+    "trigger_teleport",
+    "door",
+    "func_wall",
+    "fo_misc_info",
+    "fo_logic",
+    "fo_math",
+};
 
 .string broadcast_high;
 

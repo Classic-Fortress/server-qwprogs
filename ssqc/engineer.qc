@@ -100,7 +100,7 @@ void () W_FireLaser = {
 
     setorigin(newmis, org + '0 0 16');
 
-    newmis.velocity = vec * 1500;
+    newmis.velocity = vec * PC_ENGINEER_RAILSPEED;
     newmis.angles = vectoangles(newmis.velocity);
     newmis.oldorigin = newmis.velocity;
 
@@ -108,6 +108,10 @@ void () W_FireLaser = {
     newmis.think = SUB_Remove;
     newmis.touch = LaserBolt_Touch;
     newmis.classname = "railslug";
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis);
+    }
 };
 
 void () EMPExplode = {
