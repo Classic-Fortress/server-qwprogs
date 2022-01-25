@@ -105,8 +105,8 @@ void() CSQC_Parse_Event = {
                 AddGrenTimer(grentype);
             }
             if(timertype == 1) {
-                localcmd("play grentimer.wav\n");
-            } 
+                localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
+            }
             break;
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
