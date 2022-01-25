@@ -728,6 +728,10 @@ void () W_FireIncendiaryCannon = {
     FO_SetModel(newmis, rktmdl);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+
+    if (project_weapons) {
+        AL_ProjectProjectile(newmis);
+    }
 };
 
 void () TeamFortress_IncendiaryCannon = {
@@ -839,6 +843,125 @@ void () UseAirBlast = {
             
             ent = ent.chain;
         }
+    }
+    else
+    {
+        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
+    }
+};
+
+void () UseAirBlastV2 = {
+    float isabjump = airblastjump && self.v_angle_x > 60;
+
+    if (self.ammo_cells < airblastcells)
+    {
+        sprint(self, PRINT_HIGH, "Not enough cells to Airblast\n");
+    }
+    else if (isabjump && airblastcells > 0 && self.ammo_cells < airblastjumpcells)
+    {
+        sprint(self, PRINT_HIGH, "Not enough cells to Airblast jump\n");
+    }
+    else if (self.special_cooldown < time)
+    {
+        float cellcost = airblastcells;
+
+        self.airblast_cooldown = 1;
+        self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        entity timer = spawn();
+        timer.owner = self;
+        timer.classname = "timer";
+        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
+        timer.think = AirBlastReloadFinished;
+
+        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
+        makevectors(self.v_angle);
+        entity ent;
+
+        float  abrange = PC_PYRO_AIRBLAST_RANGE / 2;
+        vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
+        vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
+        vector ab_diameter = ab_start + aim(self,1000) * abrange;
+
+        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+
+        if (isabjump) 
+        {
+            if (airblastcells > 0 && airblastjumpcells > airblastcells) 
+            {
+                cellcost = cellcost + airblastjumpcells - airblastcells; 
+            }
+
+            if ((airblastjump == 1 || airblastjump == 3) && self.flags & FL_ONGROUND)
+                self.velocity_z = 490;
+            else if (airblastjump == 1 || airblastjump == 2)
+            {
+                self.velocity_z = self.velocity_z + 260;
+            }
+        }
+
+        self.ammo_cells = self.ammo_cells - cellcost;
+        W_SetCurrentAmmo(self);
+
+        ent = findradius(ab_origin, abrange);
+        while (ent)
+        {
+            if (ent.movetype != MOVETYPE_NONE && ent != self && CanDamage(ent,self))
+            {
+                vector diameter_pos     = ab_start + aim(self,500) * vlen(ent.origin - ab_start);
+                float  distfromdiameter = vlen(ent.origin - diameter_pos);
+
+                if (distfromdiameter <= airblastsize / 2 && ent != self)
+                {   
+                    switch (ent.classname)
+                    {
+                        case "player":
+                        case "pyro_rocket":
+                        case "flamerflame":
+                        case "proj_tranq":
+                        case "proj_bullet":
+                        case "proj_rocket":
+                        case "grenade":
+                        case "spike":
+                        case "pipebomb":
+                            vector targorg = ent.origin;
+                            float pushval = airblastpushmax;                          
+                            vector delta  = targorg - ab_start;
+                            float dist    = vlen(delta);
+                            float scale   = airblastpushmax - airblastpushmin;
+                            float percent = (abrange - dist) / abrange;
+
+                            if (ent.movetype != MOVETYPE_FLY && ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
+                            {
+                                setorigin(ent, ent.origin + '0 0 1');
+                                ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
+                            }
+                            else if (ent.movetype == MOVETYPE_FLYMISSILE) // return missle at same speed in where aiming
+                            {
+                                ent.velocity = vlen(ent.velocity) * aim(self,1000);
+                            } 
+                            else // All other trajectory is based on ab -> ent and velocity via pushval
+                            {
+                                if      (percent <= 0.05) { pushval = airblastpushmin; }
+                                else if (percent >= 0.50) { pushval = airblastpushmax; }
+                                else                      { pushval = airblastpushmin + scale * percent; }
+                                
+                                if (ent.owner != self) 
+                                {
+                                    ent.velocity = '0 0 0';
+                                }
+                                //self.origin used to avoid downward trajectory
+                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - self.origin);
+                            }
+                                
+                        break;
+                        
+                    }     
+                }
+            }  
+
+            ent = ent.chain;
+        }
+
     }
     else
     {

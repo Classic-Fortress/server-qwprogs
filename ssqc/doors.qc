@@ -28,7 +28,7 @@ void () door_blocked = {
 
 void () door_hit_top = {
     FO_Sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
-    self.state = 0;
+    self.state = STATE_TOP;
     if (self.spawnflags & 32)
         return;
 
@@ -39,7 +39,7 @@ void () door_hit_top = {
 void () door_hit_bottom = {
     self.goal_state = 2;
     FO_Sound(self, CHAN_VOICE, self.noise1, 1, ATTN_NORM);
-    self.state = 1;
+    self.state = STATE_BOTTOM;
 };
 
 void () door_go_down_silent = {
@@ -427,7 +427,7 @@ void () func_door = {
         self.pos2 = self.pos1;
         self.pos1 = self.origin;
     }
-    self.state = 1;
+    self.state = STATE_BOTTOM;
     if (self.health) {
         self.takedamage = 1;
         self.th_die = door_killed;

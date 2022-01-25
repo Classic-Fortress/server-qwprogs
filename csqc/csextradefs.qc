@@ -89,10 +89,10 @@ float nailgren_type;
 float prematch;
 float round_active;
 float round_over;
+float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float grentimer_waiting; //grenade primed, but not thrown
-float jump_counter;
 float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
@@ -114,7 +114,7 @@ string vote_list_filter;
 
 float(string) GetDrawPanel;
 void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text, string icon) Hud_DrawHudOptionsPanel;
+void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
 void (string id, float playerclass) Hud_DrawClassInfoPanel;
 void (string panelid) Hud_DrawFlagStatusBar;
 void (string panelid) Hud_DrawTeamScorePanel;
@@ -182,7 +182,7 @@ typedef struct
     string icon;
 } FO_Hud_Icons;
 
-FO_Hud_Icons HudIcons[37] = {
+FO_Hud_Icons HudIcons2[37] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -218,8 +218,8 @@ FO_Hud_Icons HudIcons[37] = {
     {ICON_FLAG_RED},
     {ICON_FLAG_YELLOW},
     {ICON_FLAG_GREEN},
-    {"textures/wad/num_percent.png"},
-    {"textures/wad/anum_percent.png"}
+    {"textures/wad/num_percent"},
+    {"textures/wad/anum_percent"}
 };
 
 FO_Hud_Icons GrenadeIcons[12] = {
@@ -237,14 +237,46 @@ FO_Hud_Icons GrenadeIcons[12] = {
     {ICON_GREN_BLAST},
 };
 
+FO_Hud_Icons FaceIcons[] = {
+    //normal
+    {"textures/wad/face1"},
+    {"textures/wad/face2"},
+    {"textures/wad/face3"},
+    {"textures/wad/face4"},
+    {"textures/wad/face5"},
+    //pain
+    {"textures/wad/face_p1"},
+    {"textures/wad/face_p2"},
+    {"textures/wad/face_p3"},
+    {"textures/wad/face_p4"},
+    {"textures/wad/face_p5"},
+};
+
+FO_Hud_Icons FaceInvisibleIcon = {"textures/wad/face_invis"};
+FO_Hud_Icons FaceInvisibleInvulnerableIcon = {"textures/wad/face_inv2"};
+FO_Hud_Icons FaceInvulnerableIcon = {"textures/wad/face_invul2"};
+FO_Hud_Icons FaceQuadIcon = {"textures/wad/face_quad"};
+
+FO_Hud_Icons ArmourIcons[] = {
+    {"textures/wad/disc"},
+    {"textures/wad/sb_armor1"},
+    {"textures/wad/sb_armor2"},
+    {"textures/wad/sb_armor3"},
+};
+FO_Hud_Icons AmmoIcons[] = {
+    {"textures/wad/sb_shells"},
+    {"textures/wad/sb_nails"},
+    {"textures/wad/sb_rocket"},
+    {"textures/wad/sb_cells"},
+};
+
+
 typedef struct {
     string ClipSize;
     float FragStreak;
     float Caps;
     string Identify;
     float PlayerClass;
-    float Gren1;
-    float Gren2;
     string MOTD;
     string Hint;
     //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch
@@ -380,17 +412,18 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text, string icon) drawPanel;
+    void(string panelid, float display, string text) drawPanel;
     string() getValue;
     float Style;
-    FO_Hud_Icons * Icon;
     float Snap;
     float Status;
     float SnapID;
 } FO_Hud_Panel;
 
+FO_Hud_Panel NullPanel;
 FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
+FO_Hud_Panel* MenuPanel;
 float Editor_SelectedPanel_Index;
 
 typedef struct {
@@ -448,6 +481,7 @@ string FO_ScoreBoardColumns[] = {
 };
 
 enum {
+    HUD_PANEL_HUDOPTIONS,
     HUD_PANEL_CLIPSIZE,
     HUD_PANEL_FRAGSTREAK,
     HUD_PANEL_CAPS,
@@ -465,19 +499,35 @@ enum {
     HUD_PANEL_SHOWSCORES,
     HUD_PANEL_TEAM_SCORE,
     HUD_PANEL_MAP_MENU,
-    HUD_PANEL_HUDOPTIONS,
+    HUD_PANEL_HEALTH,
+    HUD_PANEL_FACE,
+    HUD_PANEL_AMMO,
+    HUD_PANEL_AMMO_ICON,
+    HUD_PANEL_ARMOUR,
+    HUD_PANEL_ARMOUR_ICON,
+    HUD_PANEL_INV_SHELLS,
+    HUD_PANEL_INV_NAILS,
+    HUD_PANEL_INV_ROCKETS,
+    HUD_PANEL_INV_CELLS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
-#define FOCMD_AUTOHOP "fo_autohop"
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_GRENTIMERSOUND "fo_grentimersound"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
+#define FOCMD_FTE_HUD "fo_fte_hud"
 
 float team_no;
 float is_spectator;
 float player_class;
 float is_observer;
+//float health;
+float oldhealth;
+float painfinished;
+vector thisorigin;
+vector lastorigin;
+float nextoriginupdate;
+float speed;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

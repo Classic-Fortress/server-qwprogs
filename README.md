@@ -39,7 +39,6 @@ New features
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
-* CSQC - fo_autohop 0/1 enable bunnyhop assist (use `+aux_jump` to use with rj scripts)
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
@@ -101,6 +100,8 @@ New features
 * localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 1]
 * localinfo round_delay_time : interval time between rounds in quadmode - seconds [default: 30]
 * localinfo max_gren2_soldier : maximum number of active nail/shock grenades (TF 2.8 = 3, OzTF = 1) [default: 3]
+* localinfo distance_based_cuss_duration : on/off - enables cuss duration to be proportional to the distance from the explosion [default: off]
+* lag compensation: see antilag.md for more information
 
 == Removed ===
 * Removed weapon messages for weapons without weapon modes.

@@ -88,6 +88,7 @@ void () worldspawn = {
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
+    vote_started = -1;
     local string st;
 
     lastspawn = world;
@@ -317,6 +318,9 @@ void () worldspawn = {
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
     clientstat(STAT_READY, EV_FLOAT, is_ready);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
+    clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
+    clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
+    clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -359,10 +363,10 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
-    if(!votemode) {
-        //TODO: make this optional
-        Vote_Check();
-    }
+//    if(!votemode) {
+//        //TODO: make this optional
+//        Vote_Check();
+//    }
 };
 
 entity bodyque_head;
@@ -406,7 +410,8 @@ void (entity ent) CopyToBodyQue = {
 void(void() fnc)CheckSpawn = {
     if(fnc)
     {
-        self.dimension_seen = DMN_NOFLASH | DMN_FLASH;
+        if (self.dimension_seen != DMN_INVISIBLE)
+            self.dimension_seen = self.dimension_seen | DMN_NOFLASH | DMN_FLASH;
         //bprint(PRINT_HIGH, strcat("spawning: ", self.classname, "\n"));
         fnc();
     }

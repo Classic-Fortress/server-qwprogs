@@ -149,6 +149,11 @@ void () FO_RoundChange = {
 								self = c;
 								info_player_teamspawn();
 								break;
+							case "plat":
+								if (c.enemy)
+									c.enemy.team_no = c.team_no;
+								break;
+
 						}
 					}
 					c = findfloat(c, group_no, e.switch_team_group_no);

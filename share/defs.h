@@ -926,6 +926,7 @@
 #define PC_SOLDIER_GRENADE_INIT_2	1
 #define PC_SOLDIER_GRENADE_MAX_1	4
 #define PC_SOLDIER_GRENADE_MAX_2	1
+#define PC_SOLDIER_ROCKET_SPEED 	900
 #define PC_SOLDIER_TF_ITEMS		0
 
 // Class Details for DEMOLITION MAN
@@ -1061,8 +1062,10 @@
 #define PC_PYRO_GRENADE_MAX_1		4
 #define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
-#define PC_PYRO_AIRBLAST_RANGE	400
+#define PC_PYRO_AIRBLAST_RANGE	        400
 #define PC_PYRO_AIRBLAST_COOLDOWN	5
+#define PC_PYRO_AIRBLAST_CELLS			55
+#define PC_PYRO_AIRBLASTJUMP_CELLS		75
 #define PC_PYRO_LAVA_LIFETIME	3
 #define PC_PYRO_LAVA_RETICK		1.2
 #define PC_PYRO_FLAMETHROWER_DAM_FO	15
@@ -1076,7 +1079,8 @@
 #define PC_PYRO_BURN_MULTIPLIER_ORIG	.3
 #define PC_PYRO_BURN_MULTIPLIER_FO		1
 #define PC_PYRO_BURN_DAMAGE_AMP			1.2
-
+#define PC_PYRO_OLD_PROJSPEED			600
+#define PC_PYRO_NEW_PROJSPEED			800
 
 // pyro types
 #define PYRO_ORIGINAL	0
@@ -1114,6 +1118,7 @@
 #define PC_SPY_CELL_REGEN_AMOUNT	1
 #define PC_SPY_CELL_USAGE		3	// Amount of cells spent while invisible
 #define PC_SPY_GO_UNDERCOVER_TIME	4	// Time it takes to go undercover
+#define PC_SPY_TRANQSPEED			1500
 
 // Class Details for ENGINEER
 #define PC_ENGINEER_SKIN		22	// Not used anymore
@@ -1143,6 +1148,7 @@
 #define PC_ENGINEER_GRENADE_MAX_2	4
 #define PC_ENGINEER_TF_ITEMS		0
 #define PC_ENGINEER_GRENADE_TYPE_2_RANGE	240
+#define PC_ENGINEER_RAILSPEED		1500
 
 // Class Details for CIVILIAN
 #define PC_CIVILIAN_SKIN		22
@@ -1251,6 +1257,11 @@
 // spawnflags
 #define TFGI_NOGLOW	1 // stop the automatic glow applied in fortressone to goals with a .mdl set based on team
 #define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
+
+// spawnflags - fo_misc_info
+#define TFGI_NOGLOW	1 // we reuse some tfgi functions, so keep this spawnflag
+#define TFGI_CB_IGNORE	2 // Allow this goal to work even in clan battle/quadmode prematch
+#define FO_MISC_INFO_NO_Z_TEST	4 // Draw this "through" walls - fake it in ez, csqc do it locally
 
 /*======================================================================*/
 /* Flamethrower								*/
@@ -1404,6 +1415,16 @@
 #define FO_HUD_READY_NAME "Ready Status"
 #define FO_HUD_SHOWSCORES_NAME "Show Scores"
 #define FO_HUD_MAP_MENU_NAME "Map Menu"
+#define FO_HUD_HEALTH_NAME "Health"
+#define FO_HUD_FACE_NAME "Face"
+#define FO_HUD_AMMO_NAME "Ammo"
+#define FO_HUD_AMMO_ICON_NAME "Ammo Icon"
+#define FO_HUD_ARMOUR_NAME "Armour"
+#define FO_HUD_ARMOUR_ICON_NAME "Armour Icon"
+#define FO_HUD_INV_SHELLS_NAME "Shells"
+#define FO_HUD_INV_NAILS_NAME "Nails"
+#define FO_HUD_INV_ROCKETS_NAME "Rockets"
+#define FO_HUD_INV_CELLS_NAME "Cells"
 #define FO_HUD_TEAM_SCORE_NAME "Team Score"
 
 
@@ -1449,6 +1470,11 @@
 #define STAT_TEAMNO    33
 #define STAT_READY     34
 #define STAT_CLASS     35
+#define STAT_VELOCITY_X  36
+#define STAT_VELOCITY_Y  37
+#define STAT_VELOCITY_Z  38
+#define STAT_NO_GREN1		39
+#define STAT_NO_GREN2		40
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
@@ -1471,6 +1497,7 @@
 // func_wall
 #define WALL_SOLID_NOT	1
 #define WALL_HIDE_ON_USE	2
+#define WALL_SOLID_NOT_ON_USE 4
 
 // teams
 #define TEAM_BLUE	1

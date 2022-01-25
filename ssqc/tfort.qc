@@ -67,7 +67,13 @@ void () UseSpecialSkill = {
             return;
         case PC_PYRO:
             if (pyro_type == PYRO_FO)
-                UseAirBlast();
+                if (airblastv2) {
+                    UseAirBlastV2();
+                }
+                else 
+                {
+                    UseAirBlast();
+                }
                 Status_Refresh(self);
             break;
         case PC_SPY:
@@ -652,7 +658,7 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Pyro max grenades type 2 (napalm)", Role_None.gren2_limits[7], "", PC_PYRO_GRENADE_MAX_2);
     CF_PrintSetting("Spy max grenades type 2 (gas)", Role_None.gren2_limits[8], "", PC_SPY_GRENADE_MAX_2);
     CF_PrintSetting("Engineer max grenades type 2 (emp)", Role_None.gren2_limits[9], "", PC_ENGINEER_GRENADE_MAX_2);
-    
+    CF_PrintSetting("Distance based cuss", distance_based_cuss_duration, "", 1);
     sprint(self, PRINT_HIGH, "Concussion effect lasts ");
     sprint(self, PRINT_HIGH, ftos(cussgrentime));
     sprint(self, PRINT_HIGH, " seconds");
@@ -2696,7 +2702,7 @@ void () TeamFortress_AmmoboxTouch = {
             other.ammo_cells = other.ammo_cells + self.ammo_cells;
             dremove(self);
             bound_other_ammo(other);
-            FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, 1);
+            FO_Sound(other, CHAN_AUTO, "weapons/lock4.wav", 1, 1);
             stuffcmd(other, "bf\n");
             self = other;
             W_SetCurrentAmmo(self);

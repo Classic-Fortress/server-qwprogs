@@ -8,6 +8,18 @@ void (float inp) MOTD_Input = {
     Menu_Team_Input(inp);
 };
 
+void () Quick_Aliases =
+{
+    TeamFortress_AliasString("+quick1", "impulse 1;+attack");
+    TeamFortress_AliasString("-quick1", "-attack");
+    TeamFortress_AliasString("+quick2", "impulse 2;+attack");
+    TeamFortress_AliasString("-quick2", "-attack");
+    TeamFortress_AliasString("+quick3", "impulse 3;+attack");
+    TeamFortress_AliasString("-quick3", "-attack");
+    TeamFortress_AliasString("+quick4", "impulse 4;+attack");
+    TeamFortress_AliasString("-quick4", "-attack");
+};
+
 void () TeamFortress_MOTD = {
     if (votemode) {
         return;
@@ -248,14 +260,9 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias ("notready", TF_PLAYER_NOT_READY, 0);
         TeamFortress_Alias ("nginfo", TF_NAILGREN_INFO, 0); //nailgreninfo
         TeamFortress_AliasString("break", "cmd break");
-        TeamFortress_AliasString("+quick1", "impulse 1;+attack");
-        TeamFortress_AliasString("-quick1", "-attack");
-        TeamFortress_AliasString("+quick2", "impulse 2;+attack");
-        TeamFortress_AliasString("-quick2", "-attack");
-        TeamFortress_AliasString("+quick3", "impulse 3;+attack");
-        TeamFortress_AliasString("-quick3", "-attack");
-        TeamFortress_AliasString("+quick4", "impulse 4;+attack");
-        TeamFortress_AliasString("-quick4", "-attack");
+        TeamFortress_AliasString("voteyes", "cmd voteyes");
+        TeamFortress_AliasString("yes", "cmd voteyes");
+        Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
             Menu_Login();
