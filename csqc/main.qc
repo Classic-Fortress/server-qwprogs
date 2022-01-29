@@ -363,19 +363,32 @@ void CSQC_Shutdown() = {
 }
 
 void PrimeGren(float gren_number) {
+    if !(IsValidToUseGrenades())
+        return;
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        print("No grenades left\n");
+        return;
+    }
+
     ShowGrenadeTimer(gren_number);
     localcmd(strcat("prime", ftos(gren_number), "_server"));
 }
 
 void PrimeOrThrowGren(float gren_number) {
+    if !(IsValidToUseGrenades())
+        return;
+
+    if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
+        print("No grenades left\n");
+        return;
+    }
+
     ShowGrenadeTimer(gren_number);
     localcmd(strcat("gren", ftos(gren_number), "_server"));
 }
 
 void ShowGrenadeTimer(float gren_number) {
-    if !(IsValidToUseGrenades())
-        return;
-
     if (!grentimer_waiting && RemainingGrenades(gren_number)) {
         grentimer_waiting = TRUE;
         localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
