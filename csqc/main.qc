@@ -363,6 +363,14 @@ void CSQC_Shutdown() = {
 }
 
 void PrimeGren(float gren_number) {
+    if !(IsValidToUseGrenades())
+        return;
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        print("No grenades left\n");
+        return;
+    }
+
     ShowGrenadeTimer(gren_number);
     localcmd(strcat("prime", ftos(gren_number), "_server"));
 }
