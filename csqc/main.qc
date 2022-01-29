@@ -119,12 +119,15 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     //stop grentimer on death
     if(getstatf(STAT_HEALTH) <= 0) {
-        //localcmd("stopsound\n");
+        soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
+        soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             FO_Hud_Grentimers[i].grentype = 0;
             FO_Hud_Grentimers[i].expires = 0;
             FO_Hud_Grentimers[i].icon_index = 0;
         }
+
     }
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
@@ -391,7 +394,23 @@ void PrimeOrThrowGren(float gren_number) {
 void ShowGrenadeTimer(float gren_number) {
     if (!grentimer_waiting && RemainingGrenades(gren_number)) {
         grentimer_waiting = TRUE;
-        localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
+
+        local float grentimer_channel;
+        local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
+        local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
+
+        if (chan_gren1_soundtime == -1 ) {
+            grentimer_channel = CHAN_GREN1;
+        } else if (chan_gren2_soundtime == -1 ) {
+            grentimer_channel = CHAN_GREN2;
+        } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
+            grentimer_channel = CHAN_GREN1;
+        } else {
+            grentimer_channel = CHAN_GREN2;
+        }
+
+        localsound(cvar_string(FOCMD_GRENTIMERSOUND), grentimer_channel, 1);
+
         local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
         AddGrenTimer(grentype);
     }

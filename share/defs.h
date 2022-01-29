@@ -173,6 +173,8 @@
 #define CHAN_VOICE	2
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
+#define CHAN_GREN1	5
+#define CHAN_GREN2	6
 #define CHAN_NO_PHS_ADD	8
 
 #define ATTN_NONE	0

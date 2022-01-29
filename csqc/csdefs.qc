@@ -477,6 +477,12 @@ void(entity e, float chan, string samp, float vol, float atten, optional float s
 		if specified, 'speedpct' should normally be around 100 (or =0), 200 for double speed or 50 for half speed.
 		flags&1 means the sound should be sent reliably. */
 
+void(string soundname, optional float channel, optional float volume) localsound = #177; /*
+		Plays a sound... locally... probably best not to call this from ssqc. Also disables reverb. */
+
+float(entity e, float channel, string newsample, float volume, float attenuation, float pitchpct, float flags, float timeoffset) soundupdate = #0:soundupdate; /*
+		Changes the properties of the current sound being played on the given entity channel. newsample may be empty, and will be ignored in this case. timeoffset is relative to the current position (subtract the result of getsoundtime for absolute positions). Negative volume can be used to stop the sound. Return value is a fractional value based upon the number of audio devices that could be updated - test against TRUE rather than non-zero. */
+
 vector(vector v) normalize = #9; /*
 		Shorten or lengthen a direction vector such that it is only one quake unit long. */
 
