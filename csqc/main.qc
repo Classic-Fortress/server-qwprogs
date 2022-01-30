@@ -366,6 +366,11 @@ void CSQC_Shutdown() = {
 }
 
 void PrimeGren(float gren_number) {
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat("gren", ftos(gren_number), "_server"));
+        return;
+    }
+
     if !(IsValidToUseGrenades())
         return;
 
@@ -380,6 +385,11 @@ void PrimeGren(float gren_number) {
 }
 
 void PrimeOrThrowGren(float gren_number) {
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat("gren", ftos(gren_number), "_server"));
+        return;
+    }
+
     if !(IsValidToUseGrenades())
         return;
 
@@ -394,9 +404,6 @@ void PrimeOrThrowGren(float gren_number) {
 }
 
 void ShowGrenadeTimer(float gren_number) {
-    if (grentimer_waiting || !RemainingGrenades(gren_number))
-        return;
-
     grentimer_waiting = TRUE;
 
     local float grentimer_channel;
@@ -429,9 +436,6 @@ float RemainingGrenades(float gren_number) {
 }
 
 float IsValidToUseGrenades() {
-    if (cvar(FOCMD_GRENTIMER) != 2)
-        return FALSE;
-
     if (prematch)
         return FALSE;
 
