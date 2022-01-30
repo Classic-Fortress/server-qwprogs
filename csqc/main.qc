@@ -366,40 +366,38 @@ void CSQC_Shutdown() = {
 }
 
 void PrimeGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(strcat("gren", ftos(gren_number), "_server"));
-        return;
+    if (cvar(FOCMD_GRENTIMER) == 2) {
+        if !(IsValidToUseGrenades())
+            return;
+
+        if (RemainingGrenades(gren_number) <= 0) {
+            localsound("error.wav", CHAN_AUTO, 1);
+            print("No grenades left\n");
+            return;
+        }
+
+        if (!grentimer_waiting)
+            ShowGrenadeTimer(gren_number);
     }
 
-    if !(IsValidToUseGrenades())
-        return;
-
-    if (RemainingGrenades(gren_number) <= 0) {
-        localsound("error.wav", CHAN_AUTO, 1);
-        print("No grenades left\n");
-        return;
-    }
-
-    ShowGrenadeTimer(gren_number);
     localcmd(strcat("prime", ftos(gren_number), "_server"));
 }
 
 void PrimeOrThrowGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(strcat("gren", ftos(gren_number), "_server"));
-        return;
+    if (cvar(FOCMD_GRENTIMER) == 2) {
+        if (!IsValidToUseGrenades())
+            return;
+
+        if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
+            localsound("error.wav", CHAN_AUTO, 1);
+            print("No grenades left\n");
+            return;
+        }
+
+        if (!grentimer_waiting)
+            ShowGrenadeTimer(gren_number);
     }
 
-    if !(IsValidToUseGrenades())
-        return;
-
-    if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
-        localsound("error.wav", CHAN_AUTO, 1);
-        print("No grenades left\n");
-        return;
-    }
-
-    ShowGrenadeTimer(gren_number);
     localcmd(strcat("gren", ftos(gren_number), "_server"));
 }
 
