@@ -370,6 +370,7 @@ void PrimeGren(float gren_number) {
         return;
 
     if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
         print("No grenades left\n");
         return;
     }
@@ -383,6 +384,7 @@ void PrimeOrThrowGren(float gren_number) {
         return;
 
     if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
+        localsound("error.wav", CHAN_AUTO, 1);
         print("No grenades left\n");
         return;
     }
@@ -392,28 +394,29 @@ void PrimeOrThrowGren(float gren_number) {
 }
 
 void ShowGrenadeTimer(float gren_number) {
-    if (!grentimer_waiting && RemainingGrenades(gren_number)) {
-        grentimer_waiting = TRUE;
+    if (grentimer_waiting || !RemainingGrenades(gren_number))
+        return;
 
-        local float grentimer_channel;
-        local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
-        local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
+    grentimer_waiting = TRUE;
 
-        if (chan_gren1_soundtime == -1 ) {
-            grentimer_channel = CHAN_GREN1;
-        } else if (chan_gren2_soundtime == -1 ) {
-            grentimer_channel = CHAN_GREN2;
-        } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
-            grentimer_channel = CHAN_GREN1;
-        } else {
-            grentimer_channel = CHAN_GREN2;
-        }
+    local float grentimer_channel;
+    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
+    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
 
-        localsound(cvar_string(FOCMD_GRENTIMERSOUND), grentimer_channel, 1);
-
-        local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
-        AddGrenTimer(grentype);
+    if (chan_gren1_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN1;
+    } else if (chan_gren2_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN2;
+    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
+        grentimer_channel = CHAN_GREN1;
+    } else {
+        grentimer_channel = CHAN_GREN2;
     }
+
+    localsound(cvar_string(FOCMD_GRENTIMERSOUND), grentimer_channel, 1);
+
+    local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
+    AddGrenTimer(grentype);
 }
 
 float RemainingGrenades(float gren_number) {
