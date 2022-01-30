@@ -29,8 +29,12 @@ float (string cmd) ConsoleCmd {
                 RemoveVoteMap(argv(1));
                 return TRUE;
             case "nextmap":
-                nextmap = argv(1);
-                bprint(PRINT_HIGH, "Next map set to ", nextmap, "\n");
+                if(infokey (world, "nomapcycle")) {
+                    bprint(PRINT_HIGH, "Tried setting next map to ", nextmap, ", but nomapcycle is set.\n");
+                } else {
+                    nextmap = argv(1);
+                    bprint(PRINT_HIGH, "Next map set to ", nextmap, ". Enable nomapcycle to skip.\n");
+                }
                 return TRUE;
         }
     } else {
