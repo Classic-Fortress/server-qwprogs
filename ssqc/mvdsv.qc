@@ -29,8 +29,9 @@ float (string cmd) ConsoleCmd {
                 RemoveVoteMap(argv(1));
                 return TRUE;
             case "nextmap":
-                if(infokey (world, "nomapcycle")) {
-                    bprint(PRINT_HIGH, "Tried setting next map to ", nextmap, ", but nomapcycle is set.\n");
+                bprint(PRINT_HIGH, "Hmm: ", ftos(FO_GetUserSetting (world, "nomapcycle", "nmc", "0")), "\n"); //MEHT
+                if(FO_GetUserSetting (world, "nomapcycle", "nmc", "0")) {
+                    bprint(PRINT_HIGH, "Tried setting next map to ", argv(1), ", but nomapcycle is set.\n");
                 } else {
                     nextmap = argv(1);
                     bprint(PRINT_HIGH, "Next map set to ", nextmap, ". Enable nomapcycle to skip.\n");
