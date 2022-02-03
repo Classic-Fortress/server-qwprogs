@@ -10,6 +10,7 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+void ApplyTransparencyToGrenTimer();
 void PrimeOrThrowGren(float gren_number);
 void PrimeGren(float gren_number);
 void ShowGrenadeTimer(float gren_number);
@@ -383,6 +384,12 @@ void PrimeGren(float gren_number) {
     localcmd(strcat("prime", ftos(gren_number), "_server"));
 }
 
+void ApplyTransparencyToGrenTimer() {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        FO_Hud_Grentimers[i].alpha = 0.3;
+    }
+}
+
 void PrimeOrThrowGren(float gren_number) {
     if (cvar(FOCMD_GRENTIMER) != 2) {
         localcmd(strcat("gren", ftos(gren_number), "_server"));
@@ -393,6 +400,7 @@ void PrimeOrThrowGren(float gren_number) {
         return;
 
     if (grentimer_waiting) {
+        ApplyTransparencyToGrenTimer();
         localcmd(strcat("throwgren"));
         return;
     }

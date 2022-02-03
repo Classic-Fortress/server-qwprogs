@@ -435,6 +435,7 @@ typedef struct {
     float grentype;
     float expires;
     float icon_index;
+    float alpha;
 } FO_Hud_Grentimer;
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];
