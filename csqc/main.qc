@@ -384,21 +384,39 @@ void PrimeGren(float gren_number) {
 }
 
 void PrimeOrThrowGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) == 2) {
-        if (!IsValidToUseGrenades())
-            return;
-
-        if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
-            localsound("error.wav", CHAN_AUTO, 1);
-            print("No grenades left\n");
-            return;
-        }
-
-        if (!grentimer_waiting)
-            ShowGrenadeTimer(gren_number);
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat("gren", ftos(gren_number), "_server"));
+        return;
     }
 
-    localcmd(strcat("gren", ftos(gren_number), "_server"));
+    if (!IsValidToUseGrenades())
+        return;
+
+    if (grentimer_waiting) {
+        localcmd(strcat("throwgren"));
+        return;
+    }
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
+        print("No grenades left\n");
+        return;
+    }
+
+    ShowGrenadeTimer(gren_number);
+
+    local string cmd;
+
+    switch(gren_number) {
+        case 1:
+            cmd = "primeone";
+            break;
+        case 2:
+            cmd = "primetwo";
+            break;
+    }
+
+    localcmd(strcat(cmd));
 }
 
 void ShowGrenadeTimer(float gren_number) {
