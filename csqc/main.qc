@@ -315,10 +315,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            localcmd("+jump");
+            localcmd("+jump\n");
             break;
         case "-aux_jump":
-            localcmd("-jump");
+            localcmd("-jump\n");
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -381,7 +381,7 @@ void PrimeGren(float gren_number) {
             ShowGrenadeTimer(gren_number);
     }
 
-    localcmd(strcat("prime", ftos(gren_number), "_server"));
+    localcmd(strcat("prime", ftos(gren_number), "_server\n"));
 }
 
 void ApplyTransparencyToGrenTimer() {
@@ -392,7 +392,7 @@ void ApplyTransparencyToGrenTimer() {
 
 void PrimeOrThrowGren(float gren_number) {
     if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(strcat("gren", ftos(gren_number), "_server"));
+        localcmd(strcat("gren", ftos(gren_number), "_server\n"));
         return;
     }
 
@@ -401,7 +401,7 @@ void PrimeOrThrowGren(float gren_number) {
 
     if (grentimer_waiting) {
         ApplyTransparencyToGrenTimer();
-        localcmd(strcat("throwgren"));
+        localcmd(strcat("throwgren\n"));
         return;
     }
 
@@ -417,10 +417,10 @@ void PrimeOrThrowGren(float gren_number) {
 
     switch(gren_number) {
         case 1:
-            cmd = "primeone";
+            cmd = "primeone\n";
             break;
         case 2:
-            cmd = "primetwo";
+            cmd = "primetwo\n";
             break;
     }
 
