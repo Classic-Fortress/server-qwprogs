@@ -1525,9 +1525,9 @@ void () ClientKill = {
 
     // players can't suicide again for 10 seconds
     if(!allowpracspawns)
-	self.suicide_time = time + 5 + random() * 5;
-    else 
-	self.suicide_time = time;
+    	self.suicide_time = time + 5 + random() * 5;
+    else
+    	self.suicide_time = time;
 
     if (self.clientkillfree == 1 && !self.has_throwngren && (self.has_changedteam || self.has_changedclass)) {
         TeamFortress_SetupRespawn(FALSE);
