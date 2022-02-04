@@ -10,6 +10,7 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+void ApplyTransparencyToGrenTimer();
 void PrimeOrThrowGren(float gren_number);
 void PrimeGren(float gren_number);
 void ShowGrenadeTimer(float gren_number);
@@ -314,10 +315,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            localcmd("+jump");
+            localcmd("+jump\n");
             break;
         case "-aux_jump":
-            localcmd("-jump");
+            localcmd("-jump\n");
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -380,25 +381,50 @@ void PrimeGren(float gren_number) {
             ShowGrenadeTimer(gren_number);
     }
 
-    localcmd(strcat("prime", ftos(gren_number), "_server"));
+    localcmd(strcat("prime", ftos(gren_number), "_server\n"));
+}
+
+void ApplyTransparencyToGrenTimer() {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        FO_Hud_Grentimers[i].alpha = 0.3;
+    }
 }
 
 void PrimeOrThrowGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) == 2) {
-        if (!IsValidToUseGrenades())
-            return;
-
-        if (RemainingGrenades(gren_number) <= 0 && !grentimer_waiting) {
-            localsound("error.wav", CHAN_AUTO, 1);
-            print("No grenades left\n");
-            return;
-        }
-
-        if (!grentimer_waiting)
-            ShowGrenadeTimer(gren_number);
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat("gren", ftos(gren_number), "_server\n"));
+        return;
     }
 
-    localcmd(strcat("gren", ftos(gren_number), "_server"));
+    if (!IsValidToUseGrenades())
+        return;
+
+    if (grentimer_waiting) {
+        ApplyTransparencyToGrenTimer();
+        localcmd(strcat("throwgren\n"));
+        return;
+    }
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
+        print("No grenades left\n");
+        return;
+    }
+
+    ShowGrenadeTimer(gren_number);
+
+    local string cmd;
+
+    switch(gren_number) {
+        case 1:
+            cmd = "primeone\n";
+            break;
+        case 2:
+            cmd = "primetwo\n";
+            break;
+    }
+
+    localcmd(strcat(cmd));
 }
 
 void ShowGrenadeTimer(float gren_number) {
