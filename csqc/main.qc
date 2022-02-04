@@ -10,6 +10,7 @@ void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
+void ApplyTransparencyToGrenTimer();
 void PrimeOrThrowGren(float gren_number);
 void PrimeGren(float gren_number);
 void ShowGrenadeTimer(float gren_number);
@@ -119,12 +120,15 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     //stop grentimer on death
     if(getstatf(STAT_HEALTH) <= 0) {
-        //localcmd("stopsound\n");
+        soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
+        soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             FO_Hud_Grentimers[i].grentype = 0;
             FO_Hud_Grentimers[i].expires = 0;
             FO_Hud_Grentimers[i].icon_index = 0;
         }
+
     }
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
@@ -311,10 +315,10 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            localcmd("+jump");
+            localcmd("+jump\n");
             break;
         case "-aux_jump":
-            localcmd("-jump");
+            localcmd("-jump\n");
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -363,25 +367,87 @@ void CSQC_Shutdown() = {
 }
 
 void PrimeGren(float gren_number) {
-    ShowGrenadeTimer(gren_number);
-    localcmd(strcat("prime", ftos(gren_number), "_server"));
+    if (cvar(FOCMD_GRENTIMER) == 2) {
+        if !(IsValidToUseGrenades())
+            return;
+
+        if (RemainingGrenades(gren_number) <= 0) {
+            localsound("error.wav", CHAN_AUTO, 1);
+            print("No grenades left\n");
+            return;
+        }
+
+        if (!grentimer_waiting)
+            ShowGrenadeTimer(gren_number);
+    }
+
+    localcmd(strcat("prime", ftos(gren_number), "_server\n"));
+}
+
+void ApplyTransparencyToGrenTimer() {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        FO_Hud_Grentimers[i].alpha = 0.3;
+    }
 }
 
 void PrimeOrThrowGren(float gren_number) {
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat("gren", ftos(gren_number), "_server\n"));
+        return;
+    }
+
+    if (!IsValidToUseGrenades())
+        return;
+
+    if (grentimer_waiting) {
+        ApplyTransparencyToGrenTimer();
+        localcmd(strcat("throwgren\n"));
+        return;
+    }
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
+        print("No grenades left\n");
+        return;
+    }
+
     ShowGrenadeTimer(gren_number);
-    localcmd(strcat("gren", ftos(gren_number), "_server"));
+
+    local string cmd;
+
+    switch(gren_number) {
+        case 1:
+            cmd = "primeone\n";
+            break;
+        case 2:
+            cmd = "primetwo\n";
+            break;
+    }
+
+    localcmd(strcat(cmd));
 }
 
 void ShowGrenadeTimer(float gren_number) {
-    if !(IsValidToUseGrenades())
-        return;
+    grentimer_waiting = TRUE;
 
-    if (!grentimer_waiting && RemainingGrenades(gren_number)) {
-        grentimer_waiting = TRUE;
-        localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
-        local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
-        AddGrenTimer(grentype);
+    local float grentimer_channel;
+    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
+    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
+
+    if (chan_gren1_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN1;
+    } else if (chan_gren2_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN2;
+    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
+        grentimer_channel = CHAN_GREN1;
+    } else {
+        grentimer_channel = CHAN_GREN2;
     }
+
+    localsound(cvar_string(FOCMD_GRENTIMERSOUND), grentimer_channel, 1);
+
+    local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
+    AddGrenTimer(grentype);
 }
 
 float RemainingGrenades(float gren_number) {
@@ -394,9 +460,6 @@ float RemainingGrenades(float gren_number) {
 }
 
 float IsValidToUseGrenades() {
-    if (cvar(FOCMD_GRENTIMER) != 2)
-        return FALSE;
-
     if (prematch)
         return FALSE;
 

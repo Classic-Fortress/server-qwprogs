@@ -2,7 +2,7 @@ float GetTextAlignOffset(float pos, float width, float iconsize, string text, fl
 float fo_to_sui_aligntment(float fo_align);
 vector (FO_Hud_Panel* panel) getPanelPosition;
 vector (FO_Hud_Panel* panel) getPanelFillSize;
-void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string);
+void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string, float);
 void Hud_DrawLMPThreshold(FO_Hud_Panel*, string, float);
 FO_Hud_Panel* getHudPanelPointer(float);
 FO_Hud_Panel* getAnyHudPanelByNamePointer(string);
@@ -11,7 +11,7 @@ float GetGrenTypeForClass(float gren_number, float playerclass);
 void(string panelid, float display, string text) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
     {
-        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_CLIPSIZE);
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_CLIPSIZE, 1);
     }
 };
 
@@ -50,7 +50,7 @@ void(string panelid, float display, string text) drawFlagInfo = {
 void(string panelid, float display, string text, string icon) drawIconPanel = {
     if (display || fo_hud_editor)
     {
-        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, icon);
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, icon, 1);
     }
 };
 
@@ -121,24 +121,28 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
                         FO_Hud_Grentimers[j - 1].grentype = FO_Hud_Grentimers[j].grentype;
                         FO_Hud_Grentimers[j - 1].expires = FO_Hud_Grentimers[j].expires;
                         FO_Hud_Grentimers[j - 1].icon_index = FO_Hud_Grentimers[j].icon_index;
+                        FO_Hud_Grentimers[j - 1].alpha = FO_Hud_Grentimers[j].alpha;
                     }
                         FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].grentype = 0;
                         FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].expires = 0;
                         FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].icon_index = 0;
+                        FO_Hud_Grentimers[FO_Hud_Grentimers.length - 1].alpha = 0;
                     continue;
                 }
+
                 if(i) {
                     panel2.Scale = Scale * 0.8;
                     panel2.TextScale = TextScale * 0.8;
                 }
-                Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon);
+
+                Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon, FO_Hud_Grentimers[i].alpha);
                 panel2.Position = panel2.Position + [0, panel2.FillSize.y * panel2.Scale];
                 timercount++;
             }
         }
     }
     if(fo_hud_editor && (!display || !timercount)) {
-        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_GREN_NORMAL);
+        Hud_DrawPanelLMP(getAnyHudPanelByNamePointer(panelid), text, ICON_GREN_NORMAL, 1);
     }
 };
 

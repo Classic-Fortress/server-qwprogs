@@ -3,6 +3,7 @@ FortressOne Server
 
 New features
 ------
+
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
 * Added ``localinfo nomapcycle 1`` to stop all the confusion.
 * Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
