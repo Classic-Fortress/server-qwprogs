@@ -11,6 +11,7 @@ void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
 void ApplyTransparencyToGrenTimer();
+void ThrowGren();
 void PrimeOrThrowGren(float gren_number);
 void PrimeGren(float gren_number);
 void ShowGrenadeTimer(float gren_number);
@@ -57,6 +58,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("primeone");
     registercommand("primetwo");
+    registercommand("throwgren");
     registercommand("gren1");
     registercommand("gren2");
     registercommand("+aux_jump");
@@ -237,6 +239,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_menu_cancel":
             Menu_Cancel();
             break;
+        case "throwgren":
+            ThrowGren();
+            break;
         case "primeone":
             PrimeGren(1);
             break;
@@ -366,27 +371,47 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
+void ThrowGren() {
+    ApplyTransparencyToGrenTimer();
+    localcmd("throwgren_server\n");
+}
+
 void PrimeGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) == 2) {
-        if !(IsValidToUseGrenades())
-            return;
+    local string cmd;
 
-        if (RemainingGrenades(gren_number) <= 0) {
-            localsound("error.wav", CHAN_AUTO, 1);
-            print("No grenades left\n");
-            return;
-        }
-
-        if (!grentimer_waiting)
-            ShowGrenadeTimer(gren_number);
+    switch(gren_number) {
+        case 1:
+            cmd = "prime1_server\n";
+            break;
+        case 2:
+            cmd = "prime2_server\n";
+            break;
     }
 
-    localcmd(strcat("prime", ftos(gren_number), "_server\n"));
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(cmd);
+        return;
+    }
+
+    if (!IsValidToUseGrenades())
+        return;
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
+        print("No grenades left\n");
+        return;
+    }
+
+    ShowGrenadeTimer(gren_number);
+    localcmd(cmd);
 }
 
 void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        FO_Hud_Grentimers[i].alpha = 0.3;
+    for(float i = FO_Hud_Grentimers.length - 1; i >= 0; i--) {
+        if (FO_Hud_Grentimers[i].grentype != 0) {
+            FO_Hud_Grentimers[i].alpha = 0.3;
+            break;
+        }
     }
 }
 
@@ -401,7 +426,7 @@ void PrimeOrThrowGren(float gren_number) {
 
     if (grentimer_waiting) {
         ApplyTransparencyToGrenTimer();
-        localcmd(strcat("throwgren\n"));
+        localcmd("throwgren_server\n");
         return;
     }
 
@@ -417,14 +442,14 @@ void PrimeOrThrowGren(float gren_number) {
 
     switch(gren_number) {
         case 1:
-            cmd = "primeone\n";
+            cmd = "prime1_server\n";
             break;
         case 2:
-            cmd = "primetwo\n";
+            cmd = "prime2_server\n";
             break;
     }
 
-    localcmd(strcat(cmd));
+    localcmd(cmd);
 }
 
 void ShowGrenadeTimer(float gren_number) {
