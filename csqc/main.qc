@@ -237,6 +237,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_menu_cancel":
             Menu_Cancel();
             break;
+        case "throwgren":
+            ThrowGren();
+            break;
         case "primeone":
             PrimeGren(1);
             break;
@@ -366,27 +369,46 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
+void ThrowGren() {
+    ApplyTransparencyToGrenTimer();
+    localcmd(strcat("throwgren\n"));
+}
+
 void PrimeGren(float gren_number) {
-    if (cvar(FOCMD_GRENTIMER) == 2) {
-        if !(IsValidToUseGrenades())
-            return;
+    local string cmd;
 
-        if (RemainingGrenades(gren_number) <= 0) {
-            localsound("error.wav", CHAN_AUTO, 1);
-            print("No grenades left\n");
-            return;
-        }
-
-        if (!grentimer_waiting)
-            ShowGrenadeTimer(gren_number);
+    switch(gren_number) {
+        case 1:
+            cmd = "primeone\n";
+            break;
+        case 2:
+            cmd = "primetwo\n";
+            break;
     }
 
-    localcmd(strcat("prime", ftos(gren_number), "_server\n"));
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(strcat(cmd));
+        return;
+    }
+
+    if (!IsValidToUseGrenades())
+        return;
+
+    if (RemainingGrenades(gren_number) <= 0) {
+        localsound("error.wav", CHAN_AUTO, 1);
+        print("No grenades left\n");
+        return;
+    }
+
+    ShowGrenadeTimer(gren_number);
+    localcmd(strcat(cmd));
 }
 
 void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        FO_Hud_Grentimers[i].alpha = 0.3;
+    for(float i = FO_Hud_Grentimers.length; i >= 0; i--) {
+        if FO_Hud_Grentimers[i].grentype != 0
+            FO_Hud_Grentimers[i].alpha = 0.3;
+            break;
     }
 }
 
