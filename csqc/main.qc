@@ -381,10 +381,10 @@ void PrimeGren(float gren_number) {
 
     switch(gren_number) {
         case 1:
-            cmd = "primeone\n";
+            cmd = "prime1_server\n";
             break;
         case 2:
-            cmd = "primetwo\n";
+            cmd = "prime2_server\n";
             break;
     }
 
