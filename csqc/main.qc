@@ -83,7 +83,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
-    grentimer_waiting = FALSE;
     num_mapvotes = 0;
     vote_selected_item = world;
     vote_selected_index = -1;
@@ -153,13 +152,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
-
-    //reset grentimer status if all there are no more active grentimers
-    if(grentimer_waiting) {
-        if(FO_Hud_Grentimers[0].grentype == 0) {
-            grentimer_waiting = FALSE;
-        }
-    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -372,8 +364,22 @@ void CSQC_Shutdown() = {
 }
 
 void ThrowGren() {
-    ApplyTransparencyToGrenTimer();
-    localcmd("throwgren_server\n");
+    local string cmd = "throwgren_server\n";
+
+    if (cvar(FOCMD_GRENTIMER) != 2) {
+        localcmd(cmd);
+        return;
+    }
+
+    if (!IsValidToUseGrenades())
+        return;
+
+    local float tfstate = getstatf(STAT_TFSTATE);
+
+    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
+        ApplyTransparencyToGrenTimer();
+        localcmd(cmd);
+    }
 }
 
 void PrimeGren(float gren_number) {
@@ -395,6 +401,12 @@ void PrimeGren(float gren_number) {
 
     if (!IsValidToUseGrenades())
         return;
+
+    local float tfstate = getstatf(STAT_TFSTATE);
+
+    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
+        return;
+    }
 
     if (RemainingGrenades(gren_number) <= 0) {
         localsound("error.wav", CHAN_AUTO, 1);
@@ -424,7 +436,9 @@ void PrimeOrThrowGren(float gren_number) {
     if (!IsValidToUseGrenades())
         return;
 
-    if (grentimer_waiting) {
+    local float tfstate = getstatf(STAT_TFSTATE);
+
+    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
         ApplyTransparencyToGrenTimer();
         localcmd("throwgren_server\n");
         return;
@@ -453,8 +467,6 @@ void PrimeOrThrowGren(float gren_number) {
 }
 
 void ShowGrenadeTimer(float gren_number) {
-    grentimer_waiting = TRUE;
-
     local float grentimer_channel;
     local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
     local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);

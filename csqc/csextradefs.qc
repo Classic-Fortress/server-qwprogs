@@ -92,7 +92,6 @@ float round_over;
 float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
-float grentimer_waiting; //grenade primed, but not thrown
 float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
