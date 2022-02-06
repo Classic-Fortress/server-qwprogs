@@ -11,7 +11,6 @@ void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype);
 void ApplyTransparencyToGrenTimer();
-void ThrowGren();
 void PrimeOrThrowGren(float gren_number);
 void PrimeGren(float gren_number);
 void ShowGrenadeTimer(float gren_number);
@@ -58,7 +57,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("primeone");
     registercommand("primetwo");
-    registercommand("throwgren");
     registercommand("gren1");
     registercommand("gren2");
     registercommand("+aux_jump");
@@ -150,6 +148,10 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
         cs_grenprimed = FALSE;
+    } else {
+        if (!cs_grenprimed) {
+            ApplyTransparencyToGrenTimer();
+        }
     }
 
     renderscene();
@@ -236,9 +238,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
-            break;
-        case "throwgren":
-            ThrowGren();
             break;
         case "primeone":
             PrimeGren(1);
@@ -369,25 +368,6 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
-void ThrowGren() {
-    local string cmd = "throwgren_server\n";
-
-    if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(cmd);
-        return;
-    }
-
-    if (!IsValidToUseGrenades())
-        return;
-
-    local float tfstate = getstatf(STAT_TFSTATE);
-
-    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
-        ApplyTransparencyToGrenTimer();
-        localcmd(cmd);
-    }
-}
-
 void PrimeGren(float gren_number) {
     local string cmd;
 
@@ -444,14 +424,10 @@ void PrimeOrThrowGren(float gren_number) {
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
-        ApplyTransparencyToGrenTimer();
-        localcmd("throwgren_server\n");
+    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING) || cs_grenprimed) {
+        localcmd("throwgren\n");
         return;
     }
-
-    if (cs_grenprimed)
-        return;
 
     if (RemainingGrenades(gren_number) <= 0) {
         localsound("error.wav", CHAN_AUTO, 1);
