@@ -2980,10 +2980,10 @@ void () ImpulseCommands = {
         else if (self.impulse == TF_DROP_AMMO) {
             Menu_Drop();
         }
-        else if (self.impulse == TF_PRACSPAWN_PLACE)
-	    TeamFortress_PlacePracticeSpawn(self);
-        else if (self.impulse == TF_PRACSPAWN_REMOVE)
-	    TeamFortress_RemovePracticeSpawn(self);
+	else if (self.impulse == TF_PRACSPAWN_PLACE)
+		TeamFortress_PlacePracticeSpawn(self);
+	else if (self.impulse == TF_PRACSPAWN_REMOVE)
+		TeamFortress_RemovePracticeSpawn(self);
     }
 
     if (self.impulse == TF_INVENTORY)
