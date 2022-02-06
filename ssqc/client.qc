@@ -1682,7 +1682,7 @@ entity () SelectSpawnPoint =
 {
     if(allowpracspawns && self != world)
     {
-	local entity spot2;
+ 	local entity spot2;
 	spot2 = TeamFortress_GetPracticeSpawn(self);
 	
 	if(spot2 != world)
