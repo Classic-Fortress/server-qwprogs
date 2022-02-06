@@ -995,7 +995,7 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
     }
-    WriteFloat(MSG_MULTICAST, ((pl.tfstate & TFSTATE_GRENPRIMED) == TFSTATE_GRENPRIMED));
+
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 

@@ -270,9 +270,6 @@ void() CSQC_Parse_Event = {
             medic_type = readfloat();
             nailgren_type = readfloat();
             break;
-        case MSG_GRENTHROWN:
-            grentimer_waiting = FALSE;
-            break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
             TeamScore[1] = readfloat();
@@ -400,8 +397,5 @@ void ParseSBAR()
                 SBAR.DispenserHealth = readfloat();
             }
             break;
-    }
-    if(!readfloat()) {
-        grentimer_waiting = FALSE;
     }
 }
