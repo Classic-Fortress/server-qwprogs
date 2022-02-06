@@ -146,6 +146,12 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
+    local float tfstate = getstatf(STAT_TFSTATE);
+
+    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
+        cs_grenprimed = FALSE;
+    }
+
     renderscene();
 
     sui_begin(width, height);
@@ -444,6 +450,9 @@ void PrimeOrThrowGren(float gren_number) {
         return;
     }
 
+    if (cs_grenprimed)
+        return;
+
     if (RemainingGrenades(gren_number) <= 0) {
         localsound("error.wav", CHAN_AUTO, 1);
         print("No grenades left\n");
@@ -467,6 +476,8 @@ void PrimeOrThrowGren(float gren_number) {
 }
 
 void ShowGrenadeTimer(float gren_number) {
+    cs_grenprimed = TRUE;
+
     local float grentimer_channel;
     local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
     local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
