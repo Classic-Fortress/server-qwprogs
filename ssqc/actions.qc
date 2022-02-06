@@ -876,7 +876,7 @@ entity TeamFortress_GetPracticeSpawn(entity e)  =
 			return spt;
 		}
 		spt = find(spt, classname, "practicespawn");
-        } 
+	}
         
         return world;
 };
@@ -894,7 +894,6 @@ void TeamFortress_RemovePracticeSpawn(entity e) =
 	{
 		spawn_tfog(spt.origin);
 		dremove(spt);
-		
 	}
 };
 
@@ -918,8 +917,6 @@ void TeamFortress_PlacePracticeSpawn(entity e) =
 	FO_SetModel(ps, "progs/s_light.spr");
 	sprint(e, PRINT_HIGH, "your practice spawn has been placed @ ", vtos(e.origin),".\n");
 	spawn_tfog(ps.origin);
-		
-	
 };
 
 
