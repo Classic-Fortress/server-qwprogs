@@ -146,14 +146,12 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
+    if (tfstate & TFSTATE_GRENPRIMED)
         cs_grenprimed = FALSE;
-    } else {
-        cs_grenthrown = FALSE;
 
-        if (!cs_grenprimed) {
-            ApplyTransparencyToGrenTimer();
-        }
+    if (tfstate & TFSTATE_GRENTHROWING) {
+        ApplyTransparencyToGrenTimer();
+        cs_grenthrown = FALSE;
     }
 
     renderscene();
@@ -407,8 +405,8 @@ void PrimeGren(float gren_number) {
 }
 
 void ApplyTransparencyToGrenTimer() {
-    for(float i = FO_Hud_Grentimers.length - 1; i >= 0; i--) {
-        if (FO_Hud_Grentimers[i].grentype != 0) {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
             FO_Hud_Grentimers[i].alpha = 0.3;
             break;
         }
@@ -424,9 +422,12 @@ void PrimeOrThrowGren(float gren_number) {
     if (!IsValidToUseGrenades())
         return;
 
+    if (cs_grenprimed && cs_grenthrown)
+        return;
+
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if (!cs_grenthrown && ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING) || cs_grenprimed)) {
+    if (!cs_grenthrown && (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING))) {
         cs_grenthrown = TRUE;
         localcmd("throwgren\n");
         return;
