@@ -149,6 +149,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
         cs_grenprimed = FALSE;
     } else {
+        cs_grenthrown = FALSE;
+
         if (!cs_grenprimed) {
             ApplyTransparencyToGrenTimer();
         }
@@ -424,7 +426,8 @@ void PrimeOrThrowGren(float gren_number) {
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING) || cs_grenprimed) {
+    if (!cs_grenthrown && ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING) || cs_grenprimed)) {
+        cs_grenthrown = TRUE;
         localcmd("throwgren\n");
         return;
     }
