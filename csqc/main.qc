@@ -129,6 +129,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         }
 
     }
+
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -146,12 +147,11 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if (tfstate & TFSTATE_GRENPRIMED)
+    if (tfstate & TFSTATE_GRENPRIMED || tfstate & TFSTATE_GRENTHROWING)
         cs_grenprimed = FALSE;
 
     if (tfstate & TFSTATE_GRENTHROWING) {
         ApplyTransparencyToGrenTimer();
-        cs_grenthrown = FALSE;
     }
 
     renderscene();
@@ -368,6 +368,15 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
+void ApplyTransparencyToGrenTimer() {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
+            FO_Hud_Grentimers[i].alpha = 0.3;
+            break;
+        }
+    }
+}
+
 void PrimeGren(float gren_number) {
     local string cmd;
 
@@ -390,7 +399,7 @@ void PrimeGren(float gren_number) {
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if ((tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING)) {
+    if (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED)) {
         return;
     }
 
@@ -404,31 +413,29 @@ void PrimeGren(float gren_number) {
     localcmd(cmd);
 }
 
-void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
-            FO_Hud_Grentimers[i].alpha = 0.3;
-            break;
-        }
-    }
-}
-
 void PrimeOrThrowGren(float gren_number) {
+    local string cmd;
+
     if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(strcat("gren", ftos(gren_number), "_server\n"));
+        switch(gren_number) {
+            case 1:
+                cmd = "gren1_server\n";
+                break;
+            case 2:
+                cmd = "gren2_server\n";
+                break;
+        }
+
+        localcmd(cmd);
         return;
     }
 
     if (!IsValidToUseGrenades())
         return;
 
-    if (cs_grenprimed && cs_grenthrown)
-        return;
-
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if (!cs_grenthrown && (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED) || (tfstate & TFSTATE_GRENTHROWING))) {
-        cs_grenthrown = TRUE;
+    if (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED)) {
         localcmd("throwgren\n");
         return;
     }
@@ -440,8 +447,6 @@ void PrimeOrThrowGren(float gren_number) {
     }
 
     ShowGrenadeTimer(gren_number);
-
-    local string cmd;
 
     switch(gren_number) {
         case 1:
