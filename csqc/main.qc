@@ -120,7 +120,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     //stop grentimer on death
     if(oldhealth <= 0) {
-        cs_primed = FALSE;
+        cs_grenprimed = FALSE;
 
         soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
         soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
