@@ -117,8 +117,11 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
+
     //stop grentimer on death
-    if(getstatf(STAT_HEALTH) <= 0) {
+    if(oldhealth <= 0) {
+        cs_grenprimed = FALSE;
+
         soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
         soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
 
@@ -129,6 +132,16 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         }
 
     }
+
+    local float tfstate = getstatf(STAT_TFSTATE);
+
+    if (tfstate & TFSTATE_GRENPRIMED || tfstate & TFSTATE_GRENTHROWING)
+        cs_grenprimed = FALSE;
+
+    if (tfstate & TFSTATE_GRENTHROWING) {
+        ApplyTransparencyToGrenTimer();
+    }
+
 
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
@@ -144,15 +157,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //setviewprop(VF_AFOV, cvar("fov”));        //note: fov_x and fov_y control individual axis. afov is general
     //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
-
-    local float tfstate = getstatf(STAT_TFSTATE);
-
-    if (tfstate & TFSTATE_GRENPRIMED || tfstate & TFSTATE_GRENTHROWING)
-        cs_grenprimed = FALSE;
-
-    if (tfstate & TFSTATE_GRENTHROWING) {
-        ApplyTransparencyToGrenTimer();
-    }
 
     renderscene();
 
