@@ -484,13 +484,13 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
     return pos;
 }
 
-void AddGrenTimer(float grentype) {
+void AddGrenTimer(float grentype, float offset) {
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
             FO_Hud_Grentimers[i].grentype = grentype;
             FO_Hud_Grentimers[i].icon_index = grentype;
             FO_Hud_Grentimers[i].alpha = 1;
-            FO_Hud_Grentimers[i].expires = time + 3.8;
+            FO_Hud_Grentimers[i].expires = time + 3.8 - offset;
             break;
         }
     }
