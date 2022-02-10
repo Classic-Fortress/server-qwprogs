@@ -119,6 +119,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
 
     //stop grentimer on death
+    /* printf("oldhealth: %f", oldhealth); */
+
     if(oldhealth <= 0) {
         cs_grenprimed = FALSE;
 
@@ -441,6 +443,7 @@ void PrimeOrThrowGren(float gren_number) {
 
     if (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED)) {
         localcmd("throwgren\n");
+        printf("cs_grenprimed: %f\n", cs_grenprimed);
         return;
     }
 
