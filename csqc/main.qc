@@ -9,11 +9,8 @@ void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string valu
 void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
-void AddGrenTimer(float grentype);
+void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
-void PrimeOrThrowGren(float gren_number);
-void PrimeGren(float gren_number);
-void ShowGrenadeTimer(float gren_number);
 float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
@@ -55,10 +52,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_cancel");
     registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
-    registercommand("primeone");
-    registercommand("primetwo");
-    registercommand("gren1");
-    registercommand("gren2");
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("tracktarget");
@@ -117,13 +110,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
-
     //stop grentimer on death
-    /* printf("oldhealth: %f", oldhealth); */
-
     if(oldhealth <= 0) {
-        cs_grenprimed = FALSE;
-
         soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
         soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
 
@@ -132,18 +120,13 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
             FO_Hud_Grentimers[i].expires = 0;
             FO_Hud_Grentimers[i].icon_index = 0;
         }
-
     }
 
     local float tfstate = getstatf(STAT_TFSTATE);
 
-    if (tfstate & TFSTATE_GRENPRIMED || tfstate & TFSTATE_GRENTHROWING)
-        cs_grenprimed = FALSE;
-
     if (tfstate & TFSTATE_GRENTHROWING) {
         ApplyTransparencyToGrenTimer();
     }
-
 
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
@@ -244,18 +227,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
-            break;
-        case "primeone":
-            PrimeGren(1);
-            break;
-        case "primetwo":
-            PrimeGren(2);
-            break;
-        case "gren1":
-            PrimeOrThrowGren(1);
-            break;
-        case "gren2":
-            PrimeOrThrowGren(2);
             break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
@@ -381,139 +352,4 @@ void ApplyTransparencyToGrenTimer() {
             break;
         }
     }
-}
-
-void PrimeGren(float gren_number) {
-    local string cmd;
-
-    switch(gren_number) {
-        case 1:
-            cmd = "prime1_server\n";
-            break;
-        case 2:
-            cmd = "prime2_server\n";
-            break;
-    }
-
-    if (cvar(FOCMD_GRENTIMER) != 2) {
-        localcmd(cmd);
-        return;
-    }
-
-    if (!IsValidToUseGrenades())
-        return;
-
-    local float tfstate = getstatf(STAT_TFSTATE);
-
-    if (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED)) {
-        return;
-    }
-
-    if (RemainingGrenades(gren_number) <= 0) {
-        localsound("error.wav", CHAN_AUTO, 1);
-        print("No grenades left\n");
-        return;
-    }
-
-    ShowGrenadeTimer(gren_number);
-    localcmd(cmd);
-}
-
-void PrimeOrThrowGren(float gren_number) {
-    local string cmd;
-
-    if (cvar(FOCMD_GRENTIMER) != 2) {
-        switch(gren_number) {
-            case 1:
-                cmd = "gren1_server\n";
-                break;
-            case 2:
-                cmd = "gren2_server\n";
-                break;
-        }
-
-        localcmd(cmd);
-        return;
-    }
-
-    if (!IsValidToUseGrenades())
-        return;
-
-    local float tfstate = getstatf(STAT_TFSTATE);
-
-    if (cs_grenprimed || (tfstate & TFSTATE_GRENPRIMED)) {
-        localcmd("throwgren\n");
-        printf("cs_grenprimed: %f\n", cs_grenprimed);
-        return;
-    }
-
-    if (RemainingGrenades(gren_number) <= 0) {
-        localsound("error.wav", CHAN_AUTO, 1);
-        print("No grenades left\n");
-        return;
-    }
-
-    ShowGrenadeTimer(gren_number);
-
-    switch(gren_number) {
-        case 1:
-            cmd = "prime1_server\n";
-            break;
-        case 2:
-            cmd = "prime2_server\n";
-            break;
-    }
-
-    localcmd(cmd);
-}
-
-void ShowGrenadeTimer(float gren_number) {
-    cs_grenprimed = TRUE;
-
-    local float grentimer_channel;
-    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
-    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
-
-    if (chan_gren1_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN1;
-    } else if (chan_gren2_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN2;
-    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
-        grentimer_channel = CHAN_GREN1;
-    } else {
-        grentimer_channel = CHAN_GREN2;
-    }
-
-    localsound(cvar_string(FOCMD_GRENTIMERSOUND), grentimer_channel, 1);
-
-    local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
-    AddGrenTimer(grentype);
-}
-
-float RemainingGrenades(float gren_number) {
-    switch (gren_number) {
-        case 1:
-            return getstatf(STAT_NO_GREN1);
-        case 2:
-            return getstatf(STAT_NO_GREN2);
-    }
-}
-
-float IsValidToUseGrenades() {
-    if (prematch)
-        return FALSE;
-
-    if (round_over)
-        return FALSE;
-
-    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
-        return FALSE;
-
-    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
-        return FALSE;
-
-    if (getstatf(STAT_HEALTH) <= 0)
-        return FALSE;
-
-    return TRUE;
 }
