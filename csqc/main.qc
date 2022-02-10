@@ -122,12 +122,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         }
     }
 
-    local float tfstate = getstatf(STAT_TFSTATE);
-
-    if (tfstate & TFSTATE_GRENTHROWING) {
-        ApplyTransparencyToGrenTimer();
-    }
-
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
