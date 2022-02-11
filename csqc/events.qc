@@ -105,6 +105,12 @@ void() CSQC_Parse_Event = {
             float timertype = cvar(FOCMD_GRENTIMER);
             ParseGrenPrimed(grentype, timertype);
             break;
+        case MSG_GRENTHROWN:
+            ApplyTransparencyToGrenTimer();
+            break;
+        case MSG_PLAYERDIE:
+            StopGrenTimers();
+            break;
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
             switch (menutype) {
