@@ -445,9 +445,7 @@
 #define TF_ENGINEER_DETSENTRY   79  // Engineer: Detonate sentry gun for Engineer
 #define TF_DISCARD_DROP_AMMO    80
 #define TF_PRACSPAWN_PLACE      81
-#define TF_PRACSPAWN_REMOVE     80
-// unused                       81
-// unused                       82
+#define TF_PRACSPAWN_REMOVE     82
 // unused                       83
 // unused                       84
 // unused                       85
