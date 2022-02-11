@@ -912,6 +912,7 @@ void TeamFortress_PlacePracticeSpawn(entity e) =
 	ps.movetype = MOVETYPE_NONE;
 	ps.solid = SOLID_NOT;
 	ps.classname = "practicespawn";
+	ps.angles = e.angles;
 	setsize(ps, '0 0 0', '0 0 0');
 	setorigin(ps, e.origin + '0 0 8');
 	FO_SetModel(ps, "progs/s_light.spr");
