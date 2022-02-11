@@ -913,6 +913,8 @@ void () GibPlayer = {
 };
 
 void () PlayerDie = {
+    UpdateClientPlayerDie(self);
+
     local float i;
     local entity te;
 
@@ -952,6 +954,7 @@ void () PlayerDie = {
         GibPlayer();
         return;
     }
+
     DeathSound();
     self.angles_x = 0;
     self.angles_z = 0;

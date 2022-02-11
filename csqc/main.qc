@@ -11,6 +11,7 @@ void FO_LoadSettings();
 void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
+void StopGrenTimers();
 float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
@@ -109,18 +110,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //}
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
-
-    //stop grentimer on death
-    if(oldhealth <= 0) {
-        soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
-        soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
-
-        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-            FO_Hud_Grentimers[i].grentype = 0;
-            FO_Hud_Grentimers[i].expires = 0;
-            FO_Hud_Grentimers[i].icon_index = 0;
-        }
-    }
 
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
@@ -345,5 +334,16 @@ void ApplyTransparencyToGrenTimer() {
             FO_Hud_Grentimers[i].alpha = 0.3;
             break;
         }
+    }
+}
+
+void StopGrenTimers() {
+    soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        FO_Hud_Grentimers[i].grentype = 0;
+        FO_Hud_Grentimers[i].expires = 0;
+        FO_Hud_Grentimers[i].icon_index = 0;
     }
 }

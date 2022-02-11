@@ -815,6 +815,15 @@ void UpdateClientGrenadeThrown(entity pl) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
+void UpdateClientPlayerDie(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
 void UpdateClientIDString(entity pl) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
