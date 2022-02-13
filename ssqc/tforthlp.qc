@@ -262,6 +262,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("break", "cmd break");
         TeamFortress_AliasString("voteyes", "cmd voteyes");
         TeamFortress_AliasString("yes", "cmd voteyes");
+        TeamFortress_AliasString("fo_settings_status", "cmd fo_settings_status");
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
