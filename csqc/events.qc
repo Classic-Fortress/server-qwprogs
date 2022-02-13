@@ -1,5 +1,7 @@
 void ParseSBAR();
-void AddGrenTimer(float grentype);
+void ParseGrenPrimed(float grentype, float timertype);
+void AddGrenTimer(float grentype, float offset);
+void PlayGrenTimer(float antilag);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -101,12 +103,13 @@ void() CSQC_Parse_Event = {
         case MSG_GRENPRIMED:
             float grentype = readfloat();
             float timertype = cvar(FOCMD_GRENTIMER);
-            if(timertype != 2) {
-                AddGrenTimer(grentype);
-            }
-            if(timertype == 1) {
-                localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
-            }
+            ParseGrenPrimed(grentype, timertype);
+            break;
+        case MSG_GRENTHROWN:
+            ApplyTransparencyToGrenTimer();
+            break;
+        case MSG_PLAYERDIE:
+            StopGrenTimers();
             break;
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
@@ -270,9 +273,6 @@ void() CSQC_Parse_Event = {
             medic_type = readfloat();
             nailgren_type = readfloat();
             break;
-        case MSG_GRENTHROWN:
-            grentimer_waiting = FALSE;
-            break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
             TeamScore[1] = readfloat();
@@ -304,6 +304,45 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
+    }
+}
+
+void PlayGrenTimer(float offset) {
+    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
+    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
+    local float grentimer_channel;
+
+    if (chan_gren1_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN1;
+    } else if (chan_gren2_soundtime == -1 ) {
+        grentimer_channel = CHAN_GREN2;
+    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
+        grentimer_channel = CHAN_GREN1;
+    } else {
+        grentimer_channel = CHAN_GREN2;
+    }
+
+    local string grentimer_sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    soundupdate(self, grentimer_channel, grentimer_sound, 1, 0, 0, 0, offset);
+}
+
+void ParseGrenPrimed(float grentype, float timertype) {
+    if(timertype == 0) {
+        AddGrenTimer(grentype, 0);
+        return;
+    }
+
+    if(timertype == 1) {
+        PlayGrenTimer(0);
+        AddGrenTimer(grentype, 0);
+        return;
+    }
+
+    if(timertype == 2) {
+        local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
+        PlayGrenTimer(offset);
+        AddGrenTimer(grentype, offset);
+        return;
     }
 }
 
@@ -400,8 +439,5 @@ void ParseSBAR()
                 SBAR.DispenserHealth = readfloat();
             }
             break;
-    }
-    if(!readfloat()) {
-        grentimer_waiting = FALSE;
     }
 }

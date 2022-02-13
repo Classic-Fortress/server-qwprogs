@@ -379,7 +379,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 }
 
 // draws value string using lmps
-void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
+void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_alpha)
 {
     if (!panel || &panel == &NullPanel || (!panel.Display && !fo_hud_editor))
         return;
@@ -401,7 +401,8 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon)
     //vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
     //drawpic(pos, icon, size, '1 1 1', 1, 0);
-    drawpic(pos, icon, scaledFillSize, '1 1 1', 1, 0);
+
+    drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
 
     float len = strlen(val);
     
@@ -483,12 +484,13 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
     return pos;
 }
 
-void AddGrenTimer(float grentype) {
+void AddGrenTimer(float grentype, float offset) {
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
             FO_Hud_Grentimers[i].grentype = grentype;
             FO_Hud_Grentimers[i].icon_index = grentype;
-            FO_Hud_Grentimers[i].expires = time + 3.8;
+            FO_Hud_Grentimers[i].alpha = 1;
+            FO_Hud_Grentimers[i].expires = time + 3.8 - offset;
             break;
         }
     }

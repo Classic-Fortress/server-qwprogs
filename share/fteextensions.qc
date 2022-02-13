@@ -841,6 +841,9 @@ const float CHAN_WEAPON = 1;
 const float CHAN_VOICE = 2;
 const float CHAN_ITEM = 3;
 const float CHAN_BODY = 4;
+const float CHAN_GREN1 = 5;
+const float CHAN_GREN2 = 6;
+
 #endif
 #if defined(QWSSQC)
 const float CHANF_RELIABLE = 8;	/* Only valid if the flags argument is not specified. The sound will be sent reliably, which is important if it is intended to replace looping sounds on doors etc. */

@@ -173,6 +173,8 @@
 #define CHAN_VOICE	2
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
+#define CHAN_GREN1	5
+#define CHAN_GREN2	6
 #define CHAN_NO_PHS_ADD	8
 
 #define ATTN_NONE	0
@@ -442,8 +444,8 @@
 #define TF_ENGINEER_DETDISP     78  // Engineer: Detonate dispenser for Engineer
 #define TF_ENGINEER_DETSENTRY   79  // Engineer: Detonate sentry gun for Engineer
 #define TF_DISCARD_DROP_AMMO    80
-// unused                       81
-// unused                       82
+#define TF_PRACSPAWN_PLACE      81
+#define TF_PRACSPAWN_REMOVE     82
 // unused                       83
 // unused                       84
 // unused                       85
@@ -1473,8 +1475,9 @@
 #define STAT_VELOCITY_X  36
 #define STAT_VELOCITY_Y  37
 #define STAT_VELOCITY_Z  38
-#define STAT_NO_GREN1		39
-#define STAT_NO_GREN2		40
+#define STAT_NO_GREN1	39
+#define STAT_NO_GREN2	40
+#define STAT_TFSTATE	41
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

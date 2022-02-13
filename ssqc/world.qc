@@ -201,6 +201,7 @@ void () worldspawn = {
     precache_model("progs/gib3.mdl");
     precache_model("progs/s_bubble.spr");
     precache_model("progs/s_explod.spr");
+    precache_model("progs/s_light.spr");
     precache_model("progs/v_axe.mdl");
     precache_model("progs/v_tranq.mdl");
     precache_model("progs/v_shot.mdl");
@@ -322,6 +323,7 @@ void () worldspawn = {
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
+    clientstat(STAT_TFSTATE, EV_FLOAT, tfstate);
 
     entity worldspawnent;
     worldspawnent = spawn();
