@@ -277,8 +277,7 @@ void (string cl_pwd) Admin_Check =
     }
 };
 
-void () Admin_Aliases =
-{
+void () Admin_Aliases = {
     TeamFortress_Alias("countplayers", TF_ADMIN_COUNTPLAYERS, 0);
     TeamFortress_Alias("deal", TF_ADMIN_CYCLEDEAL, 0);
     TeamFortress_Alias("kick", TF_ADMIN_KICK, 0);
@@ -294,3 +293,4 @@ void () Admin_Aliases =
     TeamFortress_Alias("readystatus", TF_ADMIN_READYSTATUS, 0);
     stuffcmd(self,"alias ceasefire \"cmd ceasefire\"\n");
 };
+
