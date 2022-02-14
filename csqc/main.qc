@@ -9,10 +9,9 @@ void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string valu
 void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
-void AddGrenTimer(float grentype);
-void PrimeOrThrowGren(float gren_number);
-void PrimeGren(float gren_number);
-void ShowGrenadeTimer(float gren_number);
+void AddGrenTimer(float grentype, float offset);
+void ApplyTransparencyToGrenTimer();
+void StopGrenTimers();
 float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
@@ -54,10 +53,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_cancel");
     registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
-    registercommand("primeone");
-    registercommand("primetwo");
-    registercommand("gren1");
-    registercommand("gren2");
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("tracktarget");
@@ -82,6 +77,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     is_admin = FALSE;
     grentimer_waiting = FALSE;
     jump_counter = 0;
+
     num_mapvotes = 0;
     vote_selected_item = world;
     vote_selected_index = -1;
@@ -118,15 +114,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
-    //stop grentimer on death
-    if(getstatf(STAT_HEALTH) <= 0) {
-        //localcmd("stopsound\n");
-        for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-            FO_Hud_Grentimers[i].grentype = 0;
-            FO_Hud_Grentimers[i].expires = 0;
-            FO_Hud_Grentimers[i].icon_index = 0;
-        }
-    }
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -148,13 +135,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
-
-    //reset grentimer status if all there are no more active grentimers
-    if(grentimer_waiting) {
-        if(FO_Hud_Grentimers[0].grentype == 0) {
-            grentimer_waiting = FALSE;
-        }
-    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -234,18 +214,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_menu_cancel":
             Menu_Cancel();
             break;
-        case "primeone":
-            PrimeGren(1);
-            break;
-        case "primetwo":
-            PrimeGren(2);
-            break;
-        case "gren1":
-            PrimeOrThrowGren(1);
-            break;
-        case "gren2":
-            PrimeOrThrowGren(2);
-            break;
         case "+fo_showscores":
             if (cvar(FOCMD_OLDSCOREBOARD) == 1)
             {
@@ -323,7 +291,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 jump_counter = 0;
                 input_buttons &= ~2;
             }
-            
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -386,55 +353,22 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
-void PrimeGren(float gren_number) {
-    ShowGrenadeTimer(gren_number);
-    localcmd(strcat("prime", ftos(gren_number), "_server"));
-}
-
-void PrimeOrThrowGren(float gren_number) {
-    ShowGrenadeTimer(gren_number);
-    localcmd(strcat("gren", ftos(gren_number), "_server"));
-}
-
-void ShowGrenadeTimer(float gren_number) {
-    if !(IsValidToUseGrenades())
-        return;
-
-    if (!grentimer_waiting && RemainingGrenades(gren_number)) {
-        grentimer_waiting = TRUE;
-        localcmd(sprintf("play %s\n", cvar_string(FOCMD_GRENTIMERSOUND)));
-        local float grentype = GetGrenTypeForClass(gren_number, SBAR.PlayerClass);
-        AddGrenTimer(grentype);
+void ApplyTransparencyToGrenTimer() {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
+            FO_Hud_Grentimers[i].alpha = 0.3;
+            break;
+        }
     }
 }
 
-float RemainingGrenades(float gren_number) {
-    switch (gren_number) {
-        case 1:
-            return getstatf(STAT_NO_GREN1);
-        case 2:
-            return getstatf(STAT_NO_GREN2);
+void StopGrenTimers() {
+    soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        FO_Hud_Grentimers[i].grentype = 0;
+        FO_Hud_Grentimers[i].expires = 0;
+        FO_Hud_Grentimers[i].icon_index = 0;
     }
-}
-
-float IsValidToUseGrenades() {
-    if (cvar(FOCMD_GRENTIMER) != 2)
-        return FALSE;
-
-    if (prematch)
-        return FALSE;
-
-    if (round_over)
-        return FALSE;
-
-    if (SBAR.GameMode && (SBAR.GameMode & GAMEMODE_VOTE))
-        return FALSE;
-
-    if ((SBAR.GameMode & GAMEMODE_QUAD) && !round_active)
-        return FALSE;
-
-    if (getstatf(STAT_HEALTH) <= 0)
-        return FALSE;
-
-    return TRUE;
 }

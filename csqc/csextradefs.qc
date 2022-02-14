@@ -92,7 +92,8 @@ float round_over;
 float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
-float grentimer_waiting; //grenade primed, but not thrown
+float cs_grenprimed;
+float pending_prime_or_throw_command;
 float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
@@ -435,6 +436,7 @@ typedef struct {
     float grentype;
     float expires;
     float icon_index;
+    float alpha;
 } FO_Hud_Grentimer;
 
 FO_Hud_Grentimer FO_Hud_Grentimers[5];

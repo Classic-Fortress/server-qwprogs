@@ -616,6 +616,7 @@ float solid_nailgren;
 float noreturn;
 float nohitsounds;
 float nokeepcells;
+float allowpracspawns;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
@@ -754,3 +755,18 @@ string goal_class_names[7] = {
 
 .float special_cooldown;
 .float airblast_cooldown;
+
+
+// people complain about settings, let's track them
+
+string settings_to_track_list[2] = {
+    "sv_antilag",
+    "project_weapons"
+};
+
+typedef struct setting_t {
+    string setting_name;
+    string value;
+};
+
+setting_t *settings_to_track;

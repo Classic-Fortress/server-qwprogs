@@ -179,25 +179,15 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("reloadnext", TF_RELOAD_NEXT, 0);
     } else if (self.motd == 70) {
         TeamFortress_Alias("grenswitch", TF_GRENADE_SWITCH, 0);
-        TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
         TeamFortress_Alias("-gren1", TF_GRENADE_T, 0);
         TeamFortress_Alias("-gren2", TF_GRENADE_T, 0);
-        //Don't send to fte - these are handled client-side
-        if(!csqcactive) {
-            TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
-            TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
-            TeamFortress_Alias("+gren1", TF_GRENADE_1, 0);
-            TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
-            TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
-            TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
-        } else {
-            TeamFortress_Alias("prime1_server", TF_GRENADE_1, 0);
-            TeamFortress_Alias("prime2_server", TF_GRENADE_2, 0);
-            TeamFortress_Alias("gren1_server", TF_GRENADE_PT_1, 0);
-            TeamFortress_Alias("gren2_server", TF_GRENADE_PT_2, 0);
-            TeamFortress_AliasString("+gren1", "primeone");
-            TeamFortress_AliasString("+gren2", "primetwo");
-        }
+        TeamFortress_Alias("throwgren", TF_GRENADE_T, 0);
+        TeamFortress_Alias("primeone", TF_GRENADE_1, 0);
+        TeamFortress_Alias("primetwo", TF_GRENADE_2, 0);
+        TeamFortress_Alias("+gren1", TF_GRENADE_1, 0);
+        TeamFortress_Alias("+gren2", TF_GRENADE_2, 0);
+        TeamFortress_Alias("gren1", TF_GRENADE_PT_1, 0);
+        TeamFortress_Alias("gren2", TF_GRENADE_PT_2, 0);
     } else if (self.motd == 80) {
         TeamFortress_Alias("dash", TF_DASH, 0);
         TeamFortress_Alias("autoscan", TF_SCAN, 0);
@@ -262,6 +252,9 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("break", "cmd break");
         TeamFortress_AliasString("voteyes", "cmd voteyes");
         TeamFortress_AliasString("yes", "cmd voteyes");
+        TeamFortress_AliasString("fo_settings_status", "cmd fo_settings_status");
+        TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
+        TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
