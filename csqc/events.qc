@@ -1,7 +1,7 @@
 void ParseSBAR();
 void ParseGrenPrimed(float grentype, float timertype);
 void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float antilag);
+void PlayGrenTimer(float offset);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();

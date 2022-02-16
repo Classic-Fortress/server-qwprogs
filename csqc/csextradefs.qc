@@ -93,7 +93,6 @@ float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float cs_grenprimed;
-float pending_prime_or_throw_command;
 float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
