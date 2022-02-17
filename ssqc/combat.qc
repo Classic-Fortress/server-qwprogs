@@ -520,29 +520,27 @@ void (entity targ, entity inflictor, entity attacker, float damage,
         targ.dmg_inflictor = inflictor;
 
     }
-    if (!(T_AttackType & TF_TD_NOMOMENTUM))
-    {
-        if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) &&
-        !(targ.tfstate & TFSTATE_CANT_MOVE)) {
-            if (deathmsg != DMSG_GREN_NAIL) {
-
+    if (!(T_AttackType & TF_TD_NOMOMENTUM)) {
+        if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) && !(targ.tfstate & TFSTATE_CANT_MOVE)) {
+            if (deathmsg != DMSG_GREN_NAIL && deathmsg != DMSG_GREN_SHOCK && deathmsg != DMSG_GREN_BURST) {
                 targ.immune_to_check = time + damage / 20;
-                dir =
-                    targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
+                dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
                 dir = normalize(dir);
-
                 moment = damage;
+
                 if (inflictor.classname == "pyro_rocket" && pyro_type == 1) {
                     moment = damage * 1.25;
+
                     if (attacker == targ) {
                         moment = damage * 1.5;
-                    }
-                    else {
+                    } else {
                         moment = damage * 1.25;
                     }
                 }
+
                 if (targ.playerclass == PC_HVYWEAP) {
                     moment = moment / 4;
+
                     if (damage <= 50)
                         moment = 0;
                 } 

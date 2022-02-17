@@ -487,11 +487,26 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
 void AddGrenTimer(float grentype, float offset) {
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
-            FO_Hud_Grentimers[i].grentype = grentype;
-            FO_Hud_Grentimers[i].icon_index = grentype;
-            FO_Hud_Grentimers[i].alpha = 1;
-            FO_Hud_Grentimers[i].expires = time + 3.8 - offset;
+            StartGrenTimer(i, grentype, offset);
+            local float channel = CHAN_GREN1 + i;
+            PlayGrenTimer(channel, offset);
             break;
         }
     }
+}
+
+void AddSilentGrenTimer(float grentype, float offset) {
+    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
+        if(FO_Hud_Grentimers[i].grentype == 0) {
+            StartGrenTimer(i, grentype, offset);
+            break;
+        }
+    }
+}
+
+void StartGrenTimer(float slot, float grentype, float offset) {
+    FO_Hud_Grentimers[slot].grentype = grentype;
+    FO_Hud_Grentimers[slot].icon_index = grentype;
+    FO_Hud_Grentimers[slot].alpha = 1;
+    FO_Hud_Grentimers[slot].expires = time + 3.8 - offset;
 }

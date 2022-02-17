@@ -111,6 +111,7 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
         panel2.TextScale = panel.TextScale;
         panel2.Display = panel.Display;
         panel2.FillSize = panel.FillSize;
+
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
                 timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;
@@ -136,6 +137,7 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
                 }
 
                 Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon, FO_Hud_Grentimers[i].alpha);
+
                 panel2.Position = panel2.Position + [0, panel2.FillSize.y * panel2.Scale];
                 timercount++;
             }
@@ -1183,3 +1185,4 @@ float GetGrenTypeForClass(float gren_number, float playerclass) {
             }
     }
 }
+

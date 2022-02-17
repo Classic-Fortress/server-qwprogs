@@ -365,6 +365,9 @@ void ApplyTransparencyToGrenTimer() {
 void StopGrenTimers() {
     soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
     soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
 
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         FO_Hud_Grentimers[i].grentype = 0;

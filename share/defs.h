@@ -173,9 +173,12 @@
 #define CHAN_VOICE	2
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
-#define CHAN_GREN1	5
-#define CHAN_GREN2	6
 #define CHAN_NO_PHS_ADD	8
+#define CHAN_GREN1	9
+#define CHAN_GREN2	10
+#define CHAN_GREN3	11
+#define CHAN_GREN4	12
+#define CHAN_GREN5	13
 
 #define ATTN_NONE	0
 #define ATTN_NORM	1
@@ -769,9 +772,11 @@
 #define GR_TYPE_FLASH		9
 #define GR_TYPE_CALTROP		10
 #define GR_TYPE_BLAST	11
+#define GR_TYPE_SHOCK	12
+#define GR_TYPE_BURST	13
 
 // Defines for NailGren Types
-#define NGR_TYPE_DEFAULT	0
+#define NGR_TYPE_NAIL	0
 #define NGR_TYPE_LASER		1
 #define NGR_TYPE_BURST		2
 
@@ -863,7 +868,7 @@
 #define PC_SCOUT_INITAMMO_NAIL		100	// Amount of nail ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_CELL		50 	// Amount of cell ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_ROCKET	0 	// Amount of rocket ammo this class has when respawned
-#define PC_SCOUT_GRENADE_TYPE_1		GR_TYPE_FLASH		//    <- 1st Type of Grenade this class has
+/* #define PC_SCOUT_GRENADE_TYPE_1	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_CONCUSSION	//    <- 2nd Type of Grenade this class has
 #define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
 #define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
@@ -923,7 +928,7 @@
 #define PC_SOLDIER_INITAMMO_CELL	0
 #define PC_SOLDIER_INITAMMO_ROCKET	10
 #define PC_SOLDIER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_SOLDIER_GRENADE_TYPE_2	GR_TYPE_NAIL
+/* #define PC_SOLDIER_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_SOLDIER_GRENADE_INIT_1	4
 #define PC_SOLDIER_GRENADE_INIT_2	1
 #define PC_SOLDIER_GRENADE_MAX_1	4
@@ -986,7 +991,7 @@
 #define PC_MEDIC_INITAMMO_ROCKET	0
 #define PC_MEDIC_INITAMMO_MEDIKIT	50
 #define PC_MEDIC_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_MEDIC_GRENADE_TYPE_2		GR_TYPE_BLAST
+/* #define PC_MEDIC_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		2
 #define PC_MEDIC_GRENADE_MAX_1		4
@@ -1332,6 +1337,8 @@
 #define DMSG_DISPENSER_EXPLODE			39
 #define DMSG_GREN_PIPE_AIR			40
 #define DMSG_GREN_CALTROP			41
+#define DMSG_GREN_SHOCK			42
+#define DMSG_GREN_BURST			43
 
 /*======================================================*/
 /* Menus						*/
@@ -1446,6 +1453,8 @@
 #define ICON_GREN_FLARE "textures/wad/gren_flare.png"
 #define ICON_GREN_CALTROP "textures/wad/gren_caltrop.png"
 #define ICON_GREN_BLAST "textures/wad/gren_blast.png"
+#define ICON_GREN_SHOCK "textures/wad/gren_nail.png"
+#define ICON_GREN_BURST "textures/wad/gren_nail.png"
 #define ICON_SCOUT "textures/wad/scout.png"
 #define ICON_SNIPER "textures/wad/sniper.png"
 #define ICON_SOLDIER "textures/wad/soldier.png"
