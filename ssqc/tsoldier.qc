@@ -3,6 +3,8 @@
 //========================================================
 
 void () NailGrenadeExplode;
+void () ShockGrenadeExplode;
+void () BurstGrenadeExplode;
 void () NailGrenadeNailEm;
 void () NailGrenadeLaunchNail;
 void () NailGrenLaser;
@@ -18,7 +20,61 @@ void () NailGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
+void () ShockGrenadeTouch = {
+    if (other == self.owner)
+        return;
+
+    // If the Shock Grenade hits a player, it just bounces off
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    if (self.velocity == '0 0 0')
+        self.avelocity = '0 0 0';
+};
+
+void () BurstGrenadeTouch = {
+    if (other == self.owner)
+        return;
+
+    // If the Burst Grenade hits a player, it just bounces off
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    if (self.velocity == '0 0 0')
+        self.avelocity = '0 0 0';
+};
+
 void () NailGrenadeExplode = {
+    local entity te;
+
+    self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
+
+    if (self.owner.no_active_nail_grens >= max_active_gren2_soldier) {
+        te = find(world, classname, "grenade");
+
+        while (te) {
+            if ((te.owner == self.owner || te.real_owner == self.owner) && (te.no_active_nail_grens == 1)) {
+                if (!te.owner)
+                    te.owner = te.real_owner;
+
+                te.weapon = 9;
+                te.think = GrenadeExplode;
+                te.nextthink = time + 0.1;
+            }
+
+            te = find(te, classname, "grenade");
+        }
+    }
+
+    self.no_active_nail_grens = self.owner.no_active_nail_grens;
+    self.movetype = MOVETYPE_FLY;
+    setorigin(self, self.origin + '0 0 32');
+
+    if(solid_nailgren)
+        setsize(self, '-1 -1 -1', '1 1 1');
+
+    self.avelocity = '0 500 0';
+    self.nextthink = time + 0.7;
+    self.think = NailGrenadeNailEm;
+};
+
+void () ShockGrenadeExplode = {
     local entity te;
 
     self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
@@ -44,20 +100,38 @@ void () NailGrenadeExplode = {
     }
     self.avelocity = '0 500 0';
     self.nextthink = time + 0.7;
-    if (nailgren_type == NGR_TYPE_LASER)		
-    {
     self.playerclass = 0;
     self.think = NailGrenLaser;
+};
+
+void () BurstGrenadeExplode = {
+    local entity te;
+
+    self.owner.no_active_nail_grens = self.owner.no_active_nail_grens + 1;
+    if (self.owner.no_active_nail_grens >= max_active_gren2_soldier) {
+
+        te = find(world, classname, "grenade");
+        while (te) {
+            if ((te.owner == self.owner || te.real_owner == self.owner) && (te.no_active_nail_grens == 1)) {
+                if (!te.owner)
+                    te.owner = te.real_owner;
+                te.weapon = 9;
+                te.think = GrenadeExplode;
+                te.nextthink = time + 0.1;
+            }
+            te = find(te, classname, "grenade");
+        }
     }
-    else if (nailgren_type == NGR_TYPE_BURST)
-    {	
+    self.no_active_nail_grens = self.owner.no_active_nail_grens;
+    self.movetype = MOVETYPE_FLY;
+    setorigin(self, self.origin + '0 0 32');
+    if(solid_nailgren) {
+        setsize(self, '-1 -1 -1', '1 1 1');
+    }
+    self.avelocity = '0 500 0';
+    self.nextthink = time + 0.7;
     self.playerclass = 0;
     self.think = NailGrenBurst;
-    }
-    else
-    {
-    self.think = NailGrenadeNailEm;
-    }
 };
 
 void () NailGrenadeNailEm = {
@@ -142,7 +216,7 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
 	WriteCoord(MSG_MULTICAST, trace_endpos_z);
 	multicast(trace_endpos, MULTICAST_PVS);
     
-	deathmsg = DMSG_GREN_NAIL;
+	deathmsg = DMSG_GREN_SHOCK;
 	TF_T_Damage(trace_ent, self, self.real_owner, lasergren_damage, TF_TD_NOTTEAM, TF_TD_ELECTRICITY);
 	}
     if (self.t_width < time) {
@@ -157,7 +231,7 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
 	
     if (self.playerclass > lasergren_reqthinks) { 	//not >= to give an extra think so it hits start again
 	self.owner = self.real_owner;
-        self.weapon = DMSG_GREN_NAIL;
+        self.weapon = DMSG_GREN_SHOCK;
         self.think = GrenadeExplode;
     }
 };
@@ -177,11 +251,11 @@ void () NailGrenBurst = {
 	
 	sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
 	
-	deathmsg = DMSG_GREN_NAIL;
+	deathmsg = DMSG_GREN_BURST;
 	launch_spike(self.origin, v_forward);
         newmis.velocity = v_forward * 1000;
         newmis.touch = superspike_touch;
-        newmis.weapon = DMSG_GREN_NAIL;
+        newmis.weapon = DMSG_GREN_BURST;
         newmis.nextthink = time + burstgren_range;
         i++;
         current_yaw = anglemod(self.angles_y + 22.5);
@@ -191,7 +265,7 @@ void () NailGrenBurst = {
 	
     if (self.playerclass >= burstgren_count){
 	self.nextthink = time + 0.1;
-	self.weapon = DMSG_GREN_NAIL;
+	self.weapon = DMSG_GREN_BURST;
         self.think = GrenadeExplode;
 	}
 };
@@ -199,7 +273,7 @@ void () NailGrenBurst = {
 void () TeamFortress_NailGrenInfo = {
     sprint(self,2,Q"\n\snailgren info - num in brackets are default - num shown are to one dec place - updated on map change\s\n");
     sprint(self,2,Q"\n\s----------------------------------------------------------------------------------------------\s\n");
-    sprint(self,2,Q"ngt   nailgren_type           ",ftos(nailgren_type)," (",ftos(NGR_TYPE_DEFAULT),") \s// 0 default, 1 laser, 2 burst \n\n");
+    sprint(self,2,Q"ngt   nailgren_type           ",ftos(nailgren_type)," (",ftos(NGR_TYPE_NAIL),") \s// 0 default, 1 laser, 2 burst \n\n");
     sprint(self,2,Q"lgrc  lasergren_rotationcount ",ftos(lasergren_rotationcount)," (",ftos(NGR_LASER_DEFAULT_ROTATIONCOUNT),") \s// how many rotations to perform\n");
     sprint(self,2,Q"lgrt  lasergren_rotationtime  ",ftos(lasergren_rotationtime)," (",ftos(NGR_LASER_DEFAULT_ROTATIONTIME),") \s// time to complete one rotation\n");
     sprint(self,2,Q"lgr   lasergren_range         ",ftos(lasergren_range)," (",ftos(NGR_LASER_DEFAULT_RANGE),") \s// range\n");

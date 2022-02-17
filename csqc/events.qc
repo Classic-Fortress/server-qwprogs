@@ -271,11 +271,6 @@ void() CSQC_Parse_Event = {
                 round_time_remaining = time + rtr;
             }
             break;
-        case MSG_GRENADESETTINGS:
-            fo_flash = readfloat();
-            medic_type = readfloat();
-            nailgren_type = readfloat();
-            break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
             TeamScore[1] = readfloat();

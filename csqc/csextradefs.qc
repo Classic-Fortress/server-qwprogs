@@ -182,7 +182,7 @@ typedef struct
     string icon;
 } FO_Hud_Icons;
 
-FO_Hud_Icons HudIcons2[37] = {
+FO_Hud_Icons HudIcons2[39] = {
     {ICON_CLIPSIZE},
     {ICON_FRAGSTREAK},
     {ICON_CAPS},
@@ -197,6 +197,8 @@ FO_Hud_Icons HudIcons2[37] = {
     {ICON_GREN_NAPALM},
     {ICON_GREN_CALTROP},
     {ICON_GREN_BLAST},
+    {ICON_GREN_SHOCK},
+    {ICON_GREN_BURST},
     {ICON_IDENTIFY},
     {ICON_SCOUT},
     {ICON_SNIPER},
@@ -222,7 +224,7 @@ FO_Hud_Icons HudIcons2[37] = {
     {"textures/wad/anum_percent"}
 };
 
-FO_Hud_Icons GrenadeIcons[12] = {
+FO_Hud_Icons GrenadeIcons[14] = {
     {ICON_GREN_NONE},
     {ICON_GREN_NORMAL},
     {ICON_GREN_CONCUSSION},
@@ -235,6 +237,8 @@ FO_Hud_Icons GrenadeIcons[12] = {
     {ICON_GREN_FLASH},
     {ICON_GREN_CALTROP},
     {ICON_GREN_BLAST},
+    {ICON_GREN_SHOCK},
+    {ICON_GREN_BURST},
 };
 
 FO_Hud_Icons FaceIcons[] = {

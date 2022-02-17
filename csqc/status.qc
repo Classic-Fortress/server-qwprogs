@@ -137,6 +137,7 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
                 }
 
                 Hud_DrawPanelLMP(&panel2, ftos(timeleft), GrenadeIcons[FO_Hud_Grentimers[i].icon_index].icon, FO_Hud_Grentimers[i].alpha);
+
                 panel2.Position = panel2.Position + [0, panel2.FillSize.y * panel2.Scale];
                 timercount++;
             }
@@ -1184,3 +1185,4 @@ float GetGrenTypeForClass(float gren_number, float playerclass) {
             }
     }
 }
+
