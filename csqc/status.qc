@@ -111,6 +111,7 @@ void(string panelid, float display, string text) drawGrenTimerPanel = {
         panel2.TextScale = panel.TextScale;
         panel2.Display = panel.Display;
         panel2.FillSize = panel.FillSize;
+
         for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
             if(FO_Hud_Grentimers[i].grentype > 0) {
                 timeleft = floor(FO_Hud_Grentimers[i].expires - time) + 1;

@@ -1,7 +1,10 @@
 void ParseSBAR();
 void ParseGrenPrimed(float grentype, float timertype);
 void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float offset);
+void AddSilentGrenTimer(float grentype, float offset);
+void StartGrenTimer(float slot, float grentype, float offset);
+void AddGrenTimer(float grentype, float offset);
+void PlayGrenTimer(float channel, float offset);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -307,40 +310,24 @@ void() CSQC_Parse_Event = {
     }
 }
 
-void PlayGrenTimer(float offset) {
-    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
-    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
-    local float grentimer_channel;
-
-    if (chan_gren1_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN1;
-    } else if (chan_gren2_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN2;
-    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
-        grentimer_channel = CHAN_GREN1;
-    } else {
-        grentimer_channel = CHAN_GREN2;
-    }
-
-    local string grentimer_sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    soundupdate(self, grentimer_channel, grentimer_sound, 1, 0, 0, 0, offset);
+void PlayGrenTimer(float channel, float offset) {
+    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    soundupdate(self, channel, sound, 1, 0, 0, 0, offset);
 }
 
 void ParseGrenPrimed(float grentype, float timertype) {
     if(timertype == 0) {
-        AddGrenTimer(grentype, 0);
+        AddSilentGrenTimer(grentype, 0);
         return;
     }
 
     if(timertype == 1) {
-        PlayGrenTimer(0);
         AddGrenTimer(grentype, 0);
         return;
     }
 
     if(timertype == 2) {
         local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
-        PlayGrenTimer(offset);
         AddGrenTimer(grentype, offset);
         return;
     }
