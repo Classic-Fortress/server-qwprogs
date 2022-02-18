@@ -36,6 +36,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
+    registercvar(FOCMD_GRENTIMERVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 

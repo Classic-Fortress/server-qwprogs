@@ -325,8 +325,8 @@ void PlayGrenTimer(float offset) {
     }
 
     local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    localsound(sound, channel, 1); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, sound, 1, 0, 0, 0, offset);
+    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
+    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
 void ParseGrenPrimed(float grentype, float timertype) {
