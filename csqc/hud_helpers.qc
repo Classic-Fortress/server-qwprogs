@@ -485,6 +485,9 @@ vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, ve
 }
 
 void AddGrenTimer(float grentype, float offset) {
+    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
+        return;
+
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
             StartGrenTimer(i, grentype, offset);
