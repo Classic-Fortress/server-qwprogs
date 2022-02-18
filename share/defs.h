@@ -1486,7 +1486,8 @@
 #define STAT_VELOCITY_Z  38
 #define STAT_NO_GREN1	39
 #define STAT_NO_GREN2	40
-#define STAT_TFSTATE	41
+#define STAT_TP_GREN1	41
+#define STAT_TP_GREN2	42
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

@@ -12,7 +12,6 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
-float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
 void GetSelf() = {
