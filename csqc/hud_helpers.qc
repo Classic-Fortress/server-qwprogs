@@ -488,8 +488,7 @@ void AddGrenTimer(float grentype, float offset) {
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         if(FO_Hud_Grentimers[i].grentype == 0) {
             StartGrenTimer(i, grentype, offset);
-            local float channel = CHAN_GREN1 + i;
-            PlayGrenTimer(channel, offset);
+            PlayGrenTimer(offset);
             break;
         }
     }

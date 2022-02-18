@@ -4,7 +4,7 @@ void AddGrenTimer(float grentype, float offset);
 void AddSilentGrenTimer(float grentype, float offset);
 void StartGrenTimer(float slot, float grentype, float offset);
 void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float channel, float offset);
+void PlayGrenTimer(float offset);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -305,8 +305,27 @@ void() CSQC_Parse_Event = {
     }
 }
 
-void PlayGrenTimer(float channel, float offset) {
+void PlayGrenTimer(float offset) {
+    local float channel;
+    local float soundtime;
+    local float highest_soundtime;
+
+    for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
+        soundtime = getsoundtime(self, i);
+
+        if (soundtime < 0) {
+            channel = i;
+            break;
+        }
+
+        if (soundtime > highest_soundtime) {
+            highest_soundtime = soundtime;
+            channel = i;
+        }
+    }
+
     local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    localsound(sound, channel, 1); // required because soundupdate doesn't reset getsoundtime
     soundupdate(self, channel, sound, 1, 0, 0, 0, offset);
 }
 
