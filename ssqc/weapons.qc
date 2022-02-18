@@ -1920,9 +1920,8 @@ float (float weap) CheckForAmmo = {
         if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
             return 1;
     } else if (weap == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > self.reload_assault_cannon)
+        if (fo_hwguy) {
+            if (self.reload_assault_cannon >= 1 && self.ammo_shells > self.reload_assault_cannon)
                 return 1;
         }
     }
