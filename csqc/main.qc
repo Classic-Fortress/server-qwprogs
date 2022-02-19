@@ -82,6 +82,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
     MouseDown = 0;
+    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -277,10 +278,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
+            jump_counter = jump_counter + 1;
             localcmd("+jump\n");
             break;
         case "-aux_jump":
-            localcmd("-jump\n");
+            jump_counter = jump_counter - 1;
+            if (jump_counter <= 0) {
+                jump_counter = 0;
+                localcmd("-jump\n");
+            }
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
