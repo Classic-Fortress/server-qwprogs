@@ -1521,12 +1521,12 @@ void () superspike_touch = {
     if (other.takedamage) {
         spawn_touchblood(18);
         deathmsg = self.weapon;
-        if (deathmsg == DMSG_GREN_NAIL) {
+        if (deathmsg == DMSG_GREN_NAIL || deathmsg == DMSG_GREN_BURST) {
             ndmg = 40;
         }
         else {
             ndmg = sng_damage;
-        }            
+        }
 
         if (self.owner.classname == "grenade")
             TF_T_Damage(other, self, self.owner.owner, ndmg, TF_TD_NOTTEAM,
@@ -1921,9 +1921,8 @@ float (float weap) CheckForAmmo = {
         if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
             return 1;
     } else if (weap == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > self.reload_assault_cannon)
+        if (fo_hwguy) {
+            if (self.reload_assault_cannon >= 1 && self.ammo_shells > self.reload_assault_cannon)
                 return 1;
         }
     }

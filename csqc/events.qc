@@ -1,6 +1,9 @@
 void ParseSBAR();
 void ParseGrenPrimed(float grentype, float timertype);
 void AddGrenTimer(float grentype, float offset);
+void AddSilentGrenTimer(float grentype, float offset);
+void StartGrenTimer(float slot, float grentype, float offset);
+void AddGrenTimer(float grentype, float offset);
 void PlayGrenTimer(float offset);
 
 void() CSQC_Parse_Event = {
@@ -268,11 +271,6 @@ void() CSQC_Parse_Event = {
                 round_time_remaining = time + rtr;
             }
             break;
-        case MSG_GRENADESETTINGS:
-            fo_flash = readfloat();
-            medic_type = readfloat();
-            nailgren_type = readfloat();
-            break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
             TeamScore[1] = readfloat();
@@ -308,39 +306,42 @@ void() CSQC_Parse_Event = {
 }
 
 void PlayGrenTimer(float offset) {
-    local float chan_gren1_soundtime = getsoundtime(self, CHAN_GREN1);
-    local float chan_gren2_soundtime = getsoundtime(self, CHAN_GREN2);
-    local float grentimer_channel;
+    local float channel;
+    local float soundtime;
+    local float highest_soundtime;
 
-    if (chan_gren1_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN1;
-    } else if (chan_gren2_soundtime == -1 ) {
-        grentimer_channel = CHAN_GREN2;
-    } else if (chan_gren1_soundtime > chan_gren2_soundtime) {
-        grentimer_channel = CHAN_GREN1;
-    } else {
-        grentimer_channel = CHAN_GREN2;
+    for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
+        soundtime = getsoundtime(self, i);
+
+        if (soundtime < 0) {
+            channel = i;
+            break;
+        }
+
+        if (soundtime > highest_soundtime) {
+            highest_soundtime = soundtime;
+            channel = i;
+        }
     }
 
-    local string grentimer_sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    soundupdate(self, grentimer_channel, grentimer_sound, 1, 0, 0, 0, offset);
+    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
+    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
+    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
 void ParseGrenPrimed(float grentype, float timertype) {
     if(timertype == 0) {
-        AddGrenTimer(grentype, 0);
+        AddSilentGrenTimer(grentype, 0);
         return;
     }
 
     if(timertype == 1) {
-        PlayGrenTimer(0);
         AddGrenTimer(grentype, 0);
         return;
     }
 
     if(timertype == 2) {
         local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
-        PlayGrenTimer(offset);
         AddGrenTimer(grentype, offset);
         return;
     }

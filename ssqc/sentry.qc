@@ -374,8 +374,8 @@ void () Sentry_Explode = {
 };
 
 void () Sentry_Die = {
-    sprint(self.real_owner, PRINT_HIGH,
-           "Your sentry gun was destroyed\n");
+    sprint(self.real_owner, PRINT_HIGH, "Your sentry gun was destroyed\n");
+    stuffcmd(self.owner, "play misc/chink\n");
     self.real_owner.has_sentry = 0;
     
     self.tfstate = self.tfstate | TFSTATE_RESPAWN_READY;

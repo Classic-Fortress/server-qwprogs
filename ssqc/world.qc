@@ -1,4 +1,5 @@
 void () InitBodyQue;
+void () CheckTrackedSettings
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
@@ -322,7 +323,8 @@ void () worldspawn = {
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
-    clientstat(STAT_TFSTATE, EV_FLOAT, tfstate);
+    clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
+    clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -357,6 +359,15 @@ void () worldspawn = {
     }
 
     dimension_send = DMN_NOFLASH;
+
+    settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
+    for (float i = 0; i < settings_to_track_list.length; i++)
+    {
+        settings_to_track[i].setting_name = settings_to_track_list[i];
+        string val = infokey(world, settings_to_track_list[i]);
+        val = (val != "") ? val : "unset";
+        settings_to_track[i].value = val;
+    }
 };
 
 void () StartFrame = {
@@ -365,6 +376,13 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
+
+    if (framecount % 77 == 0)
+    {
+        CheckTrackedSettings();
+    }
+
+    
 //    if(!votemode) {
 //        //TODO: make this optional
 //        Vote_Check();
@@ -422,3 +440,16 @@ void(void() fnc)CheckSpawn = {
         remove(self);
     }
 };
+
+void () CheckTrackedSettings = {
+    for (float i = 0; i < settings_to_track_list.length; i++)
+    {
+        setting_t* s = &settings_to_track[i];
+        string new_val = infokey(world, s.setting_name);
+        if (new_val != s.value)
+        {
+            bprint(PRINT_HIGH, "Setting ", s.setting_name, " has been changed from ", s.value, " to ", new_val, "\n");
+            s.value = new_val;
+        }
+    }
+}

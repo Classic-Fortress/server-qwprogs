@@ -12,7 +12,6 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
-float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
 void GetSelf() = {
@@ -37,6 +36,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
+    registercvar(FOCMD_GRENTIMERVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 
@@ -75,6 +75,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
+    grentimer_waiting = FALSE;
+    jump_counter = 0;
+
     num_mapvotes = 0;
     vote_selected_item = world;
     vote_selected_index = -1;
@@ -318,7 +321,22 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
+    if (input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
+        if (pmove_onground) {
+            frames_since_onground = 0;
+        } else {
 
+            // next two frames after leaving ground
+            if (frames_since_onground <= 2) {
+                frames_since_onground = frames_since_onground + 1;
+
+            // third frame after leaving ground
+            } else if (frames_since_onground == 3) {
+                input_buttons &= ~2;
+                frames_since_onground = frames_since_onground + 1;
+            }
+        }
+    }
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -346,6 +364,9 @@ void ApplyTransparencyToGrenTimer() {
 void StopGrenTimers() {
     soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
     soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
 
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         FO_Hud_Grentimers[i].grentype = 0;

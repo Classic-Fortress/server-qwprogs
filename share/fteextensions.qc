@@ -841,8 +841,6 @@ const float CHAN_WEAPON = 1;
 const float CHAN_VOICE = 2;
 const float CHAN_ITEM = 3;
 const float CHAN_BODY = 4;
-const float CHAN_GREN1 = 5;
-const float CHAN_GREN2 = 6;
 
 #endif
 #if defined(QWSSQC)

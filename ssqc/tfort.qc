@@ -425,7 +425,7 @@ string GetGrenName(float type)
             s = "normal grenade";
             break;
         case GR_TYPE_NAIL:
-            s = (nailgren_type == NGR_TYPE_LASER) ? "shock grenade" : "nail grenade";
+            s = "nail grenade";
             break;
         case GR_TYPE_MIRV:
             s = "mirv grenade";
@@ -452,7 +452,13 @@ string GetGrenName(float type)
             s = "concussion grenade";
             break;
         case GR_TYPE_BLAST:
-            s = (medic_type == MEDIC_TYPE_BLAST) ? "blast grenade" : "concussion grenade";
+            s = "blast grenade";
+            break;
+        case GR_TYPE_SHOCK:
+            s = "shock grenade";
+            break;
+        case GR_TYPE_BURST:
+            s = "burst grenade";
             break;
         case GR_TYPE_NONE:
             s = "no grenade";
@@ -773,45 +779,40 @@ void (float inp) TeamFortress_PrimeGrenade = {
     local entity timer;
     gtype = 0;
 
-    if ((self.tfstate & TFSTATE_GRENPRIMED) ||
-        (self.tfstate & TFSTATE_GRENTHROWING))
+    if ((self.tfstate & TFSTATE_GRENPRIMED) || (self.tfstate & TFSTATE_GRENTHROWING))
         return;
     
     if (no_fire_mode)
         return;
 
-    if (    (inp == 1 && self.tp_grenade_switch != 1)
-         || (inp == 2 && self.tp_grenade_switch == 1)) {
+    if ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1)) {
+
         gtype = self.tp_grenades_1;
 
-        if (self.tp_grenades_1 == 2)
+        if (gtype == GR_TYPE_CONCUSSION)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_1 == 3) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                gs = "Shock grenade";
-            } else {
-                gs = "Nail grenade";
-            }
-        } else if (self.tp_grenades_1 == 4)
+        else if (gtype == GR_TYPE_NAIL) {
+            gs = "Nail grenade";
+        } else if (gtype == GR_TYPE_MIRV)
             gs = "Mirv grenade";
-        else if (self.tp_grenades_1 == 5)
+        else if (gtype == GR_TYPE_NAPALM)
             gs = "Napalm grenade";
-        else if (self.tp_grenades_1 == 6)
+        else if (gtype == GR_TYPE_FLARE)
             gs = "Flare";
-        else if (self.tp_grenades_1 == 7)
+        else if (gtype == GR_TYPE_GAS)
             gs = "Gas grenade";
-        else if (self.tp_grenades_1 == 8)
+        else if (gtype == GR_TYPE_EMP)
             gs = "EMP grenade";
-        else if (self.tp_grenades_1 == 9)
+        else if (gtype == GR_TYPE_FLASH)
             gs = "Flash grenade";
-        else if (self.tp_grenades_1 == 10)
+        else if (gtype == GR_TYPE_CALTROP)
             gs = "Caltrop canister";
-        else if (self.tp_grenades_1 == 11)
-            if (medic_type == MEDIC_TYPE_BLAST) {
-                gs = "Blast grenade";
-            } else {
-                gs = "Concussion grenade";
-            }
+        else if (gtype == GR_TYPE_BLAST)
+            gs = "Blast grenade";
+        else if (gtype == GR_TYPE_SHOCK)
+            gs = "Shock grenade";
+        else if (gtype == GR_TYPE_BURST)
+            gs = "Burst grenade";
         else
             gs = "Grenade";
 
@@ -852,36 +853,33 @@ void (float inp) TeamFortress_PrimeGrenade = {
             return;
         }
     }
-    if (    (inp == 2 && self.tp_grenade_switch != 1)
-         || (inp == 1 && self.tp_grenade_switch == 1)) {
+
+    if (    (inp == 2 && self.tp_grenade_switch != 1) || (inp == 1 && self.tp_grenade_switch == 1)) {
+
         gtype = self.tp_grenades_2;
 
-        if (self.tp_grenades_2 == 2)
+        if (gtype == GR_TYPE_CONCUSSION)
             gs = "Concussion grenade";
-        else if (self.tp_grenades_2 == 3) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                gs = "Shock grenade";
-            } else {
-                gs = "Nail grenade";
-            }
-        } else if (self.tp_grenades_2 == 4)
+        else if (gtype == GR_TYPE_NAIL)
+            gs = "Nail grenade";
+        else if (gtype == GR_TYPE_MIRV)
             gs = "Mirv grenade";
-        else if (self.tp_grenades_2 == 5)
+        else if (gtype == GR_TYPE_NAPALM)
             gs = "Napalm grenade";
-        else if (self.tp_grenades_2 == 6)
+        else if (gtype == GR_TYPE_FLARE)
             gs = "Flare";
-        else if (self.tp_grenades_2 == 7)
+        else if (gtype == GR_TYPE_GAS)
             gs = "Gas grenade";
-        else if (self.tp_grenades_2 == 8)
+        else if (gtype == GR_TYPE_EMP)
             gs = "EMP grenade";
-        else if (self.tp_grenades_2 == 9)
+        else if (gtype == GR_TYPE_FLASH)
             gs = "Flash grenade";
-        else if (self.tp_grenades_2 == 11)
-            if (medic_type == MEDIC_TYPE_BLAST) {
-                gs = "Blast grenade";
-            } else {
-                gs = "Concussion grenade";
-            }
+        else if (gtype == GR_TYPE_BLAST)
+            gs = "Blast grenade";
+        else if (gtype == GR_TYPE_SHOCK)
+            gs = "Shock grenade";
+        else if (gtype == GR_TYPE_BURST)
+            gs = "Burst grenade";
         else
             gs = "Grenade";
 
@@ -1014,6 +1012,7 @@ void () TeamFortress_GrenadePrimed = {
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = SUB_Null;
     newmis.nextthink = self.heat;
+
     if (self.weapon == GR_TYPE_NORMAL) {
         newmis.touch = NormalGrenadeTouch;
         newmis.think = NormalGrenadeExplode;
@@ -1029,28 +1028,30 @@ void () TeamFortress_GrenadePrimed = {
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_BLAST) {
-        if (medic_type == MEDIC_TYPE_BLAST){
-            newmis.touch = BlastGrenadeTouch;
-            newmis.think = BlastGrenadeExplode;
-            newmis.grenadename = "blastgrenade";
-            newmis.skin = 1;
-            newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/blastgren.mdl");
-        } else {
-            newmis.touch = ConcussionGrenadeTouch;
-            newmis.think = ConcussionGrenadeExplode;
-            newmis.grenadename = "concussiongrenade";
-            newmis.skin = 1;
-            newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/hgren2.mdl");
-        }
+        newmis.touch = BlastGrenadeTouch;
+        newmis.think = BlastGrenadeExplode;
+        newmis.grenadename = "blastgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/blastgren.mdl");
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
-        if (nailgren_type == NGR_TYPE_LASER)
-            newmis.grenadename = "shockgrenade";
-        else
-            newmis.grenadename = "nailgrenade";            
+        newmis.grenadename = "nailgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (self.weapon == GR_TYPE_SHOCK) {
+        newmis.touch = ShockGrenadeTouch;
+        newmis.think = ShockGrenadeExplode;
+        newmis.grenadename = "shockgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (self.weapon == GR_TYPE_BURST) {
+        newmis.touch = BurstGrenadeTouch;
+        newmis.think = BurstGrenadeExplode;
+        newmis.grenadename = "burstgrenade";
         newmis.skin = 1;
         newmis.avelocity = '0 300 0';
         FO_SetModel(newmis, "progs/biggren.mdl");
@@ -1125,11 +1126,7 @@ void () TeamFortress_GrenadeSwitch = {
         if (self.tp_grenades_1 == 2)
             gs = "Concussion grenade";
         else if (self.tp_grenades_1 == 3) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                gs = "Shock grenade";
-            } else {
-                gs = "Nail grenade";
-            }
+            gs = "Nail grenade";
         } else if (self.tp_grenades_1 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_1 == 5)
@@ -1141,11 +1138,11 @@ void () TeamFortress_GrenadeSwitch = {
         else if (self.tp_grenades_1 == 8)
             gs = "EMP grenade";
         else if (self.tp_grenades_1 == 11)
-            if (medic_type == MEDIC_TYPE_BLAST) {
-                gs = "Blast grenade";
-            } else {
-                gs = "Cuss grenade";
-            }
+            gs = "Blast grenade";
+        else if (self.tp_grenades_1 == 12)
+            gs = "Shock grenade";
+        else if (self.tp_grenades_1 == 13)
+            gs = "Burst grenade";
         else
             gs = "Grenade";
     } else {
@@ -1153,11 +1150,7 @@ void () TeamFortress_GrenadeSwitch = {
         if (self.tp_grenades_2 == 2)
             gs = "Concussion grenade";
         else if (self.tp_grenades_2 == 3) {
-            if (nailgren_type == NGR_TYPE_LASER) {
-                gs = "Shock grenade";
-            } else {
-                gs = "Nail grenade";
-            }
+            gs = "Nail grenade";
         } else if (self.tp_grenades_2 == 4)
             gs = "Mirv grenade";
         else if (self.tp_grenades_2 == 5)
@@ -1172,6 +1165,12 @@ void () TeamFortress_GrenadeSwitch = {
             gs = "Flash grenade";
         else if (self.tp_grenades_2 == 10)
             gs = "Caltrop canister";
+        else if (self.tp_grenades_2 == 11)
+            gs = "Blast grenade";
+        else if (self.tp_grenades_2 == 12)
+            gs = "Shock grenade";
+        else if (self.tp_grenades_2 == 13)
+            gs = "Burst grenade";
         else
             gs = "Grenade";
     }
@@ -1731,7 +1730,19 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_2 = role.gren2_limits[3];
 
         self.tp_grenades_1 = PC_SOLDIER_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_SOLDIER_GRENADE_TYPE_2;
+
+        switch (nailgren_type) {
+            case NGR_TYPE_NAIL:
+                self.tp_grenades_2 = GR_TYPE_NAIL;
+                break;
+            case NGR_TYPE_LASER:
+                self.tp_grenades_2 = GR_TYPE_SHOCK;
+                break;
+            case NGR_TYPE_BURST:
+                self.tp_grenades_2 = GR_TYPE_BURST;
+                break;
+        }
+
         self.tf_items = PC_SOLDIER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SOLDIER_INITARMORCLASS;
@@ -1850,7 +1861,12 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_2 = role.gren2_limits[5];
 
         self.tp_grenades_1 = PC_MEDIC_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_MEDIC_GRENADE_TYPE_2;
+        if(medic_type == MEDIC_TYPE_BLAST) {
+            self.tp_grenades_2 = GR_TYPE_BLAST;
+        } else {
+            self.tp_grenades_2 = GR_TYPE_CONCUSSION;
+        }
+
         self.tf_items = PC_MEDIC_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_MEDIC_INITARMORCLASS;
@@ -2858,28 +2874,30 @@ void () TeamFortress_ExplodePerson = {
         newmis.avelocity = '300 300 300';
         FO_SetModel(newmis, "progs/hgren2.mdl");
     } else if (self.weapon == GR_TYPE_BLAST) {
-        if (medic_type == MEDIC_TYPE_BLAST) {
-            newmis.touch = BlastGrenadeTouch;
-            newmis.think = BlastGrenadeExplode;
-            newmis.grenadename = "blastgrenade";
-            newmis.skin = 1;
-            newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/blastgren.mdl");
-        } else {
-            newmis.touch = ConcussionGrenadeTouch;
-            newmis.think = ConcussionGrenadeExplode;
-            newmis.grenadename = "concussiongrenade";
-            newmis.skin = 1;
-            newmis.avelocity = '300 300 300';
-            FO_SetModel(newmis, "progs/hgren2.mdl");
-        }
+        newmis.touch = BlastGrenadeTouch;
+        newmis.think = BlastGrenadeExplode;
+        newmis.grenadename = "blastgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/blastgren.mdl");
     } else if (self.weapon == GR_TYPE_NAIL) {
         newmis.touch = NailGrenadeTouch;
         newmis.think = NailGrenadeExplode;
-        if (nailgren_type == NGR_TYPE_LASER)
-            newmis.grenadename = "shockgrenade";
-        else
-            newmis.grenadename = "nailgrenade";            
+        newmis.grenadename = "nailgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (self.weapon == GR_TYPE_SHOCK) {
+        newmis.touch = ShockGrenadeTouch;
+        newmis.think = ShockGrenadeExplode;
+        newmis.grenadename = "shockgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (self.weapon == GR_TYPE_BURST) {
+        newmis.touch = BurstGrenadeTouch;
+        newmis.think = BurstGrenadeExplode;
+        newmis.grenadename = "burstgrenade";
         newmis.skin = 1;
         newmis.avelocity = '0 300 0';
         FO_SetModel(newmis, "progs/biggren.mdl");
