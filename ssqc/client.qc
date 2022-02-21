@@ -388,7 +388,7 @@ void () DecodeLevelParms = {
         spurs_flag	= CF_GetSetting("spf", "spurs_flag" 		, "0");		// can climb with flag
 
 
-        // nail gren types 0 = NGR_TYPE_DEFAULT, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
+        // nail gren types 0 = NGR_TYPE_NAIL, 1 = NGR_TYPE_LASER, 2 = NGR_TYPE_BURST
         nailgren_type = CF_GetSetting("ngt", "nailgren_type", ftos(NGR_TYPE_LASER));
         
         // medic types 0 = MEDIC_TYPE_DEFAULT, 1 = MEDIC_TYPE_BLAST
@@ -950,7 +950,7 @@ void () DecodeLevelParms = {
             old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
-            nailgren_type = NGR_TYPE_DEFAULT;
+            nailgren_type = NGR_TYPE_NAIL;
             medic_type = MEDIC_TYPE_DEFAULT;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
@@ -2113,8 +2113,6 @@ void () PutClientInServer = {
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
-
-    UpdateClientGrenadeSettings(self);
 };
 
 //void () info_player_start = {
@@ -3050,11 +3048,11 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         s_deathstring = " grenades himself\n";
                     return strcat(pe_target.netname, s_deathstring);
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-                    if (nailgren_type == NGR_TYPE_LASER) {
-                        return strcat(pe_target.netname, " electrocutes himself\n");
-                    } else {
-                        return strcat(pe_target.netname, " hammers himself\n");
-                    }
+                    return strcat(pe_target.netname, " hammers himself\n");
+                } else if (pf_deathmsg == DMSG_GREN_SHOCK) {
+                    return strcat(pe_target.netname, " electrocutes himself\n");
+                } else if (pf_deathmsg == DMSG_GREN_BURST) {
+                    return strcat(pe_target.netname, " peppers himself\n");
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
                     if (pe_target.playerclass == PC_DEMOMAN)
                         s_deathstring = " practiced his own Mirv dance\n";
@@ -3156,13 +3154,14 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
 
                 } else if (pf_deathmsg == DMSG_GREN_NAIL) {
-                    if (nailgren_type == NGR_TYPE_LASER) {
-                        s_deathstring = " gets melted by ";
-                        s_deathstring2 = "'s shock grenade\n";
-                    } else {
                         s_deathstring = " gets flayed by ";
                         s_deathstring2 = "'s nail grenade\n";
-                    }
+                } else if (pf_deathmsg == DMSG_GREN_SHOCK) {
+                        s_deathstring = " gets melted by ";
+                        s_deathstring2 = "'s shock grenade\n";
+                } else if (pf_deathmsg == DMSG_GREN_BURST) {
+                        s_deathstring = " gets peppered by ";
+                        s_deathstring2 = "'s burst grenade\n";
                 } else if (pf_deathmsg == DMSG_GREN_MIRV) {
                     if (pe_attacker.playerclass == PC_DEMOMAN) {
                         s_deathstring = " does a dance on ";
