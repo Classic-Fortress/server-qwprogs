@@ -1521,12 +1521,12 @@ void () superspike_touch = {
     if (other.takedamage) {
         spawn_touchblood(18);
         deathmsg = self.weapon;
-        if (deathmsg == DMSG_GREN_NAIL) {
+        if (deathmsg == DMSG_GREN_NAIL || deathmsg == DMSG_GREN_BURST) {
             ndmg = 40;
         }
         else {
             ndmg = sng_damage;
-        }            
+        }
 
         if (self.owner.classname == "grenade")
             TF_T_Damage(other, self, self.owner.owner, ndmg, TF_TD_NOTTEAM,

@@ -739,36 +739,32 @@ void (entity pl, float typ) PrintGrenadeType = {
     local string st;
     st = "";
 
-    if (typ == 1) {
+    if (typ == GR_TYPE_NORMAL) {
         st = "normal";
-    } else if (typ == 2) {
+    } else if (typ == GR_TYPE_CONCUSSION) {
         st = "concussion";
-    } else if (typ == 3) {
-        if (nailgren_type == NGR_TYPE_LASER) {
-            st = "shock";
-        } else {
-            st = "nail";
-        }
-    } else if (typ == 4) {
+    } else if (typ == GR_TYPE_NAIL) {
+        st = "nail";
+    } else if (typ == GR_TYPE_MIRV) {
         st = "mirv";
-    } else if (typ == 5) {
+    } else if (typ == GR_TYPE_NAPALM) {
         st = "napalm";
-    } else if (typ == 6) {
+    } else if (typ == GR_TYPE_FLARE) {
         st = "flare";
-    } else if (typ == 7) {
+    } else if (typ == GR_TYPE_GAS) {
         st = "gas";
-    } else if (typ == 8) {
+    } else if (typ == GR_TYPE_EMP) {
         st = "EMP";
-    } else if (typ == 10) {
+    } else if (typ == GR_TYPE_CALTROP) {
         st = "caltrop";
-    } else if (typ == 9) {
+    } else if (typ == GR_TYPE_FLASH) {
         st = "flash";
-    } else if (typ == 11) {
-        if (medic_type == MEDIC_TYPE_BLAST) {
-            st = "blast";
-        } else {
-            st = "concussion";
-        }
+    } else if (typ == GR_TYPE_BLAST) {
+        st = "blast";
+    } else if (typ == GR_TYPE_SHOCK) {
+        st = "shock";
+    } else if (typ == GR_TYPE_BURST) {
+        st = "burst";
     }
     sprint(pl, PRINT_HIGH, st);
 };

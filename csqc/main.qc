@@ -12,7 +12,6 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
-float RemainingGrenades(float gren_number);
 float IsValidToUseGrenades();
 
 void GetSelf() = {
@@ -37,6 +36,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
+    registercvar(FOCMD_GRENTIMERVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 
@@ -340,6 +340,9 @@ void ApplyTransparencyToGrenTimer() {
 void StopGrenTimers() {
     soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
     soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
+    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
 
     for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
         FO_Hud_Grentimers[i].grentype = 0;
