@@ -763,6 +763,18 @@ void () DecodeLevelParms = {
         
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
+        
+        // seperate backpack.mdl into deathbag.mdl and discard.mdl [off] (visual change only)
+        seperatebackpackmodels = CF_GetSetting("sbm", "seperatebackpackmodels", "0");
+	
+	// standardize contents of backpack dropped on a players death [off]
+	standardizedeathammo = CF_GetSetting("sda", "standardizedeathammo", "0");
+	
+	// if standardizedeathbags set to 1 use these settings instead of players ammo to fill bag on death 
+	deathammo_shells = CF_GetSetting("das", "deathammo_shells", "25");
+	deathammo_nails = CF_GetSetting("dan", "deathammo_nails", "25");
+	deathammo_cells = CF_GetSetting("dac", "deathammo_cells", "50");
+	deathammo_rockets = CF_GetSetting("dar", "deathammo_rockets", "10");
 
         // enable server-side flaginfo on statusbar [on]
         //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
