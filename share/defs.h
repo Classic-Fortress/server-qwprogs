@@ -700,7 +700,7 @@
 /*======================================================*/
 
 #define WEAP_HOOK			1
-// unused                               2
+#define WEAP_KNIFE			2
 #define WEAP_MEDIKIT			4
 #define WEAP_SPANNER			8
 #define WEAP_AXE			16
@@ -1105,7 +1105,7 @@
 #define PC_SPY_INITARMORTYPE		0.6
 #define PC_SPY_ARMORCLASSES		27	// ALL except EXPLOSION
 #define PC_SPY_INITARMORCLASS		0
-#define PC_SPY_WEAPONS			WEAP_AXE | WEAP_TRANQ | WEAP_SUPER_SHOTGUN | WEAP_NAILGUN
+#define PC_SPY_WEAPONS			WEAP_KNIFE | WEAP_TRANQ | WEAP_SUPER_SHOTGUN | WEAP_NAILGUN
 #define PC_SPY_MAXAMMO_SHOT		40
 #define PC_SPY_MAXAMMO_NAIL		100
 #define PC_SPY_MAXAMMO_CELL		30

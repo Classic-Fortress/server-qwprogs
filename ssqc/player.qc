@@ -175,6 +175,8 @@ void () player_axe3 =[121, player_axe4] {
     self.weaponframe = 3;
     if (self.current_weapon == WEAP_AXE)
         W_FireAxe();
+    else if (self.current_weapon == WEAP_KNIFE)
+        W_FireKnife();
     else
         W_FireSpanner();
 };
@@ -195,6 +197,8 @@ void () player_axeb3 =[127, player_axeb4] {
     self.weaponframe = 7;
     if (self.current_weapon == WEAP_AXE)
         W_FireAxe();
+    else if (self.current_weapon == WEAP_KNIFE)
+        W_FireKnife();
     else
         W_FireSpanner();
 };
@@ -215,6 +219,8 @@ void () player_axec3 =[133, player_axec4] {
     self.weaponframe = 3;
     if (self.current_weapon == WEAP_AXE)
         W_FireAxe();
+    else if (self.current_weapon == WEAP_KNIFE)
+        W_FireKnife();
     else
         W_FireSpanner();
 };
@@ -235,6 +241,8 @@ void () player_axed3 =[139, player_axed4] {
     self.weaponframe = 7;
     if (self.current_weapon == WEAP_AXE)
         W_FireAxe();
+    else if (self.current_weapon == WEAP_KNIFE)
+        W_FireKnife();
     else
         W_FireSpanner();
 };

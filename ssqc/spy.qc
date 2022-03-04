@@ -580,7 +580,7 @@ void (float issilent) CF_Spy_FeignDeath = {
             te = find(te, classname, "item_tfgoal");
         }
 
-        // die with axe equipped if carrying axe, medikit or spanner
+        // die with axe equipped if carrying axe, medikit, knife or spanner
         if (self.weapon <= WEAP_AXE) {
             spy_die_ax1();
             return;
