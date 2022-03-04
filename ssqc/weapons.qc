@@ -1962,6 +1962,11 @@ void () player_axeb1;
 void () player_axec1;
 void () player_axed1;
 
+void () player_knife1;
+void () player_knifeb1;
+void () player_knifec1;
+void () player_knifed1;
+
 void () player_shot1;
 void () player_nail1;
 void () player_light1;
@@ -2016,13 +2021,13 @@ void () W_Attack = {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.25)
-            player_axe1();
+            player_knife1();
         else if (r < 0.5)
-            player_axeb1();
+            player_knifeb1();
         else if (r < 0.75)
-            player_axec1();
+            player_knifec1();
         else
-            player_axed1();
+            player_knifed1();
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
