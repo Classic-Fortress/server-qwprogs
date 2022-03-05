@@ -1339,6 +1339,7 @@
 #define DMSG_GREN_CALTROP			41
 #define DMSG_GREN_SHOCK			42
 #define DMSG_GREN_BURST			43
+#define DMSG_KNIFE			44
 
 /*======================================================*/
 /* Menus						*/

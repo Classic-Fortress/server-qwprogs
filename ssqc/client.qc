@@ -3230,9 +3230,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
                 } else if (pf_deathmsg == DMSG_AXE) {
                     s_deathstring2 = "\n";
-                    if (pe_attacker.playerclass == PC_SPY)
-                        s_deathstring = " was knife-murdered by ";
-                    else if (pe_attacker.playerclass == PC_SCOUT)
+                    if (pe_attacker.playerclass == PC_SCOUT)
                         s_deathstring = "'s mellon was split by ";
                     else if (pe_attacker.playerclass == PC_SNIPER)
                         s_deathstring = " was put on the chop block by ";
@@ -3249,6 +3247,12 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         s_deathstring2 = "'s axe\n";
                     } else
                         s_deathstring = " was ax-murdered by ";
+                } else if (pf_deathmsg == DMSG_KNIFE) {
+                    s_deathstring = " was knife-murdered by ";
+                    s_deathstring2 = "\n";
+                } else if (pf_deathmsg == DMSG_BACKSTAB) {
+                    s_deathstring = " gets knifed from behind by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_SPANNER) {
                     s_deathstring = " was spanner-murdered by ";
                     s_deathstring2 = "\n";
@@ -3347,9 +3351,6 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring2 = "'s bullet spray.\n";
                 } else if (pf_deathmsg == DMSG_ASSAULTCANNON) {
                     s_deathstring = " gets sawn in half by ";
-                    s_deathstring2 = "\n";
-                } else if (pf_deathmsg == DMSG_BACKSTAB) {
-                    s_deathstring = " gets knifed from behind by ";
                     s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_TRANQ) {
                     s_deathstring = " is put to sleep by ";

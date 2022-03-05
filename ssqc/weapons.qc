@@ -238,7 +238,7 @@ void () W_FireKnife = {
                     TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
                     TF_TD_OTHER);
         } else {
-            deathmsg = DMSG_AXE;
+            deathmsg = DMSG_KNIFE;
             TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
         }
