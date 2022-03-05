@@ -245,12 +245,14 @@ void () player_axed4 =[140, player_run] {
 
 void () player_knife1 =[119, player_knife2] {
     self.weaponframe = 1;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knife2 =[120, player_knife3] {
     self.weaponframe = 2;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knife3 =[121, player_knife4] {
@@ -260,17 +262,20 @@ void () player_knife3 =[121, player_knife4] {
 
 void () player_knife4 =[122, player_run] {
     self.weaponframe = 4;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifeb1 =[125, player_knifeb2] {
     self.weaponframe = 5;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifeb2 =[126, player_knifeb3] {
     self.weaponframe = 6;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifeb3 =[127, player_knifeb4] {
@@ -280,17 +285,20 @@ void () player_knifeb3 =[127, player_knifeb4] {
 
 void () player_knifeb4 =[128, player_run] {
     self.weaponframe = 8;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifec1 =[131, player_knifec2] {
     self.weaponframe = 1;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifec2 =[132, player_knifec3] {
     self.weaponframe = 2;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifec3 =[133, player_knifec4] {
@@ -300,17 +308,20 @@ void () player_knifec3 =[133, player_knifec4] {
 
 void () player_knifec4 =[134, player_run] {
     self.weaponframe = 4;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifed1 =[137, player_knifed2] {
     self.weaponframe = 5;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifed2 =[138, player_knifed3] {
     self.weaponframe = 6;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_knifed3 =[139, player_knifed4] {
@@ -320,7 +331,8 @@ void () player_knifed3 =[139, player_knifed4] {
 
 void () player_knifed4 =[140, player_run] {
     self.weaponframe = 8;
-    W_FireKnife();
+    if (superknife)
+        W_FireKnife();
 };
 
 void () player_medikit1 =[119, player_medikit2] {

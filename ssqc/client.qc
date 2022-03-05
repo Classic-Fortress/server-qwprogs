@@ -633,6 +633,9 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // make knife hit on every frame of animation
+        superknife = CF_GetSetting("sk", "superknife", "on");
+
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
@@ -826,6 +829,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superknife = TRUE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
@@ -900,6 +904,7 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superknife = FALSE;
             old_ng_rof = TRUE;
             pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
@@ -935,6 +940,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superknife = FALSE;
             old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
