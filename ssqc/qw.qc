@@ -617,7 +617,7 @@ float noreturn;
 float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
-float seperatebackpackmodels;
+float splitbackpackmodels;
 float standardizedeathammo;
 float deathammo_shells;
 float deathammo_nails;
