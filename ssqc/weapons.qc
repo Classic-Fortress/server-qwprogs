@@ -219,7 +219,6 @@ void () W_FireKnife = {
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
-
         trace_ent.axhitme = 1;
         SpawnBlood(org, 20);
 
