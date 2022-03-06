@@ -764,8 +764,8 @@ void () DecodeLevelParms = {
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
         
-        // seperate backpack.mdl into deathbag.mdl and discard.mdl [off] (visual change only)
-        seperatebackpackmodels = CF_GetSetting("sbm", "seperatebackpackmodels", "0");
+        // split backpack.mdl into deathbag.mdl and discard.mdl [off] (visual change only)
+        splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "0");
 	
 	// standardize contents of backpack dropped on a players death [off]
 	standardizedeathammo = CF_GetSetting("sda", "standardizedeathammo", "0");
