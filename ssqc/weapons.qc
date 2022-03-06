@@ -214,8 +214,9 @@ int () W_FireKnife = {
     makevectors(self.v_angle);
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
+
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
@@ -257,7 +258,7 @@ int () W_FireKnife = {
     }
 };
 
-void () W_FireSpanner = {
+int () W_FireSpanner = {
     local vector source;
     local vector org;
     local float healam;
@@ -266,16 +267,15 @@ void () W_FireSpanner = {
     makevectors(self.v_angle);
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
+
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
 
     // It may be a trigger that can be activated by the engineer's spanner
     if (trace_ent.goal_activation & TFGA_SPANNER) {
-
         if (Activated(trace_ent, self)) {
-
             DoResults(trace_ent, self, TRUE);
 
             if (trace_ent.classname == "func_button") {
@@ -287,11 +287,9 @@ void () W_FireSpanner = {
                 self = other;
             }
         } else if (trace_ent.else_goal != 0) {
-
             te = Findgoal(trace_ent.else_goal);
             if (te)
                 AttemptToActivate(te, self, trace_ent);
-
         } else {
             FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
             WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -302,53 +300,46 @@ void () W_FireSpanner = {
             WriteCoord(MSG_MULTICAST, org_z);
             multicast(org, MULTICAST_PVS);
         }
-        return;
+        return TRUE;
     }
-    if (trace_ent.takedamage) {
 
+    if (trace_ent.takedamage) {
         if (trace_ent.classname == "building_dispenser") {
             Engineer_UseDispenser(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun") {
-
             Engineer_UseSentryGun(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun_base") {
-
             if (trace_ent.oldenemy)
                 Engineer_UseSentryGun(trace_ent.oldenemy);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "player") {
-
-            if ((((trace_ent.team_no == self.team_no) &&
-                  (self.team_no != 0)) && teamplay) || coop) {
+            if ((((trace_ent.team_no == self.team_no) && (self.team_no != 0)) && teamplay) || coop) {
 
                 healam = WEAP_SPANNER_REPAIR;
+
                 if (self.ammo_cells < healam)
                     healam = self.ammo_cells;
-                if (trace_ent.armortype == 0)
-                    return;
 
-                if ((trace_ent.maxarmor - trace_ent.armorvalue) <
-                    (healam * 4))
-                    healam =
-                        ceil((trace_ent.maxarmor -
-                              trace_ent.armorvalue) / 4);
+                if (trace_ent.armortype == 0)
+                    return TRUE;
+
+                if ((trace_ent.maxarmor - trace_ent.armorvalue) < (healam * 4))
+                    healam = ceil((trace_ent.maxarmor - trace_ent.armorvalue) / 4);
 
                 if (healam > 0) {
+                    trace_ent.armorvalue = trace_ent.armorvalue + healam * 4;
 
-                    trace_ent.armorvalue =
-                        trace_ent.armorvalue + healam * 4;
                     if (trace_ent.armorvalue > trace_ent.maxarmor)
                         trace_ent.armorvalue = trace_ent.maxarmor;
 
                     self.ammo_cells = self.ammo_cells - healam;
 
-                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
-                          ATTN_NORM);
+                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
 
                     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
                     WriteByte(MSG_MULTICAST, TE_GUNSHOT);
@@ -357,11 +348,11 @@ void () W_FireSpanner = {
                     WriteCoord(MSG_MULTICAST, org_y);
                     WriteCoord(MSG_MULTICAST, org_z);
                     multicast(org, MULTICAST_PVS);
-
-                    W_SetCurrentAmmo(self);
                 }
-                return;
+
+                return TRUE;
             }
+
             trace_ent.axhitme = 1;
             SpawnBlood(org, 20);
             deathmsg = DMSG_SPANNER;
@@ -369,6 +360,7 @@ void () W_FireSpanner = {
         } else {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
+        return TRUE;
     } else {
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -378,6 +370,7 @@ void () W_FireSpanner = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
@@ -1965,6 +1958,11 @@ void () player_axeb1;
 void () player_axec1;
 void () player_axed1;
 
+void () player_spanner1;
+void () player_spanner2;
+void () player_spanner3;
+void () player_spanner4;
+
 void () player_knife1;
 void () player_knifeb1;
 void () player_knifec1;
@@ -2034,7 +2032,7 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        player_axe1();
+        player_spanner1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         if (CheckForReload() == TRUE)
             return;

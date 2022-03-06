@@ -633,8 +633,13 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
-        // make knife hit on every frame of animation
+        // allow spanner to hit on any frame of animation
+        superspanner = CF_GetSetting("ss", "superspanner", "on");
+
+        // allow knife to hit on any frame of animation
         superknife = CF_GetSetting("sk", "superknife", "on");
+
+        // allow knife to hit on every frame of animation
         superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "on");
 
         // impulse command queueing
@@ -830,6 +835,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superspanner = TRUE;
             superknife = TRUE;
             superknife_multihit = TRUE;
             pyro_type = PYRO_OZTF;
@@ -906,6 +912,7 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
             old_ng_rof = TRUE;
@@ -943,6 +950,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
             old_ng_rof = TRUE;

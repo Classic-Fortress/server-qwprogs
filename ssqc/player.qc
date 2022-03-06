@@ -175,14 +175,40 @@ void () player_axe2 =[120, player_axe3] {
 
 void () player_axe3 =[121, player_axe4] {
     self.weaponframe = 3;
-    if (self.current_weapon == WEAP_AXE)
-        W_FireAxe();
-    else
-        W_FireSpanner();
+    W_FireAxe();
 };
 
 void () player_axe4 =[122, player_run] {
     self.weaponframe = 4;
+};
+
+void () player_spanner1 =[119, player_spanner2] {
+    hit_in_current_animation = FALSE;
+    self.weaponframe = 1;
+
+    if (superspanner)
+        hit_in_current_animation = W_FireSpanner();
+};
+
+void () player_spanner2 =[120, player_spanner3] {
+    self.weaponframe = 2;
+
+    if (superspanner && !hit_in_current_animation)
+        hit_in_current_animation = W_FireSpanner();
+};
+
+void () player_spanner3 =[121, player_spanner4] {
+    self.weaponframe = 3;
+
+    if (!superspanner || (superspanner && !hit_in_current_animation))
+        hit_in_current_animation = W_FireSpanner();
+};
+
+void () player_spanner4 =[122, player_run] {
+    self.weaponframe = 4;
+
+    if (superspanner && !hit_in_current_animation)
+        hit_in_current_animation = W_FireSpanner();
 };
 
 void () player_axeb1 =[125, player_axeb2] {
@@ -195,10 +221,7 @@ void () player_axeb2 =[126, player_axeb3] {
 
 void () player_axeb3 =[127, player_axeb4] {
     self.weaponframe = 7;
-    if (self.current_weapon == WEAP_AXE)
-        W_FireAxe();
-    else
-        W_FireSpanner();
+    W_FireAxe();
 };
 
 void () player_axeb4 =[128, player_run] {
@@ -215,10 +238,7 @@ void () player_axec2 =[132, player_axec3] {
 
 void () player_axec3 =[133, player_axec4] {
     self.weaponframe = 3;
-    if (self.current_weapon == WEAP_AXE)
-        W_FireAxe();
-    else
-        W_FireSpanner();
+    W_FireAxe();
 };
 
 void () player_axec4 =[134, player_run] {
@@ -235,10 +255,7 @@ void () player_axed2 =[138, player_axed3] {
 
 void () player_axed3 =[139, player_axed4] {
     self.weaponframe = 7;
-    if (self.current_weapon == WEAP_AXE)
-        W_FireAxe();
-    else
-        W_FireSpanner();
+    W_FireAxe();
 };
 
 void () player_axed4 =[140, player_run] {
