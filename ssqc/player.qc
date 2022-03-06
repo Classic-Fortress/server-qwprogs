@@ -248,129 +248,133 @@ void () player_axed4 =[140, player_run] {
 void () player_knife1 =[119, player_knife2] {
     hit_in_current_animation = FALSE;
     self.weaponframe = 1;
-    if (superknife)
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+    if (superknife) {
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
+    }
 };
 
 void () player_knife2 =[120, player_knife3] {
     self.weaponframe = 2;
 
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knife3 =[121, player_knife4] {
     self.weaponframe = 3;
     if (!superknife || (superknife && (superknife_multihit || !hit_in_current_animation))) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knife4 =[122, player_run] {
     self.weaponframe = 4;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifeb1 =[125, player_knifeb2] {
     hit_in_current_animation = FALSE;
     self.weaponframe = 5;
-    if (superknife)
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+    if (superknife) {
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
+    }
 };
 
 void () player_knifeb2 =[126, player_knifeb3] {
     self.weaponframe = 6;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifeb3 =[127, player_knifeb4] {
     self.weaponframe = 7;
     if (!superknife || (superknife && (superknife_multihit || !hit_in_current_animation))) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifeb4 =[128, player_run] {
     self.weaponframe = 8;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifec1 =[131, player_knifec2] {
     hit_in_current_animation = FALSE;
     self.weaponframe = 1;
-    if (superknife)
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+    if (superknife) {
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
+    }
 };
 
 void () player_knifec2 =[132, player_knifec3] {
     self.weaponframe = 2;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifec3 =[133, player_knifec4] {
     self.weaponframe = 3;
     if (!superknife || (superknife && (superknife_multihit || !hit_in_current_animation))) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifec4 =[134, player_run] {
     self.weaponframe = 4;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifed1 =[137, player_knifed2] {
     hit_in_current_animation = FALSE;
     self.weaponframe = 5;
-    if (superknife)
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+    if (superknife) {
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
+    }
 };
 
 void () player_knifed2 =[138, player_knifed3] {
     self.weaponframe = 6;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifed3 =[139, player_knifed4] {
     self.weaponframe = 7;
     if (!superknife || (superknife && (superknife_multihit || !hit_in_current_animation))) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
 void () player_knifed4 =[140, player_run] {
     self.weaponframe = 8;
     if (superknife && (superknife_multihit || !hit_in_current_animation)) {
-        hit_in_current_animation = TRUE;
-        W_FireKnife();
+        if (W_FireKnife())
+            hit_in_current_animation = TRUE;
     }
 };
 
