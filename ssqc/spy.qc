@@ -1459,7 +1459,7 @@ void () Spy_DropBackpack = {
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
     
-	if(seperatebackpackmodels)
+	if(splitbackpackmodels)
 		FO_SetModel(newmis, "progs/deathbag.mdl");
 	else
 		FO_SetModel(newmis, "progs/backpack.mdl");
