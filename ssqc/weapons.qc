@@ -206,7 +206,7 @@ void () W_FireAxe = {
     }
 };
 
-void () W_FireKnife = {
+int () W_FireKnife = {
     local vector source;
     local vector org;
     local vector def;
@@ -241,6 +241,8 @@ void () W_FireKnife = {
             TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
         }
+
+        return TRUE;
     } else {                    // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -250,6 +252,8 @@ void () W_FireKnife = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+
+        return FALSE;
     }
 };
 
