@@ -635,6 +635,7 @@ void () DecodeLevelParms = {
 
         // make knife hit on every frame of animation
         superknife = CF_GetSetting("sk", "superknife", "on");
+        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "on");
 
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
@@ -830,6 +831,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             superknife = TRUE;
+            superknife_multihit = TRUE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
@@ -905,6 +907,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
@@ -941,6 +944,7 @@ void () DecodeLevelParms = {
             ng_damage = 18;
             sng_damage = 26;
             superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
