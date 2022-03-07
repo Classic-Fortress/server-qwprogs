@@ -183,7 +183,6 @@ void () player_axe4 =[122, player_run] {
 };
 
 void () player_spanner1 =[119, player_spanner2] {
-    hit_in_current_animation = FALSE;
     self.weaponframe = 1;
 
     if (superspanner)
@@ -200,7 +199,9 @@ void () player_spanner2 =[120, player_spanner3] {
 void () player_spanner3 =[121, player_spanner4] {
     self.weaponframe = 3;
 
-    if (!superspanner || (superspanner && !hit_in_current_animation))
+    if (!superspanner)
+        W_FireSpanner();
+    else if (!hit_in_current_animation)
         hit_in_current_animation = W_FireSpanner();
 };
 
