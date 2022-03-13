@@ -633,6 +633,9 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // allow axe to hit on any frame of animation
+        superaxe = CF_GetSetting("ss", "superaxe", "on");
+
         // allow spanner to hit on any frame of animation
         superspanner = CF_GetSetting("ss", "superspanner", "on");
 
@@ -835,6 +838,7 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superaxe = TRUE;
             superspanner = TRUE;
             superknife = TRUE;
             superknife_multihit = TRUE;
@@ -912,6 +916,7 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superaxe = FALSE;
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
@@ -950,6 +955,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superaxe = FALSE;
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;

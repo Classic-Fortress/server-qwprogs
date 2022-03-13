@@ -167,19 +167,62 @@ void () player_autorifle3 =[118, player_run] {
 
 void () player_axe1 =[119, player_axe2] {
     self.weaponframe = 1;
+
+    if (superaxe)
+        hit_in_current_animation = W_FireAxe();
 };
 
 void () player_axe2 =[120, player_axe3] {
     self.weaponframe = 2;
+
+    if (superaxe && !hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
 };
 
 void () player_axe3 =[121, player_axe4] {
     self.weaponframe = 3;
-    W_FireAxe();
+
+    if (!superaxe)
+        W_FireAxe();
+    else if (!hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
 };
 
 void () player_axe4 =[122, player_run] {
     self.weaponframe = 4;
+
+    if (superaxe && !hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
+};
+
+void () player_axeb1 =[124, player_axeb2] {
+    self.weaponframe = 5;
+
+    if (superaxe)
+        hit_in_current_animation = W_FireAxe();
+};
+
+void () player_axeb2 =[125, player_axeb3] {
+    self.weaponframe = 6;
+
+    if (superaxe && !hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
+};
+
+void () player_axeb3 =[126, player_axeb4] {
+    self.weaponframe = 7;
+
+    if (!superaxe)
+        W_FireAxe();
+    else if (!hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
+};
+
+void () player_axeb4 =[127, player_run] {
+    self.weaponframe = 8;
+
+    if (superaxe && !hit_in_current_animation)
+        hit_in_current_animation = W_FireAxe();
 };
 
 void () player_spanner1 =[119, player_spanner2] {
@@ -210,23 +253,6 @@ void () player_spanner4 =[122, player_run] {
 
     if (superspanner && !hit_in_current_animation)
         hit_in_current_animation = W_FireSpanner();
-};
-
-void () player_axeb1 =[125, player_axeb2] {
-    self.weaponframe = 5;
-};
-
-void () player_axeb2 =[126, player_axeb3] {
-    self.weaponframe = 6;
-};
-
-void () player_axeb3 =[127, player_axeb4] {
-    self.weaponframe = 7;
-    W_FireAxe();
-};
-
-void () player_axeb4 =[128, player_run] {
-    self.weaponframe = 8;
 };
 
 void () player_knife1 =[119, player_knife2] {

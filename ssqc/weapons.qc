@@ -176,7 +176,7 @@ void (float att_delay) Attack_Finished = {
         self.attack_finished = time + att_delay;
 };
 
-void () W_FireAxe = {
+float () W_FireAxe = {
     local vector source;
     local vector org;
     local vector def;
@@ -185,7 +185,7 @@ void () W_FireAxe = {
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
@@ -194,6 +194,7 @@ void () W_FireAxe = {
 
         deathmsg = DMSG_AXE;
         TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
+        return TRUE;
     } else {                    // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -203,6 +204,7 @@ void () W_FireAxe = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
