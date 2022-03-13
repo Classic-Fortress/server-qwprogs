@@ -1955,8 +1955,6 @@ float (float weap) CheckForAmmo = {
 
 void () player_axe1;
 void () player_axeb1;
-void () player_axec1;
-void () player_axed1;
 
 void () player_spanner1;
 void () player_spanner2;
@@ -2007,14 +2005,10 @@ void () W_Attack = {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_axe1();
-        else if (r < 0.5)
-            player_axeb1();
-        else if (r < 0.75)
-            player_axec1();
         else
-            player_axed1();
+            player_axeb1();
     } else if (self.current_weapon == WEAP_KNIFE) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);

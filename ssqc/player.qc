@@ -229,40 +229,6 @@ void () player_axeb4 =[128, player_run] {
     self.weaponframe = 8;
 };
 
-void () player_axec1 =[131, player_axec2] {
-    self.weaponframe = 1;
-};
-
-void () player_axec2 =[132, player_axec3] {
-    self.weaponframe = 2;
-};
-
-void () player_axec3 =[133, player_axec4] {
-    self.weaponframe = 3;
-    W_FireAxe();
-};
-
-void () player_axec4 =[134, player_run] {
-    self.weaponframe = 4;
-};
-
-void () player_axed1 =[137, player_axed2] {
-    self.weaponframe = 5;
-};
-
-void () player_axed2 =[138, player_axed3] {
-    self.weaponframe = 6;
-};
-
-void () player_axed3 =[139, player_axed4] {
-    self.weaponframe = 7;
-    W_FireAxe();
-};
-
-void () player_axed4 =[140, player_run] {
-    self.weaponframe = 8;
-};
-
 void () player_knife1 =[119, player_knife2] {
     self.weaponframe = 1;
 
