@@ -800,10 +800,10 @@ void UpdateClientGrenadePrimed(entity pl, float grentype) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
     WriteFloat(MSG_MULTICAST, grentype);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
