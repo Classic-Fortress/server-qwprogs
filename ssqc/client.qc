@@ -646,7 +646,7 @@ void () DecodeLevelParms = {
         superknife = CF_GetSetting("sk", "superknife", "on");
 
         // allow knife to hit on every frame of animation
-        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "on");
+        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "off");
 
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
@@ -845,7 +845,7 @@ void () DecodeLevelParms = {
             supermedikit = TRUE;
             superspanner = TRUE;
             superknife = TRUE;
-            superknife_multihit = TRUE;
+            superknife_multihit = FALSE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
