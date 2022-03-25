@@ -593,6 +593,7 @@ float ng_velocity;
 float ng_damage;
 float sng_damage;
 float superaxe;
+float supermedikit;
 float superspanner;
 float superknife;
 float superknife_multihit;

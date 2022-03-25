@@ -313,70 +313,62 @@ void () player_knifeb4 =[128, player_run] {
 
 void () player_medikit1 =[119, player_medikit2] {
     self.weaponframe = 1;
+
+    if (supermedikit)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikit2 =[120, player_medikit3] {
     self.weaponframe = 2;
+
+    if (supermedikit && !hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikit3 =[121, player_medikit4] {
     self.weaponframe = 3;
-    W_FireMedikit();
+
+    if (!supermedikit)
+        W_FireMedikit();
+    else if (!hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikit4 =[122, player_run] {
     self.weaponframe = 4;
+
+    if (supermedikit && !hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikitb1 =[125, player_medikitb2] {
     self.weaponframe = 5;
+
+    if (supermedikit)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikitb2 =[126, player_medikitb3] {
     self.weaponframe = 6;
+
+    if (supermedikit && !hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikitb3 =[127, player_medikitb4] {
     self.weaponframe = 7;
-    W_FireMedikit();
+
+    if (!supermedikit)
+        W_FireMedikit();
+    else if (!hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_medikitb4 =[128, player_run] {
     self.weaponframe = 8;
-};
 
-void () player_medikitc1 =[131, player_medikitc2] {
-    self.weaponframe = 1;
-};
-
-void () player_medikitc2 =[132, player_medikitc3] {
-    self.weaponframe = 2;
-};
-
-void () player_medikitc3 =[133, player_medikitc4] {
-    self.weaponframe = 3;
-    W_FireMedikit();
-};
-
-void () player_medikitc4 =[134, player_run] {
-    self.weaponframe = 4;
-};
-
-void () player_medikitd1 =[137, player_medikitd2] {
-    self.weaponframe = 5;
-};
-
-void () player_medikitd2 =[138, player_medikitd3] {
-    self.weaponframe = 6;
-};
-
-void () player_medikitd3 =[139, player_medikitd4] {
-    self.weaponframe = 7;
-    W_FireMedikit();
-};
-
-void () player_medikitd4 =[140, player_run] {
-    self.weaponframe = 8;
+    if (supermedikit && !hit_in_current_animation)
+        hit_in_current_animation = W_FireMedikit();
 };
 
 void () player_nail1 =[103, player_nail2] {

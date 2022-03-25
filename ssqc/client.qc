@@ -636,6 +636,9 @@ void () DecodeLevelParms = {
         // allow axe to hit on any frame of animation
         superaxe = CF_GetSetting("ss", "superaxe", "on");
 
+        // allow medikit to hit on any frame of animation
+        supermedikit = CF_GetSetting("sm", "supermedikit", "on");
+
         // allow spanner to hit on any frame of animation
         superspanner = CF_GetSetting("ss", "superspanner", "on");
 
@@ -839,6 +842,7 @@ void () DecodeLevelParms = {
             ng_velocity = 1500;
             old_ng_rof = FALSE;
             superaxe = TRUE;
+            supermedikit = TRUE;
             superspanner = TRUE;
             superknife = TRUE;
             superknife_multihit = TRUE;
@@ -917,6 +921,7 @@ void () DecodeLevelParms = {
             old_hp_armor = TRUE;
             ng_velocity = 1000;
             superaxe = FALSE;
+            supermedikit = FALSE;
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
@@ -956,6 +961,7 @@ void () DecodeLevelParms = {
             ng_damage = 18;
             sng_damage = 26;
             superaxe = FALSE;
+            supermedikit = FALSE;
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
