@@ -176,7 +176,7 @@ void (float att_delay) Attack_Finished = {
         self.attack_finished = time + att_delay;
 };
 
-void () W_FireAxe = {
+float () W_FireAxe = {
     local vector source;
     local vector org;
     local vector def;
@@ -185,7 +185,7 @@ void () W_FireAxe = {
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
@@ -194,6 +194,7 @@ void () W_FireAxe = {
 
         deathmsg = DMSG_AXE;
         TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
+        return TRUE;
     } else {                    // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -203,6 +204,7 @@ void () W_FireAxe = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
@@ -214,8 +216,9 @@ int () W_FireKnife = {
     makevectors(self.v_angle);
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
+
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
@@ -257,7 +260,7 @@ int () W_FireKnife = {
     }
 };
 
-void () W_FireSpanner = {
+int () W_FireSpanner = {
     local vector source;
     local vector org;
     local float healam;
@@ -266,16 +269,15 @@ void () W_FireSpanner = {
     makevectors(self.v_angle);
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
+
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
 
     // It may be a trigger that can be activated by the engineer's spanner
     if (trace_ent.goal_activation & TFGA_SPANNER) {
-
         if (Activated(trace_ent, self)) {
-
             DoResults(trace_ent, self, TRUE);
 
             if (trace_ent.classname == "func_button") {
@@ -287,11 +289,9 @@ void () W_FireSpanner = {
                 self = other;
             }
         } else if (trace_ent.else_goal != 0) {
-
             te = Findgoal(trace_ent.else_goal);
             if (te)
                 AttemptToActivate(te, self, trace_ent);
-
         } else {
             FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
             WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -302,53 +302,46 @@ void () W_FireSpanner = {
             WriteCoord(MSG_MULTICAST, org_z);
             multicast(org, MULTICAST_PVS);
         }
-        return;
+        return TRUE;
     }
-    if (trace_ent.takedamage) {
 
+    if (trace_ent.takedamage) {
         if (trace_ent.classname == "building_dispenser") {
             Engineer_UseDispenser(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun") {
-
             Engineer_UseSentryGun(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun_base") {
-
             if (trace_ent.oldenemy)
                 Engineer_UseSentryGun(trace_ent.oldenemy);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "player") {
-
-            if ((((trace_ent.team_no == self.team_no) &&
-                  (self.team_no != 0)) && teamplay) || coop) {
+            if ((((trace_ent.team_no == self.team_no) && (self.team_no != 0)) && teamplay) || coop) {
 
                 healam = WEAP_SPANNER_REPAIR;
+
                 if (self.ammo_cells < healam)
                     healam = self.ammo_cells;
-                if (trace_ent.armortype == 0)
-                    return;
 
-                if ((trace_ent.maxarmor - trace_ent.armorvalue) <
-                    (healam * 4))
-                    healam =
-                        ceil((trace_ent.maxarmor -
-                              trace_ent.armorvalue) / 4);
+                if (trace_ent.armortype == 0)
+                    return TRUE;
+
+                if ((trace_ent.maxarmor - trace_ent.armorvalue) < (healam * 4))
+                    healam = ceil((trace_ent.maxarmor - trace_ent.armorvalue) / 4);
 
                 if (healam > 0) {
+                    trace_ent.armorvalue = trace_ent.armorvalue + healam * 4;
 
-                    trace_ent.armorvalue =
-                        trace_ent.armorvalue + healam * 4;
                     if (trace_ent.armorvalue > trace_ent.maxarmor)
                         trace_ent.armorvalue = trace_ent.maxarmor;
 
                     self.ammo_cells = self.ammo_cells - healam;
 
-                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
-                          ATTN_NORM);
+                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
 
                     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
                     WriteByte(MSG_MULTICAST, TE_GUNSHOT);
@@ -357,11 +350,11 @@ void () W_FireSpanner = {
                     WriteCoord(MSG_MULTICAST, org_y);
                     WriteCoord(MSG_MULTICAST, org_z);
                     multicast(org, MULTICAST_PVS);
-
-                    W_SetCurrentAmmo(self);
                 }
-                return;
+
+                return TRUE;
             }
+
             trace_ent.axhitme = 1;
             SpawnBlood(org, 20);
             deathmsg = DMSG_SPANNER;
@@ -369,6 +362,7 @@ void () W_FireSpanner = {
         } else {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
+        return TRUE;
     } else {
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -378,10 +372,11 @@ void () W_FireSpanner = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
-void () W_FireMedikit = {
+float () W_FireMedikit = {
     local vector source;
     local vector org;
     local float healam;
@@ -390,14 +385,13 @@ void () W_FireMedikit = {
 
     source = self.origin + '0 0 16';
     traceline(source, (source + (v_forward * 64)), 0, self);
-    if ((trace_fraction == 1)) {
 
-        return;
+    if (trace_fraction == 1)
+        return FALSE;
 
-    }
     org = trace_endpos - v_forward * 4;
-    if (trace_ent.takedamage) {
 
+    if (trace_ent.takedamage) {
         if (trace_ent.classname == "player") {
 
             if (((trace_ent.team_no == self.team_no) &&
@@ -525,7 +519,7 @@ void () W_FireMedikit = {
                         if (trace_ent.infection_team_no != self.team_no)
                             TF_AddFrags(self, 1);
                     }
-                    return;
+                    return TRUE;
                 }
                 if (trace_ent.numflames > 0) {
 
@@ -537,7 +531,7 @@ void () W_FireMedikit = {
                         bprint(PRINT_MEDIUM, self.netname, " put out ",
                                trace_ent.netname, "'s fire.\n");
                     }
-                    return;
+                    return TRUE;
                 }
                 if (old_medikit) {
 
@@ -608,11 +602,11 @@ void () W_FireMedikit = {
                 T_Damage(trace_ent, self, self, 10);
 
                 if (trace_ent.playerclass == PC_MEDIC)
-                    return;
+                    return TRUE;
                 if (cb_prematch)
-                    return;
+                    return TRUE;
                 if (trace_ent.tfstate & TFSTATE_INFECTED)
-                    return;
+                    return TRUE;
 
                 trace_ent.tfstate = trace_ent.tfstate | TFSTATE_INFECTED;
                 BioInfection = spawn();
@@ -627,6 +621,8 @@ void () W_FireMedikit = {
         } else {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
+        return TRUE;
+
     } else {
         // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
@@ -637,6 +633,7 @@ void () W_FireMedikit = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
@@ -1962,13 +1959,14 @@ float (float weap) CheckForAmmo = {
 
 void () player_axe1;
 void () player_axeb1;
-void () player_axec1;
-void () player_axed1;
+
+void () player_spanner1;
+void () player_spanner2;
+void () player_spanner3;
+void () player_spanner4;
 
 void () player_knife1;
 void () player_knifeb1;
-void () player_knifec1;
-void () player_knifed1;
 
 void () player_shot1;
 void () player_nail1;
@@ -1982,8 +1980,6 @@ void () player_assaultcannondown1;
 
 void () player_medikit1;
 void () player_medikitb1;
-void () player_medikitc1;
-void () player_medikitd1;
 
 void () W_Attack = {
     local float r;
@@ -2011,30 +2007,22 @@ void () W_Attack = {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_axe1();
-        else if (r < 0.5)
-            player_axeb1();
-        else if (r < 0.75)
-            player_axec1();
         else
-            player_axed1();
+            player_axeb1();
     } else if (self.current_weapon == WEAP_KNIFE) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_knife1();
-        else if (r < 0.5)
-            player_knifeb1();
-        else if (r < 0.75)
-            player_knifec1();
         else
-            player_knifed1();
+            player_knifeb1();
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        player_axe1();
+        player_spanner1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         if (CheckForReload() == TRUE)
             return;
@@ -2150,14 +2138,10 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_MEDIKIT) {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_medikit1();
-        else if (r < 0.5)
-            player_medikitb1();
-        else if (r < 0.75)
-            player_medikitc1();
         else
-            player_medikitd1();
+            player_medikitb1();
         Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
         FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);

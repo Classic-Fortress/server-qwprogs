@@ -633,9 +633,20 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
-        // make knife hit on every frame of animation
+        // allow axe to hit on any frame of animation
+        superaxe = CF_GetSetting("ss", "superaxe", "on");
+
+        // allow medikit to hit on any frame of animation
+        supermedikit = CF_GetSetting("sm", "supermedikit", "on");
+
+        // allow spanner to hit on any frame of animation
+        superspanner = CF_GetSetting("ss", "superspanner", "on");
+
+        // allow knife to hit on any frame of animation
         superknife = CF_GetSetting("sk", "superknife", "on");
-        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "on");
+
+        // allow knife to hit on every frame of animation
+        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "off");
 
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
@@ -830,8 +841,11 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superaxe = TRUE;
+            supermedikit = TRUE;
+            superspanner = TRUE;
             superknife = TRUE;
-            superknife_multihit = TRUE;
+            superknife_multihit = FALSE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
@@ -906,6 +920,9 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superaxe = FALSE;
+            supermedikit = FALSE;
+            superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
             old_ng_rof = TRUE;
@@ -943,6 +960,9 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superaxe = FALSE;
+            supermedikit = FALSE;
+            superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
             old_ng_rof = TRUE;
