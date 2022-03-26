@@ -1334,7 +1334,7 @@ void () BackpackTouch = {
         sprint(other, PRINT_LOW, s, " cells  ");
     }
     if ((self.armorvalue && (other.playerclass == 9)) &&
-        (other.ammo_cells < other.maxammo_cells)) {
+        (other.ammo_cells < other.maxammo_cells) && !standardizedeathammo) {
         s = ftos(self.armorvalue);
         sprint(other, PRINT_LOW, s, " metal  ");
         other.ammo_cells = other.ammo_cells + self.armorvalue;
@@ -1362,10 +1362,21 @@ void () DropBackpack = {
     newmis = spawn();
     newmis.origin = self.origin - '0 0 24';
 
-    newmis.ammo_shells = self.ammo_shells;
-    newmis.ammo_nails = self.ammo_nails;
-    newmis.ammo_rockets = self.ammo_rockets;
-    newmis.ammo_cells = self.ammo_cells;
+	if(standardizedeathammo)
+	{
+		newmis.ammo_shells = deathammo_shells;
+		newmis.ammo_nails = deathammo_nails;
+		newmis.ammo_rockets = deathammo_rockets;
+		newmis.ammo_cells = deathammo_cells;
+	}
+	else
+	{
+		newmis.ammo_shells = self.ammo_shells;
+		newmis.ammo_nails = self.ammo_nails;
+		newmis.ammo_rockets = self.ammo_rockets;
+		newmis.ammo_cells = self.ammo_cells;
+	}
+	
     if (drop_grenpack) {
         if (drop_gren1 == -1)
             newmis.no_grenades_1 = self.no_grenades_1;
@@ -1394,7 +1405,12 @@ void () DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    FO_SetModel(newmis, "progs/backpack.mdl");
+    
+	if(splitbackpackmodels)
+		FO_SetModel(newmis, "progs/deathbag.mdl");
+	else
+		FO_SetModel(newmis, "progs/backpack.mdl");
+		
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
     newmis.classname = "backpack";

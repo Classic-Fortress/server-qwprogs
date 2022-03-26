@@ -116,7 +116,12 @@ void () TeamFortress_Discard = {
     newmis.nextthink = time + 30;
     newmis.think = SUB_Remove;
     newmis.touch = TeamFortress_AmmoboxTouch;
-    FO_SetModel(newmis, "progs/backpack.mdl");
+    
+	if(splitbackpackmodels)
+		FO_SetModel(newmis, "progs/discard.mdl");
+	else
+		FO_SetModel(newmis, "progs/backpack.mdl");
+
 };
 
 void () TeamFortress_Discard_DropAmmo = {
