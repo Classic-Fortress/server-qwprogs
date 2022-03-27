@@ -256,7 +256,7 @@ int () W_FireKnife = {
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
 
-        return FALSE;
+        return TRUE;
     }
 };
 
