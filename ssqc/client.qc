@@ -640,7 +640,7 @@ void () DecodeLevelParms = {
         supermedikit = CF_GetSetting("sm", "supermedikit", "on");
 
         // allow spanner to hit on any frame of animation
-        superspanner = CF_GetSetting("ss", "superspanner", "on");
+        superspanner = CF_GetSetting("ss", "superspanner", "off");
 
         // allow knife to hit on any frame of animation
         superknife = CF_GetSetting("sk", "superknife", "on");
@@ -855,7 +855,7 @@ void () DecodeLevelParms = {
             old_ng_rof = FALSE;
             superaxe = TRUE;
             supermedikit = TRUE;
-            superspanner = TRUE;
+            superspanner = FALSE;
             superknife = TRUE;
             superknife_multihit = FALSE;
             pyro_type = PYRO_OZTF;
