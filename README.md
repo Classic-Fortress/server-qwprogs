@@ -16,8 +16,11 @@ New features
 * optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide
 * localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
+* localinfo superaxe on/off - causes the axe to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo supermedikit on/off - causes the medikit to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo superspanner on/off - causes the spanner to hit on all four attack frames (instead of only on 3rd frame)
 * localinfo superknife on/off - causes the knife to hit on all four attack frames (instead of only on 3rd frame)
-* localinfo superkinfe_multihit on/off - controls whether multiple hits are allowed in a single attack
+* localinfo superknife_multihit on/off - controls whether multiple hits are allowed in a single attack
 * scout has "new" flash grenades - localinfo fo_flash on (default on)
 * ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
 * `cmd votemap`/`cmd showvotes`/`cmd listmaps` can now be used at any time and are part of the same system
