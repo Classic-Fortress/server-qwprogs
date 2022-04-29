@@ -1458,7 +1458,12 @@ void () Spy_DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    FO_SetModel(newmis, "progs/backpack.mdl");
+    
+	if(splitbackpackmodels)
+		FO_SetModel(newmis, "progs/deathbag.mdl");
+	else
+		FO_SetModel(newmis, "progs/backpack.mdl");
+
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;
     newmis.classname = "backpack";
