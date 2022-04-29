@@ -105,6 +105,13 @@ void () worldspawn = {
     cvar_set("sv_waterfriction", "1");
     if (teamplay == 0)
         cvar_set("teamplay", "1");
+
+    if (infokey(world, "starttime") == string_null) {
+        calltimeofday();
+        string timestamp = strcat(tod_year, tod_mon, tod_day, tod_hour, tod_min, tod_sec);
+        localcmd(strcat("serverinfo starttime \"", timestamp, "\"\n"));
+    }
+
     localcmd("serverinfo fo_rev \"");
     localcmd(REV);
     localcmd("\"\n");

@@ -1575,7 +1575,7 @@ void (entity pl) W_SetCurrentAmmo = {
         return;
 
     if (!(self.tfstate & TFSTATE_AIMING) && !(self.tfstate & TFSTATE_CANT_MOVE))
-        player_run();
+        /* player_run(); */
 
     pl.items = pl.items - (pl.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
     pl.weapon = 0;
