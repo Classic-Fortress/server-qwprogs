@@ -592,6 +592,8 @@ float project_weapons_max_latency;
 float ng_velocity;
 float ng_damage;
 float sng_damage;
+float superknife;
+float superknife_multihit;
 float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;

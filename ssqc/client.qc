@@ -633,6 +633,10 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // make knife hit on every frame of animation
+        superknife = CF_GetSetting("sk", "superknife", "on");
+        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "on");
+
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
@@ -826,6 +830,8 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superknife = TRUE;
+            superknife_multihit = TRUE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
@@ -900,6 +906,8 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
@@ -935,6 +943,8 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
@@ -3224,9 +3234,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
                 } else if (pf_deathmsg == DMSG_AXE) {
                     s_deathstring2 = "\n";
-                    if (pe_attacker.playerclass == PC_SPY)
-                        s_deathstring = " was knife-murdered by ";
-                    else if (pe_attacker.playerclass == PC_SCOUT)
+                    if (pe_attacker.playerclass == PC_SCOUT)
                         s_deathstring = "'s mellon was split by ";
                     else if (pe_attacker.playerclass == PC_SNIPER)
                         s_deathstring = " was put on the chop block by ";
@@ -3243,6 +3251,12 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         s_deathstring2 = "'s axe\n";
                     } else
                         s_deathstring = " was ax-murdered by ";
+                } else if (pf_deathmsg == DMSG_KNIFE) {
+                    s_deathstring = " was knife-murdered by ";
+                    s_deathstring2 = "\n";
+                } else if (pf_deathmsg == DMSG_BACKSTAB) {
+                    s_deathstring = " gets knifed from behind by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_SPANNER) {
                     s_deathstring = " was spanner-murdered by ";
                     s_deathstring2 = "\n";
@@ -3341,9 +3355,6 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring2 = "'s bullet spray.\n";
                 } else if (pf_deathmsg == DMSG_ASSAULTCANNON) {
                     s_deathstring = " gets sawn in half by ";
-                    s_deathstring2 = "\n";
-                } else if (pf_deathmsg == DMSG_BACKSTAB) {
-                    s_deathstring = " gets knifed from behind by ";
                     s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_TRANQ) {
                     s_deathstring = " is put to sleep by ";

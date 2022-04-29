@@ -189,36 +189,11 @@ void () W_FireAxe = {
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
-
         trace_ent.axhitme = 1;
         SpawnBlood(org, 20);
 
-        if ((self.playerclass != PC_SPY) ||
-            (trace_ent.classname != "player")) {
-            deathmsg = DMSG_AXE;
-            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM,
-                        TF_TD_OTHER);
-        } else {
-            self.weaponmode = 1;
-            self.weaponmodel = "progs/v_knife2.mdl";
-
-            // Check direction of Attack
-            makevectors(trace_ent.v_angle);
-            def = v_right;
-            makevectors(self.v_angle);
-
-            // Backstab
-            if (crossproducttf(def, v_forward) > 0) {
-                deathmsg = DMSG_BACKSTAB;
-                TF_T_Damage(trace_ent, self, self, 120,
-                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
-                            TF_TD_OTHER);
-            } else {
-                deathmsg = DMSG_AXE;
-                TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
-                            TF_TD_OTHER);
-            }
-        }
+        deathmsg = DMSG_AXE;
+        TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
     } else {                    // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -228,6 +203,57 @@ void () W_FireAxe = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+    }
+};
+
+int () W_FireKnife = {
+    local vector source;
+    local vector org;
+    local vector def;
+
+    makevectors(self.v_angle);
+    source = self.origin + '0 0 16';
+    traceline(source, source + v_forward * 64, FALSE, self);
+    if (trace_fraction == 1)
+        return;
+
+    org = trace_endpos - v_forward * 4;
+    if (trace_ent.takedamage) {
+        trace_ent.axhitme = 1;
+        SpawnBlood(org, 20);
+
+        self.weaponmode = 1;
+        self.weaponmodel = "progs/v_knife2.mdl";
+
+        // Check direction of Attack
+        makevectors(trace_ent.v_angle);
+        def = v_right;
+        makevectors(self.v_angle);
+
+        // Backstab
+        if (crossproducttf(def, v_forward) > 0) {
+            deathmsg = DMSG_BACKSTAB;
+            TF_T_Damage(trace_ent, self, self, 120,
+                    TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
+                    TF_TD_OTHER);
+        } else {
+            deathmsg = DMSG_KNIFE;
+            TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
+                    TF_TD_OTHER);
+        }
+
+        return TRUE;
+    } else {                    // hit wall
+        FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_GUNSHOT);
+        WriteByte(MSG_MULTICAST, 3);
+        WriteCoord(MSG_MULTICAST, org_x);
+        WriteCoord(MSG_MULTICAST, org_y);
+        WriteCoord(MSG_MULTICAST, org_z);
+        multicast(org, MULTICAST_PVS);
+
+        return FALSE;
     }
 };
 
@@ -1559,13 +1585,14 @@ void (entity pl) W_SetCurrentAmmo = {
 
     if (pl.current_weapon == WEAP_AXE) {
         pl.currentammo = 0;
-        if (pl.playerclass == 8) {
-            if (pl.weaponmode == 0)
-                pl.weaponmodel = "progs/v_knife.mdl";
-            else
-                pl.weaponmodel = "progs/v_knife2.mdl";
-        } else
-            pl.weaponmodel = "progs/v_axe.mdl";
+        pl.weaponmodel = "progs/v_axe.mdl";
+        pl.weaponframe = 0;
+    } else if (pl.current_weapon == WEAP_KNIFE) {
+        pl.currentammo = 0;
+        if (pl.weaponmode == 0)
+            pl.weaponmodel = "progs/v_knife.mdl";
+        else
+            pl.weaponmodel = "progs/v_knife2.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_SPANNER) {
         pl.currentammo = pl.ammo_cells;
@@ -1740,6 +1767,8 @@ float () W_BestWeapon = {
         return WEAP_SHOTGUN;
     else if (it & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (it & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (it & WEAP_SPANNER)
         return WEAP_SPANNER;
     else if (it & WEAP_AXE)
@@ -1779,8 +1808,10 @@ void () W_ChangeToBestWeapon = {
 }
 
 float () W_CheckNoAmmo = {
-    if (self.current_weapon == WEAP_AXE || self.current_weapon == WEAP_SPANNER
-                || self.current_weapon == WEAP_MEDIKIT)
+    if (self.current_weapon == WEAP_AXE
+            || self.current_weapon == WEAP_SPANNER
+            || self.current_weapon == WEAP_KNIFE
+            || self.current_weapon == WEAP_MEDIKIT)
         return 1;
     else if (self.current_weapon == WEAP_SUPER_NAILGUN && self.currentammo >= 4)
         return 1;
@@ -1934,6 +1965,11 @@ void () player_axeb1;
 void () player_axec1;
 void () player_axed1;
 
+void () player_knife1;
+void () player_knifeb1;
+void () player_knifec1;
+void () player_knifed1;
+
 void () player_shot1;
 void () player_nail1;
 void () player_light1;
@@ -1983,6 +2019,18 @@ void () W_Attack = {
             player_axec1();
         else
             player_axed1();
+    } else if (self.current_weapon == WEAP_KNIFE) {
+        Attack_Finished(0.5);
+        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        r = random();
+        if (r < 0.25)
+            player_knife1();
+        else if (r < 0.5)
+            player_knifeb1();
+        else if (r < 0.75)
+            player_knifec1();
+        else
+            player_knifed1();
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
@@ -2193,6 +2241,7 @@ float (float weap) W_GetSlot = {
 
 float (float weap) W_OldGetSlot = {
     if (weap == WEAP_AXE
+            || weap == WEAP_KNIFE
             || weap == WEAP_MEDIKIT
             || weap == WEAP_SPANNER)
         return 1;
@@ -2364,6 +2413,8 @@ float (float inp) W_OldAmmoSlot = {
 float () W_OldWeaponSlot1 = {
     if (self.weapons_carried & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (self.weapons_carried & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (self.weapons_carried & WEAP_SPANNER)
         return WEAP_SPANNER;
     else
@@ -2499,6 +2550,8 @@ float () W_WeaponSlot3 = {
 float () W_WeaponSlot4 = {
     if (self.weapons_carried & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (self.weapons_carried & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (self.weapons_carried & WEAP_SPANNER)
         return WEAP_SPANNER;
     else
@@ -2662,7 +2715,7 @@ float (float newSlot) W_OldImpulseFromNewSlot = {
             return W_OldGetSlot(WEAP_AXE);
         }
         else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_AXE);
+            return W_OldGetSlot(WEAP_KNIFE);
         }
         else if (self.playerclass == PC_ENGINEER) {
             return W_OldGetSlot(WEAP_SPANNER);
