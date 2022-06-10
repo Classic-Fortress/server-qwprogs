@@ -174,7 +174,6 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
 
-        
         if(inp > 0) {
             if (TeamFortress_TeamIsCivilian(self.team_no) && self.playerclass == PC_CIVILIAN) {
                 sprint(self, PRINT_HIGH, "You cannot change class\n");
@@ -329,6 +328,11 @@ void (float inp) TeamFortress_ChangeClass = {
         TeamFortress_SetSpeed(self);
     }
     self.spawn_time = time;
+
+    local float autodisguise = stof(infokey(self, "autodisguise"));
+    if (self.playerclass == PC_SPY && autodisguise) {
+        TeamFortress_SpyAutoDisguise();
+    };
 };
 
 void () TeamFortress_DisplayLegalClasses = {

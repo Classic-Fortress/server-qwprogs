@@ -68,7 +68,7 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
-
+void () TeamFortress_SpyAutoDisguise;
 
 void () info_intermission =
 {
@@ -1990,6 +1990,7 @@ void () PutClientInServer = {
     if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
         TeamFortress_ChangeClass(11);
     }
+
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
             if (self.playerclass != 0) {
@@ -2007,13 +2008,14 @@ void () PutClientInServer = {
             TeamFortress_ExecClassScript(self);
         }
     }
-    
-/*
-    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
-        TeamFortress_ChangeClass(0);
-        Menu_Class(0);
-    }
-*/
+
+    /*
+        if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
+            TeamFortress_ChangeClass(0);
+            Menu_Class(0);
+        }
+    */
+
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -2036,12 +2038,13 @@ void () PutClientInServer = {
 
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
+
     TeamFortress_SetEquipment();
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_StartTimers();
-    
+
     if(quadmode && quad_roles) {
         sprint(self, PRINT_HIGH, "\sRole:\s ", GetTeamRole(self.team_no).name, "\n");
     }
@@ -2142,6 +2145,11 @@ void () PutClientInServer = {
 
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
+    }
+
+    local float autodisguise = stof(infokey(self, "autodisguise"));
+    if (self.playerclass == PC_SPY && autodisguise) {
+        TeamFortress_SpyAutoDisguise();
     }
 };
 
@@ -3666,6 +3674,47 @@ void () InitReverseCap = {
     }
 
 }
+
+void () TeamFortress_SpyAutoDisguise = {
+    local float no_teams_with_at_least_one_player = (
+            TeamFortress_TeamGetNoPlayers(1) > 0 +
+            TeamFortress_TeamGetNoPlayers(2) > 0 +
+            TeamFortress_TeamGetNoPlayers(3) > 0 +
+            TeamFortress_TeamGetNoPlayers(4) > 0
+            )
+
+    // only show this option if there's only two teams
+    switch(no_teams_with_at_least_one_player) {
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        // Do everything
+        break;
+    default:
+        break;
+    }
+
+    local entity te = find(world, classname, "player");
+    local float latest_spawn_time;
+    local entity enemy_to_disguise_as;
+
+    while (te != world) {
+        if (te.team_no != self.team_no) {
+            if (te.spawn_time > latest_spawn_time) {
+                latest_spawn_time = te.spawn_time;
+                enemy_to_disguise_as = te;
+            }
+        }
+
+        te = find(te, classname, "player");
+    }
+
+    CF_Spy_ChangeSkin(self, enemy_to_disguise_as.skin);
+    CF_Spy_ChangeColor(self, enemy_to_disguise_as.team_no);
+};
+
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*

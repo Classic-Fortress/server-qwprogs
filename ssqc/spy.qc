@@ -1435,6 +1435,10 @@ void (entity spy) Spy_RemoveDisguise = {
     }
     if (coverblown)
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
+
+    local float autodisguise = stof(infokey(self, "autodisguise"));
+    if (autodisguise)
+        TeamFortress_SpyAutoDisguise();
 };
 
 void () Spy_DropBackpack = {
