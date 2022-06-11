@@ -3700,7 +3700,7 @@ void() SV_RunClientCommand = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTf_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
                 FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
