@@ -959,7 +959,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
-	          scoutscanspike = FALSE;
+            scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
@@ -2149,6 +2149,20 @@ void () PutClientInServer = {
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (self.playerclass == PC_SPY && autodisguise) {
         FO_Spy_DisguiseLastSpawned(self);
+    }
+
+    if(self.playerclass == PC_SCOUT && self.ScannerOn == 1) {
+        te = spawn();
+        te.nextthink = time + 2;
+        te.think = TeamFortress_Scan;
+        te.owner = self;
+        te.classname = "timer";
+        te.netname = "scanner";
+        sprint(self, PRINT_HIGH, "Scanner on\n");
+        self.ScannerOn = 1;
+
+        if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
+            self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
 };
 

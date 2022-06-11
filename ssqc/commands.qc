@@ -451,7 +451,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
 
-//These only work when alive
+        //These only work when alive
         case "dropammo":
             processedCmd = TRUE;
             if(self.health <= 0) {
