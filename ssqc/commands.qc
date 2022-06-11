@@ -151,6 +151,7 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+
                 UpdateAllClientsTeamScores();
 
                 //stuffcmd(self, "color ");

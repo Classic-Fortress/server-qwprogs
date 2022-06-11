@@ -272,6 +272,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     }
     TeamFortress_TeamShowMemberClasses(pe);
     SetTeamName(pe);
+
     if(!skipclasscheck) {
         if (pe.playerclass == 0) {
             if (TeamFortress_TeamIsCivilian(tno)) {
@@ -288,6 +289,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     }
 
     forceinfokey(pe, "team_no", ftos(tno));
+
     return (1);
 };
 

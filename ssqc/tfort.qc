@@ -104,6 +104,37 @@ void () UseSpecialSkill = {
     }
 };
 
+void () UseSpecialSkill2 = {
+    local vector src;
+
+    self.impulse = 0;
+    switch (self.playerclass)
+    {
+        case PC_SCOUT:
+            // Radar something?
+            break;
+        case PC_SNIPER:
+            break;
+        case PC_DEMOMAN:
+            self.impulse = TF_DETPACK_5;
+            break;
+        case PC_MEDIC:
+            break;
+        case PC_HVYWEAP:
+            break;
+        case PC_PYRO:
+            break;
+        case PC_SPY:
+            self.impulse = TF_DISGUISE_LAST_SPAWNED;
+            break;
+        case PC_ENGINEER:
+            self.impulse = TF_ENGINEER_DETSENTRY;
+            break;
+        case PC_UNDEFINED:
+            break;
+    }
+};
+
 void () RemoveAutoIdTimer = {
     local entity te = find(world, classname, "aitimer");
     while (te != world) {
@@ -174,7 +205,6 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
 
-        
         if(inp > 0) {
             if (TeamFortress_TeamIsCivilian(self.team_no) && self.playerclass == PC_CIVILIAN) {
                 sprint(self, PRINT_HIGH, "You cannot change class\n");
@@ -329,6 +359,11 @@ void (float inp) TeamFortress_ChangeClass = {
         TeamFortress_SetSpeed(self);
     }
     self.spawn_time = time;
+
+    local float autodisguise = stof(infokey(self, "autodisguise"));
+    if (self.playerclass == PC_SPY && autodisguise) {
+        FO_Spy_DisguiseLastSpawned();
+    };
 };
 
 void () TeamFortress_DisplayLegalClasses = {

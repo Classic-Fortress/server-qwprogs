@@ -4,6 +4,9 @@ FortressOne Server
 New features
 ------
 
+* `dlastspawn` Tells spy to disguise as enemy who last spawned.
+* `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
+* `special2` Demoman: `+det5`, Spy: `dlastspawn`, Engineer: `detsentry`
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
@@ -183,10 +186,11 @@ Pyro
 Spy
 ------
 * Improved disguise menu.
+* Auto-disguse (setinfo autodisguise 1).
 * Change color and skin in one sequence.
 * Last disguise (reachable through disguise menu or using /dlast alias).
 * Stop disguising by pressing last weapon bind.
-* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen).
+* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen, /dlastspawn).
 * New aliases for changing skin (/dscout, /dsniper, /dsoldier, etc).
 * Build your own disguise aliases (e.g. alias bsniper "dblue; wait; dsniper" for blue sniper).
 * Spy can now feign death in air.
