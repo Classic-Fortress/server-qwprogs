@@ -450,7 +450,7 @@
 #define TF_PRACSPAWN_PLACE      81
 #define TF_PRACSPAWN_REMOVE     82
 #define TF_DISGUISE_LAST_SPAWNED	83  // Spy: Disguise as last enemy to spawn
-// unused                       84
+#define TF_SPECIAL_SKILL_2      84  // Class special 2
 // unused                       85
 // unused                       86
 // unused                       87

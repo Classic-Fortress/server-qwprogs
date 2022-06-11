@@ -67,6 +67,7 @@ void (entity e) TeamFortress_PlacePracticeSpawn;
 void (entity e) TeamFortress_RemovePracticeSpawn;
 void () DropKey;
 void () UseSpecialSkill;
+void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
 
@@ -2961,6 +2962,9 @@ void () ImpulseCommands = {
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
 
+    if (self.impulse == TF_SPECIAL_SKILL_2)
+        UseSpecialSkill2();
+
     if (self.impulse == TF_NEXTTIP) {
         self.display_tip = 0;
         self.tip_type = 0;
@@ -3168,6 +3172,10 @@ void () PreMatchImpulses = {
             self.invincible_finished = time + 666;
         }
     }
+
+    if (self.impulse == TF_SPECIAL_SKILL_2) {
+        // Something
+    }
 };
 
 void () DeadImpulses = {
@@ -3351,7 +3359,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
+    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_SPECIAL_SKILL_2 && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
@@ -3498,6 +3506,7 @@ void () W_WeaponFrame = {
     switch (self.impulse)
     {
         case TF_SPECIAL_SKILL:
+        case TF_SPECIAL_SKILL_2:
         case TF_PB_DETONATE:
         case TF_MEDIC_HELPME:
         case TF_DASH:

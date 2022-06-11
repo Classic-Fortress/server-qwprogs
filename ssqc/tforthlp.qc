@@ -165,6 +165,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dropitems", TF_DROPFLAG, 0);
         TeamFortress_Alias("showloc", TF_DISPLAYLOCATION, 0);
         TeamFortress_Alias("special", TF_SPECIAL_SKILL, 0);
+        TeamFortress_Alias("special2", TF_SPECIAL_SKILL_2, 0);
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
         TeamFortress_Alias("discard", TF_DISCARD, 0);
         TeamFortress_Alias("discard_drop_ammo", TF_DISCARD_DROP_AMMO, 0);
