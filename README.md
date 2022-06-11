@@ -183,10 +183,11 @@ Pyro
 Spy
 ------
 * Improved disguise menu.
+* Auto-disguse (setinfo autodisguise 1).
 * Change color and skin in one sequence.
 * Last disguise (reachable through disguise menu or using /dlast alias).
 * Stop disguising by pressing last weapon bind.
-* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen).
+* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen, /dlastdead).
 * New aliases for changing skin (/dscout, /dsniper, /dsoldier, etc).
 * Build your own disguise aliases (e.g. alias bsniper "dblue; wait; dsniper" for blue sniper).
 * Spy can now feign death in air.

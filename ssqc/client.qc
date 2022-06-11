@@ -68,7 +68,6 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
-void () TeamFortress_SpyAutoDisguise;
 
 void () info_intermission =
 {
@@ -2149,7 +2148,7 @@ void () PutClientInServer = {
 
     local float autodisguise = stof(infokey(self, "autodisguise"));
     if (self.playerclass == PC_SPY && autodisguise) {
-        TeamFortress_SpyAutoDisguise();
+        FO_Spy_DisguiseLastDead();
     }
 };
 
@@ -3675,46 +3674,6 @@ void () InitReverseCap = {
 
 }
 
-void () TeamFortress_SpyAutoDisguise = {
-    local float no_teams_with_at_least_one_player = (
-            TeamFortress_TeamGetNoPlayers(1) > 0 +
-            TeamFortress_TeamGetNoPlayers(2) > 0 +
-            TeamFortress_TeamGetNoPlayers(3) > 0 +
-            TeamFortress_TeamGetNoPlayers(4) > 0
-            )
-
-    // only show this option if there's only two teams
-    switch(no_teams_with_at_least_one_player) {
-    case 0:
-        break;
-    case 1:
-        break;
-    case 2:
-        // Do everything
-        break;
-    default:
-        break;
-    }
-
-    local entity te = find(world, classname, "player");
-    local float latest_spawn_time;
-    local entity enemy_to_disguise_as;
-
-    while (te != world) {
-        if (te.team_no != self.team_no) {
-            if (te.spawn_time > latest_spawn_time) {
-                latest_spawn_time = te.spawn_time;
-                enemy_to_disguise_as = te;
-            }
-        }
-
-        te = find(te, classname, "player");
-    }
-
-    CF_Spy_ChangeSkin(self, enemy_to_disguise_as.skin);
-    CF_Spy_ChangeColor(self, enemy_to_disguise_as.team_no);
-};
-
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*
@@ -3741,7 +3700,7 @@ void() SV_RunClientCommand = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTf_NORM);
                 self.deathtype = "falling";
             } else {
                 FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);

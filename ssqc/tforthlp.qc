@@ -237,6 +237,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dgreen", TF_DISGUISE_GREEN, 0);
         TeamFortress_Alias("denemy", TF_DISGUISE_ENEMY, 0);
         TeamFortress_Alias("dlast", TF_DISGUISE_LAST, 0);
+        TeamFortress_Alias("dlastdead", TF_DISGUISE_LAST_DEAD, 0);
         if(csqcactive) {
             TeamFortress_AliasString("build", "fo_menu_build");
         } else {

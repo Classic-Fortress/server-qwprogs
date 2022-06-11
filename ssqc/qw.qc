@@ -554,7 +554,6 @@ float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
-float autodisguise;
 float scoutdash;
 float sniperreload;
 float spawnfull;

@@ -3108,6 +3108,8 @@ void () ImpulseCommands = {
             CF_Spy_ChangeColor(self, 1);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
         CF_Spy_DisguiseLast();
+    else if (self.impulse == TF_DISGUISE_LAST_DEAD && self.playerclass == PC_SPY)
+        FO_Spy_DisguiseLastDead();
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
