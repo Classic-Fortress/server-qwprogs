@@ -71,7 +71,7 @@ void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Color_Input;
 void () CF_Spy_DisguiseLast;
-void () FO_Spy_DisguiseLastDead;
+void () FO_Spy_DisguiseLastSpawned;
 
 void () Menu_Demoman;
 void () Menu_Demoman_Cancel;

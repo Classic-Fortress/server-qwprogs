@@ -331,7 +331,7 @@ void (float inp) TeamFortress_ChangeClass = {
 
     local float autodisguise = stof(infokey(self, "autodisguise"));
     if (self.playerclass == PC_SPY && autodisguise) {
-        FO_Spy_DisguiseLastDead();
+        FO_Spy_DisguiseLastSpawned();
     };
 };
 

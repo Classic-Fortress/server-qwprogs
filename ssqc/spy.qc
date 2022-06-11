@@ -706,17 +706,7 @@ void () CF_Spy_DisguiseLast = {
     }
 };
 
-void () FO_Spy_DisguiseLastDead = {
-    local float no_teams_with_at_least_one_player = (
-            TeamFortress_TeamGetNoPlayers(1) > 0 +
-            TeamFortress_TeamGetNoPlayers(2) > 0 +
-            TeamFortress_TeamGetNoPlayers(3) > 0 +
-            TeamFortress_TeamGetNoPlayers(4) > 0
-            )
-
-    if (no_teams_with_at_least_one_player < 2)
-        return;
-
+void () FO_Spy_DisguiseLastSpawned = {
     local entity te = find(world, classname, "player");
     local float latest_spawn_time;
     local entity enemy_to_disguise_as;
@@ -732,8 +722,20 @@ void () FO_Spy_DisguiseLastDead = {
         te = find(te, classname, "player");
     }
 
-    CF_Spy_ChangeSkin(self, enemy_to_disguise_as.skin);
-    CF_Spy_ChangeColor(self, enemy_to_disguise_as.team_no);
+    if (enemy_to_disguise_as.team_no) {
+        CF_Spy_ChangeSkin(self, enemy_to_disguise_as.skin);
+        CF_Spy_ChangeColor(self, enemy_to_disguise_as.team_no);
+    } else {
+        local float lowest_enemy_team_no;
+
+        if (self.team_no == 1) {
+            lowest_enemy_team_no = 2;
+        } else {
+            lowest_enemy_team_no = 1;
+        }
+
+        CF_Spy_ChangeColor(self, lowest_enemy_team_no);
+    }
 };
 
 
@@ -1469,7 +1471,7 @@ void (entity spy) Spy_RemoveDisguise = {
 
     local float autodisguise = stof(infokey(self, "autodisguise"));
     if (autodisguise)
-        FO_Spy_DisguiseLastDead();
+        FO_Spy_DisguiseLastSpawned();
 };
 
 void () Spy_DropBackpack = {

@@ -449,8 +449,7 @@
 #define TF_DISCARD_DROP_AMMO    80
 #define TF_PRACSPAWN_PLACE      81
 #define TF_PRACSPAWN_REMOVE     82
-#define TF_DISGUISE_LAST_DEAD   83  // Spy: Disguise as last enemy to die
-// unused                       83
+#define TF_DISGUISE_LAST_SPAWNED	83  // Spy: Disguise as last enemy to spawn
 // unused                       84
 // unused                       85
 // unused                       86
