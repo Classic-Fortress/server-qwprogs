@@ -360,7 +360,7 @@ void (float inp) TeamFortress_ChangeClass = {
     }
     self.spawn_time = time;
 
-    local float autodisguise = stof(infokey(self, "autodisguise"));
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (self.playerclass == PC_SPY && autodisguise) {
         FO_Spy_DisguiseLastSpawned(self);
     };

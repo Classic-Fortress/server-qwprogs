@@ -1469,7 +1469,7 @@ void (entity spy) Spy_RemoveDisguise = {
     if (coverblown)
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
 
-    local float autodisguise = stof(infokey(self, "autodisguise"));
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (autodisguise)
         FO_Spy_DisguiseLastSpawned(self);
 };
