@@ -111,7 +111,7 @@ void () UseSpecialSkill2 = {
     switch (self.playerclass)
     {
         case PC_SCOUT:
-            // Radar something?
+            self.impulse = TF_SCAN;
             break;
         case PC_SNIPER:
             break;
