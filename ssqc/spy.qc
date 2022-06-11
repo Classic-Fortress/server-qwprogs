@@ -706,13 +706,13 @@ void () CF_Spy_DisguiseLast = {
     }
 };
 
-void () FO_Spy_DisguiseLastSpawned = {
+void (entity player) FO_Spy_DisguiseLastSpawned = {
     local entity te = find(world, classname, "player");
-    local float latest_spawn_time;
+    local float latest_spawn_time = 0;
     local entity enemy_to_disguise_as;
 
     while (te != world) {
-        if (te.team_no != self.team_no) {
+        if (te.team_no != player.team_no) {
             if (te.spawn_time > latest_spawn_time) {
                 latest_spawn_time = te.spawn_time;
                 enemy_to_disguise_as = te;
@@ -723,18 +723,18 @@ void () FO_Spy_DisguiseLastSpawned = {
     }
 
     if (enemy_to_disguise_as.team_no) {
-        CF_Spy_ChangeSkin(self, enemy_to_disguise_as.skin);
-        CF_Spy_ChangeColor(self, enemy_to_disguise_as.team_no);
+        CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin);
+        CF_Spy_ChangeColor(player, enemy_to_disguise_as.team_no);
     } else {
         local float lowest_enemy_team_no;
 
-        if (self.team_no == 1) {
+        if (player.team_no == 1) {
             lowest_enemy_team_no = 2;
         } else {
             lowest_enemy_team_no = 1;
         }
 
-        CF_Spy_ChangeColor(self, lowest_enemy_team_no);
+        CF_Spy_ChangeColor(player, lowest_enemy_team_no);
     }
 };
 
@@ -1469,9 +1469,9 @@ void (entity spy) Spy_RemoveDisguise = {
     if (coverblown)
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
 
-    local float autodisguise = stof(infokey(self, "autodisguise"));
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (autodisguise)
-        FO_Spy_DisguiseLastSpawned();
+        FO_Spy_DisguiseLastSpawned(self);
 };
 
 void () Spy_DropBackpack = {

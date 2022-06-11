@@ -3113,7 +3113,7 @@ void () ImpulseCommands = {
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
         CF_Spy_DisguiseLast();
     else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLastSpawned();
+        FO_Spy_DisguiseLastSpawned(self);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
