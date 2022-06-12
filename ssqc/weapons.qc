@@ -3057,11 +3057,33 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
         CF_Medic_AuraToggle();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_sentrygun");
     else if ((self.impulse == TF_ENGINEER_DETDISP) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_dispenser");
+    else if ((self.impulse == TF_ENGINEER_TOGGLESENTRY) && (self.playerclass == PC_ENGINEER)) {
+        if (self.has_sentry) {
+            DestroyBuilding(self, "building_sentrygun");
+        } else {
+            sprint(self, PRINT_HIGH, "test\n");
+            if (self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+            } else {
+                Menu_Engineer_Input(1);
+            }
+        }
+    } else if ((self.impulse == TF_ENGINEER_TOGGLEDISP) && (self.playerclass == PC_ENGINEER)) {
+        if (self.has_dispenser) {
+            DestroyBuilding(self, "building_dispenser");
+        } else {
+            if (self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+            } else {
+                Menu_Engineer_Input(2);
+            }
+        }
+    }
     else if ((self.impulse == 196) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_exit");
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
@@ -3171,10 +3193,6 @@ void () PreMatchImpulses = {
             self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
             self.invincible_finished = time + 666;
         }
-    }
-
-    if (self.impulse == TF_SPECIAL_SKILL_2) {
-        // Something
     }
 };
 

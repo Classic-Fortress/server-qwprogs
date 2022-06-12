@@ -451,8 +451,8 @@
 #define TF_PRACSPAWN_REMOVE     82
 #define TF_DISGUISE_LAST_SPAWNED	83  // Spy: Disguise as last enemy to spawn
 #define TF_SPECIAL_SKILL_2      84  // Class special 2
-// unused                       85
-// unused                       86
+#define TF_ENGINEER_TOGGLESENTRY	85  // Engineer: Build or detonate sentry
+#define TF_ENGINEER_TOGGLEDISP  86  // Engineer: Build or detonate dispenser
 // unused                       87
 // unused                       88
 // unused                       89
