@@ -723,8 +723,8 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
     }
 
     if (enemy_to_disguise_as.team_no) {
-        CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin);
         CF_Spy_ChangeColor(player, enemy_to_disguise_as.team_no);
+        CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin);
     } else {
         local float lowest_enemy_team_no;
 
