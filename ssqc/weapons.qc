@@ -3066,7 +3066,6 @@ void () ImpulseCommands = {
         if (self.has_sentry) {
             DestroyBuilding(self, "building_sentrygun");
         } else {
-            sprint(self, PRINT_HIGH, "test\n");
             if (self.health <= 0) {
                 sprint(self, PRINT_HIGH, "Can't build while dead.\n");
             } else {
