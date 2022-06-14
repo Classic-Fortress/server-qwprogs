@@ -3132,7 +3132,7 @@ void () ImpulseCommands = {
         else
             CF_Spy_ChangeColor(self, 1);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        CF_Spy_DisguiseLast();
+        FO_Spy_DisguiseLast(self);
     else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
         FO_Spy_DisguiseLastSpawned(self);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&

@@ -66,7 +66,7 @@ float fo_hud_editor;
 float fo_hud_menu_active;
 vector ScreenSize;
 float number_of_teams;
-float last_skin;
+float last_selected_skin;
 float last_team;
 vector sentry_pos;
 vector dispenser_pos;
