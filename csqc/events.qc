@@ -147,7 +147,7 @@ void() CSQC_Parse_Event = {
                     break;
                 case CLIENT_MENU_SPY:
                     SBAR.InvisOnly = readfloat();
-                    last_skin = readfloat();
+                    last_selected_skin = readfloat();
                     last_team = readfloat();
                     FO_Menu_Spy(2);
                     break;

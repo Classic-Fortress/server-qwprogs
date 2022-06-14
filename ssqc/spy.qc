@@ -670,7 +670,6 @@ void () CF_Spy_DisguiseStop = {
     if (self.undercover_skin || self.undercover_team) {
         sprint(self, PRINT_HIGH, "Disguised as ", s_team, " ", s_class, "\n");
         self.is_undercover = 1;
-        self.last_skin = self.undercover_skin;
         self.last_team = self.undercover_team;
     } else {
         sprint(self, PRINT_HIGH, "You stop going undercover\n");
@@ -697,12 +696,22 @@ void () CF_Spy_DisguiseStop = {
 
 };
 
-void () CF_Spy_DisguiseLast = {
-    if (self.last_skin) {
-        CF_Spy_ChangeSkin(self, self.last_skin);
+void (entity player) FO_Spy_DisguiseLast = {
+    if (player.last_team) {
+        CF_Spy_ChangeColor(player, player.last_team);
+    } else {
+        local float lowest_enemy_team_no;
+
+        if (player.team_no == 1) {
+            lowest_enemy_team_no = 2;
+        } else {
+            lowest_enemy_team_no = 1;
+        }
+
+        CF_Spy_ChangeColor(player, lowest_enemy_team_no);
     }
-    if (self.last_team) {
-        CF_Spy_ChangeColor(self, self.last_team);
+    if (player.last_selected_skin) {
+        CF_Spy_ChangeSkin(player, player.last_selected_skin);
     }
 };
 
@@ -840,7 +849,6 @@ void () CF_Spy_UndercoverThink = {
 
         if (self.skin) {
             self.owner.undercover_skin = self.skin;
-            self.owner.last_skin = self.skin;
             self.owner.disguise_skin = 0;
             self.owner.queue_skin = 0;
             self.owner.is_undercover = 1;
@@ -891,7 +899,7 @@ void () CF_Spy_UndercoverThink = {
 };
 
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
-    local entity e_timer;
+    pe_player.last_selected_skin = pf_class;
 
     // stop if you're already disguised as the requested skin
     if (pe_player.undercover_skin == pf_class)
@@ -928,12 +936,13 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
         sprint(pe_player, PRINT_HIGH, "Going undercover...\n");
     else if(pe_player.undercover_skin != pf_class)
          sprint(pe_player, PRINT_HIGH, "Changing costumes...\n");
-       
+
     pe_player.is_undercover = 2;
     pe_player.disguise_skin = pf_class;
     pe_player.disguise_team = 0;
 
     // disguise timer, finishes in 4 seconds
+    local entity e_timer;
     e_timer = spawn();
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
@@ -1473,8 +1482,16 @@ void (entity spy) Spy_RemoveDisguise = {
         Status_Print(self, "\n\n\n\n\n\n\n", "You blew your cover!");
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
-    if (autodisguise)
-        FO_Spy_DisguiseLastSpawned(self);
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
 };
 
 void () Spy_DropBackpack = {

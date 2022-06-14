@@ -361,9 +361,16 @@ void (float inp) TeamFortress_ChangeClass = {
     self.spawn_time = time;
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
-    if (self.playerclass == PC_SPY && autodisguise) {
-        FO_Spy_DisguiseLastSpawned(self);
-    };
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
 };
 
 void () TeamFortress_DisplayLegalClasses = {

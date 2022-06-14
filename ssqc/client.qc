@@ -2146,9 +2146,17 @@ void () PutClientInServer = {
         Menu_Class(0);
     }
 
+
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
-    if (self.playerclass == PC_SPY && autodisguise) {
-        FO_Spy_DisguiseLastSpawned(self);
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
     }
 
     if(self.playerclass == PC_SCOUT && self.ScannerOn == 1) {

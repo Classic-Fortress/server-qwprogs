@@ -70,7 +70,7 @@ void (float inp) Menu_Scout_Input;
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Color_Input;
-void () CF_Spy_DisguiseLast;
+void (entity player) FO_Spy_DisguiseLast;
 void (entity player) FO_Spy_DisguiseLastSpawned;
 
 void () Menu_Demoman;
@@ -579,7 +579,7 @@ void (float inp) Menu_Spy_Input = {
         else
             Menu_Spy_Skin();
     } else if (inp == 2 && !invis_only) {
-        CF_Spy_DisguiseLast();
+        FO_Spy_DisguiseLast(self);
     } else if (inp == 3) {
         CF_Spy_FeignDeath(1);
         if (self.is_feigning) {
@@ -618,7 +618,7 @@ void (entity pe_player) Menu_Spy = {
     } else if (pe_player.is_undercover == 2)
         s_skin    = Q"\s[1]\s Stop disguising        \n";
 
-    if ((!pe_player.last_skin && !pe_player.last_team) || invis_only)
+    if ((!pe_player.last_selected_skin && !pe_player.last_team) || invis_only)
         s_last = "\n";
 
     if (pe_player.is_feigning)

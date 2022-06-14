@@ -1135,8 +1135,15 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         ForceRespawn(Player);
 
     local float autodisguise = FO_GetUserSetting(Player, "autodisguise", "ad", "off");
-    if (Player.playerclass == PC_SPY && autodisguise) {
-        FO_Spy_DisguiseLastSpawned(Player);
+    if (Player.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(Player);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(Player);
+                break;
+        }
     }
 };
 
@@ -3042,7 +3049,14 @@ void () DropGoalItems = {
     TeamFortress_SetSpeed(self);
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
-    if (self.playerclass == PC_SPY && autodisguise) {
-        FO_Spy_DisguiseLastSpawned(self);
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
     }
 };
