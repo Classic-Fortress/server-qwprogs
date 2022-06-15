@@ -407,6 +407,7 @@ float already_chosen_map;
 
 .float disptimer;
 .float fire_held_down;
+.float hit_in_current_animation; // Set on knife attack if a hit is recorded to prevent combo hits
 
 // sniper location damage stuff
 .vector head_shot_vector;
