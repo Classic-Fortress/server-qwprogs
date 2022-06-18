@@ -211,8 +211,8 @@ Engineer
 * Stop building by pressing last weapon key.
 * Added message when Dispenser is destroyed.
 * Added dismantle message to show how many cells were returned to Engineer.
-* Changed class special to toggle build or detonate dispenser.
-* New class special2 to toggle build or detonate sentry.
+* Changed class special to build or detonate dispenser.
+* New class special2 to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 
 

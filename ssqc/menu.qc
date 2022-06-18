@@ -652,9 +652,6 @@ void (float inp) Menu_Spy_Skin_Input = {
         return;
     }
 
-    if (self.skin != inp)
-        CF_Spy_ChangeSkin(self, inp);
-
     if(infokeyf(self, "smt")) {
         Menu_Spy_Color();
     } else {
@@ -667,6 +664,9 @@ void (float inp) Menu_Spy_Skin_Input = {
         else
             CF_Spy_ChangeColor(self, 1);
     }
+
+    if (self.skin != inp)
+        CF_Spy_ChangeSkin(self, inp);
 };
 
 void () Menu_Spy_Skin = {
