@@ -701,6 +701,10 @@ void (entity player) FO_Spy_DisguiseLast = {
         return;
     }
 
+    if (self.is_undercover == 2 && player.last_selected_skin != player.disguise_skin) {
+        CF_Spy_DisguiseStop();
+    }
+
     local float undercover_team;
     if (player.last_team) {
         undercover_team = player.last_team;
@@ -732,6 +736,10 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
         te = find(te, classname, "player");
     }
 
+    if (self.is_undercover == 2 && enemy_to_disguise_as.skin != player.disguise_skin) {
+        CF_Spy_DisguiseStop();
+    }
+
     if (enemy_to_disguise_as.team_no) {
         CF_Spy_ChangeColor(player, enemy_to_disguise_as.team_no);
 
@@ -739,15 +747,14 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
             CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin);
         }
     } else {
-        local float lowest_enemy_team_no;
-
+        local float undercover_team;
         if (player.team_no == 1) {
-            lowest_enemy_team_no = 2;
+            undercover_team = 2;
         } else {
-            lowest_enemy_team_no = 1;
+            undercover_team = 1;
         }
 
-        CF_Spy_ChangeColor(player, lowest_enemy_team_no);
+        CF_Spy_ChangeColor(player, undercover_team);
     }
 };
 
