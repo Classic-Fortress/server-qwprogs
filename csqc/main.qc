@@ -55,6 +55,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("+special2");
+    registercommand("-special2");
+    registercommand("+rj");
+    registercommand("-rj");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -291,6 +295,96 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-jump\n");
             }
             break;
+        case "+special2":
+            switch (player_class) {
+                case PC_SCOUT:
+                    localcmd("autoscan\n");
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    localcmd("+rj\n");
+                    break;
+                case PC_DEMOMAN:
+                    localcmd("+det5\n");
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    localcmd("+rj\n");
+                    break;
+                case PC_SPY:
+                    localcmd("dlastspawn\n");
+                    break;
+                case PC_ENGINEER:
+                    localcmd("togglesentry\n");
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
+            break;
+        case "-special2":
+            switch (player_class) {
+                case PC_SCOUT:
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    localcmd("-rj\n");
+                    break;
+                case PC_DEMOMAN:
+                    localcmd("-det5\n");
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    localcmd("-rj\n");
+                    break;
+                case PC_SPY:
+                    break;
+                case PC_ENGINEER:
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
+            break;
+        case "+rj":
+            if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
+                break;
+            }
+
+            switch (player_class) {
+                case PC_SOLDIER:
+                    localcmd("impulse 1\n");
+                    break;
+                case PC_PYRO:
+                    localcmd("impulse 2\n");
+                    break;
+            }
+
+            localcmd("+attack\n");
+
+            if (input_buttons&2) {
+                jump_counter = jump_counter + 1;
+            } else {
+                localcmd("+jump\n");
+            }
+
+            break;
+        case "-rj":
+            localcmd("-attack\n");
+
+            if (jump_counter) {
+                jump_counter = jump_counter - 1;
+            } else {
+                localcmd("-jump\n");
+            }
+
+            break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
@@ -298,6 +392,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             RemoveVoteMap(argv(1), TRUE);
             break;
     }
+
     return FALSE;
 };
 

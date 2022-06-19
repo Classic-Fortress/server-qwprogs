@@ -453,7 +453,7 @@
 #define TF_SPECIAL_SKILL_2      84  // Class special 2
 #define TF_ENGINEER_TOGGLESENTRY	85  // Engineer: Build or detonate sentry
 #define TF_ENGINEER_TOGGLEDISP  86  // Engineer: Build or detonate dispenser
-// unused                       87
+#define TF_ROCKET_JUMP          87  // Soldier and Pyro: Rocket Jump
 // unused                       88
 // unused                       89
 // unused                       90

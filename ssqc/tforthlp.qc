@@ -246,6 +246,8 @@ void () TeamFortress_MOTD = {
         }
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
+        TeamFortress_Alias("togglesentry", TF_ENGINEER_TOGGLESENTRY, 0);
+        TeamFortress_Alias("toggledispenser", TF_ENGINEER_TOGGLEDISP, 0);
     } else if (self.motd == 130) {
         stuffcmd(self, "is_aliased\n");
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);
@@ -257,6 +259,8 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("fo_settings_status", "cmd fo_settings_status");
         TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
         TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
+    } else if (self.motd == 140) {
+        TeamFortress_Alias("+rj", TF_ROCKET_JUMP, 0);
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)

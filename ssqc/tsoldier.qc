@@ -285,3 +285,27 @@ void () TeamFortress_NailGrenInfo = {
     sprint(self,2,Q"\s----------------------------------------------------------------------------------------------\s\n");
     self.impulse = 0;
 };
+
+void () TeamFortress_RocketJump = {
+    if (self.playerclass != PC_SOLDIER && self.playerclass != PC_PYRO) {
+        return;
+    }
+
+    if (!WeaponReady(self)) {
+        return;
+    }
+
+    sprint(self, PRINT_HIGH, "TeamFortress_RocketJump()\n");
+
+    local float cweap = self.current_weapon;
+
+    if (self.playerclass == PC_SOLDIER) {
+        self.current_weapon = WEAP_ROCKET_LAUNCHER;
+    } else if (self.playerclass == PC_PYRO) {
+        self.current_weapon = WEAP_INCENDIARY;
+    }
+    W_Attack();
+    // input_buttons |= 2;
+    // runstandardplayerphysics(self);
+    self.current_weapon = cweap;
+};

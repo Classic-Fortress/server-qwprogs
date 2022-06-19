@@ -57,6 +57,7 @@ void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
+void () TeamFortress_RocketJump;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
@@ -3141,6 +3142,9 @@ void () ImpulseCommands = {
     else if ((self.impulse == TF_ENGINEER_BUILD) &&
              (self.playerclass == PC_ENGINEER))
         TeamFortress_EngineerBuild();
+    else if ((self.impulse == TF_ROCKET_JUMP) &&
+             (self.playerclass == PC_SOLDIER || self.playerclass == PC_PYRO))
+        TeamFortress_RocketJump();
     else if (self.impulse == FLAG_INFO) {
         if (CTF_Map == 1)
             TeamFortress_CTF_FlagInfo();
@@ -3543,7 +3547,7 @@ void () W_WeaponFrame = {
         case FLAG_INFO:
             ImpulseCommands();
             return;
-        // allows setting detpack while reloading on toggle, defaults to off        
+        // allows setting detpack while reloading on toggle, defaults to off
         case TF_DEMOMAN_DETPACK:
         case TF_DETPACK:
         case TF_DETPACK_STOP:

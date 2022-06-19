@@ -7,7 +7,7 @@ New features
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
-* `special2` Scout: `autoscan`, Demoman: `+det5`, Spy: `dlastspawn`, Engineer: Toggle build / det sentry
+* `+special2` Scout: `autoscan`, Soldier: `+rj`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: Toggle build / det sentry
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
@@ -158,6 +158,10 @@ Sniper
 * Sniper Rifle range increased.
 * Automatic sensitivity scaling while zoomed in.  Use the special button as a zoom button.  Use mouse wheel to adjust zoom while zoomed in.  Sniper Rifle now needs to be reloaded between shots.  
 
+Soldier
+------
+* New command +rj (or +special2) to rocket jump.
+
 Demolitions Man
 ------
 * New detpack menu containing 5, 20, 50 and 255 second detpacks.
@@ -184,6 +188,7 @@ Pyro
 ------
 * Add air-blast special.
 * Rebalance weapons.
+* New command +rj (or +special2) to rocket jump.
 
 Spy
 ------
@@ -211,8 +216,8 @@ Engineer
 * Stop building by pressing last weapon key.
 * Added message when Dispenser is destroyed.
 * Added dismantle message to show how many cells were returned to Engineer.
-* Changed class special to build or detonate dispenser.
-* New class special2 to build or detonate sentry.
+* New command toggledisp (or special) to build or detonate dispenser.
+* New command togglesentry (or +special2) to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 
 
