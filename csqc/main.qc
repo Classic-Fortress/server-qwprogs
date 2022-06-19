@@ -285,15 +285,20 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            jump_counter = jump_counter + 1;
+            jump_counter++;
             localcmd("+jump\n");
             break;
         case "-aux_jump":
-            jump_counter = jump_counter - 1;
-            if (jump_counter <= 0) {
+            jump_counter--;
+
+            if (jump_counter < 0) {
                 jump_counter = 0;
+            }
+
+            if (!jump_counter) {
                 localcmd("-jump\n");
             }
+
             break;
         case "+special2":
             switch (player_class) {
@@ -353,36 +358,25 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
             break;
         case "+rj":
+            if (player_class == PC_SOLDIER) {
+                localcmd("impulse 1\n");
+            } else if (player_class == PC_PYRO) {
+                localcmd("impulse 2\n");
+            } else {
+                break;
+            }
+
+            localcmd("+attack\n");
+            localcmd("+aux_jump\n");
+
+            break;
+        case "-rj":
             if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
                 break;
             }
 
-            switch (player_class) {
-                case PC_SOLDIER:
-                    localcmd("impulse 1\n");
-                    break;
-                case PC_PYRO:
-                    localcmd("impulse 2\n");
-                    break;
-            }
-
-            localcmd("+attack\n");
-
-            if (input_buttons&2) {
-                jump_counter = jump_counter + 1;
-            } else {
-                localcmd("+jump\n");
-            }
-
-            break;
-        case "-rj":
             localcmd("-attack\n");
-
-            if (jump_counter) {
-                jump_counter = jump_counter - 1;
-            } else {
-                localcmd("-jump\n");
-            }
+            localcmd("-aux_jump\n");
 
             break;
         case "vote_addmap":
@@ -416,22 +410,6 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    if (input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
-        if (pmove_onground) {
-            frames_since_onground = 0;
-        } else {
-
-            // next two frames after leaving ground
-            if (frames_since_onground <= 2) {
-                frames_since_onground = frames_since_onground + 1;
-
-            // third frame after leaving ground
-            } else if (frames_since_onground == 3) {
-                input_buttons &= ~2;
-                frames_since_onground = frames_since_onground + 1;
-            }
-        }
-    }
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
