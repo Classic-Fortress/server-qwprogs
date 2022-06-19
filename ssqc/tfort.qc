@@ -116,7 +116,6 @@ void () UseSpecialSkill2 = {
         case PC_SNIPER:
             break;
         case PC_SOLDIER:
-            self.impulse = TF_ROCKET_JUMP;
             break;
         case PC_DEMOMAN:
             self.impulse = TF_DETPACK_5;
@@ -126,7 +125,6 @@ void () UseSpecialSkill2 = {
         case PC_HVYWEAP:
             break;
         case PC_PYRO:
-            self.impulse = TF_ROCKET_JUMP;
             break;
         case PC_SPY:
             self.impulse = TF_DISGUISE_LAST_SPAWNED;

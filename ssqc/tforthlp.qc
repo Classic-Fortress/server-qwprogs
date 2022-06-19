@@ -260,7 +260,6 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
         TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
     } else if (self.motd == 140) {
-        TeamFortress_Alias("+rj", TF_ROCKET_JUMP, 0);
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
