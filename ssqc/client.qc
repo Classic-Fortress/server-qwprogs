@@ -2619,6 +2619,14 @@ void () PlayerPreThink = {
             self.flags = self.flags | FL_JUMPRELEASED;
         }
     }
+
+    if ((self.impulse == TF_SPY_DIE_OFF) && (self.playerclass == PC_SPY)) {
+        self.feign_next_damage = 0;
+        if (self.is_feigning) {
+            CF_Spy_FeignDeath(0);
+        }
+    }
+
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
@@ -2798,6 +2806,7 @@ void () PlayerPostThink = {
     if (self.view_ofs == '0 0 0') {
         return;
     }
+
     if (self.deadflag) {
         DeadImpulses();
         self.impulse = 0;

@@ -3052,9 +3052,10 @@ void () ImpulseCommands = {
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)       
         clearImpulse = TeamFortress_DetonatePipebombs(0);
-    else if (self.impulse == TF_DETPACK_STOP)
+    else if (self.impulse == TF_DETPACK_STOP) {
+        sprint(self, PRINT_HIGH, "detpack_stop\n");
         TeamFortress_DetpackStop();
-    else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
+    } else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
         CF_Medic_AuraToggle();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
             (self.playerclass == PC_ENGINEER))
@@ -3094,8 +3095,9 @@ void () ImpulseCommands = {
             Menu_Spy_Skin();
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(0);
-    else if ((self.impulse == TF_SPY_SILENT_DIE) &&
-             (self.playerclass == PC_SPY))
+    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
+        self.feign_next_damage = 1;
+    } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
         CF_Spy_ChangeSkin(self, 8);
@@ -3148,8 +3150,9 @@ void () ImpulseCommands = {
             TeamFortress_DisplayDetectionItems();
     } else if (self.impulse == TF_DISPLAYLOCATION)
         display_location();
-    else
+    else {
         DeadImpulses();
+    }
 
     if (self.impulse == TF_DETPACK)
         self.last_impulse = self.impulse;
@@ -3376,7 +3379,12 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_SPECIAL_SKILL_2 && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
+    if ((self.is_feigning) && 
+            (self.impulse != TF_SPECIAL_SKILL) &&
+            (self.impulse != TF_SPECIAL_SKILL_2) &&
+            (self.impulse != TF_MEDIC_HELPME) &&
+            (self.impulse != TF_SPY_DIE) &&
+            (self.impulse != TF_SPY_SILENT_DIE))
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {

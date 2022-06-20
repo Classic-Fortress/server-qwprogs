@@ -146,6 +146,7 @@ void () Help_ShowSpy = {
     sprint(self, PRINT_HIGH, Q"\smouse2\s - Prime/throw Hand Grenade\n");
     sprint(self, PRINT_HIGH, "\nClass aliases for Spy:\n");
     sprint(self, PRINT_HIGH, Q"\sfeign\s  - Feign death\n");
+    sprint(self, PRINT_HIGH, Q"\s+feign\s  - Hold to feign death\n");
     sprint(self, PRINT_HIGH, Q"\ssfeign\s - Silently feign death\n");
 };
 

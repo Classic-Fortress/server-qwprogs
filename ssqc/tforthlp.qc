@@ -219,6 +219,8 @@ void () TeamFortress_MOTD = {
         } else {
             TeamFortress_Alias("disguise", TF_SPY_SPY, 0);
         }
+        TeamFortress_Alias("+feign", TF_SPY_DIE_ON, 0);
+        TeamFortress_Alias("-feign", TF_SPY_DIE_OFF, 0);
         TeamFortress_Alias("feign", TF_SPY_DIE, 0);
         TeamFortress_Alias("sfeign", TF_SPY_SILENT_DIE, 0);
     } else if (self.motd == 110) {
