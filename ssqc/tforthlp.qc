@@ -210,10 +210,12 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-det255", TF_DETPACK_STOP, 0);
     } else if (self.motd == 100) {
         TeamFortress_Alias("aura", TF_MEDIC_AURA_TOGGLE, 0);
+        TeamFortress_Alias("locktoggle", TF_HVYWEAP_LOCK_TOGGLE, 0);
         TeamFortress_Alias("lock", TF_LOCKON, 0);
         TeamFortress_Alias("unlock", TF_LOCKOFF, 0);
         TeamFortress_Alias("+lock", TF_LOCKON, 0);
         TeamFortress_Alias("-lock", TF_LOCKOFF, 0);
+        TeamFortress_Alias("airblast", TF_AIRBLAST, 0);
         if(csqcactive) {
             TeamFortress_AliasString("disguise", "fo_menu_disguise");
         } else {

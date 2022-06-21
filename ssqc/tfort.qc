@@ -58,23 +58,10 @@ void () UseSpecialSkill = {
             self.impulse = TF_MEDIC_AURA_TOGGLE;
             break;
         case PC_HVYWEAP:
-            if (self.tfstate & TFSTATE_LOCK)
-                self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
-            else
-                self.tfstate = self.tfstate | TFSTATE_LOCK;
-            Status_Refresh(self);
-            self.impulse = 0;
-            return;
+            self.impulse = TF_HVYWEAP_LOCK_TOGGLE;
+            break;
         case PC_PYRO:
-            if (pyro_type == PYRO_FO)
-                if (airblastv2) {
-                    UseAirBlastV2();
-                }
-                else 
-                {
-                    UseAirBlast();
-                }
-                Status_Refresh(self);
+            self.impulse = TF_AIRBLAST;
             break;
         case PC_SPY:
             self.impulse = TF_SPY_DIE;

@@ -55,6 +55,10 @@ void () CF_Scout_Dash;
 void () CF_Spy_DisguiseStop;
 void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
+void () FO_LockToggle;
+void () FO_Airblast;
+void () UseAirBlast;
+void () UseAirBlastV2;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
@@ -3053,10 +3057,13 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_PB_DETONATE)       
         clearImpulse = TeamFortress_DetonatePipebombs(0);
     else if (self.impulse == TF_DETPACK_STOP) {
-        sprint(self, PRINT_HIGH, "detpack_stop\n");
         TeamFortress_DetpackStop();
     } else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
         CF_Medic_AuraToggle();
+    else if (self.impulse == TF_HVYWEAP_LOCK_TOGGLE && self.playerclass == PC_HVYWEAP)
+        FO_LockToggle();
+    else if (self.impulse == TF_AIRBLAST && self.playerclass == PC_PYRO)
+        FO_Airblast();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
             (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_sentrygun");
@@ -3494,7 +3501,7 @@ void () W_WeaponFrame = {
         Menu_Class(0);
         self.impulse = 0;
         return;
-    }    
+    }
     if (intermission_running)
         return;
 

@@ -765,6 +765,16 @@ void () AirBlastReloadFinished = {
     dremove(self);
 };
 
+void FO_Airblast() = {
+    if (pyro_type == PYRO_FO)
+        if (airblastv2) {
+            UseAirBlastV2();
+        } else {
+            UseAirBlast();
+        }
+    Status_Refresh(self);
+}
+
 void () UseAirBlast = {
     if (self.special_cooldown < time)
     {

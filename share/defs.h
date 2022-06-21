@@ -367,96 +367,96 @@
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
-#define TF_SLOT1                1   // Changes weapon to slot 1 (primary weapon)
-#define TF_SLOT2                2   // Changes weapon to slot 2 (secondary weapon)
-#define TF_SLOT3                3   // Changes weapon to slot 3 (tertiary weapon)
-#define TF_SLOT4                4   // Changes weapon to slot 4 (melee weapon)
-#define TF_CLASSMENU            5   // Brings up class menu
+#define TF_SLOT1                 1   // Changes weapon to slot 1 (primary weapon)
+#define TF_SLOT2                 2   // Changes weapon to slot 2 (secondary weapon)
+#define TF_SLOT3                 3   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_SLOT4                 4   // Changes weapon to slot 4 (melee weapon)
+#define TF_CLASSMENU             5   // Brings up class menu
 // unused                       6
 // unused                       7
 // unused                       8
 // unused                       9
 // unused                       10
-#define TF_WEAPNEXT             11  // Selects the next weapon slot
-#define TF_WEAPPREV             12  // Selects the previous weapon slot
-#define TF_WEAPLAST             13  // Selects the last used weapon slot
-#define TF_GRENADE_1            14  // Prime grenade type 1
-#define TF_GRENADE_2            15  // Prime grenade type 2
-#define TF_GRENADE_T            16  // Throw primed grenade
-#define TF_GRENADE_PT_1         17  // Prime and throw grenade type 1 (two clicks)
-#define TF_GRENADE_PT_2         18  // Prime and throw grenade type 2 (two clicks)
-#define TF_GRENADE_SWITCH       19  // Switch grenade mode 1/2
-#define TF_QUICKSLOT1           20  // Fire weapon slot 1 and then switch back to current weapon
-#define TF_QUICKSLOT2           21  // Fire weapon slot 2 and then switch back to current weapon
-#define TF_QUICKSLOT3           22  // Fire weapon slot 3 and then switch back to current weapon
-#define TF_QUICKSLOT4           23  // Fire weapon slot 4 and then switch back to current weapon
-#define TF_QUICKSTOP            24  // Used to tell server that quick firing has stopped
-#define TF_RELOAD_SLOT1         25  // Reload weapon slot 1
-#define TF_RELOAD_SLOT2         26  // Reload weapon slot 2
-#define TF_RELOAD_SLOT3         27  // Reload weapon slot 3
-#define TF_RELOAD               28  // Reload current weapon
-#define TF_RELOAD_NEXT          29  // Reload next weapon with a non-full clip
-#define TF_SPECIAL_SKILL        30  // Class special
-#define TF_DROPFLAG             31  // Drop flag
-#define TF_DROPKEY              32  // Drop key
-#define TF_DISCARD              33  // Discard useless ammo
-#define TF_DROP_AMMO            34  // Drop an ammo box on the ground
-#define TF_MEDIC_HELPME         35  // Alert players around you that you are in need of medical attention
-#define TF_INVENTORY            36  // Displays current inventory
-#define FLAG_INFO               37  // Displays current flag location
-#define TF_ID                   38  // Identify player/object in front of player
-#define TF_ID_TEAM              39  // Identify team player/object in front of player
-#define TF_ID_ENEMY             40  // Identify enemy player/object in front of player
-#define TF_DASH                 41  // Scout: Initialize a forward bunnyhop
-#define TF_SCAN                 42  // Scout: Toggle Scanner on/off
-#define TF_SCAN_ENEMY           43  // Scout: Toggle scanning of enemies
-#define TF_SCAN_FRIENDLY        44  // Scout: Toggle scanning of friendlies
-#define TF_SCAN_SOUND           45  // Scout: Toggle scanner sound
-#define TF_ZOOMTOGGLE           46  // Sniper: Toggle zoom mode on/off
-#define TF_ZOOMIN               47  // Sniper: Zoom in (while zoom mode is on)
-#define TF_ZOOMOUT              48  // Sniper: Zoom out (while zoom mode is on)
-#define TF_DEMOMAN_DETPACK      49  // Demoman: Bring up detpack menu
-#define TF_DETPACK              50  // Demoman: Detpack Pre-Impulse
-#define TF_DETPACK_STOP         51  // Demoman: Impulse to stop setting detpack
-#define TF_DETPACK_5            52  // Demoman: Detpack set to 5 seconds
-#define TF_DETPACK_20           53  // Demoman: Detpack set to 20 seconds
-#define TF_DETPACK_50           54  // Demoman: Detpack set to 50 seconds
-#define TF_PB_DETONATE          55  // Demoman: Detonate Pipebombs
-#define TF_MEDIC_AURA_TOGGLE    56  // Medic: Toggle Healing Aura on/off
-#define TF_LOCKON               57  // HWGuy: Turn Assault Cannon fire on
-#define TF_LOCKOFF              58  // HWGuy: Turn Assault Cannon fire off
-#define TF_SPY_DIE              59  // Spy: Feign death
-#define TF_SPY_DIE_ON           60  // Spy: Feign death next damage
-#define TF_SPY_DIE_OFF          61  // Spy: Unfeign
-#define TF_SPY_SILENT_DIE       62  // Spy: Silent feign death
-#define TF_SPY_SPY              63  // Spy: Bring up disguise menu
-#define TF_DISGUISE_ENEMY       64  // Spy: Disguise as enemy team
-#define TF_DISGUISE_LAST        65  // Spy: Use last disguise
-#define TF_DISGUISE_RESET       66  // Spy: Reset disguise
-#define TF_DISGUISE_SCOUT       67  // Spy: Disguise as Scout
-#define TF_DISGUISE_SNIPER      68  // Spy: Disguise as Sniper
-#define TF_DISGUISE_SOLDIER     69  // Spy: Disguise as Soldier
-#define TF_DISGUISE_DEMOMAN     70  // Spy: Disguise as Demoman
-#define TF_DISGUISE_MEDIC       71  // Spy: Disguise as Medic
-#define TF_DISGUISE_HWGUY       72  // Spy: Disguise as HWGuy
-#define TF_DISGUISE_PYRO        73  // Spy: Disguise as Pyro
-#define TF_DISGUISE_ENGINEER    74  // Spy: Disguise as Engineer
-#define TF_DISGUISE_BLUE        75  // Spy: Disguise as blue team
-#define TF_DISGUISE_RED         76  // Spy: Disguise as red team
-#define TF_DISGUISE_YELLOW      77  // Spy: Disguise as yellow team
-#define TF_DISGUISE_GREEN       78  // Spy: Disguise as green team
-#define TF_ENGINEER_BUILD       79  // Engineer: Bring up build menu for Engineer
-#define TF_ENGINEER_DETDISP     80  // Engineer: Detonate dispenser for Engineer
-#define TF_ENGINEER_DETSENTRY   81  // Engineer: Detonate sentry gun for Engineer
-#define TF_DISCARD_DROP_AMMO    82
-#define TF_PRACSPAWN_PLACE      83
-#define TF_PRACSPAWN_REMOVE     84
-#define TF_DISGUISE_LAST_SPAWNED	85  // Spy: Disguise as last enemy to spawn
-#define TF_SPECIAL_SKILL_2      86  // Class special 2
-#define TF_ENGINEER_TOGGLESENTRY	87  // Engineer: Build or detonate sentry
-#define TF_ENGINEER_TOGGLEDISP  88  // Engineer: Build or detonate dispenser
-// unused                       89
-// unused                       90
+#define TF_WEAPNEXT              11  // Selects the next weapon slot
+#define TF_WEAPPREV              12  // Selects the previous weapon slot
+#define TF_WEAPLAST              13  // Selects the last used weapon slot
+#define TF_GRENADE_1             14  // Prime grenade type 1
+#define TF_GRENADE_2             15  // Prime grenade type 2
+#define TF_GRENADE_T             16  // Throw primed grenade
+#define TF_GRENADE_PT_1          17  // Prime and throw grenade type 1 (two clicks)
+#define TF_GRENADE_PT_2          18  // Prime and throw grenade type 2 (two clicks)
+#define TF_GRENADE_SWITCH        19  // Switch grenade mode 1/2
+#define TF_QUICKSLOT1            20  // Fire weapon slot 1 and then switch back to current weapon
+#define TF_QUICKSLOT2            21  // Fire weapon slot 2 and then switch back to current weapon
+#define TF_QUICKSLOT3            22  // Fire weapon slot 3 and then switch back to current weapon
+#define TF_QUICKSLOT4            23  // Fire weapon slot 4 and then switch back to current weapon
+#define TF_QUICKSTOP             24  // Used to tell server that quick firing has stopped
+#define TF_RELOAD_SLOT1          25  // Reload weapon slot 1
+#define TF_RELOAD_SLOT2          26  // Reload weapon slot 2
+#define TF_RELOAD_SLOT3          27  // Reload weapon slot 3
+#define TF_RELOAD                28  // Reload current weapon
+#define TF_RELOAD_NEXT           29  // Reload next weapon with a non-full clip
+#define TF_SPECIAL_SKILL         30  // Class special
+#define TF_DROPFLAG              31  // Drop flag
+#define TF_DROPKEY               32  // Drop key
+#define TF_DISCARD               33  // Discard useless ammo
+#define TF_DROP_AMMO             34  // Drop an ammo box on the ground
+#define TF_MEDIC_HELPME          35  // Alert players around you that you are in need of medical attention
+#define TF_INVENTORY             36  // Displays current inventory
+#define FLAG_INFO                37  // Displays current flag location
+#define TF_ID                    38  // Identify player/object in front of player
+#define TF_ID_TEAM               39  // Identify team player/object in front of player
+#define TF_ID_ENEMY              40  // Identify enemy player/object in front of player
+#define TF_DASH                  41  // Scout: Initialize a forward bunnyhop
+#define TF_SCAN                  42  // Scout: Toggle Scanner on/off
+#define TF_SCAN_ENEMY            43  // Scout: Toggle scanning of enemies
+#define TF_SCAN_FRIENDLY         44  // Scout: Toggle scanning of friendlies
+#define TF_SCAN_SOUND            45  // Scout: Toggle scanner sound
+#define TF_ZOOMTOGGLE            46  // Sniper: Toggle zoom mode on/off
+#define TF_ZOOMIN                47  // Sniper: Zoom in (while zoom mode is on)
+#define TF_ZOOMOUT               48  // Sniper: Zoom out (while zoom mode is on)
+#define TF_DEMOMAN_DETPACK       49  // Demoman: Bring up detpack menu
+#define TF_DETPACK               50  // Demoman: Detpack Pre-Impulse
+#define TF_DETPACK_STOP          51  // Demoman: Impulse to stop setting detpack
+#define TF_DETPACK_5             52  // Demoman: Detpack set to 5 seconds
+#define TF_DETPACK_20            53  // Demoman: Detpack set to 20 seconds
+#define TF_DETPACK_50            54  // Demoman: Detpack set to 50 seconds
+#define TF_PB_DETONATE           55  // Demoman: Detonate Pipebombs
+#define TF_MEDIC_AURA_TOGGLE     56  // Medic: Toggle Healing Aura on/off
+#define TF_HVYWEAP_LOCK_TOGGLE   57  // Medic: Toggle Healing Aura on/off
+#define TF_LOCKON                58  // HWGuy: Turn Assault Cannon fire on
+#define TF_LOCKOFF               59  // HWGuy: Turn Assault Cannon fire off
+#define TF_AIRBLAST              60  // Pyro: Air blast
+#define TF_SPY_DIE               61  // Spy: Feign death
+#define TF_SPY_DIE_ON            62  // Spy: Feign death next damage
+#define TF_SPY_DIE_OFF           63  // Spy: Unfeign
+#define TF_SPY_SILENT_DIE        64  // Spy: Silent feign death
+#define TF_SPY_SPY               65  // Spy: Bring up disguise menu
+#define TF_DISGUISE_ENEMY        66  // Spy: Disguise as enemy team
+#define TF_DISGUISE_LAST         67  // Spy: Use last disguise
+#define TF_DISGUISE_RESET        68  // Spy: Reset disguise
+#define TF_DISGUISE_SCOUT        69  // Spy: Disguise as Scout
+#define TF_DISGUISE_SNIPER       70  // Spy: Disguise as Sniper
+#define TF_DISGUISE_SOLDIER      71  // Spy: Disguise as Soldier
+#define TF_DISGUISE_DEMOMAN      72  // Spy: Disguise as Demoman
+#define TF_DISGUISE_MEDIC        73  // Spy: Disguise as Medic
+#define TF_DISGUISE_HWGUY        74  // Spy: Disguise as HWGuy
+#define TF_DISGUISE_PYRO         75  // Spy: Disguise as Pyro
+#define TF_DISGUISE_ENGINEER     76  // Spy: Disguise as Engineer
+#define TF_DISGUISE_BLUE         77  // Spy: Disguise as blue team
+#define TF_DISGUISE_RED          78  // Spy: Disguise as red team
+#define TF_DISGUISE_YELLOW       79  // Spy: Disguise as yellow team
+#define TF_DISGUISE_GREEN        80  // Spy: Disguise as green team
+#define TF_ENGINEER_BUILD        81  // Engineer: Bring up build menu for Engineer
+#define TF_ENGINEER_DETDISP      82  // Engineer: Detonate dispenser for Engineer
+#define TF_ENGINEER_DETSENTRY    83  // Engineer: Detonate sentry gun for Engineer
+#define TF_DISCARD_DROP_AMMO     84
+#define TF_PRACSPAWN_PLACE       85
+#define TF_PRACSPAWN_REMOVE      86
+#define TF_DISGUISE_LAST_SPAWNED 87  // Spy: Disguise as last enemy to spawn
+#define TF_SPECIAL_SKILL_2       88  // Class special 2
+#define TF_ENGINEER_TOGGLESENTRY 89  // Engineer: Build or detonate sentry
+#define TF_ENGINEER_TOGGLEDISP   90  // Engineer: Build or detonate dispenser
 // unused                       91
 // unused                       92
 // unused                       93
@@ -467,47 +467,47 @@
 // unused                       98
 // unused                       99
 // unused                       100
-#define TF_CHANGETEAM           101 // Bring up team selection menu
-#define TF_TEAM_1               102 // Join team 1
-#define TF_TEAM_2               103 // Join team 2
-#define TF_TEAM_3               104 // Join team 3
-#define TF_TEAM_4               105 // Join team 4
-#define TF_DISPLAYLOCATION      106 // Displays current location and angles (for developers)
-#define TF_SHOWTF               107 // Displays server settings and mod version
-#define TF_SHOWLEGALCLASSES     108 // Show what classes are allowed by current map
-#define TF_SHOW_IDS             109 // Show ids of connected players
-#define TF_ALIAS_CHECK          110 // Check if client has gotten all the aliases
-#define TF_CHANGECLASS          111 // Bring up class selection menu
-#define TF_CHANGEPC_SCOUT       112 // Change class to Scout
-#define TF_CHANGEPC_SNIPER      113 // Change class to Sniper
-#define TF_CHANGEPC_SOLDIER     114 // Change class to Soldier
-#define TF_CHANGEPC_DEMOMAN     115 // Change class to Demoman
-#define TF_CHANGEPC_MEDIC       116 // Change class to Medic
-#define TF_CHANGEPC_HVYWEAP     117 // Change class to HWGuy
-#define TF_CHANGEPC_PYRO        118 // Change class to Pyro
-#define TF_CHANGEPC_SPY         119 // Change class to Spy
-#define TF_CHANGEPC_ENGINEER    120 // Change class to Engineer
-#define TF_CHANGEPC_RANDOM      121 // Change class to RandomPC
-#define TF_HELP_MAP             122 // Displays current map objectives
-#define TF_CLASSHELP            123 // Class help alias
-#define TF_TEAM_CLASSES         124 // Display team classes
-#define TF_TEAM_LIST            125 // Display the players in each team
-#define TF_TEAM_SCORES          126 // Display team scores
-#define TF_STATUS_QUERY         127 // Displays current team balance and equilization ratios
-#define TF_NEXTTIP              128 // Shows the next general/class tip
+#define TF_CHANGETEAM            101 // Bring up team selection menu
+#define TF_TEAM_1                102 // Join team 1
+#define TF_TEAM_2                103 // Join team 2
+#define TF_TEAM_3                104 // Join team 3
+#define TF_TEAM_4                105 // Join team 4
+#define TF_DISPLAYLOCATION       106 // Displays current location and angles (for developers)
+#define TF_SHOWTF                107 // Displays server settings and mod version
+#define TF_SHOWLEGALCLASSES      108 // Show what classes are allowed by current map
+#define TF_SHOW_IDS              109 // Show ids of connected players
+#define TF_ALIAS_CHECK           110 // Check if client has gotten all the aliases
+#define TF_CHANGECLASS           111 // Bring up class selection menu
+#define TF_CHANGEPC_SCOUT        112 // Change class to Scout
+#define TF_CHANGEPC_SNIPER       113 // Change class to Sniper
+#define TF_CHANGEPC_SOLDIER      114 // Change class to Soldier
+#define TF_CHANGEPC_DEMOMAN      115 // Change class to Demoman
+#define TF_CHANGEPC_MEDIC        116 // Change class to Medic
+#define TF_CHANGEPC_HVYWEAP      117 // Change class to HWGuy
+#define TF_CHANGEPC_PYRO         118 // Change class to Pyro
+#define TF_CHANGEPC_SPY          119 // Change class to Spy
+#define TF_CHANGEPC_ENGINEER     120 // Change class to Engineer
+#define TF_CHANGEPC_RANDOM       121 // Change class to RandomPC
+#define TF_HELP_MAP              122 // Displays current map objectives
+#define TF_CLASSHELP             123 // Class help alias
+#define TF_TEAM_CLASSES          124 // Display team classes
+#define TF_TEAM_LIST             125 // Display the players in each team
+#define TF_TEAM_SCORES           126 // Display team scores
+#define TF_STATUS_QUERY          127 // Displays current team balance and equilization ratios
+#define TF_NEXTTIP               128 // Shows the next general/class tip
 // unused                       129
 // unused                       130
-#define TF_TOGGLEVOTE           131 // Toggle vote menu on/off
-#define TF_VOTENEXT             132 // Vote to start voting for next map
-#define TF_VOTETRICK            133 // Vote to start voting for a trick map
-#define TF_VOTERACE             134 // Vote to start voting for a race map
-#define TF_FORCENEXT            135 // Vote to force a change to voted map
-#define TF_PLAYER_READY         136
-#define TF_PLAYER_NOT_READY     137
-#define TF_ADMIN_FORCESTARTMATCH      138
-#define TF_ADMIN_READYSTATUS          139
+#define TF_TOGGLEVOTE            131 // Toggle vote menu on/off
+#define TF_VOTENEXT              132 // Vote to start voting for next map
+#define TF_VOTETRICK             133 // Vote to start voting for a trick map
+#define TF_VOTERACE              134 // Vote to start voting for a race map
+#define TF_FORCENEXT             135 // Vote to force a change to voted map
+#define TF_PLAYER_READY          136
+#define TF_PLAYER_NOT_READY      137
+#define TF_ADMIN_FORCESTARTMATCH 138
+#define TF_ADMIN_READYSTATUS     139
 // unused                       140
-#define TF_NAILGREN_INFO        141
+#define TF_NAILGREN_INFO         141
 // unused                       142
 // unused                       143
 // unused                       144
@@ -556,16 +556,16 @@
 // unused                       187
 // unused                       188
 // unused                       189
-#define TF_ADMIN_CYCLEDEAL          190
-#define TF_ADMIN_KICK          191
-#define TF_ADMIN_BAN          192
-#define TF_ADMIN_COUNTPLAYERS          193
-#define TF_ADMIN_CEASEFIRE          194
+#define TF_ADMIN_CYCLEDEAL       190
+#define TF_ADMIN_KICK            191
+#define TF_ADMIN_BAN             192
+#define TF_ADMIN_COUNTPLAYERS    193
+#define TF_ADMIN_CEASEFIRE       194
 // unused                       195
-#define TF_ADMIN_NEXT          196
+#define TF_ADMIN_NEXT            196
 // unused                       197
 // unused                       198
-#define TF_ADMIN_LISTIPS          199
+#define TF_ADMIN_LISTIPS         199
 // unused                       200
 // unused                       201
 // unused                       202
@@ -574,9 +574,9 @@
 // unused                       205
 // unused                       206
 // unused                       207
-#define TF_ADMIN_CLANMODE          208
-#define TF_ADMIN_QUADMODE          209
-#define TF_ADMIN_DUELMODE          210
+#define TF_ADMIN_CLANMODE        208
+#define TF_ADMIN_QUADMODE        209
+#define TF_ADMIN_DUELMODE        210
 // unused                       211
 // unused                       212
 // unused                       213
@@ -606,7 +606,7 @@
 // unused                       237
 // unused                       238
 // unused                       239
-#define TF_ADMIN_ADMINMENU          240
+#define TF_ADMIN_ADMINMENU       240
 // unused                       241
 // unused                       242
 // unused                       243

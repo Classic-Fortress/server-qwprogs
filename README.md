@@ -4,10 +4,12 @@ FortressOne Server
 New features
 ------
 
+* `+rj` Switches to rocket/incendiary weapon, jumps and shoots. Bind jump key to `+aux_jump` to prevent `-jump` from interupting auto-hop.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
-* `+special2` Scout: `autoscan`, Soldier: `+rj`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: Toggle build / det sentry
+* `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledisp`
+* `+special2` Scout: `autoscan`, Soldier: `+rj`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: `togglesentry`
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.

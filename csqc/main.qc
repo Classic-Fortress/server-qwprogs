@@ -55,6 +55,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("+special");
+    registercommand("-special");
     registercommand("+special2");
     registercommand("-special2");
     registercommand("+rj");
@@ -299,6 +301,63 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-jump\n");
             }
 
+            break;
+        case "+special":
+            switch (player_class) {
+                case PC_SCOUT:
+                    localcmd("dash\n");
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    break;
+                case PC_DEMOMAN:
+                    localcmd("detpipe\n");
+                    break;
+                case PC_MEDIC:
+                    localcmd("aura\n");
+                    break;
+                case PC_HVYWEAP:
+                    localcmd("locktoggle\n");
+                    break;
+                case PC_PYRO:
+                    localcmd("airblast\n");
+                    break;
+                case PC_SPY:
+                    localcmd("+feign\n");
+                    break;
+                case PC_ENGINEER:
+                    localcmd("toggledisp\n");
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
+            break;
+        case "-special":
+            switch (player_class) {
+                case PC_SCOUT:
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    break;
+                case PC_DEMOMAN:
+                    localcmd("-det5\n");
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    break;
+                case PC_SPY:
+                    localcmd("-feign\n");
+                    break;
+                case PC_ENGINEER:
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
             break;
         case "+special2":
             switch (player_class) {
