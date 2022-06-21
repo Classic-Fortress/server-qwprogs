@@ -3507,11 +3507,16 @@ void () W_WeaponFrame = {
 
     // hwguy assault cannon special
     if (self.playerclass == PC_HVYWEAP) {
-        if (cannon_lock && (self.impulse == TF_LOCKON || self.impulse == TF_LOCKOFF)) {
+        if (cannon_lock &&
+                ((self.impulse == TF_LOCKON) ||
+                 (self.impulse == TF_LOCKOFF) ||
+                 (self.impulse == TF_HVYWEAP_LOCK_TOGGLE))) {
             if (self.impulse == TF_LOCKON)
                 self.tfstate = self.tfstate | TFSTATE_LOCK;
             else if (self.impulse == TF_LOCKOFF)
                 self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+            else if (self.impulse == TF_HVYWEAP_LOCK_TOGGLE)
+                FO_LockToggle();
             Status_Refresh(self);
             self.impulse = 0;
             return;
