@@ -3353,7 +3353,8 @@ void () DeadImpulses = {
 };
 
 void () ButtonFrame = {
-    if (self.button3) { // +special
+    // +special
+    if (self.button3) {
         if (!button3_keydown) {
             button3_keydown = 1;
             button3_keydown_frame = 1;
@@ -3368,7 +3369,7 @@ void () ButtonFrame = {
             case PC_SOLDIER:
                 break;
             case PC_DEMOMAN:
-                TeamFortress_DetonatePipebombs(1);
+                TeamFortress_DetonatePipebombs(0);
                 break;
             case PC_MEDIC:
                 if (button3_keydown_frame) {
@@ -3396,7 +3397,7 @@ void () ButtonFrame = {
         }
 
         button3_keydown_frame = 0;
-    } else { // -special
+    } else {
         if (button3_keydown) {
             button3_keydown = 0;
             button3_keyup_frame = 1;
@@ -3429,7 +3430,8 @@ void () ButtonFrame = {
         button3_keyup_frame = 0;
     }
 
-    if (self.button4) { // +special2
+    // +special2
+    if (self.button4) {
         if (!button4_keydown) {
             button4_keydown = 1;
             button4_keydown_frame = 1;
@@ -3437,26 +3439,26 @@ void () ButtonFrame = {
 
         switch (self.playerclass) {
             case PC_SCOUT:
-                if (button3_keydown_frame) {
+                if (button4_keydown_frame) {
                     ScannerSwitch();
                 }
                 break;
             case PC_SNIPER:
                 break;
             case PC_SOLDIER:
-                /* self.current_weapon = WEAP_ROCKET_LAUNCHER; */
-                /* self.button0 = 1; */
-                /* self.button2 = 1; */
+                // Intercepted by InterceptRocketJump()
                 break;
             case PC_DEMOMAN:
-                localcmd("+det5\n");
+                if (button4_keydown_frame) {
+                    TeamFortress_SetDetpack(5);
+                }
                 break;
             case PC_MEDIC:
                 break;
             case PC_HVYWEAP:
                 break;
             case PC_PYRO:
-                localcmd("+rj\n");
+                // Intercepted by InterceptRocketJump()
                 break;
             case PC_SPY:
                 localcmd("dlastspawn\n");
@@ -3483,6 +3485,9 @@ void () ButtonFrame = {
             case PC_SOLDIER:
                 break;
             case PC_DEMOMAN:
+                if (button4_keyup_frame) {
+                    TeamFortress_DetpackStop();
+                }
                 break;
             case PC_MEDIC:
                 break;
