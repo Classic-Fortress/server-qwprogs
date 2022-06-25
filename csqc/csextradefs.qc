@@ -57,7 +57,7 @@ vector TEXT_TEAM_COLOUR[] = {
 #define TEAM_OBSERVER 99
 
 #define BUTTON0 1
-/* #define BUTTON1 ? */
+/* BUTTON1 not supported */
 #define BUTTON2 2
 #define BUTTON3 4
 #define BUTTON4 8
