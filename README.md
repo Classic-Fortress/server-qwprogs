@@ -10,8 +10,8 @@ New features
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
 * `special2` Scout: `autoscan`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: `togglesentry`
 * New buttons (not impulses):
-    * `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
-    * `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
+* `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
+* `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
@@ -156,6 +156,7 @@ Scout
 * New Scanner menu where Scanner settings can be changed.
 * Caltrop Canisters no longer "explode" in your hands.
 * Remember Scanner status across deaths.
+* `+special2` to toggle scanner.
 
 Sniper
 ------
@@ -164,7 +165,7 @@ Sniper
 
 Soldier
 ------
-* New command +rj (or +special2) to rocket jump.
+* New command `+rj` (or `+special2`) to rocket jump.
 
 Demolitions Man
 ------
@@ -172,6 +173,7 @@ Demolitions Man
 * Changed maximum detpipes allowed per team to 6 per demoman instead of 7 total.
 * Decrease /detpipe cooldown to 0.5 seconds instead of 0.8.
 * Stop detpacking by pressing last weapon bind.
+* `+special2` to set 5 second detpack.
 
 Combat Medic
 ------
@@ -207,6 +209,7 @@ Spy
 * Spy can now feign death in air.
 * Spy now drops an empty backpack when feigning death.
 * A fake death message (but relevant to current situation) is now shown when feigning death.
+* `+special2` to disguise as last spawned enemy.
 
 Engineer
 ------
@@ -223,6 +226,8 @@ Engineer
 * New command toggledispenser (or special) to build or detonate dispenser.
 * New command togglesentry (or +special2) to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
+* `+special` to build or destroy dispenser.
+* `+special2` to build or destroy sentry.
 
 
 Development
