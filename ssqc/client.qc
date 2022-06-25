@@ -1719,16 +1719,15 @@ entity(float team_num) FindTeamSpawnPoint =
 void (entity e) ValidateUser = {
 };
 
-entity () SelectSpawnPoint =
-{
-	if(allowpracspawns && self != world)
-	{
-		local entity spot2;
-		spot2 = TeamFortress_GetPracticeSpawn(self);
+entity () SelectSpawnPoint = {
+    if (allowpracspawns && self != world)
+    {
+        local entity spot2;
+        spot2 = TeamFortress_GetPracticeSpawn(self);
 
-		if(spot2 != world)
-			return spot2;
-	}
+        if(spot2 != world)
+            return spot2;
+    }
     
     local entity spot;
     local float attempts;

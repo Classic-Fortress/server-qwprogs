@@ -411,19 +411,11 @@ void InterceptRocketJump() {
     local float rj_weapon = 32;
 
     if (active_weapon != rj_weapon) {
-        local string rj_weapon_impulse;
-
-        if (player_class == PC_SOLDIER) {
-            // need to consider old impulses
-            rj_weapon_impulse = "impulse 1\n";
+        if (getplayerkeyfloat(player_localnum, "old_weapon_impulses") || getplayerkeyfloat(player_localnum, "owi")) {
+            localcmd("impulse 7\n");
+        } else {
+            localcmd("impulse 1\n");
         }
-
-        if (player_class == PC_PYRO) {
-            // need to consider old impulses
-            rj_weapon_impulse = "impulse 2\n";
-        }
-
-        localcmd(rj_weapon_impulse);
     } else {
         // press +jump and +attack
         input_buttons |= BUTTON0 + BUTTON2;

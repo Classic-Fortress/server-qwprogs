@@ -2209,14 +2209,14 @@ float (float weap) W_GetSlot = {
     if (weap == WEAP_ROCKET_LAUNCHER
                 || weap == WEAP_SUPER_NAILGUN
                 || weap == WEAP_SNIPER_RIFLE
-                || weap == WEAP_FLAMETHROWER
+                || weap == WEAP_INCENDIARY
                 || weap == WEAP_TRANQ
                 || weap == WEAP_LASER
                 || weap == WEAP_ASSAULT_CANNON) {
         return 1;
     } else if (weap == WEAP_SUPER_SHOTGUN
                 || weap == WEAP_AUTO_RIFLE
-                || weap == WEAP_INCENDIARY) {
+                || weap == WEAP_FLAMETHROWER) {
         return 2;
     } else if (weap == WEAP_SHOTGUN) {
         if (self.playerclass == PC_SCOUT)
@@ -2274,7 +2274,7 @@ float (float weap) W_OldGetSlot = {
 float (float inp) W_AmmoSlot = {
     self.noammo = 0;
 
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         if (self.playerclass == PC_SCOUT && self.ammo_nails < 2)
             self.noammo = 1;
         else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
@@ -2290,13 +2290,13 @@ float (float inp) W_AmmoSlot = {
                 self.noammo = 1;
             else if (self.ammo_cells < 7)
                 self.noammo = 2;
-        } else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
+        } else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
             self.noammo = 1;
-        else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
+         else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
             self.noammo = 1;
         else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
             self.noammo = 1;
-    } else if (inp == 2) {
+    } else if (inp == TF_SLOT2) {
         if (self.playerclass == PC_SCOUT && self.ammo_shells < 1)
             self.noammo = 1;
         else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
@@ -2310,9 +2310,9 @@ float (float inp) W_AmmoSlot = {
             self.noammo = 1;
         else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
             self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
+        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
             self.noammo = 1;
-    } else if (inp == 3) {
+    } else if (inp == TF_SLOT3) {
         if (self.playerclass == PC_SCOUT
                     || self.playerclass == PC_ENGINEER)
             return 0;
@@ -2327,7 +2327,7 @@ float (float inp) W_AmmoSlot = {
                     || self.playerclass == PC_PYRO)
                     && self.ammo_shells < 1)
             self.noammo = 1;
-    } else if (inp == 4)
+    } else if (inp == TF_SLOT4)
         return 1;
 
     if (self.noammo > 0)
@@ -2338,10 +2338,10 @@ float (float inp) W_AmmoSlot = {
 
 float (float inp) W_OldAmmoSlot = {
     self.noammo = 0;
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         return 1;
     }
-    else if (inp == 2) {
+    else if (inp == TF_SLOT2) {
         if ((self.playerclass == PC_SCOUT 
                 || self.playerclass == PC_SNIPER
                 || self.playerclass == PC_SOLDIER
@@ -2356,7 +2356,7 @@ float (float inp) W_OldAmmoSlot = {
             self.noammo = 1;
 
     }
-    else if (inp == 3) {
+    else if (inp == TF_SLOT3) {
         if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
             self.noammo = 1;
         else if ((self.playerclass == PC_SOLDIER
@@ -2367,7 +2367,7 @@ float (float inp) W_OldAmmoSlot = {
                     && self.ammo_shells < 2)
             self.noammo = 1;
     }
-    else if (inp == 4) {
+    else if (inp == TF_SLOT4) {
         if ((self.playerclass == PC_SCOUT
                 || self.playerclass == PC_SNIPER
                 || self.playerclass == PC_SPY)
@@ -2500,7 +2500,7 @@ float () W_WeaponSlot1 = {
     else if (self.playerclass == PC_HVYWEAP)
         return WEAP_ASSAULT_CANNON;
     else if (self.playerclass == PC_PYRO)
-        return WEAP_FLAMETHROWER;
+        return WEAP_INCENDIARY;
     else if (self.playerclass == PC_SPY)
         return WEAP_TRANQ;
     else if (self.playerclass == PC_ENGINEER)
@@ -2522,7 +2522,7 @@ float () W_WeaponSlot2 = {
     else if (self.playerclass == PC_DEMOMAN) {
         return WEAP_GRENADE_LAUNCHER; // weaponmode = 1 (pipebomb launcher)
     } else if (self.playerclass == PC_PYRO)
-        return WEAP_INCENDIARY;
+        return WEAP_FLAMETHROWER;
     return 0;
 };
 
@@ -2573,16 +2573,16 @@ void (float slot) W_WeaponSlot = {
 
 void (float inp) W_OldWeaponSlot = {
     self.next_weaponmode = 0;
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         self.next_weapon = W_OldWeaponSlot1();
     }
-    else if (inp == 2) {
+    else if (inp == TF_SLOT2) {
         self.next_weapon = W_OldWeaponSlot2();
     }
-    else if (inp == 3) {
+    else if (inp == TF_SLOT3) {
         self.next_weapon = W_OldWeaponSlot3();
     }
-    else if (inp == 4) {
+    else if (inp == TF_SLOT4) {
         self.next_weapon = W_OldWeaponSlot4();
     }
     else if (inp == 5) {
@@ -2778,9 +2778,10 @@ float (entity pl) W_WeaponState_Check = {
 
 void (float inp) W_ChangeWeapon = {
     if(self.playerclass == PC_CIVILIAN) {
-        inp = 4;
+        inp = TF_SLOT4;
     }
-    if (inp < 1 || inp > GetLastWeaponImpulse())
+
+    if (inp < TF_SLOT1 || inp > GetLastWeaponImpulse())
         return;
 
     if (self.playerclass == 0)
@@ -2796,7 +2797,7 @@ void (float inp) W_ChangeWeapon = {
     
     if (IsUsingOldImpulses()) {
         if(self.playerclass == PC_CIVILIAN) {
-            inp = 1;
+            inp = TF_SLOT1;
         }
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
