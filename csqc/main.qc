@@ -12,6 +12,7 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
+void InterceptRocketJump();
 float IsValidToUseGrenades();
 
 void GetSelf() = {
@@ -303,140 +304,26 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
             break;
         case "+special":
-            switch (player_class) {
-                case PC_SCOUT:
-                    localcmd("dash\n");
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    break;
-                case PC_DEMOMAN:
-                    localcmd("detpipe\n");
-                    break;
-                case PC_MEDIC:
-                    localcmd("aura\n");
-                    break;
-                case PC_HVYWEAP:
-                    localcmd("locktoggle\n");
-                    break;
-                case PC_PYRO:
-                    localcmd("airblast\n");
-                    break;
-                case PC_SPY:
-                    localcmd("+feign\n");
-                    break;
-                case PC_ENGINEER:
-                    localcmd("toggledisp\n");
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
+            localcmd("+button3");
             break;
         case "-special":
-            switch (player_class) {
-                case PC_SCOUT:
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    break;
-                case PC_DEMOMAN:
-                    localcmd("-det5\n");
-                    break;
-                case PC_MEDIC:
-                    break;
-                case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
-                    break;
-                case PC_SPY:
-                    localcmd("-feign\n");
-                    break;
-                case PC_ENGINEER:
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
+            localcmd("-button3");
             break;
         case "+special2":
-            switch (player_class) {
-                case PC_SCOUT:
-                    localcmd("autoscan\n");
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    localcmd("+rj\n");
-                    break;
-                case PC_DEMOMAN:
-                    localcmd("+det5\n");
-                    break;
-                case PC_MEDIC:
-                    break;
-                case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
-                    localcmd("+rj\n");
-                    break;
-                case PC_SPY:
-                    localcmd("dlastspawn\n");
-                    break;
-                case PC_ENGINEER:
-                    localcmd("togglesentry\n");
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
+            localcmd("+button4");
             break;
         case "-special2":
-            switch (player_class) {
-                case PC_SCOUT:
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    localcmd("-rj\n");
-                    break;
-                case PC_DEMOMAN:
-                    localcmd("-det5\n");
-                    break;
-                case PC_MEDIC:
-                    break;
-                case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
-                    localcmd("-rj\n");
-                    break;
-                case PC_SPY:
-                    break;
-                case PC_ENGINEER:
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
+            localcmd("-button4");
             break;
         case "+rj":
-            if (player_class == PC_SOLDIER) {
-                localcmd("impulse 1\n");
-            } else if (player_class == PC_PYRO) {
-                localcmd("impulse 2\n");
-            } else {
-                break;
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("+button4");
             }
-
-            localcmd("+attack\n");
-            localcmd("+aux_jump\n");
-
             break;
         case "-rj":
-            if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
-                break;
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("-button4");
             }
-
-            localcmd("-attack\n");
-            localcmd("-aux_jump\n");
-
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -469,6 +356,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
+    InterceptRocketJump();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -504,5 +392,40 @@ void StopGrenTimers() {
         FO_Hud_Grentimers[i].grentype = 0;
         FO_Hud_Grentimers[i].expires = 0;
         FO_Hud_Grentimers[i].icon_index = 0;
+    }
+}
+
+void InterceptRocketJump() {
+    if (!(input_buttons & BUTTON4)) {
+        return;
+    }
+
+    if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
+        return;
+    }
+
+    // unpress +special2
+    input_buttons = input_buttons & ~BUTTON4;
+
+    local float active_weapon = getstatf(STAT_ACTIVEWEAPON);
+    local float rj_weapon = 32;
+
+    if (active_weapon != rj_weapon) {
+        local string rj_weapon_impulse;
+
+        if (player_class == PC_SOLDIER) {
+            // need to consider old impulses
+            rj_weapon_impulse = "impulse 1\n";
+        }
+
+        if (player_class == PC_PYRO) {
+            // need to consider old impulses
+            rj_weapon_impulse = "impulse 2\n";
+        }
+
+        localcmd(rj_weapon_impulse);
+    } else {
+        // press +jump and +attack
+        input_buttons |= BUTTON0 + BUTTON2;
     }
 }

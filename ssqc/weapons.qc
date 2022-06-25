@@ -64,6 +64,7 @@ void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
+void () FO_Engineer_ToggleDisp;
 float (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
@@ -127,6 +128,13 @@ float () IsUsingOldImpulses;
 void (float inp) W_OldWeaponSlot;
 
 void (entity ent, float num) SetFlameCount;
+
+float button3_keydown;
+float button3_keydown_frame;
+float button3_keyup_frame;
+float button4_keydown;
+float button4_keydown_frame;
+float button4_keyup_frame;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -3081,15 +3089,7 @@ void () ImpulseCommands = {
             }
         }
     } else if ((self.impulse == TF_ENGINEER_TOGGLEDISP) && (self.playerclass == PC_ENGINEER)) {
-        if (self.has_dispenser) {
-            DestroyBuilding(self, "building_dispenser");
-        } else {
-            if (self.health <= 0) {
-                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
-            } else {
-                Menu_Engineer_Input(2);
-            }
-        }
+        FO_Engineer_ToggleDisp();
     }
     else if ((self.impulse == 196) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_exit");
@@ -3352,6 +3352,155 @@ void () DeadImpulses = {
     }
 };
 
+void () ButtonFrame = {
+    if (self.button3) { // +special
+        if (!button3_keydown) {
+            button3_keydown = 1;
+            button3_keydown_frame = 1;
+        }
+
+        switch (self.playerclass) {
+            case PC_SCOUT:
+                CF_Scout_Dash();
+                break;
+            case PC_SNIPER:
+                break;
+            case PC_SOLDIER:
+                break;
+            case PC_DEMOMAN:
+                TeamFortress_DetonatePipebombs(1);
+                break;
+            case PC_MEDIC:
+                if (button3_keydown_frame) {
+                    CF_Medic_AuraToggle();
+                }
+                break;
+            case PC_HVYWEAP:
+                if (button3_keydown_frame) {
+                    FO_LockToggle();
+                }
+                break;
+            case PC_PYRO:
+                FO_Airblast();
+                break;
+            case PC_SPY:
+                FO_Spy_Feign(0);
+                break;
+            case PC_ENGINEER:
+                if (button3_keydown_frame) {
+                    FO_Engineer_ToggleDisp();
+                }
+                break;
+            case PC_UNDEFINED:
+                break;
+        }
+
+        button3_keydown_frame = 0;
+    } else { // -special
+        if (button3_keydown) {
+            button3_keydown = 0;
+            button3_keyup_frame = 1;
+        }
+
+        switch (self.playerclass) {
+            case PC_SCOUT:
+                break;
+            case PC_SNIPER:
+                break;
+            case PC_SOLDIER:
+                break;
+            case PC_DEMOMAN:
+                break;
+            case PC_MEDIC:
+                break;
+            case PC_HVYWEAP:
+                break;
+            case PC_PYRO:
+                break;
+            case PC_SPY:
+                FO_Spy_Unfeign();
+                break;
+            case PC_ENGINEER:
+                break;
+            case PC_UNDEFINED:
+                break;
+        }
+
+        button3_keyup_frame = 0;
+    }
+
+    if (self.button4) { // +special2
+        if (!button4_keydown) {
+            button4_keydown = 1;
+            button4_keydown_frame = 1;
+        }
+
+        switch (self.playerclass) {
+            case PC_SCOUT:
+                if (button3_keydown_frame) {
+                    ScannerSwitch();
+                }
+                break;
+            case PC_SNIPER:
+                break;
+            case PC_SOLDIER:
+                /* self.current_weapon = WEAP_ROCKET_LAUNCHER; */
+                /* self.button0 = 1; */
+                /* self.button2 = 1; */
+                break;
+            case PC_DEMOMAN:
+                localcmd("+det5\n");
+                break;
+            case PC_MEDIC:
+                break;
+            case PC_HVYWEAP:
+                break;
+            case PC_PYRO:
+                localcmd("+rj\n");
+                break;
+            case PC_SPY:
+                localcmd("dlastspawn\n");
+                break;
+            case PC_ENGINEER:
+                localcmd("togglesentry\n");
+                break;
+            case PC_UNDEFINED:
+                break;
+        }
+
+        button4_keydown_frame = 0;
+    } else { // -special2
+        if (button4_keydown) {
+            button4_keydown = 0;
+            button4_keyup_frame = 1;
+        }
+
+        switch (self.playerclass) {
+            case PC_SCOUT:
+                break;
+            case PC_SNIPER:
+                break;
+            case PC_SOLDIER:
+                break;
+            case PC_DEMOMAN:
+                break;
+            case PC_MEDIC:
+                break;
+            case PC_HVYWEAP:
+                break;
+            case PC_PYRO:
+                break;
+            case PC_SPY:
+                break;
+            case PC_ENGINEER:
+                break;
+            case PC_UNDEFINED:
+                break;
+        }
+
+        button4_keyup_frame = 0;
+    }
+}
 
 void () W_WeaponFrame = {
 

@@ -2389,8 +2389,10 @@ void () PlayerJump = {
         }
         return;
     }
+
     if (!(self.flags & FL_ONGROUND))
         return;
+
     if (!(self.flags & FL_JUMPRELEASED))
         return;
 
@@ -2418,6 +2420,7 @@ void () PlayerJump = {
             TeamFortress_SetSpeed(self);
         }
     }
+
     if (old_grens != 1) {
         te = find(world, classname, "timer");
         while (((te.owner != self) || (te.think != ConcussionGrenadeTimer))
@@ -2586,6 +2589,7 @@ void () PlayerPreThink = {
     if (self.deadflag == 1) {
         return;
     }
+
     if (self.is_feigning) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
@@ -2815,7 +2819,7 @@ void () PlayerPostThink = {
 
     local float fdmg;
 
-    if (((self.jump_flag < -300) && (self.flags & 512)) &&
+    if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
             FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
@@ -2851,6 +2855,7 @@ void () PlayerPostThink = {
         //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
+        ButtonFrame();
         W_WeaponFrame();
         if (self.motd <= 400) {
             TeamFortress_MOTD();
@@ -3704,7 +3709,6 @@ void () InitReverseCap = {
     }
 
 }
-
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*

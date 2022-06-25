@@ -251,7 +251,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
         TeamFortress_Alias("togglesentry", TF_ENGINEER_TOGGLESENTRY, 0);
-        TeamFortress_Alias("toggledispenser", TF_ENGINEER_TOGGLEDISP, 0);
+        TeamFortress_Alias("toggledisp", TF_ENGINEER_TOGGLEDISP, 0);
     } else if (self.motd == 130) {
         stuffcmd(self, "is_aliased\n");
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);

@@ -854,10 +854,6 @@ void () UseAirBlast = {
             ent = ent.chain;
         }
     }
-    else
-    {
-        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
-    }
 };
 
 void () UseAirBlastV2 = {
@@ -972,9 +968,5 @@ void () UseAirBlastV2 = {
             ent = ent.chain;
         }
 
-    }
-    else
-    {
-        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
     }
 };
