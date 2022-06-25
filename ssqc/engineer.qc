@@ -337,7 +337,7 @@ entity () FO_FindCurrentBuildingObject = {
     return world;
 }
 
-void () FO_Engineer_ToggleDisp = {
+void () FO_Engineer_ToggleDispenser = {
     if (self.has_dispenser) {
         DestroyBuilding(self, "building_dispenser");
     } else {
@@ -345,6 +345,18 @@ void () FO_Engineer_ToggleDisp = {
             sprint(self, PRINT_HIGH, "Can't build while dead.\n");
         } else {
             Menu_Engineer_Input(2);
+        }
+    }
+}
+
+void () FO_Engineer_ToggleSentry = {
+    if (self.has_sentry) {
+        DestroyBuilding(self, "building_sentrygun");
+    } else {
+        if (self.health <= 0) {
+            sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+        } else {
+            Menu_Engineer_Input(1);
         }
     }
 }

@@ -67,7 +67,7 @@ void () UseSpecialSkill = {
             self.impulse = TF_SPY_DIE;
             break;
         case PC_ENGINEER:
-            self.impulse = TF_ENGINEER_TOGGLEDISP;
+            self.impulse = TF_ENGINEER_TOGGLEDISPENSER;
             break;
         case PC_UNDEFINED:
             if (self.enemy == world) {

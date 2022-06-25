@@ -8,7 +8,7 @@ New features
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
-* `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledisp`
+* `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`
 * `+special2` Scout: `autoscan`, Soldier: `+rj`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: `togglesentry`
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
@@ -218,7 +218,7 @@ Engineer
 * Stop building by pressing last weapon key.
 * Added message when Dispenser is destroyed.
 * Added dismantle message to show how many cells were returned to Engineer.
-* New command toggledisp (or special) to build or detonate dispenser.
+* New command toggledispenser (or special) to build or detonate dispenser.
 * New command togglesentry (or +special2) to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 

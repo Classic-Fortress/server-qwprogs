@@ -64,7 +64,8 @@ void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
-void () FO_Engineer_ToggleDisp;
+void () FO_Engineer_ToggleDispenser;
+void () FO_Engineer_ToggleSentry;
 float (float force) TeamFortress_DetonatePipebombs;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
@@ -129,12 +130,12 @@ void (float inp) W_OldWeaponSlot;
 
 void (entity ent, float num) SetFlameCount;
 
-float button3_keydown;
-float button3_keydown_frame;
-float button3_keyup_frame;
-float button4_keydown;
-float button4_keydown_frame;
-float button4_keyup_frame;
+.float button3_keydown;
+.float button3_keydown_frame;
+.float button3_keyup_frame;
+.float button4_keydown;
+.float button4_keydown_frame;
+.float button4_keyup_frame;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -3078,19 +3079,10 @@ void () ImpulseCommands = {
     else if ((self.impulse == TF_ENGINEER_DETDISP) &&
             (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_dispenser");
-    else if ((self.impulse == TF_ENGINEER_TOGGLESENTRY) && (self.playerclass == PC_ENGINEER)) {
-        if (self.has_sentry) {
-            DestroyBuilding(self, "building_sentrygun");
-        } else {
-            if (self.health <= 0) {
-                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
-            } else {
-                Menu_Engineer_Input(1);
-            }
-        }
-    } else if ((self.impulse == TF_ENGINEER_TOGGLEDISP) && (self.playerclass == PC_ENGINEER)) {
-        FO_Engineer_ToggleDisp();
-    }
+    else if ((self.impulse == TF_ENGINEER_TOGGLEDISPENSER) && (self.playerclass == PC_ENGINEER))
+        FO_Engineer_ToggleDispenser();
+    else if ((self.impulse == TF_ENGINEER_TOGGLESENTRY) && (self.playerclass == PC_ENGINEER))
+        FO_Engineer_ToggleSentry();
     else if ((self.impulse == 196) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_exit");
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
@@ -3355,9 +3347,9 @@ void () DeadImpulses = {
 void () ButtonFrame = {
     // +special
     if (self.button3) {
-        if (!button3_keydown) {
-            button3_keydown = 1;
-            button3_keydown_frame = 1;
+        if (!self.button3_keydown) {
+            self.button3_keydown = 1;
+            self.button3_keydown_frame = 1;
         }
 
         switch (self.playerclass) {
@@ -3372,12 +3364,12 @@ void () ButtonFrame = {
                 TeamFortress_DetonatePipebombs(0);
                 break;
             case PC_MEDIC:
-                if (button3_keydown_frame) {
+                if (self.button3_keydown_frame) {
                     CF_Medic_AuraToggle();
                 }
                 break;
             case PC_HVYWEAP:
-                if (button3_keydown_frame) {
+                if (self.button3_keydown_frame) {
                     FO_LockToggle();
                 }
                 break;
@@ -3388,19 +3380,19 @@ void () ButtonFrame = {
                 FO_Spy_Feign(0);
                 break;
             case PC_ENGINEER:
-                if (button3_keydown_frame) {
-                    FO_Engineer_ToggleDisp();
+                if (self.button3_keydown_frame) {
+                    FO_Engineer_ToggleDispenser();
                 }
                 break;
             case PC_UNDEFINED:
                 break;
         }
 
-        button3_keydown_frame = 0;
+        self.button3_keydown_frame = 0;
     } else {
-        if (button3_keydown) {
-            button3_keydown = 0;
-            button3_keyup_frame = 1;
+        if (self.button3_keydown) {
+            self.button3_keydown = 0;
+            self.button3_keyup_frame = 1;
         }
 
         switch (self.playerclass) {
@@ -3427,19 +3419,19 @@ void () ButtonFrame = {
                 break;
         }
 
-        button3_keyup_frame = 0;
+        self.button3_keyup_frame = 0;
     }
 
     // +special2
     if (self.button4) {
-        if (!button4_keydown) {
-            button4_keydown = 1;
-            button4_keydown_frame = 1;
+        if (!self.button4_keydown) {
+            self.button4_keydown = 1;
+            self.button4_keydown_frame = 1;
         }
 
         switch (self.playerclass) {
             case PC_SCOUT:
-                if (button4_keydown_frame) {
+                if (self.button4_keydown_frame) {
                     ScannerSwitch();
                 }
                 break;
@@ -3449,7 +3441,7 @@ void () ButtonFrame = {
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_DEMOMAN:
-                if (button4_keydown_frame) {
+                if (self.button4_keydown_frame) {
                     TeamFortress_SetDetpack(5);
                 }
                 break;
@@ -3461,20 +3453,24 @@ void () ButtonFrame = {
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_SPY:
-                localcmd("dlastspawn\n");
+                if (self.button4_keydown_frame) {
+                    FO_Spy_DisguiseLastSpawned(self);
+                }
                 break;
             case PC_ENGINEER:
-                localcmd("togglesentry\n");
+                if (self.button4_keydown_frame) {
+                    FO_Engineer_ToggleSentry();
+                }
                 break;
             case PC_UNDEFINED:
                 break;
         }
 
-        button4_keydown_frame = 0;
+        self.button4_keydown_frame = 0;
     } else { // -special2
-        if (button4_keydown) {
-            button4_keydown = 0;
-            button4_keyup_frame = 1;
+        if (self.button4_keydown) {
+            self.button4_keydown = 0;
+            self.button4_keyup_frame = 1;
         }
 
         switch (self.playerclass) {
@@ -3485,7 +3481,7 @@ void () ButtonFrame = {
             case PC_SOLDIER:
                 break;
             case PC_DEMOMAN:
-                if (button4_keyup_frame) {
+                if (self.button4_keyup_frame) {
                     TeamFortress_DetpackStop();
                 }
                 break;
@@ -3503,7 +3499,7 @@ void () ButtonFrame = {
                 break;
         }
 
-        button4_keyup_frame = 0;
+        self.button4_keyup_frame = 0;
     }
 }
 
