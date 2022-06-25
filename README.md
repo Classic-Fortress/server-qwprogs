@@ -203,9 +203,9 @@ Spy
 * Change color and skin in one sequence.
 * Last disguise (reachable through disguise menu or using /dlast alias).
 * Stop disguising by pressing last weapon bind.
-* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen, /dlastspawn).
-* New aliases for changing skin (/dscout, /dsniper, /dsoldier, etc).
-* Build your own disguise aliases (e.g. alias bsniper "dblue; wait; dsniper" for blue sniper).
+* New aliases for changing team color (`denemy` (if 2 teams), `dblue,` `dred,` `dyellow,` `dgreen,` `dlastspawn`).
+* New aliases for changing skin (`dscout`, `dsniper`, `dsoldier`, etc).
+* Build your own disguise aliases (e.g. `alias bsniper "dblue; wait; dsniper"` for blue sniper).
 * Spy can now feign death in air.
 * Spy now drops an empty backpack when feigning death.
 * A fake death message (but relevant to current situation) is now shown when feigning death.
@@ -223,8 +223,8 @@ Engineer
 * Stop building by pressing last weapon key.
 * Added message when Dispenser is destroyed.
 * Added dismantle message to show how many cells were returned to Engineer.
-* New command toggledispenser (or special) to build or detonate dispenser.
-* New command togglesentry (or +special2) to build or detonate sentry.
+* New command toggledispenser (or `+special`) to build or detonate dispenser.
+* New command togglesentry (or `+special2`) to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
 * `+special` to build or destroy dispenser.
 * `+special2` to build or destroy sentry.
