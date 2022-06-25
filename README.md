@@ -4,7 +4,7 @@ FortressOne Server
 New features
 ------
 
-* `+rj` Switches to rocket/incendiary weapon, jumps and shoots. Bind jump key to `+aux_jump` to prevent `-jump` from interupting auto-hop.
+* `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
