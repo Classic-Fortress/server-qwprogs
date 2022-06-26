@@ -437,6 +437,8 @@ void InterceptRocketJump() {
     if (active_weapon != rj_weapon) {
         if (getplayerkeyfloat(player_localnum, "old_weapon_impulses") || getplayerkeyfloat(player_localnum, "owi")) {
             localcmd("impulse 7\n");
+        } else if (player_class = PC_PYRO && getplayerkeyfloat(player_localnum, "cf_pyro_impulses")) {
+            localcmd("impulse 2\n");
         } else {
             localcmd("impulse 1\n");
         }

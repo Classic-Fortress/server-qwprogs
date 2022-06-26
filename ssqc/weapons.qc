@@ -2212,17 +2212,20 @@ void () W_PrintWeaponMessage = {
 };
 
 float (float weap) W_GetSlot = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (weap == WEAP_ROCKET_LAUNCHER
                 || weap == WEAP_SUPER_NAILGUN
                 || weap == WEAP_SNIPER_RIFLE
-                || weap == WEAP_INCENDIARY
+                || (!cf_pyro_impulses && weap == WEAP_INCENDIARY)
+                || (cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
                 || weap == WEAP_TRANQ
                 || weap == WEAP_LASER
                 || weap == WEAP_ASSAULT_CANNON) {
         return 1;
     } else if (weap == WEAP_SUPER_SHOTGUN
                 || weap == WEAP_AUTO_RIFLE
-                || weap == WEAP_FLAMETHROWER) {
+                || (!cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
+                || (cf_pyro_impulses && weap == WEAP_INCENDIARY)) {
         return 2;
     } else if (weap == WEAP_SHOTGUN) {
         if (self.playerclass == PC_SCOUT)
@@ -2278,6 +2281,7 @@ float (float weap) W_OldGetSlot = {
 };
 
 float (float inp) W_AmmoSlot = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     self.noammo = 0;
 
     if (inp == TF_SLOT1) {
@@ -2296,7 +2300,9 @@ float (float inp) W_AmmoSlot = {
                 self.noammo = 1;
             else if (self.ammo_cells < 7)
                 self.noammo = 2;
-        } else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
+        } else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_rockets < 3)
+            self.noammo = 1;
+        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_cells < 3)
             self.noammo = 1;
          else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
             self.noammo = 1;
@@ -2316,7 +2322,9 @@ float (float inp) W_AmmoSlot = {
             self.noammo = 1;
         else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
             self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
+        else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_cells < 1)
+            self.noammo = 1;
+        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_rockets < 1)
             self.noammo = 1;
     } else if (inp == TF_SLOT3) {
         if (self.playerclass == PC_SCOUT
@@ -2493,6 +2501,7 @@ float () W_OldWeaponSlot7 = {
 };
 
 float () W_WeaponSlot1 = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (self.playerclass == PC_SCOUT)
         return WEAP_NAILGUN;
     else if (self.playerclass == PC_SNIPER)
@@ -2506,7 +2515,11 @@ float () W_WeaponSlot1 = {
     else if (self.playerclass == PC_HVYWEAP)
         return WEAP_ASSAULT_CANNON;
     else if (self.playerclass == PC_PYRO)
-        return WEAP_INCENDIARY;
+        if (cf_pyro_impulses) {
+            return WEAP_FLAMETHROWER;
+        } else {
+            return WEAP_INCENDIARY;
+        }
     else if (self.playerclass == PC_SPY)
         return WEAP_TRANQ;
     else if (self.playerclass == PC_ENGINEER)
@@ -2515,6 +2528,7 @@ float () W_WeaponSlot1 = {
 };
 
 float () W_WeaponSlot2 = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (self.playerclass == PC_SCOUT)
         return WEAP_SHOTGUN;
     else if (self.playerclass == PC_SNIPER)
@@ -2528,7 +2542,11 @@ float () W_WeaponSlot2 = {
     else if (self.playerclass == PC_DEMOMAN) {
         return WEAP_GRENADE_LAUNCHER; // weaponmode = 1 (pipebomb launcher)
     } else if (self.playerclass == PC_PYRO)
-        return WEAP_FLAMETHROWER;
+        if (cf_pyro_impulses) {
+            return WEAP_INCENDIARY;
+        } else {
+            return WEAP_FLAMETHROWER;
+        }
     return 0;
 };
 
