@@ -391,13 +391,14 @@ void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-	if(self.owner.deadflag >= 2) {
-		// reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
-		self.owner.movetype = MOVETYPE_NONE;
-		self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+    if(self.owner.deadflag >= 2) {
+        // reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
+        self.owner.movetype = MOVETYPE_NONE;
+        self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
         dremove(self);
         return;
     }
+
     if ((self.owner.playerclass != PC_SPY) || (!self.owner.is_feigning)) {
         dremove(self);
         return;
@@ -434,6 +435,166 @@ void () CF_Spy_AirThink = {
     self.nextthink = time + 0.1;
 };
 
+void (float issilent) FO_Spy_Feign = {
+    if (self.is_feigning) {
+        return;
+    }
+
+    // don't allow feign if spy is in air and air feigning is disallowed
+    if (!feign_air && !(self.flags & FL_ONGROUND)) {
+        return;
+    }
+
+    // check area for feigned spy on the ground
+    local float area_check;
+    area_check = Spy_CheckArea(self);
+    if (area_check == 3) {
+        return;
+    }
+
+    // don't check for team color cheat for 5 seconds
+    self.immune_to_check = time + 5;
+
+    // set movetype to toss
+    self.movetype = MOVETYPE_TOSS;
+
+    // this timer will make sure the spy falls
+    // to the ground when possible
+    local entity spy;
+    spy = spawn();
+    spy.classname = "airtimer";
+    spy.owner = self;
+    spy.think = CF_Spy_AirThink;
+    spy.nextthink = time + 0.1;
+
+    // set spy feign variables
+    self.is_feigning = 1;
+    self.is_button_feigning = 1;
+
+    Attack_Finished(0.8);
+    self.invisible_finished = 0;
+
+    // set precached model index
+    self.modelindex = modelindex_player;
+
+    // set size of player model
+    setsize(self, '-16 -16 -24', '16 16 -16');
+
+    // set weapon state and remove weapon viewmodel
+    W_WeaponState_Save(self);
+    self.weaponmodel = "";
+    self.weaponframe = 0;
+
+    // set view height to ground
+    self.view_ofs = '0 0 4';
+
+    // do extra stuff if feign is not silent feign
+    if (issilent == 0) {
+        // make a death sound
+        DeathSound();
+
+        // drop an empty backpack (if this is not disabled in settings)
+        if (feign_pack)
+            Spy_DropBackpack();
+
+        // print feign message (if this is not disabled in settings)
+        if (feign_msg) {
+            local string deathstring;
+            deathstring = GetDeathMessage(self, self.attacked_by, self.feignmsg);
+            bprint(PRINT_MEDIUM, deathstring);
+            KillSound(self, self.attacked_by);
+        }
+
+        // set movement speed to 0 if currently in the air to disable manipulation of trajectory
+        if (!(self.flags & FL_ONGROUND))
+            self.maxspeed = 0;
+    }
+
+    // drop flag if spy is carrying it
+    local entity te;
+    te = find(world, classname, "item_tfgoal");
+    while (te) {
+        if (te.owner == self) {
+            if (!(te.goal_activation & TFGI_KEEP) || self.has_disconnected == 1)
+                tfgoalitem_RemoveFromPlayer(te, self, 0);
+            if (CTF_Map == 1) {
+                if (te.goal_no == 1)
+                    bprint(PRINT_HIGH, self.netname, Q" \slost\s the \sblue\s flag!\n");
+                else if (te.goal_no == 2)
+                    bprint(PRINT_HIGH, self.netname, Q" \slost\s the \sred\s flag!\n");
+            }
+        }
+        te = find(te, classname, "item_tfgoal");
+    }
+
+    // die with axe equipped if carrying axe, medikit, knife or spanner
+    if (self.weapon <= WEAP_AXE) {
+        spy_die_ax1();
+        return;
+    }
+
+    // randomize death animation
+    local float i;
+    i = 1 + floor((random() * 6));
+    if (i == 1)
+        spy_diea1();
+    else if (i == 2)
+        spy_dieb1();
+    else if (i == 3)
+        spy_diec1();
+    else if (i == 4)
+        spy_died1();
+    else
+        spy_diee1();
+}
+
+void () FO_Spy_Unfeign = {
+    if (!self.is_button_feigning) {
+        return;
+    }
+
+    // check area for obstructing entities
+    local float area_check;
+    area_check = Spy_CheckArea(self);
+
+    // nothing on top => unfeign
+    if (!area_check) {
+
+        // set size of player model
+        setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
+
+        // set view height
+        self.view_ofs = '0 0 22';
+
+        // unset feign variables
+        self.is_feigning = 0;
+        self.is_button_feigning = 0;
+        self.feign_areachecked = 0;
+
+        // load saved weapon state and set current ammo
+        W_WeaponState_Load(self, 0);
+        W_SetCurrentAmmo(self);
+
+        // allow spy to move again
+        self.movetype = MOVETYPE_WALK;
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+        TeamFortress_SetSpeed(self);
+
+        // set revive animation
+        local float i;
+        i = 1 + floor(random() * 5);
+        if (i == 1) {
+            spy_upb1();
+        } else if (i == 2) {
+            spy_upc1();
+        } else if (i == 3) {
+            spy_upd1();
+        } else {
+            spy_upe1();
+        }
+    }
+}
+
 void (float issilent) CF_Spy_FeignDeath = {
     local string deathstring;
     local float area_check;
@@ -441,7 +602,6 @@ void (float issilent) CF_Spy_FeignDeath = {
     local entity te, spy;
 
     if (self.is_feigning) {
-
         // check area for obstructing entities
         area_check = Spy_CheckArea(self);
 
@@ -479,19 +639,13 @@ void (float issilent) CF_Spy_FeignDeath = {
                 spy_upe1();
             }
 
-        // something is on top of spy
+            // something is on top of spy
         } else if (area_check == 1) {
             sprint(self, PRINT_HIGH, "You cannot get up with something on top of you\n");
         } else if (area_check == 2) {
             sprint(self, PRINT_HIGH, "You cannot get up while someone is standing on you\n");
         }
     } else {
-
-        // don't feign spam timer is active
-        if (time < self.antispam_feign) {
-            sprint(self, PRINT_HIGH, "You cannot feign right now\n");
-            return;
-        }
 
         // don't allow feign if spy is in air and air feigning is disallowed
         if (!feign_air && !(self.flags & FL_ONGROUND)) {
@@ -506,9 +660,6 @@ void (float issilent) CF_Spy_FeignDeath = {
             return;
         }
 
-        // stop spy from attempting feign for 3 seconds
-        self.antispam_feign = time + 3;
-
         // don't check for team color cheat for 5 seconds
         self.immune_to_check = time + 5;
 
@@ -522,32 +673,24 @@ void (float issilent) CF_Spy_FeignDeath = {
         spy.owner = self;
         spy.think = CF_Spy_AirThink;
         spy.nextthink = time + 0.1;
-
         // set spy feign variables
         self.is_feigning = 1;
-
         Attack_Finished(0.8);
         self.invisible_finished = 0;
-
         // set precached model index
         self.modelindex = modelindex_player;
-
         // set size of player model
         setsize(self, '-16 -16 -24', '16 16 -16');
-
         // set weapon state and remove weapon viewmodel
         W_WeaponState_Save(self);
         self.weaponmodel = "";
         self.weaponframe = 0;
-
         // set view height to ground
         self.view_ofs = '0 0 4';
-
         // do extra stuff if feign is not silent feign
         if (issilent == 0) {
             // make a death sound
             DeathSound();
-
             // drop an empty backpack (if this is not disabled in settings)
             if (feign_pack)
                 Spy_DropBackpack();
@@ -558,7 +701,6 @@ void (float issilent) CF_Spy_FeignDeath = {
                 bprint(PRINT_MEDIUM, deathstring);
                 KillSound(self, self.attacked_by);
             }
-
             // set movement speed to 0 if currently in the air to disable manipulation of trajectory
             if (!(self.flags & FL_ONGROUND))
                 self.maxspeed = 0;
@@ -579,7 +721,6 @@ void (float issilent) CF_Spy_FeignDeath = {
             }
             te = find(te, classname, "item_tfgoal");
         }
-
         // die with axe equipped if carrying axe, medikit, knife or spanner
         if (self.weapon <= WEAP_AXE) {
             spy_die_ax1();
@@ -943,7 +1084,7 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     if (!pe_player.undercover_team)
         sprint(pe_player, PRINT_HIGH, "Going undercover...\n");
     else if(pe_player.undercover_skin != pf_class)
-         sprint(pe_player, PRINT_HIGH, "Changing costumes...\n");
+        sprint(pe_player, PRINT_HIGH, "Changing costumes...\n");
 
     pe_player.is_undercover = 2;
     pe_player.disguise_skin = pf_class;
@@ -1024,7 +1165,7 @@ void (entity spy) TeamFortress_SpyCalcName = {
         te = find(world, classname, "player");
         while (te) {
             if ((te.team_no == spy.undercover_team) &&
-                (te.skin == spy.undercover_skin)) {
+                    (te.skin == spy.undercover_skin)) {
                 spy.undercover_name = te.netname;
                 te = world;
             } else {
@@ -1100,7 +1241,7 @@ void () GasGrenadeMakeGas = {
             te = find(world, classname, "gastimer");
             while (te) {
                 if ((te.owner == self.owner) &&
-                    (te.no_active_gas_grens == 1)) {
+                        (te.no_active_gas_grens == 1)) {
                     te.weapon = 24;
                     te.think = RemoveGrenade;
                     te.nextthink = time + 0.1;
@@ -1115,14 +1256,14 @@ void () GasGrenadeMakeGas = {
     while (te != world) {
         if (CanDamage(te, self)) {
             if (((te.classname == "player") && (te.deadflag == 0)) &&
-                (te.has_disconnected != 1)) {
+                    (te.has_disconnected != 1)) {
                 deathmsg = 24;
                 TF_T_Damage(te, world, self.owner, 10, (1 | 2), 0);
                 if (te.tfstate & TFSTATE_HALLUCINATING) {
                     timer = find(world, classname, "timer");
                     while (((timer.owner != te) ||
-                            (timer.think != HallucinationTimer)) &&
-                           (timer != world)) {
+                                (timer.think != HallucinationTimer)) &&
+                            (timer != world)) {
                         timer = find(timer, classname, "timer");
                     }
                     if (timer != world) {
@@ -1146,7 +1287,7 @@ void () GasGrenadeMakeGas = {
                         sprint(te, PRINT_HIGH, "Far out man!\n");
                     } else {
                         sprint(te, PRINT_HIGH,
-                               "Run for cover! They are everywhere!\n");
+                                "Run for cover! They are everywhere!\n");
                     }
                     te.tfstate = te.tfstate | TFSTATE_HALLUCINATING;
                     timer = spawn();
@@ -1206,7 +1347,7 @@ void () HallucinationTimer = {
         self.health = self.health - 2.5;
     }
     if (((self.health <= 0) || (self.owner.deadflag != 0)) ||
-        (self.owner.has_disconnected == 1)) {
+            (self.owner.has_disconnected == 1)) {
         self.owner.tfstate =
             self.owner.tfstate - (self.owner.tfstate & TFSTATE_HALLUCINATING);
     }
@@ -1293,7 +1434,7 @@ void () HallucinationTimer = {
                 stuffcmd(self.owner, "play weapons/tink1.wav\n");
             } else if (halltype2 < 0.55) {
                 CenterPrint2(self.owner, "\n\n\n",
-                             Q"Your team \scaptured\s the flag!!");
+                        Q"Your team \scaptured\s the flag!!");
                 stuffcmd(self.owner, "play weapons/grenade.wav\n");
             } else if (halltype2 < 0.6) {
                 stuffcmd(self.owner, "play weapons/bounce.wav\n");
@@ -1345,7 +1486,7 @@ void () HallucinationTimer = {
                 stuffcmd(self.owner, "play weapons/sniper.wav\n");
             } else if (halltype2 < 0.6) {
                 CenterPrint2(self.owner, "\n\n\n",
-                             Q"Your flag has been \staken\s!!");
+                        Q"Your flag has been \staken\s!!");
                 stuffcmd(self.owner, "play weapons/flmfire2.wav\n");
             } else if (halltype2 < 0.7) {
                 stuffcmd(self.owner, "play weapons/flmgrexp.wav\n");
@@ -1397,16 +1538,16 @@ void () T_TranqDartTouch = {
     }
     if (other.takedamage) {
         if ((other.classname == "player") &&
-            !((other.team_no == self.owner.team_no) &&
-              (teamplay & (2 | 4)))) {
+                !((other.team_no == self.owner.team_no) &&
+                    (teamplay & (2 | 4)))) {
 
             LogEventAffliction(self.owner, other, TFSTATE_TRANQUILISED);
 
             if (other.tfstate & TFSTATE_TRANQUILISED) {
                 timer = find(world, classname, "timer");
                 while (((timer.owner != other) ||
-                        (timer.think != TranquiliserTimer)) &&
-                       (timer != world)) {
+                            (timer.think != TranquiliserTimer)) &&
+                        (timer != world)) {
                     timer = find(timer, classname, "timer");
                 }
                 if (timer != world) {
@@ -1534,11 +1675,11 @@ void () Spy_DropBackpack = {
     newmis.flags = FL_ITEM;
     newmis.solid = SOLID_TRIGGER;
     newmis.movetype = MOVETYPE_TOSS;
-    
-	if(splitbackpackmodels)
-		FO_SetModel(newmis, "progs/deathbag.mdl");
-	else
-		FO_SetModel(newmis, "progs/backpack.mdl");
+
+    if(splitbackpackmodels)
+        FO_SetModel(newmis, "progs/deathbag.mdl");
+    else
+        FO_SetModel(newmis, "progs/backpack.mdl");
 
     setsize(newmis, '-16 -16 0', '16 16 56');
     newmis.touch = BackpackTouch;

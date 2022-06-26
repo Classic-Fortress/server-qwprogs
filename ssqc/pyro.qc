@@ -765,6 +765,16 @@ void () AirBlastReloadFinished = {
     dremove(self);
 };
 
+void FO_Airblast() = {
+    if (pyro_type == PYRO_FO)
+        if (airblastv2) {
+            UseAirBlastV2();
+        } else {
+            UseAirBlast();
+        }
+    Status_Refresh(self);
+}
+
 void () UseAirBlast = {
     if (self.special_cooldown < time)
     {
@@ -843,10 +853,6 @@ void () UseAirBlast = {
             
             ent = ent.chain;
         }
-    }
-    else
-    {
-        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
     }
 };
 
@@ -962,9 +968,5 @@ void () UseAirBlastV2 = {
             ent = ent.chain;
         }
 
-    }
-    else
-    {
-        sprint(self, PRINT_HIGH, "Airblast is on cooldown\n");
     }
 };
