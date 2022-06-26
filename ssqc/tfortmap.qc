@@ -1080,6 +1080,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
         self.immune_to_check = time + 10;
         Spy_RemoveDisguise(Player);
     }
+
     if ((Goal.items != 0) && (Goal.classname != "item_tfgoal")) {
         te = Finditem(Goal.items);
         if ((te != world) && (te != Goal))
@@ -1132,6 +1133,18 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     }
     if (Goal.goal_result & TFGR_FORCE_RESPAWN)
         ForceRespawn(Player);
+
+    local float autodisguise = FO_GetUserSetting(Player, "autodisguise", "ad", "off");
+    if (Player.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(Player);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(Player);
+                break;
+        }
+    }
 };
 
 void (entity Goal, entity Player) RemoveResults = {
@@ -3034,4 +3047,16 @@ void () DropGoalItems = {
     }
     dremove(newmis);
     TeamFortress_SetSpeed(self);
+
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
 };

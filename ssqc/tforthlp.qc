@@ -165,6 +165,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dropitems", TF_DROPFLAG, 0);
         TeamFortress_Alias("showloc", TF_DISPLAYLOCATION, 0);
         TeamFortress_Alias("special", TF_SPECIAL_SKILL, 0);
+        TeamFortress_Alias("special2", TF_SPECIAL_SKILL_2, 0);
         TeamFortress_Alias("saveme", TF_MEDIC_HELPME, 0);
         TeamFortress_Alias("discard", TF_DISCARD, 0);
         TeamFortress_Alias("discard_drop_ammo", TF_DISCARD_DROP_AMMO, 0);
@@ -237,6 +238,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("dgreen", TF_DISGUISE_GREEN, 0);
         TeamFortress_Alias("denemy", TF_DISGUISE_ENEMY, 0);
         TeamFortress_Alias("dlast", TF_DISGUISE_LAST, 0);
+        TeamFortress_Alias("dlastspawn", TF_DISGUISE_LAST_SPAWNED, 0);
         if(csqcactive) {
             TeamFortress_AliasString("build", "fo_menu_build");
         } else {

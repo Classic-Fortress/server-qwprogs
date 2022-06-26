@@ -67,6 +67,7 @@ void (entity e) TeamFortress_PlacePracticeSpawn;
 void (entity e) TeamFortress_RemovePracticeSpawn;
 void () DropKey;
 void () UseSpecialSkill;
+void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
 
@@ -2961,6 +2962,9 @@ void () ImpulseCommands = {
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
 
+    if (self.impulse == TF_SPECIAL_SKILL_2)
+        UseSpecialSkill2();
+
     if (self.impulse == TF_NEXTTIP) {
         self.display_tip = 0;
         self.tip_type = 0;
@@ -3053,11 +3057,32 @@ void () ImpulseCommands = {
     else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
         CF_Medic_AuraToggle();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_sentrygun");
     else if ((self.impulse == TF_ENGINEER_DETDISP) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_dispenser");
+    else if ((self.impulse == TF_ENGINEER_TOGGLESENTRY) && (self.playerclass == PC_ENGINEER)) {
+        if (self.has_sentry) {
+            DestroyBuilding(self, "building_sentrygun");
+        } else {
+            if (self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+            } else {
+                Menu_Engineer_Input(1);
+            }
+        }
+    } else if ((self.impulse == TF_ENGINEER_TOGGLEDISP) && (self.playerclass == PC_ENGINEER)) {
+        if (self.has_dispenser) {
+            DestroyBuilding(self, "building_dispenser");
+        } else {
+            if (self.health <= 0) {
+                sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+            } else {
+                Menu_Engineer_Input(2);
+            }
+        }
+    }
     else if ((self.impulse == 196) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_exit");
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
@@ -3107,7 +3132,9 @@ void () ImpulseCommands = {
         else
             CF_Spy_ChangeColor(self, 1);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        CF_Spy_DisguiseLast();
+        FO_Spy_DisguiseLast(self);
+    else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
+        FO_Spy_DisguiseLastSpawned(self);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
@@ -3349,7 +3376,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
+    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_SPECIAL_SKILL_2 && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
@@ -3496,6 +3523,7 @@ void () W_WeaponFrame = {
     switch (self.impulse)
     {
         case TF_SPECIAL_SKILL:
+        case TF_SPECIAL_SKILL_2:
         case TF_PB_DETONATE:
         case TF_MEDIC_HELPME:
         case TF_DASH:

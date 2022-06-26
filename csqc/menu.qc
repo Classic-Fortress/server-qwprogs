@@ -181,9 +181,9 @@ var fo_menu FO_MENU_SPY = {
         } else {
             FO_MENU_SPY.options[0].name = "Disguise";
             FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
-            if(last_skin || last_team) {
+            if(last_selected_skin || last_team) {
                 FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
-                FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_skin));
+                FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_selected_skin));
             } else {
                 FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
             }
@@ -1037,9 +1037,9 @@ void FO_Menu_Spy(float force) = {
         //FO_MENU_SPY.options[1].state = FO_MENU_STATE_HIDDEN;
         FO_MENU_SPY.options[0].name = "Disguise";
         FO_MENU_SPY.options[0].value = (SBAR.IsUndercover?"on":"off");
-        if(last_skin || last_team) {
+        if(last_selected_skin || last_team) {
             FO_MENU_SPY.options[1].state = FO_MENU_STATE_NORMAL;
-            FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_skin));
+            FO_MENU_SPY.options[1].value = strcat(TeamToString(last_team)," ",ClassToString(last_selected_skin));
         } else {
             FO_MENU_SPY.options[1].state = FO_MENU_STATE_DISABLED;
         }

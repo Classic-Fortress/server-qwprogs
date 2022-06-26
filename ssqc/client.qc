@@ -69,7 +69,6 @@ float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
 
-
 void () info_intermission =
 {
     if (CheckExistence() == 0) {
@@ -960,7 +959,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
-	          scoutscanspike = FALSE;
+            scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
@@ -1990,6 +1989,7 @@ void () PutClientInServer = {
     if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
         TeamFortress_ChangeClass(11);
     }
+
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
             if (self.playerclass != 0) {
@@ -2007,13 +2007,14 @@ void () PutClientInServer = {
             TeamFortress_ExecClassScript(self);
         }
     }
-    
-/*
-    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
-        TeamFortress_ChangeClass(0);
-        Menu_Class(0);
-    }
-*/
+
+    /*
+        if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
+            TeamFortress_ChangeClass(0);
+            Menu_Class(0);
+        }
+    */
+
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -2036,12 +2037,13 @@ void () PutClientInServer = {
 
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
+
     TeamFortress_SetEquipment();
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_StartTimers();
-    
+
     if(quadmode && quad_roles) {
         sprint(self, PRINT_HIGH, "\sRole:\s ", GetTeamRole(self.team_no).name, "\n");
     }
@@ -2142,6 +2144,33 @@ void () PutClientInServer = {
 
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
+    }
+
+
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
+
+    if(self.playerclass == PC_SCOUT && self.ScannerOn == 1) {
+        te = spawn();
+        te.nextthink = time + 2;
+        te.think = TeamFortress_Scan;
+        te.owner = self;
+        te.classname = "timer";
+        te.netname = "scanner";
+        sprint(self, PRINT_HIGH, "Scanner on\n");
+        self.ScannerOn = 1;
+
+        if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
+            self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
 };
 
@@ -3666,6 +3695,7 @@ void () InitReverseCap = {
     }
 
 }
+
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*
