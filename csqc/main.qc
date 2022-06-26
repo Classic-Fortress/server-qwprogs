@@ -310,43 +310,43 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
             break;
         case "+special":
-            localcmd("+button3");
+            localcmd("+button3\n");
             break;
         case "-special":
-            localcmd("-button3");
+            localcmd("-button3\n");
             break;
         case "+special2":
-            localcmd("+button4");
+            localcmd("+button4\n");
             break;
         case "-special2":
-            localcmd("-button4");
+            localcmd("-button4\n");
             break;
         case "+grenade1":
-            localcmd("+button5");
+            localcmd("+button5\n");
             break;
         case "-grenade1":
-            localcmd("-button5");
+            localcmd("-button5\n");
             break;
         case "+grenade2":
-            localcmd("+button6");
+            localcmd("+button6\n");
             break;
         case "-grenade2":
-            localcmd("-button6");
+            localcmd("-button6\n");
             break;
         case "+dropflag":
-            localcmd("+button7");
+            localcmd("+button7\n");
             break;
         case "-dropflag":
-            localcmd("-button7");
+            localcmd("-button7\n");
             break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
-                localcmd("+button4");
+                localcmd("+button4\n");
             }
             break;
         case "-rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
-                localcmd("-button4");
+                localcmd("-button4\n");
             }
             break;
         case "vote_addmap":

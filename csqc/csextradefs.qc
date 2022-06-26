@@ -63,6 +63,7 @@ vector TEXT_TEAM_COLOUR[] = {
 #define BUTTON4 8
 #define BUTTON5 16
 #define BUTTON6 32
+#define BUTTON7 64
 
 #define MAP_MAX_CHARS 20
 

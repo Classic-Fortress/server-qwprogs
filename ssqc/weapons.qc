@@ -3558,7 +3558,7 @@ void () ButtonFrame = {
             self.button6_keydown_frame = 1;
         }
 
-        if (self.button5_keydown_frame) {
+        if (self.button6_keydown_frame) {
             TeamFortress_PrimeThrowGrenade(2);
         }
 
