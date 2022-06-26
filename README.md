@@ -8,6 +8,7 @@ New features
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
 * `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
+* `setinfo cf_pyro_impulses 1` to swap Pyro's primary and secondary weapons.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
 * `special2` Scout: `autoscan`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: `togglesentry`
