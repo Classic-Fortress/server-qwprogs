@@ -442,7 +442,6 @@ void (float issilent) FO_Spy_Feign = {
 
     // don't allow feign if spy is in air and air feigning is disallowed
     if (!feign_air && !(self.flags & FL_ONGROUND)) {
-        sprint(self, PRINT_HIGH, "You cannot feign while you are airborne\n");
         return;
     }
 
@@ -450,7 +449,6 @@ void (float issilent) FO_Spy_Feign = {
     local float area_check;
     area_check = Spy_CheckArea(self);
     if (area_check == 3) {
-        sprint(self, PRINT_HIGH, "You cannot feign on top of another spy\n");
         return;
     }
 
@@ -594,12 +592,6 @@ void () FO_Spy_Unfeign = {
         } else {
             spy_upe1();
         }
-
-        // something is on top of spy
-    } else if (area_check == 1) {
-        sprint(self, PRINT_HIGH, "You cannot get up with something on top of you\n");
-    } else if (area_check == 2) {
-        sprint(self, PRINT_HIGH, "You cannot get up while someone is standing on you\n");
     }
 }
 
