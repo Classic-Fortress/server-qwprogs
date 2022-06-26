@@ -3502,6 +3502,11 @@ void () ButtonFrame = {
 
         self.button4_keyup_frame = 0;
     }
+
+    // +dropflag
+    if (self.button7) {
+        DropGoalItems();
+    }
 }
 
 void () W_WeaponFrame = {
