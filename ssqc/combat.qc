@@ -682,7 +682,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     }
 
     if (self.feign_next_damage && !self.is_feigning){
-        CF_Spy_FeignDeath(0);
+        FO_Spy_Feign(0);
     }
 
     self = oldself;

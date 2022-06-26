@@ -3378,7 +3378,9 @@ void () ButtonFrame = {
                 FO_Airblast();
                 break;
             case PC_SPY:
-                FO_Spy_Feign(0);
+                if (self.button3_keydown_frame) {
+                    self.feign_next_damage = 1;
+                }
                 break;
             case PC_ENGINEER:
                 if (self.button3_keydown_frame) {
@@ -3412,6 +3414,9 @@ void () ButtonFrame = {
             case PC_PYRO:
                 break;
             case PC_SPY:
+                if (self.button3_keyup_frame) {
+                    self.feign_next_damage = 0;
+                }
                 FO_Spy_Unfeign();
                 break;
             case PC_ENGINEER:
