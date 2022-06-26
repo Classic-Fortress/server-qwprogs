@@ -60,6 +60,10 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-special");
     registercommand("+special2");
     registercommand("-special2");
+    registercommand("+grenade1");
+    registercommand("-grenade1");
+    registercommand("+grenade2");
+    registercommand("-grenade2");
     registercommand("+dropflag");
     registercommand("-dropflag");
     registercommand("+rj");
@@ -316,6 +320,18 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-special2":
             localcmd("-button4");
+            break;
+        case "+grenade1":
+            localcmd("+button5");
+            break;
+        case "-grenade1":
+            localcmd("-button5");
+            break;
+        case "+grenade2":
+            localcmd("+button6");
+            break;
+        case "-grenade2":
+            localcmd("-button6");
             break;
         case "+dropflag":
             localcmd("+button7");

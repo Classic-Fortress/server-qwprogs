@@ -20,6 +20,8 @@ typedef void (float n) f_void_float;
 .float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
 .float button3;                 // +special
 .float button4;                 // +special2
+.float button5;                 // +grenade1
+.float button6;                 // +grenade2
 .float button7;                 // +dropflag
 
 .float hook_out;                // Dummy field for hook to silence error messages

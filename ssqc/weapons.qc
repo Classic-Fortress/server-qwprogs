@@ -136,6 +136,12 @@ void (entity ent, float num) SetFlameCount;
 .float button4_keydown;
 .float button4_keydown_frame;
 .float button4_keyup_frame;
+.float button5_keydown;
+.float button5_keydown_frame;
+.float button5_keyup_frame;
+.float button6_keydown;
+.float button6_keydown_frame;
+.float button6_keyup_frame;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -3506,6 +3512,46 @@ void () ButtonFrame = {
         }
 
         self.button4_keyup_frame = 0;
+    }
+
+    if (self.button5) {
+        if (!self.button5_keydown) {
+            self.button5_keydown = 1;
+            self.button5_keydown_frame = 1;
+        }
+
+        if (self.button5_keydown_frame) {
+            TeamFortress_PrimeThrowGrenade(1);
+        }
+
+        self.button5_keydown_frame = 0;
+    } else {
+        if (self.button5_keydown) {
+            self.button5_keydown = 0;
+            self.button5_keyup_frame = 1;
+        }
+
+        self.button5_keyup_frame = 0;
+    }
+
+    if (self.button6) {
+        if (!self.button6_keydown) {
+            self.button6_keydown = 1;
+            self.button6_keydown_frame = 1;
+        }
+
+        if (self.button5_keydown_frame) {
+            TeamFortress_PrimeThrowGrenade(2);
+        }
+
+        self.button6_keydown_frame = 0;
+    } else {
+        if (self.button6_keydown) {
+            self.button6_keydown = 0;
+            self.button6_keyup_frame = 1;
+        }
+
+        self.button6_keyup_frame = 0;
     }
 
     // +dropflag
