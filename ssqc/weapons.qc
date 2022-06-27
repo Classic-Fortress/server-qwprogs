@@ -2991,6 +2991,17 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
+    if (!self.is_feigning) {
+        if (self.impulse == TF_GRENADE_1)
+            TeamFortress_PrimeGrenade(1);
+        else if (self.impulse == TF_GRENADE_2)
+            TeamFortress_PrimeGrenade(2);
+        else if (self.impulse == TF_GRENADE_PT_1)
+            TeamFortress_PrimeThrowGrenade(1);
+        else if (self.impulse == TF_GRENADE_PT_2)
+            TeamFortress_PrimeThrowGrenade(2);
+    }
+
     if (cb_prematch || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();
@@ -3022,17 +3033,6 @@ void () ImpulseCommands = {
         }
     } else if (self.impulse == TF_TOGGLEVOTE)
         Vote_ToggleMenu(self);
-
-    if (!self.is_feigning) {
-        if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
-        else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
-        else if (self.impulse == TF_GRENADE_PT_1)
-            TeamFortress_PrimeThrowGrenade(1);
-        else if (self.impulse == TF_GRENADE_PT_2)
-            TeamFortress_PrimeThrowGrenade(2);
-    }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (self.impulse == TF_WEAPNEXT)
