@@ -3061,12 +3061,21 @@ void () ClientDisconnect = {
         } else {
             CheckAllPlayersReady();
         }
+
+        local float f1 = TeamFortress_GetNoPlayers ();
+        if (v_ready < f1 -1) {
+            local entity p = find (world, classname, "player");
+            while (p != world) {
+                p.is_only_one_not_ready = 0;
+                p = find(p, classname, "player");
+            }
+        }
     }
-    
+
     if(votemode) {
         UnvoteForMap(self);
     }
-    
+
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {

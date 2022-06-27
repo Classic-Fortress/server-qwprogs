@@ -114,6 +114,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
+    SBAR.LastNotReady = getstatf(STAT_ONLY_ONE_NOT_READY);
     oldhealth = getstatf(STAT_HEALTH);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)

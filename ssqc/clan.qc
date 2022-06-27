@@ -371,8 +371,10 @@ void () ResetBreakAndReady = {
     while (te != world) {
         te.bvote = 0;
         te.is_ready = 0;
+        te.is_only_one_not_ready = 0;
         v_break = 0;
         v_ready = 0;
+
         if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
             UpdateClientPrematch(te, TRUE);
         }
@@ -945,6 +947,15 @@ void () PlayerNotReady = {
         self.is_ready = 0;
         v_ready = (v_ready - 1);
         Broadcast_Players_NotReady();
+
+        local float f1 = TeamFortress_GetNoPlayers ();
+        if (v_ready < f1 -1) {
+            local entity p = find (world, classname, "player");
+            while (p != world) {
+                p.is_only_one_not_ready = 0;
+                p = find(p, classname, "player");
+            }
+        }
     }
 }
 
@@ -973,8 +984,7 @@ float () CheckAllPlayersReady = {
     return 0;
 }
 
-void () PlayerReady =
-{
+void () PlayerReady = {
     if (is_countdown) {
         sprint(self, 2, "You cannot do this after countdown has started.\n");
         return;
@@ -991,16 +1001,33 @@ void () PlayerReady =
         sprint(self, 2, "You must choose a class first.\n");
         return;
     }
-    if (intermission_running)
+    if (intermission_running) {
         return;
-    if (self.classname != "player")
+    }
+
+    if (self.classname != "player") {
         return;
+    }
+
     if (self.is_ready) {
         PlayerNotReady();
         return;
     }
+
     self.is_ready = 1;
     v_ready = v_ready + 1;
+
+    local float f1 = TeamFortress_GetNoPlayers ();
+    if (v_ready == f1 -1) {
+        local entity p = find (world, classname, "player");
+        while (p != world) {
+            if (p.is_ready == 0) {
+                p.is_only_one_not_ready = 1;
+            }
+            p = find(p, classname, "player");
+        }
+    }
+
     bprint2 (3, self.netname, " is ready to start the match\n");
     if(!CheckAllPlayersReady())
         Broadcast_Players_NotReady();
@@ -1016,6 +1043,15 @@ void () RemoveVotes = {
         bprint2(2, self.netname, " is NOT ready anymore\n ");
         self.is_ready = 0;
         v_ready = (v_ready - 1);
+
+        local float f1 = TeamFortress_GetNoPlayers ();
+        if (v_ready < f1 -1) {
+            local entity p = find (world, classname, "player");
+            while (p != world) {
+                p.is_only_one_not_ready = 0;
+                p = find(p, classname, "player");
+            }
+        }
     }
 };
 
