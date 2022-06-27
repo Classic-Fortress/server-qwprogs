@@ -589,6 +589,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                     );
 
                     position.y = alert_text_position.y + 48;
+                    position.x = (ScreenSize.x / 2) - (size.x / 2);
 
                     if(keynum != "-1") {
                         message = strcat("Press ", keynumtostring(stof(keynum)), " to start");
