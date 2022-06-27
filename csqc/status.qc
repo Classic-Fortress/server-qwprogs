@@ -565,13 +565,10 @@ void(string panelid, float display, string text) drawReadyPanel = {
 
                 if(SBAR.LastNotReady) {
                     local vector alert_text_largetext = mediumtext * 2;
-                    local vector alert_text_position = position;
+                    local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;
-                    local string alert_text_message;
-
-                    if(keynum != "-1") {
-                        alert_text_message = "Everyone else is ready!";
-                    }
+                    alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
+                    local string alert_text_message = "Everyone else is ready!";
 
                     pos_aligned = GetTextAlignOffset(
                         alert_text_position.x,
