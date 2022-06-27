@@ -123,6 +123,8 @@ void () PlayerNotReady;
 void () Broadcast_Players_NotReady;
 void () StartTimer;
 
+void () ToggleInvincibility;
+
 float () GetLastWeaponImpulse;
 float () IsUsingOldImpulses;
 
@@ -3207,18 +3209,7 @@ void () PreMatchImpulses = {
         display_location();
 
     if (self.impulse == TF_SPECIAL_SKILL) {
-        if(self.tfstate & TFSTATE_INVINCIBLE) {
-            self.items = self.items - (self.items & IT_INVULNERABILITY);
-            self.invincible_time = 0;
-            self.invincible_finished = 0;
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
-            self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
-        } else {
-            self.items = self.items | IT_INVULNERABILITY;
-            self.invincible_time = 1;
-            self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
-            self.invincible_finished = time + 666;
-        }
+        ToggleInvincibility();
     }
 };
 
@@ -3377,42 +3368,48 @@ void () ButtonFrame = {
             self.button3_keydown_frame = 1;
         }
 
-        switch (self.playerclass) {
-            case PC_SCOUT:
-                CF_Scout_Dash();
-                break;
-            case PC_SNIPER:
-                break;
-            case PC_SOLDIER:
-                break;
-            case PC_DEMOMAN:
-                TeamFortress_DetonatePipebombs(0);
-                break;
-            case PC_MEDIC:
-                if (self.button3_keydown_frame) {
-                    CF_Medic_AuraToggle();
-                }
-                break;
-            case PC_HVYWEAP:
-                if (self.button3_keydown_frame) {
-                    FO_LockToggle();
-                }
-                break;
-            case PC_PYRO:
-                FO_Airblast();
-                break;
-            case PC_SPY:
-                if (self.button3_keydown_frame) {
-                    self.feign_next_damage = 1;
-                }
-                break;
-            case PC_ENGINEER:
-                if (self.button3_keydown_frame) {
-                    FO_Engineer_ToggleDispenser();
-                }
-                break;
-            case PC_UNDEFINED:
-                break;
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    CF_Scout_Dash();
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    break;
+                case PC_DEMOMAN:
+                    TeamFortress_DetonatePipebombs(0);
+                    break;
+                case PC_MEDIC:
+                    if (self.button3_keydown_frame) {
+                        CF_Medic_AuraToggle();
+                    }
+                    break;
+                case PC_HVYWEAP:
+                    if (self.button3_keydown_frame) {
+                        FO_LockToggle();
+                    }
+                    break;
+                case PC_PYRO:
+                    FO_Airblast();
+                    break;
+                case PC_SPY:
+                    if (self.button3_keydown_frame) {
+                        self.feign_next_damage = 1;
+                    }
+                    break;
+                case PC_ENGINEER:
+                    if (self.button3_keydown_frame) {
+                        FO_Engineer_ToggleDispenser();
+                    }
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
+        } else {
+            if (self.button3_keydown_frame) {
+                ToggleInvincibility();
+            }
         }
 
         self.button3_keydown_frame = 0;
@@ -3422,31 +3419,33 @@ void () ButtonFrame = {
             self.button3_keyup_frame = 1;
         }
 
-        switch (self.playerclass) {
-            case PC_SCOUT:
-                break;
-            case PC_SNIPER:
-                break;
-            case PC_SOLDIER:
-                break;
-            case PC_DEMOMAN:
-                break;
-            case PC_MEDIC:
-                break;
-            case PC_HVYWEAP:
-                break;
-            case PC_PYRO:
-                break;
-            case PC_SPY:
-                if (self.button3_keyup_frame) {
-                    self.feign_next_damage = 0;
-                }
-                FO_Spy_Unfeign();
-                break;
-            case PC_ENGINEER:
-                break;
-            case PC_UNDEFINED:
-                break;
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    break;
+                case PC_DEMOMAN:
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    break;
+                case PC_SPY:
+                    if (self.button3_keyup_frame) {
+                        self.feign_next_damage = 0;
+                    }
+                    FO_Spy_Unfeign();
+                    break;
+                case PC_ENGINEER:
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
         }
 
         self.button3_keyup_frame = 0;
@@ -3459,41 +3458,43 @@ void () ButtonFrame = {
             self.button4_keydown_frame = 1;
         }
 
-        switch (self.playerclass) {
-            case PC_SCOUT:
-                if (self.button4_keydown_frame) {
-                    ScannerSwitch();
-                }
-                break;
-            case PC_SNIPER:
-                break;
-            case PC_SOLDIER:
-                // Intercepted by InterceptRocketJump()
-                break;
-            case PC_DEMOMAN:
-                if (self.button4_keydown_frame) {
-                    TeamFortress_SetDetpack(5);
-                }
-                break;
-            case PC_MEDIC:
-                break;
-            case PC_HVYWEAP:
-                break;
-            case PC_PYRO:
-                // Intercepted by InterceptRocketJump()
-                break;
-            case PC_SPY:
-                if (self.button4_keydown_frame) {
-                    FO_Spy_DisguiseLastSpawned(self);
-                }
-                break;
-            case PC_ENGINEER:
-                if (self.button4_keydown_frame) {
-                    FO_Engineer_ToggleSentry();
-                }
-                break;
-            case PC_UNDEFINED:
-                break;
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    if (self.button4_keydown_frame) {
+                        ScannerSwitch();
+                    }
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    // Intercepted by InterceptRocketJump()
+                    break;
+                case PC_DEMOMAN:
+                    if (self.button4_keydown_frame) {
+                        TeamFortress_SetDetpack(5);
+                    }
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    // Intercepted by InterceptRocketJump()
+                    break;
+                case PC_SPY:
+                    if (self.button4_keydown_frame) {
+                        FO_Spy_DisguiseLastSpawned(self);
+                    }
+                    break;
+                case PC_ENGINEER:
+                    if (self.button4_keydown_frame) {
+                        FO_Engineer_ToggleSentry();
+                    }
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
         }
 
         self.button4_keydown_frame = 0;
@@ -3503,30 +3504,32 @@ void () ButtonFrame = {
             self.button4_keyup_frame = 1;
         }
 
-        switch (self.playerclass) {
-            case PC_SCOUT:
-                break;
-            case PC_SNIPER:
-                break;
-            case PC_SOLDIER:
-                break;
-            case PC_DEMOMAN:
-                if (self.button4_keyup_frame) {
-                    TeamFortress_DetpackStop();
-                }
-                break;
-            case PC_MEDIC:
-                break;
-            case PC_HVYWEAP:
-                break;
-            case PC_PYRO:
-                break;
-            case PC_SPY:
-                break;
-            case PC_ENGINEER:
-                break;
-            case PC_UNDEFINED:
-                break;
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    break;
+                case PC_SNIPER:
+                    break;
+                case PC_SOLDIER:
+                    break;
+                case PC_DEMOMAN:
+                    if (self.button4_keyup_frame) {
+                        TeamFortress_DetpackStop();
+                    }
+                    break;
+                case PC_MEDIC:
+                    break;
+                case PC_HVYWEAP:
+                    break;
+                case PC_PYRO:
+                    break;
+                case PC_SPY:
+                    break;
+                case PC_ENGINEER:
+                    break;
+                case PC_UNDEFINED:
+                    break;
+            }
         }
 
         self.button4_keyup_frame = 0;
@@ -3583,7 +3586,7 @@ void () W_WeaponFrame = {
     if (self.login_in_progress) {
         CenterPrint(self, "Trying to log in...");
     }
-    
+
     if (loginRequired && !self.login) {
         PrintLoginMessage();
         self.impulse = 0;
@@ -3650,7 +3653,7 @@ void () W_WeaponFrame = {
 
     // slot 1-4 (or 1-7) binds
     if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
-                && !(self.is_building && !engineer_move) && !self.is_detpacking) {
+            && !(self.is_building && !engineer_move) && !self.is_detpacking) {
 
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             // load weapon state if current state doesn't match stored state
@@ -3667,7 +3670,7 @@ void () W_WeaponFrame = {
             self.impulse = 0;
         }
 
-    // regular attack (both +attack and -attack)
+        // regular attack (both +attack and -attack)
     } else if (!self.impulse && !self.is_quickfiring) {
 
         // load weapon state if current state doesn't match
@@ -3676,7 +3679,7 @@ void () W_WeaponFrame = {
             W_WeaponState_Load(self, 0);
         }
 
-    // +slot1-4 quick fire
+        // +slot1-4 quick fire
     } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
 
         self.is_quickfiring = 1;
@@ -3705,10 +3708,10 @@ void () W_WeaponFrame = {
             }
         }
 
-    // change weapon if queue_weaponslot has been set
+        // change weapon if queue_weaponslot has been set
     } else if (self.queue_weaponslot > 0) {
         W_ChangeWeapon(self.queue_weaponslot);
-    // load weapon state
+        // load weapon state
     } else if (self.queue_weaponstate && WeaponReady(self)) {
         // load weaponstate saved from before quick fire started
         if (self.queue_weaponstate == 1)
@@ -3788,7 +3791,7 @@ void () W_WeaponFrame = {
         case FLAG_INFO:
             ImpulseCommands();
             return;
-        // allows setting detpack while reloading on toggle, defaults to off
+            // allows setting detpack while reloading on toggle, defaults to off
         case TF_DEMOMAN_DETPACK:
         case TF_DETPACK:
         case TF_DETPACK_STOP:
@@ -3816,9 +3819,9 @@ void () W_WeaponFrame = {
         return;
 
     if (self.button0 
-        && (!self.fire_held_down 
-            || 
-            (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
+            && (!self.fire_held_down 
+                || 
+                (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400) {
@@ -3892,7 +3895,7 @@ void () RemoveGrenade = {
         te = find(world, classname, "grentimer");
         while (te) {
             if ((te.owner == self.owner) &&
-                (te.no_active_napalm_grens > 0))
+                    (te.no_active_napalm_grens > 0))
                 te.no_active_napalm_grens = te.no_active_napalm_grens - 1;
             te = find(te, classname, "grentimer");
         }
@@ -3914,5 +3917,20 @@ void () RemoveGrenade = {
             te = find(te, classname, "grentimer");
         }
         dremove(self);
+    }
+};
+
+void () ToggleInvincibility = {
+    if(self.tfstate & TFSTATE_INVINCIBLE) {
+        self.items = self.items - (self.items & IT_INVULNERABILITY);
+        self.invincible_time = 0;
+        self.invincible_finished = 0;
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
+        self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
+    } else {
+        self.items = self.items | IT_INVULNERABILITY;
+        self.invincible_time = 1;
+        self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+        self.invincible_finished = time + 666;
     }
 };
