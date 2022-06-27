@@ -566,7 +566,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                 if(SBAR.LastNotReady) {
                     local vector alert_text_largetext = mediumtext * 2;
                     local vector alert_text_position = position;
-                    alert_text_position.y *= 6;
+                    alert_text_position.y = ScreenSize.y / 3;
                     local string alert_text_message;
 
                     if(keynum != "-1") {
