@@ -645,6 +645,7 @@ float autokick_kills;
 .float vote;
 .float bvote;
 .float is_ready;
+.float is_only_one_not_ready;
 
 .float is_admin;
 .float admin_mode;
