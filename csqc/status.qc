@@ -592,12 +592,18 @@ void(string panelid, float display, string text) drawReadyPanel = {
                     );
 
                     position.y = alert_text_position.y + 48;
-                }
 
-                if(keynum != "-1") {
-                    message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to start");
+                    } else {
+                        message = "Type 'ready' in the console to start";
+                    }
                 } else {
-                    message = "Type 'ready' in the console to ready up";
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    } else {
+                        message = "Type 'ready' in the console to ready up";
+                    }
                 }
             }
         }
