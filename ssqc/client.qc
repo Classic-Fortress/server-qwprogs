@@ -3066,7 +3066,7 @@ void () ClientDisconnect = {
         if (v_ready < f1 -1) {
             local entity p = find (world, classname, "player");
             while (p != world) {
-                p.is_only_one_not_ready = 0;
+                p.ready_status = 0;
                 p = find(p, classname, "player");
             }
         }

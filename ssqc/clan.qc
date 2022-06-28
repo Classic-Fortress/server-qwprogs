@@ -371,7 +371,7 @@ void () ResetBreakAndReady = {
     while (te != world) {
         te.bvote = 0;
         te.is_ready = 0;
-        te.is_only_one_not_ready = 0;
+        te.ready_status = NEITHER_TEAM_READY;
         v_break = 0;
         v_ready = 0;
 
@@ -952,7 +952,7 @@ void () PlayerNotReady = {
         if (v_ready < f1 -1) {
             local entity p = find (world, classname, "player");
             while (p != world) {
-                p.is_only_one_not_ready = 0;
+                p.ready_status = NEITHER_TEAM_READY;
                 p = find(p, classname, "player");
             }
         }
@@ -1022,7 +1022,7 @@ void () PlayerReady = {
         local entity p = find (world, classname, "player");
         while (p != world) {
             if (p.is_ready == 0) {
-                p.is_only_one_not_ready = 1;
+                p.ready_status = LAST_NOT_READY;
             }
             p = find(p, classname, "player");
         }
@@ -1048,7 +1048,7 @@ void () RemoveVotes = {
         if (v_ready < f1 -1) {
             local entity p = find (world, classname, "player");
             while (p != world) {
-                p.is_only_one_not_ready = 0;
+                p.ready_status = NEITHER_TEAM_READY;
                 p = find(p, classname, "player");
             }
         }

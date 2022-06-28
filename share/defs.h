@@ -101,7 +101,6 @@
 #define IT_HOOK			8388608
 
 // point content values
-
 #define CONTENT_EMPTY	-1
 #define CONTENT_SOLID	-2
 #define CONTENT_WATER	-3
@@ -193,7 +192,6 @@
 #define UPDATE_TEMP	3
 
 // entity effects
-
 #define EF_BRIGHTFIELD	1
 #define EF_MUZZLEFLASH	2
 #define EF_BRIGHTLIGHT	4
@@ -230,6 +228,11 @@
 #define AS_SLIDING	2
 #define AS_MELEE	3
 #define AS_MISSILE	4
+
+// ready_status
+#define NEITHER_TEAM_READY 1
+#define ENEMY_TEAM_READY   2
+#define LAST_NOT_READY     3
 
 //===========================================================================
 // TEAMFORTRESS Defs
@@ -1489,7 +1492,7 @@
 #define STAT_NO_GREN2           40
 #define STAT_TP_GREN1           41
 #define STAT_TP_GREN2           42
-#define STAT_ONLY_ONE_NOT_READY 43
+#define STAT_READY_STATUS       43
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
