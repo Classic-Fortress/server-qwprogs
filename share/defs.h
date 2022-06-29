@@ -230,8 +230,9 @@
 #define AS_MISSILE	4
 
 // ready_status
-#define ENEMY_TEAM_READY   1
-#define LAST_NOT_READY     2
+#define PLAYER_READY   1
+#define ENEMY_TEAM_READY   2
+#define LAST_NOT_READY     4
 
 //===========================================================================
 // TEAMFORTRESS Defs
@@ -1482,7 +1483,7 @@
 // stats
 // first 32 are reserved
 #define STAT_TEAMNO             33
-#define STAT_READY              34
+#define STAT_READY_STATUS       34
 #define STAT_CLASS              35
 #define STAT_VELOCITY_X         36
 #define STAT_VELOCITY_Y         37
@@ -1491,7 +1492,6 @@
 #define STAT_NO_GREN2           40
 #define STAT_TP_GREN1           41
 #define STAT_TP_GREN2           42
-#define STAT_READY_STATUS       43
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

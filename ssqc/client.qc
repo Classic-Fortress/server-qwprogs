@@ -1886,7 +1886,7 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "touches", player.touches);
     CheckSetInfoKey(player, "team_no", player.team_no);
     CheckSetInfoKey(player, "playerclass", player.playerclass);
-    CheckSetInfoKey(player, "ready", player.is_ready);
+    CheckSetInfoKey(player, "ready", player.ready_status & PLAYER_READY);
 };
 
 void (float all_dimensions) SetDimensions = {
@@ -3059,7 +3059,7 @@ void () ClientDisconnect = {
 
     if(cb_prematch) {
         //Check in case the player leaving is the last not-readied player
-        if(self.is_ready) {
+        if(self.ready_status & PLAYER_READY) {
             v_ready = (v_ready - 1);
         } else if (!CheckAllPlayersReady()) {
             UpdateReadyStatus();

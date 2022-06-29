@@ -2188,7 +2188,7 @@ float (entity pl) WeaponReady = {
     if (time >= pl.attack_finished && !(pl.tfstate & TFSTATE_RELOADING)) {
         return 1;
     }
-              
+
     return 0;
 }
 

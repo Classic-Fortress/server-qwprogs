@@ -553,7 +553,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
             return;
         }
         if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
-            if(SBAR.Ready) {
+            if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
             } else if(round_over) {
