@@ -230,9 +230,8 @@
 #define AS_MISSILE	4
 
 // ready_status
-#define NEITHER_TEAM_READY 1
-#define ENEMY_TEAM_READY   2
-#define LAST_NOT_READY     3
+#define ENEMY_TEAM_READY   1
+#define LAST_NOT_READY     2
 
 //===========================================================================
 // TEAMFORTRESS Defs

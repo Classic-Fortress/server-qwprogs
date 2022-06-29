@@ -563,7 +563,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                 tokenize(findkeysforcommand("ready"));
                 string keynum = argv(0);
 
-                if(SBAR.ReadyStatus == LAST_NOT_READY) {
+                if(SBAR.ReadyStatus & LAST_NOT_READY) {
                     local vector alert_text_largetext = mediumtext * 2;
                     local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;
@@ -596,7 +596,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                     } else {
                         message = "Type 'ready' in the console to start";
                     }
-                } else if (SBAR.ReadyStatus == ENEMY_TEAM_READY) {
+                } else if (SBAR.ReadyStatus & ENEMY_TEAM_READY) {
                     local vector alert_text_largetext = mediumtext * 2;
                     local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;

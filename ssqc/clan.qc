@@ -371,7 +371,7 @@ void () ResetBreakAndReady = {
     while (te != world) {
         te.bvote = 0;
         te.is_ready = 0;
-        te.ready_status = NEITHER_TEAM_READY;
+        UpdateReadyStatus();
         v_break = 0;
         v_ready = 0;
 
@@ -943,19 +943,114 @@ void () Broadcast_Players_NotReady = {
 
 void () PlayerNotReady = {
     if (self.is_ready) {
-        bprint2 (2, self.netname, " is NOT ready anymore\n ");
         self.is_ready = 0;
+        UpdateReadyStatus();
+        bprint2 (2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
         Broadcast_Players_NotReady();
+    }
+}
 
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.ready_status = NEITHER_TEAM_READY;
-                p = find(p, classname, "player");
-            }
+void () UpdateReadyStatus = {
+    local float players_size;
+    local float players_ready_size;
+    local float team_1_size;
+    local float team_1_ready_size;
+    local float team_2_size;
+    local float team_2_ready_size;
+    local float team_3_size;
+    local float team_3_ready_size;
+    local float team_4_size;
+    local float team_4_ready_size;
+
+    local entity p = find(world, classname, "player");
+    while (p != world) {
+        if (p.team_no) {
+            players_size++;
         }
+
+        if (p.is_ready) {
+            players_ready_size++;
+        }
+
+        switch(p.team_no) {
+            case 1:
+                team_1_size++;
+                if (p.is_ready) {
+                    team_1_ready_size++;
+                }
+                break;
+            case 2:
+                team_2_size++;
+                if (p.is_ready) {
+                    team_2_ready_size++;
+                }
+            case 3:
+                team_3_size++;
+                if (p.is_ready) {
+                    team_3_ready_size++;
+                }
+                break;
+            case 4:
+                team_4_size++;
+                if (p.is_ready) {
+                    team_4_ready_size++;
+                }
+                break;
+        }
+
+        p = find(p, classname, "player");
+    }
+
+    local float team_1_ready = (team_1_size && (team_1_size - team_1_ready_size) == 0);
+    local float team_2_ready = (team_2_size && (team_2_size - team_2_ready_size) == 0);
+    local float team_3_ready = (team_3_size && (team_3_size - team_3_ready_size) == 0);
+    local float team_4_ready = (team_4_size && (team_4_size - team_4_ready_size) == 0);
+    local float teams_ready_size = team_1_ready + team_2_ready + team_3_ready + team_4_ready;
+    local float one_player_not_ready = (players_size > 1 && players_size - players_ready_size == 1);
+
+    local entity p = find(world, classname, "player");
+    local float team_ready;
+
+    while (p != world) {
+        // ENEMY_TEAM_READY
+        switch(p.team_no) {
+            case 1:
+                if (team_1_ready) {
+                    team_ready = 1;
+                }
+                break;
+            case 2:
+                if (team_2_ready) {
+                    team_ready = 1;
+                }
+            case 3:
+                if (team_3_ready) {
+                    team_ready = 1;
+                }
+                break;
+            case 4:
+                if (team_4_ready) {
+                    team_ready = 1;
+                }
+                break;
+        }
+
+        if ((teams_ready_size - team_ready) > 0) {
+            p.ready_status |= ENEMY_TEAM_READY;
+        } else {
+            p.ready_status &= ~ENEMY_TEAM_READY;
+        }
+
+        // LAST_NOT_READY
+        if (!p.is_ready && one_player_not_ready) {
+            p.ready_status |= LAST_NOT_READY;
+        } else {
+            p.ready_status &= ~LAST_NOT_READY;
+        }
+
+
+        p = find(p, classname, "player");
     }
 }
 
@@ -1015,19 +1110,8 @@ void () PlayerReady = {
     }
 
     self.is_ready = 1;
+    UpdateReadyStatus();
     v_ready = v_ready + 1;
-
-    local float f1 = TeamFortress_GetNoPlayers ();
-    if (v_ready == f1 -1) {
-        local entity p = find (world, classname, "player");
-        while (p != world) {
-            if (p.is_ready == 0) {
-                p.ready_status = LAST_NOT_READY;
-            }
-            p = find(p, classname, "player");
-        }
-    }
-
     bprint2 (3, self.netname, " is ready to start the match\n");
     if(!CheckAllPlayersReady())
         Broadcast_Players_NotReady();
@@ -1040,18 +1124,10 @@ void () RemoveVotes = {
         v_break = (v_break - 1);
     }
     if (self.is_ready) {
-        bprint2(2, self.netname, " is NOT ready anymore\n ");
         self.is_ready = 0;
+        UpdateReadyStatus();
+        bprint2(2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
-
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.ready_status = NEITHER_TEAM_READY;
-                p = find(p, classname, "player");
-            }
-        }
     }
 };
 

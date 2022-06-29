@@ -59,6 +59,7 @@ void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
+void () UpdateReadyStatus;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
@@ -3054,21 +3055,14 @@ void () ClientDisconnect = {
         strunzone(self.StatusString);
     self.StatusString = string_null;
 
+
+
     if(cb_prematch) {
         //Check in case the player leaving is the last not-readied player
         if(self.is_ready) {
             v_ready = (v_ready - 1);
-        } else {
-            CheckAllPlayersReady();
-        }
-
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.ready_status = 0;
-                p = find(p, classname, "player");
-            }
+        } else if (!CheckAllPlayersReady()) {
+            UpdateReadyStatus();
         }
     }
 
