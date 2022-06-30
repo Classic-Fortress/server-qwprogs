@@ -435,6 +435,14 @@ void () CF_Spy_AirThink = {
     self.nextthink = time + 0.1;
 };
 
+void (float issilent) FO_Spy_ToggleFeign = {
+    if (self.is_feigning || self.feign_next_damage) {
+        FO_Spy_Unfeign();
+    } else {
+        FO_Spy_FeignOnNextDamage();
+    }
+}
+
 void (float issilent) FO_Spy_Feign = {
     if (self.is_feigning) {
         return;
@@ -548,7 +556,21 @@ void (float issilent) FO_Spy_Feign = {
         spy_diee1();
 }
 
+void () FO_Spy_FeignOnNextDamage = {
+        self.feign_next_damage = 1;
+        sprint(self, PRINT_HIGH, "Feigning on next damage...\n");
+}
+
 void () FO_Spy_Unfeign = {
+    if (self.feign_next_damage) {
+        self.feign_next_damage = 0;
+        sprint(self, PRINT_HIGH, "Feign cancelled\n");
+    }
+
+    if (!self.is_feigning) {
+        return;
+    }
+
     if (!self.is_button_feigning) {
         return;
     }

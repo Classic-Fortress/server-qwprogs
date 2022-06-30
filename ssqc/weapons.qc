@@ -64,9 +64,11 @@ void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
+void (float issilent) FO_Spy_ToggleFeign;
 void () FO_Engineer_ToggleDispenser;
 void () FO_Engineer_ToggleSentry;
 float (float force) TeamFortress_DetonatePipebombs;
+void (float timer) TeamFortress_ToggleDetpack;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 void (entity e) TeamFortress_PlacePracticeSpawn;
@@ -3122,7 +3124,7 @@ void () ImpulseCommands = {
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(0);
     else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
-        self.feign_next_damage = 1;
+        FO_Spy_FeignOnNextDamage();
     } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
@@ -3395,7 +3397,7 @@ void () ButtonFrame = {
                     break;
                 case PC_SPY:
                     if (self.button3_keydown_frame) {
-                        self.feign_next_damage = 1;
+                        FO_Spy_ToggleFeign(0);
                     }
                     break;
                 case PC_ENGINEER:
@@ -3436,10 +3438,9 @@ void () ButtonFrame = {
                 case PC_PYRO:
                     break;
                 case PC_SPY:
-                    if (self.button3_keyup_frame) {
-                        self.feign_next_damage = 0;
+                    if (FO_GetUserSetting(self, "hold_feign", "hf", "off")) {
+                        FO_Spy_Unfeign();
                     }
-                    FO_Spy_Unfeign();
                     break;
                 case PC_ENGINEER:
                     break;
@@ -3472,7 +3473,7 @@ void () ButtonFrame = {
                     break;
                 case PC_DEMOMAN:
                     if (self.button4_keydown_frame) {
-                        TeamFortress_SetDetpack(5);
+                        TeamFortress_ToggleDetpack(5);
                     }
                     break;
                 case PC_MEDIC:
@@ -3514,7 +3515,9 @@ void () ButtonFrame = {
                     break;
                 case PC_DEMOMAN:
                     if (self.button4_keyup_frame) {
-                        TeamFortress_DetpackStop();
+                        if(FO_GetUserSetting(self, "hold_detpack", "hd", "off")) {
+                            TeamFortress_DetpackStop();
+                        }
                     }
                     break;
                 case PC_MEDIC:
@@ -3535,6 +3538,7 @@ void () ButtonFrame = {
         self.button4_keyup_frame = 0;
     }
 
+    // +grenade1
     if (self.button5) {
         if (!self.button5_keydown) {
             self.button5_keydown = 1;
@@ -3542,19 +3546,31 @@ void () ButtonFrame = {
         }
 
         if (self.button5_keydown_frame) {
-            TeamFortress_PrimeThrowGrenade(1);
-        }
+            self.button5_keydown_frame = 0;
 
-        self.button5_keydown_frame = 0;
+            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
+                TeamFortress_PrimeGrenade(1);
+            } else {
+                TeamFortress_PrimeThrowGrenade(1);
+            }
+        }
+    // -grenade1
     } else {
         if (self.button5_keydown) {
             self.button5_keydown = 0;
             self.button5_keyup_frame = 1;
         }
 
-        self.button5_keyup_frame = 0;
+        if (self.button5_keyup_frame) {
+            self.button5_keyup_frame = 0;
+
+            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
+                TeamFortress_ThrowGrenade(1);
+            }
+        }
     }
 
+    // +grenade2
     if (self.button6) {
         if (!self.button6_keydown) {
             self.button6_keydown = 1;
@@ -3562,17 +3578,28 @@ void () ButtonFrame = {
         }
 
         if (self.button6_keydown_frame) {
-            TeamFortress_PrimeThrowGrenade(2);
-        }
+            self.button6_keydown_frame = 0;
 
-        self.button6_keydown_frame = 0;
+            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
+                TeamFortress_PrimeGrenade(2);
+            } else {
+                TeamFortress_PrimeThrowGrenade(2);
+            }
+        }
     } else {
         if (self.button6_keydown) {
             self.button6_keydown = 0;
             self.button6_keyup_frame = 1;
         }
 
-        self.button6_keyup_frame = 0;
+        if (self.button6_keyup_frame) {
+            self.button6_keyup_frame = 0;
+
+            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
+                TeamFortress_ThrowGrenade(2);
+            }
+        }
+
     }
 
     // +dropflag

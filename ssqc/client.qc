@@ -668,6 +668,7 @@ void () DecodeLevelParms = {
 
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+
         // Maximum number of primary grenades per class
         /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
