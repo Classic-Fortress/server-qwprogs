@@ -473,7 +473,7 @@ void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
 void () player_assaultcannon1 =[103, player_assaultcannon2] {
     if (fo_hwguy)
     {
-        if (self.tfstate & TFSTATE_RELOADING)
+        if (self.tfstate & TFSTATE_RELOADING || self.reload_assault_cannon == PC_HVYWEAP_ASSCAN_CLIPSIZE)
         {
             self.count = 1;
             player_assaultcannondown1();
@@ -523,7 +523,7 @@ void () player_assaultcannon1 =[103, player_assaultcannon2] {
 void () player_assaultcannon2 =[104, player_assaultcannon1] {
     if (fo_hwguy)
     {
-        if (self.tfstate & TFSTATE_RELOADING)
+        if (self.tfstate & TFSTATE_RELOADING || self.reload_assault_cannon == PC_HVYWEAP_ASSCAN_CLIPSIZE)
         {
             self.count = 1;
             player_assaultcannondown1();
