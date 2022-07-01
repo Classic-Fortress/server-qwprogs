@@ -534,10 +534,10 @@ void(string panelid, float display, string text) drawGameModePanel = {
 
 void(string panelid, float display, string text) drawReadyPanel = {
     FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
-    
+
     vector position = getPanelPosition(panel);
     vector size = getPanelFillSize(panel);
-    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
+    vector textsize = MENU_TEXT_SMALL * panel.Scale;
     vector textcolour = MENU_TEXT_4;
     local float padding = 4 * panel.Scale;
     local float lines;
@@ -564,31 +564,31 @@ void(string panelid, float display, string text) drawReadyPanel = {
                 string keynum = argv(0);
 
                 if(SBAR.ReadyStatus & LAST_NOT_READY) {
-                    local vector alert_text_largetext = mediumtext * 2;
+                    local vector alert_text_size = MENU_TEXT_LARGE * panel.Scale;
                     local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;
                     alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
-                    local string alert_text_message = "Everyone else is ready!";
+                    local string alert_text_message = "You're last";
 
                     pos_aligned = GetTextAlignOffset(
                         alert_text_position.x,
                         size.x,
                         padding,
                         alert_text_message,
-                        alert_text_largetext.x,
+                        alert_text_size.x,
                         panel.Orientation
                     );
 
                     drawstring(
                         [pos_aligned, alert_text_position.y],
-                        alert_text_message, 
-                        alert_text_largetext, 
-                        textcolour, 
-                        1, 
+                        alert_text_message,
+                        alert_text_size,
+                        textcolour,
+                        1,
                         0
                     );
 
-                    position.y = alert_text_position.y + 48;
+                    position.y = alert_text_position.y + alert_text_size.y + textsize.y;
                     position.x = (ScreenSize.x / 2) - (size.x / 2);
 
                     if(keynum != "-1") {
@@ -597,7 +597,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                         message = "Type 'ready' in the console to start";
                     }
                 } else if (SBAR.ReadyStatus & ENEMY_TEAM_READY) {
-                    local vector alert_text_largetext = mediumtext * 2;
+                    local vector alert_text_size = MENU_TEXT_MEDIUM * panel.Scale;
                     local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;
                     alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
@@ -608,20 +608,20 @@ void(string panelid, float display, string text) drawReadyPanel = {
                         size.x,
                         padding,
                         alert_text_message,
-                        alert_text_largetext.x,
+                        alert_text_size.x,
                         panel.Orientation
                     );
 
                     drawstring(
                         [pos_aligned, alert_text_position.y],
-                        alert_text_message, 
-                        alert_text_largetext, 
-                        textcolour, 
-                        1, 
+                        alert_text_message,
+                        alert_text_size,
+                        textcolour,
+                        1,
                         0
                     );
 
-                    position.y = alert_text_position.y + 48;
+                    position.y = alert_text_position.y + alert_text_size.y + textsize.y;
                     position.x = (ScreenSize.x / 2) - (size.x / 2);
 
                     if(keynum != "-1") {
@@ -640,13 +640,13 @@ void(string panelid, float display, string text) drawReadyPanel = {
         }
     }
     if(message) {
-        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.Orientation);
+        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,textsize.x,panel.Orientation);
         drawstring(
             [pos_aligned, position.y],
-            message, 
-            mediumtext, 
-            textcolour, 
-            1, 
+            message,
+            textsize,
+            textcolour,
+            1,
             0
         );
     }
