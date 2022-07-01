@@ -370,8 +370,8 @@ void () ResetBreakAndReady = {
     te = find (world, classname, "player");
     while (te != world) {
         te.bvote = 0;
-        te.is_ready = 0;
-        te.is_only_one_not_ready = 0;
+        te.stat_flags &= ~PLAYER_READY;
+        UpdateReadyStatus();
         v_break = 0;
         v_ready = 0;
 
@@ -877,7 +877,7 @@ void () CenterPrint_Players_NotReady = {
     local float first = 0;
     te = find (world, classname, "player");
     while (te) {
-        if (te.is_ready == 0 && !te.has_disconnected)
+        if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected)
         {
             first = first + 1;
             if (first == 1)
@@ -916,7 +916,7 @@ void () Broadcast_Players_NotReady = {
         local float first = 1;
         te = find (world, classname, "player");
         while (te != world) {
-            if (te.is_ready == 0 && !te.has_disconnected) {
+            if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected) {
                 if (!first)
                     players_not_ready = strcat(players_not_ready, ", ");
                 else
@@ -929,7 +929,7 @@ void () Broadcast_Players_NotReady = {
         bprint(1, players_not_ready);
         te = find (world, classname, "player");
         while (te != world) {
-            if (te.is_ready == 0 && !te.has_disconnected)
+            if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected)
                 sprint(te, 2, "If you are ready, type \s/ready\s in the console\n");
             te = find(te, classname, "player");
         }
@@ -942,20 +942,127 @@ void () Broadcast_Players_NotReady = {
 }
 
 void () PlayerNotReady = {
-    if (self.is_ready) {
+    if (self.stat_flags & PLAYER_READY) {
+        self.stat_flags &= ~PLAYER_READY;
+        UpdateReadyStatus();
         bprint2 (2, self.netname, " is NOT ready anymore\n ");
-        self.is_ready = 0;
         v_ready = (v_ready - 1);
         Broadcast_Players_NotReady();
+    }
+}
 
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.is_only_one_not_ready = 0;
-                p = find(p, classname, "player");
-            }
+void () UpdateReadyStatus = {
+    local float players_size = 0;
+    local float players_ready_size = 0;
+    local float team_1_size = 0;
+    local float team_1_ready_size = 0;
+    local float team_2_size = 0;
+    local float team_2_ready_size = 0;
+    local float team_3_size = 0;
+    local float team_3_ready_size = 0;
+    local float team_4_size = 0;
+    local float team_4_ready_size = 0;
+
+    local entity p = find(world, classname, "player");
+    while (p != world) {
+        switch(p.team_no) {
+            case 1:
+                team_1_size++;
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
+                    team_1_ready_size++;
+                    players_ready_size++;
+                }
+
+                break;
+            case 2:
+                team_2_size++;
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
+                    team_2_ready_size++;
+                    players_ready_size++;
+                }
+
+                break;
+            case 3:
+                team_3_size++;
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
+                    team_3_ready_size++;
+                    players_ready_size++;
+                }
+
+                break;
+            case 4:
+                team_4_size++;
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
+                    team_4_ready_size++;
+                    players_ready_size++;
+                }
+
+                break;
         }
+
+        p = find(p, classname, "player");
+    }
+
+    local float team_1_ready = (team_1_size && (team_1_size == team_1_ready_size));
+    local float team_2_ready = (team_2_size && (team_2_size == team_2_ready_size));
+    local float team_3_ready = (team_3_size && (team_3_size == team_3_ready_size));
+    local float team_4_ready = (team_4_size && (team_4_size == team_4_ready_size));
+    local float teams_ready_size = (team_1_ready + team_2_ready + team_3_ready + team_4_ready);
+    local float one_player_not_ready = ((players_size > 1) && ((players_size - players_ready_size) == 1));
+
+    local entity p = find(world, classname, "player");
+    local float team_ready;
+
+    while (p != world) {
+        team_ready = 0;
+
+        // Check if own team is ready
+        switch(p.team_no) {
+            case 1:
+                if (team_1_ready) {
+                    team_ready = 1;
+                }
+                break;
+            case 2:
+                if (team_2_ready) {
+                    team_ready = 1;
+                }
+                break;
+            case 3:
+                if (team_3_ready) {
+                    team_ready = 1;
+                }
+                break;
+            case 4:
+                if (team_4_ready) {
+                    team_ready = 1;
+                }
+                break;
+        }
+
+        // if at least one other team is ready
+        if ((teams_ready_size - team_ready) > 0) {
+            p.stat_flags |= ENEMY_TEAM_READY;
+        } else {
+            p.stat_flags &= ~ENEMY_TEAM_READY;
+        }
+
+        // if you are the last to ready up
+        if (!(p.stat_flags & PLAYER_READY) && one_player_not_ready) {
+            p.stat_flags |= LAST_NOT_READY;
+        } else {
+            p.stat_flags &= ~LAST_NOT_READY;
+        }
+
+        p = find(p, classname, "player");
     }
 }
 
@@ -969,7 +1076,7 @@ float () CheckAllPlayersReady = {
     }
     if (intermission_running)
         return 0;
-        
+
     f1 = TeamFortress_GetNoPlayers ();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
     if (v_ready == f1 && v_ready > 0) {
@@ -1009,25 +1116,14 @@ void () PlayerReady = {
         return;
     }
 
-    if (self.is_ready) {
+    if (self.stat_flags & PLAYER_READY) {
         PlayerNotReady();
         return;
     }
 
-    self.is_ready = 1;
+    self.stat_flags |= PLAYER_READY;
+    UpdateReadyStatus();
     v_ready = v_ready + 1;
-
-    local float f1 = TeamFortress_GetNoPlayers ();
-    if (v_ready == f1 -1) {
-        local entity p = find (world, classname, "player");
-        while (p != world) {
-            if (p.is_ready == 0) {
-                p.is_only_one_not_ready = 1;
-            }
-            p = find(p, classname, "player");
-        }
-    }
-
     bprint2 (3, self.netname, " is ready to start the match\n");
     if(!CheckAllPlayersReady())
         Broadcast_Players_NotReady();
@@ -1039,19 +1135,11 @@ void () RemoveVotes = {
         self.bvote = 0;
         v_break = (v_break - 1);
     }
-    if (self.is_ready) {
+    if (self.stat_flags & PLAYER_READY) {
+        self.stat_flags &= ~PLAYER_READY;
+        UpdateReadyStatus();
         bprint2(2, self.netname, " is NOT ready anymore\n ");
-        self.is_ready = 0;
         v_ready = (v_ready - 1);
-
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.is_only_one_not_ready = 0;
-                p = find(p, classname, "player");
-            }
-        }
     }
 };
 
@@ -1063,7 +1151,7 @@ void () PreMatch_Message = {
         while (p != world) {
             if (p.netname != "") {
                 sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
-                if (p.is_ready)
+                if (p.stat_flags & PLAYER_READY)
                     sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
                 else
                     sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");

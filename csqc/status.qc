@@ -553,7 +553,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
             return;
         }
         if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
-            if(SBAR.Ready) {
+            if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
             } else if(round_over) {
@@ -563,7 +563,7 @@ void(string panelid, float display, string text) drawReadyPanel = {
                 tokenize(findkeysforcommand("ready"));
                 string keynum = argv(0);
 
-                if(SBAR.LastNotReady) {
+                if(SBAR.ReadyStatus & LAST_NOT_READY) {
                     local vector alert_text_largetext = mediumtext * 2;
                     local vector alert_text_position;
                     alert_text_position.y = ScreenSize.y / 3;
@@ -595,6 +595,39 @@ void(string panelid, float display, string text) drawReadyPanel = {
                         message = strcat("Press ", keynumtostring(stof(keynum)), " to start");
                     } else {
                         message = "Type 'ready' in the console to start";
+                    }
+                } else if (SBAR.ReadyStatus & ENEMY_TEAM_READY) {
+                    local vector alert_text_largetext = mediumtext * 2;
+                    local vector alert_text_position;
+                    alert_text_position.y = ScreenSize.y / 3;
+                    alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
+                    local string alert_text_message = "Enemy team is ready!";
+
+                    pos_aligned = GetTextAlignOffset(
+                        alert_text_position.x,
+                        size.x,
+                        padding,
+                        alert_text_message,
+                        alert_text_largetext.x,
+                        panel.Orientation
+                    );
+
+                    drawstring(
+                        [pos_aligned, alert_text_position.y],
+                        alert_text_message, 
+                        alert_text_largetext, 
+                        textcolour, 
+                        1, 
+                        0
+                    );
+
+                    position.y = alert_text_position.y + 48;
+                    position.x = (ScreenSize.x / 2) - (size.x / 2);
+
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    } else {
+                        message = "Type 'ready' in the console to ready up";
                     }
                 } else {
                     if(keynum != "-1") {
