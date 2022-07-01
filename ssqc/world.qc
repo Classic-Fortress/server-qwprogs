@@ -327,7 +327,7 @@ void () worldspawn = {
     lightstyle(63, "a");
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
-    clientstat(STAT_READY_STATUS, EV_FLOAT, ready_status);
+    clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);

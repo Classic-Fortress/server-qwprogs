@@ -370,7 +370,7 @@ void () ResetBreakAndReady = {
     te = find (world, classname, "player");
     while (te != world) {
         te.bvote = 0;
-        te.ready_status &= ~PLAYER_READY;
+        te.stat_flags &= ~PLAYER_READY;
         UpdateReadyStatus();
         v_break = 0;
         v_ready = 0;
@@ -877,7 +877,7 @@ void () CenterPrint_Players_NotReady = {
     local float first = 0;
     te = find (world, classname, "player");
     while (te) {
-        if (!(te.ready_status & PLAYER_READY) && !te.has_disconnected)
+        if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected)
         {
             first = first + 1;
             if (first == 1)
@@ -916,7 +916,7 @@ void () Broadcast_Players_NotReady = {
         local float first = 1;
         te = find (world, classname, "player");
         while (te != world) {
-            if (!(te.ready_status & PLAYER_READY) && !te.has_disconnected) {
+            if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected) {
                 if (!first)
                     players_not_ready = strcat(players_not_ready, ", ");
                 else
@@ -929,7 +929,7 @@ void () Broadcast_Players_NotReady = {
         bprint(1, players_not_ready);
         te = find (world, classname, "player");
         while (te != world) {
-            if (!(te.ready_status & PLAYER_READY) && !te.has_disconnected)
+            if (!(te.stat_flags & PLAYER_READY) && !te.has_disconnected)
                 sprint(te, 2, "If you are ready, type \s/ready\s in the console\n");
             te = find(te, classname, "player");
         }
@@ -942,8 +942,8 @@ void () Broadcast_Players_NotReady = {
 }
 
 void () PlayerNotReady = {
-    if (self.ready_status & PLAYER_READY) {
-        self.ready_status &= ~PLAYER_READY;
+    if (self.stat_flags & PLAYER_READY) {
+        self.stat_flags &= ~PLAYER_READY;
         UpdateReadyStatus();
         bprint2 (2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
@@ -952,68 +952,79 @@ void () PlayerNotReady = {
 }
 
 void () UpdateReadyStatus = {
-    local float players_size;
-    local float players_ready_size;
-    local float team_1_size;
-    local float team_1_ready_size;
-    local float team_2_size;
-    local float team_2_ready_size;
-    local float team_3_size;
-    local float team_3_ready_size;
-    local float team_4_size;
-    local float team_4_ready_size;
+    local float players_size = 0;
+    local float players_ready_size = 0;
+    local float team_1_size = 0;
+    local float team_1_ready_size = 0;
+    local float team_2_size = 0;
+    local float team_2_ready_size = 0;
+    local float team_3_size = 0;
+    local float team_3_ready_size = 0;
+    local float team_4_size = 0;
+    local float team_4_ready_size = 0;
 
     local entity p = find(world, classname, "player");
     while (p != world) {
-        if (p.team_no) {
-            players_size++;
-        }
-
-        if (p.ready_status & PLAYER_READY) {
-            players_ready_size++;
-        }
-
         switch(p.team_no) {
             case 1:
                 team_1_size++;
-                if (p.ready_status & PLAYER_READY) {
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
                     team_1_ready_size++;
+                    players_ready_size++;
                 }
+
                 break;
             case 2:
                 team_2_size++;
-                if (p.ready_status & PLAYER_READY) {
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
                     team_2_ready_size++;
+                    players_ready_size++;
                 }
+
+                break;
             case 3:
                 team_3_size++;
-                if (p.ready_status & PLAYER_READY) {
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
                     team_3_ready_size++;
+                    players_ready_size++;
                 }
+
                 break;
             case 4:
                 team_4_size++;
-                if (p.ready_status & PLAYER_READY) {
+                players_size++;
+
+                if (p.stat_flags & PLAYER_READY) {
                     team_4_ready_size++;
+                    players_ready_size++;
                 }
+
                 break;
         }
 
         p = find(p, classname, "player");
     }
 
-    local float team_1_ready = (team_1_size && (team_1_size - team_1_ready_size) == 0);
-    local float team_2_ready = (team_2_size && (team_2_size - team_2_ready_size) == 0);
-    local float team_3_ready = (team_3_size && (team_3_size - team_3_ready_size) == 0);
-    local float team_4_ready = (team_4_size && (team_4_size - team_4_ready_size) == 0);
-    local float teams_ready_size = team_1_ready + team_2_ready + team_3_ready + team_4_ready;
-    local float one_player_not_ready = (players_size > 1 && players_size - players_ready_size == 1);
+    local float team_1_ready = (team_1_size && (team_1_size == team_1_ready_size));
+    local float team_2_ready = (team_2_size && (team_2_size == team_2_ready_size));
+    local float team_3_ready = (team_3_size && (team_3_size == team_3_ready_size));
+    local float team_4_ready = (team_4_size && (team_4_size == team_4_ready_size));
+    local float teams_ready_size = (team_1_ready + team_2_ready + team_3_ready + team_4_ready);
+    local float one_player_not_ready = ((players_size > 1) && ((players_size - players_ready_size) == 1));
 
     local entity p = find(world, classname, "player");
     local float team_ready;
 
     while (p != world) {
-        // ENEMY_TEAM_READY
+        team_ready = 0;
+
+        // Check if own team is ready
         switch(p.team_no) {
             case 1:
                 if (team_1_ready) {
@@ -1024,6 +1035,7 @@ void () UpdateReadyStatus = {
                 if (team_2_ready) {
                     team_ready = 1;
                 }
+                break;
             case 3:
                 if (team_3_ready) {
                     team_ready = 1;
@@ -1036,17 +1048,18 @@ void () UpdateReadyStatus = {
                 break;
         }
 
+        // if at least one other team is ready
         if ((teams_ready_size - team_ready) > 0) {
-            p.ready_status |= ENEMY_TEAM_READY;
+            p.stat_flags |= ENEMY_TEAM_READY;
         } else {
-            p.ready_status &= ~ENEMY_TEAM_READY;
+            p.stat_flags &= ~ENEMY_TEAM_READY;
         }
 
-        // LAST_NOT_READY
-        if (!(p.ready_status & PLAYER_READY) && one_player_not_ready) {
-            p.ready_status |= LAST_NOT_READY;
+        // if you are the last to ready up
+        if (!(p.stat_flags & PLAYER_READY) && one_player_not_ready) {
+            p.stat_flags |= LAST_NOT_READY;
         } else {
-            p.ready_status &= ~LAST_NOT_READY;
+            p.stat_flags &= ~LAST_NOT_READY;
         }
 
         p = find(p, classname, "player");
@@ -1103,12 +1116,12 @@ void () PlayerReady = {
         return;
     }
 
-    if (self.ready_status & PLAYER_READY) {
+    if (self.stat_flags & PLAYER_READY) {
         PlayerNotReady();
         return;
     }
 
-    self.ready_status |= PLAYER_READY;
+    self.stat_flags |= PLAYER_READY;
     UpdateReadyStatus();
     v_ready = v_ready + 1;
     bprint2 (3, self.netname, " is ready to start the match\n");
@@ -1122,8 +1135,8 @@ void () RemoveVotes = {
         self.bvote = 0;
         v_break = (v_break - 1);
     }
-    if (self.ready_status & PLAYER_READY) {
-        self.ready_status &= ~PLAYER_READY;
+    if (self.stat_flags & PLAYER_READY) {
+        self.stat_flags &= ~PLAYER_READY;
         UpdateReadyStatus();
         bprint2(2, self.netname, " is NOT ready anymore\n ");
         v_ready = (v_ready - 1);
@@ -1138,7 +1151,7 @@ void () PreMatch_Message = {
         while (p != world) {
             if (p.netname != "") {
                 sprint(p, PRINT_HIGH, "Currently in \sprematch\s time\n");
-                if (p.ready_status & PLAYER_READY)
+                if (p.stat_flags & PLAYER_READY)
                     sprint(p, PRINT_HIGH, "You are \sready\s to start the match.\n Type \s/notready\s in the console if you are not ready\n");
                 else
                     sprint(p, PRINT_HIGH, "Type \s/ready\s in the console if you are ready to start the match\n");

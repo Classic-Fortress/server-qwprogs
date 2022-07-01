@@ -1886,7 +1886,7 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "touches", player.touches);
     CheckSetInfoKey(player, "team_no", player.team_no);
     CheckSetInfoKey(player, "playerclass", player.playerclass);
-    CheckSetInfoKey(player, "ready", player.ready_status & PLAYER_READY);
+    CheckSetInfoKey(player, "ready", player.stat_flags & PLAYER_READY);
 };
 
 void (float all_dimensions) SetDimensions = {
@@ -2172,6 +2172,8 @@ void () PutClientInServer = {
         if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
+
+    UpdateReadyStatus();
 };
 
 //void () info_player_start = {
@@ -3059,7 +3061,7 @@ void () ClientDisconnect = {
 
     if(cb_prematch) {
         //Check in case the player leaving is the last not-readied player
-        if(self.ready_status & PLAYER_READY) {
+        if(self.stat_flags & PLAYER_READY) {
             v_ready = (v_ready - 1);
         } else if (!CheckAllPlayersReady()) {
             UpdateReadyStatus();

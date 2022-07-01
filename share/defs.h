@@ -229,7 +229,7 @@
 #define AS_MELEE	3
 #define AS_MISSILE	4
 
-// ready_status
+// stat_flags
 #define PLAYER_READY   1
 #define ENEMY_TEAM_READY   2
 #define LAST_NOT_READY     4
@@ -1483,7 +1483,7 @@
 // stats
 // first 32 are reserved
 #define STAT_TEAMNO             33
-#define STAT_READY_STATUS       34
+#define STAT_FLAGS              34
 #define STAT_CLASS              35
 #define STAT_VELOCITY_X         36
 #define STAT_VELOCITY_Y         37

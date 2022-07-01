@@ -650,7 +650,7 @@ float autokick_kills;
 
 .float vote;
 .float bvote;
-.float ready_status;
+.float stat_flags;
 
 .float is_admin;
 .float admin_mode;
