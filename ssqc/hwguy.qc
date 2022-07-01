@@ -127,15 +127,15 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     bullet_dir = normalize(v_forward * bullet_speed);
 
     while (shotcount > 0) {
-		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
-        rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
-		spread_dir = bullet_dir + rand_dir;
-        org = self.origin + '0 0 10' + rand_dir;
+	var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
+	rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
+	spread_dir = bullet_dir + rand_dir;
+	org = self.origin + '0 0 10' + rand_dir;
 
-		LaunchAssCan(org, spread_dir, var_speed);
+	LaunchAssCan(org, spread_dir, var_speed);
 
-		shotcount = shotcount - 1;
-	}
+	shotcount = shotcount - 1;
+    }
 }
 
 void FO_LockToggle () {

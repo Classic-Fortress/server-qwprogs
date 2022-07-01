@@ -4,6 +4,7 @@ FortressOne Server
 New features
 ------
 
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
 * `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.

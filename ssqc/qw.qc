@@ -587,6 +587,7 @@ float airblastjump;
 float airblastsize;
 float airblastcells;
 float airblastjumpcells;
+float force_reload;
 
 float old_spanner;
 float old_dispenser;
