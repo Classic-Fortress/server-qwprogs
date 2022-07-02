@@ -14,6 +14,8 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 void InterceptRocketJump();
 float IsValidToUseGrenades();
+void InterceptSlotAttacks();
+void InterceptQuickAttack();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -68,6 +70,22 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
+    registercommand("+slot1");
+    registercommand("-slot1");
+    registercommand("+slot2");
+    registercommand("-slot2");
+    registercommand("+slot3");
+    registercommand("-slot3");
+    registercommand("+slot4");
+    registercommand("-slot4");
+    registercommand("+quick1");
+    registercommand("-quick1");
+    registercommand("+quick2");
+    registercommand("-quick2");
+    registercommand("+quick3");
+    registercommand("-quick3");
+    registercommand("+quick4");
+    registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -99,6 +117,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_filter = "";
     MouseDown = 0;
     jump_counter = 0;
+    quick_firing = 0;
+    slot = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -115,6 +135,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     player_class = getstatf(STAT_CLASS);
     SBAR.Ready = getstatf(STAT_READY);
     SBAR.LastNotReady = getstatf(STAT_ONLY_ONE_NOT_READY);
+    current_weaponslot = getstatf(STAT_CURRENT_WEAPONSLOT);
     oldhealth = getstatf(STAT_HEALTH);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
@@ -350,6 +371,66 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-button4\n");
             }
             break;
+        case "+slot1":
+            slot = TF_SLOT1;
+            localcmd("+button0\n");
+            break;
+        case "-slot1":
+            localcmd("-button0\n");
+            break;
+        case "+slot2":
+            slot = TF_SLOT2;
+            localcmd("+button0\n");
+            break;
+        case "-slot2":
+            localcmd("-button0\n");
+            break;
+        case "+slot3":
+            slot = TF_SLOT3;
+            localcmd("+button0\n");
+            break;
+        case "-slot3":
+            localcmd("-button0\n");
+            break;
+        case "+slot4":
+            slot = TF_SLOT4;
+            localcmd("+button0\n");
+            break;
+        case "-slot4":
+            localcmd("-button0\n");
+            break;
+        case "+quick1":
+            quick_firing = 1;
+            slot = TF_SLOT1;
+            localcmd("+button0\n");
+            break;
+        case "-quick1":
+            localcmd("-button0\n");
+            break;
+        case "+quick2":
+            quick_firing = 1;
+            slot = TF_SLOT2;
+            localcmd("+button0\n");
+            break;
+        case "-quick2":
+            localcmd("-button0\n");
+            break;
+        case "+quick3":
+            quick_firing = 1;
+            slot = TF_SLOT3;
+            localcmd("+button0\n");
+            break;
+        case "-quick3":
+            localcmd("-button0\n");
+            break;
+        case "+quick4":
+            quick_firing = 1;
+            slot = TF_SLOT4;
+            localcmd("+button0\n");
+            break;
+        case "-quick4":
+            localcmd("-button0\n");
+            break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
@@ -382,6 +463,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame() {
     InterceptRocketJump();
+    InterceptSlotAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -446,5 +528,40 @@ void InterceptRocketJump() {
     } else {
         // press +jump and +attack
         input_buttons |= BUTTON0 + BUTTON2;
+    }
+}
+
+void InterceptSlotAttacks() {
+    if (slot && (input_buttons & BUTTON0)) {
+        if (current_weaponslot != slot) {
+            input_buttons &= ~BUTTON0;
+            localcmd("impulse ", ftos(slot), "\n");
+        } else {
+            slot = 0;
+        }
+    }
+}
+
+void InterceptQuickAttack() {
+    if (!quick_firing) {
+        return;
+    }
+
+    if (input_buttons & BUTTON0) {
+        if (current_weaponslot != slot) {
+            last_weaponslot = current_weaponslot;
+            localcmd("impulse ", ftos(slot), "\n");
+            print("unpressing button0\n");
+            input_buttons &= ~BUTTON0;
+            return;
+        }
+    } else {
+        slot = 0;
+
+        if (current_weaponslot != last_weaponslot) {
+            localcmd("impulse ", ftos(last_weaponslot), "\n");
+        } else {
+            quick_firing = 0;
+        }
     }
 }

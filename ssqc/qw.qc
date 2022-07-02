@@ -23,6 +23,7 @@ typedef void (float n) f_void_float;
 .float button5;                 // +grenade1
 .float button6;                 // +grenade2
 .float button7;                 // +dropflag
+.float button8;
 
 .float hook_out;                // Dummy field for hook to silence error messages
 .float got_aliases;             // TRUE if the player has TeamFortress aliases

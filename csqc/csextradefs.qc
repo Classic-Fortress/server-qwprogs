@@ -64,6 +64,7 @@ vector TEXT_TEAM_COLOUR[] = {
 #define BUTTON5 16
 #define BUTTON6 32
 #define BUTTON7 64
+#define BUTTON8 128
 
 #define MAP_MAX_CHARS 20
 
@@ -542,6 +543,10 @@ float nextoriginupdate;
 float speed;
 float jump_counter;
 float grentimer_waiting;
+float current_weaponslot;
+float last_weaponslot;
+float quick_firing;
+float slot;
 
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
