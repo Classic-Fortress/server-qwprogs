@@ -3020,6 +3020,8 @@ void () ImpulseCommands = {
             TeamFortress_PrimeGrenade(1);
         else if (self.impulse == TF_GRENADE_2)
             TeamFortress_PrimeGrenade(2);
+        else if (self.impulse == TF_GRENADE_T)
+            TeamFortress_ThrowGrenade();
         else if (self.impulse == TF_GRENADE_PT_1)
             TeamFortress_PrimeThrowGrenade(1);
         else if (self.impulse == TF_GRENADE_PT_2)
