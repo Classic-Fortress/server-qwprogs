@@ -146,6 +146,7 @@ void (entity ent, float num) SetFlameCount;
 .float button6_keydown;
 .float button6_keydown_frame;
 .float button6_keyup_frame;
+.float oldbuttons;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -3363,6 +3364,28 @@ void () DeadImpulses = {
 };
 
 void () ButtonFrame = {
+    local float changed_buttons = input_buttons ^ self.oldbuttons;
+    self.oldbuttons = input_buttons;
+    local float buttons_down = changed_buttons & input_buttons;
+    local float buttons_up = changed_buttons & ~input_buttons;
+
+    if (buttons_down & BUTTON8) {
+        sprint(self, PRINT_MEDIUM, "Button 8 pressed\n");
+        self.impulse = TF_SLOT1;
+    }
+    if (buttons_down & BUTTON9) {
+        sprint(self, PRINT_MEDIUM, "Button 9 pressed\n");
+        self.impulse = TF_SLOT2;
+    }
+    if (buttons_down & BUTTON10) {
+        sprint(self, PRINT_MEDIUM, "Button 10 pressed\n");
+        self.impulse = TF_SLOT3;
+    }
+    if (buttons_down & BUTTON11) {
+        sprint(self, PRINT_MEDIUM, "Button 11 pressed\n");
+        self.impulse = TF_SLOT4;
+    }
+
     // +special
     if (self.button3) {
         if (!self.button3_keydown) {
@@ -3606,6 +3629,28 @@ void () ButtonFrame = {
     if (self.button7) {
         DropGoalItems();
     }
+
+/*     if (input_buttons & BUTTON8) { */
+/*         if (changed_buttons & BUTTON8) { */
+/*             self.last_weaponslot = self.current_weaponslot; */
+/*             self.impulse = TF_SLOT1; */
+/*             input_buttons |= BUTTON0; */
+/*         } */
+/*     } else { */
+/*         if (changed_buttons & BUTTON8) { */
+/*             sprint(self, PRINT_MEDIUM, "Button 8 unpressed\n"); */
+/*             self.impulse = self.last_weaponslot; */
+/*         } */
+/*     } */
+
+/*     if (input_buttons & BUTTON9) {} */
+/*     if (input_buttons & BUTTON10) {} */
+/*     if (input_buttons & BUTTON11) {} */
+/*     if (input_buttons & BUTTON12) {} */
+/*     if (input_buttons & BUTTON13) {} */
+/*     if (input_buttons & BUTTON14) {} */
+/*     if (input_buttons & BUTTON15) {} */
+/*     if (input_buttons & BUTTON16) {} */
 }
 
 void () W_WeaponFrame = {

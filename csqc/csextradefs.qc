@@ -56,24 +56,6 @@ vector TEXT_TEAM_COLOUR[] = {
 #define TEAM_SPECTATOR 9
 #define TEAM_OBSERVER 99
 
-#define BUTTON0 1
-/* BUTTON1 not supported */
-#define BUTTON2 2
-#define BUTTON3 4
-#define BUTTON4 8
-#define BUTTON5 16
-#define BUTTON6 32
-#define BUTTON7 64
-#define BUTTON8 128
-#define BUTTON9 2048
-#define BUTTON10 4096
-#define BUTTON11 8192
-#define BUTTON12 16384
-#define BUTTON13 32768
-#define BUTTON14 65536
-#define BUTTON15 131072
-#define BUTTON16 262144
-
 #define MAP_MAX_CHARS 20
 
 .float owned_by;
@@ -552,10 +534,6 @@ float speed;
 float jump_counter;
 float grentimer_waiting;
 float current_weaponslot;
-float last_weaponslot;
-float quick_firing;
-float slot;
-
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

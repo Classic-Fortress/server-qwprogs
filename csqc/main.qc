@@ -14,8 +14,7 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 void InterceptRocketJump();
 float IsValidToUseGrenades();
-void InterceptSlotAttack(float slot);
-void InterceptQuickAttack();
+void InterceptSlotAttacks();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -78,14 +77,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-slot3");
     registercommand("+slot4");
     registercommand("-slot4");
-    registercommand("+quick1");
-    registercommand("-quick1");
-    registercommand("+quick2");
-    registercommand("-quick2");
-    registercommand("+quick3");
-    registercommand("-quick3");
-    registercommand("+quick4");
-    registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -117,8 +108,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_filter = "";
     MouseDown = 0;
     jump_counter = 0;
-    quick_firing = 0;
-    slot = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -426,19 +415,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame() {
     InterceptRocketJump();
-
-    if (input_buttons & BUTTON8) {
-        InterceptSlotAttack(TF_SLOT1);
-    }
-    if (input_buttons & BUTTON9) {
-        InterceptSlotAttack(TF_SLOT2);
-    }
-    if (input_buttons & BUTTON10) {
-        InterceptSlotAttack(TF_SLOT3);
-    }
-    if (input_buttons & BUTTON11) {
-        InterceptSlotAttack(TF_SLOT4);
-    }
+    InterceptSlotAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -506,14 +483,37 @@ void InterceptRocketJump() {
     }
 }
 
-void InterceptSlotAttack(float slot) {
-    if (getstatf(STAT_CURRENT_WEAPONSLOT) != slot) {
-        localcmd("impulse ", ftos(slot), "\n");
-        input_buttons &= ~BUTTON0;
-    } else {
+void InterceptSlotAttacks() {
+    if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
         input_buttons |= BUTTON0;
     }
 }
+
+/* void InterceptQuickAttack(float button, float slot) { */
+/*     if (!(input_buttons & button) && !last_weaponslot) { */
+/*         return; */
+/*     } */
+
+/*     local float current_weaponslot = getstatf(STAT_CURRENT_WEAPONSLOT); */
+
+/*     if (input_buttons & button) { */
+/*         if (current_weaponslot != slot) { */
+/*             last_weaponslot = current_weaponslot; */
+/*             localcmd("impulse ", ftos(slot), "\n"); */
+/*             input_buttons &= ~BUTTON0; */
+/*         } else { */
+/*             input_buttons |= BUTTON0; */
+/*         } */
+/*     } else { */
+/*         if (last_weaponslot) { */
+/*             if (current_weaponslot == last_weaponslot) { */
+/*                 last_weaponslot = 0; */
+/*             } else { */
+/*                 localcmd("impulse ", ftos(last_weaponslot), "\n"); */
+/*             } */
+/*         } */
+/*     } */
+/* } */
 
 /* void InterceptSlotAttacks() { */
 /*     if (slot && (input_buttons & BUTTON0)) { */
@@ -526,26 +526,26 @@ void InterceptSlotAttack(float slot) {
 /*     } */
 /* } */
 
-void InterceptQuickAttack() {
-    if (!quick_firing) {
-        return;
-    }
+/* void InterceptQuickAttack() { */
+/*     if (!quick_firing) { */
+/*         return; */
+/*     } */
 
-    if (input_buttons & BUTTON0) {
-        if (current_weaponslot != slot) {
-            last_weaponslot = current_weaponslot;
-            localcmd("impulse ", ftos(slot), "\n");
-            print("unpressing button0\n");
-            input_buttons &= ~BUTTON0;
-            return;
-        }
-    } else {
-        slot = 0;
+/*     if (input_buttons & BUTTON0) { */
+/*         if (current_weaponslot != slot) { */
+/*             last_weaponslot = current_weaponslot; */
+/*             localcmd("impulse ", ftos(slot), "\n"); */
+/*             print("unpressing button0\n"); */
+/*             input_buttons &= ~BUTTON0; */
+/*             return; */
+/*         } */
+/*     } else { */
+/*         slot = 0; */
 
-        if (current_weaponslot != last_weaponslot) {
-            localcmd("impulse ", ftos(last_weaponslot), "\n");
-        } else {
-            quick_firing = 0;
-        }
-    }
-}
+/*         if (current_weaponslot != last_weaponslot) { */
+/*             localcmd("impulse ", ftos(last_weaponslot), "\n"); */
+/*         } else { */
+/*             quick_firing = 0; */
+/*         } */
+/*     } */
+/* } */
