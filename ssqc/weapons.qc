@@ -3367,211 +3367,132 @@ void () DeadImpulses = {
 void () ButtonFrame = {
     local float changed_buttons = input_buttons ^ self.oldbuttons;
     self.oldbuttons = input_buttons;
-    local float buttons_down = changed_buttons & input_buttons;
-    local float buttons_up = changed_buttons & ~input_buttons;
 
-    if (buttons_down & BUTTON8) {
-        self.impulse = TF_SLOT1;
-    }
+    local float keydowns = changed_buttons & input_buttons;
+    local float keyups = changed_buttons & ~input_buttons;
 
-    if (buttons_down & BUTTON9) {
-        self.impulse = TF_SLOT2;
-    }
-
-    if (buttons_down & BUTTON10) {
-        self.impulse = TF_SLOT3;
-    }
-
-    if (buttons_down & BUTTON11) {
-        self.impulse = TF_SLOT4;
-    }
-
-    // +special
-    if (self.button3) {
-        if (!self.button3_keydown) {
-            self.button3_keydown = 1;
-            self.button3_keydown_frame = 1;
-        }
-
+    // +special every frame
+    if (input_buttons & BUTTON3) {
         if (!cb_prematch && !cease_fire) {
             switch (self.playerclass) {
                 case PC_SCOUT:
                     CF_Scout_Dash();
                     break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    break;
                 case PC_DEMOMAN:
                     TeamFortress_DetonatePipebombs(0);
-                    break;
-                case PC_MEDIC:
-                    if (self.button3_keydown_frame) {
-                        CF_Medic_AuraToggle();
-                    }
-                    break;
-                case PC_HVYWEAP:
-                    if (self.button3_keydown_frame) {
-                        FO_LockToggle();
-                    }
                     break;
                 case PC_PYRO:
                     FO_Airblast();
                     break;
-                case PC_SPY:
-                    if (self.button3_keydown_frame) {
-                        FO_Spy_ToggleFeign(0);
-                    }
-                    break;
-                case PC_ENGINEER:
-                    if (self.button3_keydown_frame) {
-                        FO_Engineer_ToggleDispenser();
-                    }
-                    break;
-                case PC_UNDEFINED:
-                    break;
             }
+        }
+    }
+
+    // -special every frame
+    if (!(input_buttons & BUTTON3)) {
+        if (FO_GetUserSetting(self, "hold_feign", "hf", "off")) {
+            FO_Spy_Unfeign();
+        }
+    }
+
+    // +special keydown frame
+    if (keydowns & BUTTON3) {
+        if (cb_prematch || cease_fire) {
+            ToggleInvincibility();
         } else {
-            if (self.button3_keydown_frame) {
-                ToggleInvincibility();
-            }
-        }
-
-        self.button3_keydown_frame = 0;
-    } else {
-        if (self.button3_keydown) {
-            self.button3_keydown = 0;
-            self.button3_keyup_frame = 1;
-        }
-
-        if (!cb_prematch && !cease_fire) {
             switch (self.playerclass) {
-                case PC_SCOUT:
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    break;
-                case PC_DEMOMAN:
-                    break;
                 case PC_MEDIC:
+                    CF_Medic_AuraToggle();
                     break;
                 case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
+                    FO_LockToggle();
                     break;
                 case PC_SPY:
-                    if (FO_GetUserSetting(self, "hold_feign", "hf", "off")) {
-                        FO_Spy_Unfeign();
-                    }
+                    FO_Spy_ToggleFeign(0);
                     break;
                 case PC_ENGINEER:
-                    break;
-                case PC_UNDEFINED:
+                    FO_Engineer_ToggleDispenser();
                     break;
             }
         }
-
-        self.button3_keyup_frame = 0;
     }
 
-    // +special2
-    if (self.button4) {
-        if (!self.button4_keydown) {
-            self.button4_keydown = 1;
-            self.button4_keydown_frame = 1;
+    // +special2 every frame
+    if (input_buttons & BUTTON4) {
+        switch (self.playerclass) {
+            case PC_SOLDIER:
+                if (IsUsingOldImpulses()) {
+                    self.impulse = 7;
+                } else {
+                    self.impulse = TF_SLOT1;
+                }
+                // Intercepted by InterceptRocketJump()
+                break;
+            case PC_PYRO:
+                if (IsUsingOldImpulses()) {
+                    self.impulse = 7;
+                } else if (IsUsingCFImpulses()) {
+                    self.impulse = TF_SLOT2;
+                } else {
+                    self.impulse = TF_SLOT1;
+                }
+                // Intercepted by InterceptRocketJump()
+                break;
         }
-
-        if (!cb_prematch && !cease_fire) {
-            switch (self.playerclass) {
-                case PC_SCOUT:
-                    if (self.button4_keydown_frame) {
-                        ScannerSwitch();
-                    }
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    if (IsUsingOldImpulses()) {
-                        self.impulse = 7;
-                    } else {
-                        self.impulse = TF_SLOT1;
-                    }
-                    // Intercepted by InterceptRocketJump()
-                    break;
-                case PC_DEMOMAN:
-                    if (self.button4_keydown_frame) {
-                        TeamFortress_ToggleDetpack(5);
-                    }
-                    break;
-                case PC_MEDIC:
-                    break;
-                case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
-                    if (IsUsingOldImpulses()) {
-                        self.impulse = 7;
-                    } else if (IsUsingCFImpulses()) {
-                        self.impulse = TF_SLOT2;
-                    } else {
-                        self.impulse = TF_SLOT1;
-                    }
-                    // Intercepted by InterceptRocketJump()
-                    break;
-                case PC_SPY:
-                    if (self.button4_keydown_frame) {
-                        FO_Spy_DisguiseLastSpawned(self);
-                    }
-                    break;
-                case PC_ENGINEER:
-                    if (self.button4_keydown_frame) {
-                        FO_Engineer_ToggleSentry();
-                    }
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
-        }
-
-        self.button4_keydown_frame = 0;
-    } else { // -special2
-        if (self.button4_keydown) {
-            self.button4_keydown = 0;
-            self.button4_keyup_frame = 1;
-        }
-
-        if (!cb_prematch && !cease_fire) {
-            switch (self.playerclass) {
-                case PC_SCOUT:
-                    break;
-                case PC_SNIPER:
-                    break;
-                case PC_SOLDIER:
-                    break;
-                case PC_DEMOMAN:
-                    if (self.button4_keyup_frame) {
-                        if(FO_GetUserSetting(self, "hold_detpack", "hd", "off")) {
-                            TeamFortress_DetpackStop();
-                        }
-                    }
-                    break;
-                case PC_MEDIC:
-                    break;
-                case PC_HVYWEAP:
-                    break;
-                case PC_PYRO:
-                    break;
-                case PC_SPY:
-                    break;
-                case PC_ENGINEER:
-                    break;
-                case PC_UNDEFINED:
-                    break;
-            }
-        }
-
-        self.button4_keyup_frame = 0;
     }
+
+    // -special2 every frame
+    // if (!(input_buttons & BUTTON4)) { }
+
+    // +special2 keydown frame
+    if (keydowns & BUTTON4) {
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    ScannerSwitch();
+                    break;
+                case PC_DEMOMAN:
+                    TeamFortress_ToggleDetpack(5);
+                    break;
+                case PC_SPY:
+                    FO_Spy_DisguiseLastSpawned(self);
+                    break;
+                case PC_ENGINEER:
+                    FO_Engineer_ToggleSentry();
+                    break;
+            }
+        }
+    }
+
+    // +special2 keyup frame
+    if (keyups & BUTTON4) {
+        switch (self.playerclass) {
+            case PC_DEMOMAN:
+                if(FO_GetUserSetting(self, "hold_detpack", "hd", "off")) {
+                    TeamFortress_DetpackStop();
+                }
+                break;
+        }
+    }
+
+
+    /*
+    // +special2 every frame
+    if (input_buttons & BUTTON4) {
+    }
+
+    // -special2 every frame
+    if (!(input_buttons & BUTTON4)) {
+    }
+
+    // +special2 keydown frame
+    if (keydowns & BUTTON4) {
+    }
+
+    // +special2 keyup frame
+    if (keyups & BUTTON4) {
+    }
+     */
 
     // +grenade1
     if (self.button5) {
@@ -3589,7 +3510,7 @@ void () ButtonFrame = {
                 TeamFortress_PrimeThrowGrenade(1);
             }
         }
-    // -grenade1
+        // -grenade1
     } else {
         if (self.button5_keydown) {
             self.button5_keydown = 0;
@@ -3638,31 +3559,26 @@ void () ButtonFrame = {
     }
 
     // +dropflag
-    if (self.button7) {
+    if (input_buttons & BUTTON7) {
         DropGoalItems();
     }
 
-/*     if (input_buttons & BUTTON8) { */
-/*         if (changed_buttons & BUTTON8) { */
-/*             self.last_weaponslot = self.current_weaponslot; */
-/*             self.impulse = TF_SLOT1; */
-/*             input_buttons |= BUTTON0; */
-/*         } */
-/*     } else { */
-/*         if (changed_buttons & BUTTON8) { */
-/*             sprint(self, PRINT_MEDIUM, "Button 8 unpressed\n"); */
-/*             self.impulse = self.last_weaponslot; */
-/*         } */
-/*     } */
+    if (keydowns & BUTTON8) {
+        self.impulse = TF_SLOT1;
+    }
 
-/*     if (input_buttons & BUTTON9) {} */
-/*     if (input_buttons & BUTTON10) {} */
-/*     if (input_buttons & BUTTON11) {} */
-/*     if (input_buttons & BUTTON12) {} */
-/*     if (input_buttons & BUTTON13) {} */
-/*     if (input_buttons & BUTTON14) {} */
-/*     if (input_buttons & BUTTON15) {} */
-/*     if (input_buttons & BUTTON16) {} */
+    if (keydowns & BUTTON9) {
+        self.impulse = TF_SLOT2;
+    }
+
+    if (keydowns & BUTTON10) {
+        self.impulse = TF_SLOT3;
+    }
+
+    if (keydowns & BUTTON11) {
+        self.impulse = TF_SLOT4;
+    }
+
 }
 
 void () W_WeaponFrame = {
