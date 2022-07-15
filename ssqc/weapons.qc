@@ -3370,19 +3370,15 @@ void () ButtonFrame = {
     local float buttons_up = changed_buttons & ~input_buttons;
 
     if (buttons_down & BUTTON8) {
-        sprint(self, PRINT_MEDIUM, "Button 8 pressed\n");
         self.impulse = TF_SLOT1;
     }
     if (buttons_down & BUTTON9) {
-        sprint(self, PRINT_MEDIUM, "Button 9 pressed\n");
         self.impulse = TF_SLOT2;
     }
     if (buttons_down & BUTTON10) {
-        sprint(self, PRINT_MEDIUM, "Button 10 pressed\n");
         self.impulse = TF_SLOT3;
     }
     if (buttons_down & BUTTON11) {
-        sprint(self, PRINT_MEDIUM, "Button 11 pressed\n");
         self.impulse = TF_SLOT4;
     }
 
