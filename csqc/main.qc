@@ -349,16 +349,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        case "+rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
-                localcmd("+button4\n");
-            }
-            break;
-        case "-rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
-                localcmd("-button4\n");
-            }
-            break;
         case "+slot1":
             localcmd("+button8\n");
             break;
@@ -382,6 +372,16 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "-slot4":
             localcmd("-button11\n");
+            break;
+        case "+rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("+button4\n");
+            }
+            break;
+        case "-rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("-button4\n");
+            }
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -455,30 +455,11 @@ void StopGrenTimers() {
 }
 
 void InterceptRocketJump() {
-    if (!(input_buttons & BUTTON4)) {
-        return;
-    }
-
     if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
         return;
     }
 
-    // unpress +special2
-    input_buttons &= ~BUTTON4;
-
-    local float active_weapon = getstatf(STAT_ACTIVEWEAPON);
-    local float rj_weapon = 32;
-
-    if (active_weapon != rj_weapon) {
-        if (getplayerkeyfloat(player_localnum, "old_weapon_impulses") || getplayerkeyfloat(player_localnum, "owi")) {
-            localcmd("impulse 7\n");
-        } else if (player_class = PC_PYRO && getplayerkeyfloat(player_localnum, "cf_pyro_impulses")) {
-            localcmd("impulse 2\n");
-        } else {
-            localcmd("impulse 1\n");
-        }
-    } else {
-        // press +jump and +attack
+    if (input_buttons & BUTTON4) {
         input_buttons |= BUTTON0 + BUTTON2;
     }
 }

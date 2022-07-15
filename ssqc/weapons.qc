@@ -129,6 +129,7 @@ void () ToggleInvincibility;
 
 float () GetLastWeaponImpulse;
 float () IsUsingOldImpulses;
+float () IsUsingCFImpulses;
 
 void (float inp) W_OldWeaponSlot;
 
@@ -3372,12 +3373,15 @@ void () ButtonFrame = {
     if (buttons_down & BUTTON8) {
         self.impulse = TF_SLOT1;
     }
+
     if (buttons_down & BUTTON9) {
         self.impulse = TF_SLOT2;
     }
+
     if (buttons_down & BUTTON10) {
         self.impulse = TF_SLOT3;
     }
+
     if (buttons_down & BUTTON11) {
         self.impulse = TF_SLOT4;
     }
@@ -3488,6 +3492,11 @@ void () ButtonFrame = {
                 case PC_SNIPER:
                     break;
                 case PC_SOLDIER:
+                    if (IsUsingOldImpulses()) {
+                        self.impulse = 7;
+                    } else {
+                        self.impulse = TF_SLOT1;
+                    }
                     // Intercepted by InterceptRocketJump()
                     break;
                 case PC_DEMOMAN:
@@ -3500,6 +3509,13 @@ void () ButtonFrame = {
                 case PC_HVYWEAP:
                     break;
                 case PC_PYRO:
+                    if (IsUsingOldImpulses()) {
+                        self.impulse = 7;
+                    } else if (IsUsingCFImpulses()) {
+                        self.impulse = TF_SLOT2;
+                    } else {
+                        self.impulse = TF_SLOT1;
+                    }
                     // Intercepted by InterceptRocketJump()
                     break;
                 case PC_SPY:
