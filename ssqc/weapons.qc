@@ -3441,9 +3441,6 @@ void () ButtonFrame = {
         }
     }
 
-    // -special2 every frame
-    // if (!(input_buttons & BUTTON4)) { }
-
     // +special2 keydown frame
     if (keydowns & BUTTON4) {
         if (!cb_prematch && !cease_fire) {
@@ -3475,110 +3472,64 @@ void () ButtonFrame = {
         }
     }
 
+    local float hold_grens = FO_GetUserSetting(self, "hold_grens", "hg", "off");
 
-    /*
-    // +special2 every frame
-    if (input_buttons & BUTTON4) {
-    }
-
-    // -special2 every frame
-    if (!(input_buttons & BUTTON4)) {
-    }
-
-    // +special2 keydown frame
-    if (keydowns & BUTTON4) {
-    }
-
-    // +special2 keyup frame
-    if (keyups & BUTTON4) {
-    }
-     */
-
-    // +grenade1
-    if (self.button5) {
-        if (!self.button5_keydown) {
-            self.button5_keydown = 1;
-            self.button5_keydown_frame = 1;
-        }
-
-        if (self.button5_keydown_frame) {
-            self.button5_keydown_frame = 0;
-
-            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
-                TeamFortress_PrimeGrenade(1);
-            } else {
-                TeamFortress_PrimeThrowGrenade(1);
-            }
-        }
-        // -grenade1
-    } else {
-        if (self.button5_keydown) {
-            self.button5_keydown = 0;
-            self.button5_keyup_frame = 1;
-        }
-
-        if (self.button5_keyup_frame) {
-            self.button5_keyup_frame = 0;
-
-            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
-                TeamFortress_ThrowGrenade(1);
-            }
+    // +grenade1 keydown frame
+    if (keydowns & BUTTON5) {
+        if (hold_grens) {
+            TeamFortress_PrimeGrenade(1);
+        } else {
+            TeamFortress_PrimeThrowGrenade(1);
         }
     }
 
-    // +grenade2
-    if (self.button6) {
-        if (!self.button6_keydown) {
-            self.button6_keydown = 1;
-            self.button6_keydown_frame = 1;
+    // +grenade1 keyup frame
+    if (keyups & BUTTON5) {
+        if (hold_grens) {
+            TeamFortress_ThrowGrenade(1);
         }
-
-        if (self.button6_keydown_frame) {
-            self.button6_keydown_frame = 0;
-
-            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
-                TeamFortress_PrimeGrenade(2);
-            } else {
-                TeamFortress_PrimeThrowGrenade(2);
-            }
-        }
-    } else {
-        if (self.button6_keydown) {
-            self.button6_keydown = 0;
-            self.button6_keyup_frame = 1;
-        }
-
-        if (self.button6_keyup_frame) {
-            self.button6_keyup_frame = 0;
-
-            if (FO_GetUserSetting(self, "hold_grens", "hg", "off")) {
-                TeamFortress_ThrowGrenade(2);
-            }
-        }
-
     }
 
-    // +dropflag
+    // +grenade2 keydown frame
+    if (keydowns & BUTTON6) {
+        if (hold_grens) {
+            TeamFortress_PrimeGrenade(2);
+        } else {
+            TeamFortress_PrimeThrowGrenade(2);
+        }
+    }
+
+    // +grenade2 keyup frame
+    if (keyups & BUTTON6) {
+        if (hold_grens) {
+            TeamFortress_ThrowGrenade(2);
+        }
+    }
+
+    // +dropflag every frame
     if (input_buttons & BUTTON7) {
         DropGoalItems();
     }
 
+    // +slot1 keydown frame
     if (keydowns & BUTTON8) {
         self.impulse = TF_SLOT1;
     }
 
+    // +slot2 keydown frame
     if (keydowns & BUTTON9) {
         self.impulse = TF_SLOT2;
     }
 
+    // +slot3 keydown frame
     if (keydowns & BUTTON10) {
         self.impulse = TF_SLOT3;
     }
 
+    // +slot4 keydown frame
     if (keydowns & BUTTON11) {
         self.impulse = TF_SLOT4;
     }
-
 }
 
 void () W_WeaponFrame = {
