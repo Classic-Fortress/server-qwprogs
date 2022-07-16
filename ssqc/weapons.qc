@@ -3511,29 +3511,68 @@ void () ButtonFrame = {
         DropGoalItems();
     }
 
-    // +slot1 keydown frame
+    // +quick1 keydown frame
     if (keydowns & BUTTON8) {
         self.impulse = TF_SLOT1;
     }
 
-    // +slot2 keydown frame
+    // +quick2 keydown frame
     if (keydowns & BUTTON9) {
         self.impulse = TF_SLOT2;
     }
 
-    // +slot3 keydown frame
+    // +quick3 keydown frame
     if (keydowns & BUTTON10) {
         self.impulse = TF_SLOT3;
     }
 
-    // +slot4 keydown frame
+    // +quick4 keydown frame
     if (keydowns & BUTTON11) {
         self.impulse = TF_SLOT4;
+    }
+
+    // +slot1 keydown frame
+    if (keydowns & BUTTON12) {
+        self.impulse = TF_SLOT1;
+    }
+
+    // +slot1 keyup frame
+    if (keyups & BUTTON12) {
+        self.impulse = TF_WEAPLAST;
+    }
+
+    // +slot2 keydown frame
+    if (keydowns & BUTTON13) {
+        self.impulse = TF_SLOT2;
+    }
+
+    // +slot2 keyup frame
+    if (keyups & BUTTON13) {
+        self.impulse = TF_WEAPLAST;
+    }
+
+    // +slot3 keydown frame
+    if (keydowns & BUTTON14) {
+        self.impulse = TF_SLOT3;
+    }
+
+    // +slot3 keyup frame
+    if (keyups & BUTTON14) {
+        self.impulse = TF_WEAPLAST;
+    }
+
+    // +slot4 keydown frame
+    if (keydowns & BUTTON15) {
+        self.impulse = TF_SLOT4;
+    }
+
+    // +slot4 keyup frame
+    if (keyups & BUTTON15) {
+        self.impulse = TF_WEAPLAST;
     }
 }
 
 void () W_WeaponFrame = {
-
     if (self.login_in_progress) {
         CenterPrint(self, "Trying to log in...");
     }

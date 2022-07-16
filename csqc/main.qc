@@ -14,6 +14,7 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 void InterceptRocketJump();
 float IsValidToUseGrenades();
+void InterceptQuickAttacks();
 void InterceptSlotAttacks();
 
 void GetSelf() = {
@@ -69,6 +70,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
+    registercommand("+quick1");
+    registercommand("-quick1");
+    registercommand("+quick2");
+    registercommand("-quick2");
+    registercommand("+quick3");
+    registercommand("-quick3");
+    registercommand("+quick4");
+    registercommand("-quick4");
     registercommand("+slot1");
     registercommand("-slot1");
     registercommand("+slot2");
@@ -352,26 +361,50 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+slot1":
             localcmd("+button8\n");
             break;
-        case "-slot1":
+        case "-quick1":
             localcmd("-button8\n");
             break;
-        case "+slot2":
+        case "+quick2":
             localcmd("+button9\n");
             break;
-        case "-slot2":
+        case "-quick2":
             localcmd("-button9\n");
             break;
-        case "+slot3":
+        case "+quick3":
             localcmd("+button10\n");
             break;
-        case "-slot3":
+        case "-quick3":
             localcmd("-button10\n");
             break;
-        case "+slot4":
+        case "+quick4":
             localcmd("+button11\n");
             break;
-        case "-slot4":
+        case "-quick4":
             localcmd("-button11\n");
+            break;
+        case "+slot1":
+            localcmd("+button12\n");
+            break;
+        case "-slot1":
+            localcmd("-button12\n");
+            break;
+        case "+slot2":
+            localcmd("+button13\n");
+            break;
+        case "-slot2":
+            localcmd("-button13\n");
+            break;
+        case "+slot3":
+            localcmd("+button14\n");
+            break;
+        case "-slot3":
+            localcmd("-button14\n");
+            break;
+        case "+slot4":
+            localcmd("+button15\n");
+            break;
+        case "-slot4":
+            localcmd("-button15\n");
             break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
@@ -416,6 +449,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 noref void CSQC_Input_Frame() {
     InterceptRocketJump();
     InterceptSlotAttacks();
+    InterceptQuickAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -464,8 +498,14 @@ void InterceptRocketJump() {
     }
 }
 
-void InterceptSlotAttacks() {
+void InterceptQuickAttacks() {
     if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
+        input_buttons |= BUTTON0;
+    }
+}
+
+void InterceptSlotAttacks() {
+    if (input_buttons & (BUTTON12 | BUTTON13 | BUTTON14 | BUTTON15)) {
         input_buttons |= BUTTON0;
     }
 }

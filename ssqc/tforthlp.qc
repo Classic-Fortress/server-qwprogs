@@ -89,14 +89,16 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("slot2", TF_SLOT2, 0);
         TeamFortress_Alias("slot3", TF_SLOT3, 0);
         TeamFortress_Alias("slot4", TF_SLOT4, 0);
-        TeamFortress_AliasString("+slot1", "impulse 20;+attack");
-        TeamFortress_AliasString("-slot1", "-attack;impulse 24");
-        TeamFortress_AliasString("+slot2", "impulse 21;+attack");
-        TeamFortress_AliasString("-slot2", "-attack;impulse 24");
-        TeamFortress_AliasString("+slot3", "impulse 22;+attack");
-        TeamFortress_AliasString("-slot3", "-attack;impulse 24");
-        TeamFortress_AliasString("+slot4", "impulse 23;+attack");
-        TeamFortress_AliasString("-slot4", "-attack;impulse 24");
+        if (!csqcactive) {
+            TeamFortress_AliasString("+slot1", "impulse 20;+attack");
+            TeamFortress_AliasString("-slot1", "-attack;impulse 24");
+            TeamFortress_AliasString("+slot2", "impulse 21;+attack");
+            TeamFortress_AliasString("-slot2", "-attack;impulse 24");
+            TeamFortress_AliasString("+slot3", "impulse 22;+attack");
+            TeamFortress_AliasString("-slot3", "-attack;impulse 24");
+            TeamFortress_AliasString("+slot4", "impulse 23;+attack");
+            TeamFortress_AliasString("-slot4", "-attack;impulse 24");
+        }
     } else if (self.motd == 30) {
         if(csqcactive) {
             TeamFortress_AliasString("changeteam", "fo_menu_team");
@@ -263,7 +265,9 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("fo_settings_status", "cmd fo_settings_status");
         TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
         TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
-        Quick_Aliases();
+        if (!csqcactive) {
+            Quick_Aliases();
+        }
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)
             Menu_Login();
