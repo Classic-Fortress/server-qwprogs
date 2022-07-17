@@ -14,8 +14,8 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 void InterceptRocketJump();
 float IsValidToUseGrenades();
-void InterceptQuickAttacks();
 void InterceptSlotAttacks();
+void InterceptQuickAttacks();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -70,14 +70,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
-    registercommand("+quick1");
-    registercommand("-quick1");
-    registercommand("+quick2");
-    registercommand("-quick2");
-    registercommand("+quick3");
-    registercommand("-quick3");
-    registercommand("+quick4");
-    registercommand("-quick4");
     registercommand("+slot1");
     registercommand("-slot1");
     registercommand("+slot2");
@@ -86,6 +78,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-slot3");
     registercommand("+slot4");
     registercommand("-slot4");
+    registercommand("+quick1");
+    registercommand("-quick1");
+    registercommand("+quick2");
+    registercommand("-quick2");
+    registercommand("+quick3");
+    registercommand("-quick3");
+    registercommand("+quick4");
+    registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -361,49 +361,49 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+slot1":
             localcmd("+button8\n");
             break;
-        case "-quick1":
+        case "-slot1":
             localcmd("-button8\n");
             break;
-        case "+quick2":
+        case "+slot2":
             localcmd("+button9\n");
             break;
-        case "-quick2":
+        case "-slot2":
             localcmd("-button9\n");
             break;
-        case "+quick3":
+        case "+slot3":
             localcmd("+button10\n");
             break;
-        case "-quick3":
+        case "-slot3":
             localcmd("-button10\n");
             break;
-        case "+quick4":
+        case "+slot4":
             localcmd("+button11\n");
             break;
-        case "-quick4":
+        case "-slot4":
             localcmd("-button11\n");
             break;
-        case "+slot1":
+        case "+quick1":
             localcmd("+button12\n");
             break;
-        case "-slot1":
+        case "-quick1":
             localcmd("-button12\n");
             break;
-        case "+slot2":
+        case "+quick2":
             localcmd("+button13\n");
             break;
-        case "-slot2":
+        case "-quick2":
             localcmd("-button13\n");
             break;
-        case "+slot3":
+        case "+quick3":
             localcmd("+button14\n");
             break;
-        case "-slot3":
+        case "-quick3":
             localcmd("-button14\n");
             break;
-        case "+slot4":
+        case "+quick4":
             localcmd("+button15\n");
             break;
-        case "-slot4":
+        case "-quick4":
             localcmd("-button15\n");
             break;
         case "+rj":

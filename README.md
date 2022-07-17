@@ -104,7 +104,7 @@ New features
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
-* Quick attack aliases (+quick1-4 will switch weapon and fire. +slot1-4 will do the same and switch back).
+* Quick attack aliases (+slot1-4 will switch weapon and fire. +quick1-4 will do the same and switch back).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.

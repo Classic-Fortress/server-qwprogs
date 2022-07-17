@@ -80,6 +80,7 @@ typedef void (float n) f_void_float;
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float quickfireprevweap;       // Weapon to select at completion on +quick* attack
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress

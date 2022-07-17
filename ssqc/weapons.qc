@@ -3511,64 +3511,87 @@ void () ButtonFrame = {
         DropGoalItems();
     }
 
-    // +quick1 keydown frame
+    // +slot1 keydown frame
     if (keydowns & BUTTON8) {
         self.impulse = TF_SLOT1;
     }
 
-    // +quick2 keydown frame
+    // +slot2 keydown frame
     if (keydowns & BUTTON9) {
         self.impulse = TF_SLOT2;
     }
 
-    // +quick3 keydown frame
+    // +slot3 keydown frame
     if (keydowns & BUTTON10) {
         self.impulse = TF_SLOT3;
     }
 
-    // +quick4 keydown frame
+    // +slot4 keydown frame
     if (keydowns & BUTTON11) {
         self.impulse = TF_SLOT4;
     }
 
-    // +slot1 keydown frame
+    // +quick1 keydown frame
     if (keydowns & BUTTON12) {
+        if (!self.quickfireprevweap) {
+            self.quickfireprevweap = self.current_weaponslot;
+        }
         self.impulse = TF_SLOT1;
     }
 
-    // +slot1 keyup frame
+    // +quick1 keyup frame
     if (keyups & BUTTON12) {
-        self.impulse = TF_WEAPLAST;
+        if (!(input_buttons & BUTTON0)) {
+            self.impulse = self.quickfireprevweap;
+            self.quickfireprevweap = 0;
+        }
     }
 
-    // +slot2 keydown frame
+    // +quick2 keydown frame
     if (keydowns & BUTTON13) {
+        if (!self.quickfireprevweap) {
+            self.quickfireprevweap = self.current_weaponslot;
+        }
         self.impulse = TF_SLOT2;
     }
 
-    // +slot2 keyup frame
+    // +quick2 keyup frame
     if (keyups & BUTTON13) {
-        self.impulse = TF_WEAPLAST;
+        if (!(input_buttons & BUTTON0)) {
+            self.impulse = self.quickfireprevweap;
+            self.quickfireprevweap = 0;
+        }
     }
 
-    // +slot3 keydown frame
+    // +quick3 keydown frame
     if (keydowns & BUTTON14) {
+        if (!self.quickfireprevweap) {
+            self.quickfireprevweap = self.current_weaponslot;
+        }
         self.impulse = TF_SLOT3;
     }
 
-    // +slot3 keyup frame
+    // +quick3 keyup frame
     if (keyups & BUTTON14) {
-        self.impulse = TF_WEAPLAST;
+        if (!(input_buttons & BUTTON0)) {
+            self.impulse = self.quickfireprevweap;
+            self.quickfireprevweap = 0;
+        }
     }
 
-    // +slot4 keydown frame
+    // +quick4 keydown frame
     if (keydowns & BUTTON15) {
+        if (!self.quickfireprevweap) {
+            self.quickfireprevweap = self.current_weaponslot;
+        }
         self.impulse = TF_SLOT4;
     }
 
-    // +slot4 keyup frame
+    // +quick4 keyup frame
     if (keyups & BUTTON15) {
-        self.impulse = TF_WEAPLAST;
+        if (!self.quickfireprevweap) {
+            self.quickfireprevweap = self.current_weaponslot;
+        }
     }
 }
 
@@ -3671,6 +3694,7 @@ void () W_WeaponFrame = {
 
         // +slot1-4 quick fire
     } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
+        sprint(self, PRINT_MEDIUM, "Line 3655 in weapons.qc\n");
 
         self.is_quickfiring = 1;
         self.has_quickfired = 0;
@@ -3685,8 +3709,7 @@ void () W_WeaponFrame = {
                     W_ChangeWeapon(3);
                 else if (self.impulse == TF_QUICKSLOT4)
                     W_ChangeWeapon(4);
-            }
-            else {
+            } else {
                 if (self.impulse == TF_QUICKSLOT1)
                     W_ChangeWeapon(W_OldImpulseFromNewSlot(1));
                 else if (self.impulse == TF_QUICKSLOT2)
