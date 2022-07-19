@@ -14,6 +14,7 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 void InterceptRocketJump();
 float IsValidToUseGrenades();
+void InterceptQuickAttacks();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -68,6 +69,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
+    registercommand("+quick1");
+    registercommand("-quick1");
+    registercommand("+quick2");
+    registercommand("-quick2");
+    registercommand("+quick3");
+    registercommand("-quick3");
+    registercommand("+quick4");
+    registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -98,7 +107,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
     MouseDown = 0;
-    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -339,6 +347,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
+        case "+quick1":
+            localcmd("+button8\n");
+            break;
+        case "-quick1":
+            localcmd("-button8\n");
+            break;
+        case "+quick2":
+            localcmd("+button9\n");
+            break;
+        case "-quick2":
+            localcmd("-button9\n");
+            break;
+        case "+quick3":
+            localcmd("+button10\n");
+            break;
+        case "-quick3":
+            localcmd("-button10\n");
+            break;
+        case "+quick4":
+            localcmd("+button11\n");
+            break;
+        case "-quick4":
+            localcmd("-button11\n");
+            break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -381,6 +413,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame() {
     InterceptRocketJump();
+    InterceptQuickAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -420,30 +453,17 @@ void StopGrenTimers() {
 }
 
 void InterceptRocketJump() {
-    if (!(input_buttons & BUTTON4)) {
-        return;
-    }
-
     if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
         return;
     }
 
-    // unpress +special2
-    input_buttons = input_buttons & ~BUTTON4;
-
-    local float active_weapon = getstatf(STAT_ACTIVEWEAPON);
-    local float rj_weapon = 32;
-
-    if (active_weapon != rj_weapon) {
-        if (getplayerkeyfloat(player_localnum, "old_weapon_impulses") || getplayerkeyfloat(player_localnum, "owi")) {
-            localcmd("impulse 7\n");
-        } else if (player_class = PC_PYRO && getplayerkeyfloat(player_localnum, "cf_pyro_impulses")) {
-            localcmd("impulse 2\n");
-        } else {
-            localcmd("impulse 1\n");
-        }
-    } else {
-        // press +jump and +attack
+    if (input_buttons & BUTTON4) {
         input_buttons |= BUTTON0 + BUTTON2;
+    }
+}
+
+void InterceptQuickAttacks() {
+    if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
+        input_buttons |= BUTTON0;
     }
 }

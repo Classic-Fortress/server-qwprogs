@@ -18,12 +18,6 @@ typedef void (float n) f_void_float;
 .float tp_grenades_1;           // 1st type of grenades being carried
 .float tp_grenades_2;           // 2nd type of grenades being carried
 .float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
-.float button3;                 // +special
-.float button4;                 // +special2
-.float button5;                 // +grenade1
-.float button6;                 // +grenade2
-.float button7;                 // +dropflag
-
 .float hook_out;                // Dummy field for hook to silence error messages
 .float got_aliases;             // TRUE if the player has TeamFortress aliases
 .float cheat_check;             // Time when we'll next check for team cheats
@@ -86,6 +80,8 @@ typedef void (float n) f_void_float;
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float default_weapon;          // Weapon to select when not firing
+
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress

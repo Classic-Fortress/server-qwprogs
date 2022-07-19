@@ -69,6 +69,13 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
+void CSEv_SetPlayerImpulse_f(float n);
+
+void (float n) CSEv_SetPlayerImpulse_f = {
+    bprint(PRINT_HIGH, self.netname, "\n");
+    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
+    self.impulse = n;
+};
 
 void () info_intermission =
 {
@@ -183,7 +190,7 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
             return TRUE;
         case "off":
             return FALSE;
-        default:            
+        default:
             return stof(st);
     }
 };
@@ -3658,6 +3665,10 @@ void (entity targ, entity attacker) ClientObituary = {
 
 float () IsUsingOldImpulses = {
     return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () IsUsingCFImpulses = {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 
 float () GetLastWeaponImpulse = {
