@@ -372,10 +372,10 @@
 #define TF_SLOT3                    3   // Changes weapon to slot 3 (tertiary weapon)
 #define TF_SLOT4                    4   // Changes weapon to slot 4 (melee weapon)
 #define TF_CLASSMENU                5   // Brings up class menu
-#define TF_BUTTONSLOT1              6
-#define TF_BUTTONSLOT2              7
-#define TF_BUTTONSLOT3              8
-#define TF_BUTTONSLOT4              9
+// unused                           6
+// unused                           7
+// unused                           8
+// unused                           9
 // unused                           10
 #define TF_WEAPNEXT                 11  // Selects the next weapon slot
 #define TF_WEAPPREV                 12  // Selects the previous weapon slot
@@ -1490,7 +1490,6 @@
 #define STAT_TP_GREN1           41
 #define STAT_TP_GREN2           42
 #define STAT_ONLY_ONE_NOT_READY 43
-#define STAT_CURRENT_WEAPONSLOT 44
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
