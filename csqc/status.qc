@@ -559,14 +559,50 @@ void(string panelid, float display, string text) drawReadyPanel = {
             } else if(round_over) {
                 message = "Change map to continue playing";
             } else {
+                textcolour = MENU_TEXT_WARNING;
                 tokenize(findkeysforcommand("ready"));
                 string keynum = argv(0);
-                if(keynum != "-1") {
-                    message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+
+                if(SBAR.LastNotReady) {
+                    local vector alert_text_largetext = mediumtext * 2;
+                    local vector alert_text_position;
+                    alert_text_position.y = ScreenSize.y / 3;
+                    alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
+                    local string alert_text_message = "Everyone else is ready!";
+
+                    pos_aligned = GetTextAlignOffset(
+                        alert_text_position.x,
+                        size.x,
+                        padding,
+                        alert_text_message,
+                        alert_text_largetext.x,
+                        panel.Orientation
+                    );
+
+                    drawstring(
+                        [pos_aligned, alert_text_position.y],
+                        alert_text_message, 
+                        alert_text_largetext, 
+                        textcolour, 
+                        1, 
+                        0
+                    );
+
+                    position.y = alert_text_position.y + 48;
+                    position.x = (ScreenSize.x / 2) - (size.x / 2);
+
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to start");
+                    } else {
+                        message = "Type 'ready' in the console to start";
+                    }
                 } else {
-                    message = "Type 'ready' in the console to ready up";
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    } else {
+                        message = "Type 'ready' in the console to ready up";
+                    }
                 }
-                textcolour = MENU_TEXT_WARNING;
             }
         }
     }
