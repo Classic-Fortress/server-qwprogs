@@ -4,6 +4,7 @@ FortressOne Server
 New features
 ------
 
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
 * `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
