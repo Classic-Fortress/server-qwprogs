@@ -2856,6 +2856,29 @@ void () PlayerPostThink = {
     } else {
         CheckPowerups();
         ButtonFrame();
+
+        if ((self.impulse >= TF_SLOT1 && self.impulse <= TF_SLOT4)
+                || self.impulse == TF_WEAPNEXT
+                || self.impulse == TF_WEAPPREV
+                || self.impulse == TF_WEAPLAST ) {
+            self.select_default_weapon = 0;
+        } else {
+            switch (self.impulse) {
+                case TF_BUTTONSLOT1:
+                    self.impulse = TF_SLOT1;
+                    break;
+                case TF_BUTTONSLOT2:
+                    self.impulse = TF_SLOT2;
+                    break;
+                case TF_BUTTONSLOT3:
+                    self.impulse = TF_SLOT3;
+                    break;
+                case TF_BUTTONSLOT4:
+                    self.impulse = TF_SLOT4;
+                    break;
+            }
+        }
+
         W_WeaponFrame();
         if (self.motd <= 400) {
             TeamFortress_MOTD();

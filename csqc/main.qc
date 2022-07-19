@@ -116,7 +116,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
     MouseDown = 0;
-    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -503,6 +502,7 @@ void InterceptQuickAttacks() {
         input_buttons |= BUTTON0;
     }
 }
+
 
 void InterceptSlotAttacks() {
     if (input_buttons & (BUTTON12 | BUTTON13 | BUTTON14 | BUTTON15)) {

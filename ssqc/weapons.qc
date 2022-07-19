@@ -2018,9 +2018,11 @@ void () W_Attack = {
 
     if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
-    
+
     if(no_fire_mode)
         return;
+
+    self.select_default_weapon = 1;
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
         (self.undercover_skin != 0))
@@ -3014,6 +3016,7 @@ void () ImpulseCommands = {
         self.impulse = 0;
         return;
     }
+
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
 
@@ -3513,84 +3516,71 @@ void () ButtonFrame = {
 
     // +slot1 keydown frame
     if (keydowns & BUTTON8) {
-        self.impulse = TF_SLOT1;
+        self.impulse = TF_BUTTONSLOT1;
     }
 
     // +slot2 keydown frame
     if (keydowns & BUTTON9) {
-        self.impulse = TF_SLOT2;
+        self.impulse = TF_BUTTONSLOT2;
     }
 
     // +slot3 keydown frame
     if (keydowns & BUTTON10) {
-        self.impulse = TF_SLOT3;
+        self.impulse = TF_BUTTONSLOT3;
     }
 
     // +slot4 keydown frame
     if (keydowns & BUTTON11) {
-        self.impulse = TF_SLOT4;
+        self.impulse = TF_BUTTONSLOT4;
     }
 
     // +quick1 keydown frame
     if (keydowns & BUTTON12) {
-        if (!self.quickfireprevweap) {
-            self.quickfireprevweap = self.current_weaponslot;
-        }
-        self.impulse = TF_SLOT1;
+        self.impulse = TF_BUTTONSLOT1;
     }
+
+    local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "1");
 
     // +quick1 keyup frame
     if (keyups & BUTTON12) {
         if (!(input_buttons & BUTTON0)) {
-            self.impulse = self.quickfireprevweap;
-            self.quickfireprevweap = 0;
+            self.impulse = default_weapon;
         }
     }
 
     // +quick2 keydown frame
     if (keydowns & BUTTON13) {
-        if (!self.quickfireprevweap) {
-            self.quickfireprevweap = self.current_weaponslot;
-        }
-        self.impulse = TF_SLOT2;
+        self.impulse = TF_BUTTONSLOT2;
     }
 
     // +quick2 keyup frame
     if (keyups & BUTTON13) {
         if (!(input_buttons & BUTTON0)) {
-            self.impulse = self.quickfireprevweap;
-            self.quickfireprevweap = 0;
+            self.impulse = default_weapon;
         }
     }
 
     // +quick3 keydown frame
     if (keydowns & BUTTON14) {
-        if (!self.quickfireprevweap) {
-            self.quickfireprevweap = self.current_weaponslot;
-        }
-        self.impulse = TF_SLOT3;
+        self.impulse = TF_BUTTONSLOT3;
     }
 
     // +quick3 keyup frame
     if (keyups & BUTTON14) {
         if (!(input_buttons & BUTTON0)) {
-            self.impulse = self.quickfireprevweap;
-            self.quickfireprevweap = 0;
+            self.impulse = default_weapon;
         }
     }
 
     // +quick4 keydown frame
     if (keydowns & BUTTON15) {
-        if (!self.quickfireprevweap) {
-            self.quickfireprevweap = self.current_weaponslot;
-        }
-        self.impulse = TF_SLOT4;
+        self.impulse = TF_BUTTONSLOT4;
     }
 
     // +quick4 keyup frame
     if (keyups & BUTTON15) {
-        if (!self.quickfireprevweap) {
-            self.quickfireprevweap = self.current_weaponslot;
+        if (!(input_buttons & BUTTON0)) {
+            self.impulse = default_weapon;
         }
     }
 }

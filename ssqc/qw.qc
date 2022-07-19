@@ -81,6 +81,9 @@ typedef void (float n) f_void_float;
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
 .float quickfireprevweap;       // Weapon to select at completion on +quick* attack
+.float select_default_weapon;   // Set after weapon changing commands to prevent default weapon being selected
+.float default_weapon;          // Weapon to select when not firing
+
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress
