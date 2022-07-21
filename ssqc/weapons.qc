@@ -3543,25 +3543,25 @@ void () ButtonFrame = {
         DropGoalItems();
     }
 
-    // +quick1 keydown frame
-    if (keydowns & BUTTON8) {
-        self.impulse = TF_SLOT1;
-    }
+    // // +quick1 keydown frame
+    // if (keydowns & BUTTON8) {
+    //     self.impulse = TF_SLOT1;
+    // }
 
-    // +quick2 keydown frame
-    if (keydowns & BUTTON9) {
-        self.impulse = TF_SLOT2;
-    }
+    // // +quick2 keydown frame
+    // if (keydowns & BUTTON9) {
+    //     self.impulse = TF_SLOT2;
+    // }
 
-    // +quick3 keydown frame
-    if (keydowns & BUTTON10) {
-        self.impulse = TF_SLOT3;
-    }
+    // // +quick3 keydown frame
+    // if (keydowns & BUTTON10) {
+    //     self.impulse = TF_SLOT3;
+    // }
 
-    // +quick4 keydown frame
-    if (keydowns & BUTTON11) {
-        self.impulse = TF_SLOT4;
-    }
+    // // +quick4 keydown frame
+    // if (keydowns & BUTTON11) {
+    //     self.impulse = TF_SLOT4;
+    // }
 }
 
 void () W_WeaponFrame = {

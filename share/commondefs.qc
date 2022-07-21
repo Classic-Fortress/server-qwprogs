@@ -81,12 +81,12 @@
 #define BUTTON6 32
 #define BUTTON7 64
 #define BUTTON8 128
-#define BUTTON9 2048
-#define BUTTON10 4096
-#define BUTTON11 8192
-#define BUTTON12 16384
-#define BUTTON13 32768
-#define BUTTON14 65536
-#define BUTTON15 131072
-#define BUTTON16 262144
+// #define BUTTON9 2048
+// #define BUTTON10 4096
+// #define BUTTON11 8192
+// #define BUTTON12 16384
+// #define BUTTON13 32768
+// #define BUTTON14 65536
+// #define BUTTON15 131072
+// #define BUTTON16 262144
 
