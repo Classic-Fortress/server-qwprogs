@@ -7,6 +7,7 @@ New features
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
 * `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo cf_pyro_impulses 1` to swap Pyro's primary and secondary weapons.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.

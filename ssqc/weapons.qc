@@ -78,6 +78,7 @@ void () UseSpecialSkill;
 void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
+float () CheckForReload;
 
 void (float all) TeamFortress_TeamShowScores;
 void (entity Player) TeamFortress_TeamShowMemberClasses;
@@ -132,6 +133,7 @@ float () IsUsingOldImpulses;
 float () IsUsingCFImpulses;
 
 void (float inp) W_OldWeaponSlot;
+
 
 void (entity ent, float num) SetFlameCount;
 
@@ -1813,7 +1815,7 @@ float () W_BestWeaponSlot = {
 
 void () W_ChangeToBestWeapon = {
     local float slot = W_BestWeaponSlot();    
-    
+
     if (!IsUsingOldImpulses())
         W_WeaponSlot(slot);
     else
@@ -1923,34 +1925,52 @@ void () W_Reload_assault_cannon = {
 float () CheckForReload = {
     if (self.current_weapon == WEAP_SHOTGUN) {
         if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         if (fo_hwguy)
         {
             if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > 0) {
-                TeamFortress_ReloadCurrentWeapon();
+                if (force_reload) {
+                    TeamFortress_ReloadCurrentWeapon();
+                }
+
                 return 1;
             }
         }
