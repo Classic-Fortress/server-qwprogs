@@ -69,14 +69,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
-    registercommand("+quick1");
-    registercommand("-quick1");
-    registercommand("+quick2");
-    registercommand("-quick2");
-    registercommand("+quick3");
-    registercommand("-quick3");
-    registercommand("+quick4");
-    registercommand("-quick4");
+    // registercommand("+quick1");
+    // registercommand("-quick1");
+    // registercommand("+quick2");
+    // registercommand("-quick2");
+    // registercommand("+quick3");
+    // registercommand("-quick3");
+    // registercommand("+quick4");
+    // registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -348,30 +348,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        case "+quick1":
-            localcmd("+button8\n");
-            break;
-        case "-quick1":
-            localcmd("-button8\n");
-            break;
-        case "+quick2":
-            localcmd("+button9\n");
-            break;
-        case "-quick2":
-            localcmd("-button9\n");
-            break;
-        case "+quick3":
-            localcmd("+button10\n");
-            break;
-        case "-quick3":
-            localcmd("-button10\n");
-            break;
-        case "+quick4":
-            localcmd("+button11\n");
-            break;
-        case "-quick4":
-            localcmd("-button11\n");
-            break;
+        // case "+quick1":
+        //     localcmd("+button8\n");
+        //     break;
+        // case "-quick1":
+        //     localcmd("-button8\n");
+        //     break;
+        // case "+quick2":
+        //     localcmd("+button9\n");
+        //     break;
+        // case "-quick2":
+        //     localcmd("-button9\n");
+        //     break;
+        // case "+quick3":
+        //     localcmd("+button10\n");
+        //     break;
+        // case "-quick3":
+        //     localcmd("-button10\n");
+        //     break;
+        // case "+quick4":
+        //     localcmd("+button11\n");
+        //     break;
+        // case "-quick4":
+        //     localcmd("-button11\n");
+        //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -414,7 +414,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 
 noref void CSQC_Input_Frame() {
     InterceptRocketJump();
-    InterceptQuickAttacks();
+    // InterceptQuickAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -463,8 +463,8 @@ void InterceptRocketJump() {
     }
 }
 
-void InterceptQuickAttacks() {
-    if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
-        input_buttons |= BUTTON0;
-    }
-}
+// void InterceptQuickAttacks() {
+//     if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
+//         input_buttons |= BUTTON0;
+//     }
+// }
