@@ -3661,8 +3661,6 @@ void () W_WeaponFrame = {
 
         // +slot1-4 quick fire
     } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
-        sprint(self, PRINT_MEDIUM, "Line 3655 in weapons.qc\n");
-
         self.is_quickfiring = 1;
         self.has_quickfired = 0;
 
