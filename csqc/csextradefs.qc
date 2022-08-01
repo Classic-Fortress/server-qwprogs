@@ -49,7 +49,6 @@ vector TEXT_TEAM_COLOUR[] = {
 #define FO_MENU_STATE_SPACER 3
 
 #define FO_MENU_MAX_OPTIONS 20
-
 #define FO_MENU_TRANSPARENCY 0.2
 
 #define MOTD_TIME 30
@@ -534,7 +533,6 @@ float nextoriginupdate;
 float speed;
 float jump_counter;
 float grentimer_waiting;
-
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

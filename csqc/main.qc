@@ -12,7 +12,9 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
+void InterceptRocketJump();
 float IsValidToUseGrenades();
+void InterceptQuickAttacks();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -55,6 +57,26 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("+special");
+    registercommand("-special");
+    registercommand("+special2");
+    registercommand("-special2");
+    registercommand("+grenade1");
+    registercommand("-grenade1");
+    registercommand("+grenade2");
+    registercommand("-grenade2");
+    registercommand("+dropflag");
+    registercommand("-dropflag");
+    registercommand("+rj");
+    registercommand("-rj");
+    // registercommand("+quick1");
+    // registercommand("-quick1");
+    // registercommand("+quick2");
+    // registercommand("-quick2");
+    // registercommand("+quick3");
+    // registercommand("-quick3");
+    // registercommand("+quick4");
+    // registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -85,7 +107,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
     MouseDown = 0;
-    jump_counter = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -282,14 +303,83 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
-            jump_counter = jump_counter + 1;
+            jump_counter++;
             localcmd("+jump\n");
             break;
         case "-aux_jump":
-            jump_counter = jump_counter - 1;
-            if (jump_counter <= 0) {
+            jump_counter--;
+
+            if (jump_counter < 0) {
                 jump_counter = 0;
+            }
+
+            if (!jump_counter) {
                 localcmd("-jump\n");
+            }
+
+            break;
+        case "+special":
+            localcmd("+button3\n");
+            break;
+        case "-special":
+            localcmd("-button3\n");
+            break;
+        case "+special2":
+            localcmd("+button4\n");
+            break;
+        case "-special2":
+            localcmd("-button4\n");
+            break;
+        case "+grenade1":
+            localcmd("+button5\n");
+            break;
+        case "-grenade1":
+            localcmd("-button5\n");
+            break;
+        case "+grenade2":
+            localcmd("+button6\n");
+            break;
+        case "-grenade2":
+            localcmd("-button6\n");
+            break;
+        case "+dropflag":
+            localcmd("+button7\n");
+            break;
+        case "-dropflag":
+            localcmd("-button7\n");
+            break;
+        // case "+quick1":
+        //     localcmd("+button8\n");
+        //     break;
+        // case "-quick1":
+        //     localcmd("-button8\n");
+        //     break;
+        // case "+quick2":
+        //     localcmd("+button9\n");
+        //     break;
+        // case "-quick2":
+        //     localcmd("-button9\n");
+        //     break;
+        // case "+quick3":
+        //     localcmd("+button10\n");
+        //     break;
+        // case "-quick3":
+        //     localcmd("-button10\n");
+        //     break;
+        // case "+quick4":
+        //     localcmd("+button11\n");
+        //     break;
+        // case "-quick4":
+        //     localcmd("-button11\n");
+        //     break;
+        case "+rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("+button4\n");
+            }
+            break;
+        case "-rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("-button4\n");
             }
             break;
         case "vote_addmap":
@@ -299,6 +389,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             RemoveVoteMap(argv(1), TRUE);
             break;
     }
+
     return FALSE;
 };
 
@@ -322,22 +413,8 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    if (input_buttons&2 && getstatf(STAT_HEALTH) > 0) {
-        if (pmove_onground) {
-            frames_since_onground = 0;
-        } else {
-
-            // next two frames after leaving ground
-            if (frames_since_onground <= 2) {
-                frames_since_onground = frames_since_onground + 1;
-
-            // third frame after leaving ground
-            } else if (frames_since_onground == 3) {
-                input_buttons &= ~2;
-                frames_since_onground = frames_since_onground + 1;
-            }
-        }
-    }
+    InterceptRocketJump();
+    // InterceptQuickAttacks();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -375,3 +452,19 @@ void StopGrenTimers() {
         FO_Hud_Grentimers[i].icon_index = 0;
     }
 }
+
+void InterceptRocketJump() {
+    if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
+        return;
+    }
+
+    if (input_buttons & BUTTON4) {
+        input_buttons |= BUTTON0 + BUTTON2;
+    }
+}
+
+// void InterceptQuickAttacks() {
+//     if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
+//         input_buttons |= BUTTON0;
+//     }
+// }

@@ -68,6 +68,13 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
+void CSEv_SetPlayerImpulse_f(float n);
+
+void (float n) CSEv_SetPlayerImpulse_f = {
+    bprint(PRINT_HIGH, self.netname, "\n");
+    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
+    self.impulse = n;
+};
 
 void () info_intermission =
 {
@@ -182,7 +189,7 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
             return TRUE;
         case "off":
             return FALSE;
-        default:            
+        default:
             return stof(st);
     }
 };
@@ -671,6 +678,7 @@ void () DecodeLevelParms = {
 
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+
         // Maximum number of primary grenades per class
         /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
@@ -1722,16 +1730,15 @@ entity(float team_num) FindTeamSpawnPoint =
 void (entity e) ValidateUser = {
 };
 
-entity () SelectSpawnPoint =
-{
-	if(allowpracspawns && self != world)
-	{
-		local entity spot2;
-		spot2 = TeamFortress_GetPracticeSpawn(self);
+entity () SelectSpawnPoint = {
+    if (allowpracspawns && self != world)
+    {
+        local entity spot2;
+        spot2 = TeamFortress_GetPracticeSpawn(self);
 
-		if(spot2 != world)
-			return spot2;
-	}
+        if(spot2 != world)
+            return spot2;
+    }
     
     local entity spot;
     local float attempts;
@@ -2392,8 +2399,10 @@ void () PlayerJump = {
         }
         return;
     }
+
     if (!(self.flags & FL_ONGROUND))
         return;
+
     if (!(self.flags & FL_JUMPRELEASED))
         return;
 
@@ -2421,6 +2430,7 @@ void () PlayerJump = {
             TeamFortress_SetSpeed(self);
         }
     }
+
     if (old_grens != 1) {
         te = find(world, classname, "timer");
         while (((te.owner != self) || (te.think != ConcussionGrenadeTimer))
@@ -2589,6 +2599,7 @@ void () PlayerPreThink = {
     if (self.deadflag == 1) {
         return;
     }
+
     if (self.is_feigning) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
@@ -2622,6 +2633,7 @@ void () PlayerPreThink = {
             self.flags = self.flags | FL_JUMPRELEASED;
         }
     }
+
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
@@ -2801,6 +2813,7 @@ void () PlayerPostThink = {
     if (self.view_ofs == '0 0 0') {
         return;
     }
+
     if (self.deadflag) {
         DeadImpulses();
         self.impulse = 0;
@@ -2809,7 +2822,7 @@ void () PlayerPostThink = {
 
     local float fdmg;
 
-    if (((self.jump_flag < -300) && (self.flags & 512)) &&
+    if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
             FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
@@ -2845,6 +2858,7 @@ void () PlayerPostThink = {
         //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
+        ButtonFrame();
         W_WeaponFrame();
         if (self.motd <= 400) {
             TeamFortress_MOTD();
@@ -3657,6 +3671,10 @@ float () IsUsingOldImpulses = {
     return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
 }
 
+float () IsUsingCFImpulses = {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
+}
+
 float () GetLastWeaponImpulse = {
     if (IsUsingOldImpulses())
         return 7;
@@ -3707,7 +3725,6 @@ void () InitReverseCap = {
     }
 
 }
-
 
 // this is to fix hack used to avoid fall damage, it currently breaks pm_airstep
 /*

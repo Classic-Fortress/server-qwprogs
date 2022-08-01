@@ -315,7 +315,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
     local float farg3;
     local entity ent, pl;
     processedCmd = FALSE;
-    
+
     if (arg1)
         arg_num = 1;
     if (arg2)
@@ -323,6 +323,11 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
     switch (arg1)
     {
+        case "impulse":
+            if (arg_num == 2) {
+                self.impulse = stof(arg2);
+            }
+            break;
         case "fo_settings_status":
             OutputTrackedSettings();
             break;

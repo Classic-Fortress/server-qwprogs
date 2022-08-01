@@ -89,6 +89,9 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("slot2", TF_SLOT2, 0);
         TeamFortress_Alias("slot3", TF_SLOT3, 0);
         TeamFortress_Alias("slot4", TF_SLOT4, 0);
+
+        // you shouldn't use these in fte, use setinfo default_weapon and +quick instead
+        // leaving in to prevent breaking change
         TeamFortress_AliasString("+slot1", "impulse 20;+attack");
         TeamFortress_AliasString("-slot1", "-attack;impulse 24");
         TeamFortress_AliasString("+slot2", "impulse 21;+attack");
@@ -210,15 +213,19 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("-det255", TF_DETPACK_STOP, 0);
     } else if (self.motd == 100) {
         TeamFortress_Alias("aura", TF_MEDIC_AURA_TOGGLE, 0);
+        TeamFortress_Alias("locktoggle", TF_HVYWEAP_LOCK_TOGGLE, 0);
         TeamFortress_Alias("lock", TF_LOCKON, 0);
         TeamFortress_Alias("unlock", TF_LOCKOFF, 0);
         TeamFortress_Alias("+lock", TF_LOCKON, 0);
         TeamFortress_Alias("-lock", TF_LOCKOFF, 0);
+        TeamFortress_Alias("airblast", TF_AIRBLAST, 0);
         if(csqcactive) {
             TeamFortress_AliasString("disguise", "fo_menu_disguise");
         } else {
             TeamFortress_Alias("disguise", TF_SPY_SPY, 0);
         }
+        TeamFortress_Alias("+feign", TF_SPY_DIE_ON, 0);
+        TeamFortress_Alias("-feign", TF_SPY_DIE_OFF, 0);
         TeamFortress_Alias("feign", TF_SPY_DIE, 0);
         TeamFortress_Alias("sfeign", TF_SPY_SILENT_DIE, 0);
     } else if (self.motd == 110) {
@@ -246,6 +253,8 @@ void () TeamFortress_MOTD = {
         }
         TeamFortress_Alias("detsentry", TF_ENGINEER_DETSENTRY, 0);
         TeamFortress_Alias("detdispenser", TF_ENGINEER_DETDISP, 0);
+        TeamFortress_Alias("toggledispenser", TF_ENGINEER_TOGGLEDISPENSER, 0);
+        TeamFortress_Alias("togglesentry", TF_ENGINEER_TOGGLESENTRY, 0);
     } else if (self.motd == 130) {
         stuffcmd(self, "is_aliased\n");
         TeamFortress_Alias ("ready", TF_PLAYER_READY, 0);
@@ -257,6 +266,7 @@ void () TeamFortress_MOTD = {
         TeamFortress_AliasString("fo_settings_status", "cmd fo_settings_status");
         TeamFortress_Alias("placepracspawn", TF_PRACSPAWN_PLACE, 0);
         TeamFortress_Alias("removepracspawn", TF_PRACSPAWN_REMOVE, 0);
+    } else if (self.motd == 140) {
         Quick_Aliases();
     } else if (self.motd == 400 && self.team_no == 0 && !csqcactive) {
         if (loginRequired && !self.login)

@@ -337,6 +337,30 @@ entity () FO_FindCurrentBuildingObject = {
     return world;
 }
 
+void () FO_Engineer_ToggleDispenser = {
+    if (self.has_dispenser) {
+        DestroyBuilding(self, "building_dispenser");
+    } else {
+        if (self.health <= 0) {
+            sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+        } else {
+            Menu_Engineer_Input(2);
+        }
+    }
+}
+
+void () FO_Engineer_ToggleSentry = {
+    if (self.has_sentry) {
+        DestroyBuilding(self, "building_sentrygun");
+    } else {
+        if (self.health <= 0) {
+            sprint(self, PRINT_HIGH, "Can't build while dead.\n");
+        } else {
+            Menu_Engineer_Input(1);
+        }
+    }
+}
+
 void () TeamFortress_EngineerBuild = {
     if (self.is_building == 0) {
         if (((self.ammo_cells < 100) && !self.has_dispenser) &&

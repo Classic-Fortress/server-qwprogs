@@ -58,29 +58,16 @@ void () UseSpecialSkill = {
             self.impulse = TF_MEDIC_AURA_TOGGLE;
             break;
         case PC_HVYWEAP:
-            if (self.tfstate & TFSTATE_LOCK)
-                self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
-            else
-                self.tfstate = self.tfstate | TFSTATE_LOCK;
-            Status_Refresh(self);
-            self.impulse = 0;
-            return;
+            self.impulse = TF_HVYWEAP_LOCK_TOGGLE;
+            break;
         case PC_PYRO:
-            if (pyro_type == PYRO_FO)
-                if (airblastv2) {
-                    UseAirBlastV2();
-                }
-                else 
-                {
-                    UseAirBlast();
-                }
-                Status_Refresh(self);
+            self.impulse = TF_AIRBLAST;
             break;
         case PC_SPY:
             self.impulse = TF_SPY_DIE;
             break;
         case PC_ENGINEER:
-            self.impulse = TF_ENGINEER_TOGGLEDISP;
+            self.impulse = TF_ENGINEER_TOGGLEDISPENSER;
             break;
         case PC_UNDEFINED:
             if (self.enemy == world) {
@@ -114,6 +101,8 @@ void () UseSpecialSkill2 = {
             self.impulse = TF_SCAN;
             break;
         case PC_SNIPER:
+            break;
+        case PC_SOLDIER:
             break;
         case PC_DEMOMAN:
             self.impulse = TF_DETPACK_5;

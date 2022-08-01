@@ -18,7 +18,6 @@ typedef void (float n) f_void_float;
 .float tp_grenades_1;           // 1st type of grenades being carried
 .float tp_grenades_2;           // 2nd type of grenades being carried
 .float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
-
 .float hook_out;                // Dummy field for hook to silence error messages
 .float got_aliases;             // TRUE if the player has TeamFortress aliases
 .float cheat_check;             // Time when we'll next check for team cheats
@@ -27,6 +26,8 @@ typedef void (float n) f_void_float;
 .float is_building;             // TRUE for an ENGINEER if they're building something
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
 .float is_feigning;             // TRUE for a SPY if they're feigning death
+.float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
+.float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_quickfiring;          // TRUE for a player if they're using the quick slots
@@ -79,6 +80,8 @@ typedef void (float n) f_void_float;
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float default_weapon;          // Weapon to select when not firing
+
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress
@@ -421,7 +424,6 @@ float already_chosen_map;
 
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
-.float antispam_feign;          // don't spam feign deaths
 .float antispam_assault_cannon; // don't spam assault cannon messages
 .float antispam_cannon_air;     // don't spam assault cannon air messages
 .float antispam_incendiary_cannon; // don't spam incendiary cannon messages

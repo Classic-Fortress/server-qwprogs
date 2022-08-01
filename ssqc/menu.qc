@@ -5,6 +5,10 @@
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin;
 void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor;
 void (float issilent) CF_Spy_FeignDeath;
+void (float issilent) FO_Spy_Feign;
+void () FO_Spy_FeignOnNextDamage;
+void () FO_Spy_Unfeign;
+void (float issilent) CF_Spy_FeignDeath;
 void () CF_Spy_Invisible;
 void () CF_Spy_DisguiseStop;
 
@@ -34,6 +38,7 @@ void (float inp) TeamFortress_ChangeClass;
 void (entity p) TeamFortress_SetSkin;
 
 void (float timer) TeamFortress_SetDetpack;
+void (float timer) TeamFortress_ToggleDetpack;
 void () TeamFortress_DetpackStop;
 
 void (float type, float amount) TeamFortress_DropAmmo;

@@ -118,7 +118,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     CheckForReload();
 
     vector bullet_dir, spread_dir, rand_dir, org;
-	float bullet_speed, var_speed;
+    float bullet_speed, var_speed;
 
     makevectors(self.v_angle);
 
@@ -126,7 +126,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     bullet_speed = PC_HVYWEAP_PROJSPEED;
     bullet_dir = normalize(v_forward * bullet_speed);
 
-    while (shotcount > 0) {       
+    while (shotcount > 0) {
 		var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
         rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
 		spread_dir = bullet_dir + rand_dir;
@@ -136,4 +136,17 @@ void FireAssCan (float shotcount, vector dir, vector spread)
 
 		shotcount = shotcount - 1;
 	}
+}
+
+void FO_LockToggle () {
+    if (self.tfstate & TFSTATE_LOCK) {
+	self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+    } else {
+	self.tfstate = self.tfstate | TFSTATE_LOCK;
+    }
+
+    Status_Refresh(self);
+    /* self.impulse = 0; */
+    /* this shouldn't be here, I think we just need to allow this impulse while shooting */
+    /* worth checking detpipes for this too */
 }
