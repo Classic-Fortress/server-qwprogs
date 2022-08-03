@@ -518,7 +518,6 @@ enum {
 #define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 #define FOCMD_FTE_HUD "fo_fte_hud"
-#define FOCMD_JUMPSOUND "player/plyrjmp8"
 
 float team_no;
 float is_spectator;
