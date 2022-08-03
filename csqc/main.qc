@@ -157,6 +157,22 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+
+    local float health = getstatf(STAT_HEALTH);
+    // The pmove_vel_z < 180 check makes sure you're not sliding
+    if (pmove_onground && health > 0 && pmove_vel_z < 180) {
+        if (last_vel_z < -650) {
+            localsound("player/land2.wav");
+        } else if (last_vel_z < -300) {
+            localsound("player/land.wav");
+        }
+
+        if (input_buttons & BUTTON2) {
+            localsound("player/plyrjmp8.wav", CHAN_BODY, 1);
+        }
+    }
+
+    last_vel_z = pmove_vel_z;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -412,8 +428,8 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    InterceptRocketJump();
     // InterceptQuickAttacks();
+    InterceptRocketJump();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
