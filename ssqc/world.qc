@@ -387,12 +387,19 @@ void () StartFrame = {
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
 
+    local float one_day = 86400;
+    if (gettime() > one_day) {
+        local entity te = find (world, classname, "player");
+        if (te == world) {
+            error("Terminated empty server with more than 24 hours uptime\n");
+        }
+    }
+
     if (framecount % 77 == 0)
     {
         CheckTrackedSettings();
     }
 
-    
 //    if(!votemode) {
 //        //TODO: make this optional
 //        Vote_Check();
