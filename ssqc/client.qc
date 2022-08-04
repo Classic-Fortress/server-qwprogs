@@ -1257,7 +1257,7 @@ void () execute_changelevel = {
         nextmap = vote_result;
     }
 
-// 
+
     other = find(world, classname, "player");
     while (other != world) {
         if (nextmapstring != string_null && nextmapstring != "")
