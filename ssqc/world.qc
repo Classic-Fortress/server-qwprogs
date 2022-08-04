@@ -1,5 +1,7 @@
 void () InitBodyQue;
-void () CheckTrackedSettings
+void () CheckTrackedSettings;
+void () TerminateStaleServer;
+
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
@@ -387,23 +389,10 @@ void () StartFrame = {
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
 
-    local float one_day = 86400;
-    if (gettime() > one_day) {
-        local entity te = find (world, classname, "player");
-        if (te == world) {
-            error("Terminated empty server with more than 24 hours uptime\n");
-        }
-    }
-
-    if (framecount % 77 == 0)
-    {
+    if (framecount % 77 == 0) {
         CheckTrackedSettings();
+        TerminateStaleServer();
     }
-
-//    if(!votemode) {
-//        //TODO: make this optional
-//        Vote_Check();
-//    }
 };
 
 entity bodyque_head;
@@ -469,4 +458,17 @@ void () CheckTrackedSettings = {
             s.value = new_val;
         }
     }
+}
+
+void () TerminateStaleServer = {
+    if (gettime() < 86400)
+        return;
+
+    for (entity e = world; (e = find(e, classname, "player")); ) {
+        if (!e.has_disconnected)
+            return; //someone is around
+    }
+
+    dprint("Terminating empty server with more than 24 hours uptime\n");
+    localcmd("quit\n");
 }

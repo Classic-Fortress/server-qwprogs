@@ -3050,7 +3050,6 @@ void () ClientDisconnect = {
             " frags\n");
     FO_Sound(self, CHAN_BODY, "player/tornoff2.wav", 1, ATTN_NONE);
     self.has_disconnected = 1;
-    self.classname = "disconnected";
     RemovePlayerOwnedEnts();
 
     if (duelmode && clanbattle && !cb_prematch) {
