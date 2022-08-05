@@ -69,6 +69,13 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
+void CSEv_SetPlayerImpulse_f(float n);
+
+void (float n) CSEv_SetPlayerImpulse_f = {
+    bprint(PRINT_HIGH, self.netname, "\n");
+    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
+    self.impulse = n;
+};
 
 void () info_intermission =
 {
@@ -183,7 +190,7 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
             return TRUE;
         case "off":
             return FALSE;
-        default:            
+        default:
             return stof(st);
     }
 };
@@ -542,6 +549,9 @@ void () DecodeLevelParms = {
         airblastcells     = CF_GetSetting("abc", "airblastcells", ftos(PC_PYRO_AIRBLAST_CELLS));
         airblastjumpcells = CF_GetSetting("abjc", "airblastjumpcells", ftos(PC_PYRO_AIRBLASTJUMP_CELLS));
 
+        // force reload [on]
+        force_reload = CF_GetSetting("fr", "forcereload", "on");
+
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");
 
@@ -669,6 +679,7 @@ void () DecodeLevelParms = {
 
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+
         // Maximum number of primary grenades per class
         /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
@@ -1247,7 +1258,7 @@ void () execute_changelevel = {
         nextmap = vote_result;
     }
 
-// 
+
     other = find(world, classname, "player");
     while (other != world) {
         if (nextmapstring != string_null && nextmapstring != "")
@@ -3654,6 +3665,10 @@ void (entity targ, entity attacker) ClientObituary = {
 
 float () IsUsingOldImpulses = {
     return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () IsUsingCFImpulses = {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 
 float () GetLastWeaponImpulse = {

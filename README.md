@@ -7,6 +7,7 @@ New features
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
 * `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo cf_pyro_impulses 1` to swap Pyro's primary and secondary weapons.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
@@ -15,6 +16,9 @@ New features
 * New buttons (not impulses):
 * `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
 * `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
+* `setinfo hold_grens` for press and hold `+grenade1` and `+grenade2`
+* `setinfo hold_fiegn` for press and hold feigning
+* `setinfo hold_detpack` for press and hold detpack
 * `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
 * `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
@@ -101,7 +105,8 @@ New features
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
-* Quick attack aliases (+quick1-4 will switch weapon and fire. +slot1-4 will do the same and switch back).
+* Quick attack aliases (+quick1-4 will switch weapon and fire).
+* Set default weapon to select after firing (e.g. `setinfo default_weapon 1`).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.

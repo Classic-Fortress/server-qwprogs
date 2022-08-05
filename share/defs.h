@@ -996,7 +996,7 @@
 #define PC_MEDIC_GRENADE_TYPE_1		GR_TYPE_NORMAL
 /* #define PC_MEDIC_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_MEDIC_GRENADE_INIT_1		3
-#define PC_MEDIC_GRENADE_INIT_2		2
+#define PC_MEDIC_GRENADE_INIT_2		3
 #define PC_MEDIC_GRENADE_MAX_1		4
 #define PC_MEDIC_GRENADE_MAX_2		3
 #define PC_MEDIC_TF_ITEMS		0
