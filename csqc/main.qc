@@ -159,8 +159,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     sui_end();
 
     local float health = getstatf(STAT_HEALTH);
+
     // The pmove_vel_z < 180 check makes sure you're not sliding
-    if (pmove_onground && health > 0 && pmove_vel_z < 180) {
+    if (pmove_onground && !last_pmove_onground && health > 0 && pmove_vel_z < 180) {
         if (last_vel_z < -650) {
             localsound("player/land2.wav");
         } else if (last_vel_z < -300) {
@@ -173,6 +174,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     }
 
     last_vel_z = pmove_vel_z;
+    last_pmove_onground = pmove_onground;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
