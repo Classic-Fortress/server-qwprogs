@@ -161,16 +161,18 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     local float health = getstatf(STAT_HEALTH);
 
-    // The pmove_vel_z < 180 check makes sure you're not sliding
-    if (pmove_onground && !last_pmove_onground && health > 0 && pmove_vel_z < 180) {
-        if (last_vel_z < -650) {
-            localsound("player/land2.wav");
-        } else if (last_vel_z < -300) {
-            localsound("player/land.wav");
+    if (pmove_onground && health > 0) {
+        // The pmove_vel_z < 180 check makes sure you're not sliding
+        if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
+            localsound("player/plyrjmp8.wav", CHAN_BODY, 1);
         }
 
-        if (input_buttons & BUTTON2) {
-            localsound("player/plyrjmp8.wav", CHAN_BODY, 1);
+        if (!last_pmove_onground) {
+            if (last_vel_z < -650) {
+                localsound("player/land2.wav");
+            } else if (last_vel_z < -300) {
+                localsound("player/land.wav");
+            }
         }
     }
 
