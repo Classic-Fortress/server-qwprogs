@@ -39,6 +39,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_GRENTIMERVOLUME, "1");
+    registercvar(FOCMD_JUMPVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 
@@ -164,7 +165,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (pmove_onground && health > 0) {
         // The pmove_vel_z < 180 check makes sure you're not sliding
         if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
-            localsound("player/plyrjmp8.wav", CHAN_BODY, 1);
+            localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
         }
 
         if (!last_pmove_onground) {
