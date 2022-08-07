@@ -169,10 +169,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
         if (!last_pmove_onground) {
             if (last_vel_z < -650) {
-                print("650 hit!\n");
                 localsound("player/land2.wav", CHAN_AUTO, 1);
             } else if (last_vel_z < -300) {
-                print("300 hit!\n");
                 localsound("player/land.wav", CHAN_AUTO, 1);
             }
         }
