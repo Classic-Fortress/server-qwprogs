@@ -6,6 +6,7 @@ void FO_WriteSettings()
     string line = FormatCfgString("", FOCMD_GRENTIMER, ftos(cvar(FOCMD_GRENTIMER)));
     line = FormatCfgString(line, FOCMD_GRENTIMERSOUND, cvar_string(FOCMD_GRENTIMERSOUND));
     line = FormatCfgString(line, FOCMD_GRENTIMERVOLUME, cvar_string(FOCMD_GRENTIMERVOLUME));
+    line = FormatCfgString(line, FOCMD_JUMPVOLUME, cvar_string(FOCMD_JUMPVOLUME));
     line = FormatCfgString(line, FOCMD_OLDSCOREBOARD, ftos(cvar(FOCMD_OLDSCOREBOARD)));
     fputs(filehandle, line);
     fclose(filehandle);
@@ -16,6 +17,7 @@ void FO_LoadDefaultSettings()
     cvar_set(FOCMD_GRENTIMER, "1");
     cvar_set(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     cvar_set(FOCMD_GRENTIMERVOLUME, "1");
+    cvar_set(FOCMD_JUMPVOLUME, "1");
     cvar_set(FOCMD_OLDSCOREBOARD, "0");
 }
 
@@ -53,6 +55,9 @@ void FO_LoadSettings()
                         break;
                     case FOCMD_GRENTIMERVOLUME:
                         cvar_set(FOCMD_GRENTIMERVOLUME, val);
+                        break;
+                    case FOCMD_JUMPVOLUME:
+                        cvar_set(FOCMD_JUMPVOLUME, val);
                         break;
                     case FOCMD_OLDSCOREBOARD:
                         cvar_set(FOCMD_OLDSCOREBOARD, val);
