@@ -59,6 +59,7 @@ void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
+void () UpdateReadyStatus;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
@@ -1896,7 +1897,7 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "touches", player.touches);
     CheckSetInfoKey(player, "team_no", player.team_no);
     CheckSetInfoKey(player, "playerclass", player.playerclass);
-    CheckSetInfoKey(player, "ready", player.is_ready);
+    CheckSetInfoKey(player, "ready", player.stat_flags & PLAYER_READY);
 };
 
 void (float all_dimensions) SetDimensions = {
@@ -2182,6 +2183,8 @@ void () PutClientInServer = {
         if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
+
+    UpdateReadyStatus();
 };
 
 //void () info_player_start = {
@@ -3065,21 +3068,14 @@ void () ClientDisconnect = {
         strunzone(self.StatusString);
     self.StatusString = string_null;
 
+
+
     if(cb_prematch) {
         //Check in case the player leaving is the last not-readied player
-        if(self.is_ready) {
+        if(self.stat_flags & PLAYER_READY) {
             v_ready = (v_ready - 1);
-        } else {
-            CheckAllPlayersReady();
-        }
-
-        local float f1 = TeamFortress_GetNoPlayers ();
-        if (v_ready < f1 -1) {
-            local entity p = find (world, classname, "player");
-            while (p != world) {
-                p.is_only_one_not_ready = 0;
-                p = find(p, classname, "player");
-            }
+        } else if (!CheckAllPlayersReady()) {
+            UpdateReadyStatus();
         }
     }
 
