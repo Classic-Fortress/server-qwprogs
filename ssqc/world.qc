@@ -1,5 +1,7 @@
 void () InitBodyQue;
-void () CheckTrackedSettings
+void () CheckTrackedSettings;
+void () TerminateStaleServer;
+
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
@@ -327,8 +329,7 @@ void () worldspawn = {
     lightstyle(63, "a");
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
-    clientstat(STAT_READY, EV_FLOAT, is_ready);
-    clientstat(STAT_ONLY_ONE_NOT_READY, EV_FLOAT, is_only_one_not_ready);
+    clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
@@ -387,16 +388,10 @@ void () StartFrame = {
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
 
-    if (framecount % 77 == 0)
-    {
+    if (framecount % 77 == 0) {
         CheckTrackedSettings();
+        TerminateStaleServer();
     }
-
-    
-//    if(!votemode) {
-//        //TODO: make this optional
-//        Vote_Check();
-//    }
 };
 
 entity bodyque_head;
@@ -462,4 +457,17 @@ void () CheckTrackedSettings = {
             s.value = new_val;
         }
     }
+}
+
+void () TerminateStaleServer = {
+    if (gettime() < 86400)
+        return;
+
+    for (entity e = world; (e = find(e, classname, "player")); ) {
+        if (!e.has_disconnected)
+            return; //someone is around
+    }
+
+    dprint("Terminating empty server with more than 24 hours uptime\n");
+    localcmd("quit\n");
 }

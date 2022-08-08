@@ -280,8 +280,7 @@ typedef struct {
     string Hint;
     //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch
     float GameMode;
-    float Ready;
-    float LastNotReady;
+    float ReadyStatus;
     float CountdownStarted;
     // scout
     float ScannerOn;
