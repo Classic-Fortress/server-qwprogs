@@ -146,6 +146,7 @@ void () Admin_CeaseFire = {
             StopTimer();
         }
         cease_fire = 1;
+        cs_paused = 1;
         bprint(2, "CEASE FIRE\n");
         te = find(world, classname, "player");
         while (te) {
@@ -167,6 +168,7 @@ void () Admin_CeaseFire = {
             dremove(te);
         }
         cease_fire = 0;
+        cs_paused = 0;
         bprint(2, "RESUME FIRE\n");
         if (cb_prematch) {
             //Make sure you don't just start the countdown on resume when not everyone's readied up
@@ -189,6 +191,7 @@ void () Admin_Pause = {
     if (!is_paused) {
         setpause(1);
         is_paused = 1;
+        cs_paused = 1;
         pause_actor = self.netname;
         if (cb_prematch && is_countdown) {
             StopTimer();
@@ -205,6 +208,7 @@ void () Admin_Pause = {
             }
             setpause(0);
             is_paused = 0;
+            cs_paused = 0;
             return;
         }
         pause_actor = self.netname;

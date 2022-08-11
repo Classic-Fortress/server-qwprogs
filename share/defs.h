@@ -230,9 +230,10 @@
 #define AS_MISSILE	4
 
 // stat_flags
-#define PLAYER_READY   1
-#define ENEMY_TEAM_READY   2
-#define LAST_NOT_READY     4
+#define PLAYER_READY     1
+#define ENEMY_TEAM_READY 2
+#define LAST_NOT_READY   4
+#define CEASEFIRE        8
 
 //===========================================================================
 // TEAMFORTRESS Defs
@@ -1492,6 +1493,7 @@
 #define STAT_NO_GREN2           40
 #define STAT_TP_GREN1           41
 #define STAT_TP_GREN2           42
+#define STAT_PAUSED             43
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

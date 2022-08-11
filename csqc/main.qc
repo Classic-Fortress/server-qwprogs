@@ -160,8 +160,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     sui_end();
 
     local float health = getstatf(STAT_HEALTH);
+    local float paused = getstatf(STAT_PAUSED);
 
-    if (pmove_onground && health > 0) {
+    if (pmove_onground && health > 0 && !paused) {
         // The pmove_vel_z < 180 check makes sure you're not sliding
         if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
             localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));

@@ -321,6 +321,7 @@ void () DecodeLevelParms = {
         autokick_time = 0;
 
         cease_fire = 0;
+        cs_paused = 0;
 
         toggleflags = toggleflags - (toggleflags & TFLAG_TEAMFRAGS);
         toggleflags = toggleflags - (toggleflags & TFLAG_CHEATCHECK);
@@ -2413,7 +2414,9 @@ void () PlayerJump = {
     self.button2 = 0;
 
     local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+
     if (!csqcactive) {
+        sprint(self, PRINT_MEDIUM, "csqcactive: ", ftos(csqcactive), "\n");
         FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
     }
 
