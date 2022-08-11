@@ -370,6 +370,7 @@ void () QuadRoundInit = {
             if (self.cnt2 <= 5)
             {
                 cease_fire = 0;
+                cs_paused = 0;
                 stuffcmd(p, "play buttons/switch04.wav\n");
             }
         }
@@ -390,6 +391,7 @@ void () StartQuadRound =
 
 	lightstyle(0, "m");
     cease_fire = 0;
+    cs_paused = 0;
 
 	p = find(world, classname, "player");
 	while (p != world) {
