@@ -2416,7 +2416,6 @@ void () PlayerJump = {
     local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
     if (!csqcactive) {
-        sprint(self, PRINT_MEDIUM, "csqcactive: ", ftos(csqcactive), "\n");
         FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
     }
 
