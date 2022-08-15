@@ -1087,8 +1087,12 @@ float () CheckAllPlayersReady = {
         } else {
             bprint (2, "All players ready, starting match\n");
             StartTimer ();
-            init_maxclients = cvar("sv_maxclients");
-            localcmd(sprintf("sv_maxclients %g\n", f1));
+
+            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "on");
+            if (limit_quad_players) {
+                init_maxclients = cvar("sv_maxclients");
+                localcmd(sprintf("sv_maxclients %g\n", f1));
+            }
         }
         return 1;
     }
