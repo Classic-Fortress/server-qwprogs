@@ -451,6 +451,9 @@ void () StartQuadRound =
             }
             te = find(te, classname, "observer");
         }
+
+		localcmd(sprintf("sv_maxclients %g\n", init_maxclients));
+
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
 		bprint2(2, "map will auto-restart in ", ftos(map_restart_time));
 		bprint2(2, " seconds\n");
