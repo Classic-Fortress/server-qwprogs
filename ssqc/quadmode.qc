@@ -257,17 +257,6 @@ void () QuadRoundBegin = {
 
 	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
 
-	// set sv_maxclients to number of players at start of match
-	local float numplayers = 0;
-	local entity player;
-	player = find (world, classname, "player");
-	while (player) {
-		if (isPlayerValid(player) == TRUE)
-			numplayers++;
-		player = find (player, classname, "player");
-	}
-	localcmd(sprintf("sv_maxclients %g\n", numplayers));
-
 	te = find(world, classname, "func_breakable");
 	while (te) {
 		setmodel(te, te.mdl);

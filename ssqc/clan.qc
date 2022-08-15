@@ -1085,6 +1085,7 @@ float () CheckAllPlayersReady = {
         } else {
             bprint (2, "All players ready, starting match\n");
             StartTimer ();
+            localcmd(sprintf("sv_maxclients %g\n", f1));
         }
         return 1;
     }
