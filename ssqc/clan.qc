@@ -1067,7 +1067,6 @@ void () UpdateReadyStatus = {
 }
 
 float () CheckAllPlayersReady = {
-    local float f1;
     if (is_countdown) {
         return 0;
     }
@@ -1077,7 +1076,7 @@ float () CheckAllPlayersReady = {
     if (intermission_running)
         return 0;
 
-    f1 = TeamFortress_GetNoPlayers ();
+    local float f1 = TeamFortress_GetNoActivePlayers();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
     if (v_ready == f1 && v_ready > 0) {
         if(cease_fire) {
@@ -1088,8 +1087,7 @@ float () CheckAllPlayersReady = {
 
             local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "on");
             if (limit_quad_players) {
-                init_maxclients = cvar("sv_maxclients");
-                localcmd(sprintf("sv_maxclients %g\n", f1));
+                quad_maxplayers = f1;
             }
         }
         return 1;

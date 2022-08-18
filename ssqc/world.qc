@@ -96,6 +96,8 @@ void () worldspawn = {
 
     lastspawn = world;
     number_of_teams = 0;
+    quad_maxplayers = 0;
+
     InitBodyQue();
     if (self.model == "maps/e1m8.bsp")
         cvar_set("sv_gravity", "100");
