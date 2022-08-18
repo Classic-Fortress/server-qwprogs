@@ -520,10 +520,13 @@ float () TeamFortress_GetNoActivePlayers = {
 
     search = find(world, classname, "player");
     while (search != world) {
-        if (search.netname != string_null) {
-            if (search.team_no && search.playerclass)
-                nump = nump + 1;
+        if (search.netname != string_null
+                && search.team_no
+                && search.playerclass
+                && !search.has_disconnected) {
+            nump = nump + 1;
         }
+
         search = find(search, classname, "player");
     }
     return (nump);

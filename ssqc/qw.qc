@@ -131,7 +131,7 @@ string nextmap;
 //
 // FortressMap stuff
 //
-float init_maxclients;
+float quad_maxplayers;
 float number_of_teams;
 float illegalclasses;
 float illegalclasses1;
