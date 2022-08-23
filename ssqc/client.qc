@@ -2413,11 +2413,7 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-
-    if (!csqcactive) {
-        FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
-    }
+    FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         if (!cannon_air) {
@@ -2848,14 +2844,10 @@ void () PlayerPostThink = {
                 }
                 fdmg = rint(fdmg);
                 TF_T_Damage(self, world, world, fdmg, 1, 0);
-                if (!csqcactive) {
-                    FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
-                }
+                FO_Sound(self, CHAN_VOICE, "player/land2.wav", 1, ATTN_NORM);
                 self.deathtype = "falling";
             } else {
-                if (!csqcactive) {
-                    FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
-                }
+                FO_Sound(self, CHAN_VOICE, "player/land.wav", 1, ATTN_NORM);
             }
         }
     }
