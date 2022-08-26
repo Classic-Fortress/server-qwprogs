@@ -2960,6 +2960,12 @@ void (optional float csqcactive) ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
+
+    local float numplayers = TeamFortress_GetNoActivePlayers ();
+    if (quadmode && quad_maxplayers && (numplayers >= quad_maxplayers)) {
+        sprint(self, PRINT_HIGH, "Match in progress, forcing to observer\n");
+        forceinfokey(self, "*spectator", "1");
+    }
 };
 
 float () RejoinWithTfId = {
