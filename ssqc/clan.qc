@@ -104,6 +104,7 @@ void () StartMatch =
     }
     cb_prematch = 0;
     cease_fire = 0;
+    cs_paused = 0;
 
     te = find(world, classname, "player");
     while (te) {
@@ -348,6 +349,7 @@ void () PreMatch_Think = {
                 CenterPrint3 (p, "Countdown ", tmp, "\n");
                 if (self.cnt2 < 6) {
                     cease_fire = 0;
+                    cs_paused = 0;
                     stuffcmd (p, "play buttons/switch04.wav\n");
                 }
             }

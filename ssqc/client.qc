@@ -321,6 +321,7 @@ void () DecodeLevelParms = {
         autokick_time = 0;
 
         cease_fire = 0;
+        cs_paused = 0;
 
         toggleflags = toggleflags - (toggleflags & TFLAG_TEAMFRAGS);
         toggleflags = toggleflags - (toggleflags & TFLAG_CHEATCHECK);
@@ -2824,6 +2825,7 @@ void () PlayerPostThink = {
     }
 
     local float fdmg;
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
     if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {

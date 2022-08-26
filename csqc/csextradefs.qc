@@ -89,7 +89,6 @@ float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float cs_grenprimed;
-float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
 entity vote_selected_item;
@@ -516,6 +515,7 @@ enum {
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_GRENTIMERSOUND "fo_grentimersound"
 #define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
+#define FOCMD_JUMPVOLUME "fo_jumpvolume"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 #define FOCMD_FTE_HUD "fo_fte_hud"
 
@@ -532,6 +532,8 @@ float nextoriginupdate;
 float speed;
 float jump_counter;
 float grentimer_waiting;
+float last_pmove_onground;
+float last_vel_z;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

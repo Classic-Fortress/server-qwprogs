@@ -66,6 +66,7 @@ New features
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
 * CSQC - fo_grentimervolume
+* CSQC - fo_jumpvolume
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config

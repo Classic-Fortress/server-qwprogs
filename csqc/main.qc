@@ -39,6 +39,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_GRENTIMERVOLUME, "1");
+    registercvar(FOCMD_JUMPVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 
@@ -157,6 +158,27 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+
+    local float health = getstatf(STAT_HEALTH);
+    local float paused = getstatf(STAT_PAUSED);
+
+    if (pmove_onground && health > 0 && !paused) {
+        // The pmove_vel_z < 180 check makes sure you're not sliding
+        if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
+            localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+        }
+
+        if (!last_pmove_onground) {
+            if (last_vel_z < -650) {
+                localsound("player/land2.wav", CHAN_AUTO, 1);
+            } else if (last_vel_z < -300) {
+                localsound("player/land.wav", CHAN_AUTO, 1);
+            }
+        }
+    }
+
+    last_vel_z = pmove_vel_z;
+    last_pmove_onground = pmove_onground;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -412,8 +434,8 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    InterceptRocketJump();
     // InterceptQuickAttacks();
+    InterceptRocketJump();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {

@@ -608,6 +608,7 @@ float detpack_when_reloading;
 float pyro_type;
 float flag_follow;
 float ceasefire_type;
+float cs_paused;
 float is_paused;
 string pause_actor;
 float unpause_requested;

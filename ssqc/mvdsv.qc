@@ -111,6 +111,7 @@ void (float duration) GE_PausedTic = {
     if (unpause_requested) {
         if ((duration >= unpause_countdown)) {
             is_paused = 0;
+            cs_paused = 0;
             unpause_countdown = 0;
             unpause_requested = 0;
             unpause_lastcountnumber = 0;
