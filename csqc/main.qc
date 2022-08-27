@@ -12,9 +12,7 @@ void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
-void InterceptRocketJump();
 float IsValidToUseGrenades();
-void InterceptQuickAttacks();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -148,8 +146,23 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //setviewprop(VF_DRAWWORLD, 1);            //whether the world entity should be drawn. set to 0 if you want a completely empty scene.
     //setviewprop(VF_MIN, '0 0 0');            //top-left coord (x,y) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
     //setviewprop(VF_SIZE, [width, height, 0]);    //virtual size (width,height) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
-    //setviewprop(VF_AFOV, cvar("fov”));        //note: fov_x and fov_y control individual axis. afov is general
+    //setviewprop(VF_AFOV, cvar("fov"));        //note: fov_x and fov_y control individual axis. afov is general
     //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
+
+    local float health = getstatf(STAT_HEALTH);
+
+    if (health <= 0 || player_class != PC_SNIPER) {
+        zoomed_in = 0;
+    }
+
+    if (zoomed_in) {
+        setviewprop(VF_AFOV, cvar("fov")/3);
+        setsensitivityscaler(1/3);
+    } else {
+        setviewprop(VF_AFOV, cvar("fov"));
+        setsensitivityscaler(1);
+    }
+
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
     renderscene();
@@ -159,7 +172,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Hud_Draw(width, height);
     sui_end();
 
-    local float health = getstatf(STAT_HEALTH);
     local float paused = getstatf(STAT_PAUSED);
 
     if (pmove_onground && health > 0 && !paused) {
@@ -434,8 +446,21 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
-    // InterceptQuickAttacks();
-    InterceptRocketJump();
+    local float changed_buttons = input_buttons ^ oldbuttons;
+    oldbuttons = input_buttons;
+
+    local float keydowns = changed_buttons & input_buttons;
+    local float keyups = changed_buttons & ~input_buttons;
+
+    // Intercept rocket jump;
+    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) && input_buttons & BUTTON4) {
+        input_buttons |= BUTTON0 + BUTTON2;
+    }
+
+    // Intercept zoom
+    if (player_class == PC_SNIPER && keydowns & BUTTON3) {
+        zoomed_in = !zoomed_in;
+    }
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -473,19 +498,3 @@ void StopGrenTimers() {
         FO_Hud_Grentimers[i].icon_index = 0;
     }
 }
-
-void InterceptRocketJump() {
-    if (player_class != PC_SOLDIER && player_class != PC_PYRO) {
-        return;
-    }
-
-    if (input_buttons & BUTTON4) {
-        input_buttons |= BUTTON0 + BUTTON2;
-    }
-}
-
-// void InterceptQuickAttacks() {
-//     if (input_buttons & (BUTTON8 | BUTTON9 | BUTTON10 | BUTTON11)) {
-//         input_buttons |= BUTTON0;
-//     }
-// }
