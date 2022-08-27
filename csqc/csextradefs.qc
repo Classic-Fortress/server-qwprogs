@@ -96,6 +96,8 @@ float vote_selected_index;
 float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
+float oldbuttons;
+float zoomed_in;
 
 .string name;
 .string description;
