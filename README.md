@@ -48,6 +48,7 @@ New features
 * CSQC - fo_hud_editor to move panels and save to config
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
+* Server option for duelmode to print winner's health `localinfo duel_print_health 1`/`localinfo dph 1`
 * Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
 * Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)

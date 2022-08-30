@@ -706,6 +706,10 @@ void () DecodeLevelParms = {
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
+        // After respawning in duel mode, nobody shoots until
+        // 0 - immediately
+        // 1 - all players have moved away from spawn
+        duel_spawn_guard = CF_GetSetting("dsg", "duel_spawn_guard", "1");
         
         //Proportion required to trigger a map change
         vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
@@ -1384,6 +1388,11 @@ void (string cn) RemoveAllEntsByClassname = {
     }
 }
 
+void () spawn_guard_think = {
+    self.nextthink = time + 0.1;
+    bprint(PRINT_HIGH, "spawn_guard_think\n");
+};
+
 void () ResetPlayers = {
     local entity te, oldself, reset_timer;
     local float teamsleft;
@@ -1425,6 +1434,13 @@ void () ResetPlayers = {
     RemoveAllEntsByClassname("pyro_rocket");
     RemoveAllEntsByClassname("proj_tranq");
    
+    if(duel_spawn_guard) {
+        no_fire_mode = 1;
+        reset_timer = spawn();
+        reset_timer.classname = "spawn_guard_check";
+        reset_timer.think = spawn_guard_think;
+        reset_timer.nextthink = time + 0.1;
+    }
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
@@ -1440,6 +1456,9 @@ void () ResetPlayers = {
             setspawnparms(self);
             PutClientInServer();
             self.respawn_time = 0;
+            if(duel_spawn_guard) {
+                self.duel_guarded = 1;
+            }
             
             self = oldself;
         }
