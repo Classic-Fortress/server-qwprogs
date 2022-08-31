@@ -2166,11 +2166,6 @@ void () PutClientInServer = {
         }
     }
     
-    if(duelmode && duel_spawn_guard) {
-        self.duel_guarded = spot;
-        self.invincible_finished = time + 666;
-    }
-
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
 
@@ -2211,6 +2206,10 @@ void () PutClientInServer = {
         Menu_Class(0);
     }
 
+    if(duelmode && duel_spawn_guard && self.team_no && self.playerclass) {
+        self.duel_guarded = spot;
+        self.invincible_finished = time + 666;
+    }
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (self.playerclass == PC_SPY) {
