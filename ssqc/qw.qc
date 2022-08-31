@@ -462,7 +462,7 @@ float no_fire_mode;
 float duel_all_grens;
 float duel_no_packs;
 float duel_spawn_guard;
-float .duel_guarded;
+.entity duel_guarded;
 float votemode;
 float voting_started;
 float voting_expires;

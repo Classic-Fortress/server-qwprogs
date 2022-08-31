@@ -453,6 +453,11 @@ void (float objtobuild) TeamFortress_Build = {
         sprint(self, PRINT_MEDIUM, "You cannot build during prematch\n");
         return;
     }
+    
+    if(no_fire_mode) {
+        sprint(self, PRINT_MEDIUM, "You cannot build right now\n");
+        return;
+    }
 
     local float btime;
     local vector tmp1;

@@ -766,6 +766,11 @@ void () AirBlastReloadFinished = {
 };
 
 void () UseAirBlast = {
+    if(no_fire_mode) {
+        sprint(self, PRINT_MEDIUM, "You cannot blast air right now\n");
+        return;
+    }
+    
     if (self.special_cooldown < time)
     {
         self.airblast_cooldown = 1;
@@ -851,6 +856,11 @@ void () UseAirBlast = {
 };
 
 void () UseAirBlastV2 = {
+    if(no_fire_mode) {
+        sprint(self, PRINT_MEDIUM, "You cannot blast air right now\n");
+        return;
+    }
+    
     float isabjump = airblastjump && self.v_angle_x > 60;
 
     if (self.ammo_cells < airblastcells)
