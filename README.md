@@ -4,6 +4,7 @@ FortressOne Server
 New features
 ------
 
+* Server option for duelmode to allow spawn protection `localinfo duel_spawn_guard 1`/`localinfo dsg 1` - it will not allow any fighting until both players have left the spawn.
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
 * Added ``localinfo nomapcycle 1`` to stop all the confusion.
 * Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
