@@ -442,9 +442,9 @@ void (entity targ, entity inflictor, entity attacker, float damage,
             }
         }
     }
-    
+
     HitSound(targ, inflictor, attacker, damage);
-    
+
     damage_attacker = attacker;
 
     if (teamplay & (TEAMPLAY_LESSSCOREHELP | TEAMPLAY_LESSPLAYERSHELP))
@@ -680,6 +680,11 @@ void (entity targ, entity inflictor, entity attacker, float damage,
             self.pain_finished = time + 5;
         }
     }
+
+    if (self.feign_next_damage && !self.is_feigning){
+        FO_Spy_Feign(0);
+    }
+
     self = oldself;
 };
 

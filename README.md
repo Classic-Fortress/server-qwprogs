@@ -4,6 +4,24 @@ FortressOne Server
 New features
 ------
 
+* Server option to limit `sv_maxclients` to current number of players during quad gametime. `localinfo limit_quad_players 0/1`. Default: `1`.
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
+* `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
+* `+dropflag` Allows player to hold button and flag will be thrown on contact.
+* `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
+* `dlastspawn` Tells spy to disguise as enemy who last spawned.
+* `setinfo cf_pyro_impulses 1` to swap Pyro's primary and secondary weapons.
+* `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
+* `setinfo autodisguise 2` Causes spy to `dlast` after spawning or cover blown.
+* `special2` Scout: `autoscan`, Demoman: `+det5`, Pyro: `+rj`, Spy: `dlastspawn`, Engineer: `togglesentry`
+* New buttons (not impulses):
+* `+special` Scout: `dash`, Demoman: `detpipe`, Medic: `aura`, Hwguy: `lock`, Pyro: `airblast`, Spy: `+feign`, Engineer: `toggledispenser`.
+* `+special2` Same as `special2`, but also has `+rj` for Soldier and Pyro.
+* `setinfo hold_grens` for press and hold `+grenade1` and `+grenade2`
+* `setinfo hold_fiegn` for press and hold feigning
+* `setinfo hold_detpack` for press and hold detpack
+* `localinfo standardizedeathammo 1` server setting to make all backpack's dropped on death contain same ammo, regardless of victims ammo. If enabled defaults to 25 shells, 25 nails, 10 rockets, 50 cells. `localinfo deathammo_shells <number>` , `localinfo deathammo_nails <number>` , `localinfo deathammo_rockets <number>`, `localinfo deathammo_cells <number>` to modify these values 
+* `localinfo splitbackpackmodels 1` server setting to have different visual models for backpack dropped on death ``progs/deathbag.mdl`` and discards ``progs/discard.mdl`` 
 * `localinfo allowpracspawns 1` option for players to set a personal spawnpoint for practice. Players can then use commands `placepracspawn` and `removepracspawn`. Suicide  time  penalties are removed while allowpracspawns is enabled.
 * Added ``localinfo nomapcycle 1`` to stop all the confusion.
 * Option to configure hwguy armor `localinfo max_armor_hwguy 250`.
@@ -16,6 +34,11 @@ New features
 * optional solid nail/shock grenades - localinfo solid_nailgren on (default on)
 * localinfo nohitsounds 1 - disables hitsounds server-wide
 * localinfo noreturn 1 - prevents goalitems from returning (will still return from lava)
+* localinfo superaxe on/off - causes the axe to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo supermedikit on/off - causes the medikit to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo superspanner on/off - causes the spanner to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo superknife on/off - causes the knife to hit on all four attack frames (instead of only on 3rd frame)
+* localinfo superknife_multihit on/off - controls whether multiple hits are allowed in a single attack
 * scout has "new" flash grenades - localinfo fo_flash on (default on)
 * ability to set client side min and max flash amounts - localinfo minflash x/localinfo maxflash x (number as a percentage - 1.5 = 150%)
 * `cmd votemap`/`cmd showvotes`/`cmd listmaps` can now be used at any time and are part of the same system
@@ -43,6 +66,7 @@ New features
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
 * CSQC - fo_grentimervolume
+* CSQC - fo_jumpvolume
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
@@ -85,7 +109,8 @@ New features
 * Grenade slot switching (/grenswitch).
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
-* Quick attack aliases (+quick1-4 will switch weapon and fire. +slot1-4 will do the same and switch back).
+* Quick attack aliases (+quick1-4 will switch weapon and fire).
+* Set default weapon to select after firing (e.g. `setinfo default_weapon 1`).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.
@@ -143,11 +168,16 @@ Scout
 * New Scanner menu where Scanner settings can be changed.
 * Caltrop Canisters no longer "explode" in your hands.
 * Remember Scanner status across deaths.
+* `+special2` to toggle scanner.
 
 Sniper
 ------
 * Sniper Rifle range increased.
 * Automatic sensitivity scaling while zoomed in.  Use the special button as a zoom button.  Use mouse wheel to adjust zoom while zoomed in.  Sniper Rifle now needs to be reloaded between shots.  
+
+Soldier
+------
+* New command `+rj` (or `+special2`) to rocket jump.
 
 Demolitions Man
 ------
@@ -155,6 +185,7 @@ Demolitions Man
 * Changed maximum detpipes allowed per team to 6 per demoman instead of 7 total.
 * Decrease /detpipe cooldown to 0.5 seconds instead of 0.8.
 * Stop detpacking by pressing last weapon bind.
+* `+special2` to set 5 second detpack.
 
 Combat Medic
 ------
@@ -173,20 +204,24 @@ Heavy Weapons Guy
 
 Pyro
 ------
-* Add knockback to Flamethrower.
+* Add air-blast special.
+* Rebalance weapons.
+* New command +rj (or +special2) to rocket jump.
 
 Spy
 ------
 * Improved disguise menu.
+* Auto-disguise (setinfo autodisguise 0/1/2).
 * Change color and skin in one sequence.
 * Last disguise (reachable through disguise menu or using /dlast alias).
 * Stop disguising by pressing last weapon bind.
-* New aliases for changing team color (/denemy (if 2 teams), /dblue, /dred, /dyellow, /dgreen).
-* New aliases for changing skin (/dscout, /dsniper, /dsoldier, etc).
-* Build your own disguise aliases (e.g. alias bsniper "dblue; wait; dsniper" for blue sniper).
+* New aliases for changing team color (`denemy` (if 2 teams), `dblue,` `dred,` `dyellow,` `dgreen,` `dlastspawn`).
+* New aliases for changing skin (`dscout`, `dsniper`, `dsoldier`, etc).
+* Build your own disguise aliases (e.g. `alias bsniper "dblue; wait; dsniper"` for blue sniper).
 * Spy can now feign death in air.
 * Spy now drops an empty backpack when feigning death.
 * A fake death message (but relevant to current situation) is now shown when feigning death.
+* `+special2` to disguise as last spawned enemy.
 
 Engineer
 ------
@@ -200,8 +235,11 @@ Engineer
 * Stop building by pressing last weapon key.
 * Added message when Dispenser is destroyed.
 * Added dismantle message to show how many cells were returned to Engineer.
-* Changed class special to detonate dispenser.
+* New command toggledispenser (or `+special`) to build or detonate dispenser.
+* New command togglesentry (or `+special2`) to build or detonate sentry.
 * Engineers can now only dismantle own buildings and rotate own Sentry Gun.
+* `+special` to build or destroy dispenser.
+* `+special2` to build or destroy sentry.
 
 
 Development

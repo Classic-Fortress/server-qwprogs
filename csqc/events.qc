@@ -147,7 +147,7 @@ void() CSQC_Parse_Event = {
                     break;
                 case CLIENT_MENU_SPY:
                     SBAR.InvisOnly = readfloat();
-                    last_skin = readfloat();
+                    last_selected_skin = readfloat();
                     last_team = readfloat();
                     FO_Menu_Spy(2);
                     break;
@@ -441,4 +441,18 @@ void ParseSBAR()
             }
             break;
     }
+}
+
+float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
+    if !(entnum == player_localentnum)
+        return 0;
+
+    switch(soundname) {
+        case "player/plyrjmp8.wav":
+        case "player/land.wav":
+        case "player/land2.wav":
+            return 1;
+    }
+
+    return 0;
 }

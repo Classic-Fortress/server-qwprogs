@@ -18,7 +18,6 @@ typedef void (float n) f_void_float;
 .float tp_grenades_1;           // 1st type of grenades being carried
 .float tp_grenades_2;           // 2nd type of grenades being carried
 .float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
-
 .float hook_out;                // Dummy field for hook to silence error messages
 .float got_aliases;             // TRUE if the player has TeamFortress aliases
 .float cheat_check;             // Time when we'll next check for team cheats
@@ -27,6 +26,8 @@ typedef void (float n) f_void_float;
 .float is_building;             // TRUE for an ENGINEER if they're building something
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
 .float is_feigning;             // TRUE for a SPY if they're feigning death
+.float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
+.float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_quickfiring;          // TRUE for a player if they're using the quick slots
@@ -58,7 +59,7 @@ typedef void (float n) f_void_float;
 .float pipecooldown;            // Time when detpipe command can be issued
 .float disguise_skin;           // The skin the spy is changing to
 .float queue_skin;              // The skin the spy will change to after team disguise is finished
-.float last_skin;               // The last skin the spy disguised as
+.float last_selected_skin;      // The last skin the spy selected to disguise as
 .float disguise_team;           // The team the spy is changing to
 .float queue_team;              // The team the spy will change to after skin disguise is finished
 .float last_team;               // The last team the spy disguised as
@@ -79,6 +80,8 @@ typedef void (float n) f_void_float;
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
+.float default_weapon;          // Weapon to select when not firing
+
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress
@@ -128,6 +131,7 @@ string nextmap;
 //
 // FortressMap stuff
 //
+float quad_maxplayers;
 float number_of_teams;
 float illegalclasses;
 float illegalclasses1;
@@ -407,6 +411,7 @@ float already_chosen_map;
 
 .float disptimer;
 .float fire_held_down;
+.float hit_in_current_animation; // Set on knife attack if a hit is recorded to prevent combo hits
 
 // sniper location damage stuff
 .vector head_shot_vector;
@@ -420,7 +425,6 @@ float already_chosen_map;
 
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
-.float antispam_feign;          // don't spam feign deaths
 .float antispam_assault_cannon; // don't spam assault cannon messages
 .float antispam_cannon_air;     // don't spam assault cannon air messages
 .float antispam_incendiary_cannon; // don't spam incendiary cannon messages
@@ -582,6 +586,7 @@ float airblastjump;
 float airblastsize;
 float airblastcells;
 float airblastjumpcells;
+float force_reload;
 
 float old_spanner;
 float old_dispenser;
@@ -594,12 +599,18 @@ float project_weapons_max_latency;
 float ng_velocity;
 float ng_damage;
 float sng_damage;
+float superaxe;
+float supermedikit;
+float superspanner;
+float superknife;
+float superknife_multihit;
 float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
 float pyro_type;
 float flag_follow;
 float ceasefire_type;
+float cs_paused;
 float is_paused;
 string pause_actor;
 float unpause_requested;
@@ -619,6 +630,12 @@ float noreturn;
 float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
+float splitbackpackmodels;
+float standardizedeathammo;
+float deathammo_shells;
+float deathammo_nails;
+float deathammo_rockets;
+float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
@@ -634,7 +651,7 @@ float autokick_kills;
 
 .float vote;
 .float bvote;
-.float is_ready;
+.float stat_flags;
 
 .float is_admin;
 .float admin_mode;
@@ -757,3 +774,18 @@ string goal_class_names[7] = {
 
 .float special_cooldown;
 .float airblast_cooldown;
+
+
+// people complain about settings, let's track them
+
+string settings_to_track_list[2] = {
+    "sv_antilag",
+    "project_weapons"
+};
+
+typedef struct setting_t {
+    string setting_name;
+    string value;
+};
+
+setting_t *settings_to_track;

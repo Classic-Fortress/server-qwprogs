@@ -254,7 +254,9 @@ void () QuadRoundBegin = {
 	local entity oldself;
     //local entity tfdet;
 	local float counter;
+
 	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
+
 	te = find(world, classname, "func_breakable");
 	while (te) {
 		setmodel(te, te.mdl);
@@ -370,6 +372,7 @@ void () QuadRoundInit = {
             if (self.cnt2 <= 5)
             {
                 cease_fire = 0;
+                cs_paused = 0;
                 stuffcmd(p, "play buttons/switch04.wav\n");
             }
         }
@@ -390,6 +393,7 @@ void () StartQuadRound =
 
 	lightstyle(0, "m");
     cease_fire = 0;
+    cs_paused = 0;
 
 	p = find(world, classname, "player");
 	while (p != world) {
@@ -449,6 +453,7 @@ void () StartQuadRound =
             }
             te = find(te, classname, "observer");
         }
+
 		bprint(2, "Rounds Over! Use \"cmd map <mapname>\" to go to the nextmap\n");
 		bprint2(2, "map will auto-restart in ", ftos(map_restart_time));
 		bprint2(2, " seconds\n");

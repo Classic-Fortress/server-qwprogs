@@ -534,10 +534,10 @@ void(string panelid, float display, string text) drawGameModePanel = {
 
 void(string panelid, float display, string text) drawReadyPanel = {
     FO_Hud_Panel* panel = getAnyHudPanelByNamePointer(panelid);
-    
+
     vector position = getPanelPosition(panel);
     vector size = getPanelFillSize(panel);
-    vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
+    vector textsize = MENU_TEXT_SMALL * panel.Scale;
     vector textcolour = MENU_TEXT_4;
     local float padding = 4 * panel.Scale;
     local float lines;
@@ -553,31 +553,100 @@ void(string panelid, float display, string text) drawReadyPanel = {
             return;
         }
         if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
-            if(SBAR.Ready) {
+            if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
             } else if(round_over) {
                 message = "Change map to continue playing";
             } else {
+                textcolour = MENU_TEXT_WARNING;
                 tokenize(findkeysforcommand("ready"));
                 string keynum = argv(0);
-                if(keynum != "-1") {
-                    message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+
+                if(SBAR.ReadyStatus & LAST_NOT_READY) {
+                    local vector alert_text_size = MENU_TEXT_LARGE * panel.Scale;
+                    local vector alert_text_position;
+                    alert_text_position.y = ScreenSize.y / 3;
+                    alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
+                    local string alert_text_message = "You're last";
+
+                    pos_aligned = GetTextAlignOffset(
+                        alert_text_position.x,
+                        size.x,
+                        padding,
+                        alert_text_message,
+                        alert_text_size.x,
+                        panel.Orientation
+                    );
+
+                    drawstring(
+                        [pos_aligned, alert_text_position.y],
+                        alert_text_message,
+                        alert_text_size,
+                        textcolour,
+                        1,
+                        0
+                    );
+
+                    position.y = alert_text_position.y + alert_text_size.y + textsize.y;
+                    position.x = (ScreenSize.x / 2) - (size.x / 2);
+
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to start");
+                    } else {
+                        message = "Type 'ready' in the console to start";
+                    }
+                } else if (SBAR.ReadyStatus & ENEMY_TEAM_READY) {
+                    local vector alert_text_size = MENU_TEXT_MEDIUM * panel.Scale;
+                    local vector alert_text_position;
+                    alert_text_position.y = ScreenSize.y / 3;
+                    alert_text_position.x = (ScreenSize.x / 2) - (size.x / 2);
+                    local string alert_text_message = "Enemy team is ready!";
+
+                    pos_aligned = GetTextAlignOffset(
+                        alert_text_position.x,
+                        size.x,
+                        padding,
+                        alert_text_message,
+                        alert_text_size.x,
+                        panel.Orientation
+                    );
+
+                    drawstring(
+                        [pos_aligned, alert_text_position.y],
+                        alert_text_message,
+                        alert_text_size,
+                        textcolour,
+                        1,
+                        0
+                    );
+
+                    position.y = alert_text_position.y + alert_text_size.y + textsize.y;
+                    position.x = (ScreenSize.x / 2) - (size.x / 2);
+
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    } else {
+                        message = "Type 'ready' in the console to ready up";
+                    }
                 } else {
-                    message = "Type 'ready' in the console to ready up";
+                    if(keynum != "-1") {
+                        message = strcat("Press ", keynumtostring(stof(keynum)), " to ready up");
+                    } else {
+                        message = "Type 'ready' in the console to ready up";
+                    }
                 }
-                textcolour = MENU_TEXT_WARNING;
             }
         }
     }
     if(message) {
-        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,mediumtext.x,panel.Orientation);
+        pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,textsize.x,panel.Orientation);
         drawstring(
             [pos_aligned, position.y],
-            message, 
-            mediumtext, 
-            textcolour, 
-            1, 
+            message,
+            textsize,
+            textcolour,
+            1,
             0
         );
     }

@@ -116,7 +116,12 @@ void () TeamFortress_Discard = {
     newmis.nextthink = time + 30;
     newmis.think = SUB_Remove;
     newmis.touch = TeamFortress_AmmoboxTouch;
-    FO_SetModel(newmis, "progs/backpack.mdl");
+    
+	if(splitbackpackmodels)
+		FO_SetModel(newmis, "progs/discard.mdl");
+	else
+		FO_SetModel(newmis, "progs/backpack.mdl");
+
 };
 
 void () TeamFortress_Discard_DropAmmo = {
@@ -472,8 +477,17 @@ void (entity pe_player, float f_type) CF_Identify = {
     }
 };
 
+void () RestoreDefaultWeapon = {
+    local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
+    if (default_weapon >= 1 && default_weapon <= 4) {
+        W_ChangeWeapon(default_weapon);
+    }
+};
+
 void TeamFortress_ReloadWeapon(float weap)
 {
+    RestoreDefaultWeapon();
+
     local float reloadtime = 0;
     local float reloadamount = 0;
     local entity tWeapon, tClip;
@@ -853,6 +867,7 @@ void () TeamFortress_ReloadNext = {
     }
 
     if (!reload)
+        RestoreDefaultWeapon();
         sprint(self, PRINT_HIGH, "All clips full\n");
 };
 

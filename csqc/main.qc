@@ -37,6 +37,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_GRENTIMER, "1");
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_GRENTIMERVOLUME, "1");
+    registercvar(FOCMD_JUMPVOLUME, "1");
     registercvar(FOCMD_OLDSCOREBOARD, "0");
     registercvar(FOCMD_FTE_HUD, "0");
 
@@ -55,6 +56,26 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
+    registercommand("+special");
+    registercommand("-special");
+    registercommand("+special2");
+    registercommand("-special2");
+    registercommand("+grenade1");
+    registercommand("-grenade1");
+    registercommand("+grenade2");
+    registercommand("-grenade2");
+    registercommand("+dropflag");
+    registercommand("-dropflag");
+    registercommand("+rj");
+    registercommand("-rj");
+    // registercommand("+quick1");
+    // registercommand("-quick1");
+    // registercommand("+quick2");
+    // registercommand("-quick2");
+    // registercommand("+quick3");
+    // registercommand("-quick3");
+    // registercommand("+quick4");
+    // registercommand("-quick4");
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -75,6 +96,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
+    grentimer_waiting = FALSE;
+    jump_counter = 0;
+
     num_mapvotes = 0;
     vote_selected_item = world;
     vote_selected_index = -1;
@@ -96,7 +120,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (team_no == 0)
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
-    SBAR.Ready = getstatf(STAT_READY);
+    SBAR.ReadyStatus = getstatf(STAT_FLAGS);
     oldhealth = getstatf(STAT_HEALTH);
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
@@ -122,8 +146,23 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     //setviewprop(VF_DRAWWORLD, 1);            //whether the world entity should be drawn. set to 0 if you want a completely empty scene.
     //setviewprop(VF_MIN, '0 0 0');            //top-left coord (x,y) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
     //setviewprop(VF_SIZE, [width, height, 0]);    //virtual size (width,height) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
-    //setviewprop(VF_AFOV, cvar("fov”));        //note: fov_x and fov_y control individual axis. afov is general
+    //setviewprop(VF_AFOV, cvar("fov"));        //note: fov_x and fov_y control individual axis. afov is general
     //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
+
+    local float health = getstatf(STAT_HEALTH);
+
+    if (health <= 0 || player_class != PC_SNIPER) {
+        zoomed_in = 0;
+    }
+
+    if (zoomed_in) {
+        setviewprop(VF_AFOV, cvar("fov")/3);
+        setsensitivityscaler(1/3);
+    } else {
+        setviewprop(VF_AFOV, cvar("fov"));
+        setsensitivityscaler(1);
+    }
+
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
     renderscene();
@@ -132,6 +171,26 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+
+    local float paused = getstatf(STAT_PAUSED);
+
+    if (pmove_onground && health > 0 && !paused) {
+        // The pmove_vel_z < 180 check makes sure you're not sliding
+        if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
+            localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+        }
+
+        if (!last_pmove_onground) {
+            if (last_vel_z < -650) {
+                localsound("player/land2.wav", CHAN_AUTO, 1);
+            } else if (last_vel_z < -300) {
+                localsound("player/land.wav", CHAN_AUTO, 1);
+            }
+        }
+    }
+
+    last_vel_z = pmove_vel_z;
+    last_pmove_onground = pmove_onground;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -277,10 +336,84 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             localcmd("cmd tracktarget\n");
             break;
         case "+aux_jump":
+            jump_counter++;
             localcmd("+jump\n");
             break;
         case "-aux_jump":
-            localcmd("-jump\n");
+            jump_counter--;
+
+            if (jump_counter < 0) {
+                jump_counter = 0;
+            }
+
+            if (!jump_counter) {
+                localcmd("-jump\n");
+            }
+
+            break;
+        case "+special":
+            localcmd("+button3\n");
+            break;
+        case "-special":
+            localcmd("-button3\n");
+            break;
+        case "+special2":
+            localcmd("+button4\n");
+            break;
+        case "-special2":
+            localcmd("-button4\n");
+            break;
+        case "+grenade1":
+            localcmd("+button5\n");
+            break;
+        case "-grenade1":
+            localcmd("-button5\n");
+            break;
+        case "+grenade2":
+            localcmd("+button6\n");
+            break;
+        case "-grenade2":
+            localcmd("-button6\n");
+            break;
+        case "+dropflag":
+            localcmd("+button7\n");
+            break;
+        case "-dropflag":
+            localcmd("-button7\n");
+            break;
+        // case "+quick1":
+        //     localcmd("+button8\n");
+        //     break;
+        // case "-quick1":
+        //     localcmd("-button8\n");
+        //     break;
+        // case "+quick2":
+        //     localcmd("+button9\n");
+        //     break;
+        // case "-quick2":
+        //     localcmd("-button9\n");
+        //     break;
+        // case "+quick3":
+        //     localcmd("+button10\n");
+        //     break;
+        // case "-quick3":
+        //     localcmd("-button10\n");
+        //     break;
+        // case "+quick4":
+        //     localcmd("+button11\n");
+        //     break;
+        // case "-quick4":
+        //     localcmd("-button11\n");
+        //     break;
+        case "+rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("+button4\n");
+            }
+            break;
+        case "-rj":
+            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+                localcmd("-button4\n");
+            }
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -289,6 +422,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             RemoveVoteMap(argv(1), TRUE);
             break;
     }
+
     return FALSE;
 };
 
@@ -312,7 +446,21 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
+    local float changed_buttons = input_buttons ^ oldbuttons;
+    oldbuttons = input_buttons;
 
+    local float keydowns = changed_buttons & input_buttons;
+    local float keyups = changed_buttons & ~input_buttons;
+
+    // Intercept rocket jump;
+    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) && input_buttons & BUTTON4) {
+        input_buttons |= BUTTON0 + BUTTON2;
+    }
+
+    // Intercept zoom
+    if (player_class == PC_SNIPER && keydowns & BUTTON3) {
+        zoomed_in = !zoomed_in;
+    }
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
