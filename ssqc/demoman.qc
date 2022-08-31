@@ -153,6 +153,11 @@ void (float timer) TeamFortress_SetDetpack = {
         return;
     }
 
+    if (no_fire_mode) {
+        sprint(self, PRINT_HIGH, "You can't set a detpack right now\n");
+        return;
+    }    
+    
     at_spot = findradius(self.origin, 65);
     while (at_spot != world) {
 
