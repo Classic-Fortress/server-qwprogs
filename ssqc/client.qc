@@ -2110,11 +2110,6 @@ void () PutClientInServer = {
         }
     }
     
-    if(duelmode && duel_spawn_guard) {
-        self.duel_guarded = spot;
-        self.invincible_finished = time + 666;
-    }
-
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
 
@@ -2154,6 +2149,12 @@ void () PutClientInServer = {
     if (self.playerclass == 0 && self.team_no > 0) {
         Menu_Class(0);
     }
+
+    if(duelmode && duel_spawn_guard && self.team_no && self.playerclass) {
+        self.duel_guarded = spot;
+        self.invincible_finished = time + 666;
+    }
+
 };
 
 //void () info_player_start = {
