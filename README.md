@@ -5,10 +5,10 @@ New features
 ------
 
 * Server option to limit `sv_maxclients` to current number of players during quad gametime. `localinfo limit_quad_players 0/1`. Default: `1`.
+* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
 * `+rj` Switches to rocket/incendiary weapon, jumps and shoots. `+aux_jump` is no longer required.
-* `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `dlastspawn` Tells spy to disguise as enemy who last spawned.
 * `setinfo cf_pyro_impulses 1` to swap Pyro's primary and secondary weapons.
 * `setinfo autodisguise 1` Causes spy to `dlastspawn` after spawning or cover blown.
@@ -72,6 +72,8 @@ New features
 * CSQC - fo_hud_editor to move panels and save to config
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
+* Server option for duelmode to allow spawn protection `localinfo duel_spawn_guard 1`/`localinfo dsg 1` - it will not allow any fighting until both players have left the spawn.
+* Server option for duelmode to print winner's health `localinfo duel_print_health 1`/`localinfo dph 1`
 * Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
 * Server option to remove packs in duel mode `localinfo duel_no_packs 1`/`localinfo dnp 1`
 * Server setting for duelmode reset delay `localinfo drd 0.5` (`localinfo duel_reset_delay 0.5`)

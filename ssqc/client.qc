@@ -733,6 +733,10 @@ void () DecodeLevelParms = {
         duel_all_grens = CF_GetSetting("dag", "duel_all_grens", "0");
         // After a duel round, print the winners' health stats
         round_winner_print_health = CF_GetSetting("dph", "duel_print_health", "0");
+        // After respawning in duel mode, nobody shoots until
+        // 0 - immediately
+        // 1 - all players have moved away from spawn
+        duel_spawn_guard = CF_GetSetting("dsg", "duel_spawn_guard", "1");
         
         //Proportion required to trigger a map change
         vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
@@ -1438,6 +1442,45 @@ void (string cn) RemoveAllEntsByClassname = {
     }
 }
 
+void () spawn_guard_think = {
+    local entity te;
+    local float no_fire = 0;
+    te = find(world, classname, "player");
+	while (te != world) {
+		if(!te.has_disconnected) {
+            if(te.duel_guarded != world) {
+                if(vlen(te.duel_guarded.origin - te.origin) > 200) {
+                    te.duel_guarded = world;
+                    te.invincible_finished = 0;
+                    te.invincible_time = 0;
+                    te.effects = 0;
+                    bprint(PRINT_HIGH, te.netname, " \bhas left the spawn!\b\n");
+                } else {
+                    no_fire++;
+                }
+            }
+        }
+		te = find (te, classname, "player");
+	}
+    self.nextthink = time + 0.1;
+	if(!no_fire) {
+        no_fire_mode = 0;
+        bprint(PRINT_HIGH, "\bFIGHT!\b\n");
+        FO_Sound(world, CHAN_ITEM, "fight.wav", 1, ATTN_NONE);
+        self.think = SUB_Remove;
+    }
+};
+
+void () StartSpawnGuard = {
+    no_fire_mode = 1;
+    entity reset_timer = spawn();
+    reset_timer.classname = "spawn_guard_check";
+    reset_timer.think = spawn_guard_think;
+    reset_timer.nextthink = time + 0.1;
+    bprint(PRINT_HIGH, "\bLeave the spawn to begin!\b\n");
+    FO_Sound(world, CHAN_ITEM, "come_get.wav", 1, ATTN_NONE);
+};
+
 void () ResetPlayers = {
     local entity te, oldself, reset_timer;
     local float teamsleft;
@@ -1479,6 +1522,11 @@ void () ResetPlayers = {
     RemoveAllEntsByClassname("pyro_rocket");
     RemoveAllEntsByClassname("proj_tranq");
    
+    if(duelmode && duel_spawn_guard) {
+        StartSpawnGuard();
+        precache_sound("get_some.wav");
+        precache_sound("fight.wav");
+    }
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
@@ -2116,6 +2164,11 @@ void () PutClientInServer = {
             spot.nextthink = time + 1;
             spot.think = SUB_Remove;
         }
+    }
+    
+    if(duelmode && duel_spawn_guard) {
+        self.duel_guarded = spot;
+        self.invincible_finished = time + 666;
     }
 
     setmodel(self, string_null);

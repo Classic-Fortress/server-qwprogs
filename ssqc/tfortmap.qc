@@ -297,7 +297,9 @@ void () TF_PlaceGoal = {
 
     if (self.classname != "info_tfgoal_timer") {
         if (self.goal_activation & TFGA_TOUCH) {
-            self.touch = tfgoal_touch;
+            if(!duelmode || !duel_no_packs) {
+                self.touch = tfgoal_touch;
+            }
         }
     } else {
         self.think = tfgoal_timer_tick;
@@ -2101,6 +2103,8 @@ void () tfgoal_touch = {
     if (cb_prematch)
         return;
     if (self.goal_state == TFGS_ACTIVE)
+        return;
+    if(duelmode && duel_no_packs)
         return;
 
     if (CTF_Map == 1) {

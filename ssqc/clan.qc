@@ -89,7 +89,7 @@ void () StartMatch =
 			dremove(te.observer_list);
 		}
 		dremove(te.linked_list);
-		dremove(te);
+		dremove(te); //remove before finding next?
 		te = find (te, classname, "detpack");
 	}
 	if(duelmode && duel_no_packs) {
@@ -161,6 +161,9 @@ void () StartMatch =
         }
     }
     if (duelmode) {
+        if(duel_spawn_guard) {
+            StartSpawnGuard();
+        }
         //ResetPlayers();
         CountMatchPlayersAndReset();
     }
