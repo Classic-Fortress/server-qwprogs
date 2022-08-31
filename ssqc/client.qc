@@ -1468,7 +1468,7 @@ void () ResetPlayers = {
     RemoveAllEntsByClassname("pyro_rocket");
     RemoveAllEntsByClassname("proj_tranq");
    
-    if(duel_spawn_guard) {
+    if(duelmode && duel_spawn_guard) {
         StartSpawnGuard();
         precache_sound("get_some.wav");
         precache_sound("fight.wav");
@@ -2110,7 +2110,7 @@ void () PutClientInServer = {
         }
     }
     
-    if(duel_spawn_guard) {
+    if(duelmode && duel_spawn_guard) {
         self.duel_guarded = spot;
         self.invincible_finished = time + 666;
     }
