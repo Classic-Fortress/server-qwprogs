@@ -401,6 +401,7 @@ float num_world_flames;
 .string undercover_name;
 .entity attacked_by;            // Used by spy feign death to produce a fake death message
 .float feignmsg;                // Stores the death message to be used when feigning
+.float next_feign_time;         // timestamp for when feign is next allowed
 
 float live_camera;
 .float camdist;
@@ -560,6 +561,7 @@ float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
+float feign_rate_limit;
 float scoutdash;
 float sniperreload;
 float spawnfull;
