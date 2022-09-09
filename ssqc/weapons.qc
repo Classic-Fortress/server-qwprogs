@@ -64,6 +64,7 @@ void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
+void (float issilent) FO_Spy_FeignCmd;
 void (float issilent) FO_Spy_ToggleFeign;
 void () FO_Engineer_ToggleDispenser;
 void () FO_Engineer_ToggleSentry;
@@ -3147,11 +3148,11 @@ void () ImpulseCommands = {
         else
             Menu_Spy_Skin();
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
-        CF_Spy_FeignDeath(0);
+        FO_Spy_FeignCmd(0);
     else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
         FO_Spy_FeignOnNextDamage();
     } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
-        CF_Spy_FeignDeath(1);
+        FO_Spy_FeignCmd(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
         CF_Spy_ChangeSkin(self, 8);
         CF_Spy_ChangeColor(self, self.team_no);

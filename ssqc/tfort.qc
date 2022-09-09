@@ -1568,6 +1568,7 @@ void () TeamFortress_SetEquipment = {
     self.airblast_cooldown = 0;
     self.is_undercover = 0;
     self.is_feigning = 0;
+    self.next_feign_time = 0;
     self.is_unabletospy = 0;
     self.is_concussed = 0;
     self.disguise_skin = 0;

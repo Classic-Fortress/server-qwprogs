@@ -682,7 +682,7 @@ void (entity targ, entity inflictor, entity attacker, float damage,
     }
 
     if (self.feign_next_damage && !self.is_feigning){
-        FO_Spy_Feign(0);
+        FO_Spy_Feign(0, /* ignore rate-limit */ 1);
     }
 
     self = oldself;

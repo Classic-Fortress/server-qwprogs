@@ -4,11 +4,9 @@
 
 void (entity pe_player, float pf_class) CF_Spy_ChangeSkin;
 void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor;
-void (float issilent) CF_Spy_FeignDeath;
-void (float issilent) FO_Spy_Feign;
+void (float issilent, float force) FO_Spy_Feign;
 void () FO_Spy_FeignOnNextDamage;
 void () FO_Spy_Unfeign;
-void (float issilent) CF_Spy_FeignDeath;
 void () CF_Spy_Invisible;
 void () CF_Spy_DisguiseStop;
 
@@ -586,7 +584,7 @@ void (float inp) Menu_Spy_Input = {
     } else if (inp == 2 && !invis_only) {
         FO_Spy_DisguiseLast(self);
     } else if (inp == 3) {
-        CF_Spy_FeignDeath(1);
+        FO_Spy_Feign(1, 0);
         if (self.is_feigning) {
             Menu_Spy(self);
         }
