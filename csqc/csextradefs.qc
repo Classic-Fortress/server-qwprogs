@@ -1,5 +1,10 @@
 #include "../share/defs.h"
 
+#define DEFCVAR_FLOAT(n,d) var float autocvar_##n = d;
+#define DEFCVAR_STRING(n,d) var string autocvar_##n = d;
+#define CVARF(n) autocvar_##n
+#define CVARS(n) autocvar_##n
+
 vector MENU_BG = '0.2 0.3 0.4';
 vector MENU_BG_DARK = '0.1 0.15 0.2';
 vector MENU_BORDER = '0.3 0.4 0.5';
@@ -519,7 +524,9 @@ enum {
 #define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
 #define FOCMD_JUMPVOLUME "fo_jumpvolume"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
-#define FOCMD_FTE_HUD "fo_fte_hud"
+
+DEFCVAR_FLOAT(fo_fte_hud, 0);
+DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 
 float team_no;
 float is_spectator;
