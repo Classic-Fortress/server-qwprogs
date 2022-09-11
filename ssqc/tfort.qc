@@ -776,8 +776,6 @@ void () TeamFortress_ShowTF = {
     }
 };
 
-void () TeamFortress_GrenadePrimed;
-
 void () GrenadeTimer = {
     self.heat = self.heat - 1;
     self.nextthink = time + 1;
@@ -788,6 +786,137 @@ void () GrenadeTimer = {
         dremove(self);
     }
 };
+
+void (entity timer) FO_SpawnThrownGrenade = {
+    local entity user = timer.owner;
+    user.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
+
+    if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
+        UpdateClientGrenadeThrown(user);
+    }
+
+    FO_Sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+    KickPlayer(-1, user);
+    newmis = spawn();
+    newmis.owner = user;
+    newmis.movetype = 10;
+    newmis.solid = 2;
+    newmis.classname = "grenade";
+    makevectors(user.v_angle);
+    if (user.deadflag) {
+        if (timer.weapon == GR_TYPE_NORMAL)
+            newmis.velocity = '0 0 200';
+        else
+            return;
+    } else if (user.v_angle_x) {
+        newmis.velocity =
+            v_forward * 600 + v_up * 200 + crandom() * v_right * 10 +
+            crandom() * v_up * 10;
+    } else {
+        newmis.velocity = aim(user, 10000);
+        newmis.velocity = newmis.velocity * 600;
+        newmis.velocity_z = 200;
+    }
+    newmis.angles = vectoangles(newmis.velocity);
+    newmis.think = SUB_Null;
+    newmis.nextthink = timer.heat;
+
+    if (timer.weapon == GR_TYPE_NORMAL) {
+        newmis.touch = NormalGrenadeTouch;
+        newmis.think = NormalGrenadeExplode;
+        newmis.grenadename = "normalgrenade";
+        newmis.skin = 0;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (timer.weapon == GR_TYPE_CONCUSSION) {
+        newmis.touch = ConcussionGrenadeTouch;
+        newmis.think = ConcussionGrenadeExplode;
+        newmis.grenadename = "concussiongrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/hgren2.mdl");
+    } else if (timer.weapon == GR_TYPE_BLAST) {
+        newmis.touch = BlastGrenadeTouch;
+        newmis.think = BlastGrenadeExplode;
+        newmis.grenadename = "blastgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/blastgren.mdl");
+    } else if (timer.weapon == GR_TYPE_NAIL) {
+        newmis.touch = NailGrenadeTouch;
+        newmis.think = NailGrenadeExplode;
+        newmis.grenadename = "nailgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (timer.weapon == GR_TYPE_SHOCK) {
+        newmis.touch = ShockGrenadeTouch;
+        newmis.think = ShockGrenadeExplode;
+        newmis.grenadename = "shockgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (timer.weapon == GR_TYPE_BURST) {
+        newmis.touch = BurstGrenadeTouch;
+        newmis.think = BurstGrenadeExplode;
+        newmis.grenadename = "burstgrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (timer.weapon == GR_TYPE_MIRV) {
+        newmis.touch = MirvGrenadeTouch;
+        newmis.think = MirvGrenadeExplode;
+        newmis.grenadename = "mirvgrenade";
+        newmis.skin = 0;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (timer.weapon == GR_TYPE_NAPALM) {
+        newmis.touch = NapalmGrenadeTouch;
+        newmis.think = NapalmGrenadeExplode;
+        newmis.grenadename = "napalmgrenade";
+        newmis.skin = 2;
+        newmis.avelocity = '0 300 0';
+        FO_SetModel(newmis, "progs/biggren.mdl");
+    } else if (timer.weapon == GR_TYPE_FLARE) {
+        newmis.touch = FlareGrenadeTouch;
+        newmis.weapon = timer.team_no;
+        newmis.think = FlareGrenadeExplode;
+        newmis.grenadename = "flaregrenade";
+        newmis.skin = 1;
+        newmis.avelocity = '300 300 300';
+        newmis.mdl = "flare";
+        FO_SetModel(newmis, "progs/flare.mdl");
+    } else if (timer.weapon == GR_TYPE_GAS) {
+        newmis.touch = GasGrenadeTouch;
+        newmis.think = GasGrenadeExplode;
+        newmis.grenadename = "gasgrenade";
+        newmis.skin = 3;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/grenade2.mdl");
+    } else if (timer.weapon == GR_TYPE_EMP) {
+        newmis.touch = EMPGrenadeTouch;
+        newmis.think = EMPGrenadeExplode;
+        newmis.grenadename = "empgrenade";
+        newmis.skin = 4;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/grenade2.mdl");
+    } else if (timer.weapon == GR_TYPE_CALTROP) {
+        newmis.touch = CanisterTouch;
+        newmis.think = ScatterCaltrops;
+        newmis.grenadename = "caltropgrenade";
+        newmis.skin = 0;
+        newmis.avelocity = '0 0 0';
+    } else if (timer.weapon == GR_TYPE_FLASH) {
+        newmis.touch = FlashGrenadeTouch;
+        newmis.think = FlashGrenadeExplode;
+        newmis.grenadename = "flashgrenade";
+        newmis.skin = 0;
+        newmis.avelocity = '300 300 300';
+        FO_SetModel(newmis, "progs/flashgren.mdl");
+    }
+    setsize(newmis, '0 0 0', '0 0 0');
+    setorigin(newmis, user.origin);
+}
 
 void (float inp) TeamFortress_PrimeThrowGrenade = {
     if ((self.tfstate & TFSTATE_GRENPRIMED) ||
@@ -801,6 +930,10 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
         TeamFortress_ThrowGrenade();
     }
 };
+
+void () TeamFortress_GrenadePrimedThink;
+void () FO_PreciseGrenadeThink;
+float () FO_UsePreciseGrenades;
 
 void (float inp) TeamFortress_PrimeGrenade = {
     local float gtype;
@@ -956,7 +1089,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             return;
         }
     }
-    self.tfstate = self.tfstate | 1;
+    self.tfstate = self.tfstate | TFSTATE_GRENPRIMED;
     tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
@@ -992,10 +1125,14 @@ void (float inp) TeamFortress_PrimeGrenade = {
         }
     }
 
-    tGrenade.think = TeamFortress_GrenadePrimed;
+    if (FO_UsePreciseGrenades())
+        tGrenade.think = FO_PreciseGrenadeThink;
+    else
+        tGrenade.think = TeamFortress_GrenadePrimedThink;
+    self.grenade_timer = tGrenade;
 };
 
-void () TeamFortress_GrenadePrimed = {
+void () TeamFortress_GrenadePrimedThink = {
     local entity user;
 
     user = self.owner;
@@ -1012,141 +1149,68 @@ void () TeamFortress_GrenadePrimed = {
     if (!(user.tfstate & TFSTATE_GRENPRIMED))
         dprint("GrenadePrimed logic error\n");
 
-    user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENPRIMED);
-    user.tfstate = user.tfstate - (user.tfstate & TFSTATE_GRENTHROWING);
-    if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
-        UpdateClientGrenadeThrown(user);
-    }
-
-    FO_Sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-    KickPlayer(-1, user);
-    newmis = spawn();
-    newmis.owner = user;
-    newmis.movetype = 10;
-    newmis.solid = 2;
-    newmis.classname = "grenade";
-    makevectors(user.v_angle);
-    if (user.deadflag) {
-        if (self.weapon == GR_TYPE_NORMAL)
-            newmis.velocity = '0 0 200';
-        else
-            return;
-    } else if (user.v_angle_x) {
-        newmis.velocity =
-            v_forward * 600 + v_up * 200 + crandom() * v_right * 10 +
-            crandom() * v_up * 10;
-    } else {
-        newmis.velocity = aim(user, 10000);
-        newmis.velocity = newmis.velocity * 600;
-        newmis.velocity_z = 200;
-    }
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.think = SUB_Null;
-    newmis.nextthink = self.heat;
-
-    if (self.weapon == GR_TYPE_NORMAL) {
-        newmis.touch = NormalGrenadeTouch;
-        newmis.think = NormalGrenadeExplode;
-        newmis.grenadename = "normalgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (self.weapon == GR_TYPE_CONCUSSION) {
-        newmis.touch = ConcussionGrenadeTouch;
-        newmis.think = ConcussionGrenadeExplode;
-        newmis.grenadename = "concussiongrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (self.weapon == GR_TYPE_BLAST) {
-        newmis.touch = BlastGrenadeTouch;
-        newmis.think = BlastGrenadeExplode;
-        newmis.grenadename = "blastgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/blastgren.mdl");
-    } else if (self.weapon == GR_TYPE_NAIL) {
-        newmis.touch = NailGrenadeTouch;
-        newmis.think = NailGrenadeExplode;
-        newmis.grenadename = "nailgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_SHOCK) {
-        newmis.touch = ShockGrenadeTouch;
-        newmis.think = ShockGrenadeExplode;
-        newmis.grenadename = "shockgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_BURST) {
-        newmis.touch = BurstGrenadeTouch;
-        newmis.think = BurstGrenadeExplode;
-        newmis.grenadename = "burstgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_MIRV) {
-        newmis.touch = MirvGrenadeTouch;
-        newmis.think = MirvGrenadeExplode;
-        newmis.grenadename = "mirvgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_NAPALM) {
-        newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
-        newmis.grenadename = "napalmgrenade";
-        newmis.skin = 2;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_FLARE) {
-        newmis.touch = FlareGrenadeTouch;
-        newmis.weapon = self.team_no;
-        newmis.think = FlareGrenadeExplode;
-        newmis.grenadename = "flaregrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        newmis.mdl = "flare";
-        FO_SetModel(newmis, "progs/flare.mdl");
-    } else if (self.weapon == GR_TYPE_GAS) {
-        newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
-        newmis.grenadename = "gasgrenade";
-        newmis.skin = 3;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (self.weapon == GR_TYPE_EMP) {
-        newmis.touch = EMPGrenadeTouch;
-        newmis.think = EMPGrenadeExplode;
-        newmis.grenadename = "empgrenade";
-        newmis.skin = 4;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (self.weapon == GR_TYPE_CALTROP) {
-        newmis.touch = CanisterTouch;
-        newmis.think = ScatterCaltrops;
-        newmis.grenadename = "caltropgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '0 0 0';
-    } else if (self.weapon == GR_TYPE_FLASH) {
-        newmis.touch = FlashGrenadeTouch;
-        newmis.think = FlashGrenadeExplode;
-        newmis.grenadename = "flashgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/flashgren.mdl");
-    }
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, user.origin);
+    FO_SpawnThrownGrenade(self);
     dremove(self);
 };
 
+float () FO_UsePreciseGrenades = {
+    return FO_GetUserSetting(self, "precise_grenades", "pg", "off");
+}
+
+void () FO_PreciseGrenadeThink = {
+    local entity user = self.owner;
+
+    // Claim: These cases do not exist for FO; to be removed once proven true.
+    if (user.deadflag || user.has_disconnected) {
+        dprint("BUG: saw deadflag / disconnected in PreciseGrenadePrimed\n");
+        dremove(self);
+        return;
+    }
+
+    // This timer fires at most 2 times:
+    // - Once at 0.8s, this is the first time you are allowed to throw.  We catch
+    // GRENTHROWING which latches this state for throws before this point.
+    // - A second time at the grenade's expiration for the case it was not thrown.
+    // We remove the timer if the client throws before expiration.
+    if (time < self.heat) {
+        if (user.tfstate & TFSTATE_GRENTHROWING) {  // Latched throw case.
+            FO_SpawnThrownGrenade(self);
+            dremove(self);
+        } else {
+            // If this fires, we never threw.
+            self.nextthink = self.heat;
+        }
+    } else {
+        TeamFortress_ExplodePerson();
+        dremove(self);
+    }
+}
+
+void () FO_ThrowPreciseGrenade = {
+    local entity timer = self.grenade_timer;
+    if (timer.nextthink != timer.heat || timer.heat - time < 0.1) {
+        // We do not allow throwing within the first second, or the last 0.1.
+        // The former is a priming time, the latter is so that client side
+        // knockback will be able to reliably predict whether a grenade was held
+        // (e.g. gren jump) or thrown up to ~200ms ping.
+        //
+        // In the first case, we've set THROWING so think will handle.
+        // In the second, buckle up.
+    } else {
+        FO_SpawnThrownGrenade(timer);
+        dremove(timer);
+    }
+}
+
 void () TeamFortress_ThrowGrenade = {
-    if (!(self.tfstate & TFSTATE_GRENPRIMED))
+    if (!(self.tfstate & (TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING)))
         return;
 
-    self.tfstate = self.tfstate | TFSTATE_GRENTHROWING;
+    self.tfstate |= TFSTATE_GRENTHROWING;
+    // While this is controlled by localinfo, it's a per-grenade value.
+    if (FO_UsePreciseGrenades() &&
+        self.grenade_timer.think == FO_PreciseGrenadeThink)
+        FO_ThrowPreciseGrenade();
 };
 
 void () TeamFortress_GrenadeSwitch = {
@@ -2877,7 +2941,7 @@ void () TeamFortress_AssaultWeapon = {
 void () TeamFortress_ExplodePerson = {
     local entity te;
 
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & 1);
+    self.owner.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
     KickPlayer(-2, self.owner);
 
     newmis = spawn();

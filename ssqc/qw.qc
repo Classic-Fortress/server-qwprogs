@@ -759,6 +759,9 @@ float canlog;
 float FO_FlashDimension;
 .float old_dimension_seen;
 
+// precise grenades
+.entity grenade_timer;
+
 // allow for default goal state
 .float default_group_no;
 // classes to search for in goal remove, restore etc
