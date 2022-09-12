@@ -77,8 +77,9 @@ void () StartMatch =
     gren = find(world, classname, "grenade");
     while (gren)
     {
-        gren.think = GrenadeExplode;
-        gren.nextthink = (time + 0.1);
+        //gren.think = GrenadeExplode;
+        //gren.nextthink = (time + 0.1);
+        dremove(gren);
         gren = find(gren, classname, "grenade");
     }
 	te = find(world, classname, "detpack");
@@ -89,7 +90,7 @@ void () StartMatch =
 			dremove(te.observer_list);
 		}
 		dremove(te.linked_list);
-		dremove(te); //remove before finding next?
+		dremove(te);
 		te = find (te, classname, "detpack");
 	}
 	if(duelmode && duel_no_packs) {

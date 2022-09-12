@@ -72,6 +72,10 @@ New features
 * CSQC - fo_hud_editor to move panels and save to config
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
+* Server option for duelmode to allow draws on a double-ko `localinfo duel_allow_draw 1`/`localinfo dad 1` (default 1)
+* Server option for duelmode to force a tie-break based on difference `localinfo duel_tie_break X`/`localinfo dtb X` (default 2)
+* Server option for duelmode to force a countdown even if there is a double-kill `localinfo duel_draw_countdown 1`/`localinfo ddc 1` (default 1). If 0, both will respawn immediately upon the second player's death.
+* Server option for duelmode to allow players to autoprime as soon as they are able `localinfo duel_autoprime 1`/`localinfo dap `. (default 0). Will only autoprime for players who have set `setinfo dap 1`
 * Server option for duelmode to allow spawn protection `localinfo duel_spawn_guard 1`/`localinfo dsg 1` - it will not allow any fighting until both players have left the spawn.
 * Server option for duelmode to print winner's health `localinfo duel_print_health 1`/`localinfo dph 1`
 * Server option for duelmode to respawn with all grens `localinfo duel_all_grens 1`/`localinfo dag 1`
