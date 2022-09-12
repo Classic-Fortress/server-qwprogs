@@ -7,6 +7,7 @@ void (entity Goal, entity AP, float addb) DoResults;
 float (entity Goal, entity AP) Activated;
 float (entity targ, entity attacker, float damage) TeamEqualiseDamage;
 float () CountRemainingTeams;
+void () CheckRules;
 
 void () monster_death_use = {
     if (self.flags & FL_FLY)
@@ -128,7 +129,9 @@ void (entity targ, entity attacker) Killed = {
         //Already in no fire mode - implies you're not the first to die
         if(no_fire_mode) {
             if(CountRemainingTeams() == 0) {
-                ResetPlayers();
+                if(!duel_draw_countdown) {
+                    ResetPlayers();
+                }
             }
         } else {
             if(CountRemainingTeams() < 2) {
