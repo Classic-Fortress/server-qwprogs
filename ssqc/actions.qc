@@ -75,6 +75,7 @@ void () TeamFortress_Discard = {
         default:
     }
     if ((newmis.ammo_rockets + newmis.ammo_cells + newmis.ammo_nails + newmis.ammo_shells) == 0) {
+        remove(newmis);
         return;
     }
 

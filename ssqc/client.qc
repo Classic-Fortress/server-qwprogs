@@ -69,6 +69,7 @@ void () InitReverseCap;
 float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
+void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
 void (float n) CSEv_SetPlayerImpulse_f = {
@@ -531,6 +532,9 @@ void () DecodeLevelParms = {
         // print fake death message when feigning death [on]
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
+        // rate limit on feign
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "5");
+
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
 	
@@ -737,6 +741,16 @@ void () DecodeLevelParms = {
         // 0 - immediately
         // 1 - all players have moved away from spawn
         duel_spawn_guard = CF_GetSetting("dsg", "duel_spawn_guard", "1");
+        // If 0, first to reach fraglimit wins
+        // If 1, a double-ko (with delay) will end the match in a draw
+        duel_allow_draw = CF_GetSetting("dad", "duel_allow_draw", "1");
+        // Sets the number of frags difference required to break a tie after a double-ko upon fraglimit
+        duel_tie_break = CF_GetSetting("dtb", "duel_tie_break", "2");
+        // If 0, in case of a double-ko, reset immediately
+        // If 1, round countdown always happens, even with a double-ko
+        duel_draw_countdown = CF_GetSetting("ddc", "duel_draw_countdown", "1");
+        // If 1, clients that have 'setinfo dap 1' will prime a gren as soon as they leave spawn
+        duel_autoprime = CF_GetSetting("dap", "duel_autoprime", "0");
         
         //Proportion required to trigger a map change
         vote_threshold = CF_GetSetting("vt", "vote_threshold", "0.5");
@@ -1443,7 +1457,7 @@ void (string cn) RemoveAllEntsByClassname = {
 }
 
 void () spawn_guard_think = {
-    local entity te;
+    local entity te, oldself;
     local float no_fire = 0;
     te = find(world, classname, "player");
 	while (te != world) {
@@ -1455,6 +1469,7 @@ void () spawn_guard_think = {
                     te.invincible_time = 0;
                     te.effects = 0;
                     bprint(PRINT_HIGH, te.netname, " \bhas left the spawn!\b\n");
+                    FO_Sound(world, CHAN_AUTO, "misc/basekey.wav", 1, ATTN_NONE);
                 } else {
                     no_fire++;
                 }
@@ -1466,8 +1481,20 @@ void () spawn_guard_think = {
 	if(!no_fire) {
         no_fire_mode = 0;
         bprint(PRINT_HIGH, "\bFIGHT!\b\n");
-        FO_Sound(world, CHAN_ITEM, "fight.wav", 1, ATTN_NONE);
+        FO_Sound(world, CHAN_AUTO, "fight.wav", 1, ATTN_NONE);
         self.think = SUB_Remove;
+        if(duel_autoprime) {
+            te = find(world, classname, "player");
+            while (te != world) {
+                if(!te.has_disconnected && infokey(te, "dap") == "1") {
+                    oldself = self;
+                    self = te;
+                    TeamFortress_PrimeGrenade(1);
+                    self = oldself;
+                }
+                te = find (te, classname, "player");
+            }
+        }
     }
 };
 
@@ -1478,13 +1505,29 @@ void () StartSpawnGuard = {
     reset_timer.think = spawn_guard_think;
     reset_timer.nextthink = time + 0.1;
     bprint(PRINT_HIGH, "\bLeave the spawn to begin!\b\n");
-    FO_Sound(world, CHAN_ITEM, "come_get.wav", 1, ATTN_NONE);
+    FO_Sound(world, CHAN_AUTO, "come_get.wav", 1, ATTN_NONE);
 };
 
+void () DuelFinish = {
+    FO_Sound(world, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NONE);
+    NextLevel();
+    RemoveGrenadeTimers();
+    RemovePrimeTimers();
+    RemoveGrenades();
+};
+
+void (entity winner) DuelWin = {
+    bprint(PRINT_HIGH, "\sDuel over!\s ", winner.netname,  " \sis victorious!\s\n");
+    DuelFinish();
+};
+
+
 void () ResetPlayers = {
-    local entity te, oldself, reset_timer;
+    local entity te, oldself, reset_timer, winner = world;
     local float teamsleft;
+    local float maxscore = 0, nextscore = 0;
     no_fire_mode = 0;
+
     reset_timer = find(world, classname, "duel_reset_timer");
     while (reset_timer != world) {
         oldself = reset_timer;
@@ -1493,6 +1536,8 @@ void () ResetPlayers = {
     }
     if(cb_prematch)
         return;
+
+    TeamFortress_TeamShowScores(2);
 
     teamsleft = CountRemainingTeams();
     if(teamsleft == 1) {
@@ -1508,7 +1553,6 @@ void () ResetPlayers = {
     } else if(teamsleft == 0) {
         bprint(PRINT_HIGH, "Everybody died! It's a draw.\n");
     }
-    TeamFortress_TeamShowScores(2);
     
     RemoveAllEntsByClassname("proj_bullet");
     RemoveAllEntsByClassname("proj_rocket");
@@ -1522,31 +1566,68 @@ void () ResetPlayers = {
     RemoveAllEntsByClassname("pyro_rocket");
     RemoveAllEntsByClassname("proj_tranq");
    
-    if(duelmode && duel_spawn_guard) {
-        StartSpawnGuard();
-        precache_sound("get_some.wav");
-        precache_sound("fight.wav");
-    }
     te = find(world, classname, "player");
 	while (te != world) {
 		if(!te.has_disconnected) {
             if(te.health > 0) {
                 stuffcmd(te, "f_respawn\n");
                 if(round_winner_print_health) {
-                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmor:\s " , ftos(te.armorvalue), "\n");
+                    bprint(PRINT_HIGH, te.netname, ": \sHealth:\s ", ftos(te.health), " \sArmour:\s " , ftos(te.armorvalue), "\n");
                 }
             }
             oldself = self;
             self = te;
+            if(duelmode && duel_allow_draw && fraglimit) {
+                //if(duel_tie_break > 0) {
+                    if(maxscore <= te.frags) {
+                        nextscore = maxscore;
+                        maxscore = te.frags;
+                        winner = te;
+                    }
+                //} else if (te.frags >= fraglimit) {
+                //    DuelWin(te);
+                //    return;
+                //}
+            }            
             RemovePlayerOwnedEnts();
             setspawnparms(self);
             PutClientInServer();
             self.respawn_time = 0;
-            
             self = oldself;
         }
 		te = find (te, classname, "player");
 	}
+    if(duelmode && duel_allow_draw) {
+        if(fraglimit) {
+            if(duel_tie_break > 0) {
+                if(maxscore == fraglimit && maxscore == nextscore) {
+                    bprint(PRINT_HIGH, "\sFraglimit reached, but the fight's not over!\s\n\sYou must reach\s ", ftos(duel_tie_break), " \sfrag difference to win!\s\n");
+                    FO_Sound(world, CHAN_AUTO, "items/suit.wav", 1, ATTN_NONE);
+                }
+                if((maxscore >= fraglimit && nextscore < fraglimit) || (maxscore > fraglimit && maxscore >= (nextscore + duel_tie_break) )) {
+                    DuelWin(winner);
+                    return;
+                }
+            } else {
+                if(maxscore >= fraglimit) {
+                    if(maxscore == nextscore) {
+                        bprint(PRINT_HIGH, "\sDuel over! It is a\s DRAW\s!\s\n");
+                        DuelFinish();
+                    } else {
+                        DuelWin(winner);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+    
+    if(duelmode && duel_spawn_guard) {
+        StartSpawnGuard();
+        precache_sound("get_some.wav");
+        precache_sound("fight.wav");
+    }
+
 }
 
 float () CountRemainingTeams = {
@@ -2166,11 +2247,6 @@ void () PutClientInServer = {
         }
     }
     
-    if(duelmode && duel_spawn_guard) {
-        self.duel_guarded = spot;
-        self.invincible_finished = time + 666;
-    }
-
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
 
@@ -2211,6 +2287,10 @@ void () PutClientInServer = {
         Menu_Class(0);
     }
 
+    if(duelmode && duel_spawn_guard && self.team_no && self.playerclass) {
+        self.duel_guarded = spot;
+        self.invincible_finished = time + 666;
+    }
 
     local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
     if (self.playerclass == PC_SPY) {
@@ -2636,7 +2716,7 @@ void () PlayerPreThink = {
     }
 
     // Check if timelimit/fraglimit has been met
-    if(!votemode) CheckRules();
+    if(!votemode && !(duelmode && duel_allow_draw)) CheckRules();
 
     if (self.playerclass != 0 || votemode) {
         WaterMove();

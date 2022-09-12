@@ -401,6 +401,7 @@ float num_world_flames;
 .string undercover_name;
 .entity attacked_by;            // Used by spy feign death to produce a fake death message
 .float feignmsg;                // Stores the death message to be used when feigning
+.float next_feign_time;         // timestamp for when feign is next allowed
 
 float live_camera;
 .float camdist;
@@ -467,6 +468,10 @@ float duel_all_grens;
 float duel_no_packs;
 float duel_spawn_guard;
 .entity duel_guarded;
+float duel_allow_draw;
+float duel_tie_break;
+float duel_draw_countdown;
+float duel_autoprime;
 float votemode;
 float voting_started;
 float voting_expires;
@@ -560,6 +565,7 @@ float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
+float feign_rate_limit;
 float scoutdash;
 float sniperreload;
 float spawnfull;
@@ -756,6 +762,9 @@ float canlog;
 // flash stuff
 float FO_FlashDimension;
 .float old_dimension_seen;
+
+// precise grenades
+.entity grenade_timer;
 
 // allow for default goal state
 .float default_group_no;
