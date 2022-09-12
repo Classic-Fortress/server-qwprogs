@@ -1,4 +1,7 @@
 void () InitBodyQue;
+void () CheckTrackedSettings;
+void () TerminateStaleServer;
+
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
 void () main = {
@@ -93,6 +96,8 @@ void () worldspawn = {
 
     lastspawn = world;
     number_of_teams = 0;
+    quad_maxplayers = 0;
+
     InitBodyQue();
     if (self.model == "maps/e1m8.bsp")
         cvar_set("sv_gravity", "100");
@@ -104,6 +109,13 @@ void () worldspawn = {
     cvar_set("sv_waterfriction", "1");
     if (teamplay == 0)
         cvar_set("teamplay", "1");
+
+    if (infokey(world, "starttime") == string_null) {
+        calltimeofday();
+        string timestamp = strcat(tod_year, tod_mon, tod_day, tod_hour, tod_min, tod_sec);
+        localcmd(strcat("serverinfo starttime \"", timestamp, "\"\n"));
+    }
+
     localcmd("serverinfo fo_rev \"");
     localcmd(REV);
     localcmd("\"\n");
@@ -259,6 +271,8 @@ void () worldspawn = {
     precache_model2("progs/grenade2.mdl");
     precache_model2("progs/v_grap.mdl");
     precache_model2("progs/caltrop.mdl");
+    precache_model2("progs/deathbag.mdl");
+    precache_model2("progs/discard.mdl");
     precache_sound("doors/baseuse.wav");
     precache_sound("doors/medtry.wav");
     precache_sound2("speech/saveme1.wav");
@@ -317,13 +331,15 @@ void () worldspawn = {
     lightstyle(63, "a");
 
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
-    clientstat(STAT_READY, EV_FLOAT, is_ready);
+    clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
     clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
     clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
+
+    globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -358,6 +374,15 @@ void () worldspawn = {
     }
 
     dimension_send = DMN_NOFLASH;
+
+    settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
+    for (float i = 0; i < settings_to_track_list.length; i++)
+    {
+        settings_to_track[i].setting_name = settings_to_track_list[i];
+        string val = infokey(world, settings_to_track_list[i]);
+        val = (val != "") ? val : "unset";
+        settings_to_track[i].value = val;
+    }
 };
 
 void () StartFrame = {
@@ -366,10 +391,11 @@ void () StartFrame = {
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
     framecount = framecount + 1;
-//    if(!votemode) {
-//        //TODO: make this optional
-//        Vote_Check();
-//    }
+
+    if (framecount % 77 == 0) {
+        CheckTrackedSettings();
+        TerminateStaleServer();
+    }
 };
 
 entity bodyque_head;
@@ -423,3 +449,29 @@ void(void() fnc)CheckSpawn = {
         remove(self);
     }
 };
+
+void () CheckTrackedSettings = {
+    for (float i = 0; i < settings_to_track_list.length; i++)
+    {
+        setting_t* s = &settings_to_track[i];
+        string new_val = infokey(world, s.setting_name);
+        if (new_val != s.value)
+        {
+            bprint(PRINT_HIGH, "Setting ", s.setting_name, " has been changed from ", s.value, " to ", new_val, "\n");
+            s.value = new_val;
+        }
+    }
+}
+
+void () TerminateStaleServer = {
+    if (gettime() < 86400)
+        return;
+
+    for (entity e = world; (e = find(e, classname, "player")); ) {
+        if (!e.has_disconnected)
+            return; //someone is around
+    }
+
+    dprint("Terminating empty server with more than 24 hours uptime\n");
+    localcmd("quit\n");
+}

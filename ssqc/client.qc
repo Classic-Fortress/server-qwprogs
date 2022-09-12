@@ -59,6 +59,7 @@ void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
 float () GetLastWeaponImpulse;
+void () UpdateReadyStatus;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
 void (float tno, float scoretoadd) TeamFortress_TeamIncreaseScore;
@@ -69,6 +70,13 @@ float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
 void () NextLevel;
+void CSEv_SetPlayerImpulse_f(float n);
+
+void (float n) CSEv_SetPlayerImpulse_f = {
+    bprint(PRINT_HIGH, self.netname, "\n");
+    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
+    self.impulse = n;
+};
 
 void () info_intermission =
 {
@@ -183,7 +191,7 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
             return TRUE;
         case "off":
             return FALSE;
-        default:            
+        default:
             return stof(st);
     }
 };
@@ -314,6 +322,7 @@ void () DecodeLevelParms = {
         autokick_time = 0;
 
         cease_fire = 0;
+        cs_paused = 0;
 
         toggleflags = toggleflags - (toggleflags & TFLAG_TEAMFRAGS);
         toggleflags = toggleflags - (toggleflags & TFLAG_CHEATCHECK);
@@ -542,6 +551,9 @@ void () DecodeLevelParms = {
         airblastcells     = CF_GetSetting("abc", "airblastcells", ftos(PC_PYRO_AIRBLAST_CELLS));
         airblastjumpcells = CF_GetSetting("abjc", "airblastjumpcells", ftos(PC_PYRO_AIRBLASTJUMP_CELLS));
 
+        // force reload [on]
+        force_reload = CF_GetSetting("fr", "forcereload", "on");
+
         // enable spy invisibility [off]
         invis_only = CF_GetSetting("s", "spyinvis", "off");
 
@@ -633,6 +645,21 @@ void () DecodeLevelParms = {
         // use old ROF for nailguns
         old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
 
+        // allow axe to hit on any frame of animation
+        superaxe = CF_GetSetting("ss", "superaxe", "on");
+
+        // allow medikit to hit on any frame of animation
+        supermedikit = CF_GetSetting("sm", "supermedikit", "on");
+
+        // allow spanner to hit on any frame of animation
+        superspanner = CF_GetSetting("ss", "superspanner", "off");
+
+        // allow knife to hit on any frame of animation
+        superknife = CF_GetSetting("sk", "superknife", "on");
+
+        // allow knife to hit on every frame of animation
+        superknife_multihit = CF_GetSetting("skmh", "superknife_multihit", "off");
+
         // impulse command queueing
         // ensures detpipe impulse isn't cleared at end of function
         impulse_queue = CF_GetSetting("impulsequeue", "impulse_queue", "off");
@@ -654,6 +681,7 @@ void () DecodeLevelParms = {
 
         // override map-set class restrictions [off]
         override_mapclasses = CF_GetSetting("omc", "override_mapclasses", "off");
+
         // Maximum number of primary grenades per class
         /*
         max_gren1_scout = CF_GetSetting("mg1_1", "max_gren1_scout", ftos(PC_SCOUT_GRENADE_MAX_1));
@@ -777,6 +805,18 @@ void () DecodeLevelParms = {
         
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
+        
+        // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
+        splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");
+	
+	// standardize contents of backpack dropped on a players death [on]
+	standardizedeathammo = CF_GetSetting("sda", "standardizedeathammo", "on");
+	
+	// if standardizedeathbags set to 1 use these settings instead of players ammo to fill bag on death 
+	deathammo_shells = CF_GetSetting("das", "deathammo_shells", "25");
+	deathammo_nails = CF_GetSetting("dan", "deathammo_nails", "25");
+	deathammo_cells = CF_GetSetting("dac", "deathammo_cells", "50");
+	deathammo_rockets = CF_GetSetting("dar", "deathammo_rockets", "10");
 
         // enable server-side flaginfo on statusbar [on]
         //        server_sbflaginfo = CF_GetSetting("ssbfi", "server_sbflaginfo", "1");
@@ -840,6 +880,11 @@ void () DecodeLevelParms = {
             old_hp_armor = FALSE;
             ng_velocity = 1500;
             old_ng_rof = FALSE;
+            superaxe = TRUE;
+            supermedikit = TRUE;
+            superspanner = FALSE;
+            superknife = TRUE;
+            superknife_multihit = FALSE;
             pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
@@ -914,6 +959,11 @@ void () DecodeLevelParms = {
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             ng_velocity = 1000;
+            superaxe = FALSE;
+            supermedikit = FALSE;
+            superspanner = FALSE;
+            superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
@@ -937,7 +987,7 @@ void () DecodeLevelParms = {
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
-	          scoutscanspike = FALSE;
+            scoutscanspike = FALSE;
         }
 
         st = infokey(world, "huetf");
@@ -949,6 +999,11 @@ void () DecodeLevelParms = {
             ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
+            superaxe = FALSE;
+            supermedikit = FALSE;
+            superspanner = FALSE;
+            superknife = FALSE;
+            superknife_multihit = FALSE;
             old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
@@ -1219,7 +1274,7 @@ void () execute_changelevel = {
         nextmap = vote_result;
     }
 
-// 
+
     other = find(world, classname, "player");
     while (other != world) {
         if (nextmapstring != string_null && nextmapstring != "")
@@ -1803,16 +1858,15 @@ entity(float team_num) FindTeamSpawnPoint =
 void (entity e) ValidateUser = {
 };
 
-entity () SelectSpawnPoint =
-{
-	if(allowpracspawns && self != world)
-	{
-		local entity spot2;
-		spot2 = TeamFortress_GetPracticeSpawn(self);
+entity () SelectSpawnPoint = {
+    if (allowpracspawns && self != world)
+    {
+        local entity spot2;
+        spot2 = TeamFortress_GetPracticeSpawn(self);
 
-		if(spot2 != world)
-			return spot2;
-	}
+        if(spot2 != world)
+            return spot2;
+    }
     
     local entity spot;
     local float attempts;
@@ -1970,7 +2024,7 @@ void (entity player) UpdateScoreboardInfo = {
     CheckSetInfoKey(player, "touches", player.touches);
     CheckSetInfoKey(player, "team_no", player.team_no);
     CheckSetInfoKey(player, "playerclass", player.playerclass);
-    CheckSetInfoKey(player, "ready", player.is_ready);
+    CheckSetInfoKey(player, "ready", player.stat_flags & PLAYER_READY);
 };
 
 void (float all_dimensions) SetDimensions = {
@@ -2073,6 +2127,7 @@ void () PutClientInServer = {
     if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
         TeamFortress_ChangeClass(11);
     }
+
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
             if (self.playerclass != 0) {
@@ -2090,13 +2145,14 @@ void () PutClientInServer = {
             TeamFortress_ExecClassScript(self);
         }
     }
-    
-/*
-    if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
-        TeamFortress_ChangeClass(0);
-        Menu_Class(0);
-    }
-*/
+
+    /*
+        if ((!IsLegalClass(self.playerclass) && !override_mapclasses) || CF_ClassIsRestricted(self.team_no, self.playerclass)) {
+            TeamFortress_ChangeClass(0);
+            Menu_Class(0);
+        }
+    */
+
     if (self.tfstate & TFSTATE_RANDOMPC) {
         oldclass = self.playerclass;
         self.playerclass = 1 + floor(random() * (10 - 1));
@@ -2119,12 +2175,13 @@ void () PutClientInServer = {
 
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
+
     TeamFortress_SetEquipment();
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_StartTimers();
-    
+
     if(quadmode && quad_roles) {
         sprint(self, PRINT_HIGH, "\sRole:\s ", GetTeamRole(self.team_no).name, "\n");
     }
@@ -2232,6 +2289,33 @@ void () PutClientInServer = {
         self.invincible_finished = time + 666;
     }
 
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
+
+    if(self.playerclass == PC_SCOUT && self.ScannerOn == 1) {
+        te = spawn();
+        te.nextthink = time + 2;
+        te.think = TeamFortress_Scan;
+        te.owner = self;
+        te.classname = "timer";
+        te.netname = "scanner";
+        sprint(self, PRINT_HIGH, "Scanner on\n");
+        self.ScannerOn = 1;
+
+        if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
+            self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
+    }
+
+    UpdateReadyStatus();
 };
 
 //void () info_player_start = {
@@ -2449,8 +2533,10 @@ void () PlayerJump = {
         }
         return;
     }
+
     if (!(self.flags & FL_ONGROUND))
         return;
+
     if (!(self.flags & FL_JUMPRELEASED))
         return;
 
@@ -2478,6 +2564,7 @@ void () PlayerJump = {
             TeamFortress_SetSpeed(self);
         }
     }
+
     if (old_grens != 1) {
         te = find(world, classname, "timer");
         while (((te.owner != self) || (te.think != ConcussionGrenadeTimer))
@@ -2646,6 +2733,7 @@ void () PlayerPreThink = {
     if (self.deadflag == 1) {
         return;
     }
+
     if (self.is_feigning) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
@@ -2679,6 +2767,7 @@ void () PlayerPreThink = {
             self.flags = self.flags | FL_JUMPRELEASED;
         }
     }
+
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
@@ -2858,6 +2947,7 @@ void () PlayerPostThink = {
     if (self.view_ofs == '0 0 0') {
         return;
     }
+
     if (self.deadflag) {
         DeadImpulses();
         self.impulse = 0;
@@ -2865,8 +2955,9 @@ void () PlayerPostThink = {
     }
 
     local float fdmg;
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
-    if (((self.jump_flag < -300) && (self.flags & 512)) &&
+    if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
         if (self.watertype == -3) {
             FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
@@ -2902,6 +2993,7 @@ void () PlayerPostThink = {
         //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
+        ButtonFrame();
         W_WeaponFrame();
         if (self.motd <= 400) {
             TeamFortress_MOTD();
@@ -3000,6 +3092,12 @@ void (optional float csqcactive) ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
+
+    local float numplayers = TeamFortress_GetNoActivePlayers ();
+    if (quadmode && quad_maxplayers && (numplayers >= quad_maxplayers)) {
+        sprint(self, PRINT_HIGH, "Match in progress, forcing to observer\n");
+        forceinfokey(self, "*spectator", "1");
+    }
 };
 
 float () RejoinWithTfId = {
@@ -3108,19 +3206,21 @@ void () ClientDisconnect = {
         strunzone(self.StatusString);
     self.StatusString = string_null;
 
+
+
     if(cb_prematch) {
         //Check in case the player leaving is the last not-readied player
-        if(self.is_ready) {
+        if(self.stat_flags & PLAYER_READY) {
             v_ready = (v_ready - 1);
-        } else {
-            CheckAllPlayersReady();
+        } else if (!CheckAllPlayersReady()) {
+            UpdateReadyStatus();
         }
     }
-    
+
     if(votemode) {
         UnvoteForMap(self);
     }
-    
+
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {
@@ -3355,9 +3455,7 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     }
                 } else if (pf_deathmsg == DMSG_AXE) {
                     s_deathstring2 = "\n";
-                    if (pe_attacker.playerclass == PC_SPY)
-                        s_deathstring = " was knife-murdered by ";
-                    else if (pe_attacker.playerclass == PC_SCOUT)
+                    if (pe_attacker.playerclass == PC_SCOUT)
                         s_deathstring = "'s mellon was split by ";
                     else if (pe_attacker.playerclass == PC_SNIPER)
                         s_deathstring = " was put on the chop block by ";
@@ -3374,6 +3472,12 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                         s_deathstring2 = "'s axe\n";
                     } else
                         s_deathstring = " was ax-murdered by ";
+                } else if (pf_deathmsg == DMSG_KNIFE) {
+                    s_deathstring = " was knife-murdered by ";
+                    s_deathstring2 = "\n";
+                } else if (pf_deathmsg == DMSG_BACKSTAB) {
+                    s_deathstring = " gets knifed from behind by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_SPANNER) {
                     s_deathstring = " was spanner-murdered by ";
                     s_deathstring2 = "\n";
@@ -3472,9 +3576,6 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring2 = "'s bullet spray.\n";
                 } else if (pf_deathmsg == DMSG_ASSAULTCANNON) {
                     s_deathstring = " gets sawn in half by ";
-                    s_deathstring2 = "\n";
-                } else if (pf_deathmsg == DMSG_BACKSTAB) {
-                    s_deathstring = " gets knifed from behind by ";
                     s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_TRANQ) {
                     s_deathstring = " is put to sleep by ";
@@ -3702,6 +3803,10 @@ void (entity targ, entity attacker) ClientObituary = {
 
 float () IsUsingOldImpulses = {
     return ((infokey(self, "old_weapon_impulses") == "1") || (infokey(self, "owi") == "1"));
+}
+
+float () IsUsingCFImpulses = {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 
 float () GetLastWeaponImpulse = {

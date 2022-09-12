@@ -128,6 +128,14 @@ void () TeamFortress_DetpackMenu = {
     Menu_Demoman();
 };
 
+void (float timer) TeamFortress_ToggleDetpack = {
+    if (self.is_detpacking) {
+        TeamFortress_DetpackStop();
+    } else {
+        TeamFortress_SetDetpack(timer);
+    }
+};
+
 void (float timer) TeamFortress_SetDetpack = {
     local string stimer;
     local entity te;

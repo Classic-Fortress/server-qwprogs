@@ -165,7 +165,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     if (!CF_TeamIsValid) {
         return 0;
     }
-    
+
     if (tno == 1)
         team = "blue team";
     else if (tno == 2)
@@ -179,7 +179,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         sprint(pe, PRINT_HIGH, "You are already on the ", team, "!\n");
         return 0;
     }
-    
+
     if (TeamFortress_TeamGetColor(tno) == 0 && !teamplay) {
         TeamFortress_TeamSetColor(tno);
         if (TeamFortress_TeamGetColor(tno) == 0) {
@@ -272,6 +272,7 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     }
     TeamFortress_TeamShowMemberClasses(pe);
     SetTeamName(pe);
+
     if(!skipclasscheck) {
         if (pe.playerclass == 0) {
             if (TeamFortress_TeamIsCivilian(tno)) {
@@ -288,6 +289,8 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     }
 
     forceinfokey(pe, "team_no", ftos(tno));
+    UpdateReadyStatus();
+
     return (1);
 };
 
@@ -295,6 +298,7 @@ float (float tno) TeamFortress_TeamSet = {
     local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
     SetDimensions(TRUE);
     UpdateAllClientsTeamScores();
+    UpdateReadyStatus();
     return (tftso);
 }
 
@@ -516,10 +520,13 @@ float () TeamFortress_GetNoActivePlayers = {
 
     search = find(world, classname, "player");
     while (search != world) {
-        if (search.netname != string_null) {
-            if (search.team_no && search.playerclass)
-                nump = nump + 1;
+        if (search.netname != string_null
+                && search.team_no
+                && search.playerclass
+                && !search.has_disconnected) {
+            nump = nump + 1;
         }
+
         search = find(search, classname, "player");
     }
     return (nump);

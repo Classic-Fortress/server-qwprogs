@@ -29,7 +29,6 @@ float (string cmd) ConsoleCmd {
                 RemoveVoteMap(argv(1));
                 return TRUE;
             case "nextmap":
-                //bprint(PRINT_HIGH, "Hmm: ", ftos(FO_GetUserSetting (world, "nomapcycle", "nmc", "0")), "\n"); //MEHT
                 if(FO_GetUserSetting (world, "nomapcycle", "nmc", "0")) {
                     bprint(PRINT_HIGH, "Tried setting next map to ", argv(1), ", but nomapcycle is set.\n");
                 } else {
@@ -112,6 +111,7 @@ void (float duration) GE_PausedTic = {
     if (unpause_requested) {
         if ((duration >= unpause_countdown)) {
             is_paused = 0;
+            cs_paused = 0;
             unpause_countdown = 0;
             unpause_requested = 0;
             unpause_lastcountnumber = 0;

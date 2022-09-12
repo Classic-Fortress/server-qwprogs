@@ -151,6 +151,7 @@ void (float cap1, float cap2) CaptainMode = {
                 te.team_no = 1;
                 SetTeamName(te);
                 TeamFortress_TeamSet_Options(te, 1, TRUE);
+
                 UpdateAllClientsTeamScores();
 
                 //stuffcmd(self, "color ");
@@ -299,13 +300,22 @@ void (entity pl) PrintWho = {
     strunzone(msg);
 }
 
+void () OutputTrackedSettings = {
+    bprint(PRINT_HIGH, self.netname, " called for a settings check (fo_settings_status)\n");
+    for (float i = 0; i < settings_to_track_list.length; i++)
+    {
+        setting_t* s = &settings_to_track[i];
+        bprint(PRINT_HIGH, "Setting ", s.setting_name, " is currently ", s.value, "\n");
+    }
+}
+
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num = 0, processedCmd, inp;
     local string tmp;
     local float farg3;
     local entity ent, pl;
     processedCmd = FALSE;
-    
+
     if (arg1)
         arg_num = 1;
     if (arg2)
@@ -313,9 +323,17 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
 
     switch (arg1)
     {
+        case "impulse":
+            if (arg_num == 2) {
+                self.impulse = stof(arg2);
+            }
+            break;
+        case "fo_settings_status":
+            OutputTrackedSettings();
+            break;
         case "progsversion":
             // yy.mm.dd.incremented vers
-            sprint(self, PRINT_HIGH, "sv progs version: 21.03.25.1\n");
+            sprint(self, PRINT_HIGH, "sv progs version: 22.02.13.1\n");
             break;
         case "adminpwd":
             processedCmd = TRUE;
@@ -438,7 +456,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
 
-//These only work when alive
+        //These only work when alive
         case "dropammo":
             processedCmd = TRUE;
             if(self.health <= 0) {

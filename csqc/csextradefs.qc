@@ -49,7 +49,6 @@ vector TEXT_TEAM_COLOUR[] = {
 #define FO_MENU_STATE_SPACER 3
 
 #define FO_MENU_MAX_OPTIONS 20
-
 #define FO_MENU_TRANSPARENCY 0.2
 
 #define MOTD_TIME 30
@@ -66,7 +65,7 @@ float fo_hud_editor;
 float fo_hud_menu_active;
 vector ScreenSize;
 float number_of_teams;
-float last_skin;
+float last_selected_skin;
 float last_team;
 vector sentry_pos;
 vector dispenser_pos;
@@ -90,7 +89,6 @@ float round_time_remaining;
 float showingscores;
 float mapvote_expiry;
 float cs_grenprimed;
-float frames_since_onground;
 float num_mapvotes;
 float num_mapvotes_filtered;
 entity vote_selected_item;
@@ -98,6 +96,8 @@ float vote_selected_index;
 float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
+float oldbuttons;
+float zoomed_in;
 
 .string name;
 .string description;
@@ -282,7 +282,7 @@ typedef struct {
     string Hint;
     //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch
     float GameMode;
-    float Ready;
+    float ReadyStatus;
     float CountdownStarted;
     // scout
     float ScannerOn;
@@ -517,6 +517,7 @@ enum {
 #define FOCMD_GRENTIMER "fo_grentimer"
 #define FOCMD_GRENTIMERSOUND "fo_grentimersound"
 #define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
+#define FOCMD_JUMPVOLUME "fo_jumpvolume"
 #define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
 #define FOCMD_FTE_HUD "fo_fte_hud"
 
@@ -531,6 +532,10 @@ vector thisorigin;
 vector lastorigin;
 float nextoriginupdate;
 float speed;
+float jump_counter;
+float grentimer_waiting;
+float last_pmove_onground;
+float last_vel_z;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

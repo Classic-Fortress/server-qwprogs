@@ -58,29 +58,16 @@ void () UseSpecialSkill = {
             self.impulse = TF_MEDIC_AURA_TOGGLE;
             break;
         case PC_HVYWEAP:
-            if (self.tfstate & TFSTATE_LOCK)
-                self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
-            else
-                self.tfstate = self.tfstate | TFSTATE_LOCK;
-            Status_Refresh(self);
-            self.impulse = 0;
-            return;
+            self.impulse = TF_HVYWEAP_LOCK_TOGGLE;
+            break;
         case PC_PYRO:
-            if (pyro_type == PYRO_FO)
-                if (airblastv2) {
-                    UseAirBlastV2();
-                }
-                else 
-                {
-                    UseAirBlast();
-                }
-                Status_Refresh(self);
+            self.impulse = TF_AIRBLAST;
             break;
         case PC_SPY:
             self.impulse = TF_SPY_DIE;
             break;
         case PC_ENGINEER:
-            self.impulse = TF_ENGINEER_DETDISP;
+            self.impulse = TF_ENGINEER_TOGGLEDISPENSER;
             break;
         case PC_UNDEFINED:
             if (self.enemy == world) {
@@ -100,6 +87,39 @@ void () UseSpecialSkill = {
                 sprint(self, PRINT_HIGH, "Removed lock\n");
                 self.enemy = world;
             }
+            break;
+    }
+};
+
+void () UseSpecialSkill2 = {
+    local vector src;
+
+    self.impulse = 0;
+    switch (self.playerclass)
+    {
+        case PC_SCOUT:
+            self.impulse = TF_SCAN;
+            break;
+        case PC_SNIPER:
+            break;
+        case PC_SOLDIER:
+            break;
+        case PC_DEMOMAN:
+            self.impulse = TF_DETPACK_5;
+            break;
+        case PC_MEDIC:
+            break;
+        case PC_HVYWEAP:
+            break;
+        case PC_PYRO:
+            break;
+        case PC_SPY:
+            self.impulse = TF_DISGUISE_LAST_SPAWNED;
+            break;
+        case PC_ENGINEER:
+            self.impulse = TF_ENGINEER_TOGGLESENTRY;
+            break;
+        case PC_UNDEFINED:
             break;
     }
 };
@@ -174,7 +194,6 @@ void (float inp) TeamFortress_ChangeClass = {
             return;
         }
 
-        
         if(inp > 0) {
             if (TeamFortress_TeamIsCivilian(self.team_no) && self.playerclass == PC_CIVILIAN) {
                 sprint(self, PRINT_HIGH, "You cannot change class\n");
@@ -329,6 +348,18 @@ void (float inp) TeamFortress_ChangeClass = {
         TeamFortress_SetSpeed(self);
     }
     self.spawn_time = time;
+
+    local float autodisguise = FO_GetUserSetting(self, "autodisguise", "ad", "off");
+    if (self.playerclass == PC_SPY) {
+        switch(autodisguise) {
+            case 1:
+                FO_Spy_DisguiseLastSpawned(self);
+                break;
+            case 2:
+                FO_Spy_DisguiseLast(self);
+                break;
+        }
+    }
 };
 
 void () TeamFortress_DisplayLegalClasses = {

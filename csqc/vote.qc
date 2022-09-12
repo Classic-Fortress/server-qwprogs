@@ -1,4 +1,3 @@
-
 void () ApplyMapFilter = {
     entity mc = find(world, classname, "map_candidate_filtered");
     entity temp = world;

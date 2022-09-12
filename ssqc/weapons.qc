@@ -55,20 +55,30 @@ void () CF_Scout_Dash;
 void () CF_Spy_DisguiseStop;
 void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
+void () FO_LockToggle;
+void () FO_Airblast;
+void () UseAirBlast;
+void () UseAirBlastV2;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
 void () TeamFortress_Discard;
 void () TeamFortress_Discard_DropAmmo;
+void (float issilent) FO_Spy_ToggleFeign;
+void () FO_Engineer_ToggleDispenser;
+void () FO_Engineer_ToggleSentry;
 float (float force) TeamFortress_DetonatePipebombs;
+void (float timer) TeamFortress_ToggleDetpack;
 void (float timer) TeamFortress_SetDetpack;
 void () TeamFortress_DetpackStop;
 void (entity e) TeamFortress_PlacePracticeSpawn;
 void (entity e) TeamFortress_RemovePracticeSpawn;
 void () DropKey;
 void () UseSpecialSkill;
+void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
+float () CheckForReload;
 
 void (float all) TeamFortress_TeamShowScores;
 void (entity Player) TeamFortress_TeamShowMemberClasses;
@@ -116,12 +126,30 @@ void () PlayerNotReady;
 void () Broadcast_Players_NotReady;
 void () StartTimer;
 
+void () ToggleInvincibility;
+
 float () GetLastWeaponImpulse;
 float () IsUsingOldImpulses;
+float () IsUsingCFImpulses;
 
 void (float inp) W_OldWeaponSlot;
 
+
 void (entity ent, float num) SetFlameCount;
+
+.float button3_keydown;
+.float button3_keydown_frame;
+.float button3_keyup_frame;
+.float button4_keydown;
+.float button4_keydown_frame;
+.float button4_keyup_frame;
+.float button5_keydown;
+.float button5_keydown_frame;
+.float button5_keyup_frame;
+.float button6_keydown;
+.float button6_keydown_frame;
+.float button6_keyup_frame;
+.float oldbuttons;
 
 void () W_Precache = {
     precache_sound("weapons/r_exp3.wav");
@@ -176,7 +204,7 @@ void (float att_delay) Attack_Finished = {
         self.attack_finished = time + att_delay;
 };
 
-void () W_FireAxe = {
+float () W_FireAxe = {
     local vector source;
     local vector org;
     local vector def;
@@ -185,40 +213,16 @@ void () W_FireAxe = {
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
     if (trace_ent.takedamage) {
-
         trace_ent.axhitme = 1;
         SpawnBlood(org, 20);
 
-        if ((self.playerclass != PC_SPY) ||
-            (trace_ent.classname != "player")) {
-            deathmsg = DMSG_AXE;
-            TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM,
-                        TF_TD_OTHER);
-        } else {
-            self.weaponmode = 1;
-            self.weaponmodel = "progs/v_knife2.mdl";
-
-            // Check direction of Attack
-            makevectors(trace_ent.v_angle);
-            def = v_right;
-            makevectors(self.v_angle);
-
-            // Backstab
-            if (crossproducttf(def, v_forward) > 0) {
-                deathmsg = DMSG_BACKSTAB;
-                TF_T_Damage(trace_ent, self, self, 120,
-                            TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
-                            TF_TD_OTHER);
-            } else {
-                deathmsg = DMSG_AXE;
-                TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
-                            TF_TD_OTHER);
-            }
-        }
+        deathmsg = DMSG_AXE;
+        TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
+        return TRUE;
     } else {                    // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -228,10 +232,63 @@ void () W_FireAxe = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
-void () W_FireSpanner = {
+int () W_FireKnife = {
+    local vector source;
+    local vector org;
+    local vector def;
+
+    makevectors(self.v_angle);
+    source = self.origin + '0 0 16';
+    traceline(source, source + v_forward * 64, FALSE, self);
+
+    if (trace_fraction == 1)
+        return FALSE;
+
+    org = trace_endpos - v_forward * 4;
+    if (trace_ent.takedamage) {
+        trace_ent.axhitme = 1;
+        SpawnBlood(org, 20);
+
+        self.weaponmode = 1;
+        self.weaponmodel = "progs/v_knife2.mdl";
+
+        // Check direction of Attack
+        makevectors(trace_ent.v_angle);
+        def = v_right;
+        makevectors(self.v_angle);
+
+        // Backstab
+        if (crossproducttf(def, v_forward) > 0) {
+            deathmsg = DMSG_BACKSTAB;
+            TF_T_Damage(trace_ent, self, self, 120,
+                    TF_TD_NOTTEAM | TF_TD_IGNOREARMOR,
+                    TF_TD_OTHER);
+        } else {
+            deathmsg = DMSG_KNIFE;
+            TF_T_Damage(trace_ent, self, self, 40, TF_TD_NOTTEAM,
+                    TF_TD_OTHER);
+        }
+
+        return TRUE;
+    } else {                    // hit wall
+        FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+        WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+        WriteByte(MSG_MULTICAST, TE_GUNSHOT);
+        WriteByte(MSG_MULTICAST, 3);
+        WriteCoord(MSG_MULTICAST, org_x);
+        WriteCoord(MSG_MULTICAST, org_y);
+        WriteCoord(MSG_MULTICAST, org_z);
+        multicast(org, MULTICAST_PVS);
+
+        return TRUE;
+    }
+};
+
+int () W_FireSpanner = {
     local vector source;
     local vector org;
     local float healam;
@@ -240,16 +297,15 @@ void () W_FireSpanner = {
     makevectors(self.v_angle);
     source = self.origin + '0 0 16';
     traceline(source, source + v_forward * 64, FALSE, self);
+
     if (trace_fraction == 1)
-        return;
+        return FALSE;
 
     org = trace_endpos - v_forward * 4;
 
     // It may be a trigger that can be activated by the engineer's spanner
     if (trace_ent.goal_activation & TFGA_SPANNER) {
-
         if (Activated(trace_ent, self)) {
-
             DoResults(trace_ent, self, TRUE);
 
             if (trace_ent.classname == "func_button") {
@@ -261,11 +317,9 @@ void () W_FireSpanner = {
                 self = other;
             }
         } else if (trace_ent.else_goal != 0) {
-
             te = Findgoal(trace_ent.else_goal);
             if (te)
                 AttemptToActivate(te, self, trace_ent);
-
         } else {
             FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
             WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -276,53 +330,46 @@ void () W_FireSpanner = {
             WriteCoord(MSG_MULTICAST, org_z);
             multicast(org, MULTICAST_PVS);
         }
-        return;
+        return TRUE;
     }
-    if (trace_ent.takedamage) {
 
+    if (trace_ent.takedamage) {
         if (trace_ent.classname == "building_dispenser") {
             Engineer_UseDispenser(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun") {
-
             Engineer_UseSentryGun(trace_ent);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "building_sentrygun_base") {
-
             if (trace_ent.oldenemy)
                 Engineer_UseSentryGun(trace_ent.oldenemy);
-            return;
+            return TRUE;
 
         } else if (trace_ent.classname == "player") {
-
-            if ((((trace_ent.team_no == self.team_no) &&
-                  (self.team_no != 0)) && teamplay) || coop) {
+            if ((((trace_ent.team_no == self.team_no) && (self.team_no != 0)) && teamplay) || coop) {
 
                 healam = WEAP_SPANNER_REPAIR;
+
                 if (self.ammo_cells < healam)
                     healam = self.ammo_cells;
-                if (trace_ent.armortype == 0)
-                    return;
 
-                if ((trace_ent.maxarmor - trace_ent.armorvalue) <
-                    (healam * 4))
-                    healam =
-                        ceil((trace_ent.maxarmor -
-                              trace_ent.armorvalue) / 4);
+                if (trace_ent.armortype == 0)
+                    return TRUE;
+
+                if ((trace_ent.maxarmor - trace_ent.armorvalue) < (healam * 4))
+                    healam = ceil((trace_ent.maxarmor - trace_ent.armorvalue) / 4);
 
                 if (healam > 0) {
+                    trace_ent.armorvalue = trace_ent.armorvalue + healam * 4;
 
-                    trace_ent.armorvalue =
-                        trace_ent.armorvalue + healam * 4;
                     if (trace_ent.armorvalue > trace_ent.maxarmor)
                         trace_ent.armorvalue = trace_ent.maxarmor;
 
                     self.ammo_cells = self.ammo_cells - healam;
 
-                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1,
-                          ATTN_NORM);
+                    FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
 
                     WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
                     WriteByte(MSG_MULTICAST, TE_GUNSHOT);
@@ -331,11 +378,11 @@ void () W_FireSpanner = {
                     WriteCoord(MSG_MULTICAST, org_y);
                     WriteCoord(MSG_MULTICAST, org_z);
                     multicast(org, MULTICAST_PVS);
-
-                    W_SetCurrentAmmo(self);
                 }
-                return;
+
+                return TRUE;
             }
+
             trace_ent.axhitme = 1;
             SpawnBlood(org, 20);
             deathmsg = DMSG_SPANNER;
@@ -343,6 +390,7 @@ void () W_FireSpanner = {
         } else {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
+        return TRUE;
     } else {
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
@@ -352,10 +400,11 @@ void () W_FireSpanner = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
-void () W_FireMedikit = {
+float () W_FireMedikit = {
     local vector source;
     local vector org;
     local float healam;
@@ -364,14 +413,13 @@ void () W_FireMedikit = {
 
     source = self.origin + '0 0 16';
     traceline(source, (source + (v_forward * 64)), 0, self);
-    if ((trace_fraction == 1)) {
 
-        return;
+    if (trace_fraction == 1)
+        return FALSE;
 
-    }
     org = trace_endpos - v_forward * 4;
-    if (trace_ent.takedamage) {
 
+    if (trace_ent.takedamage) {
         if (trace_ent.classname == "player") {
 
             if (((trace_ent.team_no == self.team_no) &&
@@ -499,7 +547,7 @@ void () W_FireMedikit = {
                         if (trace_ent.infection_team_no != self.team_no)
                             TF_AddFrags(self, 1);
                     }
-                    return;
+                    return TRUE;
                 }
                 if (trace_ent.numflames > 0) {
 
@@ -511,7 +559,7 @@ void () W_FireMedikit = {
                         bprint(PRINT_MEDIUM, self.netname, " put out ",
                                trace_ent.netname, "'s fire.\n");
                     }
-                    return;
+                    return TRUE;
                 }
                 if (old_medikit) {
 
@@ -582,11 +630,11 @@ void () W_FireMedikit = {
                 T_Damage(trace_ent, self, self, 10);
 
                 if (trace_ent.playerclass == PC_MEDIC)
-                    return;
+                    return TRUE;
                 if (cb_prematch)
-                    return;
+                    return TRUE;
                 if (trace_ent.tfstate & TFSTATE_INFECTED)
-                    return;
+                    return TRUE;
 
                 trace_ent.tfstate = trace_ent.tfstate | TFSTATE_INFECTED;
                 BioInfection = spawn();
@@ -601,6 +649,8 @@ void () W_FireMedikit = {
         } else {
             TF_T_Damage(trace_ent, self, self, 20, TF_TD_NOTTEAM, TF_TD_OTHER);
         }
+        return TRUE;
+
     } else {
         // hit wall
         FO_Sound(self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
@@ -611,6 +661,7 @@ void () W_FireMedikit = {
         WriteCoord(MSG_MULTICAST, org_y);
         WriteCoord(MSG_MULTICAST, org_z);
         multicast(org, MULTICAST_PVS);
+        return TRUE;
     }
 };
 
@@ -1552,20 +1603,21 @@ void (entity pl) W_SetCurrentAmmo = {
         return;
 
     if (!(self.tfstate & TFSTATE_AIMING) && !(self.tfstate & TFSTATE_CANT_MOVE))
-        player_run();
+        /* player_run(); */
 
     pl.items = pl.items - (pl.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
     pl.weapon = 0;
 
     if (pl.current_weapon == WEAP_AXE) {
         pl.currentammo = 0;
-        if (pl.playerclass == 8) {
-            if (pl.weaponmode == 0)
-                pl.weaponmodel = "progs/v_knife.mdl";
-            else
-                pl.weaponmodel = "progs/v_knife2.mdl";
-        } else
-            pl.weaponmodel = "progs/v_axe.mdl";
+        pl.weaponmodel = "progs/v_axe.mdl";
+        pl.weaponframe = 0;
+    } else if (pl.current_weapon == WEAP_KNIFE) {
+        pl.currentammo = 0;
+        if (pl.weaponmode == 0)
+            pl.weaponmodel = "progs/v_knife.mdl";
+        else
+            pl.weaponmodel = "progs/v_knife2.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_SPANNER) {
         pl.currentammo = pl.ammo_cells;
@@ -1740,6 +1792,8 @@ float () W_BestWeapon = {
         return WEAP_SHOTGUN;
     else if (it & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (it & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (it & WEAP_SPANNER)
         return WEAP_SPANNER;
     else if (it & WEAP_AXE)
@@ -1761,7 +1815,7 @@ float () W_BestWeaponSlot = {
 
 void () W_ChangeToBestWeapon = {
     local float slot = W_BestWeaponSlot();    
-    
+
     if (!IsUsingOldImpulses())
         W_WeaponSlot(slot);
     else
@@ -1779,8 +1833,10 @@ void () W_ChangeToBestWeapon = {
 }
 
 float () W_CheckNoAmmo = {
-    if (self.current_weapon == WEAP_AXE || self.current_weapon == WEAP_SPANNER
-                || self.current_weapon == WEAP_MEDIKIT)
+    if (self.current_weapon == WEAP_AXE
+            || self.current_weapon == WEAP_SPANNER
+            || self.current_weapon == WEAP_KNIFE
+            || self.current_weapon == WEAP_MEDIKIT)
         return 1;
     else if (self.current_weapon == WEAP_SUPER_NAILGUN && self.currentammo >= 4)
         return 1;
@@ -1869,34 +1925,52 @@ void () W_Reload_assault_cannon = {
 float () CheckForReload = {
     if (self.current_weapon == WEAP_SHOTGUN) {
         if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0)) {
-            TeamFortress_ReloadCurrentWeapon();
+            if (force_reload) {
+                TeamFortress_ReloadCurrentWeapon();
+            }
+
             return 1;
         }
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
         if (fo_hwguy)
         {
             if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > 0) {
-                TeamFortress_ReloadCurrentWeapon();
+                if (force_reload) {
+                    TeamFortress_ReloadCurrentWeapon();
+                }
+
                 return 1;
             }
         }
@@ -1931,8 +2005,14 @@ float (float weap) CheckForAmmo = {
 
 void () player_axe1;
 void () player_axeb1;
-void () player_axec1;
-void () player_axed1;
+
+void () player_spanner1;
+void () player_spanner2;
+void () player_spanner3;
+void () player_spanner4;
+
+void () player_knife1;
+void () player_knifeb1;
 
 void () player_shot1;
 void () player_nail1;
@@ -1946,8 +2026,6 @@ void () player_assaultcannondown1;
 
 void () player_medikit1;
 void () player_medikitb1;
-void () player_medikitc1;
-void () player_medikitd1;
 
 void () W_Attack = {
     local float r;
@@ -1960,7 +2038,7 @@ void () W_Attack = {
 
     if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
-    
+
     if(no_fire_mode)
         return;
 
@@ -1975,18 +2053,22 @@ void () W_Attack = {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_axe1();
-        else if (r < 0.5)
-            player_axeb1();
-        else if (r < 0.75)
-            player_axec1();
         else
-            player_axed1();
+            player_axeb1();
+    } else if (self.current_weapon == WEAP_KNIFE) {
+        Attack_Finished(0.5);
+        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        r = random();
+        if (r < 0.5)
+            player_knife1();
+        else
+            player_knifeb1();
     } else if (self.current_weapon == WEAP_SPANNER) {
         Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        player_axe1();
+        player_spanner1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         if (CheckForReload() == TRUE)
             return;
@@ -2102,14 +2184,10 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_MEDIKIT) {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
-        if (r < 0.25)
+        if (r < 0.5)
             player_medikit1();
-        else if (r < 0.5)
-            player_medikitb1();
-        else if (r < 0.75)
-            player_medikitc1();
         else
-            player_medikitd1();
+            player_medikitb1();
         Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
         FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
@@ -2134,7 +2212,7 @@ float (entity pl) WeaponReady = {
     if (time >= pl.attack_finished && !(pl.tfstate & TFSTATE_RELOADING)) {
         return 1;
     }
-              
+
     return 0;
 }
 
@@ -2160,17 +2238,20 @@ void () W_PrintWeaponMessage = {
 };
 
 float (float weap) W_GetSlot = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (weap == WEAP_ROCKET_LAUNCHER
                 || weap == WEAP_SUPER_NAILGUN
                 || weap == WEAP_SNIPER_RIFLE
-                || weap == WEAP_FLAMETHROWER
+                || (!cf_pyro_impulses && weap == WEAP_INCENDIARY)
+                || (cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
                 || weap == WEAP_TRANQ
                 || weap == WEAP_LASER
                 || weap == WEAP_ASSAULT_CANNON) {
         return 1;
     } else if (weap == WEAP_SUPER_SHOTGUN
                 || weap == WEAP_AUTO_RIFLE
-                || weap == WEAP_INCENDIARY) {
+                || (!cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
+                || (cf_pyro_impulses && weap == WEAP_INCENDIARY)) {
         return 2;
     } else if (weap == WEAP_SHOTGUN) {
         if (self.playerclass == PC_SCOUT)
@@ -2193,6 +2274,7 @@ float (float weap) W_GetSlot = {
 
 float (float weap) W_OldGetSlot = {
     if (weap == WEAP_AXE
+            || weap == WEAP_KNIFE
             || weap == WEAP_MEDIKIT
             || weap == WEAP_SPANNER)
         return 1;
@@ -2225,9 +2307,10 @@ float (float weap) W_OldGetSlot = {
 };
 
 float (float inp) W_AmmoSlot = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     self.noammo = 0;
 
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         if (self.playerclass == PC_SCOUT && self.ammo_nails < 2)
             self.noammo = 1;
         else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
@@ -2243,13 +2326,15 @@ float (float inp) W_AmmoSlot = {
                 self.noammo = 1;
             else if (self.ammo_cells < 7)
                 self.noammo = 2;
-        } else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
+        } else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_rockets < 3)
             self.noammo = 1;
-        else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
+        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_cells < 3)
+            self.noammo = 1;
+         else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
             self.noammo = 1;
         else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
             self.noammo = 1;
-    } else if (inp == 2) {
+    } else if (inp == TF_SLOT2) {
         if (self.playerclass == PC_SCOUT && self.ammo_shells < 1)
             self.noammo = 1;
         else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
@@ -2263,9 +2348,11 @@ float (float inp) W_AmmoSlot = {
             self.noammo = 1;
         else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
             self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
+        else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_cells < 1)
             self.noammo = 1;
-    } else if (inp == 3) {
+        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_rockets < 1)
+            self.noammo = 1;
+    } else if (inp == TF_SLOT3) {
         if (self.playerclass == PC_SCOUT
                     || self.playerclass == PC_ENGINEER)
             return 0;
@@ -2280,7 +2367,7 @@ float (float inp) W_AmmoSlot = {
                     || self.playerclass == PC_PYRO)
                     && self.ammo_shells < 1)
             self.noammo = 1;
-    } else if (inp == 4)
+    } else if (inp == TF_SLOT4)
         return 1;
 
     if (self.noammo > 0)
@@ -2291,10 +2378,10 @@ float (float inp) W_AmmoSlot = {
 
 float (float inp) W_OldAmmoSlot = {
     self.noammo = 0;
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         return 1;
     }
-    else if (inp == 2) {
+    else if (inp == TF_SLOT2) {
         if ((self.playerclass == PC_SCOUT 
                 || self.playerclass == PC_SNIPER
                 || self.playerclass == PC_SOLDIER
@@ -2309,7 +2396,7 @@ float (float inp) W_OldAmmoSlot = {
             self.noammo = 1;
 
     }
-    else if (inp == 3) {
+    else if (inp == TF_SLOT3) {
         if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
             self.noammo = 1;
         else if ((self.playerclass == PC_SOLDIER
@@ -2320,7 +2407,7 @@ float (float inp) W_OldAmmoSlot = {
                     && self.ammo_shells < 2)
             self.noammo = 1;
     }
-    else if (inp == 4) {
+    else if (inp == TF_SLOT4) {
         if ((self.playerclass == PC_SCOUT
                 || self.playerclass == PC_SNIPER
                 || self.playerclass == PC_SPY)
@@ -2364,6 +2451,8 @@ float (float inp) W_OldAmmoSlot = {
 float () W_OldWeaponSlot1 = {
     if (self.weapons_carried & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (self.weapons_carried & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (self.weapons_carried & WEAP_SPANNER)
         return WEAP_SPANNER;
     else
@@ -2438,6 +2527,7 @@ float () W_OldWeaponSlot7 = {
 };
 
 float () W_WeaponSlot1 = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (self.playerclass == PC_SCOUT)
         return WEAP_NAILGUN;
     else if (self.playerclass == PC_SNIPER)
@@ -2451,7 +2541,11 @@ float () W_WeaponSlot1 = {
     else if (self.playerclass == PC_HVYWEAP)
         return WEAP_ASSAULT_CANNON;
     else if (self.playerclass == PC_PYRO)
-        return WEAP_FLAMETHROWER;
+        if (cf_pyro_impulses) {
+            return WEAP_FLAMETHROWER;
+        } else {
+            return WEAP_INCENDIARY;
+        }
     else if (self.playerclass == PC_SPY)
         return WEAP_TRANQ;
     else if (self.playerclass == PC_ENGINEER)
@@ -2460,6 +2554,7 @@ float () W_WeaponSlot1 = {
 };
 
 float () W_WeaponSlot2 = {
+    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
     if (self.playerclass == PC_SCOUT)
         return WEAP_SHOTGUN;
     else if (self.playerclass == PC_SNIPER)
@@ -2473,7 +2568,11 @@ float () W_WeaponSlot2 = {
     else if (self.playerclass == PC_DEMOMAN) {
         return WEAP_GRENADE_LAUNCHER; // weaponmode = 1 (pipebomb launcher)
     } else if (self.playerclass == PC_PYRO)
-        return WEAP_INCENDIARY;
+        if (cf_pyro_impulses) {
+            return WEAP_INCENDIARY;
+        } else {
+            return WEAP_FLAMETHROWER;
+        }
     return 0;
 };
 
@@ -2499,6 +2598,8 @@ float () W_WeaponSlot3 = {
 float () W_WeaponSlot4 = {
     if (self.weapons_carried & WEAP_MEDIKIT)
         return WEAP_MEDIKIT;
+    else if (self.weapons_carried & WEAP_KNIFE)
+        return WEAP_KNIFE;
     else if (self.weapons_carried & WEAP_SPANNER)
         return WEAP_SPANNER;
     else
@@ -2522,16 +2623,16 @@ void (float slot) W_WeaponSlot = {
 
 void (float inp) W_OldWeaponSlot = {
     self.next_weaponmode = 0;
-    if (inp == 1) {
+    if (inp == TF_SLOT1) {
         self.next_weapon = W_OldWeaponSlot1();
     }
-    else if (inp == 2) {
+    else if (inp == TF_SLOT2) {
         self.next_weapon = W_OldWeaponSlot2();
     }
-    else if (inp == 3) {
+    else if (inp == TF_SLOT3) {
         self.next_weapon = W_OldWeaponSlot3();
     }
-    else if (inp == 4) {
+    else if (inp == TF_SLOT4) {
         self.next_weapon = W_OldWeaponSlot4();
     }
     else if (inp == 5) {
@@ -2662,7 +2763,7 @@ float (float newSlot) W_OldImpulseFromNewSlot = {
             return W_OldGetSlot(WEAP_AXE);
         }
         else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_AXE);
+            return W_OldGetSlot(WEAP_KNIFE);
         }
         else if (self.playerclass == PC_ENGINEER) {
             return W_OldGetSlot(WEAP_SPANNER);
@@ -2727,9 +2828,10 @@ float (entity pl) W_WeaponState_Check = {
 
 void (float inp) W_ChangeWeapon = {
     if(self.playerclass == PC_CIVILIAN) {
-        inp = 4;
+        inp = TF_SLOT4;
     }
-    if (inp < 1 || inp > GetLastWeaponImpulse())
+
+    if (inp < TF_SLOT1 || inp > GetLastWeaponImpulse())
         return;
 
     if (self.playerclass == 0)
@@ -2745,7 +2847,7 @@ void (float inp) W_ChangeWeapon = {
     
     if (IsUsingOldImpulses()) {
         if(self.playerclass == PC_CIVILIAN) {
-            inp = 1;
+            inp = TF_SLOT1;
         }
         // check for ammo
         if (! W_OldAmmoSlot(inp)) {
@@ -2915,14 +3017,31 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
+    if (!self.is_feigning) {
+        if (self.impulse == TF_GRENADE_1)
+            TeamFortress_PrimeGrenade(1);
+        else if (self.impulse == TF_GRENADE_2)
+            TeamFortress_PrimeGrenade(2);
+        else if (self.impulse == TF_GRENADE_T)
+            TeamFortress_ThrowGrenade();
+        else if (self.impulse == TF_GRENADE_PT_1)
+            TeamFortress_PrimeThrowGrenade(1);
+        else if (self.impulse == TF_GRENADE_PT_2)
+            TeamFortress_PrimeThrowGrenade(2);
+    }
+
     if (cb_prematch || cease_fire) {
         PreMatchImpulses();
         DeadImpulses();
         self.impulse = 0;
         return;
     }
+
     if (self.impulse == TF_SPECIAL_SKILL)
         UseSpecialSkill();
+
+    if (self.impulse == TF_SPECIAL_SKILL_2)
+        UseSpecialSkill2();
 
     if (self.impulse == TF_NEXTTIP) {
         self.display_tip = 0;
@@ -2943,17 +3062,6 @@ void () ImpulseCommands = {
         }
     } else if (self.impulse == TF_TOGGLEVOTE)
         Vote_ToggleMenu(self);
-
-    if (!self.is_feigning) {
-        if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
-        else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
-        else if (self.impulse == TF_GRENADE_PT_1)
-            TeamFortress_PrimeThrowGrenade(1);
-        else if (self.impulse == TF_GRENADE_PT_2)
-            TeamFortress_PrimeThrowGrenade(2);
-    }
 
     if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
         if (self.impulse == TF_WEAPNEXT)
@@ -3011,16 +3119,24 @@ void () ImpulseCommands = {
         CF_Scout_Dash();
     else if (self.impulse == TF_PB_DETONATE)       
         clearImpulse = TeamFortress_DetonatePipebombs(0);
-    else if (self.impulse == TF_DETPACK_STOP)
+    else if (self.impulse == TF_DETPACK_STOP) {
         TeamFortress_DetpackStop();
-    else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
+    } else if (self.impulse == TF_MEDIC_AURA_TOGGLE)
         CF_Medic_AuraToggle();
+    else if (self.impulse == TF_HVYWEAP_LOCK_TOGGLE && self.playerclass == PC_HVYWEAP)
+        FO_LockToggle();
+    else if (self.impulse == TF_AIRBLAST && self.playerclass == PC_PYRO)
+        FO_Airblast();
     else if ((self.impulse == TF_ENGINEER_DETSENTRY) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_sentrygun");
     else if ((self.impulse == TF_ENGINEER_DETDISP) &&
-             (self.playerclass == PC_ENGINEER))
+            (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_dispenser");
+    else if ((self.impulse == TF_ENGINEER_TOGGLEDISPENSER) && (self.playerclass == PC_ENGINEER))
+        FO_Engineer_ToggleDispenser();
+    else if ((self.impulse == TF_ENGINEER_TOGGLESENTRY) && (self.playerclass == PC_ENGINEER))
+        FO_Engineer_ToggleSentry();
     else if ((self.impulse == 196) && (self.playerclass == PC_ENGINEER))
         DestroyBuilding(self, "building_teleporter_exit");
     else if ((self.impulse == 197) && (self.playerclass == PC_ENGINEER))
@@ -3032,8 +3148,9 @@ void () ImpulseCommands = {
             Menu_Spy_Skin();
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(0);
-    else if ((self.impulse == TF_SPY_SILENT_DIE) &&
-             (self.playerclass == PC_SPY))
+    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
+        FO_Spy_FeignOnNextDamage();
+    } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         CF_Spy_FeignDeath(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
         CF_Spy_ChangeSkin(self, 8);
@@ -3070,7 +3187,9 @@ void () ImpulseCommands = {
         else
             CF_Spy_ChangeColor(self, 1);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        CF_Spy_DisguiseLast();
+        FO_Spy_DisguiseLast(self);
+    else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
+        FO_Spy_DisguiseLastSpawned(self);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
@@ -3084,8 +3203,9 @@ void () ImpulseCommands = {
             TeamFortress_DisplayDetectionItems();
     } else if (self.impulse == TF_DISPLAYLOCATION)
         display_location();
-    else
+    else {
         DeadImpulses();
+    }
 
     if (self.impulse == TF_DETPACK)
         self.last_impulse = self.impulse;
@@ -3116,18 +3236,7 @@ void () PreMatchImpulses = {
         display_location();
 
     if (self.impulse == TF_SPECIAL_SKILL) {
-        if(self.tfstate & TFSTATE_INVINCIBLE) {
-            self.items = self.items - (self.items & IT_INVULNERABILITY);
-            self.invincible_time = 0;
-            self.invincible_finished = 0;
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
-            self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
-        } else {
-            self.items = self.items | IT_INVULNERABILITY;
-            self.invincible_time = 1;
-            self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
-            self.invincible_finished = time + 666;
-        }
+        ToggleInvincibility();
     }
 };
 
@@ -3278,13 +3387,188 @@ void () DeadImpulses = {
     }
 };
 
+void () ButtonFrame = {
+    local float changed_buttons = input_buttons ^ self.oldbuttons;
+    self.oldbuttons = input_buttons;
+
+    local float keydowns = changed_buttons & input_buttons;
+    local float keyups = changed_buttons & ~input_buttons;
+
+    // +attack keyup
+    if (keyups & BUTTON0) {
+        local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
+
+        if (default_weapon >= 1 && default_weapon <= 4) {
+            self.impulse = default_weapon;
+        }
+    }
+
+    // +special every frame
+    if (input_buttons & BUTTON3) {
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    CF_Scout_Dash();
+                    break;
+                case PC_DEMOMAN:
+                    TeamFortress_DetonatePipebombs(0);
+                    break;
+                case PC_PYRO:
+                    FO_Airblast();
+                    break;
+            }
+        }
+    }
+
+    // -special every frame
+    if (!(input_buttons & BUTTON3)) {
+        if (FO_GetUserSetting(self, "hold_feign", "hf", "off")) {
+            FO_Spy_Unfeign();
+        }
+    }
+
+    // +special keydown frame
+    if (keydowns & BUTTON3) {
+        if (cb_prematch || cease_fire) {
+            ToggleInvincibility();
+        } else {
+            switch (self.playerclass) {
+                case PC_MEDIC:
+                    CF_Medic_AuraToggle();
+                    break;
+                case PC_HVYWEAP:
+                    FO_LockToggle();
+                    break;
+                case PC_SPY:
+                    FO_Spy_ToggleFeign(0);
+                    break;
+                case PC_ENGINEER:
+                    FO_Engineer_ToggleDispenser();
+                    break;
+            }
+        }
+    }
+
+    // +special2 every frame
+    if (input_buttons & BUTTON4) {
+        switch (self.playerclass) {
+            case PC_SOLDIER:
+                if (IsUsingOldImpulses()) {
+                    self.impulse = 7;
+                } else {
+                    self.impulse = TF_SLOT1;
+                }
+                // Intercepted by InterceptRocketJump()
+                break;
+            case PC_PYRO:
+                if (IsUsingOldImpulses()) {
+                    self.impulse = 7;
+                } else if (IsUsingCFImpulses()) {
+                    self.impulse = TF_SLOT2;
+                } else {
+                    self.impulse = TF_SLOT1;
+                }
+                // Intercepted by InterceptRocketJump()
+                break;
+        }
+    }
+
+    // +special2 keydown frame
+    if (keydowns & BUTTON4) {
+        if (!cb_prematch && !cease_fire) {
+            switch (self.playerclass) {
+                case PC_SCOUT:
+                    ScannerSwitch();
+                    break;
+                case PC_DEMOMAN:
+                    TeamFortress_ToggleDetpack(5);
+                    break;
+                case PC_SPY:
+                    FO_Spy_DisguiseLastSpawned(self);
+                    break;
+                case PC_ENGINEER:
+                    FO_Engineer_ToggleSentry();
+                    break;
+            }
+        }
+    }
+
+    // +special2 keyup frame
+    if (keyups & BUTTON4) {
+        switch (self.playerclass) {
+            case PC_DEMOMAN:
+                if(FO_GetUserSetting(self, "hold_detpack", "hd", "off")) {
+                    TeamFortress_DetpackStop();
+                }
+                break;
+        }
+    }
+
+    local float hold_grens = FO_GetUserSetting(self, "hold_grens", "hg", "off");
+
+    // +grenade1 keydown frame
+    if (keydowns & BUTTON5) {
+        if (hold_grens) {
+            TeamFortress_PrimeGrenade(1);
+        } else {
+            TeamFortress_PrimeThrowGrenade(1);
+        }
+    }
+
+    // +grenade1 keyup frame
+    if (keyups & BUTTON5) {
+        if (hold_grens) {
+            TeamFortress_ThrowGrenade(1);
+        }
+    }
+
+    // +grenade2 keydown frame
+    if (keydowns & BUTTON6) {
+        if (hold_grens) {
+            TeamFortress_PrimeGrenade(2);
+        } else {
+            TeamFortress_PrimeThrowGrenade(2);
+        }
+    }
+
+    // +grenade2 keyup frame
+    if (keyups & BUTTON6) {
+        if (hold_grens) {
+            TeamFortress_ThrowGrenade(2);
+        }
+    }
+
+    // +dropflag every frame
+    if (input_buttons & BUTTON7) {
+        DropGoalItems();
+    }
+
+    // // +quick1 keydown frame
+    // if (keydowns & BUTTON8) {
+    //     self.impulse = TF_SLOT1;
+    // }
+
+    // // +quick2 keydown frame
+    // if (keydowns & BUTTON9) {
+    //     self.impulse = TF_SLOT2;
+    // }
+
+    // // +quick3 keydown frame
+    // if (keydowns & BUTTON10) {
+    //     self.impulse = TF_SLOT3;
+    // }
+
+    // // +quick4 keydown frame
+    // if (keydowns & BUTTON11) {
+    //     self.impulse = TF_SLOT4;
+    // }
+}
 
 void () W_WeaponFrame = {
-
     if (self.login_in_progress) {
         CenterPrint(self, "Trying to log in...");
     }
-    
+
     if (loginRequired && !self.login) {
         PrintLoginMessage();
         self.impulse = 0;
@@ -3312,7 +3596,12 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (self.is_feigning && self.impulse != TF_SPECIAL_SKILL && self.impulse != TF_MEDIC_HELPME && self.impulse != TF_SPY_DIE && self.impulse != TF_SPY_SILENT_DIE)
+    if ((self.is_feigning) && 
+            (self.impulse != TF_SPECIAL_SKILL) &&
+            (self.impulse != TF_SPECIAL_SKILL_2) &&
+            (self.impulse != TF_MEDIC_HELPME) &&
+            (self.impulse != TF_SPY_DIE) &&
+            (self.impulse != TF_SPY_SILENT_DIE))
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
@@ -3346,7 +3635,7 @@ void () W_WeaponFrame = {
 
     // slot 1-4 (or 1-7) binds
     if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
-                && !(self.is_building && !engineer_move) && !self.is_detpacking) {
+            && !(self.is_building && !engineer_move) && !self.is_detpacking) {
 
         if (!(self.tfstate & TFSTATE_RELOADING)) {
             // load weapon state if current state doesn't match stored state
@@ -3363,7 +3652,7 @@ void () W_WeaponFrame = {
             self.impulse = 0;
         }
 
-    // regular attack (both +attack and -attack)
+        // regular attack (both +attack and -attack)
     } else if (!self.impulse && !self.is_quickfiring) {
 
         // load weapon state if current state doesn't match
@@ -3372,9 +3661,8 @@ void () W_WeaponFrame = {
             W_WeaponState_Load(self, 0);
         }
 
-    // +slot1-4 quick fire
+        // +slot1-4 quick fire
     } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
-
         self.is_quickfiring = 1;
         self.has_quickfired = 0;
 
@@ -3388,8 +3676,7 @@ void () W_WeaponFrame = {
                     W_ChangeWeapon(3);
                 else if (self.impulse == TF_QUICKSLOT4)
                     W_ChangeWeapon(4);
-            }
-            else {
+            } else {
                 if (self.impulse == TF_QUICKSLOT1)
                     W_ChangeWeapon(W_OldImpulseFromNewSlot(1));
                 else if (self.impulse == TF_QUICKSLOT2)
@@ -3401,10 +3688,10 @@ void () W_WeaponFrame = {
             }
         }
 
-    // change weapon if queue_weaponslot has been set
+        // change weapon if queue_weaponslot has been set
     } else if (self.queue_weaponslot > 0) {
         W_ChangeWeapon(self.queue_weaponslot);
-    // load weapon state
+        // load weapon state
     } else if (self.queue_weaponstate && WeaponReady(self)) {
         // load weaponstate saved from before quick fire started
         if (self.queue_weaponstate == 1)
@@ -3422,17 +3709,22 @@ void () W_WeaponFrame = {
         Menu_Class(0);
         self.impulse = 0;
         return;
-    }    
+    }
     if (intermission_running)
         return;
 
     // hwguy assault cannon special
     if (self.playerclass == PC_HVYWEAP) {
-        if (cannon_lock && (self.impulse == TF_LOCKON || self.impulse == TF_LOCKOFF)) {
+        if (cannon_lock &&
+                ((self.impulse == TF_LOCKON) ||
+                 (self.impulse == TF_LOCKOFF) ||
+                 (self.impulse == TF_HVYWEAP_LOCK_TOGGLE))) {
             if (self.impulse == TF_LOCKON)
                 self.tfstate = self.tfstate | TFSTATE_LOCK;
             else if (self.impulse == TF_LOCKOFF)
                 self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
+            else if (self.impulse == TF_HVYWEAP_LOCK_TOGGLE)
+                FO_LockToggle();
             Status_Refresh(self);
             self.impulse = 0;
             return;
@@ -3459,6 +3751,7 @@ void () W_WeaponFrame = {
     switch (self.impulse)
     {
         case TF_SPECIAL_SKILL:
+        case TF_SPECIAL_SKILL_2:
         case TF_PB_DETONATE:
         case TF_MEDIC_HELPME:
         case TF_DASH:
@@ -3478,7 +3771,7 @@ void () W_WeaponFrame = {
         case FLAG_INFO:
             ImpulseCommands();
             return;
-        // allows setting detpack while reloading on toggle, defaults to off        
+            // allows setting detpack while reloading on toggle, defaults to off
         case TF_DEMOMAN_DETPACK:
         case TF_DETPACK:
         case TF_DETPACK_STOP:
@@ -3506,9 +3799,9 @@ void () W_WeaponFrame = {
         return;
 
     if (self.button0 
-        && (!self.fire_held_down 
-            || 
-            (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
+            && (!self.fire_held_down 
+                || 
+                (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
         if (self.current_weapon == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400) {
@@ -3582,7 +3875,7 @@ void () RemoveGrenade = {
         te = find(world, classname, "grentimer");
         while (te) {
             if ((te.owner == self.owner) &&
-                (te.no_active_napalm_grens > 0))
+                    (te.no_active_napalm_grens > 0))
                 te.no_active_napalm_grens = te.no_active_napalm_grens - 1;
             te = find(te, classname, "grentimer");
         }
@@ -3604,5 +3897,20 @@ void () RemoveGrenade = {
             te = find(te, classname, "grentimer");
         }
         dremove(self);
+    }
+};
+
+void () ToggleInvincibility = {
+    if(self.tfstate & TFSTATE_INVINCIBLE) {
+        self.items = self.items - (self.items & IT_INVULNERABILITY);
+        self.invincible_time = 0;
+        self.invincible_finished = 0;
+        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
+        self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
+    } else {
+        self.items = self.items | IT_INVULNERABILITY;
+        self.invincible_time = 1;
+        self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+        self.invincible_finished = time + 666;
     }
 };
