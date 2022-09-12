@@ -39,8 +39,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_GRENTIMERVOLUME, "1");
     registercvar(FOCMD_JUMPVOLUME, "1");
-    registercvar(FOCMD_OLDSCOREBOARD, "0");
-    registercvar(FOCMD_FTE_HUD, "0");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -115,21 +113,20 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-    ScreenSize = [width, height, menushown];
-    SBAR.Hint = "";
-    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
-
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-    if(cvar(FOCMD_FTE_HUD) != 1) {
-        setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
-    }
+
+    // Draw original sbar, viewsize honoured automatically.
+    if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
+        setproperty(VF_DRAWENGINESBAR, 1);
 
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
     renderscene();
 
+    ScreenSize = [width, height, menushown];
+    SBAR.Hint = "";
     sui_begin(width, height);
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
@@ -264,14 +261,14 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                     localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(CVARF(fo_fte_hud)) {
                 FO_Show_Scores(TRUE);
             }
             break;
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(CVARF(fo_fte_hud)) {
                 FO_Show_Scores(FALSE);
             }
             break;
