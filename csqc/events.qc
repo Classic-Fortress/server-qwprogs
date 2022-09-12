@@ -444,7 +444,7 @@ void ParseSBAR()
 }
 
 float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    if !(cvar("csqcjumpsounds"))
+    if !(cvar("fo_csjumpsounds"))
         return 0;
 
     if !(entnum == player_localentnum)

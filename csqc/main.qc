@@ -88,7 +88,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
-    autocvar(csqcjumpsounds, 0, "client-side predicted jump sounds");
+    autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds");
 
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
@@ -176,7 +176,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     local float paused = getstatf(STAT_PAUSED);
 
-    if (cvar("csqcjumpsounds")) {
+    if (cvar("fo_csjumpsounds")) {
         if (pmove_onground && health > 0 && !paused) {
             // The pmove_vel_z < 180 check makes sure you're not sliding
             if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
