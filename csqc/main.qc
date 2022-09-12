@@ -88,6 +88,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
+    autocvar(csqcjumpsounds, 0, "client-side predicted jump sounds");
+
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
@@ -174,17 +176,19 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     local float paused = getstatf(STAT_PAUSED);
 
-    if (pmove_onground && health > 0 && !paused) {
-        // The pmove_vel_z < 180 check makes sure you're not sliding
-        if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
-            localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
-        }
+    if (cvar("csqcjumpsounds")) {
+        if (pmove_onground && health > 0 && !paused) {
+            // The pmove_vel_z < 180 check makes sure you're not sliding
+            if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
+                localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+            }
 
-        if (!last_pmove_onground) {
-            if (last_vel_z < -650) {
-                localsound("player/land2.wav", CHAN_AUTO, 1);
-            } else if (last_vel_z < -300) {
-                localsound("player/land.wav", CHAN_AUTO, 1);
+            if (!last_pmove_onground) {
+                if (last_vel_z < -650) {
+                    localsound("player/land2.wav", CHAN_AUTO, 1);
+                } else if (last_vel_z < -300) {
+                    localsound("player/land.wav", CHAN_AUTO, 1);
+                }
             }
         }
     }
