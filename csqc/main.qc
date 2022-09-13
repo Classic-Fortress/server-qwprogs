@@ -141,7 +141,10 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         if (pmove_onground && health > 0 && !paused) {
             // jumping
             if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
-                localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                if (jumpsound_cooldown < time) {
+                    jumpsound_cooldown = time + 0.01;
+                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                }
             }
 
             // landing
