@@ -148,18 +148,18 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
             if (!last_pmove_onground && last_vel_z < -300) {
                 thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
                 if (pointcontents(thisorigin) == CONTENT_WATER) {
-                    localsound("player/h2ojump.wav", CHAN_BODY, 1);
+                    localsound("player/h2ojump.wav", CHAN_VOICE, 1);
                 } else if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_BODY, 1);
+                    localsound("player/land2.wav", CHAN_VOICE, 1);
                 } else {
-                    localsound("player/land.wav", CHAN_BODY, 1);
+                    localsound("player/land.wav", CHAN_VOICE, 1);
                 }
             }
         }
-    }
 
-    last_vel_z = pmove_vel_z;
-    last_pmove_onground = pmove_onground;
+        last_vel_z = pmove_vel_z;
+        last_pmove_onground = pmove_onground;
+    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
