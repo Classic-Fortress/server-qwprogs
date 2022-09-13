@@ -13,6 +13,7 @@ void AddGrenTimer(float grentype, float offset);
 void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
+void Sync_GameState();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -38,8 +39,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
     registercvar(FOCMD_GRENTIMERVOLUME, "1");
     registercvar(FOCMD_JUMPVOLUME, "1");
-    registercvar(FOCMD_OLDSCOREBOARD, "0");
-    registercvar(FOCMD_FTE_HUD, "0");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -116,70 +115,33 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
-    ScreenSize = [width, height, menushown];
-    team_no = getstatf(STAT_TEAMNO);
-    is_observer = FALSE;
-    if (team_no == 0)
-        is_observer = TRUE;
-    player_class = getstatf(STAT_CLASS);
-    SBAR.ReadyStatus = getstatf(STAT_FLAGS);
-    oldhealth = getstatf(STAT_HEALTH);
-    is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
-    if (is_spectator)
-        is_observer = FALSE;
-    SBAR.Hint = "";
-    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
-    //if(nextoriginupdate < time) {
-    //    speed = vlen([thisorigin.x, thisorigin.y] - [lastorigin.x, lastorigin.y]) * 10;
-    //    lastorigin = thisorigin;
-    //    nextoriginupdate = time + 0.1;
-    //}
-    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y), getstatf(STAT_VELOCITY_Z)];
-    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
-
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-    if(cvar(FOCMD_FTE_HUD) != 1) {
-        setproperty(VF_DRAWENGINESBAR, 1);		/* boolean. If set to 1, the sbar will be drawn, and viewsize will be honoured automatically. */
-    }
-    //setviewprop(VF_ORIGIN, '0 0 0');        //view position of the scene (after view_ofs effects).
-    //setviewprop(VF_ANGLES, '0 0 0');        //override the view angles. input will work as normal. other players will see your player as normal. your screen will just be pointing a different direction.
-    //setviewprop(VF_DRAWWORLD, 1);            //whether the world entity should be drawn. set to 0 if you want a completely empty scene.
-    //setviewprop(VF_MIN, '0 0 0');            //top-left coord (x,y) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
-    //setviewprop(VF_SIZE, [width, height, 0]);    //virtual size (width,height) of the scene viewport in virtual pixels (or annoying physical pixels in dp).
-    //setviewprop(VF_AFOV, cvar("fov"));        //note: fov_x and fov_y control individual axis. afov is general
-    //setviewprop(VF_PERSPECTIVE, 1);        //1 means like quake and other 3d games. 0 means isometric.
 
-    local float health = getstatf(STAT_HEALTH);
-
-    if (health <= 0 || player_class != PC_SNIPER) {
-        zoomed_in = 0;
-    }
-
-    if (zoomed_in) {
-        setviewprop(VF_AFOV, cvar("fov")/3);
-        setsensitivityscaler(1/3);
-    } else {
-        setviewprop(VF_AFOV, cvar("fov"));
-        setsensitivityscaler(1);
-    }
+    // Draw original sbar, viewsize honoured automatically.
+    if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
+        setproperty(VF_DRAWENGINESBAR, 1);
 
     addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
 
     renderscene();
 
+    ScreenSize = [width, height, menushown];
+    SBAR.Hint = "";
     sui_begin(width, height);
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
 
-    local float paused = getstatf(STAT_PAUSED);
-
     if (cvar("fo_csjumpsounds")) {
+        local float health = getstatf(STAT_HEALTH);
+        local float paused = getstatf(STAT_PAUSED);
+
         if (pmove_onground && health > 0 && !paused) {
             // The pmove_vel_z < 180 check makes sure you're not sliding
-            if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
+            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180)) {
+                print("pmove_vel_z: ", ftos(pmove_vel_z), "\n");
                 localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
             }
 
@@ -325,14 +287,14 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                     localcmd(sprintf("bind %s +fo_showscores\n", key2));
                 }
             }
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(CVARF(fo_fte_hud)) {
                 FO_Show_Scores(TRUE);
             }
             break;
         case "-showscores":
         case "-showteamscores":
             showingscores = FALSE;
-            if(cvar(FOCMD_FTE_HUD)) {
+            if(CVARF(fo_fte_hud)) {
                 FO_Show_Scores(FALSE);
             }
             break;
@@ -465,6 +427,8 @@ noref void CSQC_Input_Frame() {
     if (player_class == PC_SNIPER && keydowns & BUTTON3) {
         zoomed_in = !zoomed_in;
     }
+
+    Sync_GameState();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -501,4 +465,61 @@ void StopGrenTimers() {
         FO_Hud_Grentimers[i].expires = 0;
         FO_Hud_Grentimers[i].icon_index = 0;
     }
+}
+
+float last_servercommandframe;
+void _Sync_ServerCommandFrame() {
+    // Server command frames are monotonically unique, we can skip processing
+    // unless there is new state.
+    if (last_servercommandframe == servercommandframe)
+        return;
+    last_servercommandframe = servercommandframe;
+
+    team_no = getstatf(STAT_TEAMNO);
+    is_observer = FALSE;
+    if (team_no == 0)
+        is_observer = TRUE;
+    player_class = getstatf(STAT_CLASS);
+    SBAR.ReadyStatus = getstatf(STAT_FLAGS);
+    oldhealth = getstatf(STAT_HEALTH);
+    is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
+    if (is_spectator)
+        is_observer = FALSE;
+
+    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
+                  getstatf(STAT_VELOCITY_Z)];
+    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
+
+    local float health = getstatf(STAT_HEALTH);
+    if (health <= 0 || player_class != PC_SNIPER) {
+        zoomed_in = 0;
+    }
+
+    if (zoomed_in) {
+        setviewprop(VF_AFOV, cvar("fov")/3);
+        setsensitivityscaler(1/3);
+    } else {
+        setviewprop(VF_AFOV, cvar("fov"));
+        setsensitivityscaler(1);
+    }
+}
+
+float last_pmove_onground;
+float last_vel_z;
+float last_clientcommandframe;
+// REQUIRES: Must be called after _Sync_ServerCommandFrame.
+void _Sync_ClientCommandFrame() {
+    // Client command frames are regenerated beyond the server frame, so we
+    // cannot check that we have not seen this client command frame alone.
+    if (last_servercommandframe == servercommandframe &&
+        last_clientcommandframe == clientcommandframe)
+        return;
+    last_clientcommandframe = clientcommandframe;
+}
+
+// Called for each {client, server} command frame, ensures globals are
+// synchronized with server and predicted state.
+void Sync_GameState() {
+    _Sync_ServerCommandFrame();
+    _Sync_ClientCommandFrame();
 }
