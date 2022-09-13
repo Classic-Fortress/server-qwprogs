@@ -444,9 +444,6 @@ void ParseSBAR()
 }
 
 float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    if !(cvar("fo_csjumpsounds"))
-        return 0;
-
     if !(entnum == player_localentnum)
         return 0;
 
@@ -454,7 +451,9 @@ float(float entnum, float channel, string soundname, float vol, float attenuatio
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
-            return 1;
+        case "player/h2ojump.wav":
+            if (autocvar(fo_csjumpsounds, 1))
+                return 1;
     }
 
     return 0;

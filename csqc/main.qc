@@ -139,17 +139,20 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         local float paused = getstatf(STAT_PAUSED);
 
         if (pmove_onground && health > 0 && !paused) {
-            // The pmove_vel_z < 180 check makes sure you're not sliding
-            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180)) {
-                print("pmove_vel_z: ", ftos(pmove_vel_z), "\n");
+            // jumping
+            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
                 localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
             }
 
-            if (!last_pmove_onground) {
-                if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_AUTO, 1);
-                } else if (last_vel_z < -300) {
-                    localsound("player/land.wav", CHAN_AUTO, 1);
+            // landing
+            if (!last_pmove_onground && last_vel_z < -300) {
+                thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
+                if (pointcontents(thisorigin) == CONTENT_WATER) {
+                    localsound("player/h2ojump.wav", CHAN_BODY, 1);
+                } else if (last_vel_z < -650) {
+                    localsound("player/land2.wav", CHAN_BODY, 1);
+                } else {
+                    localsound("player/land.wav", CHAN_BODY, 1);
                 }
             }
         }
