@@ -87,8 +87,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
-    autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds");
-
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
@@ -133,6 +131,36 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+
+    if (autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds")) {
+        local float health = getstatf(STAT_HEALTH);
+        local float paused = getstatf(STAT_PAUSED);
+
+        if (pmove_onground && health > 0 && !paused) {
+            // jumping
+            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
+                if (jumpsound_cooldown < time) {
+                    jumpsound_cooldown = time + 0.01;
+                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                }
+            }
+
+            // landing
+            if (!last_pmove_onground && last_vel_z < -300) {
+                thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
+                if (pointcontents(thisorigin) == CONTENT_WATER) {
+                    localsound("player/h2ojump.wav", CHAN_VOICE, 1);
+                } else if (last_vel_z < -650) {
+                    localsound("player/land2.wav", CHAN_VOICE, 1);
+                } else {
+                    localsound("player/land.wav", CHAN_VOICE, 1);
+                }
+            }
+        }
+
+        last_vel_z = pmove_vel_z;
+        last_pmove_onground = pmove_onground;
+    }
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -491,29 +519,6 @@ void _Sync_ClientCommandFrame() {
         last_clientcommandframe == clientcommandframe)
         return;
     last_clientcommandframe = clientcommandframe;
-
-    local float health = getstatf(STAT_HEALTH);
-    local float paused = getstatf(STAT_PAUSED);
-
-    if (cvar("fo_csjumpsounds")) {
-        if (pmove_onground && health > 0 && !paused) {
-            // The pmove_vel_z < 180 check makes sure you're not sliding
-            if (input_buttons & BUTTON2 && pmove_vel_z < 180) {
-                localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
-            }
-
-            if (!last_pmove_onground) {
-                if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_AUTO, 1);
-                } else if (last_vel_z < -300) {
-                    localsound("player/land.wav", CHAN_AUTO, 1);
-                }
-            }
-        }
-    }
-
-    last_vel_z = pmove_vel_z;
-    last_pmove_onground = pmove_onground;
 }
 
 // Called for each {client, server} command frame, ensures globals are
