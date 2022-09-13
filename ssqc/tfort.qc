@@ -1154,7 +1154,7 @@ void () TeamFortress_GrenadePrimedThink = {
 };
 
 float () FO_UsePreciseGrenades = {
-    return FO_GetUserSetting(self, "precise_grenades", "pg", "off");
+    return FO_GetUserSetting(self, "precise_grenades", "pg", "on");
 }
 
 void () FO_PreciseGrenadeThink = {
