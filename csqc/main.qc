@@ -87,8 +87,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     }
     registercvar("fo_menu_option_+", "=");
 
-    autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds");
-
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     

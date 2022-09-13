@@ -452,7 +452,7 @@ float(float entnum, float channel, string soundname, float vol, float attenuatio
         case "player/land.wav":
         case "player/land2.wav":
         case "player/h2ojump.wav":
-            if (autocvar(fo_csjumpsounds, 1))
+            if (autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds"))
                 return 1;
     }
 
