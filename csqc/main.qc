@@ -147,8 +147,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
             // landing
             if (!last_pmove_onground && last_vel_z < -300) {
-                thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
-                if (pointcontents(thisorigin) == CONTENT_WATER) {
+                if (pointcontents(pmove_org) == CONTENT_WATER) {
                     localsound("player/h2ojump.wav", CHAN_VOICE, 1);
                 } else if (last_vel_z < -650) {
                     localsound("player/land2.wav", CHAN_VOICE, 1);
@@ -508,8 +507,6 @@ void _Sync_ServerCommandFrame() {
     }
 }
 
-float last_pmove_onground;
-float last_vel_z;
 float last_clientcommandframe;
 // REQUIRES: Must be called after _Sync_ServerCommandFrame.
 void _Sync_ClientCommandFrame() {
