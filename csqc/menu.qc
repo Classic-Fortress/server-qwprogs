@@ -661,6 +661,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 
     Hud_Panels[HUD_PANEL_MAP_MENU].Display = FALSE;
 
+    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
     if(menu.update) {
