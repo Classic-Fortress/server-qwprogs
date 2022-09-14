@@ -312,7 +312,7 @@ void () OutputTrackedSettings = {
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num = 0, processedCmd, inp;
     local string tmp;
-    local float farg3;
+    local float farg2, farg3;
     local entity ent, pl;
     processedCmd = FALSE;
 

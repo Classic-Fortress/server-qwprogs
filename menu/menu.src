@@ -1,6 +1,8 @@
-#pragma progs_dat "../menu.dat"
+#pragma target fte_5768
+#pragma optimise 3
+#pragma flag enable subscope
 
-//#pragma target fte
+#pragma progs_dat "../menu.dat"
 
 #define MENU		//select the module
 
