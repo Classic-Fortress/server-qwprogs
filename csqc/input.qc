@@ -75,39 +75,31 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 switch (scanx) {
                     case K_ESCAPE:
                         return TRUE;
-                        break;
                     case K_MOUSE1:
                         MouseDown = TRUE;
                         return TRUE;
-                        break;
                     case K_UPARROW:
                         vote_selected_index--;
                         vote_list_offset--;
                         return TRUE;
-                        break;
                     case K_DOWNARROW:
                         vote_selected_index++;
                         vote_list_offset++;
                         return TRUE;
-                        break;
                     case K_PGUP:
                         vote_selected_index -= 10;
                         vote_list_offset -= 10;
                         return TRUE;
-                        break;
                     case K_PGDN:
                         vote_selected_index +=10;
                         vote_list_offset +=10;
                         return TRUE;
-                        break;
                     case K_MWHEELUP:
                         vote_list_offset--;
                         return TRUE;
-                        break;
                     case K_MWHEELDOWN:
                         vote_list_offset++;
                         return TRUE;
-                        break;
                     case K_ENTER:
                         if(vote_selected_item && current_vote == vote_selected_item.owner) {
                             localcmd("cmd break\n");
@@ -115,14 +107,12 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                             localcmd("cmd votemap ", vote_selected_item.owner.name, "\n");
                         }
                         return TRUE;
-                        break;
                     case K_BACKSPACE:
                          if(strlen(vote_list_filter) > 0) {
                             vote_list_filter = substring(vote_list_filter, 0, strlen(vote_list_filter) - 1); 
                             ApplyMapFilter();
                         }
                         return TRUE;
-                        break;
                     case K_DEL: //blank it out
                         if(strlen(vote_list_filter) > 0) {
                             vote_list_filter = "";
@@ -146,11 +136,9 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                     case K_ESCAPE:
                         showVoteMenu(FALSE);
                         return TRUE;
-                        break;
                     case K_MOUSE1:
                         MouseDown = FALSE;
                         return TRUE;
-                        break;
                 }       
             }
     } else {
@@ -162,7 +150,6 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                     case K_ESCAPE:
                         FO_Menu_Game(TRUE);
                         return TRUE;
-                        break;
                 }
                 break;
             case IE_KEYDOWN:
@@ -170,7 +157,6 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 {
                     case K_ESCAPE:
                         return TRUE;
-                        break;
                 }
                 break;
             default:

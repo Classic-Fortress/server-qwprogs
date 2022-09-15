@@ -306,9 +306,9 @@ void() CSQC_Parse_Event = {
 }
 
 void PlayGrenTimer(float offset) {
-    local float channel;
+    local float channel = CHAN_GREN1;
     local float soundtime;
-    local float highest_soundtime;
+    local float highest_soundtime = -1;
 
     for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
         soundtime = getsoundtime(self, i);
