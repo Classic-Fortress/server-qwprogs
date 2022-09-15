@@ -444,14 +444,21 @@ void ParseSBAR()
 }
 
 float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    if !(entnum == player_localentnum)
+    // Filter out sounds we may have generated locally, unless we're just
+    // pretending to be that entity.
+    if (entnum != player_localentnum || is_spectator || is_observer)
         return 0;
 
     switch(soundname) {
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
-            return 1;
+        case "player/h2ojump.wav":
+            if (CVARF(fo_csjumpsounds)) {
+                return 1;
+            } else {
+                break;
+            }
     }
 
     return 0;

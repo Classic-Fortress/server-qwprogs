@@ -527,6 +527,7 @@ enum {
 
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
+DEFCVAR_FLOAT(fo_csjumpsounds, 1);
 
 float team_no;
 float is_spectator;
@@ -541,6 +542,7 @@ float nextoriginupdate;
 float speed;
 float jump_counter;
 float grentimer_waiting;
+float jumpsound_cooldown;
 float last_pmove_onground;
 float last_vel_z;
 
