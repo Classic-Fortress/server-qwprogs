@@ -3518,7 +3518,7 @@ void () ButtonFrame = {
     // +grenade1 keyup frame
     if (keyups & BUTTON5) {
         if (hold_grens) {
-            TeamFortress_ThrowGrenade(1);
+            TeamFortress_ThrowGrenade();
         }
     }
 
@@ -3534,7 +3534,7 @@ void () ButtonFrame = {
     // +grenade2 keyup frame
     if (keyups & BUTTON6) {
         if (hold_grens) {
-            TeamFortress_ThrowGrenade(2);
+            TeamFortress_ThrowGrenade();
         }
     }
 

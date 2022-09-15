@@ -650,7 +650,7 @@ void(vector pos) mitem_frame::item_draw =
 	{
 		ui.setcliparea(ui.drawrectmin[0], ui.drawrectmin[1], ui.drawrectmax[0] - ui.drawrectmin[0], ui.drawrectmax[1] - ui.drawrectmin[1]);
 		if (item_exclusive)
-			item_exclusive.item_draw(clientpos + ch.item_position);
+			item_exclusive.item_draw(clientpos + item_exclusive.item_position);
 		else
 		{
 			for(ch = item_children; ch; ch = ch.item_next)

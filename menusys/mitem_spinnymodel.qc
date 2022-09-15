@@ -32,6 +32,7 @@ probably others. it really wouldn't surprise me.
 //helper function to work around a DP bug.
 static vector(vector v) vtodpp =
 {
+#pragma warning disable F333
 #ifndef CSQC_SIMPLE
 	//so fucking disgustingly ugly.
 	if (dp_workarounds)
@@ -41,6 +42,7 @@ static vector(vector v) vtodpp =
 	}
 #endif
 	return v;
+#pragma warning enable F333
 };
 //make sure the fields are all defined if we're in menuqc or something
 noref .vector origin;
