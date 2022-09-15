@@ -132,7 +132,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Hud_Draw(width, height);
     sui_end();
 
-    if (autocvar(fo_csjumpsounds, 1, "client-side predicted jump sounds")) {
+    if (CVARF(fo_csjumpsounds)) {
         local float health = getstatf(STAT_HEALTH);
         local float paused = getstatf(STAT_PAUSED);
 
