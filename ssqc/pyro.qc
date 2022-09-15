@@ -877,7 +877,7 @@ void () UseAirBlastV2 = {
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_diameter = ab_start + aim(self,1000) * abrange;
 
-        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+        pointparticles(particleeffectnum("fo_airblast"), ab_origin, v_forward);
 
         if (isabjump) 
         {

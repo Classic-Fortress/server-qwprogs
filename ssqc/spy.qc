@@ -755,7 +755,7 @@ void (entity player) FO_Spy_DisguiseLast = {
 void (entity player) FO_Spy_DisguiseLastSpawned = {
     local entity te = find(world, classname, "player");
     local float latest_spawn_time = 0;
-    local entity enemy_to_disguise_as;
+    local entity enemy_to_disguise_as = world;
 
     while (te != world) {
         if (te.team_no != player.team_no) {
@@ -766,6 +766,11 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
         }
 
         te = find(te, classname, "player");
+    }
+
+    if (enemy_to_disguise_as == world) {
+        sprint(self.owner, PRINT_HIGH, "No enemies to disguise as!\n");
+        return;
     }
 
     if (self.is_undercover == 2 && enemy_to_disguise_as.skin != player.disguise_skin) {

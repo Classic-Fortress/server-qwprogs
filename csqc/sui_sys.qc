@@ -640,7 +640,6 @@ float(float evtype, float scanx, float chary, float devid) sui_input_event =
 	case IE_MOUSEABS:
 		_sui_mouse_move([scanx, chary]);
 		return TRUE;
-		break;
 	case IE_MOUSEDELTA:
 		// Big question mark...
 		// maybe make our own delta based sui_cursor here..
@@ -648,7 +647,6 @@ float(float evtype, float scanx, float chary, float devid) sui_input_event =
 		// delta cursor by passing different params to this func...?
 		// for MVP let's just use mouseabs only
 		return FALSE;
-		break;
 	case IE_KEYDOWN:
 		if (_sui_binding_command != "")
 		{
@@ -668,7 +666,6 @@ float(float evtype, float scanx, float chary, float devid) sui_input_event =
 				return FALSE;
 			return _sui_add_input(chary, scanx);
 		}
-		break;
 	case IE_KEYUP:
 		if (_sui_binding_command != "")
 		{

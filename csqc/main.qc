@@ -234,7 +234,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Build(TRUE);
             break;
         case "fo_menu_dropammo":
-            FO_Menu_DropAmmo(TRUE, 1, (player_class == PC_ENGINEER));
+            FO_Menu_DropAmmo(TRUE);
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
