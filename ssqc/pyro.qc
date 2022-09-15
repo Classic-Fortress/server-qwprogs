@@ -770,6 +770,8 @@ void () UseAirBlast = {
         timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
         timer.think = AirBlastReloadFinished;
 
+        pointparticles(particleeffectnum("te_teleportsplash"),
+            self.origin + v_forward * PC_PYRO_AIRBLAST_RANGE / 4, v_forward);
         FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
         makevectors(self.v_angle);
         entity ent;
@@ -877,7 +879,7 @@ void () UseAirBlastV2 = {
         vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
         vector ab_diameter = ab_start + aim(self,1000) * abrange;
 
-        pointparticles(particleeffectnum("fo_airblast"), ab_origin, 1);
+        pointparticles(particleeffectnum("fo_airblast"), ab_origin, v_forward);
 
         if (isabjump) 
         {
