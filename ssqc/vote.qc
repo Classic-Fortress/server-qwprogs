@@ -1043,7 +1043,7 @@ float (string ps_list) List_Count = {
 
     for (i = 0; i < f_length; i++) {
         // set current character
-        local string s_current = substr(ps_list, i, 1);
+        local string s_current = substring(ps_list, i, 1);
 
         // non-empty space => word
         if (s_current != " " && s_previous == " ")
@@ -1066,7 +1066,7 @@ string (string ps_list, float pf_idx) List_Index = {
 
     for (i = 0; i < f_length; i++) {
         // set current character
-        local string s_current = substr(ps_list, i, 1);
+        local string s_current = substring(ps_list, i, 1);
 
         // non-empty space => start of word
         if (s_current != " " && s_previous == " ") {
@@ -1077,14 +1077,14 @@ string (string ps_list, float pf_idx) List_Index = {
 
         // empty space => end of word
         if (s_current == " " && f_start > -1)
-            return strzone(substr(ps_list, f_start, i - f_start));
+            return strzone(substring(ps_list, f_start, i - f_start));
 
         s_previous = s_current;
     }
 
     // if f_start is set it means a list item was found
     if (f_start > -1)
-        return strzone(substr(ps_list, f_start, i - f_start));
+        return strzone(substring(ps_list, f_start, i - f_start));
 
     return strzone(string_null);
 };
