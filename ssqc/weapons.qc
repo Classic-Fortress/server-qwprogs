@@ -1252,8 +1252,12 @@ void () W_FireLightning = {
     LightningDamage(self.origin, trace_endpos + v_forward * 4, self, 30);
 };
 
+void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
+                            entity ignore);
+
 void () GrenadeExplode = {
     local entity te;
+    float use_antilag = FALSE;
 
     if (self.voided)
         return;
@@ -1262,10 +1266,14 @@ void () GrenadeExplode = {
     if (self.classname == "pipebomb") {
         if (!(self.flags & 512))
             self.weapon = 40;
+        use_antilag = TRUE;
     }
     if (self.owner.has_disconnected != 1) {
         deathmsg = self.weapon;
-        T_RadiusDamage(self, self.owner, 120, world);
+        if (!use_antilag)
+            T_RadiusDamage(self, self.owner, 120, world);
+        else
+            T_RadiusDamage_Antilag(self, self.owner, 120, world);
     }
     if (self.no_active_nail_grens != 0) {
 

@@ -26,6 +26,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
         return impulse_queue ? FALSE : TRUE;       
     }
 
+    self.last_det_forced = force;
     e = find(world, classname, "pipebomb");
     while (e != world) {
         if (e.owner == self)
