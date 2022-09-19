@@ -30,7 +30,7 @@ void () TeamFortress_ShowTF;
 void () TeamFortress_AssaultWeapon;
 void () TeamFortress_IncendiaryCannon;
 void () TeamFortress_FlameThrower;
-void (float inp) TeamFortress_PrimeGrenade;
+void (float inp, float is_player) TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
 void () TeamFortress_GrenadeSwitch;
@@ -3028,9 +3028,9 @@ void () ImpulseCommands = {
 
     if (!self.is_feigning) {
         if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         else if (self.impulse == TF_GRENADE_T)
             TeamFortress_ThrowGrenade();
         else if (self.impulse == TF_GRENADE_PT_1)
@@ -3518,7 +3518,7 @@ void () ButtonFrame = {
     // +grenade1 keydown frame
     if (keydowns & BUTTON5) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(1);
         }
@@ -3534,7 +3534,7 @@ void () ButtonFrame = {
     // +grenade2 keydown frame
     if (keydowns & BUTTON6) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(2);
         }
@@ -3868,45 +3868,6 @@ void () SuperDamageSound = {
         }
     }
     return;
-};
-
-void () RemoveGrenade = {
-    local entity te;
-
-    if (self.no_active_napalm_grens > 0) {
-
-        self.no_active_napalm_grens = 0;
-        self.owner.no_active_napalm_grens =
-            self.owner.no_active_napalm_grens - 1;
-        if (self.owner.no_active_napalm_grens < 0)
-            self.owner.no_active_napalm_grens = 0;
-
-        te = find(world, classname, "grentimer");
-        while (te) {
-            if ((te.owner == self.owner) &&
-                    (te.no_active_napalm_grens > 0))
-                te.no_active_napalm_grens = te.no_active_napalm_grens - 1;
-            te = find(te, classname, "grentimer");
-        }
-        dremove(self.enemy);
-        dremove(self);
-    }
-    if (self.no_active_gas_grens > 0) {
-
-        self.no_active_gas_grens = 0;
-        self.owner.no_active_gas_grens =
-            self.owner.no_active_gas_grens - 1;
-        if (self.owner.no_active_gas_grens < 0)
-            self.owner.no_active_gas_grens = 0;
-
-        te = find(world, classname, "grentimer");
-        while (te) {
-            if ((te.owner == self.owner) && (te.no_active_gas_grens > 0))
-                te.no_active_gas_grens = te.no_active_gas_grens - 1;
-            te = find(te, classname, "grentimer");
-        }
-        dremove(self);
-    }
 };
 
 void () ToggleInvincibility = {

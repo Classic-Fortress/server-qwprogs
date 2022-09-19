@@ -790,6 +790,7 @@ void () GrenadeTimer = {
 void (entity timer) FO_SpawnThrownGrenade = {
     local entity user = timer.owner;
     user.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
+    user.last_throw = time;
 
     if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
         UpdateClientGrenadeThrown(user);
@@ -872,7 +873,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/biggren.mdl");
     } else if (timer.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
+        newmis.think = NapalmGrenadeExplode1;
         newmis.grenadename = "napalmgrenade";
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
@@ -888,7 +889,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/flare.mdl");
     } else if (timer.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
+        newmis.think = GasGrenadeExplode1;
         newmis.grenadename = "gasgrenade";
         newmis.skin = 3;
         newmis.avelocity = '300 300 300';
@@ -923,7 +924,7 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
         (self.tfstate & TFSTATE_GRENTHROWING))
         TeamFortress_ThrowGrenade();
     else {
-        TeamFortress_PrimeGrenade(inp);
+        TeamFortress_PrimeGrenade(inp, TRUE);
 
     if ( ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1))
                 && self.tp_grenades_1 == GR_TYPE_CALTROP)
@@ -935,7 +936,9 @@ void () TeamFortress_GrenadePrimedThink;
 void () FO_PreciseGrenadeThink;
 float () FO_UsePreciseGrenades;
 
-void (float inp) TeamFortress_PrimeGrenade = {
+// is_player defines whether this originated from the player or server.  Player
+// generated primes are corrected for latency when project_grenades is on.
+void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     local float gtype;
     local string gs;
     local string ptime;
@@ -1098,12 +1101,14 @@ void (float inp) TeamFortress_PrimeGrenade = {
         tGrenade.impulse = TF_GRENADE_1;
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
-    tGrenade.nextthink = time + 0.8;
 
+    local float lag_adjust = is_player ? AL_GrenadeOffset() : 0;
+
+    tGrenade.nextthink = time + 0.8 - lag_adjust;
     if (gtype == GR_TYPE_CALTROP)
-        tGrenade.heat = time + 0.5 + 0.5;
+        tGrenade.heat = time + 0.5 + 0.5 - lag_adjust;
     else {
-        tGrenade.heat = time + 3 + 0.8;
+        tGrenade.heat = time + 3 + 0.8 - lag_adjust;
 
         RemoveGrenadeTimers();
 
@@ -1111,7 +1116,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
         local float notimers = stof(infokey(self, "nt"));
         if (grentimers && notimers != 1) {
             timer = spawn();
-            timer.nextthink = time + 0.8;
+            timer.nextthink = time + 0.8 - lag_adjust;
             timer.think = GrenadeTimer;
             timer.heat = 4;
             timer.owner = self;
@@ -1121,7 +1126,7 @@ void (float inp) TeamFortress_PrimeGrenade = {
             }
         }
         if (grentimers && csqcactive) {
-            UpdateClientGrenadePrimed(self, gtype);
+            UpdateClientGrenadePrimed(self, gtype, tGrenade.heat);
         }
     }
 
@@ -2488,7 +2493,7 @@ void () TeamFortress_RemoveTimers = {
 
     te = find(world, classname, "timer");
     while (te != world) {
-        if ((te.owner == self) && (te.no_active_gas_grens <= 0)) {
+        if (te.owner == self) {
             dremove(te);
             te = find(world, classname, "timer");
         } else
@@ -2500,15 +2505,6 @@ void () TeamFortress_RemoveTimers = {
     RemovePrimeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);
-
-    te = find(world, classname, "grentimer");
-    while (te != world) {
-        if ((te.owner == self) && (te.no_active_napalm_grens <= 0)) {
-            dremove(te);
-            te = find(world, classname, "grentimer");
-        } else
-            te = find(te, classname, "grentimer");
-    }
 
     te = find(world, classname, "item_tfgoal");
     while (te) {
@@ -3006,7 +3002,7 @@ void () TeamFortress_ExplodePerson = {
         FO_SetModel(newmis, "progs/biggren.mdl");
     } else if (self.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
+        newmis.think = NapalmGrenadeExplode1;
         newmis.grenadename = "napalmgrenade";
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
@@ -3026,7 +3022,7 @@ void () TeamFortress_ExplodePerson = {
         return;
     } else if (self.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
+        newmis.think = GasGrenadeExplode1;
         newmis.grenadename = "gasgrenade";
         newmis.skin = 2;
         newmis.avelocity = '300 300 300';
