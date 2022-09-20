@@ -2946,6 +2946,8 @@ void () CheckPowerups = {
 
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
+    FOPlayer fop = (FOPlayer)self;
+    fop.RewindUpdate();
 
     if (self.view_ofs == '0 0 0') {
         return;
@@ -3036,6 +3038,7 @@ void () ClientConnect = {
     local string st;
     local float got_one;
 
+    spawnfunc_FOPlayer();
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
