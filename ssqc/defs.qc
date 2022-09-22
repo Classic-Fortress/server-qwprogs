@@ -341,6 +341,7 @@ void () SUB_Null;
 void (entity et, float f) SUB_Null_pain;
 void () SUB_UseTargets;
 void () SUB_Remove;
+void (entity ent) RemoveDeferred;
 
 //
 // combat.qc

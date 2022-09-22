@@ -739,20 +739,16 @@ void (entity inflictor, entity attacker, float damage,
     }
 };
 
-float RewindForPlayer(entity p);
 
-.float last_det_forced;  // state would be nicer, but cleared at respawn.
+// Implements T_RadiusDamage but with awareness that the rewound player position
+// for damage and the current player position for knockback may not be the
+// same.
+//
 // Will merge with RadiusDamage in time.
-void T_RadiusDamage_Antilag (entity inflictor, entity attacker, float damage,
-                             entity ignore) {
+void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
+                            entity ignore) {
     float dmg[2];
     vector org[2];
-
-    // No short circuiting, consider enabling.
-    if (attacker.last_det_forced)
-        return T_RadiusDamage(inflictor, attacker, damage, ignore);
-    if (!RewindForPlayer(attacker))
-        return T_RadiusDamage(inflictor, attacker, damage, ignore);
 
     int count;
     entity* list = findradius_list(inflictor.origin, damage + 40, count);
@@ -783,8 +779,6 @@ void T_RadiusDamage_Antilag (entity inflictor, entity attacker, float damage,
             TF_T_DamageKnock(c, inflictor, attacker, dmg[0], dmg[1],
                              TF_TD_NOTTEAM, TF_TD_EXPLOSION);
     }
-    FOPlayer::RestoreAll();
-
 }
 
 void (entity attacker, float damage) T_BeamDamage = {

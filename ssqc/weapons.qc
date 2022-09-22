@@ -1252,6 +1252,15 @@ void () W_FireLightning = {
     LightningDamage(self.origin, trace_endpos + v_forward * 4, self, 30);
 };
 
+void RenderExplosion(vector origin) {
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+    WriteCoord(MSG_MULTICAST, origin_x);
+    WriteCoord(MSG_MULTICAST, origin_y);
+    WriteCoord(MSG_MULTICAST, origin_z);
+    multicast(origin, MULTICAST_PHS);
+}
+
 void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
                             entity ignore);
 
@@ -1263,18 +1272,11 @@ void () GrenadeExplode = {
         return;
     self.voided = 1;
 
-    if (self.classname == "pipebomb") {
-        if (!(self.flags & 512))
-            self.weapon = 40;
-        use_antilag = TRUE;
-    }
     if (self.owner.has_disconnected != 1) {
         deathmsg = self.weapon;
-        if (!use_antilag)
-            T_RadiusDamage(self, self.owner, 120, world);
-        else
-            T_RadiusDamage_Antilag(self, self.owner, 120, world);
+        T_RadiusDamage(self, self.owner, 120, world);
     }
+
     if (self.no_active_nail_grens != 0) {
 
         self.no_active_nail_grens = 0;
@@ -1288,14 +1290,9 @@ void () GrenadeExplode = {
             te = find(te, classname, "grenade");
         }
     }
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
 
-    BecomeExplosion();
+    RenderExplosion(self.origin);
+    dremove(self);
 };
 
 void () GrenadeTouch = {
