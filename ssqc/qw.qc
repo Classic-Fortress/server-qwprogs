@@ -241,8 +241,6 @@ float coop;
 .float last_saveme_sound;
 
 .float no_active_nail_grens;
-.float no_active_napalm_grens;
-.float no_active_gas_grens;
 
 /*======================================================================*/
 /* TEAMFORTRESS GOALS							*/
@@ -442,6 +440,7 @@ float already_chosen_map;
 float clanbattle;
 float clan_scores_dumped;
 float cb_prematch;
+float disable_voting;
 float v_break;
 float v_ready;
 .float allowvote;
@@ -601,6 +600,7 @@ float max_armor_hwguy;
 
 float project_weapons;
 float project_weapons_max_latency;
+float project_grenades;
 
 float ng_velocity;
 float ng_damage;
@@ -765,6 +765,7 @@ float FO_FlashDimension;
 
 // precise grenades
 .entity grenade_timer;
+.float last_throw;
 
 // allow for default goal state
 .float default_group_no;
@@ -787,9 +788,10 @@ string goal_class_names[7] = {
 
 // people complain about settings, let's track them
 
-string settings_to_track_list[2] = {
+string settings_to_track_list[3] = {
     "sv_antilag",
-    "project_weapons"
+    "project_weapons",
+    "project_grenades",
 };
 
 typedef struct setting_t {
