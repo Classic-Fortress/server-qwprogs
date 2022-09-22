@@ -343,27 +343,30 @@ class FOPlayer {
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
-float RewindForPlayer(entity p) {
+
+float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     // Live changeagble for now.
     float project_detpipe = CF_GetSetting("pd", "project_detpipe", "off");
     // Want to lower this in time, but good for testing.
     float project_detpipe_max_lat =
         CF_GetSetting("pdml", "project_max_latency", "500") / 1000;
 
-    project_detpipe_max_lat = min(project_detpipe_max_lat,
-                                  ((AL_MAX_REWINDS - 1)* AL_FRAME_LIMIT) * 2);
-
     if (!project_detpipe)
         return FALSE;
 
-    local float rtt = infokeyf(p, INFOKEY_P_PING) / 1000;
+    project_detpipe_max_lat = min(project_detpipe_max_lat,
+                                  ((AL_MAX_REWINDS - 1)* AL_FRAME_LIMIT) * 2);
+
+    local float rtt = infokeyf(self, INFOKEY_P_PING) / 1000;
+    rtt = min(rtt, project_detpipe_max_lat);
 
     if (rtt < 0.013)
         return FALSE;
-    rtt = min(rtt, project_detpipe_max_lat);
 
-    FOPlayer fop = (FOPlayer)p;
-    fop.RewindExcept(time - rtt/2);
+    float rewind_to = max(farthest_rewind_point, time - rtt / 2);
+
+    FOPlayer fop = (FOPlayer)self;
+    fop.RewindExcept(rewind_to);
     return TRUE;
 }
 
