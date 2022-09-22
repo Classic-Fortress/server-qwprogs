@@ -440,6 +440,7 @@ float already_chosen_map;
 float clanbattle;
 float clan_scores_dumped;
 float cb_prematch;
+float disable_voting;
 float v_break;
 float v_ready;
 .float allowvote;
