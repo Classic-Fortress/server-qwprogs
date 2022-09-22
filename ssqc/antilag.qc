@@ -135,23 +135,34 @@ void DumpPos(RewindState* target, float pos) {
     printd(" dump %d %0.2f\n", Index(pos), target->snapshot[Index(pos)].time);
 }
 
-void SeekCheck(RewindState* target, float when, SeekResult* r) {
+SeekResult SeekBasic(RewindState* target, float when) {
+    SeekResult r;
     float before = 0, after = time, nearest = when + 1;
 
+    r.before = r.after = r.nearest = __NULL__;
     for (int i = 0; i < AL_MAX_REWINDS; i++) {
         RewindSnapshot* s = &target->snapshot[i];
 
-        if (s->time && s->time > when && s->time < after)
+        if (s->time && s->time > when && s->time < after) {
             after = s->time;
-        if (s->time && s->time < when && s->time > before)
+            r.after = s;
+        }
+        if (s->time && s->time < when && s->time > before) {
             before = s->time;
+            r.before = s;
+        }
     }
 
     if (fabs(when - before) < fabs(when - after))
-        nearest = before;
+        r.nearest = r.before;
     else
-        nearest = after;
+        r.nearest = r.after;
 
+    return r;
+}
+
+#if 0
+void CompareSeek(SeekResult s1, SeekResult, s2) {
     if (before != (r.before)->time)
         error(sprintf("before mismatch w=%f seek=%f check=%f\n",
                       when, (r.before)->time, before));
@@ -163,7 +174,8 @@ void SeekCheck(RewindState* target, float when, SeekResult* r) {
                       when, (r.nearest)->time, nearest));
 }
 
-SeekResult Seek(RewindState* target, float when) {
+
+SeekResult SeekOpt(RewindState* target, float when) {
     SeekResult r;
     r.before = r.after = r.nearest = __NULL__;
 
@@ -203,6 +215,14 @@ SeekResult Seek(RewindState* target, float when) {
 
     SeekCheck(target, when, &r);
     return r;
+}
+#endif
+
+SeekResult Seek(RewindState* target, float when) {
+    SeekResult r;
+    r.before = r.after = r.nearest = __NULL__;
+
+    return SeekBasic(target, when);
 }
 
 // TODO: Filter out observers, but no harm immediately.
@@ -320,7 +340,6 @@ float RewindForPlayer(entity p) {
         return FALSE;
 
     local float rtt = infokeyf(p, INFOKEY_P_PING) / 1000;
-    rtt = max(rtt, project_detpipe_max_lat);
 
     if (rtt < 0.013)
         return FALSE;
