@@ -244,6 +244,8 @@ SeekResult Seek(RewindState* target, float when) {
 
 // TODO: Filter out observers, but no harm immediately.
 void RL_Rewind(RewindState* head, entity exclude, float when) {
+    float show_rewind_points = CF_GetSetting("rds", "rewind_debug_show", "off");
+
     printd("REWIND START %p\n", head);
     RL_FOR_EACH(head, rs) {
         if (rs->owner == exclude ||
@@ -270,7 +272,8 @@ void RL_Rewind(RewindState* head, entity exclude, float when) {
             rs->owner.velocity = near->velocity;
             rs->rewound_from = near;
 
-            pointparticles(particleeffectnum("fo_airblast"), near->origin);
+            if (show_rewind_points)
+                pointparticles(particleeffectnum("fo_airblast"), near->origin);
         }
     }
     printd("REWIND END\n");
@@ -346,7 +349,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     // Live changeagble for now.
-    float project_detpipe = CF_GetSetting("pd", "project_detpipe", "off");
+    float project_detpipe = CF_GetSetting("pd", "project_detpipe", "on");
     // Want to lower this in time, but good for testing.
     float project_detpipe_max_lat =
         CF_GetSetting("pdml", "project_max_latency", "500") / 1000;
