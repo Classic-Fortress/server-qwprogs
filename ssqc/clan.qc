@@ -1091,7 +1091,7 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, starting match\n");
             StartTimer ();
 
-            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "on");
+            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "off");
             if (limit_quad_players) {
                 quad_maxplayers = f1;
             }
