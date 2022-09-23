@@ -30,10 +30,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
         rewound = AL_RewindPlayersExceptSelf(self.pipecooldown);
 
     for (float i = 0; i < count; i++) {
-        deathmsg = pipes[i].weapon;
-
         if (pipes[i].owner == self) {
-            if !(pipes[i].flags & FL_ONGROUND)
             deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
                                                       DMSG_GREN_PIPE_AIR;
 
