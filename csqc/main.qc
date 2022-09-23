@@ -138,6 +138,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
         if (pmove_onground && health > 0 && !paused) {
             // jumping
+            getinputstate(clientcommandframe); // without this the input buttons are innacurate
             if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
                 if (jumpsound_cooldown < time) {
                     jumpsound_cooldown = time + 0.01;
