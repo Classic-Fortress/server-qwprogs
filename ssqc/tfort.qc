@@ -872,7 +872,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/biggren.mdl");
     } else if (timer.weapon == GR_TYPE_NAPALM) {
         newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode;
+        newmis.think = NapalmGrenadeExplode1;
         newmis.grenadename = "napalmgrenade";
         newmis.skin = 2;
         newmis.avelocity = '0 300 0';
@@ -888,7 +888,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
         FO_SetModel(newmis, "progs/flare.mdl");
     } else if (timer.weapon == GR_TYPE_GAS) {
         newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode;
+        newmis.think = GasGrenadeExplode1;
         newmis.grenadename = "gasgrenade";
         newmis.skin = 3;
         newmis.avelocity = '300 300 300';
