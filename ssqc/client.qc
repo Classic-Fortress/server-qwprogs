@@ -2109,10 +2109,6 @@ void () PutClientInServer = {
     setmodel(self, "progs/player.mdl");
     modelindex_player = self.modelindex;
 
-    if(no_fire_mode) {
-        return;
-    }
-
     if(votemode) {
         SetVoteParams(self);
         return;
