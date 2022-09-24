@@ -337,6 +337,8 @@ void () DecodeLevelParms = {
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
 
+        disable_voting = clanbattle || quadmode;
+
         rounds = CF_GetSetting("rounds","rounds","on");
         if (!rounds)
             rounds = -1;

@@ -46,7 +46,7 @@ void (entity p, string vote) VoteForMap;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
@@ -87,7 +87,7 @@ void (entity pe_player) Vote_NextMap = {
 void (entity pe_player) Vote_TrickMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
@@ -128,7 +128,7 @@ void (entity pe_player) Vote_TrickMap = {
 void (entity pe_player) Vote_RaceMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
@@ -168,7 +168,7 @@ void (entity pe_player) Vote_RaceMap = {
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ToggleMenu = {
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (vote_started > 0 && !vote_abort) {
@@ -240,7 +240,7 @@ float () Vote_GetRaceVotes = {
 void (entity pe_player) Vote_ForceNext = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass)
@@ -291,7 +291,7 @@ float () Vote_GetForceNextVotes = {
 // called from world.qc:StartFrame()
 void () Vote_Check = {
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
@@ -513,6 +513,9 @@ void () Vote_MenuClose = {
 // shows the map vote menu
 // called from Vote_Input(), Menu_Open()
 void (entity pe_player) Vote_Menu = {
+    if (disable_voting)
+        return;
+
     local string s_choose, s_vote1, s_vote2, s_vote3, s_vote4, s_vote5;
     local string s_tmp1, s_tmp2, s_tmp3, s_tmp4, s_tmp5;
     local float f_width = 0, f_timeleft = 0;
@@ -1043,7 +1046,7 @@ float (string ps_list) List_Count = {
 
     for (i = 0; i < f_length; i++) {
         // set current character
-        local string s_current = substr(ps_list, i, 1);
+        local string s_current = substring(ps_list, i, 1);
 
         // non-empty space => word
         if (s_current != " " && s_previous == " ")
@@ -1066,7 +1069,7 @@ string (string ps_list, float pf_idx) List_Index = {
 
     for (i = 0; i < f_length; i++) {
         // set current character
-        local string s_current = substr(ps_list, i, 1);
+        local string s_current = substring(ps_list, i, 1);
 
         // non-empty space => start of word
         if (s_current != " " && s_previous == " ") {
@@ -1077,14 +1080,14 @@ string (string ps_list, float pf_idx) List_Index = {
 
         // empty space => end of word
         if (s_current == " " && f_start > -1)
-            return strzone(substr(ps_list, f_start, i - f_start));
+            return strzone(substring(ps_list, f_start, i - f_start));
 
         s_previous = s_current;
     }
 
     // if f_start is set it means a list item was found
     if (f_start > -1)
-        return strzone(substr(ps_list, f_start, i - f_start));
+        return strzone(substring(ps_list, f_start, i - f_start));
 
     return strzone(string_null);
 };
@@ -1405,7 +1408,7 @@ void() vote_think = {
 };
 
 void () StartVoting = {
-    if(voting_started)
+    if(voting_started || disable_voting)
         return;
     local float expires = CF_GetSetting("votetime", "vote_time", "60");
     local entity te;
@@ -1431,6 +1434,9 @@ void () StartVoting = {
 
 
 void (entity p, string vote) VoteForMap = {
+    if (disable_voting)
+        return;
+
     float filehandle;
     filehandle = fopen(strcat("maps/",vote,".bsp"), FILE_READ);
     if (filehandle >= 0) {
@@ -1468,6 +1474,9 @@ void (entity p, string vote) VoteForMap = {
 };
 
 void (entity p) UnvoteForMap = {
+    if (disable_voting)
+        return;
+
     if(p.vote_map) {
         if(vote_anarchy_mode) {
             bprint(PRINT_HIGH, p.netname, " \brecinds vote for\b ", p.vote_map.netname, " \bin battle\b\n");
