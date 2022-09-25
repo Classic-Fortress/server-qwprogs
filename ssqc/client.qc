@@ -628,6 +628,7 @@ void () DecodeLevelParms = {
 
         // max projectile projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
+        antilag_settings.max_projectile_slow_offset = project_weapons_max_latency / 2;
 
         // Correct grenade prime timing by player ping.
         project_grenades = CF_GetSetting("pg", "project_grenades", "on");

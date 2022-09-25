@@ -5,10 +5,12 @@ typedef void (float n) f_void_float;
 
 enum {
     CT_NOEXTERNALEFFECT,  // No external effects (e.g. reload, build, prime, etc)
+    CT_SLOW_PROJECTILE,  // Projectile for which judder is noticable (e.g. rocket)
 };
 
 struct antilag_settings_t {
     float max_client_time_offset;
+    float max_projectile_slow_offset;
 } antilag_settings;
 
 // A monotonically increasing, latency corrected notion of client-time.
