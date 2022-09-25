@@ -115,7 +115,7 @@ void FireAssCan (float shotcount, vector dir, vector spread)
 {
     self.reload_assault_cannon = self.reload_assault_cannon + 1;
     Status_Refresh(self);
-    CheckForReload();
+    FO_CheckForReload();
 
     vector bullet_dir, spread_dir, rand_dir, org;
     float bullet_speed, var_speed;

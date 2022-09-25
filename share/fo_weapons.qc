@@ -44,14 +44,13 @@ struct FO_WeapInfo {
 void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
     wi->weapon = weapon;
     wi->ammo_per_shot = 1;
-    wi->needs_reload = TRUE;
+    wi->clip_size = 0;
     switch (weapon) {
         /* NONE */
         case WEAP_HOOK:
             wi->name = "Hook";
             wi->model[0] = "progs/v_grap.mdl";
             wi->ammo_type = AMMO_NONE;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
             break;
         case WEAP_KNIFE:
@@ -59,28 +58,24 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->model[0] = "progs/v_knife.mdl";
             wi->model[1] = "progs/v_knife2.mdl";
             wi->ammo_type = AMMO_NONE;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
             break;
         case WEAP_MEDIKIT:
             wi->name = "BioAxe";
             wi->model[0] = "progs/v_medi.mdl";
             wi->ammo_type = AMMO_NONE;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
             break;
         case WEAP_SPANNER:
             wi->name = "Spanner";
             wi->model[0] = "progs/v_spanner.mdl";
             wi->ammo_type = AMMO_NONE;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
             break;
         case WEAP_AXE:
             wi->name = "Axe";
             wi->model[0] = "progs/v_axe.mdl";
             wi->ammo_type = AMMO_NONE;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
             break;
         /* SHELLS */
@@ -112,22 +107,18 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
                 wi->clip_size = 1;
                 wi->full_reload_time = 4;
                 wi->clip_fired = &self.reload_sniper_rifle;
-            } else {
-                wi->needs_reload = FALSE;
             }
             break;
         case WEAP_AUTO_RIFLE:
             wi->name = "Sniper Rifle";
             wi->model[0] = "progs/v_srifle.mdl";
             wi->ammo_type = AMMO_SHELLS;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.1;
             break;
         case WEAP_TRANQ:
             wi->name = "Tranq Gun";
             wi->model[0] = "progs/v_tranq.mdl";
             wi->ammo_type = AMMO_SHELLS;
-            wi->needs_reload = FALSE;
             wi->attack_time = 1.5;
             break;
         case WEAP_ASSAULT_CANNON:
@@ -137,6 +128,8 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->clip_size = 100;
             wi->full_reload_time = 4;
             wi->clip_fired = &player.reload_assault_cannon;
+            if (fo_hwguy)
+                wi->clip_size = PC_HVYWEAP_ASSCAN_CLIPSIZE;
             break;
         /* NAILS */
         case WEAP_NAILGUN:
@@ -145,7 +138,6 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->ammo_type = AMMO_NAILS;
             wi->ammo_per_shot = 2;
             wi->attack_time = 0.2;
-            wi->needs_reload = FALSE;
             break;
         case WEAP_SUPER_NAILGUN:
             wi->name = "Super Nailgun";
@@ -153,14 +145,12 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->ammo_type = AMMO_NAILS;
             wi->ammo_per_shot = 4;
             wi->attack_time = 0.2;
-            wi->needs_reload = FALSE;
             break;
         case WEAP_RAILGUN:
             wi->name = "Railgun";
             wi->model[0] = "progs/v_rail.mdl";
             wi->ammo_type = AMMO_NAILS;
             wi->ammo_type = AMMO_NAILS;
-            wi->needs_reload = FALSE;
             wi->attack_time = 0.4;
             break;
         /* ROCKETS */
@@ -194,14 +184,12 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
                 case PYRO_OZTF: wi->attack_time = 0.9; break;
                 case PYRO_FO: wi->attack_time = 0.9; break;
             }
-            wi->needs_reload = FALSE;
             break;
         /* CELLS */
         case WEAP_FLAMETHROWER:
             wi->name = "Flamethrower";
             wi->model[0] = "progs/v_flame.mdl";
             wi->ammo_type = AMMO_CELLS;
-            wi->needs_reload = FALSE;
             wi->attack_time = (player.waterlevel > 2) ? 1 : 0.15;
             break;
         /* NOT USED */
@@ -211,6 +199,7 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             error("Should never be invoked\n");
     }
 
+    wi->needs_reload = wi->clip_size > 0;
     wi->ammo_remaining = AMMO_to_p(player, wi->ammo_type);
     if (!wi->needs_reload) {
             wi->clip_fired = __NULL__;
@@ -218,7 +207,6 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
 }
 
 #ifdef SSQC
-void TeamFortress_OldReloadWeapon(float weap);
 void () RestoreDefaultWeapon;
 void (entity pl) Status_Refresh;
 void (entity pl, float swap) W_WeaponState_Load;
@@ -247,19 +235,18 @@ static void FOT_ReloadTimer() {
     Status_Refresh(self.owner);
 }
 
-float FO_UseNewReload() {
-    return CF_GetSetting("dunr", "debug_use_new_reload", "on");
-}
-
-float FO_CheckForAmmo(float weapon) {
+float FO_CanReload(float weapon) {
     FO_WeapInfo wi;
     FO_FillWeapInfo(self, weapon, &wi);
 
+    if (wi->ammo_type == AMMO_NONE)
+        return FALSE;
+
     if (wi->needs_reload && *wi->clip_fired > 0
         && *wi->ammo_remaining > wi->ammo_per_shot)
-        return 1;
+        return TRUE;
 
-    return 0;
+    return FALSE;
 }
 
 void () TeamFortress_ForceReloadCurrentWeapon;
@@ -267,12 +254,13 @@ float FO_CheckForReload() {
     FO_WeapInfo wi;
     FO_FillWeapInfo(self, self.current_weapon, &wi);
 
-    if (*wi->clip_fired >= wi->clip_size && *wi->ammo_remaining > 0) {
+    if (wi->needs_reload && *wi->clip_fired >= wi->clip_size &&
+        *wi->ammo_remaining > 0) {
         if (force_reload)
             TeamFortress_ForceReloadCurrentWeapon();
-        return 1;
+        return TRUE;
     } else {
-        return 0;
+        return FALSE;
     }
 }
 
