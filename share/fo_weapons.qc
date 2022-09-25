@@ -53,6 +53,7 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->ammo_type = AMMO_NONE;
             wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
+            break;
         case WEAP_KNIFE:
             wi->name = "Knife";
             wi->model[0] = "progs/v_knife.mdl";
@@ -60,18 +61,21 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->ammo_type = AMMO_NONE;
             wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
+            break;
         case WEAP_MEDIKIT:
             wi->name = "BioAxe";
             wi->model[0] = "progs/v_medi.mdl";
             wi->ammo_type = AMMO_NONE;
             wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
+            break;
         case WEAP_SPANNER:
             wi->name = "Spanner";
             wi->model[0] = "progs/v_spanner.mdl";
             wi->ammo_type = AMMO_NONE;
             wi->needs_reload = FALSE;
             wi->attack_time = 0.5;
+            break;
         case WEAP_AXE:
             wi->name = "Axe";
             wi->model[0] = "progs/v_axe.mdl";
@@ -169,6 +173,7 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->attack_time = 0.6;
             wi->full_reload_time = 4;
             wi->clip_fired = &player->reload_grenade_launcher;
+            break;
         case WEAP_ROCKET_LAUNCHER:
             wi->name = "Rocket Launcher";
             wi->model[0] = "progs/v_rock2.mdl";
@@ -192,7 +197,6 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->needs_reload = FALSE;
             break;
         /* CELLS */
-        case WEAP_LIGHTNING:
             error("Should never be invoked\n");
         case WEAP_FLAMETHROWER:
             wi->name = "Flamethrower";
@@ -201,7 +205,10 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->needs_reload = FALSE;
             wi->attack_time = (player.waterlevel > 2) ? 1 : 0.15;
             break;
+        /* NOT USED */
+        case WEAP_LIGHTNING:
         case WEAP_DETPACK:
+        default:
             error("Should never be invoked\n");
     }
 
