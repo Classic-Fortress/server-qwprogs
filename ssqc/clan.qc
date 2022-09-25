@@ -1070,6 +1070,20 @@ float () CheckAllPlayersReady = {
     if (intermission_running)
         return 0;
 
+    if (infokey(world, "needpass") != "1") {
+        local string default_password = "pineapple";
+        cvar_set("password", default_password);
+        default_password_set = 1;
+
+        local entity te = find(world, classname, "player");
+        while (te != world) {
+            if (te.team_no) {
+                sprint(te, PRINT_HIGH, "Setting password to \"", default_password, "\"\n");
+            }
+            te = find(te, classname, "player");
+        }
+    }
+
     local float f1 = TeamFortress_GetNoActivePlayers();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
     if (v_ready == f1 && v_ready > 0) {
