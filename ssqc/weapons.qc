@@ -1864,10 +1864,10 @@ void () player_medikit1;
 void () player_medikitb1;
 
 void () W_Attack = {
+    float r;
     FO_WeapState ws;
     FO_FillWeapState(self, self.current_weapon, &ws);
     FO_WeapInfo* wi = ws->wi;
-    float r;
 
     if (self.has_disconnected == TRUE)
         return;
@@ -1887,6 +1887,12 @@ void () W_Attack = {
     // Fired into forced reload?
     if (FO_CheckForReload())
         return;
+
+    if (wi->needs_reload) {
+       if (FO_CheckForReload())
+            return;
+       *ws->clip_fired += wi->ammo_per_shot;
+    }
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
         (self.undercover_skin != 0))
@@ -1915,12 +1921,10 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_SHOTGUN) {
         player_shot1();
         W_FireShotgun();
-        self.reload_shotgun = self.reload_shotgun + 1;
         Status_Refresh(self);
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
         player_shot1();
         W_FireSuperShotgun();
-        self.reload_super_shotgun = self.reload_super_shotgun + 2;
         Status_Refresh(self);
     } else if (self.current_weapon == WEAP_NAILGUN) {
         player_nail1();
@@ -1929,12 +1933,10 @@ void () W_Attack = {
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
         player_rocket1();
         W_FireGrenade();
-        self.reload_grenade_launcher = self.reload_grenade_launcher + 1;
         Status_Refresh(self);
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
         player_rocket1();
         W_FireRocket();
-        self.reload_rocket_launcher = self.reload_rocket_launcher + 1;
         Status_Refresh(self);
     } else if (self.current_weapon == WEAP_LIGHTNING) {
         player_light1();
@@ -1944,7 +1946,6 @@ void () W_Attack = {
             player_shot1();
             W_FireSniperRifle();
             if (sniperreload) {
-                self.reload_sniper_rifle = self.reload_sniper_rifle + 1;
                 Status_Refresh(self);
             }
         }
@@ -2003,8 +2004,10 @@ void () W_Attack = {
     if (self.current_weapon != WEAP_FLAMETHROWER)
         Attack_Finished(wi->attack_time);
 
-    if (wi->needs_reload)
+    if (wi->needs_reload) {
+        *ws->clip_fired += wi->ammo_per_shot;
         FO_CheckForReload();
+    }
 
     //These weapons have to log each projectile launched/bullet fired
     if (self.current_weapon != WEAP_ASSAULT_CANNON ||
