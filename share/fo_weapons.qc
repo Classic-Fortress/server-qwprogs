@@ -55,6 +55,7 @@ struct FO_WeapInfo {
     // Fields below this are automatically initialized by Init.  Do not include
     // in table.
     float needs_reload;
+    int storage_index;  // Allocated by init
 };
 
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
@@ -119,20 +120,6 @@ inline string FO_GetWeapName(float weapon) {
     return weapon_names[WEAP_to_index(weapon)];
 }
 
-struct FO_WeapState {
-    float weapon;
-
-    // Constant and relative to weapon.  TODO, migrate similar to WeapInfo.
-    FO_WeapInfo* wi;
-    string model[2];  // indexed by weaponmode
-
-    /* These are relative to the player passed. */
-    float* ammo_remaining;
-    float* clip_fired;
-};
-
-struct FO_WeapInfo weap_info_by_index[32];
-
 // REQUIRES: Order must match above.
 static string AMMO_to_s[] = {"shells", "cells", "nails" "rockets", "grenades"};
 
@@ -155,9 +142,32 @@ float WEAP_to_slot(float class, float weapon) {
     return -1;
 }
 
+// Internal clip storage for both SSQC/CSQC.
+#define CLIP_STORAGE_SIZE 8
+.float clip_fired[CLIP_STORAGE_SIZE];
+
+#ifdef SSQC
+struct FO_WeapState {
+    float weapon;
+
+    // Constant and relative to weapon.  TODO, migrate similar to WeapInfo.
+    FO_WeapInfo* wi;
+    string model[2];  // indexed by weaponmode
+
+    /* These are relative to the player passed. */
+    float* ammo_remaining;
+    float* clip_fired;
+};
+
+
 void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
     ws->weapon = weapon;
-    ws->wi = FO_GetWeapInfo(weapon);
+    FO_WeapInfo* wi = FO_GetWeapInfo(weapon);
+    ws->wi = wi;
+
+    if (wi->needs_reload)
+        ws->clip_fired = &player.clip_fired[wi->storage_index];
+    ws->ammo_remaining = AMMO_to_p(player, (ws->wi)->ammo_type);
 
     switch (weapon) {
         /* NONE */
@@ -180,16 +190,12 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
         /* SHELLS */
         case WEAP_SHOTGUN:
             ws->model[0] = "progs/v_shot.mdl";
-            ws->clip_fired = &player.reload_shotgun;
             break;
         case WEAP_SUPER_SHOTGUN:
             ws->model[0] = "progs/v_shot2.mdl";
-            ws->clip_fired = &player.reload_super_shotgun;
             break;
         case WEAP_SNIPER_RIFLE:
             ws->model[0] = "progs/v_srifle.mdl";
-            if (sniperreload)
-                ws->clip_fired = &player.reload_sniper_rifle;
             break;
         case WEAP_AUTO_RIFLE:
             ws->model[0] = "progs/v_srifle.mdl";
@@ -199,7 +205,6 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
             break;
         case WEAP_ASSAULT_CANNON:
             ws->model[0] = "progs/v_asscan.mdl";
-            ws->clip_fired = &player.reload_assault_cannon;
             break;
         /* NAILS */
         case WEAP_NAILGUN:
@@ -215,11 +220,9 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
         case WEAP_GRENADE_LAUNCHER:
             ws->model[0] = "progs/v_rock.mdl";
             ws->model[1] = "progs/v_pipe.mdl";
-            ws->clip_fired = &player.reload_grenade_launcher;
             break;
         case WEAP_ROCKET_LAUNCHER:
             ws->model[0] = "progs/v_rock2.mdl";
-            ws->clip_fired = &player.reload_rocket_launcher;
             break;
         case WEAP_INCENDIARY:
             ws->model[0] = "progs/v_irock.mdl";
@@ -234,11 +237,8 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
         default:
             error(sprintf("ID=%d should never be invoked\n", weapon));
     }
-
-    ws->ammo_remaining = AMMO_to_p(player, (ws->wi)->ammo_type);
 }
 
-#ifdef SSQC
 void () RestoreDefaultWeapon;
 void (entity pl) Status_Refresh;
 void (entity pl, float swap) W_WeaponState_Load;
@@ -367,12 +367,8 @@ void FO_ReloadWeapon(float weapon, float force) {
 
 void FO_InstantReloadAllWeapons(entity player) {
     player.tfstate &= ~TFSTATE_RELOADING;
-    player.reload_shotgun = 0;
-    player.reload_super_shotgun = 0;
-    player.reload_grenade_launcher = 0;
-    player.reload_rocket_launcher = 0;
-    player.reload_sniper_rifle = 0;
-    player.reload_assault_cannon = 0;
+    for (int i = 0; i < CLIP_STORAGE_SIZE; i++)
+        player.clip_fired[i] = 0;
 }
 #endif
 
@@ -396,20 +392,34 @@ void FO_Weapons_Init() {
             WI_ir->attack_time = 0.9; break;
     }
 
+    float clips_allocated = 0;
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
          if (WEAP_to_index(wi->weapon) != i)
              error(sprintf("Mismatch at index %d\n", i));
 
-         wi->needs_reload = wi->clip_size > 0;
+
+         if (wi->clip_size > 0) {
+             if (wi->clip_size > 0)
+                 wi->needs_reload = TRUE;
+             // We always allocate a storage index for something that can have
+             // reload to save negotiating between client and server around
+             // localinfo tunables.
+             wi->storage_index = clips_allocated++;
+         } else {
+             wi->needs_reload = FALSE;
+             wi->storage_index = -1;  // Make sure we'll OOB.
+         }
     }
+    if (clips_allocated > CLIP_STORAGE_SIZE)
+        error("Insufficient clip storage");
 
     for (i = 0; i < class_weapons.length; i++) {
         for (j = 0; j < 4; j++) {
             FO_ClassWeapons* cw = &class_weapons[i];
 
             if (cw->slots[j])
-                cw->info[j] = &weap_info_by_index[WEAP_to_index(cw->slots[j])];
+                cw->info[j] = &weapon_info[WEAP_to_index(cw->slots[j])];
             else
                 cw->info[j] = __NULL__;
         }
