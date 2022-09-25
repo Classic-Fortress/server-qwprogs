@@ -2116,6 +2116,10 @@ void () PutClientInServer = {
         return;
     }
 
+    if(no_fire_mode) {
+        return;
+    }
+
     if (self.last_playerclass == 0)
         self.last_playerclass = self.playerclass;
 
