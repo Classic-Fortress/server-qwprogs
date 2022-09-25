@@ -462,6 +462,12 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
+		if (default_password_set) {
+			cvar_set("password", "none");
+			default_password_set = 0;
+		}
+
 		localcmd("stop\n");
 		return;
 	}
