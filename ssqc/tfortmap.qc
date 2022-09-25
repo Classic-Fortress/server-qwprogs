@@ -1140,10 +1140,10 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
     if (Player.playerclass == PC_SPY) {
         switch(autodisguise) {
             case 1:
-                FO_Spy_DisguiseLastSpawned(Player);
+                FO_Spy_DisguiseLastSpawned(Player, FALSE);
                 break;
             case 2:
-                FO_Spy_DisguiseLast(Player);
+                FO_Spy_DisguiseLast(Player, FALSE);
                 break;
         }
     }
@@ -3056,10 +3056,10 @@ void () DropGoalItems = {
     if (self.playerclass == PC_SPY) {
         switch(autodisguise) {
             case 1:
-                FO_Spy_DisguiseLastSpawned(self);
+                FO_Spy_DisguiseLastSpawned(self, FALSE);
                 break;
             case 2:
-                FO_Spy_DisguiseLast(self);
+                FO_Spy_DisguiseLast(self, FALSE);
                 break;
         }
     }
