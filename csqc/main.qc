@@ -27,6 +27,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //         precache_pic(HudIcons[i].icon);
 //     }
 
+    FO_Weapons_Init();
     CsGrenTimer::Init();
 
     registercommand("fo_hud_editor");

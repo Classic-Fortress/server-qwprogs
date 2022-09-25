@@ -1,3 +1,40 @@
+#ifdef CSQC
+/*
+ * This is a hack so that we can have our client entity be closer to server for
+ * shared code.  We'll refactor this on both sides to be cleaner incrementally,
+ * but it gets us started.
+ */
+.float reload_rocket_launcher;
+.float reload_grenade_launcher;
+.float reload_shotgun;
+.float reload_super_shotgun;
+.float reload_super_shotgun;
+.float reload_assault_cannon;
+.float reload_sniper_rifle;
+.float waterlevel;
+
+.float ammo_shells;
+.float ammo_nails;
+.float ammo_rockets;
+.float ammo_cells;
+
+float fo_hwguy = TRUE;
+float sniperreload = FALSE;
+float pyro_type = PYRO_FO;
+#endif
+
+// Convert a weapon-bit to a linear index.
+static float WEAP_to_index(float weapon) {
+    float index = 0;
+    for (; weapon > 0; weapon >>= 1, index++) {
+        if (weapon >= 64) {
+            weapon >>= 6;
+            index += 6;
+        }
+    }
+    return index - 1;  // Want zero-offset.
+}
+
 enum AmmoType {
     AMMO_NONE,
     AMMO_SHELLS,
@@ -196,7 +233,7 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
         case WEAP_LIGHTNING:
         case WEAP_DETPACK:
         default:
-            error("Should never be invoked\n");
+            error(sprintf("ID=%d should never be invoked\n", weapon));
     }
 
     wi->needs_reload = wi->clip_size > 0;
@@ -329,3 +366,6 @@ void FO_ReloadWeapon(float weapon, float force) {
 
 }
 #endif
+
+void FO_Weapons_Init() {
+}
