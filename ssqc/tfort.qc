@@ -2273,7 +2273,7 @@ void () TeamFortress_SetEquipment = {
         else
             self.maxarmor = PC_ENGINEER_MAXARMOR;
         if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_LASER;
+            self.current_weapon = WEAP_RAILGUN;
 
         self.items_allowed = PC_ENGINEER_WEAPONS;
         self.items = self.items | IT_SHOTGUN | IT_SUPER_SHOTGUN;

@@ -197,7 +197,6 @@ void FO_FillWeapInfo(entity player, float weapon, FO_WeapInfo* wi) {
             wi->needs_reload = FALSE;
             break;
         /* CELLS */
-            error("Should never be invoked\n");
         case WEAP_FLAMETHROWER:
             wi->name = "Flamethrower";
             wi->model[0] = "progs/v_flame.mdl";

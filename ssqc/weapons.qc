@@ -1737,7 +1737,7 @@ void (entity pl) W_SetCurrentAmmo = {
         }
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_LASER) {
+    } else if (pl.current_weapon == WEAP_RAILGUN) {
         pl.currentammo = pl.ammo_nails;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_rail.mdl";
@@ -1785,8 +1785,8 @@ float () W_BestWeapon = {
         return WEAP_FLAMETHROWER;
     else if (self.ammo_nails >= 2 && it & WEAP_SUPER_NAILGUN)
         return WEAP_SUPER_NAILGUN;
-    else if (self.ammo_nails >= 1 && it & WEAP_LASER)
-        return WEAP_LASER;
+    else if (self.ammo_nails >= 1 && it & WEAP_RAILGUN)
+        return WEAP_RAILGUN;
     else if (self.ammo_shells >= 1 && it & WEAP_TRANQ)
         return WEAP_TRANQ;
     else if (self.ammo_shells >= 2 && it & WEAP_SUPER_SHOTGUN)
@@ -2187,7 +2187,7 @@ void () W_Attack = {
         player_shot1();
         W_FireTranq();
         Attack_Finished(1.5);
-    } else if (self.current_weapon == WEAP_LASER) {
+    } else if (self.current_weapon == WEAP_RAILGUN) {
         FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireLaser();
@@ -2238,7 +2238,7 @@ float (float weap) W_GetSlot = {
                 || (!cf_pyro_impulses && weap == WEAP_INCENDIARY)
                 || (cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
                 || weap == WEAP_TRANQ
-                || weap == WEAP_LASER
+                || weap == WEAP_RAILGUN
                 || weap == WEAP_ASSAULT_CANNON) {
         return 1;
     } else if (weap == WEAP_SUPER_SHOTGUN
@@ -2274,7 +2274,7 @@ float (float weap) W_OldGetSlot = {
     else if (weap == WEAP_SHOTGUN
                 || weap == WEAP_SNIPER_RIFLE
                 || weap == WEAP_TRANQ
-                || weap == WEAP_LASER)
+                || weap == WEAP_RAILGUN)
         return 2;
     else if (weap == WEAP_SUPER_SHOTGUN
                 || weap == WEAP_AUTO_RIFLE)
@@ -2465,7 +2465,7 @@ float () W_OldWeaponSlot2 = {
     else if (self.playerclass == PC_SPY)
         return WEAP_TRANQ;
     else if (self.playerclass == PC_ENGINEER)
-        return WEAP_LASER;
+        return WEAP_RAILGUN;
     return 0;
 };
 
@@ -2542,7 +2542,7 @@ float () W_WeaponSlot1 = {
     else if (self.playerclass == PC_SPY)
         return WEAP_TRANQ;
     else if (self.playerclass == PC_ENGINEER)
-        return WEAP_LASER;
+        return WEAP_RAILGUN;
     return 0;
 };
 
@@ -2672,7 +2672,7 @@ float (float newSlot) W_OldImpulseFromNewSlot = {
             return W_OldGetSlot(WEAP_TRANQ);
         }
         else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_LASER);
+            return W_OldGetSlot(WEAP_RAILGUN);
         }
     }
     else if (newSlot == 2) {
@@ -2730,7 +2730,7 @@ float (float newSlot) W_OldImpulseFromNewSlot = {
             return W_OldGetSlot(WEAP_NAILGUN);
         }
         else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_LASER);
+            return W_OldGetSlot(WEAP_RAILGUN);
         }
     }
     else if (newSlot == 4) {
