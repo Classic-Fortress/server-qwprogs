@@ -298,6 +298,7 @@ void RL_RestorePresent(RewindState* head) {
 
 class FOPlayer {
     RewindState* rewind_;
+
     void() FOPlayer = {
         rewind_ = AllocRewind(this);
         RL_Insert(&rewind_players, rewind_);
@@ -377,3 +378,32 @@ void UnrewindPlayer(entity p) {
     FOPlayer fop = (FOPlayer)p;
     fop.RestoreNow();
 }
+
+.float client_time_internal;
+float client_time(optional float ct_type = CT_NOEXTERNALEFFECT) {
+    return self.client_time_internal;
+}
+
+void AL_UpdateClientTime(entity player) {
+    float offset;
+
+    // Naively, we might want to offset by rtt/2, because that's how old the
+    // client's input is.  However, the client's input is also relative to a
+    // world view that is itself rtt/2 behind.  [Client is a full rtt behind,
+    // and it interpolates ahead to rtt/2 behind.]
+    // This means that if we want, say, "run to a position and perform an action"
+    // to have equivalent time, we need to correct by a full rtt.
+    offset = infokeyf(player, INFOKEY_P_PING) / 1000;
+
+    offset = min(offset, antilag_settings.max_client_time_offset);
+
+    float old_client_time = player.client_time_internal
+    if (time - offset > player.client_time_internal)
+        player.client_time_internal = time - offset;
+
+    // Monotonically increasing and not dragging beyond 75% of time as/if RTT
+    // changes.
+    player.client_time_internal = max(player.client_time_internal,
+                                      old_client_time + (1/77.0 * 0.75));
+}
+

@@ -619,6 +619,10 @@ void () DecodeLevelParms = {
         airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
+        // client_time max delta
+        antilag_settings.max_client_time_offset =
+            CF_GetSetting("almcto", "al_max_client_time_offset", "200");
+
         // project projectile weapons by player ping
         project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
@@ -2691,7 +2695,12 @@ void () CheckWaterJump = {
     }
 };
 
+void AL_UpdateClientTime(entity player);
+
 void () PlayerPreThink = {
+    // We'll use this time for calculating ping adjusted expiration / projection / etc.
+    AL_UpdateClientTime(self);
+
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
             Vote_NextMap(self);
