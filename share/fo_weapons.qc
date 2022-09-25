@@ -222,7 +222,7 @@ static void FOT_ReloadTimer() {
     FO_WeapInfo wi;
     FO_FillWeapInfo(self.owner, self.current_weapon, &wi);
 
-    if (time == self.heat) {
+    if (time >= self.heat) {
         // Reload finished
         self.owner.tfstate &= ~TFSTATE_RELOADING;
         self.owner.weaponmodel = wi->model[self.owner.weaponmode];
