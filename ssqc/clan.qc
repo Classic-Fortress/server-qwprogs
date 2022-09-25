@@ -1070,20 +1070,6 @@ float () CheckAllPlayersReady = {
     if (intermission_running)
         return 0;
 
-    if (infokey(world, "needpass") != "1") {
-        local string default_password = "pineapple";
-        cvar_set("password", default_password);
-        localcmd("localinfo default_password on\n");
-
-        local entity te = find(world, classname, "player");
-        while (te != world) {
-            if (te.team_no) {
-                sprint(te, PRINT_HIGH, "Setting password to \"", default_password, "\"\n");
-            }
-            te = find(te, classname, "player");
-        }
-    }
-
     local float f1 = TeamFortress_GetNoActivePlayers();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
     if (v_ready == f1 && v_ready > 0) {
@@ -1091,9 +1077,25 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
             bprint (2, "All players ready, starting match\n");
+
             StartTimer ();
 
-            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "off");
+            // set default password if no password set
+            if (infokey(world, "needpass") != "1") {
+                local string default_password = "pineapple"; // maybe this should be configurable
+                cvar_set("password", default_password);
+                localcmd("localinfo default_password on\n");
+
+                local entity te = find(world, classname, "player");
+                while (te != world) {
+                    if (te.team_no) {
+                        sprint(te, PRINT_HIGH, "Setting password to \"", default_password, "\"\n");
+                    }
+                    te = find(te, classname, "player");
+                }
+            }
+
+            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "on");
             if (limit_quad_players) {
                 quad_maxplayers = f1;
             }

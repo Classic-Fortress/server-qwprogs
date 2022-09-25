@@ -99,7 +99,7 @@ void () worldspawn = {
     quad_maxplayers = 0;
 
     if (infokey(world, "default_password") == "on") {
-        cvar_set("password", "none");
+        cvar_set("password", "");
         localcmd("localinfo default_password off\n");
     }
 
