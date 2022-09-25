@@ -463,9 +463,9 @@ void () StartQuadRound =
             clan_scores_dumped = 1;
  		}
 
-		if (default_password_set) {
+		if (infokey(world, "default_password") == "on") {
 			cvar_set("password", "none");
-			default_password_set = 0;
+			localcmd("localinfo default_password off\n");
 		}
 
 		localcmd("stop\n");
