@@ -3146,43 +3146,43 @@ void () ImpulseCommands = {
     } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
-        CF_Spy_ChangeSkin(self, 8);
-        CF_Spy_ChangeColor(self, self.team_no);
+        CF_Spy_ChangeSkin(self, 8, TRUE);
+        CF_Spy_ChangeColor(self, self.team_no, TRUE);
     } else if (self.impulse == TF_DISGUISE_SCOUT && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 1);
+        CF_Spy_ChangeSkin(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_SNIPER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 2);
+        CF_Spy_ChangeSkin(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_SOLDIER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 3);
+        CF_Spy_ChangeSkin(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_DEMOMAN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 4);
+        CF_Spy_ChangeSkin(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_MEDIC && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 5);
+        CF_Spy_ChangeSkin(self, 5, TRUE);
     else if (self.impulse == TF_DISGUISE_HWGUY && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 6);
+        CF_Spy_ChangeSkin(self, 6, TRUE);
     else if (self.impulse == TF_DISGUISE_PYRO && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 7);
+        CF_Spy_ChangeSkin(self, 7, TRUE);
     else if (self.impulse == TF_DISGUISE_ENGINEER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 9);
+        CF_Spy_ChangeSkin(self, 9, TRUE);
     else if (self.impulse == TF_DISGUISE_BLUE && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 1);
+        CF_Spy_ChangeColor(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_RED && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 2);
+        CF_Spy_ChangeColor(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_YELLOW && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 3);
+        CF_Spy_ChangeColor(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_GREEN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 4);
+        CF_Spy_ChangeColor(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_ENEMY && self.playerclass == PC_SPY) {
         if (number_of_teams > 2)
             Menu_Spy_Color();
         else if (self.team_no == 1)
-            CF_Spy_ChangeColor(self, 2);
+            CF_Spy_ChangeColor(self, 2, TRUE);
         else
-            CF_Spy_ChangeColor(self, 1);
+            CF_Spy_ChangeColor(self, 1, TRUE);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLast(self);
+        FO_Spy_DisguiseLast(self, TRUE);
     else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLastSpawned(self);
+        FO_Spy_DisguiseLastSpawned(self, TRUE);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
@@ -3477,7 +3477,7 @@ void () ButtonFrame = {
                     TeamFortress_ToggleDetpack(5);
                     break;
                 case PC_SPY:
-                    FO_Spy_DisguiseLastSpawned(self);
+                    FO_Spy_DisguiseLastSpawned(self, TRUE);
                     break;
                 case PC_ENGINEER:
                     FO_Engineer_ToggleSentry();
