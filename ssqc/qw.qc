@@ -617,7 +617,6 @@ float max_armor_hwguy;
 
 float project_weapons;
 float project_weapons_max_latency;
-float project_grenades;
 
 float ng_velocity;
 float ng_damage;
@@ -805,10 +804,9 @@ string goal_class_names[7] = {
 
 // people complain about settings, let's track them
 
-string settings_to_track_list[4] = {
+string settings_to_track_list[3] = {
     "sv_antilag",
     "project_weapons",
-    "project_grenades",
     "al_max_client_time_offset",
 };
 

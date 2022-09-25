@@ -630,9 +630,6 @@ void () DecodeLevelParms = {
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
         antilag_settings.max_projectile_slow_offset = project_weapons_max_latency / 2;
 
-        // Correct grenade prime timing by player ping.
-        project_grenades = CF_GetSetting("pg", "project_grenades", "on");
-
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
         if (Role_None.respawn_delay_time) {
@@ -1027,7 +1024,6 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
             medicnocuss = FALSE;
             project_weapons = FALSE;
-            project_grenades = TRUE;
             distance_based_cuss_duration = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
