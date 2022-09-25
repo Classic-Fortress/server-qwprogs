@@ -2,8 +2,8 @@
 // This file handles all menu functions and displays.
 //======================================================
 
-void (entity pe_player, float pf_class) CF_Spy_ChangeSkin;
-void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor;
+void (entity pe_player, float pf_class, float is_user) CF_Spy_ChangeSkin;
+void (entity pe_player, float pf_team_no, float is_user) CF_Spy_ChangeColor;
 void (float issilent, float force) FO_Spy_Feign;
 void () FO_Spy_FeignOnNextDamage;
 void () FO_Spy_Unfeign;
@@ -73,8 +73,8 @@ void (float inp) Menu_Scout_Input;
 void (float inp) Menu_Spy_Input;
 void (float inp) Menu_Spy_Skin_Input;
 void (float inp) Menu_Spy_Color_Input;
-void (entity player) FO_Spy_DisguiseLast;
-void (entity player) FO_Spy_DisguiseLastSpawned;
+void (entity player, float is_user) FO_Spy_DisguiseLast;
+void (entity player, float is_user) FO_Spy_DisguiseLastSpawned;
 
 void () Menu_Demoman;
 void () Menu_Demoman_Cancel;
@@ -582,7 +582,7 @@ void (float inp) Menu_Spy_Input = {
         else
             Menu_Spy_Skin();
     } else if (inp == 2 && !invis_only) {
-        FO_Spy_DisguiseLast(self);
+        FO_Spy_DisguiseLast(self, TRUE);
     } else if (inp == 3) {
         FO_Spy_Feign(1, 0);
         if (self.is_feigning) {
@@ -663,13 +663,13 @@ void (float inp) Menu_Spy_Skin_Input = {
         else if (number_of_teams > 2)
             Menu_Spy_Color();
         else if (self.team_no == 1)
-            CF_Spy_ChangeColor(self, 2);
+            CF_Spy_ChangeColor(self, 2, TRUE);
         else
-            CF_Spy_ChangeColor(self, 1);
+            CF_Spy_ChangeColor(self, 1, TRUE);
     }
 
     if (self.skin != inp)
-        CF_Spy_ChangeSkin(self, inp);
+        CF_Spy_ChangeSkin(self, inp, TRUE);
 };
 
 void () Menu_Spy_Skin = {
@@ -711,7 +711,7 @@ void (float inp) Menu_Spy_Color_Input = {
     else if (inp == 4 && color == 11)
         Menu_Spy_Color();
     else if (inp > 0 && inp <= number_of_teams)
-        CF_Spy_ChangeColor(self, inp);
+        CF_Spy_ChangeColor(self, inp, TRUE);
 };
 
 void () Menu_Spy_Color = {

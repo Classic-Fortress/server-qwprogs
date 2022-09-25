@@ -46,6 +46,7 @@ void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void (entity pe_player, float f_type) CF_Identify;
 void () TeamFortress_ReloadCurrentWeapon;
+void () TeamFortress_ForceReloadCurrentWeapon;
 void (float slot) TeamFortress_ReloadSlot;
 void () TeamFortress_ReloadNext;
 void () Sniper_ZoomToggle;
@@ -200,9 +201,9 @@ float () crandom = {
 
 void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
-        self.attack_finished = time + att_delay * 2;
+        self.attack_finished = client_time() + att_delay * 2;
     else
-        self.attack_finished = time + att_delay;
+        self.attack_finished = client_time() + att_delay;
 };
 
 float () W_FireAxe = {
@@ -1928,63 +1929,49 @@ void () W_Reload_assault_cannon = {
     Status_Refresh(self.owner);
 };
 
+float FO_CheckForReload();
+
 float () CheckForReload = {
+    if (FO_UseNewReload())
+        return FO_CheckForReload();
+
+    float need_reload = FALSE;
+
     if (self.current_weapon == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
+        if (self.reload_shotgun >= 8 && self.ammo_shells > 0)
+            need_reload = TRUE;
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
+        if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0)
+            need_reload = TRUE;
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
+        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload)
+            need_reload = TRUE;
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0)) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
+        if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0))
+            need_reload = TRUE;
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0)) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
+        if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0))
+            need_reload = TRUE;
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > 0) {
-                if (force_reload) {
-                    TeamFortress_ReloadCurrentWeapon();
-                }
-
-                return 1;
-            }
-        }
+        if (fo_hwguy && self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE
+            && self.ammo_shells > 0)
+            need_reload = TRUE;
     }
-    return 0;
+
+    if (need_reload) {
+        if (force_reload)
+            TeamFortress_ForceReloadCurrentWeapon();
+        return 1;
+    } else {
+        return 0;
+    }
 };
 
+float FO_CheckForAmmo(float weapon);
 float (float weap) CheckForAmmo = {
+    if (FO_UseNewReload())
+        return FO_CheckForAmmo(weap);
+
     if (weap == WEAP_SHOTGUN) {
         if (self.reload_shotgun >= 1 && self.ammo_shells > self.reload_shotgun)
             return 1;
@@ -3159,43 +3146,43 @@ void () ImpulseCommands = {
     } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
-        CF_Spy_ChangeSkin(self, 8);
-        CF_Spy_ChangeColor(self, self.team_no);
+        CF_Spy_ChangeSkin(self, 8, TRUE);
+        CF_Spy_ChangeColor(self, self.team_no, TRUE);
     } else if (self.impulse == TF_DISGUISE_SCOUT && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 1);
+        CF_Spy_ChangeSkin(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_SNIPER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 2);
+        CF_Spy_ChangeSkin(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_SOLDIER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 3);
+        CF_Spy_ChangeSkin(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_DEMOMAN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 4);
+        CF_Spy_ChangeSkin(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_MEDIC && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 5);
+        CF_Spy_ChangeSkin(self, 5, TRUE);
     else if (self.impulse == TF_DISGUISE_HWGUY && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 6);
+        CF_Spy_ChangeSkin(self, 6, TRUE);
     else if (self.impulse == TF_DISGUISE_PYRO && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 7);
+        CF_Spy_ChangeSkin(self, 7, TRUE);
     else if (self.impulse == TF_DISGUISE_ENGINEER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 9);
+        CF_Spy_ChangeSkin(self, 9, TRUE);
     else if (self.impulse == TF_DISGUISE_BLUE && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 1);
+        CF_Spy_ChangeColor(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_RED && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 2);
+        CF_Spy_ChangeColor(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_YELLOW && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 3);
+        CF_Spy_ChangeColor(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_GREEN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 4);
+        CF_Spy_ChangeColor(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_ENEMY && self.playerclass == PC_SPY) {
         if (number_of_teams > 2)
             Menu_Spy_Color();
         else if (self.team_no == 1)
-            CF_Spy_ChangeColor(self, 2);
+            CF_Spy_ChangeColor(self, 2, TRUE);
         else
-            CF_Spy_ChangeColor(self, 1);
+            CF_Spy_ChangeColor(self, 1, TRUE);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLast(self);
+        FO_Spy_DisguiseLast(self, TRUE);
     else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLastSpawned(self);
+        FO_Spy_DisguiseLastSpawned(self, TRUE);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
@@ -3490,7 +3477,7 @@ void () ButtonFrame = {
                     TeamFortress_ToggleDetpack(5);
                     break;
                 case PC_SPY:
-                    FO_Spy_DisguiseLastSpawned(self);
+                    FO_Spy_DisguiseLastSpawned(self, TRUE);
                     break;
                 case PC_ENGINEER:
                     FO_Engineer_ToggleSentry();

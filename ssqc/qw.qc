@@ -3,6 +3,23 @@
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
 typedef void (float n) f_void_float;
 
+enum {
+    CT_NOEXTERNALEFFECT,  // No external effects (e.g. reload, build, prime, etc)
+    CT_SLOW_PROJECTILE,  // Projectile for which judder is noticable (e.g. rocket)
+};
+
+struct antilag_settings_t {
+    float max_client_time_offset;
+    float max_projectile_slow_offset;
+} antilag_settings;
+
+// A monotonically increasing, latency corrected notion of client-time.
+// Monotonicity guarantees that for some offset `o`:
+//     at t1: client_time() + o < at t2: client_time() + o  FOR t2 > t1
+// E.g. That you never have to worry about the correction reordering events
+// that `time + o` would not.
+float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
+
 //===========================================================================
 // TEAMFORTRESS Defs
 //===========================================================================
@@ -600,7 +617,6 @@ float max_armor_hwguy;
 
 float project_weapons;
 float project_weapons_max_latency;
-float project_grenades;
 
 float ng_velocity;
 float ng_damage;
@@ -791,7 +807,7 @@ string goal_class_names[7] = {
 string settings_to_track_list[3] = {
     "sv_antilag",
     "project_weapons",
-    "project_grenades",
+    "al_max_client_time_offset",
 };
 
 typedef struct setting_t {

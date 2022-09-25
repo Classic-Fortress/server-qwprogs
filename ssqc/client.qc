@@ -619,14 +619,16 @@ void () DecodeLevelParms = {
         airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
+        // client_time max delta
+        antilag_settings.max_client_time_offset =
+            CF_GetSetting("almcto", "al_max_client_time_offset", "200");
+
         // project projectile weapons by player ping
         project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
         // max projectile projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
-
-        // Correct grenade prime timing by player ping.
-        project_grenades = CF_GetSetting("pg", "project_grenades", "on");
+        antilag_settings.max_projectile_slow_offset = project_weapons_max_latency / 2;
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -1022,7 +1024,6 @@ void () DecodeLevelParms = {
             medicaura = FALSE;
             medicnocuss = FALSE;
             project_weapons = FALSE;
-            project_grenades = TRUE;
             distance_based_cuss_duration = FALSE;
             pyro_type = 1;
             drop_grenades = FALSE;
@@ -2306,10 +2307,10 @@ void () PutClientInServer = {
     if (self.playerclass == PC_SPY) {
         switch(autodisguise) {
             case 1:
-                FO_Spy_DisguiseLastSpawned(self);
+                FO_Spy_DisguiseLastSpawned(self, FALSE);
                 break;
             case 2:
-                FO_Spy_DisguiseLast(self);
+                FO_Spy_DisguiseLast(self, FALSE);
                 break;
         }
     }
@@ -2695,7 +2696,12 @@ void () CheckWaterJump = {
     }
 };
 
+void AL_UpdateClientTime(entity player);
+
 void () PlayerPreThink = {
+    // We'll use this time for calculating ping adjusted expiration / projection / etc.
+    AL_UpdateClientTime(self);
+
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
             Vote_NextMap(self);

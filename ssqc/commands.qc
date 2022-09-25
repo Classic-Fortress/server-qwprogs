@@ -511,7 +511,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         //Menu_Spy_Color_Input(stof(arg3));
                         farg3 = stof(arg3);
                         if (farg3 > 0 && farg3 <= number_of_teams)
-                            CF_Spy_ChangeColor(self, farg3);
+                            CF_Spy_ChangeColor(self, farg3, TRUE);
                         else
                             Menu_Spy_Input(1);
                         break;

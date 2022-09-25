@@ -485,7 +485,17 @@ void () RestoreDefaultWeapon = {
     }
 };
 
-void TeamFortress_ReloadWeapon(float weap)
+void TeamFortress_OldReloadWeapon(float weap);
+void FO_ReloadWeapon(float weap, float force);
+
+void TeamFortress_ReloadWeapon(float weap, float force) {
+    if (FO_UseNewReload())
+        FO_ReloadWeapon(weap, force);
+    else
+        TeamFortress_OldReloadWeapon(weap);
+}
+
+void TeamFortress_OldReloadWeapon(float weap)
 {
     RestoreDefaultWeapon();
 
@@ -496,6 +506,7 @@ void TeamFortress_ReloadWeapon(float weap)
     if (self.tfstate & TFSTATE_RELOADING) {
         return;
     }
+
     if (weap == WEAP_SHOTGUN) {
         if (self.ammo_shells == 0) {
             sprint(self, PRINT_HIGH, "Out of shells\n");
@@ -759,7 +770,11 @@ void TeamFortress_ReloadWeapon(float weap)
 }
 
 void () TeamFortress_ReloadCurrentWeapon = {
-    TeamFortress_ReloadWeapon(self.current_weapon);
+    TeamFortress_ReloadWeapon(self.current_weapon, FALSE);
+};
+
+void () TeamFortress_ForceReloadCurrentWeapon = {
+    TeamFortress_ReloadWeapon(self.current_weapon, TRUE);
 };
 
 void (float slot) TeamFortress_ReloadSlot = {
@@ -778,7 +793,7 @@ void (float slot) TeamFortress_ReloadSlot = {
                 return;
             weap = W_WeaponSlot3();
         }
-        TeamFortress_ReloadWeapon(weap);
+        TeamFortress_ReloadWeapon(weap, FALSE);
     }
     else {
         if (slot < 1 || slot > 7)
@@ -798,7 +813,7 @@ void (float slot) TeamFortress_ReloadSlot = {
         else if (slot == 7)
             weap = W_OldWeaponSlot7();
         if (weap != 0)
-            TeamFortress_ReloadWeapon(weap);
+            TeamFortress_ReloadWeapon(weap, FALSE);
     }
 };
 
@@ -809,7 +824,7 @@ void () TeamFortress_ReloadNext = {
         // reload current slot first
         slot = W_GetSlot(self.current_weapon);
         if (CheckForAmmo(self.current_weapon)) {
-            TeamFortress_ReloadWeapon(self.current_weapon);
+            TeamFortress_ReloadWeapon(self.current_weapon, FALSE);
             reload = 1;
             return;
         }
@@ -828,7 +843,7 @@ void () TeamFortress_ReloadNext = {
 
             if (CheckForAmmo(weap)) {
                 self.current_weapon = weap;
-                TeamFortress_ReloadWeapon(weap);
+                TeamFortress_ReloadWeapon(weap, FALSE);
                 reload = 1;
                 break;
             }
@@ -837,7 +852,7 @@ void () TeamFortress_ReloadNext = {
     else {
         slot = W_OldGetSlot(self.current_weapon);
         if (CheckForAmmo(self.current_weapon)) {
-            TeamFortress_ReloadWeapon(self.current_weapon);
+            TeamFortress_ReloadWeapon(self.current_weapon, FALSE);
             reload = 1;
             return;
         }
@@ -860,7 +875,7 @@ void () TeamFortress_ReloadNext = {
 
             if (CheckForAmmo(weap)) {
                 self.current_weapon = weap;
-                TeamFortress_ReloadWeapon(weap);
+                TeamFortress_ReloadWeapon(weap, FALSE);
                 reload = 1;
                 break;
             }

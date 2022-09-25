@@ -724,6 +724,7 @@
 #define WEAP_DETPACK			131072
 #define WEAP_TRANQ			262144
 #define WEAP_LASER			524288
+#define WEAP_RAILGUN			524288
 // still room for 12 more weapons
 // but we can remove some by giving the weapons
 // a weapon mode (like the rifle)

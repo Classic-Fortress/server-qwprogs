@@ -1,48 +1,24 @@
 void AL_ProjectProjectile (entity projectile) {
-      // Project projectiles forward in time based on ping up to configurable maximum (default 100ms).    
-      // Effective projection time is maximum / 2 (eg 50ms), because we assume RTT is evenly distributed in both
-      // directions - and we want the server to spawn the entity in the position it would have
-      // have been if it had received the message (player_ping / 2) ago. 
-      local float player_ping_s = infokeyf(self, INFOKEY_P_PING) / 1000;
-      
-      if (player_ping_s > project_weapons_max_latency) {
-          player_ping_s = project_weapons_max_latency;
-      } else if (player_ping_s <= 0.0013) { // Ping 13ms or lower? Don't do anything
-          return;
-      }
-              
-      local float time_offset = (player_ping_s / 2);
-      local vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
+    float time_offset = time - client_time(CT_SLOW_PROJECTILE);
 
-      // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
-      // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
-      // because by tracing between old origin and projected origin we effectively have a single (last) frame 
-      // rewind at the projected origin. The effect is high ping players are disadvantaged in close combat.
-      // This is preferable to unhappy low ping players.
-      traceline(projectile.origin, projected_origin, 0, self);
+    if (time_offset <= 0.013)  // ping 13ms or lower? Don't do anything
+        return;
 
-      if (trace_fraction < 1) {
-          projected_origin = trace_endpos;
-      }
+    vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
+    // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
+    // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
+    // because by tracing between old origin and projected origin we effectively have a single (last) frame
+    // rewind at the projected origin. The effect is high ping players are disadvantaged in close combat.
+    // This is preferable to unhappy low ping players.
+    //
+    // XXX This will updated to use rewind.
+    traceline(projectile.origin, projected_origin, 0, self);
 
-      setorigin(projectile, projected_origin);
-}
+    if (trace_fraction < 1) {
+        projected_origin = trace_endpos;
+    }
 
-float AL_GrenadeOffset() {
-    if (!project_grenades)
-        return 0;
-
-    local float offset = infokeyf(self, INFOKEY_P_PING) / 1000;
-    local float smallest_grenade_think = 0.5;
-
-    offset /= 2;
-    // Make sure we'll always order before first think.
-    offset = min(offset, smallest_grenade_think - 0.1);
-
-    // Don't allow prime to move before throw (or to the same frame).
-    offset = min(offset, time - (self.last_throw + 0.013));
-
-    return offset;
+    setorigin(projectile, projected_origin);
 }
 
 #define DEBUG_ANTILAG 0
@@ -298,6 +274,7 @@ void RL_RestorePresent(RewindState* head) {
 
 class FOPlayer {
     RewindState* rewind_;
+
     void() FOPlayer = {
         rewind_ = AllocRewind(this);
         RL_Insert(&rewind_players, rewind_);
@@ -377,3 +354,44 @@ void UnrewindPlayer(entity p) {
     FOPlayer fop = (FOPlayer)p;
     fop.RestoreNow();
 }
+
+.float client_time_internal;
+
+float client_time(optional float ct_type = CT_NOEXTERNALEFFECT) {
+    if (ct_type == CT_NOEXTERNALEFFECT)
+        return self.client_time_internal;
+
+    float offset = time - self.client_time_internal;
+    float max_offset = 0;
+    switch (ct_type) {
+        case CT_SLOW_PROJECTILE:
+            max_offset = antilag_settings.max_projectile_slow_offset;
+            break;
+    }
+
+    return max(self.client_time_internal, time - max_offset);
+}
+
+void AL_UpdateClientTime(entity player) {
+    float offset;
+
+    // Naively, we might want to offset by rtt/2, because that's how old the
+    // client's input is.  However, the client's input is also relative to a
+    // world view that is itself rtt/2 behind.  [Client is a full rtt behind,
+    // and it interpolates ahead to rtt/2 behind.]
+    // This means that if we want, say, "run to a position and perform an action"
+    // to have equivalent time, we need to correct by a full rtt.
+    offset = infokeyf(player, INFOKEY_P_PING) / 1000;
+
+    offset = min(offset, antilag_settings.max_client_time_offset);
+
+    float old_client_time = player.client_time_internal;
+    if (time - offset > player.client_time_internal)
+        player.client_time_internal = time - offset;
+
+    // Monotonically increasing and not dragging beyond 75% of time as/if RTT
+    // changes.
+    player.client_time_internal = max(player.client_time_internal,
+                                      old_client_time + (1/77.0 * 0.75));
+}
+
