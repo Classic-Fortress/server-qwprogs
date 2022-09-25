@@ -669,8 +669,6 @@ float deathmsg;                 // Global, which is set before every T_Damage, t
 float intermission_running;
 float intermission_exittime;
 
-float default_password_set;
-
 // add clientkill ent defs
 .float clientkillforce;
 .float clientkillfree;

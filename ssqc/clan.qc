@@ -1085,7 +1085,7 @@ float () CheckAllPlayersReady = {
     if (infokey(world, "needpass") != "1") {
         local string default_password = "pineapple";
         cvar_set("password", default_password);
-        default_password_set = 1;
+        localcmd("localinfo default_password on\n");
 
         local entity te = find(world, classname, "player");
         while (te != world) {
