@@ -1884,15 +1884,10 @@ void () W_Attack = {
         W_ChangeToBestWeapon();
         return;
     }
+
     // Fired into forced reload?
     if (FO_CheckForReload())
         return;
-
-    if (wi->needs_reload) {
-       if (FO_CheckForReload())
-            return;
-       *ws->clip_fired += wi->ammo_per_shot;
-    }
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
         (self.undercover_skin != 0))
