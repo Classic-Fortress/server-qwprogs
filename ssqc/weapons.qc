@@ -80,7 +80,7 @@ void () UseSpecialSkill;
 void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
-float () CheckForReload;
+float () FO_CheckForReload;
 
 void (float all) TeamFortress_TeamShowScores;
 void (entity Player) TeamFortress_TeamShowMemberClasses;
@@ -1839,163 +1839,6 @@ void () W_ChangeToBestWeapon = {
     W_PrintWeaponMessage();
 }
 
-float () W_CheckNoAmmo = {
-    if (self.current_weapon == WEAP_AXE
-            || self.current_weapon == WEAP_SPANNER
-            || self.current_weapon == WEAP_KNIFE
-            || self.current_weapon == WEAP_MEDIKIT)
-        return 1;
-    else if (self.current_weapon == WEAP_SUPER_NAILGUN && self.currentammo >= 4)
-        return 1;
-    else if (self.current_weapon == WEAP_INCENDIARY && self.currentammo >= 3)
-        return 1;
-    else if ((self.current_weapon == WEAP_SUPER_SHOTGUN || self.current_weapon == WEAP_NAILGUN)
-                && self.currentammo >= 2)
-        return 1;
-    else if (self.currentammo > 0)
-        return 1;
-
-    W_ChangeToBestWeapon();
-    return 0;
-};
-
-void () W_Reload_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_shot.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_super_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_shot2.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void (entity pl) W_Reload_sniper_rifle = {
-    pl.reload_sniper_ticks = 0;
-    pl.tfstate = pl.tfstate - (pl.tfstate & TFSTATE_RELOADING);
-    pl.weaponmodel = "progs/v_srifle.mdl";
-    sprint(pl, PRINT_HIGH, "Finished reloading\n");
-    W_WeaponState_Load(pl, 0);
-    Status_Refresh(pl);
-};
-
-void () W_Reload_sniper_rifle_tick = {
-    self.owner.reload_sniper_ticks = self.owner.reload_sniper_ticks + 1;
-
-    if (self.owner.reload_sniper_ticks >= 4) {
-        W_Reload_sniper_rifle(self.owner);
-        dremove(self);
-        return;
-    }
-
-    Status_Refresh(self.owner);
-    self.nextthink = time + 1;
-}
-
-void () W_Reload_grenade_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    if (self.owner.weaponmode == 0)
-        self.owner.weaponmodel = "progs/v_rock.mdl";
-    else
-        self.owner.weaponmodel = "progs/v_pipe.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_rocket_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_rock2.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_assault_cannon = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_asscan.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-float FO_CheckForReload();
-
-float () CheckForReload = {
-    if (FO_UseNewReload())
-        return FO_CheckForReload();
-
-    float need_reload = FALSE;
-
-    if (self.current_weapon == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 8 && self.ammo_shells > 0)
-            need_reload = TRUE;
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0)
-            need_reload = TRUE;
-    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload)
-            need_reload = TRUE;
-    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0))
-            need_reload = TRUE;
-    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0))
-            need_reload = TRUE;
-    } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy && self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE
-            && self.ammo_shells > 0)
-            need_reload = TRUE;
-    }
-
-    if (need_reload) {
-        if (force_reload)
-            TeamFortress_ForceReloadCurrentWeapon();
-        return 1;
-    } else {
-        return 0;
-    }
-};
-
-float FO_CheckForAmmo(float weapon);
-float (float weap) CheckForAmmo = {
-    if (FO_UseNewReload())
-        return FO_CheckForAmmo(weap);
-
-    if (weap == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 1 && self.ammo_shells > self.reload_shotgun)
-            return 1;
-    } else if (weap == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 2 && self.ammo_shells > self.reload_super_shotgun)
-            return 1;
-    } else if (weap == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > self.reload_sniper_rifle && sniperreload)
-            return 1;
-    } else if (weap == WEAP_GRENADE_LAUNCHER) {
-        if (self.reload_grenade_launcher >= 1 && self.ammo_rockets > self.reload_grenade_launcher)
-            return 1;
-    } else if (weap == WEAP_ROCKET_LAUNCHER) {
-        if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
-            return 1;
-    } else if (weap == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy) {
-            if (self.reload_assault_cannon >= 1 && self.ammo_shells > self.reload_assault_cannon)
-                return 1;
-        }
-    }
-    return 0;
-};
-
 void () player_axe1;
 void () player_axeb1;
 
@@ -2021,10 +1864,9 @@ void () player_medikit1;
 void () player_medikitb1;
 
 void () W_Attack = {
-    local float r;
-
-    if (!W_CheckNoAmmo())
-        return;
+    FO_WeapInfo wi;
+    FO_FillWeapInfo(self, self.current_weapon, &wi);
+    float r;
 
     if (self.has_disconnected == TRUE)
         return;
@@ -2032,7 +1874,17 @@ void () W_Attack = {
     if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
         return;
 
-    if(no_fire_mode)
+    if (no_fire_mode)
+        return;
+
+    // Out of ammo?
+    if (wi->ammo_type != AMMO_NONE &&
+        *wi->ammo_remaining < wi->ammo_per_shot) {
+        W_ChangeToBestWeapon();
+        return;
+    }
+    // Fired into forced reload?
+    if (FO_CheckForReload())
         return;
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
@@ -2043,7 +1895,6 @@ void () W_Attack = {
     self.show_hostile = time + 1;
 
     if (self.current_weapon == WEAP_AXE) {
-        Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.5)
@@ -2051,7 +1902,6 @@ void () W_Attack = {
         else
             player_axeb1();
     } else if (self.current_weapon == WEAP_KNIFE) {
-        Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         r = random();
         if (r < 0.5)
@@ -2059,77 +1909,48 @@ void () W_Attack = {
         else
             player_knifeb1();
     } else if (self.current_weapon == WEAP_SPANNER) {
-        Attack_Finished(0.5);
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
         player_spanner1();
     } else if (self.current_weapon == WEAP_SHOTGUN) {
-        if (CheckForReload() == TRUE)
-            return;
         player_shot1();
         W_FireShotgun();
         self.reload_shotgun = self.reload_shotgun + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (CheckForReload() == TRUE)
-            return;
         player_shot1();
         W_FireSuperShotgun();
         self.reload_super_shotgun = self.reload_super_shotgun + 2;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.7);
     } else if (self.current_weapon == WEAP_NAILGUN) {
         player_nail1();
     } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
         player_nail1();
     } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if (CheckForReload() == TRUE)
-            return;
         player_rocket1();
         W_FireGrenade();
         self.reload_grenade_launcher = self.reload_grenade_launcher + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.6);
     } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if (CheckForReload() == TRUE)
-            return;
         player_rocket1();
         W_FireRocket();
         self.reload_rocket_launcher = self.reload_rocket_launcher + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.8);
     } else if (self.current_weapon == WEAP_LIGHTNING) {
         player_light1();
-        Attack_Finished(0.1);
         FO_Sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
     } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
         if (self.flags & FL_ONGROUND) {
-            if (CheckForReload() == TRUE)
-                return;
             player_shot1();
             W_FireSniperRifle();
             if (sniperreload) {
                 self.reload_sniper_rifle = self.reload_sniper_rifle + 1;
                 Status_Refresh(self);
-                CheckForReload();
             }
-            Attack_Finished(1.5);
         }
     } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
         player_autorifle1();
         W_FireAutoRifle();
-        Attack_Finished(0.1);
     } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (CheckForReload() == TRUE)
-            return;
-        }
-
         if (self.ammo_cells < 7) {
             if (time >= self.antispam_assault_cannon) {
                 sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
@@ -2157,19 +1978,6 @@ void () W_Attack = {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            switch (pyro_type)
-            {
-                case PYRO_ORIGINAL:
-                    Attack_Finished(1.2);
-                    break;
-                case PYRO_OZTF:
-                    Attack_Finished(0.9);
-                    break;
-                case PYRO_FO:
-                    //Attack_Finished(PC_PYRO_LAVA_RETICK);
-                    Attack_Finished(0.9);
-                    break;
-            }
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
@@ -2181,18 +1989,21 @@ void () W_Attack = {
             player_medikit1();
         else
             player_medikitb1();
-        Attack_Finished(0.5);
     } else if (self.current_weapon == WEAP_TRANQ) {
         FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireTranq();
-        Attack_Finished(1.5);
     } else if (self.current_weapon == WEAP_RAILGUN) {
         FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireLaser();
-        Attack_Finished(0.4);
     }
+
+    if (self.current_weapon != WEAP_FLAMETHROWER)
+        Attack_Finished(wi->attack_time);
+
+    if (wi->needs_reload)
+        FO_CheckForReload();
 
     //These weapons have to log each projectile launched/bullet fired
     if (self.current_weapon != WEAP_ASSAULT_CANNON ||

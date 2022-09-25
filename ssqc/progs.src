@@ -16,6 +16,7 @@ events.qc
 roles.qc
 q3defs.qc
 debug.qc
+../share/fo_weapons.qc
 status.qc
 functions.qc
 menu.qc
@@ -29,7 +30,6 @@ items.qc
 locfiles.qc
 antilag.qc
 combat.qc
-../share/fo_weapons.qc
 weapons.qc
 world.qc
 client.qc
