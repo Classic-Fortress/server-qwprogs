@@ -4,9 +4,6 @@ FortressOne Server
 New features
 ------
 
-* `localinfo project_grenades 0/1` [default: 0] Adjust the point at which
-  grenades are primed to correct for client latency.  Does not allow players to
-throw grenades any faster, or more frequently; only more consistently.
 * Server option to limit `sv_maxclients` to current number of players during quad gametime. `localinfo limit_quad_players 0/1`. Default: `1`.
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.

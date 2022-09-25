@@ -934,8 +934,7 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
 
 void () FO_GrenadeThink;
 
-// is_player defines whether this originated from the player or server.  Player
-// generated primes are corrected for latency when project_grenades is on.
+// is_player defines whether this originated from the player or server.
 void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     local float gtype;
     local string gs;
@@ -1100,13 +1099,11 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
 
-    local float lag_adjust = is_player ? AL_GrenadeOffset() : 0;
-
-    tGrenade.nextthink = time + 0.8 - lag_adjust;
+    tGrenade.nextthink = client_time() + 0.8;
     if (gtype == GR_TYPE_CALTROP)
-        tGrenade.heat = time + 0.5 + 0.5 - lag_adjust;
+        tGrenade.heat = client_time() + 0.5 + 0.5;
     else {
-        tGrenade.heat = time + 3 + 0.8 - lag_adjust;
+        tGrenade.heat = client_time() + 3 + 0.8;
 
         RemoveGrenadeTimers();
 
@@ -1114,7 +1111,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
         local float notimers = stof(infokey(self, "nt"));
         if (grentimers && notimers != 1) {
             timer = spawn();
-            timer.nextthink = time + 0.8 - lag_adjust;
+            timer.nextthink = client_time() + 0.8;
             timer.think = GrenadeTimer;
             timer.heat = 4;
             timer.owner = self;
@@ -2918,7 +2915,7 @@ void () TeamFortress_ExplodePerson = {
     newmis.velocity = '0 0 0';
     newmis.angles = vectoangles(newmis.velocity);
     newmis.think = SUB_Null;
-    newmis.nextthink = time + 0.1;
+    newmis.nextthink = time + 0.1;  // Server generated, no client time here.
 
     if (self.weapon == GR_TYPE_NORMAL) {
         newmis.touch = NormalGrenadeTouch;
