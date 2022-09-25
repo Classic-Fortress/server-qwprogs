@@ -201,9 +201,9 @@ float () crandom = {
 
 void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
-        self.attack_finished = time + att_delay * 2;
+        self.attack_finished = client_time() + att_delay * 2;
     else
-        self.attack_finished = time + att_delay;
+        self.attack_finished = client_time() + att_delay;
 };
 
 float () W_FireAxe = {
