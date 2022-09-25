@@ -165,6 +165,10 @@ string FO_GetWeapName(float weapon) {
 struct FO_WeapModels {
     int weapon;
     string model;
+
+    // Automatically populated.
+    int modelindex;
+
 };
 
 // Indexed by WEAP_to_index()
@@ -582,6 +586,9 @@ void FO_Weapons_Init() {
         FO_WeapModels* wm = &weapon_models[i];
         ASSERTD_EQ(WEAP_to_index(wm->weapon), i);
         precache_model(wm->model);
+#ifdef CSQC
+        wm->modelindex = getmodelindex(wm->model);
+#endif
         wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];
