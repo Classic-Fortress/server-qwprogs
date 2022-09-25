@@ -72,6 +72,8 @@ void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
+void WeaponPred_Init(entity player);
+void WeaponPred_TearDown(entity player);
 
 void (float n) CSEv_SetPlayerImpulse_f = {
     bprint(PRINT_HIGH, self.netname, "\n");
@@ -2918,6 +2920,8 @@ void () PlayerPostThink = {
     FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
+    if (WeaponPred_Active(self))
+        UpdateWeaponPred(self);
 
     if (self.view_ofs == '0 0 0') {
         return;
@@ -3060,6 +3064,8 @@ void () ClientConnect = {
     }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        WeaponPred_Init(self);
+
         InitAllStatuses(self);
         UpdateClientMOTD(self);
         UpdateClientTeamScores(self);
@@ -3198,6 +3204,7 @@ void () ClientDisconnect = {
         UnvoteForMap(self);
     }
 
+    WeaponPred_TearDown(self);
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {
