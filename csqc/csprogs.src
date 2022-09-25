@@ -11,6 +11,7 @@ csextradefs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
+../share/fo_weapons.qc
 sui_sys.qc
 vote.qc
 status.qc

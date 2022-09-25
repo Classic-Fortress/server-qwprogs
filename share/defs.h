@@ -704,26 +704,30 @@
 /* New Weapon Defines					*/
 /*======================================================*/
 
-#define WEAP_HOOK			1
-#define WEAP_KNIFE			2
-#define WEAP_MEDIKIT			4
-#define WEAP_SPANNER			8
-#define WEAP_AXE			16
-#define WEAP_SNIPER_RIFLE		32
-#define WEAP_AUTO_RIFLE			64
-#define WEAP_SHOTGUN			128
-#define WEAP_SUPER_SHOTGUN		256
-#define WEAP_NAILGUN			512
-#define WEAP_SUPER_NAILGUN		1024
-#define WEAP_GRENADE_LAUNCHER		2048
-#define WEAP_FLAMETHROWER		4096
-#define WEAP_ROCKET_LAUNCHER		8192
-#define WEAP_INCENDIARY			16384
-#define WEAP_ASSAULT_CANNON		32768
-#define WEAP_LIGHTNING			65536
-#define WEAP_DETPACK			131072
-#define WEAP_TRANQ			262144
-#define WEAP_RAILGUN			524288
+enumflags {
+    WEAP_HOOK,
+    WEAP_KNIFE,
+    WEAP_MEDIKIT,
+    WEAP_SPANNER,
+    WEAP_AXE,
+    WEAP_SNIPER_RIFLE,
+    WEAP_AUTO_RIFLE,
+    WEAP_SHOTGUN,
+    WEAP_SUPER_SHOTGUN,
+    WEAP_NAILGUN,
+    WEAP_SUPER_NAILGUN,
+    WEAP_GRENADE_LAUNCHER,
+    WEAP_FLAMETHROWER,
+    WEAP_ROCKET_LAUNCHER,
+    WEAP_INCENDIARY,
+    WEAP_ASSAULT_CANNON,
+    WEAP_LIGHTNING,
+    WEAP_DETPACK,
+    WEAP_TRANQ,
+    WEAP_RAILGUN,
+    WEAP_LAST = WEAP_RAILGUN,
+};
+
 // still room for 12 more weapons
 // but we can remove some by giving the weapons
 // a weapon mode (like the rifle)
