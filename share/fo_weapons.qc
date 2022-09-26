@@ -126,31 +126,33 @@ inline string FO_GetWeapName(float weapon) {
 }
 
 struct FO_WeapModels {
+    int weapon;
     string mode[2];
 };
 
 // Indexed by WEAP_to_index() and player.weaponmode
 static FO_WeapModels weapon_models[] = {
-/* WEAP_HOOK,             */ {{"progs/v_grap.mdl" }},
-/* WEAP_KNIFE,            */ {{"progs/v_knife.mdl", "progs/v_knife2.mdl" }},
-/* WEAP_MEDIKIT,          */ {{"progs/v_medi.mdl"}},
-/* WEAP_SPANNER,          */ {{"progs/v_span.mdl"}},
-/* WEAP_AXE,              */ {{"progs/v_axe.mdl"}},
-/* WEAP_SNIPER_RIFLE,     */ {{"progs/v_srifle.mdl"}},
-/* WEAP_AUTO_RIFLE,       */ {{"progs/v_srifle.mdl"}},
-/* WEAP_SHOTGUN,          */ {{"progs/v_shot.mdl"}},
-/* WEAP_SUPER_SHOTGUN,    */ {{"progs/v_shot2.mdl"}},
-/* WEAP_NAILGUN,          */ {{"progs/v_nail.mdl"}},
-/* WEAP_SUPER_NAILGUN,    */ {{"progs/v_nail2.mdl"}},
-/* WEAP_GRENADE_LAUNCHER, */ {{"progs/v_rock.mdl", "progs/v_pipe.mdl"}},
-/* WEAP_FLAMETHROWER,     */ {{"progs/v_flame.mdl"}},
-/* WEAP_ROCKET_LAUNCHER,  */ {{"progs/v_rock2.mdl"}},
-/* WEAP_INCENDIARY,       */ {{"progs/v_irock.mdl"}},
-/* WEAP_ASSAULT_CANNON,   */ {{"progs/v_asscan.mdl"}},
-/* WEAP_LIGHTNING,        */ {{}},
-/* WEAP_DETPACK,          */ {{}},
-/* WEAP_TRANQ,            */ {{"progs/v_tranq.mdl"}},
-/* WEAP_RAILGUN,          */ {{"progs/v_rail.mdl"}},
+  { WEAP_NONE,             {""}},
+  { WEAP_HOOK,             {"progs/v_grap.mdl" }},
+  { WEAP_KNIFE,            {"progs/v_knife.mdl", "progs/v_knife2.mdl" }},
+  { WEAP_MEDIKIT,          {"progs/v_medi.mdl"}},
+  { WEAP_SPANNER,          {"progs/v_span.mdl"}},
+  { WEAP_AXE,              {"progs/v_axe.mdl"}},
+  { WEAP_SNIPER_RIFLE,     {"progs/v_srifle.mdl"}},
+  { WEAP_AUTO_RIFLE,       {"progs/v_srifle.mdl"}},
+  { WEAP_SHOTGUN,          {"progs/v_shot.mdl"}},
+  { WEAP_SUPER_SHOTGUN,    {"progs/v_shot2.mdl"}},
+  { WEAP_NAILGUN,          {"progs/v_nail.mdl"}},
+  { WEAP_SUPER_NAILGUN,    {"progs/v_nail2.mdl"}},
+  { WEAP_GRENADE_LAUNCHER, {"progs/v_rock.mdl", "progs/v_pipe.mdl"}},
+  { WEAP_FLAMETHROWER,     {"progs/v_flame.mdl"}},
+  { WEAP_ROCKET_LAUNCHER,  {"progs/v_rock2.mdl"}},
+  { WEAP_INCENDIARY,       {"progs/v_irock.mdl"}},
+  { WEAP_ASSAULT_CANNON,   {"progs/v_asscan.mdl"}},
+  { WEAP_LIGHTNING,        {""}},
+  { WEAP_DETPACK,          {""}},
+  { WEAP_TRANQ,            {"progs/v_tranq.mdl"}},
+  { WEAP_RAILGUN,          {"progs/v_rail.mdl"}},
 };
 
 // REQUIRES: Order must match above.
@@ -360,8 +362,7 @@ void FO_Weapons_Init() {
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
          if (WEAP_to_index(wi->weapon) != i)
-             error(sprintf("Mismatch at index %d\n", i));
-
+             error(sprintf("WI mismatch at index %d\n", i));
 
          if (wi->clip_size > 0) {
              wi->needs_reload = TRUE;
@@ -375,6 +376,8 @@ void FO_Weapons_Init() {
          }
 
          FO_WeapModels* wm = &weapon_models[i];
+         if (WEAP_to_index(wm->weapon) != i)
+             error(sprintf("WM mismatch at index %d\n", i));
          for (j = 0; j < 2; j++)
              if (wm->mode[j] != "")
                  precache_model(wm->mode[j]);
