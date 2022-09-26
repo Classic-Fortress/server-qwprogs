@@ -58,7 +58,6 @@ void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
-float () GetLastWeaponImpulse;
 void () UpdateReadyStatus;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
@@ -680,9 +679,6 @@ void () DecodeLevelParms = {
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
 
-        // wait until attack_finished is over before changing weapons
-        chweap_wait_attfinished = CF_GetSetting("cwaf", "chweap_wait_atk", "on");
-
         // enable flag model following the player who has it
         flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
 
@@ -999,7 +995,6 @@ void () DecodeLevelParms = {
         if (st == "on") {
             server_huetf = TRUE;
             impulse_queue = TRUE;
-            chweap_wait_attfinished = FALSE;
             flag_follow = FALSE;
             ng_velocity = 1000;
             ng_damage = 18;
@@ -2112,9 +2107,6 @@ void () PutClientInServer = {
         return;
     }
 
-    if (self.last_playerclass == 0)
-        self.last_playerclass = self.playerclass;
-
     // remove prime timers to avoid getting an old grenade in your face
     te = find(world, classname, "primetimer");
     while (te != world) {
@@ -2177,6 +2169,7 @@ void () PutClientInServer = {
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
 
+    self.attack_finished = 0;  // Allow below to change weapon freely.
     TeamFortress_SetEquipment();
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
@@ -2190,12 +2183,6 @@ void () PutClientInServer = {
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
-    if (self.current_weaponslot && self.last_playerclass == self.playerclass)
-        W_ChangeWeapon(self.current_weaponslot);
-    else {
-        W_ChangeWeapon(W_BestWeaponSlot());
-    }
-    self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
     self.th_pain = player_pain;
@@ -3829,11 +3816,8 @@ float () IsUsingCFImpulses = {
     return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 
-float () GetLastWeaponImpulse = {
-    if (IsUsingOldImpulses())
-        return 7;
-    else 
-        return 4;
+float GetMaxWeaponInput()  {
+    return IsUsingOldImpulses() ? 7 : 4;
 }
 
 void () InitReverseCap = {

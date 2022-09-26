@@ -467,9 +467,9 @@ void (entity pe_player, float f_type) CF_Identify = {
 };
 
 void () RestoreDefaultWeapon = {
-    local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
+    float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
     if (default_weapon >= 1 && default_weapon <= 4) {
-        W_ChangeWeapon(default_weapon);
+        W_ChangeWeapon(W_WeaponBySlot(default_weapon));
     }
 };
 
@@ -482,114 +482,31 @@ void () TeamFortress_ForceReloadCurrentWeapon = {
 };
 
 void (float slot) TeamFortress_ReloadSlot = {
-    local float weap = 0;
+    float weap = W_WeaponBySlot(slot);
 
-    if (!IsUsingOldImpulses()) {
-        if (slot < 1 || slot > 3)
-            return;
+    FO_ReloadWeapon(weap, FALSE);
+}
 
-        if (slot == 1)
-            weap = W_WeaponSlot1();
-        else if (slot == 2)
-            weap = W_WeaponSlot2();
-        else if (slot == 3) {
-            if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
-                return;
-            weap = W_WeaponSlot3();
-        }
-        FO_ReloadWeapon(weap, FALSE);
-    }
-    else {
-        if (slot < 1 || slot > 7)
-            return;
-        if (slot == 1)
-            weap = W_OldWeaponSlot1();
-        else if (slot == 2)
-            weap = W_OldWeaponSlot2();
-        else if (slot == 3)
-            weap = W_OldWeaponSlot3();
-        else if (slot == 4)
-            weap = W_OldWeaponSlot4();
-        else if (slot == 5)
-            weap = W_OldWeaponSlot5();
-        else if (slot == 6)
-            weap = W_OldWeaponSlot6();
-        else if (slot == 7)
-            weap = W_OldWeaponSlot7();
-        if (weap != 0)
-            FO_ReloadWeapon(weap, FALSE);
-    }
-};
+float W_FindPrevNextWeapon(float weapon, float is_prev);
 
 void () TeamFortress_ReloadNext = {
-    local float slot, reload = 0, weap = 0;
+    float weapon = self.current_weapon;
 
-    if (!IsUsingOldImpulses()) {
-        // reload current slot first
-        slot = W_GetSlot(self.current_weapon);
-        if (FO_CanReload(self.current_weapon)) {
-            FO_ReloadWeapon(self.current_weapon, FALSE);
-            reload = 1;
-            return;
-        }
-
-        // then go through each slot
-        for (slot = 1; slot < 4; slot++) {
-            if (slot == 1)
-                weap = W_WeaponSlot1();
-            else if (slot == 2)
-                weap = W_WeaponSlot2();
-            else if (slot == 3) {
-                if (self.playerclass == PC_SCOUT || self.playerclass == PC_ENGINEER)
-                    break;
-                weap = W_WeaponSlot3();
-            }
-
-            if (FO_CanReload(weap)) {
-                self.current_weapon = weap;
-                FO_ReloadWeapon(weap, FALSE);
-                reload = 1;
+    if (!FO_CanReload(weapon)) {
+        for (int i = 0; i < 3; i++) {
+            weapon = W_FindPrevNextWeapon(weapon, FALSE);
+            if (FO_CanReload(weapon))
                 break;
-            }
-        }
-    }
-    else {
-        slot = W_OldGetSlot(self.current_weapon);
-        if (FO_CanReload(self.current_weapon)) {
-            FO_ReloadWeapon(self.current_weapon, FALSE);
-            reload = 1;
-            return;
-        }
-        // then go through each slot
-        for (slot = 1; slot < GetLastWeaponImpulse(); slot++) {
-            if (slot == 1)
-                weap = W_OldWeaponSlot1();
-            else if (slot == 2)
-                weap = W_OldWeaponSlot2();
-            else if (slot == 3)
-                weap = W_OldWeaponSlot3();
-            else if (slot == 4)
-                weap = W_OldWeaponSlot4();
-            else if (slot == 5)
-                weap = W_OldWeaponSlot5();
-            else if (slot == 6)
-                weap = W_OldWeaponSlot6();
-            else if (slot == 7)
-                weap = W_OldWeaponSlot7();
-
-            if (FO_CanReload(weap)) {
-                self.current_weapon = weap;
-                FO_ReloadWeapon(weap, FALSE);
-                reload = 1;
-                break;
-            }
         }
     }
 
-    if (!reload)
+    if (FO_CanReload(weapon)) {
+        FO_ReloadWeapon(weapon, FALSE);
         RestoreDefaultWeapon();
+    } else {
         sprint(self, PRINT_HIGH, "All clips full\n");
-};
+    }
+}
 
 entity TeamFortress_GetPracticeSpawn(entity e)  =
 {

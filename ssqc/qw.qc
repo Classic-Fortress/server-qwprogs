@@ -212,9 +212,7 @@ float coop;
 .float last_weapon;             // the last weapon the player was using
 .float current_weaponslot;      // the currently equipped weaponslot
 .float last_weaponslot;         // the last equipped weaponslot
-.float queue_weaponslot;        // the weaponslot to switch to when possible
-.float queue_weaponstate;       // the weaponstate to load when possible
-.float next_weapon;             // used by weapon slots to communicate which weapon to select
+.float queue_weapon;            // the weapon to switch to when possible
 
 // weapon states
 .float weaponstate_current_weaponslot;
@@ -634,7 +632,6 @@ string pause_actor;
 float unpause_requested;
 float unpause_countdown;
 float unpause_lastcountnumber;
-float chweap_wait_attfinished;
 float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
