@@ -135,6 +135,7 @@ float () IsUsingOldImpulses;
 float () IsUsingCFImpulses;
 
 void (float inp) W_OldWeaponSlot;
+void (entity pl) W_UpdateCurrentWeapon;
 
 
 void (entity ent, float num) SetFlameCount;
@@ -578,9 +579,6 @@ float () W_FireMedikit = {
                         FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                     }
 
-                    if (self.current_weapon == WEAP_MEDIKIT)
-                        self.currentammo = self.ammo_cells;
-
                     Status_Refresh(self);
                     T_Heal(trace_ent, healam, 1);
 
@@ -809,7 +807,6 @@ void () W_FireShotgun = {
 
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_SHOTGUN;
     FireBullets(6, dir, '0.04 0.04 0');
@@ -818,7 +815,7 @@ void () W_FireShotgun = {
 void () W_FireSuperShotgun = {
     local vector dir;
 
-    if (self.currentammo == 1) {
+    if (self.ammo_shells == 1) {
         W_FireShotgun();
         return;
     }
@@ -826,7 +823,6 @@ void () W_FireSuperShotgun = {
 
     KickPlayer(-4, self);
     self.ammo_shells = self.ammo_shells - 2;
-    self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_SSHOTGUN;
     FireBullets(14, dir, '0.14 0.08 0');
@@ -866,7 +862,6 @@ void () W_FireSniperRifle = {
     FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
 
     makevectors(self.v_angle);
     src = self.origin + v_forward * 10;
@@ -968,7 +963,6 @@ void () W_FireAutoRifle = {
 
     KickPlayer(-1, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     makevectors(self.v_angle);
     dir = v_forward;
     deathmsg = DMSG_AUTORIFLE;
@@ -981,7 +975,6 @@ void () W_FireAssaultCannon = {
 
     KickPlayer(-4, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
     
@@ -1105,7 +1098,6 @@ void () T_MissileTouch = {
 
 void () W_FireRocket = {
     self.ammo_rockets = self.ammo_rockets - 1;
-    self.currentammo = self.ammo_rockets;
     FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
 
@@ -1192,7 +1184,7 @@ void () W_FireLightning = {
     if (self.waterlevel > 1) {
         cells = self.ammo_cells;
         self.ammo_cells = 0;
-        W_SetCurrentAmmo(self);
+        W_UpdateCurrentWeapon(self);
         deathmsg = DMSG_LIGHTNING;
         T_RadiusDamage(self, self, 35 * cells, world);
         return;
@@ -1204,7 +1196,6 @@ void () W_FireLightning = {
     KickPlayer(-2, self);
 
     self.ammo_cells = self.ammo_cells - 1;
-    self.currentammo = self.ammo_cells;
 
     org = self.origin + '0 0 16';
     traceline(org, org + v_forward * 600, 1, self);
@@ -1309,7 +1300,6 @@ void () ExplodeOldestPipebomb = {
 
 void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
-    self.currentammo = self.ammo_rockets;
     FO_Sound(self, CHAN_WEAPON, "weapons/grenade.wav", 1, 1);
     KickPlayer(-2, self);
     newmis = spawn();
@@ -1394,7 +1384,6 @@ void () W_FireSuperSpikes = {
         self.ammo_nails = self.ammo_nails - 4;
     else
         self.ammo_nails = self.ammo_nails - 2;
-    self.currentammo = self.ammo_nails;
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16', dir);
     LogEventAttack(self);
@@ -1421,10 +1410,8 @@ void (float ox) W_FireSpikes = {
     FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
     if ((self.ammo_nails == 1) || !old_ng_rof) {
         self.ammo_nails = self.ammo_nails - 1;
-        self.currentammo = self.ammo_nails;
     } else {
         self.ammo_nails = self.ammo_nails - 2;
-        self.currentammo = self.ammo_nails;
     }
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
@@ -1573,7 +1560,7 @@ void () superspike_touch = {
     dremove(self);
 };
 
-void (entity pl) W_SetCurrentAmmo = {
+void (entity pl) W_UpdateCurrentWeapon = {
     entity oldself;
 
     if ((pl.health <= 0) || (pl.current_weapon == 0))
@@ -1586,22 +1573,18 @@ void (entity pl) W_SetCurrentAmmo = {
     pl.weapon = 0;
 
     if (pl.current_weapon == WEAP_AXE) {
-        pl.currentammo = 0;
         pl.weaponmodel = "progs/v_axe.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_KNIFE) {
-        pl.currentammo = 0;
         if (pl.weaponmode == 0)
             pl.weaponmodel = "progs/v_knife.mdl";
         else
             pl.weaponmodel = "progs/v_knife2.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_SPANNER) {
-        pl.currentammo = pl.ammo_cells;
         pl.weaponmodel = "progs/v_span.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_SHOTGUN) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_shot.mdl";
             pl.weaponframe = 0;
@@ -1609,7 +1592,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SHOTGUN;
     } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_shot2.mdl";
             pl.weaponframe = 0;
@@ -1617,7 +1599,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SUPER_SHOTGUN;
     } else if (pl.current_weapon == WEAP_NAILGUN) {
-        pl.currentammo = pl.ammo_nails;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_nail.mdl";
             pl.weaponframe = 0;
@@ -1625,7 +1606,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_NAILS;
         pl.weapon = IT_NAILGUN;
     } else if (pl.current_weapon == WEAP_SUPER_NAILGUN) {
-        pl.currentammo = pl.ammo_nails;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_nail2.mdl";
             pl.weaponframe = 0;
@@ -1633,7 +1613,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_NAILS;
         pl.weapon = IT_SUPER_NAILGUN;
     } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        pl.currentammo = pl.ammo_rockets;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             if (pl.weaponmode == 0)
                 pl.weaponmodel = "progs/v_rock.mdl";
@@ -1644,7 +1623,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.weapon = IT_GRENADE_LAUNCHER;
         pl.items = pl.items | IT_ROCKETS;
     } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        pl.currentammo = pl.ammo_rockets;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_rock2.mdl";
             pl.weaponframe = 0;
@@ -1652,7 +1630,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_ROCKETS;
         pl.weapon = IT_ROCKET_LAUNCHER;
     } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_srifle.mdl";
             pl.weaponframe = 0;
@@ -1660,7 +1637,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SHOTGUN;
     } else if (pl.current_weapon == WEAP_AUTO_RIFLE) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_srifle.mdl";
             pl.weaponframe = 0;
@@ -1668,7 +1644,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SUPER_SHOTGUN;
     } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_asscan.mdl";
             pl.weaponframe = 0;
@@ -1676,7 +1651,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_ROCKET_LAUNCHER;
     } else if (pl.current_weapon == WEAP_FLAMETHROWER) {
-        pl.currentammo = pl.ammo_cells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_flame.mdl";
             pl.weaponframe = 0;
@@ -1684,7 +1658,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_CELLS;
         pl.weapon = IT_GRENADE_LAUNCHER;
     } else if (pl.current_weapon == WEAP_INCENDIARY) {
-        pl.currentammo = pl.ammo_rockets;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_irock.mdl";
             pl.weaponframe = 0;
@@ -1692,12 +1665,10 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_ROCKETS;
         pl.weapon = IT_ROCKET_LAUNCHER;
     } else if (pl.current_weapon == WEAP_MEDIKIT) {
-        pl.currentammo = pl.ammo_cells;
         pl.items = pl.items | IT_CELLS;
         pl.weaponmodel = "progs/v_medi.mdl";
         pl.weaponframe = 0;
     } else if (pl.current_weapon == WEAP_TRANQ) {
-        pl.currentammo = pl.ammo_shells;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_tranq.mdl";
             pl.weaponframe = 0;
@@ -1705,7 +1676,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_SHELLS;
         pl.weapon = IT_SHOTGUN;
     } else if (pl.current_weapon == WEAP_RAILGUN) {
-        pl.currentammo = pl.ammo_nails;
         if (!(pl.tfstate & TFSTATE_RELOADING)) {
             pl.weaponmodel = "progs/v_rail.mdl";
             pl.weaponframe = 0;
@@ -1713,7 +1683,6 @@ void (entity pl) W_SetCurrentAmmo = {
         pl.items = pl.items | IT_NAILS;
         pl.weapon = IT_SHOTGUN;
     } else {
-        pl.currentammo = 0;
         pl.weaponmodel = "";
         pl.weaponframe = 0;
     }
@@ -1801,7 +1770,7 @@ void () W_ChangeToBestWeapon = {
     self.current_weaponslot = slot;
     self.current_weapon = self.next_weapon;
     self.weaponmode = self.next_weaponmode;
-    W_SetCurrentAmmo(self);
+    W_UpdateCurrentWeapon(self);
     W_WeaponState_Save(self);
     W_PrintWeaponMessage();
 }
@@ -1921,7 +1890,7 @@ void () W_Attack = {
                 self.antispam_assault_cannon = time + 3;
             }
             W_ChangeWeapon(W_BestWeaponSlot());
-            W_SetCurrentAmmo(self);
+            W_UpdateCurrentWeapon(self);
             W_WeaponState_Save(self);
         } else {
             self.ammo_cells = self.ammo_cells - 7;
@@ -2582,7 +2551,7 @@ void (entity pl, float swap) W_WeaponState_Load = {
     pl.queue_weaponstate = 0;
 
     W_WeaponState_Save(pl);
-    W_SetCurrentAmmo(pl);
+    W_UpdateCurrentWeapon(pl);
     Status_Refresh(pl);
 }
 
@@ -2654,7 +2623,7 @@ void (float inp) W_ChangeWeapon = {
     if (!self.is_quickfiring && !self.has_quickfired)
         W_WeaponState_Save(self);
 
-    W_SetCurrentAmmo(self);
+    W_UpdateCurrentWeapon(self);
     Status_Refresh(self);
     self.queue_weaponslot = 0;
 };

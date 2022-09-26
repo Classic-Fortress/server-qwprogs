@@ -2192,7 +2192,6 @@ void () PutClientInServer = {
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
-    W_SetCurrentAmmo(self);
     if (self.current_weaponslot && self.last_playerclass == self.playerclass)
         W_ChangeWeapon(self.current_weaponslot);
     else {
@@ -2779,11 +2778,15 @@ void () PlayerPreThink = {
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
+
+#if 0
+    FO_WeapState ws;
+    FO_FillWeapState(self, self.weapon, &ws);
     if (time > self.attack_finished && !self.currentammo && self.weapon > WEAP_AXE) {
         W_ChangeWeapon(W_BestWeaponSlot());
-        W_SetCurrentAmmo(self);
         W_WeaponState_Save(self);
     }
+#endif
 };
 
 void () CheckPowerups = {
@@ -2949,10 +2952,17 @@ void () CheckPowerups = {
     }
 };
 
+void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws);
+
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
+
+    FO_WeapState ws;
+    FO_FillWeapState(self, self.current_weapon, &ws);
+    self.currentammo =
+        (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
 
     if (self.view_ofs == '0 0 0') {
         return;

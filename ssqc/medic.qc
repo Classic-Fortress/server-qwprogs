@@ -73,8 +73,6 @@ void () CF_Medic_AuraFindPlayers = {
     }
 
     self.owner.ammo_cells = self.owner.ammo_cells - ceil(PC_MEDIC_MAXAMMO_CELL / 20);
-    if (self.owner.current_weapon == WEAP_MEDIKIT)
-        self.owner.currentammo = self.owner.ammo_cells;
 };
 
 // increases the medic's cells two times per second
@@ -99,9 +97,6 @@ void () CF_Medic_RegenerateCells = {
             Status_Refresh(self.owner);
         else if (f_newcells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2) && f_newcells < ceil(PC_MEDIC_MAXAMMO_CELL / 2 + PC_MEDIC_MAXAMMO_CELL / 10))
             Status_Refresh(self.owner);
-
-        if (self.owner.current_weapon == WEAP_MEDIKIT)
-            self.owner.currentammo = self.owner.ammo_cells;
     }
 
     // Update drop ammo menu if cells are

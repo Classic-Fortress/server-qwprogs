@@ -604,7 +604,6 @@ void () FO_Spy_Unfeign = {
 
         // load saved weapon state and set current ammo
         W_WeaponState_Load(self, 0);
-        W_SetCurrentAmmo(self);
 
         // allow spy to move again
         self.movetype = MOVETYPE_WALK;
@@ -1381,7 +1380,6 @@ void () HallucinationTimer = {
 
 void () W_FireTranq = {
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     KickPlayer(-2, self);
     newmis = spawn();
     newmis.owner = self;

@@ -573,7 +573,6 @@ void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
         if ((self.ammo_shells < 1) || (self.ammo_cells < 7)) {
             self.current_weapon = W_BestWeapon();
             self.current_weaponslot = W_BestWeaponSlot();
-            W_SetCurrentAmmo(self);
             W_PrintWeaponMessage();
             return;
         }
