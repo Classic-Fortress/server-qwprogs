@@ -1081,7 +1081,7 @@ float () CheckAllPlayersReady = {
             StartTimer ();
 
             // set default password if no password set
-            if (infokey(world, "needpass") != "1") {
+            if (FALSE && infokey(world, "needpass") != "1") {
                 local string default_password = "pineapple"; // maybe this should be configurable
                 cvar_set("password", default_password);
                 localcmd("localinfo default_password on\n");
