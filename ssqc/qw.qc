@@ -568,7 +568,6 @@ float old_sniperrange;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
-float old_medikit;
 float old_biodamage;
 float flame_knockback;
 float build_water;

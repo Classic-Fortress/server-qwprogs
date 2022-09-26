@@ -731,7 +731,6 @@ void () TeamFortress_ShowTF = {
 
     sprint(self, PRINT_HIGH, "\n== Combat Medic ==\n");
     CF_PrintSetting("Medic aura ability", medicaura, "", 1);
-    CF_PrintSetting("Old medikit behaviour", old_medikit, "", 1);
     CF_PrintSetting("Old bioweapon damage", old_sniperrange, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Heavy Weapons Guy ==\n");

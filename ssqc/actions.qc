@@ -34,14 +34,8 @@ void () TeamFortress_Discard = {
             break;
         case PC_MEDIC:
             newmis.ammo_rockets = self.ammo_rockets;
-            if (!medicaura && old_medikit) {
-                newmis.ammo_cells = self.ammo_cells;
-            }
-            else
-            {
-		if(c > 0)
-			newmis.ammo_cells = c;
-	     }
+            if(c > 0)
+                newmis.ammo_cells = c;
             break;
         case PC_SNIPER:
             newmis.ammo_rockets = self.ammo_rockets;
@@ -135,9 +129,6 @@ void () TeamFortress_Discard_DropAmmo = {
             break;
         case PC_MEDIC:
             disc = self.ammo_rockets;
-            if (!medicaura && old_medikit) {
-                disc += self.ammo_cells;
-            }
             break;
         case PC_SNIPER:
         case PC_SPY:

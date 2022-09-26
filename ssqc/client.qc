@@ -483,9 +483,6 @@ void () DecodeLevelParms = {
         // allow medic aura [on]
         medicaura = CF_GetSetting("ma", "medicaura", "on");
 
-        // use old tf style medikit (don't insta-heal max+50) [off]
-        old_medikit = CF_GetSetting("om", "old_medikit", "off");
-
         // use old tf style bioweapon (less damage) [off]
         old_biodamage = CF_GetSetting("ob", "old_biodamage", "off");
 
@@ -867,7 +864,6 @@ void () DecodeLevelParms = {
             detpipe_limit_world = -1;
             old_pipecooldown = FALSE;
             medicaura = TRUE;
-            old_medikit = FALSE;
             old_biodamage = FALSE;
             cannon_lock = TRUE;
             cannon_air = TRUE;
@@ -947,7 +943,6 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             old_pipecooldown = TRUE;
             medicaura = FALSE;
-            old_medikit = TRUE;
             old_biodamage = TRUE;
             cannon_lock = FALSE;
             cannon_air = TRUE;
