@@ -340,7 +340,7 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_ExecClassScript(self);
-    W_ChangeWeapon(W_BestWeaponSlot());
+    W_ChangeWeapon(W_BestWeapon());
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
@@ -544,10 +544,11 @@ void () TeamFortress_Inventory = {
     if (self.tf_items & NIT_SCANNER)
         sprint(self, PRINT_HIGH, "Scanner\n");
 
-    if (self.weapons_carried & WEAP_MEDIKIT)
+    float current_weapons = FO_CurrentWeaponsMask();
+    if (current_weapons & WEAP_MEDIKIT)
         sprint(self, PRINT_HIGH, "Medikit\n");
 
-    if (self.weapons_carried & WEAP_DETPACK) {
+    if (current_weapons & WEAP_DETPACK) {
         if (self.ammo_detpack > 0) {
             st = ftos(self.ammo_detpack);
             sprint(self, PRINT_HIGH, st, " detpack");
@@ -1568,13 +1569,9 @@ void () TeamFortress_SetEquipment = {
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
     self.items = FO_ClassWeaponItemMask(self.playerclass) | kept_items;
 
-    self.weapons_carried = 0;
     if (!remember_weapon || self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
         self.current_weapon = 0;
         self.last_weapon = 0;
-        self.current_weaponslot = W_BestWeaponSlot();
-        self.last_weaponslot = 2;
-        W_WeaponState_Save(self);
     }
 
     self.tf_items = 0;
@@ -1624,8 +1621,6 @@ void () TeamFortress_SetEquipment = {
         self.lives = -1;
 
     if (self.playerclass == PC_SCOUT) {
-        self.weapons_carried = self.weapons_carried | PC_SCOUT_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_SCOUT_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SCOUT_MAXAMMO_NAIL;
@@ -1684,11 +1679,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 50;
         else
             self.maxarmor = PC_SCOUT_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)  
-            self.current_weapon = WEAP_NAILGUN;
     } else if (self.playerclass == PC_SNIPER) {
-        self.weapons_carried = self.weapons_carried | PC_SNIPER_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_SNIPER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SNIPER_MAXAMMO_NAIL;
@@ -1738,11 +1729,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 50;
         else
             self.maxarmor = PC_SNIPER_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_SNIPER_RIFLE;
     } else if (self.playerclass == PC_SOLDIER) {
-        self.weapons_carried = self.weapons_carried | PC_SOLDIER_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_SOLDIER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SOLDIER_MAXAMMO_NAIL;
@@ -1804,11 +1791,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 200;
         else
             self.maxarmor = PC_SOLDIER_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_ROCKET_LAUNCHER;
     } else if (self.playerclass == PC_DEMOMAN) {
-        self.weapons_carried = self.weapons_carried | PC_DEMOMAN_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_DEMOMAN_MAXAMMO_ROCKET;
             self.ammo_nails = PC_DEMOMAN_MAXAMMO_NAIL;
@@ -1861,11 +1844,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 120;
         else
             self.maxarmor = PC_DEMOMAN_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_GRENADE_LAUNCHER;
     } else if (self.playerclass == PC_MEDIC) {
-        self.weapons_carried = self.weapons_carried | PC_MEDIC_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_MEDIC_MAXAMMO_ROCKET;
             self.ammo_nails = PC_MEDIC_MAXAMMO_NAIL;
@@ -1920,8 +1899,6 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 100;
         else
             self.maxarmor = PC_MEDIC_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_SUPER_NAILGUN;
 
         self.ammo_medikit = PC_MEDIC_INITAMMO_MEDIKIT;
         self.maxammo_medikit = PC_MEDIC_MAXAMMO_MEDIKIT;
@@ -1944,8 +1921,6 @@ void () TeamFortress_SetEquipment = {
         te.owner = self;
         te.classname = "timer";
     } else if (self.playerclass == PC_HVYWEAP) {
-        self.weapons_carried = self.weapons_carried | PC_HVYWEAP_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_HVYWEAP_MAXAMMO_ROCKET;
             self.ammo_nails = PC_HVYWEAP_MAXAMMO_NAIL;
@@ -2001,11 +1976,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = max_armor_hwguy;
         }
 
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_SUPER_SHOTGUN;
     } else if (self.playerclass == PC_PYRO) {
-        self.weapons_carried = self.weapons_carried | PC_PYRO_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_PYRO_MAXAMMO_ROCKET;
             self.ammo_nails = PC_PYRO_MAXAMMO_NAIL;
@@ -2054,11 +2025,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 150;
         else
             self.maxarmor = PC_PYRO_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_FLAMETHROWER;
     } else if (self.playerclass == PC_CIVILIAN) {
-        self.weapons_carried = self.weapons_carried | PC_CIVILIAN_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_CIVILIAN_MAXAMMO_ROCKET;
             self.ammo_nails = PC_CIVILIAN_MAXAMMO_NAIL;
@@ -2108,11 +2075,7 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 0;
         else
             self.maxarmor = PC_CIVILIAN_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_AXE;
     } else if (self.playerclass == PC_SPY) {
-        self.weapons_carried = self.weapons_carried | PC_SPY_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_SPY_MAXAMMO_ROCKET;
             self.ammo_nails = PC_SPY_MAXAMMO_NAIL;
@@ -2164,8 +2127,6 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 100;
         else
             self.maxarmor = PC_SPY_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_TRANQ;
 
         if (invis_only == 1) {
             te = spawn();
@@ -2175,8 +2136,6 @@ void () TeamFortress_SetEquipment = {
             te.classname = "timer";
         }
     } else if (self.playerclass == PC_ENGINEER) {
-        self.weapons_carried = self.weapons_carried | PC_ENGINEER_WEAPONS;
-
         if (spawnfull) {
             self.ammo_rockets = PC_ENGINEER_MAXAMMO_ROCKET;
             self.ammo_nails = PC_ENGINEER_MAXAMMO_NAIL;
@@ -2227,8 +2186,6 @@ void () TeamFortress_SetEquipment = {
             self.maxarmor = 50;
         else
             self.maxarmor = PC_ENGINEER_MAXARMOR;
-        if (self.last_playerclass != self.playerclass)
-            self.current_weapon = WEAP_RAILGUN;
 
     } else if (self.playerclass == PC_UNDEFINED) {
         self.ammo_rockets = 0;
@@ -2248,7 +2205,6 @@ void () TeamFortress_SetEquipment = {
         self.armorvalue = 0;
         self.weapon = 0;
         self.current_weapon = 0;
-        self.weapons_carried = 0;
 
         self.flags = FL_CLIENT | FL_NOTARGET;
         self.waterlevel = 3;
@@ -2280,9 +2236,10 @@ void () TeamFortress_SetEquipment = {
         self.items = self.items | IT_ARMOR1;
 
     if (self.last_playerclass != self.playerclass)
-        self.current_weaponslot = W_BestWeaponSlot();  
-
-    W_UpdateCurrentWeapon(self);
+        W_ChangeToBestWeapon();
+    else
+        W_UpdateCurrentWeapon(self);
+    self.last_playerclass = self.playerclass;
 };
 
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo = {
@@ -2828,7 +2785,7 @@ void () TeamFortress_AssaultWeapon = {
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
-    if (!(self.weapons_carried & WEAP_ASSAULT_CANNON))
+    if (FO_CurrentWeaponsMask() & WEAP_ASSAULT_CANNON == 0)
         return;
 
     if (self.heat > 0) {
@@ -2846,7 +2803,7 @@ void () TeamFortress_AssaultWeapon = {
         self.antispam_assault_cannon = time + 3;
         return;
     }
-    self.current_weapon = WEAP_ASSAULT_CANNON;
+    W_ChangeWeapon(WEAP_ASSAULT_CANNON);
 };
 
 void () TeamFortress_ExplodePerson = {

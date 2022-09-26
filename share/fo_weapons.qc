@@ -12,6 +12,7 @@
 .float reload_assault_cannon;
 .float reload_sniper_rifle;
 .float waterlevel;
+.float playerclass;
 
 .float ammo_shells;
 .float ammo_nails;
@@ -90,6 +91,9 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_RAILGUN,          AMMO_NAILS,   0, 1,  0.4,  0 },
 };
 
+inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
+    return &weapon_info[WEAP_to_index(weapon)];
+}
 struct FO_ClassWeapons {
     float id;
     float slots[4];
@@ -110,10 +114,6 @@ FO_ClassWeapons class_weapons[] = {
     { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SPANNER } },
     { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
-
-inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
-    return &weapon_info[WEAP_to_index(weapon)];
-}
 
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
@@ -220,11 +220,37 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_RAILGUN,          IT_SHOTGUN},
 };
 
+FO_WeapInfo* FO_ClassWeaponSlot(float class, float slot) {
+    FO_ClassWeapons* cw = &class_weapons[class];
+    return cw->info[slot - 1] ? cw->info[slot - 1] : __NULL__;
+}
+
+float FO_ClassWeapMask(float class) {
+    float result = 0;
+    for (int i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
+        if (wi)
+            result |= (wi->items)->it_weapon;
+    }
+    return result;
+}
+
 float FO_ClassWeaponItemMask(float class) {
     float mask = 0;
-    for (float i = 0; i < 4; i++) {
-        FO_WeapInfo* wi = class_weapons[class].info[i];
-        mask |= wi ? (wi->items)->it_weapon : 0;
+    for (float i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
+        if (wi)
+            mask |= (wi->items)->it_weapon;
+    }
+    return mask;
+}
+
+float FO_CurrentWeaponsMask() {
+    float mask = 0;
+    for (float i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(self.playerclass, i);
+        if (wi)
+            mask |= wi->weapon;
     }
     return mask;
 }
@@ -254,7 +280,6 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
 
 void () RestoreDefaultWeapon;
 void (entity pl) Status_Refresh;
-void (entity pl, float swap) W_WeaponState_Load;
 void (float att_delay) Attack_Finished;
 
 static void FOT_ReloadTimer() {
@@ -267,7 +292,6 @@ static void FOT_ReloadTimer() {
         self.owner.weaponmodel = ((ws->wi)->models)->model;
         sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
         dremove(self);
-        W_WeaponState_Load(self.owner, 0);
     } else {
         // Refresh clip
         if (ws->weapon != WEAP_SNIPER_RIFLE)
