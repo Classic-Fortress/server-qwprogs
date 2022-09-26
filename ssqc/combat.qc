@@ -672,7 +672,7 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
     if (targ.health <= 0) {
 
         if ((inflictor.classname == "detpack")
-            && (inflictor.weaponmode == 1) && (inflictor.enemy == targ))
+            && (inflictor.is_disarming) && (inflictor.enemy == targ))
             deathmsg = DMSG_DETPACK_DIS;
         LogEventKill(attacker, targ, inflictor);
         Killed(targ, attacker);

@@ -130,8 +130,7 @@ float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
 .float maxfbspeed;              // Maximum forward/back speed
 .float maxstrafespeed;          // Maximum side speed
 
-.float weaponmode;              // Used for multiple mode weapons
-.float last_weaponmode;         // Last weapon's weapon mode
+.float is_disarming;
 .float motd;                    // Used to display MOTD
 .float current_menu;
 .float current_menu_type;
@@ -216,15 +215,12 @@ float coop;
 .float queue_weaponslot;        // the weaponslot to switch to when possible
 .float queue_weaponstate;       // the weaponstate to load when possible
 .float next_weapon;             // used by weapon slots to communicate which weapon to select
-.float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
 
 // weapon states
 .float weaponstate_current_weaponslot;
 .float weaponstate_last_weaponslot;
 .float weaponstate_current_weapon;
 .float weaponstate_last_weapon;
-.float weaponstate_weaponmode;
-.float weaponstate_last_weaponmode;
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;

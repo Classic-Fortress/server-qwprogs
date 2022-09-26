@@ -312,7 +312,7 @@ void () TeamFortress_DetpackSet = {
     newmis.angles_y = self.owner.angles_y;
     newmis.velocity = '0 0 0';
     newmis.avelocity = '0 0 0';
-    newmis.weaponmode = 0;
+    newmis.is_disarming = FALSE;
     newmis.touch = TeamFortress_DetpackTouch;
 
     FO_SetModel(newmis, "progs/detpack.mdl");
@@ -410,7 +410,7 @@ void () TeamFortress_DetpackExplode = {
     } else
         sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out\n");
 
-    if (self.weaponmode == 1) {
+    if (self.is_disarming) {
         TeamFortress_SetSpeed(self.enemy);
         dremove(self.oldenemy);
         dremove(self.observer_list);
@@ -430,7 +430,7 @@ void () TeamFortress_DetpackTouch = {
         return;
     if (other.deadflag)
         return;
-    if (self.weaponmode == 1)
+    if (self.is_disarming)
         return;
 
     if ((other.team_no == self.owner.team_no) && (self.owner.team_no != 0))
@@ -462,7 +462,7 @@ void () TeamFortress_DetpackTouch = {
     disarm.nextthink = time + 3;
     disarm.think = TeamFortress_DetpackDisarm;
 
-    self.weaponmode = 1;
+    self.is_disarming = TRUE;
     self.enemy = other;
     self.observer_list = disarm;
 };

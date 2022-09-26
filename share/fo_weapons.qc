@@ -79,6 +79,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_NAILGUN,          AMMO_NAILS,   0, 1,  0.2,  0 },
     { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 4,  0.2,  0 },
     { WEAP_GRENADE_LAUNCHER, AMMO_ROCKETS, 6, 1,  0.6,  4 },
+    { WEAP_PIPE_LAUNCHER,    AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
     { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
@@ -101,7 +102,7 @@ FO_ClassWeapons class_weapons[] = {
     { PC_SCOUT, { WEAP_NAILGUN, WEAP_SHOTGUN, 0, WEAP_AXE } },
     { PC_SNIPER, { WEAP_SNIPER_RIFLE, WEAP_SNIPER_RIFLE, WEAP_NAILGUN, WEAP_AXE } },
     { PC_SOLDIER, { WEAP_ROCKET_LAUNCHER, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
-    { PC_DEMOMAN, { WEAP_GRENADE_LAUNCHER, WEAP_GRENADE_LAUNCHER, WEAP_SHOTGUN, WEAP_AXE } },
+    { PC_DEMOMAN, { WEAP_GRENADE_LAUNCHER, WEAP_PIPE_LAUNCHER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_MEDIC, { WEAP_SUPER_NAILGUN, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_MEDIKIT } },
     { PC_HVYWEAP, { WEAP_ASSAULT_CANNON, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_PYRO, { WEAP_INCENDIARY, WEAP_FLAMETHROWER, WEAP_SHOTGUN, WEAP_AXE } },
@@ -117,45 +118,46 @@ inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
-    "None", "Hook", "Knife", "BioAxe", "Spanner", "Axe", "Sniper Rifle",
-    "Sniper Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
-    "Grenade Launcher", "Flamethrower", "Rocket Launcher",
+    "None", "Hook", "Knife", "Medikit", "Spanner", "Axe", "Sniper Rifle",
+    "Auto Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
+    "Grenade Launcher", "Pipebomb Launcher", "Flamethrower", "Rocket Launcher",
     "Incendiary Launcher", "Assault Cannon", "Lightning Gun", "Detpack",
     "Tranquilizer", "Railgun"
 };
 
-inline string FO_GetWeapName(float weapon) {
+string FO_GetWeapName(float weapon) {
     return weapon_names[WEAP_to_index(weapon)];
 }
 
 struct FO_WeapModels {
     int weapon;
-    string mode[2];
+    string model;
 };
 
-// Indexed by WEAP_to_index() and player.weaponmode
+// Indexed by WEAP_to_index()
 static FO_WeapModels weapon_models[] = {
-  { WEAP_NONE,             {""}},
-  { WEAP_HOOK,             {"progs/v_grap.mdl" }},
-  { WEAP_KNIFE,            {"progs/v_knife.mdl", "progs/v_knife2.mdl" }},
-  { WEAP_MEDIKIT,          {"progs/v_medi.mdl"}},
-  { WEAP_SPANNER,          {"progs/v_span.mdl"}},
-  { WEAP_AXE,              {"progs/v_axe.mdl"}},
-  { WEAP_SNIPER_RIFLE,     {"progs/v_srifle.mdl"}},
-  { WEAP_AUTO_RIFLE,       {"progs/v_srifle.mdl"}},
-  { WEAP_SHOTGUN,          {"progs/v_shot.mdl"}},
-  { WEAP_SUPER_SHOTGUN,    {"progs/v_shot2.mdl"}},
-  { WEAP_NAILGUN,          {"progs/v_nail.mdl"}},
-  { WEAP_SUPER_NAILGUN,    {"progs/v_nail2.mdl"}},
-  { WEAP_GRENADE_LAUNCHER, {"progs/v_rock.mdl", "progs/v_pipe.mdl"}},
-  { WEAP_FLAMETHROWER,     {"progs/v_flame.mdl"}},
-  { WEAP_ROCKET_LAUNCHER,  {"progs/v_rock2.mdl"}},
-  { WEAP_INCENDIARY,       {"progs/v_irock.mdl"}},
-  { WEAP_ASSAULT_CANNON,   {"progs/v_asscan.mdl"}},
-  { WEAP_LIGHTNING,        {""}},
-  { WEAP_DETPACK,          {""}},
-  { WEAP_TRANQ,            {"progs/v_tranq.mdl"}},
-  { WEAP_RAILGUN,          {"progs/v_rail.mdl"}},
+  { WEAP_NONE,             ""},
+  { WEAP_HOOK,             "progs/v_grap.mdl" },
+  { WEAP_KNIFE,            "progs/v_knife.mdl" },
+  { WEAP_MEDIKIT,          "progs/v_medi.mdl" },
+  { WEAP_SPANNER,          "progs/v_span.mdl" },
+  { WEAP_AXE,              "progs/v_axe.mdl" },
+  { WEAP_SNIPER_RIFLE,     "progs/v_srifle.mdl" },
+  { WEAP_AUTO_RIFLE,       "progs/v_srifle.mdl" },
+  { WEAP_SHOTGUN,          "progs/v_shot.mdl" },
+  { WEAP_SUPER_SHOTGUN,    "progs/v_shot2.mdl" },
+  { WEAP_NAILGUN,          "progs/v_nail.mdl" },
+  { WEAP_SUPER_NAILGUN,    "progs/v_nail2.mdl" },
+  { WEAP_GRENADE_LAUNCHER, "progs/v_rock.mdl" },
+  { WEAP_PIPE_LAUNCHER,    "progs/v_pipe.mdl" },
+  { WEAP_FLAMETHROWER,     "progs/v_flame.mdl" },
+  { WEAP_ROCKET_LAUNCHER,  "progs/v_rock2.mdl" },
+  { WEAP_INCENDIARY,       "progs/v_irock.mdl" },
+  { WEAP_ASSAULT_CANNON,   "progs/v_asscan.mdl" },
+  { WEAP_LIGHTNING,        "" },
+  { WEAP_DETPACK,          "" },
+  { WEAP_TRANQ,            "progs/v_tranq.mdl" },
+  { WEAP_RAILGUN,          "progs/v_rail.mdl" },
 };
 
 // REQUIRES: Order must match above.
@@ -207,6 +209,7 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_NAILGUN,          IT_NAILGUN},
     { WEAP_SUPER_NAILGUN,    IT_SUPER_NAILGUN},
     { WEAP_GRENADE_LAUNCHER, IT_GRENADE_LAUNCHER},
+    { WEAP_PIPE_LAUNCHER,    IT_GRENADE_LAUNCHER},
     { WEAP_FLAMETHROWER,     IT_GRENADE_LAUNCHER},
     { WEAP_ROCKET_LAUNCHER,  IT_ROCKET_LAUNCHER},
     { WEAP_INCENDIARY,       IT_ROCKET_LAUNCHER},
@@ -261,7 +264,7 @@ static void FOT_ReloadTimer() {
     if (time >= self.heat) {
         // Reload finished
         self.owner.tfstate &= ~TFSTATE_RELOADING;
-        self.owner.weaponmodel = ((ws->wi)->models)->mode[self.owner.weaponmode];
+        self.owner.weaponmodel = ((ws->wi)->models)->model;
         sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
         dremove(self);
         W_WeaponState_Load(self.owner, 0);
@@ -408,7 +411,14 @@ void FO_Weapons_Init() {
          if (WEAP_to_index(wi->weapon) != i)
              error(sprintf("WI mismatch at index %d\n", i));
 
-         if (wi->clip_size > 0) {
+         if (wi->weapon == WEAP_PIPE_LAUNCHER) {
+             FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
+             wi->ammo_type = parent->ammo_type;
+             wi->clip_size = parent->clip_size;
+             wi->storage_index = parent->storage_index;
+             wi->full_reload_time = parent->full_reload_time;
+             wi->needs_reload = parent->needs_reload;
+         } else if (wi->clip_size > 0) {
              wi->needs_reload = TRUE;
              // We always allocate a storage index for something that can have
              // reload to save negotiating between client and server around
@@ -423,9 +433,7 @@ void FO_Weapons_Init() {
          if (WEAP_to_index(wm->weapon) != i)
              error(sprintf("WM mismatch at index %d\n", i));
 
-         for (j = 0; j < 2; j++)
-             if (wm->mode[j] != "")
-                 precache_model(wm->mode[j]);
+         precache_model(wm->model);
          wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];

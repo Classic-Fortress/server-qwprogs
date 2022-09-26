@@ -12,11 +12,11 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+debug.qc
+../share/fo_weapons.qc
 events.qc
 roles.qc
 q3defs.qc
-debug.qc
-../share/fo_weapons.qc
 status.qc
 functions.qc
 menu.qc
