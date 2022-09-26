@@ -261,9 +261,6 @@ void () EMPGrenadeExplode = {
                                 break;
                             case PC_MEDIC:
                                 expsize = expsize - te.maxammo_rockets * .75 * 2;
-                                if (!medicaura && old_medikit) {
-                                    expsize = expsize - te.maxammo_cells * .75;
-                                }
                                 break;
                             case PC_SNIPER:
                             case PC_SPY:
