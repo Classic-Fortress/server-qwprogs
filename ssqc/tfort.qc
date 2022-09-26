@@ -2326,7 +2326,6 @@ void () TeamFortress_SetEquipment = {
     else if (self.armortype >= 0.3)
         self.items = self.items | IT_ARMOR1;
 
-    W_SetCurrentAmmo(self);
     if (self.last_playerclass != self.playerclass)
         self.current_weaponslot = W_BestWeaponSlot();  
 };
@@ -2716,7 +2715,6 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         }
         self.ammo_cells = self.ammo_cells - ammo;
     }
-    W_SetCurrentAmmo(self);
     newmis = spawn();
     newmis.aflag = ammo;
     newmis.weapon = type;
@@ -2780,7 +2778,6 @@ void () TeamFortress_AmmoboxTouch = {
             FO_Sound(other, CHAN_AUTO, "weapons/lock4.wav", 1, 1);
             stuffcmd(other, "bf\n");
             self = other;
-            W_SetCurrentAmmo(self);
             return;
         } else if ((other.playerclass == PC_SCOUT)
                     || (other.playerclass == PC_ENGINEER)) {
@@ -2869,7 +2866,6 @@ void () TeamFortress_AmmoboxTouch = {
     FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, 1);
     stuffcmd(other, "bf\n");
     self = other;
-    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_AssaultWeapon = {
@@ -2896,7 +2892,6 @@ void () TeamFortress_AssaultWeapon = {
         return;
     }
     self.current_weapon = WEAP_ASSAULT_CANNON;
-    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_ExplodePerson = {
