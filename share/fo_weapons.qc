@@ -44,6 +44,8 @@ enum AmmoType {
     AMMO_NUM_TYPES = AMMO_ROCKETS + 1,
 };
 
+struct FO_WeapModels;
+
 struct FO_WeapInfo {
     int weapon;  // Verification
     AmmoType ammo_type;
@@ -56,6 +58,7 @@ struct FO_WeapInfo {
     // in table.
     float needs_reload;
     int storage_index;  // Allocated by init
+    FO_WeapModels* models;
 };
 
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
@@ -120,6 +123,34 @@ inline string FO_GetWeapName(float weapon) {
     return weapon_names[WEAP_to_index(weapon)];
 }
 
+struct FO_WeapModels {
+    string mode[2];
+};
+
+// Indexed by WEAP_to_index() and player.weaponmode
+static FO_WeapModels weapon_models[] = {
+/* WEAP_HOOK,             */ {{"progs/v_grap.mdl" }},
+/* WEAP_KNIFE,            */ {{"progs/v_knife.mdl", "progs/v_knife2.mdl" }},
+/* WEAP_MEDIKIT,          */ {{"progs/v_medi.mdl"}},
+/* WEAP_SPANNER,          */ {{"progs/v_span.mdl"}},
+/* WEAP_AXE,              */ {{"progs/v_axe.mdl"}},
+/* WEAP_SNIPER_RIFLE,     */ {{"progs/v_srifle.mdl"}},
+/* WEAP_AUTO_RIFLE,       */ {{"progs/v_srifle.mdl"}},
+/* WEAP_SHOTGUN,          */ {{"progs/v_shot.mdl"}},
+/* WEAP_SUPER_SHOTGUN,    */ {{"progs/v_shot2.mdl"}},
+/* WEAP_NAILGUN,          */ {{"progs/v_nail.mdl"}},
+/* WEAP_SUPER_NAILGUN,    */ {{"progs/v_nail2.mdl"}},
+/* WEAP_GRENADE_LAUNCHER, */ {{"progs/v_rock.mdl", "progs/v_pipe.mdl"}},
+/* WEAP_FLAMETHROWER,     */ {{"progs/v_flame.mdl"}},
+/* WEAP_ROCKET_LAUNCHER,  */ {{"progs/v_rock2.mdl"}},
+/* WEAP_INCENDIARY,       */ {{"progs/v_irock.mdl"}},
+/* WEAP_ASSAULT_CANNON,   */ {{"progs/v_asscan.mdl"}},
+/* WEAP_LIGHTNING,        */ {{}},
+/* WEAP_DETPACK,          */ {{}},
+/* WEAP_TRANQ,            */ {{"progs/v_tranq.mdl"}},
+/* WEAP_RAILGUN,          */ {{"progs/v_rail.mdl"}},
+};
+
 // REQUIRES: Order must match above.
 static string AMMO_to_s[] = {"shells", "cells", "nails" "rockets", "grenades"};
 
@@ -152,7 +183,6 @@ struct FO_WeapState {
 
     // Constant and relative to weapon.  TODO, migrate similar to WeapInfo.
     FO_WeapInfo* wi;
-    string model[2];  // indexed by weaponmode
 
     /* These are relative to the player passed. */
     float* ammo_remaining;
@@ -168,75 +198,6 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
     if (wi->needs_reload)
         ws->clip_fired = &player.clip_fired[wi->storage_index];
     ws->ammo_remaining = AMMO_to_p(player, (ws->wi)->ammo_type);
-
-    switch (weapon) {
-        /* NONE */
-        case WEAP_HOOK:
-            ws->model[0] = "progs/v_grap.mdl";
-            break;
-        case WEAP_KNIFE:
-            ws->model[0] = "progs/v_knife.mdl";
-            ws->model[1] = "progs/v_knife2.mdl";
-            break;
-        case WEAP_MEDIKIT:
-            ws->model[0] = "progs/v_medi.mdl";
-            break;
-        case WEAP_SPANNER:
-            ws->model[0] = "progs/v_spanner.mdl";
-            break;
-        case WEAP_AXE:
-            ws->model[0] = "progs/v_axe.mdl";
-            break;
-        /* SHELLS */
-        case WEAP_SHOTGUN:
-            ws->model[0] = "progs/v_shot.mdl";
-            break;
-        case WEAP_SUPER_SHOTGUN:
-            ws->model[0] = "progs/v_shot2.mdl";
-            break;
-        case WEAP_SNIPER_RIFLE:
-            ws->model[0] = "progs/v_srifle.mdl";
-            break;
-        case WEAP_AUTO_RIFLE:
-            ws->model[0] = "progs/v_srifle.mdl";
-            break;
-        case WEAP_TRANQ:
-            ws->model[0] = "progs/v_tranq.mdl";
-            break;
-        case WEAP_ASSAULT_CANNON:
-            ws->model[0] = "progs/v_asscan.mdl";
-            break;
-        /* NAILS */
-        case WEAP_NAILGUN:
-            ws->model[0] = "progs/v_nail.mdl";
-            break;
-        case WEAP_SUPER_NAILGUN:
-            ws->model[0] = "progs/v_nail2.mdl";
-            break;
-        case WEAP_RAILGUN:
-            ws->model[0] = "progs/v_rail.mdl";
-            break;
-        /* ROCKETS */
-        case WEAP_GRENADE_LAUNCHER:
-            ws->model[0] = "progs/v_rock.mdl";
-            ws->model[1] = "progs/v_pipe.mdl";
-            break;
-        case WEAP_ROCKET_LAUNCHER:
-            ws->model[0] = "progs/v_rock2.mdl";
-            break;
-        case WEAP_INCENDIARY:
-            ws->model[0] = "progs/v_irock.mdl";
-            break;
-        /* CELLS */
-        case WEAP_FLAMETHROWER:
-            ws->model[0] = "progs/v_flame.mdl";
-            break;
-        /* NOT USED */
-        case WEAP_LIGHTNING:
-        case WEAP_DETPACK:
-        default:
-            error(sprintf("ID=%d should never be invoked\n", weapon));
-    }
 }
 
 void () RestoreDefaultWeapon;
@@ -251,7 +212,7 @@ static void FOT_ReloadTimer() {
     if (time >= self.heat) {
         // Reload finished
         self.owner.tfstate &= ~TFSTATE_RELOADING;
-        self.owner.weaponmodel = ws->model[self.owner.weaponmode];
+        self.owner.weaponmodel = ((ws->wi)->models)->mode[self.owner.weaponmode];
         sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
         dremove(self);
         W_WeaponState_Load(self.owner, 0);
@@ -410,6 +371,12 @@ void FO_Weapons_Init() {
              wi->needs_reload = FALSE;
              wi->storage_index = -1;  // Make sure we'll OOB.
          }
+
+         FO_WeapModels* wm = &weapon_models[i];
+         for (j = 0; j < 2; j++)
+             if (wm->mode[j] != "")
+                 precache_model(wm->mode[j]);
+         wi->models = wm;
     }
     if (clips_allocated > CLIP_STORAGE_SIZE)
         error("Insufficient clip storage");
