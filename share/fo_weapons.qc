@@ -32,7 +32,7 @@ static float WEAP_to_index(float weapon) {
             index += 6;
         }
     }
-    return index - 1;  // Want zero-offset.
+    return index;
 }
 
 enum AmmoType {
@@ -64,6 +64,7 @@ struct FO_WeapInfo {
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
 // -ve values are placeholders signifying conditional init based on game modes.
 FO_WeapInfo weapon_info[] = {
+    { WEAP_NONE,             AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_HOOK,             AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_KNIFE,            AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_MEDIKIT,          AMMO_NONE,    0, 0,  0.5,  0 },
@@ -81,7 +82,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
     { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0,    4 },
     { WEAP_LIGHTNING,        AMMO_CELLS,   0, 1,  0.1,  0 },
-    { WEAP_DETPACK,          AMMO_NONE,    0, 0, -1,    0 },
+    { WEAP_DETPACK,          AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,            AMMO_SHELLS,  0, 1,  1.5,  0 },
     { WEAP_RAILGUN,          AMMO_NAILS,   0, 1,  0.4,  0 },
 };
@@ -113,10 +114,11 @@ inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
-    "Hook", "Knife", "BioAxe", "Spanner", "Axe", "Sniper Rifle", "Sniper Rifle",
-    "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun", "Grenade Launcher",
-    "Flamethrower", "Rocket Launcher", "Incendiary Launcher", "Assault Cannon",
-    "Lightning Gun", "Detpack", "Tranquilizer", "Railgun"
+    "None", "Hook", "Knife", "BioAxe", "Spanner", "Axe", "Sniper Rifle",
+    "Sniper Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
+    "Grenade Launcher", "Flamethrower", "Rocket Launcher",
+    "Incendiary Launcher", "Assault Cannon", "Lightning Gun", "Detpack",
+    "Tranquilizer", "Railgun"
 };
 
 inline string FO_GetWeapName(float weapon) {
@@ -156,13 +158,14 @@ static string AMMO_to_s[] = {"shells", "cells", "nails" "rockets", "grenades"};
 
 static float* AMMO_to_p(entity player, AmmoType ammo_type) {
     switch (ammo_type) {
-        case AMMO_NONE: return __NULL__;
         case AMMO_SHELLS: return &player.ammo_shells;
         case AMMO_CELLS: return &player.ammo_cells;
         case AMMO_NAILS: return &player.ammo_nails;
         case AMMO_ROCKETS:  return &player.ammo_rockets;
+        default:
+        case AMMO_NONE:
+                        return __NULL__;
     }
-    error(sprintf("UNK AMMO_TYPE=%d\n", ammo_type));
     return __NULL__;
 }
 
@@ -361,8 +364,7 @@ void FO_Weapons_Init() {
 
 
          if (wi->clip_size > 0) {
-             if (wi->clip_size > 0)
-                 wi->needs_reload = TRUE;
+             wi->needs_reload = TRUE;
              // We always allocate a storage index for something that can have
              // reload to save negotiating between client and server around
              // localinfo tunables.
