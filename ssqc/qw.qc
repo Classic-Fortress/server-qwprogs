@@ -11,6 +11,7 @@ enum {
 struct antilag_settings_t {
     float max_client_time_offset;
     float max_projectile_slow_offset;
+    float rewind_detpipe;
 } antilag_settings;
 
 // A monotonically increasing, latency corrected notion of client-time.
@@ -804,9 +805,10 @@ string goal_class_names[7] = {
 
 // people complain about settings, let's track them
 
-string settings_to_track_list[3] = {
+string settings_to_track_list[4] = {
     "sv_antilag",
     "project_weapons",
+    "al_rewind_detpipe",
     "al_max_client_time_offset",
 };
 
