@@ -704,6 +704,7 @@
 /* New Weapon Defines					*/
 /*======================================================*/
 
+#define WEAP_NONE 0
 enumflags {
     WEAP_HOOK,
     WEAP_KNIFE,
