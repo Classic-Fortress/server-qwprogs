@@ -752,8 +752,7 @@ string GetSBClipString(entity pl, float csqcactive)
     string msg = "";
     if (pl.tfstate & TFSTATE_RELOADING) 
     {
-        FO_WeapInfo wi;
-        FO_FillWeapInfo(pl, pl.current_weapon, &wi);
+        FO_WeapInfo* wi = FO_GetWeapInfo(pl.current_weapon);
 
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
             msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
@@ -1333,15 +1332,16 @@ string(float num) GreenScoreToString =
 
 string(entity pl, float csqcactive) ClipSizeToString =
 {
-    FO_WeapInfo wi;
-    FO_FillWeapInfo(pl, pl.current_weapon, &wi);
+    FO_WeapState ws;
+    FO_FillWeapState(pl, pl.current_weapon, &ws);
+    FO_WeapInfo* wi = ws->wi;
 
     if (!wi->needs_reload)
         return "";
 
-    if (wi->clip_size - *wi->clip_fired  > *wi->ammo_remaining)
-        *wi->clip_fired = wi->clip_size - *wi->ammo_remaining;
-    float rem = min(wi->clip_size - *wi->clip_fired, 999);
+    if (wi->clip_size - *ws->clip_fired  > *ws->ammo_remaining)
+        *ws->clip_fired = wi->clip_size - *ws->ammo_remaining;
+    float rem = min(wi->clip_size - *ws->clip_fired, 999);
 
     string st = "";
     if (csqcactive)

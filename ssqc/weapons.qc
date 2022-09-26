@@ -1864,8 +1864,9 @@ void () player_medikit1;
 void () player_medikitb1;
 
 void () W_Attack = {
-    FO_WeapInfo wi;
-    FO_FillWeapInfo(self, self.current_weapon, &wi);
+    FO_WeapState ws;
+    FO_FillWeapState(self, self.current_weapon, &ws);
+    FO_WeapInfo* wi = ws->wi;
     float r;
 
     if (self.has_disconnected == TRUE)
@@ -1879,7 +1880,7 @@ void () W_Attack = {
 
     // Out of ammo?
     if (wi->ammo_type != AMMO_NONE &&
-        *wi->ammo_remaining < wi->ammo_per_shot) {
+        *ws->ammo_remaining < wi->ammo_per_shot) {
         W_ChangeToBestWeapon();
         return;
     }
