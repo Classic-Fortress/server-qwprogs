@@ -620,6 +620,9 @@ void () DecodeLevelParms = {
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
         // client_time max delta
+        antilag_settings.rewind_detpipe =
+            CF_GetSetting("alrd", "al_rewind_detpipe", "on");
+        // client_time max delta
         antilag_settings.max_client_time_offset =
             CF_GetSetting("almcto", "al_max_client_time_offset", "200");
 
