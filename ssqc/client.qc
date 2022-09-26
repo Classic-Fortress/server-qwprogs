@@ -620,6 +620,9 @@ void () DecodeLevelParms = {
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
         // client_time max delta
+        antilag_settings.rewind_detpipe =
+            CF_GetSetting("alrd", "al_rewind_detpipe", "on");
+        // client_time max delta
         antilag_settings.max_client_time_offset =
             CF_GetSetting("almcto", "al_max_client_time_offset", "200");
 
@@ -1073,8 +1076,9 @@ void () DecodeLevelParms = {
     }
     if (parm15)
         self.is_admin = parm15;
-    
-        
+
+    // Must be after we've set up conditional options (e.g. hwguy reload).
+    FO_Weapons_Init();
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
@@ -2094,13 +2098,7 @@ void () PutClientInServer = {
     self.display_tip = 0;
     self.tip_type = 0;
 
-    self.reload_shotgun = 0;
-    self.reload_super_shotgun = 0;
-    self.reload_grenade_launcher = 0;
-    self.reload_rocket_launcher = 0;
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
-    self.reload_sniper_rifle = 0;
-    self.reload_assault_cannon = 0;
+    FO_InstantReloadAllWeapons(self);
 
     self.immune_to_check = time + 10;
     self.fire_held_down = 0;

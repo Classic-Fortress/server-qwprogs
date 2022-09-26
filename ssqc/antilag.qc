@@ -325,25 +325,19 @@ class FOPlayer {
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
-    // Live changeagble for now.
-    float project_detpipe = CF_GetSetting("pd", "project_detpipe", "on");
-    // Want to lower this in time, but good for testing.
-    float project_detpipe_max_lat =
-        CF_GetSetting("pdml", "project_max_latency", "500") / 1000;
-
-    if (!project_detpipe)
+    if (antilag_settings.rewind_detpipe)
         return FALSE;
 
-    project_detpipe_max_lat = min(project_detpipe_max_lat,
-                                  ((AL_MAX_REWINDS - 1)* AL_FRAME_LIMIT) * 2);
+    float rewind_max_offset = ((AL_MAX_REWINDS - 1)* AL_FRAME_LIMIT);
+    farthest_rewind_point = max(farthest_rewind_point,
+                                time - rewind_max_offset);
 
-    local float rtt = infokeyf(self, INFOKEY_P_PING) / 1000;
-    rtt = min(rtt, project_detpipe_max_lat);
+    // Det was pushed at client_time(), let's see if we can get there.
+    float rewind_to = max(farthest_rewind_point, client_time());
 
-    if (rtt < 0.013)
+    // Ignore for LAN pings.
+    if (time - rewind_to < 0.013)
         return FALSE;
-
-    float rewind_to = max(farthest_rewind_point, time - rtt / 2);
 
     FOPlayer fop = (FOPlayer)self;
     fop.RewindExcept(rewind_to);
