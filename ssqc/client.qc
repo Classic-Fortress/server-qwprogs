@@ -100,11 +100,8 @@ void () SetChangeParms = {
         SetNewParms();
         return;
     }
-    self.items =
-        self.items -
-        (self.
-         items & (IT_KEY1 | IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY
-                  | IT_SUIT | IT_QUAD));
+    self.items &= ~(IT_KEY1 | IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY |
+                    IT_SUIT | IT_QUAD);
     if (self.health > 100)
         self.health = 100;
     if (self.health < 50)
@@ -2827,7 +2824,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_finished < time) {
-                    self.items = self.items - IT_INVISIBILITY;
+                    self.items &= ~IT_INVISIBILITY;
                     self.invisible_finished = 0;
                     self.invisible_time = 0;
                 }
@@ -2858,7 +2855,7 @@ void () CheckPowerups = {
             }
         }
         if (self.invincible_finished < time) {
-            self.items = self.items - 1048576;
+            self.items &= ~IT_INVULNERABILITY;
             self.invincible_time = 0;
             self.invincible_finished = 0;
         }
@@ -2901,7 +2898,7 @@ void () CheckPowerups = {
             }
         }
         if (self.super_damage_finished < time) {
-            self.items = self.items - IT_QUAD;
+            self.items &= ~IT_QUAD;
             self.super_damage_finished = 0;
             self.super_time = 0;
         }
@@ -2945,7 +2942,7 @@ void () CheckPowerups = {
             }
         }
         if (self.radsuit_finished < time) {
-            self.items = self.items - 2097152;
+            self.items &= ~IT_SUIT;
             self.rad_time = 0;
             self.radsuit_finished = 0;
         }
