@@ -1566,131 +1566,18 @@ void (entity pl) W_UpdateCurrentWeapon = {
     if ((pl.health <= 0) || (pl.current_weapon == 0))
         return;
 
-    if (!(self.tfstate & TFSTATE_AIMING) && !(self.tfstate & TFSTATE_CANT_MOVE))
-        /* player_run(); */
+    FO_WeapInfo* wi = FO_GetWeapInfo(pl.current_weapon);
+    pl.items &= ~(IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS);
+    // TODO: Shouldn't this always be union?  Carrying prior behavior for now.
+    pl.items |= (wi->items)->ammo_mask;
+    pl.weapon = (wi->items)->it_weapon;
 
-    pl.items = pl.items - (pl.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
-    pl.weapon = 0;
-
-    if (pl.current_weapon == WEAP_AXE) {
-        pl.weaponmodel = "progs/v_axe.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_KNIFE) {
-        if (pl.weaponmode == 0)
-            pl.weaponmodel = "progs/v_knife.mdl";
-        else
-            pl.weaponmodel = "progs/v_knife2.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_SPANNER) {
-        pl.weaponmodel = "progs/v_span.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_SHOTGUN) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_shot.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_shot2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SUPER_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_NAILGUN) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_nail.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_NAILGUN;
-    } else if (pl.current_weapon == WEAP_SUPER_NAILGUN) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_nail2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_SUPER_NAILGUN;
-    } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            if (pl.weaponmode == 0)
-                pl.weaponmodel = "progs/v_rock.mdl";
-            else
-                pl.weaponmodel = "progs/v_pipe.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.weapon = IT_GRENADE_LAUNCHER;
-        pl.items = pl.items | IT_ROCKETS;
-    } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rock2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_ROCKETS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_srifle.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_AUTO_RIFLE) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_srifle.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SUPER_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_asscan.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_FLAMETHROWER) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_flame.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_CELLS;
-        pl.weapon = IT_GRENADE_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_INCENDIARY) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_irock.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_ROCKETS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_MEDIKIT) {
-        pl.items = pl.items | IT_CELLS;
-        pl.weaponmodel = "progs/v_medi.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_TRANQ) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_tranq.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_RAILGUN) {
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rail.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_SHOTGUN;
+    if (pl.tfstate & TFSTATE_RELOADING == 0 || pl.is_feigning) {
+        pl.weaponmodel = (wi->models)->mode[pl.weaponmode];
     } else {
         pl.weaponmodel = "";
-        pl.weaponframe = 0;
     }
-
-    if (pl.is_feigning) {
-        pl.weaponmodel = "";
-        pl.weaponframe = 0;
-    }
+    pl.weaponframe = 0;
 
     // refresh engineer build menu when ammo updated
     if (pl.menu_input == Menu_Engineer_Input)

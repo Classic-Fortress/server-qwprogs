@@ -1228,7 +1228,6 @@ void () AnarchyMode = {
     vote_anarchy_mode = TRUE;
     local entity e = find(world, classname, "player");
     while(e) {
-        e.items_allowed = IT_AXE | IT_QUAD;
         e.items = IT_AXE;
         e.weapons_carried = IT_AXE;
         e.current_weapon = WEAP_AXE;

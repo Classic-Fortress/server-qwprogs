@@ -1225,7 +1225,7 @@ void (entity disp) Engineer_Dispenser_InsertArmor = {
     if (self.armorvalue == 0) {
         self.armortype = 0;
         self.armorclass = 0;
-        self.items = (self.items - (self.items & ((IT_ARMOR1 | IT_ARMOR2) | IT_ARMOR3)));
+        self.items &= ~(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
     }
 
     if (armor > 0)

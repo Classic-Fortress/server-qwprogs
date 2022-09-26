@@ -45,6 +45,7 @@ enum AmmoType {
 };
 
 struct FO_WeapModels;
+struct FO_WeapToItem;
 
 struct FO_WeapInfo {
     int weapon;  // Verification
@@ -59,6 +60,7 @@ struct FO_WeapInfo {
     float needs_reload;
     int storage_index;  // Allocated by init
     FO_WeapModels* models;
+    FO_WeapToItem* items;
 };
 
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
@@ -95,7 +97,7 @@ struct FO_ClassWeapons {
 
 // Indexed by class ID, e.g. PC_SOLDIER
 FO_ClassWeapons class_weapons[] = {
-    { PC_UNDEFINED, { 0, 0, 0, 0 } },
+    { PC_UNDEFINED, { 0, 0, 0, WEAP_AXE } },
     { PC_SCOUT, { WEAP_NAILGUN, WEAP_SHOTGUN, 0, WEAP_AXE } },
     { PC_SNIPER, { WEAP_SNIPER_RIFLE, WEAP_SNIPER_RIFLE, WEAP_NAILGUN, WEAP_AXE } },
     { PC_SOLDIER, { WEAP_ROCKET_LAUNCHER, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
@@ -105,6 +107,7 @@ FO_ClassWeapons class_weapons[] = {
     { PC_PYRO, { WEAP_INCENDIARY, WEAP_FLAMETHROWER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_SPY, { WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN, WEAP_KNIFE } },
     { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SPANNER } },
+    { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
@@ -181,6 +184,47 @@ float WEAP_to_slot(float class, float weapon) {
 // Internal clip storage for both SSQC/CSQC.
 #define CLIP_STORAGE_SIZE 8
 .float clip_fired[CLIP_STORAGE_SIZE];
+
+struct FO_WeapToItem {
+    int weapon;
+    float it_weapon;
+
+    // Fields below this line automatically populated.
+    float ammo_mask;
+};
+
+FO_WeapToItem weapon_to_items[] = {
+    { WEAP_NONE,             0},
+    { WEAP_HOOK,             IT_HOOK},
+    { WEAP_KNIFE,            0},
+    { WEAP_MEDIKIT,          0},
+    { WEAP_SPANNER,          0},
+    { WEAP_AXE,              0},
+    { WEAP_SNIPER_RIFLE,     IT_SHOTGUN},
+    { WEAP_AUTO_RIFLE,       IT_SUPER_SHOTGUN},
+    { WEAP_SHOTGUN,          IT_SHOTGUN},
+    { WEAP_SUPER_SHOTGUN,    IT_SUPER_SHOTGUN},
+    { WEAP_NAILGUN,          IT_NAILGUN},
+    { WEAP_SUPER_NAILGUN,    IT_SUPER_NAILGUN},
+    { WEAP_GRENADE_LAUNCHER, IT_GRENADE_LAUNCHER},
+    { WEAP_FLAMETHROWER,     IT_GRENADE_LAUNCHER},
+    { WEAP_ROCKET_LAUNCHER,  IT_ROCKET_LAUNCHER},
+    { WEAP_INCENDIARY,       IT_ROCKET_LAUNCHER},
+    { WEAP_ASSAULT_CANNON,   IT_ROCKET_LAUNCHER},
+    { WEAP_LIGHTNING,        IT_LIGHTNING},
+    { WEAP_DETPACK,          0},
+    { WEAP_TRANQ,            IT_SHOTGUN},
+    { WEAP_RAILGUN,          IT_SHOTGUN},
+};
+
+float FO_ClassWeaponItemMask(float class) {
+    float mask = 0;
+    for (float i = 0; i < 4; i++) {
+        FO_WeapInfo* wi = class_weapons[class].info[i];
+        mask |= wi ? (wi->items)->it_weapon : 0;
+    }
+    return mask;
+}
 
 #ifdef SSQC
 struct FO_WeapState {
@@ -378,11 +422,23 @@ void FO_Weapons_Init() {
          FO_WeapModels* wm = &weapon_models[i];
          if (WEAP_to_index(wm->weapon) != i)
              error(sprintf("WM mismatch at index %d\n", i));
+
          for (j = 0; j < 2; j++)
              if (wm->mode[j] != "")
                  precache_model(wm->mode[j]);
          wi->models = wm;
-    }
+
+        FO_WeapToItem* wti = &weapon_to_items[i];
+        if (WEAP_to_index(wti->weapon) != i)
+             error(sprintf("WTI mismatch at index %d\n", i));
+        wi->items = wti;
+        switch (wi->ammo_type) {
+            case AMMO_SHELLS: wti->ammo_mask = IT_SHELLS; break;
+            case AMMO_CELLS: wti->ammo_mask = IT_CELLS; break;
+            case AMMO_NAILS: wti->ammo_mask = IT_NAILS; break;
+            case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
+        }
+}
     if (clips_allocated > CLIP_STORAGE_SIZE)
         error("Insufficient clip storage");
 
