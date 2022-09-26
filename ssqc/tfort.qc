@@ -1572,8 +1572,6 @@ void () TeamFortress_SetEquipment = {
     if (!remember_weapon || self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
         self.current_weapon = 0;
         self.last_weapon = 0;
-        self.weaponmode = 0;
-        self.last_weaponmode = 0;
         self.current_weaponslot = W_BestWeaponSlot();
         self.last_weaponslot = 2;
         W_WeaponState_Save(self);
@@ -2283,6 +2281,8 @@ void () TeamFortress_SetEquipment = {
 
     if (self.last_playerclass != self.playerclass)
         self.current_weaponslot = W_BestWeaponSlot();  
+
+    W_UpdateCurrentWeapon(self);
 };
 
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo = {
@@ -2447,8 +2447,8 @@ void () TeamFortress_RemoveTimers = {
 
     te = find(world, classname, "detpack");
     while (te) {
-        if ((te.weaponmode == 1) && (te.enemy == self))
-            te.weaponmode = 0;
+        if ((te.is_disarming) && (te.enemy == self))
+            te.is_disarming = FALSE;
         te = find(te, classname, "detpack");
     }
 

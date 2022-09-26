@@ -1413,7 +1413,7 @@ void () RemovePlayerOwnedEnts = {
     te = find(world, classname, "detpack");
     while (te) {
         if (te.owner == self) {
-            if (te.weaponmode == 1) {
+            if (te.is_disarming == 1) {
                 TeamFortress_SetSpeed(te.enemy);
                 dremove(te.oldenemy);
                 dremove(te.observer_list);
@@ -1426,7 +1426,7 @@ void () RemovePlayerOwnedEnts = {
     te = find(world, classname, "countdown_timer");
     while (te) {
         if (te.owner == self) {
-            if (te.weaponmode == 1) {
+            if (te.is_disarming == 1) {
                 TeamFortress_SetSpeed(te.enemy);
                 dremove(te.oldenemy);
                 dremove(te.observer_list);
