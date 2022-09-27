@@ -2155,9 +2155,6 @@ void W_ChangeWeapon(float weapon) {
 
     self.last_weapon = self.current_weapon;
 
-    if (!self.is_quickfiring)
-        W_PrintWeaponMessage();
-
     self.current_weapon = weapon;
     W_UpdateCurrentWeapon(self);
     Status_Refresh(self);
@@ -2806,43 +2803,28 @@ void () W_WeaponFrame = {
         return;
     }
 
-    // when +slotX bind is released, this gets issued
-    if (self.impulse == TF_QUICKSTOP && self.is_quickfiring) {
+    // +slot/-slot handle attack; we only need to swap back to last weapon.
+    // Let's see if we can get away with just treating this as last weapon;
+    // there were already so many edge cases in the old code such as swapping on
+    // an empty weapon.
+    if (self.impulse == TF_QUICKSTOP)
+        self.impulse = self.qf_swap_last_weapon ? TF_WEAPLAST : 0;
 
-        self.has_quickfired = 1;
-        self.impulse = 0;
-
-    }
-
-    // unset quick firing variables when quick weapon has finished firing
-    if (self.is_quickfiring && self.has_quickfired && WeaponReady(self)) {
-
-        self.is_quickfiring = 0;
-        self.has_quickfired = 0;
-
-    }
     float can_change_weapon = WeaponReady(self) &&
         !self.is_detpacking && !(self.is_building && !engineer_move);
 
+    // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
     if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
         can_change_weapon) {
         // slot 1-4 (or 1-7) binds
-
-        // obviously not quickfiring if we're changing weapon
-        self.is_quickfiring = 0;
-        self.has_quickfired = 0;
-
         W_ChangeWeaponByInput(self.impulse);
         self.impulse = 0;
     } else if (self.impulse >= TF_QUICKSLOT1 &&
                self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
-        // +slot1-4 quick fire
-        self.is_quickfiring = 1;
-        self.has_quickfired = 0;
-
-        // Manually check so that we don't queue otherwise.
-        if (self.tfstate & TFSTATE_RELOADING)
-            W_ChangeWeapon(W_WeaponBySlot(self.impulse - TF_QUICKSLOT1 + 1));
+        float weapon = W_WeaponBySlot(self.impulse - TF_QUICKSLOT1 + 1);
+        self.qf_swap_last_weapon = weapon != self.current_weapon;
+        W_ChangeWeapon(weapon);
+        self.impulse = 0;
     } else if (self.queue_weapon > 0 && can_change_weapon) {
         // change weapon if queue_weaponslot has been set
         W_ChangeWeapon(self.queue_weapon);
