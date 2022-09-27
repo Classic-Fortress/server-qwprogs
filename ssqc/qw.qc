@@ -48,9 +48,8 @@ float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
-.float is_quickfiring;          // TRUE for a player if they're using the quick slots
 .float is_concussed;            // TRUE for a player who is affected by concussion grenade
-.float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
+.float qf_swap_last_weapon;     // TRUE if +slotX was initated from another slot
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
