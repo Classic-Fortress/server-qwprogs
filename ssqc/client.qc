@@ -1047,6 +1047,9 @@ void () DecodeLevelParms = {
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
         }
+
+        // Must be after we've set up conditional options (e.g. hwguy reload).
+        FO_Weapons_Init();
     }
 
     if (parm11)
@@ -1069,8 +1072,6 @@ void () DecodeLevelParms = {
     if (parm15)
         self.is_admin = parm15;
 
-    // Must be after we've set up conditional options (e.g. hwguy reload).
-    FO_Weapons_Init();
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
