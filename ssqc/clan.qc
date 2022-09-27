@@ -84,7 +84,7 @@ void () StartMatch =
     }
 	te = find(world, classname, "detpack");
 	while (te){
-		if (te.weaponmode == 1) {
+		if (te.is_disarming == 1) {
 			TeamFortress_SetSpeed (te.enemy);
 			dremove(te.oldenemy);
 			dremove(te.observer_list);

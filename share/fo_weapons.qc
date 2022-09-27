@@ -12,6 +12,7 @@
 .float reload_assault_cannon;
 .float reload_sniper_rifle;
 .float waterlevel;
+.float playerclass;
 
 .float ammo_shells;
 .float ammo_nails;
@@ -45,6 +46,7 @@ enum AmmoType {
 };
 
 struct FO_WeapModels;
+struct FO_WeapToItem;
 
 struct FO_WeapInfo {
     int weapon;  // Verification
@@ -59,6 +61,7 @@ struct FO_WeapInfo {
     float needs_reload;
     int storage_index;  // Allocated by init
     FO_WeapModels* models;
+    FO_WeapToItem* items;
 };
 
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
@@ -67,8 +70,8 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_NONE,             AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_HOOK,             AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_KNIFE,            AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_MEDIKIT,          AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_SPANNER,          AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_MEDIKIT,          AMMO_CELLS,   0, 0,  0.5,  0 },
+    { WEAP_SPANNER,          AMMO_CELLS,   0, 0,  0.5,  0 },
     { WEAP_AXE,              AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_SNIPER_RIFLE,     AMMO_SHELLS, -9, 1,  1.5,  4 },
     { WEAP_AUTO_RIFLE,       AMMO_SHELLS,  0, 1,  0.1,  0 },
@@ -77,6 +80,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_NAILGUN,          AMMO_NAILS,   0, 1,  0.2,  0 },
     { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 4,  0.2,  0 },
     { WEAP_GRENADE_LAUNCHER, AMMO_ROCKETS, 6, 1,  0.6,  4 },
+    { WEAP_PIPE_LAUNCHER,    AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
     { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
@@ -87,6 +91,9 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_RAILGUN,          AMMO_NAILS,   0, 1,  0.4,  0 },
 };
 
+inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
+    return &weapon_info[WEAP_to_index(weapon)];
+}
 struct FO_ClassWeapons {
     float id;
     float slots[4];
@@ -95,64 +102,62 @@ struct FO_ClassWeapons {
 
 // Indexed by class ID, e.g. PC_SOLDIER
 FO_ClassWeapons class_weapons[] = {
-    { PC_UNDEFINED, { 0, 0, 0, 0 } },
+    { PC_UNDEFINED, { 0, 0, 0, WEAP_AXE } },
     { PC_SCOUT, { WEAP_NAILGUN, WEAP_SHOTGUN, 0, WEAP_AXE } },
     { PC_SNIPER, { WEAP_SNIPER_RIFLE, WEAP_SNIPER_RIFLE, WEAP_NAILGUN, WEAP_AXE } },
     { PC_SOLDIER, { WEAP_ROCKET_LAUNCHER, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
-    { PC_DEMOMAN, { WEAP_GRENADE_LAUNCHER, WEAP_GRENADE_LAUNCHER, WEAP_SHOTGUN, WEAP_AXE } },
+    { PC_DEMOMAN, { WEAP_GRENADE_LAUNCHER, WEAP_PIPE_LAUNCHER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_MEDIC, { WEAP_SUPER_NAILGUN, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_MEDIKIT } },
     { PC_HVYWEAP, { WEAP_ASSAULT_CANNON, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_PYRO, { WEAP_INCENDIARY, WEAP_FLAMETHROWER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_SPY, { WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN, WEAP_KNIFE } },
     { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SPANNER } },
+    { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
-
-inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
-    return &weapon_info[WEAP_to_index(weapon)];
-}
 
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
-    "None", "Hook", "Knife", "BioAxe", "Spanner", "Axe", "Sniper Rifle",
-    "Sniper Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
-    "Grenade Launcher", "Flamethrower", "Rocket Launcher",
+    "None", "Hook", "Knife", "Medikit", "Spanner", "Axe", "Sniper Rifle",
+    "Auto Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
+    "Grenade Launcher", "Pipebomb Launcher", "Flamethrower", "Rocket Launcher",
     "Incendiary Launcher", "Assault Cannon", "Lightning Gun", "Detpack",
     "Tranquilizer", "Railgun"
 };
 
-inline string FO_GetWeapName(float weapon) {
+string FO_GetWeapName(float weapon) {
     return weapon_names[WEAP_to_index(weapon)];
 }
 
 struct FO_WeapModels {
     int weapon;
-    string mode[2];
+    string model;
 };
 
-// Indexed by WEAP_to_index() and player.weaponmode
+// Indexed by WEAP_to_index()
 static FO_WeapModels weapon_models[] = {
-  { WEAP_NONE,             {""}},
-  { WEAP_HOOK,             {"progs/v_grap.mdl" }},
-  { WEAP_KNIFE,            {"progs/v_knife.mdl", "progs/v_knife2.mdl" }},
-  { WEAP_MEDIKIT,          {"progs/v_medi.mdl"}},
-  { WEAP_SPANNER,          {"progs/v_span.mdl"}},
-  { WEAP_AXE,              {"progs/v_axe.mdl"}},
-  { WEAP_SNIPER_RIFLE,     {"progs/v_srifle.mdl"}},
-  { WEAP_AUTO_RIFLE,       {"progs/v_srifle.mdl"}},
-  { WEAP_SHOTGUN,          {"progs/v_shot.mdl"}},
-  { WEAP_SUPER_SHOTGUN,    {"progs/v_shot2.mdl"}},
-  { WEAP_NAILGUN,          {"progs/v_nail.mdl"}},
-  { WEAP_SUPER_NAILGUN,    {"progs/v_nail2.mdl"}},
-  { WEAP_GRENADE_LAUNCHER, {"progs/v_rock.mdl", "progs/v_pipe.mdl"}},
-  { WEAP_FLAMETHROWER,     {"progs/v_flame.mdl"}},
-  { WEAP_ROCKET_LAUNCHER,  {"progs/v_rock2.mdl"}},
-  { WEAP_INCENDIARY,       {"progs/v_irock.mdl"}},
-  { WEAP_ASSAULT_CANNON,   {"progs/v_asscan.mdl"}},
-  { WEAP_LIGHTNING,        {""}},
-  { WEAP_DETPACK,          {""}},
-  { WEAP_TRANQ,            {"progs/v_tranq.mdl"}},
-  { WEAP_RAILGUN,          {"progs/v_rail.mdl"}},
+  { WEAP_NONE,             ""},
+  { WEAP_HOOK,             "progs/v_grap.mdl" },
+  { WEAP_KNIFE,            "progs/v_knife.mdl" },
+  { WEAP_MEDIKIT,          "progs/v_medi.mdl" },
+  { WEAP_SPANNER,          "progs/v_span.mdl" },
+  { WEAP_AXE,              "progs/v_axe.mdl" },
+  { WEAP_SNIPER_RIFLE,     "progs/v_srifle.mdl" },
+  { WEAP_AUTO_RIFLE,       "progs/v_srifle.mdl" },
+  { WEAP_SHOTGUN,          "progs/v_shot.mdl" },
+  { WEAP_SUPER_SHOTGUN,    "progs/v_shot2.mdl" },
+  { WEAP_NAILGUN,          "progs/v_nail.mdl" },
+  { WEAP_SUPER_NAILGUN,    "progs/v_nail2.mdl" },
+  { WEAP_GRENADE_LAUNCHER, "progs/v_rock.mdl" },
+  { WEAP_PIPE_LAUNCHER,    "progs/v_pipe.mdl" },
+  { WEAP_FLAMETHROWER,     "progs/v_flame.mdl" },
+  { WEAP_ROCKET_LAUNCHER,  "progs/v_rock2.mdl" },
+  { WEAP_INCENDIARY,       "progs/v_irock.mdl" },
+  { WEAP_ASSAULT_CANNON,   "progs/v_asscan.mdl" },
+  { WEAP_LIGHTNING,        "" },
+  { WEAP_DETPACK,          "" },
+  { WEAP_TRANQ,            "progs/v_tranq.mdl" },
+  { WEAP_RAILGUN,          "progs/v_rail.mdl" },
 };
 
 // REQUIRES: Order must match above.
@@ -182,6 +187,74 @@ float WEAP_to_slot(float class, float weapon) {
 #define CLIP_STORAGE_SIZE 8
 .float clip_fired[CLIP_STORAGE_SIZE];
 
+struct FO_WeapToItem {
+    int weapon;
+    float it_weapon;
+
+    // Fields below this line automatically populated.
+    float ammo_mask;
+};
+
+FO_WeapToItem weapon_to_items[] = {
+    { WEAP_NONE,             0},
+    { WEAP_HOOK,             IT_HOOK},
+    { WEAP_KNIFE,            0},
+    { WEAP_MEDIKIT,          0},
+    { WEAP_SPANNER,          0},
+    { WEAP_AXE,              0},
+    { WEAP_SNIPER_RIFLE,     IT_SHOTGUN},
+    { WEAP_AUTO_RIFLE,       IT_SUPER_SHOTGUN},
+    { WEAP_SHOTGUN,          IT_SHOTGUN},
+    { WEAP_SUPER_SHOTGUN,    IT_SUPER_SHOTGUN},
+    { WEAP_NAILGUN,          IT_NAILGUN},
+    { WEAP_SUPER_NAILGUN,    IT_SUPER_NAILGUN},
+    { WEAP_GRENADE_LAUNCHER, IT_GRENADE_LAUNCHER},
+    { WEAP_PIPE_LAUNCHER,    IT_GRENADE_LAUNCHER},
+    { WEAP_FLAMETHROWER,     IT_GRENADE_LAUNCHER},
+    { WEAP_ROCKET_LAUNCHER,  IT_ROCKET_LAUNCHER},
+    { WEAP_INCENDIARY,       IT_ROCKET_LAUNCHER},
+    { WEAP_ASSAULT_CANNON,   IT_ROCKET_LAUNCHER},
+    { WEAP_LIGHTNING,        IT_LIGHTNING},
+    { WEAP_DETPACK,          0},
+    { WEAP_TRANQ,            IT_SHOTGUN},
+    { WEAP_RAILGUN,          IT_SHOTGUN},
+};
+
+FO_WeapInfo* FO_ClassWeaponSlot(float class, float slot) {
+    FO_ClassWeapons* cw = &class_weapons[class];
+    return cw->info[slot - 1] ? cw->info[slot - 1] : __NULL__;
+}
+
+float FO_ClassWeapMask(float class) {
+    float result = 0;
+    for (int i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
+        if (wi)
+            result |= (wi->items)->it_weapon;
+    }
+    return result;
+}
+
+float FO_ClassWeaponItemMask(float class) {
+    float mask = 0;
+    for (float i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
+        if (wi)
+            mask |= (wi->items)->it_weapon;
+    }
+    return mask;
+}
+
+float FO_CurrentWeaponsMask() {
+    float mask = 0;
+    for (float i = 1; i <= 4; i++) {
+        FO_WeapInfo* wi = FO_ClassWeaponSlot(self.playerclass, i);
+        if (wi)
+            mask |= wi->weapon;
+    }
+    return mask;
+}
+
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
@@ -207,7 +280,6 @@ void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
 
 void () RestoreDefaultWeapon;
 void (entity pl) Status_Refresh;
-void (entity pl, float swap) W_WeaponState_Load;
 void (float att_delay) Attack_Finished;
 
 static void FOT_ReloadTimer() {
@@ -217,10 +289,9 @@ static void FOT_ReloadTimer() {
     if (time >= self.heat) {
         // Reload finished
         self.owner.tfstate &= ~TFSTATE_RELOADING;
-        self.owner.weaponmodel = ((ws->wi)->models)->mode[self.owner.weaponmode];
+        self.owner.weaponmodel = ((ws->wi)->models)->model;
         sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
         dremove(self);
-        W_WeaponState_Load(self.owner, 0);
     } else {
         // Refresh clip
         if (ws->weapon != WEAP_SNIPER_RIFLE)
@@ -364,7 +435,14 @@ void FO_Weapons_Init() {
          if (WEAP_to_index(wi->weapon) != i)
              error(sprintf("WI mismatch at index %d\n", i));
 
-         if (wi->clip_size > 0) {
+         if (wi->weapon == WEAP_PIPE_LAUNCHER) {
+             FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
+             wi->ammo_type = parent->ammo_type;
+             wi->clip_size = parent->clip_size;
+             wi->storage_index = parent->storage_index;
+             wi->full_reload_time = parent->full_reload_time;
+             wi->needs_reload = parent->needs_reload;
+         } else if (wi->clip_size > 0) {
              wi->needs_reload = TRUE;
              // We always allocate a storage index for something that can have
              // reload to save negotiating between client and server around
@@ -378,11 +456,21 @@ void FO_Weapons_Init() {
          FO_WeapModels* wm = &weapon_models[i];
          if (WEAP_to_index(wm->weapon) != i)
              error(sprintf("WM mismatch at index %d\n", i));
-         for (j = 0; j < 2; j++)
-             if (wm->mode[j] != "")
-                 precache_model(wm->mode[j]);
+
+         precache_model(wm->model);
          wi->models = wm;
-    }
+
+        FO_WeapToItem* wti = &weapon_to_items[i];
+        if (WEAP_to_index(wti->weapon) != i)
+             error(sprintf("WTI mismatch at index %d\n", i));
+        wi->items = wti;
+        switch (wi->ammo_type) {
+            case AMMO_SHELLS: wti->ammo_mask = IT_SHELLS; break;
+            case AMMO_CELLS: wti->ammo_mask = IT_CELLS; break;
+            case AMMO_NAILS: wti->ammo_mask = IT_NAILS; break;
+            case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
+        }
+}
     if (clips_allocated > CLIP_STORAGE_SIZE)
         error("Insufficient clip storage");
 

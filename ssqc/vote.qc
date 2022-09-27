@@ -1228,7 +1228,6 @@ void () AnarchyMode = {
     vote_anarchy_mode = TRUE;
     local entity e = find(world, classname, "player");
     while(e) {
-        e.items_allowed = IT_AXE | IT_QUAD;
         e.items = IT_AXE;
         e.weapons_carried = IT_AXE;
         e.current_weapon = WEAP_AXE;
@@ -1238,7 +1237,6 @@ void () AnarchyMode = {
             e.super_damage_finished = time + 666;
             //e.effects = e.effects | EF_BLUE;
         }
-        W_SetCurrentAmmo(e);
         TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
@@ -1270,7 +1268,6 @@ void () EndVoting = {
         e.current_weapon = 0;
         e.super_damage_finished = 0;
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
-        W_SetCurrentAmmo(e);
         TeamFortress_SetSpeed(e);
         e.health = 100;
         e = find(e, classname, "player");

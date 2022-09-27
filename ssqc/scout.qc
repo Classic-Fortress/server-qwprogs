@@ -564,7 +564,6 @@ void () TeamFortress_Scan = {
             sprint(self.owner, PRINT_HIGH,
                    "Not enough cells to run scanner\n");
             self.owner.ammo_cells = 0;
-            W_SetCurrentAmmo(self);
             self.owner.ScannerOn = 0;
             dremove(self);
             return;
@@ -572,7 +571,6 @@ void () TeamFortress_Scan = {
         if (scancost > self.owner.ammo_cells) {
             scanrange = self.owner.ammo_cells * 20;
             scancost = self.owner.ammo_cells;
-            W_SetCurrentAmmo(self);
         }
         scen = 0;
         scfr = 0;
@@ -592,7 +590,6 @@ void () TeamFortress_Scan = {
         if (self.owner.ammo_cells < 0) {
             self.owner.ammo_cells = 0;
         }
-        W_SetCurrentAmmo(self);
         scanrange = scanrange * 25;
         list = T_RadiusScan(self.owner, scanrange, scen, scfr);
     }
@@ -728,7 +725,6 @@ void () TeamFortress_Scan = {
         self.nextthink = time + 2;
         return;
     }
-    W_SetCurrentAmmo(self);
     self.nextthink = time + 2;
     return;
 };

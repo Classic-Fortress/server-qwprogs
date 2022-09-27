@@ -58,7 +58,6 @@ void () StartQuadRound;
 void (string cl_pwd) Admin_Check;
 void () Admin_Aliases;
 void () PreMatch_Message;
-float () GetLastWeaponImpulse;
 void () UpdateReadyStatus;
 float () CheckAllPlayersReady;
 string(float)TeamFortress_TeamGetColorString;
@@ -100,11 +99,8 @@ void () SetChangeParms = {
         SetNewParms();
         return;
     }
-    self.items =
-        self.items -
-        (self.
-         items & (IT_KEY1 | IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY
-                  | IT_SUIT | IT_QUAD));
+    self.items &= ~(IT_KEY1 | IT_KEY2 | IT_INVISIBILITY | IT_INVULNERABILITY |
+                    IT_SUIT | IT_QUAD);
     if (self.health > 100)
         self.health = 100;
     if (self.health < 50)
@@ -483,9 +479,6 @@ void () DecodeLevelParms = {
         // allow medic aura [on]
         medicaura = CF_GetSetting("ma", "medicaura", "on");
 
-        // use old tf style medikit (don't insta-heal max+50) [off]
-        old_medikit = CF_GetSetting("om", "old_medikit", "off");
-
         // use old tf style bioweapon (less damage) [off]
         old_biodamage = CF_GetSetting("ob", "old_biodamage", "off");
 
@@ -686,9 +679,6 @@ void () DecodeLevelParms = {
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
 
-        // wait until attack_finished is over before changing weapons
-        chweap_wait_attfinished = CF_GetSetting("cwaf", "chweap_wait_atk", "on");
-
         // enable flag model following the player who has it
         flag_follow = CF_GetSetting("flagfollow", "flag_follow", "on");
 
@@ -867,7 +857,6 @@ void () DecodeLevelParms = {
             detpipe_limit_world = -1;
             old_pipecooldown = FALSE;
             medicaura = TRUE;
-            old_medikit = FALSE;
             old_biodamage = FALSE;
             cannon_lock = TRUE;
             cannon_air = TRUE;
@@ -947,7 +936,6 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             old_pipecooldown = TRUE;
             medicaura = FALSE;
-            old_medikit = TRUE;
             old_biodamage = TRUE;
             cannon_lock = FALSE;
             cannon_air = TRUE;
@@ -1007,7 +995,6 @@ void () DecodeLevelParms = {
         if (st == "on") {
             server_huetf = TRUE;
             impulse_queue = TRUE;
-            chweap_wait_attfinished = FALSE;
             flag_follow = FALSE;
             ng_velocity = 1000;
             ng_damage = 18;
@@ -1055,6 +1042,9 @@ void () DecodeLevelParms = {
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
         }
+
+        // Must be after we've set up conditional options (e.g. hwguy reload).
+        FO_Weapons_Init();
     }
 
     if (parm11)
@@ -1077,8 +1067,6 @@ void () DecodeLevelParms = {
     if (parm15)
         self.is_admin = parm15;
 
-    // Must be after we've set up conditional options (e.g. hwguy reload).
-    FO_Weapons_Init();
 /*
     local entity p = find(world, classname, "player");
     while (p != world) {
@@ -1420,7 +1408,7 @@ void () RemovePlayerOwnedEnts = {
     te = find(world, classname, "detpack");
     while (te) {
         if (te.owner == self) {
-            if (te.weaponmode == 1) {
+            if (te.is_disarming == 1) {
                 TeamFortress_SetSpeed(te.enemy);
                 dremove(te.oldenemy);
                 dremove(te.observer_list);
@@ -1433,7 +1421,7 @@ void () RemovePlayerOwnedEnts = {
     te = find(world, classname, "countdown_timer");
     while (te) {
         if (te.owner == self) {
-            if (te.weaponmode == 1) {
+            if (te.is_disarming == 1) {
                 TeamFortress_SetSpeed(te.enemy);
                 dremove(te.oldenemy);
                 dremove(te.observer_list);
@@ -2123,9 +2111,6 @@ void () PutClientInServer = {
         return;
     }
 
-    if (self.last_playerclass == 0)
-        self.last_playerclass = self.playerclass;
-
     // remove prime timers to avoid getting an old grenade in your face
     te = find(world, classname, "primetimer");
     while (te != world) {
@@ -2188,6 +2173,7 @@ void () PutClientInServer = {
     TeamFortress_PrintClassName(self, self.playerclass,
                                 self.tfstate & TFSTATE_RANDOMPC);
 
+    self.attack_finished = 0;  // Allow below to change weapon freely.
     TeamFortress_SetEquipment();
     TeamFortress_SetHealth();
     TeamFortress_SetSpeed(self);
@@ -2201,13 +2187,6 @@ void () PutClientInServer = {
     stuffcmd(self, "v_idlescale 0\n");
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
-    W_SetCurrentAmmo(self);
-    if (self.current_weaponslot && self.last_playerclass == self.playerclass)
-        W_ChangeWeapon(self.current_weaponslot);
-    else {
-        W_ChangeWeapon(W_BestWeaponSlot());
-    }
-    self.last_playerclass = self.playerclass;
 
     self.attack_finished = time + 0.3;
     self.th_pain = player_pain;
@@ -2788,11 +2767,15 @@ void () PlayerPreThink = {
     if ((time < self.pausetime) || (cease_fire == 1)) {
         self.velocity = '0 0 0';
     }
+
+#if 0
+    FO_WeapState ws;
+    FO_FillWeapState(self, self.weapon, &ws);
     if (time > self.attack_finished && !self.currentammo && self.weapon > WEAP_AXE) {
         W_ChangeWeapon(W_BestWeaponSlot());
-        W_SetCurrentAmmo(self);
         W_WeaponState_Save(self);
     }
+#endif
 };
 
 void () CheckPowerups = {
@@ -2833,7 +2816,7 @@ void () CheckPowerups = {
                     }
                 }
                 if (self.invisible_finished < time) {
-                    self.items = self.items - IT_INVISIBILITY;
+                    self.items &= ~IT_INVISIBILITY;
                     self.invisible_finished = 0;
                     self.invisible_time = 0;
                 }
@@ -2864,7 +2847,7 @@ void () CheckPowerups = {
             }
         }
         if (self.invincible_finished < time) {
-            self.items = self.items - 1048576;
+            self.items &= ~IT_INVULNERABILITY;
             self.invincible_time = 0;
             self.invincible_finished = 0;
         }
@@ -2907,7 +2890,7 @@ void () CheckPowerups = {
             }
         }
         if (self.super_damage_finished < time) {
-            self.items = self.items - IT_QUAD;
+            self.items &= ~IT_QUAD;
             self.super_damage_finished = 0;
             self.super_time = 0;
         }
@@ -2951,17 +2934,24 @@ void () CheckPowerups = {
             }
         }
         if (self.radsuit_finished < time) {
-            self.items = self.items - 2097152;
+            self.items &= ~IT_SUIT;
             self.rad_time = 0;
             self.radsuit_finished = 0;
         }
     }
 };
 
+void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws);
+
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
+
+    FO_WeapState ws;
+    FO_FillWeapState(self, self.current_weapon, &ws);
+    self.currentammo =
+        (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
 
     if (self.view_ofs == '0 0 0') {
         return;
@@ -3830,11 +3820,8 @@ float () IsUsingCFImpulses = {
     return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 
-float () GetLastWeaponImpulse = {
-    if (IsUsingOldImpulses())
-        return 7;
-    else 
-        return 4;
+float GetMaxWeaponInput()  {
+    return IsUsingOldImpulses() ? 7 : 4;
 }
 
 void () InitReverseCap = {

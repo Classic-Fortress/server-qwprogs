@@ -548,7 +548,6 @@ void () W_FireFlame = {
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
-    self.currentammo = self.ammo_cells;
     FO_Sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
     flame = spawn();
     flame.owner = self;
@@ -673,7 +672,6 @@ void () W_FireIncendiaryCannon = {
         return;
     }
     self.ammo_rockets = self.ammo_rockets - 3;
-    self.currentammo = self.ammo_rockets;
     FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-3, self);
     newmis = spawn();
@@ -722,7 +720,6 @@ void () TeamFortress_IncendiaryCannon = {
         return;
     }
     self.current_weapon = WEAP_INCENDIARY;
-    W_SetCurrentAmmo(self);
 };
 
 void () TeamFortress_FlameThrower = {
@@ -734,7 +731,6 @@ void () TeamFortress_FlameThrower = {
         return;
     }
     self.current_weapon = WEAP_FLAMETHROWER;
-    W_SetCurrentAmmo(self);
 };
 
 void () AirBlastReloadFinished = {
@@ -897,7 +893,6 @@ void () UseAirBlastV2 = {
         }
 
         self.ammo_cells = self.ammo_cells - cellcost;
-        W_SetCurrentAmmo(self);
 
         ent = findradius(ab_origin, abrange);
         while (ent)

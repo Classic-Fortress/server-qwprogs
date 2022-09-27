@@ -498,9 +498,7 @@ void (float issilent, float force) FO_Spy_Feign = {
     setsize(self, '-16 -16 -24', '16 16 -16');
 
     // set weapon state and remove weapon viewmodel
-    W_WeaponState_Save(self);
-    self.weaponmodel = "";
-    self.weaponframe = 0;
+    W_QueueAndDisableWeapon();
 
     // set view height to ground
     self.view_ofs = '0 0 4';
@@ -603,8 +601,7 @@ void () FO_Spy_Unfeign = {
         self.feign_areachecked = 0;
 
         // load saved weapon state and set current ammo
-        W_WeaponState_Load(self, 0);
-        W_SetCurrentAmmo(self);
+        W_UpdateCurrentWeapon(self);
 
         // allow spy to move again
         self.movetype = MOVETYPE_WALK;
@@ -1381,7 +1378,6 @@ void () HallucinationTimer = {
 
 void () W_FireTranq = {
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     KickPlayer(-2, self);
     newmis = spawn();
     newmis.owner = self;

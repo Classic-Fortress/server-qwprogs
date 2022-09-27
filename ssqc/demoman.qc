@@ -158,11 +158,6 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
-    if (!(self.weapons_carried & WEAP_DETPACK)) {
-        sprint(self, PRINT_HIGH, "You don't have a detpack\n");
-        return;
-    }
-
     if (self.ammo_detpack <= 0) {
         sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
@@ -224,11 +219,9 @@ void (float timer) TeamFortress_SetDetpack = {
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-    self.weapon = self.current_weapon;
-    self.next_weapon = self.current_weapon;
-    self.current_weapon = 0;
-    self.weaponmodel = "";
-    self.weaponframe = 0;
+
+    self.weapon = IT_AXE;
+    W_QueueAndDisableWeapon();
 
     Status_Refresh(self);
     TeamFortress_SetSpeed(self);
@@ -265,12 +258,10 @@ void () TeamFortress_DetpackStop = {
     dremove(detpack_timer);
 
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-    self.is_detpacking = 0;
+    self.is_detpacking = 0;  // Weapon is queued.
     self.detpack_left = 0;
-    self.current_weapon = self.next_weapon;
 
     Status_Refresh(self);
-    W_SetCurrentAmmo(self);
     TeamFortress_SetSpeed(self);
     self.pausetime = time;
 };
@@ -293,10 +284,8 @@ void () TeamFortress_DetpackSet = {
     FO_Sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
     self = self.owner;
-    self.is_detpacking = 0;
-    self.current_weapon = self.next_weapon;
+    self.is_detpacking = 0;  // Weapon is queued.
     Status_Refresh(self);
-    W_SetCurrentAmmo(self);
     self = oldself;
 
     newmis = spawn();
@@ -314,7 +303,7 @@ void () TeamFortress_DetpackSet = {
     newmis.angles_y = self.owner.angles_y;
     newmis.velocity = '0 0 0';
     newmis.avelocity = '0 0 0';
-    newmis.weaponmode = 0;
+    newmis.is_disarming = FALSE;
     newmis.touch = TeamFortress_DetpackTouch;
 
     FO_SetModel(newmis, "progs/detpack.mdl");
@@ -412,7 +401,7 @@ void () TeamFortress_DetpackExplode = {
     } else
         sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out\n");
 
-    if (self.weaponmode == 1) {
+    if (self.is_disarming) {
         TeamFortress_SetSpeed(self.enemy);
         dremove(self.oldenemy);
         dremove(self.observer_list);
@@ -432,7 +421,7 @@ void () TeamFortress_DetpackTouch = {
         return;
     if (other.deadflag)
         return;
-    if (self.weaponmode == 1)
+    if (self.is_disarming)
         return;
 
     if ((other.team_no == self.owner.team_no) && (self.owner.team_no != 0))
@@ -464,7 +453,7 @@ void () TeamFortress_DetpackTouch = {
     disarm.nextthink = time + 3;
     disarm.think = TeamFortress_DetpackDisarm;
 
-    self.weaponmode = 1;
+    self.is_disarming = TRUE;
     self.enemy = other;
     self.observer_list = disarm;
 };

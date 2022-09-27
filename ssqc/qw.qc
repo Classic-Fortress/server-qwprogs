@@ -48,9 +48,8 @@ float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
-.float is_quickfiring;          // TRUE for a player if they're using the quick slots
 .float is_concussed;            // TRUE for a player who is affected by concussion grenade
-.float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
+.float qf_swap_last_weapon;     // TRUE if +slotX was initated from another slot
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
@@ -130,8 +129,7 @@ float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
 .float maxfbspeed;              // Maximum forward/back speed
 .float maxstrafespeed;          // Maximum side speed
 
-.float weaponmode;              // Used for multiple mode weapons
-.float last_weaponmode;         // Last weapon's weapon mode
+.float is_disarming;
 .float motd;                    // Used to display MOTD
 .float current_menu;
 .float current_menu_type;
@@ -213,18 +211,13 @@ float coop;
 .float last_weapon;             // the last weapon the player was using
 .float current_weaponslot;      // the currently equipped weaponslot
 .float last_weaponslot;         // the last equipped weaponslot
-.float queue_weaponslot;        // the weaponslot to switch to when possible
-.float queue_weaponstate;       // the weaponstate to load when possible
-.float next_weapon;             // used by weapon slots to communicate which weapon to select
-.float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
+.float queue_weapon;            // the weapon to switch to when possible
 
 // weapon states
 .float weaponstate_current_weaponslot;
 .float weaponstate_last_weaponslot;
 .float weaponstate_current_weapon;
 .float weaponstate_last_weapon;
-.float weaponstate_weaponmode;
-.float weaponstate_last_weaponmode;
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;
@@ -568,7 +561,6 @@ float old_sniperrange;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
-float old_medikit;
 float old_biodamage;
 float flame_knockback;
 float build_water;
@@ -639,7 +631,6 @@ string pause_actor;
 float unpause_requested;
 float unpause_countdown;
 float unpause_lastcountnumber;
-float chweap_wait_attfinished;
 float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
