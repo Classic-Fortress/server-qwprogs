@@ -548,14 +548,12 @@ void () TeamFortress_Inventory = {
     if (current_weapons & WEAP_MEDIKIT)
         sprint(self, PRINT_HIGH, "Medikit\n");
 
-    if (current_weapons & WEAP_DETPACK) {
-        if (self.ammo_detpack > 0) {
-            st = ftos(self.ammo_detpack);
-            sprint(self, PRINT_HIGH, st, " detpack");
-            if (self.ammo_detpack > 1)
-                sprint(self, PRINT_HIGH, "s");
-            sprint(self, PRINT_HIGH, "\n");
-        }
+    if (self.ammo_detpack > 0) {
+        st = ftos(self.ammo_detpack);
+        sprint(self, PRINT_HIGH, st, " detpack");
+        if (self.ammo_detpack > 1)
+            sprint(self, PRINT_HIGH, "s");
+        sprint(self, PRINT_HIGH, "\n");
     }
 
     if (self.playerclass == PC_SPY && invis_only) {

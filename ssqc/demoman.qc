@@ -158,11 +158,6 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
-    if (!(self.weapons_carried & WEAP_DETPACK)) {
-        sprint(self, PRINT_HIGH, "You don't have a detpack\n");
-        return;
-    }
-
     if (self.ammo_detpack <= 0) {
         sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
@@ -224,12 +219,9 @@ void (float timer) TeamFortress_SetDetpack = {
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-    self.weapon = IT_AXE;
-    self.queue_weapon = self.current_weapon;
 
-    self.current_weapon = 0;
-    self.weaponmodel = "";
-    self.weaponframe = 0;
+    self.weapon = IT_AXE;
+    W_QueueAndDisableWeapon();
 
     Status_Refresh(self);
     TeamFortress_SetSpeed(self);
@@ -266,10 +258,8 @@ void () TeamFortress_DetpackStop = {
     dremove(detpack_timer);
 
     self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-    self.is_detpacking = 0;
+    self.is_detpacking = 0;  // Weapon is queued.
     self.detpack_left = 0;
-    self.current_weapon = self.queue_weapon;
-    self.queue_weapon = 0;
 
     Status_Refresh(self);
     TeamFortress_SetSpeed(self);
@@ -294,9 +284,7 @@ void () TeamFortress_DetpackSet = {
     FO_Sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
     self = self.owner;
-    self.is_detpacking = 0;
-    self.current_weapon = self.queue_weapon;
-    self.queue_weapon = 0;
+    self.is_detpacking = 0;  // Weapon is queued.
     Status_Refresh(self);
     self = oldself;
 
