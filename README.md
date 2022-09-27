@@ -5,7 +5,6 @@ New features
 ------
 
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
-* Server option to limit `sv_maxclients` to current number of players during quad gametime. `localinfo limit_quad_players 0/1`. Default: `1`.
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
 * `+dropflag` Allows player to hold button and flag will be thrown on contact.
