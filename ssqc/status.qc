@@ -804,7 +804,6 @@ void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
     WriteByte(MSG_MULTICAST, grentype);
-    WriteFloat(MSG_MULTICAST, time);
     WriteFloat(MSG_MULTICAST, explodes_at);
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }

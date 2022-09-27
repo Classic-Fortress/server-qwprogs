@@ -462,6 +462,12 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
+		if (infokey(world, "default_password") == "on") {
+			cvar_set("password", "");
+			localcmd("localinfo default_password off\n");
+		}
+
 		localcmd("stop\n");
 		return;
 	}

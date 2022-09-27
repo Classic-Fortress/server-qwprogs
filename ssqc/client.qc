@@ -2107,6 +2107,10 @@ void () PutClientInServer = {
         return;
     }
 
+    if(no_fire_mode) {
+        return;
+    }
+
     // remove prime timers to avoid getting an old grenade in your face
     te = find(world, classname, "primetimer");
     while (te != world) {
