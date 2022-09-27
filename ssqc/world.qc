@@ -96,7 +96,6 @@ void () worldspawn = {
 
     lastspawn = world;
     number_of_teams = 0;
-    quad_maxplayers = 0;
 
     if (infokey(world, "default_password") == "on") {
         cvar_set("password", "");
