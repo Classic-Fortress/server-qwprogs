@@ -101,8 +101,9 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENPRIMED:
             float grentype = readbyte();
+            float primed_at = readfloat();
             float explodes_at = readfloat();
-            ParseGrenPrimed(grentype, 0, explodes_at);
+            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
             CsGrenTimer last = CsGrenTimer::GetLast();
@@ -307,10 +308,17 @@ DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
 string cached_timer;
 string GetGrenTimerSound() {
-    string wav = cvar_string(FOCMD_GRENTIMERSOUND);
-    if (cached_timer != wav) {
-        precache_sound(wav);
-        cached_timer = wav;
+    string wav = CVARS(FOCMD_GRENTIMERSOUND);
+
+    // The string NE-uop below is suspect in crashes.  Possible interaction
+    // with cvar_string implementation.  Hopefully the migration to autocvar
+    // resolves this, but also put it behind a debug control temporarily so we
+    // can test with/without.
+    if (CVARF("fo_grentimer_debug") & 8 == 1) {
+        if (cached_timer != wav) {
+            precache_sound(wav);
+            cached_timer = wav;
+        }
     }
     return wav;
 }
@@ -335,8 +343,8 @@ void OldPlayGren(float offset) {
     }
 
     local string wav = GetGrenTimerSound();
-    localsound(wav, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, wav, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+    localsound(wav, channel, CVARF(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
+    soundupdate(self, channel, wav, CVARF(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
 }
 
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
@@ -356,7 +364,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         return;
 
     string wav = GetGrenTimerSound();
-    float volume = cvar(FOCMD_GRENTIMERVOLUME);
+    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
 
     // Note there's a bug where soundupdate returns false for a new sample, even
     // though it's started.
@@ -386,13 +394,11 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
 
-#if 0
     if (primed_at < last_death_time)
         return;
-#endif
 
     local float timer_flags = 0;
-    switch (cvar(FOCMD_GRENTIMER)) {
+    switch (CVARF(FOCMD_GRENTIMER)) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
