@@ -101,8 +101,9 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_GRENPRIMED:
             float grentype = readbyte();
+            float primed_at = readfloat();
             float explodes_at = readfloat();
-            ParseGrenPrimed(grentype, 0, explodes_at);
+            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
             CsGrenTimer last = CsGrenTimer::GetLast();
@@ -386,10 +387,8 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
 
-#if 0
     if (primed_at < last_death_time)
         return;
-#endif
 
     local float timer_flags = 0;
     switch (cvar(FOCMD_GRENTIMER)) {
