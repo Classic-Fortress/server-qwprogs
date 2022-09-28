@@ -314,7 +314,7 @@ string GetGrenTimerSound() {
     // with cvar_string implementation.  Hopefully the migration to autocvar
     // resolves this, but also put it behind a debug control temporarily so we
     // can test with/without.
-    if (CVARF("fo_grentimer_debug") & 8 == 1) {
+    if (CVARF(fo_grentimer_debug) & 8 == 1) {
         if (cached_timer != wav) {
             precache_sound(wav);
             cached_timer = wav;
