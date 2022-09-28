@@ -22,6 +22,7 @@
 float fo_hwguy = TRUE;
 float sniperreload = FALSE;
 float pyro_type = PYRO_FO;
+float old_ng_rof = FALSE;
 #endif
 
 // Convert a weapon-bit to a linear index.
@@ -78,13 +79,13 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_SHOTGUN,          AMMO_SHELLS,  8, 1,  0.5,  2 },
     { WEAP_SUPER_SHOTGUN,    AMMO_SHELLS, 16, 2,  0.7,  3 },
     { WEAP_NAILGUN,          AMMO_NAILS,   0, 1,  0.2,  0 },
-    { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 4,  0.2,  0 },
+    { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 2,  0.2,  0 },
     { WEAP_GRENADE_LAUNCHER, AMMO_ROCKETS, 6, 1,  0.6,  4 },
     { WEAP_PIPE_LAUNCHER,    AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
     { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
-    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0,    4 },
+    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0.2,    4 },
     { WEAP_LIGHTNING,        AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,            AMMO_SHELLS,  0, 1,  1.5,  0 },
@@ -94,6 +95,7 @@ FO_WeapInfo weapon_info[] = {
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
     return &weapon_info[WEAP_to_index(weapon)];
 }
+
 struct FO_ClassWeapons {
     float id;
     float slots[4];
@@ -104,7 +106,7 @@ struct FO_ClassWeapons {
 FO_ClassWeapons class_weapons[] = {
     { PC_UNDEFINED, { 0, 0, 0, WEAP_AXE } },
     { PC_SCOUT, { WEAP_NAILGUN, WEAP_SHOTGUN, 0, WEAP_AXE } },
-    { PC_SNIPER, { WEAP_SNIPER_RIFLE, WEAP_SNIPER_RIFLE, WEAP_NAILGUN, WEAP_AXE } },
+    { PC_SNIPER, { WEAP_SNIPER_RIFLE, WEAP_AUTO_RIFLE, WEAP_NAILGUN, WEAP_AXE } },
     { PC_SOLDIER, { WEAP_ROCKET_LAUNCHER, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_DEMOMAN, { WEAP_GRENADE_LAUNCHER, WEAP_PIPE_LAUNCHER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_MEDIC, { WEAP_SUPER_NAILGUN, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_MEDIKIT } },
@@ -429,6 +431,14 @@ void FO_Weapons_Init() {
             WI_ir->attack_time = 0.9; break;
     }
 
+    // Consider just removing this?
+    if (old_ng_rof) {
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_NAILGUN);
+        wi->ammo_per_shot = 2;
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
+        wi->ammo_per_shot = 4;
+    }
+
     float clips_allocated = 0;
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
@@ -470,7 +480,7 @@ void FO_Weapons_Init() {
             case AMMO_NAILS: wti->ammo_mask = IT_NAILS; break;
             case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
         }
-}
+    }
     if (clips_allocated > CLIP_STORAGE_SIZE)
         error("Insufficient clip storage");
 

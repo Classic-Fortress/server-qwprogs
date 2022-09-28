@@ -2786,11 +2786,6 @@ void () TeamFortress_AssaultWeapon = {
     if (FO_CurrentWeaponsMask() & WEAP_ASSAULT_CANNON == 0)
         return;
 
-    if (self.heat > 0) {
-        sprint(self, PRINT_HIGH, "The Assault Cannon is still overheated\n");
-        return;
-    }
-
     if (self.ammo_shells < 1) {
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
         return;
