@@ -387,7 +387,6 @@ void () player_nail1 =[103, player_nail2] {
         W_FireSpikes(-4);
         self.nailpos = 0;
     }
-    Attack_Finished(0.2);
 };
 
 void () player_nail2 =[104, player_nail1] {
@@ -409,185 +408,94 @@ void () player_nail2 =[104, player_nail1] {
             self.nailpos = 0;
         }
     }  
-    Attack_Finished(0.2);
 };
 
-void () player_assaultcannonup1 =[103, player_assaultcannonup2] {
-    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | TFSTATE_AIMING;
+static float CheckNeedAssaultCannonDown() {
+    FO_WeapState ws;
+    FO_FillWeapState(self, WEAP_ASSAULT_CANNON, &ws);
+
+    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running ||
+        ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
+        self.tfstate |= TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
         self.count = 1;
-        self.heat = 0;
-        player_assaultcannondown1();
-        return;
+        player_assaultcannondown();
+        return TRUE;
     }
+    return FALSE;
+}
+void () player_assaultcannon;
+
+void () player_assaultcannonup =[103, player_assaultcannonup] {
+    if (CheckNeedAssaultCannonDown())
+        return;
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+
     self.fire_held_down = 1;
-    if (self.heat == 1) {
+    if (self.count == 0)
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
-    }
+
     SuperDamageSound();
-    Attack_Finished(0.2);
-    if ((self.heat != 2) && (self.heat != 4)) {
-        if (self.weaponframe >= 3) {
-            self.weaponframe = 0;
-        } else {
-            self.weaponframe = self.weaponframe + 1;
-        }
-    }
-    self.heat = self.heat + 1;
-    if (self.heat >= 7) {
-        self.heat = 0;
-        player_assaultcannon1();
-    }
+    if ((self.heat != 2) && (self.heat != 4))
+        self.weaponframe = (self.weaponframe + 1) % 4;
+
+    if (self.count++ >= 5)  // 600ms spin up
+        player_assaultcannon();
+    else
+        Attack_Finished(wi->attack_time);
 };
 
-void () player_assaultcannonup2 =[103, player_assaultcannonup1] {
-    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
-        self.count = 1;
-        self.heat = 0;
-        player_assaultcannondown1();
+void () player_assaultcannon =[103, player_assaultcannon] {
+    if (CheckNeedAssaultCannonDown())
         return;
-    }
-    SuperDamageSound();
-    Attack_Finished(0.2);
-    if (((self.heat != 2) && (self.heat != 4)) && (self.heat != 7)) {
-        if ((self.weaponframe == 2) && (self.heat >= 9)) {
-            self.weaponframe = 0;
-        } else {
-            if (self.weaponframe >= 3) {
-                self.weaponframe = 0;
-            } else {
-                self.weaponframe = self.weaponframe + 1;
-            }
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+
+    if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) < 30)
+            && !(self.tfstate & TFSTATE_LOCK)) {
+        if (self.count % 2 == 0) {
+            muzzleflash();
+            FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
         }
-    }
-    self.heat = self.heat + 1;
-    if (self.heat >= 13) {
-        self.heat = 0;
-        player_assaultcannon1();
-    }
-};
-
-void () player_assaultcannon1 =[103, player_assaultcannon2] {
-    if (fo_hwguy)
-    {
-        if (self.tfstate & TFSTATE_RELOADING || self.reload_assault_cannon == PC_HVYWEAP_ASSCAN_CLIPSIZE)
-        {
-            self.count = 1;
-            player_assaultcannondown1();
-            return;
-        }
-    }
-
-    if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) <= 30)
-                && !(self.tfstate & TFSTATE_LOCK)) {
-        muzzleflash();
-        FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
-
-        if (self.weaponframe == 2)
-            self.weaponframe = 4;
-        else
-            self.weaponframe = 2;
 
         SuperDamageSound();
+        self.weaponframe = self.weaponframe == 2 ? 4 : 2;
 
-        self.tfstate = self.tfstate | TFSTATE_AIMING;
+        self.tfstate |= TFSTATE_AIMING;
         if (!cannon_move)
-            self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+            self.tfstate |= TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
 
-        W_FireAssaultCannon();
+        // Halve firing speed when moving too fast.
+        if (vlen(self.velocity) < 30 || self.count % 2 == 0)
+                W_FireAssaultCannon();
     } else {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
-
-        if (self.weaponframe == 2)
-            self.weaponframe = 0;
-        else
-            self.weaponframe = 2;
+        self.weaponframe = self.weaponframe == 2 ? 0 : 2;
     }
-    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | TFSTATE_AIMING;
-        if (!cannon_move)
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-        TeamFortress_SetSpeed(self);
-        self.weaponframe = 0;
-        self.count = 1;
-        player_assaultcannondown1();
-        return;
-    }
-    Attack_Finished(0.2);
+    self.count++;
+    Attack_Finished(wi->attack_time);
 };
 
-void () player_assaultcannon2 =[104, player_assaultcannon1] {
-    if (fo_hwguy)
-    {
-        if (self.tfstate & TFSTATE_RELOADING || self.reload_assault_cannon == PC_HVYWEAP_ASSCAN_CLIPSIZE)
-        {
-            self.count = 1;
-            player_assaultcannondown1();
-            return;
-        }
-    }
-    if (vlen(self.velocity) < 30 && !(self.tfstate & TFSTATE_LOCK)) {
-        if (self.weaponframe == 2) {
-            self.weaponframe = 4;
-        } else {
-            self.weaponframe = 2;
-        }
-        SuperDamageSound();
-        W_FireAssaultCannon();
-        self.heat = self.heat + 0.1;
-    } else {
-        if (self.weaponframe == 2) {
-            self.weaponframe = 0;
-        } else {
-            self.weaponframe = 2;
-        }
-    }
-    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running) {
-        self.tfstate = self.tfstate | TFSTATE_AIMING;
-        if (!cannon_move)
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-        TeamFortress_SetSpeed(self);
-        self.weaponframe = 0;
-        self.count = 1;
-        player_assaultcannondown1();
-        return;
-    }
-    Attack_Finished(0.2);
-};
-
-void () player_assaultcannondown1 =[103, player_assaultcannondown1] {
-    if (self.count == 1) {
+void () player_assaultcannondown =[103, player_assaultcannondown] {
+    if (self.count == 0)
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
-        self.heat = 0;
-    }
-    if (self.count >= 15) {
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+
+    if (self.count >= 14) {
         self.fire_held_down = 0;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_AIMING);
+        self.tfstate &= ~TFSTATE_AIMING;
         if (!cannon_move)
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+            self.tfstate &= ~TFSTATE_CANT_MOVE;
         TeamFortress_SetSpeed(self);
-        if ((self.ammo_shells < 1) || (self.ammo_cells < 7)) {
+
+        player_run();
+        if (self.ammo_cells < 7 || !FO_CheckForReload()) {
             W_PrintWeaponMessage();
             W_ChangeToBestWeapon();
-            return;
         }
-        player_run();
-        return;
-    }
-    if ((((self.count != 8) && (self.count != 10)) && (self.count != 12))
-        && (self.count != 14)) {
-        if (self.weaponframe == 3) {
-            self.weaponframe = 0;
-        } else {
-            self.weaponframe = self.weaponframe + 1;
-        }
-    }
-    self.count = self.count + 1;
-    Attack_Finished(0.2);
+    } else if (++self.count % 2 == 0)
+        self.weaponframe = (self.weaponframe + 1) % 4;
+    Attack_Finished(wi->attack_time);
 };
 
 void () player_light1 =[105, player_light2] {
