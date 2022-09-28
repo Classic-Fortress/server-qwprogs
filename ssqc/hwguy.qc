@@ -116,7 +116,6 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     FO_WeapState ws;
     FO_FillWeapState(self, WEAP_ASSAULT_CANNON, &ws);
 
-
     Status_Refresh(self);
     FO_CheckForReload();
 

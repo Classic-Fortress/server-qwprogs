@@ -1791,7 +1791,10 @@ void () W_Attack = {
         W_FireLaser();
     }
 
-    if (self.current_weapon != WEAP_FLAMETHROWER)
+    if (self.current_weapon != WEAP_FLAMETHROWER &&    // Variable
+        self.current_weapon != WEAP_ASSAULT_CANNON &&  // In animation
+        self.current_weapon != WEAP_NAILGUN &&         // In animation
+        self.current_weapon != WEAP_SUPER_NAILGUN)     // In animation
         Attack_Finished(wi->attack_time);
 
     if (wi->needs_reload) {
