@@ -119,7 +119,6 @@ void end_sys_globals;
 .float weapon;
 .string weaponmodel;
 .float weaponframe;
-.float currentammo;
 .float ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
 
 .float items;
@@ -341,6 +340,7 @@ void () SUB_Null;
 void (entity et, float f) SUB_Null_pain;
 void () SUB_UseTargets;
 void () SUB_Remove;
+void (entity ent) RemoveDeferred;
 
 //
 // combat.qc

@@ -498,9 +498,7 @@ void (float issilent, float force) FO_Spy_Feign = {
     setsize(self, '-16 -16 -24', '16 16 -16');
 
     // set weapon state and remove weapon viewmodel
-    W_WeaponState_Save(self);
-    self.weaponmodel = "";
-    self.weaponframe = 0;
+    W_QueueAndDisableWeapon();
 
     // set view height to ground
     self.view_ofs = '0 0 4';
@@ -603,8 +601,7 @@ void () FO_Spy_Unfeign = {
         self.feign_areachecked = 0;
 
         // load saved weapon state and set current ammo
-        W_WeaponState_Load(self, 0);
-        W_SetCurrentAmmo(self);
+        W_UpdateCurrentWeapon(self);
 
         // allow spy to move again
         self.movetype = MOVETYPE_WALK;
@@ -672,7 +669,7 @@ void () CF_Spy_Invisible = {
         e_timer.classname = "spytimer";
         e_timer.owner = self;
         e_timer.think = CF_Spy_UndercoverThink;
-        e_timer.nextthink = time + 1;
+        e_timer.nextthink = client_time() + 1;
     }
 
     Status_Refresh(self);
@@ -727,9 +724,9 @@ void () CF_Spy_DisguiseStop = {
     Status_Refresh(self);
 };
 
-void (entity player) FO_Spy_DisguiseLast = {
+void (entity player, float is_user) FO_Spy_DisguiseLast = {
     if (!player.last_selected_skin) {
-        FO_Spy_DisguiseLastSpawned(player);
+        FO_Spy_DisguiseLastSpawned(player, is_user);
         return;
     }
 
@@ -748,11 +745,11 @@ void (entity player) FO_Spy_DisguiseLast = {
         }
     }
 
-    CF_Spy_ChangeColor(player, undercover_team);
-    CF_Spy_ChangeSkin(player, player.last_selected_skin);
+    CF_Spy_ChangeColor(player, undercover_team, is_user);
+    CF_Spy_ChangeSkin(player, player.last_selected_skin, is_user);
 };
 
-void (entity player) FO_Spy_DisguiseLastSpawned = {
+void (entity player, float is_user) FO_Spy_DisguiseLastSpawned = {
     local entity te = find(world, classname, "player");
     local float latest_spawn_time = 0;
     local entity enemy_to_disguise_as = world;
@@ -778,10 +775,10 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
     }
 
     if (enemy_to_disguise_as.team_no) {
-        CF_Spy_ChangeColor(player, enemy_to_disguise_as.team_no);
+        CF_Spy_ChangeColor(player, enemy_to_disguise_as.team_no, is_user);
 
         if (enemy_to_disguise_as.skin) {
-            CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin);
+            CF_Spy_ChangeSkin(player, enemy_to_disguise_as.skin, is_user);
         }
     } else {
         local float undercover_team;
@@ -791,7 +788,7 @@ void (entity player) FO_Spy_DisguiseLastSpawned = {
             undercover_team = 1;
         }
 
-        CF_Spy_ChangeColor(player, undercover_team);
+        CF_Spy_ChangeColor(player, undercover_team, is_user);
     }
 };
 
@@ -900,7 +897,7 @@ void () CF_Spy_UndercoverThink = {
             TeamFortress_SetSkin(self.owner);
 
             if (self.owner.queue_team) {
-                CF_Spy_ChangeColor(self.owner, self.owner.queue_team);
+                CF_Spy_ChangeColor(self.owner, self.owner.queue_team, FALSE);
             } else {
                 if (self.owner.undercover_team)
                     s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
@@ -921,7 +918,7 @@ void () CF_Spy_UndercoverThink = {
             TeamFortress_SetSkin(self.owner);
 
             if (self.owner.queue_skin) {
-                CF_Spy_ChangeSkin(self.owner, self.owner.queue_skin);
+                CF_Spy_ChangeSkin(self.owner, self.owner.queue_skin, FALSE);
             } else {
                 s_team = TeamFortress_TeamGetColorString(self.owner.undercover_team);
                 if (self.owner.undercover_skin)
@@ -943,7 +940,7 @@ void () CF_Spy_UndercoverThink = {
     dremove(self);
 };
 
-void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
+void (entity pe_player, float pf_class, float is_user) CF_Spy_ChangeSkin = {
     pe_player.last_selected_skin = pf_class;
 
     // stop if you're already disguised as the requested skin
@@ -993,13 +990,13 @@ void (entity pe_player, float pf_class) CF_Spy_ChangeSkin = {
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
     e_timer.think = CF_Spy_UndercoverThink;
-    e_timer.nextthink = time + 1;
+    e_timer.nextthink = (is_user ? client_time() : time) + 1;
     e_timer.skin = pf_class;
 
     Status_Refresh(pe_player);
 };
 
-void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
+void (entity pe_player, float pf_team_no, float is_user) CF_Spy_ChangeColor = {
     local entity e_timer;
     local float f_team_color = TeamFortress_TeamGetColor(pf_team_no) - 1;
 
@@ -1047,7 +1044,7 @@ void (entity pe_player, float pf_team_no) CF_Spy_ChangeColor = {
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
     e_timer.think = CF_Spy_UndercoverThink;
-    e_timer.nextthink = time + 1;
+    e_timer.nextthink = (is_user ? client_time() : time) + 1;
     e_timer.team = pf_team_no;
 
     Status_Refresh(pe_player);
@@ -1381,7 +1378,6 @@ void () HallucinationTimer = {
 
 void () W_FireTranq = {
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     KickPlayer(-2, self);
     newmis = spawn();
     newmis.owner = self;
@@ -1522,10 +1518,10 @@ void (entity spy) Spy_RemoveDisguise = {
     if (self.playerclass == PC_SPY) {
         switch(autodisguise) {
             case 1:
-                FO_Spy_DisguiseLastSpawned(self);
+                FO_Spy_DisguiseLastSpawned(self, FALSE);
                 break;
             case 2:
-                FO_Spy_DisguiseLast(self);
+                FO_Spy_DisguiseLast(self, FALSE);
                 break;
         }
     }

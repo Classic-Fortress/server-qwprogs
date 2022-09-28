@@ -46,7 +46,7 @@ void (entity p, string vote) VoteForMap;
 void (entity pe_player) Vote_NextMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_next)
@@ -87,7 +87,7 @@ void (entity pe_player) Vote_NextMap = {
 void (entity pe_player) Vote_TrickMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_trick)
@@ -128,7 +128,7 @@ void (entity pe_player) Vote_TrickMap = {
 void (entity pe_player) Vote_RaceMap = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass || pe_player.vote_race)
@@ -168,7 +168,7 @@ void (entity pe_player) Vote_RaceMap = {
 // called from weapons.qc:ImpulseCommands()
 void (entity pe_player) Vote_ToggleMenu = {
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (vote_started > 0 && !vote_abort) {
@@ -240,7 +240,7 @@ float () Vote_GetRaceVotes = {
 void (entity pe_player) Vote_ForceNext = {
     local float f_votes, f_votes_needed, f_votes_left;
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     if (!pe_player.team_no || !pe_player.playerclass)
@@ -291,7 +291,7 @@ float () Vote_GetForceNextVotes = {
 // called from world.qc:StartFrame()
 void () Vote_Check = {
 
-    if (clanbattle || vote_style)
+    if (disable_voting || vote_style)
         return;
 
     local float closetime = timelimit - CF_MAPVOTE_FINISH;
@@ -513,6 +513,9 @@ void () Vote_MenuClose = {
 // shows the map vote menu
 // called from Vote_Input(), Menu_Open()
 void (entity pe_player) Vote_Menu = {
+    if (disable_voting)
+        return;
+
     local string s_choose, s_vote1, s_vote2, s_vote3, s_vote4, s_vote5;
     local string s_tmp1, s_tmp2, s_tmp3, s_tmp4, s_tmp5;
     local float f_width = 0, f_timeleft = 0;
@@ -1225,7 +1228,6 @@ void () AnarchyMode = {
     vote_anarchy_mode = TRUE;
     local entity e = find(world, classname, "player");
     while(e) {
-        e.items_allowed = IT_AXE | IT_QUAD;
         e.items = IT_AXE;
         e.weapons_carried = IT_AXE;
         e.current_weapon = WEAP_AXE;
@@ -1235,7 +1237,6 @@ void () AnarchyMode = {
             e.super_damage_finished = time + 666;
             //e.effects = e.effects | EF_BLUE;
         }
-        W_SetCurrentAmmo(e);
         TeamFortress_SetSpeed(e);
         e = find(e, classname, "player");
     }
@@ -1267,7 +1268,6 @@ void () EndVoting = {
         e.current_weapon = 0;
         e.super_damage_finished = 0;
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
-        W_SetCurrentAmmo(e);
         TeamFortress_SetSpeed(e);
         e.health = 100;
         e = find(e, classname, "player");
@@ -1405,7 +1405,7 @@ void() vote_think = {
 };
 
 void () StartVoting = {
-    if(voting_started)
+    if(voting_started || disable_voting)
         return;
     local float expires = CF_GetSetting("votetime", "vote_time", "60");
     local entity te;
@@ -1431,6 +1431,9 @@ void () StartVoting = {
 
 
 void (entity p, string vote) VoteForMap = {
+    if (disable_voting)
+        return;
+
     float filehandle;
     filehandle = fopen(strcat("maps/",vote,".bsp"), FILE_READ);
     if (filehandle >= 0) {
@@ -1468,6 +1471,9 @@ void (entity p, string vote) VoteForMap = {
 };
 
 void (entity p) UnvoteForMap = {
+    if (disable_voting)
+        return;
+
     if(p.vote_map) {
         if(vote_anarchy_mode) {
             bprint(PRINT_HIGH, p.netname, " \brecinds vote for\b ", p.vote_map.netname, " \bin battle\b\n");

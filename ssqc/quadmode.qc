@@ -462,6 +462,12 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
+		if (infokey(world, "default_password") == "on") {
+			cvar_set("password", "");
+			localcmd("localinfo default_password off\n");
+		}
+
 		localcmd("stop\n");
 		return;
 	}
@@ -520,7 +526,7 @@ void () StartQuadRound =
 	}
 	te = find(world, classname, "detpack");
 	while (te){
-		if (te.weaponmode == 1) {
+		if (te.is_disarming == 1) {
 			TeamFortress_SetSpeed (te.enemy);
 			dremove(te.oldenemy);
 			dremove(te.observer_list);

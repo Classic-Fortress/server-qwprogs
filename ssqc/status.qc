@@ -6,7 +6,6 @@ string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
 string(entity pl, float csqcactive) ClipSizeToString;
-float(entity pl) GetClipSize;
 string(entity pl) SniperPowerToString;
 string(entity pl) DetpackToString;
 string(entity pl) AuraToString;
@@ -753,6 +752,8 @@ string GetSBClipString(entity pl, float csqcactive)
     string msg = "";
     if (pl.tfstate & TFSTATE_RELOADING) 
     {
+        FO_WeapInfo* wi = FO_GetWeapInfo(pl.current_weapon);
+
         if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
             msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
         } else {
@@ -762,7 +763,7 @@ string GetSBClipString(entity pl, float csqcactive)
                 msg = csqcactive ? "0" : " 0";
 
             msg = strcat(msg, "/");
-            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl)) : strpadr(ftos(GetClipSize(pl)), 3)));
+            msg = strcat(msg, (csqcactive ? ftos(wi->clip_size) : strpadr(ftos(wi->clip_size), 3)));
         }
     } 
     else 
@@ -1331,88 +1332,25 @@ string(float num) GreenScoreToString =
 
 string(entity pl, float csqcactive) ClipSizeToString =
 {
-    local string st = "";
-    local float num = 0, max;
+    FO_WeapState ws;
+    FO_FillWeapState(pl, pl.current_weapon, &ws);
+    FO_WeapInfo* wi = ws->wi;
 
-    max = GetClipSize(pl);
-    if (pl.current_weapon == WEAP_SHOTGUN) {
-        if ((max - pl.reload_shotgun) > pl.ammo_shells)
-            pl.reload_shotgun = max - pl.ammo_shells;
-        num = max - pl.reload_shotgun;
-    } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if ((max - pl.reload_super_shotgun) > pl.ammo_shells)
-            pl.reload_super_shotgun = max - pl.ammo_shells;
-        num = (max - pl.reload_super_shotgun);
-    } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (!sniperreload)
-            return "";
-        if ((max - pl.reload_sniper_rifle) > pl.ammo_shells)
-            pl.reload_sniper_rifle = max - pl.ammo_shells;
-        num = (max - pl.reload_sniper_rifle);
-    } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((max - pl.reload_grenade_launcher) > pl.ammo_rockets)
-            pl.reload_grenade_launcher = (max - pl.ammo_rockets);
-        num = (max - pl.reload_grenade_launcher);
-    } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((max - pl.reload_rocket_launcher) > pl.ammo_rockets)
-            pl.reload_rocket_launcher = (max - pl.ammo_rockets);
-        num = (max - pl.reload_rocket_launcher);
-    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if ((max - pl.reload_assault_cannon) > pl.ammo_shells)
-                pl.reload_assault_cannon = (max - pl.ammo_shells);
-            num = (max - pl.reload_assault_cannon);
-        }
-    } else
+    if (!wi->needs_reload)
         return "";
 
-    if (num > 999)
-        num = 999;
+    if (wi->clip_size - *ws->clip_fired  > *ws->ammo_remaining)
+        *ws->clip_fired = wi->clip_size - *ws->ammo_remaining;
+    float rem = min(wi->clip_size - *ws->clip_fired, 999);
 
+    string st = "";
     if (csqcactive)
-    {
-        st = strcat(ftos(floor(num)), "/", ftos(max));
-    }
+        st = strcat(ftos(floor(rem)), "/", ftos(wi->clip_size));
     else
-    {
-        st = strpadl(ftos(floor(num)), 2);
-        st = strcat(st, "/");
-        st = strcat(st, strpadr(ftos(max), 3));
-    }
-    
-    
+        st = strcat(strpadl(ftos(rem), 2), "/", strpadr(ftos(wi->clip_size), 3));
 
     return st;
 };
-
-float GetClipSize(entity pl) 
-{
-    switch (pl.current_weapon)
-    {
-        case WEAP_SHOTGUN:
-            return 8;
-        case WEAP_SUPER_SHOTGUN:
-            return 16;
-        case WEAP_SNIPER_RIFLE:
-            return 1;
-        case WEAP_GRENADE_LAUNCHER:
-            return 6;
-        case WEAP_ROCKET_LAUNCHER:
-            return 4;
-        case WEAP_ASSAULT_CANNON:
-            if (fo_hwguy)
-            {
-                return PC_HVYWEAP_ASSCAN_CLIPSIZE;
-            }
-            else
-            {
-                return 0;
-            }
-        default:
-            return 0;
-    }
-}
 
 string(entity pl) DisguiseToString =
 {

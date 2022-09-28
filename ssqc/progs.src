@@ -12,10 +12,11 @@ defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
+debug.qc
+../share/fo_weapons.qc
 events.qc
 roles.qc
 q3defs.qc
-debug.qc
 status.qc
 functions.qc
 menu.qc
@@ -25,10 +26,10 @@ vote.qc
 extraents.qc
 help.qc
 subs.qc
-combat.qc
 items.qc
 locfiles.qc
 antilag.qc
+combat.qc
 weapons.qc
 world.qc
 client.qc

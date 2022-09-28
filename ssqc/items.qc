@@ -262,7 +262,6 @@ void () health_touch = {
                         self.think = SUB_regen;
                     }
                     activator = other;
-                    W_SetCurrentAmmo(self);
                     SUB_UseTargets();
                 }
             }
@@ -398,7 +397,6 @@ void () armor_touch = {
             }
             oldself = self;
             self = other;
-            W_SetCurrentAmmo(self);
             self = oldself;
         }
         value = other.maxarmor;
@@ -644,7 +642,6 @@ void () weapon_touch = {
     stemp = self;
     self = other;
     Deathmatch_Weapon(old, new);
-    W_SetCurrentAmmo(self);
     self = stemp;
     if (leave)
         return;
@@ -879,7 +876,6 @@ void () ammo_touch = {
         sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
         stemp = self;
         self = other;
-        W_SetCurrentAmmo(self);
         self = stemp;
     }
     Respawn_Item(self, other);
@@ -1347,7 +1343,6 @@ void () BackpackTouch = {
     stuffcmd(other, "bf\n");
     dremove(self);
     self = other;
-    W_SetCurrentAmmo(self);
 };
 
 void () DropBackpack = {
