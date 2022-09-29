@@ -418,7 +418,7 @@ static float CheckNeedAssaultCannonDown() {
         ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
         self.tfstate |= TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
-        self.count = 1;
+        self.count = 0;
         player_assaultcannondown();
         return TRUE;
     }
@@ -481,7 +481,7 @@ void () player_assaultcannondown =[103, player_assaultcannondown] {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (self.count >= 14) {
+    if (self.count >= 14) {  // 1.5s down
         self.fire_held_down = 0;
         self.tfstate &= ~TFSTATE_AIMING;
         if (!cannon_move)
@@ -493,8 +493,10 @@ void () player_assaultcannondown =[103, player_assaultcannondown] {
             W_PrintWeaponMessage();
             W_ChangeToBestWeapon();
         }
-    } else if (++self.count % 2 == 0)
+    } else if (self.count % 2 == 0)
         self.weaponframe = (self.weaponframe + 1) % 4;
+
+    self.count++;
     Attack_Finished(wi->attack_time);
 };
 
