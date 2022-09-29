@@ -222,8 +222,20 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_RAILGUN,          IT_SHOTGUN},
 };
 
+float BoundSlotInput(float slot) {
+    if (slot < 1 || slot > 4) {
+#ifdef SSQC
+        sprint(self, PRINT_HIGH, sprintf("Error: slot %d OOB\n", slot));
+#endif
+        return 1;
+    } else {
+        return slot;
+    }
+}
+
 FO_WeapInfo* FO_ClassWeaponSlot(float class, float slot) {
     FO_ClassWeapons* cw = &class_weapons[class];
+    slot = BoundSlotInput(slot);
     return cw->info[slot - 1] ? cw->info[slot - 1] : __NULL__;
 }
 
