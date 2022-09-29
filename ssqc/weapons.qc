@@ -1374,13 +1374,12 @@ void (vector org, vector dir) launch_spike = {
 
 void () W_FireSuperSpikes = {
     local vector dir;
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
 
     FO_Sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
 
-    if (old_ng_rof)
-        self.ammo_nails = self.ammo_nails - 4;
-    else
-        self.ammo_nails = self.ammo_nails - 2;
+    self.ammo_nails -= wi->ammo_per_shot;
+
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16', dir);
     LogEventAttack(self);
@@ -1389,31 +1388,33 @@ void () W_FireSuperSpikes = {
     FO_SetModel(newmis, "progs/s_spike.mdl");
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     KickPlayer(-3, self);
+
+    Attack_Finished(wi->attack_time);
 };
 
 void (float ox) W_FireSpikes = {
     local vector dir;
+    FO_WeapInfo* wi = FO_GetWeapInfo(self.current_weapon);
 
     makevectors(self.v_angle);
-    if (((self.ammo_nails >= 4) || ((self.ammo_nails >= 2) && !old_ng_rof)) &&
-        (self.current_weapon == WEAP_SUPER_NAILGUN)) {
+
+    if (self.ammo_nails < wi->ammo_per_shot) {
+        W_ChangeToBestWeapon();
+        return;
+    } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
         W_FireSuperSpikes();
         return;
     }
-    if (self.ammo_nails < 1) {
-        W_ChangeToBestWeapon();
-        return;
-    }
+
     FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-    if ((self.ammo_nails == 1) || !old_ng_rof) {
-        self.ammo_nails = self.ammo_nails - 1;
-    } else {
-        self.ammo_nails = self.ammo_nails - 2;
-    }
+    self.ammo_nails -= wi->ammo_per_shot;
+
     dir = aim(self, 1000);
     launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
     LogEventAttack(self);
     KickPlayer(-3, self);
+
+    Attack_Finished(wi->attack_time);
 };
 
 void () t_climb = {
@@ -1649,9 +1650,8 @@ void () player_light1;
 void () player_rocket1;
 void () player_autorifle1;
 
-void () player_assaultcannon1;
-void () player_assaultcannonup1;
-void () player_assaultcannondown1;
+void () player_assaultcannonup;
+void () player_assaultcannondown;
 
 void () player_medikit1;
 void () player_medikitb1;
@@ -1752,12 +1752,12 @@ void () W_Attack = {
             }
             W_ChangeToBestWeapon();
         } else {
-            self.ammo_cells = self.ammo_cells - 7;
-            self.heat = 1;
+            self.ammo_cells -= - 7;
+            self.count = 0;
             self.immune_to_check = time + 5;
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
-            player_assaultcannonup1();
+            player_assaultcannonup();
         }
     } else if (self.current_weapon == WEAP_FLAMETHROWER) {
         player_shot1();
@@ -1798,7 +1798,8 @@ void () W_Attack = {
         Attack_Finished(wi->attack_time);
 
     if (wi->needs_reload) {
-        *ws->clip_fired += wi->ammo_per_shot;
+        if (self.current_weapon != WEAP_ASSAULT_CANNON)  // In animation
+            *ws->clip_fired += wi->ammo_per_shot;
         FO_CheckForReload();
     }
 

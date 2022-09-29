@@ -2520,7 +2520,7 @@ void () PlayerJump = {
             self.weaponframe = 0;
             self.heat = 0;
             self.count = 1;
-            player_assaultcannondown1();
+            player_assaultcannondown();
         }
         return;
     }
@@ -2549,7 +2549,7 @@ void () PlayerJump = {
             self.weaponframe = 0;
             self.count = 1;
             self.heat = 0;
-            player_assaultcannondown1();
+            player_assaultcannondown();
         } else {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
