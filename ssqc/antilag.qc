@@ -351,12 +351,12 @@ void UnrewindPlayer(entity p) {
 
 .float client_time_internal;
 
-float client_time(optional float ct_type = CT_NOEXTERNALEFFECT) {
+float client_time(float ct_type = CT_NOEXTERNALEFFECT) {
     if (ct_type == CT_NOEXTERNALEFFECT)
         return self.client_time_internal;
 
     float offset = time - self.client_time_internal;
-    float max_offset = 0;
+    float max_offset = antilag_settings.max_client_time_offset;
     switch (ct_type) {
         case CT_SLOW_PROJECTILE:
             max_offset = antilag_settings.max_projectile_slow_offset;
@@ -379,13 +379,9 @@ void AL_UpdateClientTime(entity player) {
 
     offset = min(offset, antilag_settings.max_client_time_offset);
 
-    float old_client_time = player.client_time_internal;
-    if (time - offset > player.client_time_internal)
-        player.client_time_internal = time - offset;
-
     // Monotonically increasing and not dragging beyond 75% of time as/if RTT
     // changes.
-    player.client_time_internal = max(player.client_time_internal,
-                                      old_client_time + (1/77.0 * 0.75));
+    player.client_time_internal =
+        max(time - offset, player.client_time_internal + (1/77.0 * 0.75));
 }
 
