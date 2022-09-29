@@ -399,19 +399,14 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 };
 
 void(float isnew) CSQC_Ent_Update = {
-    print("CSQC_Ent_Update, new: ", ftos(isnew), "\n");
     float etype = readbyte();
-    string s;
     switch (etype) {
-        case MSG_FLAGINFO:
-            s = readstring();
-            print("CSQC_Ent_Update, Flag info: ", s, "\n");
-            break;
         default:
-            error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
+            error("Unhandled CSQC entity\n");
             return;
     }
 };
+
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
     print("CSQC_Ent_Remove\n");
     remove(self);

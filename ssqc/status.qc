@@ -694,13 +694,6 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
-float(entity playerent, float changedflags) SendClientFlagStatus = {
-    bprint(PRINT_HIGH, "SendClientFlagStatus, for: ",playerent.netname,"\n");
-    WriteByte (MSG_ENTITY, MSG_FLAGINFO);
-    WriteString (MSG_ENTITY, self.mdl);
-    return TRUE;
-}
-
 string (entity Player, entity Item, float teamno) GetItemStatus = {
     local string st = "";
     switch (teamno)

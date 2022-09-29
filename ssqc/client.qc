@@ -216,12 +216,6 @@ void InitPrematch()
     }
 }
 
-void (entity goalitem) SetFlagSendMethod = {
-    if(goalitem) {
-        goalitem.SendEntity = SendClientFlagStatus;
-    }
-}
-
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -262,11 +256,6 @@ void () DecodeLevelParms = {
 
             if ((number_of_teams <= 0) || (number_of_teams >= 5))
                 number_of_teams = 4;
-
-            //SetFlagSendMethod(Finditem(ent.display_item_status1));
-            //SetFlagSendMethod(Finditem(ent.display_item_status2));
-            //SetFlagSendMethod(Finditem(ent.display_item_status3));
-            //SetFlagSendMethod(Finditem(ent.display_item_status4));
 
         } else {
 
