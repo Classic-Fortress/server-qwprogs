@@ -19,7 +19,7 @@ struct antilag_settings_t {
 //     at t1: client_time() + o < at t2: client_time() + o  FOR t2 > t1
 // E.g. That you never have to worry about the correction reordering events
 // that `time + o` would not.
-float client_time(optional float ct_type = CT_NOEXTERNALEFFECT);
+float client_time(float ct_type = CT_NOEXTERNALEFFECT);
 
 //===========================================================================
 // TEAMFORTRESS Defs
