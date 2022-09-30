@@ -2188,7 +2188,7 @@ void () PutClientInServer = {
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
 
-    self.attack_finished = time + 0.3;
+    self.attack_finished = client_time() + 0.3;
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
@@ -2768,14 +2768,15 @@ void () PlayerPreThink = {
         self.velocity = '0 0 0';
     }
 
-#if 0
+    // Catch all.
     FO_WeapState ws;
-    FO_FillWeapState(self, self.weapon, &ws);
-    if (time > self.attack_finished && !self.currentammo && self.weapon > WEAP_AXE) {
-        W_ChangeWeapon(W_BestWeaponSlot());
-        W_WeaponState_Save(self);
+    FO_FillWeapState(self, self.current_weapon, &ws);
+    if ((client_time() > self.attack_finished) &&
+        (self.current_weapon > WEAP_AXE) &&
+        ((ws->wi)->ammo_type != AMMO_NONE)) {
+        if (*ws->ammo_remaining == 0)
+            W_ChangeToBestWeapon();
     }
-#endif
 };
 
 void () CheckPowerups = {
