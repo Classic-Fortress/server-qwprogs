@@ -2073,7 +2073,7 @@ static ImpulseWeapons impulse_weapons[] = {
 };
 
 float W_WeaponByImpulse(float impulse) {
-    if (impulse <= 1 || impulse >= 7) return 0;
+    if (impulse < 1 || impulse > 7) return 0;
     return impulse_weapons[self.playerclass].weapons[impulse - 1];
 }
 
