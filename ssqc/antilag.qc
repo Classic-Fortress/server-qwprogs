@@ -1,3 +1,5 @@
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+
 void AL_ProjectProjectile (entity projectile) {
     float time_offset = time - client_time(CT_SLOW_PROJECTILE);
 
@@ -321,8 +323,6 @@ class FOPlayer {
         }
     };
 };
-
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     if (antilag_settings.rewind_detpipe)
