@@ -97,11 +97,6 @@ void () worldspawn = {
     lastspawn = world;
     number_of_teams = 0;
 
-    if (infokey(world, "default_password") == "on") {
-        cvar_set("password", "");
-        localcmd("localinfo default_password off\n");
-    }
-
     InitBodyQue();
     if (self.model == "maps/e1m8.bsp")
         cvar_set("sv_gravity", "100");
