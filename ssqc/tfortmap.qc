@@ -835,7 +835,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 //refill the clip if stock_reload is 2
                 if (stock_reload == 2) {
                     FO_WeapState ws;
-                    FO_FillWeapState(Player, Player.current_weapon, &ws);
+                    FO_FillWeapState(Player, Player.current_slot, &ws);
                     FO_WeapInfo* wi = ws->wi;
 
 
@@ -856,7 +856,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 } else {
                     //for use in map entities without specifically enabling the general override
                     FO_WeapState ws;
-                    FO_FillWeapState(Player, Player.current_weapon, &ws);
+                    FO_FillWeapState(Player, Player.current_slot, &ws);
 
                     if ((Goal.reload_shotgun && ws.weapon == WEAP_SHOTGUN) ||
                         (Goal.reload_super_shotgun && ws.weapon == WEAP_SUPER_SHOTGUN) ||

@@ -4,13 +4,6 @@
  * shared code.  We'll refactor this on both sides to be cleaner incrementally,
  * but it gets us started.
  */
-.float reload_rocket_launcher;
-.float reload_grenade_launcher;
-.float reload_shotgun;
-.float reload_super_shotgun;
-.float reload_super_shotgun;
-.float reload_assault_cannon;
-.float reload_sniper_rifle;
 .float waterlevel;
 .float playerclass;
 
@@ -57,10 +50,9 @@ struct FO_WeapInfo {
     float attack_time;
     float full_reload_time;
 
-    // Fields below this are automatically initialized by Init.  Do not include
-    // in table.
+    // Fields below this are automatically initialized by Init.
+    // ** Do not include in table. **
     float needs_reload;
-    int storage_index;  // Allocated by init
     FO_WeapModels* models;
     FO_WeapToItem* items;
 };
@@ -114,6 +106,7 @@ FO_ClassWeapons class_weapons[] = {
     { PC_PYRO, { WEAP_INCENDIARY, WEAP_FLAMETHROWER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_SPY, { WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN, WEAP_KNIFE } },
     { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SPANNER } },
+    { PC_RANDOM, { 0, 0, 0, WEAP_AXE } },  // TODO: Probably needs attention
     { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
 
@@ -181,13 +174,12 @@ static float* AMMO_to_p(entity player, AmmoType ammo_type) {
 float WEAP_to_slot(float class, float weapon) {
     for (float i = 0; i < 4; i++)
         if (class_weapons[class].slots[i] == weapon)
-            return i;
+            return i + TF_SLOT1;
     return -1;
 }
 
 // Internal clip storage for both SSQC/CSQC.
-#define CLIP_STORAGE_SIZE 8
-.float clip_fired[CLIP_STORAGE_SIZE];
+.float clip_fired[TF_SLOT_LAST - TF_SLOT1 + 1];
 
 struct FO_WeapToItem {
     int weapon;
@@ -223,46 +215,50 @@ FO_WeapToItem weapon_to_items[] = {
 };
 
 float BoundSlotInput(float slot) {
-    if (slot < 1 || slot > 4) {
-#ifdef SSQC
-        sprint(self, PRINT_HIGH, sprintf("Error: slot %d OOB\n", slot));
-#endif
-        return 1;
+    if (slot < TF_SLOT1 || slot > TF_SLOT4) {
+        return TF_SLOT4;
     } else {
         return slot;
     }
 }
 
-FO_WeapInfo* FO_ClassWeaponSlot(float class, float slot) {
+FO_WeapInfo* FO_SlotWeapInfo(float class, float slot) {
+    if (slot == TF_SLOT_NONE)
+        return FO_GetWeapInfo(WEAP_NONE);
+
     FO_ClassWeapons* cw = &class_weapons[class];
     slot = BoundSlotInput(slot);
-    return cw->info[slot - 1] ? cw->info[slot - 1] : __NULL__;
+    return cw->info[slot - TF_SLOT1] ? cw->info[slot - TF_SLOT1] :
+                                       FO_GetWeapInfo(WEAP_NONE);
 }
 
-float FO_ClassWeapMask(float class) {
+float FO_ClassWeaponBySlot(float class, float slot) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(class, slot);
+    if (!wi)
+        return WEAP_NONE;
+
+    return wi->weapon;
+}
+
+float FO_WeaponSlot(float slot) {
+    return FO_ClassWeaponBySlot(self.playerclass, slot);
+}
+
+
+float FO_ClassWeapItemMask(float class) {
     float result = 0;
-    for (int i = 1; i <= 4; i++) {
-        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
+    for (int i = TF_SLOT1; i <= TF_SLOT_LAST; i++) {
+        FO_WeapInfo* wi = FO_SlotWeapInfo(class, i);
         if (wi)
             result |= (wi->items)->it_weapon;
     }
     return result;
 }
 
-float FO_ClassWeaponItemMask(float class) {
+float FO_WeaponsMask(entity player) {
     float mask = 0;
-    for (float i = 1; i <= 4; i++) {
-        FO_WeapInfo* wi = FO_ClassWeaponSlot(class, i);
-        if (wi)
-            mask |= (wi->items)->it_weapon;
-    }
-    return mask;
-}
-
-float FO_CurrentWeaponsMask() {
-    float mask = 0;
-    for (float i = 1; i <= 4; i++) {
-        FO_WeapInfo* wi = FO_ClassWeaponSlot(self.playerclass, i);
+    for (float i = TF_SLOT1; i <= TF_SLOT_LAST; i++) {
+        FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, i);
         if (wi)
             mask |= wi->weapon;
     }
@@ -272,6 +268,7 @@ float FO_CurrentWeaponsMask() {
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
+    float slot;
 
     // Constant and relative to weapon.  TODO, migrate similar to WeapInfo.
     FO_WeapInfo* wi;
@@ -282,28 +279,49 @@ struct FO_WeapState {
 };
 
 
-void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws) {
-    ws->weapon = weapon;
-    FO_WeapInfo* wi = FO_GetWeapInfo(weapon);
-    ws->wi = wi;
+void FO_FillWeapState(entity player, float slot, FO_WeapState* result) {
+    if (slot < 0 || slot > 4) error(sprintf("SLOT %d OOB\n", slot));
 
-    if (wi->needs_reload)
-        ws->clip_fired = &player.clip_fired[wi->storage_index];
-    ws->ammo_remaining = AMMO_to_p(player, (ws->wi)->ammo_type);
+    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, slot);
+
+    result->weapon =  wi->weapon;
+    result->slot = slot;
+    result->wi = wi;
+
+    result->ammo_remaining = AMMO_to_p(player, wi->ammo_type);
+
+    if (slot != TF_SLOT_NONE)
+        result->clip_fired = &player.clip_fired[slot - TF_SLOT1];
+    else
+        result->clip_fired = __NULL__;
 }
 
-void () RestoreDefaultWeapon;
+float FO_ClassWeaponBySlot(float class, float slot);
+
+inline float FO_CurrentWeapon() {
+    return FO_ClassWeaponBySlot(self.playerclass, self.current_slot);
+}
+
+inline float FO_PlayerCurrentWeapon(entity player) {
+    return FO_ClassWeaponBySlot(player.playerclass, player.current_slot);
+}
+
+inline void FO_FillCurrentWeapState(FO_WeapState* result) {
+    FO_FillWeapState(self, self.current_slot, result);
+}
+
 void (entity pl) Status_Refresh;
 void (float att_delay) Attack_Finished;
 
 static void FOT_ReloadTimer() {
     FO_WeapState ws;
-    FO_FillWeapState(self.owner, self.current_weapon, &ws);
+    FO_FillWeapState(self.owner, self.owner.current_slot, &ws);
 
     if (time >= self.heat) {
         // Reload finished
         self.owner.tfstate &= ~TFSTATE_RELOADING;
         self.owner.weaponmodel = ((ws->wi)->models)->model;
+        self.owner.weaponframe = 0;
         sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
         dremove(self);
     } else {
@@ -318,9 +336,9 @@ static void FOT_ReloadTimer() {
     Status_Refresh(self.owner);
 }
 
-float FO_CanReload(float weapon) {
+float FO_CanReload(float slot) {
     FO_WeapState ws;
-    FO_FillWeapState(self, weapon, &ws);
+    FO_FillWeapState(self, slot, &ws);
     FO_WeapInfo* wi = ws->wi;
 
     if (wi->ammo_type == AMMO_NONE)
@@ -333,29 +351,14 @@ float FO_CanReload(float weapon) {
     return FALSE;
 }
 
-void () TeamFortress_ForceReloadCurrentWeapon;
-float FO_CheckForReload() {
-    FO_WeapState ws;
-    FO_FillWeapState(self, self.current_weapon, &ws);
-    FO_WeapInfo* wi = ws->wi;
-
-    if (wi->needs_reload && *ws->clip_fired >= wi->clip_size &&
-        *ws->ammo_remaining > 0) {
-        if (force_reload)
-            TeamFortress_ForceReloadCurrentWeapon();
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
-void FO_ReloadWeapon(float weapon, float force) {
+void () RestoreDefaultWeapon;
+void FO_ReloadSlot(float slot, float force) {
     RestoreDefaultWeapon();
     if (self.tfstate & TFSTATE_RELOADING)
         return;
 
     FO_WeapState ws;
-    FO_FillWeapState(self, weapon, &ws);
+    FO_FillWeapState(self, slot, &ws);
     FO_WeapInfo* wi = ws->wi;
 
     if (!wi->needs_reload)
@@ -398,12 +401,11 @@ void FO_ReloadWeapon(float weapon, float force) {
     // Actual entity that will update status bar / clear reload.
     entity reload_timer = spawn();
     reload_timer.owner = self;
-    reload_timer.current_weapon = weapon;
     reload_timer.classname = "timer";
     reload_timer.think = FOT_ReloadTimer;
 
     // TODO: Remove this hack.
-    if (weapon == WEAP_SNIPER_RIFLE) {
+    if (ws.weapon == WEAP_SNIPER_RIFLE) {
         self.reload_tick = 1;
         self.reload_sniper_ticks = 0;
     }
@@ -416,12 +418,87 @@ void FO_ReloadWeapon(float weapon, float force) {
 
 }
 
+float FO_CheckForReload() {
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+    FO_WeapInfo* wi = ws->wi;
+
+    if (wi->needs_reload && *ws->clip_fired >= wi->clip_size &&
+        *ws->ammo_remaining > 0) {
+        if (force_reload)
+            FO_ReloadSlot(self.current_slot, TRUE);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
 void FO_InstantReloadAllWeapons(entity player) {
     player.tfstate &= ~TFSTATE_RELOADING;
-    for (int i = 0; i < CLIP_STORAGE_SIZE; i++)
+    for (int i = 0; i < 4; i++)
         player.clip_fired[i] = 0;
 }
 #endif
+
+struct ImpulseWeapon {
+    int class;
+    float weapons[7];
+
+    // Autogenerated
+    float slots[7];
+};
+
+ImpulseWeapon impulse_weapons[] = {
+    { PC_UNDEFINED, { WEAP_AXE } },
+    { PC_SCOUT,
+        { WEAP_AXE, WEAP_SHOTGUN, 0, WEAP_NAILGUN } },
+    { PC_SNIPER,
+        { WEAP_AXE, WEAP_SNIPER_RIFLE, WEAP_AUTO_RIFLE, WEAP_NAILGUN } },
+    { PC_SOLDIER,
+        { WEAP_AXE, WEAP_SHOTGUN, WEAP_SUPER_SHOTGUN, 0, 0, 0, WEAP_ROCKET_LAUNCHER } },
+    { PC_DEMOMAN,
+        { WEAP_AXE, WEAP_SHOTGUN, 0, 0, WEAP_GRENADE_LAUNCHER, WEAP_PIPE_LAUNCHER} },
+    { PC_MEDIC,
+        { WEAP_MEDIKIT, WEAP_SHOTGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SUPER_NAILGUN } },
+    { PC_HVYWEAP,
+        { WEAP_AXE, WEAP_SHOTGUN, WEAP_SUPER_SHOTGUN, 0, 0, 0, WEAP_ASSAULT_CANNON } },
+    { PC_PYRO,
+        { WEAP_AXE, WEAP_SHOTGUN, 0, 0, WEAP_FLAMETHROWER, WEAP_INCENDIARY } },
+    { PC_SPY,
+        { WEAP_KNIFE, WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN } },
+    { PC_ENGINEER,
+        { WEAP_SPANNER, WEAP_RAILGUN, WEAP_SUPER_SHOTGUN } },
+    { PC_CIVILIAN,  { WEAP_AXE } },
+};
+
+float FO_ImpulseToSlot(float impulse) {
+    if (impulse < 1 || impulse > 7) return 0;
+    return impulse_weapons[self.playerclass].slots[impulse - 1];
+}
+
+#ifdef SSQC
+float IsUsingOldImpulses();
+
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+static float IsPyroSlotSwapped() {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
+}
+#else
+float IsUsingOldImpulses() { return FALSE; }
+
+static float IsPyroSlotSwapped() { return FALSE; }
+#endif
+
+static float HandlePyroSlotSwap(float slot) {
+    float cf_pyro_impulses = IsPyroSlotSwapped();
+    if (self.playerclass == PC_PYRO && cf_pyro_impulses && (slot == 1 || slot == 2))
+        slot = 3 - slot;
+    return slot;
+}
+
+float FO_SlotByInput(float input) {
+    return IsUsingOldImpulses() ? FO_ImpulseToSlot(input) : input;
+}
 
 void FO_Weapons_Init() {
     float i, j;
@@ -451,7 +528,6 @@ void FO_Weapons_Init() {
         wi->ammo_per_shot = 4;
     }
 
-    float clips_allocated = 0;
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
          if (WEAP_to_index(wi->weapon) != i)
@@ -461,24 +537,17 @@ void FO_Weapons_Init() {
              FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
              wi->ammo_type = parent->ammo_type;
              wi->clip_size = parent->clip_size;
-             wi->storage_index = parent->storage_index;
              wi->full_reload_time = parent->full_reload_time;
              wi->needs_reload = parent->needs_reload;
          } else if (wi->clip_size > 0) {
              wi->needs_reload = TRUE;
-             // We always allocate a storage index for something that can have
-             // reload to save negotiating between client and server around
-             // localinfo tunables.
-             wi->storage_index = clips_allocated++;
          } else {
              wi->needs_reload = FALSE;
-             wi->storage_index = -1;  // Make sure we'll OOB.
          }
 
          FO_WeapModels* wm = &weapon_models[i];
          if (WEAP_to_index(wm->weapon) != i)
              error(sprintf("WM mismatch at index %d\n", i));
-
          precache_model(wm->model);
          wi->models = wm;
 
@@ -493,8 +562,6 @@ void FO_Weapons_Init() {
             case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
         }
     }
-    if (clips_allocated > CLIP_STORAGE_SIZE)
-        error("Insufficient clip storage");
 
     for (i = 0; i < class_weapons.length; i++) {
         for (j = 0; j < 4; j++) {
@@ -503,7 +570,16 @@ void FO_Weapons_Init() {
             if (cw->slots[j])
                 cw->info[j] = &weapon_info[WEAP_to_index(cw->slots[j])];
             else
-                cw->info[j] = __NULL__;
+                cw->info[j] = &weapon_info[0];  // WEAP_NONE
         }
     }
+
+    for (i = 0; i < impulse_weapons.length; i++) {
+        ImpulseWeapon* iw = &impulse_weapons[i];
+
+        for (j = 0; j < 7; j++)
+            if (iw->weapons[j])
+                iw->slots[j] = WEAP_to_slot(iw->class, iw->weapons[j]);
+    }
 }
+
