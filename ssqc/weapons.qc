@@ -200,9 +200,11 @@ float () crandom = {
 
 void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
-        self.attack_finished = client_time() + att_delay * 2;
-    else
-        self.attack_finished = client_time() + att_delay;
+        att_delay *= 2;
+
+    // Ensure we hold firing rate constant with jitter.
+    self.attack_finished = max(client_time() + att_delay,
+                               self.attack_finished + att_delay);
 };
 
 float () W_FireAxe = {
@@ -1810,12 +1812,12 @@ void () W_Attack = {
         LogEventAttack(self);
 };
 
-float (entity pl) WeaponReady = {
-    if (time >= pl.attack_finished && !(pl.tfstate & TFSTATE_RELOADING)) {
-        return 1;
-    }
+float WeaponReady() {
+    if (client_time() >= self.attack_finished &&
+        !(self.tfstate & TFSTATE_RELOADING))
+        return TRUE;
 
-    return 0;
+    return FALSE;
 }
 
 void () W_PrintWeaponMessage = {
@@ -2141,7 +2143,7 @@ void W_ChangeWeapon(float weapon) {
         self.queue_weapon = weapon;
 
     // halt if weapon is not ready to be fired
-    if (!WeaponReady(self))
+    if (!WeaponReady())
         return;
 
     self.queue_weapon = 0;
@@ -2814,7 +2816,7 @@ void () W_WeaponFrame = {
     if (self.impulse == TF_QUICKSTOP)
         self.impulse = self.qf_swap_last_weapon ? TF_WEAPLAST : 0;
 
-    float can_change_weapon = WeaponReady(self) &&
+    float can_change_weapon = WeaponReady() &&
         !self.is_detpacking && !(self.is_building && !engineer_move);
 
     // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
@@ -2923,7 +2925,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (!WeaponReady(self))
+    if (!WeaponReady())
         return;
 
     if (self.impulse != 0 && self.has_disconnected == 0)
