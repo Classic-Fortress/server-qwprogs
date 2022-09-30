@@ -131,7 +131,6 @@ string nextmap;
 //
 // FortressMap stuff
 //
-float quad_maxplayers;
 float number_of_teams;
 float illegalclasses;
 float illegalclasses1;
@@ -241,8 +240,6 @@ float coop;
 .float last_saveme_sound;
 
 .float no_active_nail_grens;
-.float no_active_napalm_grens;
-.float no_active_gas_grens;
 
 /*======================================================================*/
 /* TEAMFORTRESS GOALS							*/
@@ -442,6 +439,7 @@ float already_chosen_map;
 float clanbattle;
 float clan_scores_dumped;
 float cb_prematch;
+float disable_voting;
 float v_break;
 float v_ready;
 .float allowvote;

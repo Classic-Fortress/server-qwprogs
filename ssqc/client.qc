@@ -337,6 +337,8 @@ void () DecodeLevelParms = {
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
 
+        disable_voting = clanbattle || quadmode;
+
         rounds = CF_GetSetting("rounds","rounds","on");
         if (!rounds)
             rounds = -1;
@@ -2114,6 +2116,10 @@ void () PutClientInServer = {
         return;
     }
 
+    if(no_fire_mode) {
+        return;
+    }
+
     if (self.last_playerclass == 0)
         self.last_playerclass = self.playerclass;
 
@@ -3099,12 +3105,6 @@ void () ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
-
-    local float numplayers = TeamFortress_GetNoActivePlayers ();
-    if (quadmode && quad_maxplayers && (numplayers >= quad_maxplayers)) {
-        sprint(self, PRINT_HIGH, "Match in progress, forcing to observer\n");
-        forceinfokey(self, "*spectator", "1");
-    }
 };
 
 float () RejoinWithTfId = {
