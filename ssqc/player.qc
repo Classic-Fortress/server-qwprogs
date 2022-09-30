@@ -436,7 +436,7 @@ void () player_assaultcannonup =[103, player_assaultcannonup] {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
 
     SuperDamageSound();
-    if ((self.heat != 2) && (self.heat != 4))
+    if ((self.count != 2) && (self.count != 4))
         self.weaponframe = (self.weaponframe + 1) % 4;
 
     if (self.count++ >= 5)  // 600ms spin up
@@ -493,8 +493,9 @@ void () player_assaultcannondown =[103, player_assaultcannondown] {
             W_PrintWeaponMessage();
             W_ChangeToBestWeapon();
         }
-    } else if (self.count % 2 == 0)
+    } else if (self.count % 2 == 0) {
         self.weaponframe = (self.weaponframe + 1) % 4;
+    }
 
     self.count++;
     Attack_Finished(wi->attack_time);

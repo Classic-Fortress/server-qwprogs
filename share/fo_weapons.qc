@@ -85,7 +85,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
-    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0.2,    4 },
+    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0.2,  4 },
     { WEAP_LIGHTNING,        AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,            AMMO_SHELLS,  0, 1,  1.5,  0 },
