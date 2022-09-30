@@ -372,10 +372,15 @@
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
+#define TF_SLOT_NONE                0
 #define TF_SLOT1                    1   // Changes weapon to slot 1 (primary weapon)
 #define TF_SLOT2                    2   // Changes weapon to slot 2 (secondary weapon)
 #define TF_SLOT3                    3   // Changes weapon to slot 3 (tertiary weapon)
 #define TF_SLOT4                    4   // Changes weapon to slot 4 (melee weapon)
+#define TF_SLOT_LAST                TF_SLOT4
+#define TF_SLOT_MELEE               TF_SLOT4
+#define TF_NUM_SLOTS                (TF_SLOT_LAST - TF_SLOT1 + 1)
+
 #define TF_CLASSMENU                5   // Brings up class menu
 // unused                           6
 // unused                           7

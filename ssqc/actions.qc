@@ -469,39 +469,28 @@ void (entity pe_player, float f_type) CF_Identify = {
 void () RestoreDefaultWeapon = {
     float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
     if (default_weapon >= 1 && default_weapon <= 4) {
-        W_ChangeWeapon(W_WeaponBySlot(default_weapon));
+        W_ChangeWeaponSlot(default_weapon);
     }
 };
 
-void () TeamFortress_ReloadCurrentWeapon = {
-    FO_ReloadWeapon(self.current_weapon, FALSE);
-};
-
-void () TeamFortress_ForceReloadCurrentWeapon = {
-    FO_ReloadWeapon(self.current_weapon, TRUE);
-};
-
-void (float slot) TeamFortress_ReloadSlot = {
-    float weap = W_WeaponBySlot(slot);
-
-    FO_ReloadWeapon(weap, FALSE);
-}
-
-float W_FindPrevNextWeapon(float weapon, float is_prev);
-
 void () TeamFortress_ReloadNext = {
-    float weapon = self.current_weapon;
+    float slot = self.current_slot;
 
-    if (!FO_CanReload(weapon)) {
-        for (int i = 0; i < 3; i++) {
-            weapon = W_FindPrevNextWeapon(weapon, FALSE);
-            if (FO_CanReload(weapon))
+    if (!FO_CanReload(slot)) {
+        for (int i = 1; i < TF_NUM_SLOTS; i++) {
+            slot = slot + 1;  // Easier to read than mod version because 1-base.
+            if (slot > TF_SLOT_LAST)
+                slot -= TF_NUM_SLOTS;
+            sprint(self, PRINT_HIGH, sprintf("checking %d\n", slot));
+
+            if (FO_CanReload(slot))
                 break;
         }
     }
 
-    if (FO_CanReload(weapon)) {
-        FO_ReloadWeapon(weapon, FALSE);
+    if (FO_CanReload(slot)) {
+        sprint(self, PRINT_HIGH, sprintf("reloading %d\n", slot));
+        FO_ReloadSlot(slot, FALSE);
         RestoreDefaultWeapon();
     } else {
         sprint(self, PRINT_HIGH, "All clips full\n");

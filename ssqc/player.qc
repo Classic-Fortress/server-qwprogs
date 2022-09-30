@@ -90,7 +90,7 @@ void () player_stand1 =[17, player_stand1] {
         player_run();
         return;
     }
-    if (self.current_weapon <= 16) {
+    if (self.current_slot == TF_SLOT_MELEE) {
         if (self.walkframe >= 12) {
             self.walkframe = 0;
         }
@@ -111,7 +111,7 @@ void () player_run =[6, player_run] {
         player_stand1();
         return;
     }
-    if (self.current_weapon <= 16) {
+    if (FO_CurrentWeapon() <= WEAP_AXE) {
         if (self.walkframe >= 6) {
             self.walkframe = 0;
         }
@@ -682,10 +682,10 @@ void (entity et, float f) player_pain = {
         PainSound();
         return;
     }
-    if (self.button0 && (self.current_weapon == 32768))
+    if (self.button0 && (FO_CurrentWeapon() == WEAP_INCENDIARY))
         return;
 
-    if (self.current_weapon <= 16)
+    if (FO_CurrentWeapon() <= WEAP_AXE)
         player_axpain1();
     else
         player_pain1();
@@ -925,7 +925,7 @@ void () PlayerDie = {
     DeathSound();
     self.angles_x = 0;
     self.angles_z = 0;
-    if (self.current_weapon <= 16) {
+    if (FO_CurrentWeapon() <= WEAP_AXE) {
         player_die_ax1();
         TeamFortress_SetupRespawn(0);
         return;
