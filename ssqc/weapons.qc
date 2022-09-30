@@ -202,9 +202,7 @@ void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
         att_delay *= 2;
 
-    // Ensure we hold firing rate constant with jitter.
-    self.attack_finished = max(client_time() + att_delay,
-                               self.attack_finished + att_delay);
+    self.attack_finished = client_time() + att_delay;
 };
 
 float () W_FireAxe = {
