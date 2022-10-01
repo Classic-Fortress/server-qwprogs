@@ -1,3 +1,5 @@
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+
 void AL_ProjectProjectile (entity projectile) {
       // Project projectiles forward in time based on ping up to configurable maximum (default 100ms).    
       // Effective projection time is maximum / 2 (eg 50ms), because we assume RTT is evenly distributed in both
@@ -327,8 +329,6 @@ class FOPlayer {
         }
     };
 };
-
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     // Live changeagble for now.
