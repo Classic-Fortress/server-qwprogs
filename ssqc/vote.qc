@@ -1229,7 +1229,7 @@ void () AnarchyMode = {
     local entity e = find(world, classname, "player");
     while(e) {
         // TODO: Add a no weap switch to handle this like it used to.
-        e.current_slot = TF_SLOT4;
+        e.current_slot = SlotMelee;
         if(e.vote_map) {
             e.items |= IT_QUAD;
             e.tfstate &= 128;
@@ -1263,7 +1263,7 @@ void () EndVoting = {
     while(e) {
         e.vote_map = world;
         e.items = 0;
-        e.current_slot = TF_SLOT4;
+        e.current_slot = SlotMelee;
         e.super_damage_finished = 0;
         //if(e.effects & EF_BLUE) e.effects = e.effects - EF_BLUE;
         TeamFortress_SetSpeed(e);

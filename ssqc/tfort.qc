@@ -1567,9 +1567,10 @@ void () TeamFortress_SetEquipment = {
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
     self.items = FO_ClassWeapItemMask(self.playerclass) | kept_items;
 
-    if (!remember_weapon || self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
-        self.current_slot = 0;
-        self.last_slot = 0;
+    if (!remember_weapon || self.last_playerclass != self.playerclass ||
+        (self.tfstate & TFSTATE_RANDOMPC)) {
+        self.current_slot = SlotMelee;
+        self.last_slot = SlotNull;
     }
 
     self.tf_items = 0;
@@ -2202,7 +2203,7 @@ void () TeamFortress_SetEquipment = {
         self.armortype = 0;
         self.armorvalue = 0;
         self.weapon = 0;
-        self.current_slot = 0;
+        self.current_slot = SlotNull;
 
         self.flags = FL_CLIENT | FL_NOTARGET;
         self.waterlevel = 3;

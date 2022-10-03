@@ -206,9 +206,9 @@ float coop;
 /*==============================================*/
 /* New Weapon variables				*/
 /*==============================================*/
-.float current_slot;            // the currently equipped (weapon) slot
-.float last_slot;               // the last slot the player was using
-.float queue_slot;              // the slot to switch to when possible
+.Slot current_slot;            // the currently equipped (weapon) slot
+.Slot last_slot;               // the last slot the player was using
+.Slot queue_slot;              // the slot to switch to when possible
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;

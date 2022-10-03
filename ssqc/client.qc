@@ -118,7 +118,7 @@ void () SetChangeParms = {
     parm5 = self.ammo_nails;
     parm6 = self.ammo_rockets;
     parm7 = self.ammo_cells;
-    parm8 = self.current_slot;
+    parm8 = SlotIndex(self.current_slot) + 1;
     parm9 = self.armortype * 100;
     parm10 = 0;
     parm11 = 0;
@@ -2925,8 +2925,6 @@ void () CheckPowerups = {
         }
     }
 };
-
-void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws);
 
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);

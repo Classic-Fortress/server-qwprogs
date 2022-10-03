@@ -10,7 +10,7 @@ void () SuperDamageSound;
 void () ConcussionGrenadeTimer;
 void () OldConcussionGrenadeTimer;
 
-void (float slot) W_ChangeWeaponSlot;
+void (Slot slot) W_ChangeWeaponSlot;
 void () W_ChangeToBestWeapon;
 void () W_PrintWeaponMessage;
 
@@ -1553,7 +1553,7 @@ void () superspike_touch = {
 void (entity pl) W_UpdateCurrentWeapon = {
     entity oldself;
 
-    if ((pl.health <= 0) || (pl.current_slot == 0))
+    if ((pl.health <= 0) || IsSlotNull(pl.current_slot))
         return;
 
     FO_WeapState ws;
@@ -1582,20 +1582,23 @@ void (entity pl) W_UpdateCurrentWeapon = {
     }
 };
 
-float W_BestWeaponSlot()  {
+Slot W_BestWeaponSlot()  {
     FO_WeapState ws;
-    for (float i = TF_SLOT1; i <= TF_SLOT_LAST; i++) {
-        FO_FillWeapState(self, i, &ws);
+    for (float i = 1; i <= TF_NUM_SLOTS; i++) {
+        Slot slot = MakeSlot(i);
+        FO_FillWeapState(self, slot, &ws);
 
         // AC also takes cells to fire.
         if (ws->weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
             continue;
 
+        // We don't need to handle out of ammo medi/spanner here because of
+        // fallback below.
         if (ws.weapon != WEAP_NONE &&
             ((ws.wi)->ammo_type == AMMO_NONE || *ws.ammo_remaining))
-            return i;
+            return slot;
     }
-    return TF_SLOT4;
+    return SlotMelee;
 };
 
 void () W_ChangeToBestWeapon = {
@@ -1870,148 +1873,6 @@ float (float weap) W_OldGetSlot = {
     return 0;
 };
 
-float (float inp) W_AmmoSlot = {
-    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-    self.noammo = 0;
-
-    if (inp == TF_SLOT1) {
-        if (self.playerclass == PC_SCOUT && self.ammo_nails < 2)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SOLDIER && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_MEDIC && self.ammo_nails < 4)
-            self.noammo = 1;
-        else if (self.playerclass == PC_HVYWEAP) {
-            if (self.ammo_shells < 1)
-                self.noammo = 1;
-            else if (self.ammo_cells < 7)
-                self.noammo = 2;
-        } else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_rockets < 3)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_cells < 3)
-            self.noammo = 1;
-         else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT2) {
-        if (self.playerclass == PC_SCOUT && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_SPY
-                    || self.playerclass == PC_ENGINEER)
-                    && self.ammo_shells < 2)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_cells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_rockets < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT3) {
-        if (self.playerclass == PC_SCOUT
-                    || self.playerclass == PC_ENGINEER)
-            return 0;
-        if ((self.playerclass == PC_SNIPER
-                    || self.playerclass == PC_SPY)
-                    && self.ammo_nails < 2)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_DEMOMAN
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_PYRO)
-                    && self.ammo_shells < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT4)
-        return 1;
-
-    if (self.noammo > 0)
-        return 0;
-    else
-        return 1;
-};
-
-float (float inp) W_OldAmmoSlot = {
-    self.noammo = 0;
-    if (inp == TF_SLOT1) {
-        return 1;
-    }
-    else if (inp == TF_SLOT2) {
-        if ((self.playerclass == PC_SCOUT 
-                || self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SOLDIER
-                || self.playerclass == PC_DEMOMAN
-                || self.playerclass == PC_MEDIC
-                || self.playerclass == PC_HVYWEAP
-                || self.playerclass == PC_PYRO
-                || self.playerclass == PC_SPY)
-                && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
-            self.noammo = 1;
-
-    }
-    else if (inp == TF_SLOT3) {
-        if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_SPY
-                    || self.playerclass == PC_ENGINEER)
-                    && self.ammo_shells < 2)
-            self.noammo = 1;
-    }
-    else if (inp == TF_SLOT4) {
-        if ((self.playerclass == PC_SCOUT
-                || self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SPY)
-                && self.ammo_nails < 2)
-            self.noammo = 1;
-    }
-    else if (inp == 5) {
-        if (self.playerclass == PC_MEDIC && self.ammo_nails < 4)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
-            self.noammo = 1;
-    }
-    else if (inp == 6) {
-        if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
-            self.noammo = 1;
-
-    }
-    else if (inp == 7) {
-        if (self.playerclass == PC_SOLDIER && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_HVYWEAP) {
-            if (self.ammo_shells < 1)
-                self.noammo = 1;
-            else if (self.ammo_cells < 7)
-                self.noammo = 2;
-        }
-        else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
-            self.noammo = 1;
-
-    }
-    if (self.noammo > 0)
-        return 0;
-    else
-        return 1;
-};
-
 static void W_AmmoError() {
     if (self.noammo == 1)
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
@@ -2025,8 +1886,8 @@ void W_ChangeWeaponByInput(float input) {
     if (input < 1 || input > GetMaxWeaponInput())
         return;
 
-    float slot = FO_SlotByInput(input);
-    if (slot == TF_SLOT_NONE)
+    Slot slot = FO_SlotByInput(input);
+    if (IsSlotNull(slot))
         return;
 
     W_ChangeWeaponSlot(slot);
@@ -2037,12 +1898,12 @@ void W_QueueAndDisableWeapon() {
     // We don't want to actually call Update/Change since that could affect what
     // other players see.  Caller should be setting some state that holds back
     // the queue (e.g. feigned).
-    self.current_slot = TF_SLOT_NONE;
+    self.current_slot = SlotNull;
     self.weaponmodel = "";
     self.weaponframe = 0;
 }
 
-void W_ChangeWeaponSlot(float slot) {
+void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
 
@@ -2052,21 +1913,22 @@ void W_ChangeWeaponSlot(float slot) {
         return;
 
     // queue next weapon if queue is not empty or has changed
-    if (!self.queue_slot || slot != self.queue_slot)
+    if (IsSlotNull(self.queue_slot) || !IsSameSlot(slot, self.queue_slot))
         self.queue_slot = slot;
 
     // halt if weapon is not ready to be fired
     if (!WeaponReady())
         return;
 
-    self.queue_slot = 0;
+    self.queue_slot = SlotNull;
 
-    if (*ws->ammo_remaining == 0) {
+    // We still allow swapping to medikit/spanner with no ammo.
+    if (*ws->ammo_remaining == 0 && !IsSlotMelee(slot)) {
         W_AmmoError();
         return;
     }
 
-    if (self.current_slot == slot)
+    if (IsSameSlot(slot, self.current_slot))
         return;
 
     self.last_slot = self.current_slot;
@@ -2077,45 +1939,54 @@ void W_ChangeWeaponSlot(float slot) {
 };
 
 void W_ChangeWeaponLast() {
-    if (self.last_slot)
+    if (!IsSlotNull(self.last_slot))
         W_ChangeWeaponSlot(self.last_slot);
 };
 
-float W_FindPrevNextWeaponSlot(float slot, float is_prev) {
+Slot W_FindPrevNextWeaponSlot(Slot slot, float is_prev) {
     float i, len;
-
-    float *table;
+    float direction = is_prev ? -1 : 1;
 
     if (IsUsingOldImpulses()) {
-        table = impulse_weapons[self.playerclass].slots;
-        len = impulse_weapons[self.playerclass].slots.length;
-        for (i = 0; i < 7; i++)
-            if (table[i] == slot)
+        Slot* impulse_table = impulse_weapons[self.playerclass].slots;
+        // For reasons that seem to rhyme with -ompilerbug, reads from
+        // impulse_table[offset] return junk so we use a pointer cursor.
+        Slot* cur;
+        len = 7;
+
+        for (i = 0; i < len; i++) {
+            cur = &impulse_table[i];
+            if (IsSameSlot(*cur, slot))
                 break;
+        }
+        do {
+            i = (i + direction + len) % len;
+            cur = &impulse_table[i];
+        } while (IsSlotNull(*cur));
+
+        return *cur;
     } else {
-        table = class_weapons[self.playerclass].slots;
-        len = class_weapons[self.playerclass].slots.length;
-        i = slot - TF_SLOT1;  // Table is 0-index.
+        float* slot_weaps = class_weapons[self.playerclass].slots;
+        len = 4;
+        i = SlotIndex(slot);
+
+        do {
+            i = (i + direction + len) % len;
+        } while (slot_weaps[i] == 0);
+
+        return MakeSlot(i + 1);
     }
-
-    float direction = is_prev ? -1 : 1;
-    do {
-        i = (i + direction + len) % len;
-    } while (table[i] == 0);
-
-    dprint(sprintf("FPN s=%d ip=%d i=%d\n", slot, is_prev, i));
-    return IsUsingOldImpulses() ? table[i] : i + TF_SLOT1;
 }
 
 void W_ChangeWeaponNext() {
-    if (self.weaponmodel == string_null || self.current_slot == 0)
+    if (self.weaponmodel == string_null || IsSlotNull(self.current_slot))
         return;
 
     W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(self.current_slot, FALSE));
 }
 
 void W_ChangeWeaponPrev() {
-    if (self.weaponmodel == string_null || self.current_slot == 0)
+    if (self.weaponmodel == string_null || IsSlotNull(self.current_slot))
         return;
 
     W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(self.current_slot, TRUE));
@@ -2185,11 +2056,11 @@ void () ImpulseCommands = {
         else if (self.impulse == TF_RELOAD)
             FO_ReloadSlot(self.current_slot, FALSE);
         else if (self.impulse == TF_RELOAD_SLOT1)
-            FO_ReloadSlot(TF_SLOT1, FALSE);
+            FO_ReloadSlot(MakeSlot(1), FALSE);
         else if (self.impulse == TF_RELOAD_SLOT2)
-            FO_ReloadSlot(TF_SLOT2, FALSE);
+            FO_ReloadSlot(MakeSlot(2), FALSE);
         else if (self.impulse == TF_RELOAD_SLOT3)
-            FO_ReloadSlot(TF_SLOT3, FALSE);
+            FO_ReloadSlot(MakeSlot(3), FALSE);
         else if (self.impulse == TF_RELOAD_NEXT)
             TeamFortress_ReloadNext();
         else if (self.impulse == TF_DETPACK_5)
@@ -2567,14 +2438,14 @@ void () ButtonFrame = {
     if (input_buttons & BUTTON4) {
         switch (self.playerclass) {
             case PC_SOLDIER:
-                self.impulse = TF_SLOT1;
+                self.impulse = TF_IMPULSE_SLOT1;
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_PYRO:
                 if (IsUsingCFImpulses()) {
-                    self.impulse = TF_SLOT2;
+                    self.impulse = TF_IMPULSE_SLOT2;
                 } else {
-                    self.impulse = TF_SLOT1;
+                    self.impulse = TF_IMPULSE_SLOT1;
                 }
                 // Intercepted by InterceptRocketJump()
                 break;
@@ -2736,11 +2607,16 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     } else if (self.impulse >= TF_QUICKSLOT1 &&
                self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
-        float slot = self.impulse - TF_QUICKSLOT1 + TF_SLOT1;
-        self.qf_swap_last_slot = slot != self.current_slot;
-        W_ChangeWeaponSlot(slot);
+        Slot slot = MakeSlot(self.impulse - TF_QUICKSLOT1 + 1);
+
+        if (IsSameSlot(slot, self.current_slot)) {
+            self.qf_swap_last_slot = FALSE;
+        } else {
+            self.qf_swap_last_slot = TRUE;
+            W_ChangeWeaponSlot(slot);
+        }
         self.impulse = 0;
-    } else if (self.queue_slot > 0 && can_change_weapon) {
+    } else if (!IsSlotNull(self.queue_slot) && can_change_weapon) {
         // change slot if queue_slot has been set
         W_ChangeWeaponSlot(self.queue_slot);
     }
