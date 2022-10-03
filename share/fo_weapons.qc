@@ -18,6 +18,26 @@ float pyro_type = PYRO_FO;
 float old_ng_rof = FALSE;
 #endif
 
+// Careful: Slots are not 0-indexed they start from 1.
+// Use SlotIndex() to convert a slot if you're indexing an array.
+Slot MakeSlot(float slot_num) {
+    if (slot_num < 1 || slot_num > TF_NUM_SLOTS)
+        error(sprintf("invalid slot %d\n", slot_num));
+
+    Slot result;
+    result.id = slot_num;
+    return result;
+}
+
+const Slot SlotMelee = { 4 };
+const Slot SlotNull = { 0 };
+inline float IsSlotNull(Slot slot) { return slot.id == 0; }
+inline float IsSlotMelee(Slot slot) { return slot.id == 3; }
+inline float IsSameSlot(Slot slot1, Slot slot2) { return slot1.id == slot2.id; }
+
+// Returns dense [0..TF_NUM_SLOTS-1]
+float SlotIndex(Slot slot) { return slot.id - 1; }
+
 // Convert a weapon-bit to a linear index.
 static float WEAP_to_index(float weapon) {
     float index = 0;
@@ -171,15 +191,16 @@ static float* AMMO_to_p(entity player, AmmoType ammo_type) {
     return __NULL__;
 }
 
-float WEAP_to_slot(float class, float weapon) {
-    for (float i = 0; i < 4; i++)
-        if (class_weapons[class].slots[i] == weapon)
-            return i + TF_SLOT1;
-    return -1;
+Slot WEAP_to_slot(float playerclass, float weapon) {
+    for (float i = 0; i < TF_NUM_SLOTS; i++) {
+        if (class_weapons[playerclass].slots[i] == weapon)
+            return MakeSlot(i + 1);
+    }
+    return SlotNull;
 }
 
 // Internal clip storage for both SSQC/CSQC.
-.float clip_fired[TF_SLOT_LAST - TF_SLOT1 + 1];
+.float clip_fired[TF_NUM_SLOTS];
 
 struct FO_WeapToItem {
     int weapon;
@@ -214,25 +235,16 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_RAILGUN,          IT_SHOTGUN},
 };
 
-float BoundSlotInput(float slot) {
-    if (slot < TF_SLOT1 || slot > TF_SLOT4) {
-        return TF_SLOT4;
-    } else {
-        return slot;
-    }
-}
-
-FO_WeapInfo* FO_SlotWeapInfo(float class, float slot) {
-    if (slot == TF_SLOT_NONE)
+FO_WeapInfo* FO_SlotWeapInfo(float class, Slot slot) {
+    if (IsSlotNull(slot))
         return FO_GetWeapInfo(WEAP_NONE);
 
     FO_ClassWeapons* cw = &class_weapons[class];
-    slot = BoundSlotInput(slot);
-    return cw->info[slot - TF_SLOT1] ? cw->info[slot - TF_SLOT1] :
+    return cw->info[SlotIndex(slot)] ? cw->info[SlotIndex(slot)] :
                                        FO_GetWeapInfo(WEAP_NONE);
 }
 
-float FO_ClassWeaponBySlot(float class, float slot) {
+float FO_ClassWeaponBySlot(float class, Slot slot) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(class, slot);
     if (!wi)
         return WEAP_NONE;
@@ -240,15 +252,15 @@ float FO_ClassWeaponBySlot(float class, float slot) {
     return wi->weapon;
 }
 
-float FO_WeaponSlot(float slot) {
+float FO_WeaponSlot(Slot slot) {
     return FO_ClassWeaponBySlot(self.playerclass, slot);
 }
 
 
 float FO_ClassWeapItemMask(float class) {
     float result = 0;
-    for (int i = TF_SLOT1; i <= TF_SLOT_LAST; i++) {
-        FO_WeapInfo* wi = FO_SlotWeapInfo(class, i);
+    for (int i = 1; i <= TF_NUM_SLOTS; i++) {
+        FO_WeapInfo* wi = FO_SlotWeapInfo(class, MakeSlot(i));
         if (wi)
             result |= (wi->items)->it_weapon;
     }
@@ -257,8 +269,8 @@ float FO_ClassWeapItemMask(float class) {
 
 float FO_WeaponsMask(entity player) {
     float mask = 0;
-    for (float i = TF_SLOT1; i <= TF_SLOT_LAST; i++) {
-        FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, i);
+    for (float i = 1; i <= TF_NUM_SLOTS; i++) {
+        FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, MakeSlot(i));
         if (wi)
             mask |= wi->weapon;
     }
@@ -268,7 +280,7 @@ float FO_WeaponsMask(entity player) {
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
-    float slot;
+    Slot slot;
 
     // Constant and relative to weapon.  TODO, migrate similar to WeapInfo.
     FO_WeapInfo* wi;
@@ -279,9 +291,7 @@ struct FO_WeapState {
 };
 
 
-void FO_FillWeapState(entity player, float slot, FO_WeapState* result) {
-    if (slot < 0 || slot > 4) error(sprintf("SLOT %d OOB\n", slot));
-
+void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, slot);
 
     result->weapon =  wi->weapon;
@@ -290,13 +300,13 @@ void FO_FillWeapState(entity player, float slot, FO_WeapState* result) {
 
     result->ammo_remaining = AMMO_to_p(player, wi->ammo_type);
 
-    if (slot != TF_SLOT_NONE)
-        result->clip_fired = &player.clip_fired[slot - TF_SLOT1];
+    if (!IsSlotNull(slot))
+        result->clip_fired = &player.clip_fired[SlotIndex(slot)];
     else
         result->clip_fired = __NULL__;
 }
 
-float FO_ClassWeaponBySlot(float class, float slot);
+float FO_ClassWeaponBySlot(float class, Slot slot);
 
 inline float FO_CurrentWeapon() {
     return FO_ClassWeaponBySlot(self.playerclass, self.current_slot);
@@ -336,7 +346,7 @@ static void FOT_ReloadTimer() {
     Status_Refresh(self.owner);
 }
 
-float FO_CanReload(float slot) {
+float FO_CanReload(Slot slot) {
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
     FO_WeapInfo* wi = ws->wi;
@@ -352,7 +362,7 @@ float FO_CanReload(float slot) {
 }
 
 void () RestoreDefaultWeapon;
-void FO_ReloadSlot(float slot, float force) {
+void FO_ReloadSlot(Slot slot, float force) {
     RestoreDefaultWeapon();
     if (self.tfstate & TFSTATE_RELOADING)
         return;
@@ -445,7 +455,7 @@ struct ImpulseWeapon {
     float weapons[7];
 
     // Autogenerated
-    float slots[7];
+    Slot slots[7];
 };
 
 ImpulseWeapon impulse_weapons[] = {
@@ -471,7 +481,7 @@ ImpulseWeapon impulse_weapons[] = {
     { PC_CIVILIAN,  { WEAP_AXE } },
 };
 
-float FO_ImpulseToSlot(float impulse) {
+Slot FO_ImpulseToSlot(float impulse) {
     if (impulse < 1 || impulse > 7) return 0;
     return impulse_weapons[self.playerclass].slots[impulse - 1];
 }
@@ -496,9 +506,11 @@ static float HandlePyroSlotSwap(float slot) {
     return slot;
 }
 
-float FO_SlotByInput(float input) {
-    return IsUsingOldImpulses() ? FO_ImpulseToSlot(input) : input;
+Slot FO_SlotByInput(float input) {
+    return IsUsingOldImpulses() ? FO_ImpulseToSlot(input) : MakeSlot(input);
 }
+
+float getv(float v) { return v; }
 
 void FO_Weapons_Init() {
     float i, j;

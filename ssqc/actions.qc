@@ -468,28 +468,25 @@ void (entity pe_player, float f_type) CF_Identify = {
 
 void () RestoreDefaultWeapon = {
     float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
-    if (default_weapon >= 1 && default_weapon <= 4) {
-        W_ChangeWeaponSlot(default_weapon);
+    if (default_weapon >= 1 && default_weapon <= TF_NUM_SLOTS) {
+        W_ChangeWeaponSlot(MakeSlot(default_weapon));
     }
 };
 
 void () TeamFortress_ReloadNext = {
-    float slot = self.current_slot;
+    Slot slot = self.current_slot;
 
     if (!FO_CanReload(slot)) {
-        for (int i = 1; i < TF_NUM_SLOTS; i++) {
-            slot = slot + 1;  // Easier to read than mod version because 1-base.
-            if (slot > TF_SLOT_LAST)
-                slot -= TF_NUM_SLOTS;
-            sprint(self, PRINT_HIGH, sprintf("checking %d\n", slot));
+        int base = SlotIndex(slot);
 
+        for (int i = 1; i < TF_NUM_SLOTS; i++) {
+            slot = MakeSlot(1 + ((base + 1) % TF_NUM_SLOTS));
             if (FO_CanReload(slot))
                 break;
         }
     }
 
     if (FO_CanReload(slot)) {
-        sprint(self, PRINT_HIGH, sprintf("reloading %d\n", slot));
         FO_ReloadSlot(slot, FALSE);
         RestoreDefaultWeapon();
     } else {

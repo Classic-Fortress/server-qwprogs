@@ -90,7 +90,7 @@ void () player_stand1 =[17, player_stand1] {
         player_run();
         return;
     }
-    if (self.current_slot == TF_SLOT_MELEE) {
+    if (IsSlotMelee(self.current_slot)) {
         if (self.walkframe >= 12) {
             self.walkframe = 0;
         }
@@ -412,7 +412,7 @@ void () player_nail2 =[104, player_nail1] {
 
 static float CheckNeedAssaultCannonDown() {
     FO_WeapState ws;
-    FO_FillWeapState(self, WEAP_ASSAULT_CANNON, &ws);
+    FO_FillWeapState(self, MakeSlot(1), &ws);
 
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running ||
         ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
