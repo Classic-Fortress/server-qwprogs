@@ -236,6 +236,8 @@ float coop;
 .float reload_assault_cannon;
 // Only use above for map ent compatibility.
 
+.float clip_fired[TF_NUM_SLOTS];
+
 // Assault Cannon
 .float heat;
 
