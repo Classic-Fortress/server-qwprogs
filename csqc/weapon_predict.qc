@@ -42,15 +42,3 @@ void FO_CSQC_Animate(float fired) {
             player_spannerN(); break;
     }
 }
-
-void FO_CSQC_Fire() {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-            pstate_pred.current_slot);
-
-    pstate_pred.client_thinkindex = 0;
-
-    // Must be set prior to animation code, which might internally modify.
-    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
-
-    FO_CSQC_Animate(TRUE);
-}

@@ -9,8 +9,9 @@ enumflags {
     FOWP_TFSTATE,
     FOWP_WF,
     FOWP_CLASS,
+    FOWP_RELOAD,
 };
-#define FOWP_ALL 0xFF
+#define FOWP_ALL 0xFFFF
 
 struct predict_tf_state {
     int playerclass;
@@ -26,8 +27,13 @@ struct predict_tf_state {
     float client_nextthink;
     float client_thinkindex;
 
+    float reload_finished;
+    float clip_fired[4];
+
+
      // Used for prediction, not actually communicated.  Reset each frame.
-     float firing;
+    float ammo_used[AMMO_NUM_TYPES];
+    float firing;
 };
 
 #ifdef SSQC
@@ -49,8 +55,12 @@ struct pengine_t {
 // Must include MASK_PRED_VIEWMODEL or we lose updates.
 // We only add/remove MASK_VIEWMODEL.
 float wp_model_mask;
+float wp_enabled;
+
+static int WP_Enabled() { return wp_enabled; }
 
 void FO_WeaponPred_Init(float enabled) {
+    wp_enabled = enabled;
     wp_model_mask = enabled ? MASK_PRED_VIEWMODEL : MASK_VIEWMODEL;
 }
 #endif
@@ -73,7 +83,10 @@ void UpdateWeaponPred(entity player) {
     M1(FOWP_CLASS, playerclass);
     M3(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id);
     M1(FOWP_TFSTATE, tfstate);
-    M3(FOWP_THINK, attack_finished, client_nextthink, client_thinkindex)
+    M2(FOWP_WF, attack_finished, weaponframe);
+    M2(FOWP_THINK, client_nextthink, client_thinkindex);
+    M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
+    M1(FOWP_RELOAD, reload_finished)
 
     player.predict_entity.SendFlags = mask;
 }
@@ -95,7 +108,7 @@ float WeaponPred_SendEntity(entity to_player, float sendflags) {
         return FALSE;
 
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
-    WriteByte(MSG_ENTITY, sendflags);
+    WriteFloat(MSG_ENTITY, sendflags);
 #else
 float() ReadByte = #360;
 float() ReadFloat = #367;
@@ -103,7 +116,7 @@ void InitPredEnt(entity e);
 
 #define COMM(_type, _field) pstate_server.##_field = Read##_type()
 void EntUpdate_WeaponPred(float isnew) {
-    float sendflags = readbyte();
+    float sendflags = readfloat();
 #endif
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
@@ -124,14 +137,25 @@ void EntUpdate_WeaponPred(float isnew) {
     }
 
     if (sendflags & FOWP_THINK) {
-        COMM(Float, attack_finished);
         COMM(Float, client_nextthink);
         COMM(Float, client_thinkindex);
     }
 
     if (sendflags & FOWP_WF) {
+        COMM(Float, attack_finished);
         COMM(Byte, weaponframe);
     }
+
+    if (sendflags & FOWP_CLIP) {
+        COMM(Byte, clip_fired[0]);
+        COMM(Byte, clip_fired[1]);
+        COMM(Byte, clip_fired[2]);
+        COMM(Byte, clip_fired[3]);
+    }
+
+    if (sendflags & FOWP_RELOAD)
+        COMM(Float, reload_finished);
+
 #ifdef SSQC
     return TRUE;
 #else
@@ -195,27 +219,25 @@ static Slot InputToSlot(float input) {
 }
 
 void WeaponPred_ChangeWeapon(Slot slot) {
-    // TODO: Check ammo etc
     pstate_pred.current_slot = slot;
     pstate_pred.weaponframe = 0;
 
     // UpdateViewModel will propagate.
 }
 
+void WeaponPred_Reload();
+
 void WeaponPred_Impulse() {
-    if (!pstate_pred.impulse)
-        return;
-
-    Slot queue_slot = SlotNull;
-
-    if (pstate_pred.impulse <= 7) {  // Change weapon.
+    // Note: We might have no impulse, but a queued slot here.
+    if (pstate_pred.impulse >= 1 && pstate_pred.impulse <= 7) { // Change weapon
         Slot slot = InputToSlot(pstate_pred.impulse);
         if (!IsSlotNull(slot))
             pstate_pred.queue_slot = slot;
         pstate_pred.impulse = 0;
     }
 
-    if (pstate_pred.client_time < pstate_pred.attack_finished)
+    if (pstate_pred.client_time < pstate_pred.attack_finished ||
+        (pstate_pred.tfstate & TFSTATE_RELOADING))
         return;
 
     if (!IsSlotNull(pstate_pred.queue_slot) && !pstate_pred.firing) {
@@ -223,12 +245,150 @@ void WeaponPred_Impulse() {
         pstate_pred.queue_slot = SlotNull;
     }
 
+    if (!pstate_pred.impulse)
+        return;
+
     float clear = FALSE;
+
+    if (pstate_pred.impulse == TF_RELOAD) {
+        WeaponPred_Reload();
+        clear = TRUE;
+    }
+
     if (clear)
         pstate_pred.impulse = 0;
 }
 
 void FO_CSQC_Fire();
+
+static float AmmoToStat(float ammo_type) {
+    switch (ammo_type) {
+        case AMMO_SHELLS: return STAT_SHELLS;
+        case AMMO_ROCKETS: return STAT_ROCKETS;
+        case AMMO_NAILS: return STAT_NAILS;
+        case AMMO_CELLS: return STAT_CELLS;
+    }
+    return STAT_AMMO;
+}
+
+float WP_GetAmmo(float ammo_type) {
+    if (!WP_Enabled())
+        return getstatf(AmmoToStat(ammo_type));
+
+    if (ammo_type == AMMO_NONE)
+        return 0;
+
+    float base = getstatf(AmmoToStat(ammo_type));
+    base -= pstate_pred.ammo_used[ammo_type];
+    return max(0, base);
+}
+
+float WP_CurrentAmmo() {
+    if (!WP_Enabled())
+        return getstatf(STAT_AMMO);
+
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
+                                      pstate_pred.current_slot);
+
+    return WP_GetAmmo(wi->ammo_type);
+}
+
+static float* ClipFired() {
+    float index = SlotIndex(pstate_pred.current_slot);
+    if (pstate_pred.playerclass == PC_DEMOMAN &&
+        index == 1)
+        index = 0;  // Special case: Pipebomb shares with Grenadel launcher.
+
+    return &pstate_pred.clip_fired[index];
+}
+
+string WP_GetClip() {
+    if (!WP_Enabled())
+        return SBAR.ClipSize;
+
+    Slot slot = pstate_pred.current_slot;
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
+
+    if (!wi->needs_reload || IsSlotNull(slot))
+        return "";
+
+    float capacity = wi->clip_size;
+    float still_loading = 0;
+    float fired = *ClipFired();
+
+    if (pstate_pred.tfstate & TFSTATE_RELOADING)
+        still_loading = FO_NumClipStillLoading(wi, pstate_pred.client_time,
+                                                pstate_pred.reload_finished);
+
+    float clip = capacity - fired - still_loading;
+    return sprintf("%d/%d", clip, wi->clip_size);
+}
+
+void WeaponPred_CheckReloadFinished() {
+    if ((pstate_pred.tfstate & TFSTATE_RELOADING) &&
+         pstate_pred.client_time >= pstate_pred.reload_finished) {
+        pstate_pred.tfstate &= ~TFSTATE_RELOADING;
+
+        if (pengine.is_effectframe)
+            print("Finished reloading\n");
+    }
+}
+
+void WeaponPred_Reload() {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
+                                      pstate_pred.current_slot);
+
+    if (!wi->needs_reload)
+        return;
+
+    float clip_fired = *ClipFired();
+    float ammo_rem = WP_GetAmmo(wi->ammo_type);
+
+    string msg;
+    if (!FO_CheckCanReload(wi, ammo_rem, clip_fired, msg)) {
+        if (pengine.is_effectframe)
+            print(msg);
+        return;
+    }
+
+    if (pengine.is_effectframe)
+        print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
+
+    pstate_pred.tfstate |= TFSTATE_RELOADING;
+    float amt = min(ammo_rem, clip_fired);
+    (*ClipFired()) -= amt;
+
+    pstate_pred.reload_finished = pstate_pred.client_time +
+        (amt / wi->clip_size) * wi->full_reload_time;
+}
+
+float WeaponPred_IsReloading() {
+    return pstate_pred.tfstate & TFSTATE_RELOADING;
+}
+
+
+float WeaponPred_ConsumeAmmo(FO_WeapInfo* wi) {
+    if (wi->ammo_type == AMMO_NONE || IsSlotMelee(pstate_pred.current_slot))
+        return TRUE;
+
+    int ammo = WP_GetAmmo(wi->ammo_type);
+    if (wi->ammo_per_shot > ammo)
+        return FALSE;
+
+    if (wi->needs_reload) {
+        if (*ClipFired() >= wi->clip_size) {
+            WeaponPred_Reload();
+            return FALSE;
+        }
+    }
+
+    pstate_pred.ammo_used[wi->ammo_type] += wi->ammo_per_shot;
+    *ClipFired() += wi->ammo_per_shot;
+
+    return TRUE;
+}
+
+void FO_CSQC_Animate(float fired);
 
 void WeaponPred_Attack() {
     if (pstate_pred.firing)  // Already in a continuous attack.
@@ -238,13 +398,15 @@ void WeaponPred_Attack() {
 
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
 
+    if (!WeaponPred_ConsumeAmmo(wi))
+        return;
+
+    // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 0;
     pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
 
-    FO_CSQC_Fire();
+    FO_CSQC_Animate(TRUE);
 }
-
-void FO_CSQC_Animate(float fired);
 
 void WeaponPred_DoClientThink(void) {
     FO_CSQC_Animate(FALSE);
@@ -264,6 +426,11 @@ void WeaponPred_UpdateViewModel() {
     } else {
         wp_model_mask &= ~MASK_VIEWMODEL;
 
+    }
+
+    if (pstate_pred.tfstate & TFSTATE_RELOADING) {
+        self.modelindex = 0;
+        return;
     }
 
     pmodelindex = (wi->models)->modelindex;
@@ -314,11 +481,14 @@ float WeaponPred_ClientThink() {
             pstate_pred.client_time = held_client_time;
         }
 
+        WeaponPred_CheckReloadFinished();
         WeaponPred_Impulse();
 
         if ((input_buttons & BUTTON0) &&
+            (pstate_pred.tfstate & TFSTATE_RELOADING == 0) &&
             (pstate_pred.client_time >= pstate_pred.attack_finished))
             WeaponPred_Attack();
+
     }
 
     WeaponPred_UpdateViewModel();
@@ -332,6 +502,5 @@ void InitPredEnt(entity pe) {
     self.renderflags = RF_VIEWMODEL;
 
     FO_WeaponPred_Init(TRUE);
-
 }
 #endif

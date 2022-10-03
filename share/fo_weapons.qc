@@ -228,9 +228,6 @@ Slot WEAP_to_slot(float playerclass, float weapon) {
     return SlotNull;
 }
 
-// Internal clip storage for both SSQC/CSQC.
-.float clip_fired[TF_NUM_SLOTS];
-
 struct FO_WeapToItem {
     int weapon;
     float it_weapon;
@@ -306,9 +303,24 @@ float FO_WeaponsMask(entity player) {
     return mask;
 }
 
+// Slightly awkward construction, but convenient for calling from CSQC and SSQC.
 float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
     float tick = (wi->ammo_per_shot / wi->clip_size) * wi->full_reload_time;
     return ceil((reload_finished - now) / tick) * wi->ammo_per_shot;
+}
+
+float FO_CheckCanReload(FO_WeapInfo* wi, int ammo_remaining, int clip_fired,
+                        __out string msg) {
+    if (clip_fired == 0)
+        msg = "Clip full\n";
+    else if (ammo_remaining == 0)
+        msg = strcat("Out of ", AMMO_to_s[wi->ammo_type], "\n");
+    else if (wi->clip_size - clip_fired == ammo_remaining)
+        msg = strcat("All ", AMMO_to_s[wi->ammo_type], " are in the clip\n");
+    else
+        return TRUE;
+
+    return FALSE;  // msg filled in above.
 }
 
 #ifdef SSQC
@@ -424,21 +436,14 @@ void FO_ReloadSlot(Slot slot, float force) {
     if (!wi->needs_reload)
         return;
 
-    string msg = string_null;
-    if (*ws->clip_fired == 0)
-        msg = "Clip full\n";
-    else if (*ws->ammo_remaining == 0)
-        msg = strcat("Out of ", AMMO_to_s[wi->ammo_type], "\n");
-    else if (wi->clip_size - *ws->clip_fired == *ws->ammo_remaining)
-        msg = strcat("All ", AMMO_to_s[wi->ammo_type], "are in the clip\n");
-
-    if (msg != string_null) {
+    string msg;
+    if (!FO_CheckCanReload(wi, *ws->ammo_remaining, *ws->clip_fired, msg)) {
         sprint(self, PRINT_HIGH, msg);
         return;
-    } else {
-        sprint(self, PRINT_HIGH, strcat("Reloading ",
-                                        FO_GetWeapName(ws->weapon), "...\n"));
     }
+
+    sprint(self, PRINT_HIGH,
+           strcat("Reloading ", FO_GetWeapName(ws->weapon), "...\n"));
 
     Attack_Finished(wi->attack_time);  // Carried.. but not sure it's necessary.
 
@@ -454,6 +459,7 @@ void FO_ReloadSlot(Slot slot, float force) {
     // TODO: Make ammo in clip independent from ammo_remaining (so you can't
     // have shots in clip that are discarded and other weirdness.)
     (*ws->clip_fired) -= reload_count;
+
     self.last_still_loading = reload_count;
     self.reload_finished = self.client_time + reload_duration;
 }
