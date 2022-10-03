@@ -1968,13 +1968,16 @@ Slot W_FindPrevNextWeaponSlot(Slot slot, float is_prev) {
     } else {
         float* slot_weaps = class_weapons[self.playerclass].slots;
         len = 4;
-        i = SlotIndex(slot);
 
+        // This is a little subtle, we need to transform the index both before
+        // and after the walk so that we don't walk back into ourselves.
+        i = InputHandlePyroSlotSwap(SlotIndex(slot) + 1) - 1;
         do {
             i = (i + direction + len) % len;
         } while (slot_weaps[i] == 0);
 
-        return MakeSlot(i + 1);
+        i = InputHandlePyroSlotSwap(i + 1);
+        return MakeSlot(i);
     }
 }
 
