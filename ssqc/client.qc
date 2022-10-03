@@ -118,7 +118,7 @@ void () SetChangeParms = {
     parm5 = self.ammo_nails;
     parm6 = self.ammo_rockets;
     parm7 = self.ammo_cells;
-    parm8 = self.current_weapon;
+    parm8 = SlotIndex(self.current_slot) + 1;
     parm9 = self.armortype * 100;
     parm10 = 0;
     parm11 = 0;
@@ -216,12 +216,6 @@ void InitPrematch()
     }
 }
 
-void (entity goalitem) SetFlagSendMethod = {
-    if(goalitem) {
-        goalitem.SendEntity = SendClientFlagStatus;
-    }
-}
-
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -262,11 +256,6 @@ void () DecodeLevelParms = {
 
             if ((number_of_teams <= 0) || (number_of_teams >= 5))
                 number_of_teams = 4;
-
-            //SetFlagSendMethod(Finditem(ent.display_item_status1));
-            //SetFlagSendMethod(Finditem(ent.display_item_status2));
-            //SetFlagSendMethod(Finditem(ent.display_item_status3));
-            //SetFlagSendMethod(Finditem(ent.display_item_status4));
 
         } else {
 
@@ -2512,7 +2501,7 @@ void () PlayerJump = {
             else
                 FO_Sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
-        if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
+        if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
             self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
@@ -2536,7 +2525,7 @@ void () PlayerJump = {
 
     FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
-    if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
+    if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
         if (!cannon_air) {
             if (self.antispam_cannon_air < time) {
                 sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
@@ -2770,10 +2759,9 @@ void () PlayerPreThink = {
 
     // Catch all.
     FO_WeapState ws;
-    FO_FillWeapState(self, self.current_weapon, &ws);
+    FO_FillCurrentWeapState(&ws);
     if ((client_time() > self.attack_finished) &&
-        (self.current_weapon > WEAP_AXE) &&
-        ((ws->wi)->ammo_type != AMMO_NONE)) {
+        (ws.weapon > WEAP_AXE) && ((ws->wi)->ammo_type != AMMO_NONE)) {
         if (*ws->ammo_remaining == 0)
             W_ChangeToBestWeapon();
     }
@@ -2942,15 +2930,13 @@ void () CheckPowerups = {
     }
 };
 
-void FO_FillWeapState(entity player, float weapon, FO_WeapState* ws);
-
 void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
 
     FO_WeapState ws;
-    FO_FillWeapState(self, self.current_weapon, &ws);
+    FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
 

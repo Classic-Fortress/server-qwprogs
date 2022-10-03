@@ -297,6 +297,9 @@
 /* Toggleable Game Settings				*/
 /*======================================================*/
 
+// Opaque token that encapsulates slots for correctness.
+struct Slot { int id; };
+
 // Some of the toggleflags aren't used anymore, but the bits are still
 // there to provide compatability with old maps
 #define TFLAG_CLASS_PERSIST	1  	// Persistent Classes Bit
@@ -372,10 +375,12 @@
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
-#define TF_SLOT1                    1   // Changes weapon to slot 1 (primary weapon)
-#define TF_SLOT2                    2   // Changes weapon to slot 2 (secondary weapon)
-#define TF_SLOT3                    3   // Changes weapon to slot 3 (tertiary weapon)
-#define TF_SLOT4                    4   // Changes weapon to slot 4 (melee weapon)
+#define TF_IMPULSE_SLOT1            1   // Changes weapon to slot 1 (primary weapon)
+#define TF_IMPULSE_SLOT2            2   // Changes weapon to slot 2 (secondary weapon)
+#define TF_IMPULSE_SLOT3            3   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
+#define TF_NUM_SLOTS                4
+
 #define TF_CLASSMENU                5   // Brings up class menu
 // unused                           6
 // unused                           7

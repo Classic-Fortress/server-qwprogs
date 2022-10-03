@@ -119,7 +119,7 @@ void () SniperSight_Update = {
     local vector org;
 
     if (!(self.owner.tfstate & TFSTATE_AIMING) ||
-        (self.owner.current_weapon != WEAP_SNIPER_RIFLE)) {
+        (FO_PlayerCurrentWeapon(self.owner) != WEAP_SNIPER_RIFLE)) {
 
         self.owner.tfstate =
             self.owner.tfstate - (self.owner.tfstate & TFSTATE_AIMING);

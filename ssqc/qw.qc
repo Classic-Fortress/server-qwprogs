@@ -49,7 +49,7 @@ float client_time(float ct_type = CT_NOEXTERNALEFFECT);
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_concussed;            // TRUE for a player who is affected by concussion grenade
-.float qf_swap_last_weapon;     // TRUE if +slotX was initated from another slot
+.float qf_swap_last_slot;       // TRUE if +slotX was initiated from another slot
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
@@ -205,18 +205,9 @@ float coop;
 /*==============================================*/
 /* New Weapon variables				*/
 /*==============================================*/
-.float weapons_carried;         // the weapons the player is carrying
-.float current_weapon;          // the weapon the player is using
-.float last_weapon;             // the last weapon the player was using
-.float current_weaponslot;      // the currently equipped weaponslot
-.float last_weaponslot;         // the last equipped weaponslot
-.float queue_weapon;            // the weapon to switch to when possible
-
-// weapon states
-.float weaponstate_current_weaponslot;
-.float weaponstate_last_weaponslot;
-.float weaponstate_current_weapon;
-.float weaponstate_last_weapon;
+.Slot current_slot;            // the currently equipped (weapon) slot
+.Slot last_slot;               // the last slot the player was using
+.Slot queue_slot;              // the slot to switch to when possible
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;
@@ -225,7 +216,7 @@ float coop;
 .float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
-.float reload_shotgun;
+.float reload_shotgun;          // Only use for map compatibility.
 .float reload_super_shotgun;
 .float reload_sniper_rifle;
 .float reload_grenade_launcher;

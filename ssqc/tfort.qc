@@ -340,7 +340,7 @@ void (float inp) TeamFortress_ChangeClass = {
     TeamFortress_SetSpeed(self);
     TeamFortress_SetSkin(self);
     TeamFortress_ExecClassScript(self);
-    W_ChangeWeapon(W_BestWeapon());
+    W_ChangeToBestWeapon();
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
@@ -544,7 +544,7 @@ void () TeamFortress_Inventory = {
     if (self.tf_items & NIT_SCANNER)
         sprint(self, PRINT_HIGH, "Scanner\n");
 
-    float current_weapons = FO_CurrentWeaponsMask();
+    float current_weapons = FO_WeaponsMask(self);
     if (current_weapons & WEAP_MEDIKIT)
         sprint(self, PRINT_HIGH, "Medikit\n");
 
@@ -1565,11 +1565,12 @@ void () TeamFortress_SetEquipment = {
     Team_Role * role = GetTeamRole(self.team_no);
     
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
-    self.items = FO_ClassWeaponItemMask(self.playerclass) | kept_items;
+    self.items = FO_ClassWeapItemMask(self.playerclass) | kept_items;
 
-    if (!remember_weapon || self.last_playerclass != self.playerclass || (self.tfstate & TFSTATE_RANDOMPC)) {
-        self.current_weapon = 0;
-        self.last_weapon = 0;
+    if (!remember_weapon || self.last_playerclass != self.playerclass ||
+        (self.tfstate & TFSTATE_RANDOMPC)) {
+        self.current_slot = SlotMelee;
+        self.last_slot = SlotNull;
     }
 
     self.tf_items = 0;
@@ -2202,7 +2203,7 @@ void () TeamFortress_SetEquipment = {
         self.armortype = 0;
         self.armorvalue = 0;
         self.weapon = 0;
-        self.current_weapon = 0;
+        self.current_slot = SlotNull;
 
         self.flags = FL_CLIENT | FL_NOTARGET;
         self.waterlevel = 3;
@@ -2776,27 +2777,6 @@ void () TeamFortress_AmmoboxTouch = {
     FO_Sound(other, CHAN_ITEM, "weapons/lock4.wav", 1, 1);
     stuffcmd(other, "bf\n");
     self = other;
-};
-
-void () TeamFortress_AssaultWeapon = {
-    self.impulse = 0;
-    if (self.tfstate & TFSTATE_RELOADING)
-        return;
-
-    if (FO_CurrentWeaponsMask() & WEAP_ASSAULT_CANNON == 0)
-        return;
-
-    if (self.ammo_shells < 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-
-    if (self.ammo_cells < 7 && time >= self.antispam_assault_cannon) {
-        sprint(self, PRINT_HIGH, "Not enough cells to power the Assault Cannon\n");
-        self.antispam_assault_cannon = time + 3;
-        return;
-    }
-    W_ChangeWeapon(WEAP_ASSAULT_CANNON);
 };
 
 void () TeamFortress_ExplodePerson = {

@@ -711,28 +711,6 @@ void () W_FireIncendiaryCannon = {
     }
 };
 
-void () TeamFortress_IncendiaryCannon = {
-    if (!(self.weapons_carried & WEAP_INCENDIARY)) {
-        return;
-    }
-    if (self.ammo_rockets < 3) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-    self.current_weapon = WEAP_INCENDIARY;
-};
-
-void () TeamFortress_FlameThrower = {
-    if (!(self.weapons_carried & WEAP_FLAMETHROWER)) {
-        return;
-    }
-    if (self.ammo_cells < 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-    self.current_weapon = WEAP_FLAMETHROWER;
-};
-
 void () AirBlastReloadFinished = {
     self.owner.airblast_cooldown = 0;
     sprint(self.owner, PRINT_HIGH, "Airblast ready\n");

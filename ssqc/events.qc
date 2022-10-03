@@ -170,7 +170,7 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 
 	
 	if (inflictor.classname == "player") 
-		inflictorId = GetWeaponName(attacker.current_weapon);
+		inflictorId = GetWeaponName(FO_PlayerCurrentWeapon(attacker));
 	else {
 		inflictorId = inflictor.classname;
 		if ((inflictor.classname == "spike") && (attacker.playerclass == 3)) {
@@ -272,7 +272,7 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 		killKind = "enemy";
 
 	if (inflictor.classname == "player") 
-		inflictorId = GetWeaponName(attacker.current_weapon);
+		inflictorId = GetWeaponName(FO_PlayerCurrentWeapon(attacker));
 	else {
 		inflictorId = inflictor.classname;
 		if ((inflictor.classname == "spike") && (attacker.playerclass == 3)) {
@@ -386,7 +386,7 @@ void (entity attacker) LogEventAttack = {
 	if (canlog == 0)
 		return;
 	local string event;
-	event = sprintf(",\n{\"type\": \"attack\", \"player\": \"%s\", \"playerClass\": \"%s\", \"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": \"%s\"}", getEntityNameOrLogin(attacker), ftos(attacker.playerclass), GetWeaponName(attacker.current_weapon), ftos(gametime), gametimestamp);
+	event = sprintf(",\n{\"type\": \"attack\", \"player\": \"%s\", \"playerClass\": \"%s\", \"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": \"%s\"}", getEntityNameOrLogin(attacker), ftos(attacker.playerclass), GetWeaponName(FO_PlayerCurrentWeapon(attacker)), ftos(gametime), gametimestamp);
 	logevent(event);
 }
 

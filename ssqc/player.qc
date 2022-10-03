@@ -90,7 +90,7 @@ void () player_stand1 =[17, player_stand1] {
         player_run();
         return;
     }
-    if (self.current_weapon <= 16) {
+    if (IsSlotMelee(self.current_slot)) {
         if (self.walkframe >= 12) {
             self.walkframe = 0;
         }
@@ -111,7 +111,7 @@ void () player_run =[6, player_run] {
         player_stand1();
         return;
     }
-    if (self.current_weapon <= 16) {
+    if (FO_CurrentWeapon() <= WEAP_AXE) {
         if (self.walkframe >= 6) {
             self.walkframe = 0;
         }
@@ -412,7 +412,7 @@ void () player_nail2 =[104, player_nail1] {
 
 static float CheckNeedAssaultCannonDown() {
     FO_WeapState ws;
-    FO_FillWeapState(self, WEAP_ASSAULT_CANNON, &ws);
+    FO_FillWeapState(self, MakeSlot(1), &ws);
 
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running ||
         ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
@@ -682,10 +682,10 @@ void (entity et, float f) player_pain = {
         PainSound();
         return;
     }
-    if (self.button0 && (self.current_weapon == 32768))
+    if (self.button0 && (FO_CurrentWeapon() == WEAP_INCENDIARY))
         return;
 
-    if (self.current_weapon <= 16)
+    if (FO_CurrentWeapon() <= WEAP_AXE)
         player_axpain1();
     else
         player_pain1();
@@ -925,7 +925,7 @@ void () PlayerDie = {
     DeathSound();
     self.angles_x = 0;
     self.angles_z = 0;
-    if (self.current_weapon <= 16) {
+    if (FO_CurrentWeapon() <= WEAP_AXE) {
         player_die_ax1();
         TeamFortress_SetupRespawn(0);
         return;
