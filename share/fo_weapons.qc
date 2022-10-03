@@ -499,18 +499,21 @@ float IsUsingOldImpulses() { return FALSE; }
 static float IsPyroSlotSwapped() { return FALSE; }
 #endif
 
-static float HandlePyroSlotSwap(float slot) {
+float InputHandlePyroSlotSwap(float input) {
     float cf_pyro_impulses = IsPyroSlotSwapped();
-    if (self.playerclass == PC_PYRO && cf_pyro_impulses && (slot == 1 || slot == 2))
-        slot = 3 - slot;
-    return slot;
+    if (self.playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
+        input = 3 - input;
+    return input;
 }
 
 Slot FO_SlotByInput(float input) {
-    return IsUsingOldImpulses() ? FO_ImpulseToSlot(input) : MakeSlot(input);
+    if (IsUsingOldImpulses()) {
+        return FO_ImpulseToSlot(input);
+    } else {
+        input = InputHandlePyroSlotSwap(input);
+        return MakeSlot(input);
+    }
 }
-
-float getv(float v) { return v; }
 
 void FO_Weapons_Init() {
     float i, j;

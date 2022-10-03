@@ -2384,7 +2384,7 @@ void () ButtonFrame = {
         local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
 
         if (default_weapon >= 1 && default_weapon <= 4) {
-            self.impulse = default_weapon;
+            self.impulse = InputHandlePyroSlotSwap(default_weapon);
         }
     }
 
