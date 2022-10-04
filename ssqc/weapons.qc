@@ -1935,6 +1935,7 @@ void W_ChangeWeaponSlot(Slot slot) {
     self.current_slot = slot;
 
     W_UpdateCurrentWeapon(self);
+    W_PrintWeaponMessage();
     Status_Refresh(self);
 };
 
