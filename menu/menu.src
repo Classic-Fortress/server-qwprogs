@@ -8,6 +8,7 @@
 
 #includelist
 ../share/fteextensions.qc	//also sets up system defs
+../share/debug.qc
 
 ../menusys/mitems.qc		//root item type
 ../menusys/mitems_common.qc	//basic types
