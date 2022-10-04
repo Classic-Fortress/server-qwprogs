@@ -8,6 +8,7 @@
 csdefs.qc
 csextradefs.qc
 
+../share/debug.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
