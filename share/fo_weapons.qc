@@ -22,7 +22,7 @@ float old_ng_rof = FALSE;
 // Use SlotIndex() to convert a slot if you're indexing an array.
 Slot MakeSlot(float slot_num) {
     if (slot_num < 1 || slot_num > TF_NUM_SLOTS)
-        error(sprintf("invalid slot %d\n", slot_num));
+        errorf("invalid slot %d\n", slot_num);
 
     Slot result;
     result.id = slot_num;
@@ -518,8 +518,7 @@ Slot FO_SlotByInput(float input) {
 void FO_Weapons_Init() {
     float i, j;
 
-    if (weapon_names.length != weapon_info.length)
-        error("Weapon Names/Weapon Info inconsistency\n");
+    ASSERTD_EQ(weapon_names.length, weapon_info.length);
 
     FO_WeapInfo* WI_ac = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
     WI_ac->clip_size = fo_hwguy ? PC_HVYWEAP_ASSCAN_CLIPSIZE : 0;
@@ -545,30 +544,28 @@ void FO_Weapons_Init() {
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
-         if (WEAP_to_index(wi->weapon) != i)
-             error(sprintf("WI mismatch at index %d\n", i));
+        ASSERTD_EQ(WEAP_to_index(wi->weapon), i);
 
-         if (wi->weapon == WEAP_PIPE_LAUNCHER) {
-             FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
-             wi->ammo_type = parent->ammo_type;
-             wi->clip_size = parent->clip_size;
-             wi->full_reload_time = parent->full_reload_time;
-             wi->needs_reload = parent->needs_reload;
-         } else if (wi->clip_size > 0) {
-             wi->needs_reload = TRUE;
-         } else {
-             wi->needs_reload = FALSE;
-         }
+        if (wi->weapon == WEAP_PIPE_LAUNCHER) {
+            FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
+            wi->ammo_type = parent->ammo_type;
+            wi->clip_size = parent->clip_size;
+            wi->full_reload_time = parent->full_reload_time;
+            wi->needs_reload = parent->needs_reload;
+        } else if (wi->clip_size > 0) {
+            wi->needs_reload = TRUE;
+        } else {
+            wi->needs_reload = FALSE;
+        }
 
-         FO_WeapModels* wm = &weapon_models[i];
-         if (WEAP_to_index(wm->weapon) != i)
-             error(sprintf("WM mismatch at index %d\n", i));
-         precache_model(wm->model);
-         wi->models = wm;
+        FO_WeapModels* wm = &weapon_models[i];
+        ASSERTD_EQ(WEAP_to_index(wm->weapon), i);
+        precache_model(wm->model);
+        wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];
-        if (WEAP_to_index(wti->weapon) != i)
-             error(sprintf("WTI mismatch at index %d\n", i));
+        ASSERTD_EQ(WEAP_to_index(wti->weapon), i);
+
         wi->items = wti;
         switch (wi->ammo_type) {
             case AMMO_SHELLS: wti->ammo_mask = IT_SHELLS; break;

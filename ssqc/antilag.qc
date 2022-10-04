@@ -23,12 +23,12 @@ void AL_ProjectProjectile (entity projectile) {
 
 #define DEBUG_ANTILAG 0
 
-#if DEBUG_ANTILAG
-#define printf(...) sprint(self, PRINT_HIGH, sprintf(__VA_ARGS__))
-#define printd(...) dprint(sprintf(__VA_ARGS__))
+#ifndef DEBUG_ANTILAG
+#define al_printf(...) printf(__VA_ARGS__)
+#define al_printd(...) dprint(__VA_ARGS__)
 #else
-#define printf(...)
-#define printd(...)
+#define al_printf(...)
+#define al_printd(...)
 #endif
 
 #define AL_MAX_REWINDS 25
@@ -157,14 +157,14 @@ SeekResult SeekBasic(RewindState* target, float when) {
 #if 0
 void CompareSeek(SeekResult s1, SeekResult, s2) {
     if (before != (r.before)->time)
-        error(sprintf("before mismatch w=%f seek=%f check=%f\n",
-                      when, (r.before)->time, before));
+        errorf("before mismatch w=%f seek=%f check=%f\n",
+                      when, (r.before)->time, before);
     if (after != (r.after)->time)
-        error(sprintf("after mismatch w=%f seek=%f check=%f\n",
-                      when, (r.after)->time, after));
+        errorf("after mismatch w=%f seek=%f check=%f\n",
+                      when, (r.after)->time, after);
     if (nearest != (r.nearest)->time)
-        error(sprintf("nearest mismatch w=%f seek=%f check=%f\n",
-                      when, (r.nearest)->time, nearest));
+        errorf("nearest mismatch w=%f seek=%f check=%f\n",
+                      when, (r.nearest)->time, nearest);
 }
 
 
