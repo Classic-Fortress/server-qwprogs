@@ -325,7 +325,7 @@ class FOPlayer {
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
-    if (antilag_settings.rewind_detpipe)
+    if (!antilag_settings.rewind_detpipe)
         return FALSE;
 
     float rewind_max_offset = ((AL_MAX_REWINDS - 1)* AL_FRAME_LIMIT);
