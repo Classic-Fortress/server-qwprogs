@@ -8,6 +8,7 @@
 
 #includelist
 ../share/fteextensions.qc
+../share/debug.qc
 defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc

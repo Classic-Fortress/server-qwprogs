@@ -5,7 +5,6 @@
 // The API is made simple and easy to build upon, but cuts have been made
 // to keep complexity low.
 //
-#define printf(x, ...) print(sprintf(x, __VA_ARGS__))
 
 #ifdef MENU
 const float IE_KEYDOWN = 0;	/* Specifies that a key was pressed. Second argument is the scan code. Third argument is the unicode (printable) char value. Fourth argument denotes which keyboard(or mouse, if its a mouse 'scan' key) the event came from. Note that some systems may completely separate scan codes and unicode values, with a 0 value for the unspecified argument. */
