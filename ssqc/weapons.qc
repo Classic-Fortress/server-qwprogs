@@ -2611,7 +2611,8 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     } else if (self.impulse >= TF_QUICKSLOT1 &&
                self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
-        Slot slot = MakeSlot(self.impulse - TF_QUICKSLOT1 + 1);
+        float input = InputHandlePyroSlotSwap(self.impulse - TF_QUICKSLOT1 + 1);
+        Slot slot = MakeSlot(input);
 
         if (IsSameSlot(slot, self.current_slot)) {
             self.qf_swap_last_slot = FALSE;
