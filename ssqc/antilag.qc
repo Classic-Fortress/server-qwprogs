@@ -1,7 +1,7 @@
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void AL_ProjectProjectile (entity projectile) {
-    float time_offset = time - client_time(CT_SLOW_PROJECTILE);
+    float time_offset = (time - client_time(CT_SLOW_PROJECTILE)) / 2;
 
     if (time_offset <= 0.013)  // ping 13ms or lower? Don't do anything
         return;
