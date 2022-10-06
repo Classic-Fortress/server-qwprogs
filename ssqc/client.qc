@@ -71,6 +71,8 @@ entity (entity e)TeamFortress_GetPracticeSpawn;
 void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
+void StopAssCan();
+
 void (float n) CSEv_SetPlayerImpulse_f = {
     bprint(PRINT_HIGH, self.netname, "\n");
     bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
@@ -2467,6 +2469,8 @@ void () PlayerDeathThink = {
     }
 };
 
+void player_asscan_down1();
+
 void () PlayerJump = {
     local entity te;
     local float stumble;
@@ -2491,16 +2495,10 @@ void () PlayerJump = {
             else
                 FO_Sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
-        if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
-            self.tfstate = self.tfstate | TFSTATE_AIMING;
-            TeamFortress_SetSpeed(self);
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-            TeamFortress_SetSpeed(self);
-            self.weaponframe = 0;
-            self.heat = 0;
-            self.count = 1;
-            player_assaultcannondown();
-        }
+
+        if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON))
+            StopAssCan();
+
         return;
     }
 
@@ -2521,14 +2519,7 @@ void () PlayerJump = {
                 sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
                 self.antispam_cannon_air = time + 3;
             }
-            self.tfstate = self.tfstate | TFSTATE_AIMING;
-            TeamFortress_SetSpeed(self);
-            self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-            TeamFortress_SetSpeed(self);
-            self.weaponframe = 0;
-            self.count = 1;
-            self.heat = 0;
-            player_assaultcannondown();
+            StopAssCan();
         } else {
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);

@@ -83,332 +83,170 @@ void () player_touch = {
     }
 };
 
-void () player_stand1 =[17, player_stand1] {
+void player_stand1() {
+    FO_SetClientThink(player_stand1, 0.1);
+
+    self.frame = 17;
     self.weaponframe = 0;
+
     if (self.velocity_x || self.velocity_y) {
         self.walkframe = 0;
         player_run();
         return;
     }
+
     if (IsSlotMelee(self.current_slot)) {
-        if (self.walkframe >= 12) {
+        if (self.walkframe >= 12)
             self.walkframe = 0;
-        }
         self.frame = 17 + self.walkframe;
     } else {
-        if (self.walkframe >= 5) {
+        if (self.walkframe >= 5)
             self.walkframe = 0;
-        }
         self.frame = 12 + self.walkframe;
     }
-    self.walkframe = self.walkframe + 1;
+    self.walkframe++;
 };
 
-void () player_run =[6, player_run] {
+void player_run() {
+    FO_SetClientThink(player_run, 0.1);
+
+    self.frame = 6;
     self.weaponframe = 0;
+
     if (!self.velocity_x && !self.velocity_y) {
         self.walkframe = 0;
         player_stand1();
         return;
     }
-    if (FO_CurrentWeapon() <= WEAP_AXE) {
-        if (self.walkframe >= 6) {
-            self.walkframe = 0;
-        }
-        self.frame = 0 + self.walkframe;
-    } else {
-        if (self.walkframe >= 6) {
-            self.walkframe = 0;
-        }
-        self.frame = self.frame + self.walkframe;
+
+    // Note: Reverses animation when walking backwards
+    self.walkframe = (self.walkframe + (self.movement_x < 0 ? -1 : 1) + 6) % 6;
+    self.frame = (IsSlotMelee(self.current_slot) ? 0 : 6) + self.walkframe;
+};
+
+static void think_nop() {}
+
+struct anim_t {
+    int num_frames, num_wf;
+    int frames[9];
+    int weaponframes[9];
+    int muzzle_flash;  // muzzle flash on weaponframe index 0
+    int loop;
+};
+
+void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
+    int tidx = self.client_thinkindex++;
+
+    int wfi = tidx % anim->num_wf;
+    self.weaponframe = anim->weaponframes[wfi] ?: anim->weaponframes[0] + wfi;
+    if (wfi == 0 && anim->muzzle_flash)
+        muzzleflash();
+
+    int fi = tidx % anim->num_frames;
+    self.frame = anim->frames[fi] ?: anim->frames[0] + fi;
+
+    if (wfi == anim->num_wf - 1 && !anim->loop)
+        FO_SetClientThink(player_run, 0.1);
+    else
+        FO_SetClientThink(parent_thunk, 0.1);
+
+    if (extra != think_nop)
+        extra();
+}
+
+anim_t anim_rocket = { 6, 6, {107}, {1}, TRUE };
+void player_rocketN() { client_anim_frames(player_rocketN, think_nop, &anim_rocket); }
+void player_rocket1() { self.client_thinkindex = 0; player_rocketN(); }
+
+anim_t anim_shotgun = { 6, 6, {113}, {1}, TRUE };
+void player_shotN() { client_anim_frames(player_shotN, think_nop, &anim_shotgun); }
+void player_shot1() { self.client_thinkindex = 0; player_shotN(); }
+
+
+anim_t anim_autorifle = { 3, 3, {113, 114, 118}, {1, 2, 6}, TRUE };
+void player_autorifleN() { client_anim_frames(player_autorifleN, think_nop, &anim_autorifle); }
+void player_autorifle1() { self.client_thinkindex = 0; player_autorifleN(); }
+
+
+static void axe_extra() {
+    float weapon = FO_CurrentWeapon();
+    float* flag;
+    int() w_attack;
+
+    // We'd use default below but compiler can't recognize that init is
+    // guaranteed then.
+    flag = &superaxe;
+    w_attack = W_FireAxe;
+
+    switch (weapon) {
+        case WEAP_MEDIKIT:
+            flag = &supermedikit;
+            w_attack = W_FireMedikit;
+            break;
+        case WEAP_SPANNER:
+            flag = &superspanner;
+            w_attack = W_FireSpanner;
+            break;
+        case WEAP_KNIFE:
+            flag = &superknife;
+            w_attack = W_FireKnife;
+            break;
     }
-    self.walkframe = self.walkframe + 1;
-};
 
-void () player_shot1 =[113, player_shot2] {
-    self.weaponframe = 1;
-    muzzleflash();
-};
+    if ((*flag && !self.hit_in_current_animation) ||
+        (!*flag && self.weaponframe == 3))
+        self.hit_in_current_animation = w_attack();
 
-void () player_shot2 =[114, player_shot3] {
-    self.weaponframe = 2;
-};
+    if (weapon == WEAP_KNIFE && superknife && superknife_multihit)
+        self.hit_in_current_animation = FALSE;
+}
 
-void () player_shot3 =[115, player_shot4] {
-    self.weaponframe = 3;
-};
+anim_t anim_axea = { 4, 4, {119}, {1}, FALSE };
+void player_axeN() { client_anim_frames(player_axeN, axe_extra, &anim_axea); }
+void player_axe1() { self.client_thinkindex = 0; player_axeN(); }
 
-void () player_shot4 =[116, player_shot5] {
-    self.weaponframe = 4;
-};
+anim_t anim_axeb = { 4, 4, {124}, {5}, FALSE };
+void player_axebN() { client_anim_frames(player_axebN, axe_extra, &anim_axeb); }
+void player_axeb1() { self.client_thinkindex = 0; player_axebN(); }
 
-void () player_shot5 =[117, player_shot6] {
-    self.weaponframe = 5;
-};
+void player_spannerN() { client_anim_frames(player_spannerN, axe_extra, &anim_axea); }
+void player_spanner1() { self.client_thinkindex = 0; player_spannerN(); }
 
-void () player_shot6 =[118, player_run] {
-    self.weaponframe = 6;
-};
+void player_knifeN() { client_anim_frames(player_knifeN, axe_extra, &anim_axea); }
+void player_knife1() { self.client_thinkindex = 0; player_knifeN(); }
 
-void () player_autorifle1 =[113, player_autorifle2] {
-    self.weaponframe = 1;
-    muzzleflash();
-};
+// TODO: zel had this on 125, but I think it should be on 124.  Double check.
+void player_knifebN() { client_anim_frames(player_knifebN, axe_extra, &anim_axeb); }
+void player_knifeb1() { self.client_thinkindex = 0; player_knifebN(); }
 
-void () player_autorifle2 =[114, player_autorifle3] {
-    self.weaponframe = 2;
-};
+void player_medikitN() { client_anim_frames(player_medikitN, axe_extra, &anim_axea); }
+void player_medikit1() { self.client_thinkindex = 0; player_medikitN(); }
 
-void () player_autorifle3 =[118, player_run] {
-    self.weaponframe = 6;
-};
+// TODO: zel had this on 125, but I think it should be on 124.  Double check.
+void player_medikitbN() { client_anim_frames(player_medikitbN, axe_extra, &anim_axeb); }
+void player_medikitb1() { self.client_thinkindex = 0; player_medikitbN(); }
 
-void () player_axe1 =[119, player_axe2] {
-    self.weaponframe = 1;
 
-    if (superaxe)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axe2 =[120, player_axe3] {
-    self.weaponframe = 2;
-
-    if (superaxe && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axe3 =[121, player_axe4] {
-    self.weaponframe = 3;
-
-    if (!superaxe)
-        W_FireAxe();
-    else if (!self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axe4 =[122, player_run] {
-    self.weaponframe = 4;
-
-    if (superaxe && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axeb1 =[124, player_axeb2] {
-    self.weaponframe = 5;
-
-    if (superaxe)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axeb2 =[125, player_axeb3] {
-    self.weaponframe = 6;
-
-    if (superaxe && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axeb3 =[126, player_axeb4] {
-    self.weaponframe = 7;
-
-    if (!superaxe)
-        W_FireAxe();
-    else if (!self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_axeb4 =[127, player_run] {
-    self.weaponframe = 8;
-
-    if (superaxe && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireAxe();
-};
-
-void () player_spanner1 =[119, player_spanner2] {
-    self.weaponframe = 1;
-
-    if (superspanner)
-        self.hit_in_current_animation = W_FireSpanner();
-};
-
-void () player_spanner2 =[120, player_spanner3] {
-    self.weaponframe = 2;
-
-    if (superspanner && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireSpanner();
-};
-
-void () player_spanner3 =[121, player_spanner4] {
-    self.weaponframe = 3;
-
-    if (!superspanner)
-        W_FireSpanner();
-    else if (!self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireSpanner();
-};
-
-void () player_spanner4 =[122, player_run] {
-    self.weaponframe = 4;
-
-    if (superspanner && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireSpanner();
-};
-
-void () player_knife1 =[119, player_knife2] {
-    self.weaponframe = 1;
-
-    if (superknife)
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knife2 =[120, player_knife3] {
-    self.weaponframe = 2;
-
-    if (superknife && (superknife_multihit || !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knife3 =[121, player_knife4] {
-    self.weaponframe = 3;
-
-    if (!superknife || (superknife_multihit && !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knife4 =[122, player_run] {
-    self.weaponframe = 4;
-
-    if (superknife && (superknife_multihit || !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knifeb1 =[125, player_knifeb2] {
-    self.weaponframe = 5;
-
-    if (superknife)
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knifeb2 =[126, player_knifeb3] {
-    self.weaponframe = 6;
-
-    if (superknife && (superknife_multihit || !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knifeb3 =[127, player_knifeb4] {
-    self.weaponframe = 7;
-
-    if (!superknife || (superknife_multihit && !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_knifeb4 =[128, player_run] {
-    self.weaponframe = 8;
-
-    if (superknife && (superknife_multihit || !self.hit_in_current_animation))
-        self.hit_in_current_animation = W_FireKnife();
-};
-
-void () player_medikit1 =[119, player_medikit2] {
-    self.weaponframe = 1;
-
-    if (supermedikit)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikit2 =[120, player_medikit3] {
-    self.weaponframe = 2;
-
-    if (supermedikit && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikit3 =[121, player_medikit4] {
-    self.weaponframe = 3;
-
-    if (!supermedikit)
-        W_FireMedikit();
-    else if (!self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikit4 =[122, player_run] {
-    self.weaponframe = 4;
-
-    if (supermedikit && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikitb1 =[125, player_medikitb2] {
-    self.weaponframe = 5;
-
-    if (supermedikit)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikitb2 =[126, player_medikitb3] {
-    self.weaponframe = 6;
-
-    if (supermedikit && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikitb3 =[127, player_medikitb4] {
-    self.weaponframe = 7;
-
-    if (!supermedikit)
-        W_FireMedikit();
-    else if (!self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_medikitb4 =[128, player_run] {
-    self.weaponframe = 8;
-
-    if (supermedikit && !self.hit_in_current_animation)
-        self.hit_in_current_animation = W_FireMedikit();
-};
-
-void () player_nail1 =[103, player_nail2] {
-    muzzleflash();
+void nail_extra() {
     if (!self.button0 || intermission_running) {
         player_run();
         return;
     }
-    self.weaponframe = self.weaponframe + 1;
-    if (self.weaponframe == 9) {
-        self.weaponframe = 1;
-    }
-    SuperDamageSound();
-    if (self.nailpos == 0) {
-        W_FireSpikes(4);
-        self.nailpos = 1;
-    } else {
-        W_FireSpikes(-4);
-        self.nailpos = 0;
-    }
-};
 
-void () player_nail2 =[104, player_nail1] {
-    if (!self.button0 || intermission_running) {
-        player_run();
-        return;
-    }
-    self.weaponframe = self.weaponframe + 1;
-    if (self.weaponframe == 9) {
-        self.weaponframe = 1;
-    }
-    if (!old_ng_rof) {
+    float idx = (self.client_thinkindex - 1) % 2;
+    if (idx == 0 || !old_ng_rof) {
         SuperDamageSound();
-        if (self.nailpos == 0) {
-            W_FireSpikes(4);
-            self.nailpos = 1;
-        } else {
-            W_FireSpikes(-4);
-            self.nailpos = 0;
-        }
-    }  
-};
+        W_FireSpikes(self.nailpos ? 4 : -4);
+        self.nailpos = 1 - self.nailpos;
+    }
+}
+
+anim_t anim_nailgun = { 2, 8, {103, 104}, {1}, TRUE, TRUE };
+void player_nailN() { client_anim_frames(player_nailN, nail_extra, &anim_nailgun); }
+void player_nail1() { self.client_thinkindex = 0; player_nailN(); }
+
+void player_asscan_fire();
+void player_asscan_down1();
 
 static float CheckNeedAssaultCannonDown() {
     FO_WeapState ws;
@@ -418,47 +256,42 @@ static float CheckNeedAssaultCannonDown() {
         ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
         self.tfstate |= TFSTATE_AIMING;
         TeamFortress_SetSpeed(self);
-        self.count = 0;
-        player_assaultcannondown();
+        player_asscan_down1();
         return TRUE;
     }
     return FALSE;
 }
-void () player_assaultcannon;
 
-void () player_assaultcannonup =[103, player_assaultcannonup] {
+void asscan_up_extra() {
     if (CheckNeedAssaultCannonDown())
         return;
+
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
     self.fire_held_down = 1;
-    if (self.count == 0)
+    if (self.client_thinkindex == 1)  // Already incremented
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
-
     SuperDamageSound();
-    if ((self.count != 2) && (self.count != 4))
-        self.weaponframe = (self.weaponframe + 1) % 4;
 
-    if (self.count++ >= 5)  // 600ms spin up
-        player_assaultcannon();
+    if (self.client_thinkindex == 6)  // 600ms spin up
+        player_asscan_fire();
     else
         Attack_Finished(wi->attack_time);
-};
+}
 
-void () player_assaultcannon =[103, player_assaultcannon] {
+void asscan_fire_extra() {
     if (CheckNeedAssaultCannonDown())
         return;
+
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
     if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) < 30)
             && !(self.tfstate & TFSTATE_LOCK)) {
-        if (self.count % 2 == 0) {
-            muzzleflash();
+
+        if (self.client_thinkindex % 2 == 0)
             FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
-        }
 
         SuperDamageSound();
-        self.weaponframe = self.weaponframe == 2 ? 4 : 2;
 
         self.tfstate |= TFSTATE_AIMING;
         if (!cannon_move)
@@ -472,16 +305,16 @@ void () player_assaultcannon =[103, player_assaultcannon] {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
         self.weaponframe = self.weaponframe == 2 ? 0 : 2;
     }
-    self.count++;
     Attack_Finished(wi->attack_time);
-};
+}
 
-void () player_assaultcannondown =[103, player_assaultcannondown] {
-    if (self.count == 0)
-        FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
+void asscan_down_extra() {
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (self.count >= 14) {  // 1.5s down
+    if (self.client_thinkindex == 1)
+        FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
+
+    if (self.client_thinkindex >= 15) {  // 1.5s down
         self.fire_held_down = 0;
         self.tfstate &= ~TFSTATE_AIMING;
         if (!cannon_move)
@@ -493,13 +326,20 @@ void () player_assaultcannondown =[103, player_assaultcannondown] {
             W_PrintWeaponMessage();
             W_ChangeToBestWeapon();
         }
-    } else if (self.count % 2 == 0) {
-        self.weaponframe = (self.weaponframe + 1) % 4;
     }
-
-    self.count++;
     Attack_Finished(wi->attack_time);
 };
+
+anim_t anim_asscan_up = { 1, 4, {103}, {1, 1, 2, 2}, FALSE, TRUE};
+anim_t anim_asscan_fire = { 1, 4, {103}, {2, 4}, FALSE, TRUE};
+anim_t anim_asscan_down = { 1, 8, {103}, {1, 1, 2, 2, 3, 3, 4, 4}, FALSE, TRUE};
+
+void player_asscan_upN() { client_anim_frames(player_asscan_upN, asscan_up_extra, &anim_asscan_up); }
+void player_asscan_up1() { self.client_thinkindex = 0; player_asscan_upN(); }
+
+void player_asscan_fire() { client_anim_frames(player_asscan_fire, asscan_fire_extra, &anim_asscan_fire); }
+void player_asscan_downN() { client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
+void player_asscan_down1() { self.client_thinkindex = 0; client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
 
 void () player_light1 =[105, player_light2] {
     muzzleflash();
@@ -528,31 +368,6 @@ void () player_light2 =[106, player_light1] {
     SuperDamageSound();
     W_FireLightning();
     Attack_Finished(0.2);
-};
-
-void () player_rocket1 =[107, player_rocket2] {
-    self.weaponframe = 1;
-    muzzleflash();
-};
-
-void () player_rocket2 =[108, player_rocket3] {
-    self.weaponframe = 2;
-};
-
-void () player_rocket3 =[109, player_rocket4] {
-    self.weaponframe = 3;
-};
-
-void () player_rocket4 =[110, player_rocket5] {
-    self.weaponframe = 4;
-};
-
-void () player_rocket5 =[111, player_rocket6] {
-    self.weaponframe = 5;
-};
-
-void () player_rocket6 =[112, player_run] {
-    self.weaponframe = 6;
 };
 
 void (float num_bubbles) DeathBubbles;

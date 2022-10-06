@@ -142,6 +142,17 @@ void FireAssCan (float shotcount, vector dir, vector spread)
     }
 }
 
+void StopAssCan() {
+    if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
+	self.tfstate = self.tfstate | TFSTATE_AIMING;
+	TeamFortress_SetSpeed(self);
+	self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+	TeamFortress_SetSpeed(self);
+	//self.weaponframe = 0;
+	player_asscan_down1();
+    }
+}
+
 void FO_LockToggle () {
     if (self.tfstate & TFSTATE_LOCK) {
 	self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
