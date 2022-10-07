@@ -194,7 +194,7 @@ static FO_WeapModels weapon_models[] = {
 };
 
 // REQUIRES: Order must match above.
-static string AMMO_to_s[] = {"shells", "cells", "nails" "rockets", "grenades"};
+static string AMMO_to_s[] = {"none", "shells", "nails", "cells", "rockets"};
 
 static float* AMMO_to_p(entity player, AmmoType ammo_type) {
     switch (ammo_type) {
