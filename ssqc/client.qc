@@ -2075,6 +2075,7 @@ void () PutClientInServer = {
     self.display_tip = 0;
     self.tip_type = 0;
 
+    self.current_slot = SlotMelee;
     FO_InstantReloadAllWeapons(self);
 
     self.immune_to_check = time + 10;
