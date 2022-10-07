@@ -18,9 +18,22 @@ float pyro_type = PYRO_FO;
 float old_ng_rof = FALSE;
 #endif
 
+// Some preprocessor bug is making __LINE__ not substitute right here most of
+// the time.  Oh well, even if we just get file it's good enough to narrow.
+#define CheckSlot(slot_num) _CheckSlot(__FILE__, __LINE__, slot_num)
+float _CheckSlot(string file, float line, float slot_num) {
+    if (slot_num < 1 || slot_num > TF_NUM_SLOTS) {
+        printf("%s:%d: Invalid slot (%d).  Continuing.\n",
+               file, line, slot_num);
+        return 4;
+    }
+    return slot_num;
+}
+
+#define MakeSlot(slot_num) _MakeSlot(CheckSlot(slot_num))
 // Careful: Slots are not 0-indexed they start from 1.
 // Use SlotIndex() to convert a slot if you're indexing an array.
-Slot MakeSlot(float slot_num) {
+Slot _MakeSlot(float slot_num) {
     if (slot_num < 1 || slot_num > TF_NUM_SLOTS)
         errorf("invalid slot %d\n", slot_num);
 
@@ -32,11 +45,16 @@ Slot MakeSlot(float slot_num) {
 const Slot SlotMelee = { 4 };
 const Slot SlotNull = { 0 };
 inline float IsSlotNull(Slot slot) { return slot.id == 0; }
-inline float IsSlotMelee(Slot slot) { return slot.id == 3; }
+inline float IsSlotMelee(Slot slot) { return slot.id == 4; }
 inline float IsSameSlot(Slot slot1, Slot slot2) { return slot1.id == slot2.id; }
 
 // Returns dense [0..TF_NUM_SLOTS-1]
-float SlotIndex(Slot slot) { return slot.id - 1; }
+float SlotIndex(Slot slot) {
+    if (slot.id > 4) {
+        printf("ERROR: OOB slot id (%d) found.  Continuing.\n", (float)slot.id);
+        return TF_NUM_SLOTS - 1;
+    }
+    return slot.id - 1; }
 
 // Convert a weapon-bit to a linear index.
 static float WEAP_to_index(float weapon) {
@@ -445,7 +463,7 @@ float FO_CheckForReload() {
 
 void FO_InstantReloadAllWeapons(entity player) {
     player.tfstate &= ~TFSTATE_RELOADING;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < TF_NUM_SLOTS; i++)
         player.clip_fired[i] = 0;
 }
 #endif
