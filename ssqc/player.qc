@@ -322,6 +322,7 @@ void () DeathSound = {
 };
 
 void () PlayerDead = {
+    self.client_nextthink = -1;
     self.nextthink = -1;
     self.deadflag = 2;
 };
@@ -510,197 +511,35 @@ void () set_suicide_frame = {
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
 };
 
-void () player_diea1 =[50, player_diea2] {
-};
 
-void () player_diea2 =[51, player_diea3] {
-};
+void player_die_extra() {
+    if (self.client_thinkindex >= 9)
+        PlayerDead();
+}
 
-void () player_diea3 =[52, player_diea4] {
-};
+anim_t anim_player_diea1 = { 11, 1, {50}, {0}, FALSE, FALSE };
+void player_dieaN() { client_anim_frames(player_dieaN, player_die_extra, &anim_player_diea1); }
+void player_diea1() { *thinkindex() = 0; player_dieaN(); }
 
-void () player_diea4 =[53, player_diea5] {
-};
+anim_t anim_player_dieb1 = { 9, 1, {61}, {0}, FALSE, FALSE };
+void player_diebN() { client_anim_frames(player_diebN, player_die_extra, &anim_player_dieb1); }
+void player_dieb1() { *thinkindex() = 0; player_diebN(); }
 
-void () player_diea5 =[54, player_diea6] {
-};
+anim_t anim_player_diec1 = { 15, 1, {70}, {0}, FALSE, FALSE };
+void player_diecN() { client_anim_frames(player_diecN, player_die_extra, &anim_player_diec1); }
+void player_diec1() { *thinkindex() = 0; player_diecN(); }
 
-void () player_diea6 =[55, player_diea7] {
-};
+anim_t anim_player_died1 = { 9, 1, {85}, {0}, FALSE, FALSE };
+void player_diedN() { client_anim_frames(player_diedN, player_die_extra, &anim_player_died1); }
+void player_died1() { *thinkindex() = 0; player_diedN(); }
 
-void () player_diea7 =[56, player_diea8] {
-};
+anim_t anim_player_diee1 = { 9, 1, {94}, {0}, FALSE, FALSE };
+void player_dieeN() { client_anim_frames(player_dieeN, player_die_extra, &anim_player_diee1); }
+void player_diee1() { *thinkindex() = 0; player_dieeN(); }
 
-void () player_diea8 =[57, player_diea9] {
-};
-
-void () player_diea9 =[58, player_diea10] {
-};
-
-void () player_diea10 =[59, player_diea11] {
-};
-
-void () player_diea11 =[60, player_diea11] {
-    PlayerDead();
-};
-
-void () player_dieb1 =[61, player_dieb2] {
-};
-
-void () player_dieb2 =[62, player_dieb3] {
-};
-
-void () player_dieb3 =[63, player_dieb4] {
-};
-
-void () player_dieb4 =[64, player_dieb5] {
-};
-
-void () player_dieb5 =[65, player_dieb6] {
-};
-
-void () player_dieb6 =[66, player_dieb7] {
-};
-
-void () player_dieb7 =[67, player_dieb8] {
-};
-
-void () player_dieb8 =[68, player_dieb9] {
-};
-
-void () player_dieb9 =[69, player_dieb9] {
-    PlayerDead();
-};
-
-void () player_diec1 =[70, player_diec2] {
-};
-
-void () player_diec2 =[71, player_diec3] {
-};
-
-void () player_diec3 =[72, player_diec4] {
-};
-
-void () player_diec4 =[73, player_diec5] {
-};
-
-void () player_diec5 =[74, player_diec6] {
-};
-
-void () player_diec6 =[75, player_diec7] {
-};
-
-void () player_diec7 =[76, player_diec8] {
-};
-
-void () player_diec8 =[77, player_diec9] {
-};
-
-void () player_diec9 =[78, player_diec10] {
-};
-
-void () player_diec10 =[79, player_diec11] {
-};
-
-void () player_diec11 =[80, player_diec12] {
-};
-
-void () player_diec12 =[81, player_diec13] {
-};
-
-void () player_diec13 =[82, player_diec14] {
-};
-
-void () player_diec14 =[83, player_diec15] {
-};
-
-void () player_diec15 =[84, player_diec15] {
-    PlayerDead();
-};
-
-void () player_died1 =[85, player_died2] {
-};
-
-void () player_died2 =[86, player_died3] {
-};
-
-void () player_died3 =[87, player_died4] {
-};
-
-void () player_died4 =[88, player_died5] {
-};
-
-void () player_died5 =[89, player_died6] {
-};
-
-void () player_died6 =[90, player_died7] {
-};
-
-void () player_died7 =[91, player_died8] {
-};
-
-void () player_died8 =[92, player_died9] {
-};
-
-void () player_died9 =[93, player_died9] {
-    PlayerDead();
-};
-
-void () player_diee1 =[94, player_diee2] {
-};
-
-void () player_diee2 =[95, player_diee3] {
-};
-
-void () player_diee3 =[96, player_diee4] {
-};
-
-void () player_diee4 =[97, player_diee5] {
-};
-
-void () player_diee5 =[98, player_diee6] {
-};
-
-void () player_diee6 =[99, player_diee7] {
-};
-
-void () player_diee7 =[100, player_diee8] {
-};
-
-void () player_diee8 =[101, player_diee9] {
-};
-
-void () player_diee9 =[102, player_diee9] {
-    PlayerDead();
-};
-
-void () player_die_ax1 =[41, player_die_ax2] {
-};
-
-void () player_die_ax2 =[42, player_die_ax3] {
-};
-
-void () player_die_ax3 =[43, player_die_ax4] {
-};
-
-void () player_die_ax4 =[44, player_die_ax5] {
-};
-
-void () player_die_ax5 =[45, player_die_ax6] {
-};
-
-void () player_die_ax6 =[46, player_die_ax7] {
-};
-
-void () player_die_ax7 =[47, player_die_ax8] {
-};
-
-void () player_die_ax8 =[48, player_die_ax9] {
-};
-
-void () player_die_ax9 =[49, player_die_ax9] {
-    PlayerDead();
-};
+anim_t anim_player_die_ax = { 9, 1, {41}, {0}, FALSE, FALSE };
+void player_die_axN() { client_anim_frames(player_die_axN, player_die_extra, &anim_player_die_ax); }
+void player_die_ax1() { *thinkindex() = 0; player_die_axN(); }
 
 void () Headless_Think = {
     self.frame = self.frame + 1;
