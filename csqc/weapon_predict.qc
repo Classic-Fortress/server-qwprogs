@@ -1,3 +1,7 @@
+////////////////////////////////////////////////////////////////////////////////
+/// Weapon models
+////////////////////////////////////////////////////////////////////////////////
+
 static Slot InputToSlot(float input) {
     Slot result = FO_SlotByInput(input);
     return result;
@@ -219,6 +223,8 @@ void WP_DoClientThink(void) {
     WP_AnimateModel(FALSE);
 }
 
+void PP_Fire();
+
 void WP_Attack() {
     if (pstate_pred.firing)  // Already in a continuous attack.
         return;
@@ -232,9 +238,12 @@ void WP_Attack() {
 
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 0;
-    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
 
     WP_AnimateModel(TRUE);
+    PP_Fire();
+
+    // We set this after so that weapons such as NG can handle correctly.
+    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
 }
 
 void WP_Frame() {
@@ -244,5 +253,206 @@ void WP_Frame() {
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
             (pstate_pred.client_time >= pstate_pred.attack_finished))
         WP_Attack();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Projectiles
+////////////////////////////////////////////////////////////////////////////////
+
+entity predicted_projectiles;
+.entity pred_next, pred_prev;
+
+.vector s_origin, old_origin;
+
+.float starttime, endtime, p_time;
+.float traileffectnum;
+
+struct trail_table_entry {
+    string eff_name[2];
+
+    // Automatically initialized below this line.
+    float trail[2];
+};
+
+trail_table_entry trail_table[] = {
+    {{"TR_GRENADE", "TR_ROCKET" }},
+    {{"TR_ROCKET", "TR_GRENADE" }},
+    {{"TR_ALTROCKET" }},
+    {{"TR_BLOOD" }},
+    {{"TR_SLIGHTBLOOD" }},
+    {{"TR_WIZSPIKE" }},
+    {{"TR_KNIGHTSPIKE" }},
+    {{"TR_VORESPIKE" }},
+    {{"TE_RAILTRAIL"}},
+};
+
+float nail_trail;
+
+void PP_Init() {
+    for (float i = 0; i < trail_table.length; i++) {
+        for (float j = 0; j < 2; j++) {
+            trail_table_entry* entry = &trail_table[i];
+
+            string name = entry->eff_name[j];
+            if (name == "")
+                name = entry->eff_name[0];
+
+            entry->trail[j] = particleeffectnum(name);
+        }
+    }
+
+    nail_trail = particleeffectnum("tr_spike");
+}
+
+void PP_Cleanup(entity proj) {
+  if (predicted_projectiles == proj)
+    predicted_projectiles = proj.pred_next;
+
+  if (proj.pred_prev)
+      proj.pred_prev.pred_next = proj.pred_next;
+
+  if (proj.pred_next)
+      proj.pred_next.pred_prev = proj.pred_prev;
+
+  remove(proj);
+}
+
+
+DEFCVAR_FLOAT(r_rocketlight, 1);
+DEFCVAR_FLOAT(r_rocketlight, 1);
+DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
+
+float PP_PredrawActive() {
+    float delta = time - self.starttime;
+
+    if (delta < 0)
+        return PREDRAW_NEXT;  // Forward projection is bounded.
+
+    self.origin = self.s_origin + self.velocity * delta;
+    setorigin(self, self.origin);
+
+    // we need to space out the particles incase we're running at very high fps
+    if (time > self.p_time) {
+        if (self.p_time) {
+            traceline(self.oldorigin, self.origin, MOVE_NOMONSTERS, self);
+            if (trace_fraction < 1) {
+                self.oldorigin = trace_endpos;
+                return PREDRAW_NEXT;
+            }
+
+            if (self.traileffectnum)
+                trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
+        }
+
+        self.p_time = time + 0.013;
+        self.oldorigin = self.origin;
+    }
+
+#if 0 // TODO
+    if (self.modelflags & MF_ROCKET && CVARF(r_rocketlight)) {
+        dynamiclight_add(self.origin, 200, CVARS(r_rocketlight_color), 0);
+    }
+#endif
+
+    return PREDRAW_AUTOADD;
+}
+
+float PP_Predraw() {
+    if (time > self.endtime + 0.05) {
+        PP_Cleanup(self);
+        return PREDRAW_NEXT;
+    }
+
+    return PP_PredrawActive();
+}
+
+DEFCVAR_FLOAT(r_rockettrail, 1);
+DEFCVAR_FLOAT(r_grenadetrail, 1);
+
+int PP_FindTrail(int is_grenade)
+{
+    float idx = (is_grenade ? CVARF(r_grenadetrail) : CVARF(r_rockettrail)) - 1;
+
+    if (idx >= 0 && idx < trail_table.length)
+        return trail_table[idx].trail[is_grenade];
+
+    return 0;
+}
+
+entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+  entity proj = spawn();
+
+  // TODO: Communicate with server around this.
+  // Note: We use true time here since the created projectiles exist outside of
+  // our prediction.
+  float start_offset = max(0, pstate_pred.client_ping - 0.1);
+  proj.starttime = time + start_offset;
+  proj.endtime = time + pstate_pred.client_ping;
+
+  proj.predraw = PP_Predraw;
+  proj.drawmask = MASK_ENGINE;
+
+  proj.p_time = 0;
+  proj.s_origin = pmove_org + offset + v_forward * 8;
+  proj.s_origin[2] += 16;
+  proj.velocity = v_forward * desc->speed;
+
+  proj.old_origin = proj.s_origin + 0.013 * proj.velocity;
+  proj.origin = proj.old_origin;
+
+  proj.angles = input_angles; proj.angles[0] *= -1;
+
+  setmodel(proj, desc->model);
+
+  proj.pred_next = predicted_projectiles;
+  if (predicted_projectiles)
+    predicted_projectiles.pred_prev = proj;
+  predicted_projectiles = proj;
+
+  return proj;
+}
+
+void PP_FireRocket(float is_soldier) {
+    fo_projectile* desc = is_soldier ? &fpp_rocket : &fpp_incendiary;
+
+    entity proj = PP_CreateProjectile(desc, [0, 0, 0]);
+    if (is_soldier)
+        proj.traileffectnum = PP_FindTrail(FALSE);
+}
+
+void PP_FireNG(float off) {
+    fo_projectile* desc;
+    vector offset = [0, 0, 0];
+
+    if (off == 0) {
+        desc = &fpp_super_nail;
+    } else {
+        desc = &fpp_nail;
+        offset = off * v_right;
+    }
+
+    entity proj = PP_CreateProjectile(desc, offset);
+    proj.traileffectnum = nail_trail;
+}
+
+void PP_Fire() {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
+            pstate_pred.current_slot);
+
+    if (wi->predict_type != PRED_PROJ)
+        return;
+
+    if (!pengine.is_effectframe)
+        return;
+
+    switch (wi->weapon) {
+        case WEAP_NAILGUN:
+        case WEAP_SUPER_NAILGUN:
+            break;  // Handled in animation.
+
+        case WEAP_ROCKET_LAUNCHER: PP_FireRocket(TRUE); break;
+        case WEAP_INCENDIARY: PP_FireRocket(FALSE); break;
+    }
 }
 

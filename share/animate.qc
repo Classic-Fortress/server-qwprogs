@@ -107,7 +107,7 @@ void nail_extra() {
     float idx = (self.client_thinkindex - 1) % 2;
     if (idx == 0 || !old_ng_rof) {
         SuperDamageSound();
-        W_FireSpikes(self.nailpos ? 4 : -4);
+        W_FireSpikes(idx ? 4 : -4);
         self.nailpos = 1 - self.nailpos;
     }
 }
@@ -277,8 +277,28 @@ void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
 }
 
 static void axe_extra() {}
+
+void PP_FireNG(float off);
+
 static void nail_extra() {
     pstate_pred.firing = TRUE;
+
+    if (pstate_pred.client_time < pstate_pred.attack_finished)
+        return;
+
+    if (!pengine.is_effectframe)
+        return;
+
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
+                                      pstate_pred.current_slot);
+
+    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+    float idx = (*thinkindex() - 1) % 2;
+    if (wi->weapon == WEAP_NAILGUN)
+        PP_FireNG(idx ? 4 : -4);
+    else
+        PP_FireNG(0);
+
 }
 static void asscan_up_extra() {}
 static void asscan_fire_extra() {}

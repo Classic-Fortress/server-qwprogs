@@ -22,6 +22,7 @@ struct predict_tf_state {
     float tfstate;
 
     float client_time;
+    float client_ping;
     float weaponframe;
 
     float attack_finished;
@@ -36,6 +37,16 @@ struct predict_tf_state {
     float ammo_used[AMMO_NUM_TYPES];
     float firing;
 };
+
+struct fo_projectile {
+    float speed;
+    string model;
+};
+
+fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl" };
+fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl" };
+fo_projectile fpp_nail = { 1000, "progs/spike.mdl" };
+fo_projectile fpp_super_nail = { 1000, "progs/s_spike.mdl" };
 
 #ifdef SSQC
 
@@ -113,6 +124,7 @@ void WeaponPred_Update(entity player) {
     }
 
     player.predict_state.client_time = player.client_time;
+    player.predict_state.client_ping = player.client_ping;
 
     M1(FOWP_CLASS, playerclass);
     M3(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id);
@@ -154,6 +166,7 @@ void EntUpdate_WeaponPred(float isnew) {
 #endif
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
+        COMM(Float, client_ping);
     }
 
     if (sendflags & FOWP_CLASS) {
@@ -325,12 +338,14 @@ float WP_ClientThink() {
     return PREDRAW_AUTOADD;
 }
 
+void PP_Init();
 void InitPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
 
     self.drawmask = MASK_PRED_VIEWMODEL;
     self.renderflags = RF_VIEWMODEL;
 
+    PP_Init();
     FO_WP_Init(TRUE);
 }
 #endif
