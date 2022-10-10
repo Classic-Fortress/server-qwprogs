@@ -15,11 +15,11 @@ csextradefs.qc
 ../share/weapons.qc
 ../share/weapon_predict.qc
 ../share/animate.qc
+weapon_predict.qc
 sui_sys.qc
 vote.qc
 status.qc
 menu.qc
-weapon_predict.qc
 main.qc
 events.qc
 hud_helpers.qc

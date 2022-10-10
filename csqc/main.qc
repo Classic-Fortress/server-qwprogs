@@ -28,7 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     }
 
     FO_Weapons_Init();
-    FO_WeaponPred_Init(FALSE);  // Server packet enables.
+    FO_WP_Init(FALSE);  // Server packet enables.
     CsGrenTimer::Init();
 
     registercommand("fo_hud_editor");
