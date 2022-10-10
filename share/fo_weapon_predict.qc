@@ -1,4 +1,5 @@
 #define ENT_WEAPONPRED 100
+string wp_version = "v0";
 
 enumflags {
     FOWP_CTIME,
@@ -37,6 +38,31 @@ struct predict_tf_state {
 };
 
 #ifdef SSQC
+
+float FO_GetUserSetting(entity ent, string ps_short, string ps_setting, string ps_default);
+float CF_GetSetting(string ps_short, string ps_setting, string ps_default);
+
+static float GlobalEnable() {
+    return CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
+}
+
+static float GlobalDisable() {
+    return CF_GetSetting("wpgd", "weapon_pred_global_disable", "off");
+}
+
+static float ClientEnable() {
+    // client_ping is not yet initialized.
+    float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
+
+    if (GlobalDisable() || ping < 40 * MSEC)
+        return FALSE;
+
+    if (GlobalEnable())
+        return TRUE;
+
+    return FO_GetUserSetting(self, "fowp", "fo_weapon_predict", "off");
+}
+
 .float weapon_pred_enabled;
 .predict_tf_state predict_state;
 .entity predict_entity;
@@ -75,8 +101,16 @@ void FO_WeaponPred_Init(float enabled) {
 #define M3(_bit, _f1, _f2, _f3) if (OP3(!=, ||, _f1, _f2, _f3)) { mask |= _bit; OP3(=, ;, _f1, _f2, _f3); }
 #define M4(_bit, _f1, _f2, _f3, _f4) if (OP4(!=, ||, _f1, _f2, _f3, _f4)) { mask |= _bit; OP4(=, ;, _f1, _f2, _f3, _f4); }
 
+predict_tf_state blank_state;
+.float last_full_predict_refresh;
+
 void UpdateWeaponPred(entity player) {
     float mask = FOWP_CTIME;
+
+    if (time - player.last_full_predict_refresh > 1000 * MSEC) {
+        player.predict_state = blank_state;
+        player.last_full_predict_refresh = time;
+    }
 
     player.predict_state.client_time = player.client_time;
 
@@ -165,15 +199,12 @@ void EntUpdate_WeaponPred(float isnew) {
 }
 
 #ifdef SSQC
-float FO_GetUserSetting(entity ent, string ps_short, string ps_setting, string ps_default);
-
 inline float WeaponPred_Active(entity player) {
     return player.weapon_pred_enabled;
 }
 
 void WeaponPred_Init(entity player) {
-    // Server side is once per connect.
-    if (!FO_GetUserSetting(self, "fowp", "fo_weapon_predict", "on")) {
+    if (!ClientEnable()) {  // Server side is once per connect.
         player.weapon_pred_enabled = FALSE;
         return;
     }
@@ -189,7 +220,8 @@ void WeaponPred_Init(entity player) {
     setorigin(pe, [0, 0, 0]);
 
     player.predict_entity = pe;
-    sprint(self, PRINT_HIGH, "FortressOne: Weapon Prediction Active v0\n");
+    sprint(self, PRINT_HIGH,
+            "FortressOne: Weapon Prediction Active ", wp_version, "\n");
 }
 
 void WeaponPred_TearDown(entity player) {
