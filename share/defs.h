@@ -298,7 +298,7 @@
 /*======================================================*/
 
 // Opaque token that encapsulates slots for correctness.
-struct Slot { int id; };
+typedef struct { int id; } Slot;
 
 // Some of the toggleflags aren't used anymore, but the bits are still
 // there to provide compatability with old maps

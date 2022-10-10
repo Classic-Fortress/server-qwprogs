@@ -669,7 +669,7 @@ void () CF_Spy_Invisible = {
         e_timer.classname = "spytimer";
         e_timer.owner = self;
         e_timer.think = CF_Spy_UndercoverThink;
-        e_timer.nextthink = client_time() + 1;
+        e_timer.nextthink = time + 1;
     }
 
     Status_Refresh(self);
@@ -990,7 +990,7 @@ void (entity pe_player, float pf_class, float is_user) CF_Spy_ChangeSkin = {
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
     e_timer.think = CF_Spy_UndercoverThink;
-    e_timer.nextthink = (is_user ? client_time() : time) + 1;
+    e_timer.nextthink = (is_user ? time : time) + 1;
     e_timer.skin = pf_class;
 
     Status_Refresh(pe_player);
@@ -1044,7 +1044,7 @@ void (entity pe_player, float pf_team_no, float is_user) CF_Spy_ChangeColor = {
     e_timer.classname = "spytimer";
     e_timer.owner = pe_player;
     e_timer.think = CF_Spy_UndercoverThink;
-    e_timer.nextthink = (is_user ? client_time() : time) + 1;
+    e_timer.nextthink = (is_user ? time : time) + 1;
     e_timer.team = pf_team_no;
 
     Status_Refresh(pe_player);

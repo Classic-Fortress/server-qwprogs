@@ -25,7 +25,7 @@ void () AutoId = {
         return;
     }
 
-    if (time > self.ident_time || !self.ident_time) {
+    if (self.client_time > self.ident_time || !self.ident_time) {
 
         // remove ident string from memory
         if (self.ident_string != string_null) {
@@ -663,7 +663,6 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Old dropflag behaviour", old_dropflag, "", 1);
     CF_PrintSetting("Remember weapon", remember_weapon, "", 1);
     CF_PrintSetting("Pick up discarded ammo", discammo_pickup, "", 1);
-    CF_PrintSetting("Reload clip tick", reload_cliptick, "", 1);
     CF_PrintSetting("ID extras", id_extended, "", 1);
     CF_PrintSetting("Display class tips", classtips, "", 1);
     CF_PrintSetting("Old grenades", old_grens, "", 1);
@@ -1097,11 +1096,12 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
 
-    tGrenade.nextthink = client_time() + 0.8;
+    float time_base = client_to_global_time(remote_client_time());
+    tGrenade.nextthink = time_base + 0.8;
     if (gtype == GR_TYPE_CALTROP)
-        tGrenade.heat = client_time() + 0.5 + 0.5;
+        tGrenade.heat = time_base + 0.5 + 0.5;
     else {
-        tGrenade.heat = client_time() + 3 + 0.8;
+        tGrenade.heat = time_base + 3 + 0.8;
 
         RemoveGrenadeTimers();
 
@@ -1109,7 +1109,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
         local float notimers = stof(infokey(self, "nt"));
         if (grentimers && notimers != 1) {
             timer = spawn();
-            timer.nextthink = client_time() + 0.8;
+            timer.nextthink = time_base + 0.8;
             timer.think = GrenadeTimer;
             timer.heat = 4;
             timer.owner = self;

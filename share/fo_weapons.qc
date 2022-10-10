@@ -80,11 +80,18 @@ enum AmmoType {
 struct FO_WeapModels;
 struct FO_WeapToItem;
 
+enum PredictionType {
+    NO_PREDICT,
+    PRED_MODEL,
+    PRED_PROJ,
+};
+
 struct FO_WeapInfo {
     int weapon;  // Verification
+    int predict_type;
     AmmoType ammo_type;
-    int clip_size;
-    int ammo_per_shot;
+    float clip_size;
+    float ammo_per_shot;
     float attack_time;
     float full_reload_time;
 
@@ -98,28 +105,28 @@ struct FO_WeapInfo {
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
 // -ve values are placeholders signifying conditional init based on game modes.
 FO_WeapInfo weapon_info[] = {
-    { WEAP_NONE,             AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_HOOK,             AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_KNIFE,            AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_MEDIKIT,          AMMO_CELLS,   0, 0,  0.5,  0 },
-    { WEAP_SPANNER,          AMMO_CELLS,   0, 0,  0.5,  0 },
-    { WEAP_AXE,              AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_SNIPER_RIFLE,     AMMO_SHELLS, -9, 1,  1.5,  4 },
-    { WEAP_AUTO_RIFLE,       AMMO_SHELLS,  0, 1,  0.1,  0 },
-    { WEAP_SHOTGUN,          AMMO_SHELLS,  8, 1,  0.5,  2 },
-    { WEAP_SUPER_SHOTGUN,    AMMO_SHELLS, 16, 2,  0.7,  3 },
-    { WEAP_NAILGUN,          AMMO_NAILS,   0, 1,  0.2,  0 },
-    { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 2,  0.2,  0 },
-    { WEAP_GRENADE_LAUNCHER, AMMO_ROCKETS, 6, 1,  0.6,  4 },
-    { WEAP_PIPE_LAUNCHER,    AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
-    { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
-    { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
-    { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
-    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0.2,  4 },
-    { WEAP_LIGHTNING,        AMMO_CELLS,   0, 1,  0.1,  0 },
-    { WEAP_DETPACK,          AMMO_NONE,    0, 0,  0,    0 },
-    { WEAP_TRANQ,            AMMO_SHELLS,  0, 1,  1.5,  0 },
-    { WEAP_RAILGUN,          AMMO_NAILS,   0, 1,  0.4,  0 },
+    { WEAP_NONE,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_HOOK,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_KNIFE,            PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_MEDIKIT,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
+    { WEAP_SPANNER,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
+    { WEAP_AXE,              PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_SNIPER_RIFLE,     NO_PREDICT, AMMO_SHELLS, -9, 1,  1.5,  4 },
+    { WEAP_AUTO_RIFLE,       PRED_MODEL, AMMO_SHELLS,  0, 1,  0.1,  0 },
+    { WEAP_SHOTGUN,          PRED_MODEL, AMMO_SHELLS,  8, 1,  0.5,  2 },
+    { WEAP_SUPER_SHOTGUN,    PRED_MODEL, AMMO_SHELLS, 16, 2,  0.7,  3 },
+    { WEAP_NAILGUN,          PRED_MODEL, AMMO_NAILS,   0, 1,  0.2,  0 },
+    { WEAP_SUPER_NAILGUN,    PRED_MODEL, AMMO_NAILS,   0, 2,  0.2,  0 },
+    { WEAP_GRENADE_LAUNCHER, PRED_MODEL, AMMO_ROCKETS, 6, 1,  0.6,  4 },
+    { WEAP_PIPE_LAUNCHER,    PRED_MODEL, AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
+    { WEAP_FLAMETHROWER,     PRED_MODEL, AMMO_CELLS,   0, 1,  0.15, 0 },
+    { WEAP_ROCKET_LAUNCHER,  PRED_MODEL, AMMO_ROCKETS, 4, 1,  0.8,  5 },
+    { WEAP_INCENDIARY,       PRED_MODEL, AMMO_ROCKETS, 0, 3, -9,    0 },
+    { WEAP_ASSAULT_CANNON,   NO_PREDICT, AMMO_SHELLS, -9, 1,  0.2,  4 },
+    { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
+    { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
+    { WEAP_TRANQ,            NO_PREDICT, AMMO_SHELLS,  0, 1,  1.5,  0 },
+    { WEAP_RAILGUN,          PRED_MODEL, AMMO_NAILS,   0, 1,  0.4,  0 },
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
@@ -165,6 +172,10 @@ string FO_GetWeapName(float weapon) {
 struct FO_WeapModels {
     int weapon;
     string model;
+
+    // Automatically populated.
+    int modelindex;
+
 };
 
 // Indexed by WEAP_to_index()
@@ -216,9 +227,6 @@ Slot WEAP_to_slot(float playerclass, float weapon) {
     }
     return SlotNull;
 }
-
-// Internal clip storage for both SSQC/CSQC.
-.float clip_fired[TF_NUM_SLOTS];
 
 struct FO_WeapToItem {
     int weapon;
@@ -295,6 +303,26 @@ float FO_WeaponsMask(entity player) {
     return mask;
 }
 
+// Slightly awkward construction, but convenient for calling from CSQC and SSQC.
+float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
+    float tick = (wi->ammo_per_shot / wi->clip_size) * wi->full_reload_time;
+    return ceil((reload_finished - now) / tick) * wi->ammo_per_shot;
+}
+
+float FO_CheckCanReload(FO_WeapInfo* wi, int ammo_remaining, int clip_fired,
+                        __out string msg) {
+    if (clip_fired == 0)
+        msg = "Clip full\n";
+    else if (ammo_remaining == 0)
+        msg = strcat("Out of ", AMMO_to_s[wi->ammo_type], "\n");
+    else if (wi->clip_size - clip_fired == ammo_remaining)
+        msg = strcat("All ", AMMO_to_s[wi->ammo_type], " are in the clip\n");
+    else
+        return TRUE;
+
+    return FALSE;  // msg filled in above.
+}
+
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
@@ -322,6 +350,10 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[SlotIndex(slot)];
     else
         result->clip_fired = __NULL__;
+
+    // Special case: Overlap with grenade launcher.
+    if (wi->weapon == WEAP_PIPE_LAUNCHER)
+        result->clip_fired = &player.clip_fired[0];
 }
 
 float FO_ClassWeaponBySlot(float class, Slot slot);
@@ -341,27 +373,39 @@ inline void FO_FillCurrentWeapState(FO_WeapState* result) {
 void (entity pl) Status_Refresh;
 void (float att_delay) Attack_Finished;
 
-static void FOT_ReloadTimer() {
+// Hack until we fix Status_Refresh() to not be awful.
+.float last_still_loading;
+
+float FO_ReloadFrame() {
+    if (self.tfstate & TFSTATE_RELOADING == 0)
+        return FALSE;
+
     FO_WeapState ws;
-    FO_FillWeapState(self.owner, self.owner.current_slot, &ws);
+    FO_FillWeapState(self, self.current_slot, &ws);
+    FO_WeapInfo* wi = ws.wi;
 
-    if (time >= self.heat) {
-        // Reload finished
-        self.owner.tfstate &= ~TFSTATE_RELOADING;
-        self.owner.weaponmodel = ((ws->wi)->models)->model;
-        self.owner.weaponframe = 0;
-        sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-        dremove(self);
-    } else {
-        // Refresh clip
-        if (ws->weapon != WEAP_SNIPER_RIFLE)
-            self.owner.reload_clipsize += 1;
-        else
-            self.owner.reload_sniper_ticks += 1;
+    if (wi->weapon == WEAP_NONE)
+        return FALSE;
 
-        self.nextthink = min(time + self.owner.reload_tick, self.heat);
+    if (self.client_time >= self.reload_finished) {
+        self.tfstate &= ~TFSTATE_RELOADING;
+        self.weaponmodel = ((ws->wi)->models)->model;
+        self.weaponframe = 0;
+        self.last_still_loading = 0;
+        Status_Refresh(self);
+        sprint(self, PRINT_HIGH, "Finished reloading\n");
+
+        return FALSE;
     }
-    Status_Refresh(self.owner);
+
+    float still_loading = FO_NumClipStillLoading(wi, self.client_time,
+                                                     self.reload_finished);
+    if (self.last_still_loading != still_loading) {
+        self.last_still_loading = still_loading;
+        Status_Refresh(self);
+    }
+
+    return TRUE;
 }
 
 float FO_CanReload(Slot slot) {
@@ -392,21 +436,14 @@ void FO_ReloadSlot(Slot slot, float force) {
     if (!wi->needs_reload)
         return;
 
-    string msg = string_null;
-    if (*ws->clip_fired == 0)
-        msg = "Clip full\n";
-    else if (*ws->ammo_remaining == 0)
-        msg = strcat("Out of ", AMMO_to_s[wi->ammo_type], "\n");
-    else if (wi->clip_size - *ws->clip_fired == *ws->ammo_remaining)
-        msg = strcat("All ", AMMO_to_s[wi->ammo_type], "are in the clip\n");
-
-    if (msg != string_null) {
+    string msg;
+    if (!FO_CheckCanReload(wi, *ws->ammo_remaining, *ws->clip_fired, msg)) {
         sprint(self, PRINT_HIGH, msg);
         return;
-    } else {
-        sprint(self, PRINT_HIGH, strcat("Reloading ",
-                                        FO_GetWeapName(ws->weapon), "...\n"));
     }
+
+    sprint(self, PRINT_HIGH,
+           strcat("Reloading ", FO_GetWeapName(ws->weapon), "...\n"));
 
     Attack_Finished(wi->attack_time);  // Carried.. but not sure it's necessary.
 
@@ -419,31 +456,12 @@ void FO_ReloadSlot(Slot slot, float force) {
     float reload_duration =
         (reload_count / wi->clip_size) * wi->full_reload_time;
 
-    *ws->clip_fired -= reload_count;
+    // TODO: Make ammo in clip independent from ammo_remaining (so you can't
+    // have shots in clip that are discarded and other weirdness.)
+    (*ws->clip_fired) -= reload_count;
 
-    // Sets up for status bar.
-    self.reload_time = time + reload_duration;
-    self.reload_tick = reload_duration / reload_count;
-    self.reload_clipsize = wi->clip_size - reload_count;
-
-    // Actual entity that will update status bar / clear reload.
-    entity reload_timer = spawn();
-    reload_timer.owner = self;
-    reload_timer.classname = "timer";
-    reload_timer.think = FOT_ReloadTimer;
-
-    // TODO: Remove this hack.
-    if (ws.weapon == WEAP_SNIPER_RIFLE) {
-        self.reload_tick = 1;
-        self.reload_sniper_ticks = 0;
-    }
-
-    // It turns out, even on forced reloads we should use the client_time() not
-    // the server time as the action that forced the reload (firing the last
-    // shot), was client relative.
-    reload_timer.heat = client_time() + reload_duration;
-    reload_timer.nextthink = client_time() + self.reload_tick;
-
+    self.last_still_loading = reload_count;
+    self.reload_finished = self.client_time + reload_duration;
 }
 
 float FO_CheckForReload() {
@@ -463,6 +481,8 @@ float FO_CheckForReload() {
 
 void FO_InstantReloadAllWeapons(entity player) {
     player.tfstate &= ~TFSTATE_RELOADING;
+    player.reload_finished = 0;
+    player.last_still_loading = 0;
     for (int i = 0; i < TF_NUM_SLOTS; i++)
         player.clip_fired[i] = 0;
 }
@@ -579,6 +599,9 @@ void FO_Weapons_Init() {
         FO_WeapModels* wm = &weapon_models[i];
         ASSERTD_EQ(WEAP_to_index(wm->weapon), i);
         precache_model(wm->model);
+#ifdef CSQC
+        wm->modelindex = getmodelindex(wm->model);
+#endif
         wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];

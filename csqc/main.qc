@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     }
 
     FO_Weapons_Init();
+    FO_WeaponPred_Init(FALSE);  // Server packet enables.
     CsGrenTimer::Init();
 
     registercommand("fo_hud_editor");
@@ -116,7 +117,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
         setproperty(VF_DRAWENGINESBAR, 1);
 
-    addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
+    addentities((intermission?0:wp_model_mask)|MASK_ENGINE);
 
     renderscene();
 
@@ -394,6 +395,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 void(float isnew) CSQC_Ent_Update = {
     float etype = readbyte();
     switch (etype) {
+        case ENT_WEAPONPRED:
+            EntUpdate_WeaponPred(isnew);
+            break;
         default:
             error("Unhandled CSQC entity\n");
             return;
@@ -401,7 +405,6 @@ void(float isnew) CSQC_Ent_Update = {
 };
 
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
-    print("CSQC_Ent_Remove\n");
     remove(self);
 };
 

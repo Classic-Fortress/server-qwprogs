@@ -14,10 +14,13 @@ csextradefs.qc
 ../share/common_vote.qc
 settings.qc
 ../share/fo_weapons.qc
+../share/fo_weapon_predict.qc
+../share/fo_animate.qc
 sui_sys.qc
 vote.qc
 status.qc
 menu.qc
+weapon_predict.qc
 main.qc
 events.qc
 hud_helpers.qc

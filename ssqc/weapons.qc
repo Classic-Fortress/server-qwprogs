@@ -192,10 +192,10 @@ void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
         att_delay *= 2;
 
-    self.attack_finished = client_time() + att_delay;
+    self.attack_finished = self.client_time + att_delay;
 };
 
-float () W_FireAxe = {
+int () W_FireAxe = {
     local vector source;
     local vector org;
     local vector def;
@@ -394,7 +394,7 @@ int () W_FireSpanner = {
     }
 };
 
-float () W_FireMedikit = {
+int () W_FireMedikit = {
     local vector source;
     local vector org;
     local float healam;
@@ -1607,23 +1607,16 @@ void () W_ChangeToBestWeapon = {
 
 void () player_axe1;
 void () player_axeb1;
-
 void () player_spanner1;
-void () player_spanner2;
-void () player_spanner3;
-void () player_spanner4;
-
 void () player_knife1;
 void () player_knifeb1;
-
 void () player_shot1;
 void () player_nail1;
 void () player_light1;
 void () player_rocket1;
 void () player_autorifle1;
 
-void () player_assaultcannonup;
-void () player_assaultcannondown;
+void () player_asscan_up1;
 
 void () player_medikit1;
 void () player_medikitb1;
@@ -1729,10 +1722,10 @@ void () W_Attack = {
             self.immune_to_check = time + 5;
             self.tfstate = self.tfstate | TFSTATE_AIMING;
             TeamFortress_SetSpeed(self);
-            player_assaultcannonup();
+            player_asscan_up1();
         }
     } else if (ws.weapon == WEAP_FLAMETHROWER) {
-        player_shot1();
+        player_flamethrower1();
         W_FireFlame();
         if (self.waterlevel > 2)
             Attack_Finished(1);
@@ -1782,7 +1775,7 @@ void () W_Attack = {
 };
 
 float WeaponReady() {
-    if (client_time() >= self.attack_finished &&
+    if (self.client_time >= self.attack_finished &&
         !(self.tfstate & TFSTATE_RELOADING))
         return TRUE;
 
@@ -2578,6 +2571,9 @@ void () W_WeaponFrame = {
         self.impulse = 0;
         return;
     }
+
+    if (FO_ReloadFrame())
+        return;
 
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
