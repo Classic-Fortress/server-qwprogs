@@ -1,6 +1,6 @@
 struct anim_t {
     int num_frames, num_wf;
-    int frames[9];
+    int frames[20];
     int weaponframes[9];
     int muzzle_flash;  // muzzle flash on weaponframe index 0
     int loop;
@@ -32,7 +32,7 @@ void player_stand1();
 void player_asscan_fire();
 void player_asscan_down1();
 
-static inline void *thinkindex() { return &self.client_thinkindex; }
+inline void *thinkindex() { return &self.client_thinkindex; }
 
 void FO_SetClientThink(void() func, float offset, float override = TRUE) {
     self.think = think_nop;

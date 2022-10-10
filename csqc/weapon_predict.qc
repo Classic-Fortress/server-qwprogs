@@ -247,6 +247,11 @@ void WP_Attack() {
 }
 
 void WP_Frame() {
+    if (getstatf(STAT_HEALTH) < 0) {
+        pstate_pred.current_slot = SlotNull;
+        return;
+    }
+
     WP_CheckReloadFinished();
     WP_Impulse();
 
@@ -455,4 +460,3 @@ void PP_Fire() {
         case WEAP_INCENDIARY: PP_FireRocket(FALSE); break;
     }
 }
-
