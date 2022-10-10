@@ -20,11 +20,14 @@ struct predict_tf_state {
     float tfstate;
 
     float client_time;
-    int weaponframe;
+    float weaponframe;
 
     float attack_finished;
     float client_nextthink;
     float client_thinkindex;
+
+     // Used for prediction, not actually communicated.  Reset each frame.
+     float firing;
 };
 
 #ifdef SSQC
@@ -121,13 +124,13 @@ void EntUpdate_WeaponPred(float isnew) {
     }
 
     if (sendflags & FOWP_THINK) {
+        COMM(Float, attack_finished);
         COMM(Float, client_nextthink);
         COMM(Float, client_thinkindex);
     }
 
     if (sendflags & FOWP_WF) {
         COMM(Byte, weaponframe);
-        COMM(Float, attack_finished);
     }
 #ifdef SSQC
     return TRUE;
@@ -186,11 +189,13 @@ void WeaponPred_DoServerClientThink() {
 #endif
 
 #ifdef CSQC
-void WeaponPred_ChangeWeapon(float input) {
-    Slot slot = FO_SlotByInput(input);
-    if (IsSlotNull(slot))
-        return;  // Unrecognized
+static Slot InputToSlot(float input) {
+    Slot result = FO_SlotByInput(input);
+    return result;
+}
 
+void WeaponPred_ChangeWeapon(Slot slot) {
+    // TODO: Check ammo etc
     pstate_pred.current_slot = slot;
     pstate_pred.weaponframe = 0;
 
@@ -201,28 +206,48 @@ void WeaponPred_Impulse() {
     if (!pstate_pred.impulse)
         return;
 
-    float clear = FALSE;
+    Slot queue_slot = SlotNull;
+
     if (pstate_pred.impulse <= 7) {  // Change weapon.
-        WeaponPred_ChangeWeapon(pstate_pred.impulse);
-        clear = TRUE;
+        Slot slot = InputToSlot(pstate_pred.impulse);
+        if (!IsSlotNull(slot))
+            pstate_pred.queue_slot = slot;
+        pstate_pred.impulse = 0;
     }
 
+    if (pstate_pred.client_time < pstate_pred.attack_finished)
+        return;
+
+    if (!IsSlotNull(pstate_pred.queue_slot) && !pstate_pred.firing) {
+        WeaponPred_ChangeWeapon(pstate_pred.queue_slot);
+        pstate_pred.queue_slot = SlotNull;
+    }
+
+    float clear = FALSE;
     if (clear)
         pstate_pred.impulse = 0;
 }
 
+void FO_CSQC_Fire();
+
 void WeaponPred_Attack() {
+    if (pstate_pred.firing)  // Already in a continuous attack.
+        return;
+
     Slot slot = pstate_pred.current_slot;
 
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
 
-    pstate_pred.client_thinkindex = 1;
+    pstate_pred.client_thinkindex = 0;
     pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+
+    FO_CSQC_Fire();
 }
 
+void FO_CSQC_Animate(float fired);
 
 void WeaponPred_DoClientThink(void) {
-
+    FO_CSQC_Animate(FALSE);
 }
 
 void WeaponPred_UpdateViewModel() {
@@ -230,6 +255,16 @@ void WeaponPred_UpdateViewModel() {
 
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
                                       pstate_pred.current_slot);
+
+    if (wi->predict_type == NO_PREDICT) {
+        // Fall back to engine.
+        self.modelindex = 0;
+        wp_model_mask |= MASK_VIEWMODEL;
+        return;
+    } else {
+        wp_model_mask &= ~MASK_VIEWMODEL;
+
+    }
 
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
@@ -279,13 +314,11 @@ float WeaponPred_ClientThink() {
             pstate_pred.client_time = held_client_time;
         }
 
-        if (pstate_pred.client_time >= pstate_pred.attack_finished) {
-            WeaponPred_Impulse();
+        WeaponPred_Impulse();
 
-            if (input_buttons & BUTTON0)
-                WeaponPred_Attack();
-        }
-
+        if ((input_buttons & BUTTON0) &&
+            (pstate_pred.client_time >= pstate_pred.attack_finished))
+            WeaponPred_Attack();
     }
 
     WeaponPred_UpdateViewModel();

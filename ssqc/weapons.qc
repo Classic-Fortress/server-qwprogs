@@ -1725,7 +1725,7 @@ void () W_Attack = {
             player_asscan_up1();
         }
     } else if (ws.weapon == WEAP_FLAMETHROWER) {
-        player_shot1();
+        player_flamethrower1();
         W_FireFlame();
         if (self.waterlevel > 2)
             Attack_Finished(1);
