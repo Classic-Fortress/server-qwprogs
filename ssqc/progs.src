@@ -16,9 +16,9 @@ qw.qc
 debug.qc
 time.qc
 ../share/defs.h
-../share/fo_weapons.qc
-../share/fo_weapon_predict.qc
-../share/fo_animate.qc
+../share/weapons.qc
+../share/weapon_predict.qc
+../share/animate.qc
 events.qc
 roles.qc
 q3defs.qc
