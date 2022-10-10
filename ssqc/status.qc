@@ -740,33 +740,6 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
     return st;
 }
 
-string GetSBClipString(entity pl, float csqcactive)
-{
-    string msg = "";
-    if (pl.tfstate & TFSTATE_RELOADING) 
-    {
-        FO_WeapInfo* wi = FO_GetWeapInfo(FO_PlayerCurrentWeapon(pl));
-
-        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
-        } else {
-            if (reload_cliptick)
-                msg = csqcactive ? ftos(pl.reload_clipsize) : strpadl(ftos(pl.reload_clipsize), 2);
-            else
-                msg = csqcactive ? "0" : " 0";
-
-            msg = strcat(msg, "/");
-            msg = strcat(msg, (csqcactive ? ftos(wi->clip_size) : strpadr(ftos(wi->clip_size), 3)));
-        }
-    } 
-    else 
-    {
-        msg = ClipSizeToString(pl, csqcactive);
-    }
-
-    return msg;
-}
-
 string GetSBClassInfo(entity pl, float csqcactive)
 {
     string st1 = "";
@@ -831,7 +804,7 @@ void UpdateClientIDString(entity pl) {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_ID);
     // identify
-    if (pl.ident_string && time < pl.ident_time) {
+    if (pl.ident_string && self.client_time < pl.ident_time) {
         WriteString(MSG_MULTICAST, pl.ident_string);
     } else {
         WriteString(MSG_MULTICAST, "");
@@ -848,7 +821,7 @@ void UpdateClientStatusBar(entity pl)
     string msg = "";
     msg_entity = pl;
 
-    string clipMsg = GetSBClipString(pl, TRUE);
+    string clipMsg = ClipSizeToString(pl, TRUE);
 
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SBAR);
@@ -1264,7 +1237,7 @@ void (entity pl) RefreshStatusBar = {
         st2 = "";
 
         // status line 3 column 2 - clip size
-        st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
+        st2 = strcat(Q"\sClip\s: ", ClipSizeToString(pl, csqcactive));
 
         // status line 3 column 3 - grenade 1 count
         st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
@@ -1280,7 +1253,7 @@ void (entity pl) RefreshStatusBar = {
         s3 = strzone(s3);
 
         // identify
-        if (pl.ident_string != string_null && time < pl.ident_time) {
+        if (pl.ident_string != string_null && self.client_time < pl.ident_time) {
             ident = strcat(pl.ident_string, "\n\n");
         } else {
             ident = "\n\n\n\n";
@@ -1332,15 +1305,13 @@ string(entity pl, float csqcactive) ClipSizeToString =
     if (!wi->needs_reload)
         return "";
 
-    if (wi->clip_size - *ws->clip_fired  > *ws->ammo_remaining)
-        *ws->clip_fired = wi->clip_size - *ws->ammo_remaining;
-    float rem = min(wi->clip_size - *ws->clip_fired, 999);
+    float clip_rem = min(wi->clip_size - *ws->clip_fired - pl.last_still_loading, 999);
 
     string st = "";
     if (csqcactive)
-        st = strcat(ftos(floor(rem)), "/", ftos(wi->clip_size));
+        st = strcat(ftos(floor(clip_rem)), "/", ftos(wi->clip_size));
     else
-        st = strcat(strpadl(ftos(rem), 2), "/", strpadr(ftos(wi->clip_size), 3));
+        st = strcat(strpadl(ftos(clip_rem), 2), "/", strpadr(ftos(wi->clip_size), 3));
 
     return st;
 };

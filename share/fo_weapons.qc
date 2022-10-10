@@ -83,8 +83,8 @@ struct FO_WeapToItem;
 struct FO_WeapInfo {
     int weapon;  // Verification
     AmmoType ammo_type;
-    int clip_size;
-    int ammo_per_shot;
+    float clip_size;
+    float ammo_per_shot;
     float attack_time;
     float full_reload_time;
 
@@ -295,6 +295,11 @@ float FO_WeaponsMask(entity player) {
     return mask;
 }
 
+float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
+    float tick = (wi->ammo_per_shot / wi->clip_size) * wi->full_reload_time;
+    return ceil((reload_finished - now) / tick) * wi->ammo_per_shot;
+}
+
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
@@ -345,27 +350,39 @@ inline void FO_FillCurrentWeapState(FO_WeapState* result) {
 void (entity pl) Status_Refresh;
 void (float att_delay) Attack_Finished;
 
-static void FOT_ReloadTimer() {
+// Hack until we fix Status_Refresh() to not be awful.
+.float last_still_loading;
+
+float FO_ReloadFrame() {
+    if (self.tfstate & TFSTATE_RELOADING == 0)
+        return FALSE;
+
     FO_WeapState ws;
-    FO_FillWeapState(self.owner, self.owner.current_slot, &ws);
+    FO_FillWeapState(self, self.current_slot, &ws);
+    FO_WeapInfo* wi = ws.wi;
 
-    if (time >= self.heat) {
-        // Reload finished
-        self.owner.tfstate &= ~TFSTATE_RELOADING;
-        self.owner.weaponmodel = ((ws->wi)->models)->model;
-        self.owner.weaponframe = 0;
-        sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-        dremove(self);
-    } else {
-        // Refresh clip
-        if (ws->weapon != WEAP_SNIPER_RIFLE)
-            self.owner.reload_clipsize += 1;
-        else
-            self.owner.reload_sniper_ticks += 1;
+    if (wi->weapon == WEAP_NONE)
+        return FALSE;
 
-        self.nextthink = min(time + self.owner.reload_tick, self.heat);
+    if (self.client_time >= self.reload_finished) {
+        self.tfstate &= ~TFSTATE_RELOADING;
+        self.weaponmodel = ((ws->wi)->models)->model;
+        self.weaponframe = 0;
+        self.last_still_loading = 0;
+        Status_Refresh(self);
+        sprint(self, PRINT_HIGH, "Finished reloading\n");
+
+        return FALSE;
     }
-    Status_Refresh(self.owner);
+
+    float still_loading = FO_NumClipStillLoading(wi, self.client_time,
+                                                     self.reload_finished);
+    if (self.last_still_loading != still_loading) {
+        self.last_still_loading = still_loading;
+        Status_Refresh(self);
+    }
+
+    return TRUE;
 }
 
 float FO_CanReload(Slot slot) {
@@ -423,31 +440,11 @@ void FO_ReloadSlot(Slot slot, float force) {
     float reload_duration =
         (reload_count / wi->clip_size) * wi->full_reload_time;
 
-    *ws->clip_fired -= reload_count;
-
-    // Sets up for status bar.
-    self.reload_time = time + reload_duration;
-    self.reload_tick = reload_duration / reload_count;
-    self.reload_clipsize = wi->clip_size - reload_count;
-
-    // Actual entity that will update status bar / clear reload.
-    entity reload_timer = spawn();
-    reload_timer.owner = self;
-    reload_timer.classname = "timer";
-    reload_timer.think = FOT_ReloadTimer;
-
-    // TODO: Remove this hack.
-    if (ws.weapon == WEAP_SNIPER_RIFLE) {
-        self.reload_tick = 1;
-        self.reload_sniper_ticks = 0;
-    }
-
-    // It turns out, even on forced reloads we should use the client_time() not
-    // the server time as the action that forced the reload (firing the last
-    // shot), was client relative.
-    reload_timer.heat = client_time() + reload_duration;
-    reload_timer.nextthink = client_time() + self.reload_tick;
-
+    // TODO: Make ammo in clip independent from ammo_remaining (so you can't
+    // have shots in clip that are discarded and other weirdness.)
+    (*ws->clip_fired) -= reload_count;
+    self.last_still_loading = reload_count;
+    self.reload_finished = self.client_time + reload_duration;
 }
 
 float FO_CheckForReload() {
@@ -467,6 +464,8 @@ float FO_CheckForReload() {
 
 void FO_InstantReloadAllWeapons(entity player) {
     player.tfstate &= ~TFSTATE_RELOADING;
+    player.reload_finished = 0;
+    player.last_still_loading = 0;
     for (int i = 0; i < TF_NUM_SLOTS; i++)
         player.clip_fired[i] = 0;
 }
