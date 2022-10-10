@@ -21,15 +21,6 @@ inline float client_to_global_time(float ctime) {
 }
 
 
-static void think_nop() {}
-void FO_SetClientThink(void() func, float offset, float override = TRUE) {
-    self.think = think_nop;
-    self.nextthink = 0;
-
-    self.client_think = func;
-    self.client_nextthink = self.client_time + offset;
-}
-
 void FO_CheckClientThink() {
     if (self.client_nextthink && self.client_time >= self.client_nextthink) {
         float held_client_time = self.client_time;

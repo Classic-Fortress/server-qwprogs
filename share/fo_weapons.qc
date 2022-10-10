@@ -80,8 +80,15 @@ enum AmmoType {
 struct FO_WeapModels;
 struct FO_WeapToItem;
 
+enum PredictionType {
+    NO_PREDICT,
+    PRED_MODEL,
+    PRED_PROJ,
+};
+
 struct FO_WeapInfo {
     int weapon;  // Verification
+    int predict_type;
     AmmoType ammo_type;
     float clip_size;
     float ammo_per_shot;
@@ -98,28 +105,28 @@ struct FO_WeapInfo {
 // REQUIRES: weapon at index i == WEAP_to_index(weap)
 // -ve values are placeholders signifying conditional init based on game modes.
 FO_WeapInfo weapon_info[] = {
-    { WEAP_NONE,             AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_HOOK,             AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_KNIFE,            AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_MEDIKIT,          AMMO_CELLS,   0, 0,  0.5,  0 },
-    { WEAP_SPANNER,          AMMO_CELLS,   0, 0,  0.5,  0 },
-    { WEAP_AXE,              AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_SNIPER_RIFLE,     AMMO_SHELLS, -9, 1,  1.5,  4 },
-    { WEAP_AUTO_RIFLE,       AMMO_SHELLS,  0, 1,  0.1,  0 },
-    { WEAP_SHOTGUN,          AMMO_SHELLS,  8, 1,  0.5,  2 },
-    { WEAP_SUPER_SHOTGUN,    AMMO_SHELLS, 16, 2,  0.7,  3 },
-    { WEAP_NAILGUN,          AMMO_NAILS,   0, 1,  0.2,  0 },
-    { WEAP_SUPER_NAILGUN,    AMMO_NAILS,   0, 2,  0.2,  0 },
-    { WEAP_GRENADE_LAUNCHER, AMMO_ROCKETS, 6, 1,  0.6,  4 },
-    { WEAP_PIPE_LAUNCHER,    AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
-    { WEAP_FLAMETHROWER,     AMMO_CELLS,   0, 1,  0.15, 0 },
-    { WEAP_ROCKET_LAUNCHER,  AMMO_ROCKETS, 4, 1,  0.8,  5 },
-    { WEAP_INCENDIARY,       AMMO_ROCKETS, 0, 3, -9,    0 },
-    { WEAP_ASSAULT_CANNON,   AMMO_SHELLS, -9, 1,  0.2,  4 },
-    { WEAP_LIGHTNING,        AMMO_CELLS,   0, 1,  0.1,  0 },
-    { WEAP_DETPACK,          AMMO_NONE,    0, 0,  0,    0 },
-    { WEAP_TRANQ,            AMMO_SHELLS,  0, 1,  1.5,  0 },
-    { WEAP_RAILGUN,          AMMO_NAILS,   0, 1,  0.4,  0 },
+    { WEAP_NONE,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_HOOK,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_KNIFE,            PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_MEDIKIT,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
+    { WEAP_SPANNER,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
+    { WEAP_AXE,              PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
+    { WEAP_SNIPER_RIFLE,     NO_PREDICT, AMMO_SHELLS, -9, 1,  1.5,  4 },
+    { WEAP_AUTO_RIFLE,       PRED_MODEL, AMMO_SHELLS,  0, 1,  0.1,  0 },
+    { WEAP_SHOTGUN,          PRED_MODEL, AMMO_SHELLS,  8, 1,  0.5,  2 },
+    { WEAP_SUPER_SHOTGUN,    PRED_MODEL, AMMO_SHELLS, 16, 2,  0.7,  3 },
+    { WEAP_NAILGUN,          PRED_MODEL, AMMO_NAILS,   0, 1,  0.2,  0 },
+    { WEAP_SUPER_NAILGUN,    PRED_MODEL, AMMO_NAILS,   0, 2,  0.2,  0 },
+    { WEAP_GRENADE_LAUNCHER, PRED_MODEL, AMMO_ROCKETS, 6, 1,  0.6,  4 },
+    { WEAP_PIPE_LAUNCHER,    PRED_MODEL, AMMO_NONE,    0, 1,  0.6,  4 },  // Overlaps GL
+    { WEAP_FLAMETHROWER,     PRED_MODEL, AMMO_CELLS,   0, 1,  0.15, 0 },
+    { WEAP_ROCKET_LAUNCHER,  PRED_MODEL, AMMO_ROCKETS, 4, 1,  0.8,  5 },
+    { WEAP_INCENDIARY,       PRED_MODEL, AMMO_ROCKETS, 0, 3, -9,    0 },
+    { WEAP_ASSAULT_CANNON,   NO_PREDICT, AMMO_SHELLS, -9, 1,  0.2,  4 },
+    { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
+    { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
+    { WEAP_TRANQ,            NO_PREDICT, AMMO_SHELLS,  0, 1,  1.5,  0 },
+    { WEAP_RAILGUN,          PRED_MODEL, AMMO_NAILS,   0, 1,  0.4,  0 },
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
