@@ -519,7 +519,7 @@ void (float objtobuild) TeamFortress_Build = {
         tmp2 = '16 16 48';
         newmis.mdl = "progs/disp.mdl";
         newmis.netname = "dispenser";
-        btime = client_time() + 2;
+        btime = time + 2;
         self.dispenser_ticks = 0;
     } else if (objtobuild == 2) {
         if (self.has_sentry) {
@@ -531,7 +531,7 @@ void (float objtobuild) TeamFortress_Build = {
         tmp2 = '16 16 48';
         newmis.mdl = "progs/turrbase.mdl";
         newmis.netname = "sentrygun";
-        btime = client_time() + 5;
+        btime = time + 5;
         self.sentry_ticks = 0;
     }
     if (CheckArea(newmis, self) == 0) {

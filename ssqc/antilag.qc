@@ -1,7 +1,7 @@
 void AL_ProjectProjectile (entity projectile) {
-    float time_offset = (time - client_time(CT_SLOW_PROJECTILE)) / 2;
+    float time_offset = self.client_time - remote_client_time(CT_SLOW_PROJECTILE);
 
-    if (time_offset <= 0.013)  // ping 13ms or lower? Don't do anything
+    if (time_offset <= 13 * MSEC)  // ping 13ms or lower? Don't do anything
         return;
 
     vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
@@ -332,8 +332,9 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     farthest_rewind_point = max(farthest_rewind_point,
                                 time - rewind_max_offset);
 
-    // Det was pushed at client_time(), let's see if we can get there.
-    float rewind_to = max(farthest_rewind_point, client_time());
+    // Det was pushed at remote_client_time(), let's see if we can get there.
+    float rewind_to = max(farthest_rewind_point,
+                          client_to_global_time(remote_client_time()));
 
     // Ignore for LAN pings.
     if (time - rewind_to < 0.013)
@@ -347,41 +348,5 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
 void UnrewindPlayer(entity p) {
     FOPlayer fop = (FOPlayer)p;
     fop.RestoreNow();
-}
-
-.float client_time_internal;
-
-float client_time(float ct_type = CT_NOEXTERNALEFFECT) {
-    if (ct_type == CT_NOEXTERNALEFFECT)
-        return self.client_time_internal;
-
-    float offset = time - self.client_time_internal;
-    float max_offset = antilag_settings.max_client_time_offset;
-    switch (ct_type) {
-        case CT_SLOW_PROJECTILE:
-            max_offset = antilag_settings.max_projectile_slow_offset;
-            break;
-    }
-
-    return max(self.client_time_internal, time - max_offset);
-}
-
-void AL_UpdateClientTime(entity player) {
-    float offset;
-
-    // Naively, we might want to offset by rtt/2, because that's how old the
-    // client's input is.  However, the client's input is also relative to a
-    // world view that is itself rtt/2 behind.  [Client is a full rtt behind,
-    // and it interpolates ahead to rtt/2 behind.]
-    // This means that if we want, say, "run to a position and perform an action"
-    // to have equivalent time, we need to correct by a full rtt.
-    offset = infokeyf(player, INFOKEY_P_PING) / 1000;
-
-    offset = min(offset, antilag_settings.max_client_time_offset);
-
-    // Monotonically increasing and not dragging beyond 75% of time as/if RTT
-    // changes.
-    player.client_time_internal =
-        max(time - offset, player.client_time_internal + (1/77.0 * 0.75));
 }
 

@@ -192,7 +192,7 @@ void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
         att_delay *= 2;
 
-    self.attack_finished = client_time() + att_delay;
+    self.attack_finished = self.client_time + att_delay;
 };
 
 float () W_FireAxe = {
@@ -1782,7 +1782,7 @@ void () W_Attack = {
 };
 
 float WeaponReady() {
-    if (client_time() >= self.attack_finished &&
+    if (self.client_time >= self.attack_finished &&
         !(self.tfstate & TFSTATE_RELOADING))
         return TRUE;
 
@@ -2578,6 +2578,9 @@ void () W_WeaponFrame = {
         self.impulse = 0;
         return;
     }
+
+    if (FO_ReloadFrame())
+        return;
 
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&

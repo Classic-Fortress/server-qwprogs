@@ -450,9 +450,6 @@ void () DecodeLevelParms = {
         // use old tf style dropflag (map decides on/off) [off]
         old_dropflag = CF_GetSetting("odf", "old_dropflag", "off");
 
-        // show ticking clip ammo in sbar when reloading [on]
-        reload_cliptick = CF_GetSetting("rc", "reload_cliptick", "on");
-
         // use old tf sniper range (shorter) [off]
         old_sniperrange = CF_GetSetting("os", "old_sniperrange", "off");
 
@@ -601,19 +598,18 @@ void () DecodeLevelParms = {
         airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
         airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
 
-        // client_time max delta
+        // remote_client_time max delta
         antilag_settings.rewind_detpipe =
             CF_GetSetting("alrd", "al_rewind_detpipe", "on");
-        // client_time max delta
-        antilag_settings.max_client_time_offset =
-            CF_GetSetting("almcto", "al_max_client_time_offset", "200");
+        // maximum ping we'll have effect at
+        antilag_settings.max_ping = CF_GetSetting("almp", "al_max_ping", "200");
 
         // project projectile weapons by player ping
         project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
         // max projectile projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
-        antilag_settings.max_projectile_slow_offset = project_weapons_max_latency;
+        antilag_settings.max_projectile_slow_ping = project_weapons_max_latency;
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -838,7 +834,6 @@ void () DecodeLevelParms = {
             remember_weapon = TRUE;
             discammo_pickup = FALSE;
             old_dropflag = FALSE;
-            reload_cliptick = TRUE;
             scoutdash = TRUE;
             sniperreload = TRUE;
             old_sniperrange = FALSE;
@@ -917,7 +912,6 @@ void () DecodeLevelParms = {
             remember_weapon = FALSE;
             discammo_pickup = TRUE;
             old_dropflag = TRUE;
-            reload_cliptick = FALSE;
             scoutdash = FALSE;
             sniperreload = FALSE;
             old_sniperrange = TRUE;
@@ -1962,7 +1956,7 @@ void (entity p) SetVoteParams = {
     stuffcmd(p, strcat("color ", ftos(rint(random() * 12)), " ", ftos(rint(random() * 12)), "\n"));
 
     p.takedamage = DAMAGE_AIM; //DAMAGE_YES;
-    p.attack_finished = time + 0.3;
+    p.attack_finished = self.client_time + 0.3;
     p.th_pain = player_pain;
     p.th_die = PlayerDie;
     p.height = 0;
@@ -2068,7 +2062,7 @@ void () PutClientInServer = {
     self.invincible_finished = 0;
     self.effects = 0;
     self.invincible_time = 0;
-    self.spawn_time = time;
+    self.spawn_time = self.client_time;
     self.vote_close = 0;
     self.has_throwngren = FALSE;
     self.saveme_time = 0;
@@ -2173,7 +2167,7 @@ void () PutClientInServer = {
     stuffcmd(self, "v_cshift; wait; bf\n");
     SetTeamName(self);
 
-    self.attack_finished = client_time() + 0.3;
+    self.attack_finished = self.client_time + 0.3;
     self.th_pain = player_pain;
     self.th_die = PlayerDie;
     self.height = 0;
@@ -2658,11 +2652,8 @@ void () CheckWaterJump = {
     }
 };
 
-void AL_UpdateClientTime(entity player);
-
 void () PlayerPreThink = {
-    // We'll use this time for calculating ping adjusted expiration / projection / etc.
-    AL_UpdateClientTime(self);
+    FO_UpdateClientTime();
 
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
@@ -2756,7 +2747,7 @@ void () PlayerPreThink = {
     // Catch all.
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
-    if ((client_time() > self.attack_finished) &&
+    if ((self.client_time > self.attack_finished) &&
         (ws.weapon > WEAP_AXE) && ((ws->wi)->ammo_type != AMMO_NONE)) {
         if (*ws->ammo_remaining == 0)
             W_ChangeToBestWeapon();
@@ -2927,6 +2918,7 @@ void () CheckPowerups = {
 };
 
 void () PlayerPostThink = {
+    FO_CheckClientThink();
     UpdateScoreboardInfo(self);
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();

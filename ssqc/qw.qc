@@ -9,17 +9,25 @@ enum {
 };
 
 struct antilag_settings_t {
-    float max_client_time_offset;
-    float max_projectile_slow_offset;
+    float max_ping;
+    float max_projectile_slow_ping;
     float rewind_detpipe;
 } antilag_settings;
 
-// A monotonically increasing, latency corrected notion of client-time.
-// Monotonicity guarantees that for some offset `o`:
-//     at t1: client_time() + o < at t2: client_time() + o  FOR t2 > t1
+.float client_time;              // A stable/predictable client clock
+.float client_ping;              // ping used for prediction [capped]
+.float last_remote_client_time;  // For monoticity
+
+.void() client_think;            // client-time relative think
+.float client_thinkindex;
+.float client_nextthink;
+
+// A monotonically non-decreasing, latency corrected notion of remote
+// client-time.  Monotonicity guarantees that for some offset `o`:
+//     at t1: remote_client_time() + o < at t2: lag_time() + o  FOR t2 > t1
 // E.g. That you never have to worry about the correction reordering events
 // that `time + o` would not.
-float client_time(float ct_type = CT_NOEXTERNALEFFECT);
+float remote_client_time(float ct_type = CT_NOEXTERNALEFFECT);
 
 //===========================================================================
 // TEAMFORTRESS Defs
@@ -217,16 +225,16 @@ float coop;
 .float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
-.float reload_shotgun;          // Only use for map compatibility.
+.float reload_finished;         // when the reload will finish
+
+// Only use below for map ent compatibility.
+.float reload_shotgun;
 .float reload_super_shotgun;
 .float reload_sniper_rifle;
 .float reload_grenade_launcher;
 .float reload_rocket_launcher;
 .float reload_assault_cannon;
-.float reload_tick;             // how often the status bar should be refreshed during reload
-.float reload_time;             // when the reload will finish
-.float reload_clipsize;         // how much ammo is currently in the reloading clip
-.float reload_sniper_ticks;		// used to indicate when sniper rifle (with only 1 clip) will be reloaded
+// Only use above for map ent compatibility.
 
 // Assault Cannon
 .float heat;
@@ -240,7 +248,7 @@ float coop;
 .float immune_to_check;
 
 // Make sure people don't do too many saveme sounds
-.float last_saveme_sound;
+.float next_saveme_sound;
 
 .float no_active_nail_grens;
 
@@ -546,7 +554,6 @@ float id_extended;
 float remember_weapon;
 float discammo_pickup;
 float old_dropflag;
-float reload_cliptick;
 float old_sniperrange;
 //float detpipe_limit;
 float detpipe_limit_world;
@@ -791,7 +798,7 @@ string settings_to_track_list[4] = {
     "sv_antilag",
     "project_weapons",
     "al_rewind_detpipe",
-    "al_max_client_time_offset",
+    "al_max_remote_client_time_offset",
 };
 
 typedef struct setting_t {
