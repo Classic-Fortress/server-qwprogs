@@ -322,6 +322,10 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[SlotIndex(slot)];
     else
         result->clip_fired = __NULL__;
+
+    // Special case: Overlap with grenade launcher.
+    if (wi->weapon == WEAP_PIPE_LAUNCHER)
+        result->clip_fired = &player.clip_fired[0];
 }
 
 float FO_ClassWeaponBySlot(float class, Slot slot);
