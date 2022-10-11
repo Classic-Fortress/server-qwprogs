@@ -271,7 +271,7 @@ void WP_Frame() {
 entity predicted_projectiles;
 .entity pred_next, pred_prev;
 
-.vector s_origin, old_origin;
+.vector s_origin;
 
 .float starttime, endtime, p_time;
 .float traileffectnum;
@@ -348,12 +348,12 @@ float PP_PredrawActive() {
                 self.oldorigin = trace_endpos;
                 return PREDRAW_NEXT;
             }
-
-            if (self.traileffectnum)
-                trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
         }
 
-        self.p_time = time + 0.013;
+        if (self.traileffectnum)
+            trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
+
+        self.p_time = time + frametime;
         self.oldorigin = self.origin;
     }
 
@@ -406,8 +406,8 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   proj.s_origin[2] += 16;
   proj.velocity = v_forward * desc->speed;
 
-  proj.old_origin = proj.s_origin + 0.013 * proj.velocity;
-  proj.origin = proj.old_origin;
+  proj.oldorigin = proj.s_origin + frametime * proj.velocity;
+  proj.origin = proj.oldorigin;
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 

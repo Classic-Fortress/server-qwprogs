@@ -47,8 +47,8 @@ struct fo_projectile {
 
 fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl" };
 fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl" };
-fo_projectile fpp_nail = { 1000, "progs/spike.mdl" };
-fo_projectile fpp_super_nail = { 1000, "progs/s_spike.mdl" };
+fo_projectile fpp_nail = { 1500, "progs/spike.mdl" };
+fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl" };
 
 #ifdef SSQC
 
