@@ -175,7 +175,10 @@ float WP_ConsumeAmmo(FO_WeapInfo* wi) {
 }
 
 static void prandom(void() option1, void() option2) {
-    option1();
+    if (shared_prng(self) < 0.5)
+        option1();
+    else
+        option2();
 }
 
 void WP_AnimateModel(float fired) {

@@ -11,6 +11,7 @@ enumflags {
     FOWP_WF,
     FOWP_CLASS,
     FOWP_RELOAD,
+    FOWP_RNG,
 };
 #define FOWP_ALL 0xFFFF
 
@@ -31,6 +32,7 @@ struct predict_tf_state {
 
     float reload_finished;
     float clip_fired[4];
+    int lfsr_state;
 
 
      // Used for prediction, not actually communicated.  Reset each frame.
@@ -103,6 +105,26 @@ void FO_WP_Init(float enabled) {
 #endif
 
 #ifdef SSQC
+.int lfsr_state;  // Shared random number generator
+static inline int get_lfsr_state(entity pl) { return pl.lfsr_state; }
+static inline void set_lfsr_state(entity pl, int v) { pl.lfsr_state = v; }
+#else
+static inline int get_lfsr_state(entity pl) { return pstate_pred.lfsr_state; }
+static inline void set_lfsr_state(entity pl, int v) { pstate_pred.lfsr_state = v; }
+#endif
+
+float shared_prng(entity pl) {  // A 16-bit xor-shift LFSR.
+    int v = get_lfsr_state(pl);
+    v ^= (v >> 7);
+    v ^= (v << 9);
+    v &= 65535;
+    v ^= (v >> 13);
+    set_lfsr_state(pl, v);
+
+    return (float)v / 65535.0;
+}
+
+#ifdef SSQC
 #define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
 #define OP3(_op, _j, _f1, _f2, _f3)         OP2(_op, _j, _f2, _f3)      _j OP1(_op, _f1)
@@ -133,6 +155,7 @@ void WeaponPred_Update(entity player) {
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
     M1(FOWP_RELOAD, reload_finished)
+    M1(FOWP_RNG, lfsr_state)
 
     player.predict_entity.SendFlags = mask;
 }
@@ -202,6 +225,9 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_RELOAD)
         COMM(Float, reload_finished);
+
+    if (sendflags & FOWP_RNG)
+        COMM(Float, lfsr_state);
 
 #ifdef SSQC
     return TRUE;
