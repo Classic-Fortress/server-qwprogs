@@ -460,4 +460,3 @@ void PP_Fire() {
         case WEAP_INCENDIARY: PP_FireRocket(FALSE); break;
     }
 }
-
