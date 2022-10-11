@@ -1113,6 +1113,8 @@ void () W_FireRocket = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1360,6 +1362,8 @@ void (vector org, vector dir) launch_spike = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void () W_FireSuperSpikes = {
