@@ -12,10 +12,10 @@ csextradefs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
-settings.qc
-../share/fo_weapons.qc
-../share/fo_weapon_predict.qc
-../share/fo_animate.qc
+../share/weapons.qc
+../share/weapon_predict.qc
+../share/animate.qc
+weapon_predict.qc
 sui_sys.qc
 vote.qc
 status.qc
@@ -25,5 +25,6 @@ main.qc
 events.qc
 hud_helpers.qc
 hud.qc
+settings.qc
 input.qc
 #endlist
