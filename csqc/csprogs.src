@@ -19,12 +19,11 @@ weapon_predict.qc
 sui_sys.qc
 vote.qc
 status.qc
+settings.qc
 menu.qc
-weapon_predict.qc
 main.qc
 events.qc
 hud_helpers.qc
 hud.qc
-settings.qc
 input.qc
 #endlist
