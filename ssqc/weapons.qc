@@ -1113,6 +1113,8 @@ void () W_FireRocket = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1360,6 +1362,8 @@ void (vector org, vector dir) launch_spike = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void () W_FireSuperSpikes = {
@@ -1622,7 +1626,6 @@ void () player_medikit1;
 void () player_medikitb1;
 
 void () W_Attack = {
-    float r;
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
     FO_WeapInfo* wi = ws->wi;
@@ -1656,15 +1659,13 @@ void () W_Attack = {
 
     if (ws.weapon == WEAP_AXE) {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+        if (shared_prng(self) < 0.5)
             player_axe1();
         else
             player_axeb1();
     } else if (ws.weapon == WEAP_KNIFE) {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+        if (shared_prng(self) < 0.5)
             player_knife1();
         else
             player_knifeb1();
@@ -1741,8 +1742,7 @@ void () W_Attack = {
         }
     } else if (ws.weapon == WEAP_MEDIKIT) {
         FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+        if (shared_prng(self) < 0.5)
             player_medikit1();
         else
             player_medikitb1();

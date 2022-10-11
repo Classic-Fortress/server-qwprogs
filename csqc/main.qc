@@ -398,6 +398,9 @@ void(float isnew) CSQC_Ent_Update = {
         case ENT_WEAPONPRED:
             EntUpdate_WeaponPred(isnew);
             break;
+        case ENT_PROJECTILE:
+            EntUpdate_Projectile(isnew);
+            break;
         default:
             error("Unhandled CSQC entity\n");
             return;

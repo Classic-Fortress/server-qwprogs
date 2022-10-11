@@ -1,4 +1,6 @@
 #define ENT_WEAPONPRED 100
+#define ENT_PROJECTILE 101
+
 string wp_version = "v0";
 
 enumflags {
@@ -9,9 +11,17 @@ enumflags {
     FOWP_THINK,
     FOWP_TFSTATE,
     FOWP_WF,
+    FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
+    FOWP_RNG,
 };
+
+enumflags {
+    FOPP_POS,
+    FOPP_INIT,
+};
+
 #define FOWP_ALL 0xFFFF
 
 struct predict_tf_state {
@@ -31,6 +41,7 @@ struct predict_tf_state {
 
     float reload_finished;
     float clip_fired[4];
+    int lfsr_state;
 
 
      // Used for prediction, not actually communicated.  Reset each frame.
@@ -38,37 +49,71 @@ struct predict_tf_state {
     float firing;
 };
 
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+
 struct fo_projectile {
     float speed;
     string model;
+
+    // Automatically initialized below this line.
+    int modelindex;
+    int trailindex;
 };
 
 fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl" };
 fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl" };
-fo_projectile fpp_nail = { 1000, "progs/spike.mdl" };
-fo_projectile fpp_super_nail = { 1000, "progs/s_spike.mdl" };
+fo_projectile fpp_nail = { 1500, "progs/spike.mdl" };
+fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl" };
+
+
+void InitFppProjectiles() {
+    fo_projectile* fpp_list[] =
+        { &fpp_rocket, &fpp_incendiary, &fpp_nail, &fpp_super_nail };
+
+    for (float i = 0; i < fpp_list.length; i++) {
+        fo_projectile* desc = fpp_list[i];
+        desc->modelindex = getmodelindex(desc->model);
+    }
+}
 
 #ifdef SSQC
 
-float FO_GetUserSetting(entity ent, string ps_short, string ps_setting, string ps_default);
-float CF_GetSetting(string ps_short, string ps_setting, string ps_default);
+struct weaponpred_settings_t {
+    float global_enable;
+    float global_disable;
+    float new_projectiles;
+} weaponpred_settings;
 
-static float GlobalEnable() {
-    return CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
-}
+float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+static float init_once;
+void WeaponPred_Init() {
+    if (init_once)
+        return;
+    init_once = TRUE;
 
-static float GlobalDisable() {
-    return CF_GetSetting("wpgd", "weapon_pred_global_disable", "off");
+    printf("WeaponPred_Init\n");
+    // Regular init is too late for this.
+    weaponpred_settings.global_enable =
+        CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
+    weaponpred_settings.global_disable =
+        CF_GetSetting("wpgd", "weapon_pred_global_disable", "off");
+    weaponpred_settings.new_projectiles =
+        CF_GetSetting("wpnp", "weapon_pred_new_projectiles", "off");
+
+    InitFppProjectiles();
 }
 
 static float ClientEnable() {
+    WeaponPred_Init();
+
     // client_ping is not yet initialized.
     float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
 
-    if (GlobalDisable() || ping < 40 * MSEC)
+
+    if (weaponpred_settings.global_disable || ping < 40 * MSEC)
         return FALSE;
 
-    if (GlobalEnable())
+    if (weaponpred_settings.global_enable)
         return TRUE;
 
     return FO_GetUserSetting(self, "fowp", "fo_weapon_predict", "off");
@@ -103,6 +148,26 @@ void FO_WP_Init(float enabled) {
 #endif
 
 #ifdef SSQC
+.int lfsr_state;  // Shared random number generator
+static inline int get_lfsr_state(entity pl) { return pl.lfsr_state; }
+static inline void set_lfsr_state(entity pl, int v) { pl.lfsr_state = v; }
+#else
+static inline int get_lfsr_state(entity pl) { return pstate_pred.lfsr_state; }
+static inline void set_lfsr_state(entity pl, int v) { pstate_pred.lfsr_state = v; }
+#endif
+
+float shared_prng(entity pl) {  // A 16-bit xor-shift LFSR.
+    int v = get_lfsr_state(pl);
+    v ^= (v >> 7);
+    v ^= (v << 9);
+    v &= 65535;
+    v ^= (v >> 13);
+    set_lfsr_state(pl, v);
+
+    return (float)v / 65535.0;
+}
+
+#ifdef SSQC
 #define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
 #define OP3(_op, _j, _f1, _f2, _f3)         OP2(_op, _j, _f2, _f3)      _j OP1(_op, _f1)
@@ -118,7 +183,7 @@ predict_tf_state blank_state;
 void WeaponPred_Update(entity player) {
     float mask = FOWP_CTIME;
 
-    if (time - player.last_full_predict_refresh > 1000 * MSEC) {
+    if (time - player.last_full_predict_refresh > 5000 * MSEC) {
         player.predict_state = blank_state;
         player.last_full_predict_refresh = time;
     }
@@ -129,10 +194,12 @@ void WeaponPred_Update(entity player) {
     M1(FOWP_CLASS, playerclass);
     M3(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id);
     M1(FOWP_TFSTATE, tfstate);
-    M2(FOWP_WF, attack_finished, weaponframe);
+    M1(FOWP_WF, weaponframe);
+    M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
     M1(FOWP_RELOAD, reload_finished)
+    M1(FOWP_RNG, lfsr_state)
 
     player.predict_entity.SendFlags = mask;
 }
@@ -158,7 +225,7 @@ float WP_SendEntity(entity to_player, float sendflags) {
 #else
 float() ReadByte = #360;
 float() ReadFloat = #367;
-void InitPredEnt(entity e);
+void InitWeapPredEnt(entity e);
 
 #define COMM(_type, _field) pstate_server.##_field = Read##_type()
 void EntUpdate_WeaponPred(float isnew) {
@@ -189,8 +256,11 @@ void EntUpdate_WeaponPred(float isnew) {
     }
 
     if (sendflags & FOWP_WF) {
-        COMM(Float, attack_finished);
         COMM(Byte, weaponframe);
+    }
+
+    if (sendflags & FOWP_AF) {
+        COMM(Float, attack_finished);
     }
 
     if (sendflags & FOWP_CLIP) {
@@ -203,20 +273,85 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_RELOAD)
         COMM(Float, reload_finished);
 
+    if (sendflags & FOWP_RNG)
+        COMM(Float, lfsr_state);
+
 #ifdef SSQC
     return TRUE;
 #else
     if (isnew)
-        InitPredEnt(self);
+        InitWeapPredEnt(self);
 #endif
 }
+#undef COMM
+
+
+#ifdef SSQC
+#define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
+#define COMMD(_type, _dest, _field) COMM(_type, _field)
+#define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
+float PP_SendEntity(entity to_player, float sendflags) {
+    WriteByte(MSG_ENTITY, ENT_PROJECTILE);
+    WriteByte(MSG_ENTITY, sendflags);
+#else
+
+float() ReadByte = #360;
+float() ReadShort = #362;
+float() ReadCoord = #364;
+float() ReadAngle = #365;
+float() ReadFloat = #367;
+
+void InitProjPredEnt(entity e);
+
+.vector s_origin;
+.float s_time;
+
+#define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
+#define COMMO(_type, _dest, _src) ##_dest = Read##_type()
+#define COMM(_type, _field) COMMD(_type, _field, _field)
+void InitProjPredEnt(entity pe);
+
+void EntUpdate_Projectile(float isnew) {
+    float sendflags = readbyte();
+#endif
+    if (sendflags & FOPP_POS) {
+        COMMD(Coord, s_origin[0], origin[0]);
+        COMMD(Coord, s_origin[1], origin[1]);
+        COMMD(Coord, s_origin[2], origin[2]);
+
+        COMM(Coord, velocity[0]);
+        COMM(Coord, velocity[1]);
+        COMM(Coord, velocity[2]);
+
+        COMMO(Float, self.s_time, time);
+    }
+
+    if (sendflags & FOPP_INIT) {
+        COMM(Short, modelindex);
+        COMM(Short, effects);
+
+        COMM(Angle, angles[0]);
+        COMM(Angle, angles[1]);
+        COMM(Angle, angles[2]);
+    }
+
+#ifdef SSQC
+    return TRUE;
+#else
+    if (isnew)
+        InitProjPredEnt(self);
+#endif
+}
+#undef COMMD
+#undef COMMO
+#undef COMM
 
 #ifdef SSQC
 inline float WeaponPred_Active(entity player) {
     return player.weapon_pred_enabled;
 }
 
-void WeaponPred_Init(entity player) {
+void WeaponPred_InitPlayer(entity player) {
     if (!ClientEnable()) {  // Server side is once per connect.
         player.weapon_pred_enabled = FALSE;
         return;
@@ -233,8 +368,10 @@ void WeaponPred_Init(entity player) {
     setorigin(pe, [0, 0, 0]);
 
     player.predict_entity = pe;
-    sprint(self, PRINT_HIGH,
+    sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction Active ", wp_version, "\n");
+    sprint(player, PRINT_HIGH, "FortressOne: New projectiles ",
+            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
 }
 
 void WeaponPred_TearDown(entity player) {
@@ -254,6 +391,16 @@ void WeaponPred_DoServerClientThink() {
 
         self->client_time = held_client_time;
     }
+}
+
+void PredProj_Add(entity mis) {
+    mis.dimension_seen = DMN_NOFLASH;
+
+    if (!weaponpred_settings.new_projectiles)
+        return;
+
+    mis.SendEntity = PP_SendEntity;
+    mis.SendFlags = 255;
 }
 #endif
 
@@ -299,6 +446,8 @@ void WP_UpdateViewModel() {
 void WP_Frame();
 void WP_DoClientThink();
 
+float pf, ef;
+
 float WP_ClientThink() {
     pstate_pred = pstate_server;
 
@@ -306,11 +455,16 @@ float WP_ClientThink() {
     int eframe = clientcommandframe;
     for(; pframe <= eframe; pframe++) {
         int success = getinputstate(pframe);
-        if (!success || input_timelength <= 0)
+        if (!success || input_timelength <= 0) {
+            if (pframe < eframe - 1)
+                printf("ended at %d/%d\n", (float)pframe, (float)eframe);
             break;
+        }
         makevectors(input_angles);
+        pf = pframe;
+        ef = eframe;
 
-        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
+        if (pframe >= eframe - 1 && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
         } else {
@@ -339,7 +493,8 @@ float WP_ClientThink() {
 }
 
 void PP_Init();
-void InitPredEnt(entity pe) {
+
+void InitWeapPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
 
     self.drawmask = MASK_PRED_VIEWMODEL;
@@ -348,4 +503,7 @@ void InitPredEnt(entity pe) {
     PP_Init();
     FO_WP_Init(TRUE);
 }
+
+float  PP_Predraw();
+
 #endif

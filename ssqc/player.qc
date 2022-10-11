@@ -324,7 +324,7 @@ void () DeathSound = {
 void () PlayerDead = {
     self.client_nextthink = -1;
     self.nextthink = -1;
-    self.deadflag = 2;
+    self.deadflag = DEAD_DEAD;
 };
 
 vector(float dm) VelocityForDamage =
@@ -513,7 +513,8 @@ void () set_suicide_frame = {
 
 
 void player_die_extra() {
-    if (self.client_thinkindex >= 9)
+    // Death animations are variable length, this always picks up last frame.
+    if (self.client_think == player_run)
         PlayerDead();
 }
 

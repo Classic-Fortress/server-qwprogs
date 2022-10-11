@@ -333,8 +333,7 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
                                 time - rewind_max_offset);
 
     // Det was pushed at remote_client_time(), let's see if we can get there.
-    float rewind_to = max(farthest_rewind_point,
-                          client_to_global_time(remote_client_time()));
+    float rewind_to = max(farthest_rewind_point, remote_time());
 
     // Ignore for LAN pings.
     if (time - rewind_to < 0.013)

@@ -72,7 +72,8 @@ void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
-void WeaponPred_Init(entity player);
+void WeaponPred_Init();
+void WeaponPred_InitPlayer(entity player);
 void WeaponPred_TearDown(entity player);
 
 void (float n) CSEv_SetPlayerImpulse_f = {
@@ -1032,6 +1033,7 @@ void () DecodeLevelParms = {
 
         // Must be after we've set up conditional options (e.g. hwguy reload).
         FO_Weapons_Init();
+        InitFppProjectiles();
     }
 
     if (parm11)
@@ -2066,7 +2068,7 @@ void () PutClientInServer = {
     self.invincible_finished = 0;
     self.effects = 0;
     self.invincible_time = 0;
-    self.spawn_time = self.client_time;
+    self.spawn_time = time;
     self.vote_close = 0;
     self.has_throwngren = FALSE;
     self.saveme_time = 0;
@@ -2744,7 +2746,7 @@ void () PlayerPreThink = {
     // Catch all.
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
-    if ((self.client_time > self.attack_finished) &&
+    if ((self.client_time >= self.attack_finished) &&
         (ws.weapon > WEAP_AXE) && ((ws->wi)->ammo_type != AMMO_NONE)) {
         if (*ws->ammo_remaining == 0)
             W_ChangeToBestWeapon();
@@ -3068,7 +3070,7 @@ void () ClientConnect = {
     }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        WeaponPred_Init(self);
+        WeaponPred_InitPlayer(self);
 
         InitAllStatuses(self);
         UpdateClientMOTD(self);

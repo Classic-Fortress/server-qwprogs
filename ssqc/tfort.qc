@@ -1096,7 +1096,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
 
-    float time_base = client_to_global_time(remote_client_time());
+    float time_base = remote_time();
     tGrenade.nextthink = time_base + 0.8;
     if (gtype == GR_TYPE_CALTROP)
         tGrenade.heat = time_base + 0.5 + 0.5;
