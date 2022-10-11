@@ -1113,6 +1113,8 @@ void () W_FireRocket = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1360,6 +1362,8 @@ void (vector org, vector dir) launch_spike = {
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
+
+    PredProj_Add(newmis);
 };
 
 void () W_FireSuperSpikes = {
@@ -2547,6 +2551,8 @@ void () W_WeaponFrame = {
         return;
     }
 
+    FO_ReloadFrame();
+
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
@@ -2568,8 +2574,6 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (FO_ReloadFrame())
-        return;
 
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
