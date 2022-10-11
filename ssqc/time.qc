@@ -22,7 +22,7 @@ inline float client_to_global_time(float ctime) {
 
 
 void FO_CheckClientThink() {
-    if (self.client_nextthink && self.client_time >= self.client_nextthink) {
+    if (self.client_nextthink > 0 && self.client_time >= self.client_nextthink) {
         float held_client_time = self.client_time;
 
         self.client_time = self.client_nextthink;
