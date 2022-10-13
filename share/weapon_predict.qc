@@ -188,6 +188,7 @@ void WeaponPred_Update(entity player) {
     if (time - player.last_full_predict_refresh > 5000 * MSEC) {
         player.predict_state = blank_state;
         player.last_full_predict_refresh = time;
+        mask = -1;
     }
 
     player.predict_state.client_time = player.client_time;
@@ -228,6 +229,7 @@ float WP_SendEntity(entity to_player, float sendflags) {
 float() ReadByte = #360;
 float() ReadFloat = #367;
 void InitWeapPredEnt(entity e);
+void WP_ServerUpdate();
 
 #define COMM(_type, _field) pstate_server.##_field = Read##_type()
 void EntUpdate_WeaponPred(float isnew) {
@@ -283,6 +285,8 @@ void EntUpdate_WeaponPred(float isnew) {
 #else
     if (isnew)
         InitWeapPredEnt(self);
+    else
+        WP_ServerUpdate();
 #endif
 }
 #undef COMM
@@ -479,7 +483,7 @@ float WP_ClientThink() {
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
-        if (pstate_pred.client_nextthink &&
+        while (pstate_pred.client_nextthink &&
             pstate_pred.client_time >= pstate_pred.client_nextthink) {
             float held_client_time = pstate_pred.client_time;
 

@@ -1,6 +1,16 @@
+DEFCVAR_FLOAT(wpp_debug, 0);
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
+float animate_s_time;
+
+// Corrections for when we can recognize that we missed a packet.
+void WP_ServerUpdate() {
+    if (pstate_server.attack_finished < pstate_server.client_time)
+        pstate_server.weaponframe = 0;
+}
+
 static Slot InputToSlot(float input) {
     Slot result = FO_SlotByInput(input);
     return result;
@@ -180,13 +190,30 @@ static void prandom(void() option1, void() option2) {
         option2();
 }
 
+float PP_PredictStartOffset();
+
 void WP_AnimateModel(float fired) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
             pstate_pred.current_slot);
 
-    if (pstate_pred.client_thinkindex == 0 && !fired) {
+    if (pstate_pred.client_thinkindex == 0) {
         player_run();
         return;
+    }
+
+    if (fired) {
+        // If our latency is higher than projection, synchronize animation with
+        // when it will actually start/finish.
+        float offset = max(PP_PredictStartOffset(), 0);
+
+
+        if (offset > 0) {
+            if ((CVARF(wpp_debug) & 2) && pengine.is_effectframe)
+                printf("held for %0.3f\n", offset);
+            pstate_pred.client_nextthink = animate_s_time;
+            return;
+        }
+
     }
 
     switch (wi->weapon) {
@@ -239,13 +266,23 @@ void WP_Attack() {
         return;
 
     // Must be set prior to animation code, which might internally modify.
-    pstate_pred.client_thinkindex = 0;
+    pstate_pred.client_thinkindex = 1;
 
     WP_AnimateModel(TRUE);
     PP_Fire();
 
     // We set this after so that weapons such as NG can handle correctly.
     pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+}
+
+void WPP_Dump() {
+    printf("cti p=%d s=%d wf=%d/%d\n",
+            pstate_pred.client_thinkindex, pstate_server.client_thinkindex,
+            pstate_pred.weaponframe, pstate_server.weaponframe);
+    printf("t=%4.3f (%4.3f) af=%4.3f (%4.3f) rf=%4.3f (%4.3f)\n",
+            pstate_pred.client_time, pstate_server.client_time,
+            pstate_pred.attack_finished, pstate_server.attack_finished,
+            pstate_pred.reload_finished, pstate_server.reload_finished);
 }
 
 void WP_Frame() {
@@ -395,11 +432,9 @@ int PP_FindTrail(entity e)
     return 0;
 }
 
-static float PP_EPS = 0.05;
-
-entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
-  entity proj = spawn();
-
+// Predict the effective start time of something we fire right now, accounting
+// for server side projection, ping fluctuation, etc.
+inline float PP_PredictStartOffset() {
   float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000.0;
 
   // TODO: Communicate with server around this.
@@ -408,9 +443,16 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   float start_offset = max(0, pstate_pred.client_ping - 0.1) +  // Server project
                        max(0, ping - pstate_pred.client_ping);  // Uncorrected error
 
-  proj.s_time = time + start_offset / 2 + corr_s;
+  return start_offset / 2 + corr_s;
+}
 
-  proj.starttime = proj.s_time + 2/77.0;
+static float PP_EPS = 0.05;
+
+entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+  entity proj = spawn();
+
+  proj.s_time = time + PP_PredictStartOffset();
+  proj.starttime = max(time + 2/77.0, proj.s_time);
   proj.endtime = time + pstate_pred.client_ping + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
@@ -422,7 +464,7 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   proj.s_origin[2] += 16;
   proj.velocity = v_forward * desc->speed;
 
-  proj.oldorigin = proj.s_origin;
+  proj.oldorigin = proj.s_origin + 1/77.0 * proj.velocity;
   setorigin(proj, proj.oldorigin);
 
   proj.angles = input_angles; proj.angles[0] *= -1;
@@ -482,8 +524,6 @@ void PP_Fire() {
     }
 }
 
-DEFCVAR_FLOAT(pp_show_match_dist, 0);
-
 float PredProjectile_MatchProjectile() {
     float delta_t = time - self.s_time;
     vector delta_p = self.velocity * delta_t;
@@ -502,14 +542,15 @@ float PredProjectile_MatchProjectile() {
         float c_s = 0;
         if (fabs(diff2) > 1/154.0)
             c_s = corr_s + diff2/2 + sgn * 1/77.0;
-        corr_s = corr_s ? corr_s * 0.9 + 0.1 * c_s : c_s;
+        corr_s = corr_s ? corr_s * 0.5 + 0.5 * c_s : c_s;
 
         self.oldorigin = proj.origin;  // Mate up trails.
 
-        if (CVARF(pp_show_match_dist) == 1) {
+        if (CVARF(wpp_debug) & 1) {
             proj.origin = proj.s_origin + delta_p;
-            printf("  p_diff = %0.3f / %0.3f\n",
-                vlen(proj.s_origin - self.s_origin), vlen(proj.origin - self.origin));
+            printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
+                vlen(proj.s_origin - self.s_origin), vlen(proj.origin - self.origin),
+                vlen(proj.origin - self.origin) / vlen(self.velocity));
             printf(" D2=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff2, c_s, corr_s);
         }
 

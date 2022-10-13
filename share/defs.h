@@ -626,7 +626,7 @@ typedef struct { int id; } Slot;
 // unused                           247
 // unused                           248
 // unused                           249
-// unused                           250
+#define TF_DEBUG_CSQC               250
 // unused                           251
 // unused                           252
 // unused                           253
