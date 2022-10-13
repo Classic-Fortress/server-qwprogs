@@ -289,6 +289,8 @@ void EntUpdate_WeaponPred(float isnew) {
 
 
 #ifdef SSQC
+.float s_time;
+.vector s_origin;
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
@@ -307,6 +309,7 @@ void InitProjPredEnt();
 
 .vector s_origin;
 .float s_time;
+.float owner_entnum;
 
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
@@ -316,15 +319,15 @@ void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
     if (sendflags & FOPP_POS) {
-        COMMD(Coord, s_origin[0], origin[0]);
-        COMMD(Coord, s_origin[1], origin[1]);
-        COMMD(Coord, s_origin[2], origin[2]);
+        COMM(Coord, s_origin[0]);
+        COMM(Coord, s_origin[1]);
+        COMM(Coord, s_origin[2]);
 
         COMM(Coord, velocity[0]);
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMMO(Float, self.s_time, time);
+        COMM(Float, s_time);
     }
 
     if (sendflags & FOPP_INIT) {
@@ -337,8 +340,10 @@ void EntUpdate_Projectile(float isnew) {
     }
 
 #ifdef SSQC
+    WriteEntity(MSG_ENTITY, self.owner);
     return TRUE;
 #else
+    self.owner_entnum = readentitynum();
     if (isnew)
         InitProjPredEnt();
 #endif
@@ -400,6 +405,7 @@ void PredProj_Add(entity mis) {
     if (!weaponpred_settings.new_projectiles)
         return;
 
+    mis.s_origin = mis.origin;
     mis.SendEntity = PP_SendEntity;
     mis.SendFlags = 255;
 }
@@ -455,12 +461,9 @@ float WP_ClientThink() {
     int pframe = servercommandframe + 1;
     int eframe = clientcommandframe;
     for(; pframe <= eframe; pframe++) {
-        int success = getinputstate(pframe);
-        if (!success || input_timelength <= 0) {
-            if (pframe < eframe - 1)
-                printf("ended at %d/%d\n", (float)pframe, (float)eframe);
+        if (!getinputstate(pframe) || input_timelength <= 0)
             break;
-        }
+
         makevectors(input_angles);
         pf = pframe;
         ef = eframe;

@@ -1,6 +1,7 @@
 void AL_ProjectProjectile (entity projectile) {
     float time_offset = self.client_time - remote_client_time(CT_SLOW_PROJECTILE);
 
+    projectile.s_time = time - time_offset;
     if (time_offset <= 13 * MSEC)  // ping 13ms or lower? Don't do anything
         return;
 
