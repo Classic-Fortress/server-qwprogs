@@ -2973,11 +2973,13 @@ void () PlayerPostThink = {
             RefreshStatusBar(self);
 
         CheckPowerups();
+        FO_ReloadFrame();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
         //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
+        FO_ReloadFrame();
         ButtonFrame();
         W_WeaponFrame();
         if (self.motd <= 400) {

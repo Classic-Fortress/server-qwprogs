@@ -2572,8 +2572,6 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (FO_ReloadFrame())
-        return;
 
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
