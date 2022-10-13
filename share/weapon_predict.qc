@@ -54,16 +54,17 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 struct fo_projectile {
     float speed;
     string model;
+    string trail;
 
     // Automatically initialized below this line.
-    int modelindex;
-    int trailindex;
+    float modelindex;
+    float trailindex;
 };
 
-fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl" };
-fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl" };
-fo_projectile fpp_nail = { 1500, "progs/spike.mdl" };
-fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl" };
+fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" };
+fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl", "t_lavaball" };
+fo_projectile fpp_nail = { 1500, "progs/spike.mdl", "tr_spike" };
+fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl", "tr_spike" };
 
 
 void InitFppProjectiles() {
@@ -73,6 +74,8 @@ void InitFppProjectiles() {
     for (float i = 0; i < fpp_list.length; i++) {
         fo_projectile* desc = fpp_list[i];
         desc->modelindex = getmodelindex(desc->model);
+        if (desc->trail != "")
+            desc->trailindex = particleeffectnum(strcat("fo-particles.",desc->trail));
     }
 }
 
@@ -91,7 +94,6 @@ void WeaponPred_Init() {
         return;
     init_once = TRUE;
 
-    printf("WeaponPred_Init\n");
     // Regular init is too late for this.
     weaponpred_settings.global_enable =
         CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
@@ -287,6 +289,8 @@ void EntUpdate_WeaponPred(float isnew) {
 
 
 #ifdef SSQC
+.float s_time;
+.vector s_origin;
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
@@ -301,29 +305,29 @@ float() ReadCoord = #364;
 float() ReadAngle = #365;
 float() ReadFloat = #367;
 
-void InitProjPredEnt(entity e);
+void InitProjPredEnt();
 
 .vector s_origin;
 .float s_time;
+.float owner_entnum;
 
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
-void InitProjPredEnt(entity pe);
 
 void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
     if (sendflags & FOPP_POS) {
-        COMMD(Coord, s_origin[0], origin[0]);
-        COMMD(Coord, s_origin[1], origin[1]);
-        COMMD(Coord, s_origin[2], origin[2]);
+        COMM(Coord, s_origin[0]);
+        COMM(Coord, s_origin[1]);
+        COMM(Coord, s_origin[2]);
 
         COMM(Coord, velocity[0]);
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMMO(Float, self.s_time, time);
+        COMM(Float, s_time);
     }
 
     if (sendflags & FOPP_INIT) {
@@ -336,10 +340,12 @@ void EntUpdate_Projectile(float isnew) {
     }
 
 #ifdef SSQC
+    WriteEntity(MSG_ENTITY, self.owner);
     return TRUE;
 #else
+    self.owner_entnum = readentitynum();
     if (isnew)
-        InitProjPredEnt(self);
+        InitProjPredEnt();
 #endif
 }
 #undef COMMD
@@ -399,6 +405,7 @@ void PredProj_Add(entity mis) {
     if (!weaponpred_settings.new_projectiles)
         return;
 
+    mis.s_origin = mis.origin;
     mis.SendEntity = PP_SendEntity;
     mis.SendFlags = 255;
 }
@@ -454,12 +461,9 @@ float WP_ClientThink() {
     int pframe = servercommandframe + 1;
     int eframe = clientcommandframe;
     for(; pframe <= eframe; pframe++) {
-        int success = getinputstate(pframe);
-        if (!success || input_timelength <= 0) {
-            if (pframe < eframe - 1)
-                printf("ended at %d/%d\n", (float)pframe, (float)eframe);
+        if (!getinputstate(pframe) || input_timelength <= 0)
             break;
-        }
+
         makevectors(input_angles);
         pf = pframe;
         ef = eframe;

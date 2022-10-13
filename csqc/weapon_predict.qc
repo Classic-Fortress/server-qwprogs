@@ -270,8 +270,6 @@ void WP_Frame() {
 entity predicted_projectiles;
 .entity pred_next, pred_prev;
 
-.vector s_origin;
-
 .float starttime, endtime, p_time;
 .float traileffectnum;
 
@@ -296,6 +294,8 @@ trail_table_entry trail_table[] = {
 
 float nail_trail;
 
+float corr_s;  // Auto-tuning correction factor.
+
 void PP_Init() {
     InitFppProjectiles();
 
@@ -310,6 +310,8 @@ void PP_Init() {
             entry->trail[j] = particleeffectnum(name);
         }
     }
+
+    corr_s = 0.04;  //  Ballpark factor for many common pings.
 }
 
 void PP_Cleanup(entity proj) {
@@ -332,9 +334,6 @@ DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
 float PP_PredrawActive() {
     float delta = time - self.s_time;
-
-    if (delta < 0.05)
-        return PREDRAW_NEXT;  // Forward projection is bounded.
 
     self.origin = self.s_origin + (self.velocity * delta);
     setorigin(self, self.origin);
@@ -385,10 +384,12 @@ int PP_FindTrail(entity e)
 
         if (idx >= 0 && idx < trail_table.length)
             return trail_table[idx].trail[is_grenade];
-    } else if (self.modelindex == fpp_nail.modelindex) {
-        return fpp_nail.trailindex;
-    } else if (self.modelindex == fpp_super_nail.modelindex) {
-        return fpp_super_nail.trailindex;
+    }
+
+    fo_projectile* fpp_list[] = { &fpp_incendiary, &fpp_nail, &fpp_super_nail };
+    for (float i = 0; i < fpp_list.length; i++) {
+        fo_projectile* desc = fpp_list[i];
+        if (e.modelindex == desc->modelindex) return desc->trailindex;
     }
 
     return 0;
@@ -399,24 +400,30 @@ static float PP_EPS = 0.05;
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   entity proj = spawn();
 
+  float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000.0;
+
   // TODO: Communicate with server around this.
   // Note: We use true time here since the created projectiles exist outside of
   // our prediction.
-  float start_offset = max(0, (pstate_pred.client_ping - 0.1) / 2);
-  proj.s_time = time + start_offset - 1*frametime/2;
-  proj.starttime = proj.s_time;
+  float start_offset = max(0, pstate_pred.client_ping - 0.1) +  // Server project
+                       max(0, ping - pstate_pred.client_ping);  // Uncorrected error
+
+  proj.s_time = time + start_offset / 2 + corr_s;
+
+  proj.starttime = proj.s_time + 2/77.0;
   proj.endtime = time + pstate_pred.client_ping + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_ENGINE;
 
+  setsize(proj, [0,0,0], [0,0,0]);
   proj.p_time = 0;
-  proj.s_origin = pmove_org + offset + (v_forward * 8);
+  proj.s_origin = pmove_org + offset;
   proj.s_origin[2] += 16;
   proj.velocity = v_forward * desc->speed;
 
-  proj.oldorigin = proj.s_origin + (0.05 * proj.velocity);
-  proj.origin = proj.oldorigin;
+  proj.oldorigin = proj.s_origin;
+  setorigin(proj, proj.oldorigin);
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 
@@ -433,7 +440,10 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
 void PP_FireRocket(float is_soldier) {
     fo_projectile* desc = is_soldier ? &fpp_rocket : &fpp_incendiary;
 
-    entity proj = PP_CreateProjectile(desc, [0, 0, 0]);
+    vector ovf = v_forward;
+    makevectors(input_angles);
+    ASSERTF_EQ(vlen(ovf - v_forward), 0);
+    entity proj = PP_CreateProjectile(desc, v_forward * 8);
     proj.traileffectnum = PP_FindTrail(proj);
 }
 
@@ -475,6 +485,8 @@ void PP_Fire() {
 DEFCVAR_FLOAT(pp_show_match_dist, 0);
 
 float PredProjectile_MatchProjectile() {
+    float delta_t = time - self.s_time;
+    vector delta_p = self.velocity * delta_t;
     self.origin = self.s_origin + self.velocity * (time - self.s_time);
 
     entity proj;
@@ -482,25 +494,34 @@ float PredProjectile_MatchProjectile() {
         if (proj.modelindex != self.modelindex)
             continue;
 
-        float diff = vlen(proj.origin - self.origin);
-        if (CVARF(pp_show_match_dist) == 1)
-            printf("Match D=%0.3f\n", diff);
-        if (diff > 100) // TODO: This should be much tighter.. but we got time.
+        if (fabs(proj.s_time - self.s_time) > 0.15)
             continue;
 
-        if (fabs(time - (proj.endtime - PP_EPS)) > PP_EPS * 0.9)
-            continue;
+        float diff2 = self.s_time - proj.s_time;
+        float sgn = diff2 > 0 ? 1 : -1;
+        float c_s = 0;
+        if (fabs(diff2) > 1/154.0)
+            c_s = corr_s + diff2/2 + sgn * 1/77.0;
+        corr_s = corr_s ? corr_s * 0.9 + 0.1 * c_s : c_s;
 
         self.oldorigin = proj.origin;  // Mate up trails.
-        PP_Cleanup(proj);
 
+        if (CVARF(pp_show_match_dist) == 1) {
+            proj.origin = proj.s_origin + delta_p;
+            printf("  p_diff = %0.3f / %0.3f\n",
+                vlen(proj.s_origin - self.s_origin), vlen(proj.origin - self.origin));
+            printf(" D2=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff2, c_s, corr_s);
+        }
+
+        PP_Cleanup(proj);
         return TRUE;
     }
 
     return FALSE;
 }
 
-void InitProjPredEnt(entity pe) {
+// Called on `self`.
+void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
@@ -510,5 +531,6 @@ void InitProjPredEnt(entity pe) {
     self.traileffectnum = PP_FindTrail(self);
     self.oldorigin = self.s_origin;
 
-    PredProjectile_MatchProjectile();
+    if (self.owner_entnum == player_localentnum)
+        PredProjectile_MatchProjectile();
 }

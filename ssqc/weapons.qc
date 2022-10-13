@@ -1110,11 +1110,10 @@ void () W_FireRocket = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
+    PredProj_Add(newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
-
-    PredProj_Add(newmis);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1359,11 +1358,10 @@ void (vector org, vector dir) launch_spike = {
 
     newmis.velocity = dir * ng_velocity;
 
+    PredProj_Add(newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
-
-    PredProj_Add(newmis);
 };
 
 void () W_FireSuperSpikes = {
