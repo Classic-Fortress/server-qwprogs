@@ -385,10 +385,12 @@ int PP_FindTrail(entity e)
 
         if (idx >= 0 && idx < trail_table.length)
             return trail_table[idx].trail[is_grenade];
-    } else if (self.modelindex == fpp_nail.modelindex) {
-        return fpp_nail.trailindex;
-    } else if (self.modelindex == fpp_super_nail.modelindex) {
-        return fpp_super_nail.trailindex;
+    }
+
+    fo_projectile* fpp_list[] = { &fpp_incendiary, &fpp_nail, &fpp_super_nail };
+    for (float i = 0; i < fpp_list.length; i++) {
+        fo_projectile* desc = fpp_list[i];
+        if (e.modelindex == desc->modelindex) return desc->trailindex;
     }
 
     return 0;
@@ -500,7 +502,8 @@ float PredProjectile_MatchProjectile() {
     return FALSE;
 }
 
-void InitProjPredEnt(entity pe) {
+// Called on `self`.
+void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 

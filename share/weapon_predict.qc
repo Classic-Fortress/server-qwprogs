@@ -54,16 +54,17 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 struct fo_projectile {
     float speed;
     string model;
+    string trail;
 
     // Automatically initialized below this line.
-    int modelindex;
-    int trailindex;
+    float modelindex;
+    float trailindex;
 };
 
-fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl" };
-fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl" };
-fo_projectile fpp_nail = { 1500, "progs/spike.mdl" };
-fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl" };
+fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" };
+fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl", "t_lavaball" };
+fo_projectile fpp_nail = { 1500, "progs/spike.mdl", "tr_spike" };
+fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl", "tr_spike" };
 
 
 void InitFppProjectiles() {
@@ -73,6 +74,8 @@ void InitFppProjectiles() {
     for (float i = 0; i < fpp_list.length; i++) {
         fo_projectile* desc = fpp_list[i];
         desc->modelindex = getmodelindex(desc->model);
+        if (desc->trail != "")
+            desc->trailindex = particleeffectnum(strcat("fo-particles.",desc->trail));
     }
 }
 
@@ -91,7 +94,6 @@ void WeaponPred_Init() {
         return;
     init_once = TRUE;
 
-    printf("WeaponPred_Init\n");
     // Regular init is too late for this.
     weaponpred_settings.global_enable =
         CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
@@ -301,7 +303,7 @@ float() ReadCoord = #364;
 float() ReadAngle = #365;
 float() ReadFloat = #367;
 
-void InitProjPredEnt(entity e);
+void InitProjPredEnt();
 
 .vector s_origin;
 .float s_time;
@@ -309,7 +311,6 @@ void InitProjPredEnt(entity e);
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
-void InitProjPredEnt(entity pe);
 
 void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
@@ -339,7 +340,7 @@ void EntUpdate_Projectile(float isnew) {
     return TRUE;
 #else
     if (isnew)
-        InitProjPredEnt(self);
+        InitProjPredEnt();
 #endif
 }
 #undef COMMD
