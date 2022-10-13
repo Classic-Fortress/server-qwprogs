@@ -155,6 +155,7 @@ void WPP_Status() {
     printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
 
     printf("Config:\n");
+    PRINT_CONFIG(qc_physics);
     PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
@@ -242,8 +243,6 @@ void Attack_Finished(float attack_time) {
 ////////////////////////////////////////////////////////////////////////////////
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
-float animate_s_time;
-
 static entity pred_sound_entity;
 static float last_pred_sound;
 
@@ -726,7 +725,7 @@ int FPP_FindTrail(entity e)
 
 DEFCVAR_FLOAT(cl_r2g, 0);
 
-entity FPP_Init(int fpp_type, entity proj) {
+void FPP_Init(int fpp_type, entity proj) {
     fo_projectile* desc = &fpp_types[fpp_type];
 
     proj.fpp_index = fpp_type;
@@ -736,10 +735,12 @@ entity FPP_Init(int fpp_type, entity proj) {
     else
         setmodelindex(proj, desc->modelindex);
 
-    proj.oldorigin = proj.s_origin;
-    proj.traileffectnum = FPP_FindTrail(proj);
+    if (fpp_type == FPP_GRENADE) {
+        proj.avelocity = '300 300 300';
+    }
 
-    return proj;
+    proj.traileffectnum = FPP_FindTrail(proj);
+    proj.movetype = desc->movetype;
 }
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
@@ -748,10 +749,7 @@ DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
 .float trail_started;
 float PP_PredrawActive() {
-    float delta = time - self.s_time;
-
-    self.origin = self.s_origin + (self.velocity * delta);
-    setorigin(self, self.origin);
+    CPhys_Update(self);
 
     // we need to space out the particles incase we're running at very high fps
     if (time > self.p_time) {
@@ -790,11 +788,6 @@ float PP_PredrawPredicted() {
 
 static float PP_EPS = 0.05;
 
-static vector PredProj_Pos(entity proj) {
-    float offset = time - proj.s_time;
-    return proj.s_origin + offset * proj.velocity;
-}
-
 entity PP_CreateProjectile(int fpp_type, vector offset) {
   PredProj_Sound(fpp_type);
 
@@ -818,11 +811,13 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   ProjectResult push_t =
       WeaponPred_ProjectOffset(fpp_type, pstate_pred.client_ping);
 
-  float uncorrected_ms = pstate_pred.client_ping - push_t.dynamic_ms;
+  float uncorrected_dt = (pstate_pred.client_ping - push_t.dynamic_ms) / 1000.0;
+  float static_dt = push_t.static_ms / 1000.0;
   // Note: We use true time here as created projectiles exist outside of pred.
-  proj.starttime = time + uncorrected_ms/1000.0;
-  proj.s_time = proj.starttime - push_t.static_ms/1000.0;
+  proj.starttime = time + uncorrected_dt;
+  proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_pred.client_ping / 1000.0 + PP_EPS;
+
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -831,11 +826,10 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.s_origin = pmove_org + offset;
   proj.s_origin[2] += 16;
   proj.velocity = v_forward * fpp_types[fpp_type].speed;
-
-  proj.origin = PredProj_Pos(proj);
-  proj.oldorigin = proj.origin;
-
   proj.angles = input_angles; proj.angles[0] *= -1;
+
+  CPhys_Init(proj, proj.starttime, static_dt);
+  proj.oldorigin = proj.origin;
 
   proj.pred_next = predicted_projectiles;
   if (predicted_projectiles)
@@ -981,18 +975,21 @@ void WP_Attack() {
 
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
-    float best = 200;
+    float best = 64;
 
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
+        if (proj == self)
+            error("???");
+
         if (proj.fpp_index != self.fpp_index || proj.wpp_aux != self.wpp_aux)
             continue;
 
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        proj.origin = PredProj_Pos(proj);
+        CPhys_Sync(proj, max(time, self.phys_time));
         float d = vlen(proj.origin - self.origin);
-        if (d < best) {
+        if (!best || d < best) {
             best = d;
             match = proj;
         }
@@ -1004,12 +1001,14 @@ float PredProjectile_MatchProjectile() {
         self.trail_started = match.trail_started;
 
         if (CVARF(wpp_debug) & 1) {
-            string s = sprintf(" p_diff = %0.3f, t_e=%0.3f",
+            string s = sprintf(" p_diff = %0.1f, t_e=%0.3f t=%0.3f d_t=%0.3f",
                     vlen(match.origin - self.origin),
-                    vlen(match.origin - self.origin) / vlen(self.velocity));
-            s = strcat(s, sprintf(" [c=%0.3f/%0.3f (s_t=%0.3f) s=%0.3f/%0.3f]\n",
-                    vlen(match.origin - pmove_org),time, match.s_time,
-                    vlen(self.origin - pmove_org),self.s_time));
+                    vlen(match.origin - self.origin) / vlen(self.velocity),
+                    time, time - self.phys_time);
+            s = strcat(s, sprintf(" [c=%d/%0.3f s=%d/%0.3f,%0.3f] alms=%d\n",
+                    vlen(match.origin - pmove_org), match.phys_time,
+                    vlen(self.origin - pmove_org), self.s_time, self.phys_time,
+                    self.antilag_ms));
             print(s);
         }
 
@@ -1024,11 +1023,12 @@ float PredProjectile_MatchProjectile() {
 void InitProjectileEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
+    self.s_time = self.phys_time;
 
     FPP_Init(self.fpp_index, self);
 
     self.angles = vectoangles(self.velocity);
-    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
+    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
@@ -1047,6 +1047,10 @@ void InitProjectileEnt() {
         // s_origin here as that's what we know antilag_ms to be relative to.
         self.oldorigin = self.s_origin - self.antilag_ms/ 1000.0 * self.velocity;
     }
+}
+
+void WP_SyncPhysProjectile() {
+    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 }
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);

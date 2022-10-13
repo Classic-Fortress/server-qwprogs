@@ -14,6 +14,7 @@ csextradefs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
+../share/physics.qc
 ../share/weapons.qc
 ../share/prediction.qc
 ../share/animate.qc

@@ -30,16 +30,10 @@ void AL_ProjectProjectile (entity projectile) {
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
     ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, self.client_ping);
-    float offset_ms = offset.static_ms + offset.dynamic_ms;
-    vector projected_origin = projectile.origin + offset_ms / 1000.0 * projectile.velocity;
+    float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
 
-    traceline(projectile.origin, projected_origin, 0, self);
-
-    if (trace_fraction < 1)
-        projected_origin = trace_endpos;
-
-    projectile.antilag_ms = offset_ms * trace_fraction;
-    setorigin(projectile, projected_origin);
+    float dt = Phys_Advance(projectile, offset_dt);
+    projectile.antilag_ms = dt * 1000;
 }
 #define DEBUG_ANTILAG 0
 

@@ -1,4 +1,5 @@
 var struct {
+    float qc_physics;
     float dynamic_newmis_ms;
     float max_rewind_ms;
     float max_rewind_slow_projectile_ms;
