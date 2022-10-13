@@ -411,6 +411,8 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
+void WPP_Dump();
+
 noref void CSQC_Input_Frame() {
     local float changed_buttons = input_buttons ^ oldbuttons;
     oldbuttons = input_buttons;
@@ -426,6 +428,11 @@ noref void CSQC_Input_Frame() {
     // Intercept zoom
     if (player_class == PC_SNIPER && keydowns & BUTTON3) {
         zoomed_in = !zoomed_in;
+    }
+
+    if (input_impulse == TF_DEBUG_CSQC) {
+        WPP_Dump();
+        input_impulse = 0;
     }
 
     Sync_GameState();

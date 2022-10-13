@@ -254,7 +254,7 @@ void player_run() {
 }
 
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    float tidx = (*thinkindex())++;
+    float tidx = (*thinkindex())++ - 1;
 
     float fi = tidx % anim->num_frames;
     float wfi = tidx % anim->num_wf;
@@ -282,9 +282,6 @@ void PP_FireNG(float off);
 
 static void nail_extra() {
     pstate_pred.firing = TRUE;
-
-    if (pstate_pred.client_time < pstate_pred.attack_finished)
-        return;
 
     if (!pengine.is_effectframe)
         return;
