@@ -376,16 +376,16 @@ void (float att_delay) Attack_Finished;
 // Hack until we fix Status_Refresh() to not be awful.
 .float last_still_loading;
 
-float FO_ReloadFrame() {
+void FO_ReloadFrame() {
     if (self.tfstate & TFSTATE_RELOADING == 0)
-        return FALSE;
+        return;
 
     FO_WeapState ws;
     FO_FillWeapState(self, self.current_slot, &ws);
     FO_WeapInfo* wi = ws.wi;
 
     if (wi->weapon == WEAP_NONE)
-        return FALSE;
+        return;
 
     if (self.client_time >= self.reload_finished) {
         self.tfstate &= ~TFSTATE_RELOADING;
@@ -395,7 +395,7 @@ float FO_ReloadFrame() {
         Status_Refresh(self);
         sprint(self, PRINT_HIGH, "Finished reloading\n");
 
-        return FALSE;
+        return;
     }
 
     float still_loading = FO_NumClipStillLoading(wi, self.client_time,
@@ -404,8 +404,6 @@ float FO_ReloadFrame() {
         self.last_still_loading = still_loading;
         Status_Refresh(self);
     }
-
-    return TRUE;
 }
 
 float FO_CanReload(Slot slot) {

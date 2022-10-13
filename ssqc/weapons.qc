@@ -2551,8 +2551,6 @@ void () W_WeaponFrame = {
         return;
     }
 
-    FO_ReloadFrame();
-
     if (self.menu_input) {
         if (self.impulse > 0 && self.impulse <= 10) {
             Menu_Input(self.impulse);
