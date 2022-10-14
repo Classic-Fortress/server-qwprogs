@@ -296,7 +296,7 @@ float nail_trail;
 
 float corr_s;  // Auto-tuning correction factor.
 
-void PP_Init() {
+void FO_PP_Init() {
     InitFppProjectiles();
 
     for (float i = 0; i < trail_table.length; i++) {
@@ -347,9 +347,9 @@ float PP_PredrawActive() {
                 return PREDRAW_NEXT;
             }
         }
-
         if (self.traileffectnum)
             trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
+
         self.p_time = time + frametime;
         self.oldorigin = self.origin;
     }
@@ -396,6 +396,13 @@ int PP_FindTrail(entity e)
 }
 
 static float PP_EPS = 0.05;
+DEFCVAR_FLOAT(pp_trail_offset, 0.05);
+
+static inline void PP_InitTrail(entity proj) {
+    proj.oldorigin = proj.s_origin + CVARF(pp_trail_offset) * proj.velocity;
+    proj.p_time = time + CVARF(pp_trail_offset);
+    proj.traileffectnum = PP_FindTrail(proj);
+}
 
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   entity proj = spawn();
@@ -422,12 +429,13 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   proj.s_origin[2] += 16;
   proj.velocity = v_forward * desc->speed;
 
-  proj.oldorigin = proj.s_origin;
-  setorigin(proj, proj.oldorigin);
+  setorigin(proj, proj.s_origin);
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 
   setmodel(proj, desc->model);
+
+  PP_InitTrail(proj);
 
   proj.pred_next = predicted_projectiles;
   if (predicted_projectiles)
@@ -444,7 +452,6 @@ void PP_FireRocket(float is_soldier) {
     makevectors(input_angles);
     ASSERTF_EQ(vlen(ovf - v_forward), 0);
     entity proj = PP_CreateProjectile(desc, v_forward * 8);
-    proj.traileffectnum = PP_FindTrail(proj);
 }
 
 void PP_FireNG(float off) {
@@ -459,7 +466,6 @@ void PP_FireNG(float off) {
     }
 
     entity proj = PP_CreateProjectile(desc, offset);
-    proj.traileffectnum = PP_FindTrail(proj);
 }
 
 void PP_Fire() {
@@ -485,12 +491,8 @@ void PP_Fire() {
 DEFCVAR_FLOAT(pp_show_match_dist, 0);
 
 float PredProjectile_MatchProjectile() {
-    float delta_t = time - self.s_time;
-    vector delta_p = self.velocity * delta_t;
-    self.origin = self.s_origin + self.velocity * (time - self.s_time);
-
     entity proj;
-    for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
+    for(entity proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.modelindex != self.modelindex)
             continue;
 
@@ -504,10 +506,11 @@ float PredProjectile_MatchProjectile() {
             c_s = corr_s + diff2/2 + sgn * 1/77.0;
         corr_s = corr_s ? corr_s * 0.9 + 0.1 * c_s : c_s;
 
-        self.oldorigin = proj.origin;  // Mate up trails.
+        self.oldorigin = proj.oldorigin;  // Mate up trails.
+        self.p_time = proj.p_time;
 
         if (CVARF(pp_show_match_dist) == 1) {
-            proj.origin = proj.s_origin + delta_p;
+            self.origin = self.s_origin + self.velocity * (time - self.s_time);
             printf("  p_diff = %0.3f / %0.3f\n",
                 vlen(proj.s_origin - self.s_origin), vlen(proj.origin - self.origin));
             printf(" D2=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff2, c_s, corr_s);
@@ -528,9 +531,12 @@ void InitProjPredEnt() {
     // Force modelflags refresh
     setmodel(self, modelnameforindex(self.modelindex));
 
-    self.traileffectnum = PP_FindTrail(self);
-    self.oldorigin = self.s_origin;
+    self.oldorigin = self.s_origin + CVARF(pp_trail_offset) * self.velocity;
+    self.p_time = time + CVARF(pp_trail_offset);
+
+    PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
 
     if (self.owner_entnum == player_localentnum)
         PredProjectile_MatchProjectile();
+
 }

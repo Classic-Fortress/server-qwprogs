@@ -88,8 +88,8 @@ struct weaponpred_settings_t {
 } weaponpred_settings;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
-static float init_once;
-void WeaponPred_Init() {
+void WeaponPred_InitOnce() {
+    static float init_once;
     if (init_once)
         return;
     init_once = TRUE;
@@ -106,7 +106,7 @@ void WeaponPred_Init() {
 }
 
 static float ClientEnable() {
-    WeaponPred_Init();
+    WeaponPred_InitOnce();
 
     // client_ping is not yet initialized.
     float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
@@ -358,6 +358,11 @@ inline float WeaponPred_Active(entity player) {
 }
 
 void WeaponPred_InitPlayer(entity player) {
+    WeaponPred_InitOnce();
+
+    sprint(player, PRINT_HIGH, "FortressOne: New projectiles ",
+            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
+
     if (!ClientEnable()) {  // Server side is once per connect.
         player.weapon_pred_enabled = FALSE;
         return;
@@ -376,8 +381,6 @@ void WeaponPred_InitPlayer(entity player) {
     player.predict_entity = pe;
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction Active ", wp_version, "\n");
-    sprint(player, PRINT_HIGH, "FortressOne: New projectiles ",
-            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
 }
 
 void WeaponPred_TearDown(entity player) {
@@ -496,15 +499,12 @@ float WP_ClientThink() {
     return PREDRAW_AUTOADD;
 }
 
-void PP_Init();
-
 void InitWeapPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
 
     self.drawmask = MASK_PRED_VIEWMODEL;
     self.renderflags = RF_VIEWMODEL;
 
-    PP_Init();
     FO_WP_Init(TRUE);
 }
 
