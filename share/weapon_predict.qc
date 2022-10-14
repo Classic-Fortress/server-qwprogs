@@ -111,8 +111,10 @@ static float ClientEnable() {
     // client_ping is not yet initialized.
     float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
 
+    float min_ping =
+        FO_GetUserSetting(self, "fowpmp", "fo_weapon_predict_minping", "40");
 
-    if (weaponpred_settings.global_disable || ping < 40 * MSEC)
+    if (weaponpred_settings.global_disable || ping < min_ping * MSEC)
         return FALSE;
 
     if (weaponpred_settings.global_enable)
@@ -364,7 +366,7 @@ inline float WeaponPred_Active(entity player) {
 void WeaponPred_InitPlayer(entity player) {
     WeaponPred_InitOnce();
 
-    sprint(player, PRINT_HIGH, "FortressOne: New projectiles ",
+    sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
             weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
 
     if (!ClientEnable()) {  // Server side is once per connect.
@@ -462,8 +464,12 @@ void WP_DoClientThink();
 
 float pf, ef;
 
+float last_time;
+float gen;
+
 float WP_ClientThink() {
     pstate_pred = pstate_server;
+    gen++;
 
     int pframe = servercommandframe + 1;
     int eframe = clientcommandframe;
@@ -475,7 +481,7 @@ float WP_ClientThink() {
         pf = pframe;
         ef = eframe;
 
-        if (pframe >= eframe - 1 && pframe > pengine.last_effectframe) {
+        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
         } else {

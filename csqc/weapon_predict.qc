@@ -1,5 +1,13 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
+inline FO_WeapInfo* WP_CurrentWeapon() {
+    return FO_SlotWeapInfo(pstate_pred.playerclass, pstate_pred.current_slot);
+}
+
+static inline float IsEffectFrame() {
+    return pengine.is_effectframe;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,10 +28,15 @@ inline float WP_IsReloading() {
     return pstate_pred.tfstate & TFSTATE_RELOADING;
 }
 
+float WP_CheckAmmo(FO_WeapInfo* wi);
+
 void WP_ChangeWeapon(Slot slot) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
+    if (!WP_CheckAmmo(wi))
+        return;
+
     pstate_pred.current_slot = slot;
     pstate_pred.weaponframe = 0;
-
     // UpdateViewModel will propagate.
 }
 
@@ -86,10 +99,7 @@ float WP_CurrentAmmo() {
     if (!WP_Enabled())
         return getstatf(STAT_AMMO);
 
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-                                      pstate_pred.current_slot);
-
-    return WP_GetAmmo(wi->ammo_type);
+    return WP_GetAmmo(WP_CurrentWeapon()->ammo_type);
 }
 
 static float* ClipFired() {
@@ -125,8 +135,7 @@ string WP_GetClip() {
 
 
 void WP_Reload() {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-                                      pstate_pred.current_slot);
+    FO_WeapInfo* wi = WP_CurrentWeapon();
 
     if (!wi->needs_reload)
         return;
@@ -161,16 +170,16 @@ void WP_CheckReloadFinished() {
     }
 }
 
-
-float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+float WP_CheckAmmo(FO_WeapInfo* wi) {
     if (wi->ammo_type == AMMO_NONE || IsSlotMelee(pstate_pred.current_slot))
         return TRUE;
 
     int ammo = WP_GetAmmo(wi->ammo_type);
-    if (wi->ammo_per_shot > ammo)
-        return FALSE;
+    return ammo > wi->ammo_per_shot;
+}
 
-    if (wi->needs_reload) {
+float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+    if (!WP_CheckAmmo(wi) || wi->needs_reload) {
         if (*ClipFired() >= wi->clip_size) {
             WP_Reload();
             return FALSE;
@@ -192,31 +201,13 @@ static void prandom(void() option1, void() option2) {
 
 float PP_PredictStartOffset();
 
-void WP_AnimateModel(float fired) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-            pstate_pred.current_slot);
-
+void WP_AnimateModel() {
     if (pstate_pred.client_thinkindex == 0) {
         player_run();
         return;
     }
 
-    if (fired) {
-        // If our latency is higher than projection, synchronize animation with
-        // when it will actually start/finish.
-        float offset = max(PP_PredictStartOffset(), 0);
-
-
-        if (offset > 0) {
-            if ((CVARF(wpp_debug) & 2) && pengine.is_effectframe)
-                printf("held for %0.3f\n", offset);
-            pstate_pred.client_nextthink = animate_s_time;
-            return;
-        }
-
-    }
-
-    switch (wi->weapon) {
+    switch (WP_CurrentWeapon()->weapon) {
         case WEAP_ROCKET_LAUNCHER:
         case WEAP_INCENDIARY:
         case WEAP_GRENADE_LAUNCHER:
@@ -242,37 +233,13 @@ void WP_AnimateModel(float fired) {
             prandom(player_knifeN, player_knifebN); break;
         case WEAP_MEDIKIT:
             prandom(player_medikitN, player_medikitbN); break;
-
         case WEAP_SPANNER:
             player_spannerN(); break;
     }
 }
 
 void WP_DoClientThink(void) {
-    WP_AnimateModel(FALSE);
-}
-
-void PP_Fire();
-
-void WP_Attack() {
-    if (pstate_pred.firing)  // Already in a continuous attack.
-        return;
-
-    Slot slot = pstate_pred.current_slot;
-
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
-
-    if (!WP_ConsumeAmmo(wi))
-        return;
-
-    // Must be set prior to animation code, which might internally modify.
-    pstate_pred.client_thinkindex = 1;
-
-    WP_AnimateModel(TRUE);
-    PP_Fire();
-
-    // We set this after so that weapons such as NG can handle correctly.
-    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+    WP_AnimateModel();
 }
 
 void WPP_Dump() {
@@ -283,8 +250,15 @@ void WPP_Dump() {
             pstate_pred.client_time, pstate_server.client_time,
             pstate_pred.attack_finished, pstate_server.attack_finished,
             pstate_pred.reload_finished, pstate_server.reload_finished);
+    printf("clip=%d/%d ammo_used=%d\n",
+            pstate_pred.clip_fired[SlotIndex(pstate_pred.current_slot)],
+            pstate_server.clip_fired[SlotIndex(pstate_pred.current_slot)],
+            pstate_pred.ammo_used[WP_CurrentWeapon()->ammo_type]);
 }
 
+void WP_Attack();
+
+float td;
 void WP_Frame() {
     if (getstatf(STAT_HEALTH) < 0) {
         pstate_pred.current_slot = SlotNull;
@@ -295,7 +269,7 @@ void WP_Frame() {
     WP_Impulse();
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
-            (pstate_pred.client_time >= pstate_pred.attack_finished))
+        (pstate_pred.client_time >= pstate_pred.attack_finished))
         WP_Attack();
 }
 
@@ -383,6 +357,7 @@ float PP_PredrawActive() {
                 self.oldorigin = trace_endpos;
                 return PREDRAW_NEXT;
             }
+
         }
         if (self.traileffectnum)
             trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
@@ -402,7 +377,7 @@ float PP_PredrawActive() {
 
 float PP_PredrawPredicted() {
     if (time < self.starttime || time > self.endtime) {
-        if (time > self.endtime + 0.05)
+        if (time > self.endtime)
             PP_Cleanup(self);
         return PREDRAW_NEXT;
     }
@@ -433,11 +408,11 @@ int PP_FindTrail(entity e)
 }
 
 static float PP_EPS = 0.05;
-DEFCVAR_FLOAT(pp_trail_offset, 0.05);
+DEFCVAR_FLOAT(pp_trail_start, 50);
 
 static inline void PP_InitTrail(entity proj) {
-    proj.oldorigin = proj.s_origin + CVARF(pp_trail_offset) * proj.velocity;
-    proj.p_time = time + CVARF(pp_trail_offset);
+    proj.oldorigin = proj.s_origin + CVARF(pp_trail_start) * MSEC * proj.velocity;
+    proj.p_time = time + CVARF(pp_trail_start * MSEC);
     proj.traileffectnum = PP_FindTrail(proj);
 }
 
@@ -461,7 +436,7 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   entity proj = spawn();
 
   proj.s_time = time + PP_PredictStartOffset();
-  proj.starttime = max(time + 2/77.0, proj.s_time);
+  proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
   proj.endtime = time + pstate_pred.client_ping + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
@@ -490,6 +465,9 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
 }
 
 void PP_FireRocket(float is_soldier) {
+    if (!IsEffectFrame())
+        return;
+
     fo_projectile* desc = is_soldier ? &fpp_rocket : &fpp_incendiary;
 
     vector ovf = v_forward;
@@ -499,6 +477,9 @@ void PP_FireRocket(float is_soldier) {
 }
 
 void PP_FireNG(float off) {
+    if (!IsEffectFrame())
+        return;
+
     fo_projectile* desc;
     vector offset = [0, 0, 0];
 
@@ -512,36 +493,100 @@ void PP_FireNG(float off) {
     entity proj = PP_CreateProjectile(desc, offset);
 }
 
-void PP_Fire() {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-            pstate_pred.current_slot);
+void PP_NailFrame() {
+    if (input_buttons & BUTTON0 == 0) {
+        player_run();
+        return;
+    }
 
-    if (wi->predict_type != PRED_PROJ)
+    pstate_pred.firing = TRUE;
+
+    FO_WeapInfo* wi = WP_CurrentWeapon();
+    WP_ConsumeAmmo(wi);
+
+    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+    float idx = (pstate_pred.client_thinkindex + 1) % 2;
+    if (wi->weapon == WEAP_NAILGUN)
+        PP_FireNG(idx ? 4 : -4);
+    else
+        PP_FireNG(0);
+
+}
+
+void WP_Attack() {
+    Slot slot = pstate_pred.current_slot;
+    FO_WeapInfo* wi = WP_CurrentWeapon();
+
+    if (wi->predict_type == NO_PREDICT)
         return;
 
-    if (!pengine.is_effectframe)
+    // Whether firing occurs here, or is embedded in the frame animation code
+    // (because continuous fire).
+    int in_anim = wi->weapon == WEAP_NAILGUN ||
+                  wi->weapon == WEAP_SUPER_NAILGUN;
+
+    if ((in_anim && !WP_CheckAmmo(wi)) || (!in_anim && !WP_ConsumeAmmo(wi)))
         return;
+
+    // OK.  We're ready to pew.
+
+    // Must be set prior to animation code, which might internally modify.
+    pstate_pred.client_thinkindex = 1;
 
     switch (wi->weapon) {
-        case WEAP_NAILGUN:
-        case WEAP_SUPER_NAILGUN:
-            break;  // Handled in animation.
-
         case WEAP_ROCKET_LAUNCHER: PP_FireRocket(TRUE); break;
         case WEAP_INCENDIARY: PP_FireRocket(FALSE); break;
     }
+
+    float af = pstate_pred.attack_finished;
+
+    if (!in_anim)
+        pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+
+
+#if 0
+    // If our latency is higher than forward projection, synchronize animation
+    // with when it will actually start/finish.  The projectile internally
+    // synchronizes also.
+    //
+    // ** Not currently doing this because playing animation in advance is better
+    // for understanding attack_finished as a player. **
+    float offset =
+    // max(PP_PredictStartOffset() - 2/77.0, 0);
+    if (offset > 0) {
+        if ((CVARF(wpp_debug) & 2) && pengine.is_effectframe)
+            printf("held for %0.3f\n", offset);
+
+        pstate_pred.client_nextthink = animate_s_time;
+        return;
+    }
+#endif
+
+    WP_AnimateModel();
 }
 
 float PredProjectile_MatchProjectile() {
-    entity proj;
-    for(entity proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
+    entity proj, match = __NULL__;
+    float best = 0.2;
+    for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.modelindex != self.modelindex)
             continue;
 
-        if (fabs(proj.s_time - self.s_time) > 0.15)
-            continue;
+        float d = fabs(proj.s_time - self.s_time);
+        if (d < best) {
+            best = d;
+            match = proj;
+        }
 
-        float diff_t = self.s_time - proj.s_time;
+        if (vlen(proj.s_origin - self.s_origin) < 32) {
+            match = proj;
+            break;
+        }
+
+    }
+
+    if (match) {
+        float diff_t = self.s_time - match.s_time;
         float sgn = diff_t > 0 ? 1 : -1;
         float c_s = 0;
         if (fabs(diff_t) > 1/154.0) {
@@ -549,18 +594,18 @@ float PredProjectile_MatchProjectile() {
             corr_s = corr_s ? corr_s * 0.7 + 0.3 * c_s : c_s;
         }
 
-        self.oldorigin = proj.oldorigin;  // Mate up trails.
-        self.p_time = proj.p_time;
+        self.oldorigin = match.oldorigin;  // Mate up trails.
+        self.p_time = match.p_time;
 
         if (CVARF(wpp_debug) & 1) {
-            proj.origin = proj.s_origin + (time - proj.s_time) * self.velocity;
+            match.origin = match.s_origin + (time - match.s_time) * self.velocity;
             printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
-                vlen(proj.s_origin - self.s_origin), vlen(proj.origin - self.origin),
-                vlen(proj.origin - self.origin) / vlen(self.velocity));
+                vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
+                vlen(match.origin - self.origin) / vlen(self.velocity));
             printf(" error=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff_t, c_s, corr_s);
         }
 
-        PP_Cleanup(proj);
+        PP_Cleanup(match);
         return TRUE;
     }
 
@@ -575,8 +620,8 @@ void InitProjPredEnt() {
     // Force modelflags refresh
     setmodel(self, modelnameforindex(self.modelindex));
 
-    self.oldorigin = self.s_origin + CVARF(pp_trail_offset) * self.velocity;
-    self.p_time = time + CVARF(pp_trail_offset);
+    self.oldorigin = self.s_origin + CVARF(pp_trail_start) * MSEC * self.velocity;
+    self.p_time = time + CVARF(pp_trail_start) * MSEC;
 
     PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
 

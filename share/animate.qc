@@ -43,7 +43,7 @@ void FO_SetClientThink(void() func, float offset, float override = TRUE) {
 }
 
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    int tidx = self.client_thinkindex++;
+    int tidx = self.client_thinkindex++ - 1;
 
     int wfi = tidx % anim->num_wf;
     self.weaponframe = anim->weaponframes[wfi] ?: anim->weaponframes[0] + wfi;
@@ -278,25 +278,9 @@ void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
 
 static void axe_extra() {}
 
-void PP_FireNG(float off);
+void PP_NailFrame();
+void nail_extra() { PP_NailFrame(); }
 
-static void nail_extra() {
-    pstate_pred.firing = TRUE;
-
-    if (!pengine.is_effectframe)
-        return;
-
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-                                      pstate_pred.current_slot);
-
-    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
-    float idx = (*thinkindex() - 1) % 2;
-    if (wi->weapon == WEAP_NAILGUN)
-        PP_FireNG(idx ? 4 : -4);
-    else
-        PP_FireNG(0);
-
-}
 static void asscan_up_extra() {}
 static void asscan_fire_extra() {}
 static void asscan_down_extra() {}
@@ -305,58 +289,58 @@ static void asscan_down_extra() {}
 
 anim_t anim_rocket = { 6, 6, {107}, {1}, TRUE };
 void player_rocketN() { client_anim_frames(player_rocketN, think_nop, &anim_rocket); }
-void player_rocket1() { *thinkindex() = 0; player_rocketN(); }
+void player_rocket1() { *thinkindex() = 1; player_rocketN(); }
 
 anim_t anim_shotgun = { 6, 6, {113}, {1}, TRUE };
 void player_shotN() { client_anim_frames(player_shotN, think_nop, &anim_shotgun); }
-void player_shot1() { *thinkindex() = 0; player_shotN(); }
+void player_shot1() { *thinkindex() = 1; player_shotN(); }
 
 
 anim_t anim_autorifle = { 3, 3, {113, 114, 118}, {1, 2, 6}, TRUE };
 void player_autorifleN() { client_anim_frames(player_autorifleN, think_nop, &anim_autorifle); }
-void player_autorifle1() { *thinkindex() = 0; player_autorifleN(); }
+void player_autorifle1() { *thinkindex() = 1; player_autorifleN(); }
 
 anim_t anim_axea = { 4, 4, {119}, {1}, FALSE };
 void player_axeN() { client_anim_frames(player_axeN, axe_extra, &anim_axea); }
-void player_axe1() { *thinkindex() = 0; player_axeN(); }
+void player_axe1() { *thinkindex() = 1; player_axeN(); }
 
 anim_t anim_axeb = { 4, 4, {124}, {5}, FALSE };
 void player_axebN() { client_anim_frames(player_axebN, axe_extra, &anim_axeb); }
-void player_axeb1() { *thinkindex() = 0; player_axebN(); }
+void player_axeb1() { *thinkindex() = 1; player_axebN(); }
 
 void player_spannerN() { client_anim_frames(player_spannerN, axe_extra, &anim_axea); }
-void player_spanner1() { *thinkindex() = 0; player_spannerN(); }
+void player_spanner1() { *thinkindex() = 1; player_spannerN(); }
 
 void player_knifeN() { client_anim_frames(player_knifeN, axe_extra, &anim_axea); }
-void player_knife1() { *thinkindex() = 0; player_knifeN(); }
+void player_knife1() { *thinkindex() = 1; player_knifeN(); }
 
 void player_knifebN() { client_anim_frames(player_knifebN, axe_extra, &anim_axeb); }
-void player_knifeb1() { *thinkindex() = 0; player_knifebN(); }
+void player_knifeb1() { *thinkindex() = 1; player_knifebN(); }
 
 void player_medikitN() { client_anim_frames(player_medikitN, axe_extra, &anim_axea); }
-void player_medikit1() { *thinkindex() = 0; player_medikitN(); }
+void player_medikit1() { *thinkindex() = 1; player_medikitN(); }
 
 void player_medikitbN() { client_anim_frames(player_medikitbN, axe_extra, &anim_axeb); }
-void player_medikitb1() { *thinkindex() = 0; player_medikitbN(); }
+void player_medikitb1() { *thinkindex() = 1; player_medikitbN(); }
 
 anim_t anim_nailgun = { 2, 8, {103, 104}, {1}, TRUE, TRUE };
 void player_nailN() { client_anim_frames(player_nailN, nail_extra, &anim_nailgun); }
-void player_nail1() { *thinkindex() = 0; player_nailN(); }
+void player_nail1() { *thinkindex() = 1; player_nailN(); }
 
 anim_t anim_flamethrower = { 2, 6, {103, 104}, {1}, FALSE, TRUE };
 void player_flamethrowerN() {
     client_anim_frames(player_flamethrowerN, think_nop, &anim_flamethrower);
 }
-void player_flamethrower1() { *thinkindex() = 0; player_flamethrowerN(); }
+void player_flamethrower1() { *thinkindex() = 1; player_flamethrowerN(); }
 
 anim_t anim_asscan_up = { 1, 4, {103}, {1, 1, 2, 2}, FALSE, TRUE};
 anim_t anim_asscan_fire = { 1, 2, {103}, {2, 4}, FALSE, TRUE};
 anim_t anim_asscan_down = { 1, 6, {103}, {1, 1, 2, 2, 3, 3}, FALSE, TRUE};
 
 void player_asscan_upN() { client_anim_frames(player_asscan_upN, asscan_up_extra, &anim_asscan_up); }
-void player_asscan_up1() { *thinkindex() = 0; player_asscan_upN(); }
+void player_asscan_up1() { *thinkindex() = 1; player_asscan_upN(); }
 
 void player_asscan_fire() { client_anim_frames(player_asscan_fire, asscan_fire_extra, &anim_asscan_fire); }
 void player_asscan_downN() { client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
-void player_asscan_down1() { *thinkindex() = 0; client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
+void player_asscan_down1() { *thinkindex() = 1; client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
 
