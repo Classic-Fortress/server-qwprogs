@@ -25,7 +25,7 @@ void () AutoId = {
         return;
     }
 
-    if (self.client_time > self.ident_time || !self.ident_time) {
+    if (time > self.ident_time || !self.ident_time) {
 
         // remove ident string from memory
         if (self.ident_string != string_null) {

@@ -222,7 +222,7 @@ void player_stand1() {
         return;
     }
 
-    if (IsSlotMelee(self.current_slot)) {
+    if (IsSlotMelee(self.current_slot) || self.is_detpacking) {
         if (self.walkframe >= 12)
             self.walkframe = 0;
         self.frame = 17 + self.walkframe;
