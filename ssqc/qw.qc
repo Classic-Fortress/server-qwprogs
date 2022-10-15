@@ -422,7 +422,6 @@ float live_camera;
 float already_chosen_map;
 
 .float disptimer;
-.float fire_held_down;
 .float hit_in_current_animation; // Set on knife attack if a hit is recorded to prevent combo hits
 
 // sniper location damage stuff
@@ -570,7 +569,6 @@ float cannon_move;
 float cannon_movespin;
 float cannon_conc;
 float cannon_accuracy;
-float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;

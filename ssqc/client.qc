@@ -505,9 +505,6 @@ void () DecodeLevelParms = {
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
-        // projectile FO style hwguy
-        fo_hwguy = CF_GetSetting("fohw", "fo_hwguy", "on");
-
         // allow feign death in air [on]
         feign_air = CF_GetSetting("fa", "feign_air", "on");
 
@@ -2073,10 +2070,9 @@ void () PutClientInServer = {
     self.prng_base[PRNG_HWGUY] = 65535 * random();
 
     self.immune_to_check = time + 10;
-    self.fire_held_down = 0;
     SetDimensions(TRUE);
     self.special_cooldown = 0;
-    
+
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
 
@@ -2496,7 +2492,7 @@ void () PlayerJump = {
                 FO_Sound(self, CHAN_BODY, "misc/water2.wav", 1, ATTN_NORM);
         }
 
-        if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON))
+        if (self.tfstate & TFSTATE_AC_FIRING)
             StopAssCan();
 
         return;
@@ -2513,16 +2509,12 @@ void () PlayerJump = {
 
     FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
-    if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
-        if (!cannon_air) {
-            if (self.antispam_cannon_air < time) {
-                sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
-                self.antispam_cannon_air = time + 3;
-            }
-            StopAssCan();
-        } else {
-            self.tfstate |= TFSTATE_AIMING;
+    if (!cannon_air && self.tfstate & TFSTATE_AC_FIRING) {
+        if (self.antispam_cannon_air < time) {
+            sprint(self, PRINT_MEDIUM, "You cannot fire the assault cannon without your feet on the ground...\n");
+            self.antispam_cannon_air = time + 3;
         }
+        StopAssCan();
     }
 
     if (old_grens != 1) {

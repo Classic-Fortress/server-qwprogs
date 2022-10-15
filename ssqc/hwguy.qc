@@ -52,110 +52,47 @@ void AssCanBulletTouch()
     dremove(self);
 };
 
-//======================================================================
-// Vector randomizer, used mostly for avelocity setups
-
-vector(float base, float rndmix, float plusminus) vecrand =
-{
-	local vector vecmix;
-	if (plusminus) {
-		vecmix_x = base + crandom() * rndmix; 
-		vecmix_y = base + crandom() * rndmix; 
-		vecmix_z = base + crandom() * rndmix; 
-	}
-	else {
-		vecmix_x = base + random() * rndmix; 
-		vecmix_y = base + random() * rndmix; 
-		vecmix_z = base + random() * rndmix; 
-	}
-	return vecmix;
-};
-
-void LaunchAssCan(vector org, vector dir, float proj_speed)
+void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index)
 {
     local float num;
-    
+
     newmis = spawn();
-	newmis.owner = self;
-	newmis.classname = "proj_bullet";
+    newmis.owner = self;
+    newmis.classname = "proj_bullet";
 
-    newmis.movetype = MOVETYPE_FLY;		// Small collision
+    newmis.movetype = MOVETYPE_FLY;  // Small collision
 
-	newmis.solid = SOLID_BBOX;
-	newmis.touch = AssCanBulletTouch;
+    newmis.solid = SOLID_BBOX;
+    newmis.touch = AssCanBulletTouch;
 
-  if (asscanrange > 0) {
-      num = (1 / proj_speed) * asscanrange;
-      newmis.think = AssCanBulletThink;
-      newmis.nextthink = time + num;      // Projectile range / gravity
-  } else {
-      newmis.think = SUB_Remove;
-      newmis.nextthink = time + 5;	      // Stop projectile going forever
-  }
+    if (asscanrange > 0) {
+        num = (1 / proj_speed) * asscanrange;
+        newmis.think = AssCanBulletThink;
+        newmis.nextthink = time + num;       // Projectile range / gravity
+    } else {
+        newmis.think = SUB_Remove;
+        newmis.nextthink = time + 5;           // Stop projectile going forever
+    }
 
-	newmis.mdl = MODEL_PROJ_DIAM2;
-	FO_SetModel(newmis, newmis.mdl);				// Diamond model
-	newmis.frame = random()*15;					// Full range of sizes
-	newmis.skin = 16 + random()*7;				// Bright colours
+    newmis.frame = hwguy_random()*15;       // Full range of sizes
+    newmis.skin = 16 + hwguy_random()*7;    // Bright colours
     newmis.weapon = DMSG_ASSAULTCANNON;
 
-	newmis.velocity = dir * proj_speed;			// Constant speed multiplier
-	newmis.angles = vectoangles(dir);			// Create direction angle
-	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);	// Zero size
-	setorigin (newmis, org);					// Move to starting position
+    newmis.velocity = dir * proj_speed;        // Constant speed multiplier
+    newmis.angles = vectoangles(dir);          // Create direction angle
+    setorigin (newmis, org);                   // Move to starting position
 
-	newmis.avelocity = vecrand(100, 200, FALSE);
-
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
-}
-
-void FireAssCan (float shotcount, vector dir, vector spread)
-{
-    FO_WeapState ws;
-    FO_FillWeapState(self, MakeSlot(1), &ws);
-
-    Status_Refresh(self);
-    FO_CheckForReload();
-
-    *ws->clip_fired += 1;
-
-    vector bullet_dir, spread_dir, rand_dir, org;
-    float bullet_speed, var_speed;
-
-    makevectors(self.v_angle);
-
-    // Infront of player model and down towards gun
-    bullet_speed = PC_HVYWEAP_PROJSPEED;
-    bullet_dir = normalize(v_forward * bullet_speed);
-
-    while (shotcount > 0) {
-	var_speed = crandom()*10 + bullet_speed;		// Slight speed variance
-	rand_dir = (crandom()*spread_x) * v_right + (crandom()*spread_y) * v_up;
-	spread_dir = bullet_dir + rand_dir;
-	org = self.origin + '0 0 10' + rand_dir;
-
-	LaunchAssCan(org, spread_dir, var_speed);
-
-	shotcount = shotcount - 1;
-    }
+    newmis.wpp_aux = self.ammo_shells * 100 + index;
+    FOProj_Init(FPP_ASSAULT_CANNON, newmis);
 }
 
 void StopAssCan() {
-    if (self.fire_held_down && (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON)) {
-	self.tfstate = self.tfstate | TFSTATE_AIMING;
-	//self.weaponframe = 0;
-	player_asscan_down1();
-    }
+    if (self.tfstate & TFSTATE_AC_FIRING)
+        player_asscan_down1();
 }
 
 void FO_LockToggle () {
-    if (self.tfstate & TFSTATE_LOCK) {
-	self.tfstate = self.tfstate - (self.tfstate & TFSTATE_LOCK);
-    } else {
-	self.tfstate = self.tfstate | TFSTATE_LOCK;
-    }
+    self.tfstate ^= TFSTATE_LOCK;
 
     Status_Refresh(self);
     /* self.impulse = 0; */

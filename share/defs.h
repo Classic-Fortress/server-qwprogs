@@ -251,6 +251,10 @@ enumflags {
                            // as it could result in stacked no-weapon states.)
     TFSTATE_FLASHED,
     TFSTATE_QUICKSLOT,     // QUICKSTOP should change to last weapon.
+    TFSTATE_AC_SPINUP,     // These cover the 3 assault cannon states.
+    TFSTATE_AC_SPINNING,
+    TFSTATE_AC_SPINDOWN,
+    TFSTATE_LOCK,          // assault cannon locked
     TFSTATE_INFECTED,      // set when player is infected by the bioweapon
     TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
     TFSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
@@ -258,16 +262,17 @@ enumflags {
     TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
     TFSTATE_GRENTHROWING,  // is throwing a grenade
-    TFSTATE_LOCK,          // assault cannon locked
+    TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die
     TFSTATE_HALLUCINATING, // set when player is hallucinating
     TFSTATE_TRANQUILISED,  // set when player is tranquilised
     TFSTATE_FLAMES_MAX,    // Peak burnination.
-    TFSTATE_RANDOMPC,      // Whether Playerclass is random, new one each respawn
+    TFSTATE_RANDOMPC,
 };
 
 #define TFSTATE_AC_MASK (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING|TFSTATE_AC_SPINDOWN)
+#define TFSTATE_AC_FIRING (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING)
 
 enum {
     PRNG_AXE,
@@ -1059,9 +1064,6 @@ enumflags {
 #define PC_HVYWEAP_GRENADE_MAX_1	4
 #define PC_HVYWEAP_GRENADE_MAX_2	1
 #define PC_HVYWEAP_TF_ITEMS		0
-#define PC_HVYWEAP_PROJSPEED	3000
-#define PC_HVYWEAP_ASSCAN_CLIPSIZE		100
-#define MODEL_PROJ_DIAM2 "progs/proj_diam2.mdl"
 
 
 // Class Details for PYRO
