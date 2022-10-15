@@ -55,6 +55,7 @@ enum {
     FPP_ROCKET,
     FPP_INCENDIARY,
     FPP_NAIL,
+    FPP_SUPER_NAIL,
     FPP_FLAMETHROWER,
 };
 
@@ -73,6 +74,7 @@ fo_projectile fpp_types[] = {
     { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" },
     { FPP_INCENDIARY,         800, "progs/lavaball.mdl", "t_lavaball" },
     { FPP_NAIL,              1500, "progs/spike.mdl", "tr_spike" },
+    { FPP_SUPER_NAIL,        1500, "progs/s_spike.mdl", "tr_spike" },
     { FPP_FLAMETHROWER,       600, "progs/s_explod.spr", "explodesprite" },
 };
 

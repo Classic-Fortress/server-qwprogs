@@ -520,10 +520,10 @@ void PP_NailFrame() {
     if (!IsEffectFrame())
         return;
 
-    float off = 0;
-    if (wi->weapon == WEAP_NAILGUN)  // Else: SNG, no offset.
-        off = idx ? 4 : -4;
-    PP_CreateProjectile(&fpp_types[FPP_NAIL], v_right * off);
+    if (wi->weapon == WEAP_NAILGUN)
+        PP_CreateProjectile(&fpp_types[FPP_NAIL], v_right * (idx ? 4: - 4));
+    else
+        PP_CreateProjectile(&fpp_types[FPP_SUPER_NAIL], '0 0 0');
 }
 
 void WP_Attack() {
