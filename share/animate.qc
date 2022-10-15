@@ -181,12 +181,7 @@ void asscan_down_extra() {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
 
     if (self.client_thinkindex >= 15) {  // 1.5s down
-        self.fire_held_down = 0;
         self.tfstate &= ~TFSTATE_AIMING;
-        if (!cannon_move)
-            self.tfstate &= ~TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
-
         player_run();
         if (self.ammo_cells < 7 || !FO_CheckForReload()) {
             W_PrintWeaponMessage();
@@ -327,7 +322,7 @@ anim_t anim_nailgun = { 2, 8, {103, 104}, {1}, TRUE, TRUE };
 void player_nailN() { client_anim_frames(player_nailN, nail_extra, &anim_nailgun); }
 void player_nail1() { *thinkindex() = 1; player_nailN(); }
 
-anim_t anim_flamethrower = { 2, 6, {103, 104}, {1}, FALSE, TRUE };
+anim_t anim_flamethrower = { 6, 6, {113}, {1}, TRUE, FALSE };
 void player_flamethrowerN() {
     client_anim_frames(player_flamethrowerN, think_nop, &anim_flamethrower);
 }

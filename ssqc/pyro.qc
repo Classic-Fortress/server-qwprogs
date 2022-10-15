@@ -573,6 +573,11 @@ void () W_FireFlame = {
     FO_SetModel(flame, "progs/s_explod.spr");
     setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
+
+    PredProj_Add(flame);
+    if (project_weapons) {
+        AL_ProjectProjectile(flame);
+    }
 };
 
 void () IncendiaryRadius = {
