@@ -27,7 +27,7 @@ enumflags {
 struct predict_tf_state {
     int playerclass;
     int impulse;
-    Slot current_slot, queue_slot;
+    Slot current_slot, queue_slot, last_slot;
 
     float tfstate;
 
@@ -204,7 +204,7 @@ void WeaponPred_Update(entity player) {
     player.predict_state.client_ping = player.client_ping;
 
     M1(FOWP_CLASS, playerclass);
-    M3(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id);
+    M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M1(FOWP_TFSTATE, tfstate);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
@@ -257,6 +257,7 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Byte, impulse);
         COMM(Byte, current_slot.id);
         COMM(Byte, queue_slot.id);
+        COMM(Byte, last_slot.id);
     }
 
     if (sendflags & FOWP_TFSTATE) {

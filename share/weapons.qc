@@ -518,7 +518,7 @@ ImpulseWeapon impulse_weapons[] = {
 };
 
 Slot FO_ImpulseToSlot(float impulse) {
-    if (impulse < 1 || impulse > 7) return 0;
+    if (impulse < 1 || impulse > 7) return SlotNull;
     return impulse_weapons[self.playerclass].slots[impulse - 1];
 }
 
@@ -530,9 +530,15 @@ static float IsPyroSlotSwapped() {
     return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
 #else
-float IsUsingOldImpulses() { return FALSE; }
+string(entity e, string key) infokey = #80;
 
-static float IsPyroSlotSwapped() { return FALSE; }
+float IsUsingOldImpulses() {
+    return getplayerkeyfloat(player_localnum, "owi");
+}
+
+static float IsPyroSlotSwapped() {
+    return getplayerkeyfloat(player_localnum, "cfpi");
+}
 #endif
 
 float InputHandlePyroSlotSwap(float input) {
@@ -547,7 +553,10 @@ Slot FO_SlotByInput(float input) {
         return FO_ImpulseToSlot(input);
     } else {
         input = InputHandlePyroSlotSwap(input);
-        return MakeSlot(input);
+        if (input >= 1 && input <= TF_NUM_SLOTS)
+            return MakeSlot(input);
+        else
+            return SlotNull;
     }
 }
 

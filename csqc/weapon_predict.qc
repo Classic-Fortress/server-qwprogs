@@ -35,6 +35,7 @@ void WP_ChangeWeapon(Slot slot) {
     if (!WP_CheckAmmo(wi))
         return;
 
+    pstate_pred.last_slot = pstate_pred.current_slot;
     pstate_pred.current_slot = slot;
     pstate_pred.weaponframe = 0;
     // UpdateViewModel will propagate.
@@ -44,12 +45,24 @@ void WP_Reload();
 
 void WP_Impulse() {
     // Note: We might have no impulse, but a queued slot here.
-    if (pstate_pred.impulse >= 1 && pstate_pred.impulse <= 7) { // Change weapon
-        Slot slot = InputToSlot(pstate_pred.impulse);
-        if (!IsSlotNull(slot))
-            pstate_pred.queue_slot = slot;
-        pstate_pred.impulse = 0;
+
+    float match = TRUE;
+    switch (pstate_pred.impulse) {
+        case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
+            pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
+        case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
+            Slot slot = InputToSlot(pstate_pred.impulse);
+            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot))
+                pstate_pred.queue_slot = slot;
+            break;
+        }
+        case TF_WEAPLAST:
+            pstate_pred.queue_slot = pstate_pred.last_slot; break;
+        default:
+            match = FALSE;
     }
+    if (match)
+        pstate_pred.impulse = 0;
 
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
