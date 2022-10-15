@@ -520,27 +520,27 @@ void player_die_extra() {
 
 anim_t anim_player_diea1 = { 11, 1, {50}, {0}, FALSE, FALSE };
 void player_dieaN() { client_anim_frames(player_dieaN, player_die_extra, &anim_player_diea1); }
-void player_diea1() { *thinkindex() = 0; player_dieaN(); }
+void player_diea1() { *thinkindex() = 1; player_dieaN(); }
 
 anim_t anim_player_dieb1 = { 9, 1, {61}, {0}, FALSE, FALSE };
 void player_diebN() { client_anim_frames(player_diebN, player_die_extra, &anim_player_dieb1); }
-void player_dieb1() { *thinkindex() = 0; player_diebN(); }
+void player_dieb1() { *thinkindex() = 1; player_diebN(); }
 
 anim_t anim_player_diec1 = { 15, 1, {70}, {0}, FALSE, FALSE };
 void player_diecN() { client_anim_frames(player_diecN, player_die_extra, &anim_player_diec1); }
-void player_diec1() { *thinkindex() = 0; player_diecN(); }
+void player_diec1() { *thinkindex() = 1; player_diecN(); }
 
 anim_t anim_player_died1 = { 9, 1, {85}, {0}, FALSE, FALSE };
 void player_diedN() { client_anim_frames(player_diedN, player_die_extra, &anim_player_died1); }
-void player_died1() { *thinkindex() = 0; player_diedN(); }
+void player_died1() { *thinkindex() = 1; player_diedN(); }
 
 anim_t anim_player_diee1 = { 9, 1, {94}, {0}, FALSE, FALSE };
 void player_dieeN() { client_anim_frames(player_dieeN, player_die_extra, &anim_player_diee1); }
-void player_diee1() { *thinkindex() = 0; player_dieeN(); }
+void player_diee1() { *thinkindex() = 1; player_dieeN(); }
 
 anim_t anim_player_die_ax = { 9, 1, {41}, {0}, FALSE, FALSE };
 void player_die_axN() { client_anim_frames(player_die_axN, player_die_extra, &anim_player_die_ax); }
-void player_die_ax1() { *thinkindex() = 0; player_die_axN(); }
+void player_die_ax1() { *thinkindex() = 1; player_die_axN(); }
 
 void () Headless_Think = {
     self.frame = self.frame + 1;

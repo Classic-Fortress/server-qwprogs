@@ -72,7 +72,6 @@ void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
-void WeaponPred_Init();
 void WeaponPred_InitPlayer(entity player);
 void WeaponPred_TearDown(entity player);
 

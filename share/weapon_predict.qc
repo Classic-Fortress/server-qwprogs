@@ -1,7 +1,7 @@
 #define ENT_WEAPONPRED 100
 #define ENT_PROJECTILE 101
 
-string wp_version = "v0";
+string wp_version = "v1";
 
 enumflags {
     FOWP_CTIME,
@@ -27,7 +27,7 @@ enumflags {
 struct predict_tf_state {
     int playerclass;
     int impulse;
-    Slot current_slot, queue_slot;
+    Slot current_slot, queue_slot, last_slot;
 
     float tfstate;
 
@@ -51,7 +51,15 @@ struct predict_tf_state {
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
+enum {
+    FPP_ROCKET,
+    FPP_INCENDIARY,
+    FPP_NAIL,
+    FPP_FLAMETHROWER,
+};
+
 struct fo_projectile {
+    int id;
     float speed;
     string model;
     string trail;
@@ -61,18 +69,17 @@ struct fo_projectile {
     float trailindex;
 };
 
-fo_projectile fpp_rocket = { PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" };
-fo_projectile fpp_incendiary = { 800, "progs/lavaball.mdl", "t_lavaball" };
-fo_projectile fpp_nail = { 1500, "progs/spike.mdl", "tr_spike" };
-fo_projectile fpp_super_nail = { 1500, "progs/s_spike.mdl", "tr_spike" };
-
+fo_projectile fpp_types[] = {
+    { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" },
+    { FPP_INCENDIARY,         800, "progs/lavaball.mdl", "t_lavaball" },
+    { FPP_NAIL,              1500, "progs/spike.mdl", "tr_spike" },
+    { FPP_FLAMETHROWER,       600, "progs/s_explod.spr", "explodesprite" },
+};
 
 void InitFppProjectiles() {
-    fo_projectile* fpp_list[] =
-        { &fpp_rocket, &fpp_incendiary, &fpp_nail, &fpp_super_nail };
-
-    for (float i = 0; i < fpp_list.length; i++) {
-        fo_projectile* desc = fpp_list[i];
+    for (float i = 0; i < fpp_types.length; i++) {
+        fo_projectile* desc = &fpp_types[i];
+        ASSERTD_EQ(i, desc->id);
         desc->modelindex = getmodelindex(desc->model);
         if (desc->trail != "")
             desc->trailindex = particleeffectnum(strcat("fo-particles.",desc->trail));
@@ -88,8 +95,8 @@ struct weaponpred_settings_t {
 } weaponpred_settings;
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
-static float init_once;
-void WeaponPred_Init() {
+void WeaponPred_InitOnce() {
+    static float init_once;
     if (init_once)
         return;
     init_once = TRUE;
@@ -106,13 +113,15 @@ void WeaponPred_Init() {
 }
 
 static float ClientEnable() {
-    WeaponPred_Init();
+    WeaponPred_InitOnce();
 
     // client_ping is not yet initialized.
     float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
 
+    float min_ping =
+        FO_GetUserSetting(self, "fowpmp", "fo_weapon_predict_minping", "40");
 
-    if (weaponpred_settings.global_disable || ping < 40 * MSEC)
+    if (weaponpred_settings.global_disable || ping < min_ping * MSEC)
         return FALSE;
 
     if (weaponpred_settings.global_enable)
@@ -195,7 +204,7 @@ void WeaponPred_Update(entity player) {
     player.predict_state.client_ping = player.client_ping;
 
     M1(FOWP_CLASS, playerclass);
-    M3(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id);
+    M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M1(FOWP_TFSTATE, tfstate);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
@@ -248,6 +257,7 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Byte, impulse);
         COMM(Byte, current_slot.id);
         COMM(Byte, queue_slot.id);
+        COMM(Byte, last_slot.id);
     }
 
     if (sendflags & FOWP_TFSTATE) {
@@ -362,6 +372,11 @@ inline float WeaponPred_Active(entity player) {
 }
 
 void WeaponPred_InitPlayer(entity player) {
+    WeaponPred_InitOnce();
+
+    sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
+            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
+
     if (!ClientEnable()) {  // Server side is once per connect.
         player.weapon_pred_enabled = FALSE;
         return;
@@ -380,8 +395,6 @@ void WeaponPred_InitPlayer(entity player) {
     player.predict_entity = pe;
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction Active ", wp_version, "\n");
-    sprint(player, PRINT_HIGH, "FortressOne: New projectiles ",
-            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
 }
 
 void WeaponPred_TearDown(entity player) {
@@ -459,8 +472,12 @@ void WP_DoClientThink();
 
 float pf, ef;
 
+float last_time;
+float gen;
+
 float WP_ClientThink() {
     pstate_pred = pstate_server;
+    gen++;
 
     int pframe = servercommandframe + 1;
     int eframe = clientcommandframe;
@@ -472,7 +489,7 @@ float WP_ClientThink() {
         pf = pframe;
         ef = eframe;
 
-        if (pframe >= eframe - 1 && pframe > pengine.last_effectframe) {
+        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
         } else {
@@ -500,15 +517,12 @@ float WP_ClientThink() {
     return PREDRAW_AUTOADD;
 }
 
-void PP_Init();
-
 void InitWeapPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
 
     self.drawmask = MASK_PRED_VIEWMODEL;
     self.renderflags = RF_VIEWMODEL;
 
-    PP_Init();
     FO_WP_Init(TRUE);
 }
 

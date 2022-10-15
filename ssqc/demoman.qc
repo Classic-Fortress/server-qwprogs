@@ -220,7 +220,6 @@ void (float timer) TeamFortress_SetDetpack = {
     self.immune_to_check = time + 10;
     self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
 
-    self.weapon = IT_AXE;
     W_QueueAndDisableWeapon();
 
     Status_Refresh(self);

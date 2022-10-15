@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     }
 
     FO_Weapons_Init();
+    FO_PP_Init();       // Some of this is always used by custom projectiles.
     FO_WP_Init(FALSE);  // Server packet enables.
     CsGrenTimer::Init();
 
