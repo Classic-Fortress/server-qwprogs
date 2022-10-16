@@ -263,10 +263,11 @@ void WPP_Dump() {
             pstate_pred.client_time, pstate_server.client_time,
             pstate_pred.attack_finished, pstate_server.attack_finished,
             pstate_pred.reload_finished, pstate_server.reload_finished);
-    printf("clip=%d/%d ammo_used=%d\n",
+    printf("clip=%d/%d ammo_used=%d tfstate=%d/%d\n",
             pstate_pred.clip_fired[SlotIndex(pstate_pred.current_slot)],
             pstate_server.clip_fired[SlotIndex(pstate_pred.current_slot)],
-            pstate_pred.ammo_used[WP_CurrentWeapon()->ammo_type]);
+            pstate_pred.ammo_used[WP_CurrentWeapon()->ammo_type],
+            pstate_pred.tfstate, pstate_server.tfstate);
 }
 
 void WP_Attack();

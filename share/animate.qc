@@ -182,6 +182,8 @@ void asscan_down_extra() {
 
     if (self.client_thinkindex >= 15) {  // 1.5s down
         self.tfstate &= ~TFSTATE_AIMING;
+        TeamFortress_SetSpeed(self);
+        self.fire_held_down = 0;
         player_run();
         if (self.ammo_cells < 7 || !FO_CheckForReload()) {
             W_PrintWeaponMessage();
