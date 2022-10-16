@@ -1567,9 +1567,10 @@ void (entity pl) W_UpdateCurrentWeapon = {
     pl.items |= (wi->items)->ammo_mask;
     pl.weapon = (wi->items)->it_weapon;
 
-    if ((pl.tfstate & TFSTATE_RELOADING == 0) && !pl.is_feigning)
+    if ((pl.tfstate & TFSTATE_RELOADING == 0) && !pl.is_feigning &&
+        !pl.is_detpacking) {
         pl.weaponmodel = (wi->models)->model;
-    else
+    } else
         pl.weaponmodel = "";
     pl.weaponframe = 0;
 
