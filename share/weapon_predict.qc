@@ -448,7 +448,7 @@ void WP_UpdateViewModel() {
 
     }
 
-    if (WP_IsReloading()) {
+    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING)) {
         self.modelindex = 0;
         return;
     }

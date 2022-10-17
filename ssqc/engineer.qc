@@ -402,10 +402,8 @@ void () TeamFortress_EngineerBuildStop = {
     self.is_building = 0;
     self.building_percentage = 0;
     if (!engineer_move) {
-        self.tfstate &= ~TFSTATE_CANT_MOVE;
+        self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
         self.movetype = MOVETYPE_WALK;
-        TeamFortress_SetSpeed(self);
-        // Old weapon already queued.
     }
 }
 
@@ -553,11 +551,9 @@ void (float objtobuild) TeamFortress_Build = {
     self.is_building = 1;
     if (!engineer_move) {
         self.immune_to_check = time + 5;
-        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+        self.tfstate |= TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON;
         self.movetype = MOVETYPE_NONE;
 
-        W_QueueAndDisableWeapon();
-        TeamFortress_SetSpeed(self);
         Menu_Engineer_Cancel();
     }
 
@@ -904,10 +900,8 @@ void () TeamFortress_FinishedBuilding = {
     self.is_building = FALSE;
     self.building_percentage = 0;
     if (!engineer_move) {
-        self.tfstate &= ~TFSTATE_CANT_MOVE;
+        self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
         self.movetype = MOVETYPE_WALK;
-        TeamFortress_SetSpeed(self);
-        // Weapon should be queued.
     }
     Status_Refresh(self);
 

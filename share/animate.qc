@@ -4,9 +4,10 @@ struct anim_t {
     int weaponframes[9];
     int muzzle_flash;  // muzzle flash on weaponframe index 0
     int loop;
+    int freeze_last_frame; // used for feigning death
 };
 
-static void think_nop() {}
+void think_nop() {}
 
 #ifdef SSQC
 
@@ -25,7 +26,6 @@ int W_FireSpanner();
 
 void SuperDamageSound();
 void FO_Sound(entity e, float chan, string samp, float vol, float atten);
-void TeamFortress_SetSpeed(entity p);
 
 void player_run();
 void player_stand1();
@@ -51,9 +51,11 @@ void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
         muzzleflash();
 
     int fi = tidx % anim->num_frames;
+    if (tidx >= anim->num_frames && anim->freeze_last_frame)
+        fi = anim->num_frames - 1;
     self.frame = anim->frames[fi] ?: anim->frames[0] + fi;
 
-    if (fi == anim->num_frames - 1 && !anim->loop)
+    if (fi == anim->num_frames - 1 && !anim->loop && !anim->freeze_last_frame)
         FO_SetClientThink(player_run, 0.1);
     else
         FO_SetClientThink(parent_thunk, 0.1);
@@ -119,7 +121,6 @@ static float CheckNeedAssaultCannonDown() {
     if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running ||
         ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
         self.tfstate |= TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
         player_asscan_down1();
         return TRUE;
     }
@@ -130,6 +131,7 @@ void asscan_up_extra() {
     if (CheckNeedAssaultCannonDown())
         return;
 
+    self.tfstate |= TFSTATE_AIMING;
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
     self.fire_held_down = 1;
@@ -162,10 +164,9 @@ void asscan_fire_extra() {
         self.tfstate |= TFSTATE_AIMING;
         if (!cannon_move)
             self.tfstate |= TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
 
         // Halve firing speed when moving too fast.
-        if (vlen(self.velocity) < 30 || self.count % 2 == 0)
+        if (vlen(self.velocity) < 30 || self.client_thinkindex % 2 == 1)
                 W_FireAssaultCannon();
     } else {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
@@ -182,7 +183,6 @@ void asscan_down_extra() {
 
     if (self.client_thinkindex >= 15) {  // 1.5s down
         self.tfstate &= ~TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
         self.fire_held_down = 0;
         player_run();
         if (self.ammo_cells < 7 || !FO_CheckForReload()) {

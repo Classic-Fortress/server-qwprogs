@@ -344,8 +344,7 @@ void (float inp) TeamFortress_ChangeClass = {
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
-        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
+        self.tfstate |= TFSTATE_CANT_MOVE;
     }
     self.spawn_time = time;
 
@@ -1286,7 +1285,7 @@ void (entity p) TeamFortress_SetSpeed = {
     local entity te;
 
     stuffcmd(p, "cl_movespeedkey 1\n");
-    if (p.tfstate & TFSTATE_CANT_MOVE || (p.is_building == 1 && !engineer_move) || p.is_detpacking > 0) {
+    if (p.tfstate & TFSTATE_CANT_MOVE) {
 #ifdef STOP_MOUSE_MOVEMENT
         stuffcmd(p, "m_forward 0\n");
         stuffcmd(p, "m_side 0\n");
@@ -1379,16 +1378,8 @@ void (entity p) TeamFortress_SetSpeed = {
         }
     }
     sp = ftos(p.maxfbspeed);
-    stuffcmd(p, "cl_backspeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
-    stuffcmd(p, "cl_forwardspeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
-    sp = ftos(p.maxstrafespeed);
-    stuffcmd(p, "cl_sidespeed ");
-    stuffcmd(p, sp);
-    stuffcmd(p, "\n");
+    stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
+                "; cl_sidespeed ", sp, "\n");
     p.maxspeed = p.maxfbspeed;
 };
 
@@ -2236,8 +2227,8 @@ void () TeamFortress_SetEquipment = {
 
     if (self.last_playerclass != self.playerclass)
         W_ChangeToBestWeapon();
-    else
-        W_UpdateCurrentWeapon(self);
+
+    W_UpdateCurrentWeapon(self);
     self.last_playerclass = self.playerclass;
 };
 
@@ -2356,8 +2347,7 @@ void () TeamFortress_RemoveTimers = {
     self.is_building = 0;
     self.building = world;
     if (self.tfstate & TFSTATE_AIMING) {
-        self.tfstate = self.tfstate - TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
+        self.tfstate &= ~TFSTATE_AIMING;
         self.heat = 0;
     }
     if (self.tfstate & TFSTATE_INFECTED)
@@ -3213,8 +3203,7 @@ void (entity p) KickCheater = {
     p.touch = SUB_Null;
     p.health = 0;
     p.solid = SOLID_NOT;
-    p.tfstate = p.tfstate | TFSTATE_CANT_MOVE;
-    TeamFortress_SetSpeed(p);
+    p.tfstate |= TFSTATE_CANT_MOVE;
     TeamFortress_RemoveTimers();
 };
 

@@ -218,12 +218,9 @@ void (float timer) TeamFortress_SetDetpack = {
     self.detpack_left = timer;
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
-    self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-
-    W_QueueAndDisableWeapon();
+    self.tfstate |= TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON;
 
     Status_Refresh(self);
-    TeamFortress_SetSpeed(self);
 
     self.pausetime = time + 3;
     stimer = ftos(timer);
@@ -256,12 +253,11 @@ void () TeamFortress_DetpackStop = {
     self.ammo_detpack = self.ammo_detpack + 1;
     dremove(detpack_timer);
 
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-    self.is_detpacking = 0;  // Weapon is queued.
+    self.is_detpacking = 0;
+    self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     self.detpack_left = 0;
 
     Status_Refresh(self);
-    TeamFortress_SetSpeed(self);
     self.pausetime = time;
 };
 
@@ -278,8 +274,7 @@ void () TeamFortress_DetpackSet = {
 
     self.owner.is_detpacking = 0;
     Menu_Close(self.owner);
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
-    TeamFortress_SetSpeed(self.owner);
+    self.owner.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     FO_Sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
     self = self.owner;
@@ -401,7 +396,6 @@ void () TeamFortress_DetpackExplode = {
         sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out\n");
 
     if (self.is_disarming) {
-        TeamFortress_SetSpeed(self.enemy);
         dremove(self.oldenemy);
         dremove(self.observer_list);
     }
@@ -439,11 +433,9 @@ void () TeamFortress_DetpackTouch = {
     }
 
     other.immune_to_check = time + 5;
-    other.tfstate = other.tfstate | TFSTATE_CANT_MOVE;
+    other.tfstate |= (TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
 
     sprint(other, PRINT_HIGH, "Disarming detpack...\n");
-
-    TeamFortress_SetSpeed(other);
 
     disarm = spawn();
     disarm.owner = other;
@@ -464,9 +456,8 @@ void () TeamFortress_DetpackDisarm = {
     }
     bprint(PRINT_MEDIUM, self.enemy.owner.netname,
            "'s detpack was defused by ", self.owner.netname, "\n");
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
+    self.owner.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     TF_AddFrags(self.owner, 1);
-    TeamFortress_SetSpeed(self.owner);
     self.enemy.owner.detpack_left = 0;
     Status_Refresh(self.enemy.owner);
 
