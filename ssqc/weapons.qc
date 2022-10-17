@@ -1893,8 +1893,8 @@ void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
 
-    if (!IsSlotNull(slot))
-        slot = MakeSlot(1);
+    if (IsSlotNull(slot))
+        slot = SlotMelee;  // Make Nulls noticeable...
 
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
@@ -1972,12 +1972,12 @@ Slot W_FindPrevNextWeaponSlot(Slot slot, float is_prev) {
 }
 
 void W_ChangeWeaponNext() {
-    Slot slot = IsSlotNull(self.current_slot) ? MakeSlot(1) : self.current_slot;
+    Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
     W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, FALSE));
 }
 
 void W_ChangeWeaponPrev() {
-    Slot slot = IsSlotNull(self.current_slot) ? MakeSlot(1) : self.current_slot;
+    Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
     W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, TRUE));
 }
 
