@@ -478,10 +478,7 @@ int () W_FireMedikit = {
 
                     if (te != world) {
 
-                        trace_ent.tfstate =
-                            trace_ent.tfstate -
-                            (trace_ent.tfstate & TFSTATE_TRANQUILISED);
-                        TeamFortress_SetSpeed(trace_ent);
+                        trace_ent.tfstate &= ~TFSTATE_TRANQUILISED;
                         SpawnBlood(org, 20);
 
                         bprint(PRINT_MEDIUM, self.netname, " healed ",
@@ -1552,6 +1549,17 @@ void () superspike_touch = {
     dremove(self);
 };
 
+void W_UpdateWeaponModel(entity pl) {
+    FO_WeapState ws;
+    FO_FillWeapState(pl, pl.current_slot, &ws);
+    FO_WeapInfo* wi = ws.wi;
+
+    if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0)
+        pl.weaponmodel = (wi->models)->model;
+    else
+        pl.weaponmodel = "";
+}
+
 void (entity pl) W_UpdateCurrentWeapon = {
     entity oldself;
 
@@ -1567,11 +1575,7 @@ void (entity pl) W_UpdateCurrentWeapon = {
     pl.items |= (wi->items)->ammo_mask;
     pl.weapon = (wi->items)->it_weapon;
 
-    if ((pl.tfstate & TFSTATE_RELOADING == 0) && !pl.is_feigning &&
-        !pl.is_detpacking) {
-        pl.weaponmodel = (wi->models)->model;
-    } else
-        pl.weaponmodel = "";
+    W_UpdateWeaponModel(pl);
     pl.weaponframe = 0;
 
     // refresh engineer build menu when ammo updated
@@ -1632,7 +1636,8 @@ void () W_Attack = {
     if (self.has_disconnected == TRUE)
         return;
 
-    if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
+    if (self.tfstate & TFSTATE_RELOADING ||
+        self.tfstate & TFSTATE_NO_WEAPON)
         return;
 
     if (no_fire_mode)
@@ -1720,8 +1725,7 @@ void () W_Attack = {
             self.ammo_cells -= - 7;
             self.count = 0;
             self.immune_to_check = time + 5;
-            self.tfstate = self.tfstate | TFSTATE_AIMING;
-            TeamFortress_SetSpeed(self);
+            self.tfstate |= TFSTATE_AIMING;
             player_asscan_up1();
         }
     } else if (ws.weapon == WEAP_FLAMETHROWER) {
@@ -1775,7 +1779,7 @@ void () W_Attack = {
 
 float WeaponReady() {
     if (self.client_time >= self.attack_finished &&
-        !(self.tfstate & TFSTATE_RELOADING))
+        !(self.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON)))
         return TRUE;
 
     return FALSE;
@@ -1885,19 +1889,12 @@ void W_ChangeWeaponByInput(float input) {
     W_ChangeWeaponSlot(slot);
 }
 
-void W_QueueAndDisableWeapon() {
-    self.queue_slot = self.current_slot;
-    // We don't want to actually call Update/Change since that could affect what
-    // other players see.  Caller should be setting some state that holds back
-    // the queue (e.g. feigned).
-    self.current_slot = SlotNull;
-    self.weaponmodel = "";
-    self.weaponframe = 0;
-}
-
 void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
+
+    if (!IsSlotNull(slot))
+        slot = MakeSlot(1);
 
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
@@ -1975,17 +1972,13 @@ Slot W_FindPrevNextWeaponSlot(Slot slot, float is_prev) {
 }
 
 void W_ChangeWeaponNext() {
-    if (self.weaponmodel == string_null || IsSlotNull(self.current_slot))
-        return;
-
-    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(self.current_slot, FALSE));
+    Slot slot = IsSlotNull(self.current_slot) ? MakeSlot(1) : self.current_slot;
+    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, FALSE));
 }
 
 void W_ChangeWeaponPrev() {
-    if (self.weaponmodel == string_null || IsSlotNull(self.current_slot))
-        return;
-
-    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(self.current_slot, TRUE));
+    Slot slot = IsSlotNull(self.current_slot) ? MakeSlot(1) : self.current_slot;
+    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, TRUE));
 }
 
 void () PreMatchImpulses;
@@ -2044,7 +2037,7 @@ void () ImpulseCommands = {
     } else if (self.impulse == TF_TOGGLEVOTE)
         Vote_ToggleMenu(self);
 
-    if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
+    if (self.tfstate & TFSTATE_NO_WEAPON == 0) {
         if (self.impulse == TF_WEAPNEXT)
             W_ChangeWeaponNext();
         else if (self.impulse == TF_WEAPPREV)
@@ -2067,11 +2060,10 @@ void () ImpulseCommands = {
             TeamFortress_SetDetpack(50);
         else if (self.impulse == TF_DROP_AMMO) {
             Menu_Drop();
-        }
-	else if (self.impulse == TF_PRACSPAWN_PLACE)
-		TeamFortress_PlacePracticeSpawn(self);
-	else if (self.impulse == TF_PRACSPAWN_REMOVE)
-		TeamFortress_RemovePracticeSpawn(self);
+        } else if (self.impulse == TF_PRACSPAWN_PLACE)
+            TeamFortress_PlacePracticeSpawn(self);
+        else if (self.impulse == TF_PRACSPAWN_REMOVE)
+            TeamFortress_RemovePracticeSpawn(self);
     }
 
     if (self.impulse == TF_INVENTORY)
@@ -2129,9 +2121,9 @@ void () ImpulseCommands = {
             Menu_Spy_Skin();
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(0);
-    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
+    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY))
         FO_Spy_FeignOnNextDamage();
-    } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
+    else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
         CF_Spy_ChangeSkin(self, 8, TRUE);
@@ -2571,7 +2563,6 @@ void () W_WeaponFrame = {
         return;
     }
 
-
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
@@ -2593,8 +2584,7 @@ void () W_WeaponFrame = {
     if (self.impulse == TF_QUICKSTOP)
         self.impulse = self.qf_swap_last_slot ? TF_WEAPLAST : 0;
 
-    float can_change_weapon = WeaponReady() &&
-        !self.is_detpacking && !(self.is_building && !engineer_move);
+    float can_change_weapon = WeaponReady();
 
     // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
     if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
@@ -2687,6 +2677,10 @@ void () W_WeaponFrame = {
         case TF_CHANGEPC_RANDOM:
         case TF_INVENTORY:
         case FLAG_INFO:
+        case TF_SPY_DIE:
+        case TF_SPY_DIE_ON:
+        case TF_SPY_DIE_OFF:
+        case TF_SPY_SILENT_DIE:
             ImpulseCommands();
             return;
             // allows setting detpack while reloading on toggle, defaults to off
@@ -2738,9 +2732,8 @@ void () W_WeaponFrame = {
                 if (vlen(tv) <= 50) {
                     SniperSight_Create();
                     self.heat = 50;
-                    self.tfstate = self.tfstate | 2048;
+                    self.tfstate |= TFSTATE_AIMING;
                     self.power_full = 0;
-                    TeamFortress_SetSpeed(self);
                 }
             }
         } else if (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON) {
@@ -2757,12 +2750,7 @@ void () W_WeaponFrame = {
         }
     } else if (self.tfstate & TFSTATE_AIMING) {
         W_Attack();
-        self.tfstate = self.tfstate - TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
-        self.heat = 0;
-    } else if (self.tfstate & TFSTATE_CANT_MOVE && !self.is_feigning) {
-        self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
+        self.tfstate &= ~TFSTATE_AIMING;
         self.heat = 0;
     }
 };

@@ -241,27 +241,31 @@
 //===========================================================================
 
 // TeamFortress State Flags
-#define TFSTATE_GRENPRIMED		1   // Whether the player has a primed grenade
-#define TFSTATE_RELOADING		2   // Whether the player is reloading
-#define TFSTATE_ALTKILL			4   // TRUE if killed with a weapon not in self.weapon: NOT USED ANYMORE
-#define TFSTATE_RANDOMPC		8   // Whether Playerclass is random, new one each respawn
-#define TFSTATE_INFECTED		16  // set when player is infected by the bioweapon
-#define TFSTATE_INVINCIBLE		32  // Player has permanent Invincibility (Usually by GoalItem)
-#define TFSTATE_INVISIBLE		64  // Player has permanent Invisibility (Usually by GoalItem)
-#define TFSTATE_QUAD			128 // Player has permanent Quad Damage (Usually by GoalItem)
-#define TFSTATE_RADSUIT			256 // Player has permanent Radsuit (Usually by GoalItem)
-#define TFSTATE_BURNING			512 // Is on fire
-#define TFSTATE_GRENTHROWING		1024  // is throwing a grenade
-#define TFSTATE_AIMING			2048  // is using the laser sight
-#define TFSTATE_LOCK            4096 // this state will stop hwguy from shooting assault cannon
-#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire, as sentry gun, indicate it needs to die
-#define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
-#define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
-#define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
-// FIXME - concussion and flash states aren't set or tested...
-#define TFSTATE_FLAMES_MAX		131072
-#define TFSTATE_FLASHED			262144
-#define TFSTATE_CONCUSSED		524288
+enumflags {
+    TFSTATE_GRENPRIMED,    // Whether the player has a primed grenade
+    TFSTATE_RELOADING,     // Whether the player is reloading
+    TFSTATE_AIMING,        // is using the laser sight or spinning
+    TFSTATE_CANT_MOVE,
+    TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
+                           // (Note: We don't use NO_WEAPON for reloading
+                           // as it could result in stacked no-weapon states.)
+    TFSTATE_INFECTED,      // set when player is infected by the bioweapon
+    TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
+    TFSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
+    TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
+    TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
+    TFSTATE_BURNING,       // Is on fire
+    TFSTATE_GRENTHROWING,  // is throwing a grenade
+    TFSTATE_LOCK,          // assault cannon locked
+    TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
+                           // as sentry gun,indicate it needs to die
+    TFSTATE_HALLUCINATING, // set when player is hallucinating
+    TFSTATE_TRANQUILISED,  // set when player is tranquilised
+    TFSTATE_FLAMES_MAX,    // Peak burnination.
+    TFSTATE_RANDOMPC,      // Whether Playerclass is random, new one each respawn
+};
+
+#define TFSTATE_AC_MASK (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING|TFSTATE_AC_SPINDOWN)
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOR	1  // Bypasses the armor of the target

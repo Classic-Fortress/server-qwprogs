@@ -5,353 +5,57 @@ void () T_TranqDartTouch;
 void () Spy_DropBackpack;
 void (entity targ, entity attacker) KillSound;
 
-void () spy_diea1 =[50, spy_diea2] {
-};
-
-void () spy_diea2 =[51, spy_diea3] {
-};
-
-void () spy_diea3 =[52, spy_diea4] {
-};
-
-void () spy_diea4 =[53, spy_diea5] {
-};
-
-void () spy_diea5 =[54, spy_diea6] {
-};
-
-void () spy_diea6 =[55, spy_diea7] {
-};
-
-void () spy_diea7 =[56, spy_diea8] {
-};
-
-void () spy_diea8 =[57, spy_diea9] {
-};
-
-void () spy_diea9 =[58, spy_diea10] {
-};
-
-void () spy_diea10 =[59, spy_diea11] {
-};
-
-void () spy_diea11 =[60, spy_diea11] {
-};
-
-void () spy_dieb1 =[61, spy_dieb2] {
-};
-
-void () spy_dieb2 =[62, spy_dieb3] {
-};
-
-void () spy_dieb3 =[63, spy_dieb4] {
-};
-
-void () spy_dieb4 =[64, spy_dieb5] {
-};
-
-void () spy_dieb5 =[65, spy_dieb6] {
-};
-
-void () spy_dieb6 =[66, spy_dieb7] {
-};
-
-void () spy_dieb7 =[67, spy_dieb8] {
-};
-
-void () spy_dieb8 =[68, spy_dieb9] {
-};
-
-void () spy_dieb9 =[69, spy_dieb9] {
-};
-
-void () spy_diec1 =[70, spy_diec2] {
-};
-
-void () spy_diec2 =[71, spy_diec3] {
-};
-
-void () spy_diec3 =[72, spy_diec4] {
-};
-
-void () spy_diec4 =[73, spy_diec5] {
-};
-
-void () spy_diec5 =[74, spy_diec6] {
-};
-
-void () spy_diec6 =[75, spy_diec7] {
-};
-
-void () spy_diec7 =[76, spy_diec8] {
-};
-
-void () spy_diec8 =[77, spy_diec9] {
-};
-
-void () spy_diec9 =[78, spy_diec10] {
-};
-
-void () spy_diec10 =[79, spy_diec11] {
-};
-
-void () spy_diec11 =[80, spy_diec12] {
-};
-
-void () spy_diec12 =[81, spy_diec13] {
-};
-
-void () spy_diec13 =[82, spy_diec14] {
-};
-
-void () spy_diec14 =[83, spy_diec15] {
-};
-
-void () spy_diec15 =[84, spy_diec15] {
-};
-
-void () spy_died1 =[85, spy_died2] {
-};
-
-void () spy_died2 =[86, spy_died3] {
-};
-
-void () spy_died3 =[87, spy_died4] {
-};
-
-void () spy_died4 =[88, spy_died5] {
-};
-
-void () spy_died5 =[89, spy_died6] {
-};
-
-void () spy_died6 =[90, spy_died7] {
-};
-
-void () spy_died7 =[91, spy_died8] {
-};
-
-void () spy_died8 =[92, spy_died9] {
-};
-
-void () spy_died9 =[93, spy_died9] {
-};
-
-void () spy_diee1 =[94, spy_diee2] {
-};
-
-void () spy_diee2 =[95, spy_diee3] {
-};
-
-void () spy_diee3 =[96, spy_diee4] {
-};
-
-void () spy_diee4 =[97, spy_diee5] {
-};
-
-void () spy_diee5 =[98, spy_diee6] {
-};
-
-void () spy_diee6 =[99, spy_diee7] {
-};
-
-void () spy_diee7 =[100, spy_diee8] {
-};
-
-void () spy_diee8 =[101, spy_diee9] {
-};
-
-void () spy_diee9 =[102, spy_diee9] {
-};
-
-void () spy_die_ax1 =[41, spy_die_ax2] {
-};
-
-void () spy_die_ax2 =[42, spy_die_ax3] {
-};
-
-void () spy_die_ax3 =[43, spy_die_ax4] {
-};
-
-void () spy_die_ax4 =[44, spy_die_ax5] {
-};
-
-void () spy_die_ax5 =[45, spy_die_ax6] {
-};
-
-void () spy_die_ax6 =[46, spy_die_ax7] {
-};
-
-void () spy_die_ax7 =[47, spy_die_ax8] {
-};
-
-void () spy_die_ax8 =[48, spy_die_ax9] {
-};
-
-void () spy_die_ax9 =[49, spy_die_ax9] {
-};
-
-void () spy_upb1 =[69, spy_upb2] {
-};
-
-void () spy_upb2 =[68, spy_upb3] {
-};
-
-void () spy_upb3 =[67, spy_upb4] {
-};
-
-void () spy_upb4 =[66, spy_upb5] {
-};
-
-void () spy_upb5 =[65, spy_upb6] {
-};
-
-void () spy_upb6 =[64, spy_upb7] {
-};
-
-void () spy_upb7 =[63, spy_upb8] {
-};
-
-void () spy_upb8 =[62, spy_upb9] {
-};
-
-void () spy_upb9 =[61, spy_upb9] {
-    player_stand1();
-};
-
-void () spy_upc1 =[84, spy_upc2] {
-};
-
-void () spy_upc2 =[83, spy_upc3] {
-};
-
-void () spy_upc3 =[82, spy_upc4] {
-};
-
-void () spy_upc4 =[81, spy_upc5] {
-};
-
-void () spy_upc5 =[80, spy_upc6] {
-};
-
-void () spy_upc6 =[79, spy_upc7] {
-};
-
-void () spy_upc7 =[78, spy_upc8] {
-};
-
-void () spy_upc8 =[77, spy_upc9] {
-};
-
-void () spy_upc9 =[76, spy_upc10] {
-};
-
-void () spy_upc10 =[75, spy_upc11] {
-};
-
-void () spy_upc11 =[74, spy_upc12] {
-};
-
-void () spy_upc12 =[73, spy_upc13] {
-};
-
-void () spy_upc13 =[72, spy_upc14] {
-};
-
-void () spy_upc14 =[71, spy_upc15] {
-};
-
-void () spy_upc15 =[70, spy_upc15] {
-    player_stand1();
-};
-
-void () spy_upd1 =[93, spy_upd2] {
-};
-
-void () spy_upd2 =[92, spy_upd3] {
-};
-
-void () spy_upd3 =[91, spy_upd4] {
-};
-
-void () spy_upd4 =[90, spy_upd5] {
-};
-
-void () spy_upd5 =[89, spy_upd6] {
-};
-
-void () spy_upd6 =[88, spy_upd7] {
-};
-
-void () spy_upd7 =[87, spy_upd8] {
-};
-
-void () spy_upd8 =[86, spy_upd9] {
-};
-
-void () spy_upd9 =[85, spy_upd9] {
-    player_stand1();
-};
-
-void () spy_upe1 =[94, spy_upe9] {
-};
-
-void () spy_upe9;
-void () spy_upe2 =[95, spy_upe8] {
-};
-
-void () spy_upe8;
-void () spy_upe3 =[96, spy_upe7] {
-};
-
-void () spy_upe7;
-void () spy_upe4 =[97, spy_upe6] {
-};
-
-void () spy_upe6;
-void () spy_upe5 =[98, spy_upe5] {
-};
-
-void () spy_upe6 =[99, spy_upe4] {
-};
-
-void () spy_upe7 =[100, spy_upe3] {
-};
-
-void () spy_upe8 =[101, spy_upe2] {
-};
-
-void () spy_upe9 =[102, spy_upe1] {
-    player_stand1();
-};
-
-void () spy_upaxe1 =[49, spy_upaxe2] {
-};
-
-void () spy_upaxe2 =[48, spy_upaxe3] {
-};
-
-void () spy_upaxe3 =[47, spy_upaxe4] {
-};
-
-void () spy_upaxe4 =[46, spy_upaxe5] {
-};
-
-void () spy_upaxe5 =[45, spy_upaxe6] {
-};
-
-void () spy_upaxe6 =[44, spy_upaxe7] {
-};
-
-void () spy_upaxe7 =[43, spy_upaxe8] {
-};
-
-void () spy_upaxe8 =[42, spy_upaxe9] {
-};
-
-void () spy_upaxe9 =[41, spy_upaxe9] {
-    player_stand1();
-};
+anim_t anim_spy_diea1 = { 11, 1, {50}, {0}, FALSE, FALSE, TRUE };
+void spy_dieaN() { client_anim_frames(spy_dieaN, think_nop, &anim_spy_diea1); }
+void spy_diea1() { *thinkindex() = 1; spy_dieaN(); }
+
+anim_t anim_spy_dieb1 = { 9, 1, {61}, {0}, FALSE, FALSE, TRUE };
+void spy_diebN() { client_anim_frames(spy_diebN, think_nop, &anim_spy_dieb1); }
+void spy_dieb1() { *thinkindex() = 1; spy_diebN(); }
+
+anim_t anim_spy_diec1 = { 15, 1, {70}, {0}, FALSE, FALSE, TRUE };
+void spy_diecN() { client_anim_frames(spy_diecN, think_nop, &anim_spy_diec1); }
+void spy_diec1() { *thinkindex() = 1; spy_diecN(); }
+
+anim_t anim_spy_died1 = { 9, 1, {85}, {0}, FALSE, FALSE, TRUE };
+void spy_diedN() { client_anim_frames(spy_diedN, think_nop, &anim_spy_died1); }
+void spy_died1() { *thinkindex() = 1; spy_diedN(); }
+
+anim_t anim_spy_diee1 = { 9, 1, {94}, {0}, FALSE, FALSE, TRUE };
+void spy_dieeN() { client_anim_frames(spy_dieeN, think_nop, &anim_spy_diee1); }
+void spy_diee1() { *thinkindex() = 1; spy_dieeN(); }
+
+anim_t anim_spy_die_ax1 = { 9, 1, {41}, {0}, FALSE, FALSE, TRUE };
+void spy_die_axN() { client_anim_frames(spy_die_axN, think_nop, &anim_spy_die_ax1); }
+void spy_die_ax1() { *thinkindex() = 1; spy_die_axN(); }
+
+void spy_up_extra() {
+    // Death animations are variable length, this always picks up last frame.
+    // Animation transition to stand would take an extra 100ms.
+    if (self.client_think == player_run)
+        player_stand1();
+}
+
+anim_t anim_spy_upb1 = { 9, 1, {69, 68, 67, 66, 65, 64, 63, 62, 61}, {0}, FALSE, FALSE };
+void spy_upbN() { client_anim_frames(spy_upbN, spy_up_extra, &anim_spy_upb1); }
+void spy_upb1() { *thinkindex() = 1; spy_upbN(); }
+
+anim_t anim_spy_upc1 =
+    { 15, 1, {84,83,82,81,80,79,78,77,76,75,74,73,72,71,70}, {0}, FALSE, FALSE };
+void spy_upcN() { client_anim_frames(spy_upcN, spy_up_extra, &anim_spy_upc1); }
+void spy_upc1() { *thinkindex() = 1; spy_upcN(); }
+
+anim_t anim_spy_upd1 = { 9, 1, {93, 92, 91, 90, 89, 88, 87, 86, 85}, {0}, FALSE, FALSE };
+void spy_updN() { client_anim_frames(spy_updN, spy_up_extra, &anim_spy_upd1); }
+void spy_upd1() { *thinkindex() = 1; spy_updN(); }
+
+anim_t anim_spy_upe1 = { 9, 1, {102, 101, 100, 99, 98, 97, 96, 95, 94}, {0}, FALSE, FALSE };
+void spy_upeN() { client_anim_frames(spy_upeN, spy_up_extra, &anim_spy_upe1); }
+void spy_upe1() { *thinkindex() = 1; spy_upeN(); }
+
+anim_t anim_spy_upaxe1 = { 9, 1, {49, 48, 47, 46, 45, 44, 43, 32, 41}, {0}, FALSE, FALSE };
+void spy_upaxeN() { client_anim_frames(spy_upaxeN, spy_up_extra, &anim_spy_upaxe1); }
+void spy_upaxe1() { *thinkindex() = 1; spy_upaxeN(); }
 
 float (entity pe_player) Spy_CheckArea = {
     local entity at_spot = findradius(pe_player.origin, 64);
@@ -379,10 +83,8 @@ void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
             pe_player.velocity_y = 0;
             pe_player.movetype = MOVETYPE_TOSS;
             //This is needed for plats that have a virtual presence and this causes you to fall slowly when inside it
-            if(!dontstopdead) {
-                pe_player.tfstate = pe_player.tfstate | TFSTATE_CANT_MOVE;
-                TeamFortress_SetSpeed(pe_player);
-            }
+            if(!dontstopdead)
+                pe_player.tfstate |= TFSTATE_CANT_MOVE;
         }
     }
 };
@@ -393,7 +95,7 @@ void () CF_Spy_AirThink = {
     if(self.owner.deadflag >= 2) {
         // reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
         self.owner.movetype = MOVETYPE_NONE;
-        self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+        self.owner.tfstate |= TFSTATE_CANT_MOVE;
         dremove(self);
         return;
     }
@@ -418,7 +120,7 @@ void () CF_Spy_AirThink = {
                 } else {
                     self.owner.movetype = MOVETYPE_NONE;
                 }
-                self.owner.tfstate = self.owner.tfstate | TFSTATE_CANT_MOVE;
+                self.owner.tfstate |= TFSTATE_CANT_MOVE;
             }
         }
 
@@ -426,9 +128,6 @@ void () CF_Spy_AirThink = {
         else {
             self.owner.movetype = MOVETYPE_TOSS;
         }
-
-        TeamFortress_SetSpeed(self.owner);
-
     }
 
     self.nextthink = time + 0.1;
@@ -498,7 +197,7 @@ void (float issilent, float force) FO_Spy_Feign = {
     setsize(self, '-16 -16 -24', '16 16 -16');
 
     // set weapon state and remove weapon viewmodel
-    W_QueueAndDisableWeapon();
+    self.tfstate |= TFSTATE_NO_WEAPON;
 
     // set view height to ground
     self.view_ofs = '0 0 4';
@@ -543,7 +242,7 @@ void (float issilent, float force) FO_Spy_Feign = {
     }
 
     // die with axe equipped if carrying axe, medikit, knife or spanner
-    if (self.weapon <= WEAP_AXE) {
+    if (IsSlotMelee(self.current_slot)) {
         spy_die_ax1();
         return;
     }
@@ -605,8 +304,7 @@ void () FO_Spy_Unfeign = {
 
         // allow spy to move again
         self.movetype = MOVETYPE_WALK;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
-        TeamFortress_SetSpeed(self);
+        self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
 
         // set revive animation
         local float i;
@@ -1428,14 +1126,13 @@ void () T_TranqDartTouch = {
                 }
             } else {
                 sprint(other, 2, "You feel tired...\n");
-                other.tfstate = other.tfstate | TFSTATE_TRANQUILISED;
+                other.tfstate |= TFSTATE_TRANQUILISED;
                 timer = spawn();
                 timer.nextthink = time + 15;
                 timer.think = TranquiliserTimer;
                 timer.classname = "timer";
                 timer.owner = other;
                 timer.team_no = self.owner.team_no;
-                TeamFortress_SetSpeed(other);
             }
         }
         spawn_touchblood(9);
@@ -1461,8 +1158,7 @@ void () T_TranqDartTouch = {
 };
 
 void () TranquiliserTimer = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_TRANQUILISED);
-    TeamFortress_SetSpeed(self.owner);
+    self.owner.tfstate &= ~TFSTATE_TRANQUILISED;
     sprint(self.owner, PRINT_HIGH, "You feel more alert now\n");
     dremove(self);
 };

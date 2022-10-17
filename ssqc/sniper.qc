@@ -121,9 +121,7 @@ void () SniperSight_Update = {
     if (!(self.owner.tfstate & TFSTATE_AIMING) ||
         (FO_PlayerCurrentWeapon(self.owner) != WEAP_SNIPER_RIFLE)) {
 
-        self.owner.tfstate =
-            self.owner.tfstate - (self.owner.tfstate & TFSTATE_AIMING);
-        TeamFortress_SetSpeed(self.owner);
+        self.owner.tfstate &= ~TFSTATE_AIMING;
         self.owner.heat = 0;
         dremove(self);
         return;

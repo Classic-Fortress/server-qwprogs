@@ -465,7 +465,7 @@ void () PlayerDie = {
     if (deathmatch || coop)
         DropBackpack();
 
-    self.weaponmodel = "";
+    self.tfstate |= TFSTATE_NO_WEAPON;
     self.view_ofs = '0 0 -8';
     self.deadflag = DEAD_DYING;
     self.solid = SOLID_NOT;

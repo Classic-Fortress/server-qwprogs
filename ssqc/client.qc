@@ -1688,7 +1688,7 @@ void () ClientKill = {
     set_suicide_frame();
     self.modelindex = modelindex_player;
 
-    self.weaponmodel = "";
+    self.tfstate |= TFSTATE_NO_WEAPON;
     self.view_ofs = '0 0 -8';
     self.movetype = MOVETYPE_NONE;
     TeamFortress_RemoveTimers();
@@ -2251,8 +2251,7 @@ void () PutClientInServer = {
     if (cease_fire) {
         sprint(self, PRINT_HIGH, "\n\nCease fire mode\n");
         self.immune_to_check = time + 10;
-        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
+        self.tfstate |= TFSTATE_CANT_MOVE;
     }
 
     if (self.playerclass == 0 && self.team_no > 0) {
@@ -2524,8 +2523,7 @@ void () PlayerJump = {
             }
             StopAssCan();
         } else {
-            self.tfstate = self.tfstate | TFSTATE_AIMING;
-            TeamFortress_SetSpeed(self);
+            self.tfstate |= TFSTATE_AIMING;
         }
     }
 
@@ -2713,8 +2711,7 @@ void () PlayerPreThink = {
                     self.feign_areachecked = 1;
                     if (!(self.tfstate & TFSTATE_CANT_MOVE)) {
                         self.movetype = MOVETYPE_NONE;
-                        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-                        TeamFortress_SetSpeed(self);
+                        self.tfstate |= TFSTATE_CANT_MOVE;
                     }
                 }
             }
@@ -2911,6 +2908,19 @@ void () CheckPowerups = {
     }
 };
 
+void FO_HandleTFStateUpdate() {
+    if (self.last_tfstate == self.tfstate)
+        return;
+
+    float state_changed = self.last_tfstate ^ self.tfstate;
+    if (state_changed & TFSTATE_NO_WEAPON)
+        W_UpdateWeaponModel(self);
+    if (state_changed & (TFSTATE_AIMING | TFSTATE_CANT_MOVE | TFSTATE_TRANQUILISED))
+        TeamFortress_SetSpeed(self);
+
+    self.last_tfstate = self.tfstate;
+}
+
 void () PlayerPostThink = {
     FO_CheckClientThink();
     UpdateScoreboardInfo(self);
@@ -2962,16 +2972,12 @@ void () PlayerPostThink = {
         }
     }
     self.jump_flag = self.velocity_z;
-    
-    if(votemode) {
-        if (time >= self.StatusRefreshTime)
-            RefreshStatusBar(self);
 
+    if(votemode) {
         CheckPowerups();
         FO_ReloadFrame();
         W_WeaponFrame();
         //TeamFortress_CheckforCheats();
-        //TeamFortress_SetSpeed(self);
     } else {
         CheckPowerups();
         FO_ReloadFrame();
@@ -2984,13 +2990,15 @@ void () PlayerPostThink = {
                 self.cheat_check = time + 5;
             }
         }
-        if (time >= self.StatusRefreshTime)
-            RefreshStatusBar(self);
         if (self.cheat_check <= time) {
             TeamFortress_CheckTeamCheats();
             self.cheat_check = time + 3;
         }
     }
+
+    FO_HandleTFStateUpdate();
+    if (time >= self.StatusRefreshTime)
+        RefreshStatusBar(self);
 };
 
 void () UpdateAllClientsTeamScores = {
