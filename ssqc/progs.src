@@ -19,7 +19,7 @@ debug.qc
 time.qc
 ../share/defs.h
 ../share/weapons.qc
-../share/weapon_predict.qc
+../share/prediction.qc
 ../share/animate.qc
 events.qc
 roles.qc

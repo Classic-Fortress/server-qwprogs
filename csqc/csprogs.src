@@ -15,7 +15,7 @@ csextradefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
 ../share/weapons.qc
-../share/weapon_predict.qc
+../share/prediction.qc
 ../share/animate.qc
 weapon_predict.qc
 sui_sys.qc

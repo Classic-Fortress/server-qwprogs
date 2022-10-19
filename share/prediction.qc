@@ -1,7 +1,7 @@
 #define ENT_WEAPONPRED 100
 #define ENT_PROJECTILE 101
 
-string wp_version = "v1";
+string wp_version = "v0.1";
 
 enumflags {
     FOWP_CTIME,
@@ -15,6 +15,7 @@ enumflags {
     FOWP_CLASS,
     FOWP_RELOAD,
     FOWP_RNG,
+    FOWP_PREDICT_FLAGS,
 };
 
 enumflags {
@@ -24,8 +25,15 @@ enumflags {
 
 #define FOWP_ALL 0xFFFF
 
+#define PF_WP_ENABLE    1
+#define PF_WP_DISABLE   2
+#define PF_PP_ENABLE    4
+#define PF_PP_DISABLE   8
+#define PF_ED_MASK (PF_WP_ENABLE | PF_WP_DISABLE | PF_PP_ENABLE | PF_PP_DISABLE)
+
 struct predict_tf_state {
     int playerclass;
+    int predict_flags;
     int impulse;
     Slot current_slot, queue_slot, last_slot;
 
@@ -114,50 +122,34 @@ void WeaponPred_InitOnce() {
     InitFppProjectiles();
 }
 
-static float ClientEnable() {
-    WeaponPred_InitOnce();
-
-    // client_ping is not yet initialized.
-    float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
-
-    float min_ping =
-        FO_GetUserSetting(self, "fowpmp", "fo_weapon_predict_minping", "40");
-
-    if (weaponpred_settings.global_disable || ping < min_ping * MSEC)
-        return FALSE;
-
-    if (weaponpred_settings.global_enable)
-        return TRUE;
-
-    return FO_GetUserSetting(self, "fowp", "fo_weapon_predict", "off");
-}
-
-.float weapon_pred_enabled;
 .predict_tf_state predict_state;
 .entity predict_entity;
 
 .float client_nextthink;
 .float client_thinkindex;
 #else
-predict_tf_state pstate_pred, pstate_server;
 
 struct pengine_t {
+    float pp_enabled;
+    float wp_enabled;
     float is_effectframe;
     float last_effectframe;
+
+    entity pweap_ent;
+
+    // Must include MASK_PRED_VIEWMODEL or we lose updates.
+    // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
+    float view_mask;
 } pengine;
 
-#define MASK_PRED_VIEWMODEL 256
-// Must include MASK_PRED_VIEWMODEL or we lose updates.
-// We only add/remove MASK_VIEWMODEL.
-float wp_model_mask;
-float wp_enabled;
+inline float PP_Enabled() { return pengine.pp_enabled; }
+inline float WP_Enabled() { return pengine.wp_enabled; }
+inline float WPP_ViewModelMask() { return pengine.view_mask; }
 
-inline int WP_Enabled() { return wp_enabled; }
+predict_tf_state pstate_pred, pstate_server;
+#define MASK_PRED_VIEWMODEL  256
+#define MASK_PRED_PROJECTILE 512
 
-void FO_WP_Init(float enabled) {
-    wp_enabled = enabled;
-    wp_model_mask = enabled ? MASK_PRED_VIEWMODEL : MASK_VIEWMODEL;
-}
 #endif
 
 #ifdef SSQC
@@ -193,12 +185,42 @@ float shared_prng(entity pl) {  // A 16-bit xor-shift LFSR.
 predict_tf_state blank_state;
 .float last_full_predict_refresh;
 
+static void WeaponPred_UpdatePredictionFlags() {
+    float wpp_enable = FALSE, wp_enable = FALSE, pp_enable = FALSE;
+    float wpp_disable = FALSE, wp_disable = FALSE, pp_disable = FALSE;
+
+    wp_enable   = CF_GetSetting("wpge", "wp_global_enable", "off");
+    wp_disable  = CF_GetSetting("wpgd", "wp_global_disable", "off");
+    pp_enable   = CF_GetSetting("ppge", "pp_global_enable", "off");
+    pp_disable  = CF_GetSetting("ppgd", "pp_global_disable", "off");
+    wpp_enable  = CF_GetSetting("wppge", "wpp_global_enable", "off");
+    wpp_disable = CF_GetSetting("wppge", "wpp_global_disable", "off");
+
+    float wp_mask = 0, pp_mask = 0;
+
+    // Disables dominate enables.
+    if (wpp_disable || wp_disable)
+        wp_mask = PF_WP_DISABLE;
+    else if (wpp_enable || wp_enable)
+        wp_mask = PF_WP_ENABLE;
+    if (wpp_disable || pp_disable)
+        pp_mask = PF_PP_DISABLE;
+    else if (wpp_enable || pp_enable)
+        pp_mask = PF_PP_ENABLE;
+
+    self.predict_state.predict_flags &= ~PF_ED_MASK;
+    self.predict_state.predict_flags |= wp_mask | pp_mask;
+
+    // Note: Flag to send is simply the all-bits periodic.
+}
+
 void WeaponPred_Update(entity player) {
     float mask = FOWP_CTIME;
 
-    if (time - player.last_full_predict_refresh > 5000 * MSEC) {
+    if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
         player.predict_state = blank_state;
         player.last_full_predict_refresh = time;
+        WeaponPred_UpdatePredictionFlags();
         mask = -1;
     }
 
@@ -246,6 +268,9 @@ void WP_ServerUpdate();
 void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
 #endif
+    if (sendflags & FOWP_PREDICT_FLAGS)
+        COMM(Float, predict_flags);
+
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
         COMM(Float, client_ping);
@@ -369,22 +394,13 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 #ifdef SSQC
-inline float WeaponPred_Active(entity player) {
-    return player.weapon_pred_enabled;
-}
-
 void WeaponPred_InitPlayer(entity player) {
     WeaponPred_InitOnce();
 
+    sprint(player, PRINT_HIGH,
+            "FortressOne: Weapon Prediction ", wp_version, "\n");
     sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
             weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
-
-    if (!ClientEnable()) {  // Server side is once per connect.
-        player.weapon_pred_enabled = FALSE;
-        return;
-    }
-
-    player.weapon_pred_enabled = TRUE;
 
     entity pe = spawn();
     pe.owner = player;
@@ -395,15 +411,11 @@ void WeaponPred_InitPlayer(entity player) {
     setorigin(pe, [0, 0, 0]);
 
     player.predict_entity = pe;
-    sprint(player, PRINT_HIGH,
-            "FortressOne: Weapon Prediction Active ", wp_version, "\n");
 }
 
 void WeaponPred_TearDown(entity player) {
-    if (!player.weapon_pred_enabled)
-        return;
-
-    dremove(player.predict_entity);
+    if (player.predict_entity != __NULL__)
+        dremove(player.predict_entity);
 }
 
 void WeaponPred_DoServerClientThink() {
@@ -428,106 +440,4 @@ void PredProj_Add(entity mis) {
     mis.SendEntity = PP_SendEntity;
     mis.SendFlags = 255;
 }
-#endif
-
-#ifdef CSQC
-float WP_IsReloading();
-void WP_UpdateViewModel() {
-    float pmodelindex, pframe;
-
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-                                      pstate_pred.current_slot);
-
-    if (wi->predict_type == NO_PREDICT) {
-        // Fall back to engine.
-        self.modelindex = 0;
-        wp_model_mask |= MASK_VIEWMODEL;
-        return;
-    } else {
-        wp_model_mask &= ~MASK_VIEWMODEL;
-
-    }
-
-    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING)) {
-        self.modelindex = 0;
-        return;
-    }
-
-    pmodelindex = (wi->models)->modelindex;
-    pframe = pstate_pred.weaponframe;
-
-    if (self.modelindex != pmodelindex) {
-        self.frame = pframe;
-        self.modelindex = pmodelindex;
-        self.lerpfrac = 0;
-    } else if (self.frame != pframe) {
-        self.frame2 = self.frame;
-        self.frame = pframe;
-        self.lerpfrac = 1;
-    }
-
-    self.lerpfrac = max(0, self.lerpfrac - frametime * 10);
-}
-
-void WP_Frame();
-void WP_DoClientThink();
-
-float pf, ef;
-
-float last_time;
-float gen;
-
-float WP_ClientThink() {
-    pstate_pred = pstate_server;
-    gen++;
-
-    int pframe = servercommandframe + 1;
-    int eframe = clientcommandframe;
-    for(; pframe <= eframe; pframe++) {
-        if (!getinputstate(pframe) || input_timelength <= 0)
-            break;
-
-        makevectors(input_angles);
-        pf = pframe;
-        ef = eframe;
-
-        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
-            pengine.is_effectframe = TRUE;
-            pengine.last_effectframe = pframe;
-        } else {
-            pengine.is_effectframe = FALSE;
-        }
-
-        pstate_pred.client_time += input_timelength;
-        if (input_impulse)
-          pstate_pred.impulse = input_impulse;
-
-        while (pstate_pred.client_nextthink &&
-            pstate_pred.client_time >= pstate_pred.client_nextthink) {
-            float held_client_time = pstate_pred.client_time;
-
-            pstate_pred.client_time = pstate_pred.client_nextthink;
-            pstate_pred.client_nextthink = 0;
-            WP_DoClientThink();
-            pstate_pred.client_time = held_client_time;
-        }
-
-        WP_Frame();
-    }
-
-    WP_UpdateViewModel();
-    return PREDRAW_AUTOADD;
-}
-
-void InitWeapPredEnt(entity pe) {
-    pe.predraw = WP_ClientThink;
-
-    self.drawmask = MASK_PRED_VIEWMODEL;
-    self.renderflags = RF_VIEWMODEL;
-
-    FO_WP_Init(TRUE);
-}
-
-float  PP_Predraw();
-
 #endif

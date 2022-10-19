@@ -2931,8 +2931,8 @@ void () PlayerPostThink = {
     FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
-    if (WeaponPred_Active(self))
-        WeaponPred_Update(self);
+
+    WeaponPred_Update(self);
 
     if (self.view_ofs == '0 0 0') {
         return;
