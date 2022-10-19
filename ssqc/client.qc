@@ -2917,7 +2917,7 @@ void FO_HandleTFStateUpdate() {
         return;
 
     float state_changed = self.last_tfstate ^ self.tfstate;
-    if (state_changed & TFSTATE_NO_WEAPON)
+    if (state_changed & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING))
         W_UpdateWeaponModel(self);
     if (state_changed & (TFSTATE_AIMING | TFSTATE_CANT_MOVE | TFSTATE_TRANQUILISED))
         TeamFortress_SetSpeed(self);
