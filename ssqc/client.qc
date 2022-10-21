@@ -2103,6 +2103,8 @@ void () PutClientInServer = {
 
     DecodeLevelParms();
 
+    WeaponPred_InitPlayer(self);
+
     if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
         TeamFortress_ChangeClass(11);
     }
@@ -3073,8 +3075,6 @@ void () ClientConnect = {
     }
 
     if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        WeaponPred_InitPlayer(self);
-
         InitAllStatuses(self);
         UpdateClientMOTD(self);
         UpdateClientTeamScores(self);

@@ -383,6 +383,11 @@ void EntUpdate_Projectile(float isnew) {
 
 #ifdef SSQC
 void WeaponPred_InitPlayer(entity player) {
+    if (!infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
+        bprint(PRINT_HIGH, player.netname, " is using a legacy non-CSQC client.\n");
+        return;
+    }
+
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
     sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
