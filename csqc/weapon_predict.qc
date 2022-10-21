@@ -344,16 +344,25 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
     return ammo > wi->ammo_per_shot;
 }
 
-float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+float WP_ReloadIfNeeded(FO_WeapInfo* wi) {
     if (!WP_CheckAmmo(wi) || wi->needs_reload) {
         if (*WP_ClipFired() >= wi->clip_size) {
             WP_Reload();
-            return FALSE;
+            return TRUE;
         }
     }
 
+    return FALSE;
+}
+
+float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+    if (WP_ReloadIfNeeded(wi))
+        return FALSE;
+
     pstate_pred.ammo_used[wi->ammo_type] += wi->ammo_per_shot;
     *WP_ClipFired() += wi->ammo_per_shot;
+
+    WP_ReloadIfNeeded(wi);
 
     return TRUE;
 }
@@ -751,6 +760,8 @@ void WP_Attack() {
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
     float best = 0.2;
+
+    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.modelindex != self.modelindex)
             continue;
@@ -759,13 +770,13 @@ float PredProjectile_MatchProjectile() {
         if (d < best) {
             best = d;
             match = proj;
-        }
 
-        if (vlen(proj.s_origin - self.s_origin) < 32) {
-            match = proj;
-            break;
+            proj.origin = proj.s_origin + (time - proj.s_time) * self.velocity;
+            if (vlen(proj.origin - self.origin) < 32) {
+                match = proj;
+                break;
+            }
         }
-
     }
 
     if (match) {
@@ -781,8 +792,6 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
 
         if (CVARF(wpp_debug) & 1) {
-            match.origin = match.s_origin + (time - match.s_time) * self.velocity;
-            self.origin = self.s_origin + (time - match.s_time) * self.velocity;
             printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
                 vlen(match.origin - self.origin) / vlen(self.velocity));
