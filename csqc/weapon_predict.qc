@@ -13,10 +13,10 @@ void WP_UpdateViewModel(entity pweap_ent);
 static inline float sq(float x) { return x * x; }
 
 #define csqc_print(...) \
-    do { if (CVARF(wpp_debug) & 4) \
+    do { if (CVARF(wpp_debug) & 4) { \
         print("CSQC: ", __VA_ARGS__); \
-    else \
-        print(__VA_ARGS__); } while(0)
+        SetHadEffect(); \
+    } else { print(__VA_ARGS__); } } while(0)
 
 #define NUM_PING_SAMPLES 20
 
@@ -155,6 +155,16 @@ void WPP_UpdateEnable(float force) {
 
 static inline float IsEffectFrame() {
     return pengine.is_effectframe;
+}
+
+static void SetHadEffect() {
+    // At ultra-low latencies it's possible that we're only one frame in front
+    // of the server.  But this can mean that we get that frame back immediately
+    // (and our input applies to the one after it).
+    if (servercommandframe + 2 >= pengine.last_effectframe) {
+        pengine.last_effectframe++;
+        if (CVARF(wpp_debug) & 8) print("Effect bump!\n");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -637,6 +647,7 @@ inline float PP_PredictStartOffset() {
 static float PP_EPS = 0.05;
 
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+  SetHadEffect();
   entity proj = spawn();
 
   proj.s_time = time + PP_PredictStartOffset();
@@ -730,11 +741,8 @@ void WP_Attack() {
         }
     }
 
-    float af = pstate_pred.attack_finished;
-
     if (!in_anim)
         pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
-
 
 #if 0
     // If our latency is higher than forward projection, synchronize animation
