@@ -12,6 +12,12 @@ void WP_UpdateViewModel(entity pweap_ent);
 
 static inline float sq(float x) { return x * x; }
 
+#define csqc_print(...) \
+    do { if (CVARF(wpp_debug) & 4) \
+        print("CSQC: ", __VA_ARGS__); \
+    else \
+        print(__VA_ARGS__); } while(0)
+
 #define NUM_PING_SAMPLES 20
 
 struct {
@@ -90,6 +96,7 @@ static float CalcPredEnabled(float current_enable,
 #define ENABLE_CHECK_PERIOD 2
 static float next_wpp_enable_check;
 static float next_ping_update;
+void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
@@ -135,6 +142,9 @@ void WPP_UpdateEnable(float force) {
     }
     once = TRUE;
 
+    float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
+                       (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
+    setlocaluserinfo(player_localnum, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
     pengine.view_mask = MASK_PRED_VIEWMODEL |
                         (pp_new ? MASK_PRED_PROJECTILE : 0);
@@ -293,7 +303,7 @@ string WP_GetClip() {
 void WP_Reload() {
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    if (!wi->needs_reload)
+    if (!wi->needs_reload || WP_IsReloading())
         return;
 
     float clip_fired = *WP_ClipFired();
@@ -301,13 +311,13 @@ void WP_Reload() {
 
     string msg;
     if (!FO_CheckCanReload(wi, ammo_rem, clip_fired, msg)) {
-        if (pengine.is_effectframe)
-            print(msg);
+        if (IsEffectFrame())
+            csqc_print(msg);
         return;
     }
 
-    if (pengine.is_effectframe)
-        print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
+    if (IsEffectFrame())
+        csqc_print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
 
     pstate_pred.tfstate |= TFSTATE_RELOADING;
     float amt = min(ammo_rem, clip_fired);
@@ -321,8 +331,8 @@ void WP_CheckReloadFinished() {
     if (WP_IsReloading() && pstate_pred.client_time >= pstate_pred.reload_finished) {
         pstate_pred.tfstate &= ~TFSTATE_RELOADING;
 
-        if (pengine.is_effectframe)
-            print("Finished reloading\n");
+        if (IsEffectFrame())
+            csqc_print("Finished reloading\n");
     }
 }
 
@@ -445,8 +455,10 @@ void WP_Frame() {
         return;
     }
 
-    WP_CheckReloadFinished();
-    WP_Impulse();
+    if (WP_Enabled()) {
+        WP_CheckReloadFinished();
+        WP_Impulse();
+    }
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
