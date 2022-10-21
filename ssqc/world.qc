@@ -4,6 +4,8 @@ void () TerminateStaleServer;
 
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
+void InitFppProjectiles();
+
 void () main = {
     dprint("main function\n");
     precache_file("progs.dat");
@@ -371,6 +373,7 @@ void () worldspawn = {
 
     }
 
+    InitFppProjectiles();
     dimension_send = DMN_NOFLASH;
 
     settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);

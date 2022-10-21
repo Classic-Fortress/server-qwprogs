@@ -611,7 +611,6 @@ float max_armor_hwguy;
 float project_weapons;
 float project_weapons_max_latency;
 
-float ng_velocity;
 float ng_damage;
 float sng_damage;
 float superaxe;
@@ -653,6 +652,8 @@ float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
+
+float fo_projectiles;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;

@@ -558,7 +558,7 @@ void () W_FireFlame = {
     flame.velocity = aim(self, 10000);
     if (pyro_type == PYRO_FO)
     {
-        flame.velocity = flame.velocity * 600;
+        flame.velocity = flame.velocity * fpp_types[FPP_FLAMETHROWER].speed;
         flame.nextthink = time + 0.15;
     }
     else
@@ -570,7 +570,7 @@ void () W_FireFlame = {
     flame.touch = Flamer_stream_touch;
     flame.think = s_explode1;
     
-    FO_SetModel(flame, "progs/s_explod.spr");
+    FO_SetModel(flame, fpp_types[FPP_FLAMETHROWER].model);
     setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 
@@ -693,13 +693,11 @@ void () W_FireIncendiaryCannon = {
     }
     else
     {
-        newmis.velocity = newmis.velocity * 800;
+        newmis.velocity = newmis.velocity * fpp_types[FPP_INCENDIARY].speed;
         newmis.think = IncendiaryRadius_OZTF;
 
         if (pyro_type == PYRO_FO)
-        {
-            rktmdl = "progs/lavaball.mdl";
-        }
+            rktmdl = fpp_types[FPP_INCENDIARY].model;
     }
     
     newmis.angles = vectoangles(newmis.velocity);

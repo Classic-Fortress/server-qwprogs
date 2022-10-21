@@ -29,7 +29,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Weapons_Init();
     FO_PP_Init();       // Some of this is always used by custom projectiles.
-    FO_WP_Init(FALSE);  // Server packet enables.
     CsGrenTimer::Init();
 
     registercommand("fo_hud_editor");
@@ -118,7 +117,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
         setproperty(VF_DRAWENGINESBAR, 1);
 
-    addentities((intermission?0:wp_model_mask)|MASK_ENGINE);
+    addentities((intermission?0:WPP_ViewModelMask())|MASK_ENGINE);
 
     renderscene();
 
@@ -436,6 +435,7 @@ noref void CSQC_Input_Frame() {
         input_impulse = 0;
     }
 
+    WPP_UpdateEnable(FALSE);
     Sync_GameState();
 }
 

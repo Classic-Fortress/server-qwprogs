@@ -1,7 +1,146 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
-inline FO_WeapInfo* WP_CurrentWeapon() {
-    return FO_SlotWeapInfo(pstate_pred.playerclass, pstate_pred.current_slot);
+
+DEFCVAR_FLOAT(fo_wp_minping, 40);
+DEFCVAR_FLOAT(fo_weap_predict, -1);
+DEFCVAR_FLOAT(fo_proj_predict, -1);
+
+float default_proj_predict = TRUE;
+float default_weap_predict = FALSE;
+
+void WP_UpdateViewModel(entity pweap_ent);
+
+static inline float sq(float x) { return x * x; }
+
+#define NUM_PING_SAMPLES 20
+
+struct {
+    float s1, s2, count;
+} avg_ping;
+
+static void update_avg_ping() {
+    static float samples[NUM_PING_SAMPLES];
+
+    // We use a fairly low clamp here because:
+    //  a) We want to limit the effect of momentary total loss
+    //  b) We actually want high pings to have low effective variance and
+    //     trigger it on consistently.
+    float new = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 200);
+
+    float idx = avg_ping.count++ % NUM_PING_SAMPLES;
+    float old = samples[idx];
+    samples[idx] = new;
+
+    avg_ping.s1 += new - old;
+    avg_ping.s2 += sq(new) - sq(old);
+}
+
+static float get_avg_ping(float* mean, float* variance) {
+    float n = max(min(NUM_PING_SAMPLES, avg_ping.count), 2);
+    *mean = avg_ping.s1 / n;
+    *variance = (avg_ping.s2 - sq(avg_ping.s1)/n) / (n - 1);
+    return n;
+}
+
+// Order of preference:
+//   server disable, client enable/disable, server/ping enable
+static float CalcPredEnabled(float current_enable,
+                             float unspec_default /* meaning of '-1' */,
+                             float server_disable, float server_enable,
+                             float client_value, string* set_by) {
+    if (server_disable || client_value == 0) {
+        *set_by = server_disable ? "[server disable]" : "[cvar disable]";
+
+        return FALSE;
+    }
+    if (client_value == 1) {
+        *set_by = sprintf("[cvar enable]");
+        return TRUE;
+    }
+
+    if (CVARF(fo_wp_minping) < 0)
+        return current_enable;
+
+    float ping_enable, avg, variance;
+
+    get_avg_ping(&avg, &variance);
+    // We wait until 5ms over target (or 5 ms under target) when flipping, to
+    // avoid flip flopping when ping is right at target.
+    if (variance < sq(15))
+        ping_enable = avg > CVARF(fo_wp_minping) + (current_enable ? -5 : 5);
+    else
+        return current_enable;  // variance too high, don't change anything.
+
+
+    if (unspec_default || server_enable) {
+        if (ping_enable) {
+            *set_by = sprintf("[ping] (fo_wp_minping=%0.0f / avg=%0.0f var=%0.0f)",
+                    CVARF(fo_wp_minping), avg, variance);
+            return TRUE;
+        } else {
+            *set_by = "[lan mode <40]";
+            return FALSE;
+        }
+    }
+
+    *set_by = "[default]";
+    return FALSE;
+}
+
+#define ENABLE_CHECK_PERIOD 2
+static float next_wpp_enable_check;
+static float next_ping_update;
+
+void WPP_UpdateEnable(float force) {
+    if (time > next_ping_update) {
+        update_avg_ping();
+        next_ping_update = time + ENABLE_CHECK_PERIOD / NUM_PING_SAMPLES;
+
+        float avg, variance;
+        get_avg_ping(&avg, &variance);
+    }
+
+    if (avg_ping.count < NUM_PING_SAMPLES / 2)
+        return;  // Skip until we have a useful number of samples.
+
+    if (!force && time < next_wpp_enable_check)
+        return;
+    next_wpp_enable_check = time + ENABLE_CHECK_PERIOD;
+
+    // Tristate: 1 => force on, 0 => force off, -1 => up to minping/server
+    float wp_new = -1, pp_new = -1;
+    string wp_source, pp_source;
+
+    wp_new = CalcPredEnabled(pengine.wp_enabled, default_weap_predict,
+                         pstate_server.predict_flags & PF_WP_DISABLE,
+                         pstate_server.predict_flags & PF_WP_ENABLE,
+                         CVARF(fo_weap_predict), &wp_source);
+
+    pp_new = CalcPredEnabled(pengine.pp_enabled, default_proj_predict,
+                         pstate_server.predict_flags & PF_PP_DISABLE,
+                         pstate_server.predict_flags & PF_PP_ENABLE,
+                         CVARF(fo_proj_predict), &pp_source);
+
+    static float once;
+    if (wp_new != pengine.wp_enabled || !once) {
+        printf("FortressOne: Weapon prediction %s %s\n",
+                wp_new ? "enabled" : "disabled", wp_source);
+        pengine.wp_enabled = wp_new;
+    }
+
+    if (pp_new != pengine.pp_enabled || !once) {
+        printf("FortressOne: Projectile prediction %s %s\n",
+                pp_new ? "enabled" : "disabled", pp_source);
+        pengine.pp_enabled = pp_new;
+    }
+    once = TRUE;
+
+    // We always need to "render" the view model to trigger predraw compute.
+    pengine.view_mask = MASK_PRED_VIEWMODEL |
+                        (pp_new ? MASK_PRED_PROJECTILE : 0);
+
+    if (pengine.pweap_ent != __NULL__)
+        WP_UpdateViewModel(pengine.pweap_ent);
 }
 
 static inline float IsEffectFrame() {
@@ -12,6 +151,10 @@ static inline float IsEffectFrame() {
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
 float animate_s_time;
+
+inline FO_WeapInfo* WP_CurrentWeapon() {
+    return FO_SlotWeapInfo(pstate_pred.playerclass, pstate_pred.current_slot);
+}
 
 // Corrections for when we can recognize that we missed a packet.
 void WP_ServerUpdate() {
@@ -251,10 +394,6 @@ void WP_AnimateModel() {
     }
 }
 
-void WP_DoClientThink(void) {
-    WP_AnimateModel();
-}
-
 void WPP_Dump() {
     printf("cti p=%d s=%d wf=%d/%d\n",
             pstate_pred.client_thinkindex, pstate_server.client_thinkindex,
@@ -263,11 +402,15 @@ void WPP_Dump() {
             pstate_pred.client_time, pstate_server.client_time,
             pstate_pred.attack_finished, pstate_server.attack_finished,
             pstate_pred.reload_finished, pstate_server.reload_finished);
-    printf("clip=%d/%d ammo_used=%d tfstate=%d/%d\n",
-            pstate_pred.clip_fired[SlotIndex(pstate_pred.current_slot)],
-            pstate_server.clip_fired[SlotIndex(pstate_pred.current_slot)],
+
+    int slot_index = SlotIndex(pstate_pred.current_slot);
+    if (slot_index >= 0) {
+        printf("clip=%d/%d ammo_used=%d tfstate=%d/%d\n",
+            pstate_pred.clip_fired[slot_index],
+            pstate_server.clip_fired[slot_index],
             pstate_pred.ammo_used[WP_CurrentWeapon()->ammo_type],
             pstate_pred.tfstate, pstate_server.tfstate);
+    }
 }
 
 void WP_Attack();
@@ -380,8 +523,12 @@ DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
+// A small time based correction factor (2 frames) that results in more precise
+// overlap with where the engine projectiles were previously rendered.
+static float orig_proj_offset = 2/77.0;
+
 float PP_PredrawActive() {
-    float delta = time - self.s_time;
+    float delta = time - self.s_time + orig_proj_offset;
 
     self.origin = self.s_origin + (self.velocity * delta);
     setorigin(self, self.origin);
@@ -469,6 +616,7 @@ inline float PP_PredictStartOffset() {
 static float PP_EPS = 0.05;
 
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+  printf("PredProj Create\n");
   entity proj = spawn();
 
   proj.s_time = time + PP_PredictStartOffset();
@@ -476,7 +624,7 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   proj.endtime = time + pstate_pred.client_ping + PP_EPS + 2;
 
   proj.predraw = PP_PredrawPredicted;
-  proj.drawmask = MASK_ENGINE;
+  proj.drawmask = MASK_PRED_PROJECTILE;
 
   setsize(proj, [0,0,0], [0,0,0]);
   proj.p_time = 0;
@@ -518,7 +666,7 @@ void PP_NailFrame() {
 
     float idx = (pstate_pred.client_thinkindex + 1) % 2;
 
-    if (!IsEffectFrame())
+    if (!IsEffectFrame() || !PP_Enabled())
         return;
 
     if (wi->weapon == WEAP_NAILGUN)
@@ -548,7 +696,7 @@ void WP_Attack() {
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 1;
 
-    if (IsEffectFrame() && !in_anim) {
+    if (PP_Enabled() && IsEffectFrame() && !in_anim) {
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
                 PP_CreateProjectile(&fpp_types[FPP_ROCKET], v_forward * 8);
@@ -623,6 +771,7 @@ float PredProjectile_MatchProjectile() {
 
         if (CVARF(wpp_debug) & 1) {
             match.origin = match.s_origin + (time - match.s_time) * self.velocity;
+            self.origin = self.s_origin + (time - match.s_time) * self.velocity;
             printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
                 vlen(match.origin - self.origin) / vlen(self.velocity));
@@ -650,7 +799,101 @@ void InitProjPredEnt() {
 
     PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
 
+    // We still check this with projectile prediction as there could be in
+    // flight projectiles on the transition.  This is effectively a nop in the
+    // off case since the projectile list will just be empty.
     if (self.owner_entnum == player_localentnum)
        PredProjectile_MatchProjectile();
 
 }
+
+void WP_UpdateViewModel(entity pweap_ent) {
+    float pmodelindex, pframe;
+
+    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
+                                      pstate_pred.current_slot);
+
+    // Note, even if the predicted weapon model is not visible we might still be
+    // using it to generated predicted projectiles.  E.g. we need to keep
+    // PRED_VIEWMODEL in the render mask.
+    if (!WP_Enabled() || wi->predict_type == NO_PREDICT) {
+        // Fall back to engine.
+        pweap_ent.modelindex = 0;
+        pengine.view_mask |= MASK_VIEWMODEL;
+        return;
+    } else {
+        pengine.view_mask &= ~MASK_VIEWMODEL;
+    }
+
+    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING)) {
+        pweap_ent.modelindex = 0;
+        return;
+    }
+
+    pmodelindex = (wi->models)->modelindex;
+    pframe = pstate_pred.weaponframe;
+
+    if (pweap_ent.modelindex != pmodelindex) {
+        pweap_ent.frame = pframe;
+        pweap_ent.modelindex = pmodelindex;
+        pweap_ent.lerpfrac = 0;
+    } else if (self.frame != pframe) {
+        pweap_ent.frame2 = self.frame;
+        pweap_ent.frame = pframe;
+        pweap_ent.lerpfrac = 1;
+    }
+
+    pweap_ent.lerpfrac = max(0, pweap_ent.lerpfrac - frametime * 10);
+}
+
+float WP_ClientThink() {
+    // Can only fully disable if both weapon and projectile prediction are off.
+    if (!WP_Enabled() && !PP_Enabled())
+        return PREDRAW_NEXT;
+
+    pstate_pred = pstate_server;
+
+    int pframe = servercommandframe + 1;
+    int eframe = clientcommandframe;
+    for(; pframe <= eframe; pframe++) {
+        if (!getinputstate(pframe) || input_timelength <= 0)
+            break;
+
+        makevectors(input_angles);
+        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
+            pengine.is_effectframe = TRUE;
+            pengine.last_effectframe = pframe;
+        } else {
+            pengine.is_effectframe = FALSE;
+        }
+
+        pstate_pred.client_time += input_timelength;
+        if (input_impulse)
+          pstate_pred.impulse = input_impulse;
+
+        while (pstate_pred.client_nextthink &&
+            pstate_pred.client_time >= pstate_pred.client_nextthink) {
+            float held_client_time = pstate_pred.client_time;
+
+            pstate_pred.client_time = pstate_pred.client_nextthink;
+            pstate_pred.client_nextthink = 0;
+            WP_AnimateModel();
+            pstate_pred.client_time = held_client_time;
+        }
+
+        WP_Frame();
+    }
+
+    WP_UpdateViewModel(self);
+    return PREDRAW_AUTOADD;
+}
+
+void InitWeapPredEnt(entity pe) {
+    pe.predraw = WP_ClientThink;
+
+    self.drawmask = MASK_PRED_VIEWMODEL;
+    self.renderflags = RF_VIEWMODEL;
+
+    pengine.pweap_ent = self;
+}
+

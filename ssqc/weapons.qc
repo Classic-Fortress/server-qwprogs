@@ -1092,7 +1092,7 @@ void () W_FireRocket = {
 
     makevectors(self.v_angle);
     newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * PC_SOLDIER_ROCKET_SPEED;
+    newmis.velocity = newmis.velocity * fpp_types[FPP_ROCKET].speed;
     newmis.angles = vectoangles(newmis.velocity);
 
     newmis.touch = T_MissileTouch;
@@ -1103,7 +1103,7 @@ void () W_FireRocket = {
 
     newmis.weapon = DMSG_ROCKETL;
     newmis.classname = "proj_rocket";
-    FO_SetModel(newmis, "progs/missile.mdl");
+    FO_SetModel(newmis, fpp_types[FPP_ROCKET].model);
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
@@ -1349,11 +1349,11 @@ void (vector org, vector dir) launch_spike = {
     newmis.classname = "spike";
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
-    FO_SetModel(newmis, "progs/spike.mdl");
+    FO_SetModel(newmis, fpp_types[FPP_NAIL].model);
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
-    newmis.velocity = dir * ng_velocity;
+    newmis.velocity = dir * fpp_types[FPP_NAIL].speed;
 
     PredProj_Add(newmis);
     if (project_weapons) {
@@ -1374,7 +1374,7 @@ void () W_FireSuperSpikes = {
     LogEventAttack(self);
     newmis.touch = superspike_touch;
     newmis.weapon = DMSG_SNAILGUN;
-    FO_SetModel(newmis, "progs/s_spike.mdl");
+    FO_SetModel(newmis, fpp_types[FPP_SUPER_NAIL].model);
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     KickPlayer(-3, self);
 

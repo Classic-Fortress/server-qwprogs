@@ -608,6 +608,9 @@ void () DecodeLevelParms = {
         // maximum ping we'll have effect at
         antilag_settings.max_ping = CF_GetSetting("almp", "al_max_ping", "200");
 
+        // CSQC projectiles
+        fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
+
         // project projectile weapons by player ping
         project_weapons = CF_GetSetting("pw", "project_weapons", "off");
 
@@ -632,8 +635,6 @@ void () DecodeLevelParms = {
         }
 
         // fortress one
-        // use old 1000 unit velocity for nailguns
-        ng_velocity = CF_GetSetting("ngv", "ng_velocity", "1500");
         ng_damage = CF_GetSetting("ngd", "ng_damage", "9");
         sng_damage = CF_GetSetting("sngd", "sng_damage", "13");
 
@@ -868,7 +869,6 @@ void () DecodeLevelParms = {
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
-            ng_velocity = 1500;
             old_ng_rof = FALSE;
             superaxe = TRUE;
             supermedikit = TRUE;
@@ -946,7 +946,6 @@ void () DecodeLevelParms = {
             sniperreloadpercent = FALSE;
             buildstatus = FALSE;
             old_hp_armor = TRUE;
-            ng_velocity = 1000;
             superaxe = FALSE;
             supermedikit = FALSE;
             superspanner = FALSE;
@@ -983,7 +982,6 @@ void () DecodeLevelParms = {
             server_huetf = TRUE;
             impulse_queue = TRUE;
             flag_follow = FALSE;
-            ng_velocity = 1000;
             ng_damage = 18;
             sng_damage = 26;
             superaxe = FALSE;
@@ -2935,8 +2933,8 @@ void () PlayerPostThink = {
     FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
-    if (WeaponPred_Active(self))
-        WeaponPred_Update(self);
+
+    WeaponPred_Update(self);
 
     if (self.view_ofs == '0 0 0') {
         return;
