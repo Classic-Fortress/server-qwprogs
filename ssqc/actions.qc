@@ -160,13 +160,13 @@ void () TeamFortress_Discard_DropAmmo = {
 void () TeamFortress_SaveMe = {
     local entity te, tl;
 
-    if (self.client_time > self.next_saveme_sound) {
+    if (time > self.next_saveme_sound) {
         if (random() < 0.8)
             FO_Sound(self, CHAN_WEAPON, "speech/saveme1.wav", 1, ATTN_NORM);
         else
             FO_Sound(self, CHAN_WEAPON, "speech/saveme2.wav", 1, ATTN_NORM);
 
-        self.next_saveme_sound = self.client_time + 4;
+        self.next_saveme_sound = time + 4;
     }
     te = find(world, classname, "player");
     while (te) {
@@ -258,7 +258,7 @@ void (entity pe_player) FO_Spectator_Identify = {
         }
 
        // refresh status bar
-        pe_player.ident_time = self.client_time + 0.5;
+        pe_player.ident_time = time + 0.5;
         if(pe_player.ident_string != s_id_string) {
             pe_player.ident_string = s_id_string;
             //if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
@@ -452,7 +452,7 @@ void (entity pe_player, float f_type) CF_Identify = {
             s_id_string = strcat(s_id_string, s_class);
         }
 
-        pe_player.ident_time = self.client_time + 0.5;
+        pe_player.ident_time = time + 0.5;
 
         // don't update memory when the id string is the same
         if (pe_player.ident_string == s_id_string) {
