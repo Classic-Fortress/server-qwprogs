@@ -31,6 +31,11 @@ enumflags {
 #define PF_PP_DISABLE   8
 #define PF_ED_MASK (PF_WP_ENABLE | PF_WP_DISABLE | PF_PP_ENABLE | PF_PP_DISABLE)
 
+enumflags {
+    CSQC_WEAP_PRED,
+    CSQC_PROJ_PRED,
+};
+
 struct predict_tf_state {
     int playerclass;
     int predict_flags;
@@ -224,6 +229,13 @@ void WeaponPred_Update(entity player) {
 #undef M2
 #undef M3
 #undef M4
+
+void sprint_pred(entity client, float msglevel, string s, optional string s2,
+                optional string s3, optional string s4, optional string s5) {
+    if (infokeyf(client, "fo_wpp_status") & CSQC_WEAP_PRED)
+        return;  // Message generated client-side.
+    sprint(client, msglevel, s, s2, s3, s4, s5);
+}
 #endif
 
 #ifdef SSQC

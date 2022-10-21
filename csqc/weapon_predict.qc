@@ -12,6 +12,12 @@ void WP_UpdateViewModel(entity pweap_ent);
 
 static inline float sq(float x) { return x * x; }
 
+#define csqc_print(...) \
+    do { if (CVARF(wpp_debug) & 4) { \
+        print("CSQC: ", __VA_ARGS__); \
+        SetHadEffect(); \
+    } else { print(__VA_ARGS__); } } while(0)
+
 #define NUM_PING_SAMPLES 20
 
 struct {
@@ -90,6 +96,7 @@ static float CalcPredEnabled(float current_enable,
 #define ENABLE_CHECK_PERIOD 2
 static float next_wpp_enable_check;
 static float next_ping_update;
+void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
@@ -135,6 +142,9 @@ void WPP_UpdateEnable(float force) {
     }
     once = TRUE;
 
+    float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
+                       (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
+    setlocaluserinfo(player_localnum, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
     pengine.view_mask = MASK_PRED_VIEWMODEL |
                         (pp_new ? MASK_PRED_PROJECTILE : 0);
@@ -145,6 +155,16 @@ void WPP_UpdateEnable(float force) {
 
 static inline float IsEffectFrame() {
     return pengine.is_effectframe;
+}
+
+static void SetHadEffect() {
+    // At ultra-low latencies it's possible that we're only one frame in front
+    // of the server.  But this can mean that we get that frame back immediately
+    // (and our input applies to the one after it).
+    if (servercommandframe + 2 >= pengine.last_effectframe) {
+        pengine.last_effectframe++;
+        if (CVARF(wpp_debug) & 8) print("Effect bump!\n");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +313,7 @@ string WP_GetClip() {
 void WP_Reload() {
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    if (!wi->needs_reload)
+    if (!wi->needs_reload || WP_IsReloading())
         return;
 
     float clip_fired = *WP_ClipFired();
@@ -301,13 +321,13 @@ void WP_Reload() {
 
     string msg;
     if (!FO_CheckCanReload(wi, ammo_rem, clip_fired, msg)) {
-        if (pengine.is_effectframe)
-            print(msg);
+        if (IsEffectFrame())
+            csqc_print(msg);
         return;
     }
 
-    if (pengine.is_effectframe)
-        print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
+    if (IsEffectFrame())
+        csqc_print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
 
     pstate_pred.tfstate |= TFSTATE_RELOADING;
     float amt = min(ammo_rem, clip_fired);
@@ -321,8 +341,8 @@ void WP_CheckReloadFinished() {
     if (WP_IsReloading() && pstate_pred.client_time >= pstate_pred.reload_finished) {
         pstate_pred.tfstate &= ~TFSTATE_RELOADING;
 
-        if (pengine.is_effectframe)
-            print("Finished reloading\n");
+        if (IsEffectFrame())
+            csqc_print("Finished reloading\n");
     }
 }
 
@@ -334,16 +354,25 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
     return ammo > wi->ammo_per_shot;
 }
 
-float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+float WP_ReloadIfNeeded(FO_WeapInfo* wi) {
     if (!WP_CheckAmmo(wi) || wi->needs_reload) {
         if (*WP_ClipFired() >= wi->clip_size) {
             WP_Reload();
-            return FALSE;
+            return TRUE;
         }
     }
 
+    return FALSE;
+}
+
+float WP_ConsumeAmmo(FO_WeapInfo* wi) {
+    if (WP_ReloadIfNeeded(wi))
+        return FALSE;
+
     pstate_pred.ammo_used[wi->ammo_type] += wi->ammo_per_shot;
     *WP_ClipFired() += wi->ammo_per_shot;
+
+    WP_ReloadIfNeeded(wi);
 
     return TRUE;
 }
@@ -445,8 +474,10 @@ void WP_Frame() {
         return;
     }
 
-    WP_CheckReloadFinished();
-    WP_Impulse();
+    if (WP_Enabled()) {
+        WP_CheckReloadFinished();
+        WP_Impulse();
+    }
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
@@ -616,6 +647,7 @@ inline float PP_PredictStartOffset() {
 static float PP_EPS = 0.05;
 
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+  SetHadEffect();
   entity proj = spawn();
 
   proj.s_time = time + PP_PredictStartOffset();
@@ -709,11 +741,8 @@ void WP_Attack() {
         }
     }
 
-    float af = pstate_pred.attack_finished;
-
     if (!in_anim)
         pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
-
 
 #if 0
     // If our latency is higher than forward projection, synchronize animation
@@ -739,6 +768,8 @@ void WP_Attack() {
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
     float best = 0.2;
+
+    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.modelindex != self.modelindex)
             continue;
@@ -747,13 +778,13 @@ float PredProjectile_MatchProjectile() {
         if (d < best) {
             best = d;
             match = proj;
-        }
 
-        if (vlen(proj.s_origin - self.s_origin) < 32) {
-            match = proj;
-            break;
+            proj.origin = proj.s_origin + (time - proj.s_time) * self.velocity;
+            if (vlen(proj.origin - self.origin) < 32) {
+                match = proj;
+                break;
+            }
         }
-
     }
 
     if (match) {
@@ -769,8 +800,6 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
 
         if (CVARF(wpp_debug) & 1) {
-            match.origin = match.s_origin + (time - match.s_time) * self.velocity;
-            self.origin = self.s_origin + (time - match.s_time) * self.velocity;
             printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
                 vlen(match.origin - self.origin) / vlen(self.velocity));

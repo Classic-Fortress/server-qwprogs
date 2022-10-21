@@ -376,6 +376,9 @@ void (float att_delay) Attack_Finished;
 // Hack until we fix Status_Refresh() to not be awful.
 .float last_still_loading;
 void W_UpdateCurrentWeapon(entity pl);
+void sprint_pred(entity client, float msglevel, string s, optional string s2,
+                optional string s3, optional string s4, optional string s5);
+
 
 void FO_ReloadFrame() {
     if (self.tfstate & TFSTATE_RELOADING == 0)
@@ -390,7 +393,7 @@ void FO_ReloadFrame() {
         W_UpdateCurrentWeapon(self);
         self.last_still_loading = 0;
         Status_Refresh(self);
-        sprint(self, PRINT_HIGH, "Finished reloading\n");
+        sprint_pred(self, PRINT_HIGH, "Finished reloading\n");
 
         return;
     }
@@ -436,11 +439,11 @@ void FO_ReloadSlot(Slot slot, float force) {
 
     string msg;
     if (!FO_CheckCanReload(wi, *ws->ammo_remaining, *ws->clip_fired, msg)) {
-        sprint(self, PRINT_HIGH, msg);
+        sprint_pred(self, PRINT_HIGH, msg);
         return;
     }
 
-    sprint(self, PRINT_HIGH,
+    sprint_pred(self, PRINT_HIGH,
            strcat("Reloading ", FO_GetWeapName(ws->weapon), "...\n"));
 
     Attack_Finished(wi->attack_time);  // Carried.. but not sure it's necessary.
