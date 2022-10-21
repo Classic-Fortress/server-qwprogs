@@ -78,7 +78,7 @@ void () LaserBolt_Touch = {
     dremove(self);
 };
 
-void () W_FireLaser = {
+void () W_FireRailgun = {
     local vector vec, org;
 
     self.ammo_nails = self.ammo_nails - 1;
@@ -108,6 +108,7 @@ void () W_FireLaser = {
     newmis.touch = LaserBolt_Touch;
     newmis.classname = "railslug";
 
+    PredProj_Add(newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }

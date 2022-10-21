@@ -1092,6 +1092,7 @@ void () W_FireTranq = {
     FO_SetModel(newmis, "progs/spike.mdl");
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    PredProj_Add(newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
