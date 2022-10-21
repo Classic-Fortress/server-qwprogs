@@ -523,8 +523,12 @@ DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
+// A small time based correction factor (2 frames) that results in more precise
+// overlap with where the engine projectiles were previously rendered.
+static float orig_proj_offset = 2/77.0;
+
 float PP_PredrawActive() {
-    float delta = time - self.s_time;
+    float delta = time - self.s_time + orig_proj_offset;
 
     self.origin = self.s_origin + (self.velocity * delta);
     setorigin(self, self.origin);
@@ -767,6 +771,7 @@ float PredProjectile_MatchProjectile() {
 
         if (CVARF(wpp_debug) & 1) {
             match.origin = match.s_origin + (time - match.s_time) * self.velocity;
+            self.origin = self.s_origin + (time - match.s_time) * self.velocity;
             printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
                 vlen(match.origin - self.origin) / vlen(self.velocity));

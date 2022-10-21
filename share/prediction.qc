@@ -98,30 +98,6 @@ void InitFppProjectiles() {
 
 #ifdef SSQC
 
-struct weaponpred_settings_t {
-    float global_enable;
-    float global_disable;
-    float new_projectiles;
-} weaponpred_settings;
-
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
-void WeaponPred_InitOnce() {
-    static float init_once;
-    if (init_once)
-        return;
-    init_once = TRUE;
-
-    // Regular init is too late for this.
-    weaponpred_settings.global_enable =
-        CF_GetSetting("wpge", "weapon_pred_global_enable", "off");
-    weaponpred_settings.global_disable =
-        CF_GetSetting("wpgd", "weapon_pred_global_disable", "off");
-    weaponpred_settings.new_projectiles =
-        CF_GetSetting("wpnp", "weapon_pred_new_projectiles", "off");
-
-    InitFppProjectiles();
-}
-
 .predict_tf_state predict_state;
 .entity predict_entity;
 
@@ -395,12 +371,10 @@ void EntUpdate_Projectile(float isnew) {
 
 #ifdef SSQC
 void WeaponPred_InitPlayer(entity player) {
-    WeaponPred_InitOnce();
-
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
     sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
-            weaponpred_settings.new_projectiles ? "enabled\n" : "disabled\n");
+            fo_projectiles ? "enabled\n" : "disabled\n");
 
     entity pe = spawn();
     pe.owner = player;
@@ -433,11 +407,11 @@ void WeaponPred_DoServerClientThink() {
 void PredProj_Add(entity mis) {
     mis.dimension_seen = DMN_NOFLASH;
 
-    if (!weaponpred_settings.new_projectiles)
+    if (!fo_projectiles)
         return;
 
     mis.s_origin = mis.origin;
     mis.SendEntity = PP_SendEntity;
-    mis.SendFlags = 255;
+    mis.SendFlags = 0xff;
 }
 #endif
