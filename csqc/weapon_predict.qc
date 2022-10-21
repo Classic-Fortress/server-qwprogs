@@ -738,6 +738,12 @@ void WP_Attack() {
             case WEAP_FLAMETHROWER:
                 PP_CreateProjectile(&fpp_types[FPP_FLAMETHROWER], v_forward * 16);
                 break;
+            case WEAP_TRANQ:
+                PP_CreateProjectile(&fpp_types[FPP_TRANQ], v_forward * 8);
+                break;
+            case WEAP_RAILGUN:
+                PP_CreateProjectile(&fpp_types[FPP_RAILGUN], '0 0 0');
+                break;
         }
     }
 

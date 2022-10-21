@@ -125,8 +125,8 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_ASSAULT_CANNON,   NO_PREDICT, AMMO_SHELLS, -9, 1,  0.2,  4 },
     { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
-    { WEAP_TRANQ,            NO_PREDICT, AMMO_SHELLS,  0, 1,  1.5,  0 },
-    { WEAP_RAILGUN,          PRED_MODEL, AMMO_NAILS,   0, 1,  0.4,  0 },
+    { WEAP_TRANQ,             PRED_PROJ, AMMO_SHELLS,  0, 1,  1.5,  0 },
+    { WEAP_RAILGUN,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.4,  0 },
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {

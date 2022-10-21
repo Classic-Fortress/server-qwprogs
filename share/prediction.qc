@@ -70,6 +70,8 @@ enum {
     FPP_NAIL,
     FPP_SUPER_NAIL,
     FPP_FLAMETHROWER,
+    FPP_TRANQ,
+    FPP_RAILGUN,
 };
 
 struct fo_projectile {
@@ -89,6 +91,8 @@ fo_projectile fpp_types[] = {
     { FPP_NAIL,              1500, "progs/spike.mdl", "tr_spike" },
     { FPP_SUPER_NAIL,        1500, "progs/s_spike.mdl", "tr_spike" },
     { FPP_FLAMETHROWER,       600, "progs/s_explod.spr", "explodesprite" },
+    { FPP_TRANQ,       PC_SPY_TRANQSPEED, "progs/spike.mdl", "tr_spike" },
+    { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "progs/e_spike1.mdl", "te_railtrail" },
 };
 
 void InitFppProjectiles() {
@@ -383,6 +387,11 @@ void EntUpdate_Projectile(float isnew) {
 
 #ifdef SSQC
 void WeaponPred_InitPlayer(entity player) {
+    if (!infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
+        bprint(PRINT_HIGH, player.netname, " is using a legacy non-CSQC client.\n");
+        return;
+    }
+
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
     sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",

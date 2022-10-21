@@ -104,7 +104,7 @@ float (float weap) W_OldGetSlot;
 void () W_FireFlame;
 void () W_FireIncendiaryCannon;
 void () W_FireTranq;
-void () W_FireLaser;
+void () W_FireRailgun;
 
 void () HallucinationTimer;
 void () TranquiliserTimer;
@@ -1756,7 +1756,7 @@ void () W_Attack = {
     } else if (ws.weapon == WEAP_RAILGUN) {
         FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
-        W_FireLaser();
+        W_FireRailgun();
     }
 
     if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
