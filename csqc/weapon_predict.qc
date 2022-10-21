@@ -616,7 +616,6 @@ inline float PP_PredictStartOffset() {
 static float PP_EPS = 0.05;
 
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
-  printf("PredProj Create\n");
   entity proj = spawn();
 
   proj.s_time = time + PP_PredictStartOffset();
