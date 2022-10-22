@@ -1,12 +1,12 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 
-DEFCVAR_FLOAT(fo_wp_minping, 40);
+DEFCVAR_FLOAT(fo_wp_minping, 50);
 DEFCVAR_FLOAT(fo_weap_predict, -1);
 DEFCVAR_FLOAT(fo_proj_predict, -1);
 
 float default_proj_predict = TRUE;
-float default_weap_predict = FALSE;
+float default_weap_predict = TRUE;
 
 void WP_UpdateViewModel(entity pweap_ent);
 
