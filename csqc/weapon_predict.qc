@@ -144,7 +144,7 @@ void WPP_UpdateEnable(float force) {
 
     float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
                        (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
-    setlocaluserinfo(player_localnum, "fo_wpp_status", ftos(wpp_status));
+    setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
     pengine.view_mask = MASK_PRED_VIEWMODEL |
                         (pp_new ? MASK_PRED_PROJECTILE : 0);
