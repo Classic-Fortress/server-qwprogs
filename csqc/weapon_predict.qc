@@ -1,12 +1,11 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 
+DEFCVAR_FLOAT(fo_wpp_beta, 0);
 DEFCVAR_FLOAT(fo_wp_minping, 50);
 DEFCVAR_FLOAT(fo_weap_predict, -1);
 DEFCVAR_FLOAT(fo_proj_predict, -1);
 
-float default_proj_predict = TRUE;
-float default_weap_predict = TRUE;
 
 void WP_UpdateViewModel(entity pweap_ent);
 
@@ -118,12 +117,12 @@ void WPP_UpdateEnable(float force) {
     float wp_new = -1, pp_new = -1;
     string wp_source, pp_source;
 
-    wp_new = CalcPredEnabled(pengine.wp_enabled, default_weap_predict,
+    wp_new = CalcPredEnabled(pengine.wp_enabled, CVARF(fo_wpp_beta),
                          pstate_server.predict_flags & PF_WP_DISABLE,
                          pstate_server.predict_flags & PF_WP_ENABLE,
                          CVARF(fo_weap_predict), &wp_source);
 
-    pp_new = CalcPredEnabled(pengine.pp_enabled, default_proj_predict,
+    pp_new = CalcPredEnabled(pengine.pp_enabled, CVARF(fo_wpp_beta),
                          pstate_server.predict_flags & PF_PP_DISABLE,
                          pstate_server.predict_flags & PF_PP_ENABLE,
                          CVARF(fo_proj_predict), &pp_source);
