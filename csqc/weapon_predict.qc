@@ -840,6 +840,8 @@ void InitProjPredEnt() {
 
 }
 
+DEFCVAR_FLOAT(r_drawviewmodel, 1);
+
 void WP_UpdateViewModel(entity pweap_ent) {
     float pmodelindex, pframe;
 
@@ -858,11 +860,13 @@ void WP_UpdateViewModel(entity pweap_ent) {
         pengine.view_mask &= ~MASK_VIEWMODEL;
     }
 
-    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING)) {
+    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING) ||
+        CVARF(r_drawviewmodel) == 0) {
         pweap_ent.modelindex = 0;
         return;
     }
 
+    pweap_ent.alpha = CVARF(r_drawviewmodel);
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
 
