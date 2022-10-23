@@ -374,7 +374,6 @@ void () worldspawn = {
 
     }
 
-    InitFppProjectiles();
     dimension_send = DMN_NOFLASH;
 
     settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);

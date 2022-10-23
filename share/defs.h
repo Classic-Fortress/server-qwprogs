@@ -249,6 +249,7 @@ enumflags {
     TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)
+    TFSTATE_FLASHED,
     TFSTATE_QUICKSLOT,     // QUICKSTOP should change to last weapon.
     TFSTATE_INFECTED,      // set when player is infected by the bioweapon
     TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)

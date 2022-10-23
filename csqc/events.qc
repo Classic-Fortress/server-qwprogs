@@ -524,12 +524,16 @@ void ParseSBAR()
     }
 }
 
-float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    // Filter out sounds we may have generated locally, unless we're just
-    // pretending to be that entity.
-    if (entnum != player_localentnum || is_spectator || is_observer)
+float(float ent_num, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
+    // Sound sent to our predicted weapon is expected to have been client-side.
+    if (ent_num == pengine.pweap_ent.entnum)
+        return 1;
+
+    // Sounds from remote entities are not local and we should always play.
+    if (ent_num != player_localentnum || is_spectator || is_observer)
         return 0;
 
+    // Sounds below this line are conditionally filtered.
     switch(soundname) {
         case "player/plyrjmp8.wav":
         case "player/land.wav":

@@ -205,13 +205,13 @@ void FO_FlashTimer()
 
 void SetFlashDimension(entity te)
 {
-    FO_FlashDimension = ((FO_FlashDimension + 1) == 8) ? DMN_FLASH : FO_FlashDimension + 1;
+    FO_FlashDimension = ((FO_FlashDimension - DMN_FLASH + 1) % 7) + DMN_FLASH;
     
     float playerdimension = 1<<FO_FlashDimension;
 
-    // i hate bitflags and i'm bad so this is probably wrong
-    te.dimension_see = DMN_FLASH | playerdimension;
+    te.dimension_see =  playerdimension | DMN_FLASH;
     te.dimension_seen = playerdimension | DMN_NOFLASH;
+    te.tfstate |= TFSTATE_FLASHED;
 }
 
 void FO_FlashExplode()

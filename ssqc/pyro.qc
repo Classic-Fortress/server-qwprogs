@@ -548,7 +548,7 @@ void () W_FireFlame = {
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
-    FO_Sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_FLAMETHROWER);
     flame = spawn();
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
@@ -677,7 +677,7 @@ void () W_FireIncendiaryCannon = {
         return;
     }
     self.ammo_rockets = self.ammo_rockets - 3;
-    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_RL);
     KickPlayer(-3, self);
     newmis = spawn();
     newmis.owner = self;

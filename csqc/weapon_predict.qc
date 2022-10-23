@@ -172,6 +172,20 @@ static void SetHadEffect() {
 ////////////////////////////////////////////////////////////////////////////////
 float animate_s_time;
 
+static entity pred_sound_entity;
+
+void Pred_Sound(int snd) {
+    if (pstate_pred.tfstate & TFSTATE_FLASHED)
+        return;
+
+    setorigin(pred_sound_entity, pmove_org);
+    sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, 1, ATTN_NORM);
+}
+
+void PredProj_Sound(int proj_type) {
+    Pred_Sound(fpp_types[proj_type].snd);
+}
+
 inline FO_WeapInfo* WP_CurrentWeapon() {
     return FO_SlotWeapInfo(pstate_pred.playerclass, pstate_pred.current_slot);
 }
@@ -530,6 +544,9 @@ float nail_trail;
 static float corr_s;  // Auto-tuning correction factor.
 
 void FO_PP_Init() {
+    // Entity we'll attach locally generated sound to.
+    pred_sound_entity = spawn();
+
     InitFppProjectiles();
 
     for (float i = 0; i < trail_table.length; i++) {
@@ -662,7 +679,11 @@ static float PP_EPS = 0.05;
 
 DEFCVAR_FLOAT(cl_r2g, 0);
 
-void PP_CreateProjectile(fo_projectile* desc, vector offset) {
+void PP_CreateProjectile(int proj_type, vector offset) {
+  fo_projectile* desc = &fpp_types[proj_type];
+
+  PredProj_Sound(proj_type);
+
   SetHadEffect();
   entity proj = spawn();
 
@@ -729,9 +750,9 @@ void PP_NailFrame() {
         return;
 
     if (wi->weapon == WEAP_NAILGUN)
-        PP_CreateProjectile(&fpp_types[FPP_NAIL], v_right * (idx ? 4: - 4));
+        PP_CreateProjectile(FPP_NAIL, v_right * (idx ? 4: - 4));
     else
-        PP_CreateProjectile(&fpp_types[FPP_SUPER_NAIL], '0 0 0');
+        PP_CreateProjectile(FPP_SUPER_NAIL, '0 0 0');
 }
 
 void WP_Attack() {
@@ -758,20 +779,30 @@ void WP_Attack() {
     if (PP_Enabled() && IsEffectFrame() && !in_anim) {
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
-                PP_CreateProjectile(&fpp_types[FPP_ROCKET], v_forward * 8);
+                PP_CreateProjectile(FPP_ROCKET, v_forward * 8);
                 break;
             case WEAP_INCENDIARY:
-                PP_CreateProjectile(&fpp_types[FPP_INCENDIARY], v_forward * 8);
+                PP_CreateProjectile(FPP_INCENDIARY, v_forward * 8);
                 break;
             case WEAP_FLAMETHROWER:
-                PP_CreateProjectile(&fpp_types[FPP_FLAMETHROWER], v_forward * 16);
+                PP_CreateProjectile(FPP_FLAMETHROWER, v_forward * 16);
                 break;
             case WEAP_TRANQ:
-                PP_CreateProjectile(&fpp_types[FPP_TRANQ], v_forward * 8);
+                PP_CreateProjectile(FPP_TRANQ, v_forward * 8);
                 break;
             case WEAP_RAILGUN:
-                PP_CreateProjectile(&fpp_types[FPP_RAILGUN], '0 0 0');
+                PP_CreateProjectile(FPP_RAILGUN, '0 0 0');
                 break;
+            case WEAP_GRENADE_LAUNCHER:
+            case WEAP_PIPE_LAUNCHER:
+                Pred_Sound(SND_GREN); break;
+            case WEAP_AXE:
+            case WEAP_KNIFE:
+            case WEAP_SPANNER:
+            case WEAP_MEDIKIT:
+                Pred_Sound(SND_AXE); break;
+            case WEAP_SHOTGUN: Pred_Sound(SND_SG); break;
+            case WEAP_SUPER_SHOTGUN: Pred_Sound(SND_SSG); break;
         }
     }
 
@@ -847,6 +878,14 @@ float PredProjectile_MatchProjectile() {
     return FALSE;
 }
 
+static int Proj_FindFPP(entity ent) {
+    for (float i = 0; i < fpp_types.length; i++) {
+        if (fpp_types[i].modelindex == ent.server_modelindex)
+            return i;
+    }
+    return -1;
+}
+
 // Called on `self`.
 void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
@@ -866,8 +905,11 @@ void InitProjPredEnt() {
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
-    if (self.owner_entnum == player_localentnum)
-       PredProjectile_MatchProjectile();
+    if (self.owner_entnum == player_localentnum &&
+        !PredProjectile_MatchProjectile()) {
+        // Missing projectile implies we missed the local sound, patch it up.
+        PredProj_Sound(Proj_FindFPP(self));
+    }
 }
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
@@ -890,8 +932,8 @@ void WP_UpdateViewModel(entity pweap_ent) {
         pengine.view_mask &= ~MASK_VIEWMODEL;
     }
 
-    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING) ||
-        CVARF(r_drawviewmodel) == 0) {
+    static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_RELOADING | TFSTATE_FLASHED;
+    if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
         pweap_ent.modelindex = 0;
         return;
     }
