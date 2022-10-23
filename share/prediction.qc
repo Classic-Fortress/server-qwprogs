@@ -66,6 +66,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 enum {
     FPP_ROCKET,
+    FPP_GRENADE,
     FPP_INCENDIARY,
     FPP_NAIL,
     FPP_SUPER_NAIL,
@@ -87,6 +88,7 @@ struct fo_projectile {
 
 fo_projectile fpp_types[] = {
     { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" },
+    { FPP_GRENADE,       600, "progs/grenade.mdl", "t_grenade" },
     { FPP_INCENDIARY,         800, "progs/lavaball.mdl", "t_lavaball" },
     { FPP_NAIL,              1500, "progs/spike.mdl", "tr_spike" },
     { FPP_SUPER_NAIL,        1500, "progs/s_spike.mdl", "tr_spike" },

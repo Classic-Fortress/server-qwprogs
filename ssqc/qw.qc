@@ -57,7 +57,6 @@ float remote_client_time(float ct_type = CT_NOEXTERNALEFFECT);
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
 .float is_concussed;            // TRUE for a player who is affected by concussion grenade
-.float qf_swap_last_slot;       // TRUE if +slotX was initiated from another slot
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class

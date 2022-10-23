@@ -2581,8 +2581,13 @@ void () W_WeaponFrame = {
     // Let's see if we can get away with just treating this as last weapon;
     // there were already so many edge cases in the old code such as swapping on
     // an empty weapon.
-    if (self.impulse == TF_QUICKSTOP)
-        self.impulse = self.qf_swap_last_slot ? TF_WEAPLAST : 0;
+    if (self.impulse == TF_QUICKSTOP) {
+        if (self.tfstate & TFSTATE_QUICKSLOT)
+            self.impulse = TF_WEAPLAST;
+        else
+            self.impulse = 0;
+        self.tfstate &= ~TFSTATE_QUICKSLOT;
+    }
 
     float can_change_weapon = WeaponReady();
 
@@ -2598,9 +2603,9 @@ void () W_WeaponFrame = {
         Slot slot = MakeSlot(input);
 
         if (IsSameSlot(slot, self.current_slot)) {
-            self.qf_swap_last_slot = FALSE;
+            self.tfstate &= ~TFSTATE_QUICKSLOT;
         } else {
-            self.qf_swap_last_slot = TRUE;
+            self.tfstate |= TFSTATE_QUICKSLOT;
             W_ChangeWeaponSlot(slot);
         }
         self.impulse = 0;

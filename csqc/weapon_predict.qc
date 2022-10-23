@@ -1,11 +1,12 @@
-DEFCVAR_FLOAT(wpp_debug, 0);
+.float server_modelindex;  // Track the server modelindex for matching, since it
+                           // can be overridden client-side.
 
+DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
 DEFCVAR_FLOAT(fo_wp_minping, 50);
 DEFCVAR_FLOAT(fo_weap_predict, -1);
 DEFCVAR_FLOAT(fo_proj_predict, -1);
-
 
 void WP_UpdateViewModel(entity pweap_ent);
 
@@ -209,15 +210,26 @@ void WP_Impulse() {
     // Note: We might have no impulse, but a queued slot here.
 
     float match = TRUE;
+    float quick_swap = FALSE;
     switch (pstate_pred.impulse) {
         case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
             pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
+            quick_swap = TRUE;
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
             Slot slot = InputToSlot(pstate_pred.impulse);
-            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot))
+            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot)) {
+                if (quick_swap)
+                    pstate_pred.tfstate |= TFSTATE_QUICKSLOT;
                 pstate_pred.queue_slot = slot;
+            }
             break;
         }
+        case TF_QUICKSTOP:
+            if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0) {
+                pstate_pred.impulse = 0;
+                break;
+            }
+            pstate_pred.tfstate &= ~TFSTATE_QUICKSLOT;  // Intentional fall-through.
         case TF_WEAPLAST:
             pstate_pred.queue_slot = pstate_pred.last_slot; break;
         default:
@@ -604,8 +616,10 @@ DEFCVAR_FLOAT(r_grenadetrail, 1);
 
 int PP_FindTrail(entity e)
 {
-    if (e.modelflags & (MF_GRENADE | MF_ROCKET)) {
-        float is_grenade = !!(e.modelflags & MF_GRENADE);
+    float is_rocket = e.server_modelindex == fpp_types[FPP_ROCKET].modelindex;
+    float is_grenade = e.server_modelindex == fpp_types[FPP_GRENADE].modelindex;
+
+    if (is_rocket || is_grenade) {
         float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
 
         if (idx >= 0 && idx < trail_table.length)
@@ -614,7 +628,8 @@ int PP_FindTrail(entity e)
 
     for (float i = 0; i < fpp_types.length; i++) {
         fo_projectile* desc = &fpp_types[i];
-        if (e.modelindex == desc->modelindex) return desc->trailindex;
+        if (e.server_modelindex == desc->modelindex)
+            return desc->trailindex;
     }
 
     return 0;
@@ -645,9 +660,20 @@ inline float PP_PredictStartOffset() {
 
 static float PP_EPS = 0.05;
 
-entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
+DEFCVAR_FLOAT(cl_r2g, 0);
+
+void PP_CreateProjectile(fo_projectile* desc, vector offset) {
   SetHadEffect();
   entity proj = spawn();
+
+  // Packet loss doesnt guarantee the server will actually register quickslot
+  // since it's a separate command from the attack.  We can improve this in the
+  // future via either a button or just combining them on an impulse.  But for
+  // now just dont create the projectile, it's usually swapping to a hitscan
+  // weapon anyway.
+  if (pstate_pred.tfstate & TFSTATE_QUICKSLOT &&
+      !(pstate_server.tfstate & TFSTATE_QUICKSLOT))
+      return;
 
   proj.s_time = time + PP_PredictStartOffset();
   proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
@@ -666,7 +692,12 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 
-  setmodelindex(proj, desc->modelindex);
+  proj.server_modelindex = desc->modelindex;
+
+  float modelindex = desc->modelindex;
+  if (modelindex == fpp_types[FPP_ROCKET].modelindex && CVARF(cl_r2g) == 1)
+      modelindex = fpp_types[FPP_GRENADE].modelindex;
+  setmodelindex(proj, modelindex);
 
   PP_InitTrail(proj);
 
@@ -674,8 +705,6 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   if (predicted_projectiles)
     predicted_projectiles.pred_prev = proj;
   predicted_projectiles = proj;
-
-  return proj;
 }
 
 void PP_AssCanFrame() {
@@ -776,7 +805,7 @@ float PredProjectile_MatchProjectile() {
 
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
-        if (proj.modelindex != self.modelindex)
+        if (proj.server_modelindex != self.server_modelindex)
             continue;
 
         float d = fabs(proj.s_time - self.s_time);
@@ -823,12 +852,14 @@ void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    // Force modelflags refresh
-    setmodel(self, modelnameforindex(self.modelindex));
+    self.server_modelindex = self.modelindex;
     setsize(self, [0,0,0], [0,0,0]);
 
     self.oldorigin = self.s_origin + CVARF(pp_trail_start) * MSEC * self.velocity;
     self.p_time = time + CVARF(pp_trail_start) * MSEC;
+
+    if (CVARF(cl_r2g) && self.server_modelindex == fpp_types[FPP_ROCKET].modelindex)
+        setmodelindex(self, fpp_types[FPP_GRENADE].modelindex);
 
     PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
 
@@ -837,8 +868,9 @@ void InitProjPredEnt() {
     // off case since the projectile list will just be empty.
     if (self.owner_entnum == player_localentnum)
        PredProjectile_MatchProjectile();
-
 }
+
+DEFCVAR_FLOAT(r_drawviewmodel, 1);
 
 void WP_UpdateViewModel(entity pweap_ent) {
     float pmodelindex, pframe;
@@ -858,11 +890,13 @@ void WP_UpdateViewModel(entity pweap_ent) {
         pengine.view_mask &= ~MASK_VIEWMODEL;
     }
 
-    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING)) {
+    if (pstate_pred.tfstate & (TFSTATE_NO_WEAPON | TFSTATE_RELOADING) ||
+        CVARF(r_drawviewmodel) == 0) {
         pweap_ent.modelindex = 0;
         return;
     }
 
+    pweap_ent.alpha = CVARF(r_drawviewmodel);
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
 
