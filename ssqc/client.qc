@@ -2019,6 +2019,7 @@ void (float all_dimensions) SetDimensions = {
     if (all_dimensions)
     {
         self.dimension_seen = DMN_NOFLASH;
+        self.tfstate &= ~TFSTATE_FLASHED;
 
         switch (self.team_no)
         {

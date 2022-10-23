@@ -64,6 +64,37 @@ struct predict_tf_state {
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
+struct fo_predsnd {
+    int id;
+    string sound;
+};
+
+enum {
+    SND_AXE,
+    SND_SG,
+    SND_SSG,
+    SND_RL,
+    SND_GREN,
+    SND_NAIL,
+    SND_SNAIL,
+    SND_FLAMETHROWER,
+    SND_RAILGUN,
+    SND_TRANQ,
+};
+
+fo_predsnd snd_types[] = {
+    { SND_AXE, "ax1.wav" },
+    { SND_SG, "guncock.wav" },
+    { SND_SSG, "shotgn2.wav" },
+    { SND_RL, "sgun1.wav" },
+    { SND_GREN, "grenade.wav" },
+    { SND_NAIL, "rocket1i.wav" },
+    { SND_SNAIL, "spike2.wav" },
+    { SND_FLAMETHROWER, "flmfire2.wav" },
+    { SND_RAILGUN, "railgun.wav" },
+    { SND_TRANQ, "dartgun.wav" },
+};
+
 enum {
     FPP_ROCKET,
     FPP_GRENADE,
@@ -80,6 +111,7 @@ struct fo_projectile {
     float speed;
     string model;
     string trail;
+    int snd;
 
     // Automatically initialized below this line.
     float modelindex;
@@ -87,23 +119,38 @@ struct fo_projectile {
 };
 
 fo_projectile fpp_types[] = {
-    { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "progs/missile.mdl", "" },
-    { FPP_GRENADE,       600, "progs/grenade.mdl", "t_grenade" },
-    { FPP_INCENDIARY,         800, "progs/lavaball.mdl", "t_lavaball" },
-    { FPP_NAIL,              1500, "progs/spike.mdl", "tr_spike" },
-    { FPP_SUPER_NAIL,        1500, "progs/s_spike.mdl", "tr_spike" },
-    { FPP_FLAMETHROWER,       600, "progs/s_explod.spr", "explodesprite" },
-    { FPP_TRANQ,       PC_SPY_TRANQSPEED, "progs/spike.mdl", "tr_spike" },
-    { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "progs/e_spike1.mdl", "te_railtrail" },
+    { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
+    { FPP_GRENADE,       600, "grenade.mdl", "t_grenade", SND_GREN },
+    { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL },
+    { FPP_NAIL,              1500, "spike.mdl", "tr_spike", SND_NAIL },
+    { FPP_SUPER_NAIL,        1500, "s_spike.mdl", "tr_spike", SND_SNAIL },
+    { FPP_FLAMETHROWER,       600, "s_explod.spr", "explodesprite", SND_FLAMETHROWER },
+    { FPP_TRANQ,       PC_SPY_TRANQSPEED, "spike.mdl", "tr_spike", SND_TRANQ },
+    { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
 };
 
+
 void InitFppProjectiles() {
-    for (float i = 0; i < fpp_types.length; i++) {
+    float i;
+    static int once;
+    ASSERTD_EQ(once, 0);
+    once = 1;
+
+    for (i = 0; i < fpp_types.length; i++) {
         fo_projectile* desc = &fpp_types[i];
         ASSERTD_EQ(i, desc->id);
+        desc->model = strcat("progs/", desc->model);
         desc->modelindex = getmodelindex(desc->model);
         if (desc->trail != "")
             desc->trailindex = particleeffectnum(strcat("fo-particles.",desc->trail));
+    }
+
+    for (i = 0; i < snd_types.length; i++) {
+        fo_predsnd* snd = &snd_types[i];
+
+        ASSERTD_EQ(i, snd->id);
+        snd->sound = strcat("weapons/", snd->sound);
+        precache_sound(snd->sound);
     }
 }
 
@@ -425,6 +472,24 @@ void WeaponPred_DoServerClientThink() {
 
         self->client_time = held_client_time;
     }
+}
+
+void FO_Sound(entity e, float chan, string samp, float vol, float atten);
+
+void Pred_Sound(float snd) {
+    entity target = self;
+    string wav = snd_types[snd].sound;
+
+    if (infokeyf(self, "fo_wpp_status") & CSQC_WEAP_PRED == 1) {
+        target = self.predict_entity;
+        setorigin(target, self.origin);
+    }
+
+    FO_Sound(target, CHAN_WEAPON, wav, 1, ATTN_NORM);
+}
+
+void PredProj_Sound(float proj_type) {
+    Pred_Sound(fpp_types[proj_type].snd);
 }
 
 void PredProj_Add(entity mis) {

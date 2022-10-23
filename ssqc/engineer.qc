@@ -81,6 +81,8 @@ void () LaserBolt_Touch = {
 void () W_FireRailgun = {
     local vector vec, org;
 
+    Pred_Sound(SND_RAILGUN);
+
     self.ammo_nails = self.ammo_nails - 1;
 
     makevectors(self.v_angle);

@@ -787,7 +787,7 @@ void (float shotcount, vector dir, vector spread) FireBullets = {
 void () W_FireShotgun = {
     local vector dir;
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SG);
 
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
@@ -803,7 +803,7 @@ void () W_FireSuperShotgun = {
         W_FireShotgun();
         return;
     }
-    FO_Sound(self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SSG);
 
     KickPlayer(-4, self);
     self.ammo_shells = self.ammo_shells - 2;
@@ -1082,7 +1082,6 @@ void () T_MissileTouch = {
 
 void () W_FireRocket = {
     self.ammo_rockets = self.ammo_rockets - 1;
-    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-2, self);
 
     newmis = spawn();
@@ -1107,6 +1106,7 @@ void () W_FireRocket = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
+    PredProj_Sound(FPP_ROCKET);
     PredProj_Add(newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
@@ -1285,7 +1285,7 @@ void () ExplodeOldestPipebomb = {
 
 void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
-    FO_Sound(self, CHAN_WEAPON, "weapons/grenade.wav", 1, 1);
+    Pred_Sound(SND_GREN);
     KickPlayer(-2, self);
     newmis = spawn();
     newmis.voided = 0;
@@ -1365,7 +1365,7 @@ void () W_FireSuperSpikes = {
     local vector dir;
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
+    PredProj_Sound(FPP_SUPER_NAIL);
 
     self.ammo_nails -= wi->ammo_per_shot;
 
@@ -1397,7 +1397,7 @@ void (float ox) W_FireSpikes = {
         return;
     }
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
+    PredProj_Sound(FPP_NAIL);
     self.ammo_nails -= wi->ammo_per_shot;
 
     dir = aim(self, 1000);
@@ -1662,19 +1662,19 @@ void () W_Attack = {
     self.show_hostile = time + 1;
 
     if (ws.weapon == WEAP_AXE) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        Pred_Sound(SND_AXE);
         if (shared_prng(self) < 0.5)
             player_axe1();
         else
             player_axeb1();
     } else if (ws.weapon == WEAP_KNIFE) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        Pred_Sound(SND_AXE);
         if (shared_prng(self) < 0.5)
             player_knife1();
         else
             player_knifeb1();
     } else if (ws.weapon == WEAP_SPANNER) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        Pred_Sound(SND_AXE);
         player_spanner1();
     } else if (ws.weapon == WEAP_SHOTGUN) {
         player_shot1();
@@ -1744,17 +1744,15 @@ void () W_Attack = {
             self.antispam_incendiary_cannon = time + 3;
         }
     } else if (ws.weapon == WEAP_MEDIKIT) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+        Pred_Sound(SND_AXE);
         if (shared_prng(self) < 0.5)
             player_medikit1();
         else
             player_medikitb1();
     } else if (ws.weapon == WEAP_TRANQ) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireTranq();
     } else if (ws.weapon == WEAP_RAILGUN) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
         player_shot1();
         W_FireRailgun();
     }
