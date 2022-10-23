@@ -376,9 +376,7 @@ void (float att_delay) Attack_Finished;
 // Hack until we fix Status_Refresh() to not be awful.
 .float last_still_loading;
 void W_UpdateCurrentWeapon(entity pl);
-void sprint_pred(entity client, float msglevel, string s, optional string s2,
-                optional string s3, optional string s4, optional string s5);
-
+void sprint_pred(entity client, float msglevel, string s);
 
 void FO_ReloadFrame() {
     if (self.tfstate & TFSTATE_RELOADING == 0)

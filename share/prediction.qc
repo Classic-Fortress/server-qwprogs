@@ -283,11 +283,10 @@ void WeaponPred_Update(entity player) {
 #undef M3
 #undef M4
 
-void sprint_pred(entity client, float msglevel, string s, optional string s2,
-                optional string s3, optional string s4, optional string s5) {
+void sprint_pred(entity client, float msglevel, string s) {
     if (infokeyf(client, "fo_wpp_status") & CSQC_WEAP_PRED)
         return;  // Message generated client-side.
-    sprint(client, msglevel, s, s2, s3, s4, s5);
+    sprint(client, msglevel, s);
 }
 #endif
 
@@ -435,7 +434,16 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 #ifdef SSQC
+.float wpp_init;
+
 void WeaponPred_InitPlayer(entity player) {
+    // PutClientInServer is called every spawn.  At some point we'll clean up
+    // parameter decode so that it can happen earlier and this nonsense goes
+    // away.
+    if (player.wpp_init)
+        return;
+    player.wpp_init = TRUE;
+
     if (!infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
         bprint(PRINT_HIGH, player.netname, " is using a legacy non-CSQC client.\n");
         return;

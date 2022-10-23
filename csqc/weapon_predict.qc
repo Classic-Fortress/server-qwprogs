@@ -41,11 +41,17 @@ static void update_avg_ping() {
     avg_ping.s2 += sq(new) - sq(old);
 }
 
-static float get_avg_ping(float* mean, float* variance) {
+static float fill_avg_ping(float* mean, float* variance) {
     float n = max(min(NUM_PING_SAMPLES, avg_ping.count), 2);
     *mean = avg_ping.s1 / n;
     *variance = (avg_ping.s2 - sq(avg_ping.s1)/n) / (n - 1);
     return n;
+}
+
+inline float get_avg_ping() {
+    float avg, variance;
+    fill_avg_ping(&avg, &variance);
+    return avg;
 }
 
 // Order of preference:
@@ -69,7 +75,7 @@ static float CalcPredEnabled(float current_enable,
 
     float ping_enable, avg, variance;
 
-    get_avg_ping(&avg, &variance);
+    fill_avg_ping(&avg, &variance);
     // We wait until 5ms over target (or 5 ms under target) when flipping, to
     // avoid flip flopping when ping is right at target.
     if (variance < sq(15))
@@ -102,9 +108,6 @@ void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
         update_avg_ping();
         next_ping_update = time + ENABLE_CHECK_PERIOD / NUM_PING_SAMPLES;
-
-        float avg, variance;
-        get_avg_ping(&avg, &variance);
     }
 
     if (avg_ping.count < NUM_PING_SAMPLES / 2)
@@ -173,11 +176,13 @@ static void SetHadEffect() {
 float animate_s_time;
 
 static entity pred_sound_entity;
+static float last_pred_sound;
 
 void Pred_Sound(int snd) {
     if (pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
+    last_pred_sound = time;
     setorigin(pred_sound_entity, pmove_org);
     sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, 1, ATTN_NORM);
 }
@@ -906,7 +911,8 @@ void InitProjPredEnt() {
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
     if (self.owner_entnum == player_localentnum &&
-        !PredProjectile_MatchProjectile()) {
+        !PredProjectile_MatchProjectile() &&
+        time - last_pred_sound > 75 * MSEC) {
         // Missing projectile implies we missed the local sound, patch it up.
         PredProj_Sound(Proj_FindFPP(self));
     }
