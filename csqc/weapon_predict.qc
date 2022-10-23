@@ -1,11 +1,12 @@
-DEFCVAR_FLOAT(wpp_debug, 0);
+.float server_modelindex;  // Track the server modelindex for matching, since it
+                           // can be overridden client-side.
 
+DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
 DEFCVAR_FLOAT(fo_wp_minping, 50);
 DEFCVAR_FLOAT(fo_weap_predict, -1);
 DEFCVAR_FLOAT(fo_proj_predict, -1);
-
 
 void WP_UpdateViewModel(entity pweap_ent);
 
@@ -604,8 +605,10 @@ DEFCVAR_FLOAT(r_grenadetrail, 1);
 
 int PP_FindTrail(entity e)
 {
-    if (e.modelflags & (MF_GRENADE | MF_ROCKET)) {
-        float is_grenade = !!(e.modelflags & MF_GRENADE);
+    float is_rocket = e.server_modelindex == fpp_types[FPP_ROCKET].modelindex;
+    float is_grenade = e.server_modelindex == fpp_types[FPP_GRENADE].modelindex;
+
+    if (is_rocket || is_grenade) {
         float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
 
         if (idx >= 0 && idx < trail_table.length)
@@ -614,7 +617,8 @@ int PP_FindTrail(entity e)
 
     for (float i = 0; i < fpp_types.length; i++) {
         fo_projectile* desc = &fpp_types[i];
-        if (e.modelindex == desc->modelindex) return desc->trailindex;
+        if (e.server_modelindex == desc->modelindex)
+            return desc->trailindex;
     }
 
     return 0;
@@ -645,6 +649,8 @@ inline float PP_PredictStartOffset() {
 
 static float PP_EPS = 0.05;
 
+DEFCVAR_FLOAT(cl_r2g, 0);
+
 entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
   SetHadEffect();
   entity proj = spawn();
@@ -666,7 +672,12 @@ entity PP_CreateProjectile(fo_projectile* desc, vector offset) {
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 
-  setmodelindex(proj, desc->modelindex);
+  proj.server_modelindex = desc->modelindex;
+
+  float modelindex = desc->modelindex;
+  if (modelindex == fpp_types[FPP_ROCKET].modelindex && CVARF(cl_r2g) == 1)
+      modelindex = fpp_types[FPP_GRENADE].modelindex;
+  setmodelindex(proj, modelindex);
 
   PP_InitTrail(proj);
 
@@ -776,7 +787,7 @@ float PredProjectile_MatchProjectile() {
 
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
-        if (proj.modelindex != self.modelindex)
+        if (proj.server_modelindex != self.server_modelindex)
             continue;
 
         float d = fabs(proj.s_time - self.s_time);
@@ -823,12 +834,14 @@ void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    // Force modelflags refresh
-    setmodel(self, modelnameforindex(self.modelindex));
+    self.server_modelindex = self.modelindex;
     setsize(self, [0,0,0], [0,0,0]);
 
     self.oldorigin = self.s_origin + CVARF(pp_trail_start) * MSEC * self.velocity;
     self.p_time = time + CVARF(pp_trail_start) * MSEC;
+
+    if (CVARF(cl_r2g) && self.server_modelindex == fpp_types[FPP_ROCKET].modelindex)
+        setmodelindex(self, fpp_types[FPP_GRENADE].modelindex);
 
     PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
 
@@ -837,7 +850,6 @@ void InitProjPredEnt() {
     // off case since the projectile list will just be empty.
     if (self.owner_entnum == player_localentnum)
        PredProjectile_MatchProjectile();
-
 }
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
