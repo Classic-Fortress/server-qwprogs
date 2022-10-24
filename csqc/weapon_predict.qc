@@ -249,6 +249,14 @@ void WP_Impulse() {
                 break;
             }
             pstate_pred.tfstate &= ~TFSTATE_QUICKSLOT;  // Intentional fall-through.
+        case TF_WEAPNEXT:
+            pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
+                    pstate_pred.playerclass, pstate_pred.current_slot, FALSE);
+            break;
+        case TF_WEAPPREV:
+            pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
+                    pstate_pred.playerclass, pstate_pred.current_slot, TRUE);
+            break;
         case TF_WEAPLAST:
             pstate_pred.queue_slot = pstate_pred.last_slot; break;
         default:
