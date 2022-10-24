@@ -1016,4 +1016,3 @@ void InitWeapPredEnt(entity pe) {
 
     pengine.pweap_ent = self;
 }
-

@@ -2094,6 +2094,10 @@ void () PutClientInServer = {
         return;
     }
 
+    if(no_fire_mode) {
+        return;
+    }
+
     // remove prime timers to avoid getting an old grenade in your face
     te = find(world, classname, "primetimer");
     while (te != world) {
@@ -3085,12 +3089,6 @@ void () ClientConnect = {
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
-
-    local float numplayers = TeamFortress_GetNoActivePlayers ();
-    if (quadmode && quad_maxplayers && (numplayers >= quad_maxplayers)) {
-        sprint(self, PRINT_HIGH, "Match in progress, forcing to observer\n");
-        forceinfokey(self, "*spectator", "1");
-    }
 };
 
 float () RejoinWithTfId = {
