@@ -1931,52 +1931,14 @@ void W_ChangeWeaponLast() {
         W_ChangeWeaponSlot(self.last_slot);
 };
 
-Slot W_FindPrevNextWeaponSlot(Slot slot, float is_prev) {
-    float i, len;
-    float direction = is_prev ? -1 : 1;
-
-    if (IsUsingOldImpulses()) {
-        Slot* impulse_table = impulse_weapons[self.playerclass].slots;
-        // For reasons that seem to rhyme with -ompilerbug, reads from
-        // impulse_table[offset] return junk so we use a pointer cursor.
-        Slot* cur;
-        len = 7;
-
-        for (i = 0; i < len; i++) {
-            cur = &impulse_table[i];
-            if (IsSameSlot(*cur, slot))
-                break;
-        }
-        do {
-            i = (i + direction + len) % len;
-            cur = &impulse_table[i];
-        } while (IsSlotNull(*cur));
-
-        return *cur;
-    } else {
-        float* slot_weaps = class_weapons[self.playerclass].slots;
-        len = 4;
-
-        // This is a little subtle, we need to transform the index both before
-        // and after the walk so that we don't walk back into ourselves.
-        i = InputHandlePyroSlotSwap(SlotIndex(slot) + 1) - 1;
-        do {
-            i = (i + direction + len) % len;
-        } while (slot_weaps[i] == 0);
-
-        i = InputHandlePyroSlotSwap(i + 1);
-        return MakeSlot(i);
-    }
-}
-
 void W_ChangeWeaponNext() {
     Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
-    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, FALSE));
+    W_ChangeWeaponSlot(FO_FindPrevNextWeaponSlot(self.playerclass, slot, FALSE));
 }
 
 void W_ChangeWeaponPrev() {
     Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
-    W_ChangeWeaponSlot(W_FindPrevNextWeaponSlot(slot, TRUE));
+    W_ChangeWeaponSlot(FO_FindPrevNextWeaponSlot(self.playerclass, slot, TRUE));
 }
 
 void () PreMatchImpulses;
