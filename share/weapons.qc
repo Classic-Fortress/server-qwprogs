@@ -531,12 +531,27 @@ static float IsPyroSlotSwapped() {
 #else
 string(entity e, string key) infokey = #80;
 
+static float csqc_get_user_setting(string s_short, string s_long, string def) {
+    string s = getplayerkeyvalue(player_localnum, s_short);
+    if (s == "") {
+        s = getplayerkeyvalue(player_localnum, s_long);
+        if (s == "")
+            s = def;
+    }
+
+    switch (s) {
+        case "on": return TRUE;
+        case "off": return FALSE;
+        default: return stof(s);
+    }
+}
+
 float IsUsingOldImpulses() {
-    return getplayerkeyfloat(player_localnum, "owi");
+    return csqc_get_user_setting("owi", "old_weapon_impulses", "off");
 }
 
 static float IsPyroSlotSwapped() {
-    return getplayerkeyfloat(player_localnum, "cfpi");
+    return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
 }
 #endif
 
@@ -558,6 +573,45 @@ Slot FO_SlotByInput(float input) {
             return SlotNull;
     }
 }
+
+Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
+    float i, len;
+    float direction = is_prev ? -1 : 1;
+
+    if (IsUsingOldImpulses()) {
+        Slot* impulse_table = impulse_weapons[playerclass].slots;
+        // For reasons that seem to rhyme with -ompilerbug, reads from
+        // impulse_table[offset] return junk so we use a pointer cursor.
+        Slot* cur;
+        len = 7;
+
+        for (i = 0; i < len; i++) {
+            cur = &impulse_table[i];
+            if (IsSameSlot(*cur, slot))
+                break;
+        }
+        do {
+            i = (i + direction + len) % len;
+            cur = &impulse_table[i];
+        } while (IsSlotNull(*cur));
+
+        return *cur;
+    } else {
+        float* slot_weaps = class_weapons[playerclass].slots;
+        len = 4;
+
+        // This is a little subtle, we need to transform the index both before
+        // and after the walk so that we don't walk back into ourselves.
+        i = InputHandlePyroSlotSwap(SlotIndex(slot) + 1) - 1;
+        do {
+            i = (i + direction + len) % len;
+        } while (slot_weaps[i] == 0);
+
+        i = InputHandlePyroSlotSwap(i + 1);
+        return MakeSlot(i);
+    }
+}
+
 
 void FO_Weapons_Init() {
     float i, j;
