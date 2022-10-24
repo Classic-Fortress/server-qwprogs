@@ -243,6 +243,7 @@ void WP_Impulse() {
             }
             break;
         }
+
         case TF_QUICKSTOP:
             if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0) {
                 pstate_pred.impulse = 0;
@@ -259,6 +260,16 @@ void WP_Impulse() {
             break;
         case TF_WEAPLAST:
             pstate_pred.queue_slot = pstate_pred.last_slot; break;
+
+        case TF_WEAPNEXT:
+            pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
+                    pstate_pred.playerclass, pstate_pred.current_slot, FALSE);
+            break;
+        case TF_WEAPPREV:
+            pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
+                    pstate_pred.playerclass, pstate_pred.current_slot, TRUE);
+            break;
+
         default:
             match = FALSE;
     }
@@ -700,6 +711,7 @@ void PP_CreateProjectile(int proj_type, vector offset) {
   SetHadEffect();
   entity proj = spawn();
 
+#if 0
   // Packet loss doesnt guarantee the server will actually register quickslot
   // since it's a separate command from the attack.  We can improve this in the
   // future via either a button or just combining them on an impulse.  But for
@@ -708,6 +720,7 @@ void PP_CreateProjectile(int proj_type, vector offset) {
   if (pstate_pred.tfstate & TFSTATE_QUICKSLOT &&
       !(pstate_server.tfstate & TFSTATE_QUICKSLOT))
       return;
+#endif
 
   proj.s_time = time + PP_PredictStartOffset();
   proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
