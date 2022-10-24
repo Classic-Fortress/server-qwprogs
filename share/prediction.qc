@@ -1,6 +1,11 @@
 #define ENT_WEAPONPRED 100
 #define ENT_PROJECTILE 101
 
+// Below apply to both CSQC & SSQC ents
+.float fpp_index;     // Projectile type
+.vector s_origin;  // Spawning origin (at s_time); matched for client/server
+.float s_time;     // Time spawned (in client_time)
+
 string wp_version = "v0.1";
 
 enumflags {
@@ -370,8 +375,6 @@ void EntUpdate_WeaponPred(float isnew) {
 
 
 #ifdef SSQC
-.float s_time;
-.vector s_origin;
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
@@ -388,8 +391,6 @@ float() ReadFloat = #367;
 
 void InitProjPredEnt();
 
-.vector s_origin;
-.float s_time;
 .float owner_entnum;
 
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
@@ -412,7 +413,7 @@ void EntUpdate_Projectile(float isnew) {
     }
 
     if (sendflags & FOPP_INIT) {
-        COMM(Short, modelindex);
+        COMM(Byte, fpp_index);
         COMM(Short, effects);
 
         COMM(Angle, angles[0]);
@@ -500,12 +501,20 @@ void PredProj_Sound(float proj_type) {
     Pred_Sound(fpp_types[proj_type].snd);
 }
 
-void PredProj_Add(entity mis) {
+void FOProj_Init(int fpp_type, entity mis) {
+    // This init always needs to occur.
     mis.dimension_seen = DMN_NOFLASH;
 
+    PredProj_Sound(fpp_type);
+
+    mis.modelindex = fpp_types[fpp_type].modelindex;
+    setsize(mis, '0 0 0', '0 0 0');
+
+    // Below here is only when we're using new projectile networking.
     if (!fo_projectiles)
         return;
 
+    mis.fpp_index = fpp_type;
     mis.s_origin = mis.origin;
     mis.SendEntity = PP_SendEntity;
     mis.SendFlags = 0xff;

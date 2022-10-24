@@ -1106,8 +1106,7 @@ void () W_FireRocket = {
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
-    PredProj_Sound(FPP_ROCKET);
-    PredProj_Add(newmis);
+    FOProj_Init(FPP_ROCKET, newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
@@ -1336,53 +1335,38 @@ void () W_FireGrenade = {
 void () spike_touch;
 void () superspike_touch;
 
-void (vector org, vector dir) launch_spike = {
+entity (int fpp_type, vector offset) W_FireNail = {
     newmis = spawn();
     newmis.voided = 0;
     newmis.owner = self;
     newmis.movetype = MOVETYPE_FLYMISSILE;
     newmis.solid = SOLID_BBOX;
 
-    newmis.angles = vectoangles(dir);
-    newmis.touch = spike_touch;
-    newmis.weapon = DMSG_NAILGUN;
+    newmis.angles = vectoangles(aim(self, 1000));
     newmis.classname = "spike";
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
-    FO_SetModel(newmis, fpp_types[FPP_NAIL].model);
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    setorigin(newmis, org);
+    setorigin(newmis, self.origin + offset + '0 0 16');
 
-    newmis.velocity = dir * fpp_types[FPP_NAIL].speed;
+    newmis.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
 
-    PredProj_Add(newmis);
+    if (fpp_type == FPP_NAIL) {
+        newmis.weapon = DMSG_NAILGUN;
+        newmis.touch = spike_touch;
+    } else { // fpp_type == FPP_SUPER_NAIL
+        newmis.touch = superspike_touch;
+        newmis.weapon = DMSG_SNAILGUN;
+    }
+
+    FOProj_Init(fpp_type, newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }
-};
 
-void () W_FireSuperSpikes = {
-    local vector dir;
-    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
-
-    PredProj_Sound(FPP_SUPER_NAIL);
-
-    self.ammo_nails -= wi->ammo_per_shot;
-
-    dir = aim(self, 1000);
-    launch_spike(self.origin + '0 0 16', dir);
-    LogEventAttack(self);
-    newmis.touch = superspike_touch;
-    newmis.weapon = DMSG_SNAILGUN;
-    FO_SetModel(newmis, fpp_types[FPP_SUPER_NAIL].model);
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    KickPlayer(-3, self);
-
-    Attack_Finished(wi->attack_time);
+    return newmis;
 };
 
 void (float ox) W_FireSpikes = {
-    local vector dir;
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
     FO_WeapInfo* wi = ws->wi;
@@ -1392,19 +1376,16 @@ void (float ox) W_FireSpikes = {
     if (self.ammo_nails < wi->ammo_per_shot) {
         W_ChangeToBestWeapon();
         return;
-    } else if (ws.weapon == WEAP_SUPER_NAILGUN) {
-        W_FireSuperSpikes();
-        return;
     }
 
-    PredProj_Sound(FPP_NAIL);
-    self.ammo_nails -= wi->ammo_per_shot;
+    *ws->ammo_remaining -= wi->ammo_per_shot;
+    if (wi->weapon == WEAP_NAILGUN)
+        W_FireNail(FPP_NAIL, v_right * ox);
+    else
+        W_FireNail(FPP_SUPER_NAIL, '0 0 0');
 
-    dir = aim(self, 1000);
-    launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
     LogEventAttack(self);
     KickPlayer(-3, self);
-
     Attack_Finished(wi->attack_time);
 };
 

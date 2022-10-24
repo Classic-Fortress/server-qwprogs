@@ -128,6 +128,8 @@ static float CheckNeedAssaultCannonDown() {
 }
 
 void asscan_up_extra() {
+    float tidx = *thinkindex() - 1;
+
     if (CheckNeedAssaultCannonDown())
         return;
 
@@ -135,17 +137,19 @@ void asscan_up_extra() {
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
     self.fire_held_down = 1;
-    if (self.client_thinkindex == 1)  // Already incremented
+    if (tidx == 1)
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
     SuperDamageSound();
 
-    if (self.client_thinkindex == 6)  // 600ms spin up
+    if (tidx == 6)  // 600ms spin up
         player_asscan_fire();
     else
         Attack_Finished(wi->attack_time);
 }
 
 void asscan_fire_extra() {
+    float tidx = *thinkindex() - 1;
+
     if (CheckNeedAssaultCannonDown())
         return;
 
@@ -154,7 +158,7 @@ void asscan_fire_extra() {
     if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) < 30)
             && !(self.tfstate & TFSTATE_LOCK)) {
 
-        if (self.client_thinkindex % 2 == 0) {
+        if (tidx % 2 == 1) {
             muzzleflash();
             FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
         }
@@ -166,7 +170,7 @@ void asscan_fire_extra() {
             self.tfstate |= TFSTATE_CANT_MOVE;
 
         // Halve firing speed when moving too fast.
-        if (vlen(self.velocity) < 30 || self.client_thinkindex % 2 == 1)
+        if (vlen(self.velocity) < 30 || tidx % 2 == 1)
                 W_FireAssaultCannon();
     } else {
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
@@ -176,12 +180,13 @@ void asscan_fire_extra() {
 }
 
 void asscan_down_extra() {
+    float tidx = *thinkindex() - 1;
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (self.client_thinkindex == 1)
+    if (tidx == 1)
         FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
 
-    if (self.client_thinkindex >= 15) {  // 1.5s down
+    if (tidx >= 15) {  // 1.5s down
         self.tfstate &= ~TFSTATE_AIMING;
         self.fire_held_down = 0;
         player_run();

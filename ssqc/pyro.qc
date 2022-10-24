@@ -548,7 +548,6 @@ void () W_FireFlame = {
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
-    Pred_Sound(SND_FLAMETHROWER);
     flame = spawn();
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
@@ -570,11 +569,9 @@ void () W_FireFlame = {
     flame.touch = Flamer_stream_touch;
     flame.think = s_explode1;
     
-    FO_SetModel(flame, fpp_types[FPP_FLAMETHROWER].model);
-    setsize(flame, '0 0 0', '0 0 0');
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 
-    PredProj_Add(flame);
+    FOProj_Init(FPP_FLAMETHROWER, flame);
     if (project_weapons) {
         AL_ProjectProjectile(flame);
     }
@@ -677,7 +674,6 @@ void () W_FireIncendiaryCannon = {
         return;
     }
     self.ammo_rockets = self.ammo_rockets - 3;
-    Pred_Sound(SND_RL);
     KickPlayer(-3, self);
     newmis = spawn();
     newmis.owner = self;
@@ -685,7 +681,6 @@ void () W_FireIncendiaryCannon = {
     newmis.solid = SOLID_BBOX;
     makevectors(self.v_angle);
     newmis.velocity = aim(self, 1000);
-    string rktmdl = "progs/missile.mdl";
     if (pyro_type == PYRO_ORIGINAL)
     {
         newmis.velocity = newmis.velocity * 600;
@@ -695,9 +690,6 @@ void () W_FireIncendiaryCannon = {
     {
         newmis.velocity = newmis.velocity * fpp_types[FPP_INCENDIARY].speed;
         newmis.think = IncendiaryRadius_OZTF;
-
-        if (pyro_type == PYRO_FO)
-            rktmdl = fpp_types[FPP_INCENDIARY].model;
     }
     
     newmis.angles = vectoangles(newmis.velocity);
@@ -705,11 +697,9 @@ void () W_FireIncendiaryCannon = {
     newmis.nextthink = time + 5;
     newmis.weapon = DMSG_INCENDIARY;
     newmis.classname = "pyro_rocket";
-    FO_SetModel(newmis, rktmdl);
-    setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
-    PredProj_Add(newmis);
+    FOProj_Init(FPP_INCENDIARY, newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }

@@ -301,6 +301,27 @@ void (vector org, vector vec) LaunchLaser = {
     newmis.touch = Laser_Touch;
 };
 
+void (vector org, vector dir) launch_spike = {
+    newmis = spawn();
+    newmis.voided = 0;
+    newmis.owner = self;
+    newmis.movetype = MOVETYPE_FLYMISSILE;
+    newmis.solid = SOLID_BBOX;
+
+    newmis.angles = vectoangles(dir);
+    newmis.touch = spike_touch;
+    newmis.weapon = DMSG_NAILGUN;
+    newmis.classname = "spike";
+    newmis.think = SUB_Remove;
+    newmis.nextthink = time + 6;
+    FO_SetModel(newmis, fpp_types[FPP_NAIL].model);
+    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
+    setorigin(newmis, org);
+
+    newmis.velocity = dir * fpp_types[FPP_NAIL].speed;
+};
+
+
 void () spikeshooter_use = {
     if (self.spawnflags & 2) {
         FO_Sound(self, CHAN_VOICE, "enforcer/enfire.wav", 1, ATTN_NORM);
