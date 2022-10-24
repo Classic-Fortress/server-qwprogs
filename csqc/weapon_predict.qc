@@ -54,12 +54,20 @@ inline float get_avg_ping() {
     return avg;
 }
 
+float csqc_get_user_setting(string s_short, string s_long, string def);
+
 // Order of preference:
 //   server disable, client enable/disable, server/ping enable
 static float CalcPredEnabled(float current_enable,
                              float unspec_default /* meaning of '-1' */,
                              float server_disable, float server_enable,
                              float client_value, string* set_by) {
+    if (csqc_get_user_setting("dw", "default_weapon", "0")) {
+        *set_by = "[default_weapon unsupported, talk to newby to fix your " \
+                  "config to not need it]";
+        return FALSE;
+    }
+
     if (server_disable || client_value == 0) {
         *set_by = server_disable ? "[server disable]" : "[cvar disable]";
 

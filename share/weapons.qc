@@ -531,7 +531,7 @@ static float IsPyroSlotSwapped() {
 #else
 string(entity e, string key) infokey = #80;
 
-static float csqc_get_user_setting(string s_short, string s_long, string def) {
+float csqc_get_user_setting(string s_short, string s_long, string def) {
     string s = getplayerkeyvalue(player_localnum, s_short);
     if (s == "") {
         s = getplayerkeyvalue(player_localnum, s_long);
