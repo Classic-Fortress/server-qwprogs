@@ -81,8 +81,6 @@ void () LaserBolt_Touch = {
 void () W_FireRailgun = {
     local vector vec, org;
 
-    Pred_Sound(SND_RAILGUN);
-
     self.ammo_nails = self.ammo_nails - 1;
 
     makevectors(self.v_angle);
@@ -96,21 +94,17 @@ void () W_FireRailgun = {
     newmis.movetype = MOVETYPE_FLYMISSILE;
     newmis.solid = SOLID_TRIGGER;
 
-    FO_SetModel(newmis, "progs/e_spike1.mdl");
-    setsize(newmis, '0 0 0', '0 0 0');
 
-    setorigin(newmis, org + '0 0 16');
-
-    newmis.velocity = vec * PC_ENGINEER_RAILSPEED;
+    newmis.velocity = vec * fpp_types[FPP_RAILGUN].speed;
     newmis.angles = vectoangles(newmis.velocity);
-    newmis.oldorigin = newmis.velocity;
 
     newmis.nextthink = time + 5;
     newmis.think = SUB_Remove;
     newmis.touch = LaserBolt_Touch;
     newmis.classname = "railslug";
+    setorigin(newmis, org + '0 0 16');
 
-    PredProj_Add(newmis);
+    FOProj_Init(FPP_RAILGUN, newmis);
     if (project_weapons) {
         AL_ProjectProjectile(newmis);
     }

@@ -1,6 +1,3 @@
-.float server_modelindex;  // Track the server modelindex for matching, since it
-                           // can be overridden client-side.
-
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
@@ -657,8 +654,8 @@ DEFCVAR_FLOAT(r_grenadetrail, 1);
 
 int PP_FindTrail(entity e)
 {
-    float is_rocket = e.server_modelindex == fpp_types[FPP_ROCKET].modelindex;
-    float is_grenade = e.server_modelindex == fpp_types[FPP_GRENADE].modelindex;
+    float is_rocket = e.fpp_index == FPP_ROCKET;
+    float is_grenade = e.fpp_index == FPP_GRENADE;
 
     if (is_rocket || is_grenade) {
         float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
@@ -667,13 +664,7 @@ int PP_FindTrail(entity e)
             return trail_table[idx].trail[is_grenade];
     }
 
-    for (float i = 0; i < fpp_types.length; i++) {
-        fo_projectile* desc = &fpp_types[i];
-        if (e.server_modelindex == desc->modelindex)
-            return desc->trailindex;
-    }
-
-    return 0;
+    return fpp_types[e.fpp_index].trailindex;
 }
 
 static float PP_EPS = 0.05;
@@ -711,6 +702,8 @@ void PP_CreateProjectile(int proj_type, vector offset) {
   SetHadEffect();
   entity proj = spawn();
 
+  proj.fpp_index = proj_type;
+
 #if 0
   // Packet loss doesnt guarantee the server will actually register quickslot
   // since it's a separate command from the attack.  We can improve this in the
@@ -739,12 +732,8 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 
   proj.angles = input_angles; proj.angles[0] *= -1;
 
-  proj.server_modelindex = desc->modelindex;
-
-  float modelindex = desc->modelindex;
-  if (modelindex == fpp_types[FPP_ROCKET].modelindex && CVARF(cl_r2g) == 1)
-      modelindex = fpp_types[FPP_GRENADE].modelindex;
-  setmodelindex(proj, modelindex);
+  if (self.fpp_index == FPP_ROCKET && CVARF(cl_r2g) == 1)
+      setmodelindex(proj, fpp_types[FPP_GRENADE].modelindex);
 
   PP_InitTrail(proj);
 
@@ -862,7 +851,7 @@ float PredProjectile_MatchProjectile() {
 
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
-        if (proj.server_modelindex != self.server_modelindex)
+        if (proj.fpp_index != self.fpp_index)
             continue;
 
         float d = fabs(proj.s_time - self.s_time);
@@ -904,26 +893,19 @@ float PredProjectile_MatchProjectile() {
     return FALSE;
 }
 
-static int Proj_FindFPP(entity ent) {
-    for (float i = 0; i < fpp_types.length; i++) {
-        if (fpp_types[i].modelindex == ent.server_modelindex)
-            return i;
-    }
-    return -1;
-}
-
 // Called on `self`.
 void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    self.server_modelindex = self.modelindex;
+    ASSERTF_EQ(self.effects, 0);
+    setmodelindex(self, fpp_types[self.fpp_index].modelindex);
     setsize(self, [0,0,0], [0,0,0]);
 
     self.oldorigin = self.s_origin + CVARF(pp_trail_start) * MSEC * self.velocity;
     self.p_time = time + CVARF(pp_trail_start) * MSEC;
 
-    if (CVARF(cl_r2g) && self.server_modelindex == fpp_types[FPP_ROCKET].modelindex)
+    if (CVARF(cl_r2g) && self.fpp_index == FPP_ROCKET)
         setmodelindex(self, fpp_types[FPP_GRENADE].modelindex);
 
     PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
@@ -934,8 +916,10 @@ void InitProjPredEnt() {
     if (self.owner_entnum == player_localentnum &&
         !PredProjectile_MatchProjectile() &&
         time - last_pred_sound > 75 * MSEC) {
+
         // Missing projectile implies we missed the local sound, patch it up.
-        PredProj_Sound(Proj_FindFPP(self));
+        if (PP_Enabled())
+            PredProj_Sound(self.fpp_index);
     }
 }
 
