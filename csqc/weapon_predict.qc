@@ -148,6 +148,7 @@ void WPP_Status() {
     printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
 
     printf("Config:\n");
+    PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
@@ -227,6 +228,9 @@ static float IsEffectFrame() {
     return TRUE;
 }
 
+void Attack_Finished(float attack_time) {
+    pstate_pred.attack_finished = pstate_pred.client_time + attack_time;
+}
 ////////////////////////////////////////////////////////////////////////////////
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
@@ -235,17 +239,20 @@ float animate_s_time;
 static entity pred_sound_entity;
 static float last_pred_sound;
 
-void Pred_Sound(int snd) {
+void Pred_Sound(int snd, float vol = 1) {
     if (pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
+    if (!IsEffectFrame())
+        return FALSE;
+
     last_pred_sound = time;
     setorigin(pred_sound_entity, pmove_org);
-    sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, 1, ATTN_NORM);
+    sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, vol, ATTN_NORM);
 }
 
-void PredProj_Sound(int proj_type) {
-    Pred_Sound(fpp_types[proj_type].snd);
+void PredProj_Sound(int proj_type, float vol = 1) {
+    Pred_Sound(fpp_types[proj_type].snd, vol);
 }
 
 inline FO_WeapInfo* WP_CurrentWeapon() {
@@ -475,12 +482,7 @@ float WP_ConsumeAmmo(FO_WeapInfo* wi) {
     return TRUE;
 }
 
-static void prandom(void() option1, void() option2) {
-    if (shared_prng(self) < 0.5)
-        option1();
-    else
-        option2();
-}
+var void() melee_anim = player_axeN;
 
 void WP_AnimateModel() {
     if (pstate_pred.client_thinkindex == 0) {
@@ -509,13 +511,11 @@ void WP_AnimateModel() {
             player_nailN(); break;
 
         case WEAP_AXE:
-            prandom(player_axeN, player_axebN); break;
         case WEAP_KNIFE:
-            prandom(player_knifeN, player_knifebN); break;
         case WEAP_MEDIKIT:
-            prandom(player_medikitN, player_medikitbN); break;
+            melee_anim(); break;
         case WEAP_SPANNER:
-            player_spannerN(); break;
+            player_axe1(); break;
     }
 }
 
@@ -783,7 +783,6 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 }
 
 void PP_AssCanFrame() {
-
 }
 
 void PP_NailFrame() {
@@ -796,7 +795,7 @@ void PP_NailFrame() {
 
     FO_WeapInfo* wi = WP_CurrentWeapon();
     WP_ConsumeAmmo(wi);
-    pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+    Attack_Finished(wi->attack_time);
 
     float idx = (pstate_pred.client_thinkindex + 1) % 2;
 
@@ -847,21 +846,26 @@ void WP_Attack() {
             case WEAP_RAILGUN:
                 PP_CreateProjectile(FPP_RAILGUN, '0 0 0');
                 break;
+
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
                 Pred_Sound(SND_GREN); break;
+
             case WEAP_AXE:
             case WEAP_KNIFE:
-            case WEAP_SPANNER:
             case WEAP_MEDIKIT:
+                melee_anim = shared_prng(PRNG_AXE) < 0.5 ? player_axeN : player_axebN;
+                // Fall through for sound.
+            case WEAP_SPANNER:
                 Pred_Sound(SND_AXE); break;
+
             case WEAP_SHOTGUN: Pred_Sound(SND_SG); break;
             case WEAP_SUPER_SHOTGUN: Pred_Sound(SND_SSG); break;
         }
     }
 
     if (!in_anim)
-        pstate_pred.attack_finished = pstate_pred.client_time + wi->attack_time;
+        Attack_Finished(wi->attack_time);
 
 #if 0
     // If our latency is higher than forward projection, synchronize animation

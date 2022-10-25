@@ -269,6 +269,12 @@ enumflags {
 
 #define TFSTATE_AC_MASK (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING|TFSTATE_AC_SPINDOWN)
 
+enum {
+    PRNG_AXE,
+    PRNG_HWGUY,
+    PRNG_NUM_STATES,
+};
+
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOR	1  // Bypasses the armor of the target
 #define TF_TD_NOTTEAM		2  // Doesn't damage a team member (indicates direct fire weapon)

@@ -1635,13 +1635,13 @@ void () W_Attack = {
 
     if (ws.weapon == WEAP_AXE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_axe1();
         else
             player_axeb1();
     } else if (ws.weapon == WEAP_KNIFE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_knife1();
         else
             player_knifeb1();
@@ -1717,7 +1717,7 @@ void () W_Attack = {
         }
     } else if (ws.weapon == WEAP_MEDIKIT) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_medikit1();
         else
             player_medikitb1();

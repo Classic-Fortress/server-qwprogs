@@ -21,6 +21,8 @@ struct antilag_settings_t {
 .float client_thinkindex;
 .float client_nextthink;
 
+.int prng_base[PRNG_NUM_STATES];
+
 // A monotonically non-decreasing, latency corrected notion of remote
 // client-time.  Monotonicity guarantees that for some offset `o`:
 //     at t1: remote_client_time() + o < at t2: lag_time() + o  FOR t2 > t1
