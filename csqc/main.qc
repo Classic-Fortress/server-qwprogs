@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     }
 
     FO_Weapons_Init();
+    WeapPred_InitDefaultConfig();
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
@@ -85,7 +86,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_addmap");
     registercommand("vote_removemap");
 
-    registercommand("fo_wpp_status");
+    registercommand("wpp_status");
     registercvar("fo_hud_idle_alpha", "0.3");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
@@ -390,7 +391,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 localcmd("-button4\n");
             }
             break;
-        case "fo_wpp_status":
+        case "wpp_status":
             WPP_Status();
             break;
         case "vote_addmap":
@@ -407,6 +408,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 void(float isnew) CSQC_Ent_Update = {
     float etype = readbyte();
     switch (etype) {
+        case ENT_CONFIG:
+            EntUpdate_Config();
+            break;
         case ENT_WEAPONPRED:
             EntUpdate_WeaponPred(isnew);
             break;

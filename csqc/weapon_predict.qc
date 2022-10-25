@@ -1,9 +1,16 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
-DEFCVAR_FLOAT(fo_wp_minping, 50);
-DEFCVAR_FLOAT(fo_weap_predict, -1);
-DEFCVAR_FLOAT(fo_proj_predict, -1);
+DEFCVAR_FLOAT(wpp_min_ping, -1);
+DEFCVAR_FLOAT(wpp_weap_predict, -1);
+DEFCVAR_FLOAT(wpp_proj_predict, -1);
+
+float WP_MinPing() {
+    if (CVARF(wpp_min_ping) == -1)
+            return fo_config.wp_default_min_ping_ms;
+    else
+        return CVARF(wpp_min_ping);
+}
 
 void WP_UpdateViewModel(entity pweap_ent);
 
@@ -81,7 +88,7 @@ static float CalcPredEnabled(float current_enable,
         return TRUE;
     }
 
-    if (CVARF(fo_wp_minping) < 0)
+    if (WP_MinPing() == 0)
         return current_enable;
 
     float ping_enable, avg, variance;
@@ -90,18 +97,18 @@ static float CalcPredEnabled(float current_enable,
     // We wait until 5ms over target (or 5 ms under target) when flipping, to
     // avoid flip flopping when ping is right at target.
     if (variance < sq(15))
-        ping_enable = avg > CVARF(fo_wp_minping) + (current_enable ? -5 : 5);
+        ping_enable = avg > WP_MinPing() + (current_enable ? -5 : 5);
     else
         return current_enable;  // variance too high, don't change anything.
 
 
     if (unspec_default || server_enable) {
         if (ping_enable) {
-            *set_by = sprintf("[ping] (fo_wp_minping=%0.0f / avg=%0.0f var=%0.0f)",
-                    CVARF(fo_wp_minping), avg, variance);
+            *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
+                    WP_MinPing(), avg, variance);
             return TRUE;
         } else {
-            *set_by = "[lan mode <40]";
+            *set_by = sprintf("[lan mode <%d]", WP_MinPing());
             return FALSE;
         }
     }
@@ -115,25 +122,44 @@ static float next_wpp_enable_check;
 static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
+#define PRINT_CONFIG(_field) \
+    if (fo_config.##_field) printf(" ." #_field " = %d\n", fo_config.##_field)
 void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
     CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            pstate_server.predict_flags & PF_WP_DISABLE,
-            pstate_server.predict_flags & PF_WP_ENABLE,
-            CVARF(fo_weap_predict), TRUE, &wp_source);
+            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            CVARF(wpp_weap_predict), TRUE, &wp_source);
 
     CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            pstate_server.predict_flags & PF_PP_DISABLE,
-            pstate_server.predict_flags & PF_PP_ENABLE,
-            CVARF(fo_proj_predict), wp_enabled, &pp_source);
+            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            CVARF(wpp_proj_predict), wp_enabled, &pp_source);
 
-    printf("FortressOne: Weapon prediction %s %s\n",
+    printf("Prediction Status:\n");
+    printf(" Weapon prediction %s %s\n",
             wp_enabled ? "enabled" : "disabled", wp_source);
-    printf("FortressOne: Projectile prediction %s %s\n",
+    printf(" Projectile prediction %s %s\n",
             pp_enabled ? "enabled" : "disabled", pp_source);
+
+    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    float avg, variance;
+    fill_avg_ping(&avg, &variance);
+    printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
+
+    printf("Config:\n");
+    PRINT_CONFIG(max_rewind_slow_projectile_ms);
+    PRINT_CONFIG(max_rewind_fast_projectile_ms);
+    PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(wp_default_min_ping_ms);
+    PRINT_CONFIG(wp_global_enable);
+    PRINT_CONFIG(wp_global_disable);
+    PRINT_CONFIG(pp_global_enable);
+    PRINT_CONFIG(pp_global_disable);
+    PRINT_CONFIG(wpp_global_enable);
+    PRINT_CONFIG(wpp_global_disable);
 }
+#undef PRINT_CONFIG
 
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
@@ -148,19 +174,19 @@ void WPP_UpdateEnable(float force) {
         return;
     next_wpp_enable_check = time + ENABLE_CHECK_PERIOD;
 
-    // Tristate: 1 => force on, 0 => force off, -1 => up to minping/server
+    // For wpp_weap_predict and wpp_proj_predict we use a tristate:
+    //   1 => force on, 0 => force off, -1 => up to min_ping/server
+    float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
     float wp_new = -1, pp_new = -1;
     string wp_source, pp_source;
 
-    wp_new = CalcPredEnabled(pengine.wp_enabled, CVARF(fo_wpp_beta),
-                         pstate_server.predict_flags & PF_WP_DISABLE,
-                         pstate_server.predict_flags & PF_WP_ENABLE,
-                         CVARF(fo_weap_predict), TRUE, &wp_source);
+    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
+            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            CVARF(wpp_weap_predict), TRUE, &wp_source);
 
-    pp_new = CalcPredEnabled(pengine.pp_enabled, CVARF(fo_wpp_beta),
-                         pstate_server.predict_flags & PF_PP_DISABLE,
-                         pstate_server.predict_flags & PF_PP_ENABLE,
-                         CVARF(fo_proj_predict), wp_new, &pp_source);
+    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
+            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            CVARF(wpp_proj_predict), wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
