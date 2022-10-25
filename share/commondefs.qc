@@ -1,3 +1,18 @@
+var struct {
+    float max_rewind_ms;
+    float max_rewind_slow_projectile_ms;
+    float max_rewind_fast_projectile_ms;
+    float rewind_fast_projectile_thresh;
+    float wp_default_min_ping_ms;
+
+    float wp_global_enable;
+    float wp_global_disable;
+    float pp_global_enable;
+    float pp_global_disable;
+    float wpp_global_enable;
+    float wpp_global_disable;
+} fo_config;
+
 #define MAX_FLAGINFO_LINES  10
 #define ENG_BUILDING_DISMANTLE_DISTANCE 100
 #define ENG_BUILDING_MAINT_DISTANCE 80

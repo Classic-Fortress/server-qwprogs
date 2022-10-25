@@ -605,8 +605,6 @@ void () DecodeLevelParms = {
         // remote_client_time max delta
         antilag_settings.rewind_detpipe =
             CF_GetSetting("alrd", "al_rewind_detpipe", "on");
-        // maximum ping we'll have effect at
-        antilag_settings.max_ping = CF_GetSetting("almp", "al_max_ping", "200");
 
         // CSQC projectiles
         fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
@@ -616,7 +614,6 @@ void () DecodeLevelParms = {
 
         // max projectile projection latency (default 100ms)
         project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
-        antilag_settings.max_projectile_slow_ping = project_weapons_max_latency;
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");

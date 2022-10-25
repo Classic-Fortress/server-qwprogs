@@ -1,13 +1,16 @@
 float remote_client_time(float ct_type = CT_NOEXTERNALEFFECT) {
-    float offset = self.client_ping;  // Already bounded by max_ping
+    float offset = min(self.client_ping, fo_config.max_rewind_ms);
 
     switch (ct_type) {
         case CT_SLOW_PROJECTILE:
-            offset = min(offset, antilag_settings.max_projectile_slow_ping) / 2;
+            offset = min(offset, fo_config.max_rewind_slow_projectile_ms);
+            break;
+        case CT_FAST_PROJECTILE:
+            offset = min(offset, fo_config.max_rewind_fast_projectile_ms);
             break;
     }
 
-    float target = self.client_time - offset;
+    float target = self.client_time - offset / 1000.0;
     target = max(target, self.last_remote_client_time);  // prevent jitter
     self.last_remote_client_time = target;
 
@@ -39,6 +42,5 @@ void FO_CheckClientThink() {
 void FO_UpdateClientTime() {
     self.client_time += frametime;
 
-    float ping = infokeyf(self, INFOKEY_P_PING) / 1000.0;
-    self.client_ping = min(antilag_settings.max_ping, ping);
+    self.client_ping = infokeyf(self, INFOKEY_P_PING);
 }

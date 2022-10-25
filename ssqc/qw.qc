@@ -5,17 +5,16 @@ typedef void (float n) f_void_float;
 
 enum {
     CT_NOEXTERNALEFFECT,  // No external effects (e.g. reload, build, prime, etc)
-    CT_SLOW_PROJECTILE,  // Projectile for which judder is noticable (e.g. rocket)
+    CT_SLOW_PROJECTILE,   // Slow proj => more judder (e.g. rocket)
+    CT_FAST_PROJECTILE,   // Fast proj => less judder (e.g. heavy bullet)
 };
 
 struct antilag_settings_t {
-    float max_ping;
-    float max_projectile_slow_ping;
     float rewind_detpipe;
 } antilag_settings;
 
 .float client_time;              // A stable/predictable client clock
-.float client_ping;              // ping used for prediction [capped]
+.float client_ping;              // ping used for prediction
 .float last_remote_client_time;  // For monoticity
 
 .void() client_think;            // client-time relative think

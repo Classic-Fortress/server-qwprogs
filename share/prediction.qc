@@ -9,21 +9,6 @@
 
 string wp_version = "v0.2";
 
-var struct {
-    float max_rewind_slow_projectile_ms;
-    float max_rewind_fast_projectile_ms;
-    float rewind_fast_projectile_thresh;
-    float wp_default_min_ping_ms;
-
-    float wp_global_enable;
-    float wp_global_disable;
-    float pp_global_enable;
-    float pp_global_disable;
-    float wpp_global_enable;
-    float wpp_global_disable;
-
-} fo_config;
-
 enumflags {
     FOWP_CTIME,
     FOWP_IMPULSE,
@@ -134,8 +119,8 @@ struct fo_projectile {
 };
 
 fo_projectile fpp_types[] = {
-    { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
-    { FPP_GRENADE,       600, "grenade.mdl", "t_grenade", SND_GREN },
+    { FPP_ROCKET,      PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
+    { FPP_GRENADE,            600, "grenade.mdl", "t_grenade", SND_GREN },
     { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL },
     { FPP_NAIL,              1500, "spike.mdl", "tr_spike", SND_NAIL },
     { FPP_SUPER_NAIL,        1500, "s_spike.mdl", "tr_spike", SND_SNAIL },
@@ -143,7 +128,6 @@ fo_projectile fpp_types[] = {
     { FPP_TRANQ,       PC_SPY_TRANQSPEED, "spike.mdl", "tr_spike", SND_TRANQ },
     { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
 };
-
 
 void InitFppProjectiles() {
     float i;
@@ -167,6 +151,12 @@ void InitFppProjectiles() {
         snd->sound = strcat("weapons/", snd->sound);
         precache_sound(snd->sound);
     }
+}
+
+float max_rewind_credit_ms(int fpp_type) {
+    return fpp_types[fpp_type].speed < fo_config.rewind_fast_projectile_thresh ?
+            fo_config.max_rewind_slow_projectile_ms :
+            fo_config.max_rewind_fast_projectile_ms;
 }
 
 #ifdef SSQC
@@ -421,7 +411,6 @@ void EntUpdate_Projectile(float isnew) {
 
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
-        COMM(Short, effects);
 
         COMM(Angle, angles[0]);
         COMM(Angle, angles[1]);
@@ -443,9 +432,9 @@ void EntUpdate_Projectile(float isnew) {
 
 void WeapPred_InitDefaultConfig() {
     fo_config.max_rewind_slow_projectile_ms = 100;
-    fo_config.max_rewind_fast_projectile_ms = 150;
+    fo_config.max_rewind_fast_projectile_ms = 100;
     fo_config.rewind_fast_projectile_thresh = 1500;
-    fo_config.wp_default_min_ping_ms = 45;
+    fo_config.wp_default_min_ping_ms = 40;
 }
 
 #ifdef SSQC
@@ -569,6 +558,8 @@ void PredProj_Sound(float proj_type) {
     Pred_Sound(fpp_types[proj_type].snd);
 }
 
+void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
+
 void FOProj_Init(int fpp_type, entity mis) {
     // This init always needs to occur.
     mis.dimension_seen = DMN_NOFLASH;
@@ -578,13 +569,15 @@ void FOProj_Init(int fpp_type, entity mis) {
     mis.modelindex = fpp_types[fpp_type].modelindex;
     setsize(mis, '0 0 0', '0 0 0');
 
-    // Below here is only when we're using new projectile networking.
-    if (!fo_projectiles)
-        return;
-
     mis.fpp_index = fpp_type;
     mis.s_origin = mis.origin;
-    mis.SendEntity = PP_SendEntity;
-    mis.SendFlags = 0xff;
+    mis.s_time = time;
+
+    WeaponPred_ProjectProjectile(fpp_type, mis);
+
+    if (fo_projectiles) {
+        mis.SendEntity = PP_SendEntity;
+        mis.SendFlags = 0xff;
+    }
 }
 #endif

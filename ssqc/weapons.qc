@@ -1081,17 +1081,13 @@ void () T_MissileTouch = {
 };
 
 void () W_FireRocket = {
-    self.ammo_rockets = self.ammo_rockets - 1;
-    KickPlayer(-2, self);
-
     newmis = spawn();
     newmis.owner = self;
     newmis.movetype = MOVETYPE_FLYMISSILE;
     newmis.solid = SOLID_BBOX;
 
     makevectors(self.v_angle);
-    newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * fpp_types[FPP_ROCKET].speed;
+    newmis.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
     newmis.angles = vectoangles(newmis.velocity);
 
     newmis.touch = T_MissileTouch;
@@ -1102,14 +1098,12 @@ void () W_FireRocket = {
 
     newmis.weapon = DMSG_ROCKETL;
     newmis.classname = "proj_rocket";
-    FO_SetModel(newmis, fpp_types[FPP_ROCKET].model);
-    setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
     FOProj_Init(FPP_ROCKET, newmis);
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
+
+    self.ammo_rockets = self.ammo_rockets - 1;
+    KickPlayer(-2, self);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1359,9 +1353,6 @@ entity (int fpp_type, vector offset) W_FireNail = {
     }
 
     FOProj_Init(fpp_type, newmis);
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
 
     return newmis;
 };

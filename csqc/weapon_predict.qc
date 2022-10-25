@@ -482,8 +482,6 @@ static void prandom(void() option1, void() option2) {
         option2();
 }
 
-float PP_PredictStartOffset();
-
 void WP_AnimateModel() {
     if (pstate_pred.client_thinkindex == 0) {
         player_run();
@@ -612,8 +610,6 @@ trail_table_entry trail_table[] = {
 
 float nail_trail;
 
-static float corr_s;  // Auto-tuning correction factor.
-
 void FO_PP_Init() {
     // Entity we'll attach locally generated sound to.
     pred_sound_entity = spawn();
@@ -631,8 +627,6 @@ void FO_PP_Init() {
             entry->trail[j] = particleeffectnum(name);
         }
     }
-
-    corr_s = 0.04;  //  Ballpark factor for many common pings.
 }
 
 void PP_Cleanup(entity proj) {
@@ -653,12 +647,8 @@ DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
-// A small time based correction factor (2 frames) that results in more precise
-// overlap with where the engine projectiles were previously rendered.
-static float orig_proj_offset = 2/77.0;
-
 float PP_PredrawActive() {
-    float delta = time - self.s_time + orig_proj_offset;
+    float delta = time - self.s_time;
 
     self.origin = self.s_origin + (self.velocity * delta);
     setorigin(self, self.origin);
@@ -718,7 +708,7 @@ int PP_FindTrail(entity e)
 }
 
 static float PP_EPS = 0.05;
-DEFCVAR_FLOAT(pp_trail_start, 50);
+DEFCVAR_FLOAT(pp_trail_start, 20);
 
 static inline void PP_InitTrail(entity proj) {
     proj.oldorigin = proj.s_origin + CVARF(pp_trail_start) * MSEC * proj.velocity;
@@ -728,16 +718,12 @@ static inline void PP_InitTrail(entity proj) {
 
 // Predict the effective start time of something we fire right now, accounting
 // for server side projection, ping fluctuation, etc.
-inline float PP_PredictStartOffset() {
-  float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000.0;
+float PP_StartOffset(int fpp_type) {
+    int max_credit = max_rewind_credit_ms(fpp_type);
+    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
 
-  // TODO: Communicate with server around this.
-  // Note: We use true time here since the created projectiles exist outside of
-  // our prediction.
-  float start_offset = max(0, pstate_pred.client_ping - 0.1) +  // Server project
-                       max(0, ping - pstate_pred.client_ping);  // Uncorrected error
-
-  return start_offset / 2 + corr_s;
+    return (max(pstate_pred.client_ping - max_credit, 0) +
+            ping - pstate_pred.client_ping) / 1000.0;
 }
 
 static float PP_EPS = 0.05;
@@ -767,9 +753,10 @@ void PP_CreateProjectile(int proj_type, vector offset) {
       return;
 #endif
 
-  proj.s_time = time + PP_PredictStartOffset();
+  // Note: We use true time here as created projectiles exist outside of pred.
+  proj.s_time = time + PP_StartOffset(proj_type);
   proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
-  proj.endtime = time + pstate_pred.client_ping + PP_EPS + 2;
+  proj.endtime = time + pstate_pred.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -899,43 +886,33 @@ void WP_Attack() {
 
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
-    float best = 0.2;
+    float best = 32;
 
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
+
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.fpp_index != self.fpp_index)
             continue;
 
-        float d = fabs(proj.s_time - self.s_time);
+        if (time > proj.endtime - 0.01)
+            break;   // Projectile list is time ordered
+
+        float d = vlen(proj.origin - self.origin);
         if (d < best) {
             best = d;
             match = proj;
-
-            proj.origin = proj.s_origin + (time - proj.s_time) * self.velocity;
-            if (vlen(proj.origin - self.origin) < 32) {
-                match = proj;
-                break;
-            }
         }
     }
 
     if (match) {
-        float diff_t = self.s_time - match.s_time;
-        float sgn = diff_t > 0 ? 1 : -1;
-        float c_s = 0;
-        if (fabs(diff_t) > 1/154.0) {
-            c_s = corr_s + diff_t/2 + sgn * 1/77.0;
-            corr_s = corr_s ? corr_s * 0.7 + 0.3 * c_s : c_s;
-        }
-
         self.oldorigin = match.oldorigin;  // Mate up trails.
         self.p_time = match.p_time;
 
         if (CVARF(wpp_debug) & 1) {
-            printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
+            printf("  p_diff = %0.3f / %0.3f t=%0.3f, error_s = %0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
-                vlen(match.origin - self.origin) / vlen(self.velocity));
-            printf(" error=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff_t, c_s, corr_s);
+                vlen(match.origin - self.origin) / vlen(self.velocity),
+                self.s_time - match.s_time);
         }
 
         PP_Cleanup(match);
@@ -950,7 +927,6 @@ void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    ASSERTF_EQ(self.effects, 0);
     setmodelindex(self, fpp_types[self.fpp_index].modelindex);
     setsize(self, [0,0,0], [0,0,0]);
 
