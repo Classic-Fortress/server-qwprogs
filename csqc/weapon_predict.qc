@@ -12,7 +12,6 @@ static inline float sq(float x) { return x * x; }
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
         print("CSQC: ", __VA_ARGS__); \
-        SetHadEffect(); \
     } else { print(__VA_ARGS__); } } while(0)
 
 #define NUM_PING_SAMPLES 20
@@ -58,10 +57,17 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 static float CalcPredEnabled(float current_enable,
                              float unspec_default /* meaning of '-1' */,
                              float server_disable, float server_enable,
-                             float client_value, string* set_by) {
+                             float client_value,
+                             float dependent_enabled, string* set_by) {
     if (csqc_get_user_setting("dw", "default_weapon", "0")) {
         *set_by = "[default_weapon unsupported, talk to newby to fix your " \
                   "config to not need it]";
+        return FALSE;
+    }
+
+    if (!dependent_enabled) {
+        // PP depends on WP, so !WP => !PP
+        *set_by = "[weapon prediction disabled]";
         return FALSE;
     }
 
@@ -109,6 +115,26 @@ static float next_wpp_enable_check;
 static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
+void WPP_Status() {
+    string wp_source, pp_source;
+    float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
+
+    CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
+            pstate_server.predict_flags & PF_WP_DISABLE,
+            pstate_server.predict_flags & PF_WP_ENABLE,
+            CVARF(fo_weap_predict), TRUE, &wp_source);
+
+    CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
+            pstate_server.predict_flags & PF_PP_DISABLE,
+            pstate_server.predict_flags & PF_PP_ENABLE,
+            CVARF(fo_proj_predict), wp_enabled, &pp_source);
+
+    printf("FortressOne: Weapon prediction %s %s\n",
+            wp_enabled ? "enabled" : "disabled", wp_source);
+    printf("FortressOne: Projectile prediction %s %s\n",
+            pp_enabled ? "enabled" : "disabled", pp_source);
+}
+
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
         update_avg_ping();
@@ -129,12 +155,12 @@ void WPP_UpdateEnable(float force) {
     wp_new = CalcPredEnabled(pengine.wp_enabled, CVARF(fo_wpp_beta),
                          pstate_server.predict_flags & PF_WP_DISABLE,
                          pstate_server.predict_flags & PF_WP_ENABLE,
-                         CVARF(fo_weap_predict), &wp_source);
+                         CVARF(fo_weap_predict), TRUE, &wp_source);
 
     pp_new = CalcPredEnabled(pengine.pp_enabled, CVARF(fo_wpp_beta),
                          pstate_server.predict_flags & PF_PP_DISABLE,
                          pstate_server.predict_flags & PF_PP_ENABLE,
-                         CVARF(fo_proj_predict), &pp_source);
+                         CVARF(fo_proj_predict), wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
@@ -161,11 +187,10 @@ void WPP_UpdateEnable(float force) {
         WP_UpdateViewModel(pengine.pweap_ent);
 }
 
-static inline float IsEffectFrame() {
-    return pengine.is_effectframe;
-}
+static float IsEffectFrame() {
+    if (!pengine.is_effectframe)
+        return FALSE;
 
-static void SetHadEffect() {
     // At ultra-low latencies it's possible that we're only one frame in front
     // of the server.  But this can mean that we get that frame back immediately
     // (and our input applies to the one after it).
@@ -173,6 +198,7 @@ static void SetHadEffect() {
         pengine.last_effectframe++;
         if (CVARF(wpp_debug) & 8) print("Effect bump!\n");
     }
+    return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +350,7 @@ float WP_CurrentAmmo() {
     return WP_GetAmmo(WP_CurrentWeapon()->ammo_type);
 }
 
-float* WP_ClipFired() {
+static float* WP_ClipFired() {
     float index = SlotIndex(pstate_pred.current_slot);
     if (pstate_pred.playerclass == PC_DEMOMAN &&
         index == 1)
@@ -520,10 +546,8 @@ void WP_Frame() {
         return;
     }
 
-    if (WP_Enabled()) {
-        WP_CheckReloadFinished();
-        WP_Impulse();
-    }
+    WP_CheckReloadFinished();
+    WP_Impulse();
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
@@ -699,7 +723,9 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 
   PredProj_Sound(proj_type);
 
-  SetHadEffect();
+  if (!PP_Enabled())
+      return;
+
   entity proj = spawn();
 
   proj.fpp_index = proj_type;
@@ -761,7 +787,7 @@ void PP_NailFrame() {
 
     float idx = (pstate_pred.client_thinkindex + 1) % 2;
 
-    if (!IsEffectFrame() || !PP_Enabled())
+    if (!IsEffectFrame())
         return;
 
     if (wi->weapon == WEAP_NAILGUN)
@@ -791,7 +817,7 @@ void WP_Attack() {
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 1;
 
-    if (PP_Enabled() && IsEffectFrame() && !in_anim) {
+    if (IsEffectFrame() && !in_anim) {
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
                 PP_CreateProjectile(FPP_ROCKET, v_forward * 8);
@@ -918,7 +944,7 @@ void InitProjPredEnt() {
         time - last_pred_sound > 75 * MSEC) {
 
         // Missing projectile implies we missed the local sound, patch it up.
-        if (PP_Enabled())
+        if (WP_Enabled())
             PredProj_Sound(self.fpp_index);
     }
 }
@@ -967,8 +993,7 @@ void WP_UpdateViewModel(entity pweap_ent) {
 }
 
 float WP_ClientThink() {
-    // Can only fully disable if both weapon and projectile prediction are off.
-    if (!WP_Enabled() && !PP_Enabled())
+    if (!WP_Enabled())
         return PREDRAW_NEXT;
 
     pstate_pred = pstate_server;

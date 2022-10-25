@@ -78,6 +78,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("vote_addmap");
     registercommand("vote_removemap");
+
+    registercommand("fo_wpp_status");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
@@ -380,6 +382,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("-button4\n");
             }
+            break;
+        case "fo_wpp_status":
+            WPP_Status();
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
