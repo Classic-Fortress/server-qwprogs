@@ -1,9 +1,16 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
-DEFCVAR_FLOAT(fo_wp_minping, 50);
-DEFCVAR_FLOAT(fo_weap_predict, -1);
-DEFCVAR_FLOAT(fo_proj_predict, -1);
+DEFCVAR_FLOAT(wpp_min_ping, -1);
+DEFCVAR_FLOAT(wpp_weap_predict, -1);
+DEFCVAR_FLOAT(wpp_proj_predict, -1);
+
+float WP_MinPing() {
+    if (CVARF(wpp_min_ping) == -1)
+            return fo_config.wp_default_min_ping_ms;
+    else
+        return CVARF(wpp_min_ping);
+}
 
 void WP_UpdateViewModel(entity pweap_ent);
 
@@ -81,7 +88,7 @@ static float CalcPredEnabled(float current_enable,
         return TRUE;
     }
 
-    if (CVARF(fo_wp_minping) < 0)
+    if (WP_MinPing() == 0)
         return current_enable;
 
     float ping_enable, avg, variance;
@@ -90,18 +97,18 @@ static float CalcPredEnabled(float current_enable,
     // We wait until 5ms over target (or 5 ms under target) when flipping, to
     // avoid flip flopping when ping is right at target.
     if (variance < sq(15))
-        ping_enable = avg > CVARF(fo_wp_minping) + (current_enable ? -5 : 5);
+        ping_enable = avg > WP_MinPing() + (current_enable ? -5 : 5);
     else
         return current_enable;  // variance too high, don't change anything.
 
 
     if (unspec_default || server_enable) {
         if (ping_enable) {
-            *set_by = sprintf("[ping] (fo_wp_minping=%0.0f / avg=%0.0f var=%0.0f)",
-                    CVARF(fo_wp_minping), avg, variance);
+            *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
+                    WP_MinPing(), avg, variance);
             return TRUE;
         } else {
-            *set_by = "[lan mode <40]";
+            *set_by = sprintf("[lan mode <%d]", WP_MinPing());
             return FALSE;
         }
     }
@@ -115,25 +122,44 @@ static float next_wpp_enable_check;
 static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
+#define PRINT_CONFIG(_field) \
+    if (fo_config.##_field) printf(" ." #_field " = %d\n", fo_config.##_field)
 void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
     CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            pstate_server.predict_flags & PF_WP_DISABLE,
-            pstate_server.predict_flags & PF_WP_ENABLE,
-            CVARF(fo_weap_predict), TRUE, &wp_source);
+            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            CVARF(wpp_weap_predict), TRUE, &wp_source);
 
     CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            pstate_server.predict_flags & PF_PP_DISABLE,
-            pstate_server.predict_flags & PF_PP_ENABLE,
-            CVARF(fo_proj_predict), wp_enabled, &pp_source);
+            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            CVARF(wpp_proj_predict), wp_enabled, &pp_source);
 
-    printf("FortressOne: Weapon prediction %s %s\n",
+    printf("Prediction Status:\n");
+    printf(" Weapon prediction %s %s\n",
             wp_enabled ? "enabled" : "disabled", wp_source);
-    printf("FortressOne: Projectile prediction %s %s\n",
+    printf(" Projectile prediction %s %s\n",
             pp_enabled ? "enabled" : "disabled", pp_source);
+
+    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    float avg, variance;
+    fill_avg_ping(&avg, &variance);
+    printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
+
+    printf("Config:\n");
+    PRINT_CONFIG(max_rewind_slow_projectile_ms);
+    PRINT_CONFIG(max_rewind_fast_projectile_ms);
+    PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(wp_default_min_ping_ms);
+    PRINT_CONFIG(wp_global_enable);
+    PRINT_CONFIG(wp_global_disable);
+    PRINT_CONFIG(pp_global_enable);
+    PRINT_CONFIG(pp_global_disable);
+    PRINT_CONFIG(wpp_global_enable);
+    PRINT_CONFIG(wpp_global_disable);
 }
+#undef PRINT_CONFIG
 
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
@@ -148,19 +174,19 @@ void WPP_UpdateEnable(float force) {
         return;
     next_wpp_enable_check = time + ENABLE_CHECK_PERIOD;
 
-    // Tristate: 1 => force on, 0 => force off, -1 => up to minping/server
+    // For wpp_weap_predict and wpp_proj_predict we use a tristate:
+    //   1 => force on, 0 => force off, -1 => up to min_ping/server
+    float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
     float wp_new = -1, pp_new = -1;
     string wp_source, pp_source;
 
-    wp_new = CalcPredEnabled(pengine.wp_enabled, CVARF(fo_wpp_beta),
-                         pstate_server.predict_flags & PF_WP_DISABLE,
-                         pstate_server.predict_flags & PF_WP_ENABLE,
-                         CVARF(fo_weap_predict), TRUE, &wp_source);
+    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
+            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            CVARF(wpp_weap_predict), TRUE, &wp_source);
 
-    pp_new = CalcPredEnabled(pengine.pp_enabled, CVARF(fo_wpp_beta),
-                         pstate_server.predict_flags & PF_PP_DISABLE,
-                         pstate_server.predict_flags & PF_PP_ENABLE,
-                         CVARF(fo_proj_predict), wp_new, &pp_source);
+    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
+            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            CVARF(wpp_proj_predict), wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
@@ -456,8 +482,6 @@ static void prandom(void() option1, void() option2) {
         option2();
 }
 
-float PP_PredictStartOffset();
-
 void WP_AnimateModel() {
     if (pstate_pred.client_thinkindex == 0) {
         player_run();
@@ -586,8 +610,6 @@ trail_table_entry trail_table[] = {
 
 float nail_trail;
 
-static float corr_s;  // Auto-tuning correction factor.
-
 void FO_PP_Init() {
     // Entity we'll attach locally generated sound to.
     pred_sound_entity = spawn();
@@ -605,8 +627,6 @@ void FO_PP_Init() {
             entry->trail[j] = particleeffectnum(name);
         }
     }
-
-    corr_s = 0.04;  //  Ballpark factor for many common pings.
 }
 
 void PP_Cleanup(entity proj) {
@@ -627,12 +647,8 @@ DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
-// A small time based correction factor (2 frames) that results in more precise
-// overlap with where the engine projectiles were previously rendered.
-static float orig_proj_offset = 2/77.0;
-
 float PP_PredrawActive() {
-    float delta = time - self.s_time + orig_proj_offset;
+    float delta = time - self.s_time;
 
     self.origin = self.s_origin + (self.velocity * delta);
     setorigin(self, self.origin);
@@ -692,7 +708,7 @@ int PP_FindTrail(entity e)
 }
 
 static float PP_EPS = 0.05;
-DEFCVAR_FLOAT(pp_trail_start, 50);
+DEFCVAR_FLOAT(pp_trail_start, 20);
 
 static inline void PP_InitTrail(entity proj) {
     proj.oldorigin = proj.s_origin + CVARF(pp_trail_start) * MSEC * proj.velocity;
@@ -702,16 +718,12 @@ static inline void PP_InitTrail(entity proj) {
 
 // Predict the effective start time of something we fire right now, accounting
 // for server side projection, ping fluctuation, etc.
-inline float PP_PredictStartOffset() {
-  float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000.0;
+float PP_StartOffset(int fpp_type) {
+    int max_credit = max_rewind_credit_ms(fpp_type);
+    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
 
-  // TODO: Communicate with server around this.
-  // Note: We use true time here since the created projectiles exist outside of
-  // our prediction.
-  float start_offset = max(0, pstate_pred.client_ping - 0.1) +  // Server project
-                       max(0, ping - pstate_pred.client_ping);  // Uncorrected error
-
-  return start_offset / 2 + corr_s;
+    return (max(pstate_pred.client_ping - max_credit, 0) +
+            ping - pstate_pred.client_ping) / 1000.0;
 }
 
 static float PP_EPS = 0.05;
@@ -741,9 +753,10 @@ void PP_CreateProjectile(int proj_type, vector offset) {
       return;
 #endif
 
-  proj.s_time = time + PP_PredictStartOffset();
+  // Note: We use true time here as created projectiles exist outside of pred.
+  proj.s_time = time + PP_StartOffset(proj_type);
   proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
-  proj.endtime = time + pstate_pred.client_ping + PP_EPS + 2;
+  proj.endtime = time + pstate_pred.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -873,43 +886,33 @@ void WP_Attack() {
 
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
-    float best = 0.2;
+    float best = 32;
 
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
+
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.fpp_index != self.fpp_index)
             continue;
 
-        float d = fabs(proj.s_time - self.s_time);
+        if (time > proj.endtime - 0.01)
+            break;   // Projectile list is time ordered
+
+        float d = vlen(proj.origin - self.origin);
         if (d < best) {
             best = d;
             match = proj;
-
-            proj.origin = proj.s_origin + (time - proj.s_time) * self.velocity;
-            if (vlen(proj.origin - self.origin) < 32) {
-                match = proj;
-                break;
-            }
         }
     }
 
     if (match) {
-        float diff_t = self.s_time - match.s_time;
-        float sgn = diff_t > 0 ? 1 : -1;
-        float c_s = 0;
-        if (fabs(diff_t) > 1/154.0) {
-            c_s = corr_s + diff_t/2 + sgn * 1/77.0;
-            corr_s = corr_s ? corr_s * 0.7 + 0.3 * c_s : c_s;
-        }
-
         self.oldorigin = match.oldorigin;  // Mate up trails.
         self.p_time = match.p_time;
 
         if (CVARF(wpp_debug) & 1) {
-            printf("  p_diff = %0.3f / %0.3f t=%0.3f\n",
+            printf("  p_diff = %0.3f / %0.3f t=%0.3f, error_s = %0.3f\n",
                 vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
-                vlen(match.origin - self.origin) / vlen(self.velocity));
-            printf(" error=%0.4f c_s=%0.4f corr_s=%0.4f\n", diff_t, c_s, corr_s);
+                vlen(match.origin - self.origin) / vlen(self.velocity),
+                self.s_time - match.s_time);
         }
 
         PP_Cleanup(match);
@@ -924,7 +927,6 @@ void InitProjPredEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    ASSERTF_EQ(self.effects, 0);
     setmodelindex(self, fpp_types[self.fpp_index].modelindex);
     setsize(self, [0,0,0], [0,0,0]);
 

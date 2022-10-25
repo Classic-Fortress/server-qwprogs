@@ -1092,9 +1092,6 @@ void () W_FireTranq = {
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
     FOProj_Init(FPP_TRANQ, newmis);
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
 };
 
 void () T_TranqDartTouch = {

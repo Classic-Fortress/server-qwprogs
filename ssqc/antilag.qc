@@ -1,12 +1,19 @@
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+static float NoLanProject() {
+    if (self.client_ping <= 25) {
+        self.s_time = time;  // Still need to potentially setup for networking
+        return TRUE;
+    }
+    return FALSE;
+}
 
 void AL_ProjectProjectile (entity projectile) {
-    float time_offset = self.client_time - remote_client_time(CT_SLOW_PROJECTILE);
-
-    projectile.s_time = time - time_offset;
-    if (time_offset <= 13 * MSEC)  // ping 13ms or lower? Don't do anything
+    if (NoLanProject())
         return;
 
+    float time_offset =
+        min(self.client_ping, fo_config.max_rewind_slow_projectile_ms) / 1000.0;
+
+    projectile.s_time = time - time_offset;
     vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
     // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
     // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
@@ -24,6 +31,22 @@ void AL_ProjectProjectile (entity projectile) {
     setorigin(projectile, projected_origin);
 }
 
+void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
+    if (NoLanProject())
+        return;
+
+    float max_credit = max_rewind_credit_ms(fpp_type);
+    float time_offset = min(self.client_ping, max_credit) / 1000.0;
+
+    projectile.s_time = time - time_offset;
+    vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
+    traceline(projectile.origin, projected_origin, 0, self);
+
+    if (trace_fraction < 1)
+        projected_origin = trace_endpos;
+
+    setorigin(projectile, projected_origin);
+}
 #define DEBUG_ANTILAG 0
 
 #ifndef DEBUG_ANTILAG

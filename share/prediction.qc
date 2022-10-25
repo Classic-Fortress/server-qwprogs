@@ -1,12 +1,13 @@
-#define ENT_WEAPONPRED 100
-#define ENT_PROJECTILE 101
+#define ENT_CONFIG     100
+#define ENT_WEAPONPRED 101
+#define ENT_PROJECTILE 102
 
 // Below apply to both CSQC & SSQC ents
-.float fpp_index;     // Projectile type
+.float fpp_index;  // Projectile type
 .vector s_origin;  // Spawning origin (at s_time); matched for client/server
 .float s_time;     // Time spawned (in client_time)
 
-string wp_version = "v0.1";
+string wp_version = "v0.2";
 
 enumflags {
     FOWP_CTIME,
@@ -29,12 +30,6 @@ enumflags {
 };
 
 #define FOWP_ALL 0xFFFF
-
-#define PF_WP_ENABLE    1
-#define PF_WP_DISABLE   2
-#define PF_PP_ENABLE    4
-#define PF_PP_DISABLE   8
-#define PF_ED_MASK (PF_WP_ENABLE | PF_WP_DISABLE | PF_PP_ENABLE | PF_PP_DISABLE)
 
 enumflags {
     CSQC_WEAP_PRED,
@@ -124,8 +119,8 @@ struct fo_projectile {
 };
 
 fo_projectile fpp_types[] = {
-    { FPP_ROCKET,     PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
-    { FPP_GRENADE,       600, "grenade.mdl", "t_grenade", SND_GREN },
+    { FPP_ROCKET,      PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
+    { FPP_GRENADE,            600, "grenade.mdl", "t_grenade", SND_GREN },
     { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL },
     { FPP_NAIL,              1500, "spike.mdl", "tr_spike", SND_NAIL },
     { FPP_SUPER_NAIL,        1500, "s_spike.mdl", "tr_spike", SND_SNAIL },
@@ -133,7 +128,6 @@ fo_projectile fpp_types[] = {
     { FPP_TRANQ,       PC_SPY_TRANQSPEED, "spike.mdl", "tr_spike", SND_TRANQ },
     { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
 };
-
 
 void InitFppProjectiles() {
     float i;
@@ -157,6 +151,12 @@ void InitFppProjectiles() {
         snd->sound = strcat("weapons/", snd->sound);
         precache_sound(snd->sound);
     }
+}
+
+float max_rewind_credit_ms(int fpp_type) {
+    return fpp_types[fpp_type].speed < fo_config.rewind_fast_projectile_thresh ?
+            fo_config.max_rewind_slow_projectile_ms :
+            fo_config.max_rewind_fast_projectile_ms;
 }
 
 #ifdef SSQC
@@ -224,42 +224,12 @@ float shared_prng(entity pl) {  // A 16-bit xor-shift LFSR.
 predict_tf_state blank_state;
 .float last_full_predict_refresh;
 
-static void WeaponPred_UpdatePredictionFlags() {
-    float wpp_enable = FALSE, wp_enable = FALSE, pp_enable = FALSE;
-    float wpp_disable = FALSE, wp_disable = FALSE, pp_disable = FALSE;
-
-    wp_enable   = CF_GetSetting("wpge", "wp_global_enable", "off");
-    wp_disable  = CF_GetSetting("wpgd", "wp_global_disable", "off");
-    pp_enable   = CF_GetSetting("ppge", "pp_global_enable", "off");
-    pp_disable  = CF_GetSetting("ppgd", "pp_global_disable", "off");
-    wpp_enable  = CF_GetSetting("wppge", "wpp_global_enable", "off");
-    wpp_disable = CF_GetSetting("wppge", "wpp_global_disable", "off");
-
-    float wp_mask = 0, pp_mask = 0;
-
-    // Disables dominate enables.
-    if (wpp_disable || wp_disable)
-        wp_mask = PF_WP_DISABLE;
-    else if (wpp_enable || wp_enable)
-        wp_mask = PF_WP_ENABLE;
-    if (wpp_disable || pp_disable)
-        pp_mask = PF_PP_DISABLE;
-    else if (wpp_enable || pp_enable)
-        pp_mask = PF_PP_ENABLE;
-
-    self.predict_state.predict_flags &= ~PF_ED_MASK;
-    self.predict_state.predict_flags |= wp_mask | pp_mask;
-
-    // Note: Flag to send is simply the all-bits periodic.
-}
-
 void WeaponPred_Update(entity player) {
     float mask = FOWP_CTIME;
 
     if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
         player.predict_state = blank_state;
         player.last_full_predict_refresh = time;
-        WeaponPred_UpdatePredictionFlags();
         mask = -1;
     }
 
@@ -295,6 +265,48 @@ void sprint_pred(entity client, float msglevel, string s) {
 }
 #endif
 
+#ifdef CSQC
+float() ReadByte = #360;
+float() ReadShort = #362;
+float() ReadCoord = #364;
+float() ReadAngle = #365;
+float() ReadFloat = #367;
+
+void InitWeapPredEnt(entity e);
+void WP_ServerUpdate();
+void InitProjPredEnt();
+void WPP_UpdateEnable(float force);
+
+.float owner_entnum;
+#endif
+
+#ifdef SSQC
+#define COMM(_type, _field) Write##_type(MSG_ENTITY, fo_config.##_field)
+float WP_SendConfig(entity to_player, float sendflags) {
+    WriteByte(MSG_ENTITY, ENT_CONFIG);
+#else
+#define COMM(_type, _field) fo_config.##_field = Read##_type()
+void EntUpdate_Config() {
+#endif
+    COMM(Float, max_rewind_slow_projectile_ms);
+    COMM(Float, max_rewind_fast_projectile_ms);
+    COMM(Float, rewind_fast_projectile_thresh);
+    COMM(Float, wp_default_min_ping_ms);
+    COMM(Float, wp_global_enable);
+    COMM(Float, wp_global_disable);
+    COMM(Float, pp_global_enable);
+    COMM(Float, pp_global_disable);
+    COMM(Float, wpp_global_enable);
+    COMM(Float, wpp_global_disable);
+
+#ifdef SSQC
+    return TRUE;
+#else
+    WPP_UpdateEnable(TRUE);
+#endif
+}
+#undef COMM
+
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
 float WP_SendEntity(entity to_player, float sendflags) {
@@ -304,11 +316,6 @@ float WP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
 #else
-float() ReadByte = #360;
-float() ReadFloat = #367;
-void InitWeapPredEnt(entity e);
-void WP_ServerUpdate();
-
 #define COMM(_type, _field) pstate_server.##_field = Read##_type()
 void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
@@ -383,16 +390,6 @@ float PP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, sendflags);
 #else
 
-float() ReadByte = #360;
-float() ReadShort = #362;
-float() ReadCoord = #364;
-float() ReadAngle = #365;
-float() ReadFloat = #367;
-
-void InitProjPredEnt();
-
-.float owner_entnum;
-
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
@@ -414,7 +411,6 @@ void EntUpdate_Projectile(float isnew) {
 
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
-        COMM(Short, effects);
 
         COMM(Angle, angles[0]);
         COMM(Angle, angles[1]);
@@ -434,9 +430,70 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMMO
 #undef COMM
 
-#ifdef SSQC
-.float wpp_init;
+void WeapPred_InitDefaultConfig() {
+    fo_config.max_rewind_slow_projectile_ms = 100;
+    fo_config.max_rewind_fast_projectile_ms = 100;
+    fo_config.rewind_fast_projectile_thresh = 1500;
+    fo_config.wp_default_min_ping_ms = 40;
+}
 
+#ifdef SSQC
+
+entity config_entity;
+
+#define CONFIG_UPDATE(_fl, _ps_short, _field) \
+    do { string _cur = ftos(fo_config.##_field); \
+         float _val = CF_GetSetting(_ps_short, #_field, _cur); \
+         if (_val != fo_config.##_field) { \
+                fo_config.##_field = _val; _fl = TRUE; \
+         } \
+    } while (0)
+
+static void WeaponPred_CheckConfigUpdate() {
+    float update = FALSE;
+
+    // Target is also the long form localinfo name.
+    CONFIG_UPDATE(update, "mrsp", max_rewind_slow_projectile_ms);
+    CONFIG_UPDATE(update, "mrfp", max_rewind_fast_projectile_ms);
+    CONFIG_UPDATE(update, "rfpt", rewind_fast_projectile_thresh);
+    CONFIG_UPDATE(update, "wpdmp", wp_default_min_ping_ms);
+    CONFIG_UPDATE(update, "wpge", wp_global_enable);
+    CONFIG_UPDATE(update, "wpgd", wp_global_disable);
+    CONFIG_UPDATE(update, "ppge", pp_global_enable);
+    CONFIG_UPDATE(update, "ppgd", pp_global_disable);
+    CONFIG_UPDATE(update, "wppge", wpp_global_enable);
+    CONFIG_UPDATE(update, "wppge", wpp_global_disable);
+
+    if (update)
+        print("saw update! %d", fo_config.wp_global_disable);
+
+
+    static float last_force_refresh;
+    if (time > last_force_refresh + 5) {
+        update = TRUE;
+        last_force_refresh = time;
+    }
+
+    if (update)
+        config_entity.SendFlags = 1;
+    config_entity.nextthink = time + 0.25;
+};
+#undef CONFIG_UPDATE
+
+void WeaponPred_Init() {
+    WeapPred_InitDefaultConfig();
+
+    config_entity = spawn();
+
+    config_entity.dimension_seen = DMN_FLASH | DMN_NOFLASH;
+    config_entity.pvsflags = PVSF_IGNOREPVS;
+    config_entity.SendEntity = WP_SendConfig;
+
+    config_entity.think = WeaponPred_CheckConfigUpdate;
+    config_entity.nextthink = time + 0.5;
+}
+
+.float wpp_init;
 void WeaponPred_InitPlayer(entity player) {
     // PutClientInServer is called every spawn.  At some point we'll clean up
     // parameter decode so that it can happen earlier and this nonsense goes
@@ -501,6 +558,8 @@ void PredProj_Sound(float proj_type) {
     Pred_Sound(fpp_types[proj_type].snd);
 }
 
+void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
+
 void FOProj_Init(int fpp_type, entity mis) {
     // This init always needs to occur.
     mis.dimension_seen = DMN_NOFLASH;
@@ -510,13 +569,15 @@ void FOProj_Init(int fpp_type, entity mis) {
     mis.modelindex = fpp_types[fpp_type].modelindex;
     setsize(mis, '0 0 0', '0 0 0');
 
-    // Below here is only when we're using new projectile networking.
-    if (!fo_projectiles)
-        return;
-
     mis.fpp_index = fpp_type;
     mis.s_origin = mis.origin;
-    mis.SendEntity = PP_SendEntity;
-    mis.SendFlags = 0xff;
+    mis.s_time = time;
+
+    WeaponPred_ProjectProjectile(fpp_type, mis);
+
+    if (fo_projectiles) {
+        mis.SendEntity = PP_SendEntity;
+        mis.SendFlags = 0xff;
+    }
 }
 #endif

@@ -105,9 +105,6 @@ void () W_FireRailgun = {
     setorigin(newmis, org + '0 0 16');
 
     FOProj_Init(FPP_RAILGUN, newmis);
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
 };
 
 void () EMPExplode = {

@@ -572,9 +572,6 @@ void () W_FireFlame = {
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 
     FOProj_Init(FPP_FLAMETHROWER, flame);
-    if (project_weapons) {
-        AL_ProjectProjectile(flame);
-    }
 };
 
 void () IncendiaryRadius = {
@@ -700,9 +697,6 @@ void () W_FireIncendiaryCannon = {
     setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
 
     FOProj_Init(FPP_INCENDIARY, newmis);
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
 };
 
 void () AirBlastReloadFinished = {
