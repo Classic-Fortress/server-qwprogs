@@ -201,7 +201,7 @@ SeekResult SeekOpt(RewindState* target, float when) {
     float probe = floor((time - when) / AL_FRAME_LIMIT);
     probe = max(probe - 3, 0);
     printd(" probe = %d -> %d, %d\n",
-           probe, target->cursor, Index(target->cursor - probe));
+           probe, target->cursor, Index(target->cursor - probe);
 
     if (probe > AL_MAX_REWINDS || probe < 0)
         return r;
@@ -347,8 +347,6 @@ class FOPlayer {
         }
     };
 };
-
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     if (!antilag_settings.rewind_detpipe)
