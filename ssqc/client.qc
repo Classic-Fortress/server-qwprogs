@@ -635,9 +635,6 @@ void () DecodeLevelParms = {
         ng_damage = CF_GetSetting("ngd", "ng_damage", "9");
         sng_damage = CF_GetSetting("sngd", "sng_damage", "13");
 
-        // use old ROF for nailguns
-        old_ng_rof = CF_GetSetting("ongrof", "old_ng_rof", "off");
-
         // allow axe to hit on any frame of animation
         superaxe = CF_GetSetting("ss", "superaxe", "on");
 
@@ -866,7 +863,6 @@ void () DecodeLevelParms = {
             sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
-            old_ng_rof = FALSE;
             superaxe = TRUE;
             supermedikit = TRUE;
             superspanner = FALSE;
@@ -948,7 +944,6 @@ void () DecodeLevelParms = {
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
-            old_ng_rof = TRUE;
             pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
             Role_None.gren1_limits[2] = 4;
@@ -986,7 +981,6 @@ void () DecodeLevelParms = {
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
-            old_ng_rof = TRUE;
             scoutdash = FALSE;
             fo_flash = FALSE;
             nailgren_type = NGR_TYPE_NAIL;

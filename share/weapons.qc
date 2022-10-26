@@ -15,7 +15,6 @@
 float fo_hwguy = TRUE;
 float sniperreload = FALSE;
 float pyro_type = PYRO_FO;
-float old_ng_rof = FALSE;
 #endif
 
 // Some preprocessor bug is making __LINE__ not substitute right here most of
@@ -630,14 +629,6 @@ void FO_Weapons_Init() {
         case PYRO_FO:
         default:
             WI_ir->attack_time = 0.9; break;
-    }
-
-    // Consider just removing this?
-    if (old_ng_rof) {
-        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_NAILGUN);
-        wi->ammo_per_shot = 2;
-        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
-        wi->ammo_per_shot = 4;
     }
 
     for (i = 0; i < weapon_info.length; i++) {

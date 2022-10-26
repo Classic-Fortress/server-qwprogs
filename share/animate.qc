@@ -11,13 +11,11 @@ void think_nop() {}
 
 #ifdef SSQC
 
-void nail_extra();
 void asscan_up_extra();
 void asscan_fire_extra();
 void asscan_down_extra();
 void W_PrintWeaponMessage();
 void W_ChangeToBestWeapon();
-void W_FireSpikes(float ox);
 void W_FireAssaultCannon();
 int W_FireAxe();
 int W_FireKnife();
@@ -33,6 +31,9 @@ void player_asscan_fire();
 void player_asscan_down1();
 
 inline void *thinkindex() { return &self.client_thinkindex; }
+static inline float has_button0() { return self.button0; }
+static inline float is_intermission() { return intermission_running; }
+
 
 void FO_SetClientThink(void() func, float offset, float override = TRUE) {
     self.think = think_nop;
@@ -98,20 +99,6 @@ static void axe_extra() {
 
     if (weapon == WEAP_KNIFE && superknife && superknife_multihit)
         self.hit_in_current_animation = FALSE;
-}
-
-void nail_extra() {
-    if (!self.button0 || intermission_running) {
-        player_run();
-        return;
-    }
-
-    float idx = (self.client_thinkindex - 1) % 2;
-    if (idx == 0 || !old_ng_rof) {
-        SuperDamageSound();
-        W_FireSpikes(idx ? 4 : -4);
-        self.nailpos = 1 - self.nailpos;
-    }
 }
 
 static float CheckNeedAssaultCannonDown() {
@@ -243,20 +230,35 @@ void player_stand1() {
 
 #else /* CSQC */
 static inline void *thinkindex() { return &pstate_pred.client_thinkindex; }
+static inline float has_button0() { return input_buttons & BUTTON0; }
+static inline float is_intermission() { return intermission; }
+static void SuperDamageSound() {} // TODO
 
 void FO_SetClientThink(void() func, float offset, float override = TRUE) {
     pstate_pred.client_nextthink = pstate_pred.client_time + offset;
 }
 
 void player_run() {
-    pstate_pred.firing = FALSE;
     pstate_pred.client_nextthink = 0;
     pstate_pred.client_thinkindex = 0;
     pstate_pred.weaponframe = 0;
 }
 
+// When `extra()` is specified, it is responsible ending looped animations.
+// [ Typically because +attack (button0) has been released. ]
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    float tidx = (*thinkindex())++ - 1;
+    float tidx = *thinkindex()++ - 1;
+
+    float loop = anim->loop;
+    if (loop && extra == think_nop && !(input_buttons & BUTTON0))
+        loop = TRUE;
+
+    if (tidx > anim->num_frames - 1 && !loop) {
+        player_run();
+        return;
+    } else {
+        pstate_pred.client_nextthink = pstate_pred.client_time + 0.1;
+    }
 
     float fi = tidx % anim->num_frames;
     float wfi = tidx % anim->num_wf;
@@ -264,30 +266,30 @@ void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
     float wf = anim->weaponframes[wfi] ?: anim->weaponframes[0] + wfi;
     pstate_pred.weaponframe = wf;
 
-    float loop = anim->loop && (input_buttons & BUTTON0);
-
-    if (tidx > anim->num_frames - 1 && !loop) {
-        // Special case for CSQC since we could predict through the wrap.
-        player_run();
-    } else if (fi == anim->num_frames - 1 && !loop) {
-        FO_SetClientThink(player_run, 0.1);
-    } else
-        FO_SetClientThink(parent_thunk, 0.1);
-
     if (extra != think_nop)
         extra();
 }
 
 static void axe_extra() {}
 
-void PP_NailFrame();
-void nail_extra() { PP_NailFrame(); }
-
 static void asscan_up_extra() {}
 static void asscan_fire_extra() {}
 static void asscan_down_extra() {}
 
 #endif
+
+void W_FireSpikes(float ox);
+// Shared by both client and server side.
+void nail_extra_csqc_ssqc() {
+    if (!has_button0() || is_intermission()) {
+        player_run();
+        return;
+    }
+
+    float tidx = *thinkindex() % 2;  // 1 based, and incremented.
+    SuperDamageSound();
+    W_FireSpikes(tidx ? 4 : -4);
+}
 
 anim_t anim_rocket = { 6, 6, {107}, {1}, TRUE };
 void player_rocketN() { client_anim_frames(player_rocketN, think_nop, &anim_rocket); }
@@ -296,7 +298,6 @@ void player_rocket1() { *thinkindex() = 1; player_rocketN(); }
 anim_t anim_shotgun = { 6, 6, {113}, {1}, TRUE };
 void player_shotN() { client_anim_frames(player_shotN, think_nop, &anim_shotgun); }
 void player_shot1() { *thinkindex() = 1; player_shotN(); }
-
 
 anim_t anim_autorifle = { 3, 3, {113, 114, 118}, {1, 2, 6}, TRUE };
 void player_autorifleN() { client_anim_frames(player_autorifleN, think_nop, &anim_autorifle); }
@@ -326,7 +327,7 @@ void player_medikitbN() { client_anim_frames(player_medikitbN, axe_extra, &anim_
 void player_medikitb1() { *thinkindex() = 1; player_medikitbN(); }
 
 anim_t anim_nailgun = { 2, 8, {103, 104}, {1}, TRUE, TRUE };
-void player_nailN() { client_anim_frames(player_nailN, nail_extra, &anim_nailgun); }
+void player_nailN() { client_anim_frames(player_nailN, nail_extra_csqc_ssqc, &anim_nailgun); }
 void player_nail1() { *thinkindex() = 1; player_nailN(); }
 
 anim_t anim_flamethrower = { 6, 6, {113}, {1}, TRUE, FALSE };

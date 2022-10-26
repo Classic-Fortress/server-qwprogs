@@ -274,7 +274,43 @@ inline float WP_IsReloading() {
     return pstate_pred.tfstate & TFSTATE_RELOADING;
 }
 
-float WP_CheckAmmo(FO_WeapInfo* wi);
+static float AmmoToStat(float ammo_type) {
+    switch (ammo_type) {
+        case AMMO_SHELLS: return STAT_SHELLS;
+        case AMMO_ROCKETS: return STAT_ROCKETS;
+        case AMMO_NAILS: return STAT_NAILS;
+        case AMMO_CELLS: return STAT_CELLS;
+    }
+    return STAT_AMMO;
+}
+
+float WP_GetAmmo(float ammo_type) {
+    if (!WP_Enabled())
+        return getstatf(AmmoToStat(ammo_type));
+
+    if (ammo_type == AMMO_NONE)
+        return 0;
+
+    float base = getstatf(AmmoToStat(ammo_type));
+    base -= pstate_pred.ammo_used[ammo_type];
+    return max(0, base);
+}
+
+float WP_CurrentAmmo() {
+    if (!WP_Enabled())
+        return getstatf(STAT_AMMO);
+
+    return WP_GetAmmo(WP_CurrentWeapon()->ammo_type);
+}
+
+
+float WP_CheckAmmo(FO_WeapInfo* wi) {
+    if (wi->ammo_type == AMMO_NONE || IsSlotMelee(pstate_pred.current_slot))
+        return TRUE;
+
+    int ammo = WP_GetAmmo(wi->ammo_type);
+    return ammo > wi->ammo_per_shot;
+}
 
 void WP_ChangeWeapon(Slot slot) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
@@ -287,6 +323,27 @@ void WP_ChangeWeapon(Slot slot) {
     // UpdateViewModel will propagate.
 }
 
+Slot WP_BestWeaponSlot() {
+    for (float i = 1; i <= TF_NUM_SLOTS; i++) {
+        Slot slot = MakeSlot(i);
+        FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
+
+        if (wi->weapon == WEAP_ASSAULT_CANNON && WP_GetAmmo(AMMO_CELLS) < 7)
+            continue;
+
+        if (wi->weapon == WEAP_NONE || !WP_CheckAmmo(wi))
+            continue;
+
+        return slot;
+    }
+
+    return SlotMelee;
+}
+
+void W_ChangeToBestWeapon() {
+    WP_ChangeWeapon(WP_BestWeaponSlot());
+}
+
 void WP_Reload();
 
 void WP_Impulse() {
@@ -294,6 +351,7 @@ void WP_Impulse() {
 
     float match = TRUE;
     float quick_swap = FALSE;
+
     switch (pstate_pred.impulse) {
         case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
             pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
@@ -335,7 +393,7 @@ void WP_Impulse() {
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
 
-    if (!IsSlotNull(pstate_pred.queue_slot) && !pstate_pred.firing) {
+    if (!IsSlotNull(pstate_pred.queue_slot)) {
         WP_ChangeWeapon(pstate_pred.queue_slot);
         pstate_pred.queue_slot = SlotNull;
     }
@@ -352,35 +410,6 @@ void WP_Impulse() {
 
     if (clear)
         pstate_pred.impulse = 0;
-}
-
-static float AmmoToStat(float ammo_type) {
-    switch (ammo_type) {
-        case AMMO_SHELLS: return STAT_SHELLS;
-        case AMMO_ROCKETS: return STAT_ROCKETS;
-        case AMMO_NAILS: return STAT_NAILS;
-        case AMMO_CELLS: return STAT_CELLS;
-    }
-    return STAT_AMMO;
-}
-
-float WP_GetAmmo(float ammo_type) {
-    if (!WP_Enabled())
-        return getstatf(AmmoToStat(ammo_type));
-
-    if (ammo_type == AMMO_NONE)
-        return 0;
-
-    float base = getstatf(AmmoToStat(ammo_type));
-    base -= pstate_pred.ammo_used[ammo_type];
-    return max(0, base);
-}
-
-float WP_CurrentAmmo() {
-    if (!WP_Enabled())
-        return getstatf(STAT_AMMO);
-
-    return WP_GetAmmo(WP_CurrentWeapon()->ammo_type);
 }
 
 static float* WP_ClipFired() {
@@ -413,7 +442,6 @@ string WP_GetClip() {
     float clip = capacity - fired - still_loading;
     return sprintf("%d/%d", clip, wi->clip_size);
 }
-
 
 void WP_Reload() {
     FO_WeapInfo* wi = WP_CurrentWeapon();
@@ -449,14 +477,6 @@ void WP_CheckReloadFinished() {
         if (IsEffectFrame())
             csqc_print("Finished reloading\n");
     }
-}
-
-float WP_CheckAmmo(FO_WeapInfo* wi) {
-    if (wi->ammo_type == AMMO_NONE || IsSlotMelee(pstate_pred.current_slot))
-        return TRUE;
-
-    int ammo = WP_GetAmmo(wi->ammo_type);
-    return ammo > wi->ammo_per_shot;
 }
 
 float WP_ReloadIfNeeded(FO_WeapInfo* wi) {
@@ -787,28 +807,26 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 void PP_AssCanFrame() {
 }
 
-void PP_NailFrame() {
-    if (input_buttons & BUTTON0 == 0) {
-        player_run();
+void (float ox) W_FireSpikes = {
+    FO_WeapInfo* wi = WP_CurrentWeapon();
+
+    if (!WP_CheckAmmo(wi)) {
+        W_ChangeToBestWeapon();
         return;
     }
 
-    pstate_pred.firing = TRUE;
-
-    FO_WeapInfo* wi = WP_CurrentWeapon();
     WP_ConsumeAmmo(wi);
     Attack_Finished(wi->attack_time);
-
-    float idx = (pstate_pred.client_thinkindex + 1) % 2;
 
     if (!IsEffectFrame())
         return;
 
     if (wi->weapon == WEAP_NAILGUN)
-        PP_CreateProjectile(FPP_NAIL, v_right * (idx ? 4: - 4));
+        PP_CreateProjectile(FPP_NAIL, ox * v_right);
     else
         PP_CreateProjectile(FPP_SUPER_NAIL, '0 0 0');
-}
+
+};
 
 void WP_Attack() {
     Slot slot = pstate_pred.current_slot;

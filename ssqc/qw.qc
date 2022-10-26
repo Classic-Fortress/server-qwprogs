@@ -433,7 +433,6 @@ float already_chosen_map;
 
 // flash grenade level
 .float FlashTime;
-.float nailpos;
 
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
@@ -619,7 +618,6 @@ float supermedikit;
 float superspanner;
 float superknife;
 float superknife_multihit;
-float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
 float pyro_type;

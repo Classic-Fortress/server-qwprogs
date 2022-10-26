@@ -59,7 +59,6 @@ struct predict_tf_state {
 
      // Used for prediction, not actually communicated.  Reset each frame.
     float ammo_used[AMMO_NUM_TYPES];
-    float firing;
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
