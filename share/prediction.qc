@@ -602,7 +602,7 @@ void FOProj_Init(int fpp_type, entity mis) {
 
     PredProj_Sound(fpp_type);
 
-    mis.modelindex = fpp_types[fpp_type].modelindex;
+    setmodel(mis, fpp_types[fpp_type].model);
     setsize(mis, '0 0 0', '0 0 0');
 
     mis.fpp_index = fpp_type;
