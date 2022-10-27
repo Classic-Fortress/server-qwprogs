@@ -27,6 +27,7 @@ enumflags {
 enumflags {
     FOPP_POS,
     FOPP_INIT,
+    FOPP_AUX,
 };
 
 #define FOWP_ALL 0xFFFF
@@ -54,23 +55,20 @@ struct predict_tf_state {
 
     float reload_finished;
     float clip_fired[4];
-    int lfsr_state;
+    int prng_base[PRNG_NUM_STATES];
 
 
-     // Used for prediction, not actually communicated.  Reset each frame.
+    // Used for prediction, not actually communicated.  Reset each frame.
     float ammo_used[AMMO_NUM_TYPES];
-    float firing;
+    float buttons_down, buttons_up, buttons_held;
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
-struct fo_predsnd {
-    int id;
-    string sound;
-};
-
-enum {
-    SND_AXE,
+enum SoundIndex:float {
+    SND_NONE = 0,
+    SND_FIRST = 2000,
+    SND_AXE = SND_FIRST,
     SND_SG,
     SND_SSG,
     SND_RL,
@@ -80,6 +78,15 @@ enum {
     SND_FLAMETHROWER,
     SND_RAILGUN,
     SND_TRANQ,
+    SND_ASSCAN_UP,
+    SND_ASSCAN_FIRE,
+    SND_ASSCAN_DOWN,
+    SND_ASSCAN_SPIN,
+};
+
+struct fo_predsnd {
+    SoundIndex id;
+    string sound;
 };
 
 fo_predsnd snd_types[] = {
@@ -93,6 +100,10 @@ fo_predsnd snd_types[] = {
     { SND_FLAMETHROWER, "flmfire2.wav" },
     { SND_RAILGUN, "railgun.wav" },
     { SND_TRANQ, "dartgun.wav" },
+    { SND_ASSCAN_UP, "asscan1.wav" },
+    { SND_ASSCAN_FIRE, "asscan2.wav" },
+    { SND_ASSCAN_DOWN, "asscan3.wav" },
+    { SND_ASSCAN_SPIN, "asscan4.wav" },
 };
 
 enum {
@@ -104,6 +115,7 @@ enum {
     FPP_FLAMETHROWER,
     FPP_TRANQ,
     FPP_RAILGUN,
+    FPP_ASSAULT_CANNON,
 };
 
 struct fo_projectile {
@@ -111,7 +123,7 @@ struct fo_projectile {
     float speed;
     string model;
     string trail;
-    int snd;
+    SoundIndex snd;
 
     // Automatically initialized below this line.
     float modelindex;
@@ -127,6 +139,7 @@ fo_projectile fpp_types[] = {
     { FPP_FLAMETHROWER,       600, "s_explod.spr", "explodesprite", SND_FLAMETHROWER },
     { FPP_TRANQ,       PC_SPY_TRANQSPEED, "spike.mdl", "tr_spike", SND_TRANQ },
     { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
+    { FPP_ASSAULT_CANNON,    3000, "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
 };
 
 void InitFppProjectiles() {
@@ -147,7 +160,7 @@ void InitFppProjectiles() {
     for (i = 0; i < snd_types.length; i++) {
         fo_predsnd* snd = &snd_types[i];
 
-        ASSERTD_EQ(i, snd->id);
+        ASSERTD_EQ(SND_FIRST + i, snd->id);
         snd->sound = strcat("weapons/", snd->sound);
         precache_sound(snd->sound);
     }
@@ -159,13 +172,13 @@ float max_rewind_credit_ms(int fpp_type) {
             fo_config.max_rewind_fast_projectile_ms;
 }
 
+.float wpp_aux;
+
 #ifdef SSQC
 
 .predict_tf_state predict_state;
 .entity predict_entity;
 
-.float client_nextthink;
-.float client_thinkindex;
 #else
 
 struct pengine_t {
@@ -192,23 +205,25 @@ predict_tf_state pstate_pred, pstate_server;
 #endif
 
 #ifdef SSQC
-.int lfsr_state;  // Shared random number generator
-static inline int get_lfsr_state(entity pl) { return pl.lfsr_state; }
-static inline void set_lfsr_state(entity pl, int v) { pl.lfsr_state = v; }
+inline int* prng_state(int type) { return &self.prng_base[type]; }
 #else
-static inline int get_lfsr_state(entity pl) { return pstate_pred.lfsr_state; }
-static inline void set_lfsr_state(entity pl, int v) { pstate_pred.lfsr_state = v; }
+inline int* prng_state(int type) { return &pstate_pred.prng_base[type]; }
 #endif
 
-float shared_prng(entity pl) {  // A 16-bit xor-shift LFSR.
-    int v = get_lfsr_state(pl);
+int lfsr_prng_raw(int v) {  // A 16-bit xor-shift LFSR.
     v ^= (v >> 7);
     v ^= (v << 9);
     v &= 65535;
     v ^= (v >> 13);
-    set_lfsr_state(pl, v);
+    return v;
+}
 
-    return (float)v / 65535.0;
+float lsfr_prng(int prev) {
+    return lfsr_prng_raw(prev) / 65535.0;
+}
+
+float shared_prng(int type) {
+    return (*prng_state(type) = lfsr_prng_raw(*prng_state(type))) / 65535.0;
 }
 
 #ifdef SSQC
@@ -244,7 +259,7 @@ void WeaponPred_Update(entity player) {
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
     M1(FOWP_RELOAD, reload_finished)
-    M1(FOWP_RNG, lfsr_state)
+    M2(FOWP_RNG, prng_base[0], prng_base[1])
 
     player.predict_entity.SendFlags = mask;
 }
@@ -274,7 +289,7 @@ float() ReadFloat = #367;
 
 void InitWeapPredEnt(entity e);
 void WP_ServerUpdate();
-void InitProjPredEnt();
+void InitProjectileEnt();
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
@@ -288,6 +303,7 @@ float WP_SendConfig(entity to_player, float sendflags) {
 #define COMM(_type, _field) fo_config.##_field = Read##_type()
 void EntUpdate_Config() {
 #endif
+    COMM(Float, max_rewind_ms);
     COMM(Float, max_rewind_slow_projectile_ms);
     COMM(Float, max_rewind_fast_projectile_ms);
     COMM(Float, rewind_fast_projectile_thresh);
@@ -366,8 +382,10 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_RELOAD)
         COMM(Float, reload_finished);
 
-    if (sendflags & FOWP_RNG)
-        COMM(Float, lfsr_state);
+    if (sendflags & FOWP_RNG) {
+        COMM(Float, prng_base[0]);
+        COMM(Float, prng_base[1]);
+    }
 
 #ifdef SSQC
     return TRUE;
@@ -417,13 +435,17 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Angle, angles[2]);
     }
 
+    if (sendflags & FOPP_AUX) {
+        COMM(Short, wpp_aux);
+    }
+
 #ifdef SSQC
     WriteEntity(MSG_ENTITY, self.owner);
     return TRUE;
 #else
     self.owner_entnum = readentitynum();
     if (isnew)
-        InitProjPredEnt();
+        InitProjectileEnt();
 #endif
 }
 #undef COMMD
@@ -431,6 +453,7 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 void WeapPred_InitDefaultConfig() {
+    fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
     fo_config.rewind_fast_projectile_thresh = 1500;
@@ -441,32 +464,38 @@ void WeapPred_InitDefaultConfig() {
 
 entity config_entity;
 
-#define CONFIG_UPDATE(_fl, _ps_short, _field) \
+#define CONFIG_UPDATE(_ps_short, _field) \
     do { string _cur = ftos(fo_config.##_field); \
          float _val = CF_GetSetting(_ps_short, #_field, _cur); \
          if (_val != fo_config.##_field) { \
-                fo_config.##_field = _val; _fl = TRUE; \
+                fo_config.##_field = _val; update = TRUE; \
          } \
     } while (0)
+#define CLAMP_UPDATE(_field, _clamp_low, _clamp_high) \
+    do { if (fo_config.##_field < _clamp_low || fo_config.##_field > _clamp_high) { \
+        fo_config.##_field = max(min(fo_config.##_field, _clamp_high), _clamp_low); \
+        update = TRUE; \
+    } } while (0)
 
 static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
     // Target is also the long form localinfo name.
-    CONFIG_UPDATE(update, "mrsp", max_rewind_slow_projectile_ms);
-    CONFIG_UPDATE(update, "mrfp", max_rewind_fast_projectile_ms);
-    CONFIG_UPDATE(update, "rfpt", rewind_fast_projectile_thresh);
-    CONFIG_UPDATE(update, "wpdmp", wp_default_min_ping_ms);
-    CONFIG_UPDATE(update, "wpge", wp_global_enable);
-    CONFIG_UPDATE(update, "wpgd", wp_global_disable);
-    CONFIG_UPDATE(update, "ppge", pp_global_enable);
-    CONFIG_UPDATE(update, "ppgd", pp_global_disable);
-    CONFIG_UPDATE(update, "wppge", wpp_global_enable);
-    CONFIG_UPDATE(update, "wppge", wpp_global_disable);
+    CONFIG_UPDATE("mrt", max_rewind_ms);
+    CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
+    CONFIG_UPDATE("mrfp", max_rewind_fast_projectile_ms);
+    CONFIG_UPDATE("rfpt", rewind_fast_projectile_thresh);
+    CONFIG_UPDATE("wpdmp", wp_default_min_ping_ms);
+    CONFIG_UPDATE("wpge", wp_global_enable);
+    CONFIG_UPDATE("wpgd", wp_global_disable);
+    CONFIG_UPDATE("ppge", pp_global_enable);
+    CONFIG_UPDATE("ppgd", pp_global_disable);
+    CONFIG_UPDATE("wppge", wpp_global_enable);
+    CONFIG_UPDATE("wppge", wpp_global_disable);
 
-    if (update)
-        print("saw update! %d", fo_config.wp_global_disable);
-
+    CLAMP_UPDATE(max_rewind_ms, 0, 250);
+    CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
+    CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
 
     static float last_force_refresh;
     if (time > last_force_refresh + 5) {
@@ -478,6 +507,7 @@ static void WeaponPred_CheckConfigUpdate() {
         config_entity.SendFlags = 1;
     config_entity.nextthink = time + 0.25;
 };
+#undef CLAMP_UPDATE
 #undef CONFIG_UPDATE
 
 void WeaponPred_Init() {
@@ -542,7 +572,13 @@ void WeaponPred_DoServerClientThink() {
 
 void FO_Sound(entity e, float chan, string samp, float vol, float atten);
 
-void Pred_Sound(float snd) {
+void Pred_Sound(SoundIndex snd, float vol = 1) {
+    if (snd == SND_NONE)
+        return;
+
+    ASSERTD_GE(snd, SND_FIRST);
+    snd -= SND_FIRST;
+
     entity target = self;
     string wav = snd_types[snd].sound;
 
@@ -551,11 +587,11 @@ void Pred_Sound(float snd) {
         setorigin(target, self.origin);
     }
 
-    FO_Sound(target, CHAN_WEAPON, wav, 1, ATTN_NORM);
+    FO_Sound(target, CHAN_WEAPON, wav, vol, ATTN_NORM);
 }
 
-void PredProj_Sound(float proj_type) {
-    Pred_Sound(fpp_types[proj_type].snd);
+void PredProj_Sound(int proj_type, float vol = 1) {
+    Pred_Sound(fpp_types[proj_type].snd, vol);
 }
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
@@ -575,9 +611,65 @@ void FOProj_Init(int fpp_type, entity mis) {
 
     WeaponPred_ProjectProjectile(fpp_type, mis);
 
+    // Below is conditional on using custom SendEntity.
     if (fo_projectiles) {
         mis.SendEntity = PP_SendEntity;
-        mis.SendFlags = 0xff;
+        mis.SendFlags = FOPP_POS | FOPP_INIT;
+        if (mis.wpp_aux)
+            mis.SendFlags |= FOPP_AUX;
     }
 }
 #endif
+
+#ifdef CSQC
+float WP_GetAmmo(float ammo_type);
+float get_shells() { return WP_GetAmmo(AMMO_SHELLS); }
+static inline vector get_origin() { return pmove_org; }
+#else
+float get_shells() { return self.ammo_shells; }
+static inline vector get_origin() { return self.origin; }
+#endif
+
+// Randomize by ammo index for consistency even if a packet/prediction misses.
+float hwguy_random_index;
+
+void reset_hwguy_random() {
+    hwguy_random_index = (*prng_state(PRNG_HWGUY) + get_shells() * 211) & 65535;
+    ASSERTD_NE(hwguy_random_index, 0);
+}
+
+float hwguy_random() {
+    float index = hwguy_random_index;
+    float r = (hwguy_random_index = lfsr_prng_raw(hwguy_random_index)) / 65535.0;
+    return r;
+}
+
+float hwguy_crandom() {
+    return 2 * (hwguy_random() - 0.5);
+}
+
+void FO_FireAssCanPellet(vector org, vector spread_dir, float var_speed, int index);
+
+void WeapPred_FireAssCan(vector vangle, float shotcount,
+                         vector spread) {
+    vector bullet_dir, spread_dir, rand_dir, org;
+    float bullet_speed, var_speed;
+
+    reset_hwguy_random();
+
+    makevectors(vangle);
+
+    // Infront of player model and down towards gun
+    bullet_speed = fpp_types[FPP_ASSAULT_CANNON].speed;
+    bullet_dir = v_forward;
+
+    for (int i = 0; i < shotcount; i++) {
+        var_speed = hwguy_crandom()*10 + bullet_speed; // Slight speed variance
+        rand_dir = (hwguy_crandom()*spread_x) * v_right +
+                   (hwguy_crandom()*spread_y) * v_up;
+        spread_dir = bullet_dir + rand_dir;
+        org = get_origin() + '0 0 10' + rand_dir;
+
+        FO_FireAssCanPellet(org, spread_dir, var_speed, i);
+    }
+}

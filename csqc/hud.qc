@@ -969,7 +969,7 @@ void Hud_DrawClassInfoPanel(string id, float playerclass)
                 }
                 break;
             case PC_HVYWEAP:
-                if (SBAR.LockedCannon)
+                if (WP_LockedCannon())
                 {
                     icon = ICON_HWGUY; //HudIcons[playerclass+6].icon;
                     drawpic(pos, icon, size, '1 1 1', 1, 0);

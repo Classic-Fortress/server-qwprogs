@@ -12,10 +12,8 @@
 .float ammo_rockets;
 .float ammo_cells;
 
-float fo_hwguy = TRUE;
 float sniperreload = FALSE;
 float pyro_type = PYRO_FO;
-float old_ng_rof = FALSE;
 #endif
 
 // Some preprocessor bug is making __LINE__ not substitute right here most of
@@ -122,7 +120,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_FLAMETHROWER,      PRED_PROJ, AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,   PRED_PROJ, AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,        PRED_PROJ, AMMO_ROCKETS, 0, 3, -9,    0 },
-    { WEAP_ASSAULT_CANNON,   NO_PREDICT, AMMO_SHELLS, -9, 1,  0.2,  4 },
+    { WEAP_ASSAULT_CANNON,    PRED_PROJ, AMMO_SHELLS, 100, 1,  0.2,  4 },
     { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,             PRED_PROJ, AMMO_SHELLS,  0, 1,  1.5,  0 },
@@ -618,8 +616,6 @@ void FO_Weapons_Init() {
 
     ASSERTD_EQ(weapon_names.length, weapon_info.length);
 
-    FO_WeapInfo* WI_ac = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
-    WI_ac->clip_size = fo_hwguy ? PC_HVYWEAP_ASSCAN_CLIPSIZE : 0;
     FO_WeapInfo* WI_sr = FO_GetWeapInfo(WEAP_SNIPER_RIFLE);
     WI_sr->clip_size = sniperreload ? 1 : 0;
 
@@ -630,14 +626,6 @@ void FO_Weapons_Init() {
         case PYRO_FO:
         default:
             WI_ir->attack_time = 0.9; break;
-    }
-
-    // Consider just removing this?
-    if (old_ng_rof) {
-        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_NAILGUN);
-        wi->ammo_per_shot = 2;
-        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
-        wi->ammo_per_shot = 4;
     }
 
     for (i = 0; i < weapon_info.length; i++) {

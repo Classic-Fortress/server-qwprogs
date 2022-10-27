@@ -1,5 +1,5 @@
 struct anim_t {
-    int num_frames, num_wf;
+    float num_frames, num_wf;
     int frames[20];
     int weaponframes[9];
     int muzzle_flash;  // muzzle flash on weaponframe index 0
@@ -9,15 +9,12 @@ struct anim_t {
 
 void think_nop() {}
 
+void W_ChangeToBestWeapon();
+void Pred_Sound(SoundIndex snd, float vol = 1);
+
 #ifdef SSQC
 
-void nail_extra();
-void asscan_up_extra();
-void asscan_fire_extra();
-void asscan_down_extra();
 void W_PrintWeaponMessage();
-void W_ChangeToBestWeapon();
-void W_FireSpikes(float ox);
 void W_FireAssaultCannon();
 int W_FireAxe();
 int W_FireKnife();
@@ -25,7 +22,6 @@ int W_FireMedikit();
 int W_FireSpanner();
 
 void SuperDamageSound();
-void FO_Sound(entity e, float chan, string samp, float vol, float atten);
 
 void player_run();
 void player_stand1();
@@ -33,6 +29,14 @@ void player_asscan_fire();
 void player_asscan_down1();
 
 inline void *thinkindex() { return &self.client_thinkindex; }
+static inline float *tf_state() { return &self.tfstate; }
+static inline float is_attacking() { return self.button0; }
+static inline float is_intermission() { return intermission_running; }
+static inline vector get_velocity() { return self.velocity; }
+static inline void set_weapon_frame(int f) { self.weaponframe = f; }
+static inline float get_clip_fired() {
+    return self.clip_fired[SlotIndex(self.current_slot)];
+}
 
 void FO_SetClientThink(void() func, float offset, float override = TRUE) {
     self.think = think_nop;
@@ -43,7 +47,7 @@ void FO_SetClientThink(void() func, float offset, float override = TRUE) {
 }
 
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    int tidx = self.client_thinkindex++ - 1;
+    float tidx = *thinkindex()++ - 1;
 
     int wfi = tidx % anim->num_wf;
     self.weaponframe = anim->weaponframes[wfi] ?: anim->weaponframes[0] + wfi;
@@ -100,107 +104,10 @@ static void axe_extra() {
         self.hit_in_current_animation = FALSE;
 }
 
-void nail_extra() {
-    if (!self.button0 || intermission_running) {
-        player_run();
-        return;
-    }
-
-    float idx = (self.client_thinkindex - 1) % 2;
-    if (idx == 0 || !old_ng_rof) {
-        SuperDamageSound();
-        W_FireSpikes(idx ? 4 : -4);
-        self.nailpos = 1 - self.nailpos;
-    }
-}
-
-static float CheckNeedAssaultCannonDown() {
-    FO_WeapState ws;
-    FO_FillWeapState(self, MakeSlot(1), &ws);
-
-    if ((!self.button0 || (self.ammo_shells < 1)) || intermission_running ||
-        ((ws->wi)->needs_reload && *ws->clip_fired == (ws->wi)->clip_size)) {
-        self.tfstate |= TFSTATE_AIMING;
-        player_asscan_down1();
-        return TRUE;
-    }
-    return FALSE;
-}
-
-void asscan_up_extra() {
-    float tidx = *thinkindex() - 1;
-
-    if (CheckNeedAssaultCannonDown())
-        return;
-
-    self.tfstate |= TFSTATE_AIMING;
-    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
-
-    self.fire_held_down = 1;
-    if (tidx == 1)
-        FO_Sound(self, CHAN_WEAPON, "weapons/asscan1.wav", 1, 1);
-    SuperDamageSound();
-
-    if (tidx == 6)  // 600ms spin up
-        player_asscan_fire();
-    else
-        Attack_Finished(wi->attack_time);
-}
-
-void asscan_fire_extra() {
-    float tidx = *thinkindex() - 1;
-
-    if (CheckNeedAssaultCannonDown())
-        return;
-
-    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
-
-    if (((vlen(self.velocity) <= 90 && !cannon_movespin) || vlen(self.velocity) < 30)
-            && !(self.tfstate & TFSTATE_LOCK)) {
-
-        if (tidx % 2 == 1) {
-            muzzleflash();
-            FO_Sound(self, CHAN_WEAPON, "weapons/asscan2.wav", 1, ATTN_NORM);
-        }
-
-        SuperDamageSound();
-
-        self.tfstate |= TFSTATE_AIMING;
-        if (!cannon_move)
-            self.tfstate |= TFSTATE_CANT_MOVE;
-
-        // Halve firing speed when moving too fast.
-        if (vlen(self.velocity) < 30 || tidx % 2 == 1)
-                W_FireAssaultCannon();
-    } else {
-        FO_Sound(self, CHAN_WEAPON, "weapons/asscan4.wav", 0.5, ATTN_NORM);
-        self.weaponframe = self.weaponframe == 2 ? 0 : 2;
-    }
-    Attack_Finished(wi->attack_time);
-}
-
-void asscan_down_extra() {
-    float tidx = *thinkindex() - 1;
-    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
-
-    if (tidx == 1)
-        FO_Sound(self, CHAN_WEAPON, "weapons/asscan3.wav", 0.8, 1);
-
-    if (tidx >= 15) {  // 1.5s down
-        self.tfstate &= ~TFSTATE_AIMING;
-        self.fire_held_down = 0;
-        player_run();
-        if (self.ammo_cells < 7 || !FO_CheckForReload()) {
-            W_PrintWeaponMessage();
-            W_ChangeToBestWeapon();
-        }
-    }
-    Attack_Finished(wi->attack_time);
-};
-
 void player_run() {
-    FO_SetClientThink(player_run, 0.1);
+    ASSERTD_EQ(self.tfstate & TFSTATE_AC_MASK, 0);
     self.client_thinkindex = 0;
+    FO_SetClientThink(player_run, 0.1);
 
     self.frame = 6;
     self.weaponframe = 0;
@@ -217,8 +124,8 @@ void player_run() {
 };
 
 void player_stand1() {
-    FO_SetClientThink(player_stand1, 0.1);
     self.client_thinkindex = 0;
+    FO_SetClientThink(player_stand1, 0.1);
 
     self.frame = 17;
     self.weaponframe = 0;
@@ -240,23 +147,39 @@ void player_stand1() {
     }
     self.walkframe++;
 };
-
 #else /* CSQC */
 static inline void *thinkindex() { return &pstate_pred.client_thinkindex; }
-
-void FO_SetClientThink(void() func, float offset, float override = TRUE) {
-    pstate_pred.client_nextthink = pstate_pred.client_time + offset;
-}
+static inline float *tf_state() { return &pstate_pred.tfstate; }
+static inline float is_attacking() { return input_buttons & BUTTON0; }
+static inline float is_intermission() { return intermission; }
+static void SuperDamageSound() {} // TODO
+static inline vector get_velocity() { return pmove_vel; }
+static inline void set_weapon_frame(int f) { self.frame = f; }
+static inline void muzzleflash() {}
+float* WP_ClipFired();
+static inline float get_clip_fired() { return *WP_ClipFired(); }
 
 void player_run() {
-    pstate_pred.firing = FALSE;
     pstate_pred.client_nextthink = 0;
     pstate_pred.client_thinkindex = 0;
     pstate_pred.weaponframe = 0;
 }
 
+// When `extra()` is specified, it is responsible ending looped animations.
+// [ Typically because +attack (button0) has been released. ]
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    float tidx = (*thinkindex())++ - 1;
+    float tidx = *thinkindex()++ - 1;
+
+    float loop = anim->loop;
+    if (loop && extra == think_nop && !(input_buttons & BUTTON0))
+        loop = TRUE;
+
+    if (tidx > anim->num_frames - 1 && !loop) {
+        player_run();
+        return;
+    } else {
+        pstate_pred.client_nextthink = pstate_pred.client_time + 0.1;
+    }
 
     float fi = tidx % anim->num_frames;
     float wfi = tidx % anim->num_wf;
@@ -264,30 +187,121 @@ void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
     float wf = anim->weaponframes[wfi] ?: anim->weaponframes[0] + wfi;
     pstate_pred.weaponframe = wf;
 
-    float loop = anim->loop && (input_buttons & BUTTON0);
-
-    if (tidx > anim->num_frames - 1 && !loop) {
-        // Special case for CSQC since we could predict through the wrap.
-        player_run();
-    } else if (fi == anim->num_frames - 1 && !loop) {
-        FO_SetClientThink(player_run, 0.1);
-    } else
-        FO_SetClientThink(parent_thunk, 0.1);
-
     if (extra != think_nop)
         extra();
 }
 
 static void axe_extra() {}
 
-void PP_NailFrame();
-void nail_extra() { PP_NailFrame(); }
+void player_asscan_fire();
+void player_asscan_upN();
+void player_asscan_downN();
 
-static void asscan_up_extra() {}
-static void asscan_fire_extra() {}
-static void asscan_down_extra() {}
+void player_assault_cannon() {
+    switch (pstate_pred.tfstate & TFSTATE_AC_MASK) {
+        case TFSTATE_AC_SPINUP: player_asscan_upN(); break;
+        case TFSTATE_AC_SPINNING: player_asscan_fire(); break;
+        case TFSTATE_AC_SPINDOWN: player_asscan_downN(); break;
+    }
+}
 
+void Attack_Finished(float attack_time);
+float WP_ReloadIfNeeded(FO_WeapInfo* wi);
+FO_WeapInfo* WP_CurrentWeapon();
+static inline float FO_CheckForReload() { return WP_ReloadIfNeeded(WP_CurrentWeapon()); }
 #endif
+
+void W_FireSpikes(float ox);
+// Shared by both client and server side.
+void nail_extra_csqc_ssqc() {
+    if (!is_attacking() || is_intermission()) {
+        player_run();
+        return;
+    }
+
+    float tidx = *thinkindex() % 2;  // 1 based, and incremented.
+    SuperDamageSound();
+    W_FireSpikes(tidx ? 4 : -4);
+}
+
+void player_asscan_down1();
+static float CheckNeedAssaultCannonDown() {
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+
+    if ((!is_attacking() || (get_shells() < 1)) || is_intermission() ||
+        get_clip_fired() == wi->clip_size) {
+        player_asscan_down1();
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void asscan_up_extra() {
+    float tidx = *thinkindex() - 1;  // Already incremented.
+    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+                   (TFSTATE_AC_SPINUP | TFSTATE_AIMING);
+
+    if (CheckNeedAssaultCannonDown())
+        return;
+
+    if (tidx == 1)
+        Pred_Sound(SND_ASSCAN_UP);
+    SuperDamageSound();
+
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+    if (tidx == 6)  // 600ms spin up
+        player_asscan_fire();
+    else
+        Attack_Finished(wi->attack_time);
+}
+
+void W_FireAssaultCannon();
+void asscan_fire_extra() {
+    float tidx = *thinkindex() - 1;  // Already incremented.
+    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+                  (TFSTATE_AC_SPINNING | TFSTATE_AIMING);
+
+    if (CheckNeedAssaultCannonDown())
+        return;
+
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+
+    if (vlen(get_velocity()) <= 90 && !(*tf_state () & TFSTATE_LOCK)) {
+        if (tidx % 2 == 1) {  // 1-based
+            muzzleflash();
+            Pred_Sound(SND_ASSCAN_FIRE);
+        }
+
+        SuperDamageSound();
+
+        set_weapon_frame(tidx % 2 ? 2 : 4);
+        // Halve firing speed when moving too fast.
+        if (vlen(get_velocity()) < 30 || tidx % 2 == 1)
+            W_FireAssaultCannon();
+    } else {
+        Pred_Sound(SND_ASSCAN_SPIN, 0.5);
+        set_weapon_frame(tidx % 2 ? 2 : 0);
+    }
+    Attack_Finished(wi->attack_time);
+}
+
+void asscan_down_extra() {
+    float tidx = *thinkindex() - 1;  // Already incremented.
+    FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
+    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+                  TFSTATE_AIMING | TFSTATE_AC_SPINDOWN;
+
+    if (tidx == 1)
+        Pred_Sound(SND_ASSCAN_DOWN, 0.8);
+
+    if (tidx >= 15) {  // 1.5s down
+        *tf_state() &= ~(TFSTATE_AC_MASK | TFSTATE_AIMING);
+        player_run();
+        if (self.ammo_cells < 7 || !FO_CheckForReload())
+            W_ChangeToBestWeapon();
+    }
+    Attack_Finished(wi->attack_time);
+};
 
 anim_t anim_rocket = { 6, 6, {107}, {1}, TRUE };
 void player_rocketN() { client_anim_frames(player_rocketN, think_nop, &anim_rocket); }
@@ -296,7 +310,6 @@ void player_rocket1() { *thinkindex() = 1; player_rocketN(); }
 anim_t anim_shotgun = { 6, 6, {113}, {1}, TRUE };
 void player_shotN() { client_anim_frames(player_shotN, think_nop, &anim_shotgun); }
 void player_shot1() { *thinkindex() = 1; player_shotN(); }
-
 
 anim_t anim_autorifle = { 3, 3, {113, 114, 118}, {1, 2, 6}, TRUE };
 void player_autorifleN() { client_anim_frames(player_autorifleN, think_nop, &anim_autorifle); }
@@ -326,7 +339,7 @@ void player_medikitbN() { client_anim_frames(player_medikitbN, axe_extra, &anim_
 void player_medikitb1() { *thinkindex() = 1; player_medikitbN(); }
 
 anim_t anim_nailgun = { 2, 8, {103, 104}, {1}, TRUE, TRUE };
-void player_nailN() { client_anim_frames(player_nailN, nail_extra, &anim_nailgun); }
+void player_nailN() { client_anim_frames(player_nailN, nail_extra_csqc_ssqc, &anim_nailgun); }
 void player_nail1() { *thinkindex() = 1; player_nailN(); }
 
 anim_t anim_flamethrower = { 6, 6, {113}, {1}, TRUE, FALSE };

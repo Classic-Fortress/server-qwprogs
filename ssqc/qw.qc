@@ -21,6 +21,8 @@ struct antilag_settings_t {
 .float client_thinkindex;
 .float client_nextthink;
 
+.int prng_base[PRNG_NUM_STATES];
+
 // A monotonically non-decreasing, latency corrected notion of remote
 // client-time.  Monotonicity guarantees that for some offset `o`:
 //     at t1: remote_client_time() + o < at t2: lag_time() + o  FOR t2 > t1
@@ -419,7 +421,6 @@ float live_camera;
 float already_chosen_map;
 
 .float disptimer;
-.float fire_held_down;
 .float hit_in_current_animation; // Set on knife attack if a hit is recorded to prevent combo hits
 
 // sniper location damage stuff
@@ -430,7 +431,6 @@ float already_chosen_map;
 
 // flash grenade level
 .float FlashTime;
-.float nailpos;
 
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
@@ -568,7 +568,6 @@ float cannon_move;
 float cannon_movespin;
 float cannon_conc;
 float cannon_accuracy;
-float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
@@ -616,7 +615,6 @@ float supermedikit;
 float superspanner;
 float superknife;
 float superknife_multihit;
-float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
 float pyro_type;

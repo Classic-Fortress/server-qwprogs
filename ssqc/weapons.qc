@@ -953,30 +953,25 @@ void () W_FireAutoRifle = {
     FireSniperBullet(dir, 8);
 };
 
-void FireAssCan (float shotcount, vector dir, vector spread);
 void () W_FireAssaultCannon = {
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+
+    FO_CheckForReload();
+
+    *ws->clip_fired += 1;
+    *ws->ammo_remaining -= (ws->wi)->ammo_per_shot;
+    Status_Refresh(self);
+
     local vector dir;
 
     KickPlayer(-4, self);
-    self.ammo_shells = self.ammo_shells - 1;
+
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
-    
-    if (fo_hwguy == FALSE)
-    {
-        if (cannon_accuracy == 1)
-            FireBullets(5, dir, '0 0 0');
-        else if (cannon_accuracy == 2)
-            FireBullets(5, dir, '0.1 0.1 0');
-        else if (vlen(self.velocity) < 50)
-            FireBullets(5, dir, '0.075 0.075 0');
-        else
-            FireBullets(5, dir, '0.15 0.15 0');
-    }
-    else
-    {
-        FireAssCan(5, dir, '0.04 0.04 0');
-    }
+
+    WeapPred_FireAssCan(self.v_angle, 5, '0.04 0.04 0');
+
     LogEventAttack(self);
 };
 
@@ -1635,13 +1630,13 @@ void () W_Attack = {
 
     if (ws.weapon == WEAP_AXE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_axe1();
         else
             player_axeb1();
     } else if (ws.weapon == WEAP_KNIFE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_knife1();
         else
             player_knifeb1();
@@ -1717,7 +1712,7 @@ void () W_Attack = {
         }
     } else if (ws.weapon == WEAP_MEDIKIT) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(self) < 0.5)
+        if (shared_prng(PRNG_AXE) < 0.5)
             player_medikit1();
         else
             player_medikitb1();
@@ -2647,10 +2642,7 @@ void () W_WeaponFrame = {
     if (cease_fire)
         return;
 
-    if (self.button0 
-            && (!self.fire_held_down 
-                || 
-                (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
+    if (self.button0) {
         if (FO_CurrentWeapon() == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < 400) {
