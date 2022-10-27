@@ -647,6 +647,7 @@ DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
+.float trail_started;
 float PP_PredrawActive() {
     float delta = time - self.s_time;
 
@@ -661,11 +662,11 @@ float PP_PredrawActive() {
                 self.oldorigin = trace_endpos;
                 return PREDRAW_NEXT;
             }
-
         }
-        if (self.traileffectnum)
+        if (self.traileffectnum && self.trail_started)
             trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
 
+        self.trail_started = TRUE;
         self.p_time = time + frametime;
         self.oldorigin = self.origin;
     }
@@ -708,11 +709,10 @@ int PP_FindTrail(entity e)
 }
 
 static float PP_EPS = 0.05;
-DEFCVAR_FLOAT(pp_trail_start, 20);
 
 static inline void PP_InitTrail(entity proj) {
-    proj.oldorigin = proj.s_origin + CVARF(pp_trail_start) * MSEC * proj.velocity;
-    proj.p_time = time + CVARF(pp_trail_start * MSEC);
+    proj.p_time = proj.s_time + 1/77.0;
+    proj.oldorigin = proj.s_origin;
     proj.traileffectnum = PP_FindTrail(proj);
 }
 
@@ -755,7 +755,7 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 
   // Note: We use true time here as created projectiles exist outside of pred.
   proj.s_time = time + PP_StartOffset(proj_type);
-  proj.starttime = max(time + CVARF(pp_trail_start) * MSEC, proj.s_time);
+  proj.starttime = proj.s_time;
   proj.endtime = time + pstate_pred.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
@@ -773,6 +773,8 @@ void PP_CreateProjectile(int proj_type, vector offset) {
 
   if (self.fpp_index == FPP_ROCKET && CVARF(cl_r2g) == 1)
       setmodelindex(proj, fpp_types[FPP_GRENADE].modelindex);
+  else
+      setmodelindex(proj, fpp_types[proj.fpp_index].modelindex);
 
   PP_InitTrail(proj);
 
@@ -911,6 +913,7 @@ float PredProjectile_MatchProjectile() {
     if (match) {
         self.oldorigin = match.oldorigin;  // Mate up trails.
         self.p_time = match.p_time;
+        self.trail_started = match.trail_started;
 
         if (CVARF(wpp_debug) & 1) {
             printf("  p_diff = %0.3f / %0.3f t=%0.3f, error_s = %0.3f\n",
@@ -927,15 +930,12 @@ float PredProjectile_MatchProjectile() {
 }
 
 // Called on `self`.
-void InitProjPredEnt() {
+void InitProjectileEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
     setmodelindex(self, fpp_types[self.fpp_index].modelindex);
     setsize(self, [0,0,0], [0,0,0]);
-
-    self.oldorigin = self.s_origin + CVARF(pp_trail_start) * MSEC * self.velocity;
-    self.p_time = time + CVARF(pp_trail_start) * MSEC;
 
     if (CVARF(cl_r2g) && self.fpp_index == FPP_ROCKET)
         setmodelindex(self, fpp_types[FPP_GRENADE].modelindex);

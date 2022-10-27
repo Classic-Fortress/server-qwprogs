@@ -274,7 +274,7 @@ float() ReadFloat = #367;
 
 void InitWeapPredEnt(entity e);
 void WP_ServerUpdate();
-void InitProjPredEnt();
+void InitProjectileEnt();
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
@@ -426,7 +426,7 @@ void EntUpdate_Projectile(float isnew) {
 #else
     self.owner_entnum = readentitynum();
     if (isnew)
-        InitProjPredEnt();
+        InitProjectileEnt();
 #endif
 }
 #undef COMMD
@@ -586,6 +586,7 @@ void FOProj_Init(int fpp_type, entity mis) {
 
     WeaponPred_ProjectProjectile(fpp_type, mis);
 
+    // Below is conditional on using custom SendEntity.
     if (fo_projectiles) {
         mis.SendEntity = PP_SendEntity;
         mis.SendFlags = FOPP_POS | FOPP_INIT;
