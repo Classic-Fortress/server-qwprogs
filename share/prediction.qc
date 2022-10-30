@@ -240,6 +240,9 @@ predict_tf_state blank_state;
 .float last_full_predict_refresh;
 
 void WeaponPred_Update(entity player) {
+    if (player.predict_entity == __NULL__)
+        return;
+
     float mask = FOWP_CTIME;
 
     if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
