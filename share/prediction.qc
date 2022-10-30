@@ -240,6 +240,9 @@ predict_tf_state blank_state;
 .float last_full_predict_refresh;
 
 void WeaponPred_Update(entity player) {
+    if (player.predict_entity == __NULL__)
+        return;
+
     float mask = FOWP_CTIME;
 
     if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
@@ -635,7 +638,8 @@ float hwguy_random_index;
 
 void reset_hwguy_random() {
     hwguy_random_index = (*prng_state(PRNG_HWGUY) + get_shells() * 211) & 65535;
-    ASSERTD_NE(hwguy_random_index, 0);
+    if (hwguy_random_index == 0)
+        hwguy_random_index = (get_shells() + 1) * 211;
 }
 
 float hwguy_random() {
