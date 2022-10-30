@@ -638,7 +638,8 @@ float hwguy_random_index;
 
 void reset_hwguy_random() {
     hwguy_random_index = (*prng_state(PRNG_HWGUY) + get_shells() * 211) & 65535;
-    ASSERTD_NE(hwguy_random_index, 0);
+    if (hwguy_random_index == 0)
+        hwguy_random_index = (get_shells() + 1) * 211;
 }
 
 float hwguy_random() {
