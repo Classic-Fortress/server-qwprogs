@@ -113,17 +113,6 @@ float zoomed_in;
 .float votecount;
 .float localmap;
 
-float(string) GetDrawPanel;
-void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
-void (string id, float playerclass) Hud_DrawClassInfoPanel;
-void (string panelid) Hud_DrawFlagStatusBar;
-void (string panelid) Hud_DrawTeamScorePanel;
-void (string panelid) Hud_DrawMapMenuPanel;
-float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
-vector(float panelid) getPosition;
-vector(float panelid) getFillSize;
-
 void () SUB_Null = {
 };
 
@@ -407,9 +396,94 @@ FO_TeamScores TS;
 
 float TeamScore[4];
 
+enum PanelID:float {
+    HUDP_INVALID = 0,  // Reserve 0 so we can recognize an uninit menu
+    HUDP_FIRST = 100,
+    HUDP_OPTIONS = HUDP_FIRST,
+    HUDP_CLIPSIZE,
+    HUDP_FRAGSTREAK,
+    HUDP_CAPS,
+    HUDP_GREN1,
+    HUDP_GREN2,
+    HUDP_SPECIAL,
+    HUDP_IDENTIFY,
+    HUDP_FLAGINFO,
+    HUDP_GRENTIMER,
+    HUDP_MENU,
+    HUDP_MOTD,
+    HUDP_MENU_HINT,
+    HUDP_GAME_MODE,
+    HUDP_READY,
+    HUDP_SHOWSCORES,
+    HUDP_TEAMSCORE,
+    HUDP_MAP_MENU,
+    HUDP_HEALTH,
+    HUDP_FACE,
+    HUDP_AMMO,
+    HUDP_AMMOICON,
+    HUDP_ARMOUR,
+    HUDP_ARMOURICON,
+    HUDP_INVSHELLS,
+    HUDP_INVNAILS,
+    HUDP_INVROCKETS,
+    HUDP_INVCELLS,
+    HUDP_GAMECLOCK,
+    HUDP_QUAD,
+    HUDP_PENT,
+    HUDP_RING,
+    HUDP_SUIT,
+    HUDP_KEY1,
+    HUDP_KEY2,
+    HUDP_RUNE1,
+    HUDP_RUNE2,
+    HUDP_RUNE3,
+    HUDP_RUNE4,
+    HUDP_GUN2,
+    HUDP_GUN3,
+    HUDP_GUN4,
+    HUDP_GUN5,
+    HUDP_GUN6,
+    HUDP_GUN7,
+    HUDP_GUN8,
+    HUDP_SPEED,
+    HUDP_LAST = HUDP_SPEED,
+
+    HUDP_GAP = 500,  // Just to make ids larger than this distinguishable.
+
+    HUDP_OPTION_LIST,
+    HUDP_OPTION_PANEL,
+
+    HUDB_FIRST,
+    HUDB_MAP_VOTE,
+    HUDB_MAP_CHANGE,
+    HUDB_OPTION_LIST,
+    HUDB_OPTION_SCROLLUP,
+    HUDB_OPTION_SCROLLDOWN,
+    HUDB_LAST,
+
+    HUDE_FIRST,
+    HUDE_OPTION_SCALE_SLIDER,
+    HUDE_OPTION_TEXTSCALE_SLIDER,
+    HUDE_OPTION_SCALE_SCROLL,
+    HUDE_OPTION_TEXTALIGN_TOGGLE,
+    HUDE_OPTION_SHOWHIDE_TOGGLE,
+    HUDE_OPTION_HSNAP_TOGGLE,
+    HUDE_OPTION_VSNAP_TOGGLE,
+    HUDE_OPTION_SHOWALL_TOGGLE,
+    HUDE_LAST,
+
+    HUDL_FIRST = HUDB_LAST,
+    HUDL_OPTION_BASE = 1000,
+    HUDL_MAP_BASE = 2000,
+    HUDL_LAST = 3000,
+
+    HUD_LAST = 10000,
+};
+
 // hud stuff
 typedef struct {
-    string id;
+    PanelID id;
+    string SaveName;
     string Name;
     vector Position;
     vector FillSize;
@@ -417,7 +491,7 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text) drawPanel;
+    void(float display, string text) drawPanel;
     string() getValue;
     float Style;
     float Snap;
@@ -441,6 +515,17 @@ enumflags {
     FL_GT_THROWN,
     FL_GT_ADJPING
 };
+
+float(PanelID) GetDrawPanel;
+void(string identify) Hud_DrawIdentifyPanel;
+void (float display, string text) Hud_DrawHudOptionsPanel;
+void (float playerclass) Hud_DrawClassInfoPanel;
+void () Hud_DrawFlagStatusBar;
+void () Hud_DrawTeamScorePanel;
+void () Hud_DrawMapMenuPanel;
+float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel;
+vector(PanelID) getPosition;
+vector(PanelID) getFillSize;
 
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
@@ -491,6 +576,7 @@ class CsGrenTimer {
         last_ = grentimers[next_index_];
         return last_;
     };
+
     static void() SyncPause {
         // Time froze, but sound kept running, realign.
         for (float i = 0; i < grentimers.length; i++)
@@ -547,37 +633,6 @@ string FO_ScoreBoardColumns[] = {
     "tafl",
     "dmgg",
     "dmgt"
-};
-
-enum {
-    HUD_PANEL_HUDOPTIONS,
-    HUD_PANEL_CLIPSIZE,
-    HUD_PANEL_FRAGSTREAK,
-    HUD_PANEL_CAPS,
-    HUD_PANEL_GREN1,
-    HUD_PANEL_GREN2,
-    HUD_PANEL_PLAYERCLASS,
-    HUD_PANEL_IDENTIFY,
-    HUD_PANEL_FLAGINFO,
-    HUD_PANEL_GRENTIMER,
-    HUD_PANEL_MENU,
-    HUD_PANEL_MOTD,
-    HUD_PANEL_MENU_HINT,
-    HUD_PANEL_GAME_MODE,
-    HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES,
-    HUD_PANEL_TEAM_SCORE,
-    HUD_PANEL_MAP_MENU,
-    HUD_PANEL_HEALTH,
-    HUD_PANEL_FACE,
-    HUD_PANEL_AMMO,
-    HUD_PANEL_AMMO_ICON,
-    HUD_PANEL_ARMOUR,
-    HUD_PANEL_ARMOUR_ICON,
-    HUD_PANEL_INV_SHELLS,
-    HUD_PANEL_INV_NAILS,
-    HUD_PANEL_INV_ROCKETS,
-    HUD_PANEL_INV_CELLS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"

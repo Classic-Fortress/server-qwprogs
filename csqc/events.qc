@@ -196,7 +196,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
                     break;
                 case CLIENT_MENU_MAPS:
-                    showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+                    showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
                     break;
             }
             break;

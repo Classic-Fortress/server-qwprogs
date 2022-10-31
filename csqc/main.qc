@@ -3,9 +3,8 @@ void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings(string);
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_Hud_Editor_List_Panels();
-void FO_Hud_Editor_Show_Panel(string panelid);
-void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
-void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
+void FO_Hud_Editor_Print_Panel_Setting(string, string setting);
+void FO_Hud_Editor_Set_Panel_Setting(string, string setting, string value);
 void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
@@ -14,6 +13,7 @@ void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
 void Perf_Status();
+void FO_Hud_Init();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -34,6 +34,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     INIT_PERF_SAMPLER(frame_timing);
     INIT_PERF_SAMPLER(hud_timing);
 
+    FO_Hud_Init();
     FO_Weapons_Init();
     WeapPred_InitDefaultConfig();
     FO_PP_Init();       // Some of this is always used by custom projectiles.
@@ -97,7 +98,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
     
-    MenuPanel = getAnyHudPanelByNamePointer("menu");
+    MenuPanel = getHudPanel(HUDP_MENU);
     
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
@@ -234,7 +235,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_vote":
             //FO_Menu_Vote(TRUE);
-            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+            showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);

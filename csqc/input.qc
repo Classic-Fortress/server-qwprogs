@@ -60,7 +60,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 return (fo_hud_editor || menu_mouse);
             default:
         }
-    } else if(Hud_Panels[HUD_PANEL_MAP_MENU].Display) {
+    } else if(getHudPanel(HUDP_MAP_MENU)->Display) {
         switch (evtype) {
             case IE_MOUSEDELTA:
                 return TRUE;
