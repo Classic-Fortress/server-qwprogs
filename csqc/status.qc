@@ -346,7 +346,7 @@ void(PanelID panelid, string text) drawTextPanel = {
     local float lines;
     if (fo_hud_editor) {
         string name = getHudPanel(panelid)->Name;
-        drawstring(
+        HRC_drawstring(
             [GetTextAlignOffset(position.x, size.x, padding, name,
                                 mediumtext.x, panel.Orientation),
                                 padding*2 + position.y],
@@ -376,7 +376,7 @@ void(PanelID panelid, string text) drawTextPanel = {
                 line = strreplace("\n", "", line);
                 line = strtrim(line);
                 if (strlen(line) > 0) {
-                    drawstring(
+                    HRC_drawstring(
                         [GetTextAlignOffset(position.x, size.x, padding, line,
                             mediumtext.x, panel.Orientation),
                         position.y + padding + mediumtext.y*i],
@@ -420,7 +420,7 @@ void(PanelID panelid, string text) drawMOTDPanel = {
             local string motd = serverkey("hostname");
             sui_text([0,0], mediumtext*textscale*1.5, motd, MENU_TEXT_4, 1, 0);
             /*
-            drawstring(
+            HRC_drawstring(
                 position + [size.x / 2 - stringwidth(motd,1,mediumtext*1.5)/2,padding*2], 
                 motd, 
                 mediumtext*1.5, 
@@ -443,7 +443,7 @@ void(PanelID panelid, string text) drawMOTDPanel = {
                 if (strlen(tempstr) > 0) {
                     sui_text([0,mediumtext.y*textscale * (i+2)], mediumtext*textscale, tempstr, MENU_TEXT_1, 1, 0);
                     /*
-                    drawstring(
+                    HRC_drawstring(
                         position + [size.x / 2 - stringwidth(motd,1,mediumtext)/2,padding*2 + mediumtext.y*(i+2)], 
                         motd, 
                         mediumtext, 
@@ -507,7 +507,7 @@ void(PanelID panelid, string text) drawGameModePanel = {
         }
     }
     if(message) {
-        drawstring(
+        HRC_drawstring(
             [GetTextAlignOffset(
                 position.x, size.x, padding, message, mediumtext.x,
                 panel.Orientation), position.y],
@@ -563,7 +563,7 @@ void(PanelID panelid, string text) drawReadyPanel = {
                         panel.Orientation
                     );
 
-                    drawstring(
+                    HRC_drawstring(
                         [pos_aligned, alert_text_position.y],
                         alert_text_message, alert_text_size, textcolour, 1, 0
                     );
@@ -592,7 +592,7 @@ void(PanelID panelid, string text) drawReadyPanel = {
                         panel.Orientation
                     );
 
-                    drawstring(
+                    HRC_drawstring(
                         [pos_aligned, alert_text_position.y],
                         alert_text_message, alert_text_size, textcolour, 1, 0
                     );
@@ -617,7 +617,7 @@ void(PanelID panelid, string text) drawReadyPanel = {
     }
     if(message) {
         pos_aligned = GetTextAlignOffset(position.x,size.x,padding,message,textsize.x,panel.Orientation);
-        drawstring(
+        HRC_drawstring(
             [pos_aligned, position.y], message, textsize, textcolour, 1, 0
         );
     }

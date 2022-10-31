@@ -84,7 +84,7 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
             alpha = 0.6;
             basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1;
             //FO_Hud_Panel hoverpanel = GetPanelById(id);
-            //drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
+            //HRC_drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
         }
         
         if (sui_is_held(id))
@@ -109,7 +109,7 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
     return sui_is_clicked(id);
 };
 
-// this draws backwards, haven't bothered to change as we don't use it
+// this HRC_draws backwards, haven't bothered to change as we don't use it
 void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
 {
     float c;
@@ -126,13 +126,13 @@ void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
         while(i<len) {
             i+=1;
             c = str2chr(s, len-i);
-            drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
     } else {    //use normal numbers
         while(i<len) {
             i+=1;
             c = str2chr(s, len-i);
-            drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
     }
 }
@@ -153,15 +153,15 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
         if (c == 47) // "/"
         {
             // because i'm dodgy
-            drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
         }
         else if (c == 37) // "%"
         {
-            drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
         }
         else
         {
-            drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
         i+=1;
     }
@@ -212,7 +212,7 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
         if(intval < threshold) {
             lmpname = strcat("a", lmpname);
         }
-        drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
+        HRC_drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
         i+=1;
     }
 }
@@ -352,7 +352,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
     NewPanel = pnl;
 }
 
-// draws value string using lmps
+// HRC_draws value string using lmps
 void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_alpha)
 {
     if (!panel.Display && !fo_hud_editor)
@@ -374,9 +374,9 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
 
     //vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
-    //drawpic(pos, icon, size, '1 1 1', 1, 0);
+    //HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-    drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
+    HRC_drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
 
     float len = strlen(val);
     
@@ -396,7 +396,7 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
         } else if(panel.Orientation == FO_HUD_INSERT_MIDDLE) {
             offset = (scaledFillSize.x) / 2 - ((len * smallfont)/2);
         }
-        drawstring([pos_x + offset, pos_y + scaledFillSize.y - smallfont - 2, 0], val, [smallfont, smallfont], '1 1 1', 1, 0);
+        HRC_drawstring([pos_x + offset, pos_y + scaledFillSize.y - smallfont - 2, 0], val, [smallfont, smallfont], '1 1 1', 1, 0);
     }
 }
 
@@ -421,7 +421,7 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
     pos = [pos_x + 2, pos_y + 2, 0];
 /*
     vector size = FO_Hud_Icon_Size * panel.Scale;
-    //drawpic(pos, icon, size, '1 1 1', 1, 0);
+    //HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
 
     pos = [pos_x + offset, pos_y, 0];
@@ -451,11 +451,11 @@ vector GetStringOffsetPos(float orientation, string msg, vector size, vector fon
     return pos;
 }
 
-vector DrawOffsetString(float orientation, string msg, vector size,
+vector HRC_drawOffsetString(float orientation, string msg, vector size,
         vector fontSize, vector pos, vector basepos, float newline, vector colour)
 {
     pos = GetStringOffsetPos(orientation, msg, size, fontSize, pos, basepos, newline);
-    drawstring(pos, msg, fontSize, colour, 1, 0);
+    HRC_drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
 }

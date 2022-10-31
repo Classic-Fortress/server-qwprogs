@@ -704,7 +704,7 @@ vector fo_menu_draw(fo_menu * menu) = {
     sui_action_element([0, 0], menusize, menu.id, sui_noop);
     sui_pop_frame();
     
-    drawstring(
+    HRC_drawstring(
         position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding*2], 
         menu.title, 
         mediumtext, 
@@ -752,7 +752,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                         } else {
                             padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2; //Centered
                         }
-                        drawstring(
+                        HRC_drawstring(
                             position + [disabledtextoffset, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                             menu.options[i].name, 
                             smalltext, 
@@ -764,7 +764,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                     
                 }
                 if(menu.options[i].shortcut) {
-                    drawstring(
+                    HRC_drawstring(
                         position + [padding*3, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                         menu.options[i].shortcut, 
                         smalltext, 
@@ -774,7 +774,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                     );
                 }
                 if(menu.options[i].value) {
-                    drawstring(
+                    HRC_drawstring(
                         position + [menusize.x - padding*4 - stringwidth(menu.options[i].value,1,smalltext) , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                         menu.options[i].value, 
                         //strcat(ftos(row),"/",ftos(i)),

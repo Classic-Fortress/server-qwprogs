@@ -679,14 +679,14 @@ void() sui_end =
 void(vector pos, vector size, vector color, float alpha, float flags) sui_fill =
 {
 	sui_transform_box(pos, size);
-	drawfill(pos, size, color, alpha, flags);
+	HRC_drawfill(pos, size, color, alpha, flags);
 };
 
 void(vector pos, vector size, string pic, vector color, float alpha, float flags) sui_pic =
 {
 	sui_transform_box(pos, size);
 	
-	drawpic(pos, pic, size, color, alpha, flags);
+	HRC_drawpic(pos, pic, size, color, alpha, flags);
 };
 
 void(vector pos, vector size, float width, vector color, float alpha, float flags) sui_border_box =
@@ -694,13 +694,13 @@ void(vector pos, vector size, float width, vector color, float alpha, float flag
 	sui_transform_box(pos, size);
 	
 	// Top line
-	drawfill(pos, [size_x, width], color, alpha, flags);
+	HRC_drawfill(pos, [size_x, width], color, alpha, flags);
 	// Bottom line
-	drawfill([pos_x, pos_y + size_y - width], [size_x, width], color, alpha, flags);
+	HRC_drawfill([pos_x, pos_y + size_y - width], [size_x, width], color, alpha, flags);
 	// Left line
-	drawfill([pos_x, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+	HRC_drawfill([pos_x, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
 	// Right line
-	drawfill([pos_x + size_x - width, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+	HRC_drawfill([pos_x + size_x - width, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
 };
 
 
@@ -708,7 +708,7 @@ void(vector pos, vector size, string text, vector color, float alpha, float flag
 {
 	sui_transform_box(pos, [stringwidth(text, 1, size), size_y]);
 	
-	drawstring(pos, text, size, color, alpha, flags);
+	HRC_drawstring(pos, text, size, color, alpha, flags);
 };
 
 void(float index, vector click_ratios) sui_noop = {};

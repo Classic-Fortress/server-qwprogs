@@ -120,6 +120,9 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+float HRC_NewFrame();
+void HRC_Render();
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     float fts = perf_start_sample(&frame_timing);
     clearscene();
@@ -134,14 +137,19 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
-    float hts = perf_start_sample(&hud_timing, fts);
-    ScreenSize = [width, height, menushown];
-    SBAR.Hint = "";
-    sui_begin(width, height);
-    Menu_Draw(width, height, menushown);
-    Hud_Draw(width, height);
-    sui_end();
-    perf_finish_sample(&hud_timing, hts);
+    static float last;
+
+    if (HRC_NewFrame()) {
+        float hts = perf_start_sample(&hud_timing, fts);
+        ScreenSize = [width, height, menushown];
+        SBAR.Hint = "";
+        sui_begin(width, height);
+        Menu_Draw(width, height, menushown);
+        Hud_Draw(width, height);
+        sui_end();
+        perf_finish_sample(&hud_timing, hts);
+    }
+    HRC_Render();
 
     if (CVARF(fo_csjumpsounds)) {
         local float health = getstatf(STAT_HEALTH);

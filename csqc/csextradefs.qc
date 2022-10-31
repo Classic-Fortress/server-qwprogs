@@ -526,6 +526,128 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
 vector(PanelID) getPosition;
 vector(PanelID) getFillSize;
 
+enum {
+    D_drawpic,
+    D_drawstring,
+    D_drawfill,
+};
+
+struct Draw_Args {
+    int type;
+    vector pos;
+    string s_arg;
+    vector size;
+    vector rgb;
+    float alpha;
+    float drawflag;
+};
+
+struct {
+    int enabled;
+    float last_update;
+    int draw_direct;
+    Draw_Args draw_cache[255];
+    int draw_count;
+} hud_render_cache;
+
+DEFCVAR_FLOAT(fo_hud_cache, 1)
+DEFCVAR_FLOAT(fo_hud_fps, 60)
+
+// Returns true if HUD should be re-rendered this frame.
+float HRC_NewFrame() {
+    float fps = max(min(CVARF(fo_hud_fps), 77 * 2), 30);
+
+    // Rate limit even the more complicated enable checks.
+    if (time < hud_render_cache.last_update + 1/fps)
+        return !hud_render_cache.enabled;
+    hud_render_cache.last_update = time;
+
+    if (!CVARF(fo_hud_cache) ||
+        fo_hud_menu_active || fo_hud_editor || showingscores) {
+        // Either explicitly disabled, or rendering a more complicated scene
+        // like the editor for which we'll just display in place.
+        hud_render_cache.enabled = FALSE;
+        return TRUE;
+    }
+
+
+    hud_render_cache.enabled = TRUE;
+    hud_render_cache.draw_count = 0;
+
+    return TRUE;
+}
+
+static inline Draw_Args* next_args() {
+    return &hud_render_cache.draw_cache[hud_render_cache.draw_count++];
+}
+
+void HRC_drawpic(vector pos, string pic, vector size, vector rgb='1 1 1',
+                float alpha=1, float drawflag=0) {
+    if (pic == "")
+        return;
+    /* print("draw ", pic, "\n"); */
+    if (!hud_render_cache.enabled) {
+        drawpic(pos, pic, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawpic;
+        args->pos = pos;
+        args->s_arg = pic;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawstring(vector pos, string text, vector size, vector rgb='1 1 1',
+                   float alpha=1, float drawflag=0) {
+    if (text == "")
+        return;
+    /* print("write ", text, "\n"); */
+    if (!hud_render_cache.enabled) {
+        drawstring(pos, text, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawstring;
+        args->pos = pos;
+        args->s_arg = text;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawfill(vector pos, vector size, vector rgb,
+                   float alpha=1, float drawflag=0) {
+    if (!hud_render_cache.enabled) {
+        drawfill(pos, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawfill;
+        args->pos = pos;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_Render() {
+    if (!hud_render_cache.enabled)
+        return;
+
+    for (int i = 0; i < hud_render_cache.draw_count; i++) {
+        Draw_Args* args = &hud_render_cache.draw_cache[i];
+        if (args->type == D_drawpic)
+            drawpic(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawstring)
+            drawstring(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawfill)
+            drawfill(args->pos, args->size, args->rgb, args->alpha, args->drawflag);
+    }
+}
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
 

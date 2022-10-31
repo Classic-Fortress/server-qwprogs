@@ -29,7 +29,7 @@ float read_online_avg(struct moving_avg* avg, float* mean, float* variance) {
     float n = max(min(avg->samples.count, 2), avg->samples.max_count);
 
     *mean = avg->s1 / n;
-    *variance = (avg->s2 - sq(avg->s1)/n) / (n - 1);
+    *variance = (avg->s2 - sq(avg->s1) / n) / (n - 1);
     return n;
 }
 

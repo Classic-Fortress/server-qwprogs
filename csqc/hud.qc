@@ -579,7 +579,7 @@ void() Hud_DrawTeamScorePanel = {
         offset = (fillsize_x) * i;
         score_position_x = score_position_x + offset;
         //message = strcat(message, strpad(-3, ftos(TS.team1score)));
-        drawfill(score_position, fillsize, TEXT_TEAM_COLOUR[i], 0.5, 0);
+        HRC_drawfill(score_position, fillsize, TEXT_TEAM_COLOUR[i], 0.5, 0);
         val = ftos(TeamScore[i]);
         len = strlen(val);
         textOffset = (12 * textScale * (3 - len));
@@ -626,22 +626,22 @@ void Hud_DrawFlagStatusBar()
             float bigfontvoffset = sizey / 2 - bigfont / 2; //Center text against the icon
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-                // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
-                drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].carrier,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
+                // HRC_drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
+                HRC_drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].carrier,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
             } 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-                // drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
-                drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].locname,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
+                // HRC_drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
+                HRC_drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].locname,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
             }
 
-            drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
+            HRC_drawpic([pos_x, pos_y + sizey * i, 0], icon, [sizex, sizey, 0], iconcolour, alpha, 0);
 
             if (FlagInfoLines[i].timeleft >= 0) 
             {
                 string stime = ftos(FlagInfoLines[i].timeleft);
                 float smallfont = 6 * getHudPanel(HUDP_FLAGINFO)->Scale;
-                drawstring([pos_x + sizex - stringwidth(stime, 1, [smallfont, smallfont]), pos_y + sizey * (i + 1) - smallfont, 0], stime, [smallfont, smallfont], '1 1 1', 1, 0);
+                HRC_drawstring([pos_x + sizex - stringwidth(stime, 1, [smallfont, smallfont]), pos_y + sizey * (i + 1) - smallfont, 0], stime, [smallfont, smallfont], '1 1 1', 1, 0);
             }
         }
     }
@@ -666,7 +666,7 @@ void Hud_DrawHudOptionsPanelSelector() {
     vector size = getHudPanel(HUDP_OPTIONS)->FillSize * getHudPanel(HUDP_OPTIONS)->Scale; //for simplicity, use the same size as options panel
     float textsize = 8 * (getHudPanel(HUDP_OPTIONS)->TextScale ? getHudPanel(HUDP_OPTIONS)->TextScale : getHudPanel(HUDP_OPTIONS)->Scale);
     if((pos.x + (size.x * 2)) < ScreenSize.x) {
-        //If there's room on the screen, draw to the right of options panel
+        //If there's room on the screen, HRC_draw to the right of options panel
         pos.x = pos.x + size.x;
     } else {
         pos.x = pos.x - size.x;
@@ -678,7 +678,7 @@ void Hud_DrawHudOptionsPanelSelector() {
     }
 
     float numlines = rint(size.y / (textsize + 2));
-    //Need to draw scrollbar?
+    //Need to HRC_draw scrollbar?
     if((Hud_Panels.length * (textsize + 2)) > size.y) {
         //Scrollbar buttons
         if(hud_button(HUDB_OPTION_SCROLLUP, pos + [size.x - textsize - 2,2], [textsize, textsize], "^")) {
@@ -722,23 +722,22 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
     if(hud_button(HUDB_OPTION_LIST, pos + [4,2], [140, 10], strcat(selectedPanel.Name, " >"))) {
         getHudPanel(HUDP_OPTIONS)->Status = !getHudPanel(HUDP_OPTIONS)->Status;
     }
-    
 
     if (selectedPanel != panel) {
         float fscale = selectedPanel.Scale;
-        drawstring(pos + [4,12], strcat("Scale: ",ftos(rint(fscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
+        HRC_drawstring(pos + [4,12], strcat("Scale: ",ftos(rint(fscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
         hud_slider(HUDE_OPTION_SCALE_SLIDER, pos + [8,24], [136,8], [0.2,5.0,24], fscale);
         if(fscale != selectedPanel.Scale)
             getHudPanel(Editor_SelectedPanel_Index)->Scale = fscale;
 
         float ftscale = selectedPanel.TextScale;
-        drawstring(pos + [4,34], strcat("Text Scale: ",ftos(rint(ftscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
+        HRC_drawstring(pos + [4,34], strcat("Text Scale: ",ftos(rint(ftscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
         hud_slider(HUDE_OPTION_TEXTSCALE_SLIDER, pos + [8,44], [136,8], [0,5.0,25], ftscale);
         if(ftscale != selectedPanel.TextScale)
             getHudPanel(Editor_SelectedPanel_Index)->TextScale = ftscale;
         float ftextalign = selectedPanel.Orientation;
         //drawstring(pos + [4,54], strcat("Text Pos: ", selectedPanel.Orientation ? "Left" : "Right"), [8,8], MENU_SELECTED, 1, 0);
-        drawstring(pos + [4,60], "Text Pos: ", [8,8], MENU_SELECTED, 1, 0);
+        HRC_drawstring(pos + [4,60], "Text Pos: ", [8,8], MENU_SELECTED, 1, 0);
         if(hud_button(HUDE_OPTION_TEXTALIGN_TOGGLE, pos + [size.x - 6 - 56,56], [56, 16], HUD_ALIGN[selectedPanel.Orientation])) {
             getHudPanel(Editor_SelectedPanel_Index)->Orientation = (selectedPanel.Orientation + 1) % 3;
         }
@@ -750,9 +749,9 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
             getHudPanel(Editor_SelectedPanel_Index)->Display = !selectedPanel.Display;
         }
     }
-    drawstring(pos + [4,96],"Position: ", [8,8], MENU_SELECTED, 1, 0);
-    drawstring(pos + [10,106], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
-    drawstring(pos + [10,116], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
+    HRC_drawstring(pos + [4,96],"Position: ", [8,8], MENU_SELECTED, 1, 0);
+    HRC_drawstring(pos + [10,106], strcat("x: ",ftos(selectedPanel.Position.x)), [8,8], MENU_SELECTED, 1, 0);
+    HRC_drawstring(pos + [10,116], strcat("y: ",ftos(selectedPanel.Position.y)), [8,8], MENU_SELECTED, 1, 0);
 
     local float snap = 0;
     local string ssnap;
@@ -763,7 +762,7 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
     } else {
         snap = 0;
     }
-    drawstring(pos + [4,130], "Hor. Snap: ", [8,8], MENU_SELECTED, 1, 0);
+    HRC_drawstring(pos + [4,130], "Hor. Snap: ", [8,8], MENU_SELECTED, 1, 0);
     if(hud_button(HUDE_OPTION_HSNAP_TOGGLE, pos + [size.x - 6 - 56,126], [56, 16], HUD_HORIZONTAL_ALIGN[snap])) {
         snap = (snap + 1) % 3;
         getHudPanel(Editor_SelectedPanel_Index)->Position.x = 0;
@@ -777,7 +776,7 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
     } else {
         snap = 0;
     }
-    drawstring(pos + [4,148], "Ver. Snap: ", [8,8], MENU_SELECTED, 1, 0);
+    HRC_drawstring(pos + [4,148], "Ver. Snap: ", [8,8], MENU_SELECTED, 1, 0);
     if(hud_button(HUDE_OPTION_VSNAP_TOGGLE, pos + [size.x - 6 - 56,144], [56, 16], HUD_VERTICAL_ALIGN[snap])) {
         snap = (snap + 1) % 3;
         getHudPanel(Editor_SelectedPanel_Index)->Position.y = 0;
@@ -802,7 +801,7 @@ void Hud_DrawClassInfoPanel(float playerclass)
 
     if(fo_hud_editor) {
         hud_panel(id, pos, panel->FillSize * panel->Scale, 0, panel->Display);
-        drawpic(pos, "textures/wad/face1", FO_Hud_Icon_Size * panel->Scale, '1 1 1', 1, 0);
+        HRC_drawpic(pos, "textures/wad/face1", FO_Hud_Icon_Size * panel->Scale, '1 1 1', 1, 0);
         return;
     }
     
@@ -830,7 +829,7 @@ void Hud_DrawClassInfoPanel(float playerclass)
 
         //icon = HudIcons[playerclass-1].icon;
         /* icon = HudIcons[playerclass+6].icon; */
-        /* drawpic(pos, icon, size, '1 1 1', 1, 0); */
+        /* HRC_drawpic(pos, icon, size, '1 1 1', 1, 0); */
 
         float len = 0, offset = 0;
 
@@ -838,19 +837,19 @@ void Hud_DrawClassInfoPanel(float playerclass)
         {
             case PC_SCOUT:
                 icon = ICON_SCOUT; //HudIcons[playerclass+6].icon;
-                drawpic(pos, icon, size, '1 1 1', 1, 0);
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                 msg = SBAR.ScannerOn ? "Scanning" : "Offline";
-                pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.ScannerOn)
                 {
                     msg = SBAR.ScannerRange ? strcat("Dist: ", ftos(SBAR.ScannerRange)) : "No targets";
-                    pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     if (SBAR.ScannerRange)
                     {
                         msg = (SBAR.ScannerTeamNo == team_no) ? "Friendly" : "Enemy";
                         msg = strcat(msg, " ", ClassToString(SBAR.ScannerPlayerClass));
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 break;
@@ -858,16 +857,16 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 if (SBAR.SniperDam)
                 {
                     icon = ICON_SNIPER; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("Dam: ", ftos(SBAR.SniperDam));
-                    pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                     
                     if (SBAR.SniperMax)
                     {
                         msg = "(100%)";
                         colour = '1 0 0';
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 break;
@@ -875,50 +874,50 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 if (SBAR.IsDetpacking)
                 {
                     icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Setting";
-                    pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
 
                     msg = strcat(ftos(SBAR.DetpackLeft), " (", ftos(SBAR.IsDetpacking), ") secs left");
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                 }
                 else if (SBAR.DetpackLeft)
                 {
                     icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 break;
             case PC_MEDIC:
                 icon = ICON_MEDIC; //HudIcons[playerclass+6].icon;
-                drawpic(pos, icon, size, '1 1 1', 1, 0);
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                 msg = SBAR.AuraActive ? "On" : "Off";
-                pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 if (SBAR.AuraActive)
                 {
                     if (SBAR.HealCount)
                     {
                         msg = strcat(ftos(SBAR.HealCount), " players healed");
-                        pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
 
                         msg = strcat("for ", ftos(SBAR.HealAmount), " hp");
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                     else
                     {
                         if (SBAR.AuraStatus == PC_MEDIC_AURA_OUTOFPOWER)
                         {
                             msg = "Out of power";
-                            DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                            HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                         }
                         else if (SBAR.AuraStatus == PC_MEDIC_AURA_RECHARGING)
                         {
                             msg = "Recharging";
-                            DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                            HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                         }
                     }
                 }
@@ -927,65 +926,65 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 if (WP_LockedCannon())
                 {
                     icon = ICON_HWGUY; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Assault Cannon Locked";
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
                 break;
             case PC_PYRO:
                 if (SBAR.AirBlast)
                 {
                     icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Airblast Cooling Down";
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
                 else if (!SBAR.AirBlast)
                 {
                     icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = "Airblast Ready";
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
                 }
                 break;
             case PC_SPY:
                 if (SBAR.IsUndercover == 1)
                 {
                     icon = ICON_SPY; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     if (SBAR.InvisOnly)
                     {
                         msg = "Invisible";
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                     }
                     else
                     {
                         msg = "Undercover";
-                        pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                         msg = strcat(TeamToString(SBAR.UndercoverTeam), " ", ClassToString(SBAR.UndercoverSkin));
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 else if (SBAR.IsUndercover == 2)
                 {
                     icon = ICON_SPY; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     if (SBAR.InvisOnly)
                     {
                         msg = "Invisible";
-                        pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                         msg = strcat("In ", ftos(SBAR.UndercoverTimer), " secs");
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                     else
                     {
                         msg = "Disguising";
-                        pos = DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                         if (SBAR.DisguiseTeam)
                         {
                             msg = strcat("(", TeamToString(SBAR.DisguiseTeam), SBAR.QueueSkin ? "" : ") ");
@@ -1012,7 +1011,7 @@ void Hud_DrawClassInfoPanel(float playerclass)
                             msg2 = strcat(ClassToString(SBAR.UndercoverSkin));
                         }
                         msg = strcat(msg, msg2);
-                        DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
                 break;
@@ -1020,18 +1019,18 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 if (SBAR.HasSentry)
                 {
                     icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 else if (SBAR.IsBuilding)
                 {
                     icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat(ftos(SBAR.BuildingPercentage), "%");
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 
                 // disp
@@ -1040,10 +1039,10 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 if (SBAR.HasDispenser)
                 {
                     icon = ICON_ENGINEER_DISP; //HudIcons[playerclass + 7].icon;
-                    drawpic(pos, icon, size, '1 1 1', 1, 0);
+                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
                     msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
-                    DrawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
                 break;
         }
@@ -1078,7 +1077,7 @@ void Hud_DrawIdentifyPanel(string identify) {
         msg = strtrim(msg);
         if (strlen(msg) > 0) {
             pos = pos + [0, (fontSize_y * msgcount), 0];
-            drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
+            HRC_drawstring(pos, msg, fontSize, '1 1 1', 1, 0);
             msgcount++;
         }
     }
@@ -1105,8 +1104,7 @@ void Hud_DrawPanel(FO_Hud_Panel* panel) {
                     offset = (panel.FillSize.x / 2) - (strlen(panel.Name) * 3); //because 3 = 6/2
                     break;
             }
-            //drawstring(getHudPanel(i)->Position + [offset,2], getHudPanel(i)->Name, '6 6', '0 1 0', 1, 0);
-            drawstring(getScaledPanelPosition(panel,1) + [offset,2], panel.Name, '6 6', '0 1 0', 1, 0);
+            HRC_drawstring(getScaledPanelPosition(panel,1) + [offset,2], panel.Name, '6 6', '0 1 0', 1, 0);
         }
     }
 }
