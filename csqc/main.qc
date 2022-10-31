@@ -13,10 +13,14 @@ void AddGrenTimer(float grentype, float offset);
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+void Perf_Status();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
+
+DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
@@ -26,6 +30,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //     for (float i = 0; i < HudIcons.length; i++) {
 //         precache_pic(HudIcons[i].icon);
 //     }
+
+    INIT_PERF_SAMPLER(frame_timing);
+    INIT_PERF_SAMPLER(hud_timing);
 
     FO_Weapons_Init();
     WeapPred_InitDefaultConfig();
@@ -81,6 +88,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_removemap");
 
     registercommand("wpp_status");
+    registercommand("perf_status");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
@@ -112,6 +120,7 @@ noref void() CSQC_WorldLoaded = {
 }
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
+    float fts = perf_start_sample(&frame_timing);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -124,12 +133,14 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
+    float hts = perf_start_sample(&hud_timing, fts);
     ScreenSize = [width, height, menushown];
     SBAR.Hint = "";
     sui_begin(width, height);
     Menu_Draw(width, height, menushown);
     Hud_Draw(width, height);
     sui_end();
+    perf_finish_sample(&hud_timing, hts);
 
     if (CVARF(fo_csjumpsounds)) {
         local float health = getstatf(STAT_HEALTH);
@@ -160,6 +171,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         last_vel_z = pmove_vel_z;
         last_pmove_onground = pmove_onground;
     }
+    perf_finish_sample(&frame_timing, fts);
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -387,6 +399,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "wpp_status":
             WPP_Status();
             break;
+        case "perf_status":
+            Perf_Status();
+            break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
             break;
@@ -514,4 +529,49 @@ void _Sync_ClientCommandFrame() {
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
     _Sync_ClientCommandFrame();
+}
+
+static string to_precision(float f, float p) {
+    string fmt = strcat("%0.", ftos(p), "f");
+    return sprintf(fmt, f);
+}
+
+static float get_precision() {
+    float t = gettime(1);
+
+    // For (debug) clients which have modified gettime to report with more
+    // precision.
+    return (t*1000 == ceil(t*1000)) ? 3 : 5;
+}
+
+static float gettime_lat() {
+    const float trials = 1000;
+    float s = gettime(1), f, i;
+    for (i = 0; i < trials; i++)
+        gettime(1);
+    return (gettime(1) - s)/trials;
+}
+
+// Note while this works with ms
+void Perf_Status() {
+    printf("Performance Stats:\n");
+    float avg, variance, minv, maxv;
+
+    float prec = get_precision();
+    if (prec > 3)
+        printf("gettime() timing = %0.5f\n", gettime_lat());
+
+    compute_avg(&frame_timing.samples, &avg, &variance);
+    compute_maxmin(&frame_timing.samples, &minv, &maxv);
+    printf(" Frame render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(frame_timing.samples.count, frame_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_timing.samples, &minv, &maxv);
+    printf(" HUD render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_timing.samples.count, hud_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
 }
