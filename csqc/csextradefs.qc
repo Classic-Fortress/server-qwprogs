@@ -447,7 +447,6 @@ enum PanelID:float {
     HUDP_SPEED,
     HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
     HUDP_LAST = HUDP_OPTIONS,
-    HUDP_COUNT,
 
     HUDP_GAP = 500,  // Just to make ids larger than this distinguishable.
 
@@ -476,7 +475,6 @@ enum PanelID:float {
     HUDL_FIRST = HUDB_LAST,
     HUDL_OPTION_BASE = 1000,
     HUDL_MAP_BASE = 2000,
-    HUDL_LAST = 3000,
 
     HUD_LAST = 10000,
 };
@@ -527,12 +525,14 @@ vector(PanelID) getPosition;
 vector(PanelID) getFillSize;
 
 enum {
+    D_skip,
     D_drawpic,
     D_drawstring,
     D_drawfill,
 };
 
 struct Draw_Args {
+    PanelID id;
     int type;
     vector pos;
     string s_arg;
@@ -544,23 +544,32 @@ struct Draw_Args {
 
 struct {
     int enabled;
+    PanelID active_panel;
     float last_update;
     int draw_direct;
     Draw_Args draw_cache[255];
     int draw_count;
+    float free_cache[255];
+    int free_count;
 } hud_render_cache;
 
 DEFCVAR_FLOAT(fo_hud_cache, 1)
 DEFCVAR_FLOAT(fo_hud_fps, 60)
 
+enum {
+    HRC_NF_NO_UPDATE = 0,
+    HRC_NF_FULL,
+    HRC_NF_PARTIAL,
+};
+
+inline float HRC_fps_time() { return 1/max(min(CVARF(fo_hud_fps), 77 * 2), 30); }
+
 // Returns true if HUD should be re-rendered this frame.
 float HRC_NewFrame() {
-    float fps = max(min(CVARF(fo_hud_fps), 77 * 2), 30);
-
     // Rate limit even the more complicated enable checks.
-    if (time < hud_render_cache.last_update + 1/fps)
-        return !hud_render_cache.enabled;
-    hud_render_cache.last_update = time;
+    /* if (time < hud_render_cache.last_update + HRC_fps_time()) */
+    /*     return !hud_render_cache.enabled; */
+    /* hud_render_cache.last_update = time; */
 
     if (!CVARF(fo_hud_cache) ||
         fo_hud_menu_active || fo_hud_editor || showingscores) {
@@ -570,22 +579,52 @@ float HRC_NewFrame() {
         return TRUE;
     }
 
-
     hud_render_cache.enabled = TRUE;
-    hud_render_cache.draw_count = 0;
-
-    return TRUE;
+    return FALSE;
 }
 
-static inline Draw_Args* next_args() {
-    return &hud_render_cache.draw_cache[hud_render_cache.draw_count++];
+void HRC_Invalidate(PanelID panel) {
+    float i, j;
+
+    for (i = 0; i < hud_render_cache.draw_count; i++) {
+        if (hud_render_cache.draw_cache[i].id == panel + 1) {
+            hud_render_cache.draw_cache[i].id = 0;
+            hud_render_cache.draw_cache[i].type = D_skip;
+            hud_render_cache.free_cache[hud_render_cache.free_count++] = i;
+        }
+    }
+
+    // Ascending order sort so that we don't end up inverting rendering order
+    // when pulling from the free-list.
+    for (i = 0; i < hud_render_cache.free_count; i++)
+        for (j = i + 1; j < hud_render_cache.free_count; j++)
+            if (hud_render_cache.free_cache[i] < hud_render_cache.free_cache[j]) {
+                float tmp = hud_render_cache.free_cache[i];
+                hud_render_cache.free_cache[i] = hud_render_cache.free_cache[j];
+                hud_render_cache.free_cache[j] = tmp;
+            }
+}
+
+void HRC_SetActive(PanelID panel) {
+    hud_render_cache.active_panel = panel;
+}
+
+static Draw_Args* next_args() {
+    float idx;
+    if (hud_render_cache.free_count)
+        idx = hud_render_cache.free_cache[--hud_render_cache.free_count];
+    else
+        idx = hud_render_cache.draw_count++;
+
+    Draw_Args* result = &hud_render_cache.draw_cache[idx];
+    result->id = hud_render_cache.active_panel + 1;  // 1-based, 0 => free.
+    return result;
 }
 
 void HRC_drawpic(vector pos, string pic, vector size, vector rgb='1 1 1',
                 float alpha=1, float drawflag=0) {
     if (pic == "")
         return;
-    /* print("draw ", pic, "\n"); */
     if (!hud_render_cache.enabled) {
         drawpic(pos, pic, size, rgb, alpha, drawflag);
     } else {
@@ -604,7 +643,6 @@ void HRC_drawstring(vector pos, string text, vector size, vector rgb='1 1 1',
                    float alpha=1, float drawflag=0) {
     if (text == "")
         return;
-    /* print("write ", text, "\n"); */
     if (!hud_render_cache.enabled) {
         drawstring(pos, text, size, rgb, alpha, drawflag);
     } else {
@@ -640,7 +678,9 @@ void HRC_Render() {
 
     for (int i = 0; i < hud_render_cache.draw_count; i++) {
         Draw_Args* args = &hud_render_cache.draw_cache[i];
-        if (args->type == D_drawpic)
+        if (args->type == D_skip)
+            continue;
+        else if (args->type == D_drawpic)
             drawpic(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
         else if (args->type == D_drawstring)
             drawstring(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);

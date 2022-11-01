@@ -21,6 +21,7 @@ void GetSelf() = {
 
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
@@ -33,6 +34,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     INIT_PERF_SAMPLER(frame_timing);
     INIT_PERF_SAMPLER(hud_timing);
+    INIT_PERF_SAMPLER(hud_partial_timing);
 
     FO_Hud_Init();
     FO_Weapons_Init();
@@ -120,8 +122,7 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
-float HRC_NewFrame();
-void HRC_Render();
+void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     float fts = perf_start_sample(&frame_timing);
@@ -137,19 +138,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
-    static float last;
-
-    if (HRC_NewFrame()) {
-        float hts = perf_start_sample(&hud_timing, fts);
-        ScreenSize = [width, height, menushown];
-        SBAR.Hint = "";
-        sui_begin(width, height);
-        Menu_Draw(width, height, menushown);
-        Hud_Draw(width, height);
-        sui_end();
-        perf_finish_sample(&hud_timing, hts);
-    }
-    HRC_Render();
+    Hud_UpdateView(width, height, menushown, fts);
 
     if (CVARF(fo_csjumpsounds)) {
         local float health = getstatf(STAT_HEALTH);
@@ -570,6 +559,11 @@ void Perf_Status() {
     if (prec > 3)
         printf("gettime() timing = %0.5f\n", gettime_lat());
 
+
+    printf("HUD cache used=%d freelist=%d\n",
+            (float)hud_render_cache.draw_count,
+            (float)hud_render_cache.free_count);
+
     compute_avg(&frame_timing.samples, &avg, &variance);
     compute_maxmin(&frame_timing.samples, &minv, &maxv);
     printf(" Frame render (%d) avg=%s var=%0.3f min=%s max=%s\n",
@@ -581,6 +575,13 @@ void Perf_Status() {
     compute_maxmin(&hud_timing.samples, &minv, &maxv);
     printf(" HUD render (%d) avg=%s var=%0.3f min=%s max=%s\n",
             (float)min(hud_timing.samples.count, hud_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_partial_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_partial_timing.samples, &minv, &maxv);
+    printf(" HUD partial (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_partial_timing.samples.count, hud_partial_timing.samples.max_count),
             to_precision(avg, prec), variance,
             to_precision(minv, prec), to_precision(maxv, prec));
 }

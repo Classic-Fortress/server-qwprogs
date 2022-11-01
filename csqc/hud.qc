@@ -1120,3 +1120,54 @@ void Hud_Draw(float width, float height)
     }
     HudSettings.MousePos = [Mouse.x, Mouse.y];
 }
+
+const static float HUDP_COUNT = HUDP_LAST - HUDP_FIRST + 1;
+
+struct {
+    float last_draw[HUDP_COUNT];
+    float idx;
+} incremental_hud;
+
+void Hud_UpdateView(float width, float height, float menushown, float perf_sample) {
+    float hud_update = HRC_NewFrame();
+
+    if (HRC_NewFrame()) {
+        float hts = perf_start_sample(&hud_timing, perf_sample);
+        ScreenSize = [width, height, menushown];
+        SBAR.Hint = "";
+        sui_begin(width, height);
+        Menu_Draw(width, height, menushown);
+        Hud_Draw(width, height);
+        sui_end();
+        perf_finish_sample(&hud_timing, hts);
+        return;
+    }
+
+    if (!hud_render_cache.enabled)
+        return;
+
+    // Skip any not-displayed elements.
+    float i = 0, idx = incremental_hud.idx;
+    while (!getHudPanel(HUDP_FIRST + idx)->Display &&
+            i < HUDP_COUNT) { i++; idx = (idx + 1) % HUDP_COUNT;
+    }
+    incremental_hud.idx = idx;
+
+    PanelID id = idx + HUDP_FIRST;
+    // Time ordered and oldest.
+    if (time >= incremental_hud.last_draw[idx] + HRC_fps_time()) {
+        float hts = perf_start_sample(&hud_partial_timing, perf_sample);
+        sui_begin(width, height);
+        HRC_Invalidate(id);
+        HRC_SetActive(id);
+        Hud_DrawPanel(getHudPanel(id));
+        sui_end();
+        perf_finish_sample(&hud_partial_timing, hts);
+
+        incremental_hud.last_draw[idx] = time;
+        // We'll start searching from here for next incremental update.
+        incremental_hud.idx = (incremental_hud.idx + 1) % HUDP_COUNT;
+    }
+
+    HRC_Render();
+}
