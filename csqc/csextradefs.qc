@@ -399,8 +399,7 @@ float TeamScore[4];
 enum PanelID:float {
     HUDP_INVALID = 0,  // Reserve 0 so we can recognize an uninit menu
     HUDP_FIRST = 100,
-    HUDP_OPTIONS = HUDP_FIRST,
-    HUDP_CLIPSIZE,
+    HUDP_CLIPSIZE = HUDP_FIRST,
     HUDP_FRAGSTREAK,
     HUDP_CAPS,
     HUDP_GREN1,
@@ -446,7 +445,9 @@ enum PanelID:float {
     HUDP_GUN7,
     HUDP_GUN8,
     HUDP_SPEED,
-    HUDP_LAST = HUDP_SPEED,
+    HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
+    HUDP_LAST = HUDP_OPTIONS,
+    HUDP_COUNT,
 
     HUDP_GAP = 500,  // Just to make ids larger than this distinguishable.
 
@@ -500,7 +501,6 @@ typedef struct {
 } FO_Hud_Panel;
 
 FO_Hud_Panel NullPanel;
-FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
 FO_Hud_Panel* MenuPanel;
 float Editor_SelectedPanel_Index;
@@ -516,7 +516,6 @@ enumflags {
     FL_GT_ADJPING
 };
 
-float(PanelID) GetDrawPanel;
 void(string identify) Hud_DrawIdentifyPanel;
 void (float display, string text) Hud_DrawHudOptionsPanel;
 void (float playerclass) Hud_DrawClassInfoPanel;

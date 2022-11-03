@@ -12,7 +12,7 @@ void(PanelID ignored, string text) drawClipSize = {
 };
 
 void(PanelID ignored, string text) drawIdentify = {
-    if (strlen(SBAR.Identify) > 0 || fo_hud_editor)
+    if (strlen(text) > 0 || fo_hud_editor)
         Hud_DrawIdentifyPanel(text);
 };
 
@@ -1062,14 +1062,13 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  string getValue(),
 //  Style, Snap, Status
 
-    {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return getHudPanel(DrawPanel.id)->Name;}, 1},
     {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0, drawClipSize, { return WP_GetClip(); }},
     {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
     {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
     {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0, drawGren2Panel, {return ftos(getstatf(STAT_NO_GREN2));}},
     {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, drawTextPanel, {return SBAR.Identify;}},
+    {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, drawIdentify, {return SBAR.Identify;}},
     {HUDP_FLAGINFO, "flaginfo", FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0, drawFlagInfo, {return "";}},
     {HUDP_GRENTIMER, "grentimer", FO_HUD_GRENTIMER_NAME,   '100 110', '26 26',  1,0,1,0, drawGrenTimerPanel, {return "";}},
     {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0, drawSimplePanel, {return "";}},
@@ -1109,6 +1108,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_GUN7, "gun7", "Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
     {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
     {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", speed) : "";}, 0, 4},
+    {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return "";}, 1},
 };
 
 inline FO_Hud_Panel* (PanelID panelid) getHudPanel = {

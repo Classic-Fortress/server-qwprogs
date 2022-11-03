@@ -1329,7 +1329,7 @@ void FO_Hud_Init() {
         ASSERTD_EQ(i + HUDP_FIRST, Hud_Panels[i].id);
     float next_id = HUD_LAST + 1;
 
-    DrawPanel = *getHudPanel(HUDP_OPTIONS);  // XXX
+    /* DrawPanel = *getHudPanel(HUDP_OPTIONS);  // XXX */
     INIT_MENU_IDS(FO_MENU_GAME);
     INIT_MENU_IDS(FO_MENU_GAME_SPECTATOR);
     INIT_MENU_IDS(FO_MENU_SPECTATOR_TRACK);

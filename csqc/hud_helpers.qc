@@ -1,6 +1,4 @@
 void Hud_WriteCfg(string path);
-float GetDrawPanel(PanelID id);
-void SetDrawPanel(PanelID id);
 
 void FO_Hud_Editor()
 {
@@ -49,24 +47,13 @@ void(PanelID id, vector pos, vector size, vector minmaxsteps, __inout float valu
 
 vector UpdatePos(PanelID id, vector mousepos)
 {
-    vector pos;
-//    switch (id)
-//    {
-//        case "flagiconpanel":
-//            if (HudSettings.MousePos != [0, 0])
-//            {
-//                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
-//                HudSettings.FlagIcon.Position = pos;
-//            }
-//            break;
+    if (id < HUDP_FIRST || id > HUDP_LAST)
+        return '0 0 0';
 
-//        default:
-            GetDrawPanel(id);
-            pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
-            DrawPanel.Position = pos;
-            SetDrawPanel(id);
-//            break;
-//    }
+    vector pos;
+    FO_Hud_Panel* panel = getHudPanel(id);
+    pos = panel->Position + mousepos - HudSettings.MousePos;
+    panel->Position = pos;
 
     return pos;
 }
@@ -372,7 +359,7 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
         return;
     
     vector pos;
-    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+    pos = getPanelPosition(panel); //getPosition(fid);
     vector scaledFillSize = panel.FillSize * panel.Scale;
     //if(scaledFill
 
@@ -419,7 +406,7 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
         return;
     
     vector pos;
-    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+    pos = getPanelPosition(panel);
 
     float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
     vector fillScale = panel.FillSize * textScale;
@@ -453,19 +440,21 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
     Hud_DrawStringLMPThreshold(pos + [offset,0], val, textSize, threshold);
 }
 
-vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
+vector GetStringOffsetPos(float orientation, string msg, vector size, vector fontSize,
+                          vector pos, vector basepos, float newline)
 {
     float len, offset;
     len = strlen(msg);
-    offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
+    offset = (orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
     pos = [basepos_x + offset, newline ? pos_y + 2 + ((size_y - fontSize_y) * .5) : pos_y + ((size_y - fontSize_y) * .5), 0];
 
     return pos;
 }
 
-vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline, vector colour)
+vector DrawOffsetString(float orientation, string msg, vector size,
+        vector fontSize, vector pos, vector basepos, float newline, vector colour)
 {
-    pos = GetStringOffsetPos(msg, size, fontSize, pos, basepos, newline);
+    pos = GetStringOffsetPos(orientation, msg, size, fontSize, pos, basepos, newline);
     drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
