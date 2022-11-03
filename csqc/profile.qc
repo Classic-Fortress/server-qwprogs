@@ -1,3 +1,5 @@
+DEFCVAR_FLOAT(fo_enable_profiling, 0);
+
 inline float sq(float x) { return x * x; }
 
 struct perf_samples {
@@ -87,6 +89,9 @@ struct perf_sampler {
 };
 
 float perf_start_sample(perf_sampler* ps, float force = FALSE) {
+    if (!CVARF(fo_enable_profiling))
+        return FALSE;
+
     if (time < ps->next_sample && !force)
         return FALSE;
     ps->sample_start = gettime(1); // cltime
@@ -94,7 +99,7 @@ float perf_start_sample(perf_sampler* ps, float force = FALSE) {
 }
 
 void perf_finish_sample(perf_sampler* ps, float idx) {
-    if (idx == 0)
+    if (idx == FALSE)
         return;  // Not sampled.
     ps->next_sample = cltime + (random() + random()) * ps->interval;
     perf_add_sample(&ps->samples, gettime(1) - ps->sample_start);
