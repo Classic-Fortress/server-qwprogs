@@ -113,17 +113,6 @@ float zoomed_in;
 .float votecount;
 .float localmap;
 
-float(string) GetDrawPanel;
-void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
-void (string id, float playerclass) Hud_DrawClassInfoPanel;
-void (string panelid) Hud_DrawFlagStatusBar;
-void (string panelid) Hud_DrawTeamScorePanel;
-void (string panelid) Hud_DrawMapMenuPanel;
-float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
-vector(float panelid) getPosition;
-vector(float panelid) getFillSize;
-
 void () SUB_Null = {
 };
 
@@ -407,9 +396,93 @@ FO_TeamScores TS;
 
 float TeamScore[4];
 
+enum PanelID:float {
+    HUDP_INVALID = 0,  // Reserve 0 so we can recognize an uninit menu
+    HUDP_FIRST = 100,
+    HUDP_CLIPSIZE = HUDP_FIRST,
+    HUDP_FRAGSTREAK,
+    HUDP_CAPS,
+    HUDP_GREN1,
+    HUDP_GREN2,
+    HUDP_SPECIAL,
+    HUDP_IDENTIFY,
+    HUDP_FLAGINFO,
+    HUDP_GRENTIMER,
+    HUDP_MENU,
+    HUDP_MOTD,
+    HUDP_MENU_HINT,
+    HUDP_GAME_MODE,
+    HUDP_READY,
+    HUDP_SHOWSCORES,
+    HUDP_TEAMSCORE,
+    HUDP_MAP_MENU,
+    HUDP_HEALTH,
+    HUDP_FACE,
+    HUDP_AMMO,
+    HUDP_AMMOICON,
+    HUDP_ARMOUR,
+    HUDP_ARMOURICON,
+    HUDP_INVSHELLS,
+    HUDP_INVNAILS,
+    HUDP_INVROCKETS,
+    HUDP_INVCELLS,
+    HUDP_GAMECLOCK,
+    HUDP_QUAD,
+    HUDP_PENT,
+    HUDP_RING,
+    HUDP_SUIT,
+    HUDP_KEY1,
+    HUDP_KEY2,
+    HUDP_RUNE1,
+    HUDP_RUNE2,
+    HUDP_RUNE3,
+    HUDP_RUNE4,
+    HUDP_GUN2,
+    HUDP_GUN3,
+    HUDP_GUN4,
+    HUDP_GUN5,
+    HUDP_GUN6,
+    HUDP_GUN7,
+    HUDP_GUN8,
+    HUDP_SPEED,
+    HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
+    HUDP_LAST = HUDP_OPTIONS,
+
+    HUDP_GAP = 500,  // Just to make ids larger than this distinguishable.
+
+    HUDP_OPTION_LIST,
+    HUDP_OPTION_PANEL,
+
+    HUDB_FIRST,
+    HUDB_MAP_VOTE,
+    HUDB_MAP_CHANGE,
+    HUDB_OPTION_LIST,
+    HUDB_OPTION_SCROLLUP,
+    HUDB_OPTION_SCROLLDOWN,
+    HUDB_LAST,
+
+    HUDE_FIRST,
+    HUDE_OPTION_SCALE_SLIDER,
+    HUDE_OPTION_TEXTSCALE_SLIDER,
+    HUDE_OPTION_SCALE_SCROLL,
+    HUDE_OPTION_TEXTALIGN_TOGGLE,
+    HUDE_OPTION_SHOWHIDE_TOGGLE,
+    HUDE_OPTION_HSNAP_TOGGLE,
+    HUDE_OPTION_VSNAP_TOGGLE,
+    HUDE_OPTION_SHOWALL_TOGGLE,
+    HUDE_LAST,
+
+    HUDL_FIRST = HUDB_LAST,
+    HUDL_OPTION_BASE = 1000,
+    HUDL_MAP_BASE = 2000,
+
+    HUD_LAST = 10000,
+};
+
 // hud stuff
 typedef struct {
-    string id;
+    PanelID id;
+    string SaveName;
     string Name;
     vector Position;
     vector FillSize;
@@ -417,7 +490,7 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text) drawPanel;
+    void(float display, string text) drawPanel;
     string() getValue;
     float Style;
     float Snap;
@@ -426,7 +499,6 @@ typedef struct {
 } FO_Hud_Panel;
 
 FO_Hud_Panel NullPanel;
-FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
 FO_Hud_Panel* MenuPanel;
 float Editor_SelectedPanel_Index;
@@ -442,6 +514,180 @@ enumflags {
     FL_GT_ADJPING
 };
 
+void(string identify) Hud_DrawIdentifyPanel;
+void (float display, string text) Hud_DrawHudOptionsPanel;
+void (float playerclass) Hud_DrawClassInfoPanel;
+void () Hud_DrawFlagStatusBar;
+void () Hud_DrawTeamScorePanel;
+void () Hud_DrawMapMenuPanel;
+float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel;
+vector(PanelID) getPosition;
+vector(PanelID) getFillSize;
+
+enum {
+    D_skip,
+    D_drawpic,
+    D_drawstring,
+    D_drawfill,
+};
+
+struct Draw_Args {
+    PanelID id;
+    int type;
+    vector pos;
+    string s_arg;
+    vector size;
+    vector rgb;
+    float alpha;
+    float drawflag;
+};
+
+struct {
+    int enabled;
+    PanelID active_panel;
+    float last_update;
+    int draw_direct;
+    Draw_Args draw_cache[255];
+    int draw_count;
+    float free_cache[255];
+    int free_count;
+} hud_render_cache;
+
+DEFCVAR_FLOAT(fo_hud_cache, 1)
+DEFCVAR_FLOAT(fo_hud_fps, 60)
+
+enum {
+    HRC_NF_NO_UPDATE = 0,
+    HRC_NF_FULL,
+    HRC_NF_PARTIAL,
+};
+
+inline float HRC_fps_time() { return 1/max(min(CVARF(fo_hud_fps), 77 * 2), 30); }
+
+// Returns true if HUD should be re-rendered this frame.
+float HRC_NewFrame() {
+    // Rate limit even the more complicated enable checks.
+    /* if (time < hud_render_cache.last_update + HRC_fps_time()) */
+    /*     return !hud_render_cache.enabled; */
+    /* hud_render_cache.last_update = time; */
+
+    if (!CVARF(fo_hud_cache) ||
+        fo_hud_menu_active || fo_hud_editor || showingscores) {
+        // Either explicitly disabled, or rendering a more complicated scene
+        // like the editor for which we'll just display in place.
+        hud_render_cache.enabled = FALSE;
+        return TRUE;
+    }
+
+    hud_render_cache.enabled = TRUE;
+    return FALSE;
+}
+
+void HRC_Invalidate(PanelID panel) {
+    float i, j;
+
+    for (i = 0; i < hud_render_cache.draw_count; i++) {
+        if (hud_render_cache.draw_cache[i].id == panel + 1) {
+            hud_render_cache.draw_cache[i].id = 0;
+            hud_render_cache.draw_cache[i].type = D_skip;
+            hud_render_cache.free_cache[hud_render_cache.free_count++] = i;
+        }
+    }
+
+    // Ascending order sort so that we don't end up inverting rendering order
+    // when pulling from the free-list.
+    for (i = 0; i < hud_render_cache.free_count; i++)
+        for (j = i + 1; j < hud_render_cache.free_count; j++)
+            if (hud_render_cache.free_cache[i] < hud_render_cache.free_cache[j]) {
+                float tmp = hud_render_cache.free_cache[i];
+                hud_render_cache.free_cache[i] = hud_render_cache.free_cache[j];
+                hud_render_cache.free_cache[j] = tmp;
+            }
+}
+
+void HRC_SetActive(PanelID panel) {
+    hud_render_cache.active_panel = panel;
+}
+
+static Draw_Args* next_args() {
+    float idx;
+    if (hud_render_cache.free_count)
+        idx = hud_render_cache.free_cache[--hud_render_cache.free_count];
+    else
+        idx = hud_render_cache.draw_count++;
+
+    Draw_Args* result = &hud_render_cache.draw_cache[idx];
+    result->id = hud_render_cache.active_panel + 1;  // 1-based, 0 => free.
+    return result;
+}
+
+void HRC_drawpic(vector pos, string pic, vector size, vector rgb='1 1 1',
+                float alpha=1, float drawflag=0) {
+    if (pic == "")
+        return;
+    if (!hud_render_cache.enabled) {
+        drawpic(pos, pic, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawpic;
+        args->pos = pos;
+        args->s_arg = pic;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawstring(vector pos, string text, vector size, vector rgb='1 1 1',
+                   float alpha=1, float drawflag=0) {
+    if (text == "")
+        return;
+    if (!hud_render_cache.enabled) {
+        drawstring(pos, text, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawstring;
+        args->pos = pos;
+        args->s_arg = text;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawfill(vector pos, vector size, vector rgb,
+                   float alpha=1, float drawflag=0) {
+    if (!hud_render_cache.enabled) {
+        drawfill(pos, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawfill;
+        args->pos = pos;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_Render() {
+    if (!hud_render_cache.enabled)
+        return;
+
+    for (int i = 0; i < hud_render_cache.draw_count; i++) {
+        Draw_Args* args = &hud_render_cache.draw_cache[i];
+        if (args->type == D_skip)
+            continue;
+        else if (args->type == D_drawpic)
+            drawpic(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawstring)
+            drawstring(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawfill)
+            drawfill(args->pos, args->size, args->rgb, args->alpha, args->drawflag);
+    }
+}
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
 
@@ -491,6 +737,7 @@ class CsGrenTimer {
         last_ = grentimers[next_index_];
         return last_;
     };
+
     static void() SyncPause {
         // Time froze, but sound kept running, realign.
         for (float i = 0; i < grentimers.length; i++)
@@ -547,37 +794,6 @@ string FO_ScoreBoardColumns[] = {
     "tafl",
     "dmgg",
     "dmgt"
-};
-
-enum {
-    HUD_PANEL_HUDOPTIONS,
-    HUD_PANEL_CLIPSIZE,
-    HUD_PANEL_FRAGSTREAK,
-    HUD_PANEL_CAPS,
-    HUD_PANEL_GREN1,
-    HUD_PANEL_GREN2,
-    HUD_PANEL_PLAYERCLASS,
-    HUD_PANEL_IDENTIFY,
-    HUD_PANEL_FLAGINFO,
-    HUD_PANEL_GRENTIMER,
-    HUD_PANEL_MENU,
-    HUD_PANEL_MOTD,
-    HUD_PANEL_MENU_HINT,
-    HUD_PANEL_GAME_MODE,
-    HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES,
-    HUD_PANEL_TEAM_SCORE,
-    HUD_PANEL_MAP_MENU,
-    HUD_PANEL_HEALTH,
-    HUD_PANEL_FACE,
-    HUD_PANEL_AMMO,
-    HUD_PANEL_AMMO_ICON,
-    HUD_PANEL_ARMOUR,
-    HUD_PANEL_ARMOUR_ICON,
-    HUD_PANEL_INV_SHELLS,
-    HUD_PANEL_INV_NAILS,
-    HUD_PANEL_INV_ROCKETS,
-    HUD_PANEL_INV_CELLS,
 };
 
 #define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"

@@ -186,7 +186,7 @@ vector _cursor_relative_hover;
 struct _action_element_t {
 	vector pos;
 	vector size;
-	string id;
+	PanelID id;
 	void(float index, vector click_ratios) action;
 };
 const float MAX_ACTION_ELEMENTS = 256;
@@ -218,11 +218,11 @@ void() _action_element_count_sanity =
 };
 
 const float MAX_MOUSE_ACTIONS = 16;
-string _hover_actions[MAX_MOUSE_ACTIONS];
-string _click_actions[MAX_MOUSE_ACTIONS];
-string _hold_actions[MAX_MOUSE_ACTIONS];
-string _release_actions[MAX_MOUSE_ACTIONS];
-string _last_clicked_actions[MAX_MOUSE_ACTIONS];
+PanelID _hover_actions[MAX_MOUSE_ACTIONS];
+PanelID _click_actions[MAX_MOUSE_ACTIONS];
+PanelID _hold_actions[MAX_MOUSE_ACTIONS];
+PanelID _release_actions[MAX_MOUSE_ACTIONS];
+PanelID _last_clicked_actions[MAX_MOUSE_ACTIONS];
 
 float _hover_action_count;
 float _click_action_count;
@@ -256,30 +256,19 @@ float() sui_click_held = { return _holding_click; };
 // click: on mouse1 button down AND button op, once
 
 // Returns true if id was the topmost click (what usually is cared about the most)
-float(string id) sui_is_clicked =
+float(PanelID id) sui_is_clicked =
 {
 	return _click_action_count > 0 && _click_actions[0] == id;
 };
 
-// Returns the index of the clicked id, -1 if wasn't hit at all. 0 is topmost
-float(string id) sui_click_index =
-{
-	for (int i = 0; i < _click_action_count; i++)
-	{
-		if (_click_actions[i] == id) return i;
-	}
-	return -1;
-};
-
-
 // hover: mouse is on top of the action element id
 
-float(string id) sui_is_hovered =
+float(PanelID id) sui_is_hovered =
 {
 	return _hover_action_count > 0 && _hover_actions[0] == id;
 };
 
-float(string id) sui_hover_index =
+float(PanelID id) sui_hover_index =
 {
 	for (int i = 0; i < _hover_action_count; i++)
 	{
@@ -291,54 +280,24 @@ float(string id) sui_hover_index =
 
 // hold: mouse button was clicked on top of this id and is held down, but not necessarily over this id anymore
 
-float(string id) sui_is_held =
+float(PanelID id) sui_is_held =
 {
 	return _hold_action_count > 0 && _hold_actions[0] == id;
 };
 
-float(string id) sui_hold_index =
-{
-	for (int i = 0; i < _hold_action_count; i++)
-	{
-		if (_hold_actions[i] == id) return i;
-	}
-	return -1;
-};
-
-
 // last clicked: is this the last action element that was clicked, good for focusing on input boxes for example
 
-float(string id) sui_is_last_clicked =
+float(PanelID id) sui_is_last_clicked =
 {
 	return _last_clicked_action_count > 0 && _last_clicked_actions[0] == id;
 };
 
-float(string id) sui_last_clicked_index =
-{
-	for (int i = 0; i < _last_clicked_action_count; i++)
-	{
-		if (_last_clicked_actions[i] == id) return i;
-	}
-	return -1;
-};
-
-
 // release: a thing was held, but now it was released, once
 
-float(string id) sui_is_released =
+float(PanelID id) sui_is_released =
 {
 	return _release_action_count > 0 && _release_actions[0] == id;
 };
-
-float(string id) sui_release_index =
-{
-	for (int i = 0; i < _release_action_count; i++)
-	{
-		if (_release_actions[i] == id) return i;
-	}
-	return -1;
-};
-
 
 float(float num) mouse_action_sanity =
 {
@@ -426,7 +385,7 @@ void() _sui_mouse1_up =
 	_holding_click = FALSE;
 };
 
-void(vector pos, vector size, string id, void(float index, vector click_ratios) action) sui_action_element =
+void(vector pos, vector size, PanelID id, void(float index, vector click_ratios) action) sui_action_element =
 {
 	if (!_sui_draw_initialized) 
 	{
@@ -720,14 +679,14 @@ void() sui_end =
 void(vector pos, vector size, vector color, float alpha, float flags) sui_fill =
 {
 	sui_transform_box(pos, size);
-	drawfill(pos, size, color, alpha, flags);
+	HRC_drawfill(pos, size, color, alpha, flags);
 };
 
 void(vector pos, vector size, string pic, vector color, float alpha, float flags) sui_pic =
 {
 	sui_transform_box(pos, size);
 	
-	drawpic(pos, pic, size, color, alpha, flags);
+	HRC_drawpic(pos, pic, size, color, alpha, flags);
 };
 
 void(vector pos, vector size, float width, vector color, float alpha, float flags) sui_border_box =
@@ -735,13 +694,13 @@ void(vector pos, vector size, float width, vector color, float alpha, float flag
 	sui_transform_box(pos, size);
 	
 	// Top line
-	drawfill(pos, [size_x, width], color, alpha, flags);
+	HRC_drawfill(pos, [size_x, width], color, alpha, flags);
 	// Bottom line
-	drawfill([pos_x, pos_y + size_y - width], [size_x, width], color, alpha, flags);
+	HRC_drawfill([pos_x, pos_y + size_y - width], [size_x, width], color, alpha, flags);
 	// Left line
-	drawfill([pos_x, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+	HRC_drawfill([pos_x, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
 	// Right line
-	drawfill([pos_x + size_x - width, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
+	HRC_drawfill([pos_x + size_x - width, pos_y + width], [width, size_y - width * 2], color, alpha, flags);
 };
 
 
@@ -749,14 +708,14 @@ void(vector pos, vector size, string text, vector color, float alpha, float flag
 {
 	sui_transform_box(pos, [stringwidth(text, 1, size), size_y]);
 	
-	drawstring(pos, text, size, color, alpha, flags);
+	HRC_drawstring(pos, text, size, color, alpha, flags);
 };
 
 void(float index, vector click_ratios) sui_noop = {};
 
 void(float value) sui_slider_noop = {};
 
-float(string id, vector pos, vector size, vector minmaxsteps, float value, void(float value) action) sui_slidercontrol =
+float(PanelID id, vector pos, vector size, vector minmaxsteps, float value, void(float value) action) sui_slidercontrol =
 {
 	sui_action_element(pos, size, id, sui_noop);
 	float newvalue = value;
@@ -777,7 +736,7 @@ float(string id, vector pos, vector size, vector minmaxsteps, float value, void(
 	return newvalue;
 };
 
-void(string id, vector pos, vector size, __inout string text, __inout float cursor) sui_text_input =
+void(PanelID id, vector pos, vector size, __inout string text, __inout float cursor) sui_text_input =
 {
 	sui_action_element(pos, size, id, sui_noop);
 	if (sui_is_clicked(id)) cursor = strlen(text);
@@ -789,8 +748,9 @@ void(string id, vector pos, vector size, __inout string text, __inout float curs
 	}
 };
 
+FO_Hud_Panel* (PanelID panelid) getHudPanel;
 
-void(string id, vector size, vector contentsize, __inout vector offset, vector scrollbar_widths) sui_scrollbar =
+void(PanelID id, vector size, vector contentsize, __inout vector offset, vector scrollbar_widths) sui_scrollbar =
 {
 	vector maxoffset = contentsize - size;
 	maxoffset_x = max(0, maxoffset_x);
@@ -801,7 +761,6 @@ void(string id, vector size, vector contentsize, __inout vector offset, vector s
 	vector barpos, barsize;
 	float scan = 0;
 	float char = 0;
-	string barname;
 	if (maxoffset_y > 0 && contentsize_y > 0)
 	{
 		sui_set_align([SUI_ALIGN_END, SUI_ALIGN_START]);
@@ -810,9 +769,8 @@ void(string id, vector size, vector contentsize, __inout vector offset, vector s
 		length = (size_y / contentsize_y) * size_y;
 		barpos = [0, ofs];
 		barsize = [scrollbar_widths_y, length];
-		barname = strcat(id, "vbar");
 		
-		if (sui_is_held(barname))
+		if (sui_is_held(id))
 		{
 			vector anchor = barpos + _cursor_relative_click;
 			sui_transform_point(anchor);
@@ -820,14 +778,14 @@ void(string id, vector size, vector contentsize, __inout vector offset, vector s
 			offset_y += (diff * contentsize_y) / size_y; //  * contentsize_y; // (size_y / contentsize_y);
 		}
 
-		sui_fill(barpos, barsize, '0.1 0.1 0.1' * (1 - sui_is_hovered(barname)), 0.66, 0);
-		sui_action_element(barpos, barsize, barname, sui_noop);
+		sui_fill(barpos, barsize, '0.1 0.1 0.1' * (1 - sui_is_hovered(id)), 0.66, 0);
+		sui_action_element(barpos, barsize, id, sui_noop);
 		sui_pop_frame();
 	} 
 	sui_pop_frame();
 };
 
-void(string id, vector pos, vector size, vector contentsize, __inout vector offset, vector scrollbar_widths) sui_scroll_view_begin =
+void(PanelID id, vector pos, vector size, vector contentsize, __inout vector offset, vector scrollbar_widths) sui_scroll_view_begin =
 {
 	// make space for scrollbars
 	sui_push_frame(pos, size - [scrollbar_widths_y, scrollbar_widths_x]);
@@ -876,7 +834,7 @@ float _sui_list_first;
 float _sui_list_last;
 float _sui_list_pos;
 int _sui_list_index;
-void(string id, vector pos, vector size, vector itemsize, float numitems, __inout vector offset, vector scrollbar_widths) sui_list_view_begin =
+void(PanelID id, vector pos, vector size, vector itemsize, float numitems, __inout vector offset, vector scrollbar_widths) sui_list_view_begin =
 {
 	vector contentsize = [itemsize_x, itemsize_y * numitems];
 	sui_scroll_view_begin(id, pos, size, contentsize, offset, scrollbar_widths);
@@ -902,7 +860,7 @@ void() sui_list_view_end =
 	sui_scroll_view_end();
 };
 
-string(string id, vector pos, vector size, string name, string command) sui_binder =
+string(PanelID id, vector pos, vector size, string name, string command) sui_binder =
 {
 	sui_action_element(pos, size, id, sui_noop);
 	if (sui_is_released(id))
@@ -935,7 +893,7 @@ void() sui_draw_bind_overlay =
  * Flags: 1 = No Border
  * 
  */
-float(string id, vector pos, vector size, string text, vector colour, vector textsize, vector textcolour, float alignment, float padding, float alpha, float textalpha, float flags) hud_colour_button =
+float(PanelID id, vector pos, vector size, string text, vector colour, vector textsize, vector textcolour, float alignment, float padding, float alpha, float textalpha, float flags) hud_colour_button =
 {
 	sui_push_frame(pos, size);
 	vector basecolor = sui_is_hovered(id) ? colour + MENU_HIGHLIGHT * 0.1 : colour;
@@ -956,7 +914,7 @@ float(string id, vector pos, vector size, string text, vector colour, vector tex
 	return sui_is_clicked(id);
 };
 
-float(string id, vector pos, vector size, string text) hud_button = {
+float(PanelID id, vector pos, vector size, string text) hud_button = {
 	return hud_colour_button(id, pos, size, text, MENU_BUTTON, MENU_TEXT_SMALL, MENU_TEXT_1, SUI_ALIGN_CENTER, 0, 0.6, 1, 0);
 }
 

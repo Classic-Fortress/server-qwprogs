@@ -21,6 +21,8 @@ typedef struct {
     float state;        //active/disabled
     void() action;
     vector colour;
+
+    PanelID id;  // Must be last member, automatically initialized.
 } fo_menu_option;
 
 typedef struct {
@@ -34,6 +36,8 @@ typedef struct {
     void() update;
     float page;
     string description;
+
+    PanelID id;  // Must be after statically initialized members.
 } fo_menu;
 
 class fo_menu_option_2 {
@@ -659,7 +663,7 @@ vector fo_menu_draw(fo_menu * menu) = {
         return position;
     }
 
-    Hud_Panels[HUD_PANEL_MAP_MENU].Display = FALSE;
+    getHudPanel(HUDP_MAP_MENU).Display = FALSE;
 
     thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
@@ -679,7 +683,6 @@ vector fo_menu_draw(fo_menu * menu) = {
     local vector buttonpos = position;
     local float buttonhover = FALSE;
     local vector smalltext = MENU_TEXT_SMALL * textscale, mediumtext = MENU_TEXT_MEDIUM * textscale;
-    local string id = strcat("fo_menu_",menu.title);
     local vector tempcolour;
     local float alignment = SUI_ALIGN_START;
     local vector bgcolour = (menu.flags & FO_MENU_FLAG_WARNING)?MENU_BG_WARNING:MENU_BG;
@@ -687,7 +690,7 @@ vector fo_menu_draw(fo_menu * menu) = {
     
     menusize.y = titleoffset + menu.num_opts * (buttonsize.y + padding);
     
-    if (sui_is_held(id)) {
+    if (sui_is_held(menu->id)) {
         position = position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
         MenuPanel.Position = MenuPanel.Position + [Mouse.x, Mouse.y] - HudSettings.MousePos;
     }
@@ -698,10 +701,10 @@ vector fo_menu_draw(fo_menu * menu) = {
     sui_fill([0, 0], menusize, bgcolour, FO_MENU_TRANSPARENCY, 0);
 
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-    sui_action_element([0, 0], menusize, id, sui_noop);
+    sui_action_element([0, 0], menusize, menu.id, sui_noop);
     sui_pop_frame();
     
-    drawstring(
+    HRC_drawstring(
         position + [menusize.x / 2 - stringwidth(menu.title,1,mediumtext)/2,padding*2], 
         menu.title, 
         mediumtext, 
@@ -736,7 +739,7 @@ vector fo_menu_draw(fo_menu * menu) = {
 
                 if(menu.options[i].state == FO_MENU_STATE_NORMAL) {
                     //if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), position + [padding, titleoffset + row * (buttonsize.y + padding)] + shortcutoffset, buttonsize - shortcutoffset - valueoffset, menu.options[i].name, menu.options[i].colour, smalltext, SUI_ALIGN_START, padding * 3 + smalltext.x)) {
-                    if(hud_colour_button(strcat("fo_menu_",menu.title,"_",menu.options[i].name), buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, MENU_TEXT_1, alignment, shortcutoffset.x, 0.6, 1, 0)) {
+                    if(hud_colour_button(menu.options[i].id, buttonpos, buttonsize, menu.options[i].name, menu.options[i].colour, smalltext, MENU_TEXT_1, alignment, shortcutoffset.x, 0.6, 1, 0)) {
                         menu.options[i].action();
                     }
                 } else if(menu.options[i].state == FO_MENU_STATE_DISABLED) {
@@ -749,7 +752,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                         } else {
                             padding + (buttonsize.x / 2) - stringwidth(menu.options[i].name,1,smalltext) / 2; //Centered
                         }
-                        drawstring(
+                        HRC_drawstring(
                             position + [disabledtextoffset, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (MENU_TEXT_SMALL.y / 2)], 
                             menu.options[i].name, 
                             smalltext, 
@@ -761,7 +764,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                     
                 }
                 if(menu.options[i].shortcut) {
-                    drawstring(
+                    HRC_drawstring(
                         position + [padding*3, titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                         menu.options[i].shortcut, 
                         smalltext, 
@@ -771,7 +774,7 @@ vector fo_menu_draw(fo_menu * menu) = {
                     );
                 }
                 if(menu.options[i].value) {
-                    drawstring(
+                    HRC_drawstring(
                         position + [menusize.x - padding*4 - stringwidth(menu.options[i].value,1,smalltext) , titleoffset + row * (buttonsize.y + padding) + (buttonsize.y / 2) - (smalltext.y / 2)], 
                         menu.options[i].value, 
                         //strcat(ftos(row),"/",ftos(i)),
@@ -1305,8 +1308,52 @@ void (float show) showVoteMenu = {
         Menu_Cancel();
     }
     setcursormode(show);
-    Hud_Panels[HUD_PANEL_MAP_MENU].Display = show;
+    getHudPanel(HUDP_MAP_MENU)->Display = show;
     if(show) {
         CurrentMenu = &FO_MENU_VOTE;
     }
 };
+
+#define INIT_MENU_IDS(_target) \
+    do { \
+        _target.id = ++next_id; \
+        for (i = 0; i < _target.options.length; i++) \
+            _target.options[i].id = ++next_id; \
+    } while (0)
+
+void FO_Hud_Init() {
+    float i;
+    ASSERTD_EQ(Hud_Panels.length, HUDP_LAST - HUDP_FIRST + 1);
+
+    for (i = 0; i < Hud_Panels.length; i++)
+        ASSERTD_EQ(i + HUDP_FIRST, Hud_Panels[i].id);
+    float next_id = HUD_LAST + 1;
+
+    /* DrawPanel = *getHudPanel(HUDP_OPTIONS);  // XXX */
+    INIT_MENU_IDS(FO_MENU_GAME);
+    INIT_MENU_IDS(FO_MENU_GAME_SPECTATOR);
+    INIT_MENU_IDS(FO_MENU_SPECTATOR_TRACK);
+    INIT_MENU_IDS(FO_MENU_TEAM);
+    INIT_MENU_IDS(FO_MENU_CLASS);
+    INIT_MENU_IDS(FO_MENU_DROPAMMO);
+    INIT_MENU_IDS(FO_MENU_SCOUT);
+    INIT_MENU_IDS(FO_MENU_SPY);
+    INIT_MENU_IDS(FO_MENU_SPY_TEAM);
+    INIT_MENU_IDS(FO_MENU_SPY_SKIN);
+    INIT_MENU_IDS(FO_MENU_DETPACK);
+    INIT_MENU_IDS(FO_MENU_DETPACK_CANCEL);
+    INIT_MENU_IDS(FO_MENU_BUILD);
+    INIT_MENU_IDS(FO_MENU_BUILD_CANCEL);
+    INIT_MENU_IDS(FO_MENU_SENTRY_MAINTAIN);
+    INIT_MENU_IDS(FO_MENU_SENTRY_ROTATE);
+    INIT_MENU_IDS(FO_MENU_ADMIN_MAIN);
+    INIT_MENU_IDS(FO_MENU_ADMIN_MODES);
+    INIT_MENU_IDS(FO_MENU_ADMIN_SETTINGS);
+    INIT_MENU_IDS(FO_MENU_ADMIN_PLAYERS);
+    INIT_MENU_IDS(FO_MENU_ADMIN_ROUNDS);
+    INIT_MENU_IDS(FO_MENU_ADMIN_QUAD_TIMELIMIT);
+    INIT_MENU_IDS(FO_MENU_ADMIN_TIMELIMIT);
+    INIT_MENU_IDS(FO_MENU_ADMIN_FRAGLIMIT);
+    INIT_MENU_IDS(FO_MENU_VOTE);
+}
+#undef INIT_MENU_IDS
