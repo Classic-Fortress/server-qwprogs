@@ -2516,9 +2516,9 @@ void () PlayerJump = {
         return;
 
     if (self.waterlevel >= 2) {
-        if (self.watertype == -3)
+        if (self.watertype == CONTENT_WATER)
             self.velocity_z = 100;
-        else if (self.watertype == -4)
+        else if (self.watertype == CONTENT_SLIME)
             self.velocity_z = 80;
         else
             self.velocity_z = 50;
