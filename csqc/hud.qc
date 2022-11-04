@@ -74,9 +74,8 @@ void FO_Hud_Editor_LoadDefaultSettings()
 
 void FO_Hud_Editor_List_Panels() = {
     print("^1Available HUD Elements:^7\n");
-    for(float i = 0; i < Hud_Panels.length; i++) {
+    for (float i = HUDP_FIRST; i <= HUDP_LAST; i++)
         print(getHudPanel(i)->SaveName, ": ", getHudPanel(i)->Name, "\n");
-    }
 //    for(float i = 0; i < Hud_ExtraPanels.length; i++) {
 //        print(Hud_ExtraPanels[i].id, ": ", Hud_ExtraPanels[i].Name, "\n");
 //    }
