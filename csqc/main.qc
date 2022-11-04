@@ -14,6 +14,7 @@ float IsValidToUseGrenades();
 void Sync_GameState();
 void Perf_Status();
 void FO_Hud_Init();
+void PlayCSJumpSounds();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -140,36 +141,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     Hud_UpdateView(width, height, menushown, fts);
 
-    if (CVARF(fo_csjumpsounds)) {
-        local float health = getstatf(STAT_HEALTH);
-        local float paused = getstatf(STAT_PAUSED);
-
-        if (pmove_onground && health > 0 && !paused) {
-            // jumping
-            getinputstate(clientcommandframe); // without this the input buttons are innacurate
-            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
-                if (jumpsound_cooldown < time) {
-                    jumpsound_cooldown = time + 0.01;
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, CVARF(FOCMD_JUMPVOLUME));
-                }
-            }
-
-            // landing
-            if (!last_pmove_onground && last_vel_z < -300) {
-                if (pointcontents(pmove_org) == CONTENT_WATER) {
-                    localsound("player/h2ojump.wav", CHAN_VOICE, 1);
-                } else if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_VOICE, 1);
-                } else {
-                    localsound("player/land.wav", CHAN_VOICE, 1);
-                }
-            }
-        }
-
-        last_vel_z = pmove_vel_z;
-        last_pmove_onground = pmove_onground;
-    }
     perf_finish_sample(&frame_timing, fts);
+
+    PlayCSJumpSounds();
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -360,30 +334,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        // case "+quick1":
-        //     localcmd("+button8\n");
-        //     break;
-        // case "-quick1":
-        //     localcmd("-button8\n");
-        //     break;
-        // case "+quick2":
-        //     localcmd("+button9\n");
-        //     break;
-        // case "-quick2":
-        //     localcmd("-button9\n");
-        //     break;
-        // case "+quick3":
-        //     localcmd("+button10\n");
-        //     break;
-        // case "-quick3":
-        //     localcmd("-button10\n");
-        //     break;
-        // case "+quick4":
-        //     localcmd("+button11\n");
-        //     break;
-        // case "-quick4":
-        //     localcmd("-button11\n");
-        //     break;
+            // case "+quick1":
+            //     localcmd("+button8\n");
+            //     break;
+            // case "-quick1":
+            //     localcmd("-button8\n");
+            //     break;
+            // case "+quick2":
+            //     localcmd("+button9\n");
+            //     break;
+            // case "-quick2":
+            //     localcmd("-button9\n");
+            //     break;
+            // case "+quick3":
+            //     localcmd("+button10\n");
+            //     break;
+            // case "-quick3":
+            //     localcmd("-button10\n");
+            //     break;
+            // case "+quick4":
+            //     localcmd("+button11\n");
+            //     break;
+            // case "-quick4":
+            //     localcmd("-button11\n");
+            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -494,7 +468,7 @@ void _Sync_ServerCommandFrame() {
         is_observer = FALSE;
 
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
-                  getstatf(STAT_VELOCITY_Z)];
+           getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
     local float health = getstatf(STAT_HEALTH);
@@ -517,7 +491,7 @@ void _Sync_ClientCommandFrame() {
     // Client command frames are regenerated beyond the server frame, so we
     // cannot check that we have not seen this client command frame alone.
     if (last_servercommandframe == servercommandframe &&
-        last_clientcommandframe == clientcommandframe)
+            last_clientcommandframe == clientcommandframe)
         return;
     last_clientcommandframe = clientcommandframe;
 }
@@ -585,3 +559,52 @@ void Perf_Status() {
             to_precision(avg, prec), variance,
             to_precision(minv, prec), to_precision(maxv, prec));
 }
+
+void PlayCSJumpSounds() {
+    if (!CVARF(fo_csjumpsounds)) {
+        return;
+    }
+
+    if (getstatf(STAT_PAUSED)) {
+        return;
+    }
+
+    if (pmove_onground && getstatf(STAT_HEALTH) > 0) {
+        // jumping
+        local float org = pointcontents(pmove_org);
+        local float submerged = (org == CONTENT_WATER || org == CONTENT_SLIME || org == CONTENT_LAVA);
+        getinputstate(clientcommandframe); // without this the input buttons are innacurate
+
+        if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
+            if (submerged) {
+                if (swimsound_cooldown < time) {
+                    swimsound_cooldown = time + 1;
+                    if (random() < 0.5) {
+                        localsound("player/water1.wav", CHAN_BODY, 1);
+                    } else {
+                        localsound("player/water2.wav", CHAN_BODY, 1);
+                    }
+                }
+            } else {
+                if (jumpsound_cooldown < time) {
+                    jumpsound_cooldown = time + 0.013; // should be inverse of server fps;
+                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                }
+            }
+        }
+
+        // landing
+        if (!last_pmove_onground && last_vel_z < -300) {
+            if (pointcontents(pmove_org) == CONTENT_WATER) {
+                localsound("player/h2ojump.wav", CHAN_VOICE, 1);
+            } else if (last_vel_z < -650) {
+                localsound("player/land2.wav", CHAN_VOICE, 1);
+            } else {
+                localsound("player/land.wav", CHAN_VOICE, 1);
+            }
+        }
+    }
+
+    last_vel_z = pmove_vel_z;
+    last_pmove_onground = pmove_onground;
+};

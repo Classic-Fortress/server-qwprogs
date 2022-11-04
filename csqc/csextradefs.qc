@@ -819,6 +819,7 @@ float speed;
 float jump_counter;
 float grentimer_waiting;
 float jumpsound_cooldown;
+float swimsound_cooldown;
 float last_pmove_onground;
 float last_vel_z;
 float last_death_time;
