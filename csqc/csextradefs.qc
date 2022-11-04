@@ -841,3 +841,5 @@ string(string s) strtrim = #0:strtrim; /*
 		Trims the whitespace from the start+end of the string. */
 float(float playernum, string keyname, optional float assumevalue) getplayerkeyfloat = #0:getplayerkeyfloat; /*
 		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */
+float(string key, optional float assumevalue) serverkeyfloat = #0:serverkeyfloat; /*
+		Version of serverkey that returns the value as a float (which avoids tempstrings). */
