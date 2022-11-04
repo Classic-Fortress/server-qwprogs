@@ -528,7 +528,7 @@ void PlayCSJumpSounds() {
                 }
             } else {
                 if (jumpsound_cooldown < time) {
-                    jumpsound_cooldown = time + 0.013; // should be inverse of server fps;
+                    jumpsound_cooldown = time + (1 / serverkeyfloat("maxfps"));
                     localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
                 }
             }
