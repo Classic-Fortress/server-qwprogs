@@ -399,7 +399,12 @@ float TeamScore[4];
 enum PanelID:float {
     HUDP_INVALID = 0,  // Reserve 0 so we can recognize an uninit menu
     HUDP_FIRST = 100,
-    HUDP_CLIPSIZE = HUDP_FIRST,
+    HUDP_TEAMSCORE = HUDP_FIRST,  // We put this first so that we open to below.
+    HUDP_MAP_MENU,    // We put these up front so that they are
+    HUDP_SHOWSCORES,  // rendered under other elements when editing
+    HUDP_MENU,
+    HUDP_MENU_HINT,
+    HUDP_CLIPSIZE,
     HUDP_FRAGSTREAK,
     HUDP_CAPS,
     HUDP_GREN1,
@@ -408,14 +413,9 @@ enum PanelID:float {
     HUDP_IDENTIFY,
     HUDP_FLAGINFO,
     HUDP_GRENTIMER,
-    HUDP_MENU,
     HUDP_MOTD,
-    HUDP_MENU_HINT,
     HUDP_GAME_MODE,
     HUDP_READY,
-    HUDP_SHOWSCORES,
-    HUDP_TEAMSCORE,
-    HUDP_MAP_MENU,
     HUDP_HEALTH,
     HUDP_FACE,
     HUDP_AMMO,
@@ -490,6 +490,7 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
+    float System;  // System panel display is not user managed (e.g. vote menu)
     void(float display, string text) drawPanel;
     string() getValue;
     float Style;
@@ -603,6 +604,11 @@ void HRC_Invalidate(PanelID panel) {
                 hud_render_cache.free_cache[i] = hud_render_cache.free_cache[j];
                 hud_render_cache.free_cache[j] = tmp;
             }
+}
+
+void HRC_InvalidateAll() {
+    hud_render_cache.draw_count = 0;
+    hud_render_cache.free_count = 0;
 }
 
 void HRC_SetActive(PanelID panel) {

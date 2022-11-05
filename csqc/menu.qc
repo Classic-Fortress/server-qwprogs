@@ -12,6 +12,7 @@ void (float force) FO_Menu_Spy_Team;
 void (float force) FO_Menu_Class;
 void (float force) showVoteMenu;
 void FO_Menu_Admin_Players(float force, float type, float page);
+void FO_Hud_SetDisplay(PanelID id, float display);
 
 typedef struct {
     string shortcut;    //key to press. if omitted - mouse only
@@ -663,8 +664,6 @@ vector fo_menu_draw(fo_menu * menu) = {
         return position;
     }
 
-    getHudPanel(HUDP_MAP_MENU).Display = FALSE;
-
     thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
@@ -1308,7 +1307,7 @@ void (float show) showVoteMenu = {
         Menu_Cancel();
     }
     setcursormode(show);
-    getHudPanel(HUDP_MAP_MENU)->Display = show;
+    FO_Hud_SetDisplay(HUDP_MAP_MENU, show);
     if(show) {
         CurrentMenu = &FO_MENU_VOTE;
     }
