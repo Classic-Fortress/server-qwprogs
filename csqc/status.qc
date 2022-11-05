@@ -5,6 +5,8 @@ vector (FO_Hud_Panel* panel) getPanelFillSize;
 void Hud_DrawPanelLMP(FO_Hud_Panel*, string, string, float);
 void Hud_DrawLMPThreshold(FO_Hud_Panel*, string, float);
 FO_Hud_Panel* getHudPanel(PanelID);
+void FO_Hud_HidePanel(PanelID id);
+void FO_Hud_ShowPanel(PanelID id);
 
 void(PanelID ignored, string text) drawClipSize = {
     if (SBAR.ClipSize != "" || fo_hud_editor)
@@ -391,6 +393,10 @@ void(PanelID panelid, string text) drawTextPanel = {
 void(PanelID panelid, string text) drawMOTDPanel = {
     FO_Hud_Panel* panel = getHudPanel(panelid);
     
+    // No need to render MOTD once expired.
+    if (time > motd_expiry && panel->Display)
+        FO_Hud_HidePanel(panel->id);
+
     //vector position = getPosition(id);
     //vector size = getFillSize(id);
     vector position = getPanelPosition(panel); //panel.Position;
@@ -410,6 +416,8 @@ void(PanelID panelid, string text) drawMOTDPanel = {
             // click event
         }
     }
+
+
     if((showingscores || !panel.Display) && !fo_hud_editor) {
         return;
     }
@@ -1052,8 +1060,7 @@ void(PanelID panelid, string text) drawShowScoresPanel = {
 
 void (float show) FO_Show_Scores = {
     showingscores = show;
-    FO_Hud_Panel* panel = getHudPanel(HUDP_SHOWSCORES);
-    if(panel && &panel != &NullPanel) panel.Display = show;
+    getHudPanel(HUDP_SHOWSCORES)->Display = show;
 };
 
 var FO_Hud_Panel Hud_Panels[] = {
@@ -1062,53 +1069,53 @@ var FO_Hud_Panel Hud_Panels[] = {
 //  string getValue(),
 //  Style, Snap, Status
 
-    {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0, drawClipSize, { return WP_GetClip(); }},
-    {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
-    {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
-    {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
-    {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0, drawGren2Panel, {return ftos(getstatf(STAT_NO_GREN2));}},
-    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
-    {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, drawIdentify, {return SBAR.Identify;}},
-    {HUDP_FLAGINFO, "flaginfo", FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0, drawFlagInfo, {return "";}},
-    {HUDP_GRENTIMER, "grentimer", FO_HUD_GRENTIMER_NAME,   '100 110', '26 26',  1,0,1,0, drawGrenTimerPanel, {return "";}},
-    {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0, drawSimplePanel, {return "";}},
-    {HUDP_MOTD, "motd", FO_HUD_MOTD_NAME,             '150 100', '100 24', 1,0,1,0, drawMOTDPanel, {return SBAR.MOTD;}},
-    {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0, drawTextPanel, {return SBAR.Hint;}},
-    {HUDP_GAME_MODE, "gamemode", FO_HUD_GAME_MODE_NAME,    '100 140', '100 10', 1,0,1,0, drawGameModePanel, {return "";}},
-    {HUDP_READY, "ready", FO_HUD_READY_NAME,           '10 100',  '100 10', 2,0,1,FO_HUD_INSERT_MIDDLE, drawReadyPanel, {return SBAR.Hint;}},
-    {HUDP_SHOWSCORES, "showscores", FO_HUD_SHOWSCORES_NAME, '10 100',  '600 200',1,0,0,FO_HUD_INSERT_MIDDLE, drawShowScoresPanel, {return "";}},
-    {HUDP_TEAMSCORE, "teamscore", FO_HUD_TEAM_SCORE_NAME,  '0 0',     '72 12',  2,0,1,FO_HUD_INSERT_AFTER, drawTeamScorePanel, {return "";}},
-    {HUDP_MAP_MENU, "mapmenu", FO_HUD_MAP_MENU_NAME,      '10 30',   '800 400',1,0,1,FO_HUD_INSERT_MIDDLE, drawMapMenuPanel, {return "";}},
-    {HUDP_HEALTH, "health", FO_HUD_HEALTH_NAME,         '-22 -2',  '72 24',  1,0,1,0, drawHealthArmourTextPanel, {return ftos(getstatf(STAT_HEALTH));}, 0, 34},
-    {HUDP_FACE, "face", FO_HUD_FACE_NAME,             '-70 -2',  '24 24',  1,0,1,0, drawFacePanel, {return "";}, 0, 34},
-    {HUDP_AMMO, "ammo", FO_HUD_AMMO_NAME,             '90 -2',   '72 24',  1,0,1,0, drawAmmoTextPanel, {return ftos(WP_CurrentAmmo());}, 0, 34},
-    {HUDP_AMMOICON, "ammoicon", FO_HUD_AMMO_ICON_NAME ,   '42 -2',   '24 24',  1,0,1,0, drawAmmoPanel, {return "";}, 0, 34},
-    {HUDP_ARMOUR, "armour", FO_HUD_ARMOUR_NAME,         '-134 -2', '72 24',  1,0,1,0, drawHealthArmourTextPanel, {return ftos(getstatf(STAT_ARMOR));}, 0, 34},
-    {HUDP_ARMOURICON, "armouricon", FO_HUD_ARMOUR_ICON_NAME,'-182 -2', '24 24',  1,0,1,0, drawArmourPanel, {return "";}, 0, 34},
-    {HUDP_INVSHELLS, "invshells", FO_HUD_INV_SHELLS_NAME,  '-2 -244', '24 24',  1,1.4,1,0, drawInvShellsPanel, {return ftos(WP_GetAmmo(AMMO_SHELLS));}, 1, 33},
-    {HUDP_INVNAILS, "invnails", FO_HUD_INV_NAILS_NAME,    '-2 -220', '24 24',  1,1.4,1,0, drawInvNailsPanel, {return ftos(WP_GetAmmo(AMMO_NAILS));}, 1, 33},
-    {HUDP_INVROCKETS, "invrockets", FO_HUD_INV_ROCKETS_NAME,'-2 -196', '24 24',  1,1.4,1,0, drawInvRocketsPanel, {return ftos(WP_GetAmmo(AMMO_ROCKETS));}, 1, 33},
-    {HUDP_INVCELLS, "invcells", FO_HUD_INV_CELLS_NAME,    '-2 -172', '24 24',  1,1.4,1,0, drawInvCellsPanel, {return ftos(WP_GetAmmo(AMMO_CELLS));}, 1, 33},
-    {HUDP_GAMECLOCK, "gameclock", "Game Clock",            '0 0'   ,  '108 24', 1,0.8,1,0, drawClockPanel, {return gameClockString();}, 0, 10},
-    {HUDP_QUAD, "quad", "Quad Icon",                  '-200 -30','26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_QUAD)?"textures/wad/sb_quad":"";}, 0, 36},
-    {HUDP_PENT, "pent", "Pentagram Icon",             '-170 -30','26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVULNERABILITY)?"textures/wad/sb_invuln":"";}, 0, 36},
-    {HUDP_RING, "ring", "Ring Icon",                  '-140 -30','26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVISIBILITY)?"textures/wad/sb_invis":"";}, 0, 36},
-    {HUDP_SUIT, "suit", "Biosuit Icon",               '-110 -30','26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_SUIT)?"textures/wad/sb_suit":"";}, 0, 36},
-    {HUDP_KEY1, "key1", "Silver Key",                 '140 -30', '26 26',  0.6,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY1)?"textures/wad/sb_key1":"";}, 0, 34},
-    {HUDP_KEY2, "key2", "Gold Key",                   '160 -30', '26 26',  0.6,1.4,1,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY2)?"textures/wad/sb_key2":"";}, 0, 34},
-    {HUDP_RUNE1, "rune1", "Earth Rune",                '-200 0',  '26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 1)?"textures/wad/sb_sigi1":"";}, 0, 34},
-    {HUDP_RUNE2, "rune2", "Black Rune",                '-170 0',  '26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 2)?"textures/wad/sb_sigil2":"";}, 0, 34},
-    {HUDP_RUNE3, "rune3", "Hell Rune",                 '-140 0',  '26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 4)?"textures/wad/sb_sigil3":"";}, 0, 34},
-    {HUDP_RUNE4, "rune4", "Elder Rune",                '-110 0',  '26 26',  1,1.4,1,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 8)?"textures/wad/sb_sigil4":"";}, 0, 34},
-    {HUDP_GUN2, "gun2", "Shotgun",                    '-4 -170', '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SHOTGUN);}, 0, 36},
-    {HUDP_GUN3, "gun3", "Super Shotgun",              '-4 -150', '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_SHOTGUN);}, 0, 36},
-    {HUDP_GUN4, "gun4", "Nailgun",                    '-4 -130', '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_NAILGUN);}, 0, 36},
-    {HUDP_GUN5, "gun5", "Super Nailgun",              '-4 -110', '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_NAILGUN);}, 0, 36},
-    {HUDP_GUN6, "gun6", "Grenade Launcher",           '-4 -90',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}, 0, 36},
-    {HUDP_GUN7, "gun7", "Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
-    {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
-    {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", speed) : "";}, 0, 4},
-    {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0, doNothing, {return "";}, 1},
+    {HUDP_TEAMSCORE, "teamscore", FO_HUD_TEAM_SCORE_NAME,  '0 0',     '72 12',  2,0,1,FO_HUD_INSERT_AFTER, 0, drawTeamScorePanel, {return "";}},
+    {HUDP_MAP_MENU, "mapmenu", FO_HUD_MAP_MENU_NAME,      '10 30',   '800 400',1,0,1,FO_HUD_INSERT_MIDDLE, 1, drawMapMenuPanel, {return "";}},
+    {HUDP_SHOWSCORES, "showscores", FO_HUD_SHOWSCORES_NAME, '10 100',  '600 200',1,0,1,FO_HUD_INSERT_MIDDLE, 1, drawShowScoresPanel, {return "";}},
+    {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0,1, drawSimplePanel, {return "";}},
+    {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0,0, drawTextPanel, {return SBAR.Hint;}},
+    {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0,0, drawClipSize, { return WP_GetClip(); }},
+    {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
+    {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
+    {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
+    {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0,0, drawGren2Panel, {return ftos(getstatf(STAT_NO_GREN2));}},
+    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, 0, drawIdentify, {return SBAR.Identify;}},
+    {HUDP_FLAGINFO, "flaginfo", FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0,0, drawFlagInfo, {return "";}},
+    {HUDP_GRENTIMER, "grentimer", FO_HUD_GRENTIMER_NAME,   '100 110', '26 26',  1,0,1,0,0, drawGrenTimerPanel, {return "";}},
+    {HUDP_MOTD, "motd", FO_HUD_MOTD_NAME,             '150 100', '100 24', 1,0,1,0,0, drawMOTDPanel, {return SBAR.MOTD;}},
+    {HUDP_GAME_MODE, "gamemode", FO_HUD_GAME_MODE_NAME,    '100 140', '100 10', 1,0,1,0,0, drawGameModePanel, {return "";}},
+    {HUDP_READY, "ready", FO_HUD_READY_NAME,           '10 100',  '100 10', 2,0,1,FO_HUD_INSERT_MIDDLE, 1, drawReadyPanel, {return SBAR.Hint;}},
+    {HUDP_HEALTH, "health", FO_HUD_HEALTH_NAME,         '-22 -2',  '72 24',  1,0,1,0,0, drawHealthArmourTextPanel, {return ftos(getstatf(STAT_HEALTH));}, 0, 34},
+    {HUDP_FACE, "face", FO_HUD_FACE_NAME,             '-70 -2',  '24 24',  1,0,1,0,0, drawFacePanel, {return "";}, 0, 34},
+    {HUDP_AMMO, "ammo", FO_HUD_AMMO_NAME,             '90 -2',   '72 24',  1,0,1,0,0, drawAmmoTextPanel, {return ftos(WP_CurrentAmmo());}, 0, 34},
+    {HUDP_AMMOICON, "ammoicon", FO_HUD_AMMO_ICON_NAME ,   '42 -2',   '24 24',  1,0,1,0,0, drawAmmoPanel, {return "";}, 0, 34},
+    {HUDP_ARMOUR, "armour", FO_HUD_ARMOUR_NAME,         '-134 -2', '72 24',  1,0,1,0,0, drawHealthArmourTextPanel, {return ftos(getstatf(STAT_ARMOR));}, 0, 34},
+    {HUDP_ARMOURICON, "armouricon", FO_HUD_ARMOUR_ICON_NAME,'-182 -2', '24 24',  1,0,1,0,0, drawArmourPanel, {return "";}, 0, 34},
+    {HUDP_INVSHELLS, "invshells", FO_HUD_INV_SHELLS_NAME,  '-2 -244', '24 24',  1,1.4,1,0,0, drawInvShellsPanel, {return ftos(WP_GetAmmo(AMMO_SHELLS));}, 1, 33},
+    {HUDP_INVNAILS, "invnails", FO_HUD_INV_NAILS_NAME,    '-2 -220', '24 24',  1,1.4,1,0,0, drawInvNailsPanel, {return ftos(WP_GetAmmo(AMMO_NAILS));}, 1, 33},
+    {HUDP_INVROCKETS, "invrockets", FO_HUD_INV_ROCKETS_NAME,'-2 -196', '24 24',  1,1.4,1,0,0, drawInvRocketsPanel, {return ftos(WP_GetAmmo(AMMO_ROCKETS));}, 1, 33},
+    {HUDP_INVCELLS, "invcells", FO_HUD_INV_CELLS_NAME,    '-2 -172', '24 24',  1,1.4,1,0,0, drawInvCellsPanel, {return ftos(WP_GetAmmo(AMMO_CELLS));}, 1, 33},
+    {HUDP_GAMECLOCK, "gameclock", "Game Clock",            '0 0'   ,  '108 24', 1,0.8,1,0,0, drawClockPanel, {return gameClockString();}, 0, 10},
+    {HUDP_QUAD, "quad", "Quad Icon",                  '-200 -30','26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_QUAD)?"textures/wad/sb_quad":"";}, 0, 36},
+    {HUDP_PENT, "pent", "Pentagram Icon",             '-170 -30','26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVULNERABILITY)?"textures/wad/sb_invuln":"";}, 0, 36},
+    {HUDP_RING, "ring", "Ring Icon",                  '-140 -30','26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_INVISIBILITY)?"textures/wad/sb_invis":"";}, 0, 36},
+    {HUDP_SUIT, "suit", "Biosuit Icon",               '-110 -30','26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_SUIT)?"textures/wad/sb_suit":"";}, 0, 36},
+    {HUDP_KEY1, "key1", "Silver Key",                 '140 -30', '26 26',  0.6,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY1)?"textures/wad/sb_key1":"";}, 0, 34},
+    {HUDP_KEY2, "key2", "Gold Key",                   '160 -30', '26 26',  0.6,1.4,1,0,0, drawInvIconPanel, {return (getstatf(STAT_ITEMS) & IT_KEY2)?"textures/wad/sb_key2":"";}, 0, 34},
+    {HUDP_RUNE1, "rune1", "Earth Rune",                '-200 0',  '26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 1)?"textures/wad/sb_sigi1":"";}, 0, 34},
+    {HUDP_RUNE2, "rune2", "Black Rune",                '-170 0',  '26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 2)?"textures/wad/sb_sigil2":"";}, 0, 34},
+    {HUDP_RUNE3, "rune3", "Hell Rune",                 '-140 0',  '26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 4)?"textures/wad/sb_sigil3":"";}, 0, 34},
+    {HUDP_RUNE4, "rune4", "Elder Rune",                '-110 0',  '26 26',  1,1.4,1,0,0, drawInvIconPanel, {return (getstatbits(STAT_ITEMS,28,4) & 8)?"textures/wad/sb_sigil4":"";}, 0, 34},
+    {HUDP_GUN2, "gun2", "Shotgun",                    '-4 -170', '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_SHOTGUN);}, 0, 36},
+    {HUDP_GUN3, "gun3", "Super Shotgun",              '-4 -150', '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_SHOTGUN);}, 0, 36},
+    {HUDP_GUN4, "gun4", "Nailgun",                    '-4 -130', '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_NAILGUN);}, 0, 36},
+    {HUDP_GUN5, "gun5", "Super Nailgun",              '-4 -110', '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_SUPER_NAILGUN);}, 0, 36},
+    {HUDP_GUN6, "gun6", "Grenade Launcher",           '-4 -90',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}, 0, 36},
+    {HUDP_GUN7, "gun7", "Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
+    {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
+    {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", speed) : "";}, 0, 4},
+    {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0,1, doNothing, {return "";}, 1},
 };
 
 inline FO_Hud_Panel* (PanelID panelid) getHudPanel = {

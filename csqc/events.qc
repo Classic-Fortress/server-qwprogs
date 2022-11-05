@@ -269,6 +269,7 @@ void() CSQC_Parse_Event = {
             if(rtr) {
                 round_time_remaining = time + rtr;
             }
+            FO_Hud_ShowPanel(HUDP_MOTD);
             break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();

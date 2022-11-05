@@ -1,4 +1,5 @@
 void Hud_WriteCfg(string path);
+void FO_Hud_InitSystemPanels();
 
 void FO_Hud_Editor()
 {
@@ -7,11 +8,14 @@ void FO_Hud_Editor()
         fo_hud_editor = FALSE;
         setcursormode(FALSE);
 
+        FO_Hud_InitSystemPanels();
         Hud_WriteCfg(FO_HUD_CONFIG_PATH);
     }
     else
     {
         fo_hud_editor = TRUE;
+        FO_Hud_InitSystemPanels();
+        FO_Hud_ShowPanel(HUDP_OPTIONS);
         setcursormode(TRUE);
     }
 }
@@ -83,8 +87,6 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
         {
             alpha = 0.6;
             basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1;
-            //FO_Hud_Panel hoverpanel = GetPanelById(id);
-            //HRC_drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
         }
         
         if (sui_is_held(id))
@@ -109,7 +111,7 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
     return sui_is_clicked(id);
 };
 
-// this HRC_draws backwards, haven't bothered to change as we don't use it
+// this draws backwards, haven't bothered to change as we don't use it
 void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
 {
     float c;
@@ -231,6 +233,44 @@ string GetPanelString(string line, FO_Hud_Panel* panel)
     return line;
 }
 
+void FO_Hud_HidePanel(PanelID id) {
+    getHudPanel(id)->Display = FALSE;
+    HRC_Invalidate(id);
+}
+
+void FO_Hud_ShowPanel(PanelID id) {
+    getHudPanel(id)->Display = TRUE;
+}
+
+void FO_Hud_SetDisplay(PanelID id, float display) {
+    if (display)
+        FO_Hud_ShowPanel(id);
+    else
+        FO_Hud_HidePanel(id);
+}
+
+// Hide panels that are used by other systems, e.g. scores or map voting menu,
+// that we don't want bein inadvertently rendered.
+void FO_Hud_InitSystemPanels() {
+    for (float i = HUDP_FIRST; i <= HUDP_LAST; i++) {
+        FO_Hud_Panel* panel = getHudPanel(i);
+        if (panel->System) {
+            switch (panel->id) {
+                case HUDP_MOTD:
+                case HUDP_READY:
+                    FO_Hud_ShowPanel(i);
+                    break;
+
+                case HUDP_MAP_MENU: // Enumerated for readability, not necessity
+                case HUDP_MENU:
+                default:
+                    FO_Hud_HidePanel(i);
+                    break;
+            }
+        }
+    }
+}
+
 float firstrun;
 void FO_Hud_Editor_LoadSettings(string filename)
 {
@@ -304,7 +344,7 @@ void FO_Hud_Editor_LoadSettings(string filename)
                                 panel.TextScale = stof(val);
                                 break;
                             case "display":
-                                panel.Display = stof(val);
+                                FO_Hud_SetDisplay(panel->id, stof(val));
                                 break;
                             case "nodeinsertloc":
                                 panel.Orientation = stof(val);
@@ -335,9 +375,11 @@ void FO_Hud_Editor_LoadSettings(string filename)
     if(getHudPanel(HUDP_MENU)->Position.x + getHudPanel(HUDP_MENU)->FillSize.x > vsize_x) getHudPanel(HUDP_MENU)->Position.x = vsize_x / 2 - getHudPanel(HUDP_MENU)->FillSize.x / 2;
     if(getHudPanel(HUDP_MENU)->Position.y + getHudPanel(HUDP_MENU)->FillSize.y > vsize_y) getHudPanel(HUDP_MENU)->Position.y = 64;
 
-
+    FO_Hud_InitSystemPanels();
 }
 
+
+// Inherits active render cache id
 void GetNewPanel(vector pos, vector fillSize, float scale, float display, float orientation, string name)
 {
     FO_Hud_Panel pnl;
@@ -352,7 +394,7 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
     NewPanel = pnl;
 }
 
-// HRC_draws value string using lmps
+// draws value string using lmps
 void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_alpha)
 {
     if (!panel.Display && !fo_hud_editor)
@@ -372,9 +414,7 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
         }
     }
 
-    //vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
-    //HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
     HRC_drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
 
@@ -421,7 +461,6 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
     pos = [pos_x + 2, pos_y + 2, 0];
 /*
     vector size = FO_Hud_Icon_Size * panel.Scale;
-    //HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
 
     pos = [pos_x + offset, pos_y, 0];

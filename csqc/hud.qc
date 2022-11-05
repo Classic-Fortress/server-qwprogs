@@ -22,27 +22,6 @@ void FO_Hud_Editor_LoadDefaultSettings()
     // check struct, put defaults in
     float yoffset = height - 64;
 
-    // TODO - maybe implement these to allow for pivoting of items
-/*
-    vector pos, fill;
-    float scale, display, Orientation;
-    pos = [width - 8 - FO_HUD_CLIPSIZE_PANEL_X, height - 8 - FO_HUD_CLIPSIZE_PANEL_Y];
-    scale = 1;
-    display = 1;
-    Orientation = FO_HUD_INSERT_BEFORE;
-    fill = [FO_HUD_CLIPSIZE_PANEL_X, FO_HUD_CLIPSIZE_PANEL_Y];
-    
-    for(float i = 0; i < Hud_Panels.length; i++) {
-        pos = [pos_x, pos_y - 2 - 24];
-        getHudPanel(i)->Position = pos;
-        //getHudPanel(i)->FillSize = fillSize;
-        getHudPanel(i)->Scale = scale;
-        getHudPanel(i)->Display = display;
-        getHudPanel(i)->Orientation = Orientation;
-        //pnl.Name = name;
-    }
-*/
-
     //Default menus, id, ready and MOTD to centre of the screen
     getHudPanel(HUDP_GAME_MODE)->Position = [width - getHudPanel(HUDP_GAME_MODE)->FillSize.x, 30];
     getHudPanel(HUDP_GAME_MODE)->Orientation = FO_HUD_INSERT_AFTER;
@@ -70,6 +49,7 @@ void FO_Hud_Editor_LoadDefaultSettings()
     getHudPanel(HUDP_TEAMSCORE)->Position = [(width - getHudPanel(HUDP_TEAMSCORE)->FillSize.x), 0];
     getHudPanel(HUDP_MAP_MENU)->Position = [(width / 2) - (getHudPanel(HUDP_MAP_MENU)->FillSize.x / 2), 30];
     getHudPanel(HUDP_MAP_MENU)->Scale = 1.00;
+    getHudPanel(HUDP_MAP_MENU)->Display = 0;
 }
 
 void FO_Hud_Editor_List_Panels() = {
@@ -198,7 +178,7 @@ void FO_Hud_Editor_Set_Panel_Setting(string panel_name, string setting, string v
             panel.TextScale = stof(value);
             break;
         case "show":
-            panel.Display = stof(value);
+            FO_Hud_SetDisplay(panel->id, stof(value));
             break;
         case "orientation":
             panel.Orientation = stof(value);
@@ -273,20 +253,15 @@ void() Hud_DrawMapMenuPanel = {
     local vector fillsize = panel.FillSize * panel.Scale;
     local float alpha = fo_hud_editor?0.2:0.9;
     local vector position = getPanelPosition(panel);
-    if(panel.Display) {
+    if(panel.Display)
         setcursormode(TRUE);
-    }
     if (hud_panel(panel->id, position, fillsize, alpha, panel.Display)) {
         // click event
-        if (fo_hud_editor) {
-            
-        }
     }
 
-    if(fo_hud_editor) {
+    if (fo_hud_editor)
         return;
-    }
-    
+
     local vector bgcolour = MENU_BG_DARK, textcolour = MENU_TEXT_1;
     local float textscale = 1, padding = 4, cnt = 0;
     local float titlesize = 12;
@@ -304,7 +279,7 @@ void() Hud_DrawMapMenuPanel = {
 
     local vector listviewsize = [listitemsize.x, fillsize.y - padding * 3 - listitemsize.y];
     local float visiblelistitems = floor(listviewsize.y / listitemsize.y);
- 
+
      //Window title
     sui_push_frame(position + [padding,padding], [fillsize.x - padding * 2, titlesize]);
     sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
@@ -625,12 +600,10 @@ void Hud_DrawFlagStatusBar()
             float bigfontvoffset = sizey / 2 - bigfont / 2; //Center text against the icon
             if (FlagInfoLines[i].state == FLAGINFO_CARRIED) 
             {
-                // HRC_drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
                 HRC_drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].carrier,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].carrier, [bigfont,bigfont], '1 0 0', 1, 0);
             } 
             else if (FlagInfoLines[i].state == FLAGINFO_DROPPED && FlagInfoLines[i].locname) 
             {
-                // HRC_drawstring([pos_x + sizex, pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
                 HRC_drawstring([GetTextAlignOffset(pos_x,sizex,sizex,FlagInfoLines[i].locname,bigfont,getHudPanel(HUDP_FLAGINFO)->Orientation), pos_y + bigfontvoffset + sizey * i, 0], FlagInfoLines[i].locname, [bigfont,bigfont], '1 1 1', 1, 0);
             }
 
@@ -665,7 +638,7 @@ void Hud_DrawHudOptionsPanelSelector() {
     vector size = getHudPanel(HUDP_OPTIONS)->FillSize * getHudPanel(HUDP_OPTIONS)->Scale; //for simplicity, use the same size as options panel
     float textsize = 8 * (getHudPanel(HUDP_OPTIONS)->TextScale ? getHudPanel(HUDP_OPTIONS)->TextScale : getHudPanel(HUDP_OPTIONS)->Scale);
     if((pos.x + (size.x * 2)) < ScreenSize.x) {
-        //If there's room on the screen, HRC_draw to the right of options panel
+        //If there's room on the screen, draw to the right of options panel
         pos.x = pos.x + size.x;
     } else {
         pos.x = pos.x - size.x;
@@ -677,7 +650,7 @@ void Hud_DrawHudOptionsPanelSelector() {
     }
 
     float numlines = rint(size.y / (textsize + 2));
-    //Need to HRC_draw scrollbar?
+    // Need to draw scrollbar?
     if((Hud_Panels.length * (textsize + 2)) > size.y) {
         //Scrollbar buttons
         if(hud_button(HUDB_OPTION_SCROLLUP, pos + [size.x - textsize - 2,2], [textsize, textsize], "^")) {
@@ -722,30 +695,31 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
         getHudPanel(HUDP_OPTIONS)->Status = !getHudPanel(HUDP_OPTIONS)->Status;
     }
 
-    if (selectedPanel != panel) {
-        float fscale = selectedPanel.Scale;
+    if (selectedPanel != panel /* Don't allow editing the options panel itself */) {
+        float fscale = selectedPanel->Scale;
         HRC_drawstring(pos + [4,12], strcat("Scale: ",ftos(rint(fscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
         hud_slider(HUDE_OPTION_SCALE_SLIDER, pos + [8,24], [136,8], [0.2,5.0,24], fscale);
-        if(fscale != selectedPanel.Scale)
-            getHudPanel(Editor_SelectedPanel_Index)->Scale = fscale;
+        if(fscale != selectedPanel->Scale)
+            selectedPanel->Scale = fscale;
 
-        float ftscale = selectedPanel.TextScale;
-        HRC_drawstring(pos + [4,34], strcat("Text Scale: ",ftos(rint(ftscale * 100)), "%"), [8,8], MENU_SELECTED, 1, 0);
+        float ftscale = selectedPanel->TextScale;
+        string scales = ftscale ? strcat(ftos(rint(ftscale * 100)), "%") : "Auto";
+        HRC_drawstring(pos + [4,34], strcat("Text Scale: ",scales), [8,8], MENU_SELECTED, 1, 0);
         hud_slider(HUDE_OPTION_TEXTSCALE_SLIDER, pos + [8,44], [136,8], [0,5.0,25], ftscale);
-        if(ftscale != selectedPanel.TextScale)
+        if(ftscale != selectedPanel->TextScale)
             getHudPanel(Editor_SelectedPanel_Index)->TextScale = ftscale;
-        float ftextalign = selectedPanel.Orientation;
-        //drawstring(pos + [4,54], strcat("Text Pos: ", selectedPanel.Orientation ? "Left" : "Right"), [8,8], MENU_SELECTED, 1, 0);
+        float ftextalign = selectedPanel->Orientation;
+        //drawstring(pos + [4,54], strcat("Text Pos: ", selectedPanel->Orientation ? "Left" : "Right"), [8,8], MENU_SELECTED, 1, 0);
         HRC_drawstring(pos + [4,60], "Text Pos: ", [8,8], MENU_SELECTED, 1, 0);
-        if(hud_button(HUDE_OPTION_TEXTALIGN_TOGGLE, pos + [size.x - 6 - 56,56], [56, 16], HUD_ALIGN[selectedPanel.Orientation])) {
-            getHudPanel(Editor_SelectedPanel_Index)->Orientation = (selectedPanel.Orientation + 1) % 3;
+        if(hud_button(HUDE_OPTION_TEXTALIGN_TOGGLE, pos + [size.x - 6 - 56,56], [56, 16], HUD_ALIGN[selectedPanel->Orientation])) {
+            selectedPanel->Orientation = (selectedPanel->Orientation + 1) % 3;
         }
         //hud_slider("hud_option_textalign_scroll", pos + [8,64], [32,8], [0,1,1], ftextalign);
-        //if(ftextalign != selectedPanel.Orientation) {
+        //if(ftextalign != selectedPanel->Orientation) {
         //    getHudPanel(Editor_SelectedPanel_Index)->Orientation = ftextalign;
         //}    
-        if(hud_button(HUDE_OPTION_SHOWHIDE_TOGGLE, pos + [4,74], [140, 16], selectedPanel.Display ? "Hide Panel" : "Show Panel")) {
-            getHudPanel(Editor_SelectedPanel_Index)->Display = !selectedPanel.Display;
+        if(!selectedPanel->System && hud_button(HUDE_OPTION_SHOWHIDE_TOGGLE, pos + [4,74], [140, 16], selectedPanel->Display ? "Hide Panel" : "Show Panel")) {
+            FO_Hud_SetDisplay(selectedPanel->id, !selectedPanel->Display);
         }
     }
     HRC_drawstring(pos + [4,96],"Position: ", [8,8], MENU_SELECTED, 1, 0);
@@ -754,9 +728,9 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
 
     local float snap = 0;
     local string ssnap;
-    if(getHudPanel(Editor_SelectedPanel_Index)->Snap & 2) {
+    if(selectedPanel->Snap & 2) {
         snap = 1;
-    } else if(getHudPanel(Editor_SelectedPanel_Index)->Snap & 4) {
+    } else if(selectedPanel->Snap & 4) {
         snap = 2;
     } else {
         snap = 0;
@@ -783,9 +757,10 @@ void Hud_DrawHudOptionsPanel(float display, string text) {
         getHudPanel(Editor_SelectedPanel_Index)->Snap += pow(2,(snap + 3));
     }
     
-    if(hud_button(HUDE_OPTION_SHOWALL_TOGGLE, pos + [4,162], [140, 16], getHudPanel(HUDP_OPTIONS)->Style ? "Show All" : "Hide Disabled")) {
+    if(hud_button(HUDE_OPTION_SHOWALL_TOGGLE, pos + [4,162], [140, 16], getHudPanel(HUDP_OPTIONS)->Style ? "Show All" : "Show HUD Only")) {
         getHudPanel(HUDP_OPTIONS)->Style = !getHudPanel(HUDP_OPTIONS)->Style;
     }
+    FO_Hud_ShowPanel(HUDP_OPTIONS);
 
     if(getHudPanel(HUDP_OPTIONS)->Status) {
         Hud_DrawHudOptionsPanelSelector();
