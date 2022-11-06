@@ -275,7 +275,7 @@ float firstrun;
 void FO_Hud_Editor_LoadSettings(string filename)
 {
     if(!filename || filename == "") return;
-    
+
     vector vsize = (vector)getproperty(VF_SCREENVSIZE);
     float width = vsize_x;
     float height = vsize_y;
@@ -290,14 +290,12 @@ void FO_Hud_Editor_LoadSettings(string filename)
     // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
     float filehandle;
     filehandle = fopen(filename, FILE_READ);
-	if (filehandle >= 0) {
+    if (filehandle >= 0) {
         // get number of lines                  
         string ln;
         ln = fgets(filehandle);
-        while (ln)
-        {
-            if (strlen(ln) > 0)
-            {
+        while (ln) {
+            if (strlen(ln) > 0) {
                 ln = strreplace("\n", "", ln);
                 string val, field;
 
@@ -308,72 +306,65 @@ void FO_Hud_Editor_LoadSettings(string filename)
                 val = argv(1);
                 val = strtrim(val);
 
-                //switch(field)
-                //{
+                count = tokenizebyseparator(field, ".");
+                string pnl;
+                pnl = argv(0);
+                panel = getHudPanelBySaveName(pnl);
+                if(!panel || panel == &NullPanel) {
+                    if(strlen(pnl) < 6) {
+                        ln = fgets(filehandle);
+                        continue;
+                    }
+                    pnl = substring(pnl, 0, strlen(pnl) - 5);
+                    panel = getHudPanelBySaveName(pnl);
+                    if(!panel || panel == &NullPanel) {
+                        ln = fgets(filehandle);
+                        continue;
+                    }
+                }
 
-                    //default:
-                        count = tokenizebyseparator(field, ".");
-                        string pnl;
-                        pnl = argv(0);
-                        panel = getHudPanelBySaveName(pnl);
-                        if(!panel || &panel == &NullPanel) {
-                            if(strlen(pnl) < 6) {
-                                ln = fgets(filehandle);
-                                continue;
-                            }
-                            pnl = substring(pnl, 0, strlen(pnl) - 5);
-                            panel = getHudPanelBySaveName(pnl);
-                            if(!panel || &panel == &NullPanel) {
-                                ln = fgets(filehandle);
-                                continue;
-                            }
-                        }
+                if (panel->id == HUDP_INVALID)
+                    continue;
 
-                        switch (argv(1))
-                        {
-                            case "position":
-                                count = tokenizebyseparator(val, ",");
-                                x = stof(argv(0));
-                                y = stof(argv(1));
-                                panel.Position = [x, y];
-                                break;
-                            case "scale":
-                                panel.Scale = stof(val);
-                                break;
-                            case "textscale":
-                                panel.TextScale = stof(val);
-                                break;
-                            case "display":
-                                FO_Hud_SetDisplay(panel->id, stof(val));
-                                break;
-                            case "nodeinsertloc":
-                                panel.Orientation = stof(val);
-                                break;
-                            case "snap":
-                                panel.Snap = stof(val);
-                                break;
-                            case "style":
-                                panel.Style = stof(val);
-                                break;
-                        }
-                        
-                        //SetDrawPanel(pnl);
-                        //break;
-                //}
+                switch (argv(1))
+                {
+                    case "position":
+                        count = tokenizebyseparator(val, ",");
+                        x = stof(argv(0));
+                        y = stof(argv(1));
+                        panel.Position = [x, y];
+                        break;
+                    case "scale":
+                        panel.Scale = stof(val);
+                        break;
+                    case "textscale":
+                        panel.TextScale = stof(val);
+                        break;
+                    case "display":
+                        FO_Hud_SetDisplay(panel->id, stof(val));
+                        break;
+                    case "nodeinsertloc":
+                        panel.Orientation = stof(val);
+                        break;
+                    case "snap":
+                        panel.Snap = stof(val);
+                        break;
+                    case "style":
+                        panel.Style = stof(val);
+                        break;
+                }
             }
             ln = fgets(filehandle);
         }
         fclose(filehandle);
-    }
-    else
-    {
+    } else {
         // write a new file
         Hud_WriteCfg(filename);
     }
-    if(getHudPanel(HUDP_MENU)->Position.x < 0) getHudPanel(HUDP_MENU)->Position.x = 10;
-    if(getHudPanel(HUDP_MENU)->Position.y < 0) getHudPanel(HUDP_MENU)->Position.y = 10;
-    if(getHudPanel(HUDP_MENU)->Position.x + getHudPanel(HUDP_MENU)->FillSize.x > vsize_x) getHudPanel(HUDP_MENU)->Position.x = vsize_x / 2 - getHudPanel(HUDP_MENU)->FillSize.x / 2;
-    if(getHudPanel(HUDP_MENU)->Position.y + getHudPanel(HUDP_MENU)->FillSize.y > vsize_y) getHudPanel(HUDP_MENU)->Position.y = 64;
+    if (getHudPanel(HUDP_MENU)->Position.x < 0) getHudPanel(HUDP_MENU)->Position.x = 10;
+    if (getHudPanel(HUDP_MENU)->Position.y < 0) getHudPanel(HUDP_MENU)->Position.y = 10;
+    if (getHudPanel(HUDP_MENU)->Position.x + getHudPanel(HUDP_MENU)->FillSize.x > vsize_x) getHudPanel(HUDP_MENU)->Position.x = vsize_x / 2 - getHudPanel(HUDP_MENU)->FillSize.x / 2;
+    if (getHudPanel(HUDP_MENU)->Position.y + getHudPanel(HUDP_MENU)->FillSize.y > vsize_y) getHudPanel(HUDP_MENU)->Position.y = 64;
 
     FO_Hud_InitSystemPanels();
 }
