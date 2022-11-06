@@ -457,8 +457,6 @@ const float SLIST_TEST_GREATEREQUAL = 6;
 const float SLIST_TEST_NOTEQUAL = 7;
 const float SLIST_TEST_STARTSWITH = 8;
 const float SLIST_TEST_NOTSTARTSWITH = 9;
-const vector PLAYER_MINS = [-16, -16, -24];
-const vector PLAYER_MAXS = [16, 16, 24];
 
 void(vector vang) makevectors = #1; /*
 		Takes an angle vector (pitch,yaw,roll). Writes its results into v_forward, v_right, v_up vectors. */

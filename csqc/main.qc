@@ -574,7 +574,6 @@ float InFluid(vector point){
 
 float CalculateWaterLevel() {
     local vector point = pmove_org;
-    local float default_viewheight = 22;
     local float waterlevel = 0;
 
     point[2] = pmove_org[2] + PLAYER_MINS[2] + 1; // feet
@@ -591,7 +590,7 @@ float CalculateWaterLevel() {
         waterlevel++;
     }
 
-    point[2] = pmove_org[2] + PLAYER_MINS[2] + PLAYER_MAXS[2] + default_viewheight; // eyes
+    point[2] = pmove_org[2] + PLAYER_MINS[2] + PLAYER_MAXS[2] + DEFAULT_VIEWHEIGHT; // eyes
     if (!InFluid(point)) {
         return waterlevel;
     } else {
