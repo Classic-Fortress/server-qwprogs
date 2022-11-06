@@ -626,7 +626,7 @@ void PlayCSJumpSounds() {
             } else {
                 if (pmove_onground && pmove_vel_z < 180 /*not sliding*/ ) {
                     if (jumpsound_cooldown < time) {
-                        jumpsound_cooldown = time + (1 / serverkeyfloat("maxfps"));
+                        jumpsound_cooldown = time + (2 / serverkeyfloat("maxfps"));
                         localsound("player/plyrjmp8.wav", CHAN_AUTO, cvar(FOCMD_JUMPVOLUME));
                     }
                 }
