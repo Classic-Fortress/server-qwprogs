@@ -2552,7 +2552,7 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
-    FO_Sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
+    FO_Sound(self, CHAN_AUTO, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (self.fire_held_down && (self.current_weapon == WEAP_ASSAULT_CANNON)) {
         if (!cannon_air) {
@@ -2619,10 +2619,11 @@ void () WaterMove = {
             self.pain_finished = time + 1;
         }
     }
+
     if (!self.waterlevel) {
-        if (self.flags & 16) {
+        if (self.flags & FL_INWATER) {
             FO_Sound(self, CHAN_BODY, "misc/outwater.wav", 1, 1);
-            self.flags = self.flags - 16;
+            self.flags = self.flags - FL_INWATER;
         }
         return;
     }
@@ -2648,17 +2649,19 @@ void () WaterMove = {
             }
         }
     }
-    if (!(self.flags & 16)) {
-        if (self.watertype == CONTENT_LAVA) {
-            FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
+    if (!(self.flags & FL_INWATER)) {
+        switch(self.watertype) {
+            case CONTENT_LAVA:
+                FO_Sound(self, CHAN_BODY, "player/inlava.wav", 1, 1);
+                break;
+            case CONTENT_WATER:
+                FO_Sound(self, CHAN_BODY, "player/inh2o.wav", 1, 1);
+                break;
+            case CONTENT_SLIME:
+                FO_Sound(self, CHAN_BODY, "player/slimbrn2.wav", 1, 1);
+                break;
         }
-        if (self.watertype == -3) {
-            FO_Sound(self, CHAN_BODY, "player/inh2o.wav", 1, 1);
-        }
-        if (self.watertype == -4) {
-            FO_Sound(self, CHAN_BODY, "player/slimbrn2.wav", 1, 1);
-        }
-        self.flags = self.flags + 16;
+        self.flags = self.flags + FL_INWATER;
         self.dmgtime = 0;
     }
 };
@@ -2727,6 +2730,7 @@ void () PlayerPreThink = {
     if (self.playerclass != 0 || votemode) {
         WaterMove();
     }
+
     if (self.deadflag >= 2) {
         PlayerDeathThink();
         return;

@@ -456,6 +456,10 @@ float(float entnum, float channel, string soundname, float vol, float attenuatio
         case "player/h2ojump.wav":
         case "player/water1.wav":
         case "player/water2.wav":
+        case "player/inlava.wav":
+        case "player/inh2o.wav":
+        case "player/slimbrn2.wav":
+        case "misc/outwater.wav":
             if (CVARF(fo_csjumpsounds)) {
                 return 1;
             } else {

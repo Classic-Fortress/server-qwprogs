@@ -14,6 +14,8 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+float InFluid(vector point);
+float CalculateWaterLevel();
 void PlayCSJumpSounds();
 
 void GetSelf() = {
@@ -25,9 +27,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-//     for (float i = 0; i < HudIcons.length; i++) {
-//         precache_pic(HudIcons[i].icon);
-//     }
+    //     for (float i = 0; i < HudIcons.length; i++) {
+    //         precache_pic(HudIcons[i].icon);
+    //     }
 
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
@@ -90,9 +92,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
-    
+
     MenuPanel = getAnyHudPanelByNamePointer("menu");
-    
+
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -481,8 +483,6 @@ void _Sync_ServerCommandFrame() {
     }
 }
 
-float last_pmove_onground;
-float last_vel_z;
 float last_clientcommandframe;
 // REQUIRES: Must be called after _Sync_ServerCommandFrame.
 void _Sync_ClientCommandFrame() {
@@ -501,6 +501,45 @@ void Sync_GameState() {
     _Sync_ClientCommandFrame();
 }
 
+float InFluid(vector point){
+    local float cont = pointcontents(point);
+
+    if (cont == CONTENT_WATER || cont == CONTENT_SLIME || cont == CONTENT_LAVA) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+float CalculateWaterLevel() {
+    local vector point = pmove_org;
+    local float default_viewheight = 22;
+    local float waterlevel = 0;
+
+    point[2] = pmove_org[2] + PLAYER_MINS[2] + 1; // feet
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    point[2] = pmove_org[2] + (PLAYER_MINS[2] + PLAYER_MAXS[2]) * 0.5; // waist
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    point[2] = pmove_org[2] + PLAYER_MINS[2] + PLAYER_MAXS[2] + default_viewheight; // eyes
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    return waterlevel;
+}
+
 void PlayCSJumpSounds() {
     if (!CVARF(fo_csjumpsounds)) {
         return;
@@ -510,14 +549,12 @@ void PlayCSJumpSounds() {
         return;
     }
 
-    if (pmove_onground && getstatf(STAT_HEALTH) > 0) {
-        // jumping
-        local float org = pointcontents(pmove_org);
-        local float submerged = (org == CONTENT_WATER || org == CONTENT_SLIME || org == CONTENT_LAVA);
-        getinputstate(clientcommandframe); // without this the input buttons are innacurate
+    local float waterlevel = CalculateWaterLevel();
 
-        if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
-            if (submerged) {
+    if (getstatf(STAT_HEALTH) > 0) {
+        // jumping
+        if ((input_buttons & BUTTON2)) {
+            if (waterlevel >= 2) {
                 if (swimsound_cooldown < time) {
                     swimsound_cooldown = time + 1;
                     if (random() < 0.5) {
@@ -527,25 +564,51 @@ void PlayCSJumpSounds() {
                     }
                 }
             } else {
-                if (jumpsound_cooldown < time) {
-                    jumpsound_cooldown = time + (1 / serverkeyfloat("maxfps"));
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
+                if (pmove_onground && pmove_vel_z < 180 /*not sliding*/ ) {
+                    if (jumpsound_cooldown < time) {
+                        jumpsound_cooldown = time + (1 / serverkeyfloat("maxfps"));
+                        localsound("player/plyrjmp8.wav", CHAN_AUTO, cvar(FOCMD_JUMPVOLUME));
+                    }
                 }
             }
         }
 
         // landing
-        if (!last_pmove_onground && last_vel_z < -300) {
+        if (pmove_onground && !last_onground && last_vel_z < -300) {
             if (pointcontents(pmove_org) == CONTENT_WATER) {
-                localsound("player/h2ojump.wav", CHAN_VOICE, 1);
+                localsound("player/h2ojump.wav", CHAN_BODY, 1);
             } else if (last_vel_z < -650) {
                 localsound("player/land2.wav", CHAN_VOICE, 1);
             } else {
                 localsound("player/land.wav", CHAN_VOICE, 1);
             }
         }
+
+        // entering water
+        if (waterlevel > 0 && last_waterlevel == 0) {
+            local vector feet = pmove_org;
+            feet[2] = pmove_org[2] + PLAYER_MINS[2] + 1;
+
+            switch(pointcontents(feet)) {
+                case CONTENT_LAVA:
+                    localsound("player/inlava.wav", CHAN_BODY, 1);
+                    break;
+                case CONTENT_WATER:
+                    localsound("player/inh2o.wav", CHAN_BODY, 1);
+                    break;
+                case CONTENT_SLIME:
+                    localsound("player/slimbrn2.wav", CHAN_BODY, 1);
+                    break;
+            }
+        }
+
+        // exiting water
+        if (waterlevel == 0 && last_waterlevel > 0) {
+            localsound("misc/outwater.wav", CHAN_BODY, 1);
+        }
     }
 
     last_vel_z = pmove_vel_z;
-    last_pmove_onground = pmove_onground;
+    last_onground = pmove_onground;
+    last_waterlevel = waterlevel;
 };
