@@ -41,6 +41,10 @@ vector TEXT_TEAM_COLOUR[] = {
     MENU_TEXT_GREEN_FO
 };
 
+const float DEFAULT_VIEWHEIGHT = 22;
+const vector PLAYER_MINS = [-16, -16, -24];
+const vector PLAYER_MAXS = [16, 16, 24];
+
 #define FO_MENU_FLAG_USE_MOUSE 1
 #define FO_MENU_FLAG_CENTER 2
 #define FO_MENU_FLAG_SHOW_SHORTCUTS 4
