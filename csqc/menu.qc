@@ -664,6 +664,9 @@ vector fo_menu_draw(fo_menu * menu) = {
         return position;
     }
 
+    FO_Hud_ShowPanel(HUDP_MENU_HINT);
+    SBAR.Hint = "";
+
     thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
@@ -836,6 +839,7 @@ void Menu_Cancel() = {
         setcursormode(FALSE);
         fo_hud_menu_active = FALSE;
     }
+    FO_Hud_HidePanel(HUDP_MENU_HINT);
 }
 
 void Menu_Draw(float width, float height, float menushown) = {
