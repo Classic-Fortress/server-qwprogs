@@ -804,7 +804,7 @@ void UpdateClientIDString(entity pl) {
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_ID);
     // identify
-    if (pl.ident_string && self.client_time < pl.ident_time) {
+    if (pl.ident_string && time < pl.ident_time) {
         WriteString(MSG_MULTICAST, pl.ident_string);
     } else {
         WriteString(MSG_MULTICAST, "");
@@ -1253,7 +1253,7 @@ void (entity pl) RefreshStatusBar = {
         s3 = strzone(s3);
 
         // identify
-        if (pl.ident_string != string_null && self.client_time < pl.ident_time) {
+        if (pl.ident_string != string_null && time < pl.ident_time) {
             ident = strcat(pl.ident_string, "\n\n");
         } else {
             ident = "\n\n\n\n";
