@@ -565,25 +565,6 @@ enum {
 
 inline float HRC_fps_time() { return 1/max(min(CVARF(fo_hud_fps), 77 * 2), 30); }
 
-// Returns true if HUD should be re-rendered this frame.
-float HRC_NewFrame() {
-    // Rate limit even the more complicated enable checks.
-    /* if (time < hud_render_cache.last_update + HRC_fps_time()) */
-    /*     return !hud_render_cache.enabled; */
-    /* hud_render_cache.last_update = time; */
-
-    if (!CVARF(fo_hud_cache) ||
-        fo_hud_menu_active || fo_hud_editor || showingscores) {
-        // Either explicitly disabled, or rendering a more complicated scene
-        // like the editor for which we'll just display in place.
-        hud_render_cache.enabled = FALSE;
-        return TRUE;
-    }
-
-    hud_render_cache.enabled = TRUE;
-    return FALSE;
-}
-
 void HRC_Invalidate(PanelID panel) {
     float i, j;
 
@@ -614,6 +595,26 @@ void HRC_InvalidateAll() {
 void HRC_SetActive(PanelID panel) {
     hud_render_cache.active_panel = panel;
 }
+
+// Returns true if HUD should be re-rendered this frame.
+float HRC_NewFrame() {
+    // Rate limit even the more complicated enable checks.
+    /* if (time < hud_render_cache.last_update + HRC_fps_time()) */
+    /*     return !hud_render_cache.enabled; */
+    /* hud_render_cache.last_update = time; */
+
+    if (!CVARF(fo_hud_cache) ||
+        fo_hud_menu_active || fo_hud_editor || showingscores) {
+        // Either explicitly disabled, or rendering a more complicated scene
+        // like the editor for which we'll just display in place.
+        hud_render_cache.enabled = FALSE;
+        return TRUE;
+    }
+
+    hud_render_cache.enabled = TRUE;
+    return FALSE;
+}
+
 
 static Draw_Args* next_args() {
     float idx;

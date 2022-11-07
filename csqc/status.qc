@@ -339,7 +339,7 @@ void(PanelID panelid, string text) drawSimplePanel = {
 
 void(PanelID panelid, string text) drawTextPanel = {
     FO_Hud_Panel* panel = getHudPanel(panelid);
-    
+
     vector position = getPanelPosition(panel);
     vector size = getPanelFillSize(panel);
     vector mediumtext = MENU_TEXT_SMALL * panel.Scale;
@@ -349,42 +349,31 @@ void(PanelID panelid, string text) drawTextPanel = {
     if (fo_hud_editor) {
         string name = getHudPanel(panelid)->Name;
         HRC_drawstring(
-            [GetTextAlignOffset(position.x, size.x, padding, name,
-                                mediumtext.x, panel.Orientation),
-                                padding*2 + position.y],
-            name, mediumtext, MENU_TEXT_1, 1, 0
-        );
+                [GetTextAlignOffset(position.x, size.x, padding, name,
+                    mediumtext.x, panel.Orientation),
+                padding*2 + position.y],
+                name, mediumtext, MENU_TEXT_1, 1, 0
+                );
         if (hud_panel(panelid, position, size, transparency, panel.Display)) {
             // click event
         }
     } else {
-        if(showingscores || !panel.Display) {
+        if (showingscores || !panel.Display || text == "")
             return;
-        }
-        if(text && text != "") {
-            //sui_border_box(position, size, 1, MENU_BORDER, transparency, 0);
-            //sui_push_frame(position, size);
 
-            //sui_fill([0, 0], size, MENU_BG, transparency, 0);
-
-            //sui_set_align([SUI_ALIGN_CENTER, SUI_ALIGN_CENTER]);
-            //sui_action_element([0, 0], size, panelid, sui_noop);
-            //sui_pop_frame();
-            lines = tokenizebyseparator(text, "\n");
-            local string line;
-            for (float i = 0; i <= lines; i++) {
-                line = argv(i);
-                // tokenize doesn't handle newlines very well
-                line = strreplace("\n", "", line);
-                line = strtrim(line);
-                if (strlen(line) > 0) {
-                    HRC_drawstring(
+        lines = tokenizebyseparator(text, "\n");
+        string line;
+        for (float i = 0; i <= lines; i++) {
+            line = argv(i);
+            // tokenize doesn't handle newlines very well
+            line = strtrim(strreplace("\n", "", line));
+            if (strlen(line) > 0) {
+                HRC_drawstring(
                         [GetTextAlignOffset(position.x, size.x, padding, line,
                             mediumtext.x, panel.Orientation),
                         position.y + padding + mediumtext.y*i],
                         line, mediumtext, MENU_TEXT_1, 1, 0
-                    );
-                }
+                        );
             }
         }
     }
@@ -418,9 +407,9 @@ void(PanelID panelid, string text) drawMOTDPanel = {
     }
 
 
-    if((showingscores || !panel.Display) && !fo_hud_editor) {
+    if ((showingscores || !panel.Display || text == "") && !fo_hud_editor)
         return;
-    }
+
     //if(text && text != "") {
         if((!intermission && time < motd_expiry && !team_no) || fo_hud_editor) {
             sui_push_frame(position, size);
@@ -1073,7 +1062,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_MAP_MENU, "mapmenu", FO_HUD_MAP_MENU_NAME,      '10 30',   '800 400',1,0,1,FO_HUD_INSERT_MIDDLE, 1, drawMapMenuPanel, {return "";}},
     {HUDP_SHOWSCORES, "showscores", FO_HUD_SHOWSCORES_NAME, '10 100',  '600 200',1,0,1,FO_HUD_INSERT_MIDDLE, 1, drawShowScoresPanel, {return "";}},
     {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0,1, drawSimplePanel, {return "";}},
-    {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0,0, drawTextPanel, {return SBAR.Hint;}},
+    {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0,1, drawTextPanel, {return SBAR.Hint;}},
     {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0,0, drawClipSize, { return WP_GetClip(); }},
     {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
