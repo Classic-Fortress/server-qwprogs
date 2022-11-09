@@ -1,56 +1,39 @@
 void Menu_Cancel();
 void FO_Menu_Game(float);
 
+static float HudInputEscape() {
+    if (!fo_hud_menu_active && !fo_hud_editor)
+        return FALSE;
+
+    Menu_Cancel();
+    fo_hud_editor = FALSE;
+    return TRUE;
+}
+
 float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
-    float used = sui_input_event(evtype, scanx, chary, devid);
-    //if(evtype == IE_KEYDOWN) print("Key down: ", ftos(scanx), ", char: ", ftos(chary), "\n");
-    float menu_mouse = (fo_hud_menu_active && (CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE));
-    if (fo_hud_editor || fo_hud_menu_active)
-    {
-        switch (evtype)
-        {
+    if (fo_hud_editor || fo_hud_menu_active) {
+        sui_input_event(evtype, scanx, chary, devid);
+        float menu_mouse = (fo_hud_menu_active && (CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE));
+        switch (evtype) {
             case IE_KEYUP:
-                switch (scanx)
-                {
-                    case K_ESCAPE:
-                        if(fo_hud_menu_active) {
-                            Menu_Cancel();
-                            return TRUE;
-                        }
-                        if(fo_hud_editor) {
-                            fo_hud_editor = FALSE;
-                            return TRUE;
-                        }
-                        break;
-                    case K_MOUSE1:
-                        // work out if on a button
-                        break;
-                }
+                if (scanx == K_ESCAPE && HudInputEscape())
+                    return TRUE;
                 break;
             case IE_KEYDOWN:
-                switch (scanx)
-                {
+                switch (scanx) {
                     case K_ESCAPE:
-                        if(fo_hud_menu_active) {
-                            //Menu_Cancel();
+                        if (HudInputEscape())
                             return TRUE;
-                        }
-                        if(fo_hud_editor) {
-                            //fo_hud_editor = FALSE;
-                            return TRUE;
-                        }
                         break;
                     case K_MOUSE1:
-                        if(!fo_hud_editor && fo_hud_menu_active && !(CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE)) {
+                        if(!fo_hud_editor && fo_hud_menu_active &&
+                           !(CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE))
                             break;
-                        }
-                        // work out if on a button
+
                         return TRUE;
-                        break;
                 }
-                if(fo_hud_menu_active) {
+                if(fo_hud_menu_active)
                     return fo_menu_process_input(CurrentMenu, scanx);
-                }
                 break;
             case IE_MOUSEDELTA:
                 return (fo_hud_editor || menu_mouse);
@@ -58,9 +41,9 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 Mouse.x = scanx;
                 Mouse.y = chary;
                 return (fo_hud_editor || menu_mouse);
-            default:
         }
     } else if(getHudPanel(HUDP_MAP_MENU)->Display) {
+        sui_input_event(evtype, scanx, chary, devid);
         switch (evtype) {
             case IE_MOUSEDELTA:
                 return TRUE;
@@ -69,7 +52,8 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 PrevMouse.y = Mouse.y;
                 Mouse.x = scanx;
                 Mouse.y = chary;
-                if(MouseDown) Hud_MapMenuPanel_Move(Mouse.x - PrevMouse.x, Mouse.y - PrevMouse.y);
+                if (MouseDown)
+                    Hud_MapMenuPanel_Move(Mouse.x - PrevMouse.x, Mouse.y - PrevMouse.y);
                 return TRUE;
              case IE_KEYDOWN:
                 switch (scanx) {
