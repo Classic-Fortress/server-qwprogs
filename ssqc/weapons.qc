@@ -1076,26 +1076,26 @@ void () T_MissileTouch = {
 };
 
 void () W_FireRocket = {
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(FPP_ROCKET);
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
     makevectors(self.v_angle);
-    newmis.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
-    newmis.angles = vectoangles(newmis.velocity);
+    proj.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
+    proj.angles = vectoangles(proj.velocity);
 
-    newmis.touch = T_MissileTouch;
-    newmis.voided = 0;
+    proj.touch = T_MissileTouch;
+    proj.voided = 0;
 
-    newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
 
-    newmis.weapon = DMSG_ROCKETL;
-    newmis.classname = "proj_rocket";
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    proj.weapon = DMSG_ROCKETL;
+    proj.classname = "proj_rocket";
+    proj.origin = self.origin + v_forward * 8 + '0 0 16';
 
-    FOProj_Init(FPP_ROCKET, newmis);
+    FOProj_Finalize(proj);
 
     self.ammo_rockets = self.ammo_rockets - 1;
     KickPlayer(-2, self);
@@ -1325,19 +1325,19 @@ void () spike_touch;
 void () superspike_touch;
 
 entity (int fpp_type, vector offset) W_FireNail = {
-    newmis = spawn();
-    newmis.voided = 0;
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(fpp_type);
+    proj.voided = 0;
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
-    newmis.angles = vectoangles(aim(self, 1000));
-    newmis.classname = "spike";
-    newmis.think = SUB_Remove;
-    newmis.nextthink = time + 6;
-    setorigin(newmis, self.origin + offset + '0 0 16');
+    proj.angles = vectoangles(aim(self, 1000));
+    proj.classname = "spike";
+    proj.think = SUB_Remove;
+    proj.nextthink = time + 6;
+    setorigin(proj, self.origin + offset + '0 0 16');
 
-    newmis.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
+    proj.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
 
     if (fpp_type == FPP_NAIL) {
         newmis.weapon = DMSG_NAILGUN;
@@ -1347,9 +1347,9 @@ entity (int fpp_type, vector offset) W_FireNail = {
         newmis.weapon = DMSG_SNAILGUN;
     }
 
-    FOProj_Init(fpp_type, newmis);
+    FOProj_Finalize(proj);
 
-    return newmis;
+    return proj;
 };
 
 void (float ox) W_FireSpikes = {

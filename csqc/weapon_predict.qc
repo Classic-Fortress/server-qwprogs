@@ -148,6 +148,7 @@ void WPP_Status() {
     printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
 
     printf("Config:\n");
+    PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
@@ -697,6 +698,42 @@ void PP_Cleanup(entity proj) {
   remove(proj);
 }
 
+DEFCVAR_FLOAT(r_rockettrail, 1);
+DEFCVAR_FLOAT(r_grenadetrail, 1);
+
+int FPP_FindTrail(entity e)
+{
+    float is_rocket = e.fpp_index == FPP_ROCKET;
+    float is_grenade = e.fpp_index == FPP_GRENADE;
+
+    if (is_rocket || is_grenade) {
+        float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
+
+        if (idx >= 0 && idx < trail_table.length)
+            return trail_table[idx].trail[is_grenade];
+    }
+
+    return fpp_types[e.fpp_index].trailindex;
+}
+
+DEFCVAR_FLOAT(cl_r2g, 0);
+
+entity FPP_Init(int fpp_type, entity proj) {
+    fo_projectile* desc = &fpp_types[fpp_type];
+
+    proj.fpp_index = fpp_type;
+
+    if (fpp_type == FPP_ROCKET && CVARF(cl_r2g) == 1)
+        setmodelindex(proj, fpp_types[FPP_GRENADE].modelindex);
+    else
+        setmodelindex(proj, desc->modelindex);
+
+    /* proj.p_time = proj.s_time + 1/77.0; */
+    proj.oldorigin = proj.s_origin;
+    proj.traileffectnum = FPP_FindTrail(proj);
+
+    return proj;
+}
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
@@ -718,8 +755,7 @@ float PP_PredrawActive() {
                 return PREDRAW_NEXT;
             }
         }
-        if (self.traileffectnum && self.trail_started)
-            trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
+        trailparticles(self.traileffectnum, self, self.oldorigin, self.origin);
 
         self.trail_started = TRUE;
         self.p_time = time + frametime;
@@ -745,57 +781,34 @@ float PP_PredrawPredicted() {
     return PP_PredrawActive();
 }
 
-DEFCVAR_FLOAT(r_rockettrail, 1);
-DEFCVAR_FLOAT(r_grenadetrail, 1);
-
-int PP_FindTrail(entity e)
-{
-    float is_rocket = e.fpp_index == FPP_ROCKET;
-    float is_grenade = e.fpp_index == FPP_GRENADE;
-
-    if (is_rocket || is_grenade) {
-        float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
-
-        if (idx >= 0 && idx < trail_table.length)
-            return trail_table[idx].trail[is_grenade];
-    }
-
-    return fpp_types[e.fpp_index].trailindex;
-}
-
 static float PP_EPS = 0.05;
 
-static inline void PP_InitTrail(entity proj) {
-    proj.p_time = proj.s_time + 1/77.0;
-    proj.oldorigin = proj.s_origin;
-    proj.traileffectnum = PP_FindTrail(proj);
+static vector PredProj_Pos(entity proj) {
+    float offset = time - proj.s_time;
+    return proj.s_origin + offset * proj.velocity;
 }
 
 // Predict the effective start time of something we fire right now, accounting
 // for server side projection, ping fluctuation, etc.
 float PP_StartOffset(int fpp_type) {
-    int max_credit = max_rewind_credit_ms(fpp_type);
-    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    float max_credit = max_rewind_credit_ms(fpp_type);
+    // Server will credit full frame, average out to middle of prior.
+    const float frame_cor = 1.5 * 1/77.0;
 
-    return (max(pstate_pred.client_ping - max_credit, 0) +
-            ping - pstate_pred.client_ping) / 1000.0;
+    return (max(pstate_pred.client_ping - max_credit - dynamic_newmis_ms(), 0)
+            - static_newmis_ms(fpp_type)) / 1000.0 - frame_cor;
 }
 
 static float PP_EPS = 0.05;
 
-DEFCVAR_FLOAT(cl_r2g, 0);
-
-entity PP_CreateProjectile(int proj_type, vector offset) {
-  fo_projectile* desc = &fpp_types[proj_type];
-
-  PredProj_Sound(proj_type);
+entity PP_CreateProjectile(int fpp_type, vector offset) {
+  PredProj_Sound(fpp_type);
 
   if (!PP_Enabled())
       return __NULL__;
 
   entity proj = spawn();
-
-  proj.fpp_index = proj_type;
+  FPP_Init(fpp_type, proj);
 
 #if 0
   // Packet loss doesnt guarantee the server will actually register quickslot
@@ -809,29 +822,22 @@ entity PP_CreateProjectile(int proj_type, vector offset) {
 #endif
 
   // Note: We use true time here as created projectiles exist outside of pred.
-  proj.s_time = time + PP_StartOffset(proj_type);
-  proj.starttime = proj.s_time;
-  proj.endtime = time + pstate_pred.client_ping / 1000.0 + PP_EPS;
+  proj.s_time = time + PP_StartOffset(fpp_type);
+  proj.starttime = max(time, proj.s_time);
+  proj.endtime = proj.starttime + pstate_pred.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
 
   setsize(proj, [0,0,0], [0,0,0]);
-  proj.p_time = 0;
   proj.s_origin = pmove_org + offset;
   proj.s_origin[2] += 16;
-  proj.velocity = v_forward * desc->speed;
+  proj.velocity = v_forward * fpp_types[fpp_type].speed;
 
-  setorigin(proj, proj.s_origin);
+  proj.origin = PredProj_Pos(proj);
+  proj.oldorigin = proj.origin;
 
   proj.angles = input_angles; proj.angles[0] *= -1;
-
-  if (self.fpp_index == FPP_ROCKET && CVARF(cl_r2g) == 1)
-      setmodelindex(proj, fpp_types[FPP_GRENADE].modelindex);
-  else
-      setmodelindex(proj, fpp_types[proj.fpp_index].modelindex);
-
-  PP_InitTrail(proj);
 
   proj.pred_next = predicted_projectiles;
   if (predicted_projectiles)
@@ -977,9 +983,7 @@ void WP_Attack() {
 
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
-    float best = 32;
-
-    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
+    float best = 200;
 
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
         if (proj.fpp_index != self.fpp_index || proj.wpp_aux != self.wpp_aux)
@@ -988,7 +992,7 @@ float PredProjectile_MatchProjectile() {
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        proj.origin = proj.s_origin + (time - self.s_time) * proj.velocity;
+        proj.origin = PredProj_Pos(proj);
         float d = vlen(proj.origin - self.origin);
         if (d < best) {
             best = d;
@@ -1002,10 +1006,13 @@ float PredProjectile_MatchProjectile() {
         self.trail_started = match.trail_started;
 
         if (CVARF(wpp_debug) & 1) {
-            printf("  p_diff = %0.3f / %0.3f t=%0.3f, error_s = %0.3f\n",
-                vlen(match.s_origin - self.s_origin), vlen(match.origin - self.origin),
-                vlen(match.origin - self.origin) / vlen(self.velocity),
-                self.s_time - match.s_time);
+            string s = sprintf(" p_diff = %0.3f, t_e=%0.3f",
+                    vlen(match.origin - self.origin),
+                    vlen(match.origin - self.origin) / vlen(self.velocity));
+            s = strcat(s, sprintf(" [c=%0.3f/%0.3f (s_t=%0.3f) s=%0.3f/%0.3f]\n",
+                    vlen(match.origin - pmove_org),time, match.s_time,
+                    vlen(self.origin - pmove_org),self.s_time));
+            print(s);
         }
 
         PP_Cleanup(match);
@@ -1020,24 +1027,24 @@ void InitProjectileEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
 
-    setmodelindex(self, fpp_types[self.fpp_index].modelindex);
-    setsize(self, [0,0,0], [0,0,0]);
+    FPP_Init(self.fpp_index, self);
 
-    if (CVARF(cl_r2g) && self.fpp_index == FPP_ROCKET)
-        setmodelindex(self, fpp_types[FPP_GRENADE].modelindex);
-
-    PP_InitTrail(self);  // Note: Might be overwritten by inherited match.
+    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
 
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
-    if (self.owner_entnum == player_localentnum &&
-        !PredProjectile_MatchProjectile() &&
-        time - last_pred_sound > 75 * MSEC) {
-
-        // Missing projectile implies we missed the local sound, patch it up.
-        if (WP_Enabled())
+    float has_predicted = FALSE;
+    if (self.owner_entnum == player_localentnum) {
+        has_predicted = PredProjectile_MatchProjectile();
+        if (WP_Enabled() && !has_predicted &&
+            self.s_time > last_pred_sound + PP_EPS/2)
+            // Missing projectile implies we missed the local sound, patch it up.
             PredProj_Sound(self.fpp_index);
+    }
+
+    if (!has_predicted) {
+        self.oldorigin = self.origin;
     }
 }
 

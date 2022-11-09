@@ -4,8 +4,10 @@
 
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
-.vector s_origin;  // Spawning origin (at s_time); matched for client/server
-.float s_time;     // Time spawned (in client_time)
+#ifdef CSQC
+.vector s_origin;
+.float s_time;
+#endif
 
 string wp_version = "v0.2";
 
@@ -172,6 +174,26 @@ float max_rewind_credit_ms(int fpp_type) {
             fo_config.max_rewind_fast_projectile_ms;
 }
 
+
+// The original QW implementation always forwards projectiles by 50ms, in a
+// similar way to our own antilag projection.  However, this is done in a
+// difficult to correct for fashion (especially with more complicated
+// projectiles such as grenades) as well as not reflecting the ping times of
+// today.  We split this into a ping independent and ping dependent portion, to
+// slightly widen the range at which feel and timing is uniform.
+//
+// NOTE: DO NOT USE NEWMIS FOR FO PROJECTILES.  THE NEWMIS CORRECTION IS NOW
+// MADE EXPLICITLY RATHER THAN IMPLICITLY.  [WE AUTOMATICALLY STRIP NEWMIS
+// FROM PROJECTILES PASSED TO US.]
+float static_newmis_ms(int fpp_type) {
+    if (fpp_type == FPP_FLAMETHROWER || fpp_type == FPP_ASSAULT_CANNON)
+        return 0;
+
+    return 50 - fo_config.dynamic_newmis_ms;
+}
+inline float dynamic_newmis_ms() {
+    return fo_config.dynamic_newmis_ms;
+}
 .float wpp_aux;
 
 #ifdef SSQC
@@ -306,6 +328,7 @@ float WP_SendConfig(entity to_player, float sendflags) {
 #define COMM(_type, _field) fo_config.##_field = Read##_type()
 void EntUpdate_Config() {
 #endif
+    COMM(Float, dynamic_newmis_ms);
     COMM(Float, max_rewind_ms);
     COMM(Float, max_rewind_slow_projectile_ms);
     COMM(Float, max_rewind_fast_projectile_ms);
@@ -419,15 +442,16 @@ void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
     if (sendflags & FOPP_POS) {
-        COMM(Coord, s_origin[0]);
-        COMM(Coord, s_origin[1]);
-        COMM(Coord, s_origin[2]);
+        COMMD(Coord, s_origin[0], origin[0]);
+        COMMD(Coord, s_origin[1], origin[1]);
+        COMMD(Coord, s_origin[2], origin[2]);
 
         COMM(Coord, velocity[0]);
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMM(Float, s_time);
+        COMMO(Float, self.s_time, time);
+
     }
 
     if (sendflags & FOPP_INIT) {
@@ -456,6 +480,7 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 void WeapPred_InitDefaultConfig() {
+    fo_config.dynamic_newmis_ms = 25;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
@@ -484,6 +509,7 @@ static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
     // Target is also the long form localinfo name.
+    CONFIG_UPDATE("dnm", dynamic_newmis_ms);
     CONFIG_UPDATE("mrt", max_rewind_ms);
     CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
     CONFIG_UPDATE("mrfp", max_rewind_fast_projectile_ms);
@@ -496,6 +522,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
 
+    CLAMP_UPDATE(dynamic_newmis_ms, 0, 50);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
@@ -599,20 +626,33 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
 
-void FOProj_Init(int fpp_type, entity mis) {
-    // This init always needs to occur.
-    mis.dimension_seen = DMN_NOFLASH;
+entity FOProj_Create(int fpp_type) {
+    entity prj = spawn();
+
+    prj.fpp_index = fpp_type;
+    prj.dimension_seen = DMN_NOFLASH;
+    setmodel(prj, fpp_types[fpp_type].model);
+    setsize(prj, '0 0 0', '0 0 0');
+
+    return prj;
+}
+
+
+void FOProj_Finalize(entity mis) {
+    int fpp_type = mis.fpp_index;
+    // We explicitly do not use newmis.  Newmis internally implements a fixed
+    // 50m forward of physics handling (equivalent to our projection below)
+    // which cannot be nicely unwound or accounted for.ammo_shells
+    //
+    // For our projectiles we continue to always project by at least 25ms.
+    // The remaining 25ms is moved to ping dependent correction.
+    if (newmis == mis) {
+        PRINT_ONCE("Error: fpp=%d used with newmis\n", (float)fpp_type);
+        newmis = __NULL__;
+    }
 
     PredProj_Sound(fpp_type);
-
-    setmodel(mis, fpp_types[fpp_type].model);
-    setsize(mis, '0 0 0', '0 0 0');
-
-    mis.fpp_index = fpp_type;
-    mis.s_origin = mis.origin;
-    mis.s_time = time;
-
-    WeaponPred_ProjectProjectile(fpp_type, mis);
+    WeaponPred_ProjectProjectile(mis.fpp_index, mis);
 
     // Below is conditional on using custom SendEntity.
     if (fo_projectiles) {

@@ -88,23 +88,23 @@ void () W_FireRailgun = {
     vec = aim(self, 10000);
     vec = normalize(vec);
 
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.enemy = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_TRIGGER;
+    entity proj = FOProj_Create(FPP_RAILGUN);
+    proj.owner = self;
+    proj.enemy = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_TRIGGER;
 
 
-    newmis.velocity = vec * fpp_types[FPP_RAILGUN].speed;
-    newmis.angles = vectoangles(newmis.velocity);
+    proj.velocity = vec * fpp_types[FPP_RAILGUN].speed;
+    proj.angles = vectoangles(proj.velocity);
 
-    newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
-    newmis.touch = LaserBolt_Touch;
-    newmis.classname = "railslug";
-    setorigin(newmis, org + '0 0 16');
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
+    proj.touch = LaserBolt_Touch;
+    proj.classname = "railslug";
+    setorigin(proj, org + '0 0 16');
 
-    FOProj_Init(FPP_RAILGUN, newmis);
+    FOProj_Finalize(proj);
 };
 
 void () EMPExplode = {
