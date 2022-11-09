@@ -1077,21 +1077,21 @@ void () HallucinationTimer = {
 void () W_FireTranq = {
     self.ammo_shells = self.ammo_shells - 1;
     KickPlayer(-2, self);
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = 9;
-    newmis.solid = 2;
+    entity proj = FOProj_Create(FPP_TRANQ);
+    proj.owner = self;
+    proj.movetype = 9;
+    proj.solid = 2;
     makevectors(self.v_angle);
-    newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * fpp_types[FPP_TRANQ].speed;
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.touch = T_TranqDartTouch;
-    newmis.think = SUB_Remove;
-    newmis.nextthink = time + 6;
-    newmis.classname = "proj_tranq";
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    proj.velocity = v_forward;
+    proj.velocity = proj.velocity * fpp_types[FPP_TRANQ].speed;
+    proj.angles = vectoangles(proj.velocity);
+    proj.touch = T_TranqDartTouch;
+    proj.think = SUB_Remove;
+    proj.nextthink = time + 6;
+    proj.classname = "proj_tranq";
+    setorigin(proj, self.origin + v_forward * 8 + '0 0 16');
 
-    FOProj_Init(FPP_TRANQ, newmis);
+    FOProj_Finalize(proj);
 };
 
 void () T_TranqDartTouch = {

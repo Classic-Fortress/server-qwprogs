@@ -533,7 +533,6 @@ void (float num_bubbles, vector bub_origin) NewBubbles = {
 };
 
 void () W_FireFlame = {
-    local entity flame;
     local float rn;
 
     if (self.waterlevel > 2) {
@@ -548,7 +547,7 @@ void () W_FireFlame = {
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
-    flame = spawn();
+    entity flame = FOProj_Create(FPP_FLAMETHROWER);
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
     flame.solid = SOLID_BBOX;
@@ -571,7 +570,7 @@ void () W_FireFlame = {
     
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
 
-    FOProj_Init(FPP_FLAMETHROWER, flame);
+    FOProj_Finalize(flame);
 };
 
 void () IncendiaryRadius = {
@@ -672,31 +671,31 @@ void () W_FireIncendiaryCannon = {
     }
     self.ammo_rockets = self.ammo_rockets - 3;
     KickPlayer(-3, self);
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(FPP_INCENDIARY);
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
     makevectors(self.v_angle);
-    newmis.velocity = aim(self, 1000);
+    proj.velocity = aim(self, 1000);
     if (pyro_type == PYRO_ORIGINAL)
     {
-        newmis.velocity = newmis.velocity * 600;
-        newmis.think = SUB_Remove;
+        proj.velocity = proj.velocity * 600;
+        proj.think = SUB_Remove;
     }
     else
     {
-        newmis.velocity = newmis.velocity * fpp_types[FPP_INCENDIARY].speed;
-        newmis.think = IncendiaryRadius_OZTF;
+        proj.velocity = proj.velocity * fpp_types[FPP_INCENDIARY].speed;
+        proj.think = IncendiaryRadius_OZTF;
     }
     
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.touch = T_IncendiaryTouch;
-    newmis.nextthink = time + 5;
-    newmis.weapon = DMSG_INCENDIARY;
-    newmis.classname = "pyro_rocket";
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    proj.angles = vectoangles(proj.velocity);
+    proj.touch = T_IncendiaryTouch;
+    proj.nextthink = time + 5;
+    proj.weapon = DMSG_INCENDIARY;
+    proj.classname = "pyro_rocket";
+    setorigin(proj, self.origin + v_forward * 8 + '0 0 16');
 
-    FOProj_Init(FPP_INCENDIARY, newmis);
+    FOProj_Finalize(proj);
 };
 
 void () AirBlastReloadFinished = {
