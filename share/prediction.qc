@@ -4,6 +4,7 @@
 
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
+.int antilag_ms;
 #ifdef CSQC
 .vector s_origin;
 .float s_time;
@@ -451,7 +452,7 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[2]);
 
         COMMO(Float, self.s_time, time);
-
+        COMM(Byte, antilag_ms);
     }
 
     if (sendflags & FOPP_INIT) {

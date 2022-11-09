@@ -728,7 +728,6 @@ entity FPP_Init(int fpp_type, entity proj) {
     else
         setmodelindex(proj, desc->modelindex);
 
-    /* proj.p_time = proj.s_time + 1/77.0; */
     proj.oldorigin = proj.s_origin;
     proj.traileffectnum = FPP_FindTrail(proj);
 
@@ -1044,7 +1043,9 @@ void InitProjectileEnt() {
     }
 
     if (!has_predicted) {
-        self.oldorigin = self.origin;
+        // Back-track trail for entities without a local prediction.  We use
+        // s_origin here as that's what we know antilag_ms to be relative to.
+        self.oldorigin = self.s_origin - self.antilag_ms/ 1000.0 * self.velocity;
     }
 }
 

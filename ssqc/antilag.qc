@@ -41,6 +41,7 @@ void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
     if (trace_fraction < 1)
         projected_origin = trace_endpos;
 
+    projectile.antilag_ms = time_offset;
     setorigin(projectile, projected_origin);
 }
 #define DEBUG_ANTILAG 0
