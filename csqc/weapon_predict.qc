@@ -78,6 +78,11 @@ static float CalcPredEnabled(float current_enable,
         return FALSE;
     }
 
+    if (is_spectator) {
+        *set_by = "[spectator]";
+        return FALSE;
+    }
+
     if (server_disable || client_value == 0) {
         *set_by = server_disable ? "[server disable]" : "[cvar disable]";
 
