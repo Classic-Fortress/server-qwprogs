@@ -484,7 +484,7 @@ string WP_GetClip() {
 void WP_Reload() {
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    if (!wi->needs_reload || WP_IsReloading())
+    if (!wi->needs_reload || WP_IsReloading() || prematch)
         return;
 
     float clip_fired = *WP_ClipFired();
