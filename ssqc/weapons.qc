@@ -2501,7 +2501,6 @@ void () W_WeaponFrame = {
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
         W_ChangeWeaponLast();
         self.impulse = 0;
-        return;
     }
 
     // +slot/-slot handle attack; we only need to swap back to last weapon.

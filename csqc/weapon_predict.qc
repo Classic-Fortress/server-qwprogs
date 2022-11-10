@@ -320,6 +320,8 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
     return ammo > wi->ammo_per_shot;
 }
 
+var float changed_weapon;
+
 void WP_ChangeWeapon(Slot slot) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
     if (!WP_CheckAmmo(wi))
@@ -624,7 +626,6 @@ void MP_SetSpeed() {
 }
 
 
-float td;
 void WP_Frame() {
     MP_SetSpeed();
 
