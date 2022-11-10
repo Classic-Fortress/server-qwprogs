@@ -1340,11 +1340,11 @@ entity (int fpp_type, vector offset) W_FireNail = {
     proj.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
 
     if (fpp_type == FPP_NAIL) {
-        newmis.weapon = DMSG_NAILGUN;
-        newmis.touch = spike_touch;
+        proj.weapon = DMSG_NAILGUN;
+        proj.touch = spike_touch;
     } else { // fpp_type == FPP_SUPER_NAIL
-        newmis.touch = superspike_touch;
-        newmis.weapon = DMSG_SNAILGUN;
+        proj.weapon = DMSG_SNAILGUN;
+        proj.touch = superspike_touch;
     }
 
     FOProj_Finalize(proj);
