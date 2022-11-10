@@ -29,10 +29,8 @@ void AL_ProjectProjectile (entity projectile) {
 }
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
-    if (NoLanProject())
-        return;
-
-    float max_credit = max_rewind_credit_ms(fpp_type) + dynamic_newmis_ms();
+    float max_credit = NoLanProject() ? 0 :
+                       max_rewind_credit_ms(fpp_type) + dynamic_newmis_ms();
     float time_offset = min(self.client_ping, max_credit) + static_newmis_ms(fpp_type);
 
     vector projected_origin = projectile.origin + (projectile.velocity * (time_offset / 1000.0));
