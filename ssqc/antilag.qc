@@ -29,17 +29,16 @@ void AL_ProjectProjectile (entity projectile) {
 }
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
-    float max_credit = NoLanProject() ? 0 :
-                       max_rewind_credit_ms(fpp_type) + dynamic_newmis_ms();
-    float time_offset = min(self.client_ping, max_credit) + static_newmis_ms(fpp_type);
+    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, self.client_ping);
+    float offset_ms = offset.static_ms + offset.dynamic_ms;
+    vector projected_origin = projectile.origin + offset_ms / 1000.0 * projectile.velocity;
 
-    vector projected_origin = projectile.origin + (projectile.velocity * (time_offset / 1000.0));
     traceline(projectile.origin, projected_origin, 0, self);
 
     if (trace_fraction < 1)
         projected_origin = trace_endpos;
 
-    projectile.antilag_ms = time_offset;
+    projectile.antilag_ms = offset_ms * trace_fraction;
     setorigin(projectile, projected_origin);
 }
 #define DEBUG_ANTILAG 0
