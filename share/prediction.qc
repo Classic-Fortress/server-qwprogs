@@ -2,9 +2,12 @@
 #define ENT_WEAPONPRED 101
 #define ENT_PROJECTILE 102
 
+const float SERVER_FPS = 77;
+const float SERVER_FRAME_MS = 1/SERVER_FPS * 1000.0;
+
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
-.int antilag_ms;
+.float antilag_ms;
 #ifdef CSQC
 .vector s_origin;
 .float s_time;
@@ -127,6 +130,7 @@ struct fo_projectile {
     string model;
     string trail;
     SoundIndex snd;
+    float fixed_project;  // No dynamic proportioning of newmis projection
 
     // Automatically initialized below this line.
     float modelindex;
@@ -134,9 +138,9 @@ struct fo_projectile {
 };
 
 fo_projectile fpp_types[] = {
-    { FPP_ROCKET,      PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL },
+    { FPP_ROCKET,      PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL, TRUE },
     { FPP_GRENADE,            600, "grenade.mdl", "t_grenade", SND_GREN },
-    { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL },
+    { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
     { FPP_NAIL,              1500, "spike.mdl", "tr_spike", SND_NAIL },
     { FPP_SUPER_NAIL,        1500, "s_spike.mdl", "tr_spike", SND_SNAIL },
     { FPP_FLAMETHROWER,       600, "s_explod.spr", "explodesprite", SND_FLAMETHROWER },
@@ -186,14 +190,20 @@ float max_rewind_credit_ms(int fpp_type) {
 // NOTE: DO NOT USE NEWMIS FOR FO PROJECTILES.  THE NEWMIS CORRECTION IS NOW
 // MADE EXPLICITLY RATHER THAN IMPLICITLY.  [WE AUTOMATICALLY STRIP NEWMIS
 // FROM PROJECTILES PASSED TO US.]
+static float NEWMIS_MS = 50;
 float static_newmis_ms(int fpp_type) {
     if (fpp_type == FPP_FLAMETHROWER || fpp_type == FPP_ASSAULT_CANNON)
         return 0;
 
-    return 50 - fo_config.dynamic_newmis_ms;
+    return NEWMIS_MS - fo_config.dynamic_newmis_ms;
 }
+
 inline float dynamic_newmis_ms() {
     return fo_config.dynamic_newmis_ms;
+}
+
+inline float fixed_newmis_ms(int fpp_type) {
+    return NEWMIS_MS;
 }
 .float wpp_aux;
 
@@ -523,7 +533,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
 
-    CLAMP_UPDATE(dynamic_newmis_ms, 0, 50);
+    CLAMP_UPDATE(dynamic_newmis_ms, 0, NEWMIS_MS);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
@@ -638,7 +648,6 @@ entity FOProj_Create(int fpp_type) {
     return prj;
 }
 
-
 void FOProj_Finalize(entity mis) {
     int fpp_type = mis.fpp_index;
     // We explicitly do not use newmis.  Newmis internally implements a fixed
@@ -673,6 +682,36 @@ static inline vector get_origin() { return pmove_org; }
 float get_shells() { return self.ammo_shells; }
 static inline vector get_origin() { return self.origin; }
 #endif
+
+struct ProjectResult {
+    float static_ms;
+    float dynamic_ms;
+};
+
+ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
+    float max_ping_credit = max_rewind_credit_ms(fpp_type);
+    float static_credit;
+
+    if (fpp_types[fpp_type].fixed_project) {
+        static_credit = fixed_newmis_ms(fpp_type);
+    } else {
+        static_credit = static_newmis_ms(fpp_type);
+        max_ping_credit += dynamic_newmis_ms();
+    }
+
+    float frame_nudge = 0;
+#ifdef SSQC
+    // On the server side, account for the fact that we won't do anything until
+    // the next frame.
+    frame_nudge = 1.5*SERVER_FRAME_MS;
+#endif
+    float adj_ping = max(ping - frame_nudge, 0);
+
+    ProjectResult result;
+    result.static_ms = static_credit;
+    result.dynamic_ms = min(adj_ping, max_ping_credit);
+    return result;
+}
 
 // Randomize by ammo index for consistency even if a packet/prediction misses.
 float hwguy_random_index;

@@ -106,6 +106,8 @@ static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
 #define PRINT_CONFIG(_field) \
+    printf(" ." #_field " = %d\n", fo_config.##_field)
+#define PRINT_CONFIG_ACTIVE(_field) \
     if (fo_config.##_field) printf(" ." #_field " = %d\n", fo_config.##_field)
 void WPP_Status() {
     string wp_source, pp_source;
@@ -137,12 +139,12 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
     PRINT_CONFIG(wp_default_min_ping_ms);
-    PRINT_CONFIG(wp_global_enable);
-    PRINT_CONFIG(wp_global_disable);
-    PRINT_CONFIG(pp_global_enable);
-    PRINT_CONFIG(pp_global_disable);
-    PRINT_CONFIG(wpp_global_enable);
-    PRINT_CONFIG(wpp_global_disable);
+    PRINT_CONFIG_ACTIVE(wp_global_enable);
+    PRINT_CONFIG_ACTIVE(wp_global_disable);
+    PRINT_CONFIG_ACTIVE(pp_global_enable);
+    PRINT_CONFIG_ACTIVE(pp_global_disable);
+    PRINT_CONFIG_ACTIVE(wpp_global_enable);
+    PRINT_CONFIG_ACTIVE(wpp_global_disable);
 }
 #undef PRINT_CONFIG
 
@@ -295,6 +297,8 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
     int ammo = WP_GetAmmo(wi->ammo_type);
     return ammo > wi->ammo_per_shot;
 }
+
+var float changed_weapon;
 
 void WP_ChangeWeapon(Slot slot) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
@@ -458,7 +462,7 @@ string WP_GetClip() {
 void WP_Reload() {
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    if (!wi->needs_reload || WP_IsReloading())
+    if (!wi->needs_reload || WP_IsReloading() || prematch)
         return;
 
     float clip_fired = *WP_ClipFired();
@@ -600,7 +604,6 @@ void MP_SetSpeed() {
 }
 
 
-float td;
 void WP_Frame() {
     MP_SetSpeed();
 
@@ -771,19 +774,6 @@ static vector PredProj_Pos(entity proj) {
     return proj.s_origin + offset * proj.velocity;
 }
 
-// Predict the effective start time of something we fire right now, accounting
-// for server side projection, ping fluctuation, etc.
-float PP_StartOffset(int fpp_type) {
-    float max_credit = max_rewind_credit_ms(fpp_type);
-    // Server will credit full frame, average out to middle of prior.
-    const float frame_cor = 1.5 * 1/77.0;
-
-    return (max(pstate_pred.client_ping - max_credit - dynamic_newmis_ms(), 0)
-            - static_newmis_ms(fpp_type)) / 1000.0 - frame_cor;
-}
-
-static float PP_EPS = 0.05;
-
 entity PP_CreateProjectile(int fpp_type, vector offset) {
   PredProj_Sound(fpp_type);
 
@@ -804,9 +794,13 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
       return __NULL__;
 #endif
 
+  ProjectResult push_t =
+      WeaponPred_ProjectOffset(fpp_type, pstate_pred.client_ping);
+
+  float uncorrected_ms = pstate_pred.client_ping - push_t.dynamic_ms;
   // Note: We use true time here as created projectiles exist outside of pred.
-  proj.s_time = time + PP_StartOffset(fpp_type);
-  proj.starttime = max(time, proj.s_time);
+  proj.starttime = time + uncorrected_ms/1000.0;
+  proj.s_time = proj.starttime - push_t.static_ms/1000.0;
   proj.endtime = proj.starttime + pstate_pred.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
@@ -951,7 +945,7 @@ void WP_Attack() {
     // ** Not currently doing this because playing animation in advance is better
     // for understanding attack_finished as a player. **
     float offset =
-    // max(PP_PredictStartOffset() - 2/77.0, 0);
+    // max(PP_PredictStartOffset() - 2*SERVER_FRAME_MS, 0);
     if (offset > 0) {
         if ((CVARF(wpp_debug) & 2) && pengine.is_effectframe)
             printf("held for %0.3f\n", offset);
