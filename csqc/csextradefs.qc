@@ -361,7 +361,6 @@ typedef struct
 
 MouseStruct Mouse;
 MouseStruct PrevMouse;
-float MouseDown;
 
 typedef struct {
     string filename;
@@ -596,6 +595,8 @@ void HRC_SetActive(PanelID panel) {
     hud_render_cache.active_panel = panel;
 }
 
+FO_Hud_Panel* getHudPanel(PanelID panelid);
+
 // Returns true if HUD should be re-rendered this frame.
 float HRC_NewFrame() {
     // Rate limit even the more complicated enable checks.
@@ -604,7 +605,8 @@ float HRC_NewFrame() {
     /* hud_render_cache.last_update = time; */
 
     if (!CVARF(fo_hud_cache) ||
-        fo_hud_menu_active || fo_hud_editor || showingscores) {
+        fo_hud_menu_active || fo_hud_editor || showingscores ||
+        getHudPanel(HUDP_MAP_MENU)->Display) {
         // Either explicitly disabled, or rendering a more complicated scene
         // like the editor for which we'll just display in place.
         hud_render_cache.enabled = FALSE;
