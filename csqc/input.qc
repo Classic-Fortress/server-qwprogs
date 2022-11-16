@@ -7,7 +7,6 @@ static float HudInputEscape() {
 
     Menu_Cancel();
     fo_hud_editor = FALSE;
-    printf("menu_close\n");
     return TRUE;
 }
 
@@ -123,7 +122,6 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 switch (scanx)
                 {
                     case K_ESCAPE:
-                        printf("menu_open\n");
                         FO_Menu_Game(TRUE);
                         return TRUE;
                 }
