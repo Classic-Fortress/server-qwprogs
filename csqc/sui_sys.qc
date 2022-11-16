@@ -285,6 +285,14 @@ float(PanelID id) sui_is_held =
 	return _hold_action_count > 0 && _hold_actions[0] == id;
 };
 
+float sui_has_hold(PanelID id) {
+  for (float i = 0; i < _hold_action_count; i++)
+    if (_hold_actions[i] == id)
+      return TRUE;
+
+  return FALSE;
+}
+
 // last clicked: is this the last action element that was clicked, good for focusing on input boxes for example
 
 float(PanelID id) sui_is_last_clicked =

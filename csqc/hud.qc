@@ -1103,8 +1103,6 @@ struct {
 } incremental_hud;
 
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample) {
-    float hud_update = HRC_NewFrame();
-
     ScreenSize = [width, height, menushown];
     if (HRC_NewFrame()) {
         float hts = perf_start_sample(&hud_timing, perf_sample);

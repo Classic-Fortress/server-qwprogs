@@ -117,7 +117,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_offset = 0;
     current_vote = world;
     vote_list_filter = "";
-    MouseDown = 0;
 };
 
 noref void() CSQC_WorldLoaded = {

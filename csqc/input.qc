@@ -7,6 +7,7 @@ static float HudInputEscape() {
 
     Menu_Cancel();
     fo_hud_editor = FALSE;
+    printf("menu_close\n");
     return TRUE;
 }
 
@@ -20,19 +21,10 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                     return TRUE;
                 break;
             case IE_KEYDOWN:
-                switch (scanx) {
-                    case K_ESCAPE:
-                        if (HudInputEscape())
-                            return TRUE;
-                        break;
-                    case K_MOUSE1:
-                        if(!fo_hud_editor && fo_hud_menu_active &&
-                           !(CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE))
-                            break;
+                if (scanx == K_ESCAPE || scanx == K_MOUSE1)
+                    return TRUE;
 
-                        return TRUE;
-                }
-                if(fo_hud_menu_active)
+                if (fo_hud_menu_active)
                     return fo_menu_process_input(CurrentMenu, scanx);
                 break;
             case IE_MOUSEDELTA:
@@ -44,6 +36,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
         }
     } else if(getHudPanel(HUDP_MAP_MENU)->Display) {
         sui_input_event(evtype, scanx, chary, devid);
+
         switch (evtype) {
             case IE_MOUSEDELTA:
                 return TRUE;
@@ -52,7 +45,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 PrevMouse.y = Mouse.y;
                 Mouse.x = scanx;
                 Mouse.y = chary;
-                if (MouseDown)
+                if (sui_is_held(HUDP_MAP_MENU))
                     Hud_MapMenuPanel_Move(Mouse.x - PrevMouse.x, Mouse.y - PrevMouse.y);
                 return TRUE;
              case IE_KEYDOWN:
@@ -60,7 +53,6 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                     case K_ESCAPE:
                         return TRUE;
                     case K_MOUSE1:
-                        MouseDown = TRUE;
                         return TRUE;
                     case K_UPARROW:
                         vote_selected_index--;
@@ -121,9 +113,8 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         showVoteMenu(FALSE);
                         return TRUE;
                     case K_MOUSE1:
-                        MouseDown = FALSE;
                         return TRUE;
-                }       
+                }
             }
     } else {
         switch (evtype)
@@ -132,6 +123,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                 switch (scanx)
                 {
                     case K_ESCAPE:
+                        printf("menu_open\n");
                         FO_Menu_Game(TRUE);
                         return TRUE;
                 }

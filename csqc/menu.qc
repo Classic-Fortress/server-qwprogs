@@ -835,7 +835,7 @@ float fo_menu_process_input(fo_menu * menu, float scan) = {
 }
 
 void Menu_Cancel() = {
-    if(fo_hud_menu_active) {
+    if (fo_hud_menu_active) {
         setcursormode(FALSE);
         fo_hud_menu_active = FALSE;
     }
