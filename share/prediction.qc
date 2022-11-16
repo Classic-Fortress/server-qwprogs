@@ -462,15 +462,11 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[2]);
 
         COMMO(Float, self.s_time, time);
-        COMM(Byte, antilag_ms);
     }
 
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
-
-        COMM(Angle, angles[0]);
-        COMM(Angle, angles[1]);
-        COMM(Angle, angles[2]);
+        COMM(Byte, antilag_ms);
     }
 
     if (sendflags & FOPP_AUX) {
@@ -700,15 +696,17 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
     }
 
     float frame_nudge = 0;
-#ifdef SSQC
-    // On the server side, account for the fact that we won't do anything until
-    // the next frame.
-    frame_nudge = 1.5*SERVER_FRAME_MS;
+#ifdef CSQC
+    // Account for the fact that the server usually has a physics frame that's
+    // going to be credited to the new projectile.
+    frame_nudge = 1.5 * SERVER_FRAME_MS;
 #endif
-    float adj_ping = max(ping - frame_nudge, 0);
+    // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
+    // have no resolution anyway), linearize beyond that.
+    float adj_ping = max(ping - SERVER_FRAME_MS, 0);
 
     ProjectResult result;
-    result.static_ms = static_credit;
+    result.static_ms = static_credit + frame_nudge;
     result.dynamic_ms = min(adj_ping, max_ping_credit);
     return result;
 }
