@@ -1006,6 +1006,7 @@ void InitProjectileEnt() {
 
     FPP_Init(self.fpp_index, self);
 
+    self.angles = vectoangles(self.velocity);
     self.origin = self.s_origin + (time - self.s_time) * self.velocity;
 
     // We still check this with projectile prediction as there could be in
