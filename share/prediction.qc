@@ -26,7 +26,8 @@ enumflags {
     FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
-    FOWP_RNG,
+    FOWP_RNG0,
+    FOWP_RNG1,
     FOWP_PREDICT_FLAGS,
 };
 
@@ -62,7 +63,6 @@ struct predict_tf_state {
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
-
 
     // Used for prediction, not actually communicated.  Reset each frame.
     float ammo_used[AMMO_NUM_TYPES];
@@ -142,7 +142,7 @@ fo_projectile fpp_types[] = {
     { FPP_ROCKET,       MOVETYPE_FLYMISSILE, PC_SOLDIER_ROCKET_SPEED,
         "missile.mdl", "", SND_RL, TRUE },
     { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
-        "grenade.mdl", "t_grenade", SND_GREN },
+        "grenade2.mdl", "t_grenade", SND_GREN, TRUE},
     { FPP_INCENDIARY,   MOVETYPE_FLYMISSILE, 800,
         "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
     { FPP_NAIL,         MOVETYPE_FLYMISSILE, 1500,
@@ -157,6 +157,12 @@ fo_projectile fpp_types[] = {
         "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
     { FPP_ASSAULT_CANNON, MOVETYPE_FLYMISSILE, 3000,
         "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
+};
+
+// `wpp_aux` disambiguation for FPP_GRENADE projectiles.
+enum {
+    GREN_RED,
+    GREN_PIPE,
 };
 
 void InitFppProjectiles() {
@@ -269,6 +275,10 @@ float shared_prng(int type) {
     return (*prng_state(type) = lfsr_prng_raw(*prng_state(type))) / 65535.0;
 }
 
+float shared_crandom(int type) {
+    return 2 * (shared_prng(type) - 0.5);
+}
+
 #ifdef SSQC
 #define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
@@ -303,9 +313,10 @@ void WeaponPred_Update(entity player) {
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
-    M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
-    M1(FOWP_RELOAD, reload_finished)
-    M2(FOWP_RNG, prng_base[0], prng_base[1])
+    M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
+    M1(FOWP_RELOAD, reload_finished);
+    M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
+    M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
 
     player.predict_entity.SendFlags = mask;
 }
@@ -430,10 +441,10 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_RELOAD)
         COMM(Float, reload_finished);
 
-    if (sendflags & FOWP_RNG) {
-        COMM(Float, prng_base[0]);
-        COMM(Float, prng_base[1]);
-    }
+    if (sendflags & FOWP_RNG0)
+        COMM(Short, prng_base[0]);
+    if (sendflags & FOWP_RNG1)
+        COMM(Short, prng_base[1]);
 
 #ifdef SSQC
     return TRUE;
@@ -502,7 +513,7 @@ void EntUpdate_Projectile(float isnew) {
 
 void WeapPred_InitDefaultConfig() {
     fo_config.qc_physics = 0;
-    fo_config.dynamic_newmis_ms = 25;
+    fo_config.dynamic_newmis_ms = 0;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
@@ -702,16 +713,24 @@ void FOProj_Finalize(entity mis) {
 
     PredProj_Sound(fpp_type);
 
+    float csqc_networking = fo_projectiles;
+
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
     mis.phys_time = time;
-    if (fo_config.qc_physics)
+    if (fo_config.qc_physics) {
         mis.customphysics = FO_Phys;
+    } else {
+        // If we don't have physics synchronized between client and server, use
+        // engine-side for both.
+        if (mis.fpp_index == FPP_GRENADE)
+            csqc_networking = FALSE;
+    }
 
     WeaponPred_ProjectProjectile(mis.fpp_index, mis);
 
     // Below is conditional on using custom SendEntity.
-    if (fo_projectiles) {
+    if (csqc_networking) {
         mis.SendEntity = PP_SendEntity;
         mis.SendFlags = FOPP_POS | FOPP_INIT;
         if (mis.wpp_aux)

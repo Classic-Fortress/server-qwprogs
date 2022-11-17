@@ -793,6 +793,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 
   if (!PP_Enabled())
       return __NULL__;
+  makevectors(input_angles);
 
   entity proj = spawn();
   FPP_Init(fpp_type, proj);
@@ -824,8 +825,20 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 
   setsize(proj, [0,0,0], [0,0,0]);
   proj.s_origin = pmove_org + offset;
-  proj.s_origin[2] += 16;
-  proj.velocity = v_forward * fpp_types[fpp_type].speed;
+
+  if (fpp_type != FPP_GRENADE) {
+      proj.velocity = v_forward * fpp_types[fpp_type].speed;
+      proj.s_origin[2] += 16;
+  } else {
+      if (!input_angles_x) {
+          proj.velocity = v_forward * fpp_types[fpp_type].speed;
+          proj.velocity_z = 200;
+      } else {
+          proj.velocity = (v_forward * 600) +
+              (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
+              (shared_crandom(PRNG_WEAP) * 10 * v_right);
+      }
+  }
   proj.angles = input_angles; proj.angles[0] *= -1;
 
   CPhys_Init(proj, proj.starttime, static_dt);
@@ -837,6 +850,26 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   predicted_projectiles = proj;
 
   return proj;
+}
+
+static void FPP_ApplyGrenadeProperties(entity proj) {
+    if (proj.fpp_index != FPP_GRENADE)
+        return;
+
+    switch (proj.wpp_aux) {
+        case GREN_RED:
+            proj.skin = 1;
+            break;
+        case GREN_PIPE:
+            proj.skin = 2;
+            break;
+    }
+}
+
+void W_FireGrenade(int gren_type) {
+    entity proj = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+    proj.wpp_aux = gren_type;
+    FPP_ApplyGrenadeProperties(proj);
 }
 
 void W_FireAssaultCannon() {
@@ -930,12 +963,17 @@ void WP_Attack() {
 
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
-                Pred_Sound(SND_GREN); break;
+                if (fo_config.qc_physics)
+                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER ?
+                                  GREN_RED : GREN_PIPE);
+                else
+                    Pred_Sound(SND_GREN);
+                break;
 
             case WEAP_AXE:
             case WEAP_KNIFE:
             case WEAP_MEDIKIT:
-                melee_anim = shared_prng(PRNG_AXE) < 0.5 ? player_axeN : player_axebN;
+                melee_anim = shared_prng(PRNG_WEAP) < 0.5 ? player_axeN : player_axebN;
                 // Fall through for sound.
             case WEAP_SPANNER:
                 Pred_Sound(SND_AXE); break;
@@ -1000,6 +1038,9 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
         self.trail_started = match.trail_started;
 
+        if (self.fpp_index == FPP_GRENADE)
+            self.angles = match.angles;
+
         if (CVARF(wpp_debug) & 1) {
             string s = sprintf(" p_diff = %0.1f, t_e=%0.3f t=%0.3f d_t=%0.3f",
                     vlen(match.origin - self.origin),
@@ -1024,10 +1065,11 @@ void InitProjectileEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
     self.s_time = self.phys_time;
+    self.angles = vectoangles(self.velocity);
 
     FPP_Init(self.fpp_index, self);
+    FPP_ApplyGrenadeProperties(self);
 
-    self.angles = vectoangles(self.velocity);
     CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 
     // We still check this with projectile prediction as there could be in
@@ -1116,7 +1158,6 @@ float WP_ClientThink() {
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
         pstate_pred.buttons_down = (~old_input_buttons) & input_buttons;
 
-        makevectors(input_angles);
         if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;

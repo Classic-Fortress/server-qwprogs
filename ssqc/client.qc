@@ -2064,8 +2064,8 @@ void () PutClientInServer = {
     FO_InstantReloadAllWeapons(self);
 
     // Only need initial init here.
-    if (!self.prng_base[PRNG_AXE])
-        self.prng_base[PRNG_AXE] = 65535 * random();
+    if (!self.prng_base[PRNG_WEAP])
+        self.prng_base[PRNG_WEAP] = 65535 * random();
     // For hwguy we rotate the seed value, each seed generates many random nums.
     self.prng_base[PRNG_HWGUY] = 65535 * random();
 
