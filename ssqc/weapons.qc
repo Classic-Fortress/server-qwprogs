@@ -1310,7 +1310,6 @@ void () W_FireGrenade = {
         proj.velocity = proj.velocity * 600;
         proj.velocity_z = 200;
     }
-    proj.avelocity = '300 300 300';
     proj.angles = vectoangles(proj.velocity);
     proj.think = GrenadeExplode;
     setorigin(proj, self.origin);

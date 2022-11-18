@@ -830,7 +830,7 @@ stg_table_entry stg_table[] = {
 
 void (entity timer) FO_SpawnThrownGrenade = {
     local entity user = timer.owner;
-    user.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
+    user.tfstate &= ~TFSTATE_GREN_MASK_ALL;
     user.last_throw = time;
 
     if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
@@ -839,48 +839,45 @@ void (entity timer) FO_SpawnThrownGrenade = {
 
     FO_Sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
     KickPlayer(-1, user);
-    newmis = spawn();
-    newmis.owner = user;
-    newmis.movetype = 10;
-    newmis.solid = 2;
-    newmis.classname = "grenade";
+    entity proj = FOProj_Create(FPP_GRENADE);
+    proj.owner = user;
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
+    proj.classname = "grenade";
     makevectors(user.v_angle);
     if (user.deadflag) {
         if (timer.weapon == GR_TYPE_NORMAL)
-            newmis.velocity = '0 0 200';
+            proj.velocity = '0 0 200';
         else
             return;
     } else if (user.v_angle_x) {
-        newmis.velocity =
+        proj.velocity =
             v_forward * 600 + v_up * 200 + crandom() * v_right * 10 +
             crandom() * v_up * 10;
     } else {
-        newmis.velocity = aim(user, 10000);
-        newmis.velocity = newmis.velocity * 600;
-        newmis.velocity_z = 200;
+        proj.velocity = aim(user, 10000);
+        proj.velocity = proj.velocity * 600;
+        proj.velocity_z = 200;
     }
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.think = SUB_Null;
-    newmis.nextthink = timer.heat;
+    proj.angles = vectoangles(proj.velocity);
+    proj.think = SUB_Null;
+    proj.nextthink = timer.heat;
 
     int gtype = TF_GREN_conv(timer.weapon);
     FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
-    newmis.gren_type = gtype;
-    newmis.skin = gdesc->skin;
-    FO_SetModel(newmis, gdesc->model);
-    newmis.avelocity = gdesc->avelocity;
-    newmis.touch = ste->touch;
-    newmis.think = ste->think;
+    proj.gren_type = gtype;
+    proj.skin = gdesc->skin;
+    proj.touch = ste->touch;
+    proj.think = ste->think;
 
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, user.origin);
+    setorigin(proj, user.origin);
+    FOProj_Finalize(proj);
 }
 
 void (float inp) TeamFortress_PrimeThrowGrenade = {
-    if ((self.tfstate & TFSTATE_GRENPRIMED) ||
-        (self.tfstate & TFSTATE_GRENTHROWING))
+    if (self.tfstate & TFSTATE_GREN_MASK_PRIMED)
         TeamFortress_ThrowGrenade();
     else {
         TeamFortress_PrimeGrenade(inp, TRUE);
@@ -902,9 +899,9 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     local entity timer;
     gtype = 0;
 
-    if ((self.tfstate & TFSTATE_GRENPRIMED) || (self.tfstate & TFSTATE_GRENTHROWING))
+    if (self.tfstate & TFSTATE_GREN_MASK_PRIMED)
         return;
-    
+
     if (no_fire_mode)
         return;
 
@@ -1048,7 +1045,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
             return;
         }
     }
-    self.tfstate = self.tfstate | TFSTATE_GRENPRIMED;
+    self.tfstate |= (inp == 1) ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED;
     tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
@@ -1058,7 +1055,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     else if (inp == 2)
         tGrenade.impulse = TF_GRENADE_2;
 
-    float time_base = remote_time();
+    float time_base = max(remote_time(), self.last_throw);
     tGrenade.nextthink = time_base + 0.8;
     if (gtype == GR_TYPE_CALTROP)
         tGrenade.heat = time_base + 0.5 + 0.5;
@@ -1087,6 +1084,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
 
     tGrenade.think = FO_GrenadeThink;
     self.grenade_timer = tGrenade;
+    self.last_prime = global_to_client_time(time_base);
 };
 
 
@@ -1137,7 +1135,8 @@ void () FO_ThrowGrenade = {
 }
 
 void () TeamFortress_ThrowGrenade = {
-    if (!(self.tfstate & (TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING)))
+    if ((self.tfstate & TFSTATE_GREN_MASK_PRIMED == 0) ||
+        (self.tfstate & TFSTATE_GRENTHROWING))
         return;
 
     self.tfstate |= TFSTATE_GRENTHROWING;
@@ -2735,7 +2734,7 @@ void () TeamFortress_AmmoboxTouch = {
 void () TeamFortress_ExplodePerson = {
     local entity te;
 
-    self.owner.tfstate &= ~(TFSTATE_GRENPRIMED | TFSTATE_GRENTHROWING);
+    self.owner.tfstate &= ~TFSTATE_GREN_MASK_ALL;
     KickPlayer(-2, self.owner);
 
     newmis = spawn();

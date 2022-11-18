@@ -29,7 +29,8 @@ void AL_ProjectProjectile (entity projectile) {
 }
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
-    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, self.client_ping);
+    float ping = projectile.owner.client_ping;
+    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
     float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
 
     float dt = Phys_Advance(projectile, offset_dt);

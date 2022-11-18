@@ -168,6 +168,7 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(pp_global_disable);
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
+    PRINT_CONFIG_ACTIVE(gren_beta_disable);
 }
 #undef PRINT_CONFIG
 
@@ -382,6 +383,21 @@ static void WP_HandleHeavyInputs() {
         pstate_pred.impulse = 0;
 }
 
+void W_ThrowGren(float is_throw);
+
+static void HandleButtonThrowgren(float index, float button) {
+    float b_down = pstate_pred.buttons_down & button;
+    float b_up = pstate_pred.buttons_up & button;
+
+    if (IsHoldGrenades()) {
+        if (b_up)
+            W_ThrowGren(TRUE);
+    } else {
+        if ((pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED) && b_down)
+            W_ThrowGren(TRUE);
+    }
+}
+
 void WP_Impulse() {
     // Note: We might have no impulse, but a queued slot here.
     WP_HandleHeavyInputs();
@@ -421,9 +437,17 @@ void WP_Impulse() {
                     pstate_pred.playerclass, pstate_pred.current_slot, TRUE);
             break;
 
+        case TF_GRENADE_T:
+            W_ThrowGren(TRUE);
+            break;
+
         default:
             match = FALSE;
     }
+
+    HandleButtonThrowgren(1, BUTTON5);
+    HandleButtonThrowgren(2, BUTTON6);
+
     if (match)
         pstate_pred.impulse = 0;
 
@@ -635,6 +659,7 @@ void WP_Frame() {
 
     WP_CheckReloadFinished();
     WP_Impulse();
+    W_ThrowGren(FALSE);
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
@@ -735,10 +760,6 @@ void FPP_Init(int fpp_type, entity proj) {
     else
         setmodelindex(proj, desc->modelindex);
 
-    if (fpp_type == FPP_GRENADE) {
-        proj.avelocity = '300 300 300';
-    }
-
     proj.traileffectnum = FPP_FindTrail(proj);
     proj.movetype = desc->movetype;
 }
@@ -796,6 +817,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   makevectors(input_angles);
 
   entity proj = spawn();
+  proj.owner = edict_num(player_localentnum);
   FPP_Init(fpp_type, proj);
 
 #if 0
@@ -860,6 +882,7 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
 
     setmodelindex(proj, gdesc->modelindex);
     proj.skin = gdesc->skin;
+    proj.avelocity = gdesc->avelocity;
 }
 
 void W_FireGrenade(int gren_type) {
@@ -898,6 +921,38 @@ void (float ox) W_FireSpikes = {
         PP_CreateProjectile(FPP_SUPER_NAIL, '0 0 0');
 
 };
+
+DEFCVAR_FLOAT(wpp_disable_gren, 0)
+static float PP_EnableGrenades() {
+    return fo_config.qc_physics && !fo_config.gren_beta_disable &&
+           !CVARF(wpp_disable_gren);
+}
+
+static void W_ThrowGren(float is_throw) {
+    if (!PP_EnableGrenades())
+        return;
+
+    if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
+        return;
+
+    if (is_throw)
+        pstate_pred.tfstate |= TFSTATE_GRENTHROWING;
+    else if (pstate_pred.tfstate & TFSTATE_GRENTHROWING == 0)
+        return;
+
+    if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
+        return;  // Not time to throw yet, THROWING set if necessary.
+
+    if (IsEffectFrame()) {
+        entity gren = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+        int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
+        gren.wpp_aux = FO_ClassGren(pstate_pred.playerclass, index)->id;
+        FPP_ApplyGrenadeProperties(gren);
+    }
+
+    pstate_pred.tfstate &= ~TFSTATE_GREN_MASK_ALL;
+}
+
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     vector offset = org - pmove_org - '0 0 16';
@@ -959,7 +1014,7 @@ void WP_Attack() {
 
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
-                if (fo_config.qc_physics)
+                if (PP_EnableGrenades())
                     W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER ?
                                   GREN_RED : GREN_PIPE);
                 else
@@ -1062,6 +1117,7 @@ void InitProjectileEnt() {
     self.predraw = PP_PredrawActive;
     self.s_time = self.phys_time;
     self.angles = vectoangles(self.velocity);
+    self.owner = edict_num(self.owner_entnum);
 
     FPP_Init(self.fpp_index, self);
     FPP_ApplyGrenadeProperties(self);

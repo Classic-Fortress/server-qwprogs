@@ -13,15 +13,15 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 .float s_time;
 #endif
 
-string wp_version = "v0.3-phys";
+string wp_version = "v0.4-phys";
 
 enumflags {
     FOWP_CTIME,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
+    FOWP_LASTPRIME,
     FOWP_CLIP,
     FOWP_THINK,
-    FOWP_TFSTATE,
     FOWP_WF,
     FOWP_AF,
     FOWP_CLASS,
@@ -35,6 +35,8 @@ enumflags {
     FOPP_POS,
     FOPP_INIT,
     FOPP_AUX,
+    FOPP_ANGLES,
+    FOPP_MOVETYPE,
 };
 
 #define FOWP_ALL 0xFFFF
@@ -51,6 +53,7 @@ struct predict_tf_state {
     Slot current_slot, queue_slot, last_slot;
 
     float tfstate;
+    float last_prime;
 
     float client_time;
     float client_ping;
@@ -305,6 +308,7 @@ void WeaponPred_Update(entity player) {
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M1(FOWP_TFSTATE, tfstate);
+    M1(FOWP_LASTPRIME, last_prime);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
@@ -329,6 +333,14 @@ void sprint_pred(entity client, float msglevel, string s) {
     if (infokeyf(client, "fo_wpp_status") & CSQC_WEAP_PRED)
         return;  // Message generated client-side.
     sprint(client, msglevel, s);
+}
+
+// Networked (non-csqc) entities don't appear to exist within the client-side
+// CSQC world for our physics simulation.  Until we either (a) migrate them
+// there or (b) find a way to propagate them there, we cheat by sending an
+// update to the client when such a collision occurs.
+void Predict_UpdateHack(entity e) {
+    e.SendFlags |= FOPP_POS | FOPP_ANGLES;
 }
 #endif
 
@@ -368,6 +380,7 @@ void EntUpdate_Config() {
     COMM(Float, pp_global_disable);
     COMM(Float, wpp_global_enable);
     COMM(Float, wpp_global_disable);
+    COMM(Float, gren_beta_disable);
 
 #ifdef SSQC
     return TRUE;
@@ -411,6 +424,10 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_TFSTATE) {
         COMM(Float, tfstate);
+    }
+
+    if (sendflags & FOWP_LASTPRIME) {
+        COMM(Float, last_prime);
     }
 
     if (sendflags & FOWP_THINK) {
@@ -469,6 +486,11 @@ void WP_SyncPhysProjectile();
 void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
+    if (sendflags & FOPP_INIT) {
+        COMM(Byte, fpp_index);
+        COMM(Byte, antilag_ms);
+    }
+
     if (sendflags & FOPP_POS) {
         COMMD(Coord, s_origin[0], origin[0]);
         COMMD(Coord, s_origin[1], origin[1]);
@@ -482,10 +504,14 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Float, phys_carry);
     }
 
-    if (sendflags & FOPP_INIT) {
-        COMM(Byte, fpp_index);
-        COMM(Byte, antilag_ms);
+    if (sendflags & FOPP_ANGLES) {
+        COMM(Coord, angles[0]);
+        COMM(Coord, angles[1]);
+        COMM(Coord, angles[2]);
     }
+
+    if (sendflags & FOPP_MOVETYPE)
+        COMM(Byte, movetype);
 
     if (sendflags & FOPP_AUX) {
         COMM(Short, wpp_aux);
@@ -550,6 +576,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("ppgd", pp_global_disable);
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
+    CONFIG_UPDATE("gbd", gren_beta_disable);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, NEWMIS_MS);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
@@ -705,30 +732,27 @@ void FOProj_Finalize(entity mis) {
         PRINT_ONCE("Error: fpp=%d used with newmis\n", (float)fpp_type);
         newmis = __NULL__;
     }
+    PredProj_Sound(fpp_type);
+    float csqc_networking = fo_projectiles;
 
     if (fpp_type == FPP_GRENADE) {
         FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
 
         setmodel(mis, gdesc->model);
+        mis.avelocity = gdesc->avelocity;
         mis.skin = gdesc->skin;
         mis.wpp_aux = gdesc->id;
+
+        // If we don't have physics synchronized between client and server, use
+        // engine-side for both.
+        csqc_networking = (csqc_networking && fo_config.qc_physics);
     }
-
-    PredProj_Sound(fpp_type);
-
-    float csqc_networking = fo_projectiles;
 
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
     mis.phys_time = time;
-    if (fo_config.qc_physics) {
+    if (fo_config.qc_physics)
         mis.customphysics = FO_Phys;
-    } else {
-        // If we don't have physics synchronized between client and server, use
-        // engine-side for both.
-        if (mis.fpp_index == FPP_GRENADE)
-            csqc_networking = FALSE;
-    }
 
     WeaponPred_ProjectProjectile(mis.fpp_index, mis);
 

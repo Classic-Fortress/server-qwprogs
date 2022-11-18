@@ -249,8 +249,8 @@ inline FO_GrenInfo* FO_GrenDesc(int gren_type) {
     return &fo_grenades[gren_type - GREN_FIRST];
 }
 
-FO_GrenInfo* FO_ClassGren(int playerclass, int type) {
-    return FO_GrenDesc(class_grenades[playerclass].gren[type]);
+FO_GrenInfo* FO_ClassGren(int playerclass, int index) {
+    return FO_GrenDesc(class_grenades[playerclass].gren[index]);
 }
 
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
@@ -264,8 +264,13 @@ static string weapon_names[] = {
 };
 
 string FO_GetWeapName(float weapon) {
-    return weapon_names[WEAP_to_index(weapon)];
+    // Seeing a weird compiler bug here, passing WEAP_to_index directly to the
+    // array dereference will randomly cause OOB with length 13 limit, which is
+    // much smaller than `weapon_names`.
+    int index = WEAP_to_index(weapon);
+    return weapon_names[index];
 }
+
 
 struct FO_WeapModels {
     int weapon;
@@ -650,6 +655,10 @@ float IsUsingOldImpulses() {
 
 static float IsPyroSlotSwapped() {
     return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
+}
+
+float IsHoldGrenades() {
+    return csqc_get_user_setting("hg", "hold_grens", "off");
 }
 #endif
 

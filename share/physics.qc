@@ -7,6 +7,8 @@ static const float phys_tic = 0.005;
 .float phys_t;     // Total physics time accumulated
 
 #ifdef SSQC
+void Predict_UpdateHack(entity e);
+
 static void Phys_Impact(entity e) {
     if (trace_ent.solid == SOLID_NOT)
         return;
@@ -18,6 +20,9 @@ static void Phys_Impact(entity e) {
         self.touch();
         self = held_self;
     }
+
+    if (trace_ent.solid != SOLID_BSP)
+        Predict_UpdateHack(e);
 }
 #else
 .entity groundentity;
@@ -69,7 +74,9 @@ float Phys_Push(entity e, vector offset) {
     if (e.movetype == MOVETYPE_FLYMISSILE)
         flags |= MOVE_MISSILE;
 
-    traceline(e.origin, e.origin + offset, flags, e.owner);
+    // Note: Networked entities don't currently intersect on CSQC instantiation
+    // of this, we fudge this in Phys_Impact from the server side.
+    traceline(e.origin, e.origin + offset, flags, e);
     e.origin = trace_endpos;
 
     if (trace_fraction < 1) {
