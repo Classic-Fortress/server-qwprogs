@@ -772,6 +772,29 @@ void () TeamFortress_ShowTF = {
     }
 };
 
+void () NormalGrenadeTouch = {
+    if (other == self.owner)
+        return;
+
+    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
+    if (self.velocity == '0 0 0')
+        self.avelocity = '0 0 0';
+};
+
+void () NormalGrenadeExplode = {
+    deathmsg = DMSG_GREN_HAND;
+    T_RadiusDamage(self, self.owner, 180, world);
+
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
+    WriteCoord(MSG_MULTICAST, self.origin_x);
+    WriteCoord(MSG_MULTICAST, self.origin_y);
+    WriteCoord(MSG_MULTICAST, self.origin_z);
+
+    multicast(self.origin, MULTICAST_PHS);
+    dremove(self);
+};
+
 void () GrenadeTimer = {
     self.heat = self.heat - 1;
     self.nextthink = time + 1;
@@ -781,6 +804,28 @@ void () GrenadeTimer = {
     if (!self.heat) {
         dremove(self);
     }
+};
+
+static struct stg_table_entry {
+    int id;
+    void() touch;
+    void() think;
+};
+
+stg_table_entry stg_table[] = {
+    { GREN_NORMAL,  NormalGrenadeTouch,     NormalGrenadeExplode},
+    { GREN_CONC,    ConcussionGrenadeTouch, ConcussionGrenadeExplode},
+    { GREN_BLAST,   BlastGrenadeTouch,      BlastGrenadeExplode},
+    { GREN_NAIL,    NailGrenadeTouch,       NailGrenadeExplode},
+    { GREN_SHOCK,   ShockGrenadeTouch,      ShockGrenadeExplode},
+    { GREN_BURST,   BurstGrenadeTouch,      BurstGrenadeExplode},
+    { GREN_MIRV,    MirvGrenadeTouch,       MirvGrenadeExplode},
+    { GREN_NAPALM,  NapalmGrenadeTouch,     NapalmGrenadeExplode1},
+    { GREN_FLARE,   FlareGrenadeTouch,      FlareGrenadeExplode},
+    { GREN_GAS,     GasGrenadeTouch,        GasGrenadeExplode1},
+    { GREN_EMP,     EMPGrenadeTouch,        EMPGrenadeExplode},
+    { GREN_FLASH,   FlashGrenadeTouch,      FlashGrenadeExplode},
+    { GREN_CALTROP, CanisterTouch,          ScatterCaltrops},
 };
 
 void (entity timer) FO_SpawnThrownGrenade = {
@@ -818,99 +863,17 @@ void (entity timer) FO_SpawnThrownGrenade = {
     newmis.think = SUB_Null;
     newmis.nextthink = timer.heat;
 
-    if (timer.weapon == GR_TYPE_NORMAL) {
-        newmis.touch = NormalGrenadeTouch;
-        newmis.think = NormalGrenadeExplode;
-        newmis.grenadename = "normalgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (timer.weapon == GR_TYPE_CONCUSSION) {
-        newmis.touch = ConcussionGrenadeTouch;
-        newmis.think = ConcussionGrenadeExplode;
-        newmis.grenadename = "concussiongrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (timer.weapon == GR_TYPE_BLAST) {
-        newmis.touch = BlastGrenadeTouch;
-        newmis.think = BlastGrenadeExplode;
-        newmis.grenadename = "blastgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/blastgren.mdl");
-    } else if (timer.weapon == GR_TYPE_NAIL) {
-        newmis.touch = NailGrenadeTouch;
-        newmis.think = NailGrenadeExplode;
-        newmis.grenadename = "nailgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (timer.weapon == GR_TYPE_SHOCK) {
-        newmis.touch = ShockGrenadeTouch;
-        newmis.think = ShockGrenadeExplode;
-        newmis.grenadename = "shockgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (timer.weapon == GR_TYPE_BURST) {
-        newmis.touch = BurstGrenadeTouch;
-        newmis.think = BurstGrenadeExplode;
-        newmis.grenadename = "burstgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (timer.weapon == GR_TYPE_MIRV) {
-        newmis.touch = MirvGrenadeTouch;
-        newmis.think = MirvGrenadeExplode;
-        newmis.grenadename = "mirvgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (timer.weapon == GR_TYPE_NAPALM) {
-        newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode1;
-        newmis.grenadename = "napalmgrenade";
-        newmis.skin = 2;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (timer.weapon == GR_TYPE_FLARE) {
-        newmis.touch = FlareGrenadeTouch;
-        newmis.weapon = timer.team_no;
-        newmis.think = FlareGrenadeExplode;
-        newmis.grenadename = "flaregrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        newmis.mdl = "flare";
-        FO_SetModel(newmis, "progs/flare.mdl");
-    } else if (timer.weapon == GR_TYPE_GAS) {
-        newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode1;
-        newmis.grenadename = "gasgrenade";
-        newmis.skin = 3;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (timer.weapon == GR_TYPE_EMP) {
-        newmis.touch = EMPGrenadeTouch;
-        newmis.think = EMPGrenadeExplode;
-        newmis.grenadename = "empgrenade";
-        newmis.skin = 4;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (timer.weapon == GR_TYPE_CALTROP) {
-        newmis.touch = CanisterTouch;
-        newmis.think = ScatterCaltrops;
-        newmis.grenadename = "caltropgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '0 0 0';
-    } else if (timer.weapon == GR_TYPE_FLASH) {
-        newmis.touch = FlashGrenadeTouch;
-        newmis.think = FlashGrenadeExplode;
-        newmis.grenadename = "flashgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/flashgren.mdl");
-    }
+    int gtype = TF_GREN_conv(timer.weapon);
+    FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
+    stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
+
+    newmis.gren_type = gtype;
+    newmis.skin = gdesc->skin;
+    FO_SetModel(newmis, gdesc->model);
+    newmis.avelocity = gdesc->avelocity;
+    newmis.touch = ste->touch;
+    newmis.think = ste->think;
+
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, user.origin);
 }
@@ -2786,65 +2749,8 @@ void () TeamFortress_ExplodePerson = {
     newmis.think = SUB_Null;
     newmis.nextthink = time + 0.1;  // Server generated, no client time here.
 
-    if (self.weapon == GR_TYPE_NORMAL) {
-        newmis.touch = NormalGrenadeTouch;
-        newmis.think = NormalGrenadeExplode;
-        newmis.grenadename = "normalgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (self.weapon == GR_TYPE_CONCUSSION) {
-        newmis.touch = ConcussionGrenadeTouch;
-        newmis.think = ConcussionGrenadeExplode;
-        newmis.grenadename = "concussiongrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/hgren2.mdl");
-    } else if (self.weapon == GR_TYPE_BLAST) {
-        newmis.touch = BlastGrenadeTouch;
-        newmis.think = BlastGrenadeExplode;
-        newmis.grenadename = "blastgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/blastgren.mdl");
-    } else if (self.weapon == GR_TYPE_NAIL) {
-        newmis.touch = NailGrenadeTouch;
-        newmis.think = NailGrenadeExplode;
-        newmis.grenadename = "nailgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_SHOCK) {
-        newmis.touch = ShockGrenadeTouch;
-        newmis.think = ShockGrenadeExplode;
-        newmis.grenadename = "shockgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_BURST) {
-        newmis.touch = BurstGrenadeTouch;
-        newmis.think = BurstGrenadeExplode;
-        newmis.grenadename = "burstgrenade";
-        newmis.skin = 1;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_MIRV) {
-        newmis.touch = MirvGrenadeTouch;
-        newmis.think = MirvGrenadeExplode;
-        newmis.grenadename = "mirvgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_NAPALM) {
-        newmis.touch = NapalmGrenadeTouch;
-        newmis.think = NapalmGrenadeExplode1;
-        newmis.grenadename = "napalmgrenade";
-        newmis.skin = 2;
-        newmis.avelocity = '0 300 0';
-        FO_SetModel(newmis, "progs/biggren.mdl");
-    } else if (self.weapon == GR_TYPE_FLARE) {
+    if (self.weapon == GR_TYPE_FLARE) {
         sprint(self.owner, PRINT_HIGH, "Flare lit\n");
-        newmis.grenadename = "flaregrenade";
         te = spawn();
         te.touch = SUB_Null;
         te.think = RemoveFlare;
@@ -2855,34 +2761,20 @@ void () TeamFortress_ExplodePerson = {
         dremove(self);
         dremove(newmis);
         return;
-    } else if (self.weapon == GR_TYPE_GAS) {
-        newmis.touch = GasGrenadeTouch;
-        newmis.think = GasGrenadeExplode1;
-        newmis.grenadename = "gasgrenade";
-        newmis.skin = 2;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (self.weapon == GR_TYPE_EMP) {
-        newmis.touch = EMPGrenadeTouch;
-        newmis.think = EMPGrenadeExplode;
-        newmis.grenadename = "empgrenade";
-        newmis.skin = 4;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/grenade2.mdl");
-    } else if (self.weapon == GR_TYPE_CALTROP) {
-        newmis.touch = CaltropTouch;
-        newmis.think = ScatterCaltrops;
-        newmis.grenadename = "caltropgrenade";
-    } else if (self.weapon == GR_TYPE_FLASH) {
-        newmis.touch = FlashGrenadeTouch;
-        newmis.think = FlashGrenadeExplode;
-        newmis.grenadename = "flashgrenade";
-        newmis.skin = 0;
-        newmis.avelocity = '300 300 300';
-        FO_SetModel(newmis, "progs/flashgren.mdl");
     }
+
+    int gren_type = TF_GREN_conv(self.weapon);
+    FO_GrenInfo* gdesc = FO_GrenDesc(gren_type);
+    stg_table_entry* ste = &stg_table[gren_type - GREN_FIRST];
+
+    newmis.skin = gdesc->skin;
+    FO_SetModel(newmis, gdesc->model);
+    newmis.avelocity = gdesc->avelocity;
+    newmis.touch = ste->touch;
+    newmis.think = ste->think;
     setsize(newmis, '0 0 0', '0 0 0');
     setorigin(newmis, self.owner.origin);
+
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
         bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", swallowing the grenade isn't very effective!\n");
@@ -2925,29 +2817,6 @@ void () TeamFortress_ExplodePerson = {
         bprint(PRINT_MEDIUM, "No ", self.owner.netname,
                 ", throw the grenade, not the pin!\n");
 
-    dremove(self);
-};
-
-void () NormalGrenadeTouch = {
-    if (other == self.owner)
-        return;
-
-    FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
-    if (self.velocity == '0 0 0')
-        self.avelocity = '0 0 0';
-};
-
-void () NormalGrenadeExplode = {
-    deathmsg = DMSG_GREN_HAND;
-    T_RadiusDamage(self, self.owner, 180, world);
-
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-
-    multicast(self.origin, MULTICAST_PHS);
     dremove(self);
 };
 

@@ -1284,10 +1284,9 @@ void () W_FireGrenade = {
     if (FO_CurrentWeapon() == WEAP_GRENADE_LAUNCHER || cb_prematch) {
         proj.weapon = 5;
         proj.classname = "grenade";
-        proj.skin = 1;
         proj.touch = GrenadeTouch;
         proj.nextthink = time + 2.5;
-        proj.wpp_aux = GREN_RED;
+        proj.gren_type = GREN_RED;
     } else {
         if (old_pipecooldown)
             self.pipecooldown = time + 0.8;
@@ -1295,12 +1294,11 @@ void () W_FireGrenade = {
             self.pipecooldown = time + 0.5;
         ExplodeOldestPipebomb();
         proj.classname = "pipebomb";
-        proj.skin = 2;
         proj.touch = PipebombTouch;
         proj.nextthink = time + 120;
         proj.weapon = 11;
         proj.team_no = self.team_no;
-        proj.wpp_aux = GREN_PIPE;
+        proj.gren_type = GREN_PIPE;
     }
     makevectors(self.v_angle);
     if (self.v_angle_x) {

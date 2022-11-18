@@ -153,6 +153,106 @@ FO_ClassWeapons class_weapons[] = {
     { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
 
+enum {
+    GREN_FIRST = 100,
+    GREN_NORMAL = GREN_FIRST,
+    GREN_CONC,
+    GREN_BLAST,
+    GREN_NAIL,
+    GREN_SHOCK,
+    GREN_BURST,
+    GREN_MIRV,
+    GREN_NAPALM,
+    GREN_FLARE,    // Not correctly predicted
+    GREN_GAS,
+    GREN_EMP,
+    GREN_FLASH,
+    GREN_CALTROP,
+    GREN_RED,
+    GREN_PIPE,
+    GREN_NONE,
+};
+
+// TODO: Just remove this legacy encoding.
+int TF_GREN_conv(int tf_gren) {
+    switch (tf_gren) {
+        case GR_TYPE_NORMAL: return GREN_NORMAL;
+        case GR_TYPE_CONCUSSION: return GREN_CONC;
+        case GR_TYPE_BLAST: return GREN_BLAST;
+        case GR_TYPE_NAIL: return GREN_NAIL;
+        case GR_TYPE_SHOCK: return GREN_SHOCK;
+        case GR_TYPE_BURST: return GREN_BURST;
+        case GR_TYPE_MIRV: return GREN_MIRV;
+        case GR_TYPE_NAPALM: return GREN_NAPALM;
+        case GR_TYPE_FLARE: return GREN_FLARE;
+        case GR_TYPE_GAS: return GREN_GAS;
+        case GR_TYPE_EMP: return GREN_EMP;
+        case GR_TYPE_FLASH: return GREN_FLASH;
+        case GR_TYPE_CALTROP: return GREN_CALTROP;
+    };
+
+    error("unrecognized grenade type");
+    return -1;
+}
+
+struct FO_GrenInfo {
+    int id;
+    string name;
+    string model;
+    int skin;
+    vector avelocity;
+
+    // Automatically initialized below this line.
+    float modelindex;
+    string logname;
+};
+
+FO_GrenInfo fo_grenades[] = {
+    { GREN_NORMAL,  "Grenade",    "hgren2.mdl",    0, '300 300 300',},
+    { GREN_CONC,    "Concussion", "hgren2.mdl",    1, '300 300 300'},
+    { GREN_BLAST,   "Blast",      "blastgren.mdl", 1, '300 300 300'},
+    { GREN_NAIL,    "Nail",       "biggren.mdl",   1, '0 300 0'},
+    { GREN_SHOCK,   "Shock",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_BURST,   "Burst",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_MIRV,    "Mirv",       "biggren.mdl",   0, '0 300 0'},
+    { GREN_NAPALM,  "Napalm",     "biggren.mdl",   2, '0 300 0'},
+    { GREN_FLARE,   "Flare",      "flare.mdl",     1, '300 300 300'},
+    { GREN_GAS,     "Gas",        "grenade2.mdl",  3, '300 300 300'},
+    { GREN_EMP,     "EMP",        "grenade2.mdl",  4, '300 300 300'},
+    { GREN_FLASH,   "Flash",      "flashgren.mdl", 0, '300 300 300'},
+    { GREN_CALTROP, "Caltrop",    "",              0, '300 300 300'},
+    { GREN_RED,     "Red",        "grenade2.mdl",  1, '300 300 300'},
+    { GREN_PIPE,    "Pipe",       "grenade2.mdl",  2, '300 300 300'},
+};
+
+struct FO_ClassGrenades {
+    float id;
+    float gren[2];
+};
+
+FO_ClassGrenades class_grenades[] = {
+    { PC_UNDEFINED, {GREN_NONE,   GREN_NONE} },
+    { PC_SCOUT,     {GREN_FLASH,  GREN_CONC} },
+    { PC_SNIPER,    {GREN_NORMAL, GREN_FLARE} },
+    { PC_SOLDIER,   {GREN_NORMAL, GREN_SHOCK} },
+    { PC_DEMOMAN,   {GREN_NORMAL, GREN_MIRV} },
+    { PC_MEDIC,     {GREN_NORMAL, GREN_CONC} },
+    { PC_HVYWEAP,   {GREN_NORMAL, GREN_MIRV} },
+    { PC_PYRO,      {GREN_NORMAL, GREN_NAPALM} },
+    { PC_SPY,       {GREN_NORMAL, GREN_GAS} },
+    { PC_ENGINEER,  {GREN_NORMAL, GREN_EMP} },
+    { PC_RANDOM,    {GREN_NONE,   GREN_NONE} },  // TODO: Probably needs attention
+    { PC_CIVILIAN,  {GREN_NONE,   GREN_NONE} },
+};
+
+inline FO_GrenInfo* FO_GrenDesc(int gren_type) {
+    return &fo_grenades[gren_type - GREN_FIRST];
+}
+
+FO_GrenInfo* FO_ClassGren(int playerclass, int type) {
+    return FO_GrenDesc(class_grenades[playerclass].gren[type]);
+}
+
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
@@ -681,6 +781,26 @@ void FO_Weapons_Init() {
         for (j = 0; j < 7; j++)
             if (iw->weapons[j])
                 iw->slots[j] = WEAP_to_slot(iw->class, iw->weapons[j]);
+    }
+
+    for (i = 0; i < fo_grenades.length; i++) {
+        FO_GrenInfo* gdesc = &fo_grenades[i];
+        ASSERTD_EQ(GREN_FIRST + i, gdesc->id);
+
+        if (gdesc->name != "") {
+            gdesc->name = strcat(gdesc->name, " grenade");
+            gdesc->logname = strcat(strtolower(gdesc->name), "grenade");
+        }
+
+        if (gdesc->model != "") {
+            gdesc->model = strcat("progs/", gdesc->model);
+            gdesc->modelindex = getmodelindex(gdesc->model);
+        }
+    }
+
+    for (i = 0; i < class_grenades.length; i++) {
+        FO_ClassGrenades* cg = &class_grenades[i];
+        ASSERTD_EQ(i, cg->id);
     }
 }
 

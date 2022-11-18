@@ -856,14 +856,10 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
     if (proj.fpp_index != FPP_GRENADE)
         return;
 
-    switch (proj.wpp_aux) {
-        case GREN_RED:
-            proj.skin = 1;
-            break;
-        case GREN_PIPE:
-            proj.skin = 2;
-            break;
-    }
+    FO_GrenInfo* gdesc = FO_GrenDesc(proj.wpp_aux);
+
+    setmodelindex(proj, gdesc->modelindex);
+    proj.skin = gdesc->skin;
 }
 
 void W_FireGrenade(int gren_type) {

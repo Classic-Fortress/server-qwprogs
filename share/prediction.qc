@@ -160,11 +160,6 @@ fo_projectile fpp_types[] = {
 };
 
 // `wpp_aux` disambiguation for FPP_GRENADE projectiles.
-enum {
-    GREN_RED,
-    GREN_PIPE,
-};
-
 void InitFppProjectiles() {
     float i;
     static int once;
@@ -709,6 +704,14 @@ void FOProj_Finalize(entity mis) {
     if (newmis == mis) {
         PRINT_ONCE("Error: fpp=%d used with newmis\n", (float)fpp_type);
         newmis = __NULL__;
+    }
+
+    if (fpp_type == FPP_GRENADE) {
+        FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
+
+        setmodel(mis, gdesc->model);
+        mis.skin = gdesc->skin;
+        mis.wpp_aux = gdesc->id;
     }
 
     PredProj_Sound(fpp_type);

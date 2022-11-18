@@ -750,7 +750,7 @@ float gametime;
 string gametimestamp;
 float logfilehandle;
 float canlog;
-.string grenadename;
+.int gren_type;
 .float classtime;
 .float goalrunningtime;
 
