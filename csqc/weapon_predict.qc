@@ -859,7 +859,7 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
         return;
 
     if (proj.wpp_aux < GREN_FIRST) {
-        printf("proj missing gren_type, tell newby\n");
+        printf("proj (%s) missing gren_type, tell newby\n", proj.model);
         proj.wpp_aux = GREN_FIRST;
     }
     FO_GrenInfo* gdesc = FO_GrenDesc(proj.wpp_aux);

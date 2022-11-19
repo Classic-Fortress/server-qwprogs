@@ -945,6 +945,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 newmis.movetype = 6;
                 newmis.solid = 2;
                 newmis.classname = "grenade";
+                newmis.gren_type = GREN_FLARE;
                 makevectors(self.v_angle);
                 newmis.velocity = (v_forward * 600) + (v_up * 25);
                 newmis.velocity = newmis.velocity * 700;
@@ -1012,6 +1013,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 newmis.movetype = 6;
                 newmis.solid = 2;
                 newmis.classname = "grenade";
+                newmis.gren_type = GREN_FLARE;
                 makevectors(self.v_angle);
                 if (self.v_angle_x) {
                     newmis.velocity = v_forward * 1200 + v_up * 200;
@@ -2738,8 +2740,8 @@ void () TeamFortress_ExplodePerson = {
     KickPlayer(-2, self.owner);
 
     newmis = spawn();
-    newmis.movetype = 10;
-    newmis.solid = 2;
+    newmis.movetype = MOVETYPE_BOUNCE;
+    newmis.solid = SOLID_BBOX;
     newmis.classname = "grenade";
     newmis.team_no = self.owner.team_no;
     newmis.owner = self.owner;
@@ -2762,9 +2764,9 @@ void () TeamFortress_ExplodePerson = {
         return;
     }
 
-    int gren_type = TF_GREN_conv(self.weapon);
-    FO_GrenInfo* gdesc = FO_GrenDesc(gren_type);
-    stg_table_entry* ste = &stg_table[gren_type - GREN_FIRST];
+    int gtype = TF_GREN_conv(self.weapon);
+    FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
+    stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
     newmis.skin = gdesc->skin;
     FO_SetModel(newmis, gdesc->model);
