@@ -858,6 +858,10 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
     if (proj.fpp_index != FPP_GRENADE)
         return;
 
+    if (proj.wpp_aux < GREN_FIRST) {
+        printf("proj missing gren_type, tell newby\n");
+        proj.wpp_aux = GREN_FIRST;
+    }
     FO_GrenInfo* gdesc = FO_GrenDesc(proj.wpp_aux);
 
     setmodelindex(proj, gdesc->modelindex);

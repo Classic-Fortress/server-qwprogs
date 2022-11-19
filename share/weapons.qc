@@ -245,7 +245,11 @@ FO_ClassGrenades class_grenades[] = {
     { PC_CIVILIAN,  {GREN_NONE,   GREN_NONE} },
 };
 
-inline FO_GrenInfo* FO_GrenDesc(int gren_type) {
+FO_GrenInfo* FO_GrenDesc(int gren_type) {
+    if (gren_type < GREN_FIRST) {
+        printf("proj missing gren_type, tell newby\n");
+        gren_type = GREN_FIRST;
+    }
     return &fo_grenades[gren_type - GREN_FIRST];
 }
 
