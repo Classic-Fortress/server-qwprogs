@@ -156,6 +156,7 @@ void WPP_Status() {
 
     printf("Config:\n");
     PRINT_CONFIG(qc_physics);
+    PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);

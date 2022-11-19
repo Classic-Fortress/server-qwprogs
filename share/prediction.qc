@@ -204,12 +204,11 @@ float max_rewind_credit_ms(int fpp_type) {
 // NOTE: DO NOT USE NEWMIS FOR FO PROJECTILES.  THE NEWMIS CORRECTION IS NOW
 // MADE EXPLICITLY RATHER THAN IMPLICITLY.  [WE AUTOMATICALLY STRIP NEWMIS
 // FROM PROJECTILES PASSED TO US.]
-static float NEWMIS_MS = 50;
 float static_newmis_ms(int fpp_type) {
     if (fpp_type == FPP_FLAMETHROWER || fpp_type == FPP_ASSAULT_CANNON)
         return 0;
 
-    return NEWMIS_MS - fo_config.dynamic_newmis_ms;
+    return fo_config.static_newmis_ms - fo_config.dynamic_newmis_ms;
 }
 
 inline float dynamic_newmis_ms() {
@@ -217,7 +216,7 @@ inline float dynamic_newmis_ms() {
 }
 
 inline float fixed_newmis_ms(int fpp_type) {
-    return NEWMIS_MS;
+    return fo_config.static_newmis_ms;
 }
 .float wpp_aux;
 
@@ -367,20 +366,21 @@ float WP_SendConfig(entity to_player, float sendflags) {
 #define COMM(_type, _field) fo_config.##_field = Read##_type()
 void EntUpdate_Config() {
 #endif
-    COMM(Float, qc_physics);
+    COMM(Byte, qc_physics);
+    COMM(Float, static_newmis_ms);
     COMM(Float, dynamic_newmis_ms);
-    COMM(Float, max_rewind_ms);
-    COMM(Float, max_rewind_slow_projectile_ms);
-    COMM(Float, max_rewind_fast_projectile_ms);
-    COMM(Float, rewind_fast_projectile_thresh);
-    COMM(Float, wp_default_min_ping_ms);
-    COMM(Float, wp_global_enable);
-    COMM(Float, wp_global_disable);
-    COMM(Float, pp_global_enable);
-    COMM(Float, pp_global_disable);
-    COMM(Float, wpp_global_enable);
-    COMM(Float, wpp_global_disable);
-    COMM(Float, gren_beta_disable);
+    COMM(Byte, max_rewind_ms);
+    COMM(Byte, max_rewind_slow_projectile_ms);
+    COMM(Byte, max_rewind_fast_projectile_ms);
+    COMM(Byte, rewind_fast_projectile_thresh);
+    COMM(Byte, wp_default_min_ping_ms);
+    COMM(Byte, wp_global_enable);
+    COMM(Byte, wp_global_disable);
+    COMM(Byte, pp_global_enable);
+    COMM(Byte, pp_global_disable);
+    COMM(Byte, wpp_global_enable);
+    COMM(Byte, wpp_global_disable);
+    COMM(Byte, gren_beta_disable);
 
 #ifdef SSQC
     return TRUE;
@@ -534,6 +534,7 @@ void EntUpdate_Projectile(float isnew) {
 
 void WeapPred_InitDefaultConfig() {
     fo_config.qc_physics = 0;
+    fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
@@ -564,6 +565,7 @@ static void WeaponPred_CheckConfigUpdate() {
 
     // Target is also the long form localinfo name.
     CONFIG_UPDATE("qcp", qc_physics);
+    CONFIG_UPDATE("snm", static_newmis_ms);
     CONFIG_UPDATE("dnm", dynamic_newmis_ms);
     CONFIG_UPDATE("mrt", max_rewind_ms);
     CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
@@ -578,7 +580,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
 
-    CLAMP_UPDATE(dynamic_newmis_ms, 0, NEWMIS_MS);
+    CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
