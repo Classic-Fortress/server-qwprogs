@@ -98,10 +98,10 @@ void () ShockGrenadeExplode = {
     if(solid_nailgren) {
         setsize(self, '-1 -1 -1', '1 1 1');
     }
-    self.avelocity = '0 500 0';
     self.nextthink = time + 0.7;
     self.playerclass = 0;
     self.think = NailGrenLaser;
+    self.SendFlags = FOPP_POS | FOPP_MOVETYPE;
 };
 
 void () BurstGrenadeExplode = {
@@ -191,6 +191,8 @@ void () NailGrenLaser = {	//using self.playerclass to count thinks
     self.v_angle_x = 0;
     self.v_angle_z = 0;
     self.angles = self.v_angle;
+    self.SendFlags |= FOPP_ANGLES;
+
     makevectors(self.v_angle);
 
     org = self.origin;

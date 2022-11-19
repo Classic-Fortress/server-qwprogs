@@ -749,7 +749,7 @@ float gametime;
 string gametimestamp;
 float logfilehandle;
 float canlog;
-.string grenadename;
+.int gren_type;
 .float classtime;
 .float goalrunningtime;
 
@@ -771,6 +771,7 @@ float FO_FlashDimension;
 // precise grenades
 .entity grenade_timer;
 .float last_throw;
+.float last_prime;
 
 // allow for default goal state
 .float default_group_no;

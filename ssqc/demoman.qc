@@ -100,7 +100,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     newmis.solid = SOLID_BBOX;
 
     newmis.classname = "grenade";
-    newmis.grenadename = "mirvsinglegrenade";
+    newmis.gren_type = GREN_MIRV;
     newmis.weapon = DMSG_GREN_MIRV;
     newmis.touch = NormalGrenadeTouch;
     newmis.think = NormalGrenadeExplode;

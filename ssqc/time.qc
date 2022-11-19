@@ -22,6 +22,10 @@ inline float client_to_global_time(float ctime) {
     return time + (ctime - self.client_time);
 }
 
+inline float global_to_client_time(float gtime) {
+    return self.client_time + (gtime - time);
+}
+
 // Ping corrected `time`.
 float remote_time(float ct_type = CT_NOEXTERNALEFFECT) {
     return client_to_global_time(remote_client_time(ct_type));

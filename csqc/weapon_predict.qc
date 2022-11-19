@@ -133,6 +133,8 @@ void WPP_Status() {
     printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
 
     printf("Config:\n");
+    PRINT_CONFIG(qc_physics);
+    PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
@@ -145,6 +147,7 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(pp_global_disable);
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
+    PRINT_CONFIG_ACTIVE(gren_beta_disable);
 }
 #undef PRINT_CONFIG
 
@@ -220,8 +223,6 @@ void Attack_Finished(float attack_time) {
 ////////////////////////////////////////////////////////////////////////////////
 /// Weapon models
 ////////////////////////////////////////////////////////////////////////////////
-float animate_s_time;
-
 static entity pred_sound_entity;
 static float last_pred_sound;
 
@@ -361,6 +362,21 @@ static void WP_HandleHeavyInputs() {
         pstate_pred.impulse = 0;
 }
 
+void W_ThrowGren(float is_throw);
+
+static void HandleButtonThrowgren(float index, float button) {
+    float b_down = pstate_pred.buttons_down & button;
+    float b_up = pstate_pred.buttons_up & button;
+
+    if (IsHoldGrenades()) {
+        if (b_up)
+            W_ThrowGren(TRUE);
+    } else {
+        if ((pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED) && b_down)
+            W_ThrowGren(TRUE);
+    }
+}
+
 void WP_Impulse() {
     // Note: We might have no impulse, but a queued slot here.
     WP_HandleHeavyInputs();
@@ -400,9 +416,17 @@ void WP_Impulse() {
                     pstate_pred.playerclass, pstate_pred.current_slot, TRUE);
             break;
 
+        case TF_GRENADE_T:
+            W_ThrowGren(TRUE);
+            break;
+
         default:
             match = FALSE;
     }
+
+    HandleButtonThrowgren(1, BUTTON5);
+    HandleButtonThrowgren(2, BUTTON6);
+
     if (match)
         pstate_pred.impulse = 0;
 
@@ -614,6 +638,7 @@ void WP_Frame() {
 
     WP_CheckReloadFinished();
     WP_Impulse();
+    W_ThrowGren(FALSE);
 
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
@@ -705,7 +730,7 @@ int FPP_FindTrail(entity e)
 
 DEFCVAR_FLOAT(cl_r2g, 0);
 
-entity FPP_Init(int fpp_type, entity proj) {
+void FPP_Init(int fpp_type, entity proj) {
     fo_projectile* desc = &fpp_types[fpp_type];
 
     proj.fpp_index = fpp_type;
@@ -715,10 +740,8 @@ entity FPP_Init(int fpp_type, entity proj) {
     else
         setmodelindex(proj, desc->modelindex);
 
-    proj.oldorigin = proj.s_origin;
     proj.traileffectnum = FPP_FindTrail(proj);
-
-    return proj;
+    proj.movetype = desc->movetype;
 }
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
@@ -727,10 +750,7 @@ DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
 .float trail_started;
 float PP_PredrawActive() {
-    float delta = time - self.s_time;
-
-    self.origin = self.s_origin + (self.velocity * delta);
-    setorigin(self, self.origin);
+    CPhys_Update(self);
 
     // we need to space out the particles incase we're running at very high fps
     if (time > self.p_time) {
@@ -769,18 +789,15 @@ float PP_PredrawPredicted() {
 
 static float PP_EPS = 0.05;
 
-static vector PredProj_Pos(entity proj) {
-    float offset = time - proj.s_time;
-    return proj.s_origin + offset * proj.velocity;
-}
-
 entity PP_CreateProjectile(int fpp_type, vector offset) {
   PredProj_Sound(fpp_type);
 
   if (!PP_Enabled())
       return __NULL__;
+  makevectors(input_angles);
 
   entity proj = spawn();
+  proj.owner = edict_num(player_localentnum);
   FPP_Init(fpp_type, proj);
 
 #if 0
@@ -797,24 +814,37 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   ProjectResult push_t =
       WeaponPred_ProjectOffset(fpp_type, pstate_pred.client_ping);
 
-  float uncorrected_ms = pstate_pred.client_ping - push_t.dynamic_ms;
+  float uncorrected_dt = (pstate_pred.client_ping - push_t.dynamic_ms) / 1000.0;
+  float static_dt = push_t.static_ms / 1000.0;
   // Note: We use true time here as created projectiles exist outside of pred.
-  proj.starttime = time + uncorrected_ms/1000.0;
-  proj.s_time = proj.starttime - push_t.static_ms/1000.0;
+  proj.starttime = time + uncorrected_dt;
+  proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_pred.client_ping / 1000.0 + PP_EPS;
+
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
 
   setsize(proj, [0,0,0], [0,0,0]);
   proj.s_origin = pmove_org + offset;
-  proj.s_origin[2] += 16;
-  proj.velocity = v_forward * fpp_types[fpp_type].speed;
 
-  proj.origin = PredProj_Pos(proj);
-  proj.oldorigin = proj.origin;
-
+  if (fpp_type != FPP_GRENADE) {
+      proj.velocity = v_forward * fpp_types[fpp_type].speed;
+      proj.s_origin[2] += 16;
+  } else {
+      if (!input_angles_x) {
+          proj.velocity = v_forward * fpp_types[fpp_type].speed;
+          proj.velocity_z = 200;
+      } else {
+          proj.velocity = (v_forward * 600) +
+              (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
+              (shared_crandom(PRNG_WEAP) * 10 * v_right);
+      }
+  }
   proj.angles = input_angles; proj.angles[0] *= -1;
+
+  CPhys_Init(proj, proj.starttime, static_dt);
+  proj.oldorigin = proj.origin;
 
   proj.pred_next = predicted_projectiles;
   if (predicted_projectiles)
@@ -822,6 +852,23 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   predicted_projectiles = proj;
 
   return proj;
+}
+
+static void FPP_ApplyGrenadeProperties(entity proj) {
+    if (proj.fpp_index != FPP_GRENADE)
+        return;
+
+    FO_GrenInfo* gdesc = FO_GrenDesc(proj.wpp_aux);
+
+    setmodelindex(proj, gdesc->modelindex);
+    proj.skin = gdesc->skin;
+    proj.avelocity = gdesc->avelocity;
+}
+
+void W_FireGrenade(int gren_type) {
+    entity proj = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+    proj.wpp_aux = gren_type;
+    FPP_ApplyGrenadeProperties(proj);
 }
 
 void W_FireAssaultCannon() {
@@ -854,6 +901,38 @@ void (float ox) W_FireSpikes = {
         PP_CreateProjectile(FPP_SUPER_NAIL, '0 0 0');
 
 };
+
+DEFCVAR_FLOAT(wpp_disable_gren, 0)
+static float PP_EnableGrenades() {
+    return fo_config.qc_physics && !fo_config.gren_beta_disable &&
+           !CVARF(wpp_disable_gren);
+}
+
+static void W_ThrowGren(float is_throw) {
+    if (!PP_EnableGrenades())
+        return;
+
+    if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
+        return;
+
+    if (is_throw)
+        pstate_pred.tfstate |= TFSTATE_GRENTHROWING;
+    else if (pstate_pred.tfstate & TFSTATE_GRENTHROWING == 0)
+        return;
+
+    if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
+        return;  // Not time to throw yet, THROWING set if necessary.
+
+    if (IsEffectFrame()) {
+        entity gren = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+        int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
+        gren.wpp_aux = FO_ClassGren(pstate_pred.playerclass, index)->id;
+        FPP_ApplyGrenadeProperties(gren);
+    }
+
+    pstate_pred.tfstate &= ~TFSTATE_GREN_MASK_ALL;
+}
+
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     vector offset = org - pmove_org - '0 0 16';
@@ -915,12 +994,17 @@ void WP_Attack() {
 
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
-                Pred_Sound(SND_GREN); break;
+                if (PP_EnableGrenades())
+                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER ?
+                                  GREN_RED : GREN_PIPE);
+                else
+                    Pred_Sound(SND_GREN);
+                break;
 
             case WEAP_AXE:
             case WEAP_KNIFE:
             case WEAP_MEDIKIT:
-                melee_anim = shared_prng(PRNG_AXE) < 0.5 ? player_axeN : player_axebN;
+                melee_anim = shared_prng(PRNG_WEAP) < 0.5 ? player_axeN : player_axebN;
                 // Fall through for sound.
             case WEAP_SPANNER:
                 Pred_Sound(SND_AXE); break;
@@ -960,18 +1044,21 @@ void WP_Attack() {
 
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
-    float best = 200;
+    float best = 64;
 
     for(proj = predicted_projectiles; proj != __NULL__; proj = proj.pred_next) {
+        if (proj == self)
+            error("???");
+
         if (proj.fpp_index != self.fpp_index || proj.wpp_aux != self.wpp_aux)
             continue;
 
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        proj.origin = PredProj_Pos(proj);
+        CPhys_Sync(proj, max(time, self.phys_time));
         float d = vlen(proj.origin - self.origin);
-        if (d < best) {
+        if (!best || d < best) {
             best = d;
             match = proj;
         }
@@ -982,13 +1069,18 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
         self.trail_started = match.trail_started;
 
+        if (self.fpp_index == FPP_GRENADE)
+            self.angles = match.angles;
+
         if (CVARF(wpp_debug) & 1) {
-            string s = sprintf(" p_diff = %0.3f, t_e=%0.3f",
+            string s = sprintf(" p_diff = %0.1f, t_e=%0.3f t=%0.3f d_t=%0.3f",
                     vlen(match.origin - self.origin),
-                    vlen(match.origin - self.origin) / vlen(self.velocity));
-            s = strcat(s, sprintf(" [c=%0.3f/%0.3f (s_t=%0.3f) s=%0.3f/%0.3f]\n",
-                    vlen(match.origin - pmove_org),time, match.s_time,
-                    vlen(self.origin - pmove_org),self.s_time));
+                    vlen(match.origin - self.origin) / vlen(self.velocity),
+                    time, time - self.phys_time);
+            s = strcat(s, sprintf(" [c=%d/%0.3f s=%d/%0.3f,%0.3f] alms=%d\n",
+                    vlen(match.origin - pmove_org), match.phys_time,
+                    vlen(self.origin - pmove_org), self.s_time, self.phys_time,
+                    self.antilag_ms));
             print(s);
         }
 
@@ -1003,11 +1095,14 @@ float PredProjectile_MatchProjectile() {
 void InitProjectileEnt() {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
+    self.s_time = self.phys_time;
+    self.angles = vectoangles(self.velocity);
+    self.owner = edict_num(self.owner_entnum);
 
     FPP_Init(self.fpp_index, self);
+    FPP_ApplyGrenadeProperties(self);
 
-    self.angles = vectoangles(self.velocity);
-    self.origin = self.s_origin + (time - self.s_time) * self.velocity;
+    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
@@ -1026,6 +1121,10 @@ void InitProjectileEnt() {
         // s_origin here as that's what we know antilag_ms to be relative to.
         self.oldorigin = self.s_origin - self.antilag_ms/ 1000.0 * self.velocity;
     }
+}
+
+void WP_SyncPhysProjectile() {
+    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 }
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
@@ -1091,7 +1190,6 @@ float WP_ClientThink() {
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
         pstate_pred.buttons_down = (~old_input_buttons) & input_buttons;
 
-        makevectors(input_angles);
         if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;

@@ -103,7 +103,7 @@ void () ScatterCaltrops = {
     while (num > 0) {
         e = spawn();
         e.classname = "grenade";
-        e.grenadename = "caltrop";
+        e.gren_type = GREN_CALTROP;
         e.weapon = 10;
         e.owner = self.owner;
         e.team_no = self.owner.team_no;

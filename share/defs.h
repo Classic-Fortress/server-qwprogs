@@ -242,8 +242,10 @@
 
 // TeamFortress State Flags
 enumflags {
-    TFSTATE_GRENPRIMED,    // Whether the player has a primed grenade
     TFSTATE_RELOADING,     // Whether the player is reloading
+    TFSTATE_GREN1_PRIMED,  // Whether the player has a primed gren 1
+    TFSTATE_GREN2_PRIMED,  // Whether the player has a primed gren 2
+    TFSTATE_GRENTHROWING,  // is throwing a grenade
     TFSTATE_AIMING,        // is using the laser sight or spinning
     TFSTATE_CANT_MOVE,
     TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
@@ -261,7 +263,6 @@ enumflags {
     TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
     TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
-    TFSTATE_GRENTHROWING,  // is throwing a grenade
     TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die
@@ -271,11 +272,15 @@ enumflags {
     TFSTATE_RANDOMPC,
 };
 
+
+#define TFSTATE_GREN_MASK_PRIMED (TFSTATE_GREN1_PRIMED|TFSTATE_GREN2_PRIMED)
+#define TFSTATE_GREN_MASK_ALL (TFSTATE_GREN_MASK_PRIMED|TFSTATE_GRENTHROWING)
+
 #define TFSTATE_AC_MASK (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING|TFSTATE_AC_SPINDOWN)
 #define TFSTATE_AC_FIRING (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING)
 
 enum {
-    PRNG_AXE,
+    PRNG_WEAP,
     PRNG_HWGUY,
     PRNG_NUM_STATES,
 };

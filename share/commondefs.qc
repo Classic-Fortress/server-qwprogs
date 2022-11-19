@@ -1,4 +1,6 @@
 var struct {
+    float qc_physics;
+    float static_newmis_ms;
     float dynamic_newmis_ms;
     float max_rewind_ms;
     float max_rewind_slow_projectile_ms;
@@ -12,6 +14,7 @@ var struct {
     float pp_global_disable;
     float wpp_global_enable;
     float wpp_global_disable;
+    float gren_beta_disable;
 } fo_config;
 
 #define MAX_FLAGINFO_LINES  10

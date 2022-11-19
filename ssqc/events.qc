@@ -186,8 +186,8 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 			if (damageKind == "damageTeam")
 				return;
 		}
-		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
-			inflictorId = inflictor.grenadename;
+		else if (inflictorId == "grenade")
+			inflictorId = FO_GrenDesc(inflictor.gren_type)->logname;
 	}
 
 
@@ -285,8 +285,8 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 			attackername = "world";
 		else if (inflictorId == "building_sentrygun")
 			attackername = getEntityNameOrLogin(attacker.real_owner);
-		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
-			inflictorId = inflictor.grenadename;
+		else if (inflictorId == "grenade")
+			inflictorId = FO_GrenDesc(inflictor.gren_type)->logname;
 	}
 
 	local string event;

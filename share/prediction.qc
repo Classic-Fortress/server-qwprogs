@@ -3,30 +3,31 @@
 #define ENT_PROJECTILE 102
 
 const float SERVER_FPS = 77;
-const float SERVER_FRAME_MS = 1/SERVER_FPS * 1000.0;
+const float SERVER_FRAME_DT = 1/SERVER_FPS;
+const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
 .float antilag_ms;
 #ifdef CSQC
-.vector s_origin;
 .float s_time;
 #endif
 
-string wp_version = "v0.2";
+string wp_version = "v0.4-phys";
 
 enumflags {
     FOWP_CTIME,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
+    FOWP_LASTPRIME,
     FOWP_CLIP,
     FOWP_THINK,
-    FOWP_TFSTATE,
     FOWP_WF,
     FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
-    FOWP_RNG,
+    FOWP_RNG0,
+    FOWP_RNG1,
     FOWP_PREDICT_FLAGS,
 };
 
@@ -34,6 +35,8 @@ enumflags {
     FOPP_POS,
     FOPP_INIT,
     FOPP_AUX,
+    FOPP_ANGLES,
+    FOPP_MOVETYPE,
 };
 
 #define FOWP_ALL 0xFFFF
@@ -50,6 +53,7 @@ struct predict_tf_state {
     Slot current_slot, queue_slot, last_slot;
 
     float tfstate;
+    float last_prime;
 
     float client_time;
     float client_ping;
@@ -62,7 +66,6 @@ struct predict_tf_state {
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
-
 
     // Used for prediction, not actually communicated.  Reset each frame.
     float ammo_used[AMMO_NUM_TYPES];
@@ -126,6 +129,7 @@ enum {
 
 struct fo_projectile {
     int id;
+    int movetype;
     float speed;
     string model;
     string trail;
@@ -138,17 +142,27 @@ struct fo_projectile {
 };
 
 fo_projectile fpp_types[] = {
-    { FPP_ROCKET,      PC_SOLDIER_ROCKET_SPEED, "missile.mdl", "", SND_RL, TRUE },
-    { FPP_GRENADE,            600, "grenade.mdl", "t_grenade", SND_GREN },
-    { FPP_INCENDIARY,         800, "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
-    { FPP_NAIL,              1500, "spike.mdl", "tr_spike", SND_NAIL },
-    { FPP_SUPER_NAIL,        1500, "s_spike.mdl", "tr_spike", SND_SNAIL },
-    { FPP_FLAMETHROWER,       600, "s_explod.spr", "explodesprite", SND_FLAMETHROWER },
-    { FPP_TRANQ,       PC_SPY_TRANQSPEED, "spike.mdl", "tr_spike", SND_TRANQ },
-    { FPP_RAILGUN,     PC_ENGINEER_RAILSPEED, "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
-    { FPP_ASSAULT_CANNON,    3000, "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
+    { FPP_ROCKET,       MOVETYPE_FLYMISSILE, PC_SOLDIER_ROCKET_SPEED,
+        "missile.mdl", "", SND_RL, TRUE },
+    { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
+        "grenade2.mdl", "t_grenade", SND_GREN, TRUE},
+    { FPP_INCENDIARY,   MOVETYPE_FLYMISSILE, 800,
+        "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
+    { FPP_NAIL,         MOVETYPE_FLYMISSILE, 1500,
+        "spike.mdl", "tr_spike", SND_NAIL },
+    { FPP_SUPER_NAIL,   MOVETYPE_FLYMISSILE, 1500,
+        "s_spike.mdl", "tr_spike", SND_SNAIL },
+    { FPP_FLAMETHROWER, MOVETYPE_FLYMISSILE, 600,
+        "s_explod.spr", "explodesprite", SND_FLAMETHROWER },
+    { FPP_TRANQ,        MOVETYPE_FLYMISSILE,  PC_SPY_TRANQSPEED,
+        "spike.mdl", "tr_spike", SND_TRANQ },
+    { FPP_RAILGUN,      MOVETYPE_FLYMISSILE, PC_ENGINEER_RAILSPEED,
+        "e_spike1.mdl", "te_railtrail", SND_RAILGUN },
+    { FPP_ASSAULT_CANNON, MOVETYPE_FLYMISSILE, 3000,
+        "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
 };
 
+// `wpp_aux` disambiguation for FPP_GRENADE projectiles.
 void InitFppProjectiles() {
     float i;
     static int once;
@@ -190,12 +204,11 @@ float max_rewind_credit_ms(int fpp_type) {
 // NOTE: DO NOT USE NEWMIS FOR FO PROJECTILES.  THE NEWMIS CORRECTION IS NOW
 // MADE EXPLICITLY RATHER THAN IMPLICITLY.  [WE AUTOMATICALLY STRIP NEWMIS
 // FROM PROJECTILES PASSED TO US.]
-static float NEWMIS_MS = 50;
 float static_newmis_ms(int fpp_type) {
     if (fpp_type == FPP_FLAMETHROWER || fpp_type == FPP_ASSAULT_CANNON)
         return 0;
 
-    return NEWMIS_MS - fo_config.dynamic_newmis_ms;
+    return fo_config.static_newmis_ms - fo_config.dynamic_newmis_ms;
 }
 
 inline float dynamic_newmis_ms() {
@@ -203,7 +216,7 @@ inline float dynamic_newmis_ms() {
 }
 
 inline float fixed_newmis_ms(int fpp_type) {
-    return NEWMIS_MS;
+    return fo_config.static_newmis_ms;
 }
 .float wpp_aux;
 
@@ -259,6 +272,10 @@ float shared_prng(int type) {
     return (*prng_state(type) = lfsr_prng_raw(*prng_state(type))) / 65535.0;
 }
 
+float shared_crandom(int type) {
+    return 2 * (shared_prng(type) - 0.5);
+}
+
 #ifdef SSQC
 #define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
@@ -290,12 +307,14 @@ void WeaponPred_Update(entity player) {
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M1(FOWP_TFSTATE, tfstate);
+    M1(FOWP_LASTPRIME, last_prime);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
-    M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3])
-    M1(FOWP_RELOAD, reload_finished)
-    M2(FOWP_RNG, prng_base[0], prng_base[1])
+    M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
+    M1(FOWP_RELOAD, reload_finished);
+    M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
+    M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
 
     player.predict_entity.SendFlags = mask;
 }
@@ -313,6 +332,14 @@ void sprint_pred(entity client, float msglevel, string s) {
     if (infokeyf(client, "fo_wpp_status") & CSQC_WEAP_PRED)
         return;  // Message generated client-side.
     sprint(client, msglevel, s);
+}
+
+// Networked (non-csqc) entities don't appear to exist within the client-side
+// CSQC world for our physics simulation.  Until we either (a) migrate them
+// there or (b) find a way to propagate them there, we cheat by sending an
+// update to the client when such a collision occurs.
+void Predict_UpdateHack(entity e) {
+    e.SendFlags |= FOPP_POS | FOPP_ANGLES;
 }
 #endif
 
@@ -339,18 +366,21 @@ float WP_SendConfig(entity to_player, float sendflags) {
 #define COMM(_type, _field) fo_config.##_field = Read##_type()
 void EntUpdate_Config() {
 #endif
+    COMM(Byte, qc_physics);
+    COMM(Float, static_newmis_ms);
     COMM(Float, dynamic_newmis_ms);
-    COMM(Float, max_rewind_ms);
-    COMM(Float, max_rewind_slow_projectile_ms);
-    COMM(Float, max_rewind_fast_projectile_ms);
-    COMM(Float, rewind_fast_projectile_thresh);
-    COMM(Float, wp_default_min_ping_ms);
-    COMM(Float, wp_global_enable);
-    COMM(Float, wp_global_disable);
-    COMM(Float, pp_global_enable);
-    COMM(Float, pp_global_disable);
-    COMM(Float, wpp_global_enable);
-    COMM(Float, wpp_global_disable);
+    COMM(Byte, max_rewind_ms);
+    COMM(Byte, max_rewind_slow_projectile_ms);
+    COMM(Byte, max_rewind_fast_projectile_ms);
+    COMM(Byte, rewind_fast_projectile_thresh);
+    COMM(Byte, wp_default_min_ping_ms);
+    COMM(Byte, wp_global_enable);
+    COMM(Byte, wp_global_disable);
+    COMM(Byte, pp_global_enable);
+    COMM(Byte, pp_global_disable);
+    COMM(Byte, wpp_global_enable);
+    COMM(Byte, wpp_global_disable);
+    COMM(Byte, gren_beta_disable);
 
 #ifdef SSQC
     return TRUE;
@@ -396,6 +426,10 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Float, tfstate);
     }
 
+    if (sendflags & FOWP_LASTPRIME) {
+        COMM(Float, last_prime);
+    }
+
     if (sendflags & FOWP_THINK) {
         COMM(Float, client_nextthink);
         COMM(Float, client_thinkindex);
@@ -419,10 +453,10 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_RELOAD)
         COMM(Float, reload_finished);
 
-    if (sendflags & FOWP_RNG) {
-        COMM(Float, prng_base[0]);
-        COMM(Float, prng_base[1]);
-    }
+    if (sendflags & FOWP_RNG0)
+        COMM(Short, prng_base[0]);
+    if (sendflags & FOWP_RNG1)
+        COMM(Short, prng_base[1]);
 
 #ifdef SSQC
     return TRUE;
@@ -435,7 +469,6 @@ void EntUpdate_WeaponPred(float isnew) {
 }
 #undef COMM
 
-
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
@@ -444,6 +477,7 @@ float PP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
     WriteByte(MSG_ENTITY, sendflags);
 #else
+void WP_SyncPhysProjectile();
 
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
@@ -452,6 +486,11 @@ float PP_SendEntity(entity to_player, float sendflags) {
 void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
+    if (sendflags & FOPP_INIT) {
+        COMM(Byte, fpp_index);
+        COMM(Byte, antilag_ms);
+    }
+
     if (sendflags & FOPP_POS) {
         COMMD(Coord, s_origin[0], origin[0]);
         COMMD(Coord, s_origin[1], origin[1]);
@@ -461,13 +500,18 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMMO(Float, self.s_time, time);
+        COMM(Float, phys_time);
+        COMM(Float, phys_carry);
     }
 
-    if (sendflags & FOPP_INIT) {
-        COMM(Byte, fpp_index);
-        COMM(Byte, antilag_ms);
+    if (sendflags & FOPP_ANGLES) {
+        COMM(Coord, angles[0]);
+        COMM(Coord, angles[1]);
+        COMM(Coord, angles[2]);
     }
+
+    if (sendflags & FOPP_MOVETYPE)
+        COMM(Byte, movetype);
 
     if (sendflags & FOPP_AUX) {
         COMM(Short, wpp_aux);
@@ -480,6 +524,8 @@ void EntUpdate_Projectile(float isnew) {
     self.owner_entnum = readentitynum();
     if (isnew)
         InitProjectileEnt();
+    else
+        WP_SyncPhysProjectile();
 #endif
 }
 #undef COMMD
@@ -487,7 +533,9 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 void WeapPred_InitDefaultConfig() {
-    fo_config.dynamic_newmis_ms = 25;
+    fo_config.qc_physics = 0;
+    fo_config.static_newmis_ms = 50;
+    fo_config.dynamic_newmis_ms = 0;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
@@ -516,6 +564,8 @@ static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
     // Target is also the long form localinfo name.
+    CONFIG_UPDATE("qcp", qc_physics);
+    CONFIG_UPDATE("snm", static_newmis_ms);
     CONFIG_UPDATE("dnm", dynamic_newmis_ms);
     CONFIG_UPDATE("mrt", max_rewind_ms);
     CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
@@ -528,8 +578,9 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("ppgd", pp_global_disable);
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
+    CONFIG_UPDATE("gbd", gren_beta_disable);
 
-    CLAMP_UPDATE(dynamic_newmis_ms, 0, NEWMIS_MS);
+    CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
@@ -578,6 +629,8 @@ void WeaponPred_InitPlayer(entity player) {
             "FortressOne: Weapon Prediction ", wp_version, "\n");
     sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
             fo_projectiles ? "enabled\n" : "disabled\n");
+    sprint(player, PRINT_HIGH, "FortressOne: QC Physics ",
+            fo_config.qc_physics ? "enabled\n" : "disabled\n");
 
     entity pe = spawn();
     pe.owner = player;
@@ -633,6 +686,31 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
 
+void FO_Phys() {
+    float delta = time - self.phys_time;
+    if (delta > 0) {
+        Phys_Advance(self, delta);
+        self.phys_time = time;
+    }
+
+    float held_time, thinktime;
+    // Once we lift physics, think execution comes with it.
+    do {
+        thinktime = self.nextthink;
+        if (thinktime <= 0 || thinktime > time)
+            return;
+
+        held_time = time;
+        self.nextthink = 0;
+        time = thinktime;
+        self.think();
+        time = held_time;
+
+        if (self.is_removed || self.nextthink < thinktime /* no loop on rev */)
+            return;
+    } while (1);
+}
+
 entity FOProj_Create(int fpp_type) {
     entity prj = spawn();
 
@@ -656,12 +734,32 @@ void FOProj_Finalize(entity mis) {
         PRINT_ONCE("Error: fpp=%d used with newmis\n", (float)fpp_type);
         newmis = __NULL__;
     }
-
     PredProj_Sound(fpp_type);
+    float csqc_networking = fo_projectiles;
+
+    if (fpp_type == FPP_GRENADE) {
+        FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
+
+        setmodel(mis, gdesc->model);
+        mis.avelocity = gdesc->avelocity;
+        mis.skin = gdesc->skin;
+        mis.wpp_aux = gdesc->id;
+
+        // If we don't have physics synchronized between client and server, use
+        // engine-side for both.
+        csqc_networking = (csqc_networking && fo_config.qc_physics);
+    }
+
+    // We always need to init some of the state here (e.g. phys_time) as we
+    // always use the physics code client-side.
+    mis.phys_time = time;
+    if (fo_config.qc_physics)
+        mis.customphysics = FO_Phys;
+
     WeaponPred_ProjectProjectile(mis.fpp_index, mis);
 
     // Below is conditional on using custom SendEntity.
-    if (fo_projectiles) {
+    if (csqc_networking) {
         mis.SendEntity = PP_SendEntity;
         mis.SendFlags = FOPP_POS | FOPP_INIT;
         if (mis.wpp_aux)
@@ -684,6 +782,10 @@ struct ProjectResult {
     float dynamic_ms;
 };
 
+#ifdef CSQC
+DEFCVAR_FLOAT(wpp_phys_nudge, 2/3 * SERVER_FRAME_MS);
+#endif
+
 ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
     float max_ping_credit = max_rewind_credit_ms(fpp_type);
     float static_credit;
@@ -699,7 +801,7 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
 #ifdef CSQC
     // Account for the fact that the server usually has a physics frame that's
     // going to be credited to the new projectile.
-    frame_nudge = 1.5 * SERVER_FRAME_MS;
+    frame_nudge = fo_config.qc_physics ? CVARF(wpp_phys_nudge) : 1.5 * SERVER_FRAME_MS;
 #endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
