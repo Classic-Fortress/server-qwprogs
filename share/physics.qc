@@ -168,13 +168,22 @@ float Phys_Advance(entity e, float delta) {
                 dt = Phys_Adv_Linear(e, delta);
                 delta = 0;
                 break;
+
             case MOVETYPE_BOUNCE:
                 dt = Phys_Adv_Bounce(e, phys_tic);
                 delta -= phys_tic;
                 break;
-            default:
-                errorf("unsupported movetype %d\n", e.movetype);
 
+            case MOVETYPE_NONE:
+                dt = delta;
+                delta = 0;
+                break;
+
+            default:
+                printf("ERROR: %s unsupported movetype %d\n", e.model, e.movetype);
+                dt = delta;
+                delta = 0;
+                break;
         }
 
         total += dt;
