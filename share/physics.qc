@@ -123,7 +123,8 @@ float Phys_Adv_Bounce(entity e, float dt) {
     e.angles += move_time * e.avelocity;
 
     float bounce_stop = 60 / 800 * g;
-    e.velocity = Phys_ClipVel(e.velocity, trace_plane_normal, 1.5);
+    float debounce = !IsClownMode(CLOWN_RUBBERGREN) ? 1.5 : 2.5;
+    e.velocity = Phys_ClipVel(e.velocity, trace_plane_normal, debounce);
 
     if (PHYS_DEBUG)
         printf("%s v=%0.3f p=%v\n", qc_prefix(), e.velocity_z, e.origin);
@@ -156,7 +157,8 @@ float Phys_Advance(entity e, float delta) {
         return 0;
 
     if (phys_tic * vlen(e.velocity) > 32)
-        error("phys_tic too big, needs adaptive scaling\n");
+        if (!fo_config.clown_settings)
+            error("phys_tic too big, needs adaptive scaling\n");
 
     float total = 0, dt = 0;
     delta += e.phys_carry;
@@ -164,9 +166,14 @@ float Phys_Advance(entity e, float delta) {
         switch (e.movetype) {
             case MOVETYPE_FLY:
             case MOVETYPE_FLYMISSILE:
+                float step = delta;
+                if (IsClownMode(CLOWN_PROJ_GRAVITY)) {
+                    step = phys_tic;
+                    e.velocity_z += -fo_config.clown_grav * step;
+                }
                 // Linear projectiles we can always simulate in a single step.
-                dt = Phys_Adv_Linear(e, delta);
-                delta = 0;
+                dt = Phys_Adv_Linear(e, step);
+                delta -= step;
                 break;
 
             case MOVETYPE_BOUNCE:

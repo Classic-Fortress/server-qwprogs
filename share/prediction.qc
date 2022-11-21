@@ -395,6 +395,8 @@ void EntUpdate_Config() {
     COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
     COMM(Byte, no_forward_hg);
+    COMM(Byte, clown_settings);
+    COMM(Float, clown_grav);
 
 #ifdef SSQC
     return TRUE;
@@ -546,6 +548,7 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMMO
 #undef COMM
 
+
 void WeapPred_InitDefaultConfig() {
     fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
@@ -556,6 +559,8 @@ void WeapPred_InitDefaultConfig() {
     fo_config.rewind_fast_projectile_thresh = 1500;
     fo_config.wp_default_min_ping_ms = 40;
     fo_config.no_forward_hg = 1;
+    fo_config.clown_settings = 0;
+    fo_config.clown_grav = 400;
 }
 
 #ifdef SSQC
@@ -595,6 +600,8 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
     CONFIG_UPDATE("nfhg", no_forward_hg);
+    CONFIG_UPDATE("clown", clown_settings);
+    CONFIG_UPDATE("clown_grav", clown_grav);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);

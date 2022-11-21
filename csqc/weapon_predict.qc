@@ -171,6 +171,16 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
+
+    static string clown_desc[] = { "Rubber grenades", "Proj gravity" };
+    if (fo_config.clown_settings) {
+        printf("Clown mode:\n");
+        printf(" .clown gravity=%d\n", fo_config.clown_grav);
+        for (float i = 0; i < clown_desc.length; i++)
+            if (fo_config.clown_settings & (1 << i))
+                printf(" .%s\n", clown_desc[i]);
+
+    }
 }
 #undef PRINT_CONFIG
 
