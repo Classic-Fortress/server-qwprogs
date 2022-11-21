@@ -837,9 +837,8 @@ void (entity timer) FO_SpawnThrownGrenade = {
         UpdateClientGrenadeThrown(user);
     }
 
-    FO_Sound(user, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
     KickPlayer(-1, user);
-    entity proj = FOProj_Create(FPP_GRENADE);
+    entity proj = FOProj_Create(FPP_HANDGRENADE);
     proj.owner = user;
     proj.movetype = MOVETYPE_BOUNCE;
     proj.solid = SOLID_BBOX;

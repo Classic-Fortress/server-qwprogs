@@ -252,16 +252,13 @@ void Pred_Sound(SoundIndex snd, float vol = 1) {
     if (snd == SND_NONE || !IsEffectFrame() || pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
-    ASSERTD_GE(snd, SND_FIRST);
-    snd -= SND_FIRST;
     last_pred_sound = time;
     setorigin(pred_sound_entity, pmove_org);
-    /* sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, vol, ATTN_NORM); */
-    sound(pred_sound_entity, CHAN_WEAPON, snd_types[snd].sound, vol, ATTN_NORM);
+    sound(pred_sound_entity, CHAN_WEAPON, Snd_Get(snd)->sound, vol, ATTN_NORM);
 }
 
 void PredProj_Sound(int proj_type, float vol = 1) {
-    Pred_Sound(fpp_types[proj_type].snd, vol);
+    Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
 inline FO_WeapInfo* WP_CurrentWeapon() {
@@ -737,7 +734,9 @@ DEFCVAR_FLOAT(r_grenadetrail, 1);
 int FPP_FindTrail(entity e)
 {
     float is_rocket = e.fpp_index == FPP_ROCKET;
-    float is_grenade = e.fpp_index == FPP_GRENADE;
+    float is_grenade = e.fpp_index == FPP_GRENADE;  // Do not use IsGrenade
+                                                    // here. This only applies
+                                                    // to FPP_GRENADE.
 
     if (is_rocket || is_grenade) {
         float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
@@ -849,7 +848,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   setsize(proj, [0,0,0], [0,0,0]);
   proj.s_origin = pmove_org + offset;
 
-  if (fpp_type != FPP_GRENADE) {
+  if (!FPP_IsGrenade(fpp_type)) {
       proj.velocity = v_forward * fpp_types[fpp_type].speed;
       proj.s_origin[2] += 16;
   } else {
@@ -876,7 +875,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 }
 
 static void FPP_ApplyGrenadeProperties(entity proj) {
-    if (proj.fpp_index != FPP_GRENADE)
+    if (!FPP_IsGrenade(proj.fpp_index))
         return;
 
     if (proj.wpp_aux < GREN_FIRST) {
@@ -949,7 +948,7 @@ static void W_ThrowGren(float is_throw) {
         return;  // Not time to throw yet, THROWING set if necessary.
 
     if (IsEffectFrame()) {
-        entity gren = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+        entity gren = PP_CreateProjectile(FPP_HANDGRENADE, '0 0 0');
         int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
         gren.wpp_aux = FO_ClassGren(pstate_pred.playerclass, index)->id;
         FPP_ApplyGrenadeProperties(gren);
@@ -1094,7 +1093,7 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
         self.trail_started = match.trail_started;
 
-        if (self.fpp_index == FPP_GRENADE)
+        if (FPP_IsGrenade(self.fpp_index))
             self.angles = match.angles;
 
         if (CVARF(wpp_debug) & 1) {

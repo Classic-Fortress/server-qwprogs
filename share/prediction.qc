@@ -82,6 +82,7 @@ enum SoundIndex:float {
     SND_SSG,
     SND_RL,
     SND_GREN,
+    SND_THROWGREN,
     SND_NAIL,
     SND_SNAIL,
     SND_FLAMETHROWER,
@@ -104,6 +105,7 @@ fo_predsnd snd_types[] = {
     { SND_SSG, "shotgn2.wav" },
     { SND_RL, "sgun1.wav" },
     { SND_GREN, "grenade.wav" },
+    { SND_THROWGREN, "ax1.wav" },
     { SND_NAIL, "rocket1i.wav" },
     { SND_SNAIL, "spike2.wav" },
     { SND_FLAMETHROWER, "flmfire2.wav" },
@@ -117,7 +119,8 @@ fo_predsnd snd_types[] = {
 
 enum {
     FPP_ROCKET,
-    FPP_GRENADE,
+    FPP_GRENADE,        // Grenade launcher
+    FPP_HANDGRENADE,    // TF Grenade
     FPP_INCENDIARY,
     FPP_NAIL,
     FPP_SUPER_NAIL,
@@ -146,6 +149,8 @@ fo_projectile fpp_types[] = {
         "missile.mdl", "", SND_RL, TRUE },
     { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
         "grenade2.mdl", "t_grenade", SND_GREN, TRUE},
+    { FPP_HANDGRENADE,  MOVETYPE_BOUNCE,     600,
+        "hgren2.mdl", "t_grenade", SND_THROWGREN},
     { FPP_INCENDIARY,   MOVETYPE_FLYMISSILE, 800,
         "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
     { FPP_NAIL,         MOVETYPE_FLYMISSILE, 1500,
@@ -161,6 +166,14 @@ fo_projectile fpp_types[] = {
     { FPP_ASSAULT_CANNON, MOVETYPE_FLYMISSILE, 3000,
         "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
 };
+
+inline fo_projectile* FPP_Get(int fpp_type) { return &fpp_types[fpp_type]; }
+inline fo_predsnd* Snd_Get(int snd_type) { return &snd_types[snd_type - SND_FIRST]; }
+inline fo_predsnd* FPP_Sound(int fpp_type) { return Snd_Get(FPP_Get(fpp_type)->snd); }
+
+inline float FPP_IsGrenade(int fpp_type) {
+    return fpp_type == FPP_GRENADE || fpp_type == FPP_HANDGRENADE;
+}
 
 // `wpp_aux` disambiguation for FPP_GRENADE projectiles.
 void InitFppProjectiles() {
@@ -737,7 +750,7 @@ void FOProj_Finalize(entity mis) {
     PredProj_Sound(fpp_type);
     float csqc_networking = fo_projectiles;
 
-    if (fpp_type == FPP_GRENADE) {
+    if (FPP_IsGrenade(fpp_type)) {
         FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
 
         setmodel(mis, gdesc->model);
@@ -764,6 +777,11 @@ void FOProj_Finalize(entity mis) {
         mis.SendFlags = FOPP_POS | FOPP_INIT;
         if (mis.wpp_aux)
             mis.SendFlags |= FOPP_AUX;
+    } else if (fpp_type == FPP_HANDGRENADE) {
+        entity target = self;
+        if (target.classname != "player")
+            target = target.owner;  // Handle call from timer on latched throw.
+        FO_Sound(target, CHAN_WEAPON, Snd_Get(SND_THROWGREN)->sound, 1, ATTN_NORM);
     }
 }
 #endif
