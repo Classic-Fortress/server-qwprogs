@@ -7,6 +7,9 @@ var struct {
     float max_rewind_fast_projectile_ms;
     float rewind_fast_projectile_thresh;
     float wp_default_min_ping_ms;
+    float no_forward_hg;
+    float clown_settings;
+    float clown_grav;
 
     float wp_global_enable;
     float wp_global_disable;
@@ -16,6 +19,15 @@ var struct {
     float wpp_global_disable;
     float gren_beta_disable;
 } fo_config;
+
+enumflags {
+    CLOWN_RUBBERGREN,
+    CLOWN_PROJ_GRAVITY,
+};
+
+inline float IsClownMode(int setting) {
+    return fo_config.clown_settings & setting;
+}
 
 #define MAX_FLAGINFO_LINES  10
 #define ENG_BUILDING_DISMANTLE_DISTANCE 100

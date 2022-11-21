@@ -82,6 +82,7 @@ enum SoundIndex:float {
     SND_SSG,
     SND_RL,
     SND_GREN,
+    SND_THROWGREN,
     SND_NAIL,
     SND_SNAIL,
     SND_FLAMETHROWER,
@@ -104,6 +105,7 @@ fo_predsnd snd_types[] = {
     { SND_SSG, "shotgn2.wav" },
     { SND_RL, "sgun1.wav" },
     { SND_GREN, "grenade.wav" },
+    { SND_THROWGREN, "ax1.wav" },
     { SND_NAIL, "rocket1i.wav" },
     { SND_SNAIL, "spike2.wav" },
     { SND_FLAMETHROWER, "flmfire2.wav" },
@@ -117,7 +119,8 @@ fo_predsnd snd_types[] = {
 
 enum {
     FPP_ROCKET,
-    FPP_GRENADE,
+    FPP_GRENADE,        // Grenade launcher
+    FPP_HANDGRENADE,    // TF Grenade
     FPP_INCENDIARY,
     FPP_NAIL,
     FPP_SUPER_NAIL,
@@ -146,6 +149,8 @@ fo_projectile fpp_types[] = {
         "missile.mdl", "", SND_RL, TRUE },
     { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
         "grenade2.mdl", "t_grenade", SND_GREN, TRUE},
+    { FPP_HANDGRENADE,  MOVETYPE_BOUNCE,     600,
+        "hgren2.mdl", "t_grenade", SND_THROWGREN},
     { FPP_INCENDIARY,   MOVETYPE_FLYMISSILE, 800,
         "lavaball.mdl", "t_lavaball", SND_RL, TRUE },
     { FPP_NAIL,         MOVETYPE_FLYMISSILE, 1500,
@@ -161,6 +166,14 @@ fo_projectile fpp_types[] = {
     { FPP_ASSAULT_CANNON, MOVETYPE_FLYMISSILE, 3000,
         "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
 };
+
+inline fo_projectile* FPP_Get(int fpp_type) { return &fpp_types[fpp_type]; }
+inline fo_predsnd* Snd_Get(int snd_type) { return &snd_types[snd_type - SND_FIRST]; }
+inline fo_predsnd* FPP_Sound(int fpp_type) { return Snd_Get(FPP_Get(fpp_type)->snd); }
+
+inline float FPP_IsGrenade(int fpp_type) {
+    return fpp_type == FPP_GRENADE || fpp_type == FPP_HANDGRENADE;
+}
 
 // `wpp_aux` disambiguation for FPP_GRENADE projectiles.
 void InitFppProjectiles() {
@@ -381,6 +394,9 @@ void EntUpdate_Config() {
     COMM(Byte, wpp_global_enable);
     COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
+    COMM(Byte, no_forward_hg);
+    COMM(Byte, clown_settings);
+    COMM(Float, clown_grav);
 
 #ifdef SSQC
     return TRUE;
@@ -532,8 +548,9 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMMO
 #undef COMM
 
+
 void WeapPred_InitDefaultConfig() {
-    fo_config.qc_physics = 0;
+    fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
     fo_config.max_rewind_ms = 250;
@@ -541,6 +558,9 @@ void WeapPred_InitDefaultConfig() {
     fo_config.max_rewind_fast_projectile_ms = 100;
     fo_config.rewind_fast_projectile_thresh = 1500;
     fo_config.wp_default_min_ping_ms = 40;
+    fo_config.no_forward_hg = 1;
+    fo_config.clown_settings = 0;
+    fo_config.clown_grav = 400;
 }
 
 #ifdef SSQC
@@ -579,6 +599,9 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
+    CONFIG_UPDATE("nfhg", no_forward_hg);
+    CONFIG_UPDATE("clown", clown_settings);
+    CONFIG_UPDATE("clown_grav", clown_grav);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
@@ -737,7 +760,7 @@ void FOProj_Finalize(entity mis) {
     PredProj_Sound(fpp_type);
     float csqc_networking = fo_projectiles;
 
-    if (fpp_type == FPP_GRENADE) {
+    if (FPP_IsGrenade(fpp_type)) {
         FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
 
         setmodel(mis, gdesc->model);
@@ -764,6 +787,11 @@ void FOProj_Finalize(entity mis) {
         mis.SendFlags = FOPP_POS | FOPP_INIT;
         if (mis.wpp_aux)
             mis.SendFlags |= FOPP_AUX;
+    } else if (fpp_type == FPP_HANDGRENADE) {
+        entity target = self;
+        if (target.classname != "player")
+            target = target.owner;  // Handle call from timer on latched throw.
+        FO_Sound(target, CHAN_WEAPON, Snd_Get(SND_THROWGREN)->sound, 1, ATTN_NORM);
     }
 }
 #endif
@@ -796,6 +824,9 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
         static_credit = static_newmis_ms(fpp_type);
         max_ping_credit += dynamic_newmis_ms();
     }
+
+    if (fpp_type == FPP_HANDGRENADE && fo_config.no_forward_hg)
+        max_ping_credit = 0;
 
     float frame_nudge = 0;
 #ifdef CSQC
