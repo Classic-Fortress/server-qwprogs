@@ -7,6 +7,7 @@ var struct {
     float max_rewind_fast_projectile_ms;
     float rewind_fast_projectile_thresh;
     float wp_default_min_ping_ms;
+    float no_forward_hg;
 
     float wp_global_enable;
     float wp_global_disable;

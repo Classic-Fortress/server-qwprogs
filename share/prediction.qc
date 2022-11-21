@@ -394,6 +394,7 @@ void EntUpdate_Config() {
     COMM(Byte, wpp_global_enable);
     COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
+    COMM(Byte, no_forward_hg);
 
 #ifdef SSQC
     return TRUE;
@@ -546,7 +547,7 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 void WeapPred_InitDefaultConfig() {
-    fo_config.qc_physics = 0;
+    fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
     fo_config.max_rewind_ms = 250;
@@ -554,6 +555,7 @@ void WeapPred_InitDefaultConfig() {
     fo_config.max_rewind_fast_projectile_ms = 100;
     fo_config.rewind_fast_projectile_thresh = 1500;
     fo_config.wp_default_min_ping_ms = 40;
+    fo_config.no_forward_hg = 1;
 }
 
 #ifdef SSQC
@@ -592,6 +594,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
+    CONFIG_UPDATE("nfhg", no_forward_hg);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
@@ -814,6 +817,9 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
         static_credit = static_newmis_ms(fpp_type);
         max_ping_credit += dynamic_newmis_ms();
     }
+
+    if (fpp_type == FPP_HANDGRENADE && fo_config.no_forward_hg)
+        max_ping_credit = 0;
 
     float frame_nudge = 0;
 #ifdef CSQC

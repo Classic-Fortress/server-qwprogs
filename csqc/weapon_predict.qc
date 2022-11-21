@@ -163,6 +163,7 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
     PRINT_CONFIG(wp_default_min_ping_ms);
+    PRINT_CONFIG(no_forward_hg);
     PRINT_CONFIG_ACTIVE(wp_global_enable);
     PRINT_CONFIG_ACTIVE(wp_global_disable);
     PRINT_CONFIG_ACTIVE(pp_global_enable);

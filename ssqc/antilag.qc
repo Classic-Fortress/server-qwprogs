@@ -1,33 +1,3 @@
-static float NoLanProject() {
-    if (self.client_ping <= 25)
-        return TRUE;
-    return FALSE;
-}
-
-void AL_ProjectProjectile (entity projectile) {
-    if (NoLanProject())
-        return;
-
-    float time_offset =
-        min(self.client_ping, fo_config.max_rewind_slow_projectile_ms) / 1000.0;
-
-    vector projected_origin = projectile.origin + (projectile.velocity * time_offset);
-    // Rewind projectile is preferable but unavailable. This would rewind and replay the projectile from origin
-    // to the projected origin. Since it isn't available, we will use a traceline, without MOVE_LAGGED
-    // because by tracing between old origin and projected origin we effectively have a single (last) frame
-    // rewind at the projected origin. The effect is high ping players are disadvantaged in close combat.
-    // This is preferable to unhappy low ping players.
-    //
-    // XXX This will updated to use rewind.
-    traceline(projectile.origin, projected_origin, 0, self);
-
-    if (trace_fraction < 1) {
-        projected_origin = trace_endpos;
-    }
-
-    setorigin(projectile, projected_origin);
-}
-
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
     float ping = projectile.owner.client_ping;
     ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
