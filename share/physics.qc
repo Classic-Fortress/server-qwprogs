@@ -6,6 +6,15 @@ static const float phys_tic = 0.005;
 .float phys_carry; // Carry from last partial tic
 .float phys_t;     // Total physics time accumulated
 
+enumflags {
+    PHYS_ENABLED,
+    PHYS_BOUNCE_DOWN_SLOPES,
+};
+
+static inline float PhysFlagEnabled(float flag) {
+    return fo_config.qc_physics & flag;
+}
+
 #ifdef SSQC
 void Predict_UpdateHack(entity e);
 
@@ -119,6 +128,9 @@ float Phys_Adv_Bounce(entity e, float dt) {
         return dt;
     }
 
+    if (trace_allsolid)
+        trace_fraction = 0;
+
     move_time *= min(1 - trace_fraction, 0);
     e.angles += move_time * e.avelocity;
 
@@ -129,8 +141,13 @@ float Phys_Adv_Bounce(entity e, float dt) {
     if (PHYS_DEBUG)
         printf("%s v=%0.3f p=%v\n", qc_prefix(), e.velocity_z, e.origin);
 
-    float bounce_speed = dot(trace_plane_normal, e.velocity);
-    if (trace_plane_normal.z > 0.7 && fabs(bounce_speed) < bounce_stop) {
+    float bounce_speed;
+    if (PhysFlagEnabled(PHYS_BOUNCE_DOWN_SLOPES))
+        bounce_speed = dot(trace_plane_normal, e.velocity);
+    else
+        bounce_speed = e.velocity_z;
+
+    if (trace_plane_normal.z > 0.7 && bounce_speed < bounce_stop) {
         e.flags |= FL_ONGROUND;
         e.groundentity = trace_ent;
         e.velocity = '0 0 0';
