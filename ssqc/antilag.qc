@@ -3,7 +3,7 @@ void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
     ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
     float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
 
-    float dt = Phys_Advance(projectile, offset_dt);
+    float dt = Phys_Init(projectile, time, offset_dt, PHYSF_CONSUME_ALL);
     projectile.antilag_ms = dt * 1000;
 }
 #define DEBUG_ANTILAG 0

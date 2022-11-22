@@ -2,13 +2,14 @@
 
 static const float phys_tic = 0.005;
 
-.float phys_time;  // Last physics time, 0 ==> s_time
-.float phys_carry; // Carry from last partial tic
-.float phys_t;     // Total physics time accumulated
+.float phys_time;  // Current physics time
 
 enumflags {
-    PHYS_ENABLED,
-    PHYS_BOUNCE_DOWN_SLOPES,
+    PHYSB_ENABLED,
+};
+
+enumflags {
+    PHYSF_CONSUME_ALL,
 };
 
 static inline float PhysFlagEnabled(float flag) {
@@ -18,7 +19,7 @@ static inline float PhysFlagEnabled(float flag) {
 #ifdef SSQC
 void Predict_UpdateHack(entity e);
 
-static void Phys_Impact(entity e) {
+static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (trace_ent.solid == SOLID_NOT)
         return;
 
@@ -30,46 +31,35 @@ static void Phys_Impact(entity e) {
         self = held_self;
     }
 
+#if PHYS_DEBUG
+    printf("SPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n",
+            time, e.phys_time + dt, e.phys_time + frametime);
+    printf("Imp: e=%p e.o=%p te=%p\n", e, e.owner, other);
+#endif
+
     if (trace_ent.solid != SOLID_BSP)
         Predict_UpdateHack(e);
 }
 #else
+DEFCVAR_FLOAT(fo_phys_debug, 0);
+
 .entity groundentity;
-.vector s_origin;
 .float is_removed;  // The server code implements this to track entity removal
                     // for debug checks.  But we can usefully piggy-back on it.
 
-static void Phys_Impact(entity e) {
+float get_phys_time(entity);
+
+static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (trace_ent.solid == SOLID_NOT)
         return;
 
     if (e.movetype == MOVETYPE_FLYMISSILE) {
         e.is_removed = TRUE;
     }
-}
 
-float Phys_Advance(entity e, float delta);
-
-void CPhys_Sync(entity e, float target_time) {
-    if (target_time > e.phys_time) {
-      Phys_Advance(e, target_time - e.phys_time);
-      e.phys_time = target_time;
-    }
-}
-
-void CPhys_Update(entity e) {
-    CPhys_Sync(e, time);
-}
-
-void CPhys_Init(entity e, float target_time, float delta) {
-    e.origin = e.s_origin;
-    if (delta > 0) {
-        Phys_Advance(e, delta);
-    } else {
-        setorigin(e, e.origin);
-    }
-    e.phys_carry = 0;
-    e.phys_time = target_time;
+    if (CVARF(fo_phys_debug) & 1)
+        printf("CPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n", time, e.phys_time + dt,
+                get_phys_time(e));
 }
 #endif
 
@@ -77,20 +67,20 @@ static inline float get_gravity() { return cvar("sv_gravity"); }
 
 #define dot(v1, v2) ((vector)v1 * (vector)v2)
 
-float Phys_Push(entity e, vector offset) {
-    float flags = 0;
+float Phys_Push(entity e, vector offset, float dt, float phys_flags) {
+    float trace_flags = 0;
 
     if (e.movetype == MOVETYPE_FLYMISSILE)
-        flags |= MOVE_MISSILE;
+        trace_flags |= MOVE_MISSILE;
 
     // Note: Networked entities don't currently intersect on CSQC instantiation
     // of this, we fudge this in Phys_Impact from the server side.
-    traceline(e.origin, e.origin + offset, flags, e);
+    traceline(e.origin, e.origin + offset, trace_flags, e);
     e.origin = trace_endpos;
 
     if (trace_fraction < 1) {
         setorigin(e, trace_endpos);
-        Phys_Impact(e);
+        Phys_Impact(e, trace_fraction * dt, phys_flags);
         return FALSE;
     }
 
@@ -109,7 +99,7 @@ vector Phys_ClipVel(vector orig, vector normal, float overbounce) {
     return result;
 }
 
-float Phys_Adv_Bounce(entity e, float dt) {
+float Phys_Adv_Bounce(entity e, float dt, float phys_flags) {
     float g = get_gravity();
 
     if (e.flags & FL_ONGROUND) {
@@ -122,7 +112,7 @@ float Phys_Adv_Bounce(entity e, float dt) {
     e.velocity_z -= 0.5 * dt * g;
 
     float move_time = dt, bounce;
-    if (Phys_Push(e, move_time * e.velocity)) {
+    if (Phys_Push(e, move_time * e.velocity, move_time, phys_flags)) {
         e.velocity_z -= 0.5 * dt * g;
         e.angles += dt * e.avelocity;
         return dt;
@@ -131,7 +121,7 @@ float Phys_Adv_Bounce(entity e, float dt) {
     if (trace_allsolid)
         trace_fraction = 0;
 
-    move_time *= min(1 - trace_fraction, 0);
+    move_time = (1 - trace_fraction) * dt;
     e.angles += move_time * e.avelocity;
 
     float bounce_stop = 60 / 800 * g;
@@ -142,7 +132,7 @@ float Phys_Adv_Bounce(entity e, float dt) {
         printf("%s v=%0.3f p=%v\n", qc_prefix(), e.velocity_z, e.origin);
 
     float bounce_speed;
-    if (PhysFlagEnabled(PHYS_BOUNCE_DOWN_SLOPES))
+    if (cvar("sv_gameplayfix_grenadebouncedownslopes"))
         bounce_speed = dot(trace_plane_normal, e.velocity);
     else
         bounce_speed = e.velocity_z;
@@ -159,8 +149,8 @@ float Phys_Adv_Bounce(entity e, float dt) {
     return dt - move_time;
 }
 
-float Phys_Adv_Linear(entity e, float dt) {
-    Phys_Push(e, dt * e.velocity);
+float Phys_Adv_Linear(entity e, float dt, float phys_flags) {
+    Phys_Push(e, dt * e.velocity, dt, phys_flags);
 
     if (trace_fraction < 1)
         dt *= trace_fraction;
@@ -169,54 +159,72 @@ float Phys_Adv_Linear(entity e, float dt) {
     return dt;
 }
 
-float Phys_Advance(entity e, float delta) {
-    if (delta < 0 || e.is_removed)
+float Phys_Advance(entity e, float target_time, float phys_flags) {
+    if (target_time < e.phys_time || e.is_removed) {
+        setorigin(e, e.origin);
         return 0;
+    }
 
     if (phys_tic * vlen(e.velocity) > 32)
         if (!fo_config.clown_settings)
             error("phys_tic too big, needs adaptive scaling\n");
 
-    float total = 0, dt = 0;
-    delta += e.phys_carry;
-    while (delta > phys_tic) {
+    static float limit_eps = 0.0005;
+    float limit = (phys_flags & PHYSF_CONSUME_ALL) ? limit_eps : phys_tic;
+    float total = 0, dt = 0, step = 0, delta;
+
+    while ((delta = target_time - e.phys_time) >= limit) {
         switch (e.movetype) {
             case MOVETYPE_FLY:
             case MOVETYPE_FLYMISSILE:
-                float step = delta;
+                // Linear projectiles we can always simulate in a single step.
+                if (limit > limit_eps)
+                    step = floor(delta / limit) * limit;
+                else
+                    step = delta;
+
+                // Unless there's.... gravity
                 if (IsClownMode(CLOWN_PROJ_GRAVITY)) {
-                    step = phys_tic;
+                    step = min(phys_tic, delta);
                     e.velocity_z += -fo_config.clown_grav * step;
                 }
-                // Linear projectiles we can always simulate in a single step.
-                dt = Phys_Adv_Linear(e, step);
-                delta -= step;
+
+                dt = Phys_Adv_Linear(e, step, phys_flags);
                 break;
 
             case MOVETYPE_BOUNCE:
-                dt = Phys_Adv_Bounce(e, phys_tic);
-                delta -= phys_tic;
+                step = min(phys_tic, delta);
+                dt = Phys_Adv_Bounce(e, step, phys_flags);
                 break;
 
             case MOVETYPE_NONE:
-                dt = delta;
-                delta = 0;
+                step = dt = delta;
                 break;
 
             default:
                 printf("ERROR: %s unsupported movetype %d\n", e.model, e.movetype);
-                dt = delta;
-                delta = 0;
+                step = dt = delta;
                 break;
         }
 
+        e.phys_time += step;
+        ASSERTF_LE(e.phys_time, target_time);
         total += dt;
     }
-    e.phys_t += total;
 
-    e.phys_carry = delta;
     setorigin(e, e.origin);
     return total;
+}
+
+float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
+    if (delta > 0) {
+        e.phys_time = target_time - delta;
+        return Phys_Advance(e, target_time, phys_flags);
+    } else {
+        e.phys_time = target_time;
+        setorigin(e, e.origin);
+        return 0;
+    }
 }
 
 #undef dot

@@ -10,6 +10,7 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 .float fpp_index;  // Projectile type
 .float antilag_ms;
 #ifdef CSQC
+.vector s_origin;
 .float s_time;
 #endif
 
@@ -362,10 +363,11 @@ float() ReadShort = #362;
 float() ReadCoord = #364;
 float() ReadAngle = #365;
 float() ReadFloat = #367;
+float() ReadEntity = #368;
 
 void InitWeapPredEnt(entity e);
 void WP_ServerUpdate();
-void InitProjectileEnt();
+void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
@@ -493,8 +495,6 @@ float PP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
     WriteByte(MSG_ENTITY, sendflags);
 #else
-void WP_SyncPhysProjectile();
-
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
@@ -505,19 +505,22 @@ void EntUpdate_Projectile(float isnew) {
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
         COMM(Byte, antilag_ms);
+        COMMD(Entity, owner_entnum, owner);
     }
 
     if (sendflags & FOPP_POS) {
-        COMMD(Coord, s_origin[0], origin[0]);
-        COMMD(Coord, s_origin[1], origin[1]);
-        COMMD(Coord, s_origin[2], origin[2]);
-
+        COMM(Coord, origin[0]);
+        COMM(Coord, origin[1]);
+        COMM(Coord, origin[2]);
         COMM(Coord, velocity[0]);
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
         COMM(Float, phys_time);
-        COMM(Float, phys_carry);
+#ifdef CSQC
+        self.s_origin = self.origin;
+        self.s_time = self.phys_time;
+#endif
     }
 
     if (sendflags & FOPP_ANGLES) {
@@ -534,14 +537,10 @@ void EntUpdate_Projectile(float isnew) {
     }
 
 #ifdef SSQC
-    WriteEntity(MSG_ENTITY, self.owner);
     return TRUE;
 #else
-    self.owner_entnum = readentitynum();
     if (isnew)
-        InitProjectileEnt();
-    else
-        WP_SyncPhysProjectile();
+        InitProjectileEnt(sendflags);
 #endif
 }
 #undef COMMD
@@ -710,11 +709,7 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
 
 void FO_Phys() {
-    float delta = time - self.phys_time;
-    if (delta > 0) {
-        Phys_Advance(self, delta);
-        self.phys_time = time;
-    }
+    Phys_Advance(self, time, 0);
 
     float held_time, thinktime;
     // Once we lift physics, think execution comes with it.

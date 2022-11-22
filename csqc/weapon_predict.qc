@@ -5,6 +5,9 @@ DEFCVAR_FLOAT(wpp_min_ping, -1);
 DEFCVAR_FLOAT(wpp_weap_predict, -1);
 DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
+DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
+DEFCVAR_FLOAT(wpp_phys_local_adv_ms, SERVER_FRAME_MS);
+
 float WP_MinPing() {
     if (CVARF(wpp_min_ping) == -1)
             return fo_config.wp_default_min_ping_ms;
@@ -705,7 +708,19 @@ trail_table_entry trail_table[] = {
     {{"TE_RAILTRAIL"}},
 };
 
-float nail_trail;
+static inline float phys_adv_dt() {
+    float adj_ping = max(pstate_pred.client_ping, 0);
+    return min(CVARF(wpp_phys_adv_ms), adj_ping) / 1000.0;
+}
+
+float get_phys_time(entity e) {
+    float ptime = time, adv_dt;
+    if (e.owner_entnum && e.owner_entnum != player_localentnum)
+        adv_dt = phys_adv_dt();
+    else
+        adv_dt = CVARF(wpp_phys_local_adv_ms) / 1000.0;
+    return ptime + adv_dt;
+}
 
 void FO_PP_Init() {
     // Entity we'll attach locally generated sound to.
@@ -781,7 +796,7 @@ DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
 .float trail_started;
 float PP_PredrawActive() {
-    CPhys_Update(self);
+    Phys_Advance(self, get_phys_time(self), 0);
 
     // we need to space out the particles incase we're running at very high fps
     if (time > self.p_time) {
@@ -825,7 +840,6 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 
   if (!PP_Enabled())
       return __NULL__;
-  makevectors(input_angles);
 
   entity proj = spawn();
   proj.owner = edict_num(player_localentnum);
@@ -857,11 +871,11 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.drawmask = MASK_PRED_PROJECTILE;
 
   setsize(proj, [0,0,0], [0,0,0]);
-  proj.s_origin = pmove_org + offset;
+  proj.origin = pmove_org + offset;
 
   if (!FPP_IsGrenade(fpp_type)) {
       proj.velocity = v_forward * fpp_types[fpp_type].speed;
-      proj.s_origin[2] += 16;
+      proj.origin[2] += 16;
   } else {
       if (!input_angles_x) {
           proj.velocity = v_forward * fpp_types[fpp_type].speed;
@@ -874,7 +888,8 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   }
   proj.angles = input_angles; proj.angles[0] *= -1;
 
-  CPhys_Init(proj, proj.starttime, static_dt);
+  proj.s_origin = proj.origin;
+  Phys_Init(proj, proj.starttime, static_dt, PHYSF_CONSUME_ALL);
   proj.oldorigin = proj.origin;
 
   proj.pred_next = predicted_projectiles;
@@ -1091,7 +1106,8 @@ float PredProjectile_MatchProjectile() {
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        CPhys_Sync(proj, max(time, self.phys_time));
+        Phys_Advance(proj, get_phys_time(proj), 0);
+
         float d = vlen(proj.origin - self.origin);
         if (!best || d < best) {
             best = d;
@@ -1108,13 +1124,12 @@ float PredProjectile_MatchProjectile() {
             self.angles = match.angles;
 
         if (CVARF(wpp_debug) & 1) {
-            string s = sprintf(" p_diff = %0.1f, t_e=%0.3f t=%0.3f d_t=%0.3f",
+            string s = sprintf(" p_diff: %0.1f [%0.3f] t=%0.3f p_t=c:%0.3f s:%0.3f [%0.3f]",
                     vlen(match.origin - self.origin),
                     vlen(match.origin - self.origin) / vlen(self.velocity),
-                    time, time - self.phys_time);
-            s = strcat(s, sprintf(" [c=%d/%0.3f s=%d/%0.3f,%0.3f] alms=%d\n",
-                    vlen(match.origin - pmove_org), match.phys_time,
-                    vlen(self.origin - pmove_org), self.s_time, self.phys_time,
+                    time, match.phys_time, self.phys_time, match.phys_time - self.phys_time);
+            s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
+                    vlen(match.origin - pmove_org), vlen(self.origin - pmove_org),
                     self.antilag_ms));
             print(s);
         }
@@ -1127,17 +1142,21 @@ float PredProjectile_MatchProjectile() {
 }
 
 // Called on `self`.
-void InitProjectileEnt() {
+void InitProjectileEnt(float sendflags) {
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
-    self.s_time = self.phys_time;
-    self.angles = vectoangles(self.velocity);
+    if (sendflags & FOPP_ANGLES == 0)
+        self.angles = vectoangles(self.velocity);
     self.owner = edict_num(self.owner_entnum);
 
     FPP_Init(self.fpp_index, self);
     FPP_ApplyGrenadeProperties(self);
 
-    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
+    float ptime = get_phys_time(self);
+    if (ptime > self.phys_time /* from server */)
+        Phys_Advance(self, ptime, 0);
+    else
+        setorigin(self, self.origin);
 
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
@@ -1154,12 +1173,8 @@ void InitProjectileEnt() {
     if (!has_predicted) {
         // Back-track trail for entities without a local prediction.  We use
         // s_origin here as that's what we know antilag_ms to be relative to.
-        self.oldorigin = self.s_origin - self.antilag_ms/ 1000.0 * self.velocity;
+        self.oldorigin = self.s_origin - self.antilag_ms/1000.0 * self.velocity;
     }
-}
-
-void WP_SyncPhysProjectile() {
-    CPhys_Init(self, max(time, self.phys_time), time - self.phys_time);
 }
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
@@ -1220,6 +1235,7 @@ float WP_ClientThink() {
         old_input_buttons = input_buttons;
         if (!getinputstate(pframe) || input_timelength <= 0)
             break;
+        makevectors(input_angles);
 
         pstate_pred.buttons_held = input_buttons;
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
