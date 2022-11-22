@@ -161,12 +161,7 @@ void WPP_Status() {
     PRINT_CONFIG(qc_physics);
     PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
-    PRINT_CONFIG(max_rewind_ms);
-    PRINT_CONFIG(max_rewind_slow_projectile_ms);
-    PRINT_CONFIG(max_rewind_fast_projectile_ms);
-    PRINT_CONFIG(rewind_fast_projectile_thresh);
     PRINT_CONFIG(wp_default_min_ping_ms);
-    PRINT_CONFIG(no_forward_hg);
     PRINT_CONFIG_ACTIVE(wp_global_enable);
     PRINT_CONFIG_ACTIVE(wp_global_disable);
     PRINT_CONFIG_ACTIVE(pp_global_enable);
@@ -175,12 +170,26 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
 
+    static string rewind_desc[] = { "rewind knockback" };
+    printf("Rewind Settings:\n");
+    if (fo_config.rewind_flags) {
+        for (float i = 0; i < rewind_desc.length; i++)
+            if (fo_config.rewind_flags & (1 << i))
+                printf(" .%s\n", rewind_desc[i]);
+
+    }
+    PRINT_CONFIG(no_forward_hg);
+    PRINT_CONFIG(max_rewind_ms);
+    PRINT_CONFIG(max_rewind_slow_projectile_ms);
+    PRINT_CONFIG(max_rewind_fast_projectile_ms);
+    PRINT_CONFIG(rewind_fast_projectile_thresh);
+
     static string clown_desc[] = { "Rubber grenades", "Proj gravity" };
-    if (fo_config.clown_settings) {
+    if (fo_config.clown_flags) {
         printf("Clown mode:\n");
         printf(" .clown gravity=%d\n", fo_config.clown_grav);
         for (float i = 0; i < clown_desc.length; i++)
-            if (fo_config.clown_settings & (1 << i))
+            if (fo_config.clown_flags & (1 << i))
                 printf(" .%s\n", clown_desc[i]);
 
     }

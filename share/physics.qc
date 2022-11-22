@@ -44,8 +44,7 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
 DEFCVAR_FLOAT(fo_phys_debug, 0);
 
 .entity groundentity;
-.float is_removed;  // The server code implements this to track entity removal
-                    // for debug checks.  But we can usefully piggy-back on it.
+.float voided;
 
 float get_phys_time(entity);
 
@@ -53,9 +52,8 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (trace_ent.solid == SOLID_NOT)
         return;
 
-    if (e.movetype == MOVETYPE_FLYMISSILE) {
-        e.is_removed = TRUE;
-    }
+    if (e.movetype == MOVETYPE_FLYMISSILE)
+        e.voided = TRUE;
 
     if (CVARF(fo_phys_debug) & 1)
         printf("CPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n", time, e.phys_time + dt,
@@ -160,13 +158,13 @@ float Phys_Adv_Linear(entity e, float dt, float phys_flags) {
 }
 
 float Phys_Advance(entity e, float target_time, float phys_flags) {
-    if (target_time < e.phys_time || e.is_removed) {
+    if (target_time < e.phys_time) {
         setorigin(e, e.origin);
         return 0;
     }
 
     if (phys_tic * vlen(e.velocity) > 32)
-        if (!fo_config.clown_settings)
+        if (!fo_config.clown_flags)
             error("phys_tic too big, needs adaptive scaling\n");
 
     static float limit_eps = 0.0005;
@@ -174,6 +172,11 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
     float total = 0, dt = 0, step = 0, delta;
 
     while ((delta = target_time - e.phys_time) >= limit) {
+        if (e.voided) {
+            e.phys_time = target_time;
+            break;
+        }
+
         switch (e.movetype) {
             case MOVETYPE_FLY:
             case MOVETYPE_FLYMISSILE:

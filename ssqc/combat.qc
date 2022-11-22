@@ -760,7 +760,10 @@ void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
         FOPlayer fc = (FOPlayer)c;
 
         org[0] = c.origin + (c.mins + c.maxs) * 0.5;
-        org[1] = fc.TrueOrigin() + (c.mins + c.maxs) * 0.5;
+        if (RewindFlagEnabled(REWIND_KNOCKBACK))
+            org[1] = org[0];
+        else
+            org[1] = fc.UnrewoundOrigin() + (c.mins + c.maxs) * 0.5;
 
         for (int j = 0; j < 2; j++) {
             float points = 0.5 * vlen(inflictor.origin - org[j]);
@@ -772,12 +775,17 @@ void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
             dmg[j] = points;
         }
 
-        fc.RestoreNow();  // Use current location for knockback, etc.
-        dmg[1] = min(dmg[0], dmg[1]);  // Limit Kerbal.
+        vector held_pos = c.origin;
+        if (!RewindFlagEnabled(REWIND_KNOCKBACK)) {
+            c.origin = fc.UnrewoundOrigin();
+            dmg[1] = min(dmg[0], dmg[1]);  // Limit Kerbal.
+        }
 
         if (dmg[0] > 0)
             TF_T_DamageKnock(c, inflictor, attacker, dmg[0], dmg[1],
                              TF_TD_NOTTEAM, TF_TD_EXPLOSION);
+
+        c.origin = held_pos;
     }
 }
 

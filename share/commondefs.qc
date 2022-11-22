@@ -2,13 +2,14 @@ var struct {
     float qc_physics;
     float static_newmis_ms;
     float dynamic_newmis_ms;
+    float rewind_flags;
     float max_rewind_ms;
     float max_rewind_slow_projectile_ms;
     float max_rewind_fast_projectile_ms;
     float rewind_fast_projectile_thresh;
     float wp_default_min_ping_ms;
     float no_forward_hg;
-    float clown_settings;
+    float clown_flags;
     float clown_grav;
 
     float wp_global_enable;
@@ -25,8 +26,8 @@ enumflags {
     CLOWN_PROJ_GRAVITY,
 };
 
-inline float IsClownMode(int setting) {
-    return fo_config.clown_settings & setting;
+inline float IsClownMode(int flag) {
+    return fo_config.clown_flags & flag;
 }
 
 #define MAX_FLAGINFO_LINES  10
