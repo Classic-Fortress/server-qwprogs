@@ -703,39 +703,43 @@ void TF_T_Damage(entity targ, entity inflictor, entity attacker,
 }
 
 void (entity inflictor, entity attacker, float damage,
-      entity ignore) T_RadiusDamage = {
+      entity ignore1, entity ignore2 = __NULL__, entity only = __NULL__)
+        T_RadiusDamage = {
     local float points;
     local entity head;
     local vector org;
 
-    head = findradius(inflictor.origin, damage + 40);
-    while (head) {
-        if (head != ignore) {
-            if (head.takedamage) {
+    int count, i;
+    entity* rlist = findradius_list(inflictor.origin, damage + 40, count);
 
-                org = head.origin + (head.mins + head.maxs) * 0.5;
-                points = 0.5 * vlen(inflictor.origin - org);
-                if (points < 0)
-                    points = 0;
-                points = damage - points;
-                if (head == attacker)
-                    points = points * 0.75;
+    for (i = 0; i < count; i ++) {
+        entity e = rlist[i];
+        if ((only && e != only) || e == ignore1 || e == ignore2)
+            continue;
 
-                if (points > 0) {
-                    if (CanDamage(head, inflictor)) {
-                        // shambler takes half damage from all explosions
-                        if (head.classname == "monster_shambler")
-                            T_Damage(head, inflictor, attacker,
-                                     points * 0.5);
-                        else
-                            TF_T_DamageKnock(head, inflictor, attacker, points,
-                                        points,
-                                        TF_TD_NOTTEAM, TF_TD_EXPLOSION);
-                    }
-                }
+        if (!e.takedamage)
+            continue;
+
+        org = e.origin + (e.mins + e.maxs) * 0.5;
+        points = 0.5 * vlen(inflictor.origin - org);
+        if (points < 0)
+            points = 0;
+        points = damage - points;
+        if (e == attacker)
+            points = points * 0.75;
+
+        if (points > 0) {
+            if (CanDamage(e, inflictor)) {
+                // shambler takes half damage from all explosions
+                if (e.classname == "monster_shambler")
+                    T_Damage(e, inflictor, attacker,
+                            points * 0.5);
+                else
+                    TF_T_DamageKnock(e, inflictor, attacker, points,
+                            points,
+                            TF_TD_NOTTEAM, TF_TD_EXPLOSION);
             }
         }
-        head = head.chain;
     }
 };
 

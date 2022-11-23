@@ -170,7 +170,8 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
 
-    static string rewind_desc[] = { "rewind knockback" };
+    static string rewind_desc[] = { "rewind pipe knockback", "rewind proj hit",
+                                    "sync proj self knockback" };
     printf("Rewind Settings:\n");
     if (fo_config.rewind_flags) {
         for (float i = 0; i < rewind_desc.length; i++)

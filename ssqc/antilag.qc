@@ -1,22 +1,14 @@
-void WeaponPred_ProjectProjectile(int fpp_type, entity projectile) {
-    float ping = projectile.owner.client_ping;
-    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
-    float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
-
-    float dt = Phys_Init(projectile, time, offset_dt, PHYSF_CONSUME_ALL);
-    projectile.antilag_ms = dt * 1000;
-}
-
 #define DEBUG_ANTILAG 0
 
 enumflags {
     REWIND_KNOCKBACK,
+    REWIND_PROJ_HIT,
+    REWIND_PROJ_SELFKNOCK,
 };
 
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;
 }
-
 
 #if DEBUG_ANTILAG
 #define al_printf(...) printf(__VA_ARGS__)
@@ -175,6 +167,9 @@ static void RL_RestorePositions(RewindState* head) {
 static void RewindTo(RewindState* rstate, float rtime) {
     ASSERTD_EQ(rstate->rewound, kRewound);
 
+    if (rstate->owner.health <= 0)
+        return;
+
     rtime = max(rtime, rstate->owner->spawn_time);
 
     SeekResult sr = RewindSeek(rstate, rtime);
@@ -277,4 +272,65 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     return TRUE;
 }
 
+void ProjRewind(entity e) {
+    RL_RewindTo(rewind_players, e.owner, e.phys_time);
+}
+
+void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
+    float ping = proj.owner.client_ping;
+
+    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
+    float static_dt = offset.static_ms / 1000.0;
+    float dynamic_dt = offset.dynamic_ms / 1000.0;
+    float stime = time - dynamic_dt;
+
+    float rewind_hit = RewindFlagEnabled(REWIND_PROJ_HIT);
+    float phys_flags = PHYSF_CONSUME_ALL;
+    if (rewind_hit) {
+        phys_flags |= PHYSF_REWIND_PLAYERS;
+        RL_StashPositions(rewind_players);
+        RL_RewindTo(rewind_players, proj.owner, stime);
+    }
+
+    if (RewindFlagEnabled(REWIND_PROJ_SELFKNOCK))
+            phys_flags |= PHYSF_FORWARD_KNOCK;
+
+    // Static projection happens instantly.  If rewind is active, we'll do it at
+    // the rewound point in time, but we don't advance time while stepping
+    // through it.
+    proj.s_origin = proj.origin;
+    proj.s_time = 0;
+    Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
+
+    // We initialize s_origin/s_time after Phys_Init, they are used when
+    // knockback forwarding is on to determine delay.
+    proj.s_origin = proj.origin;
+    proj.s_time = time;
+
+    float dt = 0;
+    if (!proj.voided) {
+        RewindSyncTime = ProjRewind;
+        dt = Phys_Advance(proj, time, phys_flags);
+    }
+
+    if (rewind_hit)
+        RL_RestorePositions(rewind_players);
+
+    proj.antilag_ms = dt * 1000;
+}
+
+void WeaponPred_ProjectProjectile(int fpp_type, entity proj) {
+    if (RewindFlagEnabled(REWIND_PROJ_HIT | REWIND_PROJ_SELFKNOCK)) {
+        WeaponPred_ProjectProjectileRewind(fpp_type, proj);
+        return;
+    }
+
+    proj.s_origin = proj.origin;
+    float ping = proj.owner.client_ping;
+    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
+    float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
+
+    float dt = Phys_Init(proj, time, offset_dt, PHYSF_CONSUME_ALL);
+    proj.antilag_ms = dt * 1000;
+}
 

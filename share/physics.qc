@@ -10,7 +10,11 @@ enumflags {
 
 enumflags {
     PHYSF_CONSUME_ALL,
+    PHYSF_REWIND_PLAYERS,
+    PHYSF_FORWARD_KNOCK,
 };
+
+const float FL_FORWARD_KNOCK = FL_GODMODE;
 
 static inline float PhysFlagEnabled(float flag) {
     return fo_config.qc_physics & flag;
@@ -24,6 +28,9 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
         return;
 
     if (e.touch) {
+        if (phys_flags & PHYSF_FORWARD_KNOCK)
+            e.flags |= FL_FORWARD_KNOCK;
+
         entity held_self = self;
         self = e;
         other = trace_ent;
@@ -123,7 +130,7 @@ float Phys_Adv_Bounce(entity e, float dt, float phys_flags) {
     e.angles += move_time * e.avelocity;
 
     float bounce_stop = 60 / 800 * g;
-    float debounce = !IsClownMode(CLOWN_RUBBERGREN) ? 1.5 : 2.5;
+    float debounce = !IsClownMode(CLOWN_RUBBERGREN) ? 1.5 : 2;
     e.velocity = Phys_ClipVel(e.velocity, trace_plane_normal, debounce);
 
     if (PHYS_DEBUG)
@@ -157,15 +164,24 @@ float Phys_Adv_Linear(entity e, float dt, float phys_flags) {
     return dt;
 }
 
+var void(entity e) RewindSyncTime;
+
+static void Phys_CapVel(entity e) {
+    static const float limit = 32 / phys_tic;
+
+    if (vlen(e.velocity) > limit) {
+        if (!fo_config.clown_flags)
+            printf("%s v=%d too fast, consider adaptive scaling\n",
+                    e.model, vlen(e.velocity));
+        e.velocity = normalize(e.velocity) * limit;
+    }
+}
+
 float Phys_Advance(entity e, float target_time, float phys_flags) {
     if (target_time < e.phys_time) {
         setorigin(e, e.origin);
         return 0;
     }
-
-    if (phys_tic * vlen(e.velocity) > 32)
-        if (!fo_config.clown_flags)
-            error("phys_tic too big, needs adaptive scaling\n");
 
     static float limit_eps = 0.0005;
     float limit = (phys_flags & PHYSF_CONSUME_ALL) ? limit_eps : phys_tic;
@@ -177,35 +193,27 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
             break;
         }
 
+        if (phys_flags & PHYSF_REWIND_PLAYERS)
+            RewindSyncTime(e);
+        step = min(phys_tic, delta);
+
+        if (IsClownMode(CLOWN_PROJ_GRAVITY))
+            e.velocity_z += -fo_config.clown_grav * step;
+        Phys_CapVel(e);
+
         switch (e.movetype) {
             case MOVETYPE_FLY:
             case MOVETYPE_FLYMISSILE:
-                // Linear projectiles we can always simulate in a single step.
-                if (limit > limit_eps)
-                    step = floor(delta / limit) * limit;
-                else
-                    step = delta;
-
-                // Unless there's.... gravity
-                if (IsClownMode(CLOWN_PROJ_GRAVITY)) {
-                    step = min(phys_tic, delta);
-                    e.velocity_z += -fo_config.clown_grav * step;
-                }
-
                 dt = Phys_Adv_Linear(e, step, phys_flags);
                 break;
 
             case MOVETYPE_BOUNCE:
-                step = min(phys_tic, delta);
                 dt = Phys_Adv_Bounce(e, step, phys_flags);
-                break;
-
-            case MOVETYPE_NONE:
-                step = dt = delta;
                 break;
 
             default:
                 printf("ERROR: %s unsupported movetype %d\n", e.model, e.movetype);
+            case MOVETYPE_NONE:
                 step = dt = delta;
                 break;
         }

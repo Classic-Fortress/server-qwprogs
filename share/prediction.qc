@@ -9,10 +9,8 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
 .float antilag_ms;
-#ifdef CSQC
 .vector s_origin;
 .float s_time;
-#endif
 
 string wp_version = "v0.4-phys";
 
@@ -773,7 +771,6 @@ void FOProj_Finalize(entity mis) {
 
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
-    mis.phys_time = time;
     if (fo_config.qc_physics)
         mis.customphysics = FO_Phys;
 

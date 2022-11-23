@@ -611,7 +611,10 @@ void () IncendiaryRadius_OZTF = {
     else
         damg = 92;
     deathmsg = 15;
-    T_RadiusDamage(self, self.owner, damg, other);
+
+    entity ignore_self = AntilagKnock(self, damg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, damg, other, ignore_self);
+
     self.origin = (self.origin - (8 * normalize (self.velocity)));
     WriteByte(4, 23);
     WriteByte(4, 3);
@@ -628,6 +631,11 @@ void () T_IncendiaryTouch = {
     if (other == self.owner) {
         return;
     }
+
+    if (self.voided)
+        return;
+    self.voided = 1;
+
     if (pointcontents(self.origin) == CONTENT_SKY) {
         remove(self);
         return;
