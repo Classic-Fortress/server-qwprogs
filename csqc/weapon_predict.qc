@@ -764,26 +764,26 @@ void PP_Cleanup(entity proj) {
   remove(proj);
 }
 
-DEFCVAR_FLOAT(r_rockettrail, 1);
-DEFCVAR_FLOAT(r_grenadetrail, 1);
+DEFCVAR_FLOAT(r_pyrotrail, 0);
+DEFCVAR_FLOAT(r_rockettrail, 0);
+DEFCVAR_FLOAT(r_grenadetrail, 0);
 
-int FPP_FindTrail(entity e)
-{
-    float is_rocket = e.fpp_index == FPP_ROCKET;
-    float is_grenade = e.fpp_index == FPP_GRENADE;  // Do not use IsGrenade
-                                                    // here. This only applies
-                                                    // to FPP_GRENADE.
+int FPP_FindTrail(entity e) {
+    int idx = -1; int  is_g = 0;
 
-    if (is_rocket || is_grenade) {
-        float idx = is_grenade ?  CVARF(r_grenadetrail) : CVARF(r_rockettrail) - 1;
-
-        if (idx >= 0 && idx < trail_table.length)
-            return trail_table[idx].trail[is_grenade];
+    switch (e.fpp_index) {
+        case FPP_ROCKET: idx = CVARF(r_rockettrail) - 1; break;
+        case FPP_INCENDIARY: idx = CVARF(r_pyrotrail) - 1; break;
+        case FPP_GRENADE: idx = CVARF(r_grenadetrail) - 1; is_g = 1; break;
     }
+
+    if (idx >= 0 && idx < trail_table.length)
+        return trail_table[idx].trail[is_g];
 
     return fpp_types[e.fpp_index].trailindex;
 }
 
+DEFCVAR_FLOAT(cl_p2r, 0);
 DEFCVAR_FLOAT(cl_r2g, 0);
 
 void FPP_Init(int fpp_type, entity proj) {
@@ -791,10 +791,14 @@ void FPP_Init(int fpp_type, entity proj) {
 
     proj.fpp_index = fpp_type;
 
-    if (fpp_type == FPP_ROCKET && CVARF(cl_r2g) == 1)
-        setmodelindex(proj, fpp_types[FPP_GRENADE].modelindex);
-    else
-        setmodelindex(proj, desc->modelindex);
+    int render_type = fpp_type;
+    // If someone sets both p2r and r2g, we'll convert all the way.
+    if (render_type == FPP_INCENDIARY && CVARF(cl_p2r) == 1)
+        render_type = FPP_ROCKET;
+    if (render_type == FPP_ROCKET && CVARF(cl_r2g) == 1)
+        render_type = FPP_GRENADE;
+
+    setmodelindex(proj, fpp_types[render_type].modelindex);
 
     proj.traileffectnum = FPP_FindTrail(proj);
     proj.movetype = desc->movetype;
@@ -901,7 +905,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.s_origin = proj.origin;
 
   // Trail starts at 0.05, we, split physics calcs longer than this.
-  float sdt2 = max(static_dt - 0.05, 0)
+  float sdt2 = max(static_dt - 0.05, 0);
   Phys_Init(proj, proj.starttime - sdt2, static_dt - sdt2, PHYSF_CONSUME_ALL);
   proj.oldorigin = proj.origin;
   if (sdt2 > 0)

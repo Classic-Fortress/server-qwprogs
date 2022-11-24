@@ -139,7 +139,7 @@ struct fo_projectile {
 
 fo_projectile fpp_types[] = {
     { FPP_ROCKET,       MOVETYPE_FLYMISSILE, PC_SOLDIER_ROCKET_SPEED,
-        "missile.mdl", "", SND_RL, TRUE },
+        "missile.mdl", "t_rocket", SND_RL, TRUE },
     { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
         "grenade2.mdl", "t_grenade", SND_GREN, TRUE},
     { FPP_HANDGRENADE,  MOVETYPE_BOUNCE,     600,
