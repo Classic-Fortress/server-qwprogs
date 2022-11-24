@@ -1101,7 +1101,7 @@ void () T_TranqDartTouch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1151,7 +1151,7 @@ void () T_TranqDartTouch = {
         WriteCoord(4, self.origin_z);
         multicast(self.origin, 2);
     }
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () TranquiliserTimer = {

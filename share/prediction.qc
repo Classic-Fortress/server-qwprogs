@@ -2,15 +2,9 @@
 #define ENT_WEAPONPRED 101
 #define ENT_PROJECTILE 102
 
-const float SERVER_FPS = 77;
-const float SERVER_FRAME_DT = 1/SERVER_FPS;
-const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
-
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
 .float antilag_ms;
-.vector s_origin;
-.float s_time;
 
 string wp_version = "v0.4-phys";
 
@@ -503,7 +497,7 @@ void EntUpdate_Projectile(float isnew) {
 #endif
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
-        COMM(Byte, antilag_ms);
+        COMM(Short, antilag_ms);
         COMMD(Entity, owner_entnum, owner);
     }
 

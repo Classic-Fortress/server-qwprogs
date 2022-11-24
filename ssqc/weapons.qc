@@ -1087,7 +1087,7 @@ void () T_MissileTouch = {
     self.voided = 1;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     damg = 92 + random() * 20;
@@ -1111,7 +1111,7 @@ void () T_MissileTouch = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () W_FireRocket = {
@@ -1465,7 +1465,7 @@ void () spike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1478,9 +1478,8 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                     TF_TD_NAIL);
         }
-        
-        dremove(self);
-        
+
+        dremove_sent(self);
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1493,17 +1492,16 @@ void () spike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
-    
-    if(other.classname == "worldspawn" && spurs_enabled > 0)
-    {
-		if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 || self.owner.playerclass == PC_SPY && spurs_spy == 1)
-		{
-			ConvertToSpurs(self);
-			return;
-		}
-    }
-		
-    dremove(self);
+
+        if(other.classname == "worldspawn" && spurs_enabled > 0) {
+            if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 ||
+               self.owner.playerclass == PC_SPY && spurs_spy == 1) {
+                ConvertToSpurs(self);
+                return;
+            }
+        }
+
+        dremove_sent(self);
    }
 };
 
@@ -1521,7 +1519,7 @@ void () superspike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1548,7 +1546,7 @@ void () superspike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
     }
-    dremove(self);
+    dremove_sent(self);
 };
 
 void W_UpdateWeaponModel(entity pl) {

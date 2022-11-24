@@ -30,6 +30,13 @@ inline float IsClownMode(int flag) {
     return fo_config.clown_flags & flag;
 }
 
+const float SERVER_FPS = 77;
+const float SERVER_FRAME_DT = 1/SERVER_FPS;
+const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
+
+.vector s_origin;
+.float s_time;
+
 #define MAX_FLAGINFO_LINES  10
 #define ENG_BUILDING_DISMANTLE_DISTANCE 100
 #define ENG_BUILDING_MAINT_DISTANCE 80

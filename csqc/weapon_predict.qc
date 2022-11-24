@@ -899,8 +899,13 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.angles = input_angles; proj.angles[0] *= -1;
 
   proj.s_origin = proj.origin;
-  Phys_Init(proj, proj.starttime, static_dt, PHYSF_CONSUME_ALL);
+
+  // Trail starts at 0.05, we, split physics calcs longer than this.
+  float sdt2 = max(static_dt - 0.05, 0)
+  Phys_Init(proj, proj.starttime - sdt2, static_dt - sdt2, PHYSF_CONSUME_ALL);
   proj.oldorigin = proj.origin;
+  if (sdt2 > 0)
+      Phys_Advance(proj, sdt2, PHYSF_CONSUME_ALL);
 
   proj.pred_next = predicted_projectiles;
   if (predicted_projectiles)
@@ -1183,7 +1188,8 @@ void InitProjectileEnt(float sendflags) {
     if (!has_predicted) {
         // Back-track trail for entities without a local prediction.  We use
         // s_origin here as that's what we know antilag_ms to be relative to.
-        self.oldorigin = self.s_origin - self.antilag_ms/1000.0 * self.velocity;
+        float trail_ms = (self.antilag_ms - 50) / 1000.0;
+        self.oldorigin = self.s_origin - trail_ms * self.velocity;
     }
 }
 

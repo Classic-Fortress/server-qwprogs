@@ -16,6 +16,16 @@ void (entity te) dremove =
     remove(te);
 };
 
+void dremove_sent(entity te) {
+    static const float epsilon = SERVER_FRAME_DT;
+    if (time > te.s_time + epsilon) {
+        dremove(self);
+    } else {
+        self.nextthink = time + 2 * epsilon;
+        self.think = SUB_Remove;
+    }
+}
+
 void () display_location = {
     local string st;
 
