@@ -12,6 +12,7 @@ enumflags {
     PHYSF_CONSUME_ALL,
     PHYSF_REWIND_PLAYERS,
     PHYSF_FORWARD_KNOCK,
+    PHYSF_FAIL_STARTSOLID
 };
 
 const float FL_FORWARD_KNOCK = FL_GODMODE;
@@ -81,11 +82,16 @@ float Phys_Push(entity e, vector offset, float dt, float phys_flags) {
     // Note: Networked entities don't currently intersect on CSQC instantiation
     // of this, we fudge this in Phys_Impact from the server side.
     traceline(e.origin, e.origin + offset, trace_flags, e);
+
+    if ((phys_flags & PHYSF_FAIL_STARTSOLID) && trace_startsolid) {
+        return trace_fraction;
+    }
+
     e.origin = trace_endpos;
 
     if (trace_fraction < 1) {
-        setorigin(e, trace_endpos);
-        Phys_Impact(e, trace_fraction * dt, phys_flags);
+        if ((e.flags & FL_ONGROUND == 0 || e.groundentity != trace_ent))
+            Phys_Impact(e, trace_fraction * dt, phys_flags);
         return FALSE;
     }
 
@@ -116,6 +122,7 @@ float Phys_Adv_Bounce(entity e, float dt, float phys_flags) {
 
     e.velocity_z -= 0.5 * dt * g;
 
+    phys_flags |= PHYSF_FAIL_STARTSOLID;
     float move_time = dt, bounce;
     if (Phys_Push(e, move_time * e.velocity, move_time, phys_flags)) {
         e.velocity_z -= 0.5 * dt * g;
@@ -123,8 +130,6 @@ float Phys_Adv_Bounce(entity e, float dt, float phys_flags) {
         return dt;
     }
 
-    if (trace_allsolid)
-        trace_fraction = 0;
 
     move_time = (1 - trace_fraction) * dt;
     e.angles += move_time * e.avelocity;
@@ -173,7 +178,8 @@ static void Phys_CapVel(entity e) {
         if (!fo_config.clown_flags)
             printf("%s v=%d too fast, consider adaptive scaling\n",
                     e.model, vlen(e.velocity));
-        e.velocity = normalize(e.velocity) * limit;
+        // normalize(e.velocity) * limit;
+        e.velocity = '0 0 0';
     }
 }
 
