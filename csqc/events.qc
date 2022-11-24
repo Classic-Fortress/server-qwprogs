@@ -196,7 +196,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
                     break;
                 case CLIENT_MENU_MAPS:
-                    showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+                    showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
                     break;
             }
             break;
@@ -269,6 +269,7 @@ void() CSQC_Parse_Event = {
             if(rtr) {
                 round_time_remaining = time + rtr;
             }
+            FO_Hud_ShowPanel(HUDP_MOTD);
             break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
@@ -301,6 +302,12 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
+        case MSG_PAUSE:
+            CsGrenTimer::SyncPause();
+            break;
+        case MSG_UNPAUSE:
+            CsGrenTimer::SyncUnpause();
+            break;
     }
 }
 
@@ -308,7 +315,8 @@ DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
 string cached_timer;
 string GetGrenTimerSound() {
-    string wav = cvar_string(FOCMD_GRENTIMERSOUND);
+    string wav = CVARS(FOCMD_GRENTIMERSOUND);
+
     if (cached_timer != wav) {
         precache_sound(wav);
         cached_timer = wav;
@@ -316,28 +324,16 @@ string GetGrenTimerSound() {
     return wav;
 }
 
-void OldPlayGren(float offset) {
-    local float channel = CHAN_GREN_START;
-    local float soundtime;
-    local float highest_soundtime = -1;
+void CsGrenTimer::StartSound() {
+    if !(this.flags_ & FL_GT_SOUND)
+        return;
 
-    for(float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
-        soundtime = getsoundtime(world, i);
+    string wav = GetGrenTimerSound();
+    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
 
-        if (soundtime < 0) {
-            channel = i;
-            break;
-        }
-
-        if (soundtime > highest_soundtime) {
-            highest_soundtime = soundtime;
-            channel = i;
-        }
-    }
-
-    local string wav = GetGrenTimerSound();
-    localsound(wav, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, wav, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
+    // Note there's a bug where soundupdate returns false for a new sample, even
+    // though it's started.
+    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
 }
 
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
@@ -353,22 +349,12 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         expires_at_ -= rtt/2;
     }
 
-    if !(this.flags_ & FL_GT_SOUND)
-        return;
-
-    string wav = GetGrenTimerSound();
-    float volume = cvar(FOCMD_GRENTIMERVOLUME);
-
-    // Note there's a bug where soundupdate returns false for a new sample, even
-    // though it's started.
-    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    StartSound();
 }
-
 
 void CsGrenTimer::Stop() {
     expires_at_ = -1;
-    if (flags_ & FL_GT_SOUND)
-        soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);  // -volume => stop.
+    PauseSound();  // Pause is really stop.
     flags_ = 0;
 }
 
@@ -376,11 +362,6 @@ void StopGrenTimers() {
     // New style.
     for (float i = 0; i < NUM_GREN_TIMERS; i++)
         grentimers[i].Stop();
-
-    // Old style.
-    for (float i = CHAN_GREN_START; i <= CHAN_GREN_END; i++) {
-        soundupdate(self, i, "", 0, 0, 0, 0, 0);
-    }
 }
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
@@ -391,7 +372,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
         return;
 
     local float timer_flags = 0;
-    switch (cvar(FOCMD_GRENTIMER)) {
+    switch (CVARF(FOCMD_GRENTIMER)) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
@@ -399,19 +380,9 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     }
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
-    float debug_use_new_sound = CVARF(fo_grentimer_debug) & 2;
-
-    float play_old_sound = FALSE;
-    if (!debug_use_new_sound) {
-        play_old_sound = timer_flags & FL_GT_SOUND;
-        timer_flags &= ~FL_GT_SOUND;
-    }
 
     CsGrenTimer timer = CsGrenTimer::GetNext();
     timer.Set(primed_at, explodes_at, grentype, timer_flags);
-
-    if (play_old_sound)
-        OldPlayGren(timer.sound_offset());
 
     if (debug_print_state) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
@@ -420,11 +391,8 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
         float expires_new = timer.expiry();
         float expires_ideal = explodes_at - ping/2;
 
-        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f new=%d\n",
-                    primed_at, explodes_at, explodes_at - primed_at,
-                    debug_use_new_sound));
-        print(sprintf("ideal=%0.2f new=%0.2f old=%0.2f\n",
-                expires_ideal, expires_new, expires_old));
+        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
+                      primed_at, explodes_at, explodes_at - primed_at));
     }
 }
 
@@ -539,6 +507,12 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         case "player/land.wav":
         case "player/land2.wav":
         case "player/h2ojump.wav":
+        case "player/water1.wav":
+        case "player/water2.wav":
+        case "player/inlava.wav":
+        case "player/inh2o.wav":
+        case "player/slimbrn2.wav":
+        case "misc/outwater.wav":
             if (CVARF(fo_csjumpsounds)) {
                 return 1;
             } else {
