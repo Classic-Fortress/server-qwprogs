@@ -100,7 +100,7 @@ static SeekResult RewindSeek(RewindState* rstate, float rtime) {
     for (int i = 0; i < AL_MAX_REWINDS; i++) {
         RewindSnapshot* rs = &rstate->snapshot[idx];
 
-        if (rs->time > rtime) {
+        if (rs->time >= rtime) {
             r.after = rs;
         } else {
             if (rs->time)
@@ -119,7 +119,7 @@ RewindSnapshot* RewindLog(RewindState* target) {
         error("Log mismatch\n");
 
     RewindSnapshot* rs = &target->snapshot[target->cur];
-    if (rs->time && rs->time > time + 0.001) {
+    if (rs->time && time > rs->time + 0.005) {
         target->cur = NextRewindIdx(target->cur);
         rs = &target->snapshot[target->cur];
     }
@@ -129,6 +129,12 @@ RewindSnapshot* RewindLog(RewindState* target) {
     rs->velocity = target->owner.velocity;
 
     return rs;
+}
+
+void DumpLog(RewindState* rs) {
+    for (float i = 0; i < AL_MAX_REWINDS; i++) {
+        printf("%s%2d> t=%0.3f\n", i == rs->cur ? "*" : " ", i, rs->snapshot[i].time);
+    }
 }
 
 static void RewindSave(RewindState* rs) {
@@ -166,25 +172,43 @@ static void RL_RestorePositions(RewindState* head) {
 
 static void RewindTo(RewindState* rstate, float rtime) {
     ASSERTD_EQ(rstate->rewound, kRewound);
+    entity e = rstate->owner;
 
-    if (rstate->owner.health <= 0)
+    if (e.health <= 0)
         return;
 
-    rtime = max(rtime, rstate->owner->spawn_time);
+    vector pos;
 
-    SeekResult sr = RewindSeek(rstate, rtime);
-    RewindSnapshot* a = sr.after;
-    RewindSnapshot* b = sr.before;
+    if (rtime < e.client_lastupdate) {
+        SeekResult sr = RewindSeek(rstate, rtime);
+        RewindSnapshot* a = sr.after;
+        RewindSnapshot* b = sr.before;
 
-    vector pos = a.origin;
-    if (b) {
-        float frac = (rtime - b->time) / (a->time - b->time);
-        vector diff = a->origin - b->origin;
+        float a_time;
+        vector a_origin;
 
-        if (vlen(diff) > 48)
-            frac = 1;  // Most likely teleport.
+        if (!a) {
+            a_time = time;
+            a_origin = self.origin;
+        } else {
+            a_time = a->time;
+            a_origin = a->origin;
+        }
 
-        pos = b->origin + frac * diff;
+        if (!b) {
+            pos = a_origin;  // Should never happen...
+        } else {
+            float frac = (rtime - b->time) / (a->time - b->time);
+            vector diff = a->origin - b->origin;
+
+            if (vlen(diff) > 48)
+                frac = 1;  // Most likely teleport.
+
+            pos = b->origin + frac * diff;
+        }
+    } else {
+        float max_xerp = CF_GetSetting("rwmx", "rewind_max_xerp", "0.02");
+        pos = e.origin + min(rtime - e.client_lastupdate, max_xerp) * e.velocity;
     }
 
     setorigin(rstate->owner, pos);
@@ -272,8 +296,8 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     return TRUE;
 }
 
-void ProjRewind(entity e) {
-    RL_RewindTo(rewind_players, e.owner, e.phys_time);
+void ProjRewind(entity e, float step) {
+    RL_RewindTo(rewind_players, e.owner, e.phys_time + step / 2);
 }
 
 void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
@@ -296,11 +320,10 @@ void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
             phys_flags |= PHYSF_FORWARD_KNOCK;
 
     // Static projection happens instantly.  If rewind is active, we'll do it at
-    // the rewound point in time, but we don't advance time while stepping
-    // through it.
+    // a prior point in time, but we don't advance time while stepping.
     proj.s_origin = proj.origin;
     proj.s_time = 0;
-    Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
+    float st = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
 
     // We initialize s_origin/s_time after Phys_Init, they are used when
     // knockback forwarding is on to determine delay.
@@ -316,7 +339,7 @@ void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
     if (rewind_hit)
         RL_RestorePositions(rewind_players);
 
-    proj.antilag_ms = dt * 1000;
+    proj.antilag_ms = (st + dt) * 1000;
 }
 
 void WeaponPred_ProjectProjectile(int fpp_type, entity proj) {
@@ -326,11 +349,12 @@ void WeaponPred_ProjectProjectile(int fpp_type, entity proj) {
     }
 
     proj.s_origin = proj.origin;
+    proj.s_time = time;
     float ping = proj.owner.client_ping;
     ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
-    float offset_dt = (offset.static_ms + offset.dynamic_ms) / 1000.0;
+    float static_dt = offset.static_ms / 1000.0;
+    float dynamic_dt = offset.dynamic_ms / 1000.0;
 
-    float dt = Phys_Init(proj, time, offset_dt, PHYSF_CONSUME_ALL);
+    float dt = Phys_Init(proj, time, static_dt + dynamic_dt, PHYSF_CONSUME_ALL);
     proj.antilag_ms = dt * 1000;
 }
-
