@@ -444,6 +444,9 @@ void WP_Impulse() {
             break;
     }
 
+    if (match)
+        pstate_pred.impulse = 0;
+
     HandleButtonThrowgren(1, BUTTON5);
     HandleButtonThrowgren(2, BUTTON6);
 
@@ -451,7 +454,9 @@ void WP_Impulse() {
         return;
 
     // Impulses that ARE held by attack_finished / reloading.
-    if (!match) switch (pstate_pred.impulse) {
+    match = TRUE;
+    switch (pstate_pred.impulse) {
+        case 0: break;  // Handled above.
         case TF_RELOAD:
             WP_ReloadSlot(CurrentSlot());
             break;
