@@ -704,7 +704,8 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
 
 void FO_Phys() {
-    Phys_Advance(self, time, 0);
+    if (!self.voided)
+        Phys_Advance(self, time, 0);
 
     float held_time, thinktime;
     // Once we lift physics, think execution comes with it.

@@ -83,14 +83,14 @@ float Phys_Push(entity e, vector offset, float dt, float phys_flags) {
     // of this, we fudge this in Phys_Impact from the server side.
     traceline(e.origin, e.origin + offset, trace_flags, e);
 
-    if ((phys_flags & PHYSF_FAIL_STARTSOLID) && trace_startsolid) {
-        return trace_fraction;
-    }
+    if ((phys_flags & PHYSF_FAIL_STARTSOLID) && trace_startsolid)
+        return FALSE;
 
     e.origin = trace_endpos;
 
     if (trace_fraction < 1) {
-        if ((e.flags & FL_ONGROUND == 0 || e.groundentity != trace_ent))
+        setorigin(e, trace_endpos);
+        if ((e.flags & FL_ONGROUND == 0) || e.groundentity != trace_ent)
             Phys_Impact(e, trace_fraction * dt, phys_flags);
         return FALSE;
     }

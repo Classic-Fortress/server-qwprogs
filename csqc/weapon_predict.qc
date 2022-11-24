@@ -835,6 +835,9 @@ DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
 
 .float trail_started;
 float PP_PredrawActive() {
+    if (self.voided)
+        return PREDRAW_NEXT;
+
     Phys_Advance(self, get_phys_time(self), 0);
 
     // we need to space out the particles incase we're running at very high fps
