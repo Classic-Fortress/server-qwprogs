@@ -320,10 +320,9 @@ void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
             phys_flags |= PHYSF_FORWARD_KNOCK;
 
     // Static projection happens instantly.  If rewind is active, we'll do it at
-    // the rewound point in time, but we don't advance time while stepping
-    // through it.
+    // a prior point in time, but we don't advance time while stepping.
     proj.s_origin = proj.origin;
-    proj.s_time = time;
+    proj.s_time = 0;
     float st = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
 
     // We initialize s_origin/s_time after Phys_Init, they are used when
