@@ -1104,7 +1104,7 @@ void WP_Attack() {
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
                 if (PP_EnableGrenades())
-                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER ?
+                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER || prematch ?
                                   GREN_RED : GREN_PIPE);
                 else
                     Pred_Sound(SND_GREN);
