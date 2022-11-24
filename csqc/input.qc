@@ -20,9 +20,10 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                     return TRUE;
                 break;
             case IE_KEYDOWN:
-                if (scanx == K_ESCAPE || scanx == K_MOUSE1)
+                if (scanx == K_ESCAPE)
                     return TRUE;
-
+                if (scanx == K_MOUSE1 && !menu_mouse)
+                    return FALSE;
                 if (fo_hud_menu_active)
                     return fo_menu_process_input(CurrentMenu, scanx);
                 break;
