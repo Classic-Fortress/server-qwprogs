@@ -272,6 +272,15 @@ void Attack_Finished(float attack_time) {
 static entity pred_sound_entity;
 static float last_pred_sound;
 
+static inline Slot CurrentSlot() { return pstate_pred.current_slot; }
+static inline FO_WeapInfo* SlotWI(Slot slot) {
+    return FO_SlotWeapInfo(pstate_pred.playerclass, slot);
+}
+
+inline FO_WeapInfo* WP_CurrentWeapon() {
+    return SlotWI(CurrentSlot());
+}
+
 void Pred_Sound(SoundIndex snd, float vol = 1) {
     if (snd == SND_NONE || !IsEffectFrame() || pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
@@ -283,10 +292,6 @@ void Pred_Sound(SoundIndex snd, float vol = 1) {
 
 void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(FPP_Get(proj_type)->snd, vol);
-}
-
-inline FO_WeapInfo* WP_CurrentWeapon() {
-    return FO_SlotWeapInfo(pstate_pred.playerclass, pstate_pred.current_slot);
 }
 
 // Corrections for when we can recognize that we missed a packet.
@@ -335,18 +340,21 @@ float WP_CurrentAmmo() {
 
 
 float WP_CheckAmmo(FO_WeapInfo* wi) {
-    if (wi->ammo_type == AMMO_NONE || IsSlotMelee(pstate_pred.current_slot))
+    if (wi->ammo_type == AMMO_NONE)
         return TRUE;
+
+    if (wi->weapon == WEAP_MEDIKIT || wi->weapon == WEAP_SPANNER)
+        return TRUE;
+
+    if (wi->weapon == WEAP_ASSAULT_CANNON && WP_GetAmmo(AMMO_CELLS) < 7)
+        return FALSE;
 
     int ammo = WP_GetAmmo(wi->ammo_type);
     return ammo > wi->ammo_per_shot;
 }
 
-var float changed_weapon;
-
 void WP_ChangeWeapon(Slot slot) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
-    if (!WP_CheckAmmo(wi))
+    if (!WP_CheckAmmo(SlotWI(slot)))
         return;
 
     pstate_pred.last_slot = pstate_pred.current_slot;
@@ -358,10 +366,7 @@ void WP_ChangeWeapon(Slot slot) {
 Slot WP_BestWeaponSlot() {
     for (float i = 1; i <= TF_NUM_SLOTS; i++) {
         Slot slot = MakeSlot(i);
-        FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
-
-        if (wi->weapon == WEAP_ASSAULT_CANNON && WP_GetAmmo(AMMO_CELLS) < 7)
-            continue;
+        FO_WeapInfo* wi = SlotWI(slot);
 
         if (wi->weapon == WEAP_NONE || !WP_CheckAmmo(wi))
             continue;
@@ -375,8 +380,6 @@ Slot WP_BestWeaponSlot() {
 void W_ChangeToBestWeapon() {
     WP_ChangeWeapon(WP_BestWeaponSlot());
 }
-
-void WP_Reload();
 
 float WP_LockedCannon() {
     if (!WP_Enabled())
@@ -420,14 +423,43 @@ static void HandleButtonThrowgren(float index, float button) {
     }
 }
 
+float WP_ReloadSlot(Slot slot);
+void WP_ReloadNext();
+
 void WP_Impulse() {
-    // Note: We might have no impulse, but a queued slot here.
     WP_HandleHeavyInputs();
 
-    float match = TRUE;
+    // Note: We might have no impulse, but a queued slot here.
     float quick_swap = FALSE;
 
+    // Impulses that are NOT held by attack_finished / reloading.
+    float match = TRUE;
     switch (pstate_pred.impulse) {
+        case TF_GRENADE_T:
+            W_ThrowGren(TRUE);
+            break;
+
+        default:
+            match = FALSE;
+            break;
+    }
+
+    HandleButtonThrowgren(1, BUTTON5);
+    HandleButtonThrowgren(2, BUTTON6);
+
+    if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
+        return;
+
+    // Impulses that ARE held by attack_finished / reloading.
+    if (!match) switch (pstate_pred.impulse) {
+        case TF_RELOAD:
+            WP_ReloadSlot(CurrentSlot());
+            break;
+
+        case TF_RELOAD_NEXT:
+            WP_ReloadNext();
+            break;
+
         case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
             pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
             quick_swap = TRUE;
@@ -452,105 +484,94 @@ void WP_Impulse() {
 
         case TF_WEAPNEXT:
             pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
-                    pstate_pred.playerclass, pstate_pred.current_slot, FALSE);
+                    pstate_pred.playerclass,CurrentSlot(), FALSE);
             break;
         case TF_WEAPPREV:
             pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
-                    pstate_pred.playerclass, pstate_pred.current_slot, TRUE);
-            break;
-
-        case TF_GRENADE_T:
-            W_ThrowGren(TRUE);
+                    pstate_pred.playerclass, CurrentSlot(), TRUE);
             break;
 
         default:
             match = FALSE;
+            break;
     }
-
-    HandleButtonThrowgren(1, BUTTON5);
-    HandleButtonThrowgren(2, BUTTON6);
-
-    if (match)
-        pstate_pred.impulse = 0;
-
-    if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
-        return;
 
     if (!IsSlotNull(pstate_pred.queue_slot)) {
         WP_ChangeWeapon(pstate_pred.queue_slot);
         pstate_pred.queue_slot = SlotNull;
     }
 
-    if (!pstate_pred.impulse)
-        return;
 
-    float clear = FALSE;
-
-    if (pstate_pred.impulse == TF_RELOAD) {
-        WP_Reload();
-        clear = TRUE;
-    }
-
-    if (clear)
+    if (match)
         pstate_pred.impulse = 0;
 }
 
-float* WP_ClipFired() {
-    float index = SlotIndex(pstate_pred.current_slot);
-    if (pstate_pred.playerclass == PC_DEMOMAN &&
-        index == 1)
+static float* WP_ClipFired(Slot slot) {
+    float index = SlotIndex(slot);
+    if (pstate_pred.playerclass == PC_DEMOMAN && index == 1)
         index = 0;  // Special case: Pipebomb shares with Grenadel launcher.
 
     return &pstate_pred.clip_fired[index];
+}
+
+float WP_CurrentClipFired() {
+    return *WP_ClipFired(CurrentSlot());
 }
 
 string WP_GetClip() {
     if (!WP_Enabled())
         return SBAR.ClipSize;
 
-    Slot slot = pstate_pred.current_slot;
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass, slot);
+    Slot slot = CurrentSlot();
+    FO_WeapInfo* wi = SlotWI(slot);
 
     if (!wi->needs_reload || IsSlotNull(slot))
         return "";
 
     float capacity = wi->clip_size;
     float still_loading = 0;
-    float fired = *WP_ClipFired();
+    float fired = *WP_ClipFired(slot);
 
     if (WP_IsReloading())
         still_loading = FO_NumClipStillLoading(wi, pstate_pred.client_time,
-                                                pstate_pred.reload_finished);
+                                               pstate_pred.reload_finished);
 
     float clip = capacity - fired - still_loading;
     return sprintf("%d/%d", clip, wi->clip_size);
 }
 
-void WP_Reload() {
-    FO_WeapInfo* wi = WP_CurrentWeapon();
+float WP_CanReload(Slot slot, string* msg = __NULL__) {
+    FO_WeapInfo* wi = SlotWI(slot);
 
     if (!wi->needs_reload || WP_IsReloading() || prematch)
-        return;
+        return FALSE;
 
-    float clip_fired = *WP_ClipFired();
+    float clip_fired = *WP_ClipFired(slot);
     float ammo_rem = WP_GetAmmo(wi->ammo_type);
+    return FO_CanReloadMsg(wi, ammo_rem, clip_fired, msg);
+}
 
-    string msg;
-    if (!FO_CheckCanReload(wi, ammo_rem, clip_fired, msg)) {
-        if (IsEffectFrame())
+float WP_ReloadSlot(Slot slot) {
+    FO_WeapInfo* wi = SlotWI(slot);
+
+    string msg = "";
+    if (!WP_CanReload(slot, &msg)) {
+        if (IsEffectFrame() && msg != "")
             csqc_print(msg);
-        return;
+        return FALSE;
     }
 
     if (IsEffectFrame())
         csqc_print(strcat("Reloading ", FO_GetWeapName(wi->weapon), "...\n"));
 
     pstate_pred.tfstate |= TFSTATE_RELOADING;
-    float amt = min(ammo_rem, clip_fired);
-    (*WP_ClipFired()) -= amt;
+    float amt = min(*WP_ClipFired(slot), WP_GetAmmo(wi->ammo_type));
+    (*WP_ClipFired(slot)) -= amt;
 
     pstate_pred.reload_finished = pstate_pred.client_time +
         (amt / wi->clip_size) * wi->full_reload_time;
+
+    return TRUE;
 }
 
 void WP_CheckReloadFinished() {
@@ -562,25 +583,45 @@ void WP_CheckReloadFinished() {
     }
 }
 
-float WP_ReloadIfNeeded(FO_WeapInfo* wi) {
-    if (!WP_CheckAmmo(wi) || wi->needs_reload) {
-        if (*WP_ClipFired() >= wi->clip_size) {
-            WP_Reload();
-            return TRUE;
+#define eprintf(...) if (IsEffectFrame()) printf(__VA_ARGS__)
+
+void WP_ReloadNext() {
+    Slot slot = CurrentSlot();
+
+    do {
+        slot = FO_FindPrevNextWeaponSlot(pstate_pred.playerclass, slot, FALSE);
+
+        // We check this manually because we don't want to spam reload msgs.
+        if (WP_CanReload(slot)) {
+            if (WP_ReloadSlot(slot))
+                return;
         }
-    }
+    } while (!IsSameSlot(slot, CurrentSlot()));
+
+    if (IsEffectFrame())
+        csqc_print("All clips full\n");
+}
+
+float WP_ReloadIfNeeded(Slot slot) {
+    FO_WeapInfo* wi = SlotWI(slot);
+
+    if (*WP_ClipFired(slot) >= wi->clip_size)
+        return WP_ReloadSlot(slot);
 
     return FALSE;
 }
 
-float WP_ConsumeAmmo(FO_WeapInfo* wi) {
-    if (WP_ReloadIfNeeded(wi))
+float WP_ReloadCurrentIfNeeded() { return WP_ReloadIfNeeded(CurrentSlot()); }
+
+float WP_ConsumeAmmo(Slot slot) {
+    if (WP_ReloadIfNeeded(slot))
         return FALSE;
 
+    FO_WeapInfo* wi = SlotWI(slot);
     pstate_pred.ammo_used[wi->ammo_type] += wi->ammo_per_shot;
-    *WP_ClipFired() += wi->ammo_per_shot;
+    *WP_ClipFired(slot) += wi->ammo_per_shot;
 
-    WP_ReloadIfNeeded(wi);
+    WP_ReloadIfNeeded(slot);
 
     return TRUE;
 }
@@ -941,8 +982,8 @@ void W_FireGrenade(int gren_type) {
 }
 
 void W_FireAssaultCannon() {
-    FO_WeapInfo* wi = WP_CurrentWeapon();
-    WP_ConsumeAmmo(wi);
+    if (!WP_ConsumeAmmo(CurrentSlot()))
+        return;
 
     if (!IsEffectFrame() || !PP_Enabled())
         return;
@@ -958,7 +999,7 @@ void (float ox) W_FireSpikes = {
         return;
     }
 
-    WP_ConsumeAmmo(wi);
+    WP_ConsumeAmmo(CurrentSlot());
     Attack_Finished(wi->attack_time);
 
     if (!IsEffectFrame())
@@ -1020,7 +1061,6 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
 }
 
 void WP_Attack() {
-    Slot slot = pstate_pred.current_slot;
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
     if (wi->predict_type == NO_PREDICT)
@@ -1032,7 +1072,7 @@ void WP_Attack() {
                   wi->weapon == WEAP_SUPER_NAILGUN ||
                   wi->weapon == WEAP_ASSAULT_CANNON;
 
-    if ((in_anim && !WP_CheckAmmo(wi)) || (!in_anim && !WP_ConsumeAmmo(wi)))
+    if ((in_anim && !WP_CheckAmmo(wi)) || (!in_anim && !WP_ConsumeAmmo(CurrentSlot())))
         return;
 
     // OK.  We're ready to pew.
@@ -1202,8 +1242,7 @@ DEFCVAR_FLOAT(r_drawviewmodel, 1);
 void WP_UpdateViewModel(entity pweap_ent) {
     float pmodelindex, pframe;
 
-    FO_WeapInfo* wi = FO_SlotWeapInfo(pstate_pred.playerclass,
-                                      pstate_pred.current_slot);
+    FO_WeapInfo* wi = WP_CurrentWeapon();
 
     // Note, even if the predicted weapon model is not visible we might still be
     // using it to generated predicted projectiles.  E.g. we need to keep
