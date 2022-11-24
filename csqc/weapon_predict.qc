@@ -422,6 +422,9 @@ void WP_Impulse() {
             break;
     }
 
+    if (match)
+        pstate_pred.impulse = 0;
+
     HandleButtonThrowgren(1, BUTTON5);
     HandleButtonThrowgren(2, BUTTON6);
 
@@ -429,7 +432,9 @@ void WP_Impulse() {
         return;
 
     // Impulses that ARE held by attack_finished / reloading.
-    if (!match) switch (pstate_pred.impulse) {
+    match = TRUE;
+    switch (pstate_pred.impulse) {
+        case 0: break;  // Handled above.
         case TF_RELOAD:
             WP_ReloadSlot(CurrentSlot());
             break;
@@ -1083,7 +1088,7 @@ void WP_Attack() {
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
                 if (PP_EnableGrenades())
-                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER ?
+                    W_FireGrenade(wi->weapon == WEAP_GRENADE_LAUNCHER || prematch ?
                                   GREN_RED : GREN_PIPE);
                 else
                     Pred_Sound(SND_GREN);
