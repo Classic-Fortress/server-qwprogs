@@ -462,6 +462,7 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
 		localcmd("stop\n");
 		return;
 	}

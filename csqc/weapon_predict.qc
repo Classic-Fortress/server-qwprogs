@@ -17,47 +17,25 @@ float WP_MinPing() {
 
 void WP_UpdateViewModel(entity pweap_ent);
 
-static inline float sq(float x) { return x * x; }
-
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
         print("CSQC: ", __VA_ARGS__); \
     } else { print(__VA_ARGS__); } } while(0)
 
-#define NUM_PING_SAMPLES 20
-
-struct {
-    float s1, s2, count;
-} avg_ping;
+DECLARE_MOVING_AVG(avg_ping, 20);
 
 static void update_avg_ping() {
-    static float samples[NUM_PING_SAMPLES];
-
     // We use a fairly low clamp here because:
     //  a) We want to limit the effect of momentary total loss
     //  b) We actually want high pings to have low effective variance and
     //     trigger it on consistently.
-    float new = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 200);
+    float newv = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 200);
 
-    float idx = avg_ping.count++ % NUM_PING_SAMPLES;
-    float old = samples[idx];
-    samples[idx] = new;
-
-    avg_ping.s1 += new - old;
-    avg_ping.s2 += sq(new) - sq(old);
+    update_online_avg(&avg_ping, newv);
 }
 
 static float fill_avg_ping(float* mean, float* variance) {
-    float n = max(min(NUM_PING_SAMPLES, avg_ping.count), 2);
-    *mean = avg_ping.s1 / n;
-    *variance = (avg_ping.s2 - sq(avg_ping.s1)/n) / (n - 1);
-    return n;
-}
-
-inline float get_avg_ping() {
-    float avg, variance;
-    fill_avg_ping(&avg, &variance);
-    return avg;
+    return read_online_avg(&avg_ping, mean, variance);
 }
 
 float csqc_get_user_setting(string s_short, string s_long, string def);
@@ -200,10 +178,10 @@ void WPP_Status() {
 void WPP_UpdateEnable(float force) {
     if (time > next_ping_update) {
         update_avg_ping();
-        next_ping_update = time + ENABLE_CHECK_PERIOD / NUM_PING_SAMPLES;
+        next_ping_update = time + ENABLE_CHECK_PERIOD / avg_ping.samples.max_count;
     }
 
-    if (avg_ping.count < NUM_PING_SAMPLES / 2)
+    if (avg_ping.samples.count < 5)
         return;  // Skip until we have a useful number of samples.
 
     if (!force && time < next_wpp_enable_check)
@@ -736,6 +714,7 @@ void FO_PP_Init() {
     // Entity we'll attach locally generated sound to.
     pred_sound_entity = spawn();
 
+    INIT_MOVING_AVG(avg_ping);
     InitFppProjectiles();
 
     for (float i = 0; i < trail_table.length; i++) {
@@ -1293,4 +1272,3 @@ void InitWeapPredEnt(entity pe) {
 
     pengine.pweap_ent = self;
 }
-
