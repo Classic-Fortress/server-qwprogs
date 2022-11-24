@@ -18,6 +18,7 @@ struct antilag_settings_t {
 .float client_time;              // A stable/predictable client clock
 .float client_ping;              // ping used for prediction
 .float last_remote_client_time;  // For monoticity
+.float client_lastupdate;
 
 .void() client_think;            // client-time relative think
 .float client_thinkindex;

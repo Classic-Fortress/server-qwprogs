@@ -169,7 +169,7 @@ float Phys_Adv_Linear(entity e, float dt, float phys_flags) {
     return dt;
 }
 
-var void(entity e) RewindSyncTime;
+var void(entity e, float step) RewindSyncTime;
 
 static void Phys_CapVel(entity e) {
     static const float limit = 32 / phys_tic;
@@ -199,9 +199,9 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
             break;
         }
 
-        if (phys_flags & PHYSF_REWIND_PLAYERS)
-            RewindSyncTime(e);
         step = min(phys_tic, delta);
+        if (phys_flags & PHYSF_REWIND_PLAYERS)
+            RewindSyncTime(e, step);
 
         if (IsClownMode(CLOWN_PROJ_GRAVITY))
             e.velocity_z += -fo_config.clown_grav * step;
