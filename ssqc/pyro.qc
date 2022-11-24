@@ -601,7 +601,7 @@ void () IncendiaryRadius = {
     WriteCoord(MSG_MULTICAST, self.origin_y);
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () IncendiaryRadius_OZTF = {
@@ -611,7 +611,10 @@ void () IncendiaryRadius_OZTF = {
     else
         damg = 92;
     deathmsg = 15;
-    T_RadiusDamage(self, self.owner, damg, other);
+
+    entity ignore_self = AntilagKnock(self, damg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, damg, other, ignore_self);
+
     self.origin = (self.origin - (8 * normalize (self.velocity)));
     WriteByte(4, 23);
     WriteByte(4, 3);
@@ -619,7 +622,7 @@ void () IncendiaryRadius_OZTF = {
     WriteCoord(4, self.origin_y);
     WriteCoord(4, self.origin_z);
     multicast(self.origin, 1);
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () T_IncendiaryTouch = {
@@ -628,8 +631,13 @@ void () T_IncendiaryTouch = {
     if (other == self.owner) {
         return;
     }
+
+    if (self.voided)
+        return;
+    self.voided = 1;
+
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        remove(self);
+        dremove_sent(self);
         return;
     }
     self.effects = self.effects | 4;

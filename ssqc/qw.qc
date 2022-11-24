@@ -13,6 +13,8 @@ struct antilag_settings_t {
     float rewind_detpipe;
 } antilag_settings;
 
+.vector antilag_origin;
+
 .float client_time;              // A stable/predictable client clock
 .float client_ping;              // ping used for prediction
 .float last_remote_client_time;  // For monoticity

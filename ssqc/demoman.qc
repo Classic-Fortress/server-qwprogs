@@ -40,7 +40,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
             pipes[i].voided = 1;
 
             RenderExplosion(pipes[i].origin);
-            RemoveDeferred(pipes[i]);
+            dremove(pipes[i]);
         }
     }
 

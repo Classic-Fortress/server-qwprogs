@@ -1039,6 +1039,46 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
+.float al_dmg;
+
+static void Antilag_Knock(entity e) {
+    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    dremove(e);
+}
+
+void T_Knock_Antilag() {
+    Antilag_Knock(self);
+}
+
+float AntilagKnock(entity e, float dmg) {
+    if (!RewindFlagEnabled(REWIND_PROJ_SELFKNOCK) || e.s_time == 0)
+        return FALSE;
+
+    entity knock_e = spawn();
+
+    setorigin(knock_e, e.origin);
+    knock_e.s_origin = e.s_origin;
+    knock_e.owner = e.owner;
+    knock_e.classname = e.classname;
+    knock_e.oldenemy = other;
+    knock_e.al_dmg = dmg;
+
+    vector diff = e.origin - e.s_origin;
+    float ttime = vlen(diff) / vlen(e.velocity);
+    float dtime = time - e.s_time;
+
+    float delay = ttime - dtime;
+
+    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+        knock_e.think = T_Knock_Antilag;
+        knock_e.nextthink = time + delay;
+    } else {
+        Antilag_Knock(knock_e);
+    }
+
+    return TRUE;
+}
+
 void () T_MissileTouch = {
     local float damg;
 
@@ -1047,7 +1087,7 @@ void () T_MissileTouch = {
     self.voided = 1;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     damg = 92 + random() * 20;
@@ -1058,10 +1098,9 @@ void () T_MissileTouch = {
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
 
-    if (self.owner.classname == "building_sentrygun")
-        T_RadiusDamage(self, self.owner, 150, other);
-    else
-        T_RadiusDamage(self, self.owner, 92, other);
+    float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
+    entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
@@ -1072,7 +1111,7 @@ void () T_MissileTouch = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () W_FireRocket = {
@@ -1426,7 +1465,7 @@ void () spike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1439,9 +1478,8 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                     TF_TD_NAIL);
         }
-        
-        dremove(self);
-        
+
+        dremove_sent(self);
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1454,17 +1492,16 @@ void () spike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
-    
-    if(other.classname == "worldspawn" && spurs_enabled > 0)
-    {
-		if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 || self.owner.playerclass == PC_SPY && spurs_spy == 1)
-		{
-			ConvertToSpurs(self);
-			return;
-		}
-    }
-		
-    dremove(self);
+
+        if(other.classname == "worldspawn" && spurs_enabled > 0) {
+            if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 ||
+               self.owner.playerclass == PC_SPY && spurs_spy == 1) {
+                ConvertToSpurs(self);
+                return;
+            }
+        }
+
+        dremove_sent(self);
    }
 };
 
@@ -1482,7 +1519,7 @@ void () superspike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1509,7 +1546,7 @@ void () superspike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
     }
-    dremove(self);
+    dremove_sent(self);
 };
 
 void W_UpdateWeaponModel(entity pl) {

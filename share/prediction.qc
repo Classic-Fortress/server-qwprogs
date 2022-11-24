@@ -2,16 +2,9 @@
 #define ENT_WEAPONPRED 101
 #define ENT_PROJECTILE 102
 
-const float SERVER_FPS = 77;
-const float SERVER_FRAME_DT = 1/SERVER_FPS;
-const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
-
 // Below apply to both CSQC & SSQC ents
 .float fpp_index;  // Projectile type
 .float antilag_ms;
-#ifdef CSQC
-.float s_time;
-#endif
 
 string wp_version = "v0.4-phys";
 
@@ -362,10 +355,11 @@ float() ReadShort = #362;
 float() ReadCoord = #364;
 float() ReadAngle = #365;
 float() ReadFloat = #367;
+float() ReadEntity = #368;
 
 void InitWeapPredEnt(entity e);
 void WP_ServerUpdate();
-void InitProjectileEnt();
+void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
@@ -386,6 +380,10 @@ void EntUpdate_Config() {
     COMM(Byte, max_rewind_slow_projectile_ms);
     COMM(Byte, max_rewind_fast_projectile_ms);
     COMM(Byte, rewind_fast_projectile_thresh);
+    COMM(Byte, rewind_flags);
+    COMM(Byte, no_forward_hg);
+    COMM(Byte, clown_flags);
+    COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
     COMM(Byte, wp_global_enable);
     COMM(Byte, wp_global_disable);
@@ -394,9 +392,6 @@ void EntUpdate_Config() {
     COMM(Byte, wpp_global_enable);
     COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
-    COMM(Byte, no_forward_hg);
-    COMM(Byte, clown_settings);
-    COMM(Float, clown_grav);
 
 #ifdef SSQC
     return TRUE;
@@ -493,8 +488,6 @@ float PP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
     WriteByte(MSG_ENTITY, sendflags);
 #else
-void WP_SyncPhysProjectile();
-
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
@@ -504,20 +497,23 @@ void EntUpdate_Projectile(float isnew) {
 #endif
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp_index);
-        COMM(Byte, antilag_ms);
+        COMM(Short, antilag_ms);
+        COMMD(Entity, owner_entnum, owner);
     }
 
     if (sendflags & FOPP_POS) {
-        COMMD(Coord, s_origin[0], origin[0]);
-        COMMD(Coord, s_origin[1], origin[1]);
-        COMMD(Coord, s_origin[2], origin[2]);
-
+        COMM(Coord, origin[0]);
+        COMM(Coord, origin[1]);
+        COMM(Coord, origin[2]);
         COMM(Coord, velocity[0]);
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
         COMM(Float, phys_time);
-        COMM(Float, phys_carry);
+#ifdef CSQC
+        self.s_origin = self.origin;
+        self.s_time = self.phys_time;
+#endif
     }
 
     if (sendflags & FOPP_ANGLES) {
@@ -534,14 +530,10 @@ void EntUpdate_Projectile(float isnew) {
     }
 
 #ifdef SSQC
-    WriteEntity(MSG_ENTITY, self.owner);
     return TRUE;
 #else
-    self.owner_entnum = readentitynum();
     if (isnew)
-        InitProjectileEnt();
-    else
-        WP_SyncPhysProjectile();
+        InitProjectileEnt(sendflags);
 #endif
 }
 #undef COMMD
@@ -553,13 +545,14 @@ void WeapPred_InitDefaultConfig() {
     fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
+    fo_config.rewind_flags = 0;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
     fo_config.rewind_fast_projectile_thresh = 1500;
     fo_config.wp_default_min_ping_ms = 40;
     fo_config.no_forward_hg = 1;
-    fo_config.clown_settings = 0;
+    fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
 }
 
@@ -600,7 +593,8 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
     CONFIG_UPDATE("nfhg", no_forward_hg);
-    CONFIG_UPDATE("clown", clown_settings);
+    CONFIG_UPDATE("rewind", rewind_flags);
+    CONFIG_UPDATE("clown", clown_flags);
     CONFIG_UPDATE("clown_grav", clown_grav);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
@@ -710,11 +704,7 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
 
 void FO_Phys() {
-    float delta = time - self.phys_time;
-    if (delta > 0) {
-        Phys_Advance(self, delta);
-        self.phys_time = time;
-    }
+    Phys_Advance(self, time, 0);
 
     float held_time, thinktime;
     // Once we lift physics, think execution comes with it.
@@ -775,7 +765,6 @@ void FOProj_Finalize(entity mis) {
 
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
-    mis.phys_time = time;
     if (fo_config.qc_physics)
         mis.customphysics = FO_Phys;
 

@@ -12,18 +12,17 @@ void AssCanBulletThink ()
 
 void AssCanBulletTouch()
 {
-	if (self.voided) 
-        return;				// Marked for removal
-    
+    if (self.voided)
+        return;  // Marked for removal
     self.voided = TRUE;
 
-	if (pointcontents(self.origin) == CONTENT_SKY) {
+    if (pointcontents(self.origin) == CONTENT_SKY) {
         dremove(self);
         return;
     }
 
-	if (other == self.owner) 
-        return;			// Touching self, do nothing
+    if (other == self.owner)
+        return;  // Touching self, do nothing
 
     deathmsg = self.weapon;
     if (other.health)
@@ -49,7 +48,7 @@ void AssCanBulletTouch()
         multicast(self.origin, MULTICAST_PVS);
     }
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index)
