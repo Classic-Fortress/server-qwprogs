@@ -17,11 +17,11 @@ void (entity te) dremove =
 };
 
 void dremove_sent(entity te) {
-    static const float epsilon = SERVER_FRAME_DT;
+    static const float epsilon = 2 * SERVER_FRAME_DT;
     if (time > te.s_time + epsilon) {
         dremove(self);
     } else {
-        self.nextthink = time + 2 * epsilon;
+        self.nextthink = time + epsilon;
         self.think = SUB_Remove;
     }
 }
