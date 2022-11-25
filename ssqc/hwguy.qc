@@ -12,18 +12,17 @@ void AssCanBulletThink ()
 
 void AssCanBulletTouch()
 {
-	if (self.voided) 
-        return;				// Marked for removal
-    
+    if (self.voided)
+        return;  // Marked for removal
     self.voided = TRUE;
 
-	if (pointcontents(self.origin) == CONTENT_SKY) {
+    if (pointcontents(self.origin) == CONTENT_SKY) {
         dremove(self);
         return;
     }
 
-	if (other == self.owner) 
-        return;			// Touching self, do nothing
+    if (other == self.owner)
+        return;  // Touching self, do nothing
 
     deathmsg = self.weapon;
     if (other.health)
@@ -49,41 +48,41 @@ void AssCanBulletTouch()
         multicast(self.origin, MULTICAST_PVS);
     }
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index)
 {
     local float num;
 
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.classname = "proj_bullet";
+    entity proj = FOProj_Create(FPP_ASSAULT_CANNON);
+    proj.owner = self;
+    proj.classname = "proj_bullet";
 
-    newmis.movetype = MOVETYPE_FLY;  // Small collision
+    proj.movetype = MOVETYPE_FLY;  // Small collision
 
-    newmis.solid = SOLID_BBOX;
-    newmis.touch = AssCanBulletTouch;
+    proj.solid = SOLID_BBOX;
+    proj.touch = AssCanBulletTouch;
 
     if (asscanrange > 0) {
         num = (1 / proj_speed) * asscanrange;
-        newmis.think = AssCanBulletThink;
-        newmis.nextthink = time + num;       // Projectile range / gravity
+        proj.think = AssCanBulletThink;
+        proj.nextthink = time + num;       // Projectile range / gravity
     } else {
-        newmis.think = SUB_Remove;
-        newmis.nextthink = time + 5;           // Stop projectile going forever
+        proj.think = SUB_Remove;
+        proj.nextthink = time + 5;           // Stop projectile going forever
     }
 
-    newmis.frame = hwguy_random()*15;       // Full range of sizes
-    newmis.skin = 16 + hwguy_random()*7;    // Bright colours
-    newmis.weapon = DMSG_ASSAULTCANNON;
+    proj.frame = hwguy_random()*15;       // Full range of sizes
+    proj.skin = 16 + hwguy_random()*7;    // Bright colours
+    proj.weapon = DMSG_ASSAULTCANNON;
 
-    newmis.velocity = dir * proj_speed;        // Constant speed multiplier
-    newmis.angles = vectoangles(dir);          // Create direction angle
-    setorigin (newmis, org);                   // Move to starting position
+    proj.velocity = dir * proj_speed;        // Constant speed multiplier
+    proj.angles = vectoangles(dir);          // Create direction angle
+    setorigin (proj, org);                   // Move to starting position
 
-    newmis.wpp_aux = self.ammo_shells * 100 + index;
-    FOProj_Init(FPP_ASSAULT_CANNON, newmis);
+    proj.wpp_aux = self.ammo_shells * 100 + index;
+    FOProj_Finalize(proj);
 }
 
 void StopAssCan() {

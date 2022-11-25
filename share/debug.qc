@@ -1,14 +1,28 @@
 #ifdef SSQC
 
+#define IS_CSQC 0
+#define IS_SSQC 1
+
 // printf that works in any context
 #define printf(...) bprint(PRINT_HIGH, sprintf(__VA_ARGS__))
 #define printd(...) dprint(sprintf(__VA_ARGS__))
 
-#else
+#elif defined(CSQC)
+
+#define IS_CSQC 1
+#define IS_SSQC 0
 
 #define printf(...) print(sprintf(__VA_ARGS__))
 
 #endif
+
+inline string qc_prefix() {
+#ifdef SSQC
+    return "SSQC";
+#else
+    return "CSQC";
+#endif
+}
 
 #define MSEC 0.001
 #define SEC  1

@@ -13,9 +13,12 @@ struct antilag_settings_t {
     float rewind_detpipe;
 } antilag_settings;
 
+.vector antilag_origin;
+
 .float client_time;              // A stable/predictable client clock
 .float client_ping;              // ping used for prediction
 .float last_remote_client_time;  // For monoticity
+.float client_lastupdate;
 
 .void() client_think;            // client-time relative think
 .float client_thinkindex;
@@ -749,7 +752,7 @@ float gametime;
 string gametimestamp;
 float logfilehandle;
 float canlog;
-.string grenadename;
+.int gren_type;
 .float classtime;
 .float goalrunningtime;
 
@@ -771,6 +774,7 @@ float FO_FlashDimension;
 // precise grenades
 .entity grenade_timer;
 .float last_throw;
+.float last_prime;
 
 // allow for default goal state
 .float default_group_no;

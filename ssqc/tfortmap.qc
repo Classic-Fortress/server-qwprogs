@@ -888,27 +888,17 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 if (Player.ammo_detpack > Player.maxammo_detpack) {
                     Player.ammo_detpack = Player.maxammo_detpack;
                 }
-                if (Player.tfstate & TFSTATE_GRENPRIMED) {
+                if (Player.tfstate & TFSTATE_GREN_MASK_PRIMED) {
                     te = find(world, classname, "primer");
                     while (te) {
                         if (te.owner == Player) {
                             if ((te.impulse == TF_GRENADE_2) &&
                                     (Player.no_grenades_2 <= 0)) {
-                                Player.tfstate =
-                                    Player.tfstate -
-                                    (Player.tfstate & TFSTATE_GRENPRIMED);
-                                Player.tfstate =
-                                    Player.tfstate -
-                                    (Player.tfstate & TFSTATE_GRENTHROWING);
+                                Player.tfstate &= TFSTATE_GREN_MASK_ALL;
                                 dremove(te);
                             } else if ((te.impulse == TF_GRENADE_1) &&
                                     (Player.no_grenades_1 <= 0)) {
-                                Player.tfstate =
-                                    Player.tfstate -
-                                    (Player.tfstate & TFSTATE_GRENPRIMED);
-                                Player.tfstate =
-                                    Player.tfstate -
-                                    (Player.tfstate & TFSTATE_GRENTHROWING);
+                                Player.tfstate &= TFSTATE_GREN_MASK_ALL;
                                 dremove(te);
                             }
                             te = world;
@@ -1162,27 +1152,17 @@ void (entity Goal, entity Player) RemoveResults = {
     if (Player.ammo_detpack > Player.maxammo_detpack)
         Player.ammo_detpack = Player.maxammo_detpack;
 
-    if (Player.tfstate & TFSTATE_GRENPRIMED) {
+    if (Player.tfstate & TFSTATE_GREN_MASK_PRIMED) {
         te = find(world, classname, "primer");
         while (te) {
             if (te.owner == Player) {
                 if ((te.impulse == TF_GRENADE_2) &&
                         (Player.no_grenades_2 <= 0)) {
-                    Player.tfstate =
-                        Player.tfstate -
-                        (Player.tfstate & TFSTATE_GRENPRIMED);
-                    Player.tfstate =
-                        Player.tfstate -
-                        (Player.tfstate & TFSTATE_GRENTHROWING);
+                    Player.tfstate &= ~TFSTATE_GREN_MASK_ALL;
                     dremove(te);
                 } else if ((te.impulse == TF_GRENADE_1) &&
                         (Player.no_grenades_1 <= 0)) {
-                    Player.tfstate =
-                        Player.tfstate -
-                        (Player.tfstate & TFSTATE_GRENPRIMED);
-                    Player.tfstate =
-                        Player.tfstate -
-                        (Player.tfstate & TFSTATE_GRENTHROWING);
+                    Player.tfstate &= ~TFSTATE_GREN_MASK_ALL;
                     dremove(te);
                 }
                 te = world;

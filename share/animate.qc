@@ -156,8 +156,8 @@ static void SuperDamageSound() {} // TODO
 static inline vector get_velocity() { return pmove_vel; }
 static inline void set_weapon_frame(int f) { self.frame = f; }
 static inline void muzzleflash() {}
-float* WP_ClipFired();
-static inline float get_clip_fired() { return *WP_ClipFired(); }
+float WP_CurrentClipFired();
+static inline float get_clip_fired() { return WP_CurrentClipFired(); }
 
 void player_run() {
     pstate_pred.client_nextthink = 0;
@@ -206,9 +206,8 @@ void player_assault_cannon() {
 }
 
 void Attack_Finished(float attack_time);
-float WP_ReloadIfNeeded(FO_WeapInfo* wi);
-FO_WeapInfo* WP_CurrentWeapon();
-static inline float FO_CheckForReload() { return WP_ReloadIfNeeded(WP_CurrentWeapon()); }
+float WP_ReloadCurrentIfNeeded();
+static inline float FO_CheckForReload() { return WP_ReloadCurrentIfNeeded(); }
 #endif
 
 void W_FireSpikes(float ox);

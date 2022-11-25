@@ -40,7 +40,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
             pipes[i].voided = 1;
 
             RenderExplosion(pipes[i].origin);
-            RemoveDeferred(pipes[i]);
+            dremove(pipes[i]);
         }
     }
 
@@ -100,7 +100,7 @@ void (vector org, entity shooter) MirvGrenadeLaunch = {
     newmis.solid = SOLID_BBOX;
 
     newmis.classname = "grenade";
-    newmis.grenadename = "mirvsinglegrenade";
+    newmis.gren_type = GREN_MIRV;
     newmis.weapon = DMSG_GREN_MIRV;
     newmis.touch = NormalGrenadeTouch;
     newmis.think = NormalGrenadeExplode;

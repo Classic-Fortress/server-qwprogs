@@ -1039,6 +1039,46 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
+.float al_dmg;
+
+static void Antilag_Knock(entity e) {
+    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    dremove(e);
+}
+
+void T_Knock_Antilag() {
+    Antilag_Knock(self);
+}
+
+float AntilagKnock(entity e, float dmg) {
+    if (!RewindFlagEnabled(REWIND_PROJ_SELFKNOCK) || e.s_time == 0)
+        return FALSE;
+
+    entity knock_e = spawn();
+
+    setorigin(knock_e, e.origin);
+    knock_e.s_origin = e.s_origin;
+    knock_e.owner = e.owner;
+    knock_e.classname = e.classname;
+    knock_e.oldenemy = other;
+    knock_e.al_dmg = dmg;
+
+    vector diff = e.origin - e.s_origin;
+    float ttime = vlen(diff) / vlen(e.velocity);
+    float dtime = time - e.s_time;
+
+    float delay = ttime - dtime;
+
+    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+        knock_e.think = T_Knock_Antilag;
+        knock_e.nextthink = time + delay;
+    } else {
+        Antilag_Knock(knock_e);
+    }
+
+    return TRUE;
+}
+
 void () T_MissileTouch = {
     local float damg;
 
@@ -1047,7 +1087,7 @@ void () T_MissileTouch = {
     self.voided = 1;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     damg = 92 + random() * 20;
@@ -1058,10 +1098,9 @@ void () T_MissileTouch = {
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
 
-    if (self.owner.classname == "building_sentrygun")
-        T_RadiusDamage(self, self.owner, 150, other);
-    else
-        T_RadiusDamage(self, self.owner, 92, other);
+    float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
+    entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
@@ -1072,30 +1111,30 @@ void () T_MissileTouch = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () W_FireRocket = {
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(FPP_ROCKET);
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
     makevectors(self.v_angle);
-    newmis.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
-    newmis.angles = vectoangles(newmis.velocity);
+    proj.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
+    proj.angles = vectoangles(proj.velocity);
 
-    newmis.touch = T_MissileTouch;
-    newmis.voided = 0;
+    proj.touch = T_MissileTouch;
+    proj.voided = 0;
 
-    newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
 
-    newmis.weapon = DMSG_ROCKETL;
-    newmis.classname = "proj_rocket";
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    proj.weapon = DMSG_ROCKETL;
+    proj.classname = "proj_rocket";
+    proj.origin = self.origin + v_forward * 8 + '0 0 16';
 
-    FOProj_Init(FPP_ROCKET, newmis);
+    FOProj_Finalize(proj);
 
     self.ammo_rockets = self.ammo_rockets - 1;
     KickPlayer(-2, self);
@@ -1275,81 +1314,77 @@ void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
     Pred_Sound(SND_GREN);
     KickPlayer(-2, self);
-    newmis = spawn();
-    newmis.voided = 0;
-    newmis.owner = self;
-    newmis.movetype = 10;
-    newmis.solid = 2;
+
+    entity proj = FOProj_Create(FPP_GRENADE);
+    proj.voided = 0;
+    proj.owner = self;
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
     if (FO_CurrentWeapon() == WEAP_GRENADE_LAUNCHER || cb_prematch) {
-        newmis.weapon = 5;
-        newmis.classname = "grenade";
-        newmis.skin = 1;
-        newmis.touch = GrenadeTouch;
-        newmis.nextthink = time + 2.5;
+        proj.weapon = 5;
+        proj.classname = "grenade";
+        proj.touch = GrenadeTouch;
+        proj.nextthink = time + 2.5;
+        proj.gren_type = GREN_RED;
     } else {
         if (old_pipecooldown)
             self.pipecooldown = time + 0.8;
         else
             self.pipecooldown = time + 0.5;
         ExplodeOldestPipebomb();
-        newmis.classname = "pipebomb";
-        newmis.skin = 2;
-        newmis.touch = PipebombTouch;
-        newmis.nextthink = time + 120;
-        newmis.weapon = 11;
-        newmis.team_no = self.team_no;
+        proj.classname = "pipebomb";
+        proj.touch = PipebombTouch;
+        proj.nextthink = time + 120;
+        proj.weapon = 11;
+        proj.team_no = self.team_no;
+        proj.gren_type = GREN_PIPE;
     }
     makevectors(self.v_angle);
     if (self.v_angle_x) {
-        newmis.velocity =
-            (((v_forward * 600) + (v_up * 200)) +
-             ((crandom() * v_right) * 10)) + ((crandom() * v_up) * 10);
+        proj.velocity = (v_forward * 600) +
+            (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
+            (shared_crandom(PRNG_WEAP) * 10 * v_right);
     } else {
-        newmis.velocity = aim(self, 10000);
-        newmis.velocity = newmis.velocity * 600;
-        newmis.velocity_z = 200;
+        proj.velocity = aim(self, 10000);
+        proj.velocity = proj.velocity * 600;
+        proj.velocity_z = 200;
     }
-    newmis.avelocity = '300 300 300';
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.think = GrenadeExplode;
-    FO_SetModel(newmis, "progs/grenade2.mdl");
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, self.origin);
+    proj.angles = vectoangles(proj.velocity);
+    proj.think = GrenadeExplode;
+    setorigin(proj, self.origin);
 
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
+    FOProj_Finalize(proj);
 };
 
 void () spike_touch;
 void () superspike_touch;
 
 entity (int fpp_type, vector offset) W_FireNail = {
-    newmis = spawn();
-    newmis.voided = 0;
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(fpp_type);
+    proj.voided = 0;
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
-    newmis.angles = vectoangles(aim(self, 1000));
-    newmis.classname = "spike";
-    newmis.think = SUB_Remove;
-    newmis.nextthink = time + 6;
-    setorigin(newmis, self.origin + offset + '0 0 16');
+    proj.angles = vectoangles(aim(self, 1000));
+    proj.classname = "spike";
+    proj.think = SUB_Remove;
+    proj.nextthink = time + 6;
+    setorigin(proj, self.origin + offset + '0 0 16');
 
-    newmis.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
+    proj.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
 
     if (fpp_type == FPP_NAIL) {
-        newmis.weapon = DMSG_NAILGUN;
-        newmis.touch = spike_touch;
+        proj.weapon = DMSG_NAILGUN;
+        proj.touch = spike_touch;
     } else { // fpp_type == FPP_SUPER_NAIL
-        newmis.touch = superspike_touch;
-        newmis.weapon = DMSG_SNAILGUN;
+        proj.weapon = DMSG_SNAILGUN;
+        proj.touch = superspike_touch;
     }
 
-    FOProj_Init(fpp_type, newmis);
+    FOProj_Finalize(proj);
 
-    return newmis;
+    return proj;
 };
 
 void (float ox) W_FireSpikes = {
@@ -1430,7 +1465,7 @@ void () spike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1443,9 +1478,8 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                     TF_TD_NAIL);
         }
-        
-        dremove(self);
-        
+
+        dremove_sent(self);
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1458,17 +1492,16 @@ void () spike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
-    
-    if(other.classname == "worldspawn" && spurs_enabled > 0)
-    {
-		if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 || self.owner.playerclass == PC_SPY && spurs_spy == 1)
-		{
-			ConvertToSpurs(self);
-			return;
-		}
-    }
-		
-    dremove(self);
+
+        if(other.classname == "worldspawn" && spurs_enabled > 0) {
+            if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 ||
+               self.owner.playerclass == PC_SPY && spurs_spy == 1) {
+                ConvertToSpurs(self);
+                return;
+            }
+        }
+
+        dremove_sent(self);
    }
 };
 
@@ -1486,7 +1519,7 @@ void () superspike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1513,7 +1546,7 @@ void () superspike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
     }
-    dremove(self);
+    dremove_sent(self);
 };
 
 void W_UpdateWeaponModel(entity pl) {
@@ -1630,13 +1663,13 @@ void () W_Attack = {
 
     if (ws.weapon == WEAP_AXE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(PRNG_AXE) < 0.5)
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_axe1();
         else
             player_axeb1();
     } else if (ws.weapon == WEAP_KNIFE) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(PRNG_AXE) < 0.5)
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_knife1();
         else
             player_knifeb1();
@@ -1712,7 +1745,7 @@ void () W_Attack = {
         }
     } else if (ws.weapon == WEAP_MEDIKIT) {
         Pred_Sound(SND_AXE);
-        if (shared_prng(PRNG_AXE) < 0.5)
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_medikit1();
         else
             player_medikitb1();
@@ -2501,7 +2534,6 @@ void () W_WeaponFrame = {
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
         W_ChangeWeaponLast();
         self.impulse = 0;
-        return;
     }
 
     // +slot/-slot handle attack; we only need to swap back to last weapon.

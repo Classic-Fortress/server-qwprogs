@@ -476,22 +476,17 @@ void () RestoreDefaultWeapon = {
 void () TeamFortress_ReloadNext = {
     Slot slot = self.current_slot;
 
-    if (!FO_CanReload(slot)) {
-        int base = SlotIndex(slot);
+    do {
+        slot = FO_FindPrevNextWeaponSlot(self.playerclass, slot, FALSE);
 
-        for (int i = 1; i < TF_NUM_SLOTS; i++) {
-            slot = MakeSlot(1 + ((base + 1) % TF_NUM_SLOTS));
-            if (FO_CanReload(slot))
-                break;
+        if (FO_CanReload(slot)) {
+            FO_ReloadSlot(slot, FALSE);
+            RestoreDefaultWeapon();
+            return;
         }
-    }
+    } while (!IsSameSlot(slot, self.current_slot));
 
-    if (FO_CanReload(slot)) {
-        FO_ReloadSlot(slot, FALSE);
-        RestoreDefaultWeapon();
-    } else {
-        sprint(self, PRINT_HIGH, "All clips full\n");
-    }
+    sprint_pred(self, PRINT_HIGH, "All clips full\n");
 }
 
 entity TeamFortress_GetPracticeSpawn(entity e)  =
