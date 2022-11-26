@@ -1078,7 +1078,7 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
             bprint (2, "All players ready, starting match\n");
-
+            localcmd("localinfo clown 0");  // Disable any clown settings.
             StartTimer ();
         }
         return 1;
