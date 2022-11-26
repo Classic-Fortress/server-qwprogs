@@ -765,18 +765,17 @@ trail_table_entry trail_table[] = {
     {{"TE_RAILTRAIL"}},
 };
 
-static inline float phys_adv_dt() {
-    float adj_ping = max(pstate_pred.client_ping, 0);
-    return min(CVARF(wpp_phys_adv_ms), adj_ping) / 1000.0;
+float get_phys_time_nudge_dt(entity e) {
+    float nudge, adj_ping = max(pstate_pred.client_ping, 0);
+    if (e.owner_entnum != player_localentnum)
+        nudge = CVARF(wpp_phys_adv_ms);
+    else
+        nudge = CVARF(wpp_phys_local_adv_ms);
+    return min(nudge, adj_ping) / 1000.0;
 }
 
-float get_phys_time(entity e) {
-    float ptime = time, adv_dt;
-    if (e.owner_entnum && e.owner_entnum != player_localentnum)
-        adv_dt = phys_adv_dt();
-    else
-        adv_dt = CVARF(wpp_phys_local_adv_ms) / 1000.0;
-    return ptime + adv_dt;
+inline float get_phys_time(entity e) {
+    return time + get_phys_time_nudge_dt(e);
 }
 
 void FO_PP_Init() {
