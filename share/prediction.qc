@@ -407,6 +407,11 @@ float WP_SendEntity(entity to_player, float sendflags) {
     if (to_player != self.owner)
         return FALSE;
 
+    // Initial send doesn't respect the set mask.  Maybe setsendneeded fixes
+    // this but that would need an sv binary upgrade.  Work around for now.
+    if (sendflags == 0xFFFFFF)
+        sendflags = self.SendFlags;
+
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
 #else
@@ -485,6 +490,10 @@ void EntUpdate_WeaponPred(float isnew) {
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
 float PP_SendEntity(entity to_player, float sendflags) {
+    // Initial send doesn't respect the set mask.  Maybe setsendneeded fixes
+    // this but that would need an sv binary upgrade.  Work around for now.
+    if (sendflags == 0xFFFFFF)
+        sendflags = self.SendFlags;
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
     WriteByte(MSG_ENTITY, sendflags);
 #else
