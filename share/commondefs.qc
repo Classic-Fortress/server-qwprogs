@@ -1,5 +1,6 @@
 struct FPPState {
     int index;
+    float expires_at;
 
     union {
         int aux;

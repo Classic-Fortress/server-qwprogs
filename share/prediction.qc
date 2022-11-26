@@ -30,6 +30,7 @@ enumflags {
     FOPP_AUX,
     FOPP_ANGLES,
     FOPP_MOVETYPE,
+    FOPP_EXPIRY,
     FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
@@ -453,6 +454,8 @@ float PP_SendEntity(entity to_player, float sendflags) {
         sendflags = FOPP_INIT | FOPP_POS;
         if (self.fpp.aux)
             sendflags |= FOPP_AUX;
+        if (self.fpp.expires_at)
+            sendflags |= FOPP_EXPIRY;
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
@@ -471,9 +474,10 @@ void EntUpdate_Projectile(float isnew) {
         COMMD(Entity, owner_entnum, owner);
     }
 
-    if (sendflags & FOPP_AUX) {
+    if (sendflags & FOPP_AUX)
         COMM(Short, fpp.aux);
-    }
+    if (sendflags & FOPP_EXPIRY)
+        COMM(Float, fpp.expires_at);
 
     if (sendflags & FOPP_POS) {
         COMM(Coord, origin[0]);
@@ -501,7 +505,6 @@ void EntUpdate_Projectile(float isnew) {
         if (self.movetype == MOVETYPE_FOLLOW)
             COMMD(Entity, aiment_num, aiment);
     }
-
 
 #ifdef SSQC
     return TRUE;

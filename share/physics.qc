@@ -3,6 +3,8 @@
 static const float phys_tic = 0.005;
 
 .float phys_time;  // Current physics time
+.float server_live_time;  // When an entity can first appear on server.  0 for
+                          // server-side ents.
 
 enumflags {
     PHYSB_ENABLED,
@@ -12,7 +14,8 @@ enumflags {
     PHYSF_CONSUME_ALL,
     PHYSF_REWIND_PLAYERS,
     PHYSF_FORWARD_KNOCK,
-    PHYSF_FAIL_STARTSOLID
+    PHYSF_FAIL_STARTSOLID,
+    PHYSF_SIM,
 };
 
 const float FL_FORWARD_KNOCK = FL_GODMODE;
@@ -53,7 +56,6 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     other = trace_ent;
     if (other.solid == SOLID_NOT)
         return;
-
 
     if (e.touch) {
         if (phys_flags & PHYSF_FORWARD_KNOCK)
@@ -98,9 +100,12 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     AugmentGrenadeImpact();
 
     if (CVARF(fo_phys_debug) & 1)
-        printf("CPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n", time, e.phys_time + dt,
+        printf("CPhys: Impact t=%0.3f pt=%0.3f sim=%d [%0.3f]\n", time, e.phys_time + dt,
+                phys_flags & PHYSF_SIM,
                 get_phys_time(e));
 }
+
+static void Phys_Expired(entity e, float phys_flags) {}
 
 static vector get_followed_origin() {
     if (!(float)getentity(self.aiment_num, GE_ACTIVE))
@@ -230,6 +235,12 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
         return 0;
     }
 
+    // If there's an expiry, make sure we get to the exact position.
+    if (e.fpp.expires_at && target_time > e.fpp.expires_at) {
+        target_time = e.fpp.expires_at;
+        phys_flags |= PHYSF_CONSUME_ALL;
+    }
+
     static float limit_eps = 0.0005;
     float limit = (phys_flags & PHYSF_CONSUME_ALL) ? limit_eps : phys_tic;
     float total = 0, dt = 0, step = 0, delta;
@@ -293,4 +304,39 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
         return 0;
     }
 }
+
+#ifdef CSQC
+.float phys_sim_last;
+.float phys_sim_voided_at;
+var float phys_sim_dt;
+
+void Phys_Sim(entity e) {
+    // TODO: Unvoid+undo if we make it past the void point.
+    if (phys_sim_dt < 0 || e.phys_sim_voided_at)
+        return;
+
+    float ptime = time + phys_sim_dt;
+    if (ptime < self.phys_sim_last + SERVER_FRAME_MS)
+        return;
+    self.phys_sim_last = ptime;
+
+    float held_phys_time = e.phys_time;
+    vector held_org = e.origin;
+    vector held_vel = e.velocity;
+    vector held_angles = e.angles;
+    float held_flags = e.flags;
+
+    Phys_Advance(e, ptime, PHYSF_SIM | PHYSF_CONSUME_ALL);
+
+    if (e.voided) {
+        e.phys_sim_voided_at = e.phys_time;
+        e.voided = 0;
+    }
+    e.phys_time = held_phys_time;
+    e.origin = held_org;
+    e.velocity = held_vel;
+    e.angles = held_angles;
+    e.flags = held_flags;
+}
+#endif
 #undef dot

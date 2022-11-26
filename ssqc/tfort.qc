@@ -853,6 +853,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
     proj.fpp.gren_type = gtype;
+    proj.fpp.expires_at = timer.heat;
     proj.skin = gdesc->skin;
     proj.touch = ste->touch;
     proj.think = ste->think;

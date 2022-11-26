@@ -320,10 +320,15 @@ void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
-// Corrections for when we can recognize that we missed a packet.
 void WP_ServerUpdate() {
+    // Force WF to zero, in case we missed a packet.
     if (pstate_server.attack_finished < pstate_server.client_time)
         pstate_server.weaponframe = 0;
+
+    if (CVARF(fo_wpp_beta) == 2)
+        phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
+    else
+        phys_sim_dt = -1;
 }
 
 static Slot InputToSlot(float input) {
@@ -911,6 +916,7 @@ float PP_PredrawActive() {
         return PREDRAW_NEXT;
 
     Phys_Advance(self, get_phys_time(self), 0);
+    Phys_Sim(self);
 
     // we need to space out the particles incase we're running at very high fps
     if (time > self.p_time) {
@@ -982,6 +988,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.starttime = time + uncorrected_dt;
   proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
+  proj.server_live_time = time + interp_dt();
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
