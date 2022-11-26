@@ -3,9 +3,8 @@ void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings(string);
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_Hud_Editor_List_Panels();
-void FO_Hud_Editor_Show_Panel(string panelid);
-void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
-void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
+void FO_Hud_Editor_Print_Panel_Setting(string, string setting);
+void FO_Hud_Editor_Set_Panel_Setting(string, string setting, string value);
 void Hud_WriteCfg(string path);
 void FO_LoadSettings();
 void FO_WriteSettings();
@@ -13,20 +12,34 @@ void AddGrenTimer(float grentype, float offset);
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+void Perf_Status();
+void FO_Hud_Init();
+float InFluid(vector point);
+float CalculateWaterLevel();
+void PlayCSJumpSounds();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
+
+DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-//     for (float i = 0; i < HudIcons.length; i++) {
-//         precache_pic(HudIcons[i].icon);
-//     }
+    //     for (float i = 0; i < HudIcons.length; i++) {
+    //         precache_pic(HudIcons[i].icon);
+    //     }
 
+    INIT_PERF_SAMPLER(frame_timing);
+    INIT_PERF_SAMPLER(hud_timing);
+    INIT_PERF_SAMPLER(hud_partial_timing);
+
+    FO_Hud_Init();
     FO_Weapons_Init();
     WeapPred_InitDefaultConfig();
     FO_PP_Init();       // Some of this is always used by custom projectiles.
@@ -39,11 +52,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_hud_save");
     registercommand("fo_hud_load");
 
-    registercvar(FOCMD_GRENTIMER, "1");
-    registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
-    registercvar(FOCMD_GRENTIMERVOLUME, "1");
-    registercvar(FOCMD_JUMPVOLUME, "1");
-
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
     registercommand("fo_menu_team");
@@ -55,7 +63,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
-    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
@@ -87,7 +94,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("vote_removemap");
 
     registercommand("wpp_status");
-    registercvar("fo_hud_idle_alpha", "0.3");
+    registercommand("perf_status");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
@@ -95,9 +102,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
     FO_LoadSettings();
-    
-    MenuPanel = getAnyHudPanelByNamePointer("menu");
-    
+
+    MenuPanel = getHudPanel(HUDP_MENU);
+
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -110,7 +117,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_offset = 0;
     current_vote = world;
     vote_list_filter = "";
-    MouseDown = 0;
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -118,7 +124,10 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
+    float fts = perf_start_sample(&frame_timing);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
@@ -131,42 +140,11 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
 
-    ScreenSize = [width, height, menushown];
-    SBAR.Hint = "";
-    sui_begin(width, height);
-    Menu_Draw(width, height, menushown);
-    Hud_Draw(width, height);
-    sui_end();
+    Hud_UpdateView(width, height, menushown, fts);
 
-    if (CVARF(fo_csjumpsounds)) {
-        local float health = getstatf(STAT_HEALTH);
-        local float paused = getstatf(STAT_PAUSED);
+    perf_finish_sample(&frame_timing, fts);
 
-        if (pmove_onground && health > 0 && !paused) {
-            // jumping
-            getinputstate(clientcommandframe); // without this the input buttons are innacurate
-            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
-                if (jumpsound_cooldown < time) {
-                    jumpsound_cooldown = time + 0.01;
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
-                }
-            }
-
-            // landing
-            if (!last_pmove_onground && last_vel_z < -300) {
-                if (pointcontents(pmove_org) == CONTENT_WATER) {
-                    localsound("player/h2ojump.wav", CHAN_VOICE, 1);
-                } else if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_VOICE, 1);
-                } else {
-                    localsound("player/land.wav", CHAN_VOICE, 1);
-                }
-            }
-        }
-
-        last_vel_z = pmove_vel_z;
-        last_pmove_onground = pmove_onground;
-    }
+    PlayCSJumpSounds();
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -229,7 +207,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_vote":
             //FO_Menu_Vote(TRUE);
-            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+            showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);
@@ -247,7 +225,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "+fo_showscores":
-            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -276,7 +254,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            if (CVARF(FOCMD_OLDSCOREBOARD) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -357,30 +335,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        // case "+quick1":
-        //     localcmd("+button8\n");
-        //     break;
-        // case "-quick1":
-        //     localcmd("-button8\n");
-        //     break;
-        // case "+quick2":
-        //     localcmd("+button9\n");
-        //     break;
-        // case "-quick2":
-        //     localcmd("-button9\n");
-        //     break;
-        // case "+quick3":
-        //     localcmd("+button10\n");
-        //     break;
-        // case "-quick3":
-        //     localcmd("-button10\n");
-        //     break;
-        // case "+quick4":
-        //     localcmd("+button11\n");
-        //     break;
-        // case "-quick4":
-        //     localcmd("-button11\n");
-        //     break;
+            // case "+quick1":
+            //     localcmd("+button8\n");
+            //     break;
+            // case "-quick1":
+            //     localcmd("-button8\n");
+            //     break;
+            // case "+quick2":
+            //     localcmd("+button9\n");
+            //     break;
+            // case "-quick2":
+            //     localcmd("-button9\n");
+            //     break;
+            // case "+quick3":
+            //     localcmd("+button10\n");
+            //     break;
+            // case "-quick3":
+            //     localcmd("-button10\n");
+            //     break;
+            // case "+quick4":
+            //     localcmd("+button11\n");
+            //     break;
+            // case "-quick4":
+            //     localcmd("-button11\n");
+            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -393,6 +371,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "wpp_status":
             WPP_Status();
+            break;
+        case "perf_status":
+            Perf_Status();
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -487,10 +468,6 @@ void _Sync_ServerCommandFrame() {
     if (is_spectator)
         is_observer = FALSE;
 
-    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
-                  getstatf(STAT_VELOCITY_Z)];
-    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
-
     local float health = getstatf(STAT_HEALTH);
     if (health <= 0 || player_class != PC_SNIPER) {
         zoomed_in = 0;
@@ -511,7 +488,7 @@ void _Sync_ClientCommandFrame() {
     // Client command frames are regenerated beyond the server frame, so we
     // cannot check that we have not seen this client command frame alone.
     if (last_servercommandframe == servercommandframe &&
-        last_clientcommandframe == clientcommandframe)
+            last_clientcommandframe == clientcommandframe)
         return;
     last_clientcommandframe = clientcommandframe;
 }
@@ -522,3 +499,171 @@ void Sync_GameState() {
     _Sync_ServerCommandFrame();
     _Sync_ClientCommandFrame();
 }
+
+static string to_precision(float f, float p) {
+    string fmt = strcat("%0.", ftos(p), "f");
+    return sprintf(fmt, f);
+}
+
+static float get_precision() {
+    float t = gettime(1);
+
+    // For (debug) clients which have modified gettime to report with more
+    // precision.
+    return (t*1000 == ceil(t*1000)) ? 3 : 5;
+}
+
+static float gettime_lat() {
+    const float trials = 1000;
+    float s = gettime(1), f, i;
+    for (i = 0; i < trials; i++)
+        gettime(1);
+    return (gettime(1) - s)/trials;
+}
+
+// Note while this works with ms
+void Perf_Status() {
+    printf("Performance Stats:\n");
+    float avg, variance, minv, maxv;
+
+    float prec = get_precision();
+    if (prec > 3)
+        printf("gettime() timing = %0.5f\n", gettime_lat());
+
+
+    printf("HUD cache used=%d freelist=%d\n",
+            (float)hud_render_cache.draw_count,
+            (float)hud_render_cache.free_count);
+
+    compute_avg(&frame_timing.samples, &avg, &variance);
+    compute_maxmin(&frame_timing.samples, &minv, &maxv);
+    printf(" Frame render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(frame_timing.samples.count, frame_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_timing.samples, &minv, &maxv);
+    printf(" HUD render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_timing.samples.count, hud_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_partial_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_partial_timing.samples, &minv, &maxv);
+    printf(" HUD partial (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_partial_timing.samples.count, hud_partial_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+}
+
+float InFluid(vector point){
+    local float cont = pointcontents(point);
+
+    if (cont == CONTENT_WATER || cont == CONTENT_SLIME || cont == CONTENT_LAVA) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+float CalculateWaterLevel() {
+    local vector point = pmove_org;
+    local float waterlevel = 0;
+
+    point[2] = pmove_org[2] + PLAYER_MINS[2] + 1; // feet
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    point[2] = pmove_org[2] + (PLAYER_MINS[2] + PLAYER_MAXS[2]) * 0.5; // waist
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    point[2] = pmove_org[2] + PLAYER_MINS[2] + PLAYER_MAXS[2] + DEFAULT_VIEWHEIGHT; // eyes
+    if (!InFluid(point)) {
+        return waterlevel;
+    } else {
+        waterlevel++;
+    }
+
+    return waterlevel;
+}
+
+void PlayCSJumpSounds() {
+    if (!CVARF(fo_csjumpsounds)) {
+        return;
+    }
+
+    if (getstatf(STAT_PAUSED)) {
+        return;
+    }
+
+    local float waterlevel = CalculateWaterLevel();
+
+    if (getstatf(STAT_HEALTH) > 0) {
+        // jumping
+        if ((input_buttons & BUTTON2)) {
+            if (waterlevel >= 2) {
+                if (swimsound_cooldown < time) {
+                    swimsound_cooldown = time + 1;
+                    if (random() < 0.5) {
+                        localsound("player/water1.wav", CHAN_BODY, 1);
+                    } else {
+                        localsound("player/water2.wav", CHAN_BODY, 1);
+                    }
+                }
+            } else {
+                if (pmove_onground && pmove_vel_z < 180 /*not sliding*/ ) {
+                    if (jumpsound_cooldown < time) {
+                        jumpsound_cooldown = time + (2 / serverkeyfloat("maxfps"));
+                        localsound("player/plyrjmp8.wav", CHAN_AUTO, cvar(FOCMD_JUMPVOLUME));
+                    }
+                }
+            }
+        }
+
+        // landing
+        if (pmove_onground && !last_onground && last_vel_z < -300) {
+            if (pointcontents(pmove_org) == CONTENT_WATER) {
+                localsound("player/h2ojump.wav", CHAN_BODY, 1);
+            } else if (last_vel_z < -650) {
+                localsound("player/land2.wav", CHAN_VOICE, 1);
+            } else {
+                localsound("player/land.wav", CHAN_VOICE, 1);
+            }
+        }
+
+        // entering water
+        if (waterlevel > 0 && last_waterlevel == 0) {
+            local vector feet = pmove_org;
+            feet[2] = pmove_org[2] + PLAYER_MINS[2] + 1;
+
+            switch(pointcontents(feet)) {
+                case CONTENT_LAVA:
+                    localsound("player/inlava.wav", CHAN_BODY, 1);
+                    break;
+                case CONTENT_WATER:
+                    localsound("player/inh2o.wav", CHAN_BODY, 1);
+                    break;
+                case CONTENT_SLIME:
+                    localsound("player/slimbrn2.wav", CHAN_BODY, 1);
+                    break;
+            }
+        }
+
+        // exiting water
+        if (waterlevel == 0 && last_waterlevel > 0) {
+            localsound("misc/outwater.wav", CHAN_BODY, 1);
+        }
+    }
+
+    last_vel_z = pmove_vel_z;
+    last_onground = pmove_onground;
+    last_waterlevel = waterlevel;
+};

@@ -358,4 +358,3 @@ void WeaponPred_ProjectProjectile(int fpp_type, entity proj) {
     float dt = Phys_Init(proj, time, static_dt + dynamic_dt, PHYSF_CONSUME_ALL);
     proj.antilag_ms = dt * 1000;
 }
-

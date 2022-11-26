@@ -1072,6 +1072,7 @@ float () CheckAllPlayersReady = {
 
     local float f1 = TeamFortress_GetNoActivePlayers();
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
+
     if (v_ready == f1 && v_ready > 0) {
         if(cease_fire) {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
@@ -1079,11 +1080,6 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, starting match\n");
             localcmd("localinfo clown 0");  // Disable any clown settings.
             StartTimer ();
-
-            local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "off");
-            if (limit_quad_players) {
-                quad_maxplayers = f1;
-            }
         }
         return 1;
     }
