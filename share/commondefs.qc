@@ -24,6 +24,7 @@ var struct {
 enumflags {
     CLOWN_RUBBERGREN,
     CLOWN_PROJ_GRAVITY,
+    CLOWN_LETHAL_TRANQ,
 };
 
 inline float IsClownMode(int flag) {

@@ -1097,8 +1097,12 @@ void () W_FireTranq = {
 void () T_TranqDartTouch = {
     local entity timer;
 
-    if (other.solid == 1)
+    if (other.solid == SOLID_TRIGGER)
         return;
+
+    if (self.voided)
+        return;
+    self.voided = 1;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
         dremove_sent(self);
@@ -1134,7 +1138,9 @@ void () T_TranqDartTouch = {
         }
         spawn_touchblood(9);
         deathmsg = 25;
-        TF_T_Damage(other, self, self.owner, 20, 2, 2);
+
+        float dmg = IsClownMode(CLOWN_LETHAL_TRANQ) ? 999 : 20;
+        TF_T_Damage(other, self, self.owner, dmg, 2, 2);
     } else {
         WriteByte(4, 23);
         if (self.classname == "wizspike") {
