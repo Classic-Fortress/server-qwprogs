@@ -44,6 +44,8 @@ enumflags {
     CLOWN_RUBBERGREN,
     CLOWN_PROJ_GRAVITY,
     CLOWN_LETHAL_TRANQ,
+    CLOWN_STICKY_GRENS,
+    CLOWN_STICKY_PIPES,
 };
 
 string CLOWN_DESC[] = {
@@ -51,6 +53,8 @@ string CLOWN_DESC[] = {
     "rubber grenades",
     "projectile gravity",
     "elephant tranq",
+    "sticky grenades",
+    "sticky pipes",
 };
 
 inline float IsClownMode(int flag) {

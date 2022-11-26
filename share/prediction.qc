@@ -506,6 +506,12 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, angles[2]);
     }
 
+    if (sendflags & FOPP_MOVETYPE) {
+        COMM(Byte, movetype);
+        if (self.movetype == MOVETYPE_FOLLOW)
+            COMMD(Entity, aiment_num, aiment);
+    }
+
     if (sendflags & FOPP_AUX) {
         COMM(Short, wpp_aux);
     }
@@ -785,3 +791,31 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     return result;
 }
 
+void AugmentGrenadeImpact() {
+    if (!FPP_IsGrenade(self.fpp_index) || self.voided ||
+        self.wpp_aux == GREN_RED)
+        return;
+
+    float old_move = self.movetype;
+
+    if (IsClownMode(CLOWN_STICKY_PIPES) && other.solid == SOLID_BSP)
+        self.movetype = MOVETYPE_NONE;
+
+    if (IsClownMode(CLOWN_STICKY_GRENS) && other.solid == SOLID_SLIDEBOX) {
+            self.movetype = MOVETYPE_FOLLOW;
+            self.velocity = self.origin - other.origin;
+#ifdef SSQC
+            self.aiment = other;
+            self.SendFlags |= FOPP_POS;  // Need velocity
+#else
+            self.aiment_num = other.entnum;
+#endif
+    }
+
+#ifdef SSQC
+    if (other.solid != SOLID_BSP)
+        Predict_UpdateHack(self);
+    if (self.movetype != old_move)
+        self.SendFlags |= FOPP_MOVETYPE;
+#endif
+}
