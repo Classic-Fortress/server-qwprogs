@@ -1077,6 +1077,7 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
             bprint (2, "All players ready, starting match\n");
+            localcmd("localinfo clown 0");  // Disable any clown settings.
             StartTimer ();
 
             local float limit_quad_players = CF_GetSetting("lqp", "limit_quad_players", "off");
