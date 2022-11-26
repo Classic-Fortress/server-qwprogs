@@ -72,8 +72,8 @@ void () NextLevel;
 void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
-void WeaponPred_InitPlayer(entity player);
-void WeaponPred_TearDown(entity player);
+void Predict_InitPlayer(entity player);
+void Predict_Destroy(entity player);
 
 void (float n) CSEv_SetPlayerImpulse_f = {
     bprint(PRINT_HIGH, self.netname, "\n");
@@ -2097,7 +2097,7 @@ void () PutClientInServer = {
 
     DecodeLevelParms();
 
-    WeaponPred_InitPlayer(self);
+    Predict_InitPlayer(self);
 
     if (self.playerclass != PC_CIVILIAN && TeamFortress_TeamIsCivilian(self.team_no)) {
         TeamFortress_ChangeClass(11);
@@ -2922,7 +2922,7 @@ void () PlayerPostThink = {
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
 
-    WeaponPred_Update(self);
+    Predict_Update();
 
     if (self.view_ofs == '0 0 0') {
         return;
@@ -3203,7 +3203,7 @@ void () ClientDisconnect = {
         UnvoteForMap(self);
     }
 
-    WeaponPred_TearDown(self);
+    Predict_Destroy(self);
 };
 
 string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage = {

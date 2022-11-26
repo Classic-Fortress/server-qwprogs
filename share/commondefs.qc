@@ -22,10 +22,35 @@ var struct {
 } fo_config;
 
 enumflags {
+    REWIND_KNOCKBACK,
+    REWIND_PROJ_HIT,
+    REWIND_PROJ_SELFKNOCK,
+};
+
+string REWIND_DESC[] = {
+    "rewind pipe knockback",
+    "rewind projectile hit",
+    "forward projectile self-knockback",
+};
+
+const float REWIND_DEFAULT_FLAGS = 0;
+
+float RewindFlagEnabled(float flag) {
+    return fo_config.rewind_flags & flag;
+}
+
+enumflags {
     CLOWN_FAST_PROJECTILES,
     CLOWN_RUBBERGREN,
-    CLOWN_LETHAL_TRANQ,
     CLOWN_PROJ_GRAVITY,
+    CLOWN_LETHAL_TRANQ,
+};
+
+string CLOWN_DESC[] = {
+    "fast projectiles",
+    "rubber grenades",
+    "projectile gravity",
+    "elephant tranq",
 };
 
 inline float IsClownMode(int flag) {

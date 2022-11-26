@@ -22,8 +22,31 @@ static inline float PhysFlagEnabled(float flag) {
 }
 
 #ifdef SSQC
-void Predict_UpdateHack(entity e);
+float Phys_Advance(entity e, float target_time, float phys_flags);
 
+void FO_CustomPhysics() {
+    if (!self.voided)
+        Phys_Advance(self, time, 0);
+
+    float held_time, thinktime;
+    // Once we lift physics, think execution comes with it.
+    do {
+        thinktime = self.nextthink;
+        if (thinktime <= 0 || thinktime > time)
+            return;
+
+        held_time = time;
+        self.nextthink = 0;
+        time = thinktime;
+        self.think();
+        time = held_time;
+
+        if (self.is_removed || self.nextthink < thinktime /* no loop on rev */)
+            return;
+    } while (1);
+}
+
+void Predict_UpdateHack(entity e);
 static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (trace_ent.solid == SOLID_NOT)
         return;
@@ -243,5 +266,4 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
         return 0;
     }
 }
-
 #undef dot

@@ -1,31 +1,21 @@
-#define DEBUG_ANTILAG 0
+#define DEBUG_REWIND 0
 
-enumflags {
-    REWIND_KNOCKBACK,
-    REWIND_PROJ_HIT,
-    REWIND_PROJ_SELFKNOCK,
-};
-
-float RewindFlagEnabled(float flag) {
-    return fo_config.rewind_flags & flag;
-}
-
-#if DEBUG_ANTILAG
-#define al_printf(...) printf(__VA_ARGS__)
-#define al_printd(...) dprint(__VA_ARGS__)
+#if DEBUG_REWIND
+#define rw_printf(...) printf(__VA_ARGS__)
+#define rw_printd(...) dprint(__VA_ARGS__)
 #else
-#define al_printf(...)
-#define al_printd(...)
+#define rw_printf(...)
+#define rw_printd(...)
 #endif
 
-#define AL_MAX_REWINDS 25
+#define MAX_SNAPSHOTS 25
 
 inline int NextRewindIdx(int idx) {
-    return (idx + 1) % AL_MAX_REWINDS;
+    return (idx + 1) % MAX_SNAPSHOTS;
 }
 
 inline int PrevRewindIdx(int idx) {
-    return (idx - 1 + AL_MAX_REWINDS) % AL_MAX_REWINDS;
+    return (idx - 1 + MAX_SNAPSHOTS) % MAX_SNAPSHOTS;
 }
 
 struct RewindSnapshot {
@@ -41,7 +31,7 @@ enum RewindStatus:float {
 
 struct RewindState {
     entity owner;
-    RewindSnapshot snapshot[AL_MAX_REWINDS];
+    RewindSnapshot snapshot[MAX_SNAPSHOTS];
     int cur;
 
     RewindStatus rewound;
@@ -97,7 +87,7 @@ static SeekResult RewindSeek(RewindState* rstate, float rtime) {
     r.before = r.after = __NULL__;
 
     int idx = rstate->cur;
-    for (int i = 0; i < AL_MAX_REWINDS; i++) {
+    for (int i = 0; i < MAX_SNAPSHOTS; i++) {
         RewindSnapshot* rs = &rstate->snapshot[idx];
 
         if (rs->time >= rtime) {
@@ -132,7 +122,7 @@ RewindSnapshot* RewindLog(RewindState* target) {
 }
 
 void DumpLog(RewindState* rs) {
-    for (float i = 0; i < AL_MAX_REWINDS; i++) {
+    for (float i = 0; i < MAX_SNAPSHOTS; i++) {
         printf("%s%2d> t=%0.3f\n", i == rs->cur ? "*" : " ", i, rs->snapshot[i].time);
     }
 }
@@ -217,7 +207,7 @@ static void RewindTo(RewindState* rstate, float rtime) {
 // TODO: Filter out observers, but no harm immediately.
 static void RL_RewindTo(RewindState* head, entity exclude, float rtime) {
     float show_rewind_points =
-        CF_GetSetting("rds", "rewind_debug_show", DEBUG_ANTILAG ? "on" : "off");
+        CF_GetSetting("rds", "rewind_debug_show", DEBUG_REWIND ? "on" : "off");
 
     RL_FOR_EACH(head, rstate) {
         entity e = rstate->owner;
@@ -251,9 +241,17 @@ class FOPlayer {
         RewindLog(rewind_);
     };
 
-    void(float when) RewindExcept = {
+    nonvirtual void(float when) RewindExcept = {
         RL_StashPositions(rewind_players);
         RL_RewindTo(rewind_players, this, when);
+    };
+
+    nonvirtual vector() UnrewoundOrigin = {
+        if (rewind_->rewound == kRewound) {
+            return rewind_->held_origin;
+        } else {
+            return this->origin;
+        }
     };
 
     static void (float when) RewindAll = {
@@ -264,23 +262,15 @@ class FOPlayer {
     static void() RestoreAll {
         RL_RestorePositions(rewind_players);
     };
-
-    vector() UnrewoundOrigin = {
-        if (rewind_->rewound == kRewound) {
-            return rewind_->held_origin;
-        } else {
-            return this->origin;
-        }
-    };
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
-float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
+float RewindPlayersExceptSelf(float farthest_rewind_point) {
     if (!antilag_settings.rewind_detpipe)
         return FALSE;
 
-    float rewind_max_offset = (AL_MAX_REWINDS - 1) * SERVER_FRAME_DT;
+    float rewind_max_offset = (MAX_SNAPSHOTS - 1) * SERVER_FRAME_DT;
     farthest_rewind_point = max(farthest_rewind_point,
                                 time - rewind_max_offset);
 
@@ -296,14 +286,14 @@ float AL_RewindPlayersExceptSelf(float farthest_rewind_point) {
     return TRUE;
 }
 
-void ProjRewind(entity e, float step) {
+void ProjRewindForPhys(entity e, float step) {
     RL_RewindTo(rewind_players, e.owner, e.phys_time + step / 2);
 }
 
-void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
+void Forward_Projectile(int fpp_type, entity proj) {
     float ping = proj.owner.client_ping;
 
-    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
+    ProjectResult offset = Forward_ProjectOffset(fpp_type, ping);
     float static_dt = offset.static_ms / 1000.0;
     float dynamic_dt = offset.dynamic_ms / 1000.0;
     float stime = time - dynamic_dt;
@@ -323,39 +313,20 @@ void WeaponPred_ProjectProjectileRewind(int fpp_type, entity proj) {
     // a prior point in time, but we don't advance time while stepping.
     proj.s_origin = proj.origin;
     proj.s_time = 0;
-    float st = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
+    float ft = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
 
     // We initialize s_origin/s_time after Phys_Init, they are used when
     // knockback forwarding is on to determine delay.
     proj.s_origin = proj.origin;
     proj.s_time = time;
 
-    float dt = 0;
     if (!proj.voided) {
-        RewindSyncTime = ProjRewind;
-        dt = Phys_Advance(proj, time, phys_flags);
+        RewindSyncTime = ProjRewindForPhys;
+        ft += Phys_Advance(proj, time, phys_flags);
     }
 
     if (rewind_hit)
         RL_RestorePositions(rewind_players);
 
-    proj.antilag_ms = (st + dt) * 1000;
+    proj.antilag_ms = ft * 1000;
 }
-
-void WeaponPred_ProjectProjectile(int fpp_type, entity proj) {
-    if (RewindFlagEnabled(REWIND_PROJ_HIT | REWIND_PROJ_SELFKNOCK)) {
-        WeaponPred_ProjectProjectileRewind(fpp_type, proj);
-        return;
-    }
-
-    proj.s_origin = proj.origin;
-    proj.s_time = time;
-    float ping = proj.owner.client_ping;
-    ProjectResult offset = WeaponPred_ProjectOffset(fpp_type, ping);
-    float static_dt = offset.static_ms / 1000.0;
-    float dynamic_dt = offset.dynamic_ms / 1000.0;
-
-    float dt = Phys_Init(proj, time, static_dt + dynamic_dt, PHYSF_CONSUME_ALL);
-    proj.antilag_ms = dt * 1000;
-}
-

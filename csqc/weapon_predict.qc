@@ -170,14 +170,11 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
 
-    static string rewind_desc[] = { "rewind pipe knockback", "rewind proj hit",
-                                    "sync proj self knockback" };
-    printf("Rewind Settings:\n");
-    if (fo_config.rewind_flags) {
-        for (float i = 0; i < rewind_desc.length; i++)
-            if (fo_config.rewind_flags & (1 << i))
-                printf(" .%s\n", rewind_desc[i]);
-
+    printf("Rewind Settings [rewind_flags=%d]:\n", fo_config.rewind_flags);
+    for (float i = 0; i < REWIND_DESC.length; i++) {
+        float flag = 1 << i;
+        printf(" %2d [%-3s]: .%s\n", flag,
+                (fo_config.rewind_flags & flag) ? "on": "off", REWIND_DESC[i]);
     }
     PRINT_CONFIG(no_forward_hg);
     PRINT_CONFIG(max_rewind_ms);
@@ -185,14 +182,17 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
 
-    static string clown_desc[] = { "Fast projectiles", "Rubber grenades",
-                                   "Proj gravity", "Lethal tranq" };
-    if (fo_config.clown_flags) {
-        printf("Clown mode:\n");
-        printf(" .clown gravity=%d\n", fo_config.clown_grav);
-        for (float i = 0; i < clown_desc.length; i++)
-            if (fo_config.clown_flags & (1 << i))
-                printf(" .%s\n", clown_desc[i]);
+    if (!fo_config.clown_flags)
+        return;
+
+    printf("Clown mode [clown_flags=%d]:\n", fo_config.clown_flags);
+    for (float i = 0; i < CLOWN_DESC.length; i++) {
+        float flag = 1 << i;
+        printf(" %2d [%-3s]: .%s", flag,
+                (fo_config.clown_flags & flag) ? "on": "off", CLOWN_DESC[i]);
+        if (flag == CLOWN_PROJ_GRAVITY)
+            printf(" (clown_grav=%d)", fo_config.clown_grav);
+        printf("\n");
 
     }
 }
@@ -920,7 +920,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 #endif
 
   ProjectResult push_t =
-      WeaponPred_ProjectOffset(fpp_type, pstate_pred.client_ping);
+      Forward_ProjectOffset(fpp_type, pstate_pred.client_ping);
 
   float uncorrected_dt = (pstate_pred.client_ping - push_t.dynamic_ms) / 1000.0;
   float static_dt = push_t.static_ms / 1000.0;
