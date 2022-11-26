@@ -185,7 +185,8 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
 
-    static string clown_desc[] = { "Rubber grenades", "Proj gravity", "Lethal tranq" };
+    static string clown_desc[] = { "Fast projectiles", "Rubber grenades",
+                                   "Proj gravity", "Lethal tranq" };
     if (fo_config.clown_flags) {
         printf("Clown mode:\n");
         printf(" .clown gravity=%d\n", fo_config.clown_grav);

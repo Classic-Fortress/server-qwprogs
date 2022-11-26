@@ -815,6 +815,9 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
         max_ping_credit += dynamic_newmis_ms();
     }
 
+    if (IsClownMode(CLOWN_FAST_PROJECTILES) && !FPP_IsGrenade(fpp_type))
+        static_credit = 9999;
+
     if (fpp_type == FPP_HANDGRENADE && fo_config.no_forward_hg)
         max_ping_credit = 0;
 

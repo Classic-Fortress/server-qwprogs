@@ -22,9 +22,10 @@ var struct {
 } fo_config;
 
 enumflags {
+    CLOWN_FAST_PROJECTILES,
     CLOWN_RUBBERGREN,
-    CLOWN_PROJ_GRAVITY,
     CLOWN_LETHAL_TRANQ,
+    CLOWN_PROJ_GRAVITY,
 };
 
 inline float IsClownMode(int flag) {
