@@ -33,7 +33,8 @@ string REWIND_DESC[] = {
     "forward projectile self-knockback",
 };
 
-const float REWIND_DEFAULT_FLAGS = 0;
+const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
+                                   REWIND_PROJ_SELFKNOCK;
 
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;
