@@ -197,8 +197,8 @@ void InitFppProjectiles() {
 
 float max_rewind_credit_ms(int fpp_type) {
     return fpp_types[fpp_type].speed < fo_config.rewind_fast_projectile_thresh ?
-            fo_config.max_rewind_slow_projectile_ms :
-            fo_config.max_rewind_fast_projectile_ms;
+        fo_config.max_rewind_slow_projectile_ms :
+        fo_config.max_rewind_fast_projectile_ms;
 }
 
 
@@ -279,9 +279,6 @@ void Predict_Update() {
 static float Prediction_ChangedMask(entity player) {
     float mask = FOWP_CTIME;
 
-    if (time - player.last_full_predict_refresh >= 1000 * MSEC)
-        return 0xFFFFFF;
-
     player.predict_state.client_time = player.client_time;
     player.predict_state.client_ping = player.client_ping;
 
@@ -296,6 +293,11 @@ static float Prediction_ChangedMask(entity player) {
     M1(FOWP_RELOAD, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
+
+    if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
+        player.last_full_predict_refresh = time;
+        return 0xFFFFFF;
+    }
 
     return mask;
 }
