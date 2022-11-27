@@ -133,7 +133,8 @@ void WPP_Status() {
     float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
     float avg, variance;
     fill_avg_ping(&avg, &variance);
-    printf(" inst_ping = %d avg_ping = %d var = %d\n", ping, avg, variance);
+    printf(" inst_ping = %d client_ping = %d avg_ping = %d var = %d\n",
+            ping, pstate_server.client_ping, avg, variance);
 
     printf("Config:\n");
     PRINT_CONFIG(qc_physics);
@@ -884,7 +885,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
       return __NULL__;
 
   entity proj = spawn();
-  proj.owner = edict_num(player_localentnum);
+  proj.owner_entnum = player_localentnum;
   FPP_Init(fpp_type, proj);
 
 #if 0
@@ -1193,7 +1194,6 @@ void InitProjectileEnt(float sendflags) {
     self.predraw = PP_PredrawActive;
     if (sendflags & FOPP_ANGLES == 0)
         self.angles = vectoangles(self.velocity);
-    self.owner = edict_num(self.owner_entnum);
 
     FPP_Init(self.fpp_index, self);
     FPP_ApplyGrenadeProperties(self);
