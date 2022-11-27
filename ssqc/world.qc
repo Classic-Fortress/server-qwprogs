@@ -372,7 +372,7 @@ void () worldspawn = {
     }
 
     dimension_send = DMN_NOFLASH;
-    WeaponPred_Init();
+    Predict_Init();
 
     settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
     for (float i = 0; i < settings_to_track_list.length; i++)

@@ -21,12 +21,39 @@ static inline float PhysFlagEnabled(float flag) {
     return fo_config.qc_physics & flag;
 }
 
-#ifdef SSQC
-void Predict_UpdateHack(entity e);
+void AugmentGrenadeImpact();
 
+#ifdef SSQC
+float Phys_Advance(entity e, float target_time, float phys_flags);
+
+void FO_CustomPhysics() {
+    if (!self.voided)
+        Phys_Advance(self, time, 0);
+
+    float held_time, thinktime;
+    // Once we lift physics, think execution comes with it.
+    do {
+        thinktime = self.nextthink;
+        if (thinktime <= 0 || thinktime > time)
+            return;
+
+        held_time = time;
+        self.nextthink = 0;
+        time = thinktime;
+        self.think();
+        time = held_time;
+
+        if (self.is_removed || self.nextthink < thinktime /* no loop on rev */)
+            return;
+    } while (1);
+}
+
+void Predict_UpdateHack(entity e);
 static void Phys_Impact(entity e, float dt, float phys_flags) {
-    if (trace_ent.solid == SOLID_NOT)
+    other = trace_ent;
+    if (other.solid == SOLID_NOT)
         return;
+
 
     if (e.touch) {
         if (phys_flags & PHYSF_FORWARD_KNOCK)
@@ -39,33 +66,47 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
         self = held_self;
     }
 
+    AugmentGrenadeImpact();
+
 #if PHYS_DEBUG
     printf("SPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n",
             time, e.phys_time + dt, e.phys_time + frametime);
     printf("Imp: e=%p e.o=%p te=%p\n", e, e.owner, other);
 #endif
+}
 
-    if (trace_ent.solid != SOLID_BSP)
-        Predict_UpdateHack(e);
+static vector get_followed_origin() {
+    return self.aiment.origin;
 }
 #else
 DEFCVAR_FLOAT(fo_phys_debug, 0);
 
 .entity groundentity;
+.float aiment_num;
 .float voided;
 
 float get_phys_time(entity);
 
 static void Phys_Impact(entity e, float dt, float phys_flags) {
-    if (trace_ent.solid == SOLID_NOT)
+    other = trace_ent;
+    if (other.solid == SOLID_NOT)
         return;
 
     if (e.movetype == MOVETYPE_FLYMISSILE)
         e.voided = TRUE;
 
+    AugmentGrenadeImpact();
+
     if (CVARF(fo_phys_debug) & 1)
         printf("CPhys: Impact t=%0.3f pt=%0.3f [%0.3f]\n", time, e.phys_time + dt,
                 get_phys_time(e));
+}
+
+static vector get_followed_origin() {
+    if (!(float)getentity(self.aiment_num, GE_ACTIVE))
+        return self.origin;
+    else
+        return (vector)getentity(self.aiment_num, GE_ORIGIN);
 }
 #endif
 
@@ -217,6 +258,15 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
                 dt = Phys_Adv_Bounce(e, step, phys_flags);
                 break;
 
+            case MOVETYPE_FOLLOW:
+                vector org = get_followed_origin();
+                target_time = e.phys_time;
+                step = target_time - e.phys_time;
+                dt = step > 0 ?: 0;
+
+                e.origin = org + e.velocity;
+                break;
+
             default:
                 printf("ERROR: %s unsupported movetype %d\n", e.model, e.movetype);
             case MOVETYPE_NONE:
@@ -243,5 +293,4 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
         return 0;
     }
 }
-
 #undef dot

@@ -18,6 +18,7 @@ profile.qc
 ../share/physics.qc
 ../share/weapons.qc
 ../share/prediction.qc
+../share/classes.qc
 ../share/animate.qc
 weapon_predict.qc
 sui_sys.qc

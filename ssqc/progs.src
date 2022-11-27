@@ -21,6 +21,7 @@ time.qc
 ../share/physics.qc
 ../share/weapons.qc
 ../share/prediction.qc
+../share/classes.qc
 ../share/animate.qc
 events.qc
 roles.qc
@@ -36,7 +37,7 @@ help.qc
 subs.qc
 items.qc
 locfiles.qc
-antilag.qc
+rewind.qc
 combat.qc
 weapons.qc
 world.qc

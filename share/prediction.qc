@@ -22,14 +22,16 @@ enumflags {
     FOWP_RNG0,
     FOWP_RNG1,
     FOWP_PREDICT_FLAGS,
+    FOWP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
 enumflags {
-    FOPP_POS,
     FOPP_INIT,
+    FOPP_POS,
     FOPP_AUX,
     FOPP_ANGLES,
     FOPP_MOVETYPE,
+    FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
 #define FOWP_ALL 0xFFFF
@@ -257,32 +259,6 @@ predict_tf_state pstate_pred, pstate_server;
 #endif
 
 #ifdef SSQC
-inline int* prng_state(int type) { return &self.prng_base[type]; }
-#else
-inline int* prng_state(int type) { return &pstate_pred.prng_base[type]; }
-#endif
-
-int lfsr_prng_raw(int v) {  // A 16-bit xor-shift LFSR.
-    v ^= (v >> 7);
-    v ^= (v << 9);
-    v &= 65535;
-    v ^= (v >> 13);
-    return v;
-}
-
-float lsfr_prng(int prev) {
-    return lfsr_prng_raw(prev) / 65535.0;
-}
-
-float shared_prng(int type) {
-    return (*prng_state(type) = lfsr_prng_raw(*prng_state(type))) / 65535.0;
-}
-
-float shared_crandom(int type) {
-    return 2 * (shared_prng(type) - 0.5);
-}
-
-#ifdef SSQC
 #define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
 #define OP3(_op, _j, _f1, _f2, _f3)         OP2(_op, _j, _f2, _f3)      _j OP1(_op, _f1)
@@ -292,20 +268,19 @@ float shared_crandom(int type) {
 #define M3(_bit, _f1, _f2, _f3) if (OP3(!=, ||, _f1, _f2, _f3)) { mask |= _bit; OP3(=, ;, _f1, _f2, _f3); }
 #define M4(_bit, _f1, _f2, _f3, _f4) if (OP4(!=, ||, _f1, _f2, _f3, _f4)) { mask |= _bit; OP4(=, ;, _f1, _f2, _f3, _f4); }
 
-predict_tf_state blank_state;
 .float last_full_predict_refresh;
 
-void WeaponPred_Update(entity player) {
-    if (player.predict_entity == __NULL__)
-        return;
+void Predict_Update() {
+    entity pe = self.predict_entity;
+    if (pe != __NULL__)
+        pe.SendFlags = 1;  // Will compute what to send.
+}
 
+static float Prediction_ChangedMask(entity player) {
     float mask = FOWP_CTIME;
 
-    if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
-        player.predict_state = blank_state;
-        player.last_full_predict_refresh = time;
-        mask = -1;
-    }
+    if (time - player.last_full_predict_refresh >= 1000 * MSEC)
+        return 0xFFFFFF;
 
     player.predict_state.client_time = player.client_time;
     player.predict_state.client_ping = player.client_ping;
@@ -322,7 +297,7 @@ void WeaponPred_Update(entity player) {
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
 
-    player.predict_entity.SendFlags = mask;
+    return mask;
 }
 
 #undef OP1
@@ -403,14 +378,11 @@ void EntUpdate_Config() {
 
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
-float WP_SendEntity(entity to_player, float sendflags) {
+float WP_SendEntity(entity to_player, float ignored) {
     if (to_player != self.owner)
         return FALSE;
 
-    // Initial send doesn't respect the set mask.  Maybe setsendneeded fixes
-    // this but that would need an sv binary upgrade.  Work around for now.
-    if (sendflags == 0xFFFFFF)
-        sendflags = self.SendFlags;
+    float sendflags = Prediction_ChangedMask(self.owner);
 
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
@@ -420,11 +392,11 @@ void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
 #endif
     if (sendflags & FOWP_PREDICT_FLAGS)
-        COMM(Float, predict_flags);
+        COMM(Byte, predict_flags);
 
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
-        COMM(Float, client_ping);
+        COMM(Byte, client_ping);
     }
 
     if (sendflags & FOWP_CLASS) {
@@ -490,10 +462,12 @@ void EntUpdate_WeaponPred(float isnew) {
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
 float PP_SendEntity(entity to_player, float sendflags) {
-    // Initial send doesn't respect the set mask.  Maybe setsendneeded fixes
-    // this but that would need an sv binary upgrade.  Work around for now.
-    if (sendflags == 0xFFFFFF)
-        sendflags = self.SendFlags;
+    if (sendflags & FOPP_NEW) {
+        sendflags = FOPP_INIT | FOPP_POS;
+        if (self.wpp_aux)
+            sendflags |= FOPP_AUX;
+    }
+
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
     WriteByte(MSG_ENTITY, sendflags);
 #else
@@ -518,6 +492,7 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
+        COMM(Byte, movetype);
         COMM(Float, phys_time);
 #ifdef CSQC
         self.s_origin = self.origin;
@@ -531,8 +506,11 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, angles[2]);
     }
 
-    if (sendflags & FOPP_MOVETYPE)
+    if (sendflags & FOPP_MOVETYPE) {
         COMM(Byte, movetype);
+        if (self.movetype == MOVETYPE_FOLLOW)
+            COMMD(Entity, aiment_num, aiment);
+    }
 
     if (sendflags & FOPP_AUX) {
         COMM(Short, wpp_aux);
@@ -550,11 +528,11 @@ void EntUpdate_Projectile(float isnew) {
 #undef COMM
 
 
-void WeapPred_InitDefaultConfig() {
+void Predict_InitDefaultConfig() {
     fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
-    fo_config.rewind_flags = 0;
+    fo_config.rewind_flags = REWIND_DEFAULT_FLAGS;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 100;
     fo_config.max_rewind_fast_projectile_ms = 100;
@@ -624,8 +602,8 @@ static void WeaponPred_CheckConfigUpdate() {
 #undef CLAMP_UPDATE
 #undef CONFIG_UPDATE
 
-void WeaponPred_Init() {
-    WeapPred_InitDefaultConfig();
+void Predict_Init() {
+    Predict_InitDefaultConfig();
 
     config_entity = spawn();
 
@@ -638,7 +616,7 @@ void WeaponPred_Init() {
 }
 
 .float wpp_init;
-void WeaponPred_InitPlayer(entity player) {
+void Predict_InitPlayer(entity player) {
     // PutClientInServer is called every spawn.  At some point we'll clean up
     // parameter decode so that it can happen earlier and this nonsense goes
     // away.
@@ -669,7 +647,7 @@ void WeaponPred_InitPlayer(entity player) {
     player.predict_entity = pe;
 }
 
-void WeaponPred_TearDown(entity player) {
+void Predict_Destroy(entity player) {
     if (player.predict_entity != __NULL__)
         dremove(player.predict_entity);
 }
@@ -710,29 +688,7 @@ void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(fpp_types[proj_type].snd, vol);
 }
 
-void WeaponPred_ProjectProjectile(int fpp_type, entity projectile);
-
-void FO_Phys() {
-    if (!self.voided)
-        Phys_Advance(self, time, 0);
-
-    float held_time, thinktime;
-    // Once we lift physics, think execution comes with it.
-    do {
-        thinktime = self.nextthink;
-        if (thinktime <= 0 || thinktime > time)
-            return;
-
-        held_time = time;
-        self.nextthink = 0;
-        time = thinktime;
-        self.think();
-        time = held_time;
-
-        if (self.is_removed || self.nextthink < thinktime /* no loop on rev */)
-            return;
-    } while (1);
-}
+void Forward_Projectile(int fpp_type, entity projectile);
 
 entity FOProj_Create(int fpp_type) {
     entity prj = spawn();
@@ -776,16 +732,14 @@ void FOProj_Finalize(entity mis) {
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
     if (fo_config.qc_physics)
-        mis.customphysics = FO_Phys;
+        mis.customphysics = FO_CustomPhysics;
 
-    WeaponPred_ProjectProjectile(mis.fpp_index, mis);
+    Forward_Projectile(mis.fpp_index, mis);
 
     // Below is conditional on using custom SendEntity.
     if (csqc_networking) {
         mis.SendEntity = PP_SendEntity;
-        mis.SendFlags = FOPP_POS | FOPP_INIT;
-        if (mis.wpp_aux)
-            mis.SendFlags |= FOPP_AUX;
+        mis.SendFlags = FOPP_NEW;
     } else if (fpp_type == FPP_HANDGRENADE) {
         entity target = self;
         if (target.classname != "player")
@@ -793,15 +747,6 @@ void FOProj_Finalize(entity mis) {
         FO_Sound(target, CHAN_WEAPON, Snd_Get(SND_THROWGREN)->sound, 1, ATTN_NORM);
     }
 }
-#endif
-
-#ifdef CSQC
-float WP_GetAmmo(float ammo_type);
-float get_shells() { return WP_GetAmmo(AMMO_SHELLS); }
-static inline vector get_origin() { return pmove_org; }
-#else
-float get_shells() { return self.ammo_shells; }
-static inline vector get_origin() { return self.origin; }
 #endif
 
 struct ProjectResult {
@@ -813,7 +758,7 @@ struct ProjectResult {
 DEFCVAR_FLOAT(wpp_phys_nudge, 2/3 * SERVER_FRAME_MS);
 #endif
 
-ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
+ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     float max_ping_credit = max_rewind_credit_ms(fpp_type);
     float static_credit;
 
@@ -846,47 +791,31 @@ ProjectResult WeaponPred_ProjectOffset(int fpp_type, float ping) {
     return result;
 }
 
-// Randomize by ammo index for consistency even if a packet/prediction misses.
-float hwguy_random_index;
+void AugmentGrenadeImpact() {
+    if (!FPP_IsGrenade(self.fpp_index) || self.voided ||
+        self.wpp_aux == GREN_RED)
+        return;
 
-void reset_hwguy_random() {
-    hwguy_random_index = (*prng_state(PRNG_HWGUY) + get_shells() * 211) & 65535;
-    if (hwguy_random_index == 0)
-        hwguy_random_index = (get_shells() + 1) * 211;
-}
+    float old_move = self.movetype;
 
-float hwguy_random() {
-    float index = hwguy_random_index;
-    float r = (hwguy_random_index = lfsr_prng_raw(hwguy_random_index)) / 65535.0;
-    return r;
-}
+    if (IsClownMode(CLOWN_STICKY_PIPES) && other.solid == SOLID_BSP)
+        self.movetype = MOVETYPE_NONE;
 
-float hwguy_crandom() {
-    return 2 * (hwguy_random() - 0.5);
-}
-
-void FO_FireAssCanPellet(vector org, vector spread_dir, float var_speed, int index);
-
-void WeapPred_FireAssCan(vector vangle, float shotcount,
-                         vector spread) {
-    vector bullet_dir, spread_dir, rand_dir, org;
-    float bullet_speed, var_speed;
-
-    reset_hwguy_random();
-
-    makevectors(vangle);
-
-    // Infront of player model and down towards gun
-    bullet_speed = fpp_types[FPP_ASSAULT_CANNON].speed;
-    bullet_dir = v_forward;
-
-    for (int i = 0; i < shotcount; i++) {
-        var_speed = hwguy_crandom()*10 + bullet_speed; // Slight speed variance
-        rand_dir = (hwguy_crandom()*spread_x) * v_right +
-                   (hwguy_crandom()*spread_y) * v_up;
-        spread_dir = bullet_dir + rand_dir;
-        org = get_origin() + '0 0 10' + rand_dir;
-
-        FO_FireAssCanPellet(org, spread_dir, var_speed, i);
+    if (IsClownMode(CLOWN_STICKY_GRENS) && other.solid == SOLID_SLIDEBOX) {
+            self.movetype = MOVETYPE_FOLLOW;
+            self.velocity = self.origin - other.origin;
+#ifdef SSQC
+            self.aiment = other;
+            self.SendFlags |= FOPP_POS;  // Need velocity
+#else
+            self.aiment_num = other.entnum;
+#endif
     }
+
+#ifdef SSQC
+    if (other.solid != SOLID_BSP)
+        Predict_UpdateHack(self);
+    if (self.movetype != old_move)
+        self.SendFlags |= FOPP_MOVETYPE;
+#endif
 }

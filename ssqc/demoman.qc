@@ -27,7 +27,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
 
     float rewound = FALSE;
     if (!force && count > 0)
-        rewound = AL_RewindPlayersExceptSelf(self.pipecooldown);
+        rewound = RewindPlayersExceptSelf(self.pipecooldown);
 
     for (float i = 0; i < count; i++) {
         if (pipes[i].owner == self) {
