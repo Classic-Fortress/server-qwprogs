@@ -357,4 +357,3 @@ void player_asscan_up1() { *thinkindex() = 1; player_asscan_upN(); }
 void player_asscan_fire() { client_anim_frames(player_asscan_fire, asscan_fire_extra, &anim_asscan_fire); }
 void player_asscan_downN() { client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
 void player_asscan_down1() { *thinkindex() = 1; client_anim_frames(player_asscan_downN, asscan_down_extra, &anim_asscan_down); }
-

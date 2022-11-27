@@ -11,6 +11,7 @@ csdefs.qc
 csextradefs.qc
 
 ../share/debug.qc
+profile.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
@@ -23,11 +24,11 @@ weapon_predict.qc
 sui_sys.qc
 vote.qc
 status.qc
+settings.qc
 menu.qc
 main.qc
 events.qc
 hud_helpers.qc
 hud.qc
-settings.qc
 input.qc
 #endlist

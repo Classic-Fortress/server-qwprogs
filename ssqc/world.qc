@@ -98,7 +98,6 @@ void () worldspawn = {
 
     lastspawn = world;
     number_of_teams = 0;
-    quad_maxplayers = 0;
 
     InitBodyQue();
     if (self.model == "maps/e1m8.bsp")
@@ -333,7 +332,6 @@ void () worldspawn = {
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
     clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
-    clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
     clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
