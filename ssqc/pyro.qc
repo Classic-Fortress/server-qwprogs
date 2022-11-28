@@ -556,7 +556,7 @@ void () W_FireFlame = {
     flame.velocity = aim(self, 10000);
     if (pyro_type == PYRO_FO)
     {
-        flame.velocity = flame.velocity * fpp_types[FPP_FLAMETHROWER].speed;
+        flame.velocity = flame.velocity * FPP_Get(FPP_FLAMETHROWER)->speed;
         flame.nextthink = time + 0.15;
     }
     else
@@ -692,7 +692,7 @@ void () W_FireIncendiaryCannon = {
     }
     else
     {
-        proj.velocity = proj.velocity * fpp_types[FPP_INCENDIARY].speed;
+        proj.velocity = proj.velocity * FPP_Get(FPP_INCENDIARY)->speed;
         proj.think = IncendiaryRadius_OZTF;
     }
     

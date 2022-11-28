@@ -818,7 +818,7 @@ DEFCVAR_FLOAT(r_grenadetrail, 0);
 int FPP_FindTrail(entity e) {
     int idx = -1; int  is_g = 0;
 
-    switch (e.fpp_index) {
+    switch (e.fpp.index) {
         case FPP_ROCKET: idx = CVARF(r_rockettrail) - 1; break;
         case FPP_INCENDIARY: idx = CVARF(r_pyrotrail) - 1; break;
         case FPP_GRENADE: idx = CVARF(r_grenadetrail) - 1; is_g = 1; break;
@@ -827,16 +827,16 @@ int FPP_FindTrail(entity e) {
     if (idx >= 0 && idx < trail_table.length)
         return trail_table[idx].trail[is_g];
 
-    return fpp_types[e.fpp_index].trailindex;
+    return FPP_Get(e.fpp.index)->trailindex;
 }
 
 DEFCVAR_FLOAT(cl_p2r, 0);
 DEFCVAR_FLOAT(cl_r2g, 0);
 
 void FPP_Init(int fpp_type, entity proj) {
-    fo_projectile* desc = &fpp_types[fpp_type];
+    fo_projectile* desc = FPP_Get(fpp_type);
 
-    proj.fpp_index = fpp_type;
+    proj.fpp.index = fpp_type;
 
     int render_type = fpp_type;
     // If someone sets both p2r and r2g, we'll convert all the way.
@@ -845,7 +845,7 @@ void FPP_Init(int fpp_type, entity proj) {
     if (render_type == FPP_ROCKET && CVARF(cl_r2g) == 1)
         render_type = FPP_GRENADE;
 
-    setmodelindex(proj, fpp_types[render_type].modelindex);
+    setmodelindex(proj, FPP_Get(render_type)->modelindex);
 
     proj.traileffectnum = FPP_FindTrail(proj);
     proj.movetype = desc->movetype;
@@ -937,15 +937,16 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   setsize(proj, [0,0,0], [0,0,0]);
   proj.origin = pmove_org + offset;
 
+  float proj_speed = FPP_Get(fpp_type)->speed;
   if (!FPP_IsGrenade(fpp_type)) {
-      proj.velocity = v_forward * fpp_types[fpp_type].speed;
+      proj.velocity = v_forward * proj_speed;
       proj.origin[2] += 16;
   } else {
       if (!input_angles_x) {
-          proj.velocity = v_forward * fpp_types[fpp_type].speed;
+          proj.velocity = v_forward * proj_speed;
           proj.velocity_z = 200;
       } else {
-          proj.velocity = (v_forward * 600) +
+          proj.velocity = (v_forward * proj_speed) +
               (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
               (shared_crandom(PRNG_WEAP) * 10 * v_right);
       }
@@ -970,14 +971,14 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 }
 
 static void FPP_ApplyGrenadeProperties(entity proj) {
-    if (!FPP_IsGrenade(proj.fpp_index))
+    if (!FPP_IsGrenade(proj.fpp.index))
         return;
 
-    if (proj.wpp_aux < GREN_FIRST) {
+    if (proj.fpp.gren_type < GREN_FIRST) {
         printf("proj (%s) missing gren_type, tell newby\n", proj.model);
-        proj.wpp_aux = GREN_FIRST;
+        proj.fpp.gren_type = GREN_FIRST;
     }
-    FO_GrenInfo* gdesc = FO_GrenDesc(proj.wpp_aux);
+    FO_GrenInfo* gdesc = FO_GrenDesc(proj.fpp.gren_type);
 
     setmodelindex(proj, gdesc->modelindex);
     proj.skin = gdesc->skin;
@@ -986,7 +987,7 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
 
 void W_FireGrenade(int gren_type) {
     entity proj = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
-    proj.wpp_aux = gren_type;
+    proj.fpp.gren_type = gren_type;
     FPP_ApplyGrenadeProperties(proj);
 }
 
@@ -1045,7 +1046,7 @@ static void W_ThrowGren(float is_throw) {
     if (IsEffectFrame()) {
         entity gren = PP_CreateProjectile(FPP_HANDGRENADE, '0 0 0');
         int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
-        gren.wpp_aux = FO_ClassGren(pstate_pred.playerclass, index)->id;
+        gren.fpp.gren_type = FO_ClassGren(pstate_pred.playerclass, index)->id;
         FPP_ApplyGrenadeProperties(gren);
     }
 
@@ -1066,7 +1067,7 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     proj.skin = 16 + hwguy_random() * 7;
     proj.velocity = dir * proj_speed;
     proj.angles = vectoangles(dir);
-    proj.wpp_aux = WP_GetAmmo(AMMO_SHELLS) * 100 + index;
+    proj.fpp.ammo_index = WP_GetAmmo(AMMO_SHELLS) * 100 + index;
 }
 
 void WP_Attack() {
@@ -1168,7 +1169,7 @@ float PredProjectile_MatchProjectile() {
         if (proj == self)
             error("???");
 
-        if (proj.fpp_index != self.fpp_index || proj.wpp_aux != self.wpp_aux)
+        if (proj.fpp.index != self.fpp.index || proj.fpp.aux != self.fpp.aux)
             continue;
 
         if (time > proj.endtime - 0.01)
@@ -1188,7 +1189,7 @@ float PredProjectile_MatchProjectile() {
         self.p_time = match.p_time;
         self.trail_started = match.trail_started;
 
-        if (FPP_IsGrenade(self.fpp_index))
+        if (FPP_IsGrenade(self.fpp.index))
             self.angles = match.angles;
 
         if (CVARF(wpp_debug) & 1) {
@@ -1216,7 +1217,7 @@ void InitProjectileEnt(float sendflags) {
     if (sendflags & FOPP_ANGLES == 0)
         self.angles = vectoangles(self.velocity);
 
-    FPP_Init(self.fpp_index, self);
+    FPP_Init(self.fpp.index, self);
     FPP_ApplyGrenadeProperties(self);
 
     float ptime = get_phys_time(self);
@@ -1234,7 +1235,7 @@ void InitProjectileEnt(float sendflags) {
         if (WP_Enabled() && !has_predicted &&
             self.s_time > last_pred_sound + PP_EPS/2)
             // Missing projectile implies we missed the local sound, patch it up.
-            PredProj_Sound(self.fpp_index);
+            PredProj_Sound(self.fpp.index);
     }
 
     if (!has_predicted) {

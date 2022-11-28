@@ -78,7 +78,7 @@ static void (vector org, entity shooter) MirvGrenadeLaunch = {
     proj.velocity = [xdir * 2, ydir * 2, zdir * 15];
 
     FO_GrenInfo* gdesc = FO_GrenDesc(GREN_MIRVLET);
-    proj.gren_type = GREN_MIRVLET;
+    proj.fpp.gren_type = GREN_MIRVLET;
     proj.skin = gdesc->skin;
 
     setorigin(proj, org);

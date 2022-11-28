@@ -1,3 +1,15 @@
+struct FPPState {
+    int index;
+
+    union {
+        int aux;
+        int gren_type;
+        int ammo_index;
+    };
+};
+
+.FPPState fpp;
+
 var struct {
     float qc_physics;
     float static_newmis_ms;

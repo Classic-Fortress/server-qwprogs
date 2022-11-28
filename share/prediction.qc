@@ -3,7 +3,6 @@
 #define ENT_PROJECTILE 102
 
 // Below apply to both CSQC & SSQC ents
-.float fpp_index;  // Projectile type
 .float antilag_ms;
 
 string wp_version = "v0.4-phys";
@@ -94,7 +93,7 @@ struct fo_predsnd {
     string sound;
 };
 
-fo_predsnd snd_types[] = {
+static fo_predsnd snd_types[] = {
     { SND_AXE, "ax1.wav" },
     { SND_SG, "guncock.wav" },
     { SND_SSG, "shotgn2.wav" },
@@ -113,7 +112,9 @@ fo_predsnd snd_types[] = {
 };
 
 enum {
-    FPP_ROCKET,
+    FPP_NONE,
+    FPP_FIRST = 50,
+    FPP_ROCKET = FPP_FIRST,
     FPP_GRENADE,        // Grenade launcher
     FPP_HANDGRENADE,    // TF Grenade
     FPP_INCENDIARY,
@@ -139,7 +140,7 @@ struct fo_projectile {
     float trailindex;
 };
 
-fo_projectile fpp_types[] = {
+static fo_projectile fpp_types[] = {
     { FPP_ROCKET,       MOVETYPE_FLYMISSILE, PC_SOLDIER_ROCKET_SPEED,
         "missile.mdl", "t_rocket", SND_RL, TRUE },
     { FPP_GRENADE,      MOVETYPE_BOUNCE,     600,
@@ -162,7 +163,7 @@ fo_projectile fpp_types[] = {
         "proj_diam2.mdl", "tr_asscan", SND_NONE /* in anim */ },
 };
 
-inline fo_projectile* FPP_Get(int fpp_type) { return &fpp_types[fpp_type]; }
+inline fo_projectile* FPP_Get(int fpp_type) { return &fpp_types[fpp_type - FPP_FIRST]; }
 inline fo_predsnd* Snd_Get(int snd_type) { return &snd_types[snd_type - SND_FIRST]; }
 inline fo_predsnd* FPP_Sound(int fpp_type) { return Snd_Get(FPP_Get(fpp_type)->snd); }
 
@@ -170,7 +171,6 @@ inline float FPP_IsGrenade(int fpp_type) {
     return fpp_type == FPP_GRENADE || fpp_type == FPP_HANDGRENADE;
 }
 
-// `wpp_aux` disambiguation for FPP_GRENADE projectiles.
 void InitFppProjectiles() {
     float i;
     static int once;
@@ -179,7 +179,7 @@ void InitFppProjectiles() {
 
     for (i = 0; i < fpp_types.length; i++) {
         fo_projectile* desc = &fpp_types[i];
-        ASSERTD_EQ(i, desc->id);
+        ASSERTD_EQ(i + FPP_FIRST, desc->id);
         desc->model = strcat("progs/", desc->model);
         desc->modelindex = getmodelindex(desc->model);
         if (desc->trail != "")
@@ -196,7 +196,7 @@ void InitFppProjectiles() {
 }
 
 float max_rewind_credit_ms(int fpp_type) {
-    return fpp_types[fpp_type].speed < fo_config.rewind_fast_projectile_thresh ?
+    return FPP_Get(fpp_type)->speed < fo_config.rewind_fast_projectile_thresh ?
         fo_config.max_rewind_slow_projectile_ms :
         fo_config.max_rewind_fast_projectile_ms;
 }
@@ -226,7 +226,6 @@ inline float dynamic_newmis_ms() {
 inline float fixed_newmis_ms(int fpp_type) {
     return fo_config.static_newmis_ms;
 }
-.float wpp_aux;
 
 #ifdef SSQC
 
@@ -466,7 +465,7 @@ void EntUpdate_WeaponPred(float isnew) {
 float PP_SendEntity(entity to_player, float sendflags) {
     if (sendflags & FOPP_NEW) {
         sendflags = FOPP_INIT | FOPP_POS;
-        if (self.wpp_aux)
+        if (self.fpp.aux)
             sendflags |= FOPP_AUX;
     }
 
@@ -481,9 +480,13 @@ void EntUpdate_Projectile(float isnew) {
     float sendflags = readbyte();
 #endif
     if (sendflags & FOPP_INIT) {
-        COMM(Byte, fpp_index);
+        COMM(Byte, fpp.index);
         COMM(Short, antilag_ms);
         COMMD(Entity, owner_entnum, owner);
+    }
+
+    if (sendflags & FOPP_AUX) {
+        COMM(Short, fpp.aux);
     }
 
     if (sendflags & FOPP_POS) {
@@ -514,9 +517,6 @@ void EntUpdate_Projectile(float isnew) {
             COMMD(Entity, aiment_num, aiment);
     }
 
-    if (sendflags & FOPP_AUX) {
-        COMM(Short, wpp_aux);
-    }
 
 #ifdef SSQC
     return TRUE;
@@ -687,7 +687,7 @@ void Pred_Sound(SoundIndex snd, float vol = 1) {
 }
 
 void PredProj_Sound(int proj_type, float vol = 1) {
-    Pred_Sound(fpp_types[proj_type].snd, vol);
+    Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
 void Forward_Projectile(int fpp_type, entity projectile);
@@ -695,16 +695,16 @@ void Forward_Projectile(int fpp_type, entity projectile);
 entity FOProj_Create(int fpp_type) {
     entity prj = spawn();
 
-    prj.fpp_index = fpp_type;
+    prj.fpp.index = fpp_type;
     prj.dimension_seen = DMN_NOFLASH;
-    setmodel(prj, fpp_types[fpp_type].model);
+    setmodel(prj, FPP_Get(fpp_type)->model);
     setsize(prj, '0 0 0', '0 0 0');
 
     return prj;
 }
 
 void FOProj_Finalize(entity mis) {
-    int fpp_type = mis.fpp_index;
+    int fpp_type = mis.fpp.index;
     // We explicitly do not use newmis.  Newmis internally implements a fixed
     // 50m forward of physics handling (equivalent to our projection below)
     // which cannot be nicely unwound or accounted for.ammo_shells
@@ -719,12 +719,12 @@ void FOProj_Finalize(entity mis) {
     float csqc_networking = fo_projectiles;
 
     if (FPP_IsGrenade(fpp_type)) {
-        FO_GrenInfo* gdesc = FO_GrenDesc(mis.gren_type);
+        FO_GrenInfo* gdesc = FO_GrenDesc(mis.fpp.gren_type);
 
         setmodel(mis, gdesc->model);
         mis.avelocity = gdesc->avelocity;
         mis.skin = gdesc->skin;
-        mis.wpp_aux = gdesc->id;
+        mis.fpp.gren_type = gdesc->id;
 
         // If we don't have physics synchronized between client and server, use
         // engine-side for both.
@@ -736,7 +736,7 @@ void FOProj_Finalize(entity mis) {
     if (fo_config.qc_physics)
         mis.customphysics = FO_CustomPhysics;
 
-    Forward_Projectile(mis.fpp_index, mis);
+    Forward_Projectile(mis.fpp.index, mis);
 
     // Below is conditional on using custom SendEntity.
     if (csqc_networking) {
@@ -764,7 +764,7 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     float max_ping_credit = max_rewind_credit_ms(fpp_type);
     float static_credit;
 
-    if (fpp_types[fpp_type].fixed_project) {
+    if (FPP_Get(fpp_type)->fixed_project) {
         static_credit = fixed_newmis_ms(fpp_type);
     } else {
         static_credit = static_newmis_ms(fpp_type);
@@ -794,13 +794,14 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
 }
 
 void AugmentGrenadeImpact() {
-    if (!FPP_IsGrenade(self.fpp_index) || self.voided ||
-        self.wpp_aux == GREN_RED)
+    if (!FPP_IsGrenade(self.fpp.index) || self.voided ||
+        self.fpp.gren_type == GREN_RED)
         return;
 
     float old_move = self.movetype;
 
-    if (IsClownMode(CLOWN_STICKY_PIPES) && other.solid == SOLID_BSP)
+    if (IsClownMode(CLOWN_STICKY_PIPES) && self.fpp.gren_type == GREN_PIPE &&
+            other.solid == SOLID_BSP)
         self.movetype = MOVETYPE_NONE;
 
     if (IsClownMode(CLOWN_STICKY_GRENS) && other.solid == SOLID_SLIDEBOX) {

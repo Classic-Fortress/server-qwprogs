@@ -64,7 +64,7 @@ void WeapPred_FireAssCan(vector vangle, float shotcount,
     makevectors(vangle);
 
     // In front of player model and down towards gun
-    bullet_speed = fpp_types[FPP_ASSAULT_CANNON].speed;
+    bullet_speed = FPP_Get(FPP_ASSAULT_CANNON)->speed;
     bullet_dir = v_forward;
 
     for (int i = 0; i < shotcount; i++) {

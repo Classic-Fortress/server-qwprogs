@@ -852,7 +852,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
     FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
-    proj.gren_type = gtype;
+    proj.fpp.gren_type = gtype;
     proj.skin = gdesc->skin;
     proj.touch = ste->touch;
     proj.think = ste->think;
@@ -930,7 +930,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 newmis.movetype = 6;
                 newmis.solid = 2;
                 newmis.classname = "grenade";
-                newmis.gren_type = GREN_FLARE;
+                newmis.fpp.gren_type = GREN_FLARE;
                 makevectors(self.v_angle);
                 newmis.velocity = (v_forward * 600) + (v_up * 25);
                 newmis.velocity = newmis.velocity * 700;
@@ -998,7 +998,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 newmis.movetype = 6;
                 newmis.solid = 2;
                 newmis.classname = "grenade";
-                newmis.gren_type = GREN_FLARE;
+                newmis.fpp.gren_type = GREN_FLARE;
                 makevectors(self.v_angle);
                 if (self.v_angle_x) {
                     newmis.velocity = v_forward * 1200 + v_up * 200;

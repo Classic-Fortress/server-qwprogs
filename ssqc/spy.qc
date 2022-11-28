@@ -1083,7 +1083,7 @@ void () W_FireTranq = {
     proj.solid = 2;
     makevectors(self.v_angle);
     proj.velocity = v_forward;
-    proj.velocity = proj.velocity * fpp_types[FPP_TRANQ].speed;
+    proj.velocity = proj.velocity * FPP_Get(FPP_TRANQ)->speed;
     proj.angles = vectoangles(proj.velocity);
     proj.touch = T_TranqDartTouch;
     proj.think = SUB_Remove;
