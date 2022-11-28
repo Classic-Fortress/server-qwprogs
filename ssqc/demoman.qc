@@ -3,11 +3,9 @@
 //========================================================
 
 void () NormalGrenadeTouch;
-void () NormalGrenadeExplode;
 
 void () MirvGrenadeTouch;
 void () MirvGrenadeExplode;
-void (vector org, entity shooter) MirvGrenadeLaunch;
 
 void () TeamFortress_DetpackMenu;
 void () TeamFortress_DetpackStop;
@@ -62,60 +60,42 @@ void () MirvGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
+static void (vector org, entity shooter) MirvGrenadeLaunch = {
+    float xdir = 75 * crandom();
+    float ydir = 75 * crandom();
+    float zdir = 40 * random();
+
+    entity proj = FOProj_Create(FPP_HANDGRENADE);
+    proj.owner = shooter;
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
+
+    proj.classname = "grenade";
+    proj.touch = NormalGrenadeTouch;
+    proj.think = FO_T_GrenExplode;
+    proj.nextthink = time + 2 + random();
+
+    proj.velocity = [xdir * 2, ydir * 2, zdir * 15];
+
+    FO_GrenInfo* gdesc = FO_GrenDesc(GREN_MIRVLET);
+    proj.gren_type = GREN_MIRVLET;
+    proj.skin = gdesc->skin;
+
+    setorigin(proj, org);
+    FOProj_Finalize(proj);
+};
+
 void () MirvGrenadeExplode = {
-    local float i;
-
-    deathmsg = DMSG_GREN_MIRV;
-    T_RadiusDamage(self, self.owner, 100, world);
-
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
+    FO_GrenExplode(self);
 
     self.solid = SOLID_NOT;
-    i = 0;
-    while (i < 4) {
-        MirvGrenadeLaunch(self.origin + '0 0 -1', self.owner);
-        i = i + 1;
-    }
-    BecomeExplosion();
+    for (int i = 0; i < 4; i++)
+        MirvGrenadeLaunch(self.origin, self.owner);
+
+    dremove(self);
 
 };
 
-void (vector org, entity shooter) MirvGrenadeLaunch = {
-    local float xdir;
-    local float ydir;
-    local float zdir;
-
-    xdir = 150 * random() - 75;
-    ydir = 150 * random() - 75;
-    zdir = 40 * random();
-
-    newmis = spawn();
-    newmis.owner = shooter;
-    newmis.movetype = MOVETYPE_BOUNCE;
-    newmis.solid = SOLID_BBOX;
-
-    newmis.classname = "grenade";
-    newmis.gren_type = GREN_MIRV;
-    newmis.weapon = DMSG_GREN_MIRV;
-    newmis.touch = NormalGrenadeTouch;
-    newmis.think = NormalGrenadeExplode;
-    newmis.nextthink = time + 2 + random();
-
-    newmis.velocity_x = xdir * 2;
-    newmis.velocity_y = ydir * 2;
-    newmis.velocity_z = zdir * 15;
-    newmis.avelocity = '250 300 400';
-
-    FO_SetModel(newmis, "progs/grenade2.mdl");
-
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    setorigin(newmis, org);
-};
 
 void () TeamFortress_DetpackMenu = {
     local entity detpack;

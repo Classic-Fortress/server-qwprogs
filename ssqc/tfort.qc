@@ -781,20 +781,6 @@ void () NormalGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
-void () NormalGrenadeExplode = {
-    deathmsg = DMSG_GREN_HAND;
-    T_RadiusDamage(self, self.owner, 180, world);
-
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-
-    multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
-};
-
 void () GrenadeTimer = {
     self.heat = self.heat - 1;
     self.nextthink = time + 1;
@@ -813,8 +799,8 @@ static struct stg_table_entry {
 };
 
 stg_table_entry stg_table[] = {
-    { GREN_NORMAL,  NormalGrenadeTouch,     NormalGrenadeExplode},
-    { GREN_CONC,    ConcussionGrenadeTouch, ConcussionGrenadeExplode},
+    { GREN_NORMAL,  NormalGrenadeTouch,     FO_T_GrenExplode},
+    { GREN_CONC,    ConcussionGrenadeTouch, FO_T_GrenExplode},
     { GREN_BLAST,   BlastGrenadeTouch,      BlastGrenadeExplode},
     { GREN_NAIL,    NailGrenadeTouch,       NailGrenadeExplode},
     { GREN_SHOCK,   ShockGrenadeTouch,      ShockGrenadeExplode},

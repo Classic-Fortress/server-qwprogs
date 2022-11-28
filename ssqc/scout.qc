@@ -9,7 +9,6 @@ void () FlashGrenadeTouch;
 void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
-void () ConcussionGrenadeExplode;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
@@ -357,17 +356,6 @@ void () ConcussionGrenadeTouch = {
     FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
-};
-
-void () ConcussionGrenadeExplode = {
-    T_RadiusBounce(self, self.owner, 240, world);
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
 };
 
 void () BlastGrenadeTouch = {

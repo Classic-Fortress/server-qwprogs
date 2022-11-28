@@ -168,6 +168,7 @@ enum {
     GREN_EMP,
     GREN_FLASH,
     GREN_CALTROP,
+    GREN_MIRVLET,
     GREN_RED,
     GREN_PIPE,
     GREN_NONE,
@@ -221,9 +222,48 @@ FO_GrenInfo fo_grenades[] = {
     { GREN_EMP,     "EMP",        "grenade2.mdl",  4, '300 300 300'},
     { GREN_FLASH,   "Flash",      "flashgren.mdl", 0, '300 300 300'},
     { GREN_CALTROP, "Caltrop",    "",              0, '300 300 300'},
+    { GREN_MIRVLET, "Mirvlet",    "grenade2.mdl",  1, '250 300 400'},
     { GREN_RED,     "Red",        "grenade2.mdl",  1, '300 300 300'},
     { GREN_PIPE,    "Pipe",       "grenade2.mdl",  2, '300 300 300'},
 };
+
+enum {
+    kRadiusDamage,
+    kRadiusBounce,
+};
+
+struct FO_GrenExp {
+    int type;
+    int dmg;
+    int deathmsg;
+
+};
+
+float FO_GrenGetExp(int gren_type, __out FO_GrenExp exp) {
+    exp.type = kRadiusDamage;
+    switch (gren_type) {
+        case GREN_NORMAL:
+            exp.dmg = 180;
+            exp.deathmsg = DMSG_GREN_HAND;
+            break;
+        case GREN_MIRVLET:
+            exp.dmg = 180;
+            exp.deathmsg = DMSG_GREN_MIRV;
+            break;
+        case GREN_CONC:
+            exp.dmg = 240;
+            exp.type = kRadiusBounce;
+            break;
+        case GREN_MIRV:
+            exp.dmg = 100;
+            exp.deathmsg = DMSG_GREN_MIRV;
+            break;
+        default:
+            return FALSE;
+    }
+
+    return TRUE;
+}
 
 struct FO_ClassGrenades {
     float id;

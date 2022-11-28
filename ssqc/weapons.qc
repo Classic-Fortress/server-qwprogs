@@ -1234,6 +1234,27 @@ void RenderExplosion(vector origin) {
     WriteCoord(MSG_MULTICAST, origin_z);
     multicast(origin, MULTICAST_PHS);
 }
+void T_RadiusBounce(entity inflictor, entity attacker, float bounce,
+                    entity ignore);
+
+// REQUIRES: e.gren_type is set and supported by FO_GrenGetExp
+void FO_GrenExplode(entity e) {
+    FO_GrenExp exp;
+    ASSERTF_TRUE(FO_GrenGetExp(e.gren_type, exp));
+
+    deathmsg = exp.deathmsg;
+    if (exp.type == kRadiusDamage)
+        T_RadiusDamage(self, self.owner, exp.dmg, world);
+    else if (exp.type == kRadiusBounce)
+        T_RadiusBounce(self, self.owner, exp.dmg, world);
+
+    RenderExplosion(e.origin);
+}
+
+void FO_T_GrenExplode() {
+    FO_GrenExplode(self);
+    dremove(self);
+}
 
 void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
                             entity ignore);
