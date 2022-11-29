@@ -234,23 +234,6 @@ inline float fixed_newmis_ms(int fpp_type) {
 
 #else
 
-struct pengine_t {
-    float pp_enabled;
-    float wp_enabled;
-    float is_effectframe;
-    float last_effectframe;
-
-    entity pweap_ent;
-
-    // Must include MASK_PRED_VIEWMODEL or we lose updates.
-    // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
-    float view_mask;
-} pengine;
-
-inline float PP_Enabled() { return pengine.pp_enabled; }
-inline float WP_Enabled() { return pengine.wp_enabled; }
-inline float WPP_ViewModelMask() { return pengine.view_mask; }
-
 predict_tf_state pstate_pred, pstate_server;
 #define MASK_PRED_VIEWMODEL  256
 #define MASK_PRED_PROJECTILE 512
@@ -497,7 +480,6 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMM(Byte, movetype);
         COMM(Float, phys_time);
 #ifdef CSQC
         self.s_origin = self.origin;
@@ -809,7 +791,8 @@ void AugmentGrenadeImpact() {
             self.velocity = self.origin - other.origin;
 #ifdef SSQC
             self.aiment = other;
-            self.SendFlags |= FOPP_POS;  // Need velocity
+            self.SendFlags |= FOPP_POS | FOPP_MOVETYPE;  // Need velocity for
+                                                         // offset
 #else
             self.aiment_num = other.entnum;
 #endif

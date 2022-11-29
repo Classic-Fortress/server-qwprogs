@@ -122,7 +122,7 @@ float Phys_Push(entity e, vector offset, float dt, float phys_flags) {
 
     // Note: Networked entities don't currently intersect on CSQC instantiation
     // of this, we fudge this in Phys_Impact from the server side.
-    traceline(e.origin, e.origin + offset, trace_flags, e);
+    traceline(e.origin, e.origin + offset, trace_flags, e.owner);
 
     if ((phys_flags & PHYSF_FAIL_STARTSOLID) && trace_startsolid)
         return FALSE;

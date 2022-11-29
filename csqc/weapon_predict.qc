@@ -8,6 +8,24 @@ DEFCVAR_FLOAT(wpp_proj_predict, -1);
 DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
 DEFCVAR_FLOAT(wpp_phys_local_adv_ms, SERVER_FRAME_MS);
 
+struct pengine_t {
+    float pp_enabled;
+    float wp_enabled;
+    float is_effectframe;
+    float last_effectframe;
+
+    entity player_ent;
+    entity pweap_ent;
+
+    // Must include MASK_PRED_VIEWMODEL or we lose updates.
+    // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
+    float view_mask;
+} pengine;
+
+inline float PP_Enabled() { return pengine.pp_enabled; }
+inline float WP_Enabled() { return pengine.wp_enabled; }
+inline float WPP_ViewModelMask() { return pengine.view_mask; }
+
 float WP_MinPing() {
     if (CVARF(wpp_min_ping) == -1)
             return fo_config.wp_default_min_ping_ms;
@@ -83,6 +101,11 @@ static float CalcPredEnabled(float current_enable,
 
     if (is_spectator) {
         *set_by = "[spectator]";
+        return FALSE;
+    }
+
+    if (is_observer) {
+        *set_by = "[observer]";
         return FALSE;
     }
 
@@ -231,6 +254,7 @@ void WPP_UpdateEnable(float force) {
         printf("FortressOne: Weapon prediction %s %s\n",
                 wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
+        pengine.player_ent = edict_num(player_localentnum);
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
@@ -239,6 +263,7 @@ void WPP_UpdateEnable(float force) {
         pengine.pp_enabled = pp_new;
     }
     once = TRUE;
+
 
     float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
                        (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
@@ -907,6 +932,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
 
   entity proj = spawn();
   proj.owner_entnum = player_localentnum;
+  proj.owner = pengine.player_ent;
   FPP_Init(fpp_type, proj);
 
 #if 0
@@ -1220,6 +1246,9 @@ void InitProjectileEnt(float sendflags) {
     FPP_Init(self.fpp.index, self);
     FPP_ApplyGrenadeProperties(self);
 
+    if (self.owner_entnum == player_localentnum)
+        self.owner = pengine.player_ent;
+
     float ptime = get_phys_time(self);
     if (ptime > self.phys_time /* from server */)
         Phys_Advance(self, ptime, 0);
@@ -1343,6 +1372,7 @@ void InitWeapPredEnt(entity pe) {
     self.drawmask = MASK_PRED_VIEWMODEL;
     self.renderflags = RF_VIEWMODEL;
 
-    pengine.pweap_ent = self;
+    pe.owner = pengine.player_ent;
+    pengine.pweap_ent = pe;
 }
 
