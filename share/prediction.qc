@@ -234,23 +234,6 @@ inline float fixed_newmis_ms(int fpp_type) {
 
 #else
 
-struct pengine_t {
-    float pp_enabled;
-    float wp_enabled;
-    float is_effectframe;
-    float last_effectframe;
-
-    entity pweap_ent;
-
-    // Must include MASK_PRED_VIEWMODEL or we lose updates.
-    // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
-    float view_mask;
-} pengine;
-
-inline float PP_Enabled() { return pengine.pp_enabled; }
-inline float WP_Enabled() { return pengine.wp_enabled; }
-inline float WPP_ViewModelMask() { return pengine.view_mask; }
-
 predict_tf_state pstate_pred, pstate_server;
 #define MASK_PRED_VIEWMODEL  256
 #define MASK_PRED_PROJECTILE 512
@@ -497,7 +480,6 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, velocity[1]);
         COMM(Coord, velocity[2]);
 
-        COMM(Byte, movetype);
         COMM(Float, phys_time);
 #ifdef CSQC
         self.s_origin = self.origin;
@@ -562,6 +544,18 @@ entity config_entity;
         update = TRUE; \
     } } while (0)
 
+float ForwardDoorsPossible() {
+    static float once;
+    static float possible;
+
+    if (!once) {
+        possible = CF_GetSetting("rfd", "rewind_forward_doors", "off");
+        once = TRUE;
+    }
+
+    return possible;
+}
+
 static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
@@ -590,6 +584,9 @@ static void WeaponPred_CheckConfigUpdate() {
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
+
+    if (!ForwardDoorsPossible())
+        fo_config.rewind_flags &= ~REWIND_FORWARD_DOORS;
 
     static float last_force_refresh;
     if (time > last_force_refresh + 5) {
@@ -756,10 +753,6 @@ struct ProjectResult {
     float dynamic_ms;
 };
 
-#ifdef CSQC
-DEFCVAR_FLOAT(wpp_phys_nudge, 2/3 * SERVER_FRAME_MS);
-#endif
-
 ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     float max_ping_credit = max_rewind_credit_ms(fpp_type);
     float static_credit;
@@ -781,7 +774,8 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
 #ifdef CSQC
     // Account for the fact that the server usually has a physics frame that's
     // going to be credited to the new projectile.
-    frame_nudge = fo_config.qc_physics ? CVARF(wpp_phys_nudge) : 1.5 * SERVER_FRAME_MS;
+    if (!fo_config.qc_physics)
+        frame_nudge = SERVER_FRAME_MS * 1.5;
 #endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
@@ -809,7 +803,8 @@ void AugmentGrenadeImpact() {
             self.velocity = self.origin - other.origin;
 #ifdef SSQC
             self.aiment = other;
-            self.SendFlags |= FOPP_POS;  // Need velocity
+            self.SendFlags |= FOPP_POS | FOPP_MOVETYPE;  // Need velocity for
+                                                         // offset
 #else
             self.aiment_num = other.entnum;
 #endif

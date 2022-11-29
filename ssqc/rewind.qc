@@ -330,3 +330,19 @@ void Forward_Projectile(int fpp_type, entity proj) {
 
     proj.antilag_ms = ft * 1000;
 }
+
+void Forward_OpenDoors(entity player) {
+    if (!RewindFlagEnabled(REWIND_FORWARD_DOORS))
+        return;
+
+    vector offset = max(player.client_ping, 150) / 1000.0 * player.velocity;
+    traceline(player.origin, player.origin + offset, MOVE_TRIGGERS, player);
+
+    if (trace_fraction < 1 && trace_ent.solid == SOLID_TRIGGER) {
+        entity held_self = self;
+        other = player;
+        self = trace_ent;
+        trace_ent.touch();
+        self = held_self;
+    }
+}

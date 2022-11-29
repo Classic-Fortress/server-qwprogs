@@ -467,6 +467,7 @@ void _Sync_ServerCommandFrame() {
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
+    is_player = !is_spectator && !is_observer;
 
     local float health = getstatf(STAT_HEALTH);
     if (health <= 0 || player_class != PC_SNIPER) {

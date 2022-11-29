@@ -2724,16 +2724,16 @@ void () TeamFortress_ExplodePerson = {
     self.owner.tfstate &= ~TFSTATE_GREN_MASK_ALL;
     KickPlayer(-2, self.owner);
 
-    newmis = spawn();
-    newmis.movetype = MOVETYPE_BOUNCE;
-    newmis.solid = SOLID_BBOX;
-    newmis.classname = "grenade";
-    newmis.team_no = self.owner.team_no;
-    newmis.owner = self.owner;
-    newmis.velocity = '0 0 0';
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.think = SUB_Null;
-    newmis.nextthink = time + 0.1;  // Server generated, no client time here.
+    entity proj = FOProj_Create(FPP_HANDGRENADE);
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
+    proj.classname = "grenade";
+    proj.team_no = self.owner.team_no;
+    proj.owner = self.owner;
+    proj.velocity = '0 0 0';
+    proj.angles = vectoangles(proj.velocity);
+    proj.think = SUB_Null;
+    proj.nextthink = time + 0.1;  // Server generated, no client time here.
 
     if (self.weapon == GR_TYPE_FLARE) {
         sprint(self.owner, PRINT_HIGH, "Flare lit\n");
@@ -2745,7 +2745,7 @@ void () TeamFortress_ExplodePerson = {
         te.solid = 0;
         self.owner.effects = self.owner.effects | EF_BRIGHTLIGHT;
         dremove(self);
-        dremove(newmis);
+        dremove(proj);
         return;
     }
 
@@ -2753,13 +2753,13 @@ void () TeamFortress_ExplodePerson = {
     FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
-    newmis.skin = gdesc->skin;
-    FO_SetModel(newmis, gdesc->model);
-    newmis.avelocity = gdesc->avelocity;
-    newmis.touch = ste->touch;
-    newmis.think = ste->think;
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, self.owner.origin);
+    proj.fpp.gren_type = gtype;
+    proj.skin = gdesc->skin;
+    proj.avelocity = gdesc->avelocity;
+    proj.touch = ste->touch;
+    proj.think = ste->think;
+    setorigin(proj, self.owner.origin);
+    FOProj_Finalize(proj);
 
     if ((self.owner.playerclass == PC_SCOUT) && (self.weapon != 10))
         bprint(PRINT_MEDIUM, "No ", self.owner.netname,
