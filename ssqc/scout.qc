@@ -721,42 +721,25 @@ void () TeamFortress_Scan = {
 
 void CussSpeedBump()
 {
-    entity p;
-    p = self.owner;
+    entity p = self.owner;
     self.nextthink = time + .3;
 
-    if (!self.cnt2)
-    {
+    if (!self.cnt) {
         makevectors(p.v_angle);
 
         // if medic within x units of ground, slow
-        traceline(p.origin, (v_up * -1000), MOVE_NOMONSTERS, p);
+        traceline(p.origin, p.origin - 100 * v_up, MOVE_NOMONSTERS, p);
 
-        if (vlen(p.origin - trace_endpos) <= 100)
-        {
-            // near ground
-            self.cnt2 = 1;
-        }
-    }
-
-    if (self.cnt2)
-    {
-        self.cnt = self.cnt + 1;
-
+        if (trace_fraction < 1)  // Found ground
+            self.cnt = TRUE;
+    } else {
+        self.cnt2++;
         if (vlen(p.velocity) > 1000)
-        {
-            if (self.cnt < 10)
-            {
-                p.velocity = p.velocity *.9;
-            }        
-        }
+            p.velocity *= 0.9;
     }
-    
 
-    if (self.cnt >= 10)
-    {
+    if (self.cnt2 > 9)
         dremove(self);
-    }
 }
 
 void (entity inflictor, entity attacker, float bounce,
