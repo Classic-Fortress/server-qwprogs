@@ -335,7 +335,8 @@ void Forward_OpenDoors(entity player) {
     if (!RewindFlagEnabled(REWIND_FORWARD_DOORS))
         return;
 
-    vector offset = max(player.client_ping, 150) / 1000.0 * player.velocity;
+    vector offset = min(550, vlen(player.velocity)) * normalize(player.velocity);
+    offset *= max(player.client_ping, 150) / 1000.0;
     traceline(player.origin, player.origin + offset, MOVE_TRIGGERS, player);
 
     if (trace_fraction < 1 && trace_ent.solid == SOLID_TRIGGER) {
