@@ -2916,6 +2916,7 @@ void () PlayerPostThink = {
     UpdateScoreboardInfo(self);
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
+    Forward_OpenDoors(self);
 
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);

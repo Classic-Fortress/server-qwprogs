@@ -544,6 +544,18 @@ entity config_entity;
         update = TRUE; \
     } } while (0)
 
+float ForwardDoorsPossible() {
+    static float once;
+    static float possible;
+
+    if (!once) {
+        possible = CF_GetSetting("rfd", "rewind_forward_doors", "off");
+        once = TRUE;
+    }
+
+    return possible;
+}
+
 static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
@@ -572,6 +584,9 @@ static void WeaponPred_CheckConfigUpdate() {
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
+
+    if (!ForwardDoorsPossible())
+        fo_config.rewind_flags &= ~REWIND_FORWARD_DOORS;
 
     static float last_force_refresh;
     if (time > last_force_refresh + 5) {

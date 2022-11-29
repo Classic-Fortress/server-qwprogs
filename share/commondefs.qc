@@ -36,12 +36,14 @@ var struct {
 enumflags {
     REWIND_KNOCKBACK,
     REWIND_PROJ_HIT,
+    REWIND_FORWARD_DOORS,
     REWIND_PROJ_SELFKNOCK,
 };
 
 string REWIND_DESC[] = {
     "rewind pipe knockback",
     "rewind projectile hit",
+    "open doors earlier for hpbs [requires rfd=1]",
     "forward projectile self-knockback",
 };
 
