@@ -179,7 +179,7 @@ static void RewindTo(RewindState* rstate, float rtime) {
 
         if (!a) {
             a_time = time;
-            a_origin = self.origin;
+            a_origin = e.origin;
         } else {
             a_time = a->time;
             a_origin = a->origin;
