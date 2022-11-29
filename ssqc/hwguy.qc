@@ -81,7 +81,7 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index)
     proj.angles = vectoangles(dir);          // Create direction angle
     setorigin (proj, org);                   // Move to starting position
 
-    proj.wpp_aux = self.ammo_shells * 100 + index;
+    proj.fpp.ammo_index = self.ammo_shells * 100 + index;
     FOProj_Finalize(proj);
 }
 

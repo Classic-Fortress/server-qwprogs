@@ -752,7 +752,6 @@ float gametime;
 string gametimestamp;
 float logfilehandle;
 float canlog;
-.int gren_type;
 .float classtime;
 .float goalrunningtime;
 

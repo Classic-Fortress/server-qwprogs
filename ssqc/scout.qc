@@ -9,7 +9,6 @@ void () FlashGrenadeTouch;
 void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
-void () ConcussionGrenadeExplode;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
@@ -103,7 +102,7 @@ void () ScatterCaltrops = {
     while (num > 0) {
         e = spawn();
         e.classname = "grenade";
-        e.gren_type = GREN_CALTROP;
+        e.fpp.gren_type = GREN_CALTROP;
         e.weapon = 10;
         e.owner = self.owner;
         e.team_no = self.owner.team_no;
@@ -357,17 +356,6 @@ void () ConcussionGrenadeTouch = {
     FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
-};
-
-void () ConcussionGrenadeExplode = {
-    T_RadiusBounce(self, self.owner, 240, world);
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
 };
 
 void () BlastGrenadeTouch = {
@@ -733,42 +721,25 @@ void () TeamFortress_Scan = {
 
 void CussSpeedBump()
 {
-    entity p;
-    p = self.owner;
+    entity p = self.owner;
     self.nextthink = time + .3;
 
-    if (!self.cnt2)
-    {
+    if (!self.cnt) {
         makevectors(p.v_angle);
 
         // if medic within x units of ground, slow
-        traceline(p.origin, (v_up * -1000), MOVE_NOMONSTERS, p);
+        traceline(p.origin, p.origin - 100 * v_up, MOVE_NOMONSTERS, p);
 
-        if (vlen(p.origin - trace_endpos) <= 100)
-        {
-            // near ground
-            self.cnt2 = 1;
-        }
-    }
-
-    if (self.cnt2)
-    {
-        self.cnt = self.cnt + 1;
-
+        if (trace_fraction < 1)  // Found ground
+            self.cnt = TRUE;
+    } else {
+        self.cnt2++;
         if (vlen(p.velocity) > 1000)
-        {
-            if (self.cnt < 10)
-            {
-                p.velocity = p.velocity *.9;
-            }        
-        }
+            p.velocity *= 0.9;
     }
-    
 
-    if (self.cnt >= 10)
-    {
+    if (self.cnt2 > 9)
         dremove(self);
-    }
 }
 
 void (entity inflictor, entity attacker, float bounce,

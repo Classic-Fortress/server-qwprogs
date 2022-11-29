@@ -95,7 +95,7 @@ void () W_FireRailgun = {
     proj.solid = SOLID_TRIGGER;
 
 
-    proj.velocity = vec * fpp_types[FPP_RAILGUN].speed;
+    proj.velocity = vec * FPP_Get(FPP_RAILGUN)->speed;
     proj.angles = vectoangles(proj.velocity);
 
     proj.nextthink = time + 5;

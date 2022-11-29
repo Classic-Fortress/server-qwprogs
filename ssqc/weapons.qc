@@ -1121,7 +1121,7 @@ void () W_FireRocket = {
     proj.solid = SOLID_BBOX;
 
     makevectors(self.v_angle);
-    proj.velocity = v_forward * fpp_types[FPP_ROCKET].speed;
+    proj.velocity = v_forward * FPP_Get(FPP_ROCKET)->speed;
     proj.angles = vectoangles(proj.velocity);
 
     proj.touch = T_MissileTouch;
@@ -1234,6 +1234,27 @@ void RenderExplosion(vector origin) {
     WriteCoord(MSG_MULTICAST, origin_z);
     multicast(origin, MULTICAST_PHS);
 }
+void T_RadiusBounce(entity inflictor, entity attacker, float bounce,
+                    entity ignore);
+
+// REQUIRES: e.gren_type is set and supported by FO_GrenGetExp
+void FO_GrenExplode(entity e) {
+    FO_GrenExp exp;
+    ASSERTF_TRUE(FO_GrenGetExp(e.fpp.gren_type, exp));
+
+    deathmsg = exp.deathmsg;
+    if (exp.type == kRadiusDamage)
+        T_RadiusDamage(self, self.owner, exp.dmg, world);
+    else if (exp.type == kRadiusBounce)
+        T_RadiusBounce(self, self.owner, exp.dmg, world);
+
+    RenderExplosion(e.origin);
+}
+
+void FO_T_GrenExplode() {
+    FO_GrenExplode(self);
+    dremove(self);
+}
 
 void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
                             entity ignore);
@@ -1325,7 +1346,7 @@ void () W_FireGrenade = {
         proj.classname = "grenade";
         proj.touch = GrenadeTouch;
         proj.nextthink = time + 2.5;
-        proj.gren_type = GREN_RED;
+        proj.fpp.gren_type = GREN_RED;
     } else {
         if (old_pipecooldown)
             self.pipecooldown = time + 0.8;
@@ -1337,7 +1358,7 @@ void () W_FireGrenade = {
         proj.nextthink = time + 120;
         proj.weapon = 11;
         proj.team_no = self.team_no;
-        proj.gren_type = GREN_PIPE;
+        proj.fpp.gren_type = GREN_PIPE;
     }
     makevectors(self.v_angle);
     if (self.v_angle_x) {
@@ -1372,7 +1393,7 @@ entity (int fpp_type, vector offset) W_FireNail = {
     proj.nextthink = time + 6;
     setorigin(proj, self.origin + offset + '0 0 16');
 
-    proj.velocity = aim(self, 1000) * fpp_types[fpp_type].speed;
+    proj.velocity = aim(self, 1000) * FPP_Get(fpp_type)->speed;
 
     if (fpp_type == FPP_NAIL) {
         proj.weapon = DMSG_NAILGUN;

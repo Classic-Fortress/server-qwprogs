@@ -314,11 +314,12 @@ void (vector org, vector dir) launch_spike = {
     newmis.classname = "spike";
     newmis.think = SUB_Remove;
     newmis.nextthink = time + 6;
-    FO_SetModel(newmis, fpp_types[FPP_NAIL].model);
+    fo_projectile* fdesc = FPP_Get(FPP_NAIL);
+    FO_SetModel(newmis, fdesc->model);
     setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
     setorigin(newmis, org);
 
-    newmis.velocity = dir * fpp_types[FPP_NAIL].speed;
+    newmis.velocity = dir * fdesc->speed;
 };
 
 
