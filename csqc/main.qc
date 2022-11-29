@@ -486,6 +486,7 @@ void _Sync_ServerCommandFrame() {
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
+    is_player = !is_spectator && !is_observer;
 
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
                   getstatf(STAT_VELOCITY_Z)];

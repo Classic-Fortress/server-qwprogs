@@ -576,6 +576,7 @@ float team_no;
 float is_spectator;
 float player_class;
 float is_observer;
+float is_player;
 //float health;
 float oldhealth;
 float painfinished;

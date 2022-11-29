@@ -6,7 +6,7 @@ DEFCVAR_FLOAT(wpp_weap_predict, -1);
 DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
 DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
-DEFCVAR_FLOAT(wpp_phys_local_adv_ms, SERVER_FRAME_MS);
+DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
 
 struct pengine_t {
     float pp_enabled;
@@ -14,6 +14,7 @@ struct pengine_t {
     float is_effectframe;
     float last_effectframe;
 
+    float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
     entity pweap_ent;
 
@@ -254,7 +255,15 @@ void WPP_UpdateEnable(float force) {
         printf("FortressOne: Weapon prediction %s %s\n",
                 wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
-        pengine.player_ent = edict_num(player_localentnum);
+
+        if (wp_new) {
+            entity player = edict_num(player_localentnum);
+            pengine.player_entnum = player_localentnum;
+            pengine.player_ent = player;
+            pengine.pweap_ent.owner = player;
+        } else {
+            pengine.player_entnum = -1;
+        }
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
@@ -791,13 +800,28 @@ trail_table_entry trail_table[] = {
     {{"TE_RAILTRAIL"}},
 };
 
+inline float interp_ms() {
+    return (clientcommandframe - servercommandframe) * SERVER_FRAME_MS;
+}
+
+inline float interp_dt() {
+    return interp_ms() / 1000.0;
+}
+
+inline float interp_time() {
+    return time + interp_dt();
+}
+
 float get_phys_time_nudge_dt(entity e) {
-    float nudge, adj_ping = max(pstate_pred.client_ping, 0);
-    if (e.owner_entnum != player_localentnum)
+    if (!is_player)
+        return 0;
+
+    float nudge;
+    if (e.owner_entnum != pengine.player_entnum)
         nudge = CVARF(wpp_phys_adv_ms);
     else
         nudge = CVARF(wpp_phys_local_adv_ms);
-    return min(nudge, adj_ping) / 1000.0;
+    return min(nudge, interp_ms()) / 1000.0;
 }
 
 inline float get_phys_time(entity e) {
@@ -946,16 +970,17 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
       return __NULL__;
 #endif
 
-  ProjectResult push_t =
-      Forward_ProjectOffset(fpp_type, pstate_pred.client_ping);
+  ProjectResult push_t = Forward_ProjectOffset(fpp_type, interp_ms());
 
-  float uncorrected_dt = (pstate_pred.client_ping - push_t.dynamic_ms) / 1000.0;
+  // Using interp_ms() to predict which packet it will arrive in, while using
+  // client_ping to predict when that packet will arrive, seems to produce
+  // more consistent results, possibly due to batching.
+  float uncorrected_dt = (pstate_server.client_ping - push_t.dynamic_ms) / 1000.0;
   float static_dt = push_t.static_ms / 1000.0;
   // Note: We use true time here as created projectiles exist outside of pred.
   proj.starttime = time + uncorrected_dt;
   proj.s_time = proj.starttime - static_dt;
-  proj.endtime = proj.starttime + pstate_pred.client_ping / 1000.0 + PP_EPS;
-
+  proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -1201,7 +1226,7 @@ float PredProjectile_MatchProjectile() {
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        Phys_Advance(proj, get_phys_time(proj), 0);
+        Phys_Advance(proj, get_phys_time(proj), PHYSF_CONSUME_ALL);
 
         float d = vlen(proj.origin - self.origin);
         if (!best || d < best) {
@@ -1246,7 +1271,7 @@ void InitProjectileEnt(float sendflags) {
     FPP_Init(self.fpp.index, self);
     FPP_ApplyGrenadeProperties(self);
 
-    if (self.owner_entnum == player_localentnum)
+    if (self.owner_entnum == pengine.player_entnum)
         self.owner = pengine.player_ent;
 
     float ptime = get_phys_time(self);
@@ -1259,7 +1284,7 @@ void InitProjectileEnt(float sendflags) {
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
     float has_predicted = FALSE;
-    if (self.owner_entnum == player_localentnum) {
+    if (self.owner_entnum == pengine.player_entnum) {
         has_predicted = PredProjectile_MatchProjectile();
         if (WP_Enabled() && !has_predicted &&
             self.s_time > last_pred_sound + PP_EPS/2)
@@ -1372,7 +1397,6 @@ void InitWeapPredEnt(entity pe) {
     self.drawmask = MASK_PRED_VIEWMODEL;
     self.renderflags = RF_VIEWMODEL;
 
-    pe.owner = pengine.player_ent;
     pengine.pweap_ent = pe;
 }
 

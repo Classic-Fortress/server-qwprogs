@@ -738,10 +738,6 @@ struct ProjectResult {
     float dynamic_ms;
 };
 
-#ifdef CSQC
-DEFCVAR_FLOAT(wpp_phys_nudge, 2/3 * SERVER_FRAME_MS);
-#endif
-
 ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     float max_ping_credit = max_rewind_credit_ms(fpp_type);
     float static_credit;
@@ -763,7 +759,8 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
 #ifdef CSQC
     // Account for the fact that the server usually has a physics frame that's
     // going to be credited to the new projectile.
-    frame_nudge = fo_config.qc_physics ? CVARF(wpp_phys_nudge) : 1.5 * SERVER_FRAME_MS;
+    if (!fo_config.qc_physics)
+        frame_nudge = SERVER_FRAME_MS * 1.5;
 #endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
