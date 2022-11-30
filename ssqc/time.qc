@@ -45,7 +45,6 @@ void FO_CheckClientThink() {
 
 void FO_UpdateClientTime() {
     self.client_time += frametime;
-    self.client_lastupdate = time;
 
     self.client_ping = infokeyf(self, INFOKEY_P_PING);
 }

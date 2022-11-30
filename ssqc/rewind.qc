@@ -108,13 +108,20 @@ RewindSnapshot* RewindLog(RewindState* target) {
     if (target->owner != self)
         error("Log mismatch\n");
 
+    target->owner->client_lastupdate = time;
+
     RewindSnapshot* rs = &target->snapshot[target->cur];
-    if (rs->time && time > rs->time + 0.005) {
-        target->cur = NextRewindIdx(target->cur);
-        rs = &target->snapshot[target->cur];
+    if (time > rs->time + 0.05) {
+        if (rs->time) {
+            target->cur = NextRewindIdx(target->cur);
+            rs = &target->snapshot[target->cur];
+        }
+        // Only set timestamp when we start the rewind entry.  Subsequent
+        // overlapped updates will update the position but not the time (so that
+        // we can't drag it arbitrarily far forwards).
+        rs->time = time;
     }
 
-    rs->time = time;
     rs->origin = target->owner.origin;
     rs->velocity = target->owner.velocity;
 
@@ -164,7 +171,7 @@ static void RewindTo(RewindState* rstate, float rtime) {
     ASSERTD_EQ(rstate->rewound, kRewound);
     entity e = rstate->owner;
 
-    if (e.health <= 0)
+    if (e.health <= 0 || rtime < e->spawn_time)
         return;
 
     vector pos;
@@ -177,19 +184,20 @@ static void RewindTo(RewindState* rstate, float rtime) {
         float a_time;
         vector a_origin;
 
-        if (!a) {
-            a_time = time;
-            a_origin = e.origin;
-        } else {
+        if (a) {
             a_time = a->time;
             a_origin = a->origin;
+        } else {
+            a_time = time;
+            a_origin = rstate->held_origin;
         }
 
         if (!b) {
-            pos = a_origin;  // Should never happen...
+            pos = a_origin;  // Should only happen if ran off the end of the
+                             // array, this shouldn't occur at stock limits.
         } else {
-            float frac = (rtime - b->time) / (a->time - b->time);
-            vector diff = a->origin - b->origin;
+            float frac = (rtime - b->time) / (a_time - b->time);
+            vector diff = a_origin - b->origin;
 
             if (vlen(diff) > 48)
                 frac = 1;  // Most likely teleport.
@@ -198,7 +206,7 @@ static void RewindTo(RewindState* rstate, float rtime) {
         }
     } else {
         float max_xerp = CF_GetSetting("rwmx", "rewind_max_xerp", "0.02");
-        pos = e.origin + min(rtime - e.client_lastupdate, max_xerp) * e.velocity;
+        pos = rstate->held_origin + min(rtime - e.client_lastupdate, max_xerp) * e.velocity;
     }
 
     setorigin(rstate->owner, pos);
@@ -211,7 +219,7 @@ static void RL_RewindTo(RewindState* head, entity exclude, float rtime) {
 
     RL_FOR_EACH(head, rstate) {
         entity e = rstate->owner;
-        if (e == exclude || rtime < e->spawn_time)
+        if (e == exclude)
             continue;
 
         RewindTo(rstate, rtime);
