@@ -1263,6 +1263,11 @@ float PredProjectile_MatchProjectile() {
 
 // Called on `self`.
 void InitProjectileEnt(float sendflags) {
+    if (self.fpp.index == FPP_NONE) {
+      printf("ERROR: Missing FPP flags=%d\n", sendflags);
+      self.fpp.index = FPP_RAILGUN;  // Something people will notice.
+    }
+
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
     if (sendflags & FOPP_ANGLES == 0)
