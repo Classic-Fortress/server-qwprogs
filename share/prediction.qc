@@ -380,7 +380,7 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
-        COMM(Byte, client_ping);
+        COMM(Short, client_ping);
     }
 
     if (sendflags & FOWP_CLASS) {
