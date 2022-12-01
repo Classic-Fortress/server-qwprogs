@@ -12,7 +12,7 @@ struct pengine_t {
     float pp_enabled;
     float wp_enabled;
     float is_effectframe;
-    float last_effectframe;
+    float last_effectframe, last_effectframe2;
 
     float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
@@ -1348,6 +1348,8 @@ void WP_UpdateViewModel(entity pweap_ent) {
     pweap_ent.lerpfrac = max(0, pweap_ent.lerpfrac - frametime * 10);
 }
 
+void PM_PredictJump();
+
 float WP_ClientThink() {
     if (!WP_Enabled())
         return PREDRAW_NEXT;
@@ -1355,6 +1357,7 @@ float WP_ClientThink() {
     pstate_pred = pstate_server;
 
     getinputstate(servercommandframe); // Setup first read for old_buttons.
+    pengine.last_effectframe2 = pengine.last_effectframe;
 
     float old_input_buttons;
     int pframe = servercommandframe + 1;
@@ -1384,6 +1387,7 @@ float WP_ClientThink() {
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
+        PM_PredictJump();
         WP_Frame();
     }
 
