@@ -263,10 +263,11 @@ void WPP_UpdateEnable(float force) {
         WP_UpdateViewModel(pengine.pweap_ent);
 }
 
-static float IsEffectFrame() {
+float IsEffectFrame() {
     if (!pengine.is_effectframe)
         return FALSE;
 
+#if 0
     // At ultra-low latencies it's possible that we're only one frame in front
     // of the server.  But this can mean that we get that frame back immediately
     // (and our input applies to the one after it).
@@ -274,7 +275,18 @@ static float IsEffectFrame() {
         pengine.last_effectframe++;
         if (CVARF(wpp_debug) & 8) print("Effect bump!\n");
     }
+#endif
     return TRUE;
+}
+
+// This covers frames that would have been effect frames, but were missed client
+// side due to <reasons>.  It's too loose for things like lining up
+// projectiles where we just take the miss, but for things like sound it's
+// better to have minutely off than not play.
+float IsEffectFrameMulti() {
+    return (pengine.is_effectframe ||
+            (pstate_pred.seq > pengine.last_effectframe &&
+             pstate_pred.seq < clientcommandframe));
 }
 
 void Attack_Finished(float attack_time) {
@@ -739,6 +751,16 @@ void WP_Frame() {
         return;
     }
 
+    while (pstate_pred.client_nextthink &&
+            pstate_pred.client_time >= pstate_pred.client_nextthink) {
+        float held_client_time = pstate_pred.client_time;
+
+        pstate_pred.client_time = pstate_pred.client_nextthink;
+        pstate_pred.client_nextthink = 0;
+        WP_AnimateModel();
+        pstate_pred.client_time = held_client_time;
+    }
+
     WP_CheckReloadFinished();
     WP_Impulse();
     W_ThrowGren(FALSE);
@@ -779,7 +801,7 @@ trail_table_entry trail_table[] = {
 };
 
 inline float interp_ms() {
-    return (clientcommandframe - servercommandframe) * SERVER_FRAME_MS;
+    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
 }
 
 inline float interp_dt() {
@@ -1336,18 +1358,22 @@ float WP_ClientThink() {
 
     float old_input_buttons;
     int pframe = servercommandframe + 1;
-    int eframe = clientcommandframe;
+    int eframe = clientcommandframe - 1;
+    int effect_frame = clientcommandframe - 1;
+
+    pstate_server.seq = servercommandframe;
     for(; pframe <= eframe; pframe++) {
         old_input_buttons = input_buttons;
         if (!getinputstate(pframe) || input_timelength <= 0)
             break;
         makevectors(input_angles);
 
+        pstate_pred.seq = pframe;
         pstate_pred.buttons_held = input_buttons;
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
         pstate_pred.buttons_down = (~old_input_buttons) & input_buttons;
 
-        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
+        if (pframe == effect_frame && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
         } else {
@@ -1357,16 +1383,6 @@ float WP_ClientThink() {
         pstate_pred.client_time += input_timelength;
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
-
-        while (pstate_pred.client_nextthink &&
-            pstate_pred.client_time >= pstate_pred.client_nextthink) {
-            float held_client_time = pstate_pred.client_time;
-
-            pstate_pred.client_time = pstate_pred.client_nextthink;
-            pstate_pred.client_nextthink = 0;
-            WP_AnimateModel();
-            pstate_pred.client_time = held_client_time;
-        }
 
         WP_Frame();
     }

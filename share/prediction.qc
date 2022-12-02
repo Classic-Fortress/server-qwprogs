@@ -61,9 +61,12 @@ struct predict_tf_state {
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
 
+#ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
+    int seq;
     float ammo_used[AMMO_NUM_TYPES];
     float buttons_down, buttons_up, buttons_held;
+#endif
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
