@@ -344,9 +344,13 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
     flags_ = timer_flags;
 
     if (this.flags_ & FL_GT_ADJPING) {
-        local float rtt =
-            getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
-        expires_at_ -= rtt/2;
+        float rtt = pstate_pred.client_ping;
+        if (RewindFlagEnabled(REWIND_GRENADES))
+            rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
+        else
+            rtt /= 2;  // Not actually right, but preserve buggy behavior for
+                       // now as people are used to it.
+        expires_at_ -= rtt / 1000;
     }
 
     StartSound();

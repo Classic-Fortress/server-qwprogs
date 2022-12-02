@@ -2,6 +2,11 @@ struct FPPState {
     int index;
     float expires_at;
 
+#ifdef SSQC
+    int flags;
+    float dynamic_dt;
+#endif
+
     union {
         int aux;
         int gren_type;
@@ -11,6 +16,11 @@ struct FPPState {
 
 .FPPState fpp;
 
+enumflags {
+    FPF_NO_REWIND,
+    FPF_FIXED_DYNAMIC,
+};
+
 var struct {
     float qc_physics;
     float static_newmis_ms;
@@ -19,9 +29,9 @@ var struct {
     float max_rewind_ms;
     float max_rewind_slow_projectile_ms;
     float max_rewind_fast_projectile_ms;
+    float max_rewind_grenade_ms;
     float rewind_fast_projectile_thresh;
     float wp_default_min_ping_ms;
-    float no_forward_hg;
     float clown_flags;
     float clown_grav;
 
@@ -37,19 +47,21 @@ var struct {
 enumflags {
     REWIND_KNOCKBACK,
     REWIND_PROJ_HIT,
+    REWIND_GRENADES,
     REWIND_FORWARD_DOORS,
-    REWIND_PROJ_SELFKNOCK,
+    REWIND_FORWARD_PROJ_SELFKNOCK,
 };
 
 string REWIND_DESC[] = {
     "rewind pipe knockback",
     "rewind projectile hit",
+    "rewind grenade throws",
     "open doors earlier for hpbs [requires rfd=1]",
     "forward projectile self-knockback",
 };
 
 const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
-                                   REWIND_PROJ_SELFKNOCK;
+                                   REWIND_FORWARD_PROJ_SELFKNOCK;
 
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;

@@ -23,6 +23,10 @@ float remote_time() {
     return client_to_global_time(remote_client_time());
 }
 
+float bounded_remote_time(float dt) {
+    return max(time - dt, remote_time());
+}
+
 void FO_CheckClientThink() {
     if (self.client_nextthink > 0 && self.client_time >= self.client_nextthink) {
         float held_client_time = self.client_time;

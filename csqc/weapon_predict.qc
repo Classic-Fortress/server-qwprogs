@@ -179,11 +179,11 @@ void WPP_Status() {
         printf(" %2d [%-3s]: .%s\n", flag,
                 (fo_config.rewind_flags & flag) ? "on": "off", REWIND_DESC[i]);
     }
-    PRINT_CONFIG(no_forward_hg);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(max_rewind_grenade_ms);
 
     if (!fo_config.clown_flags)
         return;
@@ -457,6 +457,7 @@ static void HandleButtonThrowgren(float index, float button) {
 float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 
+float interp_time();
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
@@ -1102,10 +1103,21 @@ static void W_ThrowGren(float is_throw) {
     if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
         return;  // Not time to throw yet, THROWING set if necessary.
 
+    int type_index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
+    int gren_type = FO_ClassGren(pstate_pred.playerclass, type_index)->id;
+
+    float last_possible_throw = pstate_pred.last_prime + 3.7;
+    last_possible_throw -= FO_RewindGrenDt(gren_type);
+
+    // We're conservative here, a missed predicted projectile throw into what's
+    // actually a held grenade is frustrating.  Better to leave it up to the
+    // server when it's really tight.
+    if (pstate_pred.client_time > last_possible_throw - 1.5 * SERVER_FRAME_DT)
+        return;  // Buckle up... probably.
+
     if (IsEffectFrame()) {
         entity gren = PP_CreateProjectile(FPP_HANDGRENADE, '0 0 0');
-        int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
-        gren.fpp.gren_type = FO_ClassGren(pstate_pred.playerclass, index)->id;
+        gren.fpp.gren_type = gren_type;
         FPP_ApplyGrenadeProperties(gren);
     }
 

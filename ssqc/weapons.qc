@@ -1051,7 +1051,7 @@ void T_Knock_Antilag() {
 }
 
 float AntilagKnock(entity e, float dmg) {
-    if (!RewindFlagEnabled(REWIND_PROJ_SELFKNOCK) || e.s_time == 0)
+    if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
         return FALSE;
 
     entity knock_e = spawn();
