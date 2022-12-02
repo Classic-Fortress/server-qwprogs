@@ -614,9 +614,9 @@ void PlayCSJumpSounds() {
                 if (swimsound_cooldown < time) {
                     swimsound_cooldown = time + 1;
                     if (random() < 0.5) {
-                        localsound("player/water1.wav", CHAN_BODY, 1);
+                        localsound("misc/water1.wav", CHAN_BODY, 1);
                     } else {
-                        localsound("player/water2.wav", CHAN_BODY, 1);
+                        localsound("misc/water2.wav", CHAN_BODY, 1);
                     }
                 }
             } else {

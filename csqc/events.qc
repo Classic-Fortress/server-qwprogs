@@ -507,8 +507,8 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         case "player/land.wav":
         case "player/land2.wav":
         case "player/h2ojump.wav":
-        case "player/water1.wav":
-        case "player/water2.wav":
+        case "misc/water1.wav":
+        case "misc/water2.wav":
         case "player/inlava.wav":
         case "player/inh2o.wav":
         case "player/slimbrn2.wav":
