@@ -1,14 +1,6 @@
-float remote_client_time(float ct_type = CT_NOEXTERNALEFFECT) {
-    float offset = min(self.client_ping, fo_config.max_rewind_ms);
-
-    switch (ct_type) {
-        case CT_SLOW_PROJECTILE:
-            offset = min(offset, fo_config.max_rewind_slow_projectile_ms);
-            break;
-        case CT_FAST_PROJECTILE:
-            offset = min(offset, fo_config.max_rewind_fast_projectile_ms);
-            break;
-    }
+float remote_client_time() {
+    float adj_ping = max(self.client_ping - SERVER_FRAME_MS, 0);
+    float offset = min(adj_ping, fo_config.max_rewind_ms);
 
     float target = self.client_time - offset / 1000.0;
     target = max(target, self.last_remote_client_time);  // prevent jitter
@@ -27,8 +19,8 @@ inline float global_to_client_time(float gtime) {
 }
 
 // Ping corrected `time`.
-float remote_time(float ct_type = CT_NOEXTERNALEFFECT) {
-    return client_to_global_time(remote_client_time(ct_type));
+float remote_time() {
+    return client_to_global_time(remote_client_time());
 }
 
 void FO_CheckClientThink() {
