@@ -304,9 +304,13 @@ void Forward_Projectile(int fpp_type, entity proj) {
     ProjectResult offset = Forward_ProjectOffset(fpp_type, ping);
     float static_dt = offset.static_ms / 1000.0;
     float dynamic_dt = offset.dynamic_ms / 1000.0;
+
+    if (proj.fpp.flags & FPF_FIXED_DYNAMIC)
+        dynamic_dt = proj.fpp.dynamic_dt;
     float stime = time - dynamic_dt;
 
-    float rewind_hit = RewindFlagEnabled(REWIND_PROJ_HIT);
+    float no_rewind = proj.fpp.flags & FPF_NO_REWIND;
+    float rewind_hit = !no_rewind && RewindFlagEnabled(REWIND_PROJ_HIT);
     float phys_flags = PHYSF_CONSUME_ALL;
     if (rewind_hit) {
         phys_flags |= PHYSF_REWIND_PLAYERS;
@@ -314,7 +318,7 @@ void Forward_Projectile(int fpp_type, entity proj) {
         RL_RewindTo(rewind_players, proj.owner, stime);
     }
 
-    if (RewindFlagEnabled(REWIND_PROJ_SELFKNOCK))
+    if (!no_rewind && RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK))
             phys_flags |= PHYSF_FORWARD_KNOCK;
 
     // Static projection happens instantly.  If rewind is active, we'll do it at

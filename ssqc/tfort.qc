@@ -848,11 +848,12 @@ void (entity timer) FO_SpawnThrownGrenade = {
     proj.think = SUB_Null;
     proj.nextthink = timer.heat;
 
-    int gtype = TF_GREN_conv(timer.weapon);
+    int gtype = timer.fpp.gren_type;
     FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
     proj.fpp.gren_type = gtype;
+    proj.fpp.expires_at = timer.heat;
     proj.skin = gdesc->skin;
     proj.touch = ste->touch;
     proj.think = ste->think;
@@ -1036,6 +1037,8 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
+    tGrenade.fpp.gren_type = TF_GREN_conv(gtype);
+
     tGrenade.classname = "primetimer";
     if (inp == 1)
         tGrenade.impulse = TF_GRENADE_1;
@@ -1095,8 +1098,13 @@ void () FO_GrenadeThink = {
             FO_SpawnThrownGrenade(self);
             dremove(self);
         } else {
+            // When REWIND_GRENADES is enabled, we slightly time-warp the
+            // spawned grenade to open up the timing window on being able to
+            // rewind a throw further.  Total time is the same.
+            float expiry = self.heat + FO_RewindGrenWinDt(self.fpp.gren_type);
+
             // If this fires, we never threw.
-            self.nextthink = self.heat;
+            self.nextthink = expiry;
         }
     } else {
         if (self.weapon != GR_TYPE_CALTROP)
@@ -1106,9 +1114,15 @@ void () FO_GrenadeThink = {
 }
 
 void () FO_ThrowGrenade = {
-    local entity timer = self.grenade_timer;
-    if (timer.nextthink != timer.heat || timer.heat - time < 0.1) {
-        // We do not allow throwing within the first second, or the last 0.1.
+    entity timer = self.grenade_timer;
+
+    float throwtime = time, lockout = 0.1;
+    if (RewindFlagEnabled(REWIND_GRENADES))
+        throwtime = bounded_remote_time(FO_RewindGrenDt(timer.fpp.gren_type));
+
+    if (timer.nextthink - FO_MaxRewindGrenWinDt() > timer.heat ||
+        throwtime > timer.heat - lockout) {
+        // We do not allow throwing within the 0.8s, or the last 0.1s.
         // The former is a priming time, the latter is so that client side
         // knockback will be able to reliably predict whether a grenade was held
         // (e.g. gren jump) or thrown up to ~200ms ping.
@@ -2719,7 +2733,9 @@ void () TeamFortress_AmmoboxTouch = {
 };
 
 void () TeamFortress_ExplodePerson = {
-    local entity te;
+    entity te;
+    int gtype = self.fpp.gren_type;
+    FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
 
     self.owner.tfstate &= ~TFSTATE_GREN_MASK_ALL;
     KickPlayer(-2, self.owner);
@@ -2733,7 +2749,14 @@ void () TeamFortress_ExplodePerson = {
     proj.velocity = '0 0 0';
     proj.angles = vectoangles(proj.velocity);
     proj.think = SUB_Null;
-    proj.nextthink = time + 0.1;  // Server generated, no client time here.
+    float expires = time + 0.1;  // Server generated, no client time here.
+    float rw_dt = FO_RewindGrenWinDt(gtype);
+    if (rw_dt > 0) {
+        proj.fpp.flags |= FPF_FIXED_DYNAMIC;
+        proj.fpp.dynamic_dt = rw_dt;
+        expires -= rw_dt;
+    }
+    proj.nextthink = expires;
 
     if (self.weapon == GR_TYPE_FLARE) {
         sprint(self.owner, PRINT_HIGH, "Flare lit\n");
@@ -2749,11 +2772,10 @@ void () TeamFortress_ExplodePerson = {
         return;
     }
 
-    int gtype = TF_GREN_conv(self.weapon);
-    FO_GrenInfo* gdesc = FO_GrenDesc(gtype);
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
     proj.fpp.gren_type = gtype;
+    proj.fpp.flags |= FPF_NO_REWIND;
     proj.skin = gdesc->skin;
     proj.avelocity = gdesc->avelocity;
     proj.touch = ste->touch;

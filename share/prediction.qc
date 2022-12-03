@@ -30,6 +30,7 @@ enumflags {
     FOPP_AUX,
     FOPP_ANGLES,
     FOPP_MOVETYPE,
+    FOPP_EXPIRY,
     FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
@@ -61,9 +62,12 @@ struct predict_tf_state {
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
 
+#ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
+    int seq;
     float ammo_used[AMMO_NUM_TYPES];
     float buttons_down, buttons_up, buttons_held;
+#endif
 };
 
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
@@ -196,7 +200,7 @@ void InitFppProjectiles() {
 }
 
 float max_rewind_credit_ms(int fpp_type) {
-    return FPP_Get(fpp_type)->speed < fo_config.rewind_fast_projectile_thresh ?
+    return (FPP_Get(fpp_type)->speed < fo_config.rewind_fast_projectile_thresh) ?
         fo_config.max_rewind_slow_projectile_ms :
         fo_config.max_rewind_fast_projectile_ms;
 }
@@ -212,7 +216,7 @@ float max_rewind_credit_ms(int fpp_type) {
 // NOTE: DO NOT USE NEWMIS FOR FO PROJECTILES.  THE NEWMIS CORRECTION IS NOW
 // MADE EXPLICITLY RATHER THAN IMPLICITLY.  [WE AUTOMATICALLY STRIP NEWMIS
 // FROM PROJECTILES PASSED TO US.]
-float static_newmis_ms(int fpp_type) {
+static float static_newmis_ms(int fpp_type) {
     if (fpp_type == FPP_FLAMETHROWER || fpp_type == FPP_ASSAULT_CANNON)
         return 0;
 
@@ -225,6 +229,43 @@ inline float dynamic_newmis_ms() {
 
 inline float fixed_newmis_ms(int fpp_type) {
     return fo_config.static_newmis_ms;
+}
+
+float FO_RewindGrenMs(int gren_type) {
+    if (!RewindFlagEnabled(REWIND_GRENADES))
+        return 0;
+
+    float result = fo_config.max_rewind_grenade_ms;
+    if (gren_type == GREN_CONC)
+        result += 25;
+
+    return result;
+}
+
+float FO_RewindGrenDt(int gren_type) {
+    if (!RewindFlagEnabled(REWIND_GRENADES))
+        return 0;
+
+    return FO_RewindGrenMs(gren_type) / 1000.0;
+}
+
+float FO_RewindGrenWinDt(int gren_type) {
+    if (!RewindFlagEnabled(REWIND_GRENADES) ||
+        fo_config.max_rewind_ms <= 50)
+        return 0;
+
+    // There's no benefit to holding a conc grenade -- and it's beneficial to
+    // hold it late, so we open the window slightly further when needed.
+    return gren_type == GREN_CONC ? 0.05 : 0.025;
+}
+
+float FO_MaxRewindGrenWinDt() {
+    if (!RewindFlagEnabled(REWIND_GRENADES) ||
+        fo_config.max_rewind_ms <= 50)
+        return 0;
+
+    // Large rewind possible, open up the window.
+    return 0.1;  // An always correct value
 }
 
 #ifdef SSQC
@@ -338,9 +379,8 @@ void EntUpdate_Config() {
     COMM(Byte, max_rewind_ms);
     COMM(Byte, max_rewind_slow_projectile_ms);
     COMM(Byte, max_rewind_fast_projectile_ms);
-    COMM(Byte, rewind_fast_projectile_thresh);
+    COMM(Short, rewind_fast_projectile_thresh);
     COMM(Byte, rewind_flags);
-    COMM(Byte, no_forward_hg);
     COMM(Byte, clown_flags);
     COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
@@ -450,6 +490,8 @@ float PP_SendEntity(entity to_player, float sendflags) {
         sendflags = FOPP_INIT | FOPP_POS;
         if (self.fpp.aux)
             sendflags |= FOPP_AUX;
+        if (self.fpp.expires_at)
+            sendflags |= FOPP_EXPIRY;
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
@@ -468,9 +510,10 @@ void EntUpdate_Projectile(float isnew) {
         COMMD(Entity, owner_entnum, owner);
     }
 
-    if (sendflags & FOPP_AUX) {
+    if (sendflags & FOPP_AUX)
         COMM(Short, fpp.aux);
-    }
+    if (sendflags & FOPP_EXPIRY)
+        COMM(Float, fpp.expires_at);
 
     if (sendflags & FOPP_POS) {
         COMM(Coord, origin[0]);
@@ -499,7 +542,6 @@ void EntUpdate_Projectile(float isnew) {
             COMMD(Entity, aiment_num, aiment);
     }
 
-
 #ifdef SSQC
     return TRUE;
 #else
@@ -518,11 +560,11 @@ void Predict_InitDefaultConfig() {
     fo_config.dynamic_newmis_ms = 0;
     fo_config.rewind_flags = REWIND_DEFAULT_FLAGS;
     fo_config.max_rewind_ms = 250;
-    fo_config.max_rewind_slow_projectile_ms = 100;
-    fo_config.max_rewind_fast_projectile_ms = 100;
+    fo_config.max_rewind_slow_projectile_ms = 150;
+    fo_config.max_rewind_fast_projectile_ms = 150;
+    fo_config.max_rewind_grenade_ms = 50; // Only affects REWIND_GREN
     fo_config.rewind_fast_projectile_thresh = 1500;
     fo_config.wp_default_min_ping_ms = 40;
-    fo_config.no_forward_hg = 1;
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
 }
@@ -566,6 +608,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("mrt", max_rewind_ms);
     CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
     CONFIG_UPDATE("mrfp", max_rewind_fast_projectile_ms);
+    CONFIG_UPDATE("mrg", max_rewind_grenade_ms);
     CONFIG_UPDATE("rfpt", rewind_fast_projectile_thresh);
     CONFIG_UPDATE("wpdmp", wp_default_min_ping_ms);
     CONFIG_UPDATE("wpge", wp_global_enable);
@@ -575,7 +618,6 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_enable);
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
-    CONFIG_UPDATE("nfhg", no_forward_hg);
     CONFIG_UPDATE("rewind", rewind_flags);
     CONFIG_UPDATE("clown", clown_flags);
     CONFIG_UPDATE("clown_grav", clown_grav);
@@ -584,6 +626,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
     CLAMP_UPDATE(max_rewind_slow_projectile_ms, 0, fo_config.max_rewind_ms);
     CLAMP_UPDATE(max_rewind_fast_projectile_ms, 0, fo_config.max_rewind_ms);
+    CLAMP_UPDATE(max_rewind_grenade_ms, 0, 125);
 
     if (!ForwardDoorsPossible())
         fo_config.rewind_flags &= ~REWIND_FORWARD_DOORS;
@@ -759,6 +802,12 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
 
     if (FPP_Get(fpp_type)->fixed_project) {
         static_credit = fixed_newmis_ms(fpp_type);
+    } else if (fpp_type == FPP_HANDGRENADE) {
+        static_credit = static_newmis_ms(fpp_type);
+        if (RewindFlagEnabled(REWIND_GRENADES))
+            max_ping_credit = fo_config.max_rewind_grenade_ms;
+        else
+            max_ping_credit = 0;
     } else {
         static_credit = static_newmis_ms(fpp_type);
         max_ping_credit += dynamic_newmis_ms();
@@ -766,9 +815,6 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
 
     if (IsClownMode(CLOWN_FAST_PROJECTILES) && !FPP_IsGrenade(fpp_type))
         static_credit = 9999;
-
-    if (fpp_type == FPP_HANDGRENADE && fo_config.no_forward_hg)
-        max_ping_credit = 0;
 
     float frame_nudge = 0;
 #ifdef CSQC

@@ -2948,7 +2948,7 @@ void () PlayerPostThink = {
 
     if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
-        if (self.watertype == -3) {
+        if (self.watertype == CONTENT_WATER) {
             FO_Sound(self, CHAN_BODY, "player/h2ojump.wav", 1, ATTN_NORM);
         } else {
             if (self.jump_flag < -650) {

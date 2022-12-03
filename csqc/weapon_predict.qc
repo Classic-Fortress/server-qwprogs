@@ -12,7 +12,7 @@ struct pengine_t {
     float pp_enabled;
     float wp_enabled;
     float is_effectframe;
-    float last_effectframe;
+    float last_effectframe, last_effectframe2;
 
     float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
@@ -179,11 +179,11 @@ void WPP_Status() {
         printf(" %2d [%-3s]: .%s\n", flag,
                 (fo_config.rewind_flags & flag) ? "on": "off", REWIND_DESC[i]);
     }
-    PRINT_CONFIG(no_forward_hg);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(max_rewind_grenade_ms);
 
     if (!fo_config.clown_flags)
         return;
@@ -263,10 +263,11 @@ void WPP_UpdateEnable(float force) {
         WP_UpdateViewModel(pengine.pweap_ent);
 }
 
-static float IsEffectFrame() {
+float IsEffectFrame() {
     if (!pengine.is_effectframe)
         return FALSE;
 
+#if 0
     // At ultra-low latencies it's possible that we're only one frame in front
     // of the server.  But this can mean that we get that frame back immediately
     // (and our input applies to the one after it).
@@ -274,7 +275,18 @@ static float IsEffectFrame() {
         pengine.last_effectframe++;
         if (CVARF(wpp_debug) & 8) print("Effect bump!\n");
     }
+#endif
     return TRUE;
+}
+
+// This covers frames that would have been effect frames, but were missed client
+// side due to <reasons>.  It's too loose for things like lining up
+// projectiles where we just take the miss, but for things like sound it's
+// better to have minutely off than not play.
+float IsEffectFrameMulti() {
+    return (pengine.is_effectframe ||
+            (pstate_pred.seq > pengine.last_effectframe &&
+             pstate_pred.seq < clientcommandframe));
 }
 
 void Attack_Finished(float attack_time) {
@@ -308,10 +320,15 @@ void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
-// Corrections for when we can recognize that we missed a packet.
 void WP_ServerUpdate() {
+    // Force WF to zero, in case we missed a packet.
     if (pstate_server.attack_finished < pstate_server.client_time)
         pstate_server.weaponframe = 0;
+
+    if (CVARF(fo_wpp_beta) == 2)
+        phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
+    else
+        phys_sim_dt = -1;
 }
 
 static Slot InputToSlot(float input) {
@@ -440,6 +457,7 @@ static void HandleButtonThrowgren(float index, float button) {
 float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 
+float interp_time();
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
@@ -739,6 +757,16 @@ void WP_Frame() {
         return;
     }
 
+    while (pstate_pred.client_nextthink &&
+            pstate_pred.client_time >= pstate_pred.client_nextthink) {
+        float held_client_time = pstate_pred.client_time;
+
+        pstate_pred.client_time = pstate_pred.client_nextthink;
+        pstate_pred.client_nextthink = 0;
+        WP_AnimateModel();
+        pstate_pred.client_time = held_client_time;
+    }
+
     WP_CheckReloadFinished();
     WP_Impulse();
     W_ThrowGren(FALSE);
@@ -779,7 +807,7 @@ trail_table_entry trail_table[] = {
 };
 
 inline float interp_ms() {
-    return (clientcommandframe - servercommandframe) * SERVER_FRAME_MS;
+    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
 }
 
 inline float interp_dt() {
@@ -889,6 +917,7 @@ float PP_PredrawActive() {
         return PREDRAW_NEXT;
 
     Phys_Advance(self, get_phys_time(self), 0);
+    Phys_Sim(self);
 
     // we need to space out the particles incase we're running at very high fps
     if (time > self.p_time) {
@@ -960,6 +989,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.starttime = time + uncorrected_dt;
   proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
+  proj.server_live_time = time + interp_dt();
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -1073,10 +1103,21 @@ static void W_ThrowGren(float is_throw) {
     if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
         return;  // Not time to throw yet, THROWING set if necessary.
 
+    int type_index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
+    int gren_type = FO_ClassGren(pstate_pred.playerclass, type_index)->id;
+
+    float last_possible_throw = pstate_pred.last_prime + 3.7;
+    last_possible_throw -= FO_RewindGrenDt(gren_type);
+
+    // We're conservative here, a missed predicted projectile throw into what's
+    // actually a held grenade is frustrating.  Better to leave it up to the
+    // server when it's really tight.
+    if (pstate_pred.client_time > last_possible_throw - 1.5 * SERVER_FRAME_DT)
+        return;  // Buckle up... probably.
+
     if (IsEffectFrame()) {
         entity gren = PP_CreateProjectile(FPP_HANDGRENADE, '0 0 0');
-        int index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
-        gren.fpp.gren_type = FO_ClassGren(pstate_pred.playerclass, index)->id;
+        gren.fpp.gren_type = gren_type;
         FPP_ApplyGrenadeProperties(gren);
     }
 
@@ -1326,6 +1367,8 @@ void WP_UpdateViewModel(entity pweap_ent) {
     pweap_ent.lerpfrac = max(0, pweap_ent.lerpfrac - frametime * 10);
 }
 
+void PM_PredictJump();
+
 float WP_ClientThink() {
     if (!WP_Enabled())
         return PREDRAW_NEXT;
@@ -1333,21 +1376,26 @@ float WP_ClientThink() {
     pstate_pred = pstate_server;
 
     getinputstate(servercommandframe); // Setup first read for old_buttons.
+    pengine.last_effectframe2 = pengine.last_effectframe;
 
     float old_input_buttons;
     int pframe = servercommandframe + 1;
-    int eframe = clientcommandframe;
+    int eframe = clientcommandframe - 1;
+    int effect_frame = clientcommandframe - 1;
+
+    pstate_server.seq = servercommandframe;
     for(; pframe <= eframe; pframe++) {
         old_input_buttons = input_buttons;
         if (!getinputstate(pframe) || input_timelength <= 0)
             break;
         makevectors(input_angles);
 
+        pstate_pred.seq = pframe;
         pstate_pred.buttons_held = input_buttons;
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
         pstate_pred.buttons_down = (~old_input_buttons) & input_buttons;
 
-        if (pframe == eframe - 1 && pframe > pengine.last_effectframe) {
+        if (pframe == effect_frame && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
         } else {
@@ -1358,16 +1406,7 @@ float WP_ClientThink() {
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
-        while (pstate_pred.client_nextthink &&
-            pstate_pred.client_time >= pstate_pred.client_nextthink) {
-            float held_client_time = pstate_pred.client_time;
-
-            pstate_pred.client_time = pstate_pred.client_nextthink;
-            pstate_pred.client_nextthink = 0;
-            WP_AnimateModel();
-            pstate_pred.client_time = held_client_time;
-        }
-
+        PM_PredictJump();
         WP_Frame();
     }
 
