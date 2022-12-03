@@ -379,6 +379,7 @@ void EntUpdate_Config() {
     COMM(Byte, max_rewind_ms);
     COMM(Byte, max_rewind_slow_projectile_ms);
     COMM(Byte, max_rewind_fast_projectile_ms);
+    COMM(Byte, max_rewind_grenade_ms);
     COMM(Short, rewind_fast_projectile_thresh);
     COMM(Byte, rewind_flags);
     COMM(Byte, clown_flags);
