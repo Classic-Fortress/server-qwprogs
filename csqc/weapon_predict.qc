@@ -182,8 +182,8 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
-    PRINT_CONFIG(rewind_fast_projectile_thresh);
     PRINT_CONFIG(max_rewind_grenade_ms);
+    PRINT_CONFIG(rewind_fast_projectile_thresh);
 
     if (!fo_config.clown_flags)
         return;
@@ -1082,14 +1082,10 @@ void (float ox) W_FireSpikes = {
 
 };
 
-DEFCVAR_FLOAT(wpp_disable_gren, 0)
-static float PP_EnableGrenades() {
-    return fo_config.qc_physics && !fo_config.gren_beta_disable &&
-           !CVARF(wpp_disable_gren);
-}
+static float QcPhysics() { return fo_config.qc_physics; }
 
 static void W_ThrowGren(float is_throw) {
-    if (!PP_EnableGrenades())
+    if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES))
         return;
 
     if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
@@ -1184,7 +1180,7 @@ void WP_Attack() {
 
             case WEAP_GRENADE_LAUNCHER:
             case WEAP_PIPE_LAUNCHER:
-                if (PP_EnableGrenades())
+                if (QcPhysics())
                     W_FireGrenade((wi->weapon == WEAP_GRENADE_LAUNCHER || prematch) ?
                                   GREN_RED : GREN_PIPE);
                 else
