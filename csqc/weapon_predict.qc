@@ -128,6 +128,7 @@ static float CalcPredEnabled(float current_enable,
 }
 
 #define ENABLE_CHECK_PERIOD 2
+static float client_delay_packets;
 static float next_wpp_enable_check;
 static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
@@ -159,8 +160,11 @@ void WPP_Status() {
     fill_avg_ping(&avg, &variance);
     printf(" inst_ping = %d client_ping = %d avg_ping = %d var = %d\n",
             ping, pstate_server.client_ping, avg, variance);
+    if (fo_config.min_ping_ms)
+        printf(" client_delay_packets = %d\n", client_delay_packets);
 
     printf("Config:\n");
+    PRINT_CONFIG(min_ping_ms);
     PRINT_CONFIG(qc_physics);
     PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
@@ -261,6 +265,72 @@ void WPP_UpdateEnable(float force) {
 
     if (pengine.pweap_ent != __NULL__)
         WP_UpdateViewModel(pengine.pweap_ent);
+}
+
+DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
+                                     // what minping will be chosen.
+DEFCVAR_FLOAT(cl_delay_packets, 0);  // Can be used to query, but not set.
+
+void UpdateMinPing() {
+    static float next_update;
+    if (!fo_config.min_ping_ms || time < next_update)
+        return;
+    next_update = time + 1;
+
+    const float PING_SAMPLES = 10;
+    static float num_samples;
+    static float ping_cache[PING_SAMPLES];
+    static float once;
+
+    if (CVARF(cl_delay_packets) != client_delay_packets) {
+        // We expect to see a one-time mismatch, but after this, clients are
+        // trying to change it on us.  Make that noisy.
+        if (once)
+            localcmd(sprintf("say forced reset delay_packets %d -> %d\n",
+                        CVARF(cl_delay_packets), client_delay_packets));
+        once = TRUE;
+
+        next_update = time + 0.1;
+        localcmd(sprintf("cl_delay_packets %d\n", client_delay_packets));
+        return;
+    }
+
+    float cache_index = (num_samples++) % ping_cache.length;
+    ping_cache[cache_index] =
+        max(0, getplayerkeyfloat(player_localnum, INFOKEY_P_PING));
+
+    if (num_samples < 10)
+        return;
+
+    float ping = ping_cache[0];
+    for (int i = 1; i < ping_cache.length; i++)
+        ping = min(ping, ping_cache[i]);
+
+    ping = max(ping - client_delay_packets, SERVER_FRAME_MS);
+    float target = max(fo_config.min_ping_ms - ping, 0);
+
+    if (CVARF(fo_minping_min) > 0)
+        target = max(target, CVARF(fo_minping_min));
+
+    if (!is_player)
+        target = 0;
+
+    if (target == 0) {
+        client_delay_packets = 0;
+    } else {
+        float nv = (ceil((target - 0.1)/ 3)) * 3 + 1;
+        // Bound how much we'll step at once.
+        if (!client_delay_packets)
+            client_delay_packets = nv;
+        else
+            client_delay_packets = min(client_delay_packets + 5, nv);
+    }
+
+    if (CVARF(cl_delay_packets) != client_delay_packets) {
+        localcmd(sprintf("cl_delay_packets %d\n", client_delay_packets));
+        setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
+        num_samples = 0;
+    }
 }
 
 float IsEffectFrame() {

@@ -22,6 +22,8 @@ enumflags {
 };
 
 var struct {
+    float min_ping_ms;
+
     float qc_physics;
     float static_newmis_ms;
     float dynamic_newmis_ms;

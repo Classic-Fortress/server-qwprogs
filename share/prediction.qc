@@ -374,6 +374,7 @@ float WP_SendConfig(entity to_player, float sendflags) {
 void EntUpdate_Config() {
 #endif
     COMM(Byte, qc_physics);
+    COMM(Byte, min_ping_ms);
     COMM(Float, static_newmis_ms);
     COMM(Float, dynamic_newmis_ms);
     COMM(Byte, max_rewind_ms);
@@ -556,6 +557,7 @@ void EntUpdate_Projectile(float isnew) {
 
 
 void Predict_InitDefaultConfig() {
+    fo_config.min_ping_ms = 0;
     fo_config.qc_physics = 1;
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
@@ -604,6 +606,7 @@ static void WeaponPred_CheckConfigUpdate() {
 
     // Target is also the long form localinfo name.
     CONFIG_UPDATE("qcp", qc_physics);
+    CONFIG_UPDATE("mpm", min_ping_ms);
     CONFIG_UPDATE("snm", static_newmis_ms);
     CONFIG_UPDATE("dnm", dynamic_newmis_ms);
     CONFIG_UPDATE("mrt", max_rewind_ms);
