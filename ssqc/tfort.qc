@@ -796,6 +796,7 @@ static struct stg_table_entry {
     int id;
     void() touch;
     void() think;
+    float no_expiry;
 };
 
 stg_table_entry stg_table[] = {
@@ -803,12 +804,12 @@ stg_table_entry stg_table[] = {
     { GREN_CONC,    ConcussionGrenadeTouch, FO_T_GrenExplode},
     { GREN_BLAST,   BlastGrenadeTouch,      BlastGrenadeExplode},
     { GREN_NAIL,    NailGrenadeTouch,       NailGrenadeExplode},
-    { GREN_SHOCK,   ShockGrenadeTouch,      ShockGrenadeExplode},
+    { GREN_SHOCK,   ShockGrenadeTouch,      ShockGrenadeExplode, TRUE},
     { GREN_BURST,   BurstGrenadeTouch,      BurstGrenadeExplode},
     { GREN_MIRV,    MirvGrenadeTouch,       MirvGrenadeExplode},
-    { GREN_NAPALM,  NapalmGrenadeTouch,     NapalmGrenadeExplode1},
+    { GREN_NAPALM,  NapalmGrenadeTouch,     NapalmGrenadeExplode1, TRUE},
     { GREN_FLARE,   FlareGrenadeTouch,      FlareGrenadeExplode},
-    { GREN_GAS,     GasGrenadeTouch,        GasGrenadeExplode1},
+    { GREN_GAS,     GasGrenadeTouch,        GasGrenadeExplode1, TRUE},
     { GREN_EMP,     EMPGrenadeTouch,        EMPGrenadeExplode},
     { GREN_FLASH,   FlashGrenadeTouch,      FlashGrenadeExplode},
     { GREN_CALTROP, CanisterTouch,          ScatterCaltrops},
@@ -853,7 +854,8 @@ void (entity timer) FO_SpawnThrownGrenade = {
     stg_table_entry* ste = &stg_table[gtype - GREN_FIRST];
 
     proj.fpp.gren_type = gtype;
-    proj.fpp.expires_at = timer.heat;
+    if (!ste->no_expiry)
+        proj.fpp.expires_at = timer.heat;
     proj.skin = gdesc->skin;
     proj.touch = ste->touch;
     proj.think = ste->think;
