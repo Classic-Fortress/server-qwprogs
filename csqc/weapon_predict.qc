@@ -271,9 +271,24 @@ DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
                                      // what minping will be chosen.
 DEFCVAR_FLOAT(cl_delay_packets, 0);  // Can be used to query, but not set.
 
+static void set_minping_delay_packets() {
+    localcmd(sprintf("cl_delay_packets %d\n", client_delay_packets));
+    setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
+}
+
 void UpdateMinPing() {
     static float next_update;
-    if (!fo_config.min_ping_ms || time < next_update)
+
+    if (!fo_config.min_ping_ms) {
+        // Clear, if-and-only-if, we control the value.
+        if (client_delay_packets) {
+            client_delay_packets = 0;
+            set_minping_delay_packets();
+        }
+        return;
+    }
+
+    if (time < next_update)
         return;
     next_update = time + 1;
 
@@ -291,7 +306,7 @@ void UpdateMinPing() {
         once = TRUE;
 
         next_update = time + 0.1;
-        localcmd(sprintf("cl_delay_packets %d\n", client_delay_packets));
+        set_minping_delay_packets();
         return;
     }
 
@@ -323,11 +338,11 @@ void UpdateMinPing() {
         if (!client_delay_packets)
             client_delay_packets = nv;
         else
-            client_delay_packets = min(client_delay_packets + 5, nv);
+            client_delay_packets = min(client_delay_packets + 10, nv);
     }
 
     if (CVARF(cl_delay_packets) != client_delay_packets) {
-        localcmd(sprintf("cl_delay_packets %d\n", client_delay_packets));
+        set_minping_delay_packets();
         setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
         num_samples = 0;
     }
