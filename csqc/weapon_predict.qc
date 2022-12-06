@@ -1169,6 +1169,22 @@ void (float ox) W_FireSpikes = {
 
 static float QcPhysics() { return fo_config.qc_physics; }
 
+static float CanThrowGrenade(int gren_type) {
+    if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
+        return FALSE;  // Not time to throw yet, THROWING set if necessary.
+
+    float last_possible_throw = pstate_pred.last_prime + 3.7;
+    last_possible_throw -= FO_RewindGrenDt(gren_type);
+
+    // We're conservative here, a missed predicted projectile throw into what's
+    // actually a held grenade is frustrating.  Better to leave it up to the
+    // server when it's really tight.
+    if (pstate_pred.client_time > last_possible_throw - 1.5 * SERVER_FRAME_DT)
+        return FALSE;  // Buckle up... probably.
+
+    return TRUE;
+}
+
 static void W_ThrowGren(float is_throw) {
     if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES))
         return;
@@ -1181,20 +1197,10 @@ static void W_ThrowGren(float is_throw) {
     else if (pstate_pred.tfstate & TFSTATE_GRENTHROWING == 0)
         return;
 
-    if (pstate_pred.client_time < pstate_pred.last_prime + 0.8)
-        return;  // Not time to throw yet, THROWING set if necessary.
-
     int type_index = (pstate_pred.tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
     int gren_type = FO_ClassGren(pstate_pred.playerclass, type_index)->id;
-
-    float last_possible_throw = pstate_pred.last_prime + 3.7;
-    last_possible_throw -= FO_RewindGrenDt(gren_type);
-
-    // We're conservative here, a missed predicted projectile throw into what's
-    // actually a held grenade is frustrating.  Better to leave it up to the
-    // server when it's really tight.
-    if (pstate_pred.client_time > last_possible_throw - 1.5 * SERVER_FRAME_DT)
-        return;  // Buckle up... probably.
+    if (!CanThrowGrenade(gren_type) && !IsClownMode(CLOWN_SPAM_GRENADES))
+        return;
 
     if (IsEffectFrame()) {
         entity gren = PP_CreateProjectile(FPP_HANDGRENADE, '0 0 0');
