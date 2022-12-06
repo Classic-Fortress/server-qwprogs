@@ -276,7 +276,7 @@ float FO_MaxRewindGrenWinDt() {
 #else
 
 predict_tf_state pstate_pred, pstate_server;
-#define MASK_PRED_VIEWMODEL  256
+#define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512
 
 #endif

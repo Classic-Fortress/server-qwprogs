@@ -17,6 +17,7 @@ struct pengine_t {
     float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
     entity pweap_ent;
+    entity viewmodel;
 
     // Must include MASK_PRED_VIEWMODEL or we lose updates.
     // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
@@ -34,7 +35,7 @@ float WP_MinPing() {
         return CVARF(wpp_min_ping);
 }
 
-void WP_UpdateViewModel(entity pweap_ent);
+void WP_UpdateViewModel();
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -260,11 +261,11 @@ void WPP_UpdateEnable(float force) {
                        (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
-    pengine.view_mask = MASK_PRED_VIEWMODEL |
+    pengine.view_mask = MASK_PRED_ENT | MASK_VIEWMODEL |
                         (pp_new ? MASK_PRED_PROJECTILE : 0);
 
-    if (pengine.pweap_ent != __NULL__)
-        WP_UpdateViewModel(pengine.pweap_ent);
+    if (pengine.viewmodel != __NULL__)
+        WP_UpdateViewModel();
 }
 
 DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
@@ -1414,17 +1415,15 @@ void InitProjectileEnt(float sendflags) {
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
 
-void WP_UpdateViewModel(entity pweap_ent) {
+void WP_UpdateViewModel() {
+    entity viewmodel = pengine.viewmodel;
     float pmodelindex, pframe;
 
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    // Note, even if the predicted weapon model is not visible we might still be
-    // using it to generated predicted projectiles.  E.g. we need to keep
-    // PRED_VIEWMODEL in the render mask.
     if (!WP_Enabled() || wi->predict_type == NO_PREDICT) {
         // Fall back to engine.
-        pweap_ent.modelindex = 0;
+        viewmodel.modelindex = 0;
         pengine.view_mask |= MASK_VIEWMODEL;
         return;
     } else {
@@ -1433,25 +1432,25 @@ void WP_UpdateViewModel(entity pweap_ent) {
 
     static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_RELOADING | TFSTATE_FLASHED;
     if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
-        pweap_ent.modelindex = 0;
+        viewmodel.modelindex = 0;
         return;
     }
 
-    pweap_ent.alpha = CVARF(r_drawviewmodel);
+    viewmodel.alpha = CVARF(r_drawviewmodel);
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
 
-    if (pweap_ent.modelindex != pmodelindex) {
-        pweap_ent.frame = pframe;
-        pweap_ent.modelindex = pmodelindex;
-        pweap_ent.lerpfrac = 0;
-    } else if (self.frame != pframe) {
-        pweap_ent.frame2 = self.frame;
-        pweap_ent.frame = pframe;
-        pweap_ent.lerpfrac = 1;
+    if (viewmodel.modelindex != pmodelindex) {
+        viewmodel.frame = pframe;
+        viewmodel.modelindex = pmodelindex;
+        viewmodel.lerpfrac = 0;
+    } else if (viewmodel.frame != pframe) {
+        viewmodel.frame2 = viewmodel.frame;
+        viewmodel.frame = pframe;
+        viewmodel.lerpfrac = 1;
     }
 
-    pweap_ent.lerpfrac = max(0, pweap_ent.lerpfrac - frametime * 10);
+    viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
 void PM_PredictJump();
@@ -1497,15 +1496,18 @@ float WP_ClientThink() {
         WP_Frame();
     }
 
-    WP_UpdateViewModel(self);
+    WP_UpdateViewModel();
     return PREDRAW_AUTOADD;
 }
 
 void InitWeapPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
-
-    self.drawmask = MASK_PRED_VIEWMODEL;
-    self.renderflags = RF_VIEWMODEL;
-
     pengine.pweap_ent = pe;
+    pe.drawmask = MASK_PRED_ENT;
+
+    entity viewmodel = spawn();
+    viewmodel.drawmask = MASK_PRED_ENT;
+    viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
+    pengine.viewmodel = viewmodel;
+
 }

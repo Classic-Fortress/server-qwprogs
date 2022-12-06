@@ -136,7 +136,10 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
         setproperty(VF_DRAWENGINESBAR, 1);
 
-    addentities((intermission?0:WPP_ViewModelMask())|MASK_ENGINE);
+    float mask = MASK_ENGINE;
+    if (!intermission)
+        mask |= WPP_ViewModelMask();
+    addentities(mask);
 
     renderscene();
 
