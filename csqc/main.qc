@@ -447,6 +447,9 @@ void CSQC_Shutdown() = {
     FO_WriteSettings();
 }
 
+// We can query, but not set via an autocvar.
+DEFCVAR_FLOAT(cl_delay_packets, 0);
+
 float last_servercommandframe;
 void _Sync_ServerCommandFrame() {
     // Server command frames are monotonically unique, we can skip processing
@@ -479,6 +482,8 @@ void _Sync_ServerCommandFrame() {
         setviewprop(VF_AFOV, cvar("fov"));
         setsensitivityscaler(1);
     }
+
+    UpdateMinPing();
 }
 
 float last_clientcommandframe;

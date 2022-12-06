@@ -22,6 +22,8 @@ enumflags {
 };
 
 var struct {
+    float min_ping_ms;
+
     float qc_physics;
     float static_newmis_ms;
     float dynamic_newmis_ms;
@@ -74,6 +76,7 @@ enumflags {
     CLOWN_LETHAL_TRANQ,
     CLOWN_STICKY_GRENS,
     CLOWN_STICKY_PIPES,
+    CLOWN_SPAM_GRENADES,
 };
 
 string CLOWN_DESC[] = {
@@ -83,6 +86,7 @@ string CLOWN_DESC[] = {
     "elephant tranq",
     "sticky grenades",
     "sticky pipes",
+    "no grenade prime-time",
 };
 
 inline float IsClownMode(int flag) {

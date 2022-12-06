@@ -94,6 +94,7 @@ void () ShockGrenadeExplode = {
     }
     self.no_active_nail_grens = self.owner.no_active_nail_grens;
     self.movetype = MOVETYPE_FLY;
+    self.velocity = '0 0 0';
     setorigin(self, self.origin + '0 0 32');
     if(solid_nailgren) {
         setsize(self, '-1 -1 -1', '1 1 1');
