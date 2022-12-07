@@ -22,6 +22,7 @@ profile.qc
 ../share/animate.qc
 weapon_predict.qc
 pmove.qc
+tfx.qc
 sui_sys.qc
 vote.qc
 status.qc

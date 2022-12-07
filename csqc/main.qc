@@ -117,6 +117,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_offset = 0;
     current_vote = world;
     vote_list_filter = "";
+
+    TF_Init();
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -136,9 +138,13 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
         setproperty(VF_DRAWENGINESBAR, 1);
 
-    addentities((intermission?0:WPP_ViewModelMask())|MASK_ENGINE);
+    float mask = MASK_ENGINE;
+    if (!intermission)
+        mask |= WPP_ViewModelMask();
+    addentities(mask);
 
     renderscene();
+    TFxRenderGrenadeTimers();
 
     Hud_UpdateView(width, height, menushown, fts);
 
@@ -403,6 +409,8 @@ void(float isnew) CSQC_Ent_Update = {
 };
 
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
+    if (self.removefunc)
+        self.removefunc();
     remove(self);
 };
 

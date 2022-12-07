@@ -276,8 +276,9 @@ float FO_MaxRewindGrenWinDt() {
 #else
 
 predict_tf_state pstate_pred, pstate_server;
-#define MASK_PRED_VIEWMODEL  256
+#define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512
+#define MASK_OUTLINE        1024
 
 #endif
 
@@ -383,6 +384,7 @@ void EntUpdate_Config() {
     COMM(Byte, max_rewind_grenade_ms);
     COMM(Short, rewind_fast_projectile_thresh);
     COMM(Byte, rewind_flags);
+    COMM(Short, tfx_flags);
     COMM(Byte, clown_flags);
     COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
@@ -562,6 +564,7 @@ void Predict_InitDefaultConfig() {
     fo_config.static_newmis_ms = 50;
     fo_config.dynamic_newmis_ms = 0;
     fo_config.rewind_flags = REWIND_DEFAULT_FLAGS;
+    fo_config.tfx_flags = TFX_DEFAULT_FLAGS;
     fo_config.max_rewind_ms = 250;
     fo_config.max_rewind_slow_projectile_ms = 150;
     fo_config.max_rewind_fast_projectile_ms = 150;
@@ -623,6 +626,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE("wppge", wpp_global_disable);
     CONFIG_UPDATE("gbd", gren_beta_disable);
     CONFIG_UPDATE("rewind", rewind_flags);
+    CONFIG_UPDATE("tfx", tfx_flags);
     CONFIG_UPDATE("clown", clown_flags);
     CONFIG_UPDATE("clown_grav", clown_grav);
 

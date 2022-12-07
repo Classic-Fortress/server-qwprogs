@@ -17,6 +17,7 @@ struct pengine_t {
     float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
     entity pweap_ent;
+    entity viewmodel;
 
     // Must include MASK_PRED_VIEWMODEL or we lose updates.
     // We only add/remove MASK_VIEWMODEL and MASK_PRED_PROJECTILE
@@ -34,7 +35,7 @@ float WP_MinPing() {
         return CVARF(wpp_min_ping);
 }
 
-void WP_UpdateViewModel(entity pweap_ent);
+void WP_UpdateViewModel();
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -162,6 +163,17 @@ void WPP_Status() {
             ping, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
+    printf("\n");
+
+    if (fo_config.tfx_flags) {
+        printf("TFX [tfx_flags=%d]\n", fo_config.tfx_flags);
+        for (float i = 0; i < TFX_DESC.length; i++) {
+            float flag = 1 << i;
+            printf(" %2d [%-3s]: .%s\n", flag, TFxEnabled(flag) ? "on": "off",
+                    TFX_DESC[i]);
+        }
+        printf("\n");
+    }
 
     printf("Config:\n");
     PRINT_CONFIG(min_ping_ms);
@@ -176,18 +188,21 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
+    printf("\n");
 
     printf("Rewind Settings [rewind_flags=%d]:\n", fo_config.rewind_flags);
     for (float i = 0; i < REWIND_DESC.length; i++) {
         float flag = 1 << i;
         printf(" %2d [%-3s]: .%s\n", flag,
-                (fo_config.rewind_flags & flag) ? "on": "off", REWIND_DESC[i]);
+               RewindFlagEnabled(flag) ?  "on": "off", REWIND_DESC[i]);
     }
+
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(max_rewind_grenade_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    printf("\n");
 
     if (!fo_config.clown_flags)
         return;
@@ -200,7 +215,6 @@ void WPP_Status() {
         if (flag == CLOWN_PROJ_GRAVITY)
             printf(" (clown_grav=%d)", fo_config.clown_grav);
         printf("\n");
-
     }
 }
 #undef PRINT_CONFIG
@@ -260,11 +274,11 @@ void WPP_UpdateEnable(float force) {
                        (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
-    pengine.view_mask = MASK_PRED_VIEWMODEL |
+    pengine.view_mask = MASK_PRED_ENT | MASK_VIEWMODEL |
                         (pp_new ? MASK_PRED_PROJECTILE : 0);
 
-    if (pengine.pweap_ent != __NULL__)
-        WP_UpdateViewModel(pengine.pweap_ent);
+    if (pengine.viewmodel != __NULL__)
+        WP_UpdateViewModel();
 }
 
 DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
@@ -1414,17 +1428,15 @@ void InitProjectileEnt(float sendflags) {
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
 
-void WP_UpdateViewModel(entity pweap_ent) {
+void WP_UpdateViewModel() {
+    entity viewmodel = pengine.viewmodel;
     float pmodelindex, pframe;
 
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
-    // Note, even if the predicted weapon model is not visible we might still be
-    // using it to generated predicted projectiles.  E.g. we need to keep
-    // PRED_VIEWMODEL in the render mask.
     if (!WP_Enabled() || wi->predict_type == NO_PREDICT) {
         // Fall back to engine.
-        pweap_ent.modelindex = 0;
+        viewmodel.modelindex = 0;
         pengine.view_mask |= MASK_VIEWMODEL;
         return;
     } else {
@@ -1433,25 +1445,25 @@ void WP_UpdateViewModel(entity pweap_ent) {
 
     static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_RELOADING | TFSTATE_FLASHED;
     if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
-        pweap_ent.modelindex = 0;
+        viewmodel.modelindex = 0;
         return;
     }
 
-    pweap_ent.alpha = CVARF(r_drawviewmodel);
+    viewmodel.alpha = CVARF(r_drawviewmodel);
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
 
-    if (pweap_ent.modelindex != pmodelindex) {
-        pweap_ent.frame = pframe;
-        pweap_ent.modelindex = pmodelindex;
-        pweap_ent.lerpfrac = 0;
-    } else if (self.frame != pframe) {
-        pweap_ent.frame2 = self.frame;
-        pweap_ent.frame = pframe;
-        pweap_ent.lerpfrac = 1;
+    if (viewmodel.modelindex != pmodelindex) {
+        viewmodel.frame = pframe;
+        viewmodel.modelindex = pmodelindex;
+        viewmodel.lerpfrac = 0;
+    } else if (viewmodel.frame != pframe) {
+        viewmodel.frame2 = viewmodel.frame;
+        viewmodel.frame = pframe;
+        viewmodel.lerpfrac = 1;
     }
 
-    pweap_ent.lerpfrac = max(0, pweap_ent.lerpfrac - frametime * 10);
+    viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
 void PM_PredictJump();
@@ -1497,15 +1509,18 @@ float WP_ClientThink() {
         WP_Frame();
     }
 
-    WP_UpdateViewModel(self);
+    WP_UpdateViewModel();
     return PREDRAW_AUTOADD;
 }
 
 void InitWeapPredEnt(entity pe) {
     pe.predraw = WP_ClientThink;
-
-    self.drawmask = MASK_PRED_VIEWMODEL;
-    self.renderflags = RF_VIEWMODEL;
-
     pengine.pweap_ent = pe;
+    pe.drawmask = MASK_PRED_ENT;
+
+    entity viewmodel = spawn();
+    viewmodel.drawmask = MASK_PRED_ENT;
+    viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
+    pengine.viewmodel = viewmodel;
+
 }

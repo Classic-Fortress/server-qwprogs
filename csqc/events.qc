@@ -113,6 +113,11 @@ void() CSQC_Parse_Event = {
             last_death_time = readfloat();
             StopGrenTimers();
             break;
+        case MSG_TFX_GRENTIMER:
+            float entnum = readentitynum();
+            float explodes_at = readfloat();
+            TFxGrenTimerUpdate(entnum, explodes_at);
+            break;
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
             switch (menutype) {
