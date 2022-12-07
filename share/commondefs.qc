@@ -37,6 +37,8 @@ var struct {
     float clown_flags;
     float clown_grav;
 
+    float tfx_flags;
+
     float wp_global_enable;
     float wp_global_disable;
     float pp_global_enable;
@@ -68,6 +70,38 @@ const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;
 }
+
+enumflags {
+    TFX_SPEC_OUTLINE,
+    TFX_SPEC_SEEFLAG,
+    TFX_SPEC_GRENTIMER,
+    TFX_PREMATCH_OUTLINE,
+    TFX_OFFENSE_SEEFLAG,
+    TFX_DEFENSE_SEEFLAG,
+    TFX_OFFENSE_OUTLINE,
+    TFX_DEFENSE_OUTLINE,
+    TFX_OFFENSE_GRENTIMER,
+    TFX_DEFENSE_GRENTIMER,
+};
+
+string TFX_DESC[] = {
+    "Spectators see outlines",
+    "Spectators see flags",
+    "Spectators see grenade timers",
+    "Prematch see outlines",
+    "Offense sees flag (always)",
+    "Defense sees flag, when not carried",
+    "Offense sees grentimers",
+    "Defense sees grentimers",
+    "Offense sees outlines",
+    "Defense sees outlines",
+};
+
+float TFxEnabled(float flag) {
+    return fo_config.tfx_flags & flag;
+}
+
+const float TFX_DEFAULT_FLAGS = TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_PREMATCH_OUTLINE;
 
 enumflags {
     CLOWN_FAST_PROJECTILES,
@@ -136,6 +170,8 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 #define MSG_PLAYERDIE       22
 #define MSG_PAUSE           23
 #define MSG_UNPAUSE         24
+
+#define MSG_TFX_GRENTIMER   25
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

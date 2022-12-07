@@ -163,6 +163,17 @@ void WPP_Status() {
             ping, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
+    printf("\n");
+
+    if (fo_config.tfx_flags) {
+        printf("TFX [tfx_flags=%d]\n", fo_config.tfx_flags);
+        for (float i = 0; i < TFX_DESC.length; i++) {
+            float flag = 1 << i;
+            printf(" %2d [%-3s]: .%s\n", flag, TFxEnabled(flag) ? "on": "off",
+                    TFX_DESC[i]);
+        }
+        printf("\n");
+    }
 
     printf("Config:\n");
     PRINT_CONFIG(min_ping_ms);
@@ -177,18 +188,21 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
+    printf("\n");
 
     printf("Rewind Settings [rewind_flags=%d]:\n", fo_config.rewind_flags);
     for (float i = 0; i < REWIND_DESC.length; i++) {
         float flag = 1 << i;
         printf(" %2d [%-3s]: .%s\n", flag,
-                (fo_config.rewind_flags & flag) ? "on": "off", REWIND_DESC[i]);
+               RewindFlagEnabled(flag) ?  "on": "off", REWIND_DESC[i]);
     }
+
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(max_rewind_grenade_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    printf("\n");
 
     if (!fo_config.clown_flags)
         return;
@@ -201,7 +215,6 @@ void WPP_Status() {
         if (flag == CLOWN_PROJ_GRAVITY)
             printf(" (clown_grav=%d)", fo_config.clown_grav);
         printf("\n");
-
     }
 }
 #undef PRINT_CONFIG

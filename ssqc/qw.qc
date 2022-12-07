@@ -192,6 +192,7 @@ float round_winner_team;
 entity round_winner;
 float round_winner_print_health;
 
+float team_no_attack;
 .float team_no;                 // The team you belong to
 .float lives;                   // The number of lives you have left
 

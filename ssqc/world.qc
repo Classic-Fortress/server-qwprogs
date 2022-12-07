@@ -338,6 +338,7 @@ void () worldspawn = {
     clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
 
     globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");
+    globalstat(STAT_TEAMNO_ATTACK, EV_FLOAT, "team_no_attack");
 
     entity worldspawnent;
     worldspawnent = spawn();

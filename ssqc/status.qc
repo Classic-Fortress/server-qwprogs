@@ -763,6 +763,21 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
+// Temporary until we network player ents.
+static void TFxUpdateGrenadeTimer(entity player, float explodes_at) {
+    const float tfx_gren_mask =
+        TFX_SPEC_GRENTIMER | TFX_DEFENSE_GRENTIMER | TFX_OFFENSE_GRENTIMER;
+
+    if (!TFxEnabled(tfx_gren_mask))
+        return;
+
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_TFX_GRENTIMER);
+    WriteEntity(MSG_MULTICAST, player);
+    WriteFloat(MSG_MULTICAST, explodes_at);
+    multicast('0 0 0', MULTICAST_ALL_R);
+}
+
 void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
@@ -773,15 +788,19 @@ void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     WriteFloat(MSG_MULTICAST, time);
     WriteFloat(MSG_MULTICAST, explodes_at);
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+
+    TFxUpdateGrenadeTimer(pl, explodes_at);
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+
+    TFxUpdateGrenadeTimer(pl, 0);
 }
 
 void UpdateClientPlayerDie(entity pl) = {

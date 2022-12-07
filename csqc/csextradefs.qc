@@ -67,6 +67,7 @@ const vector PLAYER_MAXS = [16, 16, 24];
 
 #define MAP_MAX_CHARS 20
 
+.void() removefunc;
 .float owned_by;
 .string netname;
 .float playerid;
