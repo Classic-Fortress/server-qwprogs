@@ -2,7 +2,7 @@
 .float grentimer_expires;  // TODO: integrate this
 .float teamno;
 static entity local_player;
-static float shader_team[2], shader_flag;
+static float shader_team[2], shader_flag, shader_over_outline;
 
 enum {
     TeamNone = 0,
@@ -62,7 +62,7 @@ static float ShowPlayerOutline(entity player) {
     if (player.entnum == player_localentnum || player.teamno == TeamNone)
         return FALSE;
 
-    if (prematch && TFxEnabled(TFX_PREMATCH_OUTLINE))
+    if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))
         return TRUE;
 
     if (!is_player)
@@ -84,7 +84,7 @@ static void AddOutline(entity ent, string model) {
     entity o = spawn();
     setmodel(o, model);
     o.classname = "outline";
-    o.fatness = 2;
+    o.fatness = 1;
     setsize(o, PLAYER_MINS, PLAYER_MAXS);
 
     ent.outline = o;
@@ -113,6 +113,7 @@ float UpdatePlayer(float isnew) {
         if (self.entnum == player_localentnum && is_player)
             local_player = self;
         AddOutline(self, "progs/player.mdl");
+        self.forceshader = shader_over_outline;
     }
 
     if (self.entnum == player_localentnum)
@@ -128,6 +129,9 @@ float UpdatePlayer(float isnew) {
 
 static float ShowTeamGrenTimer(float team, float my_team) {
     if (!is_player && TFxEnabled(TFX_SPEC_GRENTIMER))
+        return TRUE;
+
+    if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))
         return TRUE;
 
     if (team == AttackingTeamNo()) {
@@ -218,6 +222,9 @@ static float ShowFlagOutline() {
     if (!is_player && TFxEnabled(TFX_SPEC_SEEFLAG))
         return TRUE;
 
+    if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))
+        return TRUE;
+
     if (TFxEnabled(TFX_OFFENSE_SEEFLAG) && IsAttacking(local_player))
         return TRUE;
 
@@ -243,8 +250,10 @@ static void UpdateFlagOutline(entity flag) {
 }
 
 float UpdateFlag(float isnew) {
-    if (isnew)
+    if (isnew) {
         AddOutline(self, "progs/ff_flag.mdl");
+        // Flags have their own shader already, just make them shiny for now.
+    }
 
     UpdateFlagOutline(self);
 
@@ -262,7 +271,6 @@ void TF_Init() {
     deltalisten("progs/ff_flag.mdl", UpdateFlag, 0);
 
     shader_team[0] = shaderforname("blue_team", "{"
-        "sort nearest\n"
         "{ map textures/sfx/quad.tga\n"
         "rgbGen lightingDiffuse\n"
         "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
@@ -273,7 +281,6 @@ void TF_Init() {
         "}\n}");
 
     shader_team[1] = shaderforname("red_team", "{"
-        "sort nearest\n"
         "{ map textures/sfx/pent.tga\n"
         "rgbGen lightingDiffuse\n"
         "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
@@ -283,8 +290,11 @@ void TF_Init() {
         "nodepthtest\n"
         "}\n}");
 
-    shader_flag = shaderforname("flag", "{"
+    shader_over_outline = shaderforname("over_outline", "{"
         "sort nearest\n"
+        "}");
+
+    shader_flag = shaderforname("flag", "{"
         "{ map textures/sfx/specular.tga\n"
         "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
         "tcgen environment\n"

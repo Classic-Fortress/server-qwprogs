@@ -72,10 +72,10 @@ float RewindFlagEnabled(float flag) {
 }
 
 enumflags {
+    TFX_PREMATCH_EVERYTHING,
     TFX_SPEC_OUTLINE,
     TFX_SPEC_SEEFLAG,
     TFX_SPEC_GRENTIMER,
-    TFX_PREMATCH_OUTLINE,
     TFX_OFFENSE_SEEFLAG,
     TFX_DEFENSE_SEEFLAG,
     TFX_OFFENSE_OUTLINE,
@@ -85,10 +85,10 @@ enumflags {
 };
 
 string TFX_DESC[] = {
+    "Prematch see everything",
     "Spectators see outlines",
     "Spectators see flags",
     "Spectators see grenade timers",
-    "Prematch see outlines",
     "Offense sees flag (always)",
     "Defense sees flag, when not carried",
     "Offense sees grentimers",
@@ -101,7 +101,9 @@ float TFxEnabled(float flag) {
     return fo_config.tfx_flags & flag;
 }
 
-const float TFX_DEFAULT_FLAGS = TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_PREMATCH_OUTLINE;
+const float TFX_DEFAULT_FLAGS =
+        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG |
+        TFX_PREMATCH_EVERYTHING;
 
 enumflags {
     CLOWN_FAST_PROJECTILES,
