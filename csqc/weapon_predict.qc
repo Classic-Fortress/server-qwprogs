@@ -1466,8 +1466,6 @@ void WP_UpdateViewModel() {
     viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
-void PM_PredictJump();
-
 float WP_ClientThink() {
     if (!WP_Enabled())
         return PREDRAW_NEXT;
@@ -1505,7 +1503,6 @@ float WP_ClientThink() {
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
-        PM_PredictJump();
         WP_Frame();
     }
 

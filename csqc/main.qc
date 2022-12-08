@@ -494,22 +494,12 @@ void _Sync_ServerCommandFrame() {
     UpdateMinPing();
 }
 
-float last_clientcommandframe;
-// REQUIRES: Must be called after _Sync_ServerCommandFrame.
-void _Sync_ClientCommandFrame() {
-    // Client command frames are regenerated beyond the server frame, so we
-    // cannot check that we have not seen this client command frame alone.
-    if (last_servercommandframe == servercommandframe &&
-            last_clientcommandframe == clientcommandframe)
-        return;
-    last_clientcommandframe = clientcommandframe;
-}
 
 // Called for each {client, server} command frame, ensures globals are
 // synchronized with server and predicted state.
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
-    _Sync_ClientCommandFrame();
+    PM_PredictJump();
 }
 
 static string to_precision(float f, float p) {

@@ -2,7 +2,7 @@ const vector PLAYER_MINS = [-16, -16, -24];
 const vector PLAYER_MAXS = [16, 16, 32];
 
 inline float CSQC_JumpSounds_Active() {
-    return WP_Enabled() && CVARF(fo_csjumpsounds);
+    return CVARF(fo_csjumpsounds);
 }
 
 // Sets *type to whatever is at the feet of `point`.
@@ -23,10 +23,18 @@ static float PM_GetWaterLevel(vector point, float* type) {
 }
 
 void PM_PredictJump() {
-    if (!CVARF(fo_csjumpsounds) || getstatf(STAT_PAUSED))
+    if (!CSQC_JumpSounds_Active() || getstatf(STAT_PAUSED))
         return;
 
+    static float last_clientframe;
     static float last_onground, last_waterlevel, last_vel_z;
+
+    if (!getinputstate(clientcommandframe) || input_timelength <= 0)
+        return;
+
+    if (time <= last_clientframe)
+        return;
+    last_clientframe = time;
 
     float fluidtype;
     float waterlevel = PM_GetWaterLevel(pmove_org, &fluidtype);
@@ -41,9 +49,6 @@ void PM_PredictJump() {
         last_waterlevel = 0;
         return;
     }
-
-    if (!IsEffectFrameMulti())
-        return;
 
     static float swimsound_next;
 
