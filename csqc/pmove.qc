@@ -28,15 +28,7 @@ void PM_PredictJump() {
     if (!CSQC_JumpSounds_Active() || getstatf(STAT_PAUSED))
         return;
 
-    static float last_clientframe;
     static float last_onground, last_waterlevel, last_vel_z;
-
-    if (!getinputstate(clientcommandframe) || input_timelength <= 0)
-        return;
-
-    if (time <= last_clientframe)
-        return;
-    last_clientframe = time;
 
     float fluidtype;
     float waterlevel = PM_GetWaterLevel(pmove_org, &fluidtype);
