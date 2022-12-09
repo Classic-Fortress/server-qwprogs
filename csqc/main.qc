@@ -229,7 +229,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Menu_Cancel();
             break;
         case "+fo_showscores":
-            if (CVARF(FOCMD_OLDSCOREBOARD) == 1)
+            if (CVARF(fo_oldscoreboard) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -258,7 +258,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (CVARF(FOCMD_OLDSCOREBOARD) != 1)
+            if (CVARF(fo_oldscoreboard) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -457,6 +457,7 @@ void CSQC_Shutdown() = {
 
 // We can query, but not set via an autocvar.
 DEFCVAR_FLOAT(cl_delay_packets, 0);
+DEFCVAR_FLOAT(fov, 90);
 
 float last_servercommandframe;
 void _Sync_ServerCommandFrame() {
@@ -484,10 +485,10 @@ void _Sync_ServerCommandFrame() {
     }
 
     if (zoomed_in) {
-        setviewprop(VF_AFOV, cvar("fov")/3);
+        setviewprop(VF_AFOV, CVARF(fov))/3;
         setsensitivityscaler(1/3);
     } else {
-        setviewprop(VF_AFOV, cvar("fov"));
+        setviewprop(VF_AFOV, CVARF(fov));
         setsensitivityscaler(1);
     }
 

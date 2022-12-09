@@ -810,13 +810,6 @@ string FO_ScoreBoardColumns[] = {
     "dmgt"
 };
 
-#define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
-#define FOCMD_GRENTIMER "fo_grentimer"
-#define FOCMD_GRENTIMERSOUND "fo_grentimersound"
-#define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
-#define FOCMD_JUMPVOLUME "fo_jumpvolume"
-#define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
-
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);

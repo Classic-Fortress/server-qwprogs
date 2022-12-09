@@ -1,3 +1,5 @@
+DEFCVAR_FLOAT(fo_jumpvolume, 1);
+
 const vector PLAYER_MINS = [-16, -16, -24];
 const vector PLAYER_MAXS = [16, 16, 32];
 
@@ -80,7 +82,7 @@ void PM_PredictJump() {
             //    stairs when combined with (1).  We can test for this by
             //    watching to see whether we actually got a sufficiently large
             //    velocity increase.
-            localsound("player/plyrjmp8.wav", CHAN_AUTO, cvar(FOCMD_JUMPVOLUME));
+            localsound("player/plyrjmp8.wav", CHAN_AUTO, CVARF(fo_jumpvolume));
         }
     }
 

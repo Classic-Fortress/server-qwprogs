@@ -320,7 +320,7 @@ DEFCVAR_FLOAT(fo_grentimer_debug, 0);
 
 string cached_timer;
 string GetGrenTimerSound() {
-    string wav = CVARS(FOCMD_GRENTIMERSOUND);
+    string wav = CVARS(fo_grentimersound);
 
     if (cached_timer != wav) {
         precache_sound(wav);
@@ -334,7 +334,7 @@ void CsGrenTimer::StartSound() {
         return;
 
     string wav = GetGrenTimerSound();
-    float volume = CVARF(FOCMD_GRENTIMERVOLUME);
+    float volume = CVARF(fo_grentimervolume);
 
     // Note there's a bug where soundupdate returns false for a new sample, even
     // though it's started.
@@ -381,7 +381,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
         return;
 
     local float timer_flags = 0;
-    switch (CVARF(FOCMD_GRENTIMER)) {
+    switch (CVARF(fo_grentimer)) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
