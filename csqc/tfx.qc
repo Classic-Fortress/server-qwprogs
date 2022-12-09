@@ -95,9 +95,11 @@ static void UpdateOutline(entity player) {
     entity o = player.outline;
     if (!ShowPlayerOutline(player)) {
         o.drawmask = 0;
+        self.forceshader = 0;
         return;
     }
 
+    self.forceshader = shader_over_outline;
     o.forceshader = shader_team[TeamNo(player) - TeamBlue];
     o.drawmask = MASK_ENGINE;
     o.frame = player.frame;
@@ -112,8 +114,8 @@ float UpdatePlayer(float isnew) {
     if (isnew) {
         if (self.entnum == player_localentnum && is_player)
             local_player = self;
+
         AddOutline(self, "progs/player.mdl");
-        self.forceshader = shader_over_outline;
     }
 
     if (self.entnum == player_localentnum)
@@ -265,41 +267,41 @@ void TFxGrenTimerUpdate(float ent_num, float expiry) {
     he->grentimer_expires = expiry;
 }
 
+static string OutlineShader(string texture) {
+    return sprintf(
+"{\
+  sort 6\
+  {\
+     map %s\
+     rgbGen lightingDiffuse\
+     blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\
+     tcgen environment\
+     tcmod rotate 30\
+     tcmod scroll 1.1\
+     nodepthtest\
+     depthfunc greater\
+  }\
+}", texture);
+}
+
+static string rnds(string prefix) {
+#if 0
+    // Debugging convenience, concatenates a random string when enabled so that
+    // shaders don't get cached on-client between builds.
+    for (int i = 0; i < 5; i++)
+            prefix = strcat(prefix, chr2str('a' + floor(random() * 26)));
+#endif
+    return prefix;
+}
+
 void TF_Init() {
     precache_model("progs/player.mdl");
-    deltalisten("progs/player.mdl", UpdatePlayer, 3);
+    deltalisten("progs/player.mdl", UpdatePlayer, 0);
     deltalisten("progs/ff_flag.mdl", UpdateFlag, 0);
 
-    shader_team[0] = shaderforname("blue_team", "{"
-        "{ map textures/sfx/quad.tga\n"
-        "rgbGen lightingDiffuse\n"
-        "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
-        "tcgen environment\n"
-        "tcmod rotate 30\n"
-        "tcmod scroll 1.1\n"
-        "nodepthtest\n"
-        "}\n}");
+    shader_team[0] = shaderforname(rnds("blue_team_outline"), OutlineShader("textures/sfx/quad.tga"));
+    shader_team[1] = shaderforname(rnds("red_team_outline"), OutlineShader("textures/sfx/pent.tga"));
+    shader_flag = shaderforname(rnds("flag_outline"), OutlineShader("textures/sfx/specular.tga"));
 
-    shader_team[1] = shaderforname("red_team", "{"
-        "{ map textures/sfx/pent.tga\n"
-        "rgbGen lightingDiffuse\n"
-        "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
-        "tcgen environment\n"
-        "tcmod rotate 30\n"
-        "tcmod scroll 1.1\n"
-        "nodepthtest\n"
-        "}\n}");
-
-    shader_over_outline = shaderforname("over_outline", "{"
-        "sort nearest\n"
-        "}");
-
-    shader_flag = shaderforname("flag", "{"
-        "{ map textures/sfx/specular.tga\n"
-        "blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\n"
-        "tcgen environment\n"
-        "tcmod scroll 1.1\n"
-        "nodepthtest\n"
-        "}\n}");
-
+    shader_over_outline = shaderforname(rnds("over_outline"), "{ sort 7 }");
 }

@@ -1519,5 +1519,4 @@ void InitWeapPredEnt(entity pe) {
     viewmodel.drawmask = MASK_PRED_ENT;
     viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
     pengine.viewmodel = viewmodel;
-
 }
