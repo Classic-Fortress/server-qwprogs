@@ -24,6 +24,11 @@ static float PM_GetWaterLevel(vector point, float* type) {
     return waterlevel;
 }
 
+// Some versions of FTE do not correctly update pmove_vel (although other state,
+// e.g. pmove_org is).  Until we're directly tied to pmove, we snoop on recent
+// values when we think this is happening.
+float recent_pmove_vel_z;
+
 void PM_PredictJump() {
     if (!CSQC_JumpSounds_Active() || getstatf(STAT_PAUSED))
         return;
@@ -36,6 +41,7 @@ void PM_PredictJump() {
     float onground = pmove_onground;
     float landing = onground && !last_onground;
     float health = getstatf(STAT_HEALTH);
+    float vel_z = pmove_vel_z ?: recent_pmove_vel_z;
 
     if (health <= 0) {
         last_onground = 1;
@@ -62,8 +68,7 @@ void PM_PredictJump() {
             swimsound_next = time + 1;
             sound = random() < 0.5 ? "player/water1.wav" : "player/water2.wav";
             localsound(sound, CHAN_BODY, 1);
-        } else if (last_onground && !onground &&
-                   pmove_vel_z > last_vel_z + 200) {
+        } else if (last_onground && !onground && vel_z > last_vel_z + 200) {
             // The default pmove implementation and server behave slightly
             // differently here in two important ways here:
             // 1) Jump calculations run _prior_ to movement rather than post,
@@ -90,7 +95,7 @@ void PM_PredictJump() {
         localsound("misc/outwater.wav", CHAN_BODY, 1);
     }
 
-    last_vel_z = pmove_vel_z;
-    last_onground = pmove_onground;
+    last_vel_z = vel_z;
+    last_onground = onground;
     last_waterlevel = waterlevel;
 };
