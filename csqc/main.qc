@@ -149,6 +149,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     Hud_UpdateView(width, height, menushown, fts);
 
     perf_finish_sample(&frame_timing, fts);
+
+    // Work around bug in some versions of FTE.  See pmove.qc
+    recent_pmove_vel_z = pmove_vel_z;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
