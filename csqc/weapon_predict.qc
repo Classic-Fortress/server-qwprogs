@@ -8,6 +8,8 @@ DEFCVAR_FLOAT(wpp_proj_predict, -1);
 DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
 DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
 
+DEFCVAR_FLOAT(wpp_setspeed, 1);
+
 struct pengine_t {
     float pp_enabled;
     float wp_enabled;
@@ -138,6 +140,21 @@ void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocal
     printf(" ." #_field " = %d\n", fo_config.##_field)
 #define PRINT_CONFIG_ACTIVE(_field) \
     if (fo_config.##_field) printf(" ." #_field " = %d\n", fo_config.##_field)
+
+static void PrintFlagField(string desc, float bits, float nbits,
+                           string* bit_desc) {
+    if (!bits)
+        return;
+
+    printf(desc, bits);
+    for (float i = 0; i < nbits; i++) {
+        float flag = 1 << i;
+        string enabled = (bits & flag) ? "on" : "off";
+        printf(" %3d [%-3s]: %s\n", flag, enabled, bit_desc[i]);
+    }
+    printf("\n");
+}
+
 void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
@@ -163,17 +180,8 @@ void WPP_Status() {
             ping, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
+    printf(" maxspeed = %d\n", pstate_server.csqc_maxspeed);
     printf("\n");
-
-    if (fo_config.tfx_flags) {
-        printf("TFX [tfx_flags=%d]\n", fo_config.tfx_flags);
-        for (float i = 0; i < TFX_DESC.length; i++) {
-            float flag = 1 << i;
-            printf(" %2d [%-3s]: .%s\n", flag, TFxEnabled(flag) ? "on": "off",
-                    TFX_DESC[i]);
-        }
-        printf("\n");
-    }
 
     printf("Config:\n");
     PRINT_CONFIG(min_ping_ms);
@@ -188,15 +196,6 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
-    printf("\n");
-
-    printf("Rewind Settings [rewind_flags=%d]:\n", fo_config.rewind_flags);
-    for (float i = 0; i < REWIND_DESC.length; i++) {
-        float flag = 1 << i;
-        printf(" %2d [%-3s]: .%s\n", flag,
-               RewindFlagEnabled(flag) ?  "on": "off", REWIND_DESC[i]);
-    }
-
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
@@ -204,18 +203,14 @@ void WPP_Status() {
     PRINT_CONFIG(rewind_fast_projectile_thresh);
     printf("\n");
 
-    if (!fo_config.clown_flags)
-        return;
+    PrintFlagField("Rewind Settings [rewind_flags=%d]\n",
+                   fo_config.rewind_flags, REWIND_DESC.length, REWIND_DESC);
 
-    printf("Clown mode [clown_flags=%d]:\n", fo_config.clown_flags);
-    for (float i = 0; i < CLOWN_DESC.length; i++) {
-        float flag = 1 << i;
-        printf(" %2d [%-3s]: .%s", flag,
-                (fo_config.clown_flags & flag) ? "on": "off", CLOWN_DESC[i]);
-        if (flag == CLOWN_PROJ_GRAVITY)
-            printf(" (clown_grav=%d)", fo_config.clown_grav);
-        printf("\n");
-    }
+    PrintFlagField("TFX [tfx_flags=%d]:\n", fo_config.tfx_flags,
+                   TFX_DESC.length, TFX_DESC);
+
+    PrintFlagField("Clown mode [clown_flags=%d]\n",
+                   fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
 }
 #undef PRINT_CONFIG
 
@@ -270,8 +265,15 @@ void WPP_UpdateEnable(float force) {
     once = TRUE;
 
 
-    float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
-                       (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
+    float wpp_status = 0;
+    if (pengine.wp_enabled) {
+        wpp_status |= CSQC_WEAP_PRED;
+        if (pengine.pp_enabled)
+            wpp_status |= CSQC_PROJ_PRED;
+        if (CVARF(wpp_setspeed))
+            wpp_status |= CSQC_SETSPEED;
+    }
+
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
     pengine.view_mask = MASK_PRED_ENT | MASK_VIEWMODEL |
@@ -824,33 +826,53 @@ void WPP_Dump() {
 
 void WP_Attack();
 
+DEFCVAR_FLOAT(cl_forwardspeed, 0);
+DEFCVAR_FLOAT(cl_backspeed, 0);
+DEFCVAR_FLOAT(cl_sidespeed, 0);
+
 void MP_SetSpeed() {
-#if 0
-    // This wants ping correction to not be a punishment...
-    static float prev_state;
-
-    if (!IsEffectFrame())
+    if (!CVARF(wpp_setspeed))
         return;
 
-    if (pstate_pred.tfstate & TFSTATE_AIMING == prev_state)
-        return;
+    const float speed_aiming = 80;
+    const float speed_aiming2dir = ceil(speed_aiming/sqrt(2));
+    static float last_playerclass;
 
-    prev_state = pstate_pred.tfstate & TFSTATE_AIMING;
+    float speed = pstate_pred.csqc_maxspeed, force = FALSE;
 
-    string mspeed = "999";
+    float fastest =
+        max(CVARF(cl_forwardspeed), CVARF(cl_backspeed), CVARF(cl_sidespeed));
+
+    if (pstate_pred.playerclass != last_playerclass)
+        force = TRUE;
+    last_playerclass = pstate_pred.playerclass;
+
     if (pstate_pred.tfstate & TFSTATE_AIMING)
-        mspeed = "80";
+        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
+    else if (fastest == speed_aiming || fastest == speed_aiming2dir)
+        force = TRUE;  // This is an imperfect good heuristic that avoids
+                       // issues on missed packets/transitions/etc.
 
-    localcmd("cl_forwardspeed ", mspeed, "\n");
-    localcmd("cl_sidespeed ", mspeed, "\n");
-    localcmd("cl_backspeed ", mspeed, "\n");
-#endif
+    // Cap as maxspeed would, but client-side, when enabled.
+    if (RewindFlagEnabled(REWIND_SETSPEED) && speed < pstate_pred.csqc_maxspeed) {
+            if (input_movevalues.x && input_movevalues.y)
+                speed = speed_aiming2dir;
+            else if (fastest == speed_aiming2dir)
+                force = TRUE;  // reset back to speed_aiming
+    }
+
+    // We check >speed, not =speed as it's still valid for clients to control to
+    // lower speeds.  Except for transitions where the maxspeed is reset.
+    if (fastest > speed || force) {
+        string spd = ftos(speed);
+        localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
+        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
+    }
 }
 
 
-void WP_Frame() {
-    MP_SetSpeed();
 
+void WP_Frame() {
     if (getstatf(STAT_HEALTH) < 0) {
         pstate_pred.current_slot = SlotNull;
         return;
@@ -873,6 +895,8 @@ void WP_Frame() {
     if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
         (pstate_pred.client_time >= pstate_pred.attack_finished))
         WP_Attack();
+
+    MP_SetSpeed();
 }
 
 

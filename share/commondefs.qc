@@ -37,6 +37,7 @@ var struct {
     float clown_flags;
     float clown_grav;
 
+    float predict_flags;
     float tfx_flags;
 
     float wp_global_enable;
@@ -54,18 +55,21 @@ enumflags {
     REWIND_GRENADES,
     REWIND_FORWARD_DOORS,
     REWIND_FORWARD_PROJ_SELFKNOCK,
+    REWIND_SETSPEED,
 };
 
 string REWIND_DESC[] = {
     "rewind pipe knockback",
     "rewind projectile hit",
     "rewind grenade throws",
-    "open doors earlier for hpbs [requires rfd=1]",
     "forward projectile self-knockback",
+    "open doors earlier for hpbs [requires rfd=1]",
+    "allow csqc to handle maxspeed"
 };
 
 const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
-                                   REWIND_FORWARD_PROJ_SELFKNOCK;
+                                   REWIND_FORWARD_PROJ_SELFKNOCK |
+                                   REWIND_SETSPEED;
 
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;
@@ -104,6 +108,20 @@ float TFxEnabled(float flag) {
 const float TFX_DEFAULT_FLAGS =
         TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG |
         TFX_PREMATCH_EVERYTHING;
+
+enum CSQCFlags {
+    PREDICT_CSQC_SETSPEED,
+};
+
+string PREDICTF_DESC[] = {
+    "allow csqc to handle maxspeed"
+};
+
+inline float PredictEnabled(float flag) {
+    return fo_config.predict_flags & flag;
+};
+
+const float PREDICT_FLAGS_DEFAULT = 0;
 
 enumflags {
     CLOWN_FAST_PROJECTILES,

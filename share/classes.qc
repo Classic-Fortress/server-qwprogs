@@ -77,3 +77,19 @@ void WeapPred_FireAssCan(vector vangle, float shotcount,
         FO_FireAssCanPellet(org, spread_dir, var_speed, i);
     }
 }
+
+float Class_MaxSpeed(float playerclass) {
+    switch (playerclass) {
+        case PC_SCOUT: return PC_SCOUT_MAXSPEED;
+        case PC_SNIPER: return PC_SNIPER_MAXSPEED;
+        case PC_SOLDIER: return PC_SOLDIER_MAXSPEED;
+        case PC_DEMOMAN: return PC_DEMOMAN_MAXSPEED;
+        case PC_MEDIC: return PC_MEDIC_MAXSPEED;
+        case PC_HVYWEAP: return PC_HVYWEAP_MAXSPEED;
+        case PC_PYRO: return PC_PYRO_MAXSPEED;
+        case PC_SPY: return PC_SPY_MAXSPEED;
+        case PC_ENGINEER: return PC_ENGINEER_MAXSPEED;
+        case PC_CIVILIAN: return PC_CIVILIAN_MAXSPEED;
+        default: return 0;
+    }
+}

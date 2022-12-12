@@ -138,8 +138,7 @@ float remote_client_time();
 .float items_allowed;
 .float armor_allowed;
 .float maxarmor;
-.float maxfbspeed;              // Maximum forward/back speed
-.float maxstrafespeed;          // Maximum side speed
+.float csqc_maxspeed;
 
 .float is_disarming;
 .float motd;                    // Used to display MOTD
