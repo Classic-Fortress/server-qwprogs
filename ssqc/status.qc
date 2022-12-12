@@ -874,17 +874,12 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
         case PC_SNIPER:
-            float dam, max;
+            float dam;
             dam = 0;
-            max = FALSE;
             if (sniperpower)
-            {
                 dam = pl.heat;
-                max = pl.power_full;
-            }
-            
+
             WriteFloat(MSG_MULTICAST, dam);
-            WriteFloat(MSG_MULTICAST, max);
             break;
         case PC_DEMOMAN:
             WriteFloat(MSG_MULTICAST, pl.is_detpacking);
@@ -988,7 +983,7 @@ void UpdateClientStatusBar(entity pl)
                     {
                         WriteFloat(MSG_MULTICAST, disp.health);
                     }
-                    disp = find(disp, classname, "building_dispenser");
+                    disp = find(disp, classname, "building_d0; //ispenser");
                 }
             }
             break;
@@ -1404,9 +1399,8 @@ string(entity pl) SniperPowerToString =
         st = Q"\spower\s: ";
         st = strcat(st, ftos(pl.heat));
         st = strcat(st, " dmg");
-        if (pl.power_full) {
+        if (pl.heat == PC_SNIPER_MAXDAM)
             st = strcat(st, " (max)");
-        }
     }
 
     return st;

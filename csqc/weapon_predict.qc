@@ -1,13 +1,14 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
+DEFCVAR_FLOAT(fo_client_sniper_sight, 1);
+
 DEFCVAR_FLOAT(wpp_min_ping, -1);
 DEFCVAR_FLOAT(wpp_weap_predict, -1);
 DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
 DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
 DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
-
 DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 struct pengine_t {
@@ -38,6 +39,18 @@ float WP_MinPing() {
 }
 
 void WP_UpdateViewModel();
+
+inline float interp_ms() {
+    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
+}
+
+inline float interp_dt() {
+    return interp_ms() / 1000.0;
+}
+
+inline float interp_time() {
+    return time + interp_dt();
+}
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -264,7 +277,6 @@ void WPP_UpdateEnable(float force) {
     }
     once = TRUE;
 
-
     float wpp_status = 0;
     if (pengine.wp_enabled) {
         wpp_status |= CSQC_WEAP_PRED;
@@ -272,6 +284,8 @@ void WPP_UpdateEnable(float force) {
             wpp_status |= CSQC_PROJ_PRED;
         if (CVARF(wpp_setspeed))
             wpp_status |= CSQC_SETSPEED;
+        if (CVARF(fo_client_sniper_sight))
+            wpp_status |= CSQC_SNIPER_SIGHT;
     }
 
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
@@ -540,6 +554,75 @@ static void WP_HandleHeavyInputs() {
         pstate_pred.impulse = 0;
 }
 
+struct {
+    float start_seq;
+    entity sight;
+    float sight_modelindex;
+} SniperState;
+
+static void WP_InitSniper() {
+    entity sight = spawn();
+    sight.solid = SOLID_NOT;
+    sight.drawmask = 0;
+    float index = getmodelindex("progs/sight.spr");
+    setmodelindex(sight, index);
+
+    SniperState.sight = sight;
+}
+
+float WP_SniperCharge() {
+    if (!WP_Enabled())
+        return SBAR.SniperDam;
+
+    if (!SniperState.start_seq)
+        return 0;
+
+    float heat = 50 + (pstate_pred.seq - SniperState.start_seq) * 3;
+    return min(PC_SNIPER_MAXDAM, heat);
+}
+
+static void WP_Sniper_UpdateSight() {
+    if (pstate_pred.playerclass != PC_SNIPER || !CVARF(fo_client_sniper_sight) ||
+        (pstate_pred.tfstate & TFSTATE_AIMING == 0)) {
+        SniperState.sight.drawmask = 0;
+        return;
+    }
+
+    SniperState.sight.drawmask = MASK_ENGINE;
+    vector org = pmove_org + v_forward * 10;
+    org.z += PLAYER_MINS.z - 1 + (PLAYER_MAXS.z - PLAYER_MINS.z) * 0.7;
+    traceline(org, org + v_forward * 9192, MOVE_NORMAL, 0);
+    setorigin(SniperState.sight, trace_endpos);
+}
+
+static float WP_Sniper_IsAttack() {
+    float aiming = pstate_pred.tfstate & TFSTATE_AIMING;
+
+    // Just box these out up front
+    if (pstate_pred.client_time < pstate_pred.attack_finished ||
+        !WP_GetAmmo(AMMO_SHELLS))
+        return FALSE;
+
+    if (pstate_pred.buttons_held & BUTTON0) {
+        // Start charging when possible/necessary.
+        if (!aiming && pmove_onground && vlen(pmove_vel) <= 50) {
+            pstate_pred.tfstate |= TFSTATE_AIMING;
+            SniperState.start_seq = pstate_pred.seq;
+        }
+        return FALSE;
+    } else if (pstate_pred.buttons_up & BUTTON0) {
+        pstate_pred.tfstate &= ~TFSTATE_AIMING;
+        SniperState.start_seq = 0;
+
+        if (aiming && pmove_onground && IsEffectFrame())
+            printf("C attack at it=%0.3f t=%0.3f\n", interp_time(), time);
+        // Can fire iff already aiming and on ground
+        return (aiming && pmove_onground);
+    } else {
+        return FALSE;
+    }
+}
+
 void W_ThrowGren(float is_throw);
 
 static void HandleButtonThrowgren(float index, float button) {
@@ -558,7 +641,6 @@ static void HandleButtonThrowgren(float index, float button) {
 float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 
-float interp_time();
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
@@ -783,6 +865,7 @@ void WP_AnimateModel() {
         case WEAP_RAILGUN:
         case WEAP_SHOTGUN:
         case WEAP_SUPER_SHOTGUN:
+        case WEAP_SNIPER_RIFLE:
             player_shotN(); break;
 
         case WEAP_FLAMETHROWER:
@@ -892,10 +975,19 @@ void WP_Frame() {
     WP_Impulse();
     W_ThrowGren(FALSE);
 
-    if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
-        (pstate_pred.client_time >= pstate_pred.attack_finished))
+    float is_attack = 0;
+
+    if (pstate_pred.playerclass != PC_SNIPER)
+        is_attack = ((input_buttons & BUTTON0) &&
+                     (pstate_pred.client_time >= pstate_pred.attack_finished) &&
+                     !WP_IsReloading());
+    else
+        is_attack = WP_Sniper_IsAttack();
+
+    if (is_attack)
         WP_Attack();
 
+    WP_Sniper_UpdateSight();
     MP_SetSpeed();
 }
 
@@ -928,18 +1020,6 @@ trail_table_entry trail_table[] = {
     {{"TR_VORESPIKE" }},
     {{"TE_RAILTRAIL"}},
 };
-
-inline float interp_ms() {
-    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
-}
-
-inline float interp_dt() {
-    return interp_ms() / 1000.0;
-}
-
-inline float interp_time() {
-    return time + interp_dt();
-}
 
 float get_phys_time_nudge_dt(entity e) {
     if (!is_player)
@@ -1326,6 +1406,7 @@ void WP_Attack() {
 
             case WEAP_SHOTGUN: Pred_Sound(SND_SG); break;
             case WEAP_SUPER_SHOTGUN: Pred_Sound(SND_SSG); break;
+            case WEAP_SNIPER_RIFLE: Pred_Sound(SND_SNIPER_RIFLE); break;
         }
     }
 
@@ -1535,6 +1616,8 @@ float WP_ClientThink() {
 }
 
 void InitWeapPredEnt(entity pe) {
+    WP_InitSniper();
+
     pe.predraw = WP_ClientThink;
     pengine.pweap_ent = pe;
     pe.drawmask = MASK_PRED_ENT;

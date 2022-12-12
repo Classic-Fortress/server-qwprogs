@@ -430,7 +430,6 @@ void ParseSBAR()
             break;
         case PC_SNIPER:
             SBAR.SniperDam = readfloat();
-            SBAR.SniperMax = readfloat();
             break;
         case PC_DEMOMAN:
             SBAR.IsDetpacking = readfloat();

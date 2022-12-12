@@ -941,6 +941,8 @@ enumflags {
 #define PC_SNIPER_GRENADE_MAX_2	        4
 #define PC_SNIPER_TF_ITEMS		0
 
+#define PC_SNIPER_MAXDAM		401
+
 // Class Details for SOLDIER
 #define PC_SOLDIER_SKIN			6
 #define PC_SOLDIER_MAXHEALTH		100

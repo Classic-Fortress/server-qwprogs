@@ -843,7 +843,7 @@ void () W_FireSniperRifle = {
     local vector h;
     dir = '0 0 0';
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SNIPER_RIFLE);
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
 
@@ -2698,15 +2698,12 @@ void () W_WeaponFrame = {
     if (self.button0) {
         if (FO_CurrentWeapon() == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
-                if (self.heat < 400) {
-                    self.heat = self.heat + 3;
+                if (self.heat < PC_SNIPER_MAXDAM) {
+                    self.heat = max(self.heat + 3, PC_SNIPER_MAXDAM);
                     if ((sniperpower) && (self.power_time < (time - 0.3))) {
                         self.power_time = time;
                         Status_Refresh(self);
                     }
-                } else if ((sniperpower) && (!self.power_full)) {
-                    self.power_full = 1;
-                    Status_Refresh(self);
                 }
             } else {
                 local vector tv = self.velocity;
@@ -2715,7 +2712,6 @@ void () W_WeaponFrame = {
                     SniperSight_Create();
                     self.heat = 50;
                     self.tfstate |= TFSTATE_AIMING;
-                    self.power_full = 0;
                 }
             }
         } else if (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON) {
@@ -2734,6 +2730,7 @@ void () W_WeaponFrame = {
         W_Attack();
         self.tfstate &= ~TFSTATE_AIMING;
         self.heat = 0;
+        printf("S attack at %0.3f\n", time);
     }
 };
 

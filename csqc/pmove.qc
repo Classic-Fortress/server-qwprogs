@@ -1,8 +1,5 @@
 DEFCVAR_FLOAT(fo_jumpvolume, 1);
 
-const vector PLAYER_MINS = [-16, -16, -24];
-const vector PLAYER_MAXS = [16, 16, 32];
-
 inline float CSQC_JumpSounds_Active() {
     return CVARF(fo_csjumpsounds);
 }

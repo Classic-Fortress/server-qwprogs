@@ -40,6 +40,7 @@ enumflags {
     CSQC_WEAP_PRED,
     CSQC_PROJ_PRED,
     CSQC_SETSPEED,
+    CSQC_SNIPER_SIGHT,
 };
 
 struct predict_tf_state {
@@ -88,6 +89,7 @@ enum SoundIndex:float {
     SND_FLAMETHROWER,
     SND_RAILGUN,
     SND_TRANQ,
+    SND_SNIPER_RIFLE,
     SND_ASSCAN_UP,
     SND_ASSCAN_FIRE,
     SND_ASSCAN_DOWN,
@@ -111,6 +113,7 @@ static fo_predsnd snd_types[] = {
     { SND_FLAMETHROWER, "flmfire2.wav" },
     { SND_RAILGUN, "railgun.wav" },
     { SND_TRANQ, "dartgun.wav" },
+    { SND_SNIPER_RIFLE, "sniper.wav" },
     { SND_ASSCAN_UP, "asscan1.wav" },
     { SND_ASSCAN_FIRE, "asscan2.wav" },
     { SND_ASSCAN_DOWN, "asscan3.wav" },
@@ -278,7 +281,6 @@ float FO_MaxRewindGrenWinDt() {
 inline float ClientPred_Enabled(entity client, float pred_flag) {
     return infokeyf(client, "fo_wpp_status") & pred_flag;
 }
-
 #else
 
 predict_tf_state pstate_pred, pstate_server;

@@ -109,7 +109,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_MEDIKIT,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
     { WEAP_SPANNER,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
     { WEAP_AXE,              PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
-    { WEAP_SNIPER_RIFLE,     NO_PREDICT, AMMO_SHELLS, -9, 1,  1.5,  4 },
+    { WEAP_SNIPER_RIFLE,     PRED_MODEL, AMMO_SHELLS, -9, 1,  1.5,  4 },
     { WEAP_AUTO_RIFLE,       PRED_MODEL, AMMO_SHELLS,  0, 1,  0.1,  0 },
     { WEAP_SHOTGUN,          PRED_MODEL, AMMO_SHELLS,  8, 1,  0.5,  2 },
     { WEAP_SUPER_SHOTGUN,    PRED_MODEL, AMMO_SHELLS, 16, 2,  0.7,  3 },

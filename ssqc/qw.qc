@@ -102,7 +102,6 @@ float remote_client_time();
 .float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
-.float power_full;              // Whether sniper power has reached full power or not
 .float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
 .float dispenser_ticks;         // Used to indicate when engineer's dispenser is finished building
 .float building_percentage;     // The building percentage shown in status bar

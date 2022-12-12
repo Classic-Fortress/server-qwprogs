@@ -1249,6 +1249,7 @@ void (entity p) TeamFortress_SetSpeed = {
     float tf;
     entity te;
 
+    float oldmax = self.maxspeed;
     stuffcmd(p, "cl_movespeedkey 1\n");
     if (p.tfstate & TFSTATE_CANT_MOVE) {
 #ifdef STOP_MOUSE_MOVEMENT
