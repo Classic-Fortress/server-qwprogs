@@ -2730,7 +2730,6 @@ void () W_WeaponFrame = {
         W_Attack();
         self.tfstate &= ~TFSTATE_AIMING;
         self.heat = 0;
-        printf("S attack at %0.3f\n", time);
     }
 };
 

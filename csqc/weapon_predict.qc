@@ -613,9 +613,6 @@ static float WP_Sniper_IsAttack() {
     } else if (pstate_pred.buttons_up & BUTTON0) {
         pstate_pred.tfstate &= ~TFSTATE_AIMING;
         SniperState.start_seq = 0;
-
-        if (aiming && pmove_onground && IsEffectFrame())
-            printf("C attack at it=%0.3f t=%0.3f\n", interp_time(), time);
         // Can fire iff already aiming and on ground
         return (aiming && pmove_onground);
     } else {
