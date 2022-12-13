@@ -1,0 +1,37 @@
+The status bar shows TF-specific info, and it works in different ways depending on the client:
+For fte, it will detect that csqc is active and send messages directly to the csqc part of the client to display individual HUD icons and statuses.
+For ezquake (and basically everything else), it will use a centerprint hack to permanently display the status bar.
+
+It can be enabled using the client setting
+    setinfo sb 40
+(or any positive integer). The integer is relevant for the non-fte version, as it dictates how many empty "lines" to skip before drawing it, thus allowing basic control of its veritcal position.
+
+A specific sub-component can be enabled using the command
+    setinfo sbflaginfo 1|2
+Setting it to 0 will turn it off, setting it to 1 will enable it, but only 6 seconds after spawn (after the class tips finish displaying) and a setting of 2 will make it permanent.
+
+The sb flaginfo will display the current status of any flags/item_tfgoals that have been tagged by the mapper. The logic is the same as the stock "flaginfo" command, which is marking up to 4 goalitems in the info_tfdetect
+entity using the fields display_item_status1 - display_item_status4 using the items' goal_no numbers. This is further documented in the tf reference docs.
+This does limit the number of trackable items to 4 however.
+The flaginfo functionality is extended by having it also display who it's currenly carried by, or, if dropped, the location (based on the loc file) and time to return.
+Note that currently, the item names are hard-coded to be "blue/red/yellow/green flag", to cover most cases, where mappers didn't necessarily name them nicely.
+
+The sb flaginfo component also displays the "button" countdowns (such as lasers/security being down), if available, and there is room.
+This functions in a similar way to the flag info, but, while technically unlimited, 
+the combined number of all sbar items (flags and buttons) is 10 for fte and 6 for ezquake.
+For ezquake, the buttons will be distinguished by name, and will not appear until they are actually triggered and have a countdown active.
+For fte, the buttons are distinguished by team colours and will display a different icon to the flag, but otherwise function similarly.
+
+For a map to allow these to be tracked, the following needs to be set for each button:
+- It must be set on an info_tfgoal entity
+- It must have the field "track_goal" be set to 1
+- It must have a "goal_no" field set
+- It must have the field "delay_time" set to the countdown time
+- It must be triggered at the start of the countdown either via goal_no or targetname. It doesn't have to be part of the main trigger chain however.
+- For ezquake, it must have a "netname" field set to distinguish the goals.
+- For FTE, it should have the "owned_by" field set which will determine the icon colour.
+- Optionally, it can have the field "team_str_moved" set to set a custom string to be displayed while the countdown is active. If not set, the default is "Offline". 
+
+For FTE, the icons for the above are in the same location as the normal hud elements:
+ie fortress/textures/wad/
+They are named "flag_<teamno>" for the flag icons and "off_icon_glow_<teamno>" for the button icons.

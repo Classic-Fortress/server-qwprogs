@@ -1,0 +1,84 @@
+#pragma target fte_5768
+#pragma optimise 3
+#pragma flag enable subscope
+#pragma flag enable iffloat
+#pragma flag enable lo
+
+#pragma progs_dat "../qwprogs.dat"
+
+#define QWSSQC
+
+#includelist
+../share/fteextensions.qc
+../share/debug.qc
+defs.qc
+../share/commondefs.qc
+../share/common_helpers.qc
+qw.qc
+debug.qc
+time.qc
+../share/defs.h
+../share/physics.qc
+../share/weapons.qc
+../share/prediction.qc
+../share/classes.qc
+../share/animate.qc
+events.qc
+roles.qc
+q3defs.qc
+status.qc
+functions.qc
+menu.qc
+csmenu.qc
+../share/common_vote.qc
+vote.qc
+extraents.qc
+help.qc
+subs.qc
+items.qc
+locfiles.qc
+rewind.qc
+combat.qc
+weapons.qc
+world.qc
+client.qc
+player.qc
+doors.qc
+buttons.qc
+triggers.qc
+tforttm.qc
+plats.qc
+misc.qc
+monsters.qc
+flare.qc
+sentry.qc
+boss.qc
+admin.qc
+scout.qc
+sniper.qc
+tsoldier.qc
+demoman.qc
+medic.qc
+hwguy.qc
+pyro.qc
+spy.qc
+engineer.qc
+camera.qc
+clan.qc
+quadmode.qc
+tfort.qc
+tforthlp.qc
+tfortmap.qc
+login.qc
+commands.qc
+ctf.qc
+coop.qc
+actions.qc
+spect.qc
+q3.qc
+mvdsv.qc
+rotate.qc
+fo_logic.qc
+fo_math.qc
+fo_misc_info.qc
+#endlist
