@@ -828,16 +828,16 @@ void Hud_DrawClassInfoPanel(float playerclass)
                 }
                 break;
             case PC_SNIPER:
-                if (SBAR.SniperDam)
+                float sniper_dam = WP_SniperCharge();
+                if (sniper_dam)
                 {
                     icon = ICON_SNIPER; //HudIcons[playerclass+6].icon;
                     HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-                    msg = strcat("Dam: ", ftos(SBAR.SniperDam));
+                    msg = strcat("Dam: ", ftos(sniper_dam));
                     pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                     
-                    if (SBAR.SniperMax)
-                    {
+                    if (sniper_dam == PC_SNIPER_MAXDAM) {
                         msg = "(100%)";
                         colour = '1 0 0';
                         HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);

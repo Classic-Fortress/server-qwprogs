@@ -1245,10 +1245,11 @@ float (float pc) IsLegalClass = {
 };
 
 void (entity p) TeamFortress_SetSpeed = {
-    local string sp;
-    local float tf;
-    local entity te;
+    string sp;
+    float tf;
+    entity te;
 
+    float oldmax = self.maxspeed;
     stuffcmd(p, "cl_movespeedkey 1\n");
     if (p.tfstate & TFSTATE_CANT_MOVE) {
 #ifdef STOP_MOUSE_MOVEMENT
@@ -1268,84 +1269,47 @@ void (entity p) TeamFortress_SetSpeed = {
         stuffcmd(p, "m_side 0.8\n");
     }
 #endif
-    if (p.playerclass == PC_SCOUT) {
-        p.maxfbspeed = PC_SCOUT_MAXSPEED;
-        p.maxstrafespeed = PC_SCOUT_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SNIPER) {
-        p.maxfbspeed = PC_SNIPER_MAXSPEED;
-        p.maxstrafespeed = PC_SNIPER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SOLDIER) {
-        p.maxfbspeed = PC_SOLDIER_MAXSPEED;
-        p.maxstrafespeed = PC_SOLDIER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_DEMOMAN) {
-        p.maxfbspeed = PC_DEMOMAN_MAXSPEED;
-        p.maxstrafespeed = PC_DEMOMAN_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_MEDIC) {
-        if (medic_type == MEDIC_TYPE_BLAST) {
-            p.maxfbspeed = PC_BLASTMEDIC_MAXSPEED;
-            p.maxstrafespeed = PC_BLASTMEDIC_MAXSTRAFESPEED;
-        } else {
-            p.maxfbspeed = PC_MEDIC_MAXSPEED;
-            p.maxstrafespeed = PC_MEDIC_MAXSTRAFESPEED;
-        }
-    } else if (p.playerclass == PC_HVYWEAP) {
-        p.maxfbspeed = PC_HVYWEAP_MAXSPEED;
-        p.maxstrafespeed = PC_HVYWEAP_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_PYRO) {
-        p.maxfbspeed = PC_PYRO_MAXSPEED;
-        p.maxstrafespeed = PC_PYRO_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_CIVILIAN || votemode) {
-        p.maxfbspeed = PC_CIVILIAN_MAXSPEED;
-        p.maxstrafespeed = PC_CIVILIAN_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_SPY) {
-        p.maxfbspeed = PC_SPY_MAXSPEED;
-        p.maxstrafespeed = PC_SPY_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_ENGINEER) {
-        p.maxfbspeed = PC_ENGINEER_MAXSPEED;
-        p.maxstrafespeed = PC_ENGINEER_MAXSTRAFESPEED;
-    } else if (p.playerclass == PC_UNDEFINED) {
-        //      p.maxfbspeed = 320;
-        //      p.maxstrafespeed = 320;
-        p.maxfbspeed = 0;
-        p.maxstrafespeed = 0;
-        p.maxspeed = 0;
-        return;
-    }
+    float new_max = Class_MaxSpeed(p.playerclass);
+
     tf = 0;
     te = find(world, classname, "item_tfgoal");
     while ((te != world) && (tf == 0)) {
         if (te.owner == p) {
             if (te.goal_activation & TFGI_SLOW) {
                 tf = 1;
-                p.maxfbspeed = p.maxfbspeed / 2;
-                p.maxstrafespeed = p.maxstrafespeed / 2;
+                new_max /= 2;
             }
         }
         te = find(te, classname, "item_tfgoal");
     }
-    if (p.tfstate & TFSTATE_TRANQUILISED) {
-        p.maxfbspeed = p.maxfbspeed / 2;
-        p.maxstrafespeed = p.maxstrafespeed / 2;
+
+    if (p.tfstate & TFSTATE_TRANQUILISED)
+        new_max /= 2;
+
+    if (p.leg_damage)
+        new_max *= (10 - min(p.leg_damage, 6)) / 10;
+
+    float client_enable = ClientPred_Enabled(p, CSQC_SETSPEED);
+
+    // When the client is co-operating (and enabled), allow it to handle
+    // TFSTATE_AIMING transitions due to the frequent edges here and negative
+    // maxspeed/pmove interaction (bounds client prediction until maxspeed makes
+    // it to client, even though released on unpredicted earlier frame, leading
+    // to lots of skipping).
+    if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable)
+        if (p.tfstate & TFSTATE_AIMING)
+            new_max = min(new_max, 80);
+
+    if (!client_enable) {
+        // It's possible to set the client-enable without REWIND_SETSPEED,
+        // they'll just skip more.
+        sp = ftos(new_max);
+        stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
+                 "; cl_sidespeed ", sp, "\n");
     }
-    if (p.leg_damage) {
-        if (p.leg_damage > 6) {
-            p.leg_damage = 6;
-        }
-        p.maxfbspeed = p.maxfbspeed * (10 - p.leg_damage) / 10;
-        p.maxstrafespeed = p.maxstrafespeed * (10 - p.leg_damage) / 10;
-    }
-    if (p.tfstate & TFSTATE_AIMING) {
-        if (p.maxfbspeed > 80) {
-            p.maxfbspeed = 80;
-        }
-        if (p.maxstrafespeed > 80) {
-            p.maxstrafespeed = 80;
-        }
-    }
-    sp = ftos(p.maxfbspeed);
-    stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
-                "; cl_sidespeed ", sp, "\n");
-    p.maxspeed = p.maxfbspeed;
+
+    p.maxspeed = new_max;
+    p.csqc_maxspeed = new_max;  // Always set, need populated on transition.
 };
 
 void () TeamFortress_SetHealth = {
@@ -2941,7 +2905,7 @@ void () TeamFortress_CheckforCheats = {
     vf_z = 0;
     vf = normalize(vf);
     tf = vplf_x * vf_x + vplf_y * vf_y;
-    pf = self.owner.maxfbspeed + 100;
+    pf = self.owner.maxspeed + 100;
 
     if ((self.owner.tfstate & TFSTATE_CANT_MOVE) && (tf > 20)) {
         self.nextthink = time + 0.5;

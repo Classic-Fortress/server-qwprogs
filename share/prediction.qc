@@ -39,6 +39,8 @@ enumflags {
 enumflags {
     CSQC_WEAP_PRED,
     CSQC_PROJ_PRED,
+    CSQC_SETSPEED,
+    CSQC_SNIPER_SIGHT,
 };
 
 struct predict_tf_state {
@@ -49,6 +51,7 @@ struct predict_tf_state {
 
     float tfstate;
     float last_prime;
+    float csqc_maxspeed;
 
     float client_time;
     float client_ping;
@@ -86,6 +89,7 @@ enum SoundIndex:float {
     SND_FLAMETHROWER,
     SND_RAILGUN,
     SND_TRANQ,
+    SND_SNIPER_RIFLE,
     SND_ASSCAN_UP,
     SND_ASSCAN_FIRE,
     SND_ASSCAN_DOWN,
@@ -109,6 +113,7 @@ static fo_predsnd snd_types[] = {
     { SND_FLAMETHROWER, "flmfire2.wav" },
     { SND_RAILGUN, "railgun.wav" },
     { SND_TRANQ, "dartgun.wav" },
+    { SND_SNIPER_RIFLE, "sniper.wav" },
     { SND_ASSCAN_UP, "asscan1.wav" },
     { SND_ASSCAN_FIRE, "asscan2.wav" },
     { SND_ASSCAN_DOWN, "asscan3.wav" },
@@ -273,6 +278,9 @@ float FO_MaxRewindGrenWinDt() {
 .predict_tf_state predict_state;
 .entity predict_entity;
 
+inline float ClientPred_Enabled(entity client, float pred_flag) {
+    return infokeyf(client, "fo_wpp_status") & pred_flag;
+}
 #else
 
 predict_tf_state pstate_pred, pstate_server;
@@ -308,7 +316,7 @@ static float Prediction_ChangedMask(entity player) {
 
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
-    M1(FOWP_TFSTATE, tfstate);
+    M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
@@ -336,7 +344,7 @@ static float Prediction_ChangedMask(entity player) {
 #undef M4
 
 void sprint_pred(entity client, float msglevel, string s) {
-    if (infokeyf(client, "fo_wpp_status") & CSQC_WEAP_PRED)
+    if (ClientPred_Enabled(client, CSQC_WEAP_PRED))
         return;  // Message generated client-side.
     sprint(client, msglevel, s);
 }
@@ -440,6 +448,7 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_TFSTATE) {
         COMM(Float, tfstate);
+        COMM(Short, csqc_maxspeed);
     }
 
     if (sendflags & FOWP_LASTPRIME) {
@@ -726,7 +735,7 @@ void Pred_Sound(SoundIndex snd, float vol = 1) {
     entity target = self;
     string wav = snd_types[snd].sound;
 
-    if (infokeyf(self, "fo_wpp_status") & CSQC_WEAP_PRED == 1) {
+    if (ClientPred_Enabled(self, CSQC_WEAP_PRED)) {
         target = self.predict_entity;
         setorigin(target, self.origin);
     }

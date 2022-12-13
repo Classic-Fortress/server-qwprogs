@@ -545,8 +545,8 @@ void () DecodeLevelParms = {
         // allow scout dash [on]
         scoutdash = CF_GetSetting("sd", "scoutdash", "on");
 
-        // enable sniper rifle reload [on]
-        sniperreload = CF_GetSetting("sr", "sniperreload", "on");
+        // enable sniper rifle reload [off]
+        sniperreload = CF_GetSetting("sr", "sniperreload", "off");
 
         // spawn with full ammo/armor [off]
         spawnfull = CF_GetSetting("sf", "spawnfull", "off");

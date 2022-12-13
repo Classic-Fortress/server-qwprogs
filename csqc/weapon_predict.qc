@@ -1,12 +1,15 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
+DEFCVAR_FLOAT(fo_client_sniper_sight, 1);
+
 DEFCVAR_FLOAT(wpp_min_ping, -1);
 DEFCVAR_FLOAT(wpp_weap_predict, -1);
 DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
 DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
 DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
+DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 struct pengine_t {
     float pp_enabled;
@@ -36,6 +39,18 @@ float WP_MinPing() {
 }
 
 void WP_UpdateViewModel();
+
+inline float interp_ms() {
+    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
+}
+
+inline float interp_dt() {
+    return interp_ms() / 1000.0;
+}
+
+inline float interp_time() {
+    return time + interp_dt();
+}
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -138,6 +153,21 @@ void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocal
     printf(" ." #_field " = %d\n", fo_config.##_field)
 #define PRINT_CONFIG_ACTIVE(_field) \
     if (fo_config.##_field) printf(" ." #_field " = %d\n", fo_config.##_field)
+
+static void PrintFlagField(string desc, float bits, float nbits,
+                           string* bit_desc) {
+    if (!bits)
+        return;
+
+    printf(desc, bits);
+    for (float i = 0; i < nbits; i++) {
+        float flag = 1 << i;
+        string enabled = (bits & flag) ? "on" : "off";
+        printf(" %3d [%-3s]: %s\n", flag, enabled, bit_desc[i]);
+    }
+    printf("\n");
+}
+
 void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
@@ -163,17 +193,8 @@ void WPP_Status() {
             ping, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
+    printf(" maxspeed = %d\n", pstate_server.csqc_maxspeed);
     printf("\n");
-
-    if (fo_config.tfx_flags) {
-        printf("TFX [tfx_flags=%d]\n", fo_config.tfx_flags);
-        for (float i = 0; i < TFX_DESC.length; i++) {
-            float flag = 1 << i;
-            printf(" %2d [%-3s]: .%s\n", flag, TFxEnabled(flag) ? "on": "off",
-                    TFX_DESC[i]);
-        }
-        printf("\n");
-    }
 
     printf("Config:\n");
     PRINT_CONFIG(min_ping_ms);
@@ -188,15 +209,6 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
-    printf("\n");
-
-    printf("Rewind Settings [rewind_flags=%d]:\n", fo_config.rewind_flags);
-    for (float i = 0; i < REWIND_DESC.length; i++) {
-        float flag = 1 << i;
-        printf(" %2d [%-3s]: .%s\n", flag,
-               RewindFlagEnabled(flag) ?  "on": "off", REWIND_DESC[i]);
-    }
-
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
@@ -204,18 +216,14 @@ void WPP_Status() {
     PRINT_CONFIG(rewind_fast_projectile_thresh);
     printf("\n");
 
-    if (!fo_config.clown_flags)
-        return;
+    PrintFlagField("Rewind Settings [rewind_flags=%d]\n",
+                   fo_config.rewind_flags, REWIND_DESC.length, REWIND_DESC);
 
-    printf("Clown mode [clown_flags=%d]:\n", fo_config.clown_flags);
-    for (float i = 0; i < CLOWN_DESC.length; i++) {
-        float flag = 1 << i;
-        printf(" %2d [%-3s]: .%s", flag,
-                (fo_config.clown_flags & flag) ? "on": "off", CLOWN_DESC[i]);
-        if (flag == CLOWN_PROJ_GRAVITY)
-            printf(" (clown_grav=%d)", fo_config.clown_grav);
-        printf("\n");
-    }
+    PrintFlagField("TFX [tfx_flags=%d]:\n", fo_config.tfx_flags,
+                   TFX_DESC.length, TFX_DESC);
+
+    PrintFlagField("Clown mode [clown_flags=%d]\n",
+                   fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
 }
 #undef PRINT_CONFIG
 
@@ -269,9 +277,17 @@ void WPP_UpdateEnable(float force) {
     }
     once = TRUE;
 
+    float wpp_status = 0;
+    if (pengine.wp_enabled) {
+        wpp_status |= CSQC_WEAP_PRED;
+        if (pengine.pp_enabled)
+            wpp_status |= CSQC_PROJ_PRED;
+        if (CVARF(wpp_setspeed))
+            wpp_status |= CSQC_SETSPEED;
+        if (CVARF(fo_client_sniper_sight))
+            wpp_status |= CSQC_SNIPER_SIGHT;
+    }
 
-    float wpp_status = (pengine.wp_enabled ? CSQC_WEAP_PRED : 0) +
-                       (pengine.pp_enabled ? CSQC_PROJ_PRED : 0);
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.
     pengine.view_mask = MASK_PRED_ENT | MASK_VIEWMODEL |
@@ -538,6 +554,75 @@ static void WP_HandleHeavyInputs() {
         pstate_pred.impulse = 0;
 }
 
+struct {
+    float start_seq;
+    entity sight;
+    float sight_modelindex;
+} SniperState;
+
+static void WP_InitSniper() {
+    entity sight = spawn();
+    sight.solid = SOLID_NOT;
+    sight.drawmask = 0;
+    float index = getmodelindex("progs/sight.spr");
+    setmodelindex(sight, index);
+
+    SniperState.sight = sight;
+}
+
+float WP_SniperCharge() {
+    if (!WP_Enabled())
+        return SBAR.SniperDam;
+
+    if (!SniperState.start_seq)
+        return 0;
+
+    float heat = 50 + (pstate_pred.seq - SniperState.start_seq) * 3;
+    return min(PC_SNIPER_MAXDAM, heat);
+}
+
+static void WP_Sniper_UpdateSight() {
+    if (pstate_pred.playerclass != PC_SNIPER || !CVARF(fo_client_sniper_sight) ||
+        (pstate_pred.tfstate & TFSTATE_AIMING == 0)) {
+        SniperState.sight.drawmask = 0;
+        return;
+    }
+
+    SniperState.sight.drawmask = MASK_ENGINE;
+    vector org = pmove_org + v_forward * 10;
+    org.z += PLAYER_MINS.z - 1 + (PLAYER_MAXS.z - PLAYER_MINS.z) * 0.7;
+    traceline(org, org + v_forward * 9192, MOVE_NORMAL, 0);
+    setorigin(SniperState.sight, trace_endpos);
+}
+
+static float WP_Sniper_IsAttack() {
+    float aiming = pstate_pred.tfstate & TFSTATE_AIMING;
+
+    // Just box these out up front
+    if (pstate_pred.client_time < pstate_pred.attack_finished ||
+        !WP_GetAmmo(AMMO_SHELLS))
+        return FALSE;
+
+    if (pstate_pred.buttons_held & BUTTON0) {
+        // Start charging when possible/necessary.
+        if (!aiming && pmove_onground && vlen(pmove_vel) <= 50) {
+            pstate_pred.tfstate |= TFSTATE_AIMING;
+            SniperState.start_seq = pstate_pred.seq;
+        }
+        return FALSE;
+    } else if (pstate_pred.buttons_up & BUTTON0) {
+        pstate_pred.tfstate &= ~TFSTATE_AIMING;
+        SniperState.start_seq = 0;
+
+        if (aiming && pmove_onground && IsEffectFrame())
+            printf("C attack at it=%0.3f t=%0.3f\n", interp_time(), time);
+        // Can fire iff already aiming and on ground
+        return (aiming && pmove_onground);
+    } else {
+        return FALSE;
+    }
+}
+
 void W_ThrowGren(float is_throw);
 
 static void HandleButtonThrowgren(float index, float button) {
@@ -556,7 +641,6 @@ static void HandleButtonThrowgren(float index, float button) {
 float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 
-float interp_time();
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
@@ -781,6 +865,7 @@ void WP_AnimateModel() {
         case WEAP_RAILGUN:
         case WEAP_SHOTGUN:
         case WEAP_SUPER_SHOTGUN:
+        case WEAP_SNIPER_RIFLE:
             player_shotN(); break;
 
         case WEAP_FLAMETHROWER:
@@ -824,33 +909,53 @@ void WPP_Dump() {
 
 void WP_Attack();
 
+DEFCVAR_FLOAT(cl_forwardspeed, 0);
+DEFCVAR_FLOAT(cl_backspeed, 0);
+DEFCVAR_FLOAT(cl_sidespeed, 0);
+
 void MP_SetSpeed() {
-#if 0
-    // This wants ping correction to not be a punishment...
-    static float prev_state;
-
-    if (!IsEffectFrame())
+    if (!CVARF(wpp_setspeed))
         return;
 
-    if (pstate_pred.tfstate & TFSTATE_AIMING == prev_state)
-        return;
+    const float speed_aiming = 80;
+    const float speed_aiming2dir = ceil(speed_aiming/sqrt(2));
+    static float last_playerclass;
 
-    prev_state = pstate_pred.tfstate & TFSTATE_AIMING;
+    float speed = pstate_pred.csqc_maxspeed, force = FALSE;
 
-    string mspeed = "999";
+    float fastest =
+        max(CVARF(cl_forwardspeed), CVARF(cl_backspeed), CVARF(cl_sidespeed));
+
+    if (pstate_pred.playerclass != last_playerclass)
+        force = TRUE;
+    last_playerclass = pstate_pred.playerclass;
+
     if (pstate_pred.tfstate & TFSTATE_AIMING)
-        mspeed = "80";
+        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
+    else if (fastest == speed_aiming || fastest == speed_aiming2dir)
+        force = TRUE;  // This is an imperfect good heuristic that avoids
+                       // issues on missed packets/transitions/etc.
 
-    localcmd("cl_forwardspeed ", mspeed, "\n");
-    localcmd("cl_sidespeed ", mspeed, "\n");
-    localcmd("cl_backspeed ", mspeed, "\n");
-#endif
+    // Cap as maxspeed would, but client-side, when enabled.
+    if (RewindFlagEnabled(REWIND_SETSPEED) && speed < pstate_pred.csqc_maxspeed) {
+            if (input_movevalues.x && input_movevalues.y)
+                speed = speed_aiming2dir;
+            else if (fastest == speed_aiming2dir)
+                force = TRUE;  // reset back to speed_aiming
+    }
+
+    // We check >speed, not =speed as it's still valid for clients to control to
+    // lower speeds.  Except for transitions where the maxspeed is reset.
+    if (fastest > speed || force) {
+        string spd = ftos(speed);
+        localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
+        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
+    }
 }
 
 
-void WP_Frame() {
-    MP_SetSpeed();
 
+void WP_Frame() {
     if (getstatf(STAT_HEALTH) < 0) {
         pstate_pred.current_slot = SlotNull;
         return;
@@ -870,9 +975,20 @@ void WP_Frame() {
     WP_Impulse();
     W_ThrowGren(FALSE);
 
-    if ((input_buttons & BUTTON0) && !WP_IsReloading() &&
-        (pstate_pred.client_time >= pstate_pred.attack_finished))
+    float is_attack = 0;
+
+    if (pstate_pred.playerclass != PC_SNIPER)
+        is_attack = ((input_buttons & BUTTON0) &&
+                     (pstate_pred.client_time >= pstate_pred.attack_finished) &&
+                     !WP_IsReloading());
+    else
+        is_attack = WP_Sniper_IsAttack();
+
+    if (is_attack)
         WP_Attack();
+
+    WP_Sniper_UpdateSight();
+    MP_SetSpeed();
 }
 
 
@@ -904,18 +1020,6 @@ trail_table_entry trail_table[] = {
     {{"TR_VORESPIKE" }},
     {{"TE_RAILTRAIL"}},
 };
-
-inline float interp_ms() {
-    return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
-}
-
-inline float interp_dt() {
-    return interp_ms() / 1000.0;
-}
-
-inline float interp_time() {
-    return time + interp_dt();
-}
 
 float get_phys_time_nudge_dt(entity e) {
     if (!is_player)
@@ -1302,6 +1406,7 @@ void WP_Attack() {
 
             case WEAP_SHOTGUN: Pred_Sound(SND_SG); break;
             case WEAP_SUPER_SHOTGUN: Pred_Sound(SND_SSG); break;
+            case WEAP_SNIPER_RIFLE: Pred_Sound(SND_SNIPER_RIFLE); break;
         }
     }
 
@@ -1511,6 +1616,8 @@ float WP_ClientThink() {
 }
 
 void InitWeapPredEnt(entity pe) {
+    WP_InitSniper();
+
     pe.predraw = WP_ClientThink;
     pengine.pweap_ent = pe;
     pe.drawmask = MASK_PRED_ENT;

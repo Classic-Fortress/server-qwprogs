@@ -43,7 +43,7 @@ vector TEXT_TEAM_COLOUR[] = {
 
 const float DEFAULT_VIEWHEIGHT = 22;
 const vector PLAYER_MINS = [-16, -16, -24];
-const vector PLAYER_MAXS = [16, 16, 24];
+const vector PLAYER_MAXS = [16, 16, 32];
 
 #define FO_MENU_FLAG_USE_MOUSE 1
 #define FO_MENU_FLAG_CENTER 2
@@ -290,7 +290,6 @@ typedef struct {
     float ScannerTFItemsFlags;
     // sniper
     float SniperDam;
-    float SniperMax;
     // demoman
     float IsDetpacking;
     float DetpackLeft;
