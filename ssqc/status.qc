@@ -983,7 +983,7 @@ void UpdateClientStatusBar(entity pl)
                     {
                         WriteFloat(MSG_MULTICAST, disp.health);
                     }
-                    disp = find(disp, classname, "building_d0; //ispenser");
+                    disp = find(disp, classname, "building_dispenser");
                 }
             }
             break;
