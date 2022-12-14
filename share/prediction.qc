@@ -73,7 +73,8 @@ struct predict_tf_state {
 #endif
 };
 
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+string CF_GetSettingRaw(string ps_short, string ps_setting, string ps_default);
+float CF_GetSetting(string ps_short, string ps_setting, string ps_default);
 
 enum SoundIndex:float {
     SND_NONE = 0,
@@ -588,12 +589,16 @@ void Predict_InitDefaultConfig() {
 
 entity config_entity;
 
-#define CONFIG_UPDATE(_ps_short, _field) \
+#define CONFIG_UPDATE(_flag, _ps_short, _field) \
     do { string _cur = ftos(fo_config.##_field); \
-         float _val = CF_GetSetting(_ps_short, #_field, _cur); \
-         if (_val != fo_config.##_field) { \
-                fo_config.##_field = _val; update = TRUE; \
-         } \
+      float _val; \
+      if (_flag) \
+        _val = ParseFlags(CF_GetSettingRaw(_ps_short, #_field, _cur)); \
+      else \
+        _val = CF_GetSetting(_ps_short, #_field, _cur); \
+      if (_val != fo_config.##_field) { \
+          fo_config.##_field = _val; update = TRUE; \
+      } \
     } while (0)
 #define CLAMP_UPDATE(_field, _clamp_low, _clamp_high) \
     do { if (fo_config.##_field < _clamp_low || fo_config.##_field > _clamp_high) { \
@@ -613,31 +618,40 @@ float ForwardDoorsPossible() {
     return possible;
 }
 
+// Equivalent to stof(str) when not splittable (e.g. single OR'd val).
+static float ParseFlags(string str) {
+    float n = tokenize(str);
+    float result = 0;
+    for (int i = 0; i < n; i++)
+        result |= stof(argv(i));
+    return result;
+}
+
 static void WeaponPred_CheckConfigUpdate() {
     float update = FALSE;
 
     // Target is also the long form localinfo name.
-    CONFIG_UPDATE("qcp", qc_physics);
-    CONFIG_UPDATE("mpm", min_ping_ms);
-    CONFIG_UPDATE("snm", static_newmis_ms);
-    CONFIG_UPDATE("dnm", dynamic_newmis_ms);
-    CONFIG_UPDATE("mrt", max_rewind_ms);
-    CONFIG_UPDATE("mrsp", max_rewind_slow_projectile_ms);
-    CONFIG_UPDATE("mrfp", max_rewind_fast_projectile_ms);
-    CONFIG_UPDATE("mrg", max_rewind_grenade_ms);
-    CONFIG_UPDATE("rfpt", rewind_fast_projectile_thresh);
-    CONFIG_UPDATE("wpdmp", wp_default_min_ping_ms);
-    CONFIG_UPDATE("wpge", wp_global_enable);
-    CONFIG_UPDATE("wpgd", wp_global_disable);
-    CONFIG_UPDATE("ppge", pp_global_enable);
-    CONFIG_UPDATE("ppgd", pp_global_disable);
-    CONFIG_UPDATE("wppge", wpp_global_enable);
-    CONFIG_UPDATE("wppge", wpp_global_disable);
-    CONFIG_UPDATE("gbd", gren_beta_disable);
-    CONFIG_UPDATE("rewind", rewind_flags);
-    CONFIG_UPDATE("tfx", tfx_flags);
-    CONFIG_UPDATE("clown", clown_flags);
-    CONFIG_UPDATE("clown_grav", clown_grav);
+    CONFIG_UPDATE(FALSE, "qcp", qc_physics);
+    CONFIG_UPDATE(FALSE, "mpm", min_ping_ms);
+    CONFIG_UPDATE(FALSE, "snm", static_newmis_ms);
+    CONFIG_UPDATE(FALSE, "dnm", dynamic_newmis_ms);
+    CONFIG_UPDATE(FALSE, "mrt", max_rewind_ms);
+    CONFIG_UPDATE(FALSE, "mrsp", max_rewind_slow_projectile_ms);
+    CONFIG_UPDATE(FALSE, "mrfp", max_rewind_fast_projectile_ms);
+    CONFIG_UPDATE(FALSE, "mrg", max_rewind_grenade_ms);
+    CONFIG_UPDATE(FALSE, "rfpt", rewind_fast_projectile_thresh);
+    CONFIG_UPDATE(FALSE, "wpdmp", wp_default_min_ping_ms);
+    CONFIG_UPDATE(FALSE, "wpge", wp_global_enable);
+    CONFIG_UPDATE(FALSE, "wpgd", wp_global_disable);
+    CONFIG_UPDATE(FALSE, "ppge", pp_global_enable);
+    CONFIG_UPDATE(FALSE, "ppgd", pp_global_disable);
+    CONFIG_UPDATE(FALSE, "wppge", wpp_global_enable);
+    CONFIG_UPDATE(FALSE, "wppge", wpp_global_disable);
+    CONFIG_UPDATE(FALSE, "gbd", gren_beta_disable);
+    CONFIG_UPDATE(TRUE,  "rewind", rewind_flags);
+    CONFIG_UPDATE(TRUE,  "tfx", tfx_flags);
+    CONFIG_UPDATE(TRUE,  "clown", clown_flags);
+    CONFIG_UPDATE(FALSE, "clown_grav", clown_grav);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);

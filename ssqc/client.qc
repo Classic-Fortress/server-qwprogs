@@ -173,17 +173,23 @@ string (entity ent, string ps_short, string ps_setting, string ps_default) FO_Ge
 
     return st;
 };
-//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting = {
-    local string st;
 
-    st = infokey(ent, ps_short);
+string FO_GetUserSettingRaw(entity ent, string ps_short, string ps_setting,
+                            string ps_default) {
+    string st = infokey(ent, ps_short);
     if (st == string_null) {
         st = infokey(ent, ps_setting);
         if (st == string_null) {
             st = ps_default;
         }
     }
+    return st;
+}
+
+//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
+float FO_GetUserSetting(entity ent, string ps_short, string ps_setting,
+                        string ps_default) {
+    string st = FO_GetUserSettingRaw(ent, ps_short, ps_setting, ps_default);
 
     switch (st)
     {
@@ -196,7 +202,12 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
     }
 };
 
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+string CF_GetSettingRaw(string ps_short, string ps_setting,
+                        string ps_default) {
+    return FO_GetUserSettingRaw(world, ps_short, ps_setting, ps_default);
+};
+
+float CF_GetSetting(string ps_short, string ps_setting, string ps_default) {
     return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
