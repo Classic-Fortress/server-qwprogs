@@ -573,6 +573,9 @@ void () T_IncendiaryTouch = {
     damg = 42 + random() * 20;
 
     if (other.health) {
+        if (CF_GetSetting("pdf", "pyro_direct_fix", "on") &&
+            other.solid != SOLID_BSP)
+            SetOnFire(other, self.owner, self.origin, 30);
         deathmsg = DMSG_FLAME;
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
