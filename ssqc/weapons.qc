@@ -50,8 +50,6 @@ void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
 void () FO_LockToggle;
 void () FO_Airblast;
-void () UseAirBlast;
-void () UseAirBlastV2;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;

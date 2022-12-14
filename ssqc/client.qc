@@ -173,17 +173,23 @@ string (entity ent, string ps_short, string ps_setting, string ps_default) FO_Ge
 
     return st;
 };
-//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting = {
-    local string st;
 
-    st = infokey(ent, ps_short);
+string FO_GetUserSettingRaw(entity ent, string ps_short, string ps_setting,
+                            string ps_default) {
+    string st = infokey(ent, ps_short);
     if (st == string_null) {
         st = infokey(ent, ps_setting);
         if (st == string_null) {
             st = ps_default;
         }
     }
+    return st;
+}
+
+//if ent is world, return serverinfo, if ent is a player, return that client's setinfo key
+float FO_GetUserSetting(entity ent, string ps_short, string ps_setting,
+                        string ps_default) {
+    string st = FO_GetUserSettingRaw(ent, ps_short, ps_setting, ps_default);
 
     switch (st)
     {
@@ -196,7 +202,12 @@ float (entity ent, string ps_short, string ps_setting, string ps_default) FO_Get
     }
 };
 
-float (string ps_short, string ps_setting, string ps_default) CF_GetSetting = {
+string CF_GetSettingRaw(string ps_short, string ps_setting,
+                        string ps_default) {
+    return FO_GetUserSettingRaw(world, ps_short, ps_setting, ps_default);
+};
+
+float CF_GetSetting(string ps_short, string ps_setting, string ps_default) {
     return FO_GetUserSetting(world, ps_short, ps_setting, ps_default);
 };
 
@@ -527,15 +538,6 @@ void () DecodeLevelParms = {
         asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
 
-        // Pyro Airblast pushval min and max
-        airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
-        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "470");
-        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "600");
-        airblastjump    = CF_GetSetting("abj", "airblastjump", "off");
-        airblastsize    = CF_GetSetting("abs", "airblastsize", "150");
-        airblastcells     = CF_GetSetting("abc", "airblastcells", ftos(PC_PYRO_AIRBLAST_CELLS));
-        airblastjumpcells = CF_GetSetting("abjc", "airblastjumpcells", ftos(PC_PYRO_AIRBLASTJUMP_CELLS));
-
         // force reload [on]
         force_reload = CF_GetSetting("fr", "forcereload", "on");
 
@@ -594,11 +596,6 @@ void () DecodeLevelParms = {
         asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
         
-        // Pyro Airblast pushval min and max
-        airblastv2 = CF_GetSetting("abv2", "airblastv2", "off");
-        airblastpushmin = CF_GetSetting("abpmin", "airblastpushmin", "500");
-        airblastpushmax = CF_GetSetting("abpmax", "airblastpushmax", "800");
-
         // remote_client_time max delta
         antilag_settings.rewind_detpipe =
             CF_GetSetting("alrd", "al_rewind_detpipe", "on");
@@ -653,9 +650,6 @@ void () DecodeLevelParms = {
 
         // whitelists detpack impulses on the list of commands that you're allowed to use while reloading [off]
         detpack_when_reloading = CF_GetSetting("detreload", "detpack_while_reloading", "off");
-
-        // pyro class type - 0:default; 1:OzTF like; 2:plasmaclass
-        pyro_type = CF_GetSetting("pyrotype", "pyro_type", "2");
 
         // ceasefire type - 0: default; 1: pause
         ceasefire_type = CF_GetSetting("ceasefiretype", "cft", "1");
@@ -865,7 +859,6 @@ void () DecodeLevelParms = {
             superspanner = FALSE;
             superknife = TRUE;
             superknife_multihit = FALSE;
-            pyro_type = PYRO_OZTF;
             Role_None.gren1_limits[1] = PC_SCOUT_GRENADE_MAX_1;
             Role_None.gren1_limits[2] = PC_SNIPER_GRENADE_MAX_1;
             Role_None.gren1_limits[3] = PC_SOLDIER_GRENADE_MAX_1;
@@ -888,9 +881,6 @@ void () DecodeLevelParms = {
             walls_block_emp = FALSE;
             solid_nailgren = FALSE;
             scoutscanspike = TRUE;
-            airblastpushmin = 470;
-            airblastpushmax = 600;
-            airblastsize    = 150;
         }
 
         st = infokey(world, "faithful");
@@ -941,7 +931,6 @@ void () DecodeLevelParms = {
             superspanner = FALSE;
             superknife = FALSE;
             superknife_multihit = FALSE;
-            pyro_type = PYRO_ORIGINAL;
             Role_None.gren1_limits[1] = 4;
             Role_None.gren1_limits[2] = 4;
             Role_None.gren1_limits[3] = 4;
@@ -988,7 +977,6 @@ void () DecodeLevelParms = {
             medicnocuss = FALSE;
             project_weapons = FALSE;
             distance_based_cuss_duration = FALSE;
-            pyro_type = 1;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
             drop_gren1 = 0;

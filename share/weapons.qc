@@ -13,7 +13,6 @@
 .float ammo_cells;
 
 float sniperreload = FALSE;
-float pyro_type = PYRO_FO;
 #endif
 
 // Some preprocessor bug is making __LINE__ not substitute right here most of
@@ -119,7 +118,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_PIPE_LAUNCHER,     PRED_PROJ, AMMO_ROCKETS, 6, 1,  0.6,  4 },  // Overlaps GL
     { WEAP_FLAMETHROWER,      PRED_PROJ, AMMO_CELLS,   0, 1,  0.15, 0 },
     { WEAP_ROCKET_LAUNCHER,   PRED_PROJ, AMMO_ROCKETS, 4, 1,  0.8,  5 },
-    { WEAP_INCENDIARY,        PRED_PROJ, AMMO_ROCKETS, 0, 3, -9,    0 },
+    { WEAP_INCENDIARY,        PRED_PROJ, AMMO_ROCKETS, 0, 3,  0.9,    0 },
     { WEAP_ASSAULT_CANNON,    PRED_PROJ, AMMO_SHELLS, 100, 1,  0.2,  4 },
     { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
@@ -771,15 +770,6 @@ void FO_Weapons_Init() {
 
     FO_WeapInfo* WI_sr = FO_GetWeapInfo(WEAP_SNIPER_RIFLE);
     WI_sr->clip_size = sniperreload ? 1 : 0;
-
-    FO_WeapInfo* WI_ir = FO_GetWeapInfo(WEAP_INCENDIARY);
-    switch (pyro_type) {
-        case PYRO_ORIGINAL: WI_ir->attack_time = 1.2; break;
-        case PYRO_OZTF:
-        case PYRO_FO:
-        default:
-            WI_ir->attack_time = 0.9; break;
-    }
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
