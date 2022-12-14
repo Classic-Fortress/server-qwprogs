@@ -424,8 +424,8 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
 
     no_damage = 0;
 
-    if (pyro_type == PYRO_FO && (targ.tfstate & TFSTATE_BURNING))
-        damage = damage * PC_PYRO_BURN_DAMAGE_AMP;
+    if (targ.tfstate & TFSTATE_BURNING)
+        damage *= PC_PYRO_BURN_DAMAGE_AMP;
 
     if (attacker.classname == "player") {
 
@@ -537,14 +537,6 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
                 dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
                 dir = normalize(dir);
                 moment = knock_damage;
-
-                if (inflictor.classname == "pyro_rocket" && pyro_type == 1) {
-                    if (attacker == targ) {
-                        moment *= 1.5;
-                    } else {
-                        moment *= 1.25;
-                    }
-                }
 
                 if (targ.playerclass == PC_HVYWEAP) {
                     moment = moment / 4;
