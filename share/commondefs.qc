@@ -68,8 +68,7 @@ string REWIND_DESC[] = {
 };
 
 const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
-                                   REWIND_FORWARD_PROJ_SELFKNOCK |
-                                   REWIND_SETSPEED;
+                                   REWIND_FORWARD_PROJ_SELFKNOCK;
 
 float RewindFlagEnabled(float flag) {
     return fo_config.rewind_flags & flag;
@@ -106,8 +105,7 @@ float TFxEnabled(float flag) {
 }
 
 const float TFX_DEFAULT_FLAGS =
-        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG |
-        TFX_PREMATCH_EVERYTHING;
+        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG;
 
 enum CSQCFlags {
     PREDICT_CSQC_SETSPEED,

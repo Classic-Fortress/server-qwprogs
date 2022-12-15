@@ -1256,9 +1256,13 @@ void (entity p) TeamFortress_SetSpeed = {
         stuffcmd(p, "m_side 0\n");
 #endif
         p.velocity = '0 0 0';
-        stuffcmd(p, "cl_backspeed 0\n");
-        stuffcmd(p, "cl_forwardspeed 0\n");
-        stuffcmd(p, "cl_sidespeed 0\n");
+        if (!RewindFlagEnabled(REWIND_SETSPEED)) {
+            // maxspeed suffices for any modern client, delete these once
+            // tested in a few pugs.
+            stuffcmd(p, "cl_backspeed 0\n");
+            stuffcmd(p, "cl_forwardspeed 0\n");
+            stuffcmd(p, "cl_sidespeed 0\n");
+        }
         p.maxspeed = 0;
         return;
     }
@@ -1268,6 +1272,13 @@ void (entity p) TeamFortress_SetSpeed = {
         stuffcmd(p, "m_side 0.8\n");
     }
 #endif
+    if (p.playerclass == PC_UNDEFINED) {
+        // Typically this hits spectators and then spec movetype --> maxspeed
+        // actually ignored.
+        p.maxspeed = 0;
+        return;
+    }
+
     float new_max = Class_MaxSpeed(p.playerclass);
 
     tf = 0;
@@ -1295,13 +1306,10 @@ void (entity p) TeamFortress_SetSpeed = {
     // maxspeed/pmove interaction (bounds client prediction until maxspeed makes
     // it to client, even though released on unpredicted earlier frame, leading
     // to lots of skipping).
-    if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable)
+    if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable) {
         if (p.tfstate & TFSTATE_AIMING)
             new_max = min(new_max, 80);
 
-    if (!client_enable) {
-        // It's possible to set the client-enable without REWIND_SETSPEED,
-        // they'll just skip more.
         sp = ftos(new_max);
         stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
                  "; cl_sidespeed ", sp, "\n");

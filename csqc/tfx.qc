@@ -80,9 +80,9 @@ static void RemoveOutline() {
         remove(self.outline);
 }
 
-static void AddOutline(entity ent, string model) {
+static void AddOutline(entity ent) {
     entity o = spawn();
-    setmodel(o, model);
+    setmodelindex(o, ent.modelindex);
     o.classname = "outline";
     o.fatness = 1;
     setsize(o, PLAYER_MINS, PLAYER_MAXS);
@@ -115,7 +115,7 @@ float UpdatePlayer(float isnew) {
         if (self.entnum == player_localentnum && is_player)
             local_player = self;
 
-        AddOutline(self, "progs/player.mdl");
+        AddOutline(self);
     }
 
     if (self.entnum == player_localentnum)
@@ -253,7 +253,8 @@ static void UpdateFlagOutline(entity flag) {
 
 float UpdateFlag(float isnew) {
     if (isnew) {
-        AddOutline(self, "progs/ff_flag.mdl");
+        float mindex = self.modelindex;
+        AddOutline(self);
         // Flags have their own shader already, just make them shiny for now.
     }
 
@@ -277,7 +278,6 @@ static string OutlineShader(string texture) {
      blendfunc GL_ONE GL_ONE_MINUS_SRC_COLOR\
      tcgen environment\
      tcmod rotate 30\
-     tcmod scroll 1.1\
      nodepthtest\
      depthfunc greater\
   }\
@@ -295,13 +295,18 @@ static string rnds(string prefix) {
 }
 
 void TF_Init() {
-    precache_model("progs/player.mdl");
+#if 0
+    Deltalisten breaks some default shaders even without a forceoverride.  Quick
+    fix to unblock.
+
     deltalisten("progs/player.mdl", UpdatePlayer, 0);
     deltalisten("progs/ff_flag.mdl", UpdateFlag, 0);
+    deltalisten("progs/tf_flag.mdl", UpdateFlag, 0);
 
     shader_team[0] = shaderforname(rnds("blue_team_outline"), OutlineShader("textures/sfx/quad.tga"));
     shader_team[1] = shaderforname(rnds("red_team_outline"), OutlineShader("textures/sfx/pent.tga"));
     shader_flag = shaderforname(rnds("flag_outline"), OutlineShader("textures/sfx/specular.tga"));
 
     shader_over_outline = shaderforname(rnds("over_outline"), "{ sort 7 }");
+#endif
 }
