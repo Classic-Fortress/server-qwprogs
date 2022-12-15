@@ -914,39 +914,37 @@ void MP_SetSpeed() {
     if (!CVARF(wpp_setspeed))
         return;
 
+    static float last_playerclass, last_set;
+
+    float speed = pstate_pred.csqc_maxspeed;
+
+    if (pstate_pred.playerclass != last_playerclass)
+        last_set = -1;  // Force update.
+    last_playerclass = pstate_pred.playerclass;
+
     const float speed_aiming = 80;
     const float speed_aiming2dir = ceil(speed_aiming/sqrt(2));
-    static float last_playerclass;
 
-    float speed = pstate_pred.csqc_maxspeed, force = FALSE;
+    if (pstate_pred.tfstate & TFSTATE_AIMING) {
+        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
+
+        // Cap as maxspeed would, but client-side, when enabled.
+        if (RewindFlagEnabled(REWIND_SETSPEED))
+            if (input_movevalues.x && input_movevalues.y)
+                speed = min(speed, speed_aiming2dir);
+    }
 
     float fastest =
         max(CVARF(cl_forwardspeed), CVARF(cl_backspeed), CVARF(cl_sidespeed));
 
-    if (pstate_pred.playerclass != last_playerclass)
-        force = TRUE;
-    last_playerclass = pstate_pred.playerclass;
-
-    if (pstate_pred.tfstate & TFSTATE_AIMING)
-        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
-    else if (fastest == speed_aiming || fastest == speed_aiming2dir)
-        force = TRUE;  // This is an imperfect good heuristic that avoids
-                       // issues on missed packets/transitions/etc.
-
-    // Cap as maxspeed would, but client-side, when enabled.
-    if (RewindFlagEnabled(REWIND_SETSPEED) && speed < pstate_pred.csqc_maxspeed) {
-            if (input_movevalues.x && input_movevalues.y)
-                speed = speed_aiming2dir;
-            else if (fastest == speed_aiming2dir)
-                force = TRUE;  // reset back to speed_aiming
-    }
-
     // We check >speed, not =speed as it's still valid for clients to control to
     // lower speeds.  Except for transitions where the maxspeed is reset.
-    if (fastest > speed || force) {
+    if (speed > last_set || fastest > speed) {
+        last_set = speed;
+        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
+
         string spd = ftos(speed);
         localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
-        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
     }
 }
 
