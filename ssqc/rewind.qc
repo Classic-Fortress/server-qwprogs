@@ -205,8 +205,10 @@ static void RewindTo(RewindState* rstate, float rtime) {
             pos = b->origin + frac * diff;
         }
     } else {
-        float max_xerp = CF_GetSetting("rwmx", "rewind_max_xerp", "0.02");
-        pos = rstate->held_origin + min(rtime - e.client_lastupdate, max_xerp) * e.velocity;
+        pos = rstate->held_origin;
+        float max_xerp = CF_GetSetting("rwmx", "rewind_max_xerp", "0");
+        if (max_xerp > 0)
+            pos += min(rtime - e.client_lastupdate, max_xerp) * rstate->held_velocity;
     }
 
     setorigin(rstate->owner, pos);
