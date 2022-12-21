@@ -366,6 +366,7 @@ float() ReadCoord = #364;
 float() ReadAngle = #365;
 float() ReadFloat = #367;
 float() ReadEntity = #368;
+int() ReadInt = #0:readint;
 
 void InitWeapPredEnt(entity e);
 void WP_ServerUpdate();
@@ -480,9 +481,9 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Float, reload_finished);
 
     if (sendflags & FOWP_RNG0)
-        COMM(Short, prng_base[0]);
+        COMM(Int, prng_base[PRNG_WEAP]);
     if (sendflags & FOWP_RNG1)
-        COMM(Short, prng_base[1]);
+        COMM(Int, prng_base[PRNG_HWGUY]);
 
 #ifdef SSQC
     return TRUE;
