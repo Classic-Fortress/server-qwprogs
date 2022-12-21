@@ -442,7 +442,8 @@ void WP_ServerUpdate() {
 
     // Match up melee animations when they don't match.  The easiest way for
     // this to happen is effectframe miss.
-    if (pstate_server.weaponframe >= 1 && pstate_server.weaponframe < 8 &&
+    if (IsSlotMelee(pstate_server.current_slot) &&
+        pstate_server.weaponframe >= 1 && pstate_server.weaponframe < 8 &&
         pstate_pred.weaponframe >= 1 && pstate_pred.weaponframe < 8) {
         pstate_server.weaponframe = (pstate_server.weaponframe - 1) % 4;
         if (pstate_pred.weaponframe >= 4)
@@ -1357,13 +1358,16 @@ void WP_Attack() {
     if (wi->predict_type == NO_PREDICT)
         return;
 
+    if (!WP_CheckAmmo(wi))
+        return;
+
     // Whether firing occurs here, or is embedded in the frame animation code
     // (because continuous fire).
     int in_anim = wi->weapon == WEAP_NAILGUN ||
                   wi->weapon == WEAP_SUPER_NAILGUN ||
                   wi->weapon == WEAP_ASSAULT_CANNON;
 
-    if ((in_anim && !WP_CheckAmmo(wi)) || (!in_anim && !WP_ConsumeAmmo(CurrentSlot())))
+    if (!in_anim && !WP_ConsumeAmmo(CurrentSlot()))
         return;
 
     // OK.  We're ready to pew.
