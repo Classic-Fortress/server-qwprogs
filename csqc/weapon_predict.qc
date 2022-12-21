@@ -440,6 +440,16 @@ void WP_ServerUpdate() {
     if (pstate_server.attack_finished < pstate_server.client_time)
         pstate_server.weaponframe = 0;
 
+    // Match up melee animations when they don't match.  The easiest way for
+    // this to happen is effectframe miss.
+    if (pstate_server.weaponframe >= 1 && pstate_server.weaponframe < 8 &&
+        pstate_pred.weaponframe >= 1 && pstate_pred.weaponframe < 8) {
+        pstate_server.weaponframe = (pstate_server.weaponframe - 1) % 4;
+        if (pstate_pred.weaponframe >= 4)
+            pstate_server.weaponframe += 4;
+        pstate_server.weaponframe += 1;
+    }
+
     if (CVARF(fo_wpp_beta) == 2)
         phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
     else
