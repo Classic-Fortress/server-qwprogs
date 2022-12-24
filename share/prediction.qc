@@ -350,14 +350,6 @@ void sprint_pred(entity client, float msglevel, string s) {
         return;  // Message generated client-side.
     sprint(client, msglevel, s);
 }
-
-// Networked (non-csqc) entities don't appear to exist within the client-side
-// CSQC world for our physics simulation.  Until we either (a) migrate them
-// there or (b) find a way to propagate them there, we cheat by sending an
-// update to the client when such a collision occurs.
-void Predict_UpdateHack(entity e) {
-    e.SendFlags |= FOPP_POS | FOPP_ANGLES;
-}
 #endif
 
 #ifdef CSQC
@@ -745,6 +737,38 @@ void WeaponPred_DoServerClientThink() {
     }
 }
 
+void FO_CustomPhysics() {
+    if (!self.voided) {
+        Phys_Advance(self, time, 0);
+
+        // Moving platforms don't get properly reflected into the entities CSQC
+        // sees so just blast the client with updates when on one (in motion).
+        // Basically what the stock netcode does anyway.  It's not perfect but,
+        // better than nothing.
+        entity ground = self.groundentity;
+        if ((self.flags & FL_ONGROUND) && (ground.movetype == MOVETYPE_PUSH) &&
+            (vlen(ground.velocity) > 0))
+            self.SendFlags |= FOPP_POS;
+    }
+
+    float held_time, thinktime;
+    // Once we lift physics, think execution comes with it.
+    do {
+        thinktime = self.nextthink;
+        if (thinktime <= 0 || thinktime > time)
+            return;
+
+        held_time = time;
+        self.nextthink = 0;
+        time = thinktime;
+        self.think();
+        time = held_time;
+
+        if (self.is_removed || self.nextthink < thinktime /* no loop on rev */)
+            return;
+    } while (1);
+}
+
 void FO_Sound(entity e, float chan, string samp, float vol, float atten);
 
 void Pred_Sound(SoundIndex snd, float vol = 1) {
@@ -896,9 +920,16 @@ void AugmentGrenadeImpact() {
     }
 
 #ifdef SSQC
-    if (other.solid != SOLID_BSP)
-        Predict_UpdateHack(self);
+    if (other.solid != SOLID_BSP) {
+        // Networked (non-csqc) entities don't appear to exist within the
+        // client-side CSQC world for our physics simulation.  Until we either
+        // (a) migrate them there or (b) find a way to propagate them there, we
+        // cheat by sending an update to the client when such a collision
+        // occurs.
+        self.SendFlags |= FOPP_POS | FOPP_ANGLES;
+    }
     if (self.movetype != old_move)
         self.SendFlags |= FOPP_MOVETYPE;
 #endif
 }
+
