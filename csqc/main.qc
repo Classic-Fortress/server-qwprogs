@@ -128,11 +128,16 @@ noref void() CSQC_WorldLoaded = {
 
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 
+DEFCVAR_FLOAT(fov, 90);
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
     float fts = perf_start_sample(&frame_timing);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
+
+    if (zoomed_in)
+        setviewprop(VF_AFOV, CVARF(fov)/3);
 
     // Draw original sbar, viewsize honoured automatically.
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
@@ -417,8 +422,6 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-void WPP_Dump();
-
 noref void CSQC_Input_Frame() {
     local float changed_buttons = input_buttons ^ oldbuttons;
     oldbuttons = input_buttons;
@@ -426,31 +429,30 @@ noref void CSQC_Input_Frame() {
     local float keydowns = changed_buttons & input_buttons;
     local float keyups = changed_buttons & ~input_buttons;
 
+    Sync_GameState();
+
     // Intercept rocket jump;
-    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) && input_buttons & BUTTON4) {
-        input_buttons |= BUTTON0 + BUTTON2;
-    }
+    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) &&
+        (input_buttons & BUTTON4))
+        input_buttons |= BUTTON0 | BUTTON2;
 
-    // Intercept zoom
-    if (player_class == PC_SNIPER && keydowns & BUTTON3) {
-        zoomed_in = !zoomed_in;
-    }
+    // Handle zoom
+    float prev_zoomed_in = zoomed_in;
+    if (player_class == PC_SNIPER && is_alive)
+        zoomed_in = input_buttons & BUTTON3;
+    else
+        zoomed_in = 0;
 
-    if (input_impulse == TF_DEBUG_CSQC) {
-        WPP_Dump();
-        input_impulse = 0;
-    }
+    if (prev_zoomed_in != zoomed_in)
+        setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
     WPP_UpdateEnable(FALSE);
-    Sync_GameState();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
-    local float health = getstatf(STAT_HEALTH);
-    //pain face is 0.2 long
-    if(oldhealth > health) {
+    if (take > 0)
         painfinished = time + 0.2;
-    }
+
     return 0;
 }
 
@@ -476,24 +478,16 @@ void _Sync_ServerCommandFrame() {
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
-    oldhealth = getstatf(STAT_HEALTH);
+
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
     is_player = (!is_spectator && !is_observer);
 
-    local float health = getstatf(STAT_HEALTH);
-    if (health <= 0 || player_class != PC_SNIPER) {
-        zoomed_in = 0;
-    }
-
-    if (zoomed_in) {
-        setviewprop(VF_AFOV, CVARF(fov))/3;
-        setsensitivityscaler(1/3);
-    } else {
-        setviewprop(VF_AFOV, CVARF(fov));
-        setsensitivityscaler(1);
-    }
+    if (!is_player || getstatf(STAT_HEALTH) <= 0)
+        is_alive = 0;
+    else
+        is_alive = 1;
 
     UpdateMinPing();
 }

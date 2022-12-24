@@ -648,6 +648,7 @@ static void HandleButtonThrowgren(float index, float button) {
 
 float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
+void WPP_Dump();
 
 void WP_Impulse() {
     WP_HandleHeavyInputs();
@@ -660,6 +661,10 @@ void WP_Impulse() {
     switch (pstate_pred.impulse) {
         case TF_GRENADE_T:
             W_ThrowGren(TRUE);
+            break;
+
+        case TF_DEBUG_CSQC:
+            WPP_Dump();
             break;
 
         default:
@@ -962,7 +967,7 @@ void MP_SetSpeed() {
 
 
 void WP_Frame() {
-    if (getstatf(STAT_HEALTH) < 0) {
+    if (!is_alive) {
         pstate_pred.current_slot = SlotNull;
         return;
     }

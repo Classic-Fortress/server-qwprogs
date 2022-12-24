@@ -37,10 +37,9 @@ void PM_PredictJump() {
     float jumping = input_buttons & BUTTON2;
     float onground = pmove_onground;
     float landing = onground && !last_onground;
-    float health = getstatf(STAT_HEALTH);
     float vel_z = pmove_vel_z ?: recent_pmove_vel_z;
 
-    if (health <= 0) {
+    if (!is_alive) {
         last_onground = 1;
         last_vel_z = 0;
         last_waterlevel = 0;
