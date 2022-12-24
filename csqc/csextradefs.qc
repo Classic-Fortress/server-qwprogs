@@ -95,7 +95,7 @@ float quad_rounds_total;
 float prematch;
 float round_active;
 float round_over;
-float round_time_remaining;
+float round_ending;
 float showingscores;
 float mapvote_expiry;
 float num_mapvotes;

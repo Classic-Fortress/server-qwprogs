@@ -298,9 +298,9 @@ string gameClockString() {
     float minutes = 0;
     float seconds = 0;
     float timelimit = stof(serverkey("timelimit"));
-    
-    if(round_time_remaining) {
-        float t = round_time_remaining - time; 
+
+    if(round_ending) {
+        float t = round_ending - time;
         if(t < 0) t = t * -1;
         minutes = floor(t/60);
         seconds = floor(t - (minutes*60));
@@ -314,14 +314,12 @@ string gameClockString() {
         minutes = floor(time/60);
         seconds = floor(time - (minutes*60));
     }
-    
+
     string sm = strcat((minutes<10?"0":""),ftos(minutes));
     string ss = strcat((seconds<10?"0":""),ftos(seconds));
-    
+
     string tmp = strcat(sm,":",ss);
-    //if(round_time_remaining) tmp = ftos(floor(round_time_remaining - time));
-    
-    return tmp;  
+    return tmp;
 };
 
 static void(PanelID panelid, string text) doNothing = {};
