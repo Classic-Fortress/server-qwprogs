@@ -818,6 +818,7 @@ float is_spectator;
 float player_class;
 float is_observer;
 float is_player;
+float is_alive;
 //float health;
 float oldhealth;
 float painfinished;

@@ -95,6 +95,7 @@ void () ShockGrenadeExplode = {
     self.no_active_nail_grens = self.owner.no_active_nail_grens;
     self.movetype = MOVETYPE_FLY;
     self.velocity = '0 0 0';
+    self.avelocity = '0 500 0';
     setorigin(self, self.origin + '0 0 32');
     if(solid_nailgren) {
         setsize(self, '-1 -1 -1', '1 1 1');
@@ -102,7 +103,7 @@ void () ShockGrenadeExplode = {
     self.nextthink = time + 0.7;
     self.playerclass = 0;
     self.think = NailGrenLaser;
-    self.SendFlags |= FOPP_POS | FOPP_MOVETYPE;
+    self.SendFlags |= FOPP_POS | FOPP_MOVETYPE | FOPP_AVEL;
 };
 
 void () BurstGrenadeExplode = {
