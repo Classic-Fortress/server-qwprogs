@@ -29,6 +29,7 @@ enumflags {
     FOPP_POS,
     FOPP_AUX,
     FOPP_ANGLES,
+    FOPP_AVEL,
     FOPP_MOVETYPE,
     FOPP_EXPIRY,
     FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
@@ -549,6 +550,12 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, angles[0]);
         COMM(Coord, angles[1]);
         COMM(Coord, angles[2]);
+    }
+
+    if (sendflags & FOPP_AVEL) {
+        COMM(Coord, avelocity[0]);
+        COMM(Coord, avelocity[1]);
+        COMM(Coord, avelocity[2]);
     }
 
     if (sendflags & FOPP_MOVETYPE) {
