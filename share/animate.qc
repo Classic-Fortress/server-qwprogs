@@ -93,7 +93,7 @@ static void axe_extra() {
             break;
     }
 
-    if (self.weaponframe == 1)
+    if (*thinkindex() == 2)  // 1-index and already incremented.
         self.hit_in_current_animation = FALSE;
 
     if ((*flag && !self.hit_in_current_animation) ||
