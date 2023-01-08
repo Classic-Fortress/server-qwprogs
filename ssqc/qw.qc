@@ -786,6 +786,9 @@ string goal_class_names[7] = {
 .float airblast_cooldown;
 
 
+// backend
+string match_id;
+
 // people complain about settings, let's track them
 
 string settings_to_track_list[2] = {

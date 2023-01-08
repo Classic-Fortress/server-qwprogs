@@ -1523,3 +1523,7 @@
 #define TEAM_RED	2
 #define TEAM_YELL	3
 #define TEAM_GREN	4
+
+// web request index
+#define FO_MATCH_STARTED_REQUEST	1
+#define BR_LOGIN_REQUEST			2

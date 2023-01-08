@@ -1,5 +1,61 @@
 void () info_player_teamspawn;
 
+void () PostFOMatchStarted = {
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
+	data = strcat(data, "    \"discord_channel\": {\n");
+	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
+	data = strcat(data, "    },\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		if (TeamFortress_TeamGetNoPlayers(tn) == 0)
+			continue;
+
+		if (tn > 1)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"players\": [\n");
+
+		prefix_comma = FALSE;
+
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(p.team_no == tn) {
+				if (prefix_comma)
+					data = strcat(data, ",");
+
+				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
+				data = strcat(data, "{ \"auth_token\": \"", token, "\" }\n");
+				prefix_comma = TRUE;
+			}
+
+			p = find(p, classname, "player");
+		}
+
+		data = strcat(data, "        ]\n");
+		data = strcat(data, "      }\n");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	// make url configurable
+	uri_post("http://host.docker.internal:3000/results/api/v1/matches", FO_MATCH_STARTED_REQUEST, "application/json", data);
+	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
+	bprint(PRINT_HIGH, "data: ", data, "\n");
+};
+
 float () CheckWinningTeam = {
 	local float win_score = 0;
 	local float winning_team = 0;
@@ -306,56 +362,7 @@ void () QuadRoundBegin = {
         te = find(te, classname, "observer");
     }
 
-	local string data = "";
-
-	data = strcat(data, "{\n");
-	data = strcat(data, "  \"match\": {\n");
-	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
-	data = strcat(data, "    \"discord_channel\": {\n");
-	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
-	data = strcat(data, "    },\n");
-	data = strcat(data, "    \"teams\": {\n");
-
-	local float prefix_comma;
-	local string token;
-	local entity p;
-	local float tn;
-
-	for (tn = 1; tn <= number_of_teams; ++tn) {
-		if (tn > 1)
-			data = strcat(data, ",");
-
-		data = strcat(data, "      \"", ftos(tn), "\": {\n");
-		data = strcat(data, "        \"players\": [\n");
-
-		prefix_comma = FALSE;
-
-		p = find(world, classname, "player");
-		while (p != world) {
-			if(p.team_no == tn) {
-				if (prefix_comma)
-					data = strcat(data, ",");
-
-				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
-				data = strcat(data, "{ \"auth_token\": \"", token, "\" }\n");
-				prefix_comma = TRUE;
-			}
-
-			p = find(p, classname, "player");
-		}
-
-		data = strcat(data, "        ]\n");
-		data = strcat(data, "      }\n");
-	}
-
-	data = strcat(data, "    }\n");
-	data = strcat(data, "  }\n");
-	data = strcat(data, "}\n");
-
-	// make url configurable
-	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
-	bprint(PRINT_HIGH, "data: ", data, "\n");
-	uri_post("http://host.docker.internal:3000/results/api/v1/matches", 11, "application/json", data);
+	PostFOMatchStarted();
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
 	if (!self.cnt) {
