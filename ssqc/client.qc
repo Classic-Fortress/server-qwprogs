@@ -814,6 +814,9 @@ void () DecodeLevelParms = {
         // specify discord channel for auto-reporting [""]
         discord_channel_id = infokey(world, "discord_channel_id");
 
+        // specify discord channel for auto-reporting [""]
+        backend_uri = infokey(world, "backend_uri", "https://www.fortressone.org");
+
         // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
         splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");
 	

@@ -5,7 +5,8 @@ New features
 ------
 
 * website backend for match results, stats. Login with discord at https://www.fortressone.org, and set `_fo_token`.
-* `localinfo discord_channel_id n` to specify discord_channel. Required for autoreporting.
+* `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
+* `localinfo backend_uri <uri>` to specify backend API endpoint, i.e. https://www.fortressone.org/ in prod
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.

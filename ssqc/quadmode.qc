@@ -50,7 +50,7 @@ void () PostFOMatchStarted = {
 	data = strcat(data, "}\n");
 
 	// make url configurable
-	uri_post("http://host.docker.internal:3000/results/api/v1/matches", FO_MATCH_STARTED_REQUEST, "application/json", data);
+	uri_post(sprintf("%s/results/api/v1/matches", backend_uri), FO_MATCH_STARTED_REQUEST, "application/json", data);
 	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
 	bprint(PRINT_HIGH, "data: ", data, "\n");
 };
