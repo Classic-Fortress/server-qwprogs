@@ -249,7 +249,6 @@ void () QuadRoundThink = {
 };
 
 void () QuadRoundBegin = {
-
 	local entity te;
 	local entity oldself;
     //local entity tfdet;
@@ -298,7 +297,7 @@ void () QuadRoundBegin = {
 		self = oldself;
 		te = find (te, classname, "player");
 	}
-//	lightstyle (0, "m");
+	//	lightstyle (0, "m");
     te = find(world, classname, "observer");
     while (te) {
         if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
@@ -306,6 +305,57 @@ void () QuadRoundBegin = {
         }
         te = find(te, classname, "observer");
     }
+
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
+	data = strcat(data, "    \"discord_channel\": {\n");
+	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
+	data = strcat(data, "    },\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float prefix_comma;
+	local string token;
+	local entity p;
+	local float tn;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		if (tn > 1)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"players\": [\n");
+
+		prefix_comma = FALSE;
+
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(p.team_no == tn) {
+				if (prefix_comma)
+					data = strcat(data, ",");
+
+				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
+				data = strcat(data, "{ \"auth_token\": \"", token, "\" }\n");
+				prefix_comma = TRUE;
+			}
+
+			p = find(p, classname, "player");
+		}
+
+		data = strcat(data, "        ]\n");
+		data = strcat(data, "      }\n");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	// make url configurable
+	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
+	bprint(PRINT_HIGH, "data: ", data, "\n");
+	uri_post("http://host.docker.internal:3000/results/api/v1/matches", 11, "application/json", data);
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
 	if (!self.cnt) {
@@ -421,6 +471,33 @@ void () StartQuadRound =
 	round_over = 1;
 
 	if (rounds == 1) {
+		local float i = 0;
+		local string data = "";
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(i > 0)
+				data = strcat("&", data);
+			
+			data = strcat("fo_token[", ftos(i), "]=", p.fo_token);
+			i++;
+
+			p = find(p, classname, "player");
+		}
+
+		// make url configurable
+		/* bprint(PRINT_HIGH, "===sending StartQuadRound request===\n"); */
+		/* bprint(PRINT_HIGH, data, "\n"); */
+		/* uri_get("http://host.docker.internal:3000/foos", 11, "application/x-www-form-urlencoded", data); */
+
+		while (p != world) {
+			if (p.netname != "" && p.team_no && p.playerclass) {
+			}
+			if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+				UpdateClientPrematch(p, TRUE);
+			}
+			p = find(p, classname, "player");
+		}
+
 		quad_winner = CheckWinningTeam();
 		if (quad_winner == 0)
 			bprint (2, "Round Drawn!\n");
@@ -433,6 +510,10 @@ void () StartQuadRound =
 		else if (quad_winner == 4)
 			bprint(2, "Green Team Wins!\n");
 		p = find (world, classname, "player");
+
+		// send result to server
+		
+
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
 				p.takedamage = DAMAGE_NO;

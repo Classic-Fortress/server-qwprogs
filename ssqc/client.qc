@@ -810,7 +810,10 @@ void () DecodeLevelParms = {
         
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
-        
+
+        // specify discord channel for auto-reporting [""]
+        discord_channel_id = infokey(world, "discord_channel_id");
+
         // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
         splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");
 	

@@ -14,6 +14,18 @@ void (entity player, string login, string secret) performLogin = {
 }
 
 void(float reqid, float responsecode, string resourcebody, int resourcebytes) URI_Get_Callback = {
+	switch(reqid)
+	{
+		case 11:
+			bprint(PRINT_HIGH, "=================\n");
+			bprint(PRINT_HIGH, "=================\n");
+			bprint(PRINT_HIGH, "responsecode: ", ftos(responsecode), "\n");
+			bprint(PRINT_HIGH, "resourcebody: ", resourcebody, "\n");
+			bprint(PRINT_HIGH, "=================\n");
+			bprint(PRINT_HIGH, "=================\n");
+			return;
+	}
+
 	local float got_one = 0;
 	self.login_in_progress = 0;	
 	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);

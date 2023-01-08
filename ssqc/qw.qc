@@ -634,6 +634,7 @@ float noreturn;
 float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
+string discord_channel_id;
 float splitbackpackmodels;
 float standardizedeathammo;
 float deathammo_shells;
@@ -736,6 +737,8 @@ string loginUrl;
 string webpageUrl;
 .string login;
 .float login_in_progress;
+
+.string fo_token;
 
 //Logging fields
 float gametime;
