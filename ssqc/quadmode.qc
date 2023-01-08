@@ -17,12 +17,6 @@ void () PostFOMatchStarted = {
 	local string token;
 
 	for (tn = 1; tn <= number_of_teams; ++tn) {
-		if (TeamFortress_TeamGetNoPlayers(tn) == 0)
-			continue;
-
-		if (tn > 1)
-			data = strcat(data, ",");
-
 		data = strcat(data, "      \"", ftos(tn), "\": {\n");
 		data = strcat(data, "        \"players\": [\n");
 
@@ -35,7 +29,7 @@ void () PostFOMatchStarted = {
 					data = strcat(data, ",");
 
 				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
-				data = strcat(data, "{ \"auth_token\": \"", token, "\" }\n");
+				data = strcat(data, "          { \"auth_token\": \"", token, "\" }\n");
 				prefix_comma = TRUE;
 			}
 
@@ -43,7 +37,12 @@ void () PostFOMatchStarted = {
 		}
 
 		data = strcat(data, "        ]\n");
-		data = strcat(data, "      }\n");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \n");
 	}
 
 	data = strcat(data, "    }\n");
