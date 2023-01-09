@@ -811,11 +811,11 @@ void () DecodeLevelParms = {
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
 
-        // specify discord channel for auto-reporting [""]
+        // specify discord channel for results auto-reporting [""]
         discord_channel_id = infokey(world, "discord_channel_id");
 
-        // specify discord channel for auto-reporting [""]
-        backend_uri = infokey(world, "backend_uri", "https://www.fortressone.org");
+        // specify API host for backend [""]
+        backend_host = infokey(world, "backend_host", "https://www.fortressone.org");
 
         // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
         splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");

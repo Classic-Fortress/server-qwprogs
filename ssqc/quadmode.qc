@@ -49,9 +49,25 @@ void () PostFOMatchStarted = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	// make url configurable
-	uri_post(sprintf("%s/results/api/v1/matches", backend_uri), FO_MATCH_STARTED_REQUEST, "application/json", data);
+	local string uri = sprintf("%s/results/api/v1/matches", backend_host);
+	uri_post(uri, FO_MATCH_STARTED_REQUEST, "application/json", data);
 	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
+	bprint(PRINT_HIGH, "data: ", data, "\n");
+};
+
+void (float winner) PostFOMatchFinished = {
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
+	data = strcat(data, "    \"winner\": \"", ftos(winner), "\"\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_host, match_id);
+	uri_post(uri, FO_MATCH_STARTED_REQUEST, "application/json", data);
+	bprint(PRINT_HIGH, "===sending QuadRoundFinished request===\n");
 	bprint(PRINT_HIGH, "data: ", data, "\n");
 };
 
@@ -361,9 +377,9 @@ void () QuadRoundBegin = {
         te = find(te, classname, "observer");
     }
 
+	bprint(2, "QUAD ROUND BEGINS NOW\n");
 	PostFOMatchStarted();
 
-	bprint(2, "QUAD ROUND BEGINS NOW\n");
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
@@ -518,7 +534,7 @@ void () StartQuadRound =
 		p = find (world, classname, "player");
 
 		// send result to server
-		
+		PostFOMatchFinished(quad_winner);
 
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {

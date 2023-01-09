@@ -635,7 +635,7 @@ float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
 string discord_channel_id;
-string backend_uri;
+string backend_host;
 float splitbackpackmodels;
 float standardizedeathammo;
 float deathammo_shells;
