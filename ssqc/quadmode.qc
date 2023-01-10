@@ -50,9 +50,9 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches", backend_host);
-	uri_post(uri, FO_MATCH_STARTED_REQUEST, "application/json", data);
-	bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n");
-	bprint(PRINT_HIGH, "data: ", data, "\n");
+	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
+	/* bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n"); */
+	/* bprint(PRINT_HIGH, "data: ", data, "\n"); */
 };
 
 void (float winner) PostFOQuadFinished = {
@@ -66,9 +66,9 @@ void (float winner) PostFOQuadFinished = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_host, match_id);
-	uri_post(uri, FO_MATCH_STARTED_REQUEST, "application/json", data);
-	bprint(PRINT_HIGH, "===sending QuadRoundFinished request===\n");
-	bprint(PRINT_HIGH, "data: ", data, "\n");
+	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
+	/* bprint(PRINT_HIGH, "===sending QuadRoundFinished request===\n"); */
+	/* bprint(PRINT_HIGH, "data: ", data, "\n"); */
 };
 
 float () CheckWinningTeam = {

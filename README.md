@@ -4,9 +4,10 @@ FortressOne Server
 New features
 ------
 
-* website backend for match results, stats. Login with discord at https://www.fortressone.org, and set `_fo_token`.
+* Website backend for match results, stats. Login with discord at https://www.fortressone.org, and `setinfo _fo_token <token>`.
 * `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
 * `localinfo backend_host <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
+* All-time attack and all-time defence team options.
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.

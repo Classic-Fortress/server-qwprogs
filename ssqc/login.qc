@@ -15,11 +15,17 @@ void (entity player, string login, string secret) performLogin = {
 
 void(float reqid, float responsecode, string resourcebody, int resourcebytes) URI_Get_Callback = {
 	switch(reqid) {
-		case FO_MATCH_STARTED_REQUEST:
+		case FO_QUAD_STARTED_REQUEST:
+			bprint(PRINT_HIGH, "response code: ", ftos(responsecode), "\n");
 			match_id = resourcebody;
-			bprint(PRINT_HIGH, "=================\n");
-			bprint(PRINT_HIGH, "Match ID: ", match_id, "\n");
-			bprint(PRINT_HIGH, "=================\n");
+			bprint(PRINT_HIGH, "Match logged ID: ", match_id, "\n");
+			break;
+		case FO_QUAD_FINISHED_REQUEST:
+			match_id = resourcebody;
+			bprint(PRINT_HIGH, "response code: ", ftos(responsecode), "\n");
+			bprint(PRINT_HIGH, "body: ", resourcebody, "\n");
+			/* bprint(PRINT_HIGH, "Match ID: ", match_id, "\n"); */
+			/* bprint(PRINT_HIGH, "=================\n"); */
 			break;
 		case BR_LOGIN_REQUEST:
 			local float got_one = 0;
