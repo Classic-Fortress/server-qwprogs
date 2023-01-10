@@ -255,7 +255,8 @@ void () QuadRoundBegin = {
     //local entity tfdet;
 	local float counter;
 
-	localcmd(strcat(strcat("timelimit ", ftos(stof(infokey(world, "round_time")))), "\n"));
+	local float round_time = stof(infokey(world, "round_time"));
+	localcmd(strcat(strcat("timelimit ", ftos(round_time)), "\n"));
 
 	te = find(world, classname, "func_breakable");
 	while (te) {
@@ -308,6 +309,15 @@ void () QuadRoundBegin = {
     }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
+
+    te = find(world, classname, "player");
+    while (te) {
+        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
+            UpdateClientQuadRoundBegin(te, round_time);
+        }
+        te = find(te, classname, "player");
+    }
+
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
 		self.cnt2 = 60;
