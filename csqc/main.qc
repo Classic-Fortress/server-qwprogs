@@ -480,6 +480,7 @@ void _Sync_ServerCommandFrame() {
     last_servercommandframe = servercommandframe;
 
     team_no = getstatf(STAT_TEAMNO);
+    all_time = getstatf(STAT_ALL_TIME);
     is_observer = FALSE;
     if (team_no == 0)
         is_observer = TRUE;

@@ -1494,6 +1494,7 @@
 #define STAT_TP_GREN1           41
 #define STAT_TP_GREN2           42
 #define STAT_PAUSED             43
+#define STAT_ALL_TIME           44
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

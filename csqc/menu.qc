@@ -904,14 +904,8 @@ void FO_Menu_Team(float force) = {
         if(number_of_teams < 2) {
             return;
         }
-        //Hide autoteam option
-        //FO_MENU_TEAM.num_opts = number_of_teams;
-        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_HIDDEN;
         FO_MENU_TEAM.options[5].state = FO_MENU_STATE_DISABLED;
     } else {
-        //Show autoteam option
-        //FO_MENU_TEAM.num_opts = 8;
-        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_NORMAL;
         FO_MENU_TEAM.options[5].state = FO_MENU_STATE_NORMAL;
     }
     for(float i = 0; i < 4; i++) {
