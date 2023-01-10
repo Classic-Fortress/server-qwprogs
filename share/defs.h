@@ -1524,6 +1524,11 @@
 #define TEAM_YELL	3
 #define TEAM_GREN	4
 
+// all time teams
+#define ALL_TIME_COLOUR		0
+#define ALL_TIME_ATTACK		1
+#define ALL_TIME_DEFENCE	2
+
 // web request index
 #define FO_MATCH_STARTED_REQUEST	1
 #define BR_LOGIN_REQUEST			2

@@ -165,7 +165,9 @@ entity round_winner;
 float round_winner_print_health;
 
 .float team_no;                 // The team you belong to
+.float all_time;                // Automatically join attacking/defending team during quads
 .float lives;                   // The number of lives you have left
+
 
 .float infection_team_no;       // The team_no of the person who infected you
 

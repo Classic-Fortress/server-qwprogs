@@ -121,7 +121,6 @@ void () TranquiliserTimer;
 void () TeamFortress_CTF_FlagInfo;
 void () ClanMode;
 void () QuadMode;
-void () EndQuadRound;
 void () PlayerReady;
 void () PlayerNotReady;
 void () Broadcast_Players_NotReady;

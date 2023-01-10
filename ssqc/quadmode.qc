@@ -1,6 +1,6 @@
 void () info_player_teamspawn;
 
-void () PostFOMatchStarted = {
+void () PostFOQuadStarted = {
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -24,7 +24,7 @@ void () PostFOMatchStarted = {
 
 		p = find(world, classname, "player");
 		while (p != world) {
-			if(p.team_no == tn) {
+			if(p.team_no == tn && p.all_time == ALL_TIME_COLOUR) {
 				if (prefix_comma)
 					data = strcat(data, ",");
 
@@ -55,7 +55,7 @@ void () PostFOMatchStarted = {
 	bprint(PRINT_HIGH, "data: ", data, "\n");
 };
 
-void (float winner) PostFOMatchFinished = {
+void (float winner) PostFOQuadFinished = {
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -378,7 +378,6 @@ void () QuadRoundBegin = {
     }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
-	PostFOMatchStarted();
 
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
@@ -493,24 +492,6 @@ void () StartQuadRound =
 	round_over = 1;
 
 	if (rounds == 1) {
-		local float i = 0;
-		local string data = "";
-		p = find(world, classname, "player");
-		while (p != world) {
-			if(i > 0)
-				data = strcat("&", data);
-			
-			data = strcat("fo_token[", ftos(i), "]=", p.fo_token);
-			i++;
-
-			p = find(p, classname, "player");
-		}
-
-		// make url configurable
-		/* bprint(PRINT_HIGH, "===sending StartQuadRound request===\n"); */
-		/* bprint(PRINT_HIGH, data, "\n"); */
-		/* uri_get("http://host.docker.internal:3000/foos", 11, "application/x-www-form-urlencoded", data); */
-
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
 			}
@@ -534,7 +515,7 @@ void () StartQuadRound =
 		p = find (world, classname, "player");
 
 		// send result to server
-		PostFOMatchFinished(quad_winner);
+		PostFOQuadFinished(quad_winner);
 
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
@@ -568,8 +549,34 @@ void () StartQuadRound =
 		localcmd("stop\n");
 		return;
 	}
-	if (rounds > 1)
+
+	if (rounds > 1){
 		rounds = (rounds - 1);
+
+		if (rounds == 2)
+			PostFOQuadStarted();
+
+		if (rounds == 1 /* final round */) {
+			te = find(world, classname, "player");
+			while (te != world) {
+				if (te.all_time != ALL_TIME_COLOUR) {
+					sprint(te, PRINT_HIGH, "Swapping teams.\n");
+
+					switch(te.all_time) {
+						case ALL_TIME_ATTACK:
+							stuffcmd(te, "cmd changeteam attack\n");
+							break;
+						case ALL_TIME_DEFENCE:
+							stuffcmd(te, "cmd changeteam defence\n");
+							break;
+					}
+				}
+
+				te = find(te, classname, "player");
+			}
+		}
+	}
+
 	if (intermission_running)
 		return;
 
@@ -669,22 +676,3 @@ void () StartQuadRound =
 		te.nextthink = (time + 1);
 	}
 };
-
-void () EndQuadRound = {
-	if (infokey(world, "quadmode") == "on") {
-		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
-			if (rounds > 1) {			
-                local string st;
-                st = ftos(round_delay_time);
-                bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
-				lightstyle (0, "e");
-				self.think = QuadRoundOver;
-				self.nextthink = (time + 0.1);
-			}
-			else if (rounds == 1) {
-				StartQuadRound();
-			}
-		}
-	}
-};
-

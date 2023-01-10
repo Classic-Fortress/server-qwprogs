@@ -131,6 +131,12 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
+
+                    if(!(SBAR.GameMode & GAMEMODE_QUAD)) {
+                        FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
+                        FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
+                    }
+
                     FO_Menu_Team(2);
                     break;
                 case CLIENT_MENU_CLASS:
