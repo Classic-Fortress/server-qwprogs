@@ -274,8 +274,11 @@ void() CSQC_Parse_Event = {
             //game_started = readbyte();
             local float rtr = readfloat();
             if(rtr) {
-                round_time_remaining = time + rtr;
+                round_ending = time + rtr;
             }
+            break;
+        case MSG_QUAD_ROUND_BEGIN:
+            round_ending = readfloat() * 60 + time + 1;
             break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
