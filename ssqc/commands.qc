@@ -393,12 +393,12 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     case "attack":
                         self.all_time = ALL_TIME_ATTACK;
                         arg2 = final_round ? "2" : "1";
-                        sprint(self, PRINT_HIGH, "You will always be on the attacking team\n");
+                        sprint(self, PRINT_HIGH, "Always on the attacking team\n");
                         break;
                     case "defence":
                         self.all_time = ALL_TIME_DEFENCE;
                         arg2 = final_round ? "1" : "2";
-                        sprint(self, PRINT_HIGH, "You will always be on the defending team\n");
+                        sprint(self, PRINT_HIGH, "Always on the defending team\n");
                         break;
                     default:
                         self.all_time = ALL_TIME_COLOUR;
