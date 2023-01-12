@@ -935,6 +935,15 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint (self, PRINT_HIGH, "Missing username/password\n");
             }
             break;
+        case "fo-login":
+            processedCmd = TRUE;
+            if (self.fo_login != string_null) {
+                sprint (self, PRINT_HIGH, "You are already logged in\n");
+            }
+            else {
+                performFoLogin(self);
+            }
+            break;
         case "login-silent" :
             processedCmd = TRUE;
             if (arg3 != string_null) {
@@ -955,7 +964,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
     }
-   
+
     if (self.is_admin)
     {
         switch (arg1)
@@ -1298,7 +1307,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 break;
         }
     }
-    
+
     return processedCmd;
 }
 
@@ -1307,7 +1316,7 @@ void (string cmd) SV_ParseClientCommand = {
     tokenize(cmd);
 
     isProcessed = ParseCmds(argv(0), argv(1), argv(2));
-    
+
     if (!isProcessed)
     {
         clientcommand(self, cmd);

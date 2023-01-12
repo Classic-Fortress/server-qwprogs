@@ -734,14 +734,16 @@ string (string s, float width) strpadr =
 float captainmode;
 .float captain;
 
+// fortressone.org API
+float foLoginRequired;
+.string fo_login;
+
 //Player ID
 float loginRequired;
 string loginUrl;
 string webpageUrl;
 .string login;
 .float login_in_progress;
-
-.string fo_token;
 
 //Logging fields
 float gametime;

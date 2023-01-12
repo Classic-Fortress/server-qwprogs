@@ -295,6 +295,11 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 };
 
 float (float tno) TeamFortress_TeamSet = {
+    if (quadmode && !cb_prematch && tno >=1 && tno <=4 && !self.fo_login) {
+        sprint(self, PRINT_HIGH, "Cannot join game in progress if not logged in. Spectate or log in at ", backend_host, "\n");
+        return 0;
+    }
+
     local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
     SetDimensions(TRUE);
     UpdateAllClientsTeamScores();

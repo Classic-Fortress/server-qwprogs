@@ -1086,6 +1086,11 @@ float () CheckAllPlayersReady = {
 }
 
 void () PlayerReady = {
+    if (!self.fo_login && foLoginRequired) {
+        sprint(self, PRINT_HIGH, "You need to log in to ready up. See ", backend_host, "\n");
+        return;
+    }
+
     if (is_countdown) {
         sprint(self, 2, "You cannot do this after countdown has started.\n");
         return;

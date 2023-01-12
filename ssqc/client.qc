@@ -779,6 +779,15 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
+        // specify API host for backend [""]
+        backend_host = FO_GetUserSettingString(world, "backend_host", "bh", "https://www.fortressone.org");
+
+        // enforces API login
+        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "0");
+
+        // specify discord channel [""]
+        discord_channel_id = infokey(world, "discord_channel_id");
+
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
@@ -810,12 +819,6 @@ void () DecodeLevelParms = {
         
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
-
-        // specify discord channel for results auto-reporting [""]
-        discord_channel_id = infokey(world, "discord_channel_id");
-
-        // specify API host for backend [""]
-        backend_host = infokey(world, "backend_host", "https://www.fortressone.org");
 
         // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
         splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");
@@ -3059,11 +3062,17 @@ void () ClientConnect = {
     if (self.netname == string_null)
         KickCheater(self);
 
+    if (FO_GetUserSettingString(self, "_fo_token", "fo_token", FALSE)) {
+        stuffcmd(self, "cmd fo-login\n");
+    } else if (foLoginRequired) {
+        sprint(self, PRINT_HIGH, "You need to log in to ready up. Update setinfo _fo_token. See ", backend_host, "\n");
+    }
+
     if (infokey(self,"*login"))
         self.login = infokey(self,"*login");
     if (infokey(self,"*admin"))
         self.is_admin = stof(infokey(self, "*admin"));
-    if (self.login == string_null)
+    if (loginRequired && self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
     TeamFortress_Alias("id", TF_ID, 0);

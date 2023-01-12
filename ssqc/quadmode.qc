@@ -71,8 +71,6 @@ void (float winner) PostFOQuadFinished = {
 
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_host, match_id);
 	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
-	/* bprint(PRINT_HIGH, "===sending QuadRoundFinished request===\n"); */
-	/* bprint(PRINT_HIGH, "data: ", data, "\n"); */
 };
 
 float () CheckWinningTeam = {

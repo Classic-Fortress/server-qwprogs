@@ -13,19 +13,64 @@ void (entity player, string login, string secret) performLogin = {
 	dprint("\n");
 }
 
+void (entity player) performFoLogin = {
+	local string uri = sprintf("%s/results/api/v1/fo_login", backend_host);
+	local string token = FO_GetUserSettingString(player, "_fo_token", "fo_token", "");
+	uri_get(uri, FO_LOGIN_REQUEST, "application/json", sprintf("{ \"auth_token\": \"%s\" }", token));
+	player.login_in_progress = 1;
+	dprint(sprintf("%s [%s] logging in\n", infokey(player, "name"), infokey(player, "ip")));
+}
+
 void(float reqid, float responsecode, string resourcebody, int resourcebytes) URI_Get_Callback = {
+	local float success = !responsecode;
+
 	switch(reqid) {
 		case FO_QUAD_STARTED_REQUEST:
-			bprint(PRINT_HIGH, "response code: ", ftos(responsecode), "\n");
-			match_id = resourcebody;
-			bprint(PRINT_HIGH, "Match logged ID: ", match_id, "\n");
+			local string msg;
+
+			if (success && resourcebody) {
+				match_id = resourcebody;
+				msg = sprintf("Quad start successfully logged. ID: %s\n", match_id);
+				bprint(PRINT_HIGH, msg);
+				dprint(msg);
+			} else {
+				msg = sprintf("Quad start failed to log. Response code: %d\n", responsecode);
+				bprint(PRINT_HIGH, msg);
+				dprint(msg);
+			}
+
 			break;
 		case FO_QUAD_FINISHED_REQUEST:
-			match_id = resourcebody;
-			bprint(PRINT_HIGH, "response code: ", ftos(responsecode), "\n");
-			bprint(PRINT_HIGH, "body: ", resourcebody, "\n");
-			/* bprint(PRINT_HIGH, "Match ID: ", match_id, "\n"); */
-			/* bprint(PRINT_HIGH, "=================\n"); */
+			local string msg;
+
+			if (success && resourcebody == match_id) {
+				msg = sprintf("Quad result successfully logged. ID: %s\n", match_id);
+				bprint(PRINT_HIGH, msg);
+				dprint(msg);
+			} else {
+				msg = sprintf("Quad result failed to log. Response code: %d\n", responsecode);
+				bprint(PRINT_HIGH, msg);
+				dprint(msg);
+			}
+
+			break;
+		case FO_LOGIN_REQUEST:
+			self.login_in_progress = 0;	
+			local string msg;
+
+			if (!responsecode) {
+				self.fo_login = resourcebody;
+				CenterPrint(self, sprintf("You have logged in as %s\n", self.fo_login));
+				msg = sprintf("%s has logged in as %s\n", infokey(self, "name"), self.fo_login);
+				bprint(PRINT_HIGH, msg);
+				dprint(msg);
+			} else {
+				CenterPrint(self, "Login failed\n");
+				msg = (sprintf("%s login failed. Response code: %d\n", infokey(self, "name"), responsecode));
+				sprint(self, PRINT_HIGH, msg);
+				dprint(msg);
+			}
+
 			break;
 		case BR_LOGIN_REQUEST:
 			local float got_one = 0;
