@@ -61,7 +61,7 @@ void(float reqid, float responsecode, string resourcebody, int resourcebytes) UR
 			if (!responsecode) {
 				self.fo_login = resourcebody;
 				CenterPrint(self, sprintf("You have logged in as %s\n", self.fo_login));
-				msg = sprintf("%s has logged in as %s\n", infokey(self, "name"), self.fo_login);
+				msg = sprintf("%s logged in as %s\n", infokey(self, "name"), self.fo_login);
 				bprint(PRINT_HIGH, msg);
 				dprint(msg);
 			} else {

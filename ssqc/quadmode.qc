@@ -8,7 +8,7 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 	data = strcat(data, "    \"server\": {\n");
 	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
-	data = strcat(data, "      \"host\": \"", cvar_string("sv_serverip"), "\"\n");
+	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
 	data = strcat(data, "    },\n");
 	data = strcat(data, "    \"discord_channel\": {\n");
 	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
@@ -61,11 +61,36 @@ void () PostFOQuadStarted = {
 
 void (float winner) PostFOQuadFinished = {
 	local string data = "";
+	local entity t = find(world, classname, "round");
+	local float timeleft;
+	if (t != world) {
+		timeleft = t.cnt * 60 + t.cnt2;
+	}
 
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
 	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
-	data = strcat(data, "    \"winner\": \"", ftos(winner), "\"\n");
+	data = strcat(data, "    \"winner\": \"", ftos(winner), "\",\n");
+	data = strcat(data, "    \"timeleft\": \"", ftos(timeleft), "\",\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		local float score = TeamFortress_TeamGetScore(tn);
+
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"score\": \"", ftos(score), "\"");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+	}
+
+	data = strcat(data, "    }\n");
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
