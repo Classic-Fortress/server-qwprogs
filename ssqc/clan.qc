@@ -318,6 +318,7 @@ void () PreMatch_Think = {
 
                     localcmd("record \"");
                     str = strzone(GetGameFileName());
+                    demo_filename = str;
                     localcmd(strzone(str));
                     localcmd("\"\n");
 
@@ -1087,7 +1088,7 @@ float () CheckAllPlayersReady = {
 
 void () PlayerReady = {
     if (!self.fo_login && foLoginRequired) {
-        sprint(self, PRINT_HIGH, "You need to log in to ready up. See ", backend_host, "\n");
+        sprint(self, PRINT_HIGH, "You need to log in to ready up. See ", backend_address, "\n");
         return;
     }
 

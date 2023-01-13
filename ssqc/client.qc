@@ -780,7 +780,10 @@ void () DecodeLevelParms = {
         }
 
         // specify API host for backend [""]
-        backend_host = FO_GetUserSettingString(world, "backend_host", "bh", "https://www.fortressone.org");
+        backend_address = FO_GetUserSettingString(world, "backend_address", "backaddy", "https://www.fortressone.org/");
+
+        // specify demo filehost address e.g. https://fortressone-demos.s3.amazonaws.com/sydney/staging/
+        demo_files_address = FO_GetUserSettingString(world, "demo_files_address", "demofileaddy", "");
 
         // enforces API login
         foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "0");
@@ -3065,7 +3068,7 @@ void () ClientConnect = {
     if (FO_GetUserSettingString(self, "_fo_token", "fo_token", FALSE)) {
         stuffcmd(self, "cmd fo-login\n");
     } else if (foLoginRequired) {
-        sprint(self, PRINT_HIGH, "You need to log in to ready up. Update setinfo _fo_token. See ", backend_host, "\n");
+        sprint(self, PRINT_HIGH, "You need to log in to ready up. Update setinfo _fo_token. See ", backend_address, "\n");
     }
 
     if (infokey(self,"*login"))

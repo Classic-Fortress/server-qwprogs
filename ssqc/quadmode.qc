@@ -6,6 +6,10 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
+
+	local string demo_uri = strcat(demo_files_address, demo_filename);
+	data = strcat(data, "    \"demo_uri\": \"", demo_uri, "\",\n");
+
 	data = strcat(data, "    \"server\": {\n");
 	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
 	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
@@ -53,7 +57,7 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	local string uri = sprintf("%s/results/api/v1/matches", backend_host);
+	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 	/* bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n"); */
 	/* bprint(PRINT_HIGH, "data: ", data, "\n"); */
@@ -61,6 +65,7 @@ void () PostFOQuadStarted = {
 
 void (float winner) PostFOQuadFinished = {
 	local string data = "";
+
 	local entity t = find(world, classname, "round");
 	local float timeleft;
 	if (t != world) {
@@ -94,7 +99,7 @@ void (float winner) PostFOQuadFinished = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_host, match_id);
+	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
 	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
 };
 

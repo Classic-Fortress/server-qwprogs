@@ -480,6 +480,7 @@ float vote_anarchy_mode;
 float vote_total_votes;
 float vote_style;
 float vote_threshold;
+string demo_filename;
 
 .float tf_id;
 
@@ -637,7 +638,8 @@ float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
 string discord_channel_id;
-string backend_host;
+string backend_address;
+string demo_files_address;
 float splitbackpackmodels;
 float standardizedeathammo;
 float deathammo_shells;
