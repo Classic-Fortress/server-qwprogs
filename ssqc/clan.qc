@@ -318,7 +318,7 @@ void () PreMatch_Think = {
 
                     localcmd("record \"");
                     str = strzone(GetGameFileName());
-                    demo_filename = str;
+                    game_filename = str;
                     localcmd(strzone(str));
                     localcmd("\"\n");
 

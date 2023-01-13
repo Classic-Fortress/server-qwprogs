@@ -7,8 +7,11 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "  \"match\": {\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
-	local string demo_uri = strcat(demo_files_address, demo_filename);
+	local string demo_uri = strcat(demo_files_address, game_filename, ".mvd");
 	data = strcat(data, "    \"demo_uri\": \"", demo_uri, "\",\n");
+
+	local string stats_uri = strcat(stats_files_address, game_filename, ".json");
+	data = strcat(data, "    \"stats_uri\": \"", stats_uri, "\",\n");
 
 	data = strcat(data, "    \"server\": {\n");
 	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
