@@ -481,7 +481,6 @@ float vote_total_votes;
 float vote_style;
 float vote_threshold;
 string game_filename;
-string stats_filename;
 
 .float tf_id;
 

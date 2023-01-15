@@ -134,10 +134,6 @@ void() CSQC_Parse_Event = {
 
                     if(SBAR.GameMode & GAMEMODE_QUAD) {
                         switch (all_time) {
-                            case ALL_TIME_COLOUR:
-                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
-                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
-                                break;
                             case ALL_TIME_ATTACK:
                                 FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
                                 FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
@@ -146,6 +142,9 @@ void() CSQC_Parse_Event = {
                                 FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
                                 FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
                                 break;
+                            default:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
                         }
                     } else {
                         FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;

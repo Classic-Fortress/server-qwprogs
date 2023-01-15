@@ -70,7 +70,7 @@ void (float winner) PostFOQuadFinished = {
 	local string data = "";
 
 	local entity t = find(world, classname, "round");
-	local float timeleft;
+	local float timeleft = 0;
 	if (t != world) {
 		timeleft = t.cnt * 60 + t.cnt2;
 	}
