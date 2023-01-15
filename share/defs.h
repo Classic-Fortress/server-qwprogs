@@ -1404,6 +1404,7 @@
 
 #define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"
 #define FO_CONFIG_PATH	"fortressone_csqc.cfg"
+#define FO_TOKEN_PATH	"fortressone_token.cfg"
 
 #define HUD_ICON_SIZE_X   24
 #define HUD_ICON_SIZE_Y   24

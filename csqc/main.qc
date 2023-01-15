@@ -28,6 +28,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 //         precache_pic(HudIcons[i].icon);
 //     }
 
+    registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
@@ -170,6 +171,28 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "login":
+            local string token = argv(1);
+            local float filehandle;
+
+            if(token == "") {
+                filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+
+                if (filehandle == -1) {
+                    print("You need to provide your token\n");
+                    break;
+                } else {
+                    token = fgets(filehandle);
+                }
+            } else {
+                filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
+                fputs(filehandle, token);
+                fclose(filehandle);
+            }
+
+            localcmd("setinfo _fo_token ", token, "\n");
+            localcmd("cmd fo-login\n");
+            break;
         case "fo_hud_editor":
             FO_Hud_Editor();
             break;

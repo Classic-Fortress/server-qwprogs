@@ -789,7 +789,7 @@ void () DecodeLevelParms = {
         stats_files_address = FO_GetUserSettingString(world, "stats_files_address", "statsfileaddy", "");
 
         // enforces API login
-        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "0");
+        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
 
         // specify discord channel [""]
         discord_channel_id = infokey(world, "discord_channel_id");
