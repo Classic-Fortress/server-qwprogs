@@ -14,6 +14,7 @@ void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+void FoLogin(string token);
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -172,26 +173,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
     switch(argv(0)) {
         case "login":
-            local string token = argv(1);
-            local float filehandle;
-
-            if(token == "") {
-                filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
-
-                if (filehandle == -1) {
-                    print("You need to provide your token\n");
-                    break;
-                } else {
-                    token = fgets(filehandle);
-                }
-            } else {
-                filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
-                fputs(filehandle, token);
-                fclose(filehandle);
-            }
-
-            localcmd("setinfo _fo_token ", token, "\n");
-            localcmd("cmd fo-login\n");
+            FoLogin(argv(1));
             break;
         case "fo_hud_editor":
             FO_Hud_Editor();
@@ -374,30 +356,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        // case "+quick1":
-        //     localcmd("+button8\n");
-        //     break;
-        // case "-quick1":
-        //     localcmd("-button8\n");
-        //     break;
-        // case "+quick2":
-        //     localcmd("+button9\n");
-        //     break;
-        // case "-quick2":
-        //     localcmd("-button9\n");
-        //     break;
-        // case "+quick3":
-        //     localcmd("+button10\n");
-        //     break;
-        // case "-quick3":
-        //     localcmd("-button10\n");
-        //     break;
-        // case "+quick4":
-        //     localcmd("+button11\n");
-        //     break;
-        // case "-quick4":
-        //     localcmd("-button11\n");
-        //     break;
+            // case "+quick1":
+            //     localcmd("+button8\n");
+            //     break;
+            // case "-quick1":
+            //     localcmd("-button8\n");
+            //     break;
+            // case "+quick2":
+            //     localcmd("+button9\n");
+            //     break;
+            // case "-quick2":
+            //     localcmd("-button9\n");
+            //     break;
+            // case "+quick3":
+            //     localcmd("+button10\n");
+            //     break;
+            // case "-quick3":
+            //     localcmd("-button10\n");
+            //     break;
+            // case "+quick4":
+            //     localcmd("+button11\n");
+            //     break;
+            // case "-quick4":
+            //     localcmd("-button11\n");
+            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -515,7 +497,7 @@ void _Sync_ServerCommandFrame() {
         is_observer = FALSE;
 
     vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
-                  getstatf(STAT_VELOCITY_Z)];
+           getstatf(STAT_VELOCITY_Z)];
     speed = sqrt(vel.x * vel.x + vel.y * vel.y);
 
     local float health = getstatf(STAT_HEALTH);
@@ -540,7 +522,7 @@ void _Sync_ClientCommandFrame() {
     // Client command frames are regenerated beyond the server frame, so we
     // cannot check that we have not seen this client command frame alone.
     if (last_servercommandframe == servercommandframe &&
-        last_clientcommandframe == clientcommandframe)
+            last_clientcommandframe == clientcommandframe)
         return;
     last_clientcommandframe = clientcommandframe;
 }
@@ -550,4 +532,25 @@ void _Sync_ClientCommandFrame() {
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
     _Sync_ClientCommandFrame();
+}
+
+void FoLogin(string token) {
+    local float filehandle;
+
+    if (token != "") {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
+        fputs(filehandle, token);
+        fclose(filehandle);
+    } else {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+        if (filehandle == -1) {
+            print("Can't login without valid token\n");
+            return;
+        } else {
+            token = fgets(filehandle);
+        }
+    }
+
+    localcmd("setinfo _fo_token ", token, "\n");
+    localcmd("cmd fo-login\n");
 }

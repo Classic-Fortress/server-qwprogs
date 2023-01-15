@@ -363,6 +363,16 @@ void UpdateClient_VoteMap_Add(entity pl, entity map_candidate) = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS);
 }
 
+void UpdateClient_Login(entity pl) = {
+    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+        return;
+
+    msg_entity = pl;
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_LOGIN);
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+}
+
 void() votemap_sender_think = {
     if (self.owner.vote_map_send) {
         UpdateClient_VoteMap_Add(self.owner, self.owner.vote_map_send);

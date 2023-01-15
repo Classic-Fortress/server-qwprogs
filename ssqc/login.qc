@@ -14,10 +14,10 @@ void (entity player, string login, string secret) performLogin = {
 }
 
 void (entity player) performFoLogin = {
+	player.login_in_progress = 1;
 	local string uri = sprintf("%s/results/api/v1/fo_login", backend_address);
 	local string token = FO_GetUserSettingString(player, "_fo_token", "fo_token", "");
 	uri_get(uri, FO_LOGIN_REQUEST, "application/json", sprintf("{ \"auth_token\": \"%s\" }", token));
-	player.login_in_progress = 1;
 	dprint(sprintf("%s [%s] logging in\n", infokey(player, "name"), infokey(player, "ip")));
 }
 

@@ -3068,12 +3068,6 @@ void () ClientConnect = {
     if (self.netname == string_null)
         KickCheater(self);
 
-    if (FO_GetUserSettingString(self, "_fo_token", "fo_token", FALSE)) {
-        stuffcmd(self, "cmd fo-login\n");
-    } else if (foLoginRequired) {
-        sprint(self, PRINT_HIGH, "You need to log in to ready up. Update setinfo _fo_token. See ", backend_address, "\n");
-    }
-
     if (infokey(self,"*login"))
         self.login = infokey(self,"*login");
     if (infokey(self,"*admin"))
@@ -3123,6 +3117,7 @@ void () ClientConnect = {
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
         UpdateClient_VoteMap_AddAll(self);
+        UpdateClient_Login(self);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

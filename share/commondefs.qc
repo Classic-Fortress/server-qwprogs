@@ -33,6 +33,7 @@
 #define MSG_VOTE_MAP_DELETE 21
 #define MSG_PLAYERDIE       22
 #define MSG_QUAD_ROUND_BEGIN   23
+#define MSG_LOGIN    24
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2

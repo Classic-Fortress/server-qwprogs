@@ -326,6 +326,15 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
+        case MSG_LOGIN:
+            local float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+            if (filehandle != -1) {
+                localcmd("setinfo _fo_token ", fgets(filehandle), "\n");
+                localcmd("cmd fo-login\n");
+            } else {
+                print("You are not logged in\n");
+            }
+            break;
     }
 }
 

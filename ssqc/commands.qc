@@ -938,7 +938,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
         case "fo-login":
             processedCmd = TRUE;
             if (self.fo_login != string_null) {
-                sprint (self, PRINT_HIGH, "You are already logged in\n");
+                sprint (self, PRINT_HIGH, "You are logged in\n");
             }
             else {
                 performFoLogin(self);
