@@ -3,6 +3,36 @@
 void (entity Goal, entity AP, entity ActivatingGoal) AttemptToActivate;
 typedef void (float n) f_void_float;
 
+enum {
+    CT_NOEXTERNALEFFECT,  // No external effects (e.g. reload, build, prime, etc)
+    CT_SLOW_PROJECTILE,   // Slow proj => more judder (e.g. rocket)
+    CT_FAST_PROJECTILE,   // Fast proj => less judder (e.g. heavy bullet)
+};
+
+struct antilag_settings_t {
+    float rewind_detpipe;
+} antilag_settings;
+
+.vector antilag_origin;
+
+.float client_time;              // A stable/predictable client clock
+.float client_ping;              // ping used for prediction
+.float last_remote_client_time;  // For monoticity
+.float client_lastupdate;
+
+.void() client_think;            // client-time relative think
+.float client_thinkindex;
+.float client_nextthink;
+
+.int prng_base[PRNG_NUM_STATES];
+
+// A monotonically non-decreasing, latency corrected notion of remote
+// client-time.  Monotonicity guarantees that for some offset `o`:
+//     at t1: remote_client_time() + o < at t2: lag_time() + o  FOR t2 > t1
+// E.g. That you never have to worry about the correction reordering events
+// that `time + o` would not.
+float remote_client_time();
+
 //===========================================================================
 // TEAMFORTRESS Defs
 //===========================================================================
@@ -30,9 +60,7 @@ typedef void (float n) f_void_float;
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
-.float is_quickfiring;          // TRUE for a player if they're using the quick slots
 .float is_concussed;            // TRUE for a player who is affected by concussion grenade
-.float has_quickfired;          // TRUE for a player that has stopped quick firing (until weapon is ready)
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
@@ -74,7 +102,6 @@ typedef void (float n) f_void_float;
 .float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
-.float power_full;              // Whether sniper power has reached full power or not
 .float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
 .float dispenser_ticks;         // Used to indicate when engineer's dispenser is finished building
 .float building_percentage;     // The building percentage shown in status bar
@@ -85,6 +112,7 @@ typedef void (float n) f_void_float;
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
 .float tfstate;                 // State flags for TeamFortress
+.float last_tfstate;             // Internal cache of tfstate for detecting updates
 .entity linked_list;            // Used just like chain. Has to be separate so
                                 // it doesn't interfere with chain. See T_RadiusScan
 
@@ -109,11 +137,9 @@ typedef void (float n) f_void_float;
 .float items_allowed;
 .float armor_allowed;
 .float maxarmor;
-.float maxfbspeed;              // Maximum forward/back speed
-.float maxstrafespeed;          // Maximum side speed
+.float csqc_maxspeed;
 
-.float weaponmode;              // Used for multiple mode weapons
-.float last_weaponmode;         // Last weapon's weapon mode
+.float is_disarming;
 .float motd;                    // Used to display MOTD
 .float current_menu;
 .float current_menu_type;
@@ -164,6 +190,7 @@ float round_winner_team;
 entity round_winner;
 float round_winner_print_health;
 
+float team_no_attack;
 .float team_no;                 // The team you belong to
 .float all_time;                // Automatically join attacking/defending team during quads
 .float lives;                   // The number of lives you have left
@@ -191,23 +218,9 @@ float coop;
 /*==============================================*/
 /* New Weapon variables				*/
 /*==============================================*/
-.float weapons_carried;         // the weapons the player is carrying
-.float current_weapon;          // the weapon the player is using
-.float last_weapon;             // the last weapon the player was using
-.float current_weaponslot;      // the currently equipped weaponslot
-.float last_weaponslot;         // the last equipped weaponslot
-.float queue_weaponslot;        // the weaponslot to switch to when possible
-.float queue_weaponstate;       // the weaponstate to load when possible
-.float next_weapon;             // used by weapon slots to communicate which weapon to select
-.float next_weaponmode;         // used by weapon slots to communicate which weapon mode to select
-
-// weapon states
-.float weaponstate_current_weaponslot;
-.float weaponstate_last_weaponslot;
-.float weaponstate_current_weapon;
-.float weaponstate_last_weapon;
-.float weaponstate_weaponmode;
-.float weaponstate_last_weaponmode;
+.Slot current_slot;            // the currently equipped (weapon) slot
+.Slot last_slot;               // the last slot the player was using
+.Slot queue_slot;              // the slot to switch to when possible
 
 .float ammo_medikit;            // Ammo used for the medikit
 .float maxammo_medikit;
@@ -216,16 +229,18 @@ float coop;
 .float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
+.float reload_finished;         // when the reload will finish
+
+// Only use below for map ent compatibility.
 .float reload_shotgun;
 .float reload_super_shotgun;
 .float reload_sniper_rifle;
 .float reload_grenade_launcher;
 .float reload_rocket_launcher;
 .float reload_assault_cannon;
-.float reload_tick;             // how often the status bar should be refreshed during reload
-.float reload_time;             // when the reload will finish
-.float reload_clipsize;         // how much ammo is currently in the reloading clip
-.float reload_sniper_ticks;		// used to indicate when sniper rifle (with only 1 clip) will be reloaded
+// Only use above for map ent compatibility.
+
+.float clip_fired[TF_NUM_SLOTS];
 
 // Assault Cannon
 .float heat;
@@ -239,7 +254,7 @@ float coop;
 .float immune_to_check;
 
 // Make sure people don't do too many saveme sounds
-.float last_saveme_sound;
+.float next_saveme_sound;
 
 .float no_active_nail_grens;
 
@@ -410,7 +425,6 @@ float live_camera;
 float already_chosen_map;
 
 .float disptimer;
-.float fire_held_down;
 .float hit_in_current_animation; // Set on knife attack if a hit is recorded to prevent combo hits
 
 // sniper location damage stuff
@@ -421,7 +435,6 @@ float already_chosen_map;
 
 // flash grenade level
 .float FlashTime;
-.float nailpos;
 
 // anti spam
 .float antispam_detpack;        // don't spam detpack messages
@@ -546,13 +559,11 @@ float id_extended;
 float remember_weapon;
 float discammo_pickup;
 float old_dropflag;
-float reload_cliptick;
 float old_sniperrange;
 //float detpipe_limit;
 float detpipe_limit_world;
 float old_pipecooldown;
 float medicaura;
-float old_medikit;
 float old_biodamage;
 float flame_knockback;
 float build_water;
@@ -562,7 +573,6 @@ float cannon_move;
 float cannon_movespin;
 float cannon_conc;
 float cannon_accuracy;
-float fo_hwguy;
 float feign_air;
 float feign_pack;
 float feign_msg;
@@ -586,13 +596,6 @@ float server_huetf;
 float scoutscanspike;
 float asscanrange;
 float asscanrangedie;
-float airblastv2;
-float airblastpushmin;
-float airblastpushmax;
-float airblastjump;
-float airblastsize;
-float airblastcells;
-float airblastjumpcells;
 float force_reload;
 
 float old_spanner;
@@ -603,7 +606,6 @@ float max_armor_hwguy;
 float project_weapons;
 float project_weapons_max_latency;
 
-float ng_velocity;
 float ng_damage;
 float sng_damage;
 float superaxe;
@@ -611,10 +613,8 @@ float supermedikit;
 float superspanner;
 float superknife;
 float superknife_multihit;
-float old_ng_rof;
 float impulse_queue;
 float detpack_when_reloading;
-float pyro_type;
 float flag_follow;
 float ceasefire_type;
 float cs_paused;
@@ -623,7 +623,6 @@ string pause_actor;
 float unpause_requested;
 float unpause_countdown;
 float unpause_lastcountnumber;
-float chweap_wait_attfinished;
 float override_mapclasses;
 float solid_detpack;
 float walls_block_emp;
@@ -650,6 +649,8 @@ float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
+
+float fo_projectiles;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -753,7 +754,6 @@ float gametime;
 string gametimestamp;
 float logfilehandle;
 float canlog;
-.string grenadename;
 .float classtime;
 .float goalrunningtime;
 
@@ -774,6 +774,8 @@ float FO_FlashDimension;
 
 // precise grenades
 .entity grenade_timer;
+.float last_throw;
+.float last_prime;
 
 // allow for default goal state
 .float default_group_no;
@@ -799,9 +801,11 @@ string match_id;
 
 // people complain about settings, let's track them
 
-string settings_to_track_list[2] = {
+string settings_to_track_list[4] = {
     "sv_antilag",
-    "project_weapons"
+    "project_weapons",
+    "al_rewind_detpipe",
+    "al_max_remote_client_time_offset",
 };
 
 typedef struct setting_t {

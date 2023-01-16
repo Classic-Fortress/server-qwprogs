@@ -94,75 +94,15 @@ void (entity player, float previous, float next, float timeplayed) LogEventChang
 	logevent(event);
 }
 
-string (float code, float mode) GetWeaponName = {
-	if (code == 1) {
-		return "hook";
+string (float weapon) GetWeaponName = {
+	if (weapon >= 1 && weapon <= WEAP_LAST) {
+		string name = FO_GetWeapName(weapon);
+		name = strtolower(name);
+		name = strreplace(name, " ", "");
+		return name;
 	}
-	else if (code == 4) {
-		return "medikit";
-	}
-	else if (code == 8) {
-		return "spanner";
-	}
-	else if (code == 16) {
-		return "axe";
-	}
-	else if (code == 32) {
-		return "sniperrifle";
-	}
-	else if (code == 64) {
-		return "autorifle";
-	}
-	else if (code == 128) {
-		return "shotgun";
-	}
-	else if (code == 256) {
-		return "supershotgun";
-	}
-	else if (code == 512) {
-		return "nailgun";
-	}
-	else if (code == 1024) {
-		return "supernailgun";
-	}
-	else if (code == 2048) {
-		if (mode == 0)
-			return "grenadelauncher";
-		else if (mode == 1)
-			return "pipebomblauncher";
-	}
-	else if (code == 4096) {
-		return "flamethrower";
-	}
-	else if (code == 8192) {
-		return "rocketlauncher";
-	}
-	else if (code == 16384) {
-		return "incendiary";
-	}
-	else if (code == 32768) {
-		return "assaultcannon";
-	}
-	else if (code == 65536) {
-		return "lightning";
-	}
-	else if (code == 131072) {
-		return "plasmagun";
-	}
-	else if (code == 262144) {
-		return "tranquilizer";
-	}
-	else if (code == 524288) {
-		return "railgun";
-	}
-	else if (code == 1048576) {
-		return "tribolt";
-	}
-	else if (code == 2097152) {
-		return "sniperrail";
-	}
-	else
-		return "undefined";
+
+	return "undefined";
 }
 
 void (entity attacker, entity target, string afflictionType) LogAffliction = {
@@ -230,7 +170,7 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 
 	
 	if (inflictor.classname == "player") 
-		inflictorId = GetWeaponName(attacker.current_weapon, attacker.weaponmode);
+		inflictorId = GetWeaponName(FO_PlayerCurrentWeapon(attacker));
 	else {
 		inflictorId = inflictor.classname;
 		if ((inflictor.classname == "spike") && (attacker.playerclass == 3)) {
@@ -246,8 +186,8 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 			if (damageKind == "damageTeam")
 				return;
 		}
-		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
-			inflictorId = inflictor.grenadename;
+		else if (inflictorId == "grenade" && inflictor.fpp.gren_type >= GREN_FIRST)
+			inflictorId = FO_GrenDesc(inflictor.fpp.gren_type)->logname;
 	}
 
 
@@ -332,7 +272,7 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 		killKind = "enemy";
 
 	if (inflictor.classname == "player") 
-		inflictorId = GetWeaponName(attacker.current_weapon, attacker.weaponmode);
+		inflictorId = GetWeaponName(FO_PlayerCurrentWeapon(attacker));
 	else {
 		inflictorId = inflictor.classname;
 		if ((inflictor.classname == "spike") && (attacker.playerclass == 3)) {
@@ -345,8 +285,8 @@ void (entity attacker, entity target, entity inflictor) LogEventKill = {
 			attackername = "world";
 		else if (inflictorId == "building_sentrygun")
 			attackername = getEntityNameOrLogin(attacker.real_owner);
-		else if ((inflictorId == "grenade") && (inflictor.grenadename != ""))
-			inflictorId = inflictor.grenadename;
+		else if (inflictorId == "grenade" && inflictor.fpp.gren_type >= GREN_FIRST)
+			inflictorId = FO_GrenDesc(inflictor.fpp.gren_type)->logname;
 	}
 
 	local string event;
@@ -446,7 +386,7 @@ void (entity attacker) LogEventAttack = {
 	if (canlog == 0)
 		return;
 	local string event;
-	event = sprintf(",\n{\"type\": \"attack\", \"player\": \"%s\", \"playerClass\": \"%s\", \"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": \"%s\"}", getEntityNameOrLogin(attacker), ftos(attacker.playerclass), GetWeaponName(attacker.current_weapon, attacker.weaponmode), ftos(gametime), gametimestamp);
+	event = sprintf(",\n{\"type\": \"attack\", \"player\": \"%s\", \"playerClass\": \"%s\", \"inflictor\": \"%s\", \"time\": %s, \"gameTimeStamp\": \"%s\"}", getEntityNameOrLogin(attacker), ftos(attacker.playerclass), GetWeaponName(FO_PlayerCurrentWeapon(attacker)), ftos(gametime), gametimestamp);
 	logevent(event);
 }
 

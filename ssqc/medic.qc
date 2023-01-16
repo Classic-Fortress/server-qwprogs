@@ -73,8 +73,6 @@ void () CF_Medic_AuraFindPlayers = {
     }
 
     self.owner.ammo_cells = self.owner.ammo_cells - ceil(PC_MEDIC_MAXAMMO_CELL / 20);
-    if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
-        self.owner.currentammo = self.owner.ammo_cells;
 };
 
 // increases the medic's cells two times per second
@@ -82,10 +80,6 @@ void () CF_Medic_AuraFindPlayers = {
 void () CF_Medic_RegenerateCells = {
     local entity oldself;
     local float f_newcells = self.owner.ammo_cells + min(ceil(PC_MEDIC_MAXAMMO_CELL * (PC_MEDIC_CELL_REGEN_PERCENT / 100)), ceil(PC_MEDIC_MAXAMMO_CELL - self.owner.ammo_cells));
-
-    // don't regenerate cells if not using aura or new medikit
-    if (!medicaura && old_medikit)
-        return;
 
     // skip this regen tick if on cooldown
     if (time <= self.owner.regen_cooldown) {
@@ -103,9 +97,6 @@ void () CF_Medic_RegenerateCells = {
             Status_Refresh(self.owner);
         else if (f_newcells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2) && f_newcells < ceil(PC_MEDIC_MAXAMMO_CELL / 2 + PC_MEDIC_MAXAMMO_CELL / 10))
             Status_Refresh(self.owner);
-
-        if (self.owner.current_weapon == WEAP_MEDIKIT && !old_medikit)
-            self.owner.currentammo = self.owner.ammo_cells;
     }
 
     // Update drop ammo menu if cells are
@@ -128,11 +119,7 @@ void () CF_Medic_Regenerate = {
     }
 
     // only regen if half of max or more cells with new medikit
-    if (!old_medikit) {
-        if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
-            return;
-        }
-    } else if (self.owner.health >= self.owner.max_health || self.owner.ammo_medikit) {
+    if (self.owner.health >= self.owner.max_health || self.owner.ammo_cells < ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
         return;
     }
 

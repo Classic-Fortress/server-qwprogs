@@ -4,6 +4,8 @@ void () TerminateStaleServer;
 
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
 
+void InitFppProjectiles();
+
 void () main = {
     dprint("main function\n");
     precache_file("progs.dat");
@@ -277,7 +279,6 @@ void () worldspawn = {
     precache_sound2("speech/saveme2.wav");
     precache_model2("progs/detpack2.mdl");
     precache_model2("progs/grenade3.mdl");
-    precache_model2(MODEL_PROJ_DIAM2);
     precache_sound("grentimer.wav");
     precache_sound("mcp_grentimer1.wav");
     precache_sound("mcp_grentimer2.wav");
@@ -332,13 +333,13 @@ void () worldspawn = {
     clientstat(STAT_ALL_TIME, EV_FLOAT, all_time);
     clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
     clientstat(STAT_CLASS, EV_FLOAT, playerclass);
-    clientstat(STAT_VELOCITY_X, EV_VECTOR, velocity); //STAT_VELOCITY_Y and Z are automaticaly defined with this too, because vector
     clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
     clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
     clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
 
     globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");
+    globalstat(STAT_TEAMNO_ATTACK, EV_FLOAT, "team_no_attack");
 
     entity worldspawnent;
     worldspawnent = spawn();
@@ -373,6 +374,7 @@ void () worldspawn = {
     }
 
     dimension_send = DMN_NOFLASH;
+    Predict_Init();
 
     settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
     for (float i = 0; i < settings_to_track_list.length; i++)

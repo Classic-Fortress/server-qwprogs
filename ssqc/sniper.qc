@@ -119,11 +119,9 @@ void () SniperSight_Update = {
     local vector org;
 
     if (!(self.owner.tfstate & TFSTATE_AIMING) ||
-        (self.owner.current_weapon != WEAP_SNIPER_RIFLE)) {
+        (FO_PlayerCurrentWeapon(self.owner) != WEAP_SNIPER_RIFLE)) {
 
-        self.owner.tfstate =
-            self.owner.tfstate - (self.owner.tfstate & TFSTATE_AIMING);
-        TeamFortress_SetSpeed(self.owner);
+        self.owner.tfstate &= ~TFSTATE_AIMING;
         self.owner.heat = 0;
         dremove(self);
         return;
@@ -143,6 +141,13 @@ void () SniperSight_Update = {
     setorigin(self, trace_endpos);
     self.nextthink = time + 0.1;
 };
+
+static float sight_send_filter() {
+    if (other == self.owner)
+        return FALSE;
+
+    return TRUE;
+}
 
 void () SniperSight_Create = {
     local entity sight;
@@ -165,4 +170,6 @@ void () SniperSight_Create = {
 
     sight.think = SniperSight_Update;
     sight.nextthink = time + 0.05;
+    if (ClientPred_Enabled(self, CSQC_SNIPER_SIGHT))
+        sight.customizeentityforclient = sight_send_filter;
 };

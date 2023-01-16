@@ -84,7 +84,7 @@ void () StartMatch =
     }
 	te = find(world, classname, "detpack");
 	while (te){
-		if (te.weaponmode == 1) {
+		if (te.is_disarming == 1) {
 			TeamFortress_SetSpeed (te.enemy);
 			dremove(te.oldenemy);
 			dremove(te.observer_list);
@@ -1079,6 +1079,7 @@ float () CheckAllPlayersReady = {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
             bprint (2, "All players ready, starting match\n");
+            localcmd("localinfo clown 0");  // Disable any clown settings.
             StartTimer ();
         }
         return 1;

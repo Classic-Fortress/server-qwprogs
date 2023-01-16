@@ -3,11 +3,9 @@
 //========================================================
 
 void () NormalGrenadeTouch;
-void () NormalGrenadeExplode;
 
 void () MirvGrenadeTouch;
 void () MirvGrenadeExplode;
-void (vector org, entity shooter) MirvGrenadeLaunch;
 
 void () TeamFortress_DetpackMenu;
 void () TeamFortress_DetpackStop;
@@ -27,7 +25,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
 
     float rewound = FALSE;
     if (!force && count > 0)
-        rewound = AL_RewindPlayersExceptSelf(self.pipecooldown);
+        rewound = RewindPlayersExceptSelf(self.pipecooldown);
 
     for (float i = 0; i < count; i++) {
         if (pipes[i].owner == self) {
@@ -40,7 +38,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
             pipes[i].voided = 1;
 
             RenderExplosion(pipes[i].origin);
-            RemoveDeferred(pipes[i]);
+            dremove(pipes[i]);
         }
     }
 
@@ -62,60 +60,42 @@ void () MirvGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
+static void (vector org, entity shooter) MirvGrenadeLaunch = {
+    float xdir = 75 * crandom();
+    float ydir = 75 * crandom();
+    float zdir = 40 * random();
+
+    entity proj = FOProj_Create(FPP_HANDGRENADE);
+    proj.owner = shooter;
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
+
+    proj.classname = "grenade";
+    proj.touch = NormalGrenadeTouch;
+    proj.think = FO_T_GrenExplode;
+    proj.nextthink = time + 2 + random();
+
+    proj.velocity = [xdir * 2, ydir * 2, zdir * 15];
+
+    FO_GrenInfo* gdesc = FO_GrenDesc(GREN_MIRVLET);
+    proj.fpp.gren_type = GREN_MIRVLET;
+    proj.skin = gdesc->skin;
+
+    setorigin(proj, org);
+    FOProj_Finalize(proj);
+};
+
 void () MirvGrenadeExplode = {
-    local float i;
-
-    deathmsg = DMSG_GREN_MIRV;
-    T_RadiusDamage(self, self.owner, 100, world);
-
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
+    FO_GrenExplode(self);
 
     self.solid = SOLID_NOT;
-    i = 0;
-    while (i < 4) {
-        MirvGrenadeLaunch(self.origin + '0 0 -1', self.owner);
-        i = i + 1;
-    }
-    BecomeExplosion();
+    for (int i = 0; i < 4; i++)
+        MirvGrenadeLaunch(self.origin, self.owner);
+
+    dremove(self);
 
 };
 
-void (vector org, entity shooter) MirvGrenadeLaunch = {
-    local float xdir;
-    local float ydir;
-    local float zdir;
-
-    xdir = 150 * random() - 75;
-    ydir = 150 * random() - 75;
-    zdir = 40 * random();
-
-    newmis = spawn();
-    newmis.owner = shooter;
-    newmis.movetype = MOVETYPE_BOUNCE;
-    newmis.solid = SOLID_BBOX;
-
-    newmis.classname = "grenade";
-    newmis.grenadename = "mirvsinglegrenade";
-    newmis.weapon = DMSG_GREN_MIRV;
-    newmis.touch = NormalGrenadeTouch;
-    newmis.think = NormalGrenadeExplode;
-    newmis.nextthink = time + 2 + random();
-
-    newmis.velocity_x = xdir * 2;
-    newmis.velocity_y = ydir * 2;
-    newmis.velocity_z = zdir * 15;
-    newmis.avelocity = '250 300 400';
-
-    FO_SetModel(newmis, "progs/grenade2.mdl");
-
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    setorigin(newmis, org);
-};
 
 void () TeamFortress_DetpackMenu = {
     local entity detpack;
@@ -158,11 +138,6 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
-    if (!(self.weapons_carried & WEAP_DETPACK)) {
-        sprint(self, PRINT_HIGH, "You don't have a detpack\n");
-        return;
-    }
-
     if (self.ammo_detpack <= 0) {
         sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
@@ -223,15 +198,9 @@ void (float timer) TeamFortress_SetDetpack = {
     self.detpack_left = timer;
     self.ammo_detpack = self.ammo_detpack - 1;
     self.immune_to_check = time + 10;
-    self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
-    self.weapon = self.current_weapon;
-    self.next_weapon = self.current_weapon;
-    self.current_weapon = 0;
-    self.weaponmodel = "";
-    self.weaponframe = 0;
+    self.tfstate |= TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON;
 
     Status_Refresh(self);
-    TeamFortress_SetSpeed(self);
 
     self.pausetime = time + 3;
     stimer = ftos(timer);
@@ -264,14 +233,11 @@ void () TeamFortress_DetpackStop = {
     self.ammo_detpack = self.ammo_detpack + 1;
     dremove(detpack_timer);
 
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
     self.is_detpacking = 0;
+    self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     self.detpack_left = 0;
-    self.current_weapon = self.next_weapon;
 
     Status_Refresh(self);
-    W_SetCurrentAmmo(self);
-    TeamFortress_SetSpeed(self);
     self.pausetime = time;
 };
 
@@ -288,15 +254,12 @@ void () TeamFortress_DetpackSet = {
 
     self.owner.is_detpacking = 0;
     Menu_Close(self.owner);
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
-    TeamFortress_SetSpeed(self.owner);
+    self.owner.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     FO_Sound(self.owner, CHAN_VOICE, "doors/medtry.wav", 1, ATTN_NORM);
     oldself = self;
     self = self.owner;
-    self.is_detpacking = 0;
-    self.current_weapon = self.next_weapon;
+    self.is_detpacking = 0;  // Weapon is queued.
     Status_Refresh(self);
-    W_SetCurrentAmmo(self);
     self = oldself;
 
     newmis = spawn();
@@ -314,7 +277,7 @@ void () TeamFortress_DetpackSet = {
     newmis.angles_y = self.owner.angles_y;
     newmis.velocity = '0 0 0';
     newmis.avelocity = '0 0 0';
-    newmis.weaponmode = 0;
+    newmis.is_disarming = FALSE;
     newmis.touch = TeamFortress_DetpackTouch;
 
     FO_SetModel(newmis, "progs/detpack.mdl");
@@ -412,8 +375,7 @@ void () TeamFortress_DetpackExplode = {
     } else
         sprint(self.owner, PRINT_HIGH, "Your detpack fizzled out\n");
 
-    if (self.weaponmode == 1) {
-        TeamFortress_SetSpeed(self.enemy);
+    if (self.is_disarming) {
         dremove(self.oldenemy);
         dremove(self.observer_list);
     }
@@ -432,7 +394,7 @@ void () TeamFortress_DetpackTouch = {
         return;
     if (other.deadflag)
         return;
-    if (self.weaponmode == 1)
+    if (self.is_disarming)
         return;
 
     if ((other.team_no == self.owner.team_no) && (self.owner.team_no != 0))
@@ -451,11 +413,9 @@ void () TeamFortress_DetpackTouch = {
     }
 
     other.immune_to_check = time + 5;
-    other.tfstate = other.tfstate | TFSTATE_CANT_MOVE;
+    other.tfstate |= (TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
 
     sprint(other, PRINT_HIGH, "Disarming detpack...\n");
-
-    TeamFortress_SetSpeed(other);
 
     disarm = spawn();
     disarm.owner = other;
@@ -464,7 +424,7 @@ void () TeamFortress_DetpackTouch = {
     disarm.nextthink = time + 3;
     disarm.think = TeamFortress_DetpackDisarm;
 
-    self.weaponmode = 1;
+    self.is_disarming = TRUE;
     self.enemy = other;
     self.observer_list = disarm;
 };
@@ -476,9 +436,8 @@ void () TeamFortress_DetpackDisarm = {
     }
     bprint(PRINT_MEDIUM, self.enemy.owner.netname,
            "'s detpack was defused by ", self.owner.netname, "\n");
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_CANT_MOVE);
+    self.owner.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
     TF_AddFrags(self.owner, 1);
-    TeamFortress_SetSpeed(self.owner);
     self.enemy.owner.detpack_left = 0;
     Status_Refresh(self.enemy.owner);
 

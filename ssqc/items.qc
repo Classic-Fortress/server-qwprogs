@@ -241,7 +241,7 @@ void () health_touch = {
         }
     } else {
         if (!T_Heal(other, self.healamount, 0)) {
-            if (other.weapons_carried & 4) {
+            if (FO_WeaponsMask(other) & WEAP_MEDIKIT) {
                 if (other.ammo_medikit < other.maxammo_medikit) {
                     other.ammo_medikit =
                         other.ammo_medikit + self.healamount;
@@ -262,7 +262,6 @@ void () health_touch = {
                         self.think = SUB_regen;
                     }
                     activator = other;
-                    W_SetCurrentAmmo(self);
                     SUB_UseTargets();
                 }
             }
@@ -318,7 +317,6 @@ void () armor_touch = {
     local float value;
     local float bit;
     local string s;
-    local entity oldself;
 
     if (other.health <= 0) {
         return;
@@ -396,10 +394,6 @@ void () armor_touch = {
             if (other.ammo_cells > other.maxammo_cells) {
                 other.ammo_cells = other.maxammo_cells;
             }
-            oldself = self;
-            self = other;
-            W_SetCurrentAmmo(self);
-            self = oldself;
         }
         value = other.maxarmor;
     }
@@ -509,9 +503,6 @@ float (float w) RankForWeapon = {
     return 7;
 };
 
-void (float old, float new) Deathmatch_Weapon = {
-};
-
 void () ammo_touch;
 
 void (entity ritem, entity act) Respawn_Item = {
@@ -533,15 +524,12 @@ void (entity ritem, entity act) Respawn_Item = {
     self = oldself;
 };
 
-float () W_BestWeapon;
-
 void () weapon_touch = {
     local float hadammo;
-    local float best;
     local float new;
     local float old;
-    local entity stemp;
     local float leave;
+    float other_weapons_carried = FO_WeaponsMask(other);
     new = 0;
 
     if (!(other.flags & 8))
@@ -553,17 +541,13 @@ void () weapon_touch = {
     if (cb_prematch == 1)
         return;
 
-    stemp = self;
-    self = other;
-    best = W_BestWeapon();
-    self = stemp;
     if ((deathmatch == 2) || coop) {
         leave = 1;
     } else {
         leave = 0;
     }
     if (self.classname == "weapon_nailgun") {
-        if (leave && (other.weapons_carried & WEAP_NAILGUN)) {
+        if (leave && (other_weapons_carried & WEAP_NAILGUN)) {
             return;
         }
         if (!TeamFortress_CanGetWeapon(other, WEAP_NAILGUN)) {
@@ -574,7 +558,7 @@ void () weapon_touch = {
         other.ammo_nails = other.ammo_nails + 30;
     } else {
         if (self.classname == "weapon_supernailgun") {
-            if (leave && (other.weapons_carried & WEAP_SUPER_NAILGUN)) {
+            if (leave && (other_weapons_carried & WEAP_SUPER_NAILGUN)) {
                 return;
             }
             if (!TeamFortress_CanGetWeapon(other, WEAP_SUPER_NAILGUN)) {
@@ -585,7 +569,7 @@ void () weapon_touch = {
             other.ammo_nails = other.ammo_nails + 30;
         } else {
             if (self.classname == "weapon_supershotgun") {
-                if (leave && (other.weapons_carried & WEAP_SUPER_SHOTGUN)) {
+                if (leave && (other_weapons_carried & WEAP_SUPER_SHOTGUN)) {
                     return;
                 }
                 if (!TeamFortress_CanGetWeapon(other, WEAP_SUPER_SHOTGUN)) {
@@ -596,7 +580,7 @@ void () weapon_touch = {
                 other.ammo_shells = other.ammo_shells + 5;
             } else {
                 if (self.classname == "weapon_rocketlauncher") {
-                    if (leave && (other.weapons_carried & WEAP_ROCKET_LAUNCHER)) {
+                    if (leave && (other_weapons_carried & WEAP_ROCKET_LAUNCHER)) {
                         return;
                     }
                     if (!TeamFortress_CanGetWeapon(other, WEAP_ROCKET_LAUNCHER)) {
@@ -607,7 +591,7 @@ void () weapon_touch = {
                     other.ammo_rockets = other.ammo_rockets + 5;
                 } else {
                     if (self.classname == "weapon_grenadelauncher") {
-                        if (leave && (other.weapons_carried & WEAP_GRENADE_LAUNCHER)) {
+                        if (leave && (other_weapons_carried & WEAP_GRENADE_LAUNCHER)) {
                             return;
                         }
                         if (!TeamFortress_CanGetWeapon(other, WEAP_GRENADE_LAUNCHER)) {
@@ -618,7 +602,7 @@ void () weapon_touch = {
                         other.ammo_rockets = other.ammo_rockets + 5;
                     } else {
                         if (self.classname == "weapon_lightning") {
-                            if (leave && (other.weapons_carried & WEAP_LIGHTNING)) {
+                            if (leave && (other_weapons_carried & WEAP_LIGHTNING)) {
                                 return;
                             }
                             if (!TeamFortress_CanGetWeapon(other, WEAP_LIGHTNING)) {
@@ -639,13 +623,6 @@ void () weapon_touch = {
     FO_Sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
     stuffcmd(other, "bf\n");
     bound_other_ammo(other);
-    old = other.weapons_carried;
-    other.weapons_carried = other.weapons_carried | new;
-    stemp = self;
-    self = other;
-    Deathmatch_Weapon(old, new);
-    W_SetCurrentAmmo(self);
-    self = stemp;
     if (leave)
         return;
     Respawn_Item(self, other);
@@ -813,8 +790,6 @@ float () GetGrenadePossibility = {
 };
 
 void () ammo_touch = {
-    local entity stemp;
-    local float best;
     local float gotgren;
     local float gotbox;
 
@@ -832,10 +807,6 @@ void () ammo_touch = {
     }
     gotgren = 0;
     gotbox = 0;
-    stemp = self;
-    self = other;
-    best = W_BestWeapon();
-    self = stemp;
     if (self.weapon == 1) {
         if (other.ammo_shells >= TeamFortress_GetMaxAmmo(other, 256)) {
             return;
@@ -877,10 +848,6 @@ void () ammo_touch = {
     if (gotbox) {
         bound_other_ammo(other);
         sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
-        stemp = self;
-        self = other;
-        W_SetCurrentAmmo(self);
-        self = stemp;
     }
     Respawn_Item(self, other);
 };
@@ -1347,7 +1314,6 @@ void () BackpackTouch = {
     stuffcmd(other, "bf\n");
     dremove(self);
     self = other;
-    W_SetCurrentAmmo(self);
 };
 
 void () DropBackpack = {

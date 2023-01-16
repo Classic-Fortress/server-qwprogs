@@ -173,11 +173,12 @@
 #define CHAN_ITEM	3
 #define CHAN_BODY	4
 #define CHAN_NO_PHS_ADD	8
-#define CHAN_GREN1	9
-#define CHAN_GREN2	10
-#define CHAN_GREN3	11
-#define CHAN_GREN4	12
-#define CHAN_GREN5	13
+
+// We can overlap these with regular channels since they play on the world ent.
+#define NUM_GREN_TIMERS 5 // We overlap channels when >3 active.
+#define CHAN_GREN_START 9
+#define CHAN_GREN_END 13
+// #define CHAN_GREN_END (CHAN_GREN_START + NUM_GREN_TIMERS - 1)
 
 #define ATTN_NONE	0
 #define ATTN_NORM	1
@@ -240,27 +241,49 @@
 //===========================================================================
 
 // TeamFortress State Flags
-#define TFSTATE_GRENPRIMED		1   // Whether the player has a primed grenade
-#define TFSTATE_RELOADING		2   // Whether the player is reloading
-#define TFSTATE_ALTKILL			4   // TRUE if killed with a weapon not in self.weapon: NOT USED ANYMORE
-#define TFSTATE_RANDOMPC		8   // Whether Playerclass is random, new one each respawn
-#define TFSTATE_INFECTED		16  // set when player is infected by the bioweapon
-#define TFSTATE_INVINCIBLE		32  // Player has permanent Invincibility (Usually by GoalItem)
-#define TFSTATE_INVISIBLE		64  // Player has permanent Invisibility (Usually by GoalItem)
-#define TFSTATE_QUAD			128 // Player has permanent Quad Damage (Usually by GoalItem)
-#define TFSTATE_RADSUIT			256 // Player has permanent Radsuit (Usually by GoalItem)
-#define TFSTATE_BURNING			512 // Is on fire
-#define TFSTATE_GRENTHROWING		1024  // is throwing a grenade
-#define TFSTATE_AIMING			2048  // is using the laser sight
-#define TFSTATE_LOCK            4096 // this state will stop hwguy from shooting assault cannon
-#define TFSTATE_RESPAWN_READY		8192  // is waiting for respawn, and has pressed fire, as sentry gun, indicate it needs to die
-#define TFSTATE_HALLUCINATING		16384  // set when player is hallucinating
-#define TFSTATE_TRANQUILISED 		32768  // set when player is tranquilised
-#define TFSTATE_CANT_MOVE		65536  // set when player is setting a detpack
-// FIXME - concussion and flash states aren't set or tested...
-#define TFSTATE_FLAMES_MAX		131072
-#define TFSTATE_FLASHED			262144
-#define TFSTATE_CONCUSSED		524288
+enumflags {
+    TFSTATE_RELOADING,     // Whether the player is reloading
+    TFSTATE_GREN1_PRIMED,  // Whether the player has a primed gren 1
+    TFSTATE_GREN2_PRIMED,  // Whether the player has a primed gren 2
+    TFSTATE_GRENTHROWING,  // is throwing a grenade
+    TFSTATE_AIMING,        // is using the laser sight or spinning
+    TFSTATE_CANT_MOVE,
+    TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
+                           // (Note: We don't use NO_WEAPON for reloading
+                           // as it could result in stacked no-weapon states.)
+    TFSTATE_FLASHED,
+    TFSTATE_QUICKSLOT,     // QUICKSTOP should change to last weapon.
+    TFSTATE_AC_SPINUP,     // These cover the 3 assault cannon states.
+    TFSTATE_AC_SPINNING,
+    TFSTATE_AC_SPINDOWN,
+    TFSTATE_LOCK,          // assault cannon locked
+    TFSTATE_INFECTED,      // set when player is infected by the bioweapon
+    TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
+    TFSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
+    TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
+    TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
+    TFSTATE_BURNING,       // Is on fire
+    TFSTATE_AIMING,        // is using the laser sight or spinning cannon
+    TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
+                           // as sentry gun,indicate it needs to die
+    TFSTATE_HALLUCINATING, // set when player is hallucinating
+    TFSTATE_TRANQUILISED,  // set when player is tranquilised
+    TFSTATE_FLAMES_MAX,    // Peak burnination.
+    TFSTATE_RANDOMPC,
+};
+
+
+#define TFSTATE_GREN_MASK_PRIMED (TFSTATE_GREN1_PRIMED|TFSTATE_GREN2_PRIMED)
+#define TFSTATE_GREN_MASK_ALL (TFSTATE_GREN_MASK_PRIMED|TFSTATE_GRENTHROWING)
+
+#define TFSTATE_AC_MASK (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING|TFSTATE_AC_SPINDOWN)
+#define TFSTATE_AC_FIRING (TFSTATE_AC_SPINUP|TFSTATE_AC_SPINNING)
+
+enum {
+    PRNG_WEAP,
+    PRNG_HWGUY,
+    PRNG_NUM_STATES,
+};
 
 // Defines used by TF_T_Damage (see combat.qc)
 #define TF_TD_IGNOREARMOR	1  // Bypasses the armor of the target
@@ -295,6 +318,9 @@
 /*======================================================*/
 /* Toggleable Game Settings				*/
 /*======================================================*/
+
+// Opaque token that encapsulates slots for correctness.
+typedef struct { int id; } Slot;
 
 // Some of the toggleflags aren't used anymore, but the bits are still
 // there to provide compatability with old maps
@@ -371,10 +397,12 @@
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
-#define TF_SLOT1                    1   // Changes weapon to slot 1 (primary weapon)
-#define TF_SLOT2                    2   // Changes weapon to slot 2 (secondary weapon)
-#define TF_SLOT3                    3   // Changes weapon to slot 3 (tertiary weapon)
-#define TF_SLOT4                    4   // Changes weapon to slot 4 (melee weapon)
+#define TF_IMPULSE_SLOT1            1   // Changes weapon to slot 1 (primary weapon)
+#define TF_IMPULSE_SLOT2            2   // Changes weapon to slot 2 (secondary weapon)
+#define TF_IMPULSE_SLOT3            3   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
+#define TF_NUM_SLOTS                4
+
 #define TF_CLASSMENU                5   // Brings up class menu
 // unused                           6
 // unused                           7
@@ -620,7 +648,7 @@
 // unused                           247
 // unused                           248
 // unused                           249
-// unused                           250
+#define TF_DEBUG_CSQC               250
 // unused                           251
 // unused                           252
 // unused                           253
@@ -703,26 +731,32 @@
 /* New Weapon Defines					*/
 /*======================================================*/
 
-#define WEAP_HOOK			1
-#define WEAP_KNIFE			2
-#define WEAP_MEDIKIT			4
-#define WEAP_SPANNER			8
-#define WEAP_AXE			16
-#define WEAP_SNIPER_RIFLE		32
-#define WEAP_AUTO_RIFLE			64
-#define WEAP_SHOTGUN			128
-#define WEAP_SUPER_SHOTGUN		256
-#define WEAP_NAILGUN			512
-#define WEAP_SUPER_NAILGUN		1024
-#define WEAP_GRENADE_LAUNCHER		2048
-#define WEAP_FLAMETHROWER		4096
-#define WEAP_ROCKET_LAUNCHER		8192
-#define WEAP_INCENDIARY			16384
-#define WEAP_ASSAULT_CANNON		32768
-#define WEAP_LIGHTNING			65536
-#define WEAP_DETPACK			131072
-#define WEAP_TRANQ			262144
-#define WEAP_LASER			524288
+#define WEAP_NONE 0
+enumflags {
+    WEAP_HOOK,
+    WEAP_KNIFE,
+    WEAP_MEDIKIT,
+    WEAP_SPANNER,
+    WEAP_AXE,
+    WEAP_SNIPER_RIFLE,
+    WEAP_AUTO_RIFLE,
+    WEAP_SHOTGUN,
+    WEAP_SUPER_SHOTGUN,
+    WEAP_NAILGUN,
+    WEAP_SUPER_NAILGUN,
+    WEAP_GRENADE_LAUNCHER,
+    WEAP_PIPE_LAUNCHER,
+    WEAP_FLAMETHROWER,
+    WEAP_ROCKET_LAUNCHER,
+    WEAP_INCENDIARY,
+    WEAP_ASSAULT_CANNON,
+    WEAP_LIGHTNING,
+    WEAP_DETPACK,
+    WEAP_TRANQ,
+    WEAP_RAILGUN,
+    WEAP_LAST = WEAP_RAILGUN,
+};
+
 // still room for 12 more weapons
 // but we can remove some by giving the weapons
 // a weapon mode (like the rifle)
@@ -856,14 +890,12 @@
 #define PC_SCOUT_SKIN			4 	// Skin for this class when Classkin is on.
 #define PC_SCOUT_MAXHEALTH		100	// Maximum Health Level
 #define PC_SCOUT_MAXSPEED		450	// Maximum movement speed
-#define PC_SCOUT_MAXSTRAFESPEED		450	// Maximum strafing movement speed
 #define PC_SCOUT_MAXARMOR		25 	// Maximum Armor Level, of any armor class
 #define PC_SCOUT_INITARMOR		0 	// Armor level when respawned
 #define PC_SCOUT_MAXARMORTYPE		0.3	// Maximum level of Armor absorption
 #define PC_SCOUT_INITARMORTYPE		0.3	// Absorption Level of armor when respawned
 #define PC_SCOUT_ARMORCLASSES		3 	// #AT_SAVESHOT | #AT_SAVENAIL	<-Armor Classes allowed for this class
 #define PC_SCOUT_INITARMORCLASS		0 	// Armorclass worn when respawned
-#define PC_SCOUT_WEAPONS		WEAP_AXE | WEAP_SHOTGUN | WEAP_NAILGUN
 #define PC_SCOUT_MAXAMMO_SHOT		50 	// Maximum amount of shot ammo this class can carry
 #define PC_SCOUT_MAXAMMO_NAIL		200	// Maximum amount of nail ammo this class can carry
 #define PC_SCOUT_MAXAMMO_CELL		100	// Maximum amount of cell ammo this class can carry
@@ -887,14 +919,12 @@
 #define PC_SNIPER_SKIN			5
 #define PC_SNIPER_MAXHEALTH		100
 #define PC_SNIPER_MAXSPEED		300
-#define PC_SNIPER_MAXSTRAFESPEED	300
 #define PC_SNIPER_MAXARMOR		40
 #define PC_SNIPER_INITARMOR		0
 #define PC_SNIPER_MAXARMORTYPE		0.3
 #define PC_SNIPER_INITARMORTYPE		0.3
 #define PC_SNIPER_ARMORCLASSES		3	// #AT_SAVESHOT | #AT_SAVENAIL
 #define PC_SNIPER_INITARMORCLASS	0
-#define PC_SNIPER_WEAPONS		WEAP_SNIPER_RIFLE | WEAP_AUTO_RIFLE | WEAP_AXE | WEAP_NAILGUN
 #define PC_SNIPER_MAXAMMO_SHOT		75
 #define PC_SNIPER_MAXAMMO_NAIL		100
 #define PC_SNIPER_MAXAMMO_CELL		50
@@ -911,18 +941,18 @@
 #define PC_SNIPER_GRENADE_MAX_2	        4
 #define PC_SNIPER_TF_ITEMS		0
 
+#define PC_SNIPER_MAXDAM		401
+
 // Class Details for SOLDIER
 #define PC_SOLDIER_SKIN			6
 #define PC_SOLDIER_MAXHEALTH		100
 #define PC_SOLDIER_MAXSPEED		240
-#define PC_SOLDIER_MAXSTRAFESPEED	240
 #define PC_SOLDIER_MAXARMOR		200
 #define PC_SOLDIER_INITARMOR		100
 #define PC_SOLDIER_MAXARMORTYPE		0.8
 #define PC_SOLDIER_INITARMORTYPE	0.8
 #define PC_SOLDIER_ARMORCLASSES		31	// ALL
 #define PC_SOLDIER_INITARMORCLASS	0
-#define PC_SOLDIER_WEAPONS		WEAP_AXE | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_ROCKET_LAUNCHER
 #define PC_SOLDIER_MAXAMMO_SHOT		100
 #define PC_SOLDIER_MAXAMMO_NAIL		100
 #define PC_SOLDIER_MAXAMMO_CELL		50
@@ -944,14 +974,12 @@
 #define PC_DEMOMAN_SKIN			1
 #define PC_DEMOMAN_MAXHEALTH		100
 #define PC_DEMOMAN_MAXSPEED		280
-#define PC_DEMOMAN_MAXSTRAFESPEED	280
 #define PC_DEMOMAN_MAXARMOR		110
 #define PC_DEMOMAN_INITARMOR		40
 #define PC_DEMOMAN_MAXARMORTYPE		0.6
 #define PC_DEMOMAN_INITARMORTYPE	0.6
 #define PC_DEMOMAN_ARMORCLASSES		31	// ALL
 #define PC_DEMOMAN_INITARMORCLASS	0	//4	// AT_SAVEEXPLOSION
-#define PC_DEMOMAN_WEAPONS		WEAP_AXE | WEAP_SHOTGUN | WEAP_GRENADE_LAUNCHER | WEAP_DETPACK
 #define PC_DEMOMAN_MAXAMMO_SHOT		75
 #define PC_DEMOMAN_MAXAMMO_NAIL		50
 #define PC_DEMOMAN_MAXAMMO_CELL		50
@@ -974,16 +1002,13 @@
 #define PC_MEDIC_SKIN			3
 #define PC_MEDIC_MAXHEALTH		100
 #define PC_MEDIC_MAXSPEED		320
-#define PC_MEDIC_MAXSTRAFESPEED		320
 #define PC_BLASTMEDIC_MAXSPEED		280
-#define PC_BLASTMEDIC_MAXSTRAFESPEED		280
 #define PC_MEDIC_MAXARMOR		90
 #define PC_MEDIC_INITARMOR		40
 #define PC_MEDIC_MAXARMORTYPE		0.6
 #define PC_MEDIC_INITARMORTYPE		0.3
 #define PC_MEDIC_ARMORCLASSES		11	// ALL except EXPLOSION
 #define PC_MEDIC_INITARMORCLASS		0
-#define PC_MEDIC_WEAPONS		WEAP_MEDIKIT | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN | WEAP_SUPER_NAILGUN
 #define PC_MEDIC_MAXAMMO_SHOT		75
 #define PC_MEDIC_MAXAMMO_NAIL		150
 #define PC_MEDIC_MAXAMMO_CELL		50
@@ -1018,14 +1043,12 @@
 #define PC_HVYWEAP_SKIN			2
 #define PC_HVYWEAP_MAXHEALTH		100
 #define PC_HVYWEAP_MAXSPEED		230
-#define PC_HVYWEAP_MAXSTRAFESPEED	230
 #define PC_HVYWEAP_MAXARMOR		300
 #define PC_HVYWEAP_INITARMOR		150
 #define PC_HVYWEAP_MAXARMORTYPE		0.8
 #define PC_HVYWEAP_INITARMORTYPE	0.8
 #define PC_HVYWEAP_ARMORCLASSES		31	// ALL
 #define PC_HVYWEAP_INITARMORCLASS	0
-#define PC_HVYWEAP_WEAPONS		WEAP_ASSAULT_CANNON | WEAP_AXE | WEAP_SHOTGUN | WEAP_SUPER_SHOTGUN
 #define PC_HVYWEAP_MAXAMMO_SHOT		200
 #define PC_HVYWEAP_MAXAMMO_NAIL		200
 #define PC_HVYWEAP_MAXAMMO_CELL		50
@@ -1041,23 +1064,18 @@
 #define PC_HVYWEAP_GRENADE_MAX_1	4
 #define PC_HVYWEAP_GRENADE_MAX_2	1
 #define PC_HVYWEAP_TF_ITEMS		0
-#define PC_HVYWEAP_PROJSPEED	3000
-#define PC_HVYWEAP_ASSCAN_CLIPSIZE		100
-#define MODEL_PROJ_DIAM2 "progs/proj_diam2.mdl"
 
 
 // Class Details for PYRO
 #define PC_PYRO_SKIN			21
 #define PC_PYRO_MAXHEALTH		100
 #define PC_PYRO_MAXSPEED		300
-#define PC_PYRO_MAXSTRAFESPEED		300
 #define PC_PYRO_MAXARMOR		150
 #define PC_PYRO_INITARMOR		50
 #define PC_PYRO_MAXARMORTYPE		0.6
 #define PC_PYRO_INITARMORTYPE		0.6
 #define PC_PYRO_ARMORCLASSES		27	// ALL except EXPLOSION
 #define PC_PYRO_INITARMORCLASS		16	// AT_SAVEFIRE
-#define PC_PYRO_WEAPONS			WEAP_INCENDIARY | WEAP_FLAMETHROWER | WEAP_AXE | WEAP_SHOTGUN
 #define PC_PYRO_MAXAMMO_SHOT		40
 #define PC_PYRO_MAXAMMO_NAIL		50
 #define PC_PYRO_MAXAMMO_CELL		200
@@ -1079,37 +1097,23 @@
 #define PC_PYRO_AIRBLASTJUMP_CELLS		75
 #define PC_PYRO_LAVA_LIFETIME	3
 #define PC_PYRO_LAVA_RETICK		1.2
-#define PC_PYRO_FLAMETHROWER_DAM_FO	15
-#define PC_PYRO_FLAMETHROWER_DAM_ORIG	10
-#define PC_PYRO_NAPALM_INIT_DAM_ORIG	20
-#define PC_PYRO_NAPALM_INIT_DAM_FO		40
-#define PC_PYRO_NAPALM_MAX_EXPLOSIONS_ORIG	8
-#define PC_PYRO_NAPALM_MAX_EXPLOSIONS_FO	4
-#define PC_PYRO_INIT_BURN_DAM_ORIG		6
-#define PC_PYRO_INIT_BURN_DAM_FO		12
-#define PC_PYRO_BURN_MULTIPLIER_ORIG	.3
-#define PC_PYRO_BURN_MULTIPLIER_FO		1
+#define PC_PYRO_FLAMETHROWER_DAM	15
+#define PC_PYRO_NAPALM_INIT_DAM		40
+#define PC_PYRO_NAPALM_MAX_EXPLOSIONS	4
+#define PC_PYRO_INIT_BURN_DAM		12
+#define PC_PYRO_BURN_MULTIPLIER		1
 #define PC_PYRO_BURN_DAMAGE_AMP			1.2
-#define PC_PYRO_OLD_PROJSPEED			600
-#define PC_PYRO_NEW_PROJSPEED			800
-
-// pyro types
-#define PYRO_ORIGINAL	0
-#define PYRO_OZTF		1
-#define PYRO_FO			2
 
 // Class Details for SPY
 #define PC_SPY_SKIN			22
 #define PC_SPY_MAXHEALTH		100
 #define PC_SPY_MAXSPEED			300
-#define PC_SPY_MAXSTRAFESPEED		300
 #define PC_SPY_MAXARMOR			90
 #define PC_SPY_INITARMOR		15
 #define PC_SPY_MAXARMORTYPE		0.6
 #define PC_SPY_INITARMORTYPE		0.6
 #define PC_SPY_ARMORCLASSES		27	// ALL except EXPLOSION
 #define PC_SPY_INITARMORCLASS		0
-#define PC_SPY_WEAPONS			WEAP_KNIFE | WEAP_TRANQ | WEAP_SUPER_SHOTGUN | WEAP_NAILGUN
 #define PC_SPY_MAXAMMO_SHOT		40
 #define PC_SPY_MAXAMMO_NAIL		100
 #define PC_SPY_MAXAMMO_CELL		30
@@ -1135,14 +1139,12 @@
 #define PC_ENGINEER_SKIN		22	// Not used anymore
 #define PC_ENGINEER_MAXHEALTH		100
 #define PC_ENGINEER_MAXSPEED		300
-#define PC_ENGINEER_MAXSTRAFESPEED	300
 #define PC_ENGINEER_MAXARMOR		30
 #define PC_ENGINEER_INITARMOR		5
 #define PC_ENGINEER_MAXARMORTYPE	0.6
 #define PC_ENGINEER_INITARMORTYPE	0.3
 #define PC_ENGINEER_ARMORCLASSES	31	// ALL
 #define PC_ENGINEER_INITARMORCLASS	0
-#define PC_ENGINEER_WEAPONS		WEAP_SPANNER | WEAP_LASER | WEAP_SUPER_SHOTGUN
 #define PC_ENGINEER_MAXAMMO_SHOT	50
 #define PC_ENGINEER_MAXAMMO_NAIL	50
 #define PC_ENGINEER_MAXAMMO_CELL	200	// synonymous with metal
@@ -1165,14 +1167,12 @@
 #define PC_CIVILIAN_SKIN		22
 #define PC_CIVILIAN_MAXHEALTH		50
 #define PC_CIVILIAN_MAXSPEED		240
-#define PC_CIVILIAN_MAXSTRAFESPEED	240
 #define PC_CIVILIAN_MAXARMOR		0
 #define PC_CIVILIAN_INITARMOR		0
 #define PC_CIVILIAN_MAXARMORTYPE	0
 #define PC_CIVILIAN_INITARMORTYPE	0
 #define PC_CIVILIAN_ARMORCLASSES	0
 #define PC_CIVILIAN_INITARMORCLASS	0
-#define PC_CIVILIAN_WEAPONS		WEAP_AXE
 #define PC_CIVILIAN_MAXAMMO_SHOT	0
 #define PC_CIVILIAN_MAXAMMO_NAIL	0
 #define PC_CIVILIAN_MAXAMMO_CELL	0
@@ -1487,15 +1487,13 @@
 #define STAT_TEAMNO             33
 #define STAT_FLAGS              34
 #define STAT_CLASS              35
-#define STAT_VELOCITY_X         36
-#define STAT_VELOCITY_Y         37
-#define STAT_VELOCITY_Z         38
-#define STAT_NO_GREN1           39
-#define STAT_NO_GREN2           40
-#define STAT_TP_GREN1           41
-#define STAT_TP_GREN2           42
-#define STAT_PAUSED             43
-#define STAT_ALL_TIME           44
+#define STAT_NO_GREN1           36
+#define STAT_NO_GREN2           37
+#define STAT_TP_GREN1           38
+#define STAT_TP_GREN2           39
+#define STAT_PAUSED             40
+#define STAT_TEAMNO_ATTACK      41
+#define STAT_ALL_TIME           42
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

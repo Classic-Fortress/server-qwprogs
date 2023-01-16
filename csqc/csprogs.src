@@ -1,6 +1,8 @@
 #pragma target fte_5768
 #pragma optimise 3
 #pragma flag enable subscope
+#pragma flag enable iffloat
+#pragma flag enable lo
 
 #pragma progs_dat "../csprogs.dat"
 
@@ -8,17 +10,27 @@
 csdefs.qc
 csextradefs.qc
 
+../share/debug.qc
+profile.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 ../share/common_vote.qc
+../share/physics.qc
+../share/weapons.qc
+../share/prediction.qc
+../share/classes.qc
+../share/animate.qc
+weapon_predict.qc
+pmove.qc
+tfx.qc
 sui_sys.qc
 vote.qc
 status.qc
+settings.qc
 menu.qc
 main.qc
 events.qc
 hud_helpers.qc
 hud.qc
-settings.qc
 input.qc
 #endlist

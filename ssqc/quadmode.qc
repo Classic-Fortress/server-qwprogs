@@ -374,6 +374,7 @@ void () QuadRoundBegin = {
 	round_over = 0;
     
     if(quad_roles) {
+        team_no_attack = 1 + (rounds % 2);
         //tfdet = find(world, classname, "info_tfdetect");
         if(rounds % 2) {
             Team1_Role = &Role_Defence;
@@ -590,6 +591,7 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
 		localcmd("stop\n");
 		return;
 	}
@@ -674,7 +676,7 @@ void () StartQuadRound =
 	}
 	te = find(world, classname, "detpack");
 	while (te){
-		if (te.weaponmode == 1) {
+		if (te.is_disarming == 1) {
 			TeamFortress_SetSpeed (te.enemy);
 			dremove(te.oldenemy);
 			dremove(te.observer_list);

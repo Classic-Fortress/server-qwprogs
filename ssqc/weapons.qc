@@ -10,10 +10,8 @@ void () SuperDamageSound;
 void () ConcussionGrenadeTimer;
 void () OldConcussionGrenadeTimer;
 
-void (float inp) W_ChangeWeapon;
+void (Slot slot) W_ChangeWeaponSlot;
 void () W_ChangeToBestWeapon;
-void (float slot) W_WeaponSlot;
-void (entity pl) W_WeaponState_Save;
 void () W_PrintWeaponMessage;
 
 void () button_fire;
@@ -27,10 +25,7 @@ void () TeamFortress_DisplayLegalClasses;
 void () TeamFortress_ShowIDs;
 void () TeamFortress_ShowTF;
 
-void () TeamFortress_AssaultWeapon;
-void () TeamFortress_IncendiaryCannon;
-void () TeamFortress_FlameThrower;
-void (float inp) TeamFortress_PrimeGrenade;
+void (float inp, float is_player) TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
 void () TeamFortress_GrenadeSwitch;
@@ -45,8 +40,6 @@ void () Help_Show;
 void () TeamFortress_Inventory;
 void () TeamFortress_SaveMe;
 void (entity pe_player, float f_type) CF_Identify;
-void () TeamFortress_ReloadCurrentWeapon;
-void (float slot) TeamFortress_ReloadSlot;
 void () TeamFortress_ReloadNext;
 void () Sniper_ZoomToggle;
 void (float zoom_in) Sniper_ZoomAdjust;
@@ -57,8 +50,6 @@ void () TeamFortress_DetpackMenu;
 void () CF_Medic_AuraToggle;
 void () FO_LockToggle;
 void () FO_Airblast;
-void () UseAirBlast;
-void () UseAirBlastV2;
 void () TeamFortress_EngineerBuild;
 void () TeamFortress_EngineerBuildStop;
 void () TeamFortress_Scan;
@@ -79,7 +70,7 @@ void () UseSpecialSkill;
 void () UseSpecialSkill2;
 void () RemoveFlare;
 void () ScannerSwitch;
-float () CheckForReload;
+float () FO_CheckForReload;
 
 void (float all) TeamFortress_TeamShowScores;
 void (entity Player) TeamFortress_TeamShowMemberClasses;
@@ -106,14 +97,12 @@ void () TeamFortress_NailGrenInfo;
 void () BioInfection_Decay;
 void () BioInfection_MonsterDecay;
 
-void (entity pl, float swap) W_WeaponState_Load;
 float (float weap) W_GetSlot;
 float (float weap) W_OldGetSlot;
-float () W_BestWeaponSlot;
 void () W_FireFlame;
 void () W_FireIncendiaryCannon;
 void () W_FireTranq;
-void () W_FireLaser;
+void () W_FireRailgun;
 
 void () HallucinationTimer;
 void () TranquiliserTimer;
@@ -128,12 +117,11 @@ void () StartTimer;
 
 void () ToggleInvincibility;
 
-float () GetLastWeaponImpulse;
+float () GetMaxWeaponInput;
 float () IsUsingOldImpulses;
 float () IsUsingCFImpulses;
 
-void (float inp) W_OldWeaponSlot;
-
+void (entity pl) W_UpdateCurrentWeapon;
 
 void (entity ent, float num) SetFlameCount;
 
@@ -199,12 +187,12 @@ float () crandom = {
 
 void (float att_delay) Attack_Finished = {
     if (self.tfstate & TFSTATE_TRANQUILISED)
-        self.attack_finished = time + att_delay * 2;
-    else
-        self.attack_finished = time + att_delay;
+        att_delay *= 2;
+
+    self.attack_finished = self.client_time + att_delay;
 };
 
-float () W_FireAxe = {
+int () W_FireAxe = {
     local vector source;
     local vector org;
     local vector def;
@@ -253,8 +241,7 @@ int () W_FireKnife = {
         trace_ent.axhitme = 1;
         SpawnBlood(org, 20);
 
-        self.weaponmode = 1;
-        self.weaponmodel = "progs/v_knife2.mdl";
+        // TODO: Rework knife bloodying
 
         // Check direction of Attack
         makevectors(trace_ent.v_angle);
@@ -404,7 +391,7 @@ int () W_FireSpanner = {
     }
 };
 
-float () W_FireMedikit = {
+int () W_FireMedikit = {
     local vector source;
     local vector org;
     local float healam;
@@ -488,10 +475,7 @@ float () W_FireMedikit = {
 
                     if (te != world) {
 
-                        trace_ent.tfstate =
-                            trace_ent.tfstate -
-                            (trace_ent.tfstate & TFSTATE_TRANQUILISED);
-                        TeamFortress_SetSpeed(trace_ent);
+                        trace_ent.tfstate &= ~TFSTATE_TRANQUILISED;
                         SpawnBlood(org, 20);
 
                         bprint(PRINT_MEDIUM, self.netname, " healed ",
@@ -561,37 +545,7 @@ float () W_FireMedikit = {
                     }
                     return TRUE;
                 }
-                if (old_medikit) {
-
-                    if (healam > 0 && trace_ent.health < trace_ent.max_health) {
-
-                        FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
-                        trace_ent.axhitme = 1;
-                        SpawnBlood(org, 20);
-                        T_Heal(trace_ent, healam, 0);
-
-                    } else if (trace_ent.health >= trace_ent.max_health && trace_ent.health < (trace_ent.max_health + 50)) {
-
-                        healam = 5;
-                        if (healam > (self.ammo_medikit * 5))
-                            healam = self.ammo_medikit * 5;
-
-                        if (healam > 0) {
-                            FO_Sound(trace_ent, CHAN_ITEM, "items/r_item2.wav", 1, ATTN_NORM);
-                            T_Heal(trace_ent, healam, 1);
-                            self.ammo_medikit = self.ammo_medikit - rint(healam / 5);
-
-                            if (!(trace_ent.items & IT_SUPERHEALTH)) {
-                                trace_ent.items = trace_ent.items | IT_SUPERHEALTH;
-                                newmis = spawn();
-                                newmis.nextthink = time + 5;
-                                newmis.think = item_megahealth_rot;
-                                newmis.owner = trace_ent;
-                            }
-                        }
-                    }
-
-                } else if (trace_ent.health < (trace_ent.max_health + 50)) {
+                if (trace_ent.health < (trace_ent.max_health + 50)) {
 
                     if (self.ammo_cells >= ceil(PC_MEDIC_MAXAMMO_CELL / 2)) {
                         healam = trace_ent.max_health - trace_ent.health + 50;
@@ -605,9 +559,6 @@ float () W_FireMedikit = {
                         self.ammo_cells = self.ammo_cells - min(self.ammo_cells, ceil((PC_MEDIC_MAXAMMO_CELL / 20)));
                         FO_Sound(trace_ent, CHAN_WEAPON, "items/r_item1.wav", 1, ATTN_NORM);
                     }
-
-                    if (self.current_weapon == WEAP_MEDIKIT)
-                        self.currentammo = self.ammo_cells;
 
                     Status_Refresh(self);
                     T_Heal(trace_ent, healam, 1);
@@ -813,31 +764,30 @@ void (float shotcount, vector dir, vector spread) FireBullets = {
 
         traceline(src, (src + (direction * 2048)), MOVE_LAGGED, self);
         if (trace_fraction != 1) {
-            if (self.current_weapon != WEAP_ASSAULT_CANNON)
+            if (FO_CurrentWeapon() != WEAP_ASSAULT_CANNON)
                 TraceAttack(4, direction);
             else
                 TraceAttack(8, direction);
         }
         shotcount = shotcount - 1;
 
-        if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+        if (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON) {
             puff_org = trace_endpos + direction;
             Multi_Finish();
         }
     }
     ApplyMultiDamage();
-    if (self.current_weapon != WEAP_ASSAULT_CANNON)
+    if (FO_CurrentWeapon() != WEAP_ASSAULT_CANNON)
         Multi_Finish();
 };
 
 void () W_FireShotgun = {
     local vector dir;
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SG);
 
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_SHOTGUN;
     FireBullets(6, dir, '0.04 0.04 0');
@@ -846,15 +796,14 @@ void () W_FireShotgun = {
 void () W_FireSuperShotgun = {
     local vector dir;
 
-    if (self.currentammo == 1) {
+    if (self.ammo_shells == 1) {
         W_FireShotgun();
         return;
     }
-    FO_Sound(self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SSG);
 
     KickPlayer(-4, self);
     self.ammo_shells = self.ammo_shells - 2;
-    self.currentammo = self.ammo_shells;
     dir = aim(self, 100000);
     deathmsg = DMSG_SSHOTGUN;
     FireBullets(14, dir, '0.14 0.08 0');
@@ -891,10 +840,9 @@ void () W_FireSniperRifle = {
     local vector h;
     dir = '0 0 0';
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/sniper.wav", 1, ATTN_NORM);
+    Pred_Sound(SND_SNIPER_RIFLE);
     KickPlayer(-2, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
 
     makevectors(self.v_angle);
     src = self.origin + v_forward * 10;
@@ -996,38 +944,31 @@ void () W_FireAutoRifle = {
 
     KickPlayer(-1, self);
     self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
     makevectors(self.v_angle);
     dir = v_forward;
     deathmsg = DMSG_AUTORIFLE;
     FireSniperBullet(dir, 8);
 };
 
-void FireAssCan (float shotcount, vector dir, vector spread);
 void () W_FireAssaultCannon = {
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+
+    FO_CheckForReload();
+
+    *ws->clip_fired += 1;
+    *ws->ammo_remaining -= (ws->wi)->ammo_per_shot;
+    Status_Refresh(self);
+
     local vector dir;
 
     KickPlayer(-4, self);
-    self.ammo_shells = self.ammo_shells - 1;
-    self.currentammo = self.ammo_shells;
+
     dir = aim(self, 100000);
     deathmsg = DMSG_ASSAULTCANNON;
-    
-    if (fo_hwguy == FALSE)
-    {
-        if (cannon_accuracy == 1)
-            FireBullets(5, dir, '0 0 0');
-        else if (cannon_accuracy == 2)
-            FireBullets(5, dir, '0.1 0.1 0');
-        else if (vlen(self.velocity) < 50)
-            FireBullets(5, dir, '0.075 0.075 0');
-        else
-            FireBullets(5, dir, '0.15 0.15 0');
-    }
-    else
-    {
-        FireAssCan(5, dir, '0.04 0.04 0');
-    }
+
+    WeapPred_FireAssCan(self.v_angle, 5, '0.04 0.04 0');
+
     LogEventAttack(self);
 };
 
@@ -1095,6 +1036,46 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
+.float al_dmg;
+
+static void Antilag_Knock(entity e) {
+    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    dremove(e);
+}
+
+void T_Knock_Antilag() {
+    Antilag_Knock(self);
+}
+
+float AntilagKnock(entity e, float dmg) {
+    if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
+        return FALSE;
+
+    entity knock_e = spawn();
+
+    setorigin(knock_e, e.origin);
+    knock_e.s_origin = e.s_origin;
+    knock_e.owner = e.owner;
+    knock_e.classname = e.classname;
+    knock_e.oldenemy = other;
+    knock_e.al_dmg = dmg;
+
+    vector diff = e.origin - e.s_origin;
+    float ttime = vlen(diff) / vlen(e.velocity);
+    float dtime = time - e.s_time;
+
+    float delay = ttime - dtime;
+
+    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+        knock_e.think = T_Knock_Antilag;
+        knock_e.nextthink = time + delay;
+    } else {
+        Antilag_Knock(knock_e);
+    }
+
+    return TRUE;
+}
+
 void () T_MissileTouch = {
     local float damg;
 
@@ -1103,7 +1084,7 @@ void () T_MissileTouch = {
     self.voided = 1;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     damg = 92 + random() * 20;
@@ -1114,10 +1095,9 @@ void () T_MissileTouch = {
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_OTHER);
 
-    if (self.owner.classname == "building_sentrygun")
-        T_RadiusDamage(self, self.owner, 150, other);
-    else
-        T_RadiusDamage(self, self.owner, 92, other);
+    float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
+    entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
@@ -1128,40 +1108,33 @@ void () T_MissileTouch = {
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
 
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () W_FireRocket = {
-    self.ammo_rockets = self.ammo_rockets - 1;
-    self.currentammo = self.ammo_rockets;
-    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
-    KickPlayer(-2, self);
-
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(FPP_ROCKET);
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
     makevectors(self.v_angle);
-    newmis.velocity = v_forward;
-    newmis.velocity = newmis.velocity * PC_SOLDIER_ROCKET_SPEED;
-    newmis.angles = vectoangles(newmis.velocity);
+    proj.velocity = v_forward * FPP_Get(FPP_ROCKET)->speed;
+    proj.angles = vectoangles(proj.velocity);
 
-    newmis.touch = T_MissileTouch;
-    newmis.voided = 0;
+    proj.touch = T_MissileTouch;
+    proj.voided = 0;
 
-    newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
 
-    newmis.weapon = DMSG_ROCKETL;
-    newmis.classname = "proj_rocket";
-    FO_SetModel(newmis, "progs/missile.mdl");
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
+    proj.weapon = DMSG_ROCKETL;
+    proj.classname = "proj_rocket";
+    proj.origin = self.origin + v_forward * 8 + '0 0 16';
 
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
+    FOProj_Finalize(proj);
+
+    self.ammo_rockets = self.ammo_rockets - 1;
+    KickPlayer(-2, self);
 };
 
 void (entity from, float damage) LightningHit = {
@@ -1220,7 +1193,7 @@ void () W_FireLightning = {
     if (self.waterlevel > 1) {
         cells = self.ammo_cells;
         self.ammo_cells = 0;
-        W_SetCurrentAmmo(self);
+        W_UpdateCurrentWeapon(self);
         deathmsg = DMSG_LIGHTNING;
         T_RadiusDamage(self, self, 35 * cells, world);
         return;
@@ -1232,7 +1205,6 @@ void () W_FireLightning = {
     KickPlayer(-2, self);
 
     self.ammo_cells = self.ammo_cells - 1;
-    self.currentammo = self.ammo_cells;
 
     org = self.origin + '0 0 16';
     traceline(org, org + v_forward * 600, 1, self);
@@ -1258,6 +1230,27 @@ void RenderExplosion(vector origin) {
     WriteCoord(MSG_MULTICAST, origin_y);
     WriteCoord(MSG_MULTICAST, origin_z);
     multicast(origin, MULTICAST_PHS);
+}
+void T_RadiusBounce(entity inflictor, entity attacker, float bounce,
+                    entity ignore);
+
+// REQUIRES: e.gren_type is set and supported by FO_GrenGetExp
+void FO_GrenExplode(entity e) {
+    FO_GrenExp exp;
+    ASSERTF_TRUE(FO_GrenGetExp(e.fpp.gren_type, exp));
+
+    deathmsg = exp.deathmsg;
+    if (exp.type == kRadiusDamage)
+        T_RadiusDamage(self, self.owner, exp.dmg, world);
+    else if (exp.type == kRadiusBounce)
+        T_RadiusBounce(self, self.owner, exp.dmg, world);
+
+    RenderExplosion(e.origin);
+}
+
+void FO_T_GrenExplode() {
+    FO_GrenExplode(self);
+    dremove(self);
 }
 
 void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
@@ -1337,127 +1330,102 @@ void () ExplodeOldestPipebomb = {
 
 void () W_FireGrenade = {
     self.ammo_rockets = self.ammo_rockets - 1;
-    self.currentammo = self.ammo_rockets;
-    FO_Sound(self, CHAN_WEAPON, "weapons/grenade.wav", 1, 1);
+    Pred_Sound(SND_GREN);
     KickPlayer(-2, self);
-    newmis = spawn();
-    newmis.voided = 0;
-    newmis.owner = self;
-    newmis.movetype = 10;
-    newmis.solid = 2;
-    if ((self.weaponmode == 0) || (cb_prematch)) {
-        newmis.weapon = 5;
-        newmis.classname = "grenade";
-        newmis.skin = 1;
-        newmis.touch = GrenadeTouch;
-        newmis.nextthink = time + 2.5;
+
+    entity proj = FOProj_Create(FPP_GRENADE);
+    proj.voided = 0;
+    proj.owner = self;
+    proj.movetype = MOVETYPE_BOUNCE;
+    proj.solid = SOLID_BBOX;
+    if (FO_CurrentWeapon() == WEAP_GRENADE_LAUNCHER || cb_prematch) {
+        proj.weapon = 5;
+        proj.classname = "grenade";
+        proj.touch = GrenadeTouch;
+        proj.nextthink = time + 2.5;
+        proj.fpp.gren_type = GREN_RED;
     } else {
         if (old_pipecooldown)
             self.pipecooldown = time + 0.8;
         else
             self.pipecooldown = time + 0.5;
         ExplodeOldestPipebomb();
-        newmis.classname = "pipebomb";
-        newmis.skin = 2;
-        newmis.touch = PipebombTouch;
-        newmis.nextthink = time + 120;
-        newmis.weapon = 11;
-        newmis.team_no = self.team_no;
+        proj.classname = "pipebomb";
+        proj.touch = PipebombTouch;
+        proj.nextthink = time + 120;
+        proj.weapon = 11;
+        proj.team_no = self.team_no;
+        proj.fpp.gren_type = GREN_PIPE;
     }
     makevectors(self.v_angle);
     if (self.v_angle_x) {
-        newmis.velocity =
-            (((v_forward * 600) + (v_up * 200)) +
-             ((crandom() * v_right) * 10)) + ((crandom() * v_up) * 10);
+        proj.velocity = (v_forward * 600) +
+            (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
+            (shared_crandom(PRNG_WEAP) * 10 * v_right);
     } else {
-        newmis.velocity = aim(self, 10000);
-        newmis.velocity = newmis.velocity * 600;
-        newmis.velocity_z = 200;
+        proj.velocity = aim(self, 10000);
+        proj.velocity = proj.velocity * 600;
+        proj.velocity_z = 200;
     }
-    newmis.avelocity = '300 300 300';
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.think = GrenadeExplode;
-    FO_SetModel(newmis, "progs/grenade2.mdl");
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, self.origin);
+    proj.angles = vectoangles(proj.velocity);
+    proj.think = GrenadeExplode;
+    setorigin(proj, self.origin);
 
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
+    FOProj_Finalize(proj);
 };
 
 void () spike_touch;
 void () superspike_touch;
 
-void (vector org, vector dir) launch_spike = {
-    newmis = spawn();
-    newmis.voided = 0;
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+entity (int fpp_type, vector offset) W_FireNail = {
+    entity proj = FOProj_Create(fpp_type);
+    proj.voided = 0;
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
 
-    newmis.angles = vectoangles(dir);
-    newmis.touch = spike_touch;
-    newmis.weapon = DMSG_NAILGUN;
-    newmis.classname = "spike";
-    newmis.think = SUB_Remove;
-    newmis.nextthink = time + 6;
-    FO_SetModel(newmis, "progs/spike.mdl");
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    setorigin(newmis, org);
+    proj.angles = vectoangles(aim(self, 1000));
+    proj.classname = "spike";
+    proj.think = SUB_Remove;
+    proj.nextthink = time + 6;
+    setorigin(proj, self.origin + offset + '0 0 16');
 
-    newmis.velocity = dir * ng_velocity;
+    proj.velocity = aim(self, 1000) * FPP_Get(fpp_type)->speed;
 
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
+    if (fpp_type == FPP_NAIL) {
+        proj.weapon = DMSG_NAILGUN;
+        proj.touch = spike_touch;
+    } else { // fpp_type == FPP_SUPER_NAIL
+        proj.weapon = DMSG_SNAILGUN;
+        proj.touch = superspike_touch;
     }
-};
 
-void () W_FireSuperSpikes = {
-    local vector dir;
+    FOProj_Finalize(proj);
 
-    FO_Sound(self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
-
-    if (old_ng_rof)
-        self.ammo_nails = self.ammo_nails - 4;
-    else
-        self.ammo_nails = self.ammo_nails - 2;
-    self.currentammo = self.ammo_nails;
-    dir = aim(self, 1000);
-    launch_spike(self.origin + '0 0 16', dir);
-    LogEventAttack(self);
-    newmis.touch = superspike_touch;
-    newmis.weapon = DMSG_SNAILGUN;
-    FO_SetModel(newmis, "progs/s_spike.mdl");
-    setsize(newmis, VEC_ORIGIN, VEC_ORIGIN);
-    KickPlayer(-3, self);
+    return proj;
 };
 
 void (float ox) W_FireSpikes = {
-    local vector dir;
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+    FO_WeapInfo* wi = ws->wi;
 
     makevectors(self.v_angle);
-    if (((self.ammo_nails >= 4) || ((self.ammo_nails >= 2) && !old_ng_rof)) &&
-        (self.current_weapon == WEAP_SUPER_NAILGUN)) {
-        W_FireSuperSpikes();
-        return;
-    }
-    if (self.ammo_nails < 1) {
+
+    if (self.ammo_nails < wi->ammo_per_shot) {
         W_ChangeToBestWeapon();
         return;
     }
-    FO_Sound(self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
-    if ((self.ammo_nails == 1) || !old_ng_rof) {
-        self.ammo_nails = self.ammo_nails - 1;
-        self.currentammo = self.ammo_nails;
-    } else {
-        self.ammo_nails = self.ammo_nails - 2;
-        self.currentammo = self.ammo_nails;
-    }
-    dir = aim(self, 1000);
-    launch_spike(self.origin + '0 0 16' + v_right * ox, dir);
+
+    *ws->ammo_remaining -= wi->ammo_per_shot;
+    if (wi->weapon == WEAP_NAILGUN)
+        W_FireNail(FPP_NAIL, v_right * ox);
+    else
+        W_FireNail(FPP_SUPER_NAIL, '0 0 0');
+
     LogEventAttack(self);
     KickPlayer(-3, self);
+    Attack_Finished(wi->attack_time);
 };
 
 void () t_climb = {
@@ -1515,7 +1483,7 @@ void () spike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1528,9 +1496,8 @@ void () spike_touch = {
             TF_T_Damage(other, self, self.owner, ng_damage, TF_TD_NOTTEAM,
                     TF_TD_NAIL);
         }
-        
-        dremove(self);
-        
+
+        dremove_sent(self);
     } else {
         WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
         if (self.classname == "wizspike")
@@ -1543,17 +1510,16 @@ void () spike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_y);
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
-    
-    if(other.classname == "worldspawn" && spurs_enabled > 0)
-    {
-		if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 || self.owner.playerclass == PC_SPY && spurs_spy == 1)
-		{
-			ConvertToSpurs(self);
-			return;
-		}
-    }
-		
-    dremove(self);
+
+        if(other.classname == "worldspawn" && spurs_enabled > 0) {
+            if(self.owner.playerclass == PC_SCOUT && spurs_scout == 1 ||
+               self.owner.playerclass == PC_SPY && spurs_spy == 1) {
+                ConvertToSpurs(self);
+                return;
+            }
+        }
+
+        dremove_sent(self);
    }
 };
 
@@ -1571,7 +1537,7 @@ void () superspike_touch = {
         return;
 
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
+        dremove_sent(self);
         return;
     }
     if (other.takedamage) {
@@ -1598,161 +1564,37 @@ void () superspike_touch = {
         WriteCoord(MSG_MULTICAST, self.origin_z);
         multicast(self.origin, MULTICAST_PHS);
     }
-    dremove(self);
+    dremove_sent(self);
 };
 
-void (entity pl) W_SetCurrentAmmo = {
+void W_UpdateWeaponModel(entity pl) {
+    FO_WeapState ws;
+    FO_FillWeapState(pl, pl.current_slot, &ws);
+    FO_WeapInfo* wi = ws.wi;
+
+    if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0)
+        pl.weaponmodel = (wi->models)->model;
+    else
+        pl.weaponmodel = "";
+}
+
+void (entity pl) W_UpdateCurrentWeapon = {
     entity oldself;
 
-    if ((pl.health <= 0) || (pl.current_weapon == 0))
+    if ((pl.health <= 0) || IsSlotNull(pl.current_slot))
         return;
 
-    if (!(self.tfstate & TFSTATE_AIMING) && !(self.tfstate & TFSTATE_CANT_MOVE))
-        /* player_run(); */
+    FO_WeapState ws;
+    FO_FillWeapState(pl, pl.current_slot, &ws);
+    FO_WeapInfo* wi = ws.wi;
 
-    pl.items = pl.items - (pl.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS));
-    pl.weapon = 0;
+    pl.items &= ~(IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS);
+    // TODO: Shouldn't this always be union?  Carrying prior behavior for now.
+    pl.items |= (wi->items)->ammo_mask;
+    pl.weapon = (wi->items)->it_weapon;
 
-    if (pl.current_weapon == WEAP_AXE) {
-        pl.currentammo = 0;
-        pl.weaponmodel = "progs/v_axe.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_KNIFE) {
-        pl.currentammo = 0;
-        if (pl.weaponmode == 0)
-            pl.weaponmodel = "progs/v_knife.mdl";
-        else
-            pl.weaponmodel = "progs/v_knife2.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_SPANNER) {
-        pl.currentammo = pl.ammo_cells;
-        pl.weaponmodel = "progs/v_span.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_SHOTGUN) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_shot.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_shot2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SUPER_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_NAILGUN) {
-        pl.currentammo = pl.ammo_nails;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_nail.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_NAILGUN;
-    } else if (pl.current_weapon == WEAP_SUPER_NAILGUN) {
-        pl.currentammo = pl.ammo_nails;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_nail2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_SUPER_NAILGUN;
-    } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        pl.currentammo = pl.ammo_rockets;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            if (pl.weaponmode == 0)
-                pl.weaponmodel = "progs/v_rock.mdl";
-            else
-                pl.weaponmodel = "progs/v_pipe.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.weapon = IT_GRENADE_LAUNCHER;
-        pl.items = pl.items | IT_ROCKETS;
-    } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        pl.currentammo = pl.ammo_rockets;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rock2.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_ROCKETS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_srifle.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_AUTO_RIFLE) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_srifle.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SUPER_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_asscan.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_FLAMETHROWER) {
-        pl.currentammo = pl.ammo_cells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_flame.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_CELLS;
-        pl.weapon = IT_GRENADE_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_INCENDIARY) {
-        pl.currentammo = pl.ammo_rockets;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_irock.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_ROCKETS;
-        pl.weapon = IT_ROCKET_LAUNCHER;
-    } else if (pl.current_weapon == WEAP_MEDIKIT) {
-        if (!old_medikit) {
-            pl.currentammo = pl.ammo_cells;
-            pl.items = pl.items | IT_CELLS;
-        } else
-            pl.currentammo = 0;
-        pl.weaponmodel = "progs/v_medi.mdl";
-        pl.weaponframe = 0;
-    } else if (pl.current_weapon == WEAP_TRANQ) {
-        pl.currentammo = pl.ammo_shells;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_tranq.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_SHELLS;
-        pl.weapon = IT_SHOTGUN;
-    } else if (pl.current_weapon == WEAP_LASER) {
-        pl.currentammo = pl.ammo_nails;
-        if (!(pl.tfstate & TFSTATE_RELOADING)) {
-            pl.weaponmodel = "progs/v_rail.mdl";
-            pl.weaponframe = 0;
-        }
-        pl.items = pl.items | IT_NAILS;
-        pl.weapon = IT_SHOTGUN;
-    } else {
-        pl.currentammo = 0;
-        pl.weaponmodel = "";
-        pl.weaponframe = 0;
-    }
-
-    if (pl.is_feigning) {
-        pl.weaponmodel = "";
-        pl.weaponframe = 0;
-    }
+    W_UpdateWeaponModel(pl);
+    pl.weaponframe = 0;
 
     // refresh engineer build menu when ammo updated
     if (pl.menu_input == Menu_Engineer_Input)
@@ -1765,286 +1607,69 @@ void (entity pl) W_SetCurrentAmmo = {
     }
 };
 
-float () W_BestWeapon = {
-    local float it;
+Slot W_BestWeaponSlot()  {
+    FO_WeapState ws;
+    for (float i = 1; i <= TF_NUM_SLOTS; i++) {
+        Slot slot = MakeSlot(i);
+        FO_FillWeapState(self, slot, &ws);
 
-    it = self.weapons_carried;
-    if ((self.ammo_cells >= 1 && it & WEAP_LIGHTNING) && self.waterlevel <= 1)
-        return WEAP_LIGHTNING;
-    else if ((self.ammo_cells >= 7 && self.ammo_shells >= 1) && it & WEAP_ASSAULT_CANNON)
-        return WEAP_ASSAULT_CANNON;
-    else if (self.ammo_rockets >= 1 && it & WEAP_GRENADE_LAUNCHER)
-        return WEAP_GRENADE_LAUNCHER;
-    else if (self.ammo_rockets >= 1 && it & WEAP_ROCKET_LAUNCHER)
-        return WEAP_ROCKET_LAUNCHER;
-    else if (self.ammo_rockets >= 3 && it & WEAP_INCENDIARY)
-        return WEAP_INCENDIARY;
-    else if (self.ammo_cells >= 1 && it & WEAP_FLAMETHROWER)
-        return WEAP_FLAMETHROWER;
-    else if (self.ammo_nails >= 2 && it & WEAP_SUPER_NAILGUN)
-        return WEAP_SUPER_NAILGUN;
-    else if (self.ammo_nails >= 1 && it & WEAP_LASER)
-        return WEAP_LASER;
-    else if (self.ammo_shells >= 1 && it & WEAP_TRANQ)
-        return WEAP_TRANQ;
-    else if (self.ammo_shells >= 2 && it & WEAP_SUPER_SHOTGUN)
-        return WEAP_SUPER_SHOTGUN;
-    else if (self.ammo_shells >= 1 && it & WEAP_SNIPER_RIFLE)
-        return WEAP_SNIPER_RIFLE;
-    else if (self.ammo_nails >= 1 && it & WEAP_NAILGUN)
-        return WEAP_NAILGUN;
-    else if (self.ammo_shells >= 1 && it & WEAP_SHOTGUN)
-        return WEAP_SHOTGUN;
-    else if (it & WEAP_MEDIKIT)
-        return WEAP_MEDIKIT;
-    else if (it & WEAP_KNIFE)
-        return WEAP_KNIFE;
-    else if (it & WEAP_SPANNER)
-        return WEAP_SPANNER;
-    else if (it & WEAP_AXE)
-        return WEAP_AXE;
+        // AC also takes cells to fire.
+        if (ws->weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
+            continue;
 
-    return 0;
-};
-
-float () W_BestWeaponSlot = {
-    local float weap;
-
-    weap = W_BestWeapon();
-
-    if (!IsUsingOldImpulses())
-        return W_GetSlot(weap);
-    else 
-        return W_OldGetSlot(weap);
+        // We don't need to handle out of ammo medi/spanner here because of
+        // fallback below.
+        if (ws.weapon != WEAP_NONE &&
+            ((ws.wi)->ammo_type == AMMO_NONE || *ws.ammo_remaining))
+            return slot;
+    }
+    return SlotMelee;
 };
 
 void () W_ChangeToBestWeapon = {
-    local float slot = W_BestWeaponSlot();    
-
-    if (!IsUsingOldImpulses())
-        W_WeaponSlot(slot);
-    else
-        W_OldWeaponSlot(slot);
-
-    //self.last_weaponslot = self.current_weaponslot;
-    //self.last_weapon = self.current_weapon;
-    //self.last_weaponmode = self.weaponmode;
-    self.current_weaponslot = slot;
-    self.current_weapon = self.next_weapon;
-    self.weaponmode = self.next_weaponmode;
-    W_SetCurrentAmmo(self);
-    W_WeaponState_Save(self);
-    W_PrintWeaponMessage();
+    W_ChangeWeaponSlot(W_BestWeaponSlot());
 }
-
-float () W_CheckNoAmmo = {
-    if (self.current_weapon == WEAP_AXE
-            || self.current_weapon == WEAP_SPANNER
-            || self.current_weapon == WEAP_KNIFE
-            || self.current_weapon == WEAP_MEDIKIT)
-        return 1;
-    else if (self.current_weapon == WEAP_SUPER_NAILGUN && self.currentammo >= 4)
-        return 1;
-    else if (self.current_weapon == WEAP_INCENDIARY && self.currentammo >= 3)
-        return 1;
-    else if ((self.current_weapon == WEAP_SUPER_SHOTGUN || self.current_weapon == WEAP_NAILGUN)
-                && self.currentammo >= 2)
-        return 1;
-    else if (self.currentammo > 0)
-        return 1;
-
-    W_ChangeToBestWeapon();
-    return 0;
-};
-
-void () W_Reload_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_shot.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_super_shotgun = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_shot2.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void (entity pl) W_Reload_sniper_rifle = {
-    pl.reload_sniper_ticks = 0;
-    pl.tfstate = pl.tfstate - (pl.tfstate & TFSTATE_RELOADING);
-    pl.weaponmodel = "progs/v_srifle.mdl";
-    sprint(pl, PRINT_HIGH, "Finished reloading\n");
-    W_WeaponState_Load(pl, 0);
-    Status_Refresh(pl);
-};
-
-void () W_Reload_sniper_rifle_tick = {
-    self.owner.reload_sniper_ticks = self.owner.reload_sniper_ticks + 1;
-
-    if (self.owner.reload_sniper_ticks >= 4) {
-        W_Reload_sniper_rifle(self.owner);
-        dremove(self);
-        return;
-    }
-
-    Status_Refresh(self.owner);
-    self.nextthink = time + 1;
-}
-
-void () W_Reload_grenade_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    if (self.owner.weaponmode == 0)
-        self.owner.weaponmodel = "progs/v_rock.mdl";
-    else
-        self.owner.weaponmodel = "progs/v_pipe.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_rocket_launcher = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_rock2.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-void () W_Reload_assault_cannon = {
-    self.owner.tfstate = self.owner.tfstate - (self.owner.tfstate & TFSTATE_RELOADING);
-    self.owner.weaponmodel = "progs/v_asscan.mdl";
-    sprint(self.owner, PRINT_HIGH, "Finished reloading\n");
-    dremove(self);
-    W_WeaponState_Load(self.owner, 0);
-    Status_Refresh(self.owner);
-};
-
-float () CheckForReload = {
-    if (self.current_weapon == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 8 && self.ammo_shells > 0) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 16 && self.ammo_shells > 0) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
-    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > 0 && sniperreload) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
-    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((self.reload_grenade_launcher >= 6) && (self.ammo_rockets > 0)) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
-    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((self.reload_rocket_launcher >= 4) && (self.ammo_rockets > 0)) {
-            if (force_reload) {
-                TeamFortress_ReloadCurrentWeapon();
-            }
-
-            return 1;
-        }
-    } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (self.reload_assault_cannon >= PC_HVYWEAP_ASSCAN_CLIPSIZE && self.ammo_shells > 0) {
-                if (force_reload) {
-                    TeamFortress_ReloadCurrentWeapon();
-                }
-
-                return 1;
-            }
-        }
-    }
-    return 0;
-};
-
-float (float weap) CheckForAmmo = {
-    if (weap == WEAP_SHOTGUN) {
-        if (self.reload_shotgun >= 1 && self.ammo_shells > self.reload_shotgun)
-            return 1;
-    } else if (weap == WEAP_SUPER_SHOTGUN) {
-        if (self.reload_super_shotgun >= 2 && self.ammo_shells > self.reload_super_shotgun)
-            return 1;
-    } else if (weap == WEAP_SNIPER_RIFLE) {
-        if (self.reload_sniper_rifle >= 1 && self.ammo_shells > self.reload_sniper_rifle && sniperreload)
-            return 1;
-    } else if (weap == WEAP_GRENADE_LAUNCHER) {
-        if (self.reload_grenade_launcher >= 1 && self.ammo_rockets > self.reload_grenade_launcher)
-            return 1;
-    } else if (weap == WEAP_ROCKET_LAUNCHER) {
-        if (self.reload_rocket_launcher >= 1 && self.ammo_rockets > self.reload_rocket_launcher)
-            return 1;
-    } else if (weap == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy) {
-            if (self.reload_assault_cannon >= 1 && self.ammo_shells > self.reload_assault_cannon)
-                return 1;
-        }
-    }
-    return 0;
-};
 
 void () player_axe1;
 void () player_axeb1;
-
 void () player_spanner1;
-void () player_spanner2;
-void () player_spanner3;
-void () player_spanner4;
-
 void () player_knife1;
 void () player_knifeb1;
-
 void () player_shot1;
 void () player_nail1;
 void () player_light1;
 void () player_rocket1;
 void () player_autorifle1;
 
-void () player_assaultcannon1;
-void () player_assaultcannonup1;
-void () player_assaultcannondown1;
+void () player_asscan_up1;
 
 void () player_medikit1;
 void () player_medikitb1;
 
 void () W_Attack = {
-    local float r;
-
-    if (!W_CheckNoAmmo())
-        return;
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+    FO_WeapInfo* wi = ws->wi;
 
     if (self.has_disconnected == TRUE)
         return;
 
-    if (self.tfstate & TFSTATE_RELOADING || self.is_detpacking)
+    if (self.tfstate & TFSTATE_RELOADING ||
+        self.tfstate & TFSTATE_NO_WEAPON)
         return;
 
-    if(no_fire_mode)
+    if (no_fire_mode)
+        return;
+
+    // Out of ammo?
+    if (wi->ammo_type != AMMO_NONE &&
+        *ws->ammo_remaining < wi->ammo_per_shot) {
+        W_ChangeToBestWeapon();
+        return;
+    }
+
+    // Fired into forced reload?
+    if (FO_CheckForReload())
         return;
 
     if ((self.is_undercover || (self.undercover_team != 0)) ||
@@ -2054,183 +1679,138 @@ void () W_Attack = {
     makevectors(self.v_angle);
     self.show_hostile = time + 1;
 
-    if (self.current_weapon == WEAP_AXE) {
-        Attack_Finished(0.5);
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+    if (ws.weapon == WEAP_AXE) {
+        Pred_Sound(SND_AXE);
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_axe1();
         else
             player_axeb1();
-    } else if (self.current_weapon == WEAP_KNIFE) {
-        Attack_Finished(0.5);
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+    } else if (ws.weapon == WEAP_KNIFE) {
+        Pred_Sound(SND_AXE);
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_knife1();
         else
             player_knifeb1();
-    } else if (self.current_weapon == WEAP_SPANNER) {
-        Attack_Finished(0.5);
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+    } else if (ws.weapon == WEAP_SPANNER) {
+        Pred_Sound(SND_AXE);
         player_spanner1();
-    } else if (self.current_weapon == WEAP_SHOTGUN) {
-        if (CheckForReload() == TRUE)
-            return;
+    } else if (ws.weapon == WEAP_SHOTGUN) {
         player_shot1();
         W_FireShotgun();
-        self.reload_shotgun = self.reload_shotgun + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.5);
-    } else if (self.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if (CheckForReload() == TRUE)
-            return;
+    } else if (ws.weapon == WEAP_SUPER_SHOTGUN) {
         player_shot1();
         W_FireSuperShotgun();
-        self.reload_super_shotgun = self.reload_super_shotgun + 2;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.7);
-    } else if (self.current_weapon == WEAP_NAILGUN) {
+    } else if (ws.weapon == WEAP_NAILGUN) {
         player_nail1();
-    } else if (self.current_weapon == WEAP_SUPER_NAILGUN) {
+    } else if (ws.weapon == WEAP_SUPER_NAILGUN) {
         player_nail1();
-    } else if (self.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if (CheckForReload() == TRUE)
-            return;
+    } else if (ws.weapon == WEAP_GRENADE_LAUNCHER) {
         player_rocket1();
         W_FireGrenade();
-        self.reload_grenade_launcher = self.reload_grenade_launcher + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.6);
-    } else if (self.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if (CheckForReload() == TRUE)
-            return;
+    } else if (ws.weapon == WEAP_PIPE_LAUNCHER) {
+        player_rocket1();
+        W_FireGrenade();
+        Status_Refresh(self);
+    } else if (ws.weapon == WEAP_ROCKET_LAUNCHER) {
         player_rocket1();
         W_FireRocket();
-        self.reload_rocket_launcher = self.reload_rocket_launcher + 1;
         Status_Refresh(self);
-        CheckForReload();
-        Attack_Finished(0.8);
-    } else if (self.current_weapon == WEAP_LIGHTNING) {
+    } else if (ws.weapon == WEAP_LIGHTNING) {
         player_light1();
-        Attack_Finished(0.1);
         FO_Sound(self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
-    } else if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+    } else if (ws.weapon == WEAP_SNIPER_RIFLE) {
         if (self.flags & FL_ONGROUND) {
-            if (CheckForReload() == TRUE)
-                return;
             player_shot1();
             W_FireSniperRifle();
             if (sniperreload) {
-                self.reload_sniper_rifle = self.reload_sniper_rifle + 1;
                 Status_Refresh(self);
-                CheckForReload();
             }
-            Attack_Finished(1.5);
         }
-    } else if (self.current_weapon == WEAP_AUTO_RIFLE) {
+    } else if (ws.weapon == WEAP_AUTO_RIFLE) {
         player_autorifle1();
         W_FireAutoRifle();
-        Attack_Finished(0.1);
-    } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if (CheckForReload() == TRUE)
-            return;
-        }
-
+    } else if (ws.weapon == WEAP_ASSAULT_CANNON) {
         if (self.ammo_cells < 7) {
             if (time >= self.antispam_assault_cannon) {
                 sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
                 self.antispam_assault_cannon = time + 3;
             }
-            W_ChangeWeapon(W_BestWeaponSlot());
-            W_SetCurrentAmmo(self);
-            W_WeaponState_Save(self);
+            W_ChangeToBestWeapon();
         } else {
-            self.ammo_cells = self.ammo_cells - 7;
-            self.heat = 1;
+            self.ammo_cells -= - 7;
+            self.count = 0;
             self.immune_to_check = time + 5;
-            self.tfstate = self.tfstate | TFSTATE_AIMING;
-            TeamFortress_SetSpeed(self);
-            player_assaultcannonup1();
+            self.tfstate |= TFSTATE_AIMING;
+            player_asscan_up1();
         }
-    } else if (self.current_weapon == WEAP_FLAMETHROWER) {
-        player_shot1();
+    } else if (ws.weapon == WEAP_FLAMETHROWER) {
+        player_flamethrower1();
         W_FireFlame();
         if (self.waterlevel > 2)
             Attack_Finished(1);
         else
             Attack_Finished(0.15);
-    } else if (self.current_weapon == WEAP_INCENDIARY) {
+    } else if (ws.weapon == WEAP_INCENDIARY) {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
             W_FireIncendiaryCannon();
-            switch (pyro_type)
-            {
-                case PYRO_ORIGINAL:
-                    Attack_Finished(1.2);
-                    break;
-                case PYRO_OZTF:
-                    Attack_Finished(0.9);
-                    break;
-                case PYRO_FO:
-                    //Attack_Finished(PC_PYRO_LAVA_RETICK);
-                    Attack_Finished(0.9);
-                    break;
-            }
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
         }
-    } else if (self.current_weapon == WEAP_MEDIKIT) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
-        r = random();
-        if (r < 0.5)
+    } else if (ws.weapon == WEAP_MEDIKIT) {
+        Pred_Sound(SND_AXE);
+        if (shared_prng(PRNG_WEAP) < 0.5)
             player_medikit1();
         else
             player_medikitb1();
-        Attack_Finished(0.5);
-    } else if (self.current_weapon == WEAP_TRANQ) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/dartgun.wav", 1, ATTN_NORM);
+    } else if (ws.weapon == WEAP_TRANQ) {
         player_shot1();
         W_FireTranq();
-        Attack_Finished(1.5);
-    } else if (self.current_weapon == WEAP_LASER) {
-        FO_Sound(self, CHAN_WEAPON, "weapons/railgun.wav", 1, ATTN_NORM);
+    } else if (ws.weapon == WEAP_RAILGUN) {
         player_shot1();
-        W_FireLaser();
-        Attack_Finished(0.4);
+        W_FireRailgun();
+    }
+
+    if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
+        ws.weapon != WEAP_ASSAULT_CANNON &&  // In animation
+        ws.weapon != WEAP_NAILGUN &&         // In animation
+        ws.weapon != WEAP_SUPER_NAILGUN)     // In animation
+        Attack_Finished(wi->attack_time);
+
+    if (wi->needs_reload) {
+        if (ws.weapon != WEAP_ASSAULT_CANNON)  // In animation
+            *ws->clip_fired += wi->ammo_per_shot;
+        FO_CheckForReload();
     }
 
     //These weapons have to log each projectile launched/bullet fired
-    if (self.current_weapon != WEAP_ASSAULT_CANNON ||
-        self.current_weapon != WEAP_NAILGUN ||
-        self.current_weapon != WEAP_SUPER_NAILGUN)
+    if (ws.weapon != WEAP_ASSAULT_CANNON || ws.weapon != WEAP_NAILGUN ||
+        ws.weapon != WEAP_SUPER_NAILGUN)
         LogEventAttack(self);
 };
 
-float (entity pl) WeaponReady = {
-    if (time >= pl.attack_finished && !(pl.tfstate & TFSTATE_RELOADING)) {
-        return 1;
-    }
+float WeaponReady() {
+    if (self.client_time >= self.attack_finished &&
+        !(self.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON)))
+        return TRUE;
 
-    return 0;
+    return FALSE;
 }
 
 void () W_PrintWeaponMessage = {
-    switch (self.current_weapon)
+    switch (FO_CurrentWeapon())
     {
         case WEAP_GRENADE_LAUNCHER:
-            if (self.weaponmode == GL_NORMAL)
-                sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
-            else if (cb_prematch)
-                sprint(self, PRINT_MEDIUM,
-                    "Pipebomb mode not available in prematch\n");
-            else if (self.weaponmode == GL_PIPEBOMB)
+            sprint(self, PRINT_MEDIUM, "Normal grenade mode\n");
+            break;
+        case WEAP_PIPE_LAUNCHER:
+            if (cb_prematch)
+                sprint(self, PRINT_MEDIUM, "Pipebomb mode not available in prematch\n");
+            else
                 sprint(self, PRINT_MEDIUM, "Pipebomb mode\n");
             break;
         case WEAP_SNIPER_RIFLE:
@@ -2250,7 +1830,7 @@ float (float weap) W_GetSlot = {
                 || (!cf_pyro_impulses && weap == WEAP_INCENDIARY)
                 || (cf_pyro_impulses && weap == WEAP_FLAMETHROWER)
                 || weap == WEAP_TRANQ
-                || weap == WEAP_LASER
+                || weap == WEAP_RAILGUN
                 || weap == WEAP_ASSAULT_CANNON) {
         return 1;
     } else if (weap == WEAP_SUPER_SHOTGUN
@@ -2268,11 +1848,6 @@ float (float weap) W_GetSlot = {
             return 1;
         else
             return 3;
-    } else if (weap == WEAP_GRENADE_LAUNCHER) {
-        if (self.weaponmode == 0)
-            return 1;
-        else
-            return 2;
     }
     return 0;
 };
@@ -2286,7 +1861,7 @@ float (float weap) W_OldGetSlot = {
     else if (weap == WEAP_SHOTGUN
                 || weap == WEAP_SNIPER_RIFLE
                 || weap == WEAP_TRANQ
-                || weap == WEAP_LASER)
+                || weap == WEAP_RAILGUN)
         return 2;
     else if (weap == WEAP_SUPER_SHOTGUN
                 || weap == WEAP_AUTO_RIFLE)
@@ -2302,715 +1877,87 @@ float (float weap) W_OldGetSlot = {
                 || weap == WEAP_ASSAULT_CANNON
                 || weap == WEAP_INCENDIARY)
         return 7;
-    else if (weap == WEAP_GRENADE_LAUNCHER) {
-        if (self.weaponmode == 0)
-            return 6;
-        else
-            return 7;
-    }
+    else if (weap == WEAP_GRENADE_LAUNCHER)
+        return 6;
+    else if (weap == WEAP_PIPE_LAUNCHER)
+        return 7;
+
     return 0;
 };
 
-float (float inp) W_AmmoSlot = {
-    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-    self.noammo = 0;
-
-    if (inp == TF_SLOT1) {
-        if (self.playerclass == PC_SCOUT && self.ammo_nails < 2)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SOLDIER && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_MEDIC && self.ammo_nails < 4)
-            self.noammo = 1;
-        else if (self.playerclass == PC_HVYWEAP) {
-            if (self.ammo_shells < 1)
-                self.noammo = 1;
-            else if (self.ammo_cells < 7)
-                self.noammo = 2;
-        } else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_rockets < 3)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_cells < 3)
-            self.noammo = 1;
-         else if (self.playerclass == PC_SPY && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT2) {
-        if (self.playerclass == PC_SCOUT && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_SPY
-                    || self.playerclass == PC_ENGINEER)
-                    && self.ammo_shells < 2)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && !cf_pyro_impulses && self.ammo_cells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && cf_pyro_impulses && self.ammo_rockets < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT3) {
-        if (self.playerclass == PC_SCOUT
-                    || self.playerclass == PC_ENGINEER)
-            return 0;
-        if ((self.playerclass == PC_SNIPER
-                    || self.playerclass == PC_SPY)
-                    && self.ammo_nails < 2)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_DEMOMAN
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_PYRO)
-                    && self.ammo_shells < 1)
-            self.noammo = 1;
-    } else if (inp == TF_SLOT4)
-        return 1;
-
-    if (self.noammo > 0)
-        return 0;
-    else
-        return 1;
-};
-
-float (float inp) W_OldAmmoSlot = {
-    self.noammo = 0;
-    if (inp == TF_SLOT1) {
-        return 1;
-    }
-    else if (inp == TF_SLOT2) {
-        if ((self.playerclass == PC_SCOUT 
-                || self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SOLDIER
-                || self.playerclass == PC_DEMOMAN
-                || self.playerclass == PC_MEDIC
-                || self.playerclass == PC_HVYWEAP
-                || self.playerclass == PC_PYRO
-                || self.playerclass == PC_SPY)
-                && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_ENGINEER && self.ammo_nails < 1)
-            self.noammo = 1;
-
-    }
-    else if (inp == TF_SLOT3) {
-        if (self.playerclass == PC_SNIPER && self.ammo_shells < 1)
-            self.noammo = 1;
-        else if ((self.playerclass == PC_SOLDIER
-                    || self.playerclass == PC_MEDIC
-                    || self.playerclass == PC_HVYWEAP
-                    || self.playerclass == PC_SPY
-                    || self.playerclass == PC_ENGINEER)
-                    && self.ammo_shells < 2)
-            self.noammo = 1;
-    }
-    else if (inp == TF_SLOT4) {
-        if ((self.playerclass == PC_SCOUT
-                || self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SPY)
-                && self.ammo_nails < 2)
-            self.noammo = 1;
-    }
-    else if (inp == 5) {
-        if (self.playerclass == PC_MEDIC && self.ammo_nails < 4)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
-            self.noammo = 1;
-    }
-    else if (inp == 6) {
-        if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_PYRO && self.ammo_cells < 1)
-            self.noammo = 1;
-
-    }
-    else if (inp == 7) {
-        if (self.playerclass == PC_SOLDIER && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_DEMOMAN && self.ammo_rockets < 1)
-            self.noammo = 1;
-        else if (self.playerclass == PC_HVYWEAP) {
-            if (self.ammo_shells < 1)
-                self.noammo = 1;
-            else if (self.ammo_cells < 7)
-                self.noammo = 2;
-        }
-        else if (self.playerclass == PC_PYRO && self.ammo_rockets < 3)
-            self.noammo = 1;
-
-    }
-    if (self.noammo > 0)
-        return 0;
-    else
-        return 1;
-};
-
-float () W_OldWeaponSlot1 = {
-    if (self.weapons_carried & WEAP_MEDIKIT)
-        return WEAP_MEDIKIT;
-    else if (self.weapons_carried & WEAP_KNIFE)
-        return WEAP_KNIFE;
-    else if (self.weapons_carried & WEAP_SPANNER)
-        return WEAP_SPANNER;
-    else
-        return WEAP_AXE;
-};
-
-float () W_OldWeaponSlot2 = {
-    if (self.playerclass == PC_SCOUT    
-            ||self.playerclass == PC_SOLDIER
-            || self.playerclass == PC_DEMOMAN
-            || self.playerclass == PC_MEDIC
-            || self.playerclass == PC_HVYWEAP
-            || self.playerclass == PC_PYRO)
-        return WEAP_SHOTGUN;
-    else if (self.playerclass == PC_SNIPER) 
-        return WEAP_SNIPER_RIFLE;
-    else if (self.playerclass == PC_SPY)
-        return WEAP_TRANQ;
-    else if (self.playerclass == PC_ENGINEER)
-        return WEAP_LASER;
-    return 0;
-};
-
-float () W_OldWeaponSlot3 = {
-    if (self.playerclass == PC_SOLDIER
-            || self.playerclass == PC_MEDIC
-            || self.playerclass == PC_HVYWEAP
-            || self.playerclass == PC_SPY
-            || self.playerclass == PC_ENGINEER)
-        return WEAP_SUPER_SHOTGUN;
-    else if (self.playerclass == PC_SNIPER) 
-        return WEAP_AUTO_RIFLE;
-    return 0;
-};
-
-float () W_OldWeaponSlot4 = {
-    if (self.playerclass == PC_SCOUT
-        || self.playerclass == PC_SNIPER
-        || self.playerclass == PC_SPY)
-        return WEAP_NAILGUN;
-    return 0;
-};
-
-float () W_OldWeaponSlot5 = {
-    if (self.playerclass == PC_MEDIC)
-        return WEAP_SUPER_NAILGUN;
-    else if (self.playerclass == PC_PYRO)
-        return WEAP_FLAMETHROWER;
-    return 0;
-};
-
-float () W_OldWeaponSlot6 = {
-    if (self.playerclass == PC_DEMOMAN) {
-        self.next_weaponmode = 0;
-        return WEAP_GRENADE_LAUNCHER;
-    }
-    else if (self.playerclass == PC_PYRO)
-        return WEAP_FLAMETHROWER;
-    return 0;  
-};
-
-float () W_OldWeaponSlot7 = {
-    if (self.playerclass == PC_SOLDIER)
-        return WEAP_ROCKET_LAUNCHER;
-    if (self.playerclass == PC_DEMOMAN)
-        return WEAP_GRENADE_LAUNCHER;
-    else if (self.playerclass == PC_HVYWEAP)
-        return WEAP_ASSAULT_CANNON;
-    else if (self.playerclass == PC_PYRO)
-        return WEAP_INCENDIARY;
-    return 0;
-};
-
-float () W_WeaponSlot1 = {
-    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-    if (self.playerclass == PC_SCOUT)
-        return WEAP_NAILGUN;
-    else if (self.playerclass == PC_SNIPER)
-        return WEAP_SNIPER_RIFLE;
-    else if (self.playerclass == PC_SOLDIER)
-        return WEAP_ROCKET_LAUNCHER;
-    else if (self.playerclass == PC_DEMOMAN)
-        return WEAP_GRENADE_LAUNCHER;
-    else if (self.playerclass == PC_MEDIC)
-        return WEAP_SUPER_NAILGUN;
-    else if (self.playerclass == PC_HVYWEAP)
-        return WEAP_ASSAULT_CANNON;
-    else if (self.playerclass == PC_PYRO)
-        if (cf_pyro_impulses) {
-            return WEAP_FLAMETHROWER;
-        } else {
-            return WEAP_INCENDIARY;
-        }
-    else if (self.playerclass == PC_SPY)
-        return WEAP_TRANQ;
-    else if (self.playerclass == PC_ENGINEER)
-        return WEAP_LASER;
-    return 0;
-};
-
-float () W_WeaponSlot2 = {
-    local float cf_pyro_impulses = FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-    if (self.playerclass == PC_SCOUT)
-        return WEAP_SHOTGUN;
-    else if (self.playerclass == PC_SNIPER)
-        return WEAP_AUTO_RIFLE;
-    else if (self.playerclass == PC_SOLDIER
-                || self.playerclass == PC_MEDIC
-                || self.playerclass == PC_HVYWEAP
-                || self.playerclass == PC_SPY
-                || self.playerclass == PC_ENGINEER)
-        return WEAP_SUPER_SHOTGUN;
-    else if (self.playerclass == PC_DEMOMAN) {
-        return WEAP_GRENADE_LAUNCHER; // weaponmode = 1 (pipebomb launcher)
-    } else if (self.playerclass == PC_PYRO)
-        if (cf_pyro_impulses) {
-            return WEAP_INCENDIARY;
-        } else {
-            return WEAP_FLAMETHROWER;
-        }
-    return 0;
-};
-
-float () W_WeaponSlot3 = {
-    if (self.playerclass == PC_SCOUT
-                || self.playerclass == PC_ENGINEER) {
-        sprint(self, PRINT_HIGH, "No weapon\n");
-        return 0;
-    }
-
-    if (self.playerclass == PC_SNIPER
-                || self.playerclass == PC_SPY)
-        return WEAP_NAILGUN;
-    else if (self.playerclass == PC_SOLDIER
-                || self.playerclass == PC_DEMOMAN
-                || self.playerclass == PC_MEDIC
-                || self.playerclass == PC_HVYWEAP
-                || self.playerclass == PC_PYRO)
-        return WEAP_SHOTGUN;
-    return 0;
-};
-
-float () W_WeaponSlot4 = {
-    if (self.weapons_carried & WEAP_MEDIKIT)
-        return WEAP_MEDIKIT;
-    else if (self.weapons_carried & WEAP_KNIFE)
-        return WEAP_KNIFE;
-    else if (self.weapons_carried & WEAP_SPANNER)
-        return WEAP_SPANNER;
-    else
-        return WEAP_AXE;
-};
-
-void (float slot) W_WeaponSlot = {
-    self.next_weaponmode = 0;
-    if (slot == 1)
-        self.next_weapon = W_WeaponSlot1();
-    else if (slot == 2) {
-        self.next_weapon = W_WeaponSlot2();
-        if (self.next_weapon == WEAP_GRENADE_LAUNCHER)
-            self.next_weaponmode = 1;
-    }
-    else if (slot == 3)
-        self.next_weapon = W_WeaponSlot3();
-    else if (slot == 4)
-        self.next_weapon = W_WeaponSlot4();
-};
-
-void (float inp) W_OldWeaponSlot = {
-    self.next_weaponmode = 0;
-    if (inp == TF_SLOT1) {
-        self.next_weapon = W_OldWeaponSlot1();
-    }
-    else if (inp == TF_SLOT2) {
-        self.next_weapon = W_OldWeaponSlot2();
-    }
-    else if (inp == TF_SLOT3) {
-        self.next_weapon = W_OldWeaponSlot3();
-    }
-    else if (inp == TF_SLOT4) {
-        self.next_weapon = W_OldWeaponSlot4();
-    }
-    else if (inp == 5) {
-        self.next_weapon = W_OldWeaponSlot5();
-    }
-    else if (inp == 6) {
-        self.next_weapon = W_OldWeaponSlot6();
-    }
-    else if (inp == 7) {
-        self.next_weapon = W_OldWeaponSlot7();
-        if (self.next_weapon == WEAP_GRENADE_LAUNCHER)
-            self.next_weaponmode = 1;
-    }
-    if (self.next_weapon == 0) {
-        self.next_weapon = self.current_weapon;
-        sprint(self, PRINT_HIGH, "No weapon\n"); 
-    }
-}
-
-float (float newSlot) W_OldImpulseFromNewSlot = {
-    if (newSlot == 1) {
-        if (self.playerclass == PC_SCOUT) {
-            return W_OldGetSlot(WEAP_NAILGUN);
-        }
-        else if (self.playerclass == PC_SNIPER) {
-            return W_OldGetSlot(WEAP_SNIPER_RIFLE);
-        }
-        else if (self.playerclass == PC_SOLDIER) {
-            return W_OldGetSlot(WEAP_ROCKET_LAUNCHER);
-        }
-        else if (self.playerclass == PC_DEMOMAN) {
-            return 6;
-        }
-        else if (self.playerclass == PC_MEDIC) {
-            return W_OldGetSlot(WEAP_SUPER_NAILGUN);
-        }
-        else if (self.playerclass == PC_HVYWEAP) {
-            return W_OldGetSlot(WEAP_ASSAULT_CANNON);
-        }
-        else if (self.playerclass == PC_PYRO) {
-            return W_OldGetSlot(WEAP_INCENDIARY);
-        }
-        else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_TRANQ);
-        }
-        else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_LASER);
-        }
-    }
-    else if (newSlot == 2) {
-        if (self.playerclass == PC_SCOUT) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_SNIPER) {
-            return W_OldGetSlot(WEAP_AUTO_RIFLE);
-        }
-        else if (self.playerclass == PC_SOLDIER) {
-            return W_OldGetSlot(WEAP_SUPER_SHOTGUN);
-        }
-        else if (self.playerclass == PC_DEMOMAN) {
-            return 7;
-        }
-        else if (self.playerclass == PC_MEDIC) {
-            return W_OldGetSlot(WEAP_SUPER_SHOTGUN);
-        }
-        else if (self.playerclass == PC_HVYWEAP) {
-            return W_OldGetSlot(WEAP_SUPER_SHOTGUN);
-        }
-        else if (self.playerclass == PC_PYRO) {
-            return W_OldGetSlot(WEAP_FLAMETHROWER);
-        }
-        else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_SUPER_SHOTGUN);
-        }
-        else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_SUPER_SHOTGUN);
-        }
-    }
-    else if (newSlot == 3) {
-        if (self.playerclass == PC_SCOUT) {
-            return W_OldGetSlot(WEAP_NAILGUN);
-        }
-        else if (self.playerclass == PC_SNIPER) {
-            return W_OldGetSlot(WEAP_NAILGUN);
-        }
-        else if (self.playerclass == PC_SOLDIER) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_DEMOMAN) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_MEDIC) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_HVYWEAP) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_PYRO) {
-            return W_OldGetSlot(WEAP_SHOTGUN);
-        }
-        else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_NAILGUN);
-        }
-        else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_LASER);
-        }
-    }
-    else if (newSlot == 4) {
-        if (self.playerclass == PC_SCOUT) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_SNIPER) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_SOLDIER) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_DEMOMAN) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_MEDIC) {
-            return W_OldGetSlot(WEAP_MEDIKIT);
-        }
-        else if (self.playerclass == PC_HVYWEAP) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_PYRO) {
-            return W_OldGetSlot(WEAP_AXE);
-        }
-        else if (self.playerclass == PC_SPY) {
-            return W_OldGetSlot(WEAP_KNIFE);
-        }
-        else if (self.playerclass == PC_ENGINEER) {
-            return W_OldGetSlot(WEAP_SPANNER);
-        }
-    }
-    return 0;
-}
-
-void () W_AmmoError = {
+static void W_AmmoError() {
     if (self.noammo == 1)
         sprint(self, PRINT_HIGH, "Not enough ammo\n");
     else if (self.noammo == 2 && time >= self.antispam_assault_cannon) {
         sprint(self, PRINT_HIGH, "Not enough cells to power the assault cannon\n");
         self.antispam_assault_cannon = time + 3;
     }
-};
+}
 
-void (entity pl) W_WeaponState_Save = {
-    if (!WeaponReady(pl))
+void W_ChangeWeaponByInput(float input) {
+    if (input < 1 || input > GetMaxWeaponInput())
         return;
 
-    pl.weaponstate_current_weaponslot = pl.current_weaponslot;
-    pl.weaponstate_last_weaponslot = pl.last_weaponslot;
-    pl.weaponstate_current_weapon = pl.current_weapon;
-    pl.weaponstate_last_weapon = pl.last_weapon;
-    pl.weaponstate_weaponmode = pl.weaponmode;
-    pl.weaponstate_last_weaponmode = pl.last_weaponmode;
-}
-
-void (entity pl, float swap) W_WeaponState_Load = {
-    if (!swap) {
-        pl.current_weaponslot = pl.weaponstate_current_weaponslot;
-        pl.last_weaponslot    = pl.weaponstate_last_weaponslot;
-        pl.current_weapon     = pl.weaponstate_current_weapon;
-        pl.last_weapon        = pl.weaponstate_last_weapon;
-        pl.weaponmode         = pl.weaponstate_weaponmode;
-        pl.last_weaponmode    = pl.weaponstate_last_weaponmode;
-    } else {
-        pl.current_weaponslot = pl.weaponstate_last_weaponslot;
-        pl.last_weaponslot    = pl.weaponstate_current_weaponslot;
-        pl.current_weapon     = pl.weaponstate_last_weapon;
-        pl.last_weapon        = pl.weaponstate_current_weapon;
-        pl.weaponmode         = pl.weaponstate_last_weaponmode;
-        pl.last_weaponmode    = pl.weaponstate_weaponmode;
-    }
-    pl.queue_weaponstate = 0;
-
-    W_WeaponState_Save(pl);
-    W_SetCurrentAmmo(pl);
-    Status_Refresh(pl);
-}
-
-float (entity pl) W_WeaponState_Check = {
-                                           //  bprint(2,ftos(pl.current_weaponslot == pl.weaponstate_current_weaponslot));
-    //bprint(2,"\n");
-    if (pl.current_weaponslot == pl.weaponstate_current_weaponslot
-                && pl.last_weaponslot == pl.weaponstate_last_weaponslot)
-        return 1;
-    else
-        return 0;
-}
-
-void (float inp) W_ChangeWeapon = {
-    if(self.playerclass == PC_CIVILIAN) {
-        inp = TF_SLOT4;
-    }
-
-    if (inp < TF_SLOT1 || inp > GetLastWeaponImpulse())
+    Slot slot = FO_SlotByInput(input);
+    if (IsSlotNull(slot))
         return;
 
+    W_ChangeWeaponSlot(slot);
+}
+
+void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
 
+    if (IsSlotNull(slot))
+        slot = SlotMelee;  // Make Nulls noticeable...
+
+    FO_WeapState ws;
+    FO_FillWeapState(self, slot, &ws);
+    if (ws.weapon == WEAP_NONE)
+        return;
+
     // queue next weapon if queue is not empty or has changed
-    if (!self.queue_weaponslot || inp != self.queue_weaponslot)
-        self.queue_weaponslot = inp;
+    if (IsSlotNull(self.queue_slot) || !IsSameSlot(slot, self.queue_slot))
+        self.queue_slot = slot;
 
     // halt if weapon is not ready to be fired
-    if (!WeaponReady(self) && chweap_wait_attfinished)
+    if (!WeaponReady())
         return;
-    
-    if (IsUsingOldImpulses()) {
-        if(self.playerclass == PC_CIVILIAN) {
-            inp = TF_SLOT1;
-        }
-        // check for ammo
-        if (! W_OldAmmoSlot(inp)) {
-            W_AmmoError();
-            self.queue_weaponslot = 0;
-            return;
-        }
-        W_OldWeaponSlot(inp);
-    }
-    else {
-        // check for ammo
-        if (! W_AmmoSlot(inp)) {
-            W_AmmoError();
-            self.queue_weaponslot = 0;
-            return;
-        }
 
-        W_WeaponSlot(inp);
+    self.queue_slot = SlotNull;
+
+    // We still allow swapping to medikit/spanner with no ammo.
+    if (*ws->ammo_remaining == 0 && !IsSlotMelee(slot)) {
+        W_AmmoError();
+        return;
     }
 
-    // don't update current/last weapon information if next weapon is the same as current
-    if (self.current_weapon != self.next_weapon || self.weaponmode != self.next_weaponmode) {
-        self.last_weaponslot = self.current_weaponslot;
-        self.current_weaponslot = self.queue_weaponslot;
-        self.last_weapon = self.current_weapon;
-        self.current_weapon = self.next_weapon;
-        self.last_weaponmode = self.weaponmode;
-        self.weaponmode = self.next_weaponmode;
+    if (IsSameSlot(slot, self.current_slot))
+        return;
 
-        if (!self.is_quickfiring)
-            W_PrintWeaponMessage();
-    }
+    self.last_slot = self.current_slot;
+    self.current_slot = slot;
 
-    if (!self.is_quickfiring && !self.has_quickfired)
-        W_WeaponState_Save(self);
-
-    W_SetCurrentAmmo(self);
+    W_UpdateCurrentWeapon(self);
+    W_PrintWeaponMessage();
     Status_Refresh(self);
-    self.queue_weaponslot = 0;
 };
 
-void () CycleWeaponLast = {
-    if (!self.last_weaponslot)
-        return;
-
-    if (!self.is_quickfiring)
-        W_ChangeWeapon(self.last_weaponslot);
-    else
-        W_WeaponState_Load(self, 1);
+void W_ChangeWeaponLast() {
+    if (!IsSlotNull(self.last_slot))
+        W_ChangeWeaponSlot(self.last_slot);
 };
 
-void () CycleWeaponNext = {
-    local float slot, next;
+void W_ChangeWeaponNext() {
+    Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
+    W_ChangeWeaponSlot(FO_FindPrevNextWeaponSlot(self.playerclass, slot, FALSE));
+}
 
-    if (self.weaponmodel == string_null || self.current_weapon == 0)
-        return;
-
-    next = 0;
-    if (!IsUsingOldImpulses()) {
-        for (slot = 1; slot <= 4; slot++) {
-            next = (slot == 4) ? 1 : (slot + 1);
-            if (self.current_weaponslot == slot) {
-                while (! W_AmmoSlot(next))
-                    next = (next == 4) ? 1 : (next + 1);
-                break;
-            }
-        }
-    }
-    else if (IsUsingOldImpulses()) {
-        for (slot = self.current_weaponslot; slot <= GetLastWeaponImpulse(); slot++) {
-            next = (slot == GetLastWeaponImpulse()) ? 1 : (slot + 1);
-            if (next == 1) {
-                if (W_OldWeaponSlot1() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 2) {
-                if (W_OldWeaponSlot2() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 3) {
-                if (W_OldWeaponSlot3() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 4) {
-                if (W_OldWeaponSlot4() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 5) {
-                if (W_OldWeaponSlot5() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 6) {
-                if (W_OldWeaponSlot6() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 7) {
-                if (W_OldWeaponSlot7() && W_OldAmmoSlot(next))
-                    break;
-            }
-        }
-    }
-    W_ChangeWeapon(next);
-};
-
-void () CycleWeaponPrev = {
-    local float slot, next;
-
-    if (self.weaponmodel == string_null || self.current_weapon == 0)
-        return;
-
-    next = 0;
-    if (!IsUsingOldImpulses()) {
-        for (slot = 1; slot <= 4; slot++) {
-            next = (slot == 1) ? 4 : (slot - 1);
-            if (self.current_weaponslot == slot) {
-                while (! W_AmmoSlot(next))
-                    next = (next == 1) ? 4 : (next - 1);
-                break;
-            }
-        }
-    }
-    else {
-        for (slot = self.current_weaponslot; slot >= 1; slot--) {
-            next = (slot == 1) ? GetLastWeaponImpulse() : (slot - 1);
-            if (next == 1) {
-                if (W_OldWeaponSlot1() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 2) {
-                if (W_OldWeaponSlot2() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 3) {
-                if (W_OldWeaponSlot3() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 4) {
-                if (W_OldWeaponSlot4() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 5) {
-                if (W_OldWeaponSlot5() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 6) {
-                if (W_OldWeaponSlot6() && W_OldAmmoSlot(next))
-                    break;
-            }
-            else if (next == 7) {
-                if (W_OldWeaponSlot7() && W_OldAmmoSlot(next))
-                    break;
-            }
-        }
-    }
-     
-
-    W_ChangeWeapon(next);
-};
+void W_ChangeWeaponPrev() {
+    Slot slot = IsSlotNull(self.current_slot) ? SlotMelee : self.current_slot;
+    W_ChangeWeaponSlot(FO_FindPrevNextWeaponSlot(self.playerclass, slot, TRUE));
+}
 
 void () PreMatchImpulses;
 void () DeadImpulses;
@@ -3024,9 +1971,9 @@ void () ImpulseCommands = {
 
     if (!self.is_feigning) {
         if (self.impulse == TF_GRENADE_1)
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         else if (self.impulse == TF_GRENADE_T)
             TeamFortress_ThrowGrenade();
         else if (self.impulse == TF_GRENADE_PT_1)
@@ -3060,27 +2007,27 @@ void () ImpulseCommands = {
             CF_Spy_DisguiseStop();
         else if (self.playerclass == PC_ENGINEER && self.is_building) {
             TeamFortress_EngineerBuildStop();
-            CycleWeaponLast();
+            W_ChangeWeaponLast();
         } else if (self.playerclass == PC_DEMOMAN && self.is_detpacking) {
             TeamFortress_DetpackStop();
-            CycleWeaponLast();
+            W_ChangeWeaponLast();
         }
     } else if (self.impulse == TF_TOGGLEVOTE)
         Vote_ToggleMenu(self);
 
-    if ((!self.is_building && !self.is_detpacking) && !self.is_feigning) {
+    if (self.tfstate & TFSTATE_NO_WEAPON == 0) {
         if (self.impulse == TF_WEAPNEXT)
-            CycleWeaponNext();
+            W_ChangeWeaponNext();
         else if (self.impulse == TF_WEAPPREV)
-            CycleWeaponPrev();
+            W_ChangeWeaponPrev();
         else if (self.impulse == TF_RELOAD)
-            TeamFortress_ReloadCurrentWeapon();
+            FO_ReloadSlot(self.current_slot, FALSE);
         else if (self.impulse == TF_RELOAD_SLOT1)
-            TeamFortress_ReloadSlot(1);
+            FO_ReloadSlot(MakeSlot(1), FALSE);
         else if (self.impulse == TF_RELOAD_SLOT2)
-            TeamFortress_ReloadSlot(2);
+            FO_ReloadSlot(MakeSlot(2), FALSE);
         else if (self.impulse == TF_RELOAD_SLOT3)
-            TeamFortress_ReloadSlot(3);
+            FO_ReloadSlot(MakeSlot(3), FALSE);
         else if (self.impulse == TF_RELOAD_NEXT)
             TeamFortress_ReloadNext();
         else if (self.impulse == TF_DETPACK_5)
@@ -3091,11 +2038,10 @@ void () ImpulseCommands = {
             TeamFortress_SetDetpack(50);
         else if (self.impulse == TF_DROP_AMMO) {
             Menu_Drop();
-        }
-	else if (self.impulse == TF_PRACSPAWN_PLACE)
-		TeamFortress_PlacePracticeSpawn(self);
-	else if (self.impulse == TF_PRACSPAWN_REMOVE)
-		TeamFortress_RemovePracticeSpawn(self);
+        } else if (self.impulse == TF_PRACSPAWN_PLACE)
+            TeamFortress_PlacePracticeSpawn(self);
+        else if (self.impulse == TF_PRACSPAWN_REMOVE)
+            TeamFortress_RemovePracticeSpawn(self);
     }
 
     if (self.impulse == TF_INVENTORY)
@@ -3153,48 +2099,48 @@ void () ImpulseCommands = {
             Menu_Spy_Skin();
     } else if ((self.impulse == TF_SPY_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(0);
-    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY)) {
+    else if ((self.impulse == TF_SPY_DIE_ON) && (self.playerclass == PC_SPY))
         FO_Spy_FeignOnNextDamage();
-    } else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
+    else if ((self.impulse == TF_SPY_SILENT_DIE) && (self.playerclass == PC_SPY))
         FO_Spy_FeignCmd(1);
     else if (self.impulse == TF_DISGUISE_RESET && self.playerclass == PC_SPY) {
-        CF_Spy_ChangeSkin(self, 8);
-        CF_Spy_ChangeColor(self, self.team_no);
+        CF_Spy_ChangeSkin(self, 8, TRUE);
+        CF_Spy_ChangeColor(self, self.team_no, TRUE);
     } else if (self.impulse == TF_DISGUISE_SCOUT && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 1);
+        CF_Spy_ChangeSkin(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_SNIPER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 2);
+        CF_Spy_ChangeSkin(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_SOLDIER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 3);
+        CF_Spy_ChangeSkin(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_DEMOMAN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 4);
+        CF_Spy_ChangeSkin(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_MEDIC && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 5);
+        CF_Spy_ChangeSkin(self, 5, TRUE);
     else if (self.impulse == TF_DISGUISE_HWGUY && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 6);
+        CF_Spy_ChangeSkin(self, 6, TRUE);
     else if (self.impulse == TF_DISGUISE_PYRO && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 7);
+        CF_Spy_ChangeSkin(self, 7, TRUE);
     else if (self.impulse == TF_DISGUISE_ENGINEER && self.playerclass == PC_SPY)
-        CF_Spy_ChangeSkin(self, 9);
+        CF_Spy_ChangeSkin(self, 9, TRUE);
     else if (self.impulse == TF_DISGUISE_BLUE && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 1);
+        CF_Spy_ChangeColor(self, 1, TRUE);
     else if (self.impulse == TF_DISGUISE_RED && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 2);
+        CF_Spy_ChangeColor(self, 2, TRUE);
     else if (self.impulse == TF_DISGUISE_YELLOW && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 3);
+        CF_Spy_ChangeColor(self, 3, TRUE);
     else if (self.impulse == TF_DISGUISE_GREEN && self.playerclass == PC_SPY)
-        CF_Spy_ChangeColor(self, 4);
+        CF_Spy_ChangeColor(self, 4, TRUE);
     else if (self.impulse == TF_DISGUISE_ENEMY && self.playerclass == PC_SPY) {
         if (number_of_teams > 2)
             Menu_Spy_Color();
         else if (self.team_no == 1)
-            CF_Spy_ChangeColor(self, 2);
+            CF_Spy_ChangeColor(self, 2, TRUE);
         else
-            CF_Spy_ChangeColor(self, 1);
+            CF_Spy_ChangeColor(self, 1, TRUE);
     } else if (self.impulse == TF_DISGUISE_LAST && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLast(self);
+        FO_Spy_DisguiseLast(self, TRUE);
     else if (self.impulse == TF_DISGUISE_LAST_SPAWNED && self.playerclass == PC_SPY)
-        FO_Spy_DisguiseLastSpawned(self);
+        FO_Spy_DisguiseLastSpawned(self, TRUE);
     else if ((self.impulse == TF_DEMOMAN_DETPACK) &&
              (self.playerclass == PC_DEMOMAN))
         TeamFortress_DetpackMenu();
@@ -3224,9 +2170,9 @@ void () ImpulseCommands = {
 
 void () PreMatchImpulses = {
     if (self.impulse == TF_WEAPNEXT)
-        CycleWeaponNext();
+        W_ChangeWeaponNext();
     else if (self.impulse == TF_WEAPPREV)
-        CycleWeaponPrev();
+        W_ChangeWeaponPrev();
 
     if (self.impulse == TF_INVENTORY)
         TeamFortress_Inventory();
@@ -3404,7 +2350,7 @@ void () ButtonFrame = {
         local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
 
         if (default_weapon >= 1 && default_weapon <= 4) {
-            self.impulse = default_weapon;
+            self.impulse = InputHandlePyroSlotSwap(default_weapon);
         }
     }
 
@@ -3458,20 +2404,14 @@ void () ButtonFrame = {
     if (input_buttons & BUTTON4) {
         switch (self.playerclass) {
             case PC_SOLDIER:
-                if (IsUsingOldImpulses()) {
-                    self.impulse = 7;
-                } else {
-                    self.impulse = TF_SLOT1;
-                }
+                self.impulse = TF_IMPULSE_SLOT1;
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_PYRO:
-                if (IsUsingOldImpulses()) {
-                    self.impulse = 7;
-                } else if (IsUsingCFImpulses()) {
-                    self.impulse = TF_SLOT2;
+                if (IsUsingCFImpulses()) {
+                    self.impulse = TF_IMPULSE_SLOT2;
                 } else {
-                    self.impulse = TF_SLOT1;
+                    self.impulse = TF_IMPULSE_SLOT1;
                 }
                 // Intercepted by InterceptRocketJump()
                 break;
@@ -3489,7 +2429,7 @@ void () ButtonFrame = {
                     TeamFortress_ToggleDetpack(5);
                     break;
                 case PC_SPY:
-                    FO_Spy_DisguiseLastSpawned(self);
+                    FO_Spy_DisguiseLastSpawned(self, TRUE);
                     break;
                 case PC_ENGINEER:
                     FO_Engineer_ToggleSentry();
@@ -3514,7 +2454,7 @@ void () ButtonFrame = {
     // +grenade1 keydown frame
     if (keydowns & BUTTON5) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(1);
+            TeamFortress_PrimeGrenade(1, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(1);
         }
@@ -3530,7 +2470,7 @@ void () ButtonFrame = {
     // +grenade2 keydown frame
     if (keydowns & BUTTON6) {
         if (hold_grens) {
-            TeamFortress_PrimeGrenade(2);
+            TeamFortress_PrimeGrenade(2, TRUE);
         } else {
             TeamFortress_PrimeThrowGrenade(2);
         }
@@ -3601,7 +2541,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if ((self.is_feigning) && 
+    if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
             (self.impulse != TF_MEDIC_HELPME) &&
@@ -3610,100 +2550,45 @@ void () W_WeaponFrame = {
         return;
 
     if (self.impulse == TF_WEAPLAST && self.is_undercover != 2) {
-
-        // change to last weapon now
-        if (WeaponReady(self))
-            CycleWeaponLast();
-        // change to weaponstate (prior to quick fire) when weapon is ready
-        else if (self.is_quickfiring)
-            self.queue_weaponstate = 2;
-        // change to last weapon when weapon is ready
-        else
-            self.queue_weaponslot = self.last_weaponslot;
-    }
-
-    // when +slotX bind is released, this gets issued
-    if (self.impulse == TF_QUICKSTOP && self.is_quickfiring) {
-
-        self.has_quickfired = 1;
+        W_ChangeWeaponLast();
         self.impulse = 0;
-
     }
 
-    // unset quick firing variables when quick weapon has finished firing
-    if (self.is_quickfiring && self.has_quickfired && WeaponReady(self)) {
-
-        self.is_quickfiring = 0;
-        self.has_quickfired = 0;
-
-    }
-
-    // slot 1-4 (or 1-7) binds
-    if (self.impulse >= 1 && self.impulse <= GetLastWeaponImpulse() && (WeaponReady(self) || !chweap_wait_attfinished)
-            && !(self.is_building && !engineer_move) && !self.is_detpacking) {
-
-        if (!(self.tfstate & TFSTATE_RELOADING)) {
-            // load weapon state if current state doesn't match stored state
-            if (!W_WeaponState_Check(self))
-                W_WeaponState_Load(self, 0);
-
-            // obviously not quickfiring if we're changing weapon
-            self.is_quickfiring = 0;
-            self.has_quickfired = 0;
-            W_ChangeWeapon(self.impulse);
-        } 
-        else if (!chweap_wait_attfinished) {
-            //clears impulse so it doesn't switch weapons just after reloading   
-            self.impulse = 0;
-        }
-
-        // regular attack (both +attack and -attack)
-    } else if (!self.impulse && !self.is_quickfiring) {
-
-        // load weapon state if current state doesn't match
-        // stored state, if weapon is ready
-        if (!W_WeaponState_Check(self) && WeaponReady(self) && !(self.tfstate & TFSTATE_AIMING)) {
-            W_WeaponState_Load(self, 0);
-        }
-
-        // +slot1-4 quick fire
-    } else if (self.impulse >= TF_QUICKSLOT1 && self.impulse <= TF_QUICKSLOT4 && !self.is_detpacking) {
-        self.is_quickfiring = 1;
-        self.has_quickfired = 0;
-
-        if (WeaponReady(self)) {
-            if (!IsUsingOldImpulses()) {
-                if (self.impulse == TF_QUICKSLOT1)
-                    W_ChangeWeapon(1);
-                else if (self.impulse == TF_QUICKSLOT2)
-                    W_ChangeWeapon(2);
-                else if (self.impulse == TF_QUICKSLOT3)
-                    W_ChangeWeapon(3);
-                else if (self.impulse == TF_QUICKSLOT4)
-                    W_ChangeWeapon(4);
-            } else {
-                if (self.impulse == TF_QUICKSLOT1)
-                    W_ChangeWeapon(W_OldImpulseFromNewSlot(1));
-                else if (self.impulse == TF_QUICKSLOT2)
-                    W_ChangeWeapon(W_OldImpulseFromNewSlot(2));
-                else if (self.impulse == TF_QUICKSLOT3)
-                    W_ChangeWeapon(W_OldImpulseFromNewSlot(3));
-                else if (self.impulse == TF_QUICKSLOT4)
-                    W_ChangeWeapon(W_OldImpulseFromNewSlot(4));
-            }
-        }
-
-        // change weapon if queue_weaponslot has been set
-    } else if (self.queue_weaponslot > 0) {
-        W_ChangeWeapon(self.queue_weaponslot);
-        // load weapon state
-    } else if (self.queue_weaponstate && WeaponReady(self)) {
-        // load weaponstate saved from before quick fire started
-        if (self.queue_weaponstate == 1)
-            W_WeaponState_Load(self, 0);
-        // load swapped weaponstate
+    // +slot/-slot handle attack; we only need to swap back to last weapon.
+    // Let's see if we can get away with just treating this as last weapon;
+    // there were already so many edge cases in the old code such as swapping on
+    // an empty weapon.
+    if (self.impulse == TF_QUICKSTOP) {
+        if (self.tfstate & TFSTATE_QUICKSLOT)
+            self.impulse = TF_WEAPLAST;
         else
-            W_WeaponState_Load(self, 1);
+            self.impulse = 0;
+        self.tfstate &= ~TFSTATE_QUICKSLOT;
+    }
+
+    float can_change_weapon = WeaponReady();
+
+    // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
+    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
+        can_change_weapon) {
+        // slot 1-4 (or 1-7) binds
+        W_ChangeWeaponByInput(self.impulse);
+        self.impulse = 0;
+    } else if (self.impulse >= TF_QUICKSLOT1 &&
+               self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
+        float input = InputHandlePyroSlotSwap(self.impulse - TF_QUICKSLOT1 + 1);
+        Slot slot = MakeSlot(input);
+
+        if (IsSameSlot(slot, self.current_slot)) {
+            self.tfstate &= ~TFSTATE_QUICKSLOT;
+        } else {
+            self.tfstate |= TFSTATE_QUICKSLOT;
+            W_ChangeWeaponSlot(slot);
+        }
+        self.impulse = 0;
+    } else if (!IsSlotNull(self.queue_slot) && can_change_weapon) {
+        // change slot if queue_slot has been set
+        W_ChangeWeaponSlot(self.queue_slot);
     }
 
     if (self.impulse == TF_CHANGETEAM) {
@@ -3774,6 +2659,10 @@ void () W_WeaponFrame = {
         case TF_CHANGEPC_RANDOM:
         case TF_INVENTORY:
         case FLAG_INFO:
+        case TF_SPY_DIE:
+        case TF_SPY_DIE_ON:
+        case TF_SPY_DIE_OFF:
+        case TF_SPY_SILENT_DIE:
             ImpulseCommands();
             return;
             // allows setting detpack while reloading on toggle, defaults to off
@@ -3795,7 +2684,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if (!WeaponReady(self))
+    if (!WeaponReady())
         return;
 
     if (self.impulse != 0 && self.has_disconnected == 0)
@@ -3803,21 +2692,15 @@ void () W_WeaponFrame = {
     if (cease_fire)
         return;
 
-    if (self.button0 
-            && (!self.fire_held_down 
-                || 
-                (self.fire_held_down && self.heat == 0 && self.playerclass == PC_HVYWEAP))) {
-        if (self.current_weapon == WEAP_SNIPER_RIFLE) {
+    if (self.button0) {
+        if (FO_CurrentWeapon() == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
-                if (self.heat < 400) {
-                    self.heat = self.heat + 3;
+                if (self.heat < PC_SNIPER_MAXDAM) {
+                    self.heat = max(self.heat + 3, PC_SNIPER_MAXDAM);
                     if ((sniperpower) && (self.power_time < (time - 0.3))) {
                         self.power_time = time;
                         Status_Refresh(self);
                     }
-                } else if ((sniperpower) && (!self.power_full)) {
-                    self.power_full = 1;
-                    Status_Refresh(self);
                 }
             } else {
                 local vector tv = self.velocity;
@@ -3825,12 +2708,10 @@ void () W_WeaponFrame = {
                 if (vlen(tv) <= 50) {
                     SniperSight_Create();
                     self.heat = 50;
-                    self.tfstate = self.tfstate | 2048;
-                    self.power_full = 0;
-                    TeamFortress_SetSpeed(self);
+                    self.tfstate |= TFSTATE_AIMING;
                 }
             }
-        } else if (self.current_weapon == WEAP_ASSAULT_CANNON) {
+        } else if (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON) {
             if (self.flags & FL_ONGROUND || cannon_air) {
                 SuperDamageSound();
                 W_Attack();
@@ -3842,16 +2723,9 @@ void () W_WeaponFrame = {
             SuperDamageSound();
             W_Attack();
         }
-    } else if (self.playerclass == 0) {
-        self.weaponmode = 0;
     } else if (self.tfstate & TFSTATE_AIMING) {
         W_Attack();
-        self.tfstate = self.tfstate - TFSTATE_AIMING;
-        TeamFortress_SetSpeed(self);
-        self.heat = 0;
-    } else if (self.tfstate & TFSTATE_CANT_MOVE && !self.is_feigning) {
-        self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
-        TeamFortress_SetSpeed(self);
+        self.tfstate &= ~TFSTATE_AIMING;
         self.heat = 0;
     }
 };

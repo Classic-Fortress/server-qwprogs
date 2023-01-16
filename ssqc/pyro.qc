@@ -12,14 +12,9 @@ void (entity ent, float num) SetFlameCount = {
     ent.numflames = num;
 
     if (num == 0)
-    {
-        ent.tfstate = ent.tfstate - (ent.tfstate & TFSTATE_BURNING);
-    }
+        ent.tfstate &= ~TFSTATE_BURNING;
     else
-    {
-        ent.tfstate = ent.tfstate | TFSTATE_BURNING;
-    }
-    
+        ent.tfstate |= TFSTATE_BURNING;
 };
 
 entity(string type, entity p_owner) FlameSpawn =
@@ -157,17 +152,8 @@ void () NapalmGrenadeExplode2 = {
     // TODO - make a settings struct and put these in on world spawn
     float explodeDam = 0;
     float maxExplosions = 0;
-    switch (pyro_type)
-    {
-        case PYRO_FO:
-            explodeDam = PC_PYRO_NAPALM_INIT_DAM_FO;
-            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_FO;
-            break;
-        default:
-            explodeDam = PC_PYRO_NAPALM_INIT_DAM_ORIG;
-            maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS_ORIG;
-            break;
-    }
+    explodeDam = PC_PYRO_NAPALM_INIT_DAM;
+    maxExplosions = PC_PYRO_NAPALM_MAX_EXPLOSIONS;
 
     self.nextthink = time + 1;
     makevectors(self.v_angle);
@@ -310,20 +296,7 @@ void () FlameFollow = {
     }
     self.nextthink = time + 0.1;
     if ((self.effects == 8) && (self.heat >= 3)) {
-        damage = 0;
-        switch (pyro_type)
-        {
-            case PYRO_FO:
-                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_FO * 3;
-                break;
-            default:
-                damage = self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER_ORIG * 3;
-                break;
-        }
-        
-        if (damage < 1) {
-            damage = 1;
-        }
+        damage = min(self.enemy.numflames * PC_PYRO_BURN_MULTIPLIER * 3, 1);
         self.heat = 1;
         deathmsg = 15;
         TF_T_Damage(self.enemy, self, self.owner, damage, TF_TD_NOTTEAM,
@@ -435,14 +408,8 @@ void () Flamer_stream_touch = {
                 }
             }
 
-            if (pyro_type == PYRO_FO)
-            {
-                TF_T_Damage(other, self, self.owner, PC_PYRO_FLAMETHROWER_DAM_FO, TF_TD_NOTTEAM, TF_TD_FIRE);
-            }
-            else
-            {
-                TF_T_Damage(other, self, self.owner, PC_PYRO_FLAMETHROWER_DAM_ORIG, TF_TD_NOTTEAM, TF_TD_FIRE);
-            }
+            TF_T_Damage(other, self, self.owner, PC_PYRO_FLAMETHROWER_DAM,
+                        TF_TD_NOTTEAM, TF_TD_FIRE);
 
             float flamehealth = 45;
             SetOnFire(other, self.owner, self.origin, flamehealth);
@@ -450,7 +417,7 @@ void () Flamer_stream_touch = {
         }
     } else {
         if ((random() < 0.3) ||
-            (pointcontents((self.origin + '0 0 1')) != -1)) {
+            (pointcontents((self.origin + '0 0 1')) != CONTENT_EMPTY)) {
             remove(self);
             return;
         }
@@ -476,16 +443,8 @@ void () Napalm_touch = {
     }
     if (other != world) {
         if ((other.takedamage == 2) && (other.health > 0)) {
-            float dam = 0;
-            switch (pyro_type)
-            {
-                case PYRO_FO:
-                    dam = PC_PYRO_INIT_BURN_DAM_FO;
-                    break;
-                default:
-                    dam = PC_PYRO_INIT_BURN_DAM_ORIG;
-                    break;
-            }
+            float dam = PC_PYRO_INIT_BURN_DAM;
+
             deathmsg = DMSG_FLAME;
             TF_T_Damage(other, self, self.owner, dam, TF_TD_NOTTEAM,
                         TF_TD_FIRE);
@@ -533,7 +492,6 @@ void (float num_bubbles, vector bub_origin) NewBubbles = {
 };
 
 void () W_FireFlame = {
-    local entity flame;
     local float rn;
 
     if (self.waterlevel > 2) {
@@ -548,32 +506,21 @@ void () W_FireFlame = {
         return;
     }
     self.ammo_cells = self.ammo_cells - 1;
-    self.currentammo = self.ammo_cells;
-    FO_Sound(self, CHAN_AUTO, "weapons/flmfire2.wav", 1, ATTN_NORM);
-    flame = spawn();
+    entity flame = FOProj_Create(FPP_FLAMETHROWER);
     flame.owner = self;
     flame.movetype = MOVETYPE_FLYMISSILE;
     flame.solid = SOLID_BBOX;
     flame.classname = "flamerflame";
     makevectors(self.v_angle);
-    flame.velocity = aim(self, 10000);
-    if (pyro_type == PYRO_FO)
-    {
-        flame.velocity = flame.velocity * 600;
-        flame.nextthink = time + 0.15;
-    }
-    else
-    {
-        flame.velocity = flame.velocity * 600;
-        flame.nextthink = time + 0.15;
-    }
-    
+    flame.velocity = aim(self, 10000) * FPP_Get(FPP_FLAMETHROWER)->speed;
+    flame.nextthink = time + 0.15;
+
     flame.touch = Flamer_stream_touch;
     flame.think = s_explode1;
-    
-    FO_SetModel(flame, "progs/s_explod.spr");
-    setsize(flame, '0 0 0', '0 0 0');
+
     setorigin(flame, self.origin + v_forward * 16 + '0 0 16');
+
+    FOProj_Finalize(flame);
 };
 
 void () IncendiaryRadius = {
@@ -604,25 +551,7 @@ void () IncendiaryRadius = {
     WriteCoord(MSG_MULTICAST, self.origin_y);
     WriteCoord(MSG_MULTICAST, self.origin_z);
     multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
-};
-
-void () IncendiaryRadius_OZTF = {
-    local float damg;
-    if (pyro_type == 1)
-        damg = 68;
-    else
-        damg = 92;
-    deathmsg = 15;
-    T_RadiusDamage(self, self.owner, damg, other);
-    self.origin = (self.origin - (8 * normalize (self.velocity)));
-    WriteByte(4, 23);
-    WriteByte(4, 3);
-    WriteCoord(4, self.origin_x);
-    WriteCoord(4, self.origin_y);
-    WriteCoord(4, self.origin_z);
-    multicast(self.origin, 1);
-    dremove(self);
+    dremove_sent(self);
 };
 
 void () T_IncendiaryTouch = {
@@ -631,41 +560,41 @@ void () T_IncendiaryTouch = {
     if (other == self.owner) {
         return;
     }
+
+    if (self.voided)
+        return;
+    self.voided = 1;
+
     if (pointcontents(self.origin) == CONTENT_SKY) {
-        remove(self);
+        dremove_sent(self);
         return;
     }
     self.effects = self.effects | 4;
-    if (pyro_type == PYRO_ORIGINAL)
-    {
-        damg = 30 + random() * 20;
-    }
-    else
-    {
-        if (pyro_type == 1)
-            damg = 68 + random() * 20;
-        else
-            damg = 42 + random() * 20;
-    }
-    
+    damg = 42 + random() * 20;
+
     if (other.health) {
+        if (CF_GetSetting("pdf", "pyro_direct_fix", "on") &&
+            other.solid != SOLID_BSP)
+            SetOnFire(other, self.owner, self.origin, 30);
         deathmsg = DMSG_FLAME;
         TF_T_Damage(other, self, self.owner, damg, TF_TD_NOTTEAM,
                     TF_TD_FIRE);
     }
 
-    switch (pyro_type)
-    {
-        case PYRO_ORIGINAL:
-            IncendiaryRadius();
-            break;
-        case PYRO_OZTF:
-            IncendiaryRadius_OZTF();
-            break;
-        case PYRO_FO:
-            IncendiaryRadius_OZTF();
-            break;
-    }
+    damg = 92;
+    deathmsg = 15;
+
+    entity ignore_self = AntilagKnock(self, damg) ? self.owner : __NULL__;
+    T_RadiusDamage(self, self.owner, damg, other, ignore_self);
+
+    self.origin = (self.origin - (8 * normalize (self.velocity)));
+    WriteByte(4, 23);
+    WriteByte(4, 3);
+    WriteCoord(4, self.origin_x);
+    WriteCoord(4, self.origin_y);
+    WriteCoord(4, self.origin_z);
+    multicast(self.origin, 1);
+    dremove_sent(self);
 };
 
 void () W_FireIncendiaryCannon = {
@@ -673,68 +602,23 @@ void () W_FireIncendiaryCannon = {
         return;
     }
     self.ammo_rockets = self.ammo_rockets - 3;
-    self.currentammo = self.ammo_rockets;
-    FO_Sound(self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
     KickPlayer(-3, self);
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_BBOX;
+    entity proj = FOProj_Create(FPP_INCENDIARY);
+    proj.owner = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
+
     makevectors(self.v_angle);
-    newmis.velocity = aim(self, 1000);
-    string rktmdl = "progs/missile.mdl";
-    if (pyro_type == PYRO_ORIGINAL)
-    {
-        newmis.velocity = newmis.velocity * 600;
-        newmis.think = SUB_Remove;
-    }
-    else
-    {
-        newmis.velocity = newmis.velocity * 800;
-        newmis.think = IncendiaryRadius_OZTF;
+    proj.velocity = aim(self, 1000) * FPP_Get(FPP_INCENDIARY)->speed;
+    proj.angles = vectoangles(proj.velocity);
+    proj.touch = T_IncendiaryTouch;
+    proj.think = SUB_Remove;
+    proj.nextthink = time + 5;
+    proj.weapon = DMSG_INCENDIARY;
+    proj.classname = "pyro_rocket";
+    setorigin(proj, self.origin + v_forward * 8 + '0 0 16');
 
-        if (pyro_type == PYRO_FO)
-        {
-            rktmdl = "progs/lavaball.mdl";
-        }
-    }
-    
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.touch = T_IncendiaryTouch;
-    newmis.nextthink = time + 5;
-    newmis.weapon = DMSG_INCENDIARY;
-    newmis.classname = "pyro_rocket";
-    FO_SetModel(newmis, rktmdl);
-    setsize(newmis, '0 0 0', '0 0 0');
-    setorigin(newmis, self.origin + v_forward * 8 + '0 0 16');
-
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
-};
-
-void () TeamFortress_IncendiaryCannon = {
-    if (!(self.weapons_carried & WEAP_INCENDIARY)) {
-        return;
-    }
-    if (self.ammo_rockets < 3) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-    self.current_weapon = WEAP_INCENDIARY;
-    W_SetCurrentAmmo(self);
-};
-
-void () TeamFortress_FlameThrower = {
-    if (!(self.weapons_carried & WEAP_FLAMETHROWER)) {
-        return;
-    }
-    if (self.ammo_cells < 1) {
-        sprint(self, PRINT_HIGH, "Not enough ammo\n");
-        return;
-    }
-    self.current_weapon = WEAP_FLAMETHROWER;
-    W_SetCurrentAmmo(self);
+    FOProj_Finalize(proj);
 };
 
 void () AirBlastReloadFinished = {
@@ -745,219 +629,83 @@ void () AirBlastReloadFinished = {
 };
 
 void FO_Airblast() = {
-    if (pyro_type == PYRO_FO)
-        if (airblastv2) {
-            UseAirBlastV2();
-        } else {
-            UseAirBlast();
-        }
-    Status_Refresh(self);
-}
-
-void () UseAirBlast = {
     if(no_fire_mode) {
         sprint(self, PRINT_MEDIUM, "You cannot blast air right now\n");
         return;
     }
-    
-    if (self.special_cooldown < time)
-    {
-        self.airblast_cooldown = 1;
-        self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
-        entity timer = spawn();
-        timer.owner = self;
-        timer.classname = "timer";
-        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
-        timer.think = AirBlastReloadFinished;
 
-        pointparticles(particleeffectnum("te_teleportsplash"),
+    if (time < self.special_cooldown)
+        return;
+
+    self.airblast_cooldown = 1;
+    self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+    entity timer = spawn();
+    timer.owner = self;
+    timer.classname = "timer";
+    timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
+    timer.think = AirBlastReloadFinished;
+
+    pointparticles(particleeffectnum("te_teleportsplash"),
             self.origin + v_forward * PC_PYRO_AIRBLAST_RANGE / 4, v_forward);
-        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
-        makevectors(self.v_angle);
-        entity ent;
+    FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
+    makevectors(self.v_angle);
 
-        ent = findradius(self.origin, PC_PYRO_AIRBLAST_RANGE);
-        while (ent)
-        {
-            if (ent.movetype != MOVETYPE_NONE && ent != self)
-            {                
-                if (infront(ent))
-                {
-                    switch (ent.classname)
-                    {
-                        case "player":
-                        case "pyro_rocket":
-                        case "flamerflame":
-                        case "proj_tranq":
-                        case "proj_bullet":
-                        case "proj_rocket":
-                        case "grenade":
-                        case "spike":
-                        case "pipebomb":
-                            vector targorg;
-                            targorg = ent.origin;
-                            float pushval = 1000;
-                            if (ent == self)
-                            {
-                                pushval = 500;
-                                traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
-                                if (trace_fraction < 1)
-                                {
-                                    targorg = self.origin - (v_forward * 200 * trace_fraction);
-                                }
-                            }
-                            
-                            vector delta = targorg - self.origin;
-                            float dist = vlen(delta);
-                            float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+    int count;
+    entity* list = findradius_list(self.origin, PC_PYRO_AIRBLAST_RANGE, count);
 
-                            if (ent.flags & FL_ONGROUND)
-                            {
-                                if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
-                                {
-                                    setorigin(ent, ent.origin + '0 0 1');
-                                }
-                            }
-                            
-                            delta = normalize(delta);
-                            delta = delta * percent * pushval;
+    for (int i = 0; i < count; i++) {
+        entity ent = list[i];
 
-                            if (ent.movetype == MOVETYPE_FLYMISSILE)
-                            {
-                                float speed = vlen(ent.velocity);
-                                ent.velocity = normalize(delta) * speed;
-                            }
-                            else
-                            {
-                                ent.velocity = ent.velocity + delta;
-                            }
-                            
-                            break;
-                    }
-                }     
-            }  
-            
-            ent = ent.chain;
-        }
-    }
-};
+        if (ent.movetype == MOVETYPE_NONE || ent == self || !infront(ent))
+            continue;
 
-void () UseAirBlastV2 = {
-    if(no_fire_mode) {
-        sprint(self, PRINT_MEDIUM, "You cannot blast air right now\n");
-        return;
-    }
-    
-    float isabjump = airblastjump && self.v_angle_x > 60;
+        switch (ent.classname) {
+            case "player":
+            case "pyro_rocket":
+            case "flamerflame":
+            case "proj_tranq":
+            case "proj_bullet":
+            case "proj_rocket":
+            case "grenade":
+            case "spike":
+            case "pipebomb":
+                break;
 
-    if (self.ammo_cells < airblastcells)
-    {
-        sprint(self, PRINT_HIGH, "Not enough cells to Airblast\n");
-    }
-    else if (isabjump && airblastcells > 0 && self.ammo_cells < airblastjumpcells)
-    {
-        sprint(self, PRINT_HIGH, "Not enough cells to Airblast jump\n");
-    }
-    else if (self.special_cooldown < time)
-    {
-        float cellcost = airblastcells;
-
-        self.airblast_cooldown = 1;
-        self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
-        entity timer = spawn();
-        timer.owner = self;
-        timer.classname = "timer";
-        timer.nextthink = time + PC_PYRO_AIRBLAST_COOLDOWN;
-        timer.think = AirBlastReloadFinished;
-
-        FO_Sound(self, CHAN_WEAPON, "weapons/airblastshoot.wav", 1, ATTN_NORM);
-        makevectors(self.v_angle);
-        entity ent;
-
-        float  abrange = PC_PYRO_AIRBLAST_RANGE / 2;
-        vector ab_start  = self.origin + v_up * 20 + v_forward * 8;
-        vector ab_origin = ab_start + aim(self,1000) * (abrange / 2);
-        vector ab_diameter = ab_start + aim(self,1000) * abrange;
-
-        pointparticles(particleeffectnum("fo_airblast"), ab_origin, v_forward);
-
-        if (isabjump) 
-        {
-            if (airblastcells > 0 && airblastjumpcells > airblastcells) 
-            {
-                cellcost = cellcost + airblastjumpcells - airblastcells; 
-            }
-
-            if ((airblastjump == 1 || airblastjump == 3) && self.flags & FL_ONGROUND)
-                self.velocity_z = 490;
-            else if (airblastjump == 1 || airblastjump == 2)
-            {
-                self.velocity_z = self.velocity_z + 260;
-            }
+            default:
+                continue;  // Next in list.
         }
 
-        self.ammo_cells = self.ammo_cells - cellcost;
-        W_SetCurrentAmmo(self);
-
-        ent = findradius(ab_origin, abrange);
-        while (ent)
-        {
-            if (ent.movetype != MOVETYPE_NONE && ent != self && CanDamage(ent,self))
-            {
-                vector diameter_pos     = ab_start + aim(self,500) * vlen(ent.origin - ab_start);
-                float  distfromdiameter = vlen(ent.origin - diameter_pos);
-
-                if (distfromdiameter <= airblastsize / 2 && ent != self)
-                {   
-                    switch (ent.classname)
-                    {
-                        case "player":
-                        case "pyro_rocket":
-                        case "flamerflame":
-                        case "proj_tranq":
-                        case "proj_bullet":
-                        case "proj_rocket":
-                        case "grenade":
-                        case "spike":
-                        case "pipebomb":
-                            vector targorg = ent.origin;
-                            float pushval = airblastpushmax;                          
-                            vector delta  = targorg - ab_start;
-                            float dist    = vlen(delta);
-                            float scale   = airblastpushmax - airblastpushmin;
-                            float percent = (abrange - dist) / abrange;
-
-                            if (ent.movetype != MOVETYPE_FLY && ent.classname != "pipebomb" && ent.velocity == '0 0 0') // Airblast non-moving ents, except for pipebombs
-                            {
-                                setorigin(ent, ent.origin + '0 0 1');
-                                ent.velocity = '0 0 150' + normalize(ent.origin - (self.origin - v_up * 28 )) * 400;
-                            }
-                            else if (ent.movetype == MOVETYPE_FLYMISSILE) // return missle at same speed in where aiming
-                            {
-                                ent.velocity = vlen(ent.velocity) * aim(self,1000);
-                            } 
-                            else // All other trajectory is based on ab -> ent and velocity via pushval
-                            {
-                                if      (percent <= 0.05) { pushval = airblastpushmin; }
-                                else if (percent >= 0.50) { pushval = airblastpushmax; }
-                                else                      { pushval = airblastpushmin + scale * percent; }
-                                
-                                if (ent.owner != self) 
-                                {
-                                    ent.velocity = '0 0 0';
-                                }
-                                //self.origin used to avoid downward trajectory
-                                ent.velocity = ent.velocity + pushval * normalize(ent.origin - self.origin);
-                            }
-                                
-                        break;
-                        
-                    }     
-                }
-            }  
-
-            ent = ent.chain;
+        vector targorg;
+        targorg = ent.origin;
+        float pushval = 1000;
+        if (ent == self) {
+            pushval = 500;
+            traceline(self.origin, self.origin + v_forward * 200, MOVE_NOMONSTERS, self);
+            if (trace_fraction < 1)
+                targorg = self.origin - (v_forward * 200 * trace_fraction);
         }
 
+        vector delta = targorg - self.origin;
+        float dist = vlen(delta);
+        float percent = (PC_PYRO_AIRBLAST_RANGE - dist) / PC_PYRO_AIRBLAST_RANGE;
+
+        if (ent.flags & FL_ONGROUND) {
+            if (ent.classname != "pipebomb" && ent != self) // leave them on ground, we don't want them blasted
+                setorigin(ent, ent.origin + '0 0 1');
+        }
+
+        delta = normalize(delta);
+        delta = delta * percent * pushval;
+
+        if (ent.movetype == MOVETYPE_FLYMISSILE) {
+            float speed = vlen(ent.velocity);
+            ent.velocity = normalize(delta) * speed;
+        } else {
+            ent.velocity = ent.velocity + delta;
+        }
+
+        if (ent.classname != "player")
+            ent.SendFlags |= FOPP_POS;
     }
+    Status_Refresh(self);
 };

@@ -9,7 +9,6 @@ void () FlashGrenadeTouch;
 void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
-void () ConcussionGrenadeExplode;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 void (entity inflictor, entity attacker, float bounce,
@@ -103,7 +102,7 @@ void () ScatterCaltrops = {
     while (num > 0) {
         e = spawn();
         e.classname = "grenade";
-        e.grenadename = "caltrop";
+        e.fpp.gren_type = GREN_CALTROP;
         e.weapon = 10;
         e.owner = self.owner;
         e.team_no = self.owner.team_no;
@@ -205,13 +204,13 @@ void FO_FlashTimer()
 
 void SetFlashDimension(entity te)
 {
-    FO_FlashDimension = ((FO_FlashDimension + 1) == 8) ? DMN_FLASH : FO_FlashDimension + 1;
+    FO_FlashDimension = ((FO_FlashDimension - DMN_FLASH + 1) % 7) + DMN_FLASH;
     
     float playerdimension = 1<<FO_FlashDimension;
 
-    // i hate bitflags and i'm bad so this is probably wrong
-    te.dimension_see = DMN_FLASH | playerdimension;
+    te.dimension_see =  playerdimension | DMN_FLASH;
     te.dimension_seen = playerdimension | DMN_NOFLASH;
+    te.tfstate |= TFSTATE_FLASHED;
 }
 
 void FO_FlashExplode()
@@ -225,7 +224,7 @@ void FO_FlashExplode()
         if (te.classname == "player") {
             traceline(self.origin, te.origin, 1, self);
             if (trace_fraction == 1) {
-                LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
+                // LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
                 sprint(te, PRINT_HIGH, "You have been flashed!\n");
                 org = te.origin + (te.mins + te.maxs) * 0.5;
                 frac = (rad - vlen(self.origin - org)) / rad;
@@ -303,7 +302,7 @@ void () FlashGrenadeExplode = {
             if (te.classname == "player") {
                 traceline(self.origin, te.origin, 1, self);
                 if (trace_fraction == 1) {
-                    LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
+                    // LogEventAffliction(self.owner, te, TFSTATE_FLASHED);
                     if (vlen(self.origin - te.origin) <= 200) {
                         deathmsg = DMSG_GREN_FLASH;
                         TF_T_Damage(te, self, self.owner, 60, 2, 16 | 4);
@@ -357,17 +356,6 @@ void () ConcussionGrenadeTouch = {
     FO_Sound(self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);
     if (self.velocity == '0 0 0')
         self.avelocity = '0 0 0';
-};
-
-void () ConcussionGrenadeExplode = {
-    T_RadiusBounce(self, self.owner, 240, world);
-    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
-    WriteByte(MSG_MULTICAST, TE_EXPLOSION);
-    WriteCoord(MSG_MULTICAST, self.origin_x);
-    WriteCoord(MSG_MULTICAST, self.origin_y);
-    WriteCoord(MSG_MULTICAST, self.origin_z);
-    multicast(self.origin, MULTICAST_PHS);
-    dremove(self);
 };
 
 void () BlastGrenadeTouch = {
@@ -484,7 +472,9 @@ void () ConcussionGrenadeTimer = {
     pos = pointcontents(src);
 
     if ((self.owner.flags & 512) || (self.owner.flags & 16)) {
-        if (!self.owner.is_feigning && !(self.owner.current_weapon == WEAP_ASSAULT_CANNON && !cannon_conc && self.owner.button0)) {
+        if (!self.owner.is_feigning &&
+            !(FO_PlayerCurrentWeapon(self.owner) == WEAP_ASSAULT_CANNON &&
+            !cannon_conc && self.owner.button0)) {
             makevectors(self.owner.v_angle);
             stumble = crandom() * self.health;
             if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
@@ -564,7 +554,6 @@ void () TeamFortress_Scan = {
             sprint(self.owner, PRINT_HIGH,
                    "Not enough cells to run scanner\n");
             self.owner.ammo_cells = 0;
-            W_SetCurrentAmmo(self);
             self.owner.ScannerOn = 0;
             dremove(self);
             return;
@@ -572,7 +561,6 @@ void () TeamFortress_Scan = {
         if (scancost > self.owner.ammo_cells) {
             scanrange = self.owner.ammo_cells * 20;
             scancost = self.owner.ammo_cells;
-            W_SetCurrentAmmo(self);
         }
         scen = 0;
         scfr = 0;
@@ -592,7 +580,6 @@ void () TeamFortress_Scan = {
         if (self.owner.ammo_cells < 0) {
             self.owner.ammo_cells = 0;
         }
-        W_SetCurrentAmmo(self);
         scanrange = scanrange * 25;
         list = T_RadiusScan(self.owner, scanrange, scen, scfr);
     }
@@ -728,49 +715,31 @@ void () TeamFortress_Scan = {
         self.nextthink = time + 2;
         return;
     }
-    W_SetCurrentAmmo(self);
     self.nextthink = time + 2;
     return;
 };
 
 void CussSpeedBump()
 {
-    entity p;
-    p = self.owner;
+    entity p = self.owner;
     self.nextthink = time + .3;
 
-    if (!self.cnt2)
-    {
+    if (!self.cnt) {
         makevectors(p.v_angle);
 
         // if medic within x units of ground, slow
-        traceline(p.origin, (v_up * -1000), MOVE_NOMONSTERS, p);
+        traceline(p.origin, p.origin - 100 * v_up, MOVE_NOMONSTERS, p);
 
-        if (vlen(p.origin - trace_endpos) <= 100)
-        {
-            // near ground
-            self.cnt2 = 1;
-        }
-    }
-
-    if (self.cnt2)
-    {
-        self.cnt = self.cnt + 1;
-
+        if (trace_fraction < 1)  // Found ground
+            self.cnt = TRUE;
+    } else {
+        self.cnt2++;
         if (vlen(p.velocity) > 1000)
-        {
-            if (self.cnt < 10)
-            {
-                p.velocity = p.velocity *.9;
-            }        
-        }
+            p.velocity *= 0.9;
     }
-    
 
-    if (self.cnt >= 10)
-    {
+    if (self.cnt2 > 9)
         dremove(self);
-    }
 }
 
 void (entity inflictor, entity attacker, float bounce,
@@ -896,7 +865,7 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.nextthink = time + 0.25;
                             }
                         } else {
-                            LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
+                            // LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
                             if (old_grens == TRUE) {
                                 stuffcmd(head, "v_idlescale 100\n");
                                 stuffcmd(head, "fov 130\n");
