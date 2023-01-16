@@ -1404,6 +1404,7 @@ enumflags {
 
 #define FO_HUD_CONFIG_PATH	"fortressone_hud.cfg"
 #define FO_CONFIG_PATH	"fortressone_csqc.cfg"
+#define FO_TOKEN_PATH	"fortressone_token.cfg"
 
 #define HUD_ICON_SIZE_X   24
 #define HUD_ICON_SIZE_Y   24
@@ -1492,6 +1493,7 @@ enumflags {
 #define STAT_TP_GREN2           39
 #define STAT_PAUSED             40
 #define STAT_TEAMNO_ATTACK      41
+#define STAT_ALL_TIME           42
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
@@ -1521,3 +1523,14 @@ enumflags {
 #define TEAM_RED	2
 #define TEAM_YELL	3
 #define TEAM_GREN	4
+
+// all time teams
+#define ALL_TIME_COLOUR		0
+#define ALL_TIME_ATTACK		1
+#define ALL_TIME_DEFENCE	2
+
+// web request index
+#define BR_LOGIN_REQUEST			1
+#define FO_QUAD_STARTED_REQUEST		2
+#define FO_QUAD_FINISHED_REQUEST	3
+#define FO_LOGIN_REQUEST			4

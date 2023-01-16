@@ -12,6 +12,7 @@ void AddGrenTimer(float grentype, float offset);
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+void FoLogin(string token);
 void Perf_Status();
 void FO_Hud_Init();
 float InFluid(vector point);
@@ -45,6 +46,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
+    registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
@@ -166,6 +168,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "login":
+            FoLogin(argv(1));
+            break;
         case "fo_hud_editor":
             FO_Hud_Editor();
             break;
@@ -473,6 +478,7 @@ void _Sync_ServerCommandFrame() {
     last_servercommandframe = servercommandframe;
 
     team_no = getstatf(STAT_TEAMNO);
+    all_time = getstatf(STAT_ALL_TIME);
     is_observer = FALSE;
     if (team_no == 0)
         is_observer = TRUE;
@@ -498,6 +504,27 @@ void _Sync_ServerCommandFrame() {
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
     PM_PredictJump();
+}
+
+void FoLogin(string token) {
+    local float filehandle;
+
+    if (token != "") {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
+        fputs(filehandle, token);
+        fclose(filehandle);
+    } else {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+        if (filehandle == -1) {
+            print("Can't login without valid token\n");
+            return;
+        } else {
+            token = fgets(filehandle);
+        }
+    }
+
+    localcmd("setinfo _fo_token ", token, "\n");
+    localcmd("cmd fo-login\n");
 }
 
 static string to_precision(float f, float p) {

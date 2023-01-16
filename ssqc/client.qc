@@ -752,6 +752,21 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
+        // specify API host for backend [""]
+        backend_address = FO_GetUserSettingString(world, "backend_address", "backaddy", "https://www.fortressone.org/");
+
+        // specify demo filehost address e.g. https://fortressone-demos.s3.amazonaws.com/sydney/staging/
+        demo_files_address = FO_GetUserSettingString(world, "demo_files_address", "demofileaddy", "");
+
+        // specify stats filehost address e.g. http://fortressone-stats.s3-ap-southeast-2.amazonaws.com/sydney/staging/
+        stats_files_address = FO_GetUserSettingString(world, "stats_files_address", "statsfileaddy", "");
+
+        // enforces API login
+        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
+
+        // specify discord channel [""]
+        discord_channel_id = infokey(world, "discord_channel_id");
+
         // fortress one flash time in seconds
         fo_flashtime = CF_GetSetting("ff", "fo_flashtime", "2");
 
@@ -783,7 +798,7 @@ void () DecodeLevelParms = {
         
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
-        
+
         // split backpack.mdl into deathbag.mdl and discard.mdl [on] (visual change only)
         splitbackpackmodels = CF_GetSetting("sbm", "splitbackpackmodels", "on");
 	
@@ -3023,7 +3038,7 @@ void () ClientConnect = {
         self.login = infokey(self,"*login");
     if (infokey(self,"*admin"))
         self.is_admin = stof(infokey(self, "*admin"));
-    if (self.login == string_null)
+    if (loginRequired && self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
     TeamFortress_Alias("id", TF_ID, 0);
@@ -3068,6 +3083,7 @@ void () ClientConnect = {
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
         UpdateClient_VoteMap_AddAll(self);
+        UpdateClient_Login(self);
     }
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

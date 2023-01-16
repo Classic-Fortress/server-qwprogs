@@ -318,6 +318,7 @@ void () PreMatch_Think = {
 
                     localcmd("record \"");
                     str = strzone(GetGameFileName());
+                    game_filename = str;
                     localcmd(strzone(str));
                     localcmd("\"\n");
 
@@ -1087,6 +1088,11 @@ float () CheckAllPlayersReady = {
 }
 
 void () PlayerReady = {
+    if (!self.fo_login && foLoginRequired) {
+        sprint(self, PRINT_HIGH, "You need to log in to ready up. See fortressone.org\n");
+        return;
+    }
+
     if (is_countdown) {
         sprint(self, 2, "You cannot do this after countdown has started.\n");
         return;

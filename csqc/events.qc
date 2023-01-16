@@ -126,7 +126,7 @@ void() CSQC_Parse_Event = {
                     for(float i = 0; i < 4; i++) {
                         if(i < number_of_teams) {
                             FO_MENU_TEAM.options[i].value = ftos(readbyte());
-                            if((i + 1) != team_no) {
+                            if(((i + 1) != team_no) || (all_time != ALL_TIME_COLOUR)) {
                                 FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
                             } else {
                                 FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
@@ -135,6 +135,26 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
+
+                    if(SBAR.GameMode & GAMEMODE_QUAD) {
+                        switch (all_time) {
+                            case ALL_TIME_ATTACK:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
+                                break;
+                            case ALL_TIME_DEFENCE:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
+                                break;
+                            default:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
+                        }
+                    } else {
+                        FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
+                        FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
+                    }
+
                     FO_Menu_Team(2);
                     break;
                 case CLIENT_MENU_CLASS:
@@ -146,7 +166,7 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_SCOUT:
                     float scanner_on = readbyte();
                     float scanner_flags = readfloat();
-                    
+
                     FO_Menu_Scout(2, scanner_on, scanner_flags);
                     break;
                 case CLIENT_MENU_SPY:
@@ -309,6 +329,15 @@ void() CSQC_Parse_Event = {
             break;
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
+            break;
+        case MSG_LOGIN:
+            local float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+            if (filehandle != -1) {
+                localcmd("setinfo _fo_token ", fgets(filehandle), "\n");
+                localcmd("cmd fo-login\n");
+            } else {
+                print("You are not logged in\n");
+            }
             break;
         case MSG_PAUSE:
             CsGrenTimer::SyncPause();

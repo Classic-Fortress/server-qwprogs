@@ -103,6 +103,7 @@ var fo_menu FO_MENU_SPECTATOR_TRACK = {
 
 void teamChosen(string team) = {
     localcmd("cmd changeteam ", team, "\n");
+
     if(player_class) {
         Menu_Cancel();
     } else {
@@ -118,9 +119,11 @@ var fo_menu FO_MENU_TEAM = {
         {"4","Green team","","Also okay",FO_MENU_STATE_NORMAL,{teamChosen("4");},MENU_TEXT_GREEN_FO},
         MenuSpacer,
         {"5","Auto-assign team","","",FO_MENU_STATE_NORMAL,{teamChosen("auto");},MENU_BUTTON},
+        {"6","All time attack","","Always on the attacking team",FO_MENU_STATE_NORMAL,{teamChosen("attack");},MENU_BUTTON},
+        {"7","All time defence","","Always on the defending team",FO_MENU_STATE_NORMAL,{teamChosen("defence");},MENU_BUTTON},
         MenuSpacer,
         {"0","Spectate","","",FO_MENU_STATE_NORMAL,{localcmd("observe\n");Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE, {
+    }, 10, TRUE, {
         if(intermission) {
             Menu_Cancel();
         }
@@ -907,14 +910,8 @@ void FO_Menu_Team(float force) = {
         if(number_of_teams < 2) {
             return;
         }
-        //Hide autoteam option
-        //FO_MENU_TEAM.num_opts = number_of_teams;
-        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_HIDDEN;
         FO_MENU_TEAM.options[5].state = FO_MENU_STATE_DISABLED;
     } else {
-        //Show autoteam option
-        //FO_MENU_TEAM.num_opts = 8;
-        //FO_MENU_TEAM.options[4].state = FO_MENU_STATE_NORMAL;
         FO_MENU_TEAM.options[5].state = FO_MENU_STATE_NORMAL;
     }
     for(float i = 0; i < 4; i++) {

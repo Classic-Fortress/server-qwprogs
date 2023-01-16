@@ -192,7 +192,9 @@ float round_winner_print_health;
 
 float team_no_attack;
 .float team_no;                 // The team you belong to
+.float all_time;                // Automatically join attacking/defending team during quads
 .float lives;                   // The number of lives you have left
+
 
 .float infection_team_no;       // The team_no of the person who infected you
 
@@ -491,6 +493,7 @@ float vote_anarchy_mode;
 float vote_total_votes;
 float vote_style;
 float vote_threshold;
+string game_filename;
 
 .float tf_id;
 
@@ -633,6 +636,10 @@ float noreturn;
 float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
+string discord_channel_id;
+string backend_address;
+string demo_files_address;
+string stats_files_address;
 float splitbackpackmodels;
 float standardizedeathammo;
 float deathammo_shells;
@@ -731,6 +738,10 @@ string (string s, float width) strpadr =
 float captainmode;
 .float captain;
 
+// fortressone.org API
+float foLoginRequired;
+.string fo_login;
+
 //Player ID
 float loginRequired;
 string loginUrl;
@@ -784,6 +795,9 @@ string goal_class_names[7] = {
 .float special_cooldown;
 .float airblast_cooldown;
 
+
+// backend
+string match_id;
 
 // people complain about settings, let's track them
 
