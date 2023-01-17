@@ -67,6 +67,9 @@ void () PostFOQuadStarted = {
 };
 
 void (float winner) PostFOQuadFinished = {
+	if (!match_id)
+		return;
+
 	local string data = "";
 
 	local entity t = find(world, classname, "round");
@@ -597,7 +600,18 @@ void () StartQuadRound =
 	if (rounds > 1){
 		rounds = (rounds - 1);
 
-		if (rounds == 2)
+
+		p = find (world, classname, "player");
+
+		local float legit_players = 0;
+		while (p != world) {
+			if (p.team_no && p.playerclass)
+				legit_players++;
+
+			p = find(p, classname, "player");
+		}
+
+		if (rounds == 2 && legit_players > 1)
 			PostFOQuadStarted();
 
 		if (rounds == 1 /* final round */) {
