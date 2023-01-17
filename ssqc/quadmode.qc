@@ -60,6 +60,7 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
+	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 	/* bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n"); */
@@ -105,6 +106,7 @@ void (float winner) PostFOQuadFinished = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
+	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
 	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
 };
@@ -541,10 +543,11 @@ void () StartQuadRound =
 	if (rounds == 1) {
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
+				if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+					UpdateClientPrematch(p, TRUE);
+				}
 			}
-			if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
-				UpdateClientPrematch(p, TRUE);
-			}
+
 			p = find(p, classname, "player");
 		}
 
