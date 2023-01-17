@@ -753,7 +753,10 @@ void () DecodeLevelParms = {
         }
 
         // specify API host for backend [""]
-        backend_address = FO_GetUserSettingString(world, "backend_address", "backaddy", "https://www.fortressone.org/");
+        // I don't actually call this because it's value is sometimes needed before this code is called.
+        // Use admin menu to 'end map', DecodeLevelParms() doesn't get called until later. These setting
+        // globals should probably moved earlier.
+        /* backend_address = FO_GetUserSettingString(world, "backend_address", "backaddy", "https://www.fortressone.org/"); */
 
         // specify demo filehost address e.g. https://fortressone-demos.s3.amazonaws.com/sydney/staging/
         demo_files_address = FO_GetUserSettingString(world, "demo_files_address", "demofileaddy", "");
