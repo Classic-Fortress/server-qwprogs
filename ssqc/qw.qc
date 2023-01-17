@@ -637,7 +637,6 @@ float nohitsounds;
 float nokeepcells;
 float allowpracspawns;
 string discord_channel_id;
-string backend_address;
 string demo_files_address;
 string stats_files_address;
 float splitbackpackmodels;
