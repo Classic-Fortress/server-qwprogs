@@ -634,6 +634,8 @@ float fo_repair_ratio;
 float solid_nailgren;
 float noreturn;
 float nohitsounds;
+float nohittext;
+float zutmode;						  
 float nokeepcells;
 float allowpracspawns;
 string discord_channel_id;

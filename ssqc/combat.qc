@@ -147,10 +147,13 @@ void (entity targ, entity attacker) Killed = {
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
-    if(nohitsounds) {
+    if(nohitsounds)
         return;
-    }
-
+    
+	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+	
+	if(csqcactive && zutmode)
+		return;																				 	 															   						  
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
     {
         if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser"))
@@ -222,6 +225,9 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 
 void (entity targ, entity attacker) KillSound = {
 
+	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+	if(csqcactive && zutmode)
+		return;														   
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) {
 		if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) {
 		
@@ -268,6 +274,81 @@ void (entity targ, entity attacker) KillSound = {
 	}
 };
 
+void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float original_damage, float actual_damage) =
+{
+	local float hitflag = 0;
+	local entity trueattacker = attacker;
+	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) 
+	{
+		if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) 
+		{
+			if (attacker.classname == "building_sentrygun")
+				trueattacker = attacker.real_owner;
+		}
+	}
+	
+	local float csqcactive = infokeyf(trueattacker, INFOKEY_P_CSQCACTIVE);
+	if(!csqcactive)
+		return;
+
+
+	//server allowances -- just baking in hitflag coz im a lazy as
+	if(nohitsounds)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_NOAUDIO);
+	if(nohittext)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_NOTEXT);
+	
+	//no armour left on target -- other games call it "screaming" "cracked" "one shot" etc
+	if(targ.armorvalue <= 0)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_NOARMOUR);
+	
+	if(targ.health <= 0)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_KILLINGBLOW);
+		
+	//meatshot -- this is very lazy, should do t_missile etc
+	if(
+	((inflictor.weapon == DMSG_ROCKETL) && (original_damage >= 80)) || 
+	((inflictor.weapon == DMSG_SSHOTGUN) && (original_damage >= 40)) || 
+	((inflictor.weapon == DMSG_GRENADEL) && (original_damage >= 85)) || 
+	((inflictor.weapon == DMSG_INCENDIARY) && (original_damage >= 40))
+	)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_MEATSHOT);
+	
+	//headshot
+	if (deathmsg == DMSG_SNIPERHEADSHOT)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_HEADSHOT);
+	
+	//self
+	if(trueattacker == targ)
+		hitflag = Bitfield_Add(hitflag, HITFLAG_SELF);
+		
+	//friendly
+	local float frnd = 0;
+	if(targ.team_no == trueattacker.team_no)
+		frnd = 1;
+	if(targ.undercover_team != 0 && targ.playerclass == PC_SPY && targ.team_no != trueattacker.team_no)
+		frnd = 1;
+		
+		if(frnd)
+			hitflag = Bitfield_Add(hitflag, HITFLAG_FRIENDLY);
+
+	
+	//feign
+	 if (targ.playerclass == PC_SPY && targ.is_feigning && targ.team_no != trueattacker.team_no)
+			hitflag = Bitfield_Add(hitflag, HITFLAG_FEIGNEDENEMY);
+	
+	//TODO: cuss - done elsewhere
+    
+	msg_entity = trueattacker;
+	WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+	WriteByte(MSG_MULTICAST, MSG_HITFLAG);
+	WriteCoord(MSG_MULTICAST, targ.origin.x);
+	WriteCoord(MSG_MULTICAST, targ.origin.y);
+	WriteCoord(MSG_MULTICAST, targ.origin.z);
+	WriteShort(MSG_MULTICAST, actual_damage);
+	WriteShort(MSG_MULTICAST, hitflag);
+	multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
+};																												   
 void (entity targ, entity inflictor, entity attacker,
       float damage, float knock_damage) T_DamageKnock = {
     local vector dir;
@@ -661,6 +742,8 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         targ.armorvalue = 0;
     }
 
+	if(zutmode)
+		BroadcastHitFlag(targ, inflictor, attacker, original_damage, damh);		   
     if (targ.health <= 0) {
 
         if ((inflictor.classname == "detpack")

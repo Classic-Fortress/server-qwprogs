@@ -796,6 +796,11 @@ void () DecodeLevelParms = {
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
         
+		//test zutmode for testing stuff [off]
+        zutmode = CF_GetSetting("zm", "zutmode", "0");
+        
+        // disable hit text [off]
+        nohittext = CF_GetSetting("nht", "nohittext", 0);							 
         // disable setinfo keepcells [off]
         nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
         
@@ -1006,6 +1011,8 @@ void () DecodeLevelParms = {
             stock_reload = FALSE;
             classtips = FALSE;
             nohitsounds = TRUE;
+			nohittext = TRUE;	//damned luddites
+			zutmode = FALSE;
             detpack_when_reloading = TRUE;
             old_hp_armor = TRUE;
             //server_sbflaginfo = FALSE;

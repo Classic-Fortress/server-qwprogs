@@ -23,6 +23,7 @@ time.qc
 ../share/prediction.qc
 ../share/classes.qc
 ../share/animate.qc
+../share/mcp_precache.qc					
 events.qc
 roles.qc
 q3defs.qc
