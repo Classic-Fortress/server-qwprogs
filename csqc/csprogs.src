@@ -20,6 +20,7 @@ profile.qc
 ../share/prediction.qc
 ../share/classes.qc
 ../share/animate.qc
+../share/mcp_precache.qc						
 weapon_predict.qc
 pmove.qc
 tfx.qc
@@ -30,6 +31,7 @@ settings.qc
 menu.qc
 main.qc
 events.qc
+hitfeedback.qc			  
 hud_helpers.qc
 hud.qc
 input.qc

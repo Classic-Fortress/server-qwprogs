@@ -1,5 +1,6 @@
 void ParseSBAR();
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+void ParseHitFlag(vector hf_pos, float hf_dmg, float hf);														 
 float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 
 void() CSQC_Parse_Event = {
@@ -118,6 +119,15 @@ void() CSQC_Parse_Event = {
             float explodes_at = readfloat();
             TFxGrenTimerUpdate(entnum, explodes_at);
             break;
+		case MSG_HITFLAG:
+			local vector hf_pos = '0 0 0';
+			hf_pos_x = readcoord();
+			hf_pos_y = readcoord();
+			hf_pos_z = readcoord();
+			local float hf_dmg = readshort();
+			local float hf = readshort();
+			ParseHitFlag(hf_pos, hf_dmg, hf);
+			break;				 
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
             switch (menutype) {
@@ -436,7 +446,117 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
                       primed_at, explodes_at, explodes_at - primed_at));
     }
 }
+float HitflagThink() =
+{
+	local float speed = self.min_val * frametime;
+	local vector htvect = '0 0 0';
+	htvect.z = speed;
+	setorigin(self, self.origin + htvect);
+	
+	if(time > self.max_val)
+		remove(self);
+	return FALSE;
+}
 
+void ParseHitFlag(vector hf_pos, float hf_dmg, float hf) = 
+{
+	local float hittext_allowed = 1;
+	if(Bitfield_Contains(hf, HITFLAG_NOTEXT) || CVARF(fo_hittext_enabled) == 0)
+		hittext_allowed = 0;
+
+	local float hitaudio_allowed = 1;
+	if(Bitfield_Contains(hf, HITFLAG_NOAUDIO) || CVARF(fo_hitaudio_enabled) == 0)
+		hitaudio_allowed = 0;
+	
+	local float hurtself = 0;
+	local float friendly = 0;
+	local float killingblow = 0;
+	local float meatshot = 0;
+	local float noarmour = 0;
+	local float headshot = 0;
+	local float feignedenemy = 0;
+	
+	if(Bitfield_Contains(hf, HITFLAG_NOARMOUR))
+		noarmour = 1;
+		
+	if(Bitfield_Contains(hf, HITFLAG_KILLINGBLOW))	
+		killingblow = 1;
+	
+	if(Bitfield_Contains(hf, HITFLAG_MEATSHOT))	
+		meatshot = 1;
+	
+	if(Bitfield_Contains(hf, HITFLAG_HEADSHOT))	
+		headshot = 1;
+	
+	if(Bitfield_Contains(hf, HITFLAG_SELF))
+		hurtself = 1;
+		
+	if(Bitfield_Contains(hf, HITFLAG_FRIENDLY))
+		friendly = 1;
+	
+	if(Bitfield_Contains(hf, HITFLAG_FEIGNEDENEMY))
+		feignedenemy = 1;
+	
+	if(hitaudio_allowed)
+	{
+		//hitsound
+		if(friendly && !hurtself && !feignedenemy)
+			localsound(SND_HURTTEAM, CHAN_AUTO, 1);
+			
+		else if(hurtself)
+			localsound(SND_HURTSELF, CHAN_AUTO, 1);
+			
+		else
+			if(!feignedenemy)
+				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+		
+		//killsound
+		if(killingblow)
+		{
+			if(friendly && !hurtself)
+				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
+			else if(hurtself)
+				localsound(SND_KILLSELF, CHAN_AUTO, 1);
+			else
+				localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+
+		}
+	}
+	
+	if(headshot && !friendly && !feignedenemy)
+		localsound(SND_HEADSHOT, CHAN_AUTO, 1);
+	
+	if(noarmour && !friendly && !feignedenemy)
+		localsound(SND_NOARMOUR, CHAN_AUTO, 1);
+	
+	if(hittext_allowed && !friendly)
+	{
+		
+		
+		if(feignedenemy && !killingblow)
+		{
+			return;
+		}
+		else
+		{
+			local vector offs = '0 0 0';
+			offs_z = CVARF(fo_hittext_offset);
+			local entity te = spawn();
+			local vector pos = '0 0 0';
+			pos.x = hf_pos_x;
+			pos.y = hf_pos_y;
+			pos.z = hf_pos_z;
+			setorigin(te, pos + offs);		
+			te.drawmask = MASK_ENGINE;
+			te.classname = CN_HITTEXT;		
+			te.predraw = HitflagThink;
+			te.max_val = time + CVARF(fo_hittext_duration);
+			te.min_val = CVARF(fo_hittext_speed);
+			te.votecount = hf_dmg;
+			te.localmap = noarmour;
+		}
+	}
+};					  
 void ParseSBAR()
 {
     SBAR.ClipSize = readstring();
