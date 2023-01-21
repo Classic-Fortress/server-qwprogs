@@ -278,19 +278,28 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 {
 	local float hitflag = 0;
 	local entity trueattacker = attacker;
+        local float validtarg = 0;
+        
 	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) 
 	{
 		if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) 
 		{
+			validtarg = 1;
+			
 			if (attacker.classname == "building_sentrygun")
 				trueattacker = attacker.real_owner;
 		}
 	}
+
+	if(!validtarg)
+		return;
 	
 	local float csqcactive = infokeyf(trueattacker, INFOKEY_P_CSQCACTIVE);
 	if(!csqcactive)
 		return;
-
+	
+	if(trueattacker.FlashTime > 0)
+		return;
 
 	//server allowances -- just baking in hitflag coz im a lazy as
 	if(nohitsounds)
@@ -299,7 +308,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 		hitflag = Bitfield_Add(hitflag, HITFLAG_NOTEXT);
 	
 	//no armour left on target -- other games call it "screaming" "cracked" "one shot" etc
-	if(targ.armorvalue <= 0)
+	if(targ.armorvalue <= 0 && targ.classname == "player")
 		hitflag = Bitfield_Add(hitflag, HITFLAG_NOARMOUR);
 	
 	if(targ.health <= 0)
@@ -338,6 +347,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 			hitflag = Bitfield_Add(hitflag, HITFLAG_FEIGNEDENEMY);
 	
 	//TODO: cuss - done elsewhere
+
     
 	msg_entity = trueattacker;
 	WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
@@ -346,6 +356,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 	WriteCoord(MSG_MULTICAST, targ.origin.y);
 	WriteCoord(MSG_MULTICAST, targ.origin.z);
 	WriteShort(MSG_MULTICAST, actual_damage);
+	WriteShort(MSG_MULTICAST, original_damage);
 	WriteShort(MSG_MULTICAST, hitflag);
 	multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
 };																												   
