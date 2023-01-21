@@ -170,7 +170,7 @@ void FO_LoadSettings()
                     case FOCMD_OLDSCOREBOARD:
                         CVARF(fo_oldscoreboard) = stof(val);
                         break;
-					case FOCMD_HITAUDIO_ENABLED:
+		    case FOCMD_HITAUDIO_ENABLED:
                         CVARF(fo_hitaudio_enabled) = stof(val);
                         break;
                     case FOCMD_HITAUDIO_HURTSELF:
@@ -192,47 +192,37 @@ void FO_LoadSettings()
                         CVARF(fo_hitaudio_killenemy) = stof(val);
                         break;
                     case FOCMD_HITAUDIO_NOARMOUR:
-						CVARF(fo_hitaudio_noarmour) = stof(val);
-						break;
-			
-					case FOCMD_HITTEXT_ENABLED:
-						CVARF(fo_hittext_enabled) = stof(val);
-						break;
-						
-					case FOCMD_HITTEXT_SIZE:
-						CVARF(fo_hittext_size) = stof(val);
-						break;
-					
-					case FOCMD_HITTEXT_SPEED:
-						CVARF(fo_hittext_speed) = stof(val);
-						break;
-					
-					case FOCMD_HITTEXT_ALPHA:
-					CVARF(fo_hittext_alpha) = stof(val);
-					break;
-					
-					case FOCMD_HITTEXT_DURATION:
-						CVARF(fo_hittext_duration) = stof(val);
-						break;
-						
-					case FOCMD_HITTEXT_RAWDAMAGE:
-						CVARF(fo_hittext_rawdamage) = stof(val);
-						break;
-					
-					case FOCMD_HITTEXT_NOARMOUR:
-						CVARF(fo_hittext_noarmour) = stof(val);
-						break;
-						
-					case FOCMD_HITTEXT_OFFSET:
-						CVARF(fo_hittext_offset) = stof(val);
-						break;
-						
-					case FOCMD_HITTEXT_COLOUR:
-						CVARS(fo_hittext_colour) = val;
-						break;
-						
-					case FOCMD_HITTEXT_COLOUR2:
-						CVARS(fo_hittext_colour2) = val;
+			CVARF(fo_hitaudio_noarmour) = stof(val);
+			break;
+		    case FOCMD_HITTEXT_ENABLED:
+			CVARF(fo_hittext_enabled) = stof(val);
+			break;			
+		    case FOCMD_HITTEXT_SIZE:
+			CVARF(fo_hittext_size) = stof(val);
+			break;		
+		    case FOCMD_HITTEXT_SPEED:
+			CVARF(fo_hittext_speed) = stof(val);
+			break;		
+		    case FOCMD_HITTEXT_ALPHA:
+			CVARF(fo_hittext_alpha) = stof(val);
+			break;		
+		    case FOCMD_HITTEXT_DURATION:
+			CVARF(fo_hittext_duration) = stof(val);
+			break;			
+		    case FOCMD_HITTEXT_RAWDAMAGE:
+			CVARF(fo_hittext_rawdamage) = stof(val);
+			break;	
+		    case FOCMD_HITTEXT_NOARMOUR:
+			CVARF(fo_hittext_noarmour) = stof(val);
+			break;		
+		    case FOCMD_HITTEXT_OFFSET:
+			CVARF(fo_hittext_offset) = stof(val);
+			break;		
+		    case FOCMD_HITTEXT_COLOUR:
+			CVARS(fo_hittext_colour) = val;
+			break;		
+		    case FOCMD_HITTEXT_COLOUR2:
+			CVARS(fo_hittext_colour2) = val;
                 }
             }
             ln = fgets(filehandle);

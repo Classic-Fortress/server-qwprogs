@@ -30,7 +30,7 @@ static float RenderHitText(entity p) {
         return FALSE;
 
     vector clr = stov(CVARS(fo_hittext_colour));
-    if(CVARF(fo_hittext_noarmour) == 2 && p.zut2 == 1)
+    if(CVARF(fo_hittext_noarmour) == 1 && p.zut2 == 1)
 	clr = stov(CVARS(fo_hittext_colour2));
 	
     vector c = project(po);
