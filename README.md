@@ -3,35 +3,40 @@ FortressOne Server
 
 New features
 ------
+
+---------------------------------
+
 * Added in csqc hitaudio and hittext for testing `localinfo zutmode 1` on server to enable.
   
-  Client commands, default shown:
+Client commands, default shown:
   
-  === Audio ===
-  `fo_hitaudio_enabled 1'      - toggle on/off
-  `fo_hitaudio_hurtself 0'     - play a sound when you hurt yourself
-  `fo_hitaudio_team 1'         - play a sound when you hurt a teammate   
-  `fo_hitaudio_enemy 1'        - play a sound when you hurt an enemy
-  `fo_hitaudio_killself 1`     - play a sound when you kill yourself
-  `fo_hitaudio_killteam 1`     - play a sound when you kill a teammate
-  `fo_hitaudio_killenemy 1`    - play a sound when you kill an enemy
-  `fo_hitaudio_noarmour 0`     - play an extra sound if you hurt an enemy with no armour
+=== Audio ===
+* `fo_hitaudio_enabled 1`      - toggle on/off
+* `fo_hitaudio_hurtself 0`     - play a sound when you hurt yourself
+* `fo_hitaudio_team 1`         - play a sound when you hurt a teammate   
+* `fo_hitaudio_enemy 1`        - play a sound when you hurt an enemy
+* `fo_hitaudio_killself 1`     - play a sound when you kill yourself
+* `fo_hitaudio_killteam 1`     - play a sound when you kill a teammate
+* `fo_hitaudio_killenemy 1`    - play a sound when you kill an enemy
+* `fo_hitaudio_noarmour 0`     - play an extra sound if you hurt an enemy with no armour
   
-  also added a headshot sound for snipers, only plays for the client  
-  sounds files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announcer/`
+also added a headshot sound for snipers, only plays for the client  
+sounds files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announcer/`
   
-  === Text ===
-  'fo_hittext_enabled 1`       - toggle on/off
-  'fo_hittext_size 32`         - size of text
-  'fo_hittext_speed 96`        - how fast it scrolls up
-  'fo_hittext_alpha 1`         - alpha
-  'fo_hittext_duration 2`      - how long before text disappears
-  'fo_hittext_rawdamage 1`     - setting to 0 shows damage AFTER armour mitigation
-  'fo_hittext_noarmour 1`      - changes colour of text if enemy has no armour, see 'fo_hittext_colour2' to set
-  'fo_hittext_offset 32`       - how high text appears above target
-  'fo_hittext_colour "1 1 1"`  - default colour of text (rgb 0-1)
-  'fo_hittext_colour2 "1 0 1"` - overrides default colour of text if `fo_hittext_noarmour 1` is set and target has no armour
-  
+=== Text ===
+* `fo_hittext_enabled 1`       - toggle on/off
+* `fo_hittext_size 32`         - size of text
+* `fo_hittext_speed 96`        - how fast it scrolls up
+* `fo_hittext_alpha 1`         - alpha
+* `fo_hittext_duration 2`      - how long before text disappears
+* `fo_hittext_rawdamage 1`     - setting to 0 shows damage AFTER armour mitigation
+* `fo_hittext_noarmour 1`      - changes colour of text if enemy has no armour, see 'fo_hittext_colour2' to set
+* `fo_hittext_offset 32`       - how high text appears above target
+* `fo_hittext_colour "1 1 1"`  - default colour of text (rgb 0-1)
+* `fo_hittext_colour2 "1 0 1"` - overrides default colour of text if `fo_hittext_noarmour 1` is set and target has no armour
+
+-------------------------------
+
 * Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
 * `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
 * `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
