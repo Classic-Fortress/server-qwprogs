@@ -18,7 +18,8 @@ DEFCVAR_FLOAT(fo_hittext_size, 16);
 DEFCVAR_FLOAT(fo_hittext_speed, 96);
 DEFCVAR_FLOAT(fo_hittext_duration, 2);
 DEFCVAR_FLOAT(fo_hittext_alpha, 1);
-DEFCVAR_FLOAT(fo_hittext_style, 1);
+DEFCVAR_FLOAT(fo_hittext_rawdamage, 1);
+DEFCVAR_FLOAT(fo_hittext_noarmour, 1);
 DEFCVAR_FLOAT(fo_hittext_offset, 32);
 DEFCVAR_STRING(fo_hittext_colour, "1 1 1");
 DEFCVAR_STRING(fo_hittext_colour2, "1 0 1");									  
@@ -54,14 +55,15 @@ const string FOCMD_HITAUDIO_HURTENEMY 		= "fo_hitaudio_hurtenemy";
 const string FOCMD_HITAUDIO_KILLSELF 		= "fo_hitaudio_killself";
 const string FOCMD_HITAUDIO_KILLTEAM 		= "fo_hitaudio_killteam";
 const string FOCMD_HITAUDIO_KILLENEMY 		= "fo_hitaudio_killenemy";
-const string FOCMD_HITAUDIO_NOARMOUR	= "fo_hitaudio_noarmour";
+const string FOCMD_HITAUDIO_NOARMOUR		= "fo_hitaudio_noarmour";
 
 const string FOCMD_HITTEXT_ENABLED		= "fo_hittext_enabled";
 const string FOCMD_HITTEXT_SIZE			= "fo_hittext_size";
 const string FOCMD_HITTEXT_SPEED		= "fo_hittext_speed";
 const string FOCMD_HITTEXT_ALPHA		= "fo_hittext_alpha";
 const string FOCMD_HITTEXT_DURATION		= "fo_hittext_duration";
-const string FOCMD_HITTEXT_STYLE		= "fo_hittext_style";
+const string FOCMD_HITTEXT_RAWDAMAGE		= "fo_hittext_rawdamage";
+const string FOCMD_HITTEXT_NOARMOUR		= "fo_hittext_noarmour";
 const string FOCMD_HITTEXT_OFFSET		= "fo_hittext_offset";
 const string FOCMD_HITTEXT_COLOUR		= "fo_hittext_colour";
 const string FOCMD_HITTEXT_COLOUR2		= "fo_hittext_colour2";															  
@@ -90,7 +92,8 @@ void FO_WriteSettings()
     line = FormatCfgString(line, FOCMD_HITTEXT_SPEED, 		ftos(CVARF(fo_hittext_speed)));
     line = FormatCfgString(line, FOCMD_HITTEXT_DURATION, 	ftos(CVARF(fo_hittext_duration)));
     line = FormatCfgString(line, FOCMD_HITTEXT_ALPHA, 		ftos(CVARF(fo_hittext_alpha)));
-    line = FormatCfgString(line, FOCMD_HITTEXT_STYLE, 		ftos(CVARF(fo_hittext_style)));
+    line = FormatCfgString(line, FOCMD_HITTEXT_RAWDAMAGE,	ftos(CVARF(fo_hittext_rawdamage)));
+    line = FormatCfgString(line, FOCMD_HITTEXT_NOARMOUR,	ftos(CVARF(fo_hittext_noarmour)));
     line = FormatCfgString(line, FOCMD_HITTEXT_OFFSET, 		ftos(CVARF(fo_hittext_offset)));
     line = FormatCfgString(line, FOCMD_HITTEXT_COLOUR,	 	CVARS(fo_hittext_colour));
     line = FormatCfgString(line, FOCMD_HITTEXT_COLOUR2,	 	CVARS(fo_hittext_colour2));
@@ -119,7 +122,8 @@ void FO_LoadDefaultSettings()
     CVARF(fo_hittext_speed) = 96;
     CVARF(fo_hittext_alpha) = 1;
     CVARF(fo_hittext_duration) = 2;
-    CVARF(fo_hittext_style) = 1;
+    CVARF(fo_hittext_rawdamage) = 1;
+    CVARF(fo_hittext_noarmour) = 1;
     CVARF(fo_hittext_offset) = 32;
     CVARS(fo_hittext_colour) = "1 1 1";
     CVARS(fo_hittext_colour2) = "1 0 1";								
@@ -211,8 +215,12 @@ void FO_LoadSettings()
 						CVARF(fo_hittext_duration) = stof(val);
 						break;
 						
-					case FOCMD_HITTEXT_STYLE:
-						CVARF(fo_hittext_style) = stof(val);
+					case FOCMD_HITTEXT_RAWDAMAGE:
+						CVARF(fo_hittext_rawdamage) = stof(val);
+						break;
+					
+					case FOCMD_HITTEXT_NOARMOUR:
+						CVARF(fo_hittext_noarmour) = stof(val);
 						break;
 						
 					case FOCMD_HITTEXT_OFFSET:
