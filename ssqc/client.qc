@@ -795,15 +795,15 @@ void () DecodeLevelParms = {
 
         // disable hit sounds [off]
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
-        
-		//test zutmode for testing stuff [off]
+
+        //test zutmode for testing stuff [off]
         zutmode = CF_GetSetting("zm", "zutmode", "0");
-        
+
         // disable hit text [off]
         nohittext = CF_GetSetting("nht", "nohittext", 0);							 
         // disable setinfo keepcells [off]
         nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
-        
+
         // allow clients to place a personal practice spawn [off]
         allowpracspawns = CF_GetSetting("aps", "allowpracspawns", "0");
 
@@ -1011,8 +1011,8 @@ void () DecodeLevelParms = {
             stock_reload = FALSE;
             classtips = FALSE;
             nohitsounds = TRUE;
-			nohittext = TRUE;	//damned luddites
-			zutmode = FALSE;
+            nohittext = TRUE;	//damned luddites
+            zutmode = FALSE;
             detpack_when_reloading = TRUE;
             old_hp_armor = TRUE;
             //server_sbflaginfo = FALSE;

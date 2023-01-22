@@ -142,24 +142,23 @@ void (entity targ, entity attacker) Killed = {
     if(vote_anarchy_mode) {
         UnvoteForMap(targ);
     }
-    
-    
 };
 
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
     if(nohitsounds)
         return;
-    
-	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-	
-	if(csqcactive && zutmode)
-		return;																				 	 															   						  
-	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
+
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
+
+    if(csqcactive && zutmode)
+        return;																				 	 															   						  
+
+    if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
     {
         if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser"))
         {
             local entity trueattacker;
-                        
+
             if (attacker.classname == "building_sentrygun")
             {	// work out correct attacker
                 trueattacker = attacker.real_owner;
@@ -168,7 +167,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
             {
                 trueattacker = attacker;
             }
-            
+
             if (trueattacker == targ)
             {
                 return;
@@ -176,7 +175,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 
             local string hitsound;
             hitsound = infokey(trueattacker, "hitsound");
-            
+
             if (hitsound == "1" || hitsound == "2")
             {
                 local float crit = 0;
@@ -204,7 +203,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 
                 float targteam;
                 targteam = (targ.undercover_team == 0) ? targ.team_no : targ.undercover_team;
-                
+
                 if (targteam != attacker.team_no) {
                     if (crit == 1){
                         stuffcmd(trueattacker, "play misc/hitsoundcrit.wav\n");		//sounds precached in weapons.qc
@@ -219,59 +218,60 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                     }
                 }	
             }
-		}
-	}
+        }
+    }
 };
 
 void (entity targ, entity attacker) KillSound = {
+    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
-	local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-	if(csqcactive && zutmode)
-		return;														   
-	if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) {
-		if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) {
-		
-			local entity trueattacker;
-			if (attacker.classname == "building_sentrygun") {
-				trueattacker = attacker.real_owner;
-			}
-			else {
-				trueattacker = attacker;
-			}
+    if(csqcactive && zutmode)
+        return;
 
-			local string killsound = infokey(trueattacker, "killsound");
+    if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) {
+        if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) {
 
-			if (killsound == "1" || killsound == "2" || killsound == "3"){
-			
-				if (targ.team_no != trueattacker.team_no) {
-					stuffcmd(trueattacker, "play misc/killsound.wav\n");
-					return;
-				}
-				else {
-				
-					if (trueattacker == targ) {
-						if(killsound == "3") {
-							stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");	
-						}
-						return;
-					}
-					
-					if (killsound == "2" || killsound == "3") {
-						stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");
-					}
-				
-				}
-			}
-		}
-	}
-	else {
-		if (targ.classname == "player") {
-			local string targkillsound = infokey(targ, "killsound");
-			if (targkillsound == "3") {
-				stuffcmd(targ, "play misc/killsoundteam.wav\n");
-			}
-		}
-	}
+            local entity trueattacker;
+            if (attacker.classname == "building_sentrygun") {
+                trueattacker = attacker.real_owner;
+            }
+            else {
+                trueattacker = attacker;
+            }
+
+            local string killsound = infokey(trueattacker, "killsound");
+
+            if (killsound == "1" || killsound == "2" || killsound == "3"){
+
+                if (targ.team_no != trueattacker.team_no) {
+                    stuffcmd(trueattacker, "play misc/killsound.wav\n");
+                    return;
+                }
+                else {
+
+                    if (trueattacker == targ) {
+                        if(killsound == "3") {
+                            stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");	
+                        }
+                        return;
+                    }
+
+                    if (killsound == "2" || killsound == "3") {
+                        stuffcmd(trueattacker, "play misc/killsoundteam.wav\n");
+                    }
+
+                }
+            }
+        }
+    }
+    else {
+        if (targ.classname == "player") {
+            local string targkillsound = infokey(targ, "killsound");
+            if (targkillsound == "3") {
+                stuffcmd(targ, "play misc/killsoundteam.wav\n");
+            }
+        }
+    }
 };
 
 void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float original_damage, float actual_damage) =
@@ -753,8 +753,9 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         targ.armorvalue = 0;
     }
 
-	if(zutmode)
-		BroadcastHitFlag(targ, inflictor, attacker, original_damage, damh);		   
+    if(zutmode)
+        BroadcastHitFlag(targ, inflictor, attacker, original_damage, damh);		   
+
     if (targ.health <= 0) {
 
         if ((inflictor.classname == "detpack")
