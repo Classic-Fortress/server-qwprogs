@@ -5,6 +5,7 @@ void () PostFOQuadStarted = {
 
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"round\": \"1\",\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
 	local string demo_uri = strcat(demo_files_address, game_filename, ".mvd");
@@ -40,7 +41,10 @@ void () PostFOQuadStarted = {
 					data = strcat(data, ",");
 
 				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
-				data = strcat(data, "          { \"auth_token\": \"", token, "\" }\n");
+				data = strcat(data, "          {\n");
+				data = strcat(data, "            \"auth_token\": \"", token, "\",\n");
+				data = strcat(data, "            \"playerclass\": \"", ftos(p.playerclass), "\"\n");
+				data = strcat(data, "          }\n");
 				prefix_comma = TRUE;
 			}
 
