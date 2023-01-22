@@ -30,7 +30,7 @@ static float RenderHitText(entity p) {
         return FALSE;
 
     vector clr = stov(CVARS(fo_hittext_colour));
-    if(CVARF(fo_hittext_noarmour) == 1 && p.zut2 == 1)
+    if(CVARF(fo_hittext_noarmour) == 1 && p.target_armourless == 1)
 	clr = stov(CVARS(fo_hittext_colour2));
 	
     vector c = project(po);
@@ -40,9 +40,9 @@ static float RenderHitText(entity p) {
     size_x = CVARF(fo_hittext_size);
     size_y = CVARF(fo_hittext_size);
     size = size * (maxd - max(diff, mind)) / (maxd - mind);
-    string str = ftos(p.zut1);
+    string str = ftos(p.hittext_damage);
     c.x -= stringwidth(str, FALSE, size) / 2;
-    drawstring(c, str, size, clr, p.zut5, 0);
+    drawstring(c, str, size, clr, p.hittext_alpha, 0);
 
     return TRUE;
 }

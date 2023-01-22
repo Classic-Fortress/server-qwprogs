@@ -449,12 +449,12 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
 }
 float HitflagThink() =
 {
-	local float speed = self.zut4 * frametime;
+	local float speed = self.hittext_speed * frametime;
 	local vector htvect = '0 0 0';
 	htvect.z = speed;
 	setorigin(self, self.origin + htvect);
 	
-	if(time > self.zut3)
+	if(time > self.hittext_duration)
 		remove(self);
 	return FALSE;
 }
@@ -559,11 +559,11 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			te.drawmask = MASK_ENGINE;
 			te.classname = CN_HITTEXT;		
 			te.predraw = HitflagThink;
-			CVARF(fo_hittext_rawdamage) ? te.zut1 = rawdmg : te.zut1 = mitdmg;
-			te.zut2 = noarmourontarg;
-			te.zut3 = time + CVARF(fo_hittext_duration);
-			te.zut4 = CVARF(fo_hittext_speed);
-			te.zut5 = CVARF(fo_hittext_alpha);
+			CVARF(fo_hittext_rawdamage) ? te.hittext_damage = rawdmg : te.hittext_damage = mitdmg;
+			te.target_armourless = noarmourontarg;
+			te.hittext_duration = time + CVARF(fo_hittext_duration);
+			te.hittext_speed = CVARF(fo_hittext_speed);
+			te.hittext_alpha = CVARF(fo_hittext_alpha);
 		}
 	}
 };					  
