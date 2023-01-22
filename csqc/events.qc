@@ -1,5 +1,6 @@
 void ParseSBAR();
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag);														 
 float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 
 void() CSQC_Parse_Event = {
@@ -118,6 +119,16 @@ void() CSQC_Parse_Event = {
             float explodes_at = readfloat();
             TFxGrenTimerUpdate(entnum, explodes_at);
             break;
+	case MSG_HITFLAG:
+	    local vector targpos = '0 0 0';
+	    targpos_x = readcoord();
+	    targpos_y = readcoord();
+            targpos_z = readcoord();
+	    local float mitdmg = readshort();
+            local float rawdmg = readshort();
+            local float hitflag = readshort();
+	    ParseHitFlag(targpos, mitdmg, rawdmg, hitflag);
+	    break;				 
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
             switch (menutype) {
@@ -436,7 +447,126 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
                       primed_at, explodes_at, explodes_at - primed_at));
     }
 }
+float HitflagThink() =
+{
+	local float speed = self.hittext_speed * frametime;
+	local vector htvect = '0 0 0';
+	htvect.z = speed;
+	setorigin(self, self.origin + htvect);
+	
+	if(time > self.hittext_duration)
+		remove(self);
+	return FALSE;
+}
 
+void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) = 
+{
+	local float hittext_allowed = 1;
+	if(Bitfield_Contains(hitflag, HITFLAG_NOTEXT) || CVARF(fo_hittext_enabled) == 0)
+		hittext_allowed = 0;
+
+	local float hitaudio_allowed = 1;
+	if(Bitfield_Contains(hitflag, HITFLAG_NOAUDIO) || CVARF(fo_hitaudio_enabled) == 0)
+		hitaudio_allowed = 0;
+	
+	local float hurtself = 0;
+	local float flashed = 0;
+	local float friendly = 0;
+	local float killingblow = 0;
+	local float meatshot = 0;
+	local float noarmourontarg = 0;
+	local float headshot = 0;
+	local float feignedenemy = 0;
+	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
+	local float wantsrawdmg = CVARF(fo_hittext_rawdamage);
+	
+	if(Bitfield_Contains(hitflag, HITFLAG_NOARMOUR))
+		noarmourontarg = 1;
+		
+	if(Bitfield_Contains(hitflag, HITFLAG_KILLINGBLOW))	
+		killingblow = 1;
+	
+	if(Bitfield_Contains(hitflag, HITFLAG_MEATSHOT))	
+		meatshot = 1;
+	
+	if(Bitfield_Contains(hitflag, HITFLAG_HEADSHOT))	
+		headshot = 1;
+	
+	if(Bitfield_Contains(hitflag, HITFLAG_SELF))
+		hurtself = 1;
+		
+	if(Bitfield_Contains(hitflag, HITFLAG_FRIENDLY))
+		friendly = 1;
+	
+	if(Bitfield_Contains(hitflag, HITFLAG_FEIGNEDENEMY))
+		feignedenemy = 1;
+		
+	if(Bitfield_Contains(hitflag, HITFLAG_IMFLASHED))
+		flashed = 1;
+	
+	if(flashed)
+		return;
+	
+	if(hitaudio_allowed)
+	{
+		//hitsound
+		if(friendly && !hurtself && !feignedenemy)
+			localsound(SND_HURTTEAM, CHAN_AUTO, 1);
+			
+		else if(hurtself)
+			localsound(SND_HURTSELF, CHAN_AUTO, 1);
+			
+		else
+			if(!feignedenemy)
+				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+		
+		//killsound
+		if(killingblow)
+		{
+			if(friendly && !hurtself)
+				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
+			else if(hurtself)
+				localsound(SND_KILLSELF, CHAN_AUTO, 1);
+			else
+				localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+		}
+		
+		if(headshot && !friendly && !feignedenemy)
+			localsound(SND_HEADSHOT, CHAN_AUTO, 1);
+	
+		if(noarmourontarg && !friendly && !feignedenemy && wantsnoarmoursound)
+			localsound(SND_NOARMOUR, CHAN_AUTO, 1);
+	}
+	
+	if(hittext_allowed && !friendly)
+	{
+		
+		
+		if(feignedenemy && !killingblow)
+		{
+			return;
+		}
+		else
+		{
+			local vector offs = '0 0 0';
+			offs_z = CVARF(fo_hittext_offset);
+			local entity te = spawn();
+			local vector pos = '0 0 0';
+			pos.x = targpos_x;
+			pos.y = targpos_y;
+			pos.z = targpos_z;
+			setorigin(te, pos + offs);		
+			te.drawmask = MASK_ENGINE;
+			te.classname = CN_HITTEXT;		
+			te.predraw = HitflagThink;
+			CVARF(fo_hittext_rawdamage) ? te.hittext_damage = rawdmg : te.hittext_damage = mitdmg;
+			te.target_armourless = noarmourontarg;
+			te.hittext_duration = time + CVARF(fo_hittext_duration);
+			te.hittext_speed = CVARF(fo_hittext_speed);
+			te.hittext_alpha = CVARF(fo_hittext_alpha);
+		}
+	}
+};					  
 void ParseSBAR()
 {
     SBAR.ClipSize = readstring();

@@ -117,6 +117,11 @@ float zoomed_in;
 .float max_val;
 .float votecount;
 .float localmap;
+.float hittext_damage;	//using for random stuff
+.float target_armourless;
+.float hittext_duration;
+.float hittext_speed;
+.float hittext_alpha;
 
 void () SUB_Null = {
 };
