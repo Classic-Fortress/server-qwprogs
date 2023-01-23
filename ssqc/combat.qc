@@ -147,12 +147,7 @@ void (entity targ, entity attacker) Killed = {
 void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
     if(nohitsounds)
         return;
-
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-
-    if(csqcactive && zutmode)
-        return;																				 	 															   						  
-
+															 	 															   						  	
     if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser"))
     {
         if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser"))
@@ -168,10 +163,13 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                 trueattacker = attacker;
             }
 
+            local float csqcactive = infokeyf(trueattacker, INFOKEY_P_CSQCACTIVE);
+
+            if(zutmode && csqcactive)
+                return;	
+                
             if (trueattacker == targ)
-            {
                 return;
-            }
 
             local string hitsound;
             hitsound = infokey(trueattacker, "hitsound");
@@ -223,10 +221,7 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
 };
 
 void (entity targ, entity attacker) KillSound = {
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
-    if(csqcactive && zutmode)
-        return;
 
     if ((attacker.classname == "player") || (attacker.classname == "building_sentrygun") || (attacker.classname == "building_dispenser")) {
         if ((targ.classname == "player") || (targ.classname == "building_sentrygun") || (targ.classname == "building_dispenser")) {
@@ -238,7 +233,11 @@ void (entity targ, entity attacker) KillSound = {
             else {
                 trueattacker = attacker;
             }
-
+            
+            local float csqcactive = infokeyf(trueattacker, INFOKEY_P_CSQCACTIVE);
+            if(csqcactive && zutmode)
+                 return;
+                 
             local string killsound = infokey(trueattacker, "killsound");
 
             if (killsound == "1" || killsound == "2" || killsound == "3"){
@@ -362,7 +361,8 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 	WriteShort(MSG_MULTICAST, actual_damage);
 	WriteShort(MSG_MULTICAST, original_damage);
 	WriteShort(MSG_MULTICAST, hitflag);
-	multicast('0 0 0', MULTICAST_ONE_R_NOSPECS); 
+	//WriteEntity(MSG_MULTICAST, targ);
+	multicast('0 0 0', MULTICAST_ONE_R); 
 };																												   
 void (entity targ, entity inflictor, entity attacker,
       float damage, float knock_damage) T_DamageKnock = {
