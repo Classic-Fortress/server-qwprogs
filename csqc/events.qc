@@ -478,6 +478,7 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	local float headshot = 0;
 	local float feignedenemy = 0;
 	local float wantsrawdmg = CVARF(fo_hittext_rawdamage);
+	local float killedundercover = Bitfield_Contains(hitflag, HITFLAG_KILLEDUNDERCOVERSPY);
 	
 	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
 	local float wantshurtselfsound = CVARF(fo_hitaudio_hurtself);
@@ -525,13 +526,15 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			localsound(SND_HURTSELF, CHAN_AUTO, 1);
 			
 		else
+		{
 			if(!feignedenemy && wantshurtenemysound)
 				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+		}
 		
 		//killsound
 		if(killingblow)
 		{
-			if(friendly && !hurtself && wantskillteamsound)
+			if(friendly && !hurtself && wantskillteamsound && !killedundercover)
 			{
 				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
 			}
