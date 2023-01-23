@@ -28,10 +28,19 @@ static float RenderHitText(entity p) {
 
     if (trace_fraction < 1)
         return FALSE;
-
-    vector clr = stov(CVARS(fo_hittext_colour));
-    if(CVARF(fo_hittext_noarmour) == 1 && p.target_armourless == 1)
-	clr = stov(CVARS(fo_hittext_colour2));
+    
+    vector clr = '0 0 0';
+    
+    if(!p.target_friendly)
+    {
+    	if(CVARF(fo_hittext_noarmour) == 1 && p.target_armourless == 1)
+	    clr = stov(CVARS(fo_hittext_colour2));
+	else
+            clr = stov(CVARS(fo_hittext_colour));
+    }
+    
+    if(p.target_friendly)
+	clr = stov(CVARS(fo_hittext_colour3));
 	
     vector c = project(po);
     

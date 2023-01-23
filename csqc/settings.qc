@@ -5,13 +5,13 @@ DEFCVAR_FLOAT(fo_grentimervolume, 1);
 DEFCVAR_FLOAT(fo_oldscoreboard, 0);
 
 DEFCVAR_FLOAT(fo_hitaudio_enabled, 1);
-DEFCVAR_FLOAT(fo_hitaudio_hurtself, 0);
+DEFCVAR_FLOAT(fo_hitaudio_hurtself, 1);
 DEFCVAR_FLOAT(fo_hitaudio_hurtteam, 1);
 DEFCVAR_FLOAT(fo_hitaudio_hurtenemy, 1);
 DEFCVAR_FLOAT(fo_hitaudio_killself, 1);
 DEFCVAR_FLOAT(fo_hitaudio_killteam, 1);
 DEFCVAR_FLOAT(fo_hitaudio_killenemy, 1);
-DEFCVAR_FLOAT(fo_hitaudio_noarmour, 0);
+DEFCVAR_FLOAT(fo_hitaudio_noarmour, 1);
 
 DEFCVAR_FLOAT(fo_hittext_enabled, 1);
 DEFCVAR_FLOAT(fo_hittext_size, 16);
@@ -21,8 +21,10 @@ DEFCVAR_FLOAT(fo_hittext_alpha, 1);
 DEFCVAR_FLOAT(fo_hittext_rawdamage, 1);
 DEFCVAR_FLOAT(fo_hittext_noarmour, 1);
 DEFCVAR_FLOAT(fo_hittext_offset, 32);
+DEFCVAR_FLOAT(fo_hittext_friendly, 0);
 DEFCVAR_STRING(fo_hittext_colour, "1 1 1");
-DEFCVAR_STRING(fo_hittext_colour2, "1 0 1");									  
+DEFCVAR_STRING(fo_hittext_colour2, "1 0 1");
+DEFCVAR_STRING(fo_hittext_colour3, "1 0 0");									  
 // CVARS that just pass via regular config state.
 DEFCVAR_FLOAT(fo_hud_idle_alpha, 0.3);
 DEFCVAR_FLOAT(FOCMD_ADMIN_MENU_UPDATE_TIME, 2);
@@ -65,8 +67,11 @@ const string FOCMD_HITTEXT_DURATION		= "fo_hittext_duration";
 const string FOCMD_HITTEXT_RAWDAMAGE		= "fo_hittext_rawdamage";
 const string FOCMD_HITTEXT_NOARMOUR		= "fo_hittext_noarmour";
 const string FOCMD_HITTEXT_OFFSET		= "fo_hittext_offset";
+const string FOCMD_HITTEXT_FRIENDLY		= "fo_hittext_fiendly";
 const string FOCMD_HITTEXT_COLOUR		= "fo_hittext_colour";
-const string FOCMD_HITTEXT_COLOUR2		= "fo_hittext_colour2";															  
+const string FOCMD_HITTEXT_COLOUR2		= "fo_hittext_colour2";	
+const string FOCMD_HITTEXT_COLOUR3		= "fo_hittext_colour3";	
+														  
 void FO_WriteSettings()
 {
     // this overwrites
@@ -95,8 +100,10 @@ void FO_WriteSettings()
     line = FormatCfgString(line, FOCMD_HITTEXT_RAWDAMAGE,	ftos(CVARF(fo_hittext_rawdamage)));
     line = FormatCfgString(line, FOCMD_HITTEXT_NOARMOUR,	ftos(CVARF(fo_hittext_noarmour)));
     line = FormatCfgString(line, FOCMD_HITTEXT_OFFSET, 		ftos(CVARF(fo_hittext_offset)));
+    line = FormatCfgString(line, FOCMD_HITTEXT_FRIENDLY,	ftos(CVARF(fo_hittext_friendly)));
     line = FormatCfgString(line, FOCMD_HITTEXT_COLOUR,	 	CVARS(fo_hittext_colour));
     line = FormatCfgString(line, FOCMD_HITTEXT_COLOUR2,	 	CVARS(fo_hittext_colour2));
+    line = FormatCfgString(line, FOCMD_HITTEXT_COLOUR2,	 	CVARS(fo_hittext_colour3));
     fputs(filehandle, line);
     fclose(filehandle);
 }
@@ -109,13 +116,13 @@ void FO_LoadDefaultSettings()
     CVARF(fo_jumpvolume) = 1;
     CVARF(fo_oldscoreboard) = 0;
     CVARF(fo_hitaudio_enabled) = 1;
-    CVARF(fo_hitaudio_hurtself) = 0;
+    CVARF(fo_hitaudio_hurtself) = 1;
     CVARF(fo_hitaudio_hurtteam) = 1;
     CVARF(fo_hitaudio_hurtenemy) = 1;
     CVARF(fo_hitaudio_killself) = 1;
     CVARF(fo_hitaudio_killteam) = 1;
     CVARF(fo_hitaudio_killenemy) = 1;
-    CVARF(fo_hitaudio_noarmour) = 0;
+    CVARF(fo_hitaudio_noarmour) = 1;
     
     CVARF(fo_hittext_enabled) = 1;
     CVARF(fo_hittext_size) = 16;
@@ -125,8 +132,10 @@ void FO_LoadDefaultSettings()
     CVARF(fo_hittext_rawdamage) = 1;
     CVARF(fo_hittext_noarmour) = 1;
     CVARF(fo_hittext_offset) = 32;
+    CVARF(fo_hittext_friendly) = 0;
     CVARS(fo_hittext_colour) = "1 1 1";
-    CVARS(fo_hittext_colour2) = "1 0 1";								
+    CVARS(fo_hittext_colour2) = "1 0 1";
+    CVARS(fo_hittext_colour3) = "1 0 0";								
 }
 
 void FO_LoadSettings()
@@ -217,12 +226,19 @@ void FO_LoadSettings()
 			break;		
 		    case FOCMD_HITTEXT_OFFSET:
 			CVARF(fo_hittext_offset) = stof(val);
-			break;		
+			break;
+		    case FOCMD_HITTEXT_FRIENDLY:
+			CVARF(fo_hittext_friendly) = stof(val);
+			break;			
 		    case FOCMD_HITTEXT_COLOUR:
 			CVARS(fo_hittext_colour) = val;
 			break;		
 		    case FOCMD_HITTEXT_COLOUR2:
 			CVARS(fo_hittext_colour2) = val;
+			break;
+		    case FOCMD_HITTEXT_COLOUR2:
+		     	CVARS(fo_hittext_colour3) = val;
+		     	break;
                 }
             }
             ln = fgets(filehandle);

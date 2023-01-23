@@ -495,9 +495,10 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	if(Bitfield_Contains(hitflag, HITFLAG_KILLINGBLOW))	
 		killingblow = 1;
 	
-	if(Bitfield_Contains(hitflag, HITFLAG_MEATSHOT))	
+	if(Bitfield_Contains(hitflag, HITFLAG_MEATSHOT))
+	{
 		meatshot = 1;
-	
+	}
 	if(Bitfield_Contains(hitflag, HITFLAG_HEADSHOT))	
 		headshot = 1;
 	
@@ -519,33 +520,62 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	if(hitaudio_allowed)
 	{
 		//hitsound
-		if(friendly && !hurtself && !feignedenemy && wantshurtteamsound)
-			localsound(SND_HURTTEAM, CHAN_AUTO, 1);
-			
-		else if(hurtself && wantshurtselfsound)
-			localsound(SND_HURTSELF, CHAN_AUTO, 1);
-			
+
+		if(friendly && !hurtself && !feignedenemy)
+		{
+			if(wantshurtteamsound)
+			{
+				localsound(SND_HURTTEAM, CHAN_AUTO, 1);
+			}
+		}
+				
+		else if(hurtself)
+		{
+			if(wantshurtselfsound)
+			{
+				localsound(SND_HURTSELF, CHAN_AUTO, 1);
+			}
+		}
+					
+		else if(feignedenemy)
+		{
+			feignedenemy = feignedenemy; //do nothing i guess
+		}
+		else if(wantshurtenemysound)
+		{
+			if(meatshot)
+			{
+				localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1);
+			}
+			else
+			{	
+				localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+			}
+		}
 		else
 		{
-			if(!feignedenemy && wantshurtenemysound)
-				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+			feignedenemy = feignedenemy; //do nothing i guess
 		}
 		
 		//killsound
 		if(killingblow)
 		{
-			if(friendly && !hurtself && wantskillteamsound && !killedundercover)
+			if(friendly && !hurtself && !killedundercover)
 			{
-				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
+				if(wantskillteamsound)
+					localsound(SND_KILLTEAM, CHAN_AUTO, 1);
 			}
-			else if(hurtself && wantskillselfsound)
+			else if(hurtself)
 			{
-				localsound(SND_KILLSELF, CHAN_AUTO, 1);
+				if(wantskillselfsound)
+					localsound(SND_KILLSELF, CHAN_AUTO, 1);
 			}
 			else
 			{
 				if(wantskillenemysound)
+				{
 					localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+				}
 			}
 		}
 		
@@ -556,7 +586,7 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			localsound(SND_NOARMOUR, CHAN_AUTO, 1);
 	}
 	
-	if(hittext_allowed && !friendly)
+	if(hittext_allowed)
 	{
 		if(feignedenemy && !killingblow)
 		{
@@ -564,6 +594,9 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 		}
 		else
 		{
+			if(friendly && !CVARF(fo_hittext_friendly) && !feignedenemy)
+				return;
+			
 			local vector offs = '0 0 0';
 			offs_z = CVARF(fo_hittext_offset);
 			local entity te = spawn();
@@ -580,6 +613,10 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			te.hittext_duration = time + CVARF(fo_hittext_duration);
 			te.hittext_speed = CVARF(fo_hittext_speed);
 			te.hittext_alpha = CVARF(fo_hittext_alpha);
+			if(feignedenemy)
+				te.target_friendly = 0;
+			else
+				te.target_friendly = friendly;
 		}
 	}
 };					  
