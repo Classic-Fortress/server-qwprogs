@@ -312,7 +312,11 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker, float orig
 		hitflag = Bitfield_Add(hitflag, HITFLAG_NOARMOUR);
 	
 	if(targ.health <= 0)
+	{
 		hitflag = Bitfield_Add(hitflag, HITFLAG_KILLINGBLOW);
+		if(targ.undercover_team != 0 && targ.playerclass == PC_SPY && targ.team_no != trueattacker.team_no)
+			hitflag = Bitfield_Add(hitflag, HITFLAG_KILLEDUNDERCOVERSPY);
+	}
 		
 	//meatshot -- this is very lazy, should do t_missile etc
 	if(
