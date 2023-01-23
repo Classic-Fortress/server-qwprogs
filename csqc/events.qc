@@ -477,8 +477,16 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	local float noarmourontarg = 0;
 	local float headshot = 0;
 	local float feignedenemy = 0;
-	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
 	local float wantsrawdmg = CVARF(fo_hittext_rawdamage);
+	
+	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
+	local float wantshurtselfsound = CVARF(fo_hitaudio_hurtself);
+	local float wantshurtenemysound = CVARF(fo_hitaudio_hurtenemy);
+	local float wantshurtteamsound = CVARF(fo_hitaudio_hurtteam);
+	
+	local float wantskillselfsound = CVARF(fo_hitaudio_killself);
+	local float wantskillenemysound = CVARF(fo_hitaudio_killenemy);
+	local float wantskillteamsound = CVARF(fo_hitaudio_killteam);
 	
 	if(Bitfield_Contains(hitflag, HITFLAG_NOARMOUR))
 		noarmourontarg = 1;
@@ -510,25 +518,32 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	if(hitaudio_allowed)
 	{
 		//hitsound
-		if(friendly && !hurtself && !feignedenemy)
+		if(friendly && !hurtself && !feignedenemy && wantshurtteamsound)
 			localsound(SND_HURTTEAM, CHAN_AUTO, 1);
 			
-		else if(hurtself)
+		else if(hurtself && wantshurtselfsound)
 			localsound(SND_HURTSELF, CHAN_AUTO, 1);
 			
 		else
-			if(!feignedenemy)
+			if(!feignedenemy && wantshurtenemysound)
 				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
 		
 		//killsound
 		if(killingblow)
 		{
-			if(friendly && !hurtself)
+			if(friendly && !hurtself && wantskillteamsound)
+			{
 				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
-			else if(hurtself)
+			}
+			else if(hurtself && wantskillselfsound)
+			{
 				localsound(SND_KILLSELF, CHAN_AUTO, 1);
+			}
 			else
-				localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+			{
+				if(wantskillenemysound)
+					localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+			}
 		}
 		
 		if(headshot && !friendly && !feignedenemy)
@@ -540,8 +555,6 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	
 	if(hittext_allowed && !friendly)
 	{
-		
-		
 		if(feignedenemy && !killingblow)
 		{
 			return;
