@@ -797,10 +797,11 @@ void () DecodeLevelParms = {
         nohitsounds = CF_GetSetting("nhs", "nohitsounds", "0");
 
         //test zutmode for testing stuff [off]
-        zutmode = CF_GetSetting("zm", "zutmode", "0");
+        zutmode = CF_GetSetting("zm", "zutmode", "1");
 
         // disable hit text [off]
-        nohittext = CF_GetSetting("nht", "nohittext", 0);							 
+        nohittext = CF_GetSetting("nht", "nohittext", "0");
+
         // disable setinfo keepcells [off]
         nokeepcells = CF_GetSetting("nkc", "nokeepcells", "0");
 
