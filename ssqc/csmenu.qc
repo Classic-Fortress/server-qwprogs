@@ -367,6 +367,9 @@ void UpdateClient_Login(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
 
+    if(!foLoginRequired)
+        return;
+
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_LOGIN);

@@ -802,13 +802,13 @@ void () DecodeLevelParms = {
 
         // health repair 
         fo_repair_ratio = CF_GetSetting("forep", "fo_repair_ratio", "2");
-        
+
         // keep teams on map change [off]
         cb_keepteams = CF_GetSetting("kt", "keep_teams", "0");
 
         // use att/def roles in quad mode [off]
         quad_roles = CF_GetSetting("qr", "quad_roles", "0");
-        
+
         LoadRole(&Role_Attack);
         LoadRole(&Role_Defence);
         InitTeamRoles();
