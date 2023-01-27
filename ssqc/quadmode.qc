@@ -67,8 +67,61 @@ void () PostFOQuadStarted = {
 	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
-	/* bprint(PRINT_HIGH, "===sending QuadRoundBegin request===\n"); */
-	/* bprint(PRINT_HIGH, "data: ", data, "\n"); */
+};
+
+void () PostFOQuadFinalRoundStarted = {
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
+	data = strcat(data, "    \"round\": \"2\",\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"players\": [\n");
+
+		prefix_comma = FALSE;
+
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(p.team_no == tn && p.all_time == ALL_TIME_COLOUR) {
+				if (prefix_comma)
+					data = strcat(data, ",");
+
+				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
+				data = strcat(data, "          {\n");
+				data = strcat(data, "            \"auth_token\": \"", token, "\",\n");
+				data = strcat(data, "            \"playerclass\": \"", ftos(p.playerclass), "\"\n");
+				data = strcat(data, "          }\n");
+				prefix_comma = TRUE;
+			}
+
+			p = find(p, classname, "player");
+		}
+
+		data = strcat(data, "        ]\n");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \n");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	local string backend_address = infokey(world, "backend_address");
+	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
+	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
 
 void (float winner) PostFOQuadFinished = {
@@ -423,6 +476,9 @@ void () QuadRoundBegin = {
     }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
+
+	if (rounds == 1)
+		PostFOQuadFinalRoundStarted();
 
     te = find(world, classname, "player");
     while (te) {
