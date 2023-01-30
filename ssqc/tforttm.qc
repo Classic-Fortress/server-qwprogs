@@ -241,6 +241,8 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     stuffcmd(pe, st);
     stuffcmd(pe, "\n");
 
+    UpdateClient_Login(pe);
+
     if(!skipclasscheck) {
         if(pe.playerclass == PC_CIVILIAN) {
             if (TeamFortress_TeamIsCivilian(tno)) {

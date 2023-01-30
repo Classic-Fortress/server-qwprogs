@@ -5,7 +5,7 @@ void () PostFOQuadStarted = {
 
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
-	data = strcat(data, "    \"round\": \"1\",\n");
+	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
 	local string demo_uri = strcat(demo_files_address, game_filename, ".mvd");
@@ -75,7 +75,7 @@ void () PostFOQuadFinalRoundStarted = {
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
 	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
-	data = strcat(data, "    \"round\": \"2\",\n");
+	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
 	data = strcat(data, "    \"teams\": {\n");
 
 	local float tn;
@@ -84,7 +84,10 @@ void () PostFOQuadFinalRoundStarted = {
 	local string token;
 
 	for (tn = 1; tn <= number_of_teams; ++tn) {
+		local float score = TeamFortress_TeamGetScore(tn);
+
 		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"score\": \"", ftos(score), "\",");
 		data = strcat(data, "        \"players\": [\n");
 
 		prefix_comma = FALSE;
