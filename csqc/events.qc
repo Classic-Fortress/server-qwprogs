@@ -477,8 +477,17 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	local float noarmourontarg = 0;
 	local float headshot = 0;
 	local float feignedenemy = 0;
-	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
 	local float wantsrawdmg = CVARF(fo_hittext_rawdamage);
+	local float killedundercover = Bitfield_Contains(hitflag, HITFLAG_KILLEDUNDERCOVERSPY);
+	
+	local float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
+	local float wantshurtselfsound = CVARF(fo_hitaudio_hurtself);
+	local float wantshurtenemysound = CVARF(fo_hitaudio_hurtenemy);
+	local float wantshurtteamsound = CVARF(fo_hitaudio_hurtteam);
+	
+	local float wantskillselfsound = CVARF(fo_hitaudio_killself);
+	local float wantskillenemysound = CVARF(fo_hitaudio_killenemy);
+	local float wantskillteamsound = CVARF(fo_hitaudio_killteam);
 	
 	if(Bitfield_Contains(hitflag, HITFLAG_NOARMOUR))
 		noarmourontarg = 1;
@@ -486,9 +495,10 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	if(Bitfield_Contains(hitflag, HITFLAG_KILLINGBLOW))	
 		killingblow = 1;
 	
-	if(Bitfield_Contains(hitflag, HITFLAG_MEATSHOT))	
+	if(Bitfield_Contains(hitflag, HITFLAG_MEATSHOT))
+	{
 		meatshot = 1;
-	
+	}
 	if(Bitfield_Contains(hitflag, HITFLAG_HEADSHOT))	
 		headshot = 1;
 	
@@ -510,25 +520,63 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 	if(hitaudio_allowed)
 	{
 		//hitsound
+
 		if(friendly && !hurtself && !feignedenemy)
-			localsound(SND_HURTTEAM, CHAN_AUTO, 1);
-			
+		{
+			if(wantshurtteamsound)
+			{
+				localsound(SND_HURTTEAM, CHAN_AUTO, 1);
+			}
+		}
+				
 		else if(hurtself)
-			localsound(SND_HURTSELF, CHAN_AUTO, 1);
-			
+		{
+			if(wantshurtselfsound)
+			{
+				localsound(SND_HURTSELF, CHAN_AUTO, 1);
+			}
+		}
+					
+		else if(feignedenemy)
+		{
+			feignedenemy = feignedenemy; //do nothing i guess
+		}
+		else if(wantshurtenemysound)
+		{
+			if(meatshot)
+			{
+				localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1);
+			}
+			else
+			{	
+				localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+			}
+		}
 		else
-			if(!feignedenemy)
-				meatshot ? localsound(SND_HURTENEMY_MEATSHOT, CHAN_AUTO, 1) : localsound(SND_HURTENEMY, CHAN_AUTO, 1);
+		{
+			feignedenemy = feignedenemy; //do nothing i guess
+		}
 		
 		//killsound
 		if(killingblow)
 		{
-			if(friendly && !hurtself)
-				localsound(SND_KILLTEAM, CHAN_AUTO, 1);
+			if(friendly && !hurtself && !killedundercover)
+			{
+				if(wantskillteamsound)
+					localsound(SND_KILLTEAM, CHAN_AUTO, 1);
+			}
 			else if(hurtself)
-				localsound(SND_KILLSELF, CHAN_AUTO, 1);
+			{
+				if(wantskillselfsound)
+					localsound(SND_KILLSELF, CHAN_AUTO, 1);
+			}
 			else
-				localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+			{
+				if(wantskillenemysound)
+				{
+					localsound(SND_KILLENEMY, CHAN_AUTO, 1);
+				}
+			}
 		}
 		
 		if(headshot && !friendly && !feignedenemy)
@@ -538,16 +586,17 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			localsound(SND_NOARMOUR, CHAN_AUTO, 1);
 	}
 	
-	if(hittext_allowed && !friendly)
+	if(hittext_allowed)
 	{
-		
-		
 		if(feignedenemy && !killingblow)
 		{
 			return;
 		}
 		else
 		{
+			if(friendly && !CVARF(fo_hittext_friendly) && !feignedenemy)
+				return;
+			
 			local vector offs = '0 0 0';
 			offs_z = CVARF(fo_hittext_offset);
 			local entity te = spawn();
@@ -564,6 +613,10 @@ void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag) =
 			te.hittext_duration = time + CVARF(fo_hittext_duration);
 			te.hittext_speed = CVARF(fo_hittext_speed);
 			te.hittext_alpha = CVARF(fo_hittext_alpha);
+			if(feignedenemy)
+				te.target_friendly = 0;
+			else
+				te.target_friendly = friendly;
 		}
 	}
 };					  

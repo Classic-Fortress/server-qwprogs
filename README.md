@@ -5,6 +5,8 @@ New features
 ------
 
 ---------------------------------
+* Added in `fo_hittext_friendly 0` - setting to 1 shows text when damaging friendlys
+* Added in `fo_hittext_colour3 "1 0 0"` - colour of friendly hittext if fo_hittext_friendly is set to 1 (rgb 0-1)
 
 * Added in csqc hitaudio and hittext for testing `localinfo zutmode 1` on server to enable.
   
@@ -12,13 +14,13 @@ Client commands, default shown:
   
 === Audio ===
 * `fo_hitaudio_enabled 1`      - toggle on/off
-* `fo_hitaudio_hurtself 0`     - play a sound when you hurt yourself
+* `fo_hitaudio_hurtself 1`     - play a sound when you hurt yourself
 * `fo_hitaudio_hurtteam 1`     - play a sound when you hurt a teammate   
 * `fo_hitaudio_hurtenemy 1`    - play a sound when you hurt an enemy
 * `fo_hitaudio_killself 1`     - play a sound when you kill yourself
 * `fo_hitaudio_killteam 1`     - play a sound when you kill a teammate
 * `fo_hitaudio_killenemy 1`    - play a sound when you kill an enemy
-* `fo_hitaudio_noarmour 0`     - play an extra sound if you hurt an enemy with no armour
+* `fo_hitaudio_noarmour 1`     - play an extra sound if you hurt an enemy with no armour
   
 also added a headshot sound for snipers, only plays for the client  
 sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announcer/`
@@ -32,9 +34,10 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * `fo_hittext_rawdamage 1`     - setting to 0 shows damage AFTER armour mitigation
 * `fo_hittext_noarmour 1`      - changes colour of text if enemy has no armour, see `fo_hittext_colour2` to set
 * `fo_hittext_offset 32`       - how high text appears above target
-* `fo_hittext_colour "1 1 1"`  - default colour of text (rgb 0-1)
-* `fo_hittext_colour2 "1 0 1"` - overrides default colour of text if `fo_hittext_noarmour 1` is set and target has no armour (rgb 0-1)
-
+* `fo_hittext_friendly 0`      - toggles text above friendlys if you damage them
+* `fo_hittext_colour "1 1 1"`  - default colour of enemy text (rgb 0-1)
+* `fo_hittext_colour2 "1 0 1"` - overrides default colour of enemy text if `fo_hittext_noarmour 1` is set and target has no armour (rgb 0-1)
+* `fo_hittext_colour3 "1 0 0"` - colour of friendly hittext if fo_hittext_friendly is set to 1 (rgb 0-1)
 -------------------------------
 
 * Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
