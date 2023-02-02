@@ -1075,15 +1075,19 @@ float () CheckAllPlayersReady = {
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
 
     if (v_ready == f1 && v_ready > 0) {
-        if(cease_fire) {
+        if (TeamFortress_TeamGetNoPlayers(1) != TeamFortress_TeamGetNoPlayers(2)) {
+            bprint (2, "Teams have uneven number of players, is someone supposed to be all-time attack?\n");
+        } else if(cease_fire) {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
         } else {
             bprint (2, "All players ready, starting match\n");
             localcmd("localinfo clown 0");  // Disable any clown settings.
             StartTimer ();
         }
+
         return 1;
     }
+
     return 0;
 }
 
