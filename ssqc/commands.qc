@@ -386,6 +386,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 break;
             }
+
             if (arg2) {
                 local float final_round = (rounds == 1);
 
@@ -432,6 +433,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 //UpdateClientMenu_Team(self);
                 Menu_Team(0);
             }
+
             break;
         case "changeclass":
             processedCmd = TRUE;
@@ -935,20 +937,24 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint (self, PRINT_HIGH, "Missing username/password\n");
             }
             break;
-        case "fo-login":
-            processedCmd = TRUE;
-            if (self.fo_login != string_null) {
-                sprint (self, PRINT_HIGH, "You are logged in\n");
-            }
-            else {
-                performFoLogin(self);
-            }
-            break;
         case "login-silent" :
             processedCmd = TRUE;
             if (arg3 != string_null) {
                 performLogin(self,arg2,arg3);
             }
+            break;
+        case "fo-login":
+            processedCmd = TRUE;
+            if (self.fo_login != string_null) {
+                sprint (self, PRINT_HIGH, "You are logged in\n");
+            } else {
+                performFoLogin(self);
+            }
+            break;
+        case "fo-login-silent":
+            processedCmd = TRUE;
+            if (self.fo_login == string_null)
+                performFoLogin(self);
             break;
         case "who":
             processedCmd = TRUE;

@@ -1075,7 +1075,7 @@ float () CheckAllPlayersReady = {
     bprint (PRINT_HIGH, "Total players ready - ",ftos(v_ready),"/",ftos(f1),".\n");
 
     if (v_ready == f1 && v_ready > 0) {
-        if (TeamFortress_TeamGetNoPlayers(1) != TeamFortress_TeamGetNoPlayers(2)) {
+        if (TeamFortress_TeamGetNoPlayersExcludingAllTime(1) != TeamFortress_TeamGetNoPlayersExcludingAllTime(2)) {
             bprint (2, "Teams have uneven number of players, is someone supposed to be all-time attack?\n");
         } else if(cease_fire) {
             bprint (2, "All players ready, match will start after ceasefire ends.\n");
@@ -1092,7 +1092,7 @@ float () CheckAllPlayersReady = {
 }
 
 void () PlayerReady = {
-    if (!self.fo_login && foLoginRequired) {
+    if (self.fo_login == string_null && foLoginRequired) {
         sprint(self, PRINT_HIGH, "You need to log in to ready up. See fortressone.org\n");
         return;
     }

@@ -241,8 +241,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
     stuffcmd(pe, st);
     stuffcmd(pe, "\n");
 
-    UpdateClient_Login(pe);
-
     if(!skipclasscheck) {
         if(pe.playerclass == PC_CIVILIAN) {
             if (TeamFortress_TeamIsCivilian(tno)) {
@@ -303,6 +301,7 @@ float (float tno) TeamFortress_TeamSet = {
     }
 
     local float tftso = TeamFortress_TeamSet_Options(self, tno, FALSE);
+
     SetDimensions(TRUE);
     UpdateAllClientsTeamScores();
     UpdateReadyStatus();
@@ -461,24 +460,32 @@ float (float tno) TeamFortress_TeamGetLives = {
 };
 
 float (float tno) TeamFortress_TeamGetNoPlayers = {
-    local float size_team;
     local entity search;
-    size_team = 0;
+    local string cn = tno == 0 ? "observer" : "player";
+    local float size_team = 0;
 
-    search = find(world, classname, "player");
+    search = find(world, classname, cn);
     while (search != world) {
         if (search.team_no == tno)
             size_team = size_team + 1;
-        search = find(search, classname, "player");
+        search = find(search, classname, cn);
     }
-    if (tno == 0) {
-        search = find(world, classname, "observer");
-        while ((search != world)) {
-            if (search.team_no == tno)
-                size_team = size_team + 1;
-            search = find(search, classname, "observer");
-        }
+
+    return (size_team);
+};
+
+float (float tno) TeamFortress_TeamGetNoPlayersExcludingAllTime = {
+    local entity search;
+    local string cn = tno == 0 ? "observer" : "player";
+    local float size_team = 0;
+
+    search = find(world, classname, cn);
+    while (search != world) {
+        if (search.team_no == tno && search.all_time == ALL_TIME_COLOUR)
+            size_team = size_team + 1;
+        search = find(search, classname, cn);
     }
+
     return (size_team);
 };
 
