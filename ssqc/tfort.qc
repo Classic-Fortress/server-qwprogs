@@ -233,6 +233,7 @@ void (float inp) TeamFortress_ChangeClass = {
         self.immune_to_check = time + 10;
         return;
     }
+
     if (teamplay && (self.team_no == 0)) {
         if (toggleflags & TFLAG_AUTOTEAM) {
             if (TeamFortress_TeamPutPlayerInTeam() == 0)

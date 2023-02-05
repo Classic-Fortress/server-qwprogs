@@ -1987,6 +1987,7 @@ void (entity p) SetVoteParams = {
     p.ammo_rockets = 0;
     p.ammo_cells = 0;
     p.armortype = 0;
+    // why?
     p.team_no = 0;
     p.playerclass = 0;
     p.flags |= FL_ONGROUND;
@@ -2077,6 +2078,11 @@ void (float all_dimensions) SetDimensions = {
 };
 
 void () PutClientInServer = {
+    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
+        if (self.fo_login == string_null && foLoginRequired)
+            UpdateClient_Login(self);
+    }
+
     local float oldclass;
     local entity spot;
     local entity te;
@@ -2129,10 +2135,10 @@ void () PutClientInServer = {
     setmodel(self, "progs/player.mdl");
     modelindex_player = self.modelindex;
 
-    if(votemode) {
-        SetVoteParams(self);
-        return;
-    }
+    // TODO: There's a bug here where self.team_no is set to 0 immediately after joining team
+    /* if(votemode) { */
+    /*     SetVoteParams(self); */
+    /* } */
 
     if(no_fire_mode) {
         return;
@@ -3120,8 +3126,8 @@ void () ClientConnect = {
         //if(quadmode)
         UpdateClientPrematch(self, !cb_prematch);
         UpdateClient_VoteMap_AddAll(self);
-        UpdateClient_Login(self);
     }
+
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
 };

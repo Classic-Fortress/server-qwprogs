@@ -552,5 +552,5 @@ void FoLogin(string token) {
     }
 
     localcmd("setinfo _fo_token ", token, "\n");
-    localcmd("cmd fo-login\n");
+    localcmd("cmd fo-login-silent\n");
 }

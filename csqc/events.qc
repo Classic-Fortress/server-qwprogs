@@ -329,7 +329,7 @@ void() CSQC_Parse_Event = {
             local float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
             if (filehandle != -1) {
                 localcmd("setinfo _fo_token ", fgets(filehandle), "\n");
-                localcmd("cmd fo-login\n");
+                localcmd("cmd fo-login-silent\n");
             } else {
                 print("You are not logged in\n");
             }

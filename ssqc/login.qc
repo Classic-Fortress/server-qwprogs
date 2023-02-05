@@ -14,7 +14,6 @@ void (entity player, string login, string secret) performLogin = {
 }
 
 void (entity player) performFoLogin = {
-	player.login_in_progress = 1;
 	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/fo_login", backend_address);
 	local string token = FO_GetUserSettingString(player, "_fo_token", "fo_token", "");
@@ -56,7 +55,6 @@ void(float reqid, float responsecode, string resourcebody, int resourcebytes) UR
 
 			break;
 		case FO_LOGIN_REQUEST:
-			self.login_in_progress = 0;	
 			local string msg;
 
 			if (!responsecode) {
