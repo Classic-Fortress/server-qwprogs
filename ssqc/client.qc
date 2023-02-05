@@ -779,20 +779,21 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
-        // specify API host for backend [""]
-        // I don't actually call this because it's value is sometimes needed before this code is called.
+        // I don't actually define these because their values are sometimes needed before this code is called.
         // Use admin menu to 'end map', DecodeLevelParms() doesn't get called until later. These setting
         // globals should probably moved earlier.
-        /* backend_address = FO_GetUserSettingString(world, "backend_address", "backaddy", "https://www.fortressone.org/"); */
+
+        // specify API host for backend [""]
+        // backend_address = FO_GetUserSettingString(world, "backend_address", "https://www.fortressone.org/");
+
+        // enforce API login [""]
+        // foLoginRequired = CF_GetSetting("fologinrequired", "1");
 
         // specify demo filehost address e.g. https://fortressone-demos.s3.amazonaws.com/sydney/staging/
         demo_files_address = FO_GetUserSettingString(world, "demo_files_address", "demofileaddy", "");
 
         // specify stats filehost address e.g. http://fortressone-stats.s3-ap-southeast-2.amazonaws.com/sydney/staging/
         stats_files_address = FO_GetUserSettingString(world, "stats_files_address", "statsfileaddy", "");
-
-        // enforces API login
-        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
 
         // specify discord channel [""]
         discord_channel_id = infokey(world, "discord_channel_id");
@@ -2078,8 +2079,10 @@ void (float all_dimensions) SetDimensions = {
 };
 
 void () PutClientInServer = {
-    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        if (self.fo_login == string_null && foLoginRequired)
+    if (self.fo_login == string_null) {
+        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
+
+        if (foLoginRequired)
             UpdateClient_Login(self);
     }
 
