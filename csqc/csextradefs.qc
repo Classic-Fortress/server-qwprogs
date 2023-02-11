@@ -708,6 +708,9 @@ void HRC_Render() {
             drawfill(args->pos, args->size, args->rgb, args->alpha, args->drawflag);
     }
 }
+
+DEFCVAR_FLOAT(fo_grentimer_nostack, 0);
+
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
 
@@ -717,6 +720,7 @@ class CsGrenTimer {
     float expires_at_;
     float flags_;
     float grentype_;
+    float playing_;
 
     nonvirtual float() index { return index_; };
     nonvirtual float() active { return expires_at_ > time; };
@@ -734,6 +738,7 @@ class CsGrenTimer {
     nonvirtual void() Stop;
 
     nonvirtual void() PauseSound {
+        playing_ = FALSE;
         if (flags_ & FL_GT_SOUND)  // -volume => stop.
             soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);
     };
@@ -761,15 +766,31 @@ class CsGrenTimer {
     static void() SyncPause {
         // Time froze, but sound kept running, realign.
         for (float i = 0; i < grentimers.length; i++)
-            if (grentimers[i].active)
+            if (grentimers[i].active())
                 grentimers[i].PauseSound();
     };
 
     static void() SyncUnpause {
         // Time froze, but sound kept running, realign.
         for (float i = 0; i < grentimers.length; i++)
-            if (grentimers[i].active)
+            if (grentimers[i].active())
                 grentimers[i].StartSound();
+    };
+
+    static void() UpdateSoundStack {
+        if (!CVARF(fo_grentimer_nostack))
+            return;
+
+        CsGrenTimer best = __NULL__;
+
+        for (float i = 0; i < grentimers.length; i++) {
+            CsGrenTimer c = grentimers[i];
+            if (c.active() && (best == __NULL__ || c.expiry() < best.expiry()))
+                best = c;
+        }
+
+        if (best != __NULL__ && !best.playing_)
+            best.StartSound();
     };
 
     static CsGrenTimer() GetLast { return last_; };

@@ -382,6 +382,7 @@ void CsGrenTimer::StartSound() {
     // Note there's a bug where soundupdate returns false for a new sample, even
     // though it's started.
     soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    this.playing_ = TRUE;
 }
 
 void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
@@ -390,6 +391,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
     primed_at_ = primed_at;
     expires_at_ = expires_at;
     flags_ = timer_flags;
+    playing_ = FALSE;
 
     if (this.flags_ & FL_GT_ADJPING) {
         float rtt = pstate_pred.client_ping;
@@ -401,7 +403,10 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         expires_at_ -= rtt / 1000;
     }
 
-    StartSound();
+    if (!CVARF(fo_grentimer_nostack))
+        StartSound();
+    else
+        UpdateSoundStack();
 }
 
 void CsGrenTimer::Stop() {
