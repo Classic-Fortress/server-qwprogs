@@ -395,7 +395,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
         float rtt = pstate_pred.client_ping;
         if (RewindFlagEnabled(REWIND_GRENADES))
             rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
-        else
+        else if ((this.flags_ & FL_GT_FULL_RTT) == 0)
             rtt /= 2;  // Not actually right, but preserve buggy behavior for
                        // now as people are used to it.
         expires_at_ -= rtt / 1000;
@@ -427,8 +427,9 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     switch (CVARF(fo_grentimer)) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
+        case 3: timer_flags = FL_GT_FULL_RTT;  // Intentional fall-through.
         // 2 [and something sane for anything we don't recognize.]
-        default: timer_flags = FL_GT_SOUND | FL_GT_ADJPING; break;
+        default: timer_flags |= FL_GT_SOUND | FL_GT_ADJPING; break;
     }
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
@@ -439,12 +440,10 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (debug_print_state) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
 
-        float expires_old = time + 3.8 - ping;
-        float expires_new = timer.expiry();
-        float expires_ideal = explodes_at - ping/2;
+        float expires_at = timer.expiry();
 
-        print(sprintf("primed_at=%0.2f explodes_at=%0.2f fuse=%0.2f\n",
-                      primed_at, explodes_at, explodes_at - primed_at));
+        print(sprintf("primed_at=%0.2f expires_at=%0.2f explodes_at=%0.2f tfuse=%0.2f\n",
+                      primed_at, expires_at, explodes_at, expires_at - primed_at));
     }
 }
 float HitflagThink() =

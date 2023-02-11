@@ -521,7 +521,8 @@ FO_Hud_Settings HudSettings;
 enumflags {
     FL_GT_SOUND,
     FL_GT_THROWN,
-    FL_GT_ADJPING
+    FL_GT_ADJPING,
+    FL_GT_FULL_RTT,
 };
 
 void(string identify) Hud_DrawIdentifyPanel;
