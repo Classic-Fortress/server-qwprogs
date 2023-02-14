@@ -497,6 +497,7 @@ void _Sync_ServerCommandFrame() {
         is_alive = 1;
 
     UpdateMinPing();
+    CsGrenTimer::UpdateSoundStack();
 }
 
 
