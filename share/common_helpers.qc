@@ -23,23 +23,3 @@ string TeamToString(float num)
     if (num == 4) return "Green";
     return " ";
 }
-float Bitfield_Add (float bf, float b) =
-{
-	bf = bf | b;
-	return bf;
-};
-
-float Bitfield_Remove (float bf, float b) =
-{
-	bf = bf - (bf & b);
-	return bf;
-};
-
-float Bitfield_Contains (float bf, float b) =
-{
-	if (bf & b)
-		return  1;
-	else 	
-		return 0;
-
-};										

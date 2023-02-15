@@ -135,7 +135,7 @@ void FO_LoadDefaultSettings()
     CVARF(fo_hittext_friendly) = 0;
     CVARS(fo_hittext_colour) = "1 1 1";
     CVARS(fo_hittext_colour2) = "1 0 1";
-    CVARS(fo_hittext_colour3) = "1 0 0";								
+    CVARS(fo_hittext_colour3) = "1 0 0";
 }
 
 void FO_LoadSettings()

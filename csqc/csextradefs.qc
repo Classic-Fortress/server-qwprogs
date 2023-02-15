@@ -117,12 +117,10 @@ float zoomed_in;
 .float max_val;
 .float votecount;
 .float localmap;
-.float hittext_damage;
-.float target_armourless;
-.float target_friendly;
-.float hittext_duration;
-.float hittext_speed;
-.float hittext_alpha;
+
+.string hittext_str;
+.float hittext_hitflags;
+.float hittext_expires;
 
 void () SUB_Null = {
 };
