@@ -6,8 +6,6 @@ void FO_Hud_Editor_List_Panels();
 void FO_Hud_Editor_Print_Panel_Setting(string, string setting);
 void FO_Hud_Editor_Set_Panel_Setting(string, string setting, string value);
 void Hud_WriteCfg(string path);
-void FO_LoadSettings();
-void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
 void StopGrenTimers();
 float IsValidToUseGrenades();
@@ -104,7 +102,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercvar("fo_menu_option_+", "=");
 
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
-    FO_LoadSettings();
 
     MenuPanel = getHudPanel(HUDP_MENU);
 
@@ -462,8 +459,7 @@ float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
     return 0;
 }
 
-void CSQC_Shutdown() = {
-    FO_WriteSettings();
+void CSQC_Shutdown() {
 }
 
 // We can query, but not set via an autocvar.
