@@ -18,7 +18,7 @@ void FO_Hud_Init();
 float InFluid(vector point);
 float CalculateWaterLevel();
 void PlayCSJumpSounds();
-void RenderHitTexts();					  
+void RenderHitTexts();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
@@ -153,7 +153,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
     renderscene();
     TFxRenderGrenadeTimers();
-	RenderHitTexts();
+    RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
 
     perf_finish_sample(&frame_timing, fts);
