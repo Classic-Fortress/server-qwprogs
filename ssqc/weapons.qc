@@ -2569,6 +2569,9 @@ void () W_WeaponFrame = {
     float can_change_weapon = WeaponReady();
 
     // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
+    if (!IsSlotNull(self.queue_slot) && can_change_weapon)
+        W_ChangeWeaponSlot(self.queue_slot);
+
     if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
         can_change_weapon) {
         // slot 1-4 (or 1-7) binds
@@ -2586,9 +2589,6 @@ void () W_WeaponFrame = {
             W_ChangeWeaponSlot(slot);
         }
         self.impulse = 0;
-    } else if (!IsSlotNull(self.queue_slot) && can_change_weapon) {
-        // change slot if queue_slot has been set
-        W_ChangeWeaponSlot(self.queue_slot);
     }
 
     if (self.impulse == TF_CHANGETEAM) {
