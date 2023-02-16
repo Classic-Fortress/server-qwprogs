@@ -219,6 +219,18 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
     }
 }
 
+static string FormatCfgString(string line, string field, string value) {
+    line = strcat(line, "\n", field, ":", value);
+    return line;
+}
+
+static string FormatCfgVector(string line, string field, vector value)
+{
+    line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
+
+    return line;
+}
+
 string GetPanelString(string line, FO_Hud_Panel* panel)
 {
     string sn = panel->SaveName;

@@ -484,7 +484,7 @@ static void PlayHitSound(float hitflags) {
         if (HITFLAG(HEADSHOT))
             localsound(SND_HEADSHOT, CHAN_AUTO, 1);
         if (HITFLAG(NOARMOUR) && wantsnoarmoursound)
-            localsound(SND_HEADSHOT, CHAN_AUTO, 1);
+            localsound(SND_NOARMOUR, CHAN_AUTO, 1);
     }
 
     if (snd != "")
