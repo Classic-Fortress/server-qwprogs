@@ -650,6 +650,13 @@ float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 void WPP_Dump();
 
+static void WP_ChangeIfQueued() {
+    if (!IsSlotNull(pstate_pred.queue_slot)) {
+        WP_ChangeWeapon(pstate_pred.queue_slot);
+        pstate_pred.queue_slot = SlotNull;
+    }
+}
+
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
@@ -680,6 +687,8 @@ void WP_Impulse() {
 
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
+
+    WP_ChangeIfQueued();  // Might have something previously buffered.
 
     // Impulses that ARE held by attack_finished / reloading.
     match = TRUE;
@@ -729,11 +738,7 @@ void WP_Impulse() {
             break;
     }
 
-    if (!IsSlotNull(pstate_pred.queue_slot)) {
-        WP_ChangeWeapon(pstate_pred.queue_slot);
-        pstate_pred.queue_slot = SlotNull;
-    }
-
+    WP_ChangeIfQueued();  // Might have something newly buffered.
 
     if (match)
         pstate_pred.impulse = 0;
