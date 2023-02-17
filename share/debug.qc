@@ -30,15 +30,13 @@ inline string qc_prefix() {
 #define errors(fmt, ...) error(sprintf("%s:%d Error> " fmt, __FILE__, __LINE__))
 #define errorf(fmt, ...) error(sprintf("%s:%d Error> " fmt, __FILE__, __LINE__, __VA_ARGS__))
 
-#define _ASSERT_OP(_op, _invop, _fmt, _v1, _v2) \
-    if (!((_v1) _op (_v2))) \
-        errorf("Expected: %s " #_op " %s, but: " #_fmt " " #_invop " " #_fmt "\n", \
-               #_v1, #_v2, _v1, _v2)
+#define _ASSERT_OP(_op, _invop, _fmt, _val1, _v2) \
+    if (!((_val1) _op (_v2))) \
+        errorf("Expected: %s " #_op " %s, but: " #_fmt " " #_invop " " #_fmt "\n", #_val1, #_v2, _val1, _v2)
 
 #define __ASSERT_OP(_op, _invop, _fmt, _v1, _v2, __v1, __v2) \
     if (!((__v1) _op (__v2))) \
-        errorf("Expected: %s " #_op " %s, but: " #_fmt " " #_invop " " #_fmt "\n", \
-               #_v1, #_v2, __v1, __v2)
+        errorf("Expected: %s " #_op " %s, but: " #_fmt " " #_invop " " #_fmt "\n", #_v1, #_v2, __v1, __v2)
 
 #define ASSERTF_EQ(_v1, _v2) _ASSERT_OP(==, !=, %0.2f, _v1, _v2)
 #define ASSERTF_NE(_v1, _v2) _ASSERT_OP(!=, ==, %0.2f, _v1, _v2)

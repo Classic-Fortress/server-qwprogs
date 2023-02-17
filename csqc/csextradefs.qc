@@ -846,8 +846,6 @@ float player_class;
 float is_observer;
 float is_player;
 float is_alive;
-//float health;
-float oldhealth;
 float painfinished;
 vector thisorigin;
 float jump_counter;

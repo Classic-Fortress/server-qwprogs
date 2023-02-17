@@ -809,7 +809,7 @@ string settings_to_track_list[4] = {
     "al_max_remote_client_time_offset",
 };
 
-typedef struct setting_t {
+struct setting_t {
     string setting_name;
     string value;
 };

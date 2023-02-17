@@ -96,7 +96,7 @@ float(vector pos, float scan, float char, float down) mitem_tabs::item_keypress 
 {
 	local mitem ch;
 	local vector tpos = pos;
-	local vector sz;
+	local vector sz = '0 0 0';
 	local float result;
 
 	if (down && (scan == K_MOUSE1 || scan == K_MOUSE2 || scan == K_MOUSE3))
