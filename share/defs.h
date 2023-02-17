@@ -320,7 +320,7 @@ enum {
 /*======================================================*/
 
 // Opaque token that encapsulates slots for correctness.
-typedef struct { int id; } Slot;
+struct Slot { int id; };
 
 // Some of the toggleflags aren't used anymore, but the bits are still
 // there to provide compatability with old maps
@@ -403,7 +403,7 @@ typedef struct { int id; } Slot;
 #define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
 #define TF_NUM_SLOTS                4
 
-#define TF_CLASSMENU                5   // Brings up class menu
+// unused                           5
 // unused                           6
 // unused                           7
 // unused                           8
