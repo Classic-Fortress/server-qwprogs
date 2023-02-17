@@ -1323,7 +1323,7 @@ static float CanThrowGrenade(int gren_type) {
 }
 
 static void W_ThrowGren(float is_throw) {
-    if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES))
+    if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES) || getstatf(STAT_NOFIRE))
         return;
 
     if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
@@ -1366,6 +1366,9 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
 }
 
 void WP_Attack() {
+    if (getstatf(STAT_NOFIRE))
+        return;
+
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
     if (wi->predict_type == NO_PREDICT)
