@@ -17,7 +17,6 @@ defs.qc
 qw.qc
 debug.qc
 time.qc
-../share/defs.h
 ../share/physics.qc
 ../share/weapons.qc
 ../share/prediction.qc

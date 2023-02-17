@@ -458,7 +458,7 @@ void WP_ServerUpdate() {
 }
 
 static Slot InputToSlot(float input) {
-    Slot result = FO_SlotByInput(input);
+    Slot result = FO_SlotByInput(pstate_pred.playerclass, input);
     return result;
 }
 
