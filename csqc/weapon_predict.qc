@@ -422,13 +422,16 @@ inline FO_WeapInfo* WP_CurrentWeapon() {
     return SlotWI(CurrentSlot());
 }
 
-void Pred_Sound(SoundIndex snd, float vol = 1) {
-    if (snd == SND_NONE || !IsEffectFrame() || pstate_pred.tfstate & TFSTATE_FLASHED)
+void RawPred_Sound(SoundIndex snd, float vol = 1) {
+    if (snd == SND_NONE || pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
-    last_pred_sound = time;
-    setorigin(pred_sound_entity, pmove_org);
-    sound(pred_sound_entity, CHAN_WEAPON, Snd_Get(snd)->sound, vol, ATTN_NORM);
+    localsound(Snd_Get(snd)->sound, CHAN_WEAPON, vol);
+}
+
+void Pred_Sound(SoundIndex snd, float vol = 1) {
+    if (IsEffectFrame())
+        RawPred_Sound(snd, vol);
 }
 
 void PredProj_Sound(int proj_type, float vol = 1) {
@@ -1534,12 +1537,14 @@ void InitProjectileEnt(float sendflags) {
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
     float has_predicted = FALSE;
-    if (self.owner_entnum == pengine.player_entnum) {
+    if (PP_Enabled() && self.owner_entnum == pengine.player_entnum) {
         has_predicted = PredProjectile_MatchProjectile();
-        if (WP_Enabled() && !has_predicted &&
-            self.s_time > last_pred_sound + PP_EPS/2)
-            // Missing projectile implies we missed the local sound, patch it up.
-            PredProj_Sound(self.fpp.index);
+
+        // Either missed prediction, or not active.  We don't want to condition
+        // on effect frames here as this isn't predicted; stronger: if we missed
+        // the sound we probably missed an effect frame!
+        if (!has_predicted)
+            RawPred_Sound(FPP_Get(self.fpp.index)->snd);
     }
 
     if (!has_predicted) {
