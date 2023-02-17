@@ -79,8 +79,7 @@ void () TeamFortress_MOTD = {
             return;
         }
 
-        //TeamFortress_Alias("menu", TF_CLASSMENU, 0);
-        if(csqcactive) {
+        if (csqcactive) {
             TeamFortress_AliasString("menu", "fo_menu_special");
         } else {
             TeamFortress_AliasString("menu", "cmd menu");
