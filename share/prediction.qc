@@ -781,7 +781,7 @@ void Pred_Sound(SoundIndex snd, float vol = 1) {
     entity target = self;
     string wav = snd_types[snd].sound;
 
-    if (ClientPred_Enabled(self, CSQC_WEAP_PRED)) {
+    if (ClientPred_Enabled(self, CSQC_PROJ_PRED)) {
         target = self.predict_entity;
         setorigin(target, self.origin);
     }
