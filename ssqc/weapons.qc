@@ -2527,6 +2527,18 @@ void () W_WeaponFrame = {
         }
     }
 
+    if (self.impulse == TF_CLASSMENU && self.playerclass != PC_MEDIC) {
+        switch (self.playerclass) {
+            case PC_ENGINEER: Menu_Engineer(self); break;
+            case PC_SCOUT: Menu_Scout(); break;
+            case PC_SPY: Menu_Spy(self); break;
+            case PC_DEMOMAN: TeamFortress_DetpackMenu(); break;
+        }
+
+        self.impulse = 0;
+        return;
+    }
+
     if ((self.is_feigning) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
