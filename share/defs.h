@@ -403,7 +403,7 @@ struct Slot { int id; };
 #define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
 #define TF_NUM_SLOTS                4
 
-// unused                           5
+#define TF_CLASSMENU                5   // Brings up class menu
 // unused                           6
 // unused                           7
 // unused                           8
