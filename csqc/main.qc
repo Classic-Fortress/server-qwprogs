@@ -26,6 +26,8 @@ DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
 
+void ClientSettings_Check();
+
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
@@ -90,6 +92,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
+    registercommand("fo_settings_check");
 
     registercommand("vote_addmap");
     registercommand("vote_removemap");
@@ -123,6 +126,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
+    ClientSettings_Check();
     localcmd("menu_restart\n");
 }
 
@@ -238,6 +242,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
+            break;
+        case "fo_settings_check":
+            ClientSettings_Check();
             break;
         case "+fo_showscores":
             if (CVARF(fo_oldscoreboard) == 1)
@@ -580,4 +587,16 @@ void Perf_Status() {
             (float)min(hud_partial_timing.samples.count, hud_partial_timing.samples.max_count),
             to_precision(avg, prec), variance,
             to_precision(minv, prec), to_precision(maxv, prec));
+}
+
+void ClientSettings_Check() {
+    localcmd("cl_movespeedkey 1");
+    if (cvar("worker_count") == 0)
+        printf("ERROR: Please set `worker_count 4` to reduce stuttering!\n");
+
+    if (cvar("r_temporalscenecache") == 0)
+        printf("RECOMMENDED: Please set `r_temporalscenecache 1` to reduce stuttering!\n");
+    if (cvar("fo_grentimer") != 2)
+        printf("RECOMMEND: Setting `fo_grentimer 2` for ping correction.\n");
+    printf("Finished checking settings...\n");
 }
