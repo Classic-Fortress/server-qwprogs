@@ -965,7 +965,6 @@ void MP_SetSpeed() {
     // lower speeds.  Except for transitions where the maxspeed is reset.
     if (speed > last_set || fastest > speed) {
         last_set = speed;
-        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
 
         string spd = ftos(speed);
         localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");

@@ -1250,33 +1250,17 @@ void (entity p) TeamFortress_SetSpeed = {
     float tf;
     entity te;
 
-    stuffcmd(p, "cl_movespeedkey 1\n");
     if (p.tfstate & TFSTATE_CANT_MOVE) {
-#ifdef STOP_MOUSE_MOVEMENT
-        stuffcmd(p, "m_forward 0\n");
-        stuffcmd(p, "m_side 0\n");
-#endif
         p.velocity = '0 0 0';
-        if (!RewindFlagEnabled(REWIND_SETSPEED)) {
-            // maxspeed suffices for any modern client, delete these once
-            // tested in a few pugs.
-            stuffcmd(p, "cl_backspeed 0\n");
-            stuffcmd(p, "cl_forwardspeed 0\n");
-            stuffcmd(p, "cl_sidespeed 0\n");
-        }
         p.maxspeed = 0;
         return;
     }
-#ifdef STOP_MOUSE_MOVEMENT
-    else {
-        stuffcmd(p, "m_forward 1\n");
-        stuffcmd(p, "m_side 0.8\n");
-    }
-#endif
+
     if (p.playerclass == PC_UNDEFINED) {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
         p.maxspeed = 0;
+        stuffcmd(p, "cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500\n");
         return;
     }
 
