@@ -593,10 +593,11 @@ void ClientSettings_Check() {
     localcmd("cl_movespeedkey 1");
     if (cvar("worker_count") == 0)
         printf("ERROR: Please set `worker_count 4` to reduce stuttering!\n");
-
     if (cvar("r_temporalscenecache") == 0)
         printf("RECOMMENDED: Please set `r_temporalscenecache 1` to reduce stuttering!\n");
     if (cvar("fo_grentimer") != 2)
         printf("RECOMMEND: Setting `fo_grentimer 2` for ping correction.\n");
+    if (cvar("fo_hud_cache") != 1)
+        printf("ERROR: Please set `fo_hud_cache 1` to improve fps.\n");
     printf("Finished checking settings...\n");
 }
