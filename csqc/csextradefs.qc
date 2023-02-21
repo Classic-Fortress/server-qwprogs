@@ -520,7 +520,6 @@ enumflags {
     FL_GT_SOUND,
     FL_GT_THROWN,
     FL_GT_ADJPING,
-    FL_GT_FULL_RTT,
 };
 
 void(string identify) Hud_DrawIdentifyPanel;
@@ -706,7 +705,8 @@ void HRC_Render() {
     }
 }
 
-DEFCVAR_FLOAT(fo_grentimer_nostack, 0);
+DEFCVAR_FLOAT(fo_grentimer_ping_frac, 1);  // Fraction of ping to correct for.
+DEFCVAR_FLOAT(fo_grentimer_nostack, 0);    // When set, only play soonest timer.
 
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
