@@ -614,7 +614,7 @@ float HRC_NewFrame() {
     /* hud_render_cache.last_update = time; */
 
     if (!CVARF(fo_hud_cache) ||
-        fo_hud_menu_active || fo_hud_editor || showingscores ||
+        fo_hud_menu_active || fo_hud_editor ||
         getHudPanel(HUDP_MAP_MENU)->Display) {
         // Either explicitly disabled, or rendering a more complicated scene
         // like the editor for which we'll just display in place.
@@ -625,7 +625,6 @@ float HRC_NewFrame() {
     hud_render_cache.enabled = TRUE;
     return FALSE;
 }
-
 
 static Draw_Args* next_args() {
     float idx;
