@@ -858,12 +858,12 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel
 };
 
 enum {
-    SC_BLUE,
-    SC_RED,
-    SC_YELLOW,
-    SC_GREEN,
-    SC_SPECS,
-    NUM_SC = SC_SPECS,
+    SCT_BLUE,
+    SCT_RED,
+    SCT_YELLOW,
+    SCT_GREEN,
+    SCT_SPECS,
+    NUM_SCT,
 };
 
 struct FO_ScoreBoardTeam {
@@ -872,7 +872,7 @@ struct FO_ScoreBoardTeam {
 };
 
 struct FO_ScoreBoard {
-    FO_ScoreBoardTeam team[NUM_SC];
+    FO_ScoreBoardTeam team[NUM_SCT];
 };
 
 static FO_ScoreBoard score_board;
@@ -898,7 +898,7 @@ void drawShowScoresPanel(PanelID panelid, string text) {
 
     float i;
 
-    for (i = 0; i < NUM_SC; i++)
+    for (i = 0; i < NUM_SCT; i++)
         score_board.team[i].count = 0;
 
     sui_push_frame(position, [size.x, 1]);
@@ -917,7 +917,7 @@ void drawShowScoresPanel(PanelID panelid, string text) {
                 sbl_team_no -= 1;  // Maps to SC enum
                 break;
             default:
-                sbl_team_no = SC_SPECS;
+                sbl_team_no = SCT_SPECS;
                 break;
         }
 
@@ -943,7 +943,7 @@ void drawShowScoresPanel(PanelID panelid, string text) {
         sbl->ready = getplayerkeyfloat(i, "ready");
         sbl->chat = getplayerkeyfloat(i, "chat");
 
-        if (sbl_team_no == SC_SPECS) {
+        if (sbl_team_no == SCT_SPECS) {
             float spec = getplayerkeyfloat(i, "*spectator");
             sbl->team_no = (spec == 1) ? TEAM_SPECTATOR : TEAM_OBSERVER;
             sbl->classtext = (spec == 1) ? "Spectator" : "Observer";
@@ -956,7 +956,7 @@ void drawShowScoresPanel(PanelID panelid, string text) {
     vector yspacer = [0, 20];
     size_y = smalltext_y;
 
-    for (i = 0; i < NUM_SC; i++) {
+    for (i = 0; i < NUM_SCT; i++) {
         FO_ScoreBoardTeam* team = &score_board.team[i];
         if (!team->count)
             continue;
