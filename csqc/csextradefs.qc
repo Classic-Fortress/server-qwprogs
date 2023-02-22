@@ -794,7 +794,7 @@ class CsGrenTimer {
 };
 
 // scoreboard stuff
-typedef struct {
+struct FO_ScoreBoardLine{
     float ping;
     float pl;
     string classtext;
@@ -812,7 +812,7 @@ typedef struct {
     float damagetaken;
     float ready;
     float chat;
-} FO_ScoreBoardLine;
+};
 
 // fte maxclients is 255, right?
 #define FO_SCOREBOARDLINES_LENGTH 32
@@ -833,6 +833,12 @@ string FO_ScoreBoardColumns[] = {
     "dmgg",
     "dmgt"
 };
+
+struct {
+    string icon_ready;
+    string icon_chat;
+    string icon_afk;
+} FO_ScoreBoardAssets;
 
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);

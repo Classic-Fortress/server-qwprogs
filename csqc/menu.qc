@@ -1321,6 +1321,17 @@ void (float show) showVoteMenu = {
             _target.options[i].id = ++next_id; \
     } while (0)
 
+
+// Returns path if it exists, empty string otherwise.
+static string InitIfFileExists(string path) {
+    float filehandle = fopen(path, FILE_READ);
+    if (filehandle >= 0) {
+        fclose(filehandle);
+        return path;
+    }
+    return "";
+}
+
 void FO_Hud_Init() {
     float i;
     ASSERTD_EQ(Hud_Panels.length, HUDP_LAST - HUDP_FIRST + 1);
@@ -1355,5 +1366,9 @@ void FO_Hud_Init() {
     INIT_MENU_IDS(FO_MENU_ADMIN_TIMELIMIT);
     INIT_MENU_IDS(FO_MENU_ADMIN_FRAGLIMIT);
     INIT_MENU_IDS(FO_MENU_VOTE);
+
+    FO_ScoreBoardAssets.icon_ready = InitIfFileExists("textures/wad/icon_ready.png");
+    FO_ScoreBoardAssets.icon_chat = InitIfFileExists("textures/wad/icon_chat.png");
+    FO_ScoreBoardAssets.icon_afk = InitIfFileExists("textures/wad/icon_afk.png");
 }
 #undef INIT_MENU_IDS
