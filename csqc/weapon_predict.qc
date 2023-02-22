@@ -1130,7 +1130,13 @@ void FPP_Init(int fpp_type, entity proj) {
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
-DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
+DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");  // Radius ignored.
+
+static float HasLight(int fpp_type) {
+    if (!CVARF(r_rocketlight))
+        return FALSE;
+    return fpp_type == FPP_ROCKET || fpp_type == FPP_INCENDIARY;
+}
 
 .float trail_started;
 float PP_PredrawActive() {
@@ -1156,11 +1162,8 @@ float PP_PredrawActive() {
         self.oldorigin = self.origin;
     }
 
-#if 0 // TODO
-    if (self.modelflags & MF_ROCKET && CVARF(r_rocketlight)) {
-        dynamiclight_add(self.origin, 200, CVARS(r_rocketlight_color), 0);
-    }
-#endif
+    if (HasLight(self.fpp.index))
+        dynamiclight_add(self.origin, 200, stov(CVARS(r_rocketlight_color)));
 
     return PREDRAW_AUTOADD;
 }
