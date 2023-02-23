@@ -182,33 +182,32 @@ int TF_GREN_conv(int tf_gren) {
 
 struct FO_GrenInfo {
     int id;
-    string name;
+    string logname;
     string model;
     int skin;
     vector avelocity;
 
     // Automatically initialized below this line.
     float modelindex;
-    string logname;
 };
 
 FO_GrenInfo fo_grenades[] = {
-    { GREN_NORMAL,  "Grenade",    "hgren2.mdl",    0, '300 300 300',},
-    { GREN_CONC,    "Concussion", "hgren2.mdl",    1, '300 300 300'},
-    { GREN_BLAST,   "Blast",      "blastgren.mdl", 1, '300 300 300'},
-    { GREN_NAIL,    "Nail",       "biggren.mdl",   1, '0 300 0'},
-    { GREN_SHOCK,   "Shock",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_BURST,   "Burst",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_MIRV,    "Mirv",       "biggren.mdl",   0, '0 300 0'},
-    { GREN_NAPALM,  "Napalm",     "biggren.mdl",   2, '0 300 0'},
-    { GREN_FLARE,   "Flare",      "flare.mdl",     1, '300 300 300'},
-    { GREN_GAS,     "Gas",        "grenade2.mdl",  3, '300 300 300'},
-    { GREN_EMP,     "EMP",        "grenade2.mdl",  4, '300 300 300'},
-    { GREN_FLASH,   "Flash",      "flashgren.mdl", 0, '300 300 300'},
-    { GREN_CALTROP, "Caltrop",    "",              0, '300 300 300'},
-    { GREN_MIRVLET, "Mirvlet",    "grenade2.mdl",  1, '250 300 400'},
-    { GREN_RED,     "Red",        "grenade2.mdl",  1, '300 300 300'},
-    { GREN_PIPE,    "Pipe",       "grenade2.mdl",  2, '300 300 300'},
+    { GREN_NORMAL,  "normal",    "hgren2.mdl",    0, '300 300 300',},
+    { GREN_CONC,    "concussion", "hgren2.mdl",    1, '300 300 300'},
+    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, '300 300 300'},
+    { GREN_NAIL,    "nail",       "biggren.mdl",   1, '0 300 0'},
+    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_BURST,   "burst",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, '0 300 0'},
+    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, '0 300 0'},
+    { GREN_FLARE,   "flare",      "flare.mdl",     1, '300 300 300'},
+    { GREN_GAS,     "gas",        "grenade2.mdl",  3, '300 300 300'},
+    { GREN_EMP,     "emp",        "grenade2.mdl",  4, '300 300 300'},
+    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, '300 300 300'},
+    { GREN_CALTROP, "caltrop",    "",              0, '300 300 300'},
+    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, '250 300 400'},
+    { GREN_RED,     "gl",         "grenade2.mdl",  1, '300 300 300'},
+    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, '300 300 300'},
 };
 
 enum {
@@ -814,10 +813,8 @@ void FO_Weapons_Init() {
         FO_GrenInfo* gdesc = &fo_grenades[i];
         ASSERTD_EQ(GREN_FIRST + i, gdesc->id);
 
-        if (gdesc->name != "") {
-            gdesc->name = strcat(gdesc->name, " grenade");
-            gdesc->logname = strcat(strtolower(gdesc->name), "grenade");
-        }
+        if (i < GREN_RED)
+            gdesc->logname = strcat(strtolower(gdesc->logname), "grenade");
 
         if (gdesc->model != "") {
             gdesc->model = strcat("progs/", gdesc->model);
