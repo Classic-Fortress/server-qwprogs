@@ -95,7 +95,7 @@ string (float weapon) GetWeaponName = {
     if (weapon >= 1 && weapon <= WEAP_LAST) {
         string name = FO_GetWeapName(weapon);
         name = strtolower(name);
-        name = strreplace(name, " ", "");
+        name = strreplace(" ", "", name);
         return name;
     }
 
