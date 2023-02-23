@@ -657,14 +657,34 @@ void (vector position, vector size, string val, vector textcolour, float alpha
     sui_text(position, size, val, textcolour, 1, 0);
 };
 
-vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel
-    , float padding, vector columnColour) drawShowScoresTeamPanel = {
+enum {
+    SCT_BLUE,
+    SCT_RED,
+    SCT_YELLOW,
+    SCT_GREEN,
+    SCT_SPECS,
+    NUM_SCT,
+};
+
+struct FO_ScoreBoardTeam {
+    FO_ScoreBoardLine lines[FO_SCOREBOARDLINES_LENGTH];
+    int count;
+};
+
+struct FO_ScoreBoard {
+    FO_ScoreBoardTeam team[NUM_SCT];
+};
+
+static FO_ScoreBoard score_board;
+
+vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
+                                float padding, vector columnColour) {
     vector textcolour = MENU_TEXT_1;
     vector smalltext = MENU_TEXT_SMALL * panel.Scale;
     vector yspacer = [0, 20];
     vector position = [0, 0];
     vector size = getPanelFillSize(panel);
-    
+
     position = [0,0];
     sui_set_align([SUI_ALIGN_START, SUI_ALIGN_START]);
     size = [size_x, smalltext_y];
@@ -677,7 +697,8 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel
 
     float classspace = strlen("class") * smalltext.x;
 
-    for (float i = 0; i < FO_ScoreBoardColumns.length; i++) {
+    FO_ScoreBoardLine* lines = &team->lines;
+    for (float i = 0; i < team->count; i++) {
         string colname = FO_ScoreBoardColumns[i];
         if (lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER) {
             switch (colname) {
@@ -857,25 +878,6 @@ vector (FO_ScoreBoardLine *lines, FO_Hud_Panel *panel
     return position;
 };
 
-enum {
-    SCT_BLUE,
-    SCT_RED,
-    SCT_YELLOW,
-    SCT_GREEN,
-    SCT_SPECS,
-    NUM_SCT,
-};
-
-struct FO_ScoreBoardTeam {
-    FO_ScoreBoardLine lines[FO_SCOREBOARDLINES_LENGTH];
-    int count;
-};
-
-struct FO_ScoreBoard {
-    FO_ScoreBoardTeam team[NUM_SCT];
-};
-
-static FO_ScoreBoard score_board;
 
 void drawShowScoresPanel(PanelID panelid, string text) {
     FO_Hud_Panel* panel = getHudPanel(panelid);
@@ -963,8 +965,8 @@ void drawShowScoresPanel(PanelID panelid, string text) {
 
         position += yspacer;
         sui_push_frame(position, size);
-        position = drawShowScoresTeamPanel(&team->lines, panel,
-                padding, TEXT_TEAM_COLOUR[i]);
+        position = drawShowScoresTeamPanel(panel, team, padding,
+                                           TEXT_TEAM_COLOUR[i]);
         sbCount++;
     }
 
