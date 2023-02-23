@@ -698,7 +698,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
     float classspace = strlen("class") * smalltext.x;
 
     FO_ScoreBoardLine* lines = &team->lines;
-    for (float i = 0; i < team->count; i++) {
+    for (float i = 0; i < FO_ScoreBoardColumns.length; i++) {
         string colname = FO_ScoreBoardColumns[i];
         if (lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER) {
             switch (colname) {
@@ -723,7 +723,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
 
     position = [0, smalltext.y];
     float lineCount = 1;
-    for (float i = 0; i < FO_SCOREBOARDLINES_LENGTH; i++) {
+    for (float i = 0; i < team->count; i++) {
         string name = lines[i].name;
         if (!name)
             continue;
