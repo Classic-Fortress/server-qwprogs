@@ -556,9 +556,9 @@ struct {
     PanelID active_panel;
     float last_update;
     int draw_direct;
-    Draw_Args draw_cache[255];
+    Draw_Args draw_cache[1000];
     int draw_count;
-    float free_cache[255];
+    float free_cache[1000];
     int free_count;
 } hud_render_cache;
 
