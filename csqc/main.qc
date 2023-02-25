@@ -45,6 +45,15 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
+    registercommand("+zel1");
+    registercommand("-zel1");
+    registercommand("+zel2");
+    registercommand("-zel2");
+    registercommand("+zel3");
+    registercommand("-zel3");
+    registercommand("+zel4");
+    registercommand("-zel4");
+
     registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
@@ -166,6 +175,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "+zel1":
+            input_slots |= SLOT1;
+            break;
+        case "-zel1":
+            input_slots &= ~SLOT1;
+            break;
+        case "+zel2":
+            input_slots |= SLOT2;
+            break;
+        case "-zel2":
+            input_slots &= ~SLOT2;
+            break;
+        case "+zel3":
+            input_slots |= SLOT3;
+            break;
+        case "-zel3":
+            input_slots &= ~SLOT3;
+            break;
+        case "+zel4":
+            input_slots |= SLOT4;
+            break;
+        case "-zel4":
+            input_slots &= ~SLOT4;
+            break;
         case "login":
             FoLogin(argv(1));
             break;
@@ -426,6 +459,32 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 noref void CSQC_Input_Frame() {
+    local float changed_slots = input_slots ^ oldslots;
+    oldslots = input_slots;
+
+    local float slotdowns = changed_slots & input_buttons;
+    local float slotups = changed_slots & ~input_buttons;
+
+    if (input_slots)
+        input_buttons |= BUTTON0;
+
+    if (changed_slots & SLOT1) {
+        if (input_slots & SLOT1)
+            input_impulse = 1;
+        else
+
+    if ((changed_slots & SLOT2) && (input_slots & SLOT2))
+        input_impulse = 2;
+    if ((changed_slots & SLOT3) && (input_slots & SLOT3))
+        input_impulse = 3;
+    if ((changed_slots & SLOT4) && (input_slots & SLOT4))
+        input_impulse = 4;
+
+    /* if ((changed_slots & SLOT1) && !(input_buttons & SLOT1)) */
+    /* if ((changed_slots & SLOT2) && !(input_buttons & SLOT2)) */
+    /* if ((changed_slots & SLOT3) && !(input_buttons & SLOT3)) */
+    /* if ((changed_slots & SLOT4) && !(input_buttons & SLOT4)) */
+
     local float changed_buttons = input_buttons ^ oldbuttons;
     oldbuttons = input_buttons;
 

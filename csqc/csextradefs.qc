@@ -67,6 +67,11 @@ const vector PLAYER_MAXS = [16, 16, 32];
 
 #define MAP_MAX_CHARS 20
 
+#define SLOT1 1
+#define SLOT2 2
+#define SLOT3 4
+#define SLOT4 8
+
 .void() removefunc;
 .float owned_by;
 .string netname;
@@ -107,6 +112,8 @@ entity current_vote;
 string vote_list_filter;
 float oldbuttons;
 float zoomed_in;
+float input_slots;
+float oldslots;
 
 .string name;
 .string description;
@@ -793,6 +800,10 @@ class CsGrenTimer {
 
     static CsGrenTimer() GetLast { return last_; };
 };
+
+
+// slot selection history
+float slot_selection_history[10];
 
 // scoreboard stuff
 typedef struct {
