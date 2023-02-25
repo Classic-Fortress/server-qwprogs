@@ -1,10 +1,33 @@
 FortressOne Server
 ==================
 
-New features
-------
+New commands
+------------
 
----------------------------------
+* `fo_hud_cache 1` less resource intensive hud
+* `fo_hud_fps 60` set hud refresh rate
+* `fo_grentimer_ping_frac 1` fraction of ping to correct for
+* `fo_grentimer_nostack 0` when set, only play the oldest timer
+* `fo_fte_hud 0` completely replace Quake engine hud with FO hud
+* `fo_legacy_sbar 0` use oldschool Team Fortress status bar
+* `fo_oldscoreboard 0` use oldschool Quake scoreboard
+* `fo_adminrefresh 2` time in seconds for admin menu to refresh
+* `fo_wpp_beta 0` client side weapon/projectile prediction
+* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled. -1 defaults to 40.
+* `wpp_weap_predict -1` weapon prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `wpp_proj_predict -1` projectile prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `fo_client_sniper_sight 1` client side sniper dot
+* `cl_p2r` for old weapon impulses
+* `cl_r2g` for old weapon impulses
+* `r_pyrotrail 0`
+* `r_rockettrail 0`
+* `r_grenadetrail 0`
+* `wpp_phys_adv_ms 0`
+* `wpp_phys_local_adv_ms 0`
+* `wpp_setspeed 1`
+* `wpp_debug 1` bitfield 0,1,2,4,8 for debugging
+* `fo_phys_debug 1` bitfield 0,1 for debugging
+
 * Added in `fo_hittext_friendly 0` - setting to 1 shows text when damaging friendlys
 * Added in `fo_hittext_colour3 "1 0 0"` - colour of friendly hittext if fo_hittext_friendly is set to 1 (rgb 0-1)
 
@@ -105,12 +128,12 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
-* CSQC - fo_grentimervolume
-* CSQC - fo_jumpvolume
+* CSQC - fo_grentimervolume 1
+* CSQC - fo_jumpvolume 1
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
-* CSQC - fo_csjumpsounds
+* CSQC - fo_csjumpsounds 1 for client side jump sounds (not delayed by ping)
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
 * Server option for duelmode to allow draws on a double-ko `localinfo duel_allow_draw 1`/`localinfo dad 1` (default 1)
