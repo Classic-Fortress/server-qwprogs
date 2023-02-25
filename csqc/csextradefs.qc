@@ -38,8 +38,13 @@ vector TEXT_TEAM_COLOUR[] = {
     MENU_TEXT_BLUE_FO,
     MENU_TEXT_RED_FO,
     MENU_TEXT_YELLOW_FO,
-    MENU_TEXT_GREEN_FO
+    MENU_TEXT_GREEN_FO,
+    MENU_TEXT_SPEC_FO,
 };
+
+const float DEFAULT_VIEWHEIGHT = 22;
+const vector PLAYER_MINS = [-16, -16, -24];
+const vector PLAYER_MAXS = [16, 16, 32];
 
 #define FO_MENU_FLAG_USE_MOUSE 1
 #define FO_MENU_FLAG_CENTER 2
@@ -63,6 +68,7 @@ vector TEXT_TEAM_COLOUR[] = {
 
 #define MAP_MAX_CHARS 20
 
+.void() removefunc;
 .float owned_by;
 .string netname;
 .float playerid;
@@ -113,16 +119,9 @@ float zoomed_in;
 .float votecount;
 .float localmap;
 
-float(string) GetDrawPanel;
-void(string id, string identify) Hud_DrawIdentifyPanel;
-void (string panelid, float display, string text) Hud_DrawHudOptionsPanel;
-void (string id, float playerclass) Hud_DrawClassInfoPanel;
-void (string panelid) Hud_DrawFlagStatusBar;
-void (string panelid) Hud_DrawTeamScorePanel;
-void (string panelid) Hud_DrawMapMenuPanel;
-float(string id, vector pos, vector size, float alpha, float enabled) hud_panel;
-vector(float panelid) getPosition;
-vector(float panelid) getFillSize;
+.string hittext_str;
+.float hittext_hitflags;
+.float hittext_expires;
 
 void () SUB_Null = {
 };
@@ -296,7 +295,6 @@ typedef struct {
     float ScannerTFItemsFlags;
     // sniper
     float SniperDam;
-    float SniperMax;
     // demoman
     float IsDetpacking;
     float DetpackLeft;
@@ -372,7 +370,6 @@ typedef struct
 
 MouseStruct Mouse;
 MouseStruct PrevMouse;
-float MouseDown;
 
 typedef struct {
     string filename;
@@ -407,9 +404,93 @@ FO_TeamScores TS;
 
 float TeamScore[4];
 
+enum PanelID:float {
+    HUDP_INVALID = 0,  // Reserve 0 so we can recognize an uninit menu
+    HUDP_FIRST = 100,
+    HUDP_TEAMSCORE = HUDP_FIRST,  // We put this first so that we open to below.
+    HUDP_MAP_MENU,    // We put these up front so that they are
+    HUDP_SHOWSCORES,  // rendered under other elements when editing
+    HUDP_MENU,
+    HUDP_MENU_HINT,
+    HUDP_CLIPSIZE,
+    HUDP_FRAGSTREAK,
+    HUDP_CAPS,
+    HUDP_GREN1,
+    HUDP_GREN2,
+    HUDP_SPECIAL,
+    HUDP_IDENTIFY,
+    HUDP_FLAGINFO,
+    HUDP_GRENTIMER,
+    HUDP_MOTD,
+    HUDP_GAME_MODE,
+    HUDP_READY,
+    HUDP_HEALTH,
+    HUDP_FACE,
+    HUDP_AMMO,
+    HUDP_AMMOICON,
+    HUDP_ARMOUR,
+    HUDP_ARMOURICON,
+    HUDP_INVSHELLS,
+    HUDP_INVNAILS,
+    HUDP_INVROCKETS,
+    HUDP_INVCELLS,
+    HUDP_GAMECLOCK,
+    HUDP_QUAD,
+    HUDP_PENT,
+    HUDP_RING,
+    HUDP_SUIT,
+    HUDP_KEY1,
+    HUDP_KEY2,
+    HUDP_RUNE1,
+    HUDP_RUNE2,
+    HUDP_RUNE3,
+    HUDP_RUNE4,
+    HUDP_GUN2,
+    HUDP_GUN3,
+    HUDP_GUN4,
+    HUDP_GUN5,
+    HUDP_GUN6,
+    HUDP_GUN7,
+    HUDP_GUN8,
+    HUDP_SPEED,
+    HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
+    HUDP_LAST = HUDP_OPTIONS,
+
+    HUDP_GAP = 500,  // Just to make ids larger than this distinguishable.
+
+    HUDP_OPTION_LIST,
+    HUDP_OPTION_PANEL,
+
+    HUDB_FIRST,
+    HUDB_MAP_VOTE,
+    HUDB_MAP_CHANGE,
+    HUDB_OPTION_LIST,
+    HUDB_OPTION_SCROLLUP,
+    HUDB_OPTION_SCROLLDOWN,
+    HUDB_LAST,
+
+    HUDE_FIRST,
+    HUDE_OPTION_SCALE_SLIDER,
+    HUDE_OPTION_TEXTSCALE_SLIDER,
+    HUDE_OPTION_SCALE_SCROLL,
+    HUDE_OPTION_TEXTALIGN_TOGGLE,
+    HUDE_OPTION_SHOWHIDE_TOGGLE,
+    HUDE_OPTION_HSNAP_TOGGLE,
+    HUDE_OPTION_VSNAP_TOGGLE,
+    HUDE_OPTION_SHOWALL_TOGGLE,
+    HUDE_LAST,
+
+    HUDL_FIRST = HUDB_LAST,
+    HUDL_OPTION_BASE = 1000,
+    HUDL_MAP_BASE = 2000,
+
+    HUD_LAST = 10000,
+};
+
 // hud stuff
 typedef struct {
-    string id;
+    PanelID id;
+    string SaveName;
     string Name;
     vector Position;
     vector FillSize;
@@ -417,7 +498,8 @@ typedef struct {
     float TextScale;
     float Display;
     float Orientation;
-    void(string panelid, float display, string text) drawPanel;
+    float System;  // System panel display is not user managed (e.g. vote menu)
+    void(float display, string text) drawPanel;
     string() getValue;
     float Style;
     float Snap;
@@ -426,7 +508,6 @@ typedef struct {
 } FO_Hud_Panel;
 
 FO_Hud_Panel NullPanel;
-FO_Hud_Panel DrawPanel;
 FO_Hud_Panel NewPanel;
 FO_Hud_Panel* MenuPanel;
 float Editor_SelectedPanel_Index;
@@ -436,17 +517,285 @@ typedef struct {
 } FO_Hud_Settings;
 FO_Hud_Settings HudSettings;
 
-typedef struct {
-    float grentype;
-    float expires;
-    float icon_index;
-    float alpha;
-} FO_Hud_Grentimer;
+enumflags {
+    FL_GT_SOUND,
+    FL_GT_THROWN,
+    FL_GT_ADJPING,
+};
 
-FO_Hud_Grentimer FO_Hud_Grentimers[5];
+void(string identify) Hud_DrawIdentifyPanel;
+void (float display, string text) Hud_DrawHudOptionsPanel;
+void (float playerclass) Hud_DrawClassInfoPanel;
+void () Hud_DrawFlagStatusBar;
+void () Hud_DrawTeamScorePanel;
+void () Hud_DrawMapMenuPanel;
+float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel;
+vector(PanelID) getPosition;
+vector(PanelID) getFillSize;
+
+enum {
+    D_skip,
+    D_drawpic,
+    D_drawstring,
+    D_drawfill,
+};
+
+struct Draw_Args {
+    PanelID id;
+    int type;
+    vector pos;
+    string s_arg;
+    vector size;
+    vector rgb;
+    float alpha;
+    float drawflag;
+};
+
+struct {
+    int enabled;
+    PanelID active_panel;
+    float last_update;
+    int draw_direct;
+    Draw_Args draw_cache[1000];
+    int draw_count;
+    float free_cache[1000];
+    int free_count;
+} hud_render_cache;
+
+DEFCVAR_FLOAT(fo_hud_cache, 1)
+DEFCVAR_FLOAT(fo_hud_fps, 60)
+
+enum {
+    HRC_NF_NO_UPDATE = 0,
+    HRC_NF_FULL,
+    HRC_NF_PARTIAL,
+};
+
+inline float HRC_fps_time() { return 1/max(min(CVARF(fo_hud_fps), 77 * 2), 30); }
+
+void HRC_Invalidate(PanelID panel) {
+    float i, j;
+
+    for (i = 0; i < hud_render_cache.draw_count; i++) {
+        if (hud_render_cache.draw_cache[i].id == panel + 1) {
+            hud_render_cache.draw_cache[i].id = 0;
+            hud_render_cache.draw_cache[i].type = D_skip;
+            hud_render_cache.free_cache[hud_render_cache.free_count++] = i;
+        }
+    }
+
+    // Ascending order sort so that we don't end up inverting rendering order
+    // when pulling from the free-list.
+    for (i = 0; i < hud_render_cache.free_count; i++)
+        for (j = i + 1; j < hud_render_cache.free_count; j++)
+            if (hud_render_cache.free_cache[i] < hud_render_cache.free_cache[j]) {
+                float tmp = hud_render_cache.free_cache[i];
+                hud_render_cache.free_cache[i] = hud_render_cache.free_cache[j];
+                hud_render_cache.free_cache[j] = tmp;
+            }
+}
+
+void HRC_InvalidateAll() {
+    hud_render_cache.draw_count = 0;
+    hud_render_cache.free_count = 0;
+}
+
+void HRC_SetActive(PanelID panel) {
+    hud_render_cache.active_panel = panel;
+}
+
+FO_Hud_Panel* getHudPanel(PanelID panelid);
+
+// Returns true if HUD should be re-rendered this frame.
+float HRC_NewFrame() {
+    // Rate limit even the more complicated enable checks.
+    /* if (time < hud_render_cache.last_update + HRC_fps_time()) */
+    /*     return !hud_render_cache.enabled; */
+    /* hud_render_cache.last_update = time; */
+
+    if (!CVARF(fo_hud_cache) ||
+        fo_hud_menu_active || fo_hud_editor ||
+        getHudPanel(HUDP_MAP_MENU)->Display) {
+        // Either explicitly disabled, or rendering a more complicated scene
+        // like the editor for which we'll just display in place.
+        hud_render_cache.enabled = FALSE;
+        return TRUE;
+    }
+
+    hud_render_cache.enabled = TRUE;
+    return FALSE;
+}
+
+static Draw_Args* next_args() {
+    float idx;
+    if (hud_render_cache.free_count)
+        idx = hud_render_cache.free_cache[--hud_render_cache.free_count];
+    else
+        idx = hud_render_cache.draw_count++;
+
+    Draw_Args* result = &hud_render_cache.draw_cache[idx];
+    result->id = hud_render_cache.active_panel + 1;  // 1-based, 0 => free.
+    return result;
+}
+
+void HRC_drawpic(vector pos, string pic, vector size, vector rgb='1 1 1',
+                float alpha=1, float drawflag=0) {
+    if (pic == "")
+        return;
+    if (!hud_render_cache.enabled) {
+        drawpic(pos, pic, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawpic;
+        args->pos = pos;
+        args->s_arg = pic;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawstring(vector pos, string text, vector size, vector rgb='1 1 1',
+                   float alpha=1, float drawflag=0) {
+    if (text == "")
+        return;
+    if (!hud_render_cache.enabled) {
+        drawstring(pos, text, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawstring;
+        args->pos = pos;
+        args->s_arg = text;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_drawfill(vector pos, vector size, vector rgb,
+                   float alpha=1, float drawflag=0) {
+    if (!hud_render_cache.enabled) {
+        drawfill(pos, size, rgb, alpha, drawflag);
+    } else {
+        Draw_Args* args = next_args();
+        args->type = D_drawfill;
+        args->pos = pos;
+        args->size = size;
+        args->rgb = rgb;
+        args->alpha = alpha;
+        args->drawflag = drawflag;
+    }
+}
+
+void HRC_Render() {
+    if (!hud_render_cache.enabled)
+        return;
+
+    for (int i = 0; i < hud_render_cache.draw_count; i++) {
+        Draw_Args* args = &hud_render_cache.draw_cache[i];
+        if (args->type == D_skip)
+            continue;
+        else if (args->type == D_drawpic)
+            drawpic(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawstring)
+            drawstring(args->pos, args->s_arg, args->size, args->rgb, args->alpha, args->drawflag);
+        else if (args->type == D_drawfill)
+            drawfill(args->pos, args->size, args->rgb, args->alpha, args->drawflag);
+    }
+}
+
+DEFCVAR_FLOAT(fo_grentimer_ping_frac, 1);  // Fraction of ping to correct for.
+DEFCVAR_FLOAT(fo_grentimer_nostack, 0);    // When set, only play soonest timer.
+
+class CsGrenTimer;
+CsGrenTimer grentimers[NUM_GREN_TIMERS];
+
+class CsGrenTimer {
+    float index_;
+    float primed_at_;
+    float expires_at_;
+    float flags_;
+    float grentype_;
+    float playing_;
+
+    nonvirtual float() index { return index_; };
+    nonvirtual float() active { return expires_at_ > time; };
+    nonvirtual float() expiry { return expires_at_; };
+    nonvirtual float() grentype { return grentype_; };
+    nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
+    nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
+    nonvirtual float() sound_offset {
+        float offset = max(3.8 - (expires_at_ - time), 0);
+        return offset;
+    };
+
+    nonvirtual void(float primed_at, float expires_at,
+                    float grentype, float timer_flags) Set;
+    nonvirtual void() Stop;
+
+    nonvirtual void() PauseSound {
+        playing_ = FALSE;
+        if (flags_ & FL_GT_SOUND)  // -volume => stop.
+            soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);
+    };
+    nonvirtual void() StartSound;
+
+    static float next_index_;
+    static CsGrenTimer last_;
+
+    static void() Init {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i] = spawn(CsGrenTimer, index_: i);
+    };
+
+    static void() StopAll {
+        for (float i = 0; i < grentimers.length; i++)
+            grentimers[i].Stop();
+    };
+
+    static CsGrenTimer() GetNext {
+        next_index_ = (next_index_ + 1) % grentimers.length;
+        last_ = grentimers[next_index_];
+        return last_;
+    };
+
+    static void() SyncPause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active())
+                grentimers[i].PauseSound();
+    };
+
+    static void() SyncUnpause {
+        // Time froze, but sound kept running, realign.
+        for (float i = 0; i < grentimers.length; i++)
+            if (grentimers[i].active())
+                grentimers[i].StartSound();
+    };
+
+    static void() UpdateSoundStack {
+        if (!CVARF(fo_grentimer_nostack))
+            return;
+
+        CsGrenTimer best = __NULL__;
+
+        for (float i = 0; i < grentimers.length; i++) {
+            CsGrenTimer c = grentimers[i];
+            if (c.active() && (best == __NULL__ || c.expiry() < best.expiry()))
+                best = c;
+        }
+
+        if (best != __NULL__ && !best.playing_)
+            best.StartSound();
+    };
+
+    static CsGrenTimer() GetLast { return last_; };
+};
 
 // scoreboard stuff
-typedef struct {
+struct FO_ScoreBoardLine{
     float ping;
     float pl;
     string classtext;
@@ -464,7 +813,7 @@ typedef struct {
     float damagetaken;
     float ready;
     float chat;
-} FO_ScoreBoardLine;
+};
 
 // fte maxclients is 255, right?
 #define FO_SCOREBOARDLINES_LENGTH 32
@@ -486,62 +835,28 @@ string FO_ScoreBoardColumns[] = {
     "dmgt"
 };
 
-enum {
-    HUD_PANEL_HUDOPTIONS,
-    HUD_PANEL_CLIPSIZE,
-    HUD_PANEL_FRAGSTREAK,
-    HUD_PANEL_CAPS,
-    HUD_PANEL_GREN1,
-    HUD_PANEL_GREN2,
-    HUD_PANEL_PLAYERCLASS,
-    HUD_PANEL_IDENTIFY,
-    HUD_PANEL_FLAGINFO,
-    HUD_PANEL_GRENTIMER,
-    HUD_PANEL_MENU,
-    HUD_PANEL_MOTD,
-    HUD_PANEL_MENU_HINT,
-    HUD_PANEL_GAME_MODE,
-    HUD_PANEL_READY,
-    HUD_PANEL_SHOWSCORES,
-    HUD_PANEL_TEAM_SCORE,
-    HUD_PANEL_MAP_MENU,
-    HUD_PANEL_HEALTH,
-    HUD_PANEL_FACE,
-    HUD_PANEL_AMMO,
-    HUD_PANEL_AMMO_ICON,
-    HUD_PANEL_ARMOUR,
-    HUD_PANEL_ARMOUR_ICON,
-    HUD_PANEL_INV_SHELLS,
-    HUD_PANEL_INV_NAILS,
-    HUD_PANEL_INV_ROCKETS,
-    HUD_PANEL_INV_CELLS,
-};
-
-#define FOCMD_OLDSCOREBOARD "fo_oldscoreboard"
-#define FOCMD_GRENTIMER "fo_grentimer"
-#define FOCMD_GRENTIMERSOUND "fo_grentimersound"
-#define FOCMD_GRENTIMERVOLUME "fo_grentimervolume"
-#define FOCMD_JUMPVOLUME "fo_jumpvolume"
-#define FOCMD_ADMIN_MENU_UPDATE_TIME "fo_adminrefresh"
+struct {
+    string icon_ready;
+    string icon_chat;
+    string icon_afk;
+} FO_ScoreBoardAssets;
 
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
 
 float team_no;
+float all_time;
 float is_spectator;
 float player_class;
 float is_observer;
-//float health;
-float oldhealth;
+float is_player;
+float is_alive;
 float painfinished;
 vector thisorigin;
-float speed;
 float jump_counter;
 float grentimer_waiting;
-float jumpsound_cooldown;
-float last_pmove_onground;
-float last_vel_z;
+float last_death_time;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
@@ -560,3 +875,5 @@ string(string s) strtrim = #0:strtrim; /*
 		Trims the whitespace from the start+end of the string. */
 float(float playernum, string keyname, optional float assumevalue) getplayerkeyfloat = #0:getplayerkeyfloat; /*
 		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */
+float(string key, optional float assumevalue) serverkeyfloat = #0:serverkeyfloat; /*
+		Version of serverkey that returns the value as a float (which avoids tempstrings). */

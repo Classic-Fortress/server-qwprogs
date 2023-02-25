@@ -3,42 +3,57 @@ void Hud_Draw(float width, float height);
 void FO_Hud_Editor_LoadSettings(string);
 void FO_Hud_Editor_LoadDefaultSettings();
 void FO_Hud_Editor_List_Panels();
-void FO_Hud_Editor_Show_Panel(string panelid);
-void FO_Hud_Editor_Print_Panel_Setting(string panelid, string setting);
-void FO_Hud_Editor_Set_Panel_Setting(string panelid, string setting, string value);
+void FO_Hud_Editor_Print_Panel_Setting(string, string setting);
+void FO_Hud_Editor_Set_Panel_Setting(string, string setting, string value);
 void Hud_WriteCfg(string path);
-void FO_LoadSettings();
-void FO_WriteSettings();
 void AddGrenTimer(float grentype, float offset);
-void ApplyTransparencyToGrenTimer();
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
+void FoLogin(string token);
+void Perf_Status();
+void FO_Hud_Init();
+float InFluid(vector point);
+float CalculateWaterLevel();
+void PlayCSJumpSounds();
+void RenderHitTexts();
 
 void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
+
+DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
+DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
+
+void ClientSettings_Check();
 
 noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     print("CSQC Started\n");
 
     //    precache_model("progs/weapons/v_rock.mdl");
 
-//     for (float i = 0; i < HudIcons.length; i++) {
-//         precache_pic(HudIcons[i].icon);
-//     }
+    //     for (float i = 0; i < HudIcons.length; i++) {
+    //         precache_pic(HudIcons[i].icon);
+    //     }
 
+    INIT_PERF_SAMPLER(frame_timing);
+    INIT_PERF_SAMPLER(hud_timing);
+    INIT_PERF_SAMPLER(hud_partial_timing);
+
+    FO_Hud_Init();
+    FO_Weapons_Init();
+    Predict_InitDefaultConfig();
+    FO_PP_Init();       // Some of this is always used by custom projectiles.
+    CsGrenTimer::Init();
+
+    registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
     registercommand("fo_hud_reset");
     registercommand("fo_hud");
     registercommand("fo_hud_save");
     registercommand("fo_hud_load");
-
-    registercvar(FOCMD_GRENTIMER, "1");
-    registercvar(FOCMD_GRENTIMERSOUND, "grentimer.wav");
-    registercvar(FOCMD_GRENTIMERVOLUME, "1");
-    registercvar(FOCMD_JUMPVOLUME, "1");
 
     registercommand("fo_menu_game");
     registercommand("fo_main_menu");
@@ -51,7 +66,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
-    registercvar(FOCMD_ADMIN_MENU_UPDATE_TIME, "2");
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
@@ -78,20 +92,22 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
+    registercommand("fo_settings_check");
 
     registercommand("vote_addmap");
     registercommand("vote_removemap");
-    registercvar("fo_hud_idle_alpha", "0.3");
+
+    registercommand("wpp_status");
+    registercommand("perf_status");
     for(float i = 0; i < MENU_OPTION.length - 1; i++) {
         registercvar(strcat("fo_menu_option_",MENU_OPTION[i]), MENU_OPTION[i]);
     }
     registercvar("fo_menu_option_+", "=");
 
     FO_Hud_Editor_LoadSettings(FO_HUD_CONFIG_PATH);
-    FO_LoadSettings();
-    
-    MenuPanel = getAnyHudPanelByNamePointer("menu");
-    
+
+    MenuPanel = getHudPanel(HUDP_MENU);
+
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
@@ -104,63 +120,47 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_offset = 0;
     current_vote = world;
     vote_list_filter = "";
-    MouseDown = 0;
+
+    TF_Init();
 };
 
 noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
+    ClientSettings_Check();
     localcmd("menu_restart\n");
 }
 
+void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
+
+DEFCVAR_FLOAT(fov, 90);
+
 noref void(float width, float height, float menushown) CSQC_UpdateView = {
+    float fts = perf_start_sample(&frame_timing);
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
+
+    if (zoomed_in)
+        setviewprop(VF_AFOV, CVARF(fov)/3);
 
     // Draw original sbar, viewsize honoured automatically.
     if (!CVARF(fo_fte_hud) || CVARF(fo_legacy_sbar))
         setproperty(VF_DRAWENGINESBAR, 1);
 
-    addentities((intermission?0:MASK_VIEWMODEL)|MASK_ENGINE); 		// add entities with these rendermask field var's to our view
+    float mask = MASK_ENGINE;
+    if (!intermission)
+        mask |= WPP_ViewModelMask();
+    addentities(mask);
 
     renderscene();
+    TFxRenderGrenadeTimers();
+    RenderHitTexts();
+    Hud_UpdateView(width, height, menushown, fts);
 
-    ScreenSize = [width, height, menushown];
-    SBAR.Hint = "";
-    sui_begin(width, height);
-    Menu_Draw(width, height, menushown);
-    Hud_Draw(width, height);
-    sui_end();
+    perf_finish_sample(&frame_timing, fts);
 
-    if (CVARF(fo_csjumpsounds)) {
-        local float health = getstatf(STAT_HEALTH);
-        local float paused = getstatf(STAT_PAUSED);
-
-        if (pmove_onground && health > 0 && !paused) {
-            // jumping
-            getinputstate(clientcommandframe); // without this the input buttons are innacurate
-            if ((input_buttons & BUTTON2) && (pmove_vel_z < 180 /* not sliding */)) {
-                if (jumpsound_cooldown < time) {
-                    jumpsound_cooldown = time + 0.01;
-                    localsound("player/plyrjmp8.wav", CHAN_BODY, cvar(FOCMD_JUMPVOLUME));
-                }
-            }
-
-            // landing
-            if (!last_pmove_onground && last_vel_z < -300) {
-                if (pointcontents(pmove_org) == CONTENT_WATER) {
-                    localsound("player/h2ojump.wav", CHAN_VOICE, 1);
-                } else if (last_vel_z < -650) {
-                    localsound("player/land2.wav", CHAN_VOICE, 1);
-                } else {
-                    localsound("player/land.wav", CHAN_VOICE, 1);
-                }
-            }
-        }
-
-        last_vel_z = pmove_vel_z;
-        last_pmove_onground = pmove_onground;
-    }
+    // Work around bug in some versions of FTE.  See pmove.qc
+    recent_pmove_vel_z = pmove_vel_z;
 }
 
 noref float(string cmd) CSQC_ConsoleCommand = {
@@ -170,6 +170,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "login":
+            FoLogin(argv(1));
+            break;
         case "fo_hud_editor":
             FO_Hud_Editor();
             break;
@@ -223,7 +226,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_vote":
             //FO_Menu_Vote(TRUE);
-            showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+            showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
             break;
         case "fo_menu_special":
             FO_Menu_Special(TRUE);
@@ -240,8 +243,11 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "fo_menu_cancel":
             Menu_Cancel();
             break;
+        case "fo_settings_check":
+            ClientSettings_Check();
+            break;
         case "+fo_showscores":
-            if (cvar(FOCMD_OLDSCOREBOARD) == 1)
+            if (CVARF(fo_oldscoreboard) == 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -270,7 +276,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "+showscores":
         case "+showteamscores":
             showingscores = TRUE;
-            if (cvar(FOCMD_OLDSCOREBOARD) != 1)
+            if (CVARF(fo_oldscoreboard) != 1)
             {
                 tokenize(findkeysforcommand(argv(0)));
 
@@ -351,30 +357,30 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-dropflag":
             localcmd("-button7\n");
             break;
-        // case "+quick1":
-        //     localcmd("+button8\n");
-        //     break;
-        // case "-quick1":
-        //     localcmd("-button8\n");
-        //     break;
-        // case "+quick2":
-        //     localcmd("+button9\n");
-        //     break;
-        // case "-quick2":
-        //     localcmd("-button9\n");
-        //     break;
-        // case "+quick3":
-        //     localcmd("+button10\n");
-        //     break;
-        // case "-quick3":
-        //     localcmd("-button10\n");
-        //     break;
-        // case "+quick4":
-        //     localcmd("+button11\n");
-        //     break;
-        // case "-quick4":
-        //     localcmd("-button11\n");
-        //     break;
+            // case "+quick1":
+            //     localcmd("+button8\n");
+            //     break;
+            // case "-quick1":
+            //     localcmd("-button8\n");
+            //     break;
+            // case "+quick2":
+            //     localcmd("+button9\n");
+            //     break;
+            // case "-quick2":
+            //     localcmd("-button9\n");
+            //     break;
+            // case "+quick3":
+            //     localcmd("+button10\n");
+            //     break;
+            // case "-quick3":
+            //     localcmd("-button10\n");
+            //     break;
+            // case "+quick4":
+            //     localcmd("+button11\n");
+            //     break;
+            // case "-quick4":
+            //     localcmd("-button11\n");
+            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -384,6 +390,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("-button4\n");
             }
+            break;
+        case "wpp_status":
+            WPP_Status();
+            break;
+        case "perf_status":
+            Perf_Status();
             break;
         case "vote_addmap":
             AddVoteMap(argv(1),argv(2),argv(3),stof(argv(4)),stof(argv(5)),stof(argv(6)),TRUE);
@@ -397,21 +409,26 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 };
 
 void(float isnew) CSQC_Ent_Update = {
-    print("CSQC_Ent_Update, new: ", ftos(isnew), "\n");
     float etype = readbyte();
-    string s;
     switch (etype) {
-        case MSG_FLAGINFO:
-            s = readstring();
-            print("CSQC_Ent_Update, Flag info: ", s, "\n");
+        case ENT_CONFIG:
+            EntUpdate_Config();
+            break;
+        case ENT_WEAPONPRED:
+            EntUpdate_WeaponPred(isnew);
+            break;
+        case ENT_PROJECTILE:
+            EntUpdate_Projectile(isnew);
             break;
         default:
-            error("Unhandled CSQC entity\n"); //you can change it to a print, but if you're not using sv_csqcdebug 1 doing so would just confuse people over the real cause.
+            error("Unhandled CSQC entity\n");
             return;
     }
 };
+
 void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and will no longer be tracked...
-    print("CSQC_Ent_Remove\n");
+    if (self.removefunc)
+        self.removefunc();
     remove(self);
 };
 
@@ -422,54 +439,39 @@ noref void CSQC_Input_Frame() {
     local float keydowns = changed_buttons & input_buttons;
     local float keyups = changed_buttons & ~input_buttons;
 
-    // Intercept rocket jump;
-    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) && input_buttons & BUTTON4) {
-        input_buttons |= BUTTON0 + BUTTON2;
-    }
-
-    // Intercept zoom
-    if (player_class == PC_SNIPER && keydowns & BUTTON3) {
-        zoomed_in = !zoomed_in;
-    }
-
     Sync_GameState();
+
+    // Intercept rocket jump;
+    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) &&
+        (input_buttons & BUTTON4))
+        input_buttons |= BUTTON0 | BUTTON2;
+
+    // Handle zoom
+    float prev_zoomed_in = zoomed_in;
+    if (player_class == PC_SNIPER && is_alive)
+        zoomed_in = input_buttons & BUTTON3;
+    else
+        zoomed_in = 0;
+
+    if (prev_zoomed_in != zoomed_in)
+        setsensitivityscaler(zoomed_in ? 1/3 : 1);
+
+    WPP_UpdateEnable(FALSE);
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
-    local float health = getstatf(STAT_HEALTH);
-    //pain face is 0.2 long
-    if(oldhealth > health) {
+    if (take > 0)
         painfinished = time + 0.2;
-    }
+
     return 0;
 }
 
-void CSQC_Shutdown() = {
-    FO_WriteSettings();
+void CSQC_Shutdown() {
 }
 
-void ApplyTransparencyToGrenTimer() {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if (FO_Hud_Grentimers[i].grentype != 0 && FO_Hud_Grentimers[i].alpha != 0.3) {
-            FO_Hud_Grentimers[i].alpha = 0.3;
-            break;
-        }
-    }
-}
-
-void StopGrenTimers() {
-    soundupdate(self, CHAN_GREN1, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN2, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN3, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN4, "", 0, 0, 0, 0, 0);
-    soundupdate(self, CHAN_GREN5, "", 0, 0, 0, 0, 0);
-
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        FO_Hud_Grentimers[i].grentype = 0;
-        FO_Hud_Grentimers[i].expires = 0;
-        FO_Hud_Grentimers[i].icon_index = 0;
-    }
-}
+// We can query, but not set via an autocvar.
+DEFCVAR_FLOAT(cl_delay_packets, 0);
+DEFCVAR_FLOAT(fov, 90);
 
 float last_servercommandframe;
 void _Sync_ServerCommandFrame() {
@@ -480,50 +482,122 @@ void _Sync_ServerCommandFrame() {
     last_servercommandframe = servercommandframe;
 
     team_no = getstatf(STAT_TEAMNO);
+    all_time = getstatf(STAT_ALL_TIME);
     is_observer = FALSE;
     if (team_no == 0)
         is_observer = TRUE;
     player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
-    oldhealth = getstatf(STAT_HEALTH);
+
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
+    is_player = (!is_spectator && !is_observer);
 
-    vector vel = [getstatf(STAT_VELOCITY_X), getstatf(STAT_VELOCITY_Y),
-                  getstatf(STAT_VELOCITY_Z)];
-    speed = sqrt(vel.x * vel.x + vel.y * vel.y);
+    if (!is_player || getstatf(STAT_HEALTH) <= 0)
+        is_alive = 0;
+    else
+        is_alive = 1;
 
-    local float health = getstatf(STAT_HEALTH);
-    if (health <= 0 || player_class != PC_SNIPER) {
-        zoomed_in = 0;
-    }
-
-    if (zoomed_in) {
-        setviewprop(VF_AFOV, cvar("fov")/3);
-        setsensitivityscaler(1/3);
-    } else {
-        setviewprop(VF_AFOV, cvar("fov"));
-        setsensitivityscaler(1);
-    }
+    UpdateMinPing();
+    CsGrenTimer::UpdateSoundStack();
 }
 
-float last_pmove_onground;
-float last_vel_z;
-float last_clientcommandframe;
-// REQUIRES: Must be called after _Sync_ServerCommandFrame.
-void _Sync_ClientCommandFrame() {
-    // Client command frames are regenerated beyond the server frame, so we
-    // cannot check that we have not seen this client command frame alone.
-    if (last_servercommandframe == servercommandframe &&
-        last_clientcommandframe == clientcommandframe)
-        return;
-    last_clientcommandframe = clientcommandframe;
-}
 
 // Called for each {client, server} command frame, ensures globals are
 // synchronized with server and predicted state.
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
-    _Sync_ClientCommandFrame();
+    PM_PredictJump();
+}
+
+void FoLogin(string token) {
+    local float filehandle;
+
+    if (token != "") {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
+        fputs(filehandle, token);
+        fclose(filehandle);
+    } else {
+        filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+        if (filehandle == -1) {
+            print("Can't login without valid token\n");
+            return;
+        } else {
+            token = fgets(filehandle);
+        }
+    }
+
+    localcmd("setinfo _fo_token ", token, "\n");
+    localcmd("cmd fo-login-silent\n");
+}
+
+static string to_precision(float f, float p) {
+    string fmt = strcat("%0.", ftos(p), "f");
+    return sprintf(fmt, f);
+}
+
+static float get_precision() {
+    float t = gettime(1);
+
+    // For (debug) clients which have modified gettime to report with more
+    // precision.
+    return (t*1000 == ceil(t*1000)) ? 3 : 5;
+}
+
+static float gettime_lat() {
+    const float trials = 1000;
+    float s = gettime(1), f, i;
+    for (i = 0; i < trials; i++)
+        gettime(1);
+    return (gettime(1) - s)/trials;
+}
+
+// Note while this works with ms
+void Perf_Status() {
+    printf("Performance Stats:\n");
+    float avg, variance, minv, maxv;
+
+    float prec = get_precision();
+    if (prec > 3)
+        printf("gettime() timing = %0.5f\n", gettime_lat());
+
+
+    printf("HUD cache used=%d freelist=%d\n",
+            (float)hud_render_cache.draw_count,
+            (float)hud_render_cache.free_count);
+
+    compute_avg(&frame_timing.samples, &avg, &variance);
+    compute_maxmin(&frame_timing.samples, &minv, &maxv);
+    printf(" Frame render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(frame_timing.samples.count, frame_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_timing.samples, &minv, &maxv);
+    printf(" HUD render (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_timing.samples.count, hud_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+
+    compute_avg(&hud_partial_timing.samples, &avg, &variance);
+    compute_maxmin(&hud_partial_timing.samples, &minv, &maxv);
+    printf(" HUD partial (%d) avg=%s var=%0.3f min=%s max=%s\n",
+            (float)min(hud_partial_timing.samples.count, hud_partial_timing.samples.max_count),
+            to_precision(avg, prec), variance,
+            to_precision(minv, prec), to_precision(maxv, prec));
+}
+
+void ClientSettings_Check() {
+    localcmd("cl_movespeedkey 1");
+    if (cvar("worker_count") == 0)
+        printf("ERROR: Please set `worker_count 4` to reduce stuttering!\n");
+    if (cvar("r_temporalscenecache") == 0)
+        printf("RECOMMENDED: Please set `r_temporalscenecache 1` to reduce stuttering!\n");
+    if (cvar("fo_grentimer") != 2)
+        printf("RECOMMEND: Setting `fo_grentimer 2` for ping correction.\n");
+    if (cvar("fo_hud_cache") != 1)
+        printf("ERROR: Please set `fo_hud_cache 1` to improve fps.\n");
+    printf("Finished checking settings...\n");
 }

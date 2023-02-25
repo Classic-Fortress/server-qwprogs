@@ -152,8 +152,7 @@ void () Admin_CeaseFire = {
         while (te) {
             CenterPrint3(te, "CEASE FIRE\nCalled by: ", self.netname, "\n");
             te.immune_to_check = (time + 5);
-            te.tfstate = (te.tfstate | TFSTATE_CANT_MOVE);
-            TeamFortress_SetSpeed(te);
+            te.tfstate |= TFSTATE_CANT_MOVE;
             te = find(te, classname, "player");
         }
         te = spawn();
@@ -180,16 +179,31 @@ void () Admin_CeaseFire = {
         while (te) {
             CenterPrint3(te, "RESUME FIRE\nCalled by: ", self.netname, "\n");
             te.immune_to_check = (time + 5);
-            te.tfstate = (te.tfstate - (te.tfstate & TFSTATE_CANT_MOVE));
-            TeamFortress_SetSpeed (te);
+            te.tfstate &= ~TFSTATE_CANT_MOVE;
             te = find (te, classname, "player");
         }
     }
 };
 
+void NotifyPauseUnpause(float is_pause) {
+    int count;
+    entity* p = find_list(classname, "player", EV_STRING, count);
+
+    for (float i = 0; i < count; i++) {
+        if (p[i].netname == "" || !infokeyf(p[i], INFOKEY_P_CSQCACTIVE))
+            continue;
+
+        msg_entity = p[i];
+        WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+        WriteByte(MSG_MULTICAST, is_pause ? MSG_PAUSE : MSG_UNPAUSE);
+        multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+    }
+}
+
 void () Admin_Pause = {
     if (!is_paused) {
         setpause(1);
+        NotifyPauseUnpause(TRUE);
         is_paused = 1;
         cs_paused = 1;
         pause_actor = self.netname;

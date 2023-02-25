@@ -1,10 +1,7 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float timertype);
-void AddGrenTimer(float grentype, float offset);
-void AddSilentGrenTimer(float grentype, float offset);
-void StartGrenTimer(float slot, float grentype, float offset);
-void AddGrenTimer(float grentype, float offset);
-void PlayGrenTimer(float offset);
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag);														 
+float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -104,15 +101,33 @@ void() CSQC_Parse_Event = {
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
-            float grentype = readfloat();
-            float timertype = cvar(FOCMD_GRENTIMER);
-            ParseGrenPrimed(grentype, timertype);
+            float grentype = readbyte();
+            float primed_at = readfloat();
+            float explodes_at = readfloat();
+            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
-            ApplyTransparencyToGrenTimer();
+            CsGrenTimer last = CsGrenTimer::GetLast();
+            last.set_thrown();
             break;
         case MSG_PLAYERDIE:
+            last_death_time = readfloat();
             StopGrenTimers();
+            break;
+        case MSG_TFX_GRENTIMER:
+            float entnum = readentitynum();
+            float explodes_at = readfloat();
+            TFxGrenTimerUpdate(entnum, explodes_at);
+            break;
+        case MSG_HITFLAG:
+            vector targpos;
+            targpos_x = readcoord();
+            targpos_y = readcoord();
+            targpos_z = readcoord();
+            float mitdmg = readshort();
+            float rawdmg = readshort();
+            float hitflag = readshort();
+            ParseHitFlag(targpos, mitdmg, rawdmg, hitflag);
             break;
         case MSG_CLIENT_MENU:
             float menutype = readfloat();
@@ -122,7 +137,7 @@ void() CSQC_Parse_Event = {
                     for(float i = 0; i < 4; i++) {
                         if(i < number_of_teams) {
                             FO_MENU_TEAM.options[i].value = ftos(readbyte());
-                            if((i + 1) != team_no) {
+                            if(((i + 1) != team_no) || (all_time != ALL_TIME_COLOUR)) {
                                 FO_MENU_TEAM.options[i].state = FO_MENU_STATE_NORMAL;
                             } else {
                                 FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
@@ -131,6 +146,26 @@ void() CSQC_Parse_Event = {
                             FO_MENU_TEAM.options[i].state = FO_MENU_STATE_DISABLED;
                         }
                     }
+
+                    if(SBAR.GameMode & GAMEMODE_QUAD) {
+                        switch (all_time) {
+                            case ALL_TIME_ATTACK:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
+                                break;
+                            case ALL_TIME_DEFENCE:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
+                                break;
+                            default:
+                                FO_MENU_TEAM.options[6].state = FO_MENU_STATE_NORMAL;
+                                FO_MENU_TEAM.options[7].state = FO_MENU_STATE_NORMAL;
+                        }
+                    } else {
+                        FO_MENU_TEAM.options[6].state = FO_MENU_STATE_DISABLED;
+                        FO_MENU_TEAM.options[7].state = FO_MENU_STATE_DISABLED;
+                    }
+
                     FO_Menu_Team(2);
                     break;
                 case CLIENT_MENU_CLASS:
@@ -142,7 +177,7 @@ void() CSQC_Parse_Event = {
                 case CLIENT_MENU_SCOUT:
                     float scanner_on = readbyte();
                     float scanner_flags = readfloat();
-                    
+
                     FO_Menu_Scout(2, scanner_on, scanner_flags);
                     break;
                 case CLIENT_MENU_SPY:
@@ -197,7 +232,7 @@ void() CSQC_Parse_Event = {
                     FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_PICK, 0);
                     break;
                 case CLIENT_MENU_MAPS:
-                    showVoteMenu(!Hud_Panels[HUD_PANEL_MAP_MENU].Display);
+                    showVoteMenu(!getHudPanel(HUDP_MAP_MENU)->Display);
                     break;
             }
             break;
@@ -270,6 +305,7 @@ void() CSQC_Parse_Event = {
             if(rtr) {
                 round_ending = time + rtr;
             }
+            FO_Hud_ShowPanel(HUDP_MOTD);
             break;
         case MSG_QUAD_ROUND_BEGIN:
             round_ending = readfloat() * 60 + time + 1;
@@ -305,50 +341,187 @@ void() CSQC_Parse_Event = {
         case MSG_VOTE_MAP_DELETE:
             RemoveVoteMap(readstring(), FALSE);
             break;
-    }
-}
-
-void PlayGrenTimer(float offset) {
-    local float channel = CHAN_GREN1;
-    local float soundtime;
-    local float highest_soundtime = -1;
-
-    for(float i = CHAN_GREN1; i <= CHAN_GREN5; i++) {
-        soundtime = getsoundtime(self, i);
-
-        if (soundtime < 0) {
-            channel = i;
+        case MSG_LOGIN:
+            local float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+            if (filehandle != -1) {
+                localcmd("setinfo _fo_token ", fgets(filehandle), "\n");
+                localcmd("cmd fo-login-silent\n");
+            } else {
+                print("You are not logged in\n");
+            }
             break;
-        }
-
-        if (soundtime > highest_soundtime) {
-            highest_soundtime = soundtime;
-            channel = i;
-        }
-    }
-
-    local string sound = cvar_string(FOCMD_GRENTIMERSOUND);
-    localsound(sound, channel, cvar(FOCMD_GRENTIMERVOLUME)); // required because soundupdate doesn't reset getsoundtime
-    soundupdate(self, channel, sound, cvar(FOCMD_GRENTIMERVOLUME), 0, 0, 0, offset);
-}
-
-void ParseGrenPrimed(float grentype, float timertype) {
-    if(timertype == 0) {
-        AddSilentGrenTimer(grentype, 0);
-        return;
-    }
-
-    if(timertype == 1) {
-        AddGrenTimer(grentype, 0);
-        return;
-    }
-
-    if(timertype == 2) {
-        local float offset = getplayerkeyfloat(player_localnum, INFOKEY_P_PING)/1000;
-        AddGrenTimer(grentype, offset);
-        return;
+        case MSG_PAUSE:
+            CsGrenTimer::SyncPause();
+            break;
+        case MSG_UNPAUSE:
+            CsGrenTimer::SyncUnpause();
+            break;
     }
 }
+
+DEFCVAR_FLOAT(fo_grentimer_debug, 0);
+
+string cached_timer;
+string GetGrenTimerSound() {
+    string wav = CVARS(fo_grentimersound);
+
+    if (cached_timer != wav) {
+        precache_sound(wav);
+        cached_timer = wav;
+    }
+    return wav;
+}
+
+void CsGrenTimer::StartSound() {
+    if !(this.flags_ & FL_GT_SOUND)
+        return;
+
+    string wav = GetGrenTimerSound();
+    float volume = CVARF(fo_grentimervolume);
+
+    // Note there's a bug where soundupdate returns false for a new sample, even
+    // though it's started.
+    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    this.playing_ = TRUE;
+}
+
+void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
+                      float timer_flags) {
+    grentype_ = _grentype;
+    primed_at_ = primed_at;
+    expires_at_ = expires_at;
+    flags_ = timer_flags;
+    playing_ = FALSE;
+
+    if (this.flags_ & FL_GT_ADJPING) {
+        float rtt = pstate_pred.client_ping * CVARF(fo_grentimer_ping_frac);
+        if (RewindFlagEnabled(REWIND_GRENADES))
+            rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
+        expires_at_ -= rtt / 1000;
+    }
+
+    if (!CVARF(fo_grentimer_nostack))
+        StartSound();
+    else
+        UpdateSoundStack();
+}
+
+void CsGrenTimer::Stop() {
+    expires_at_ = -1;
+    PauseSound();  // Pause is really stop.
+    flags_ = 0;
+}
+
+void StopGrenTimers() {
+    // New style.
+    for (float i = 0; i < NUM_GREN_TIMERS; i++)
+        grentimers[i].Stop();
+}
+
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
+    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
+        return;
+
+    if (primed_at < last_death_time)
+        return;
+
+    local float timer_flags = 0;
+    switch (CVARF(fo_grentimer)) {
+        case 0: break;
+        case 1: timer_flags = FL_GT_SOUND; break;
+        // 2 [and something sane for anything we don't recognize.]
+        default: timer_flags |= FL_GT_SOUND | FL_GT_ADJPING; break;
+    }
+
+    float debug_print_state = CVARF(fo_grentimer_debug) & 1;
+
+    CsGrenTimer timer = CsGrenTimer::GetNext();
+    timer.Set(primed_at, explodes_at, grentype, timer_flags);
+
+    if (debug_print_state) {
+        float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
+
+        float expires_at = timer.expiry();
+
+        print(sprintf("primed_at=%0.2f expires_at=%0.2f explodes_at=%0.2f tfuse=%0.2f\n",
+                      primed_at, expires_at, explodes_at, expires_at - primed_at));
+    }
+}
+#define HITFLAG(_fl_name) (hitflags & (HITFLAG_##_fl_name))
+
+static void PlayHitSound(float hitflags) {
+    float wantsnoarmoursound = CVARF(fo_hitaudio_noarmour);
+    float wantshurtselfsound = CVARF(fo_hitaudio_hurtself);
+    float wantshurtenemysound = CVARF(fo_hitaudio_hurtenemy);
+    float wantshurtteamsound = CVARF(fo_hitaudio_hurtteam);
+
+    float wantskillselfsound = CVARF(fo_hitaudio_killself);
+    float wantskillenemysound = CVARF(fo_hitaudio_killenemy);
+    float wantskillteamsound = CVARF(fo_hitaudio_killteam);
+
+    string snd = "", snd2 = "";
+
+    if (HITFLAG(SELF)) {
+        if (wantshurtselfsound)
+            snd = SND_HURTSELF;
+        if (wantskillselfsound && HITFLAG(KILLINGBLOW))
+            snd2 = SND_KILLSELF;
+    } else if (HITFLAG(FRIENDLY)) {
+        if (wantshurtteamsound)
+            snd = SND_HURTTEAM;
+        if (wantskillteamsound && HITFLAG(KILLINGBLOW))
+            snd2 = SND_KILLTEAM;
+    } else {
+        if (wantshurtenemysound)
+            snd = HITFLAG(MEATSHOT) ? SND_HURTENEMY_MEATSHOT : SND_HURTENEMY;
+        if (wantskillenemysound && HITFLAG(KILLINGBLOW))
+            snd2 = SND_KILLENEMY;
+
+        if (HITFLAG(HEADSHOT))
+            localsound(SND_HEADSHOT, CHAN_AUTO, 1);
+        if (HITFLAG(NOARMOUR) && wantsnoarmoursound)
+            localsound(SND_NOARMOUR, CHAN_AUTO, 1);
+    }
+
+    if (snd != "")
+        localsound(snd, CHAN_AUTO, 1);
+    if (snd2 != "")
+        localsound(snd2, CHAN_AUTO, 1);
+}
+
+void NewHittext(entity hittext);
+
+void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflags) {
+        if (HITFLAG(IMFLASHED))
+            return;
+
+        float want_hittext = CVARF(fo_hittext_enabled) && !HITFLAG(NOTEXT);
+        float want_hitsound = CVARF(fo_hitaudio_enabled) && !HITFLAG(NOAUDIO);
+
+        if (want_hitsound)
+            PlayHitSound(hitflags);
+
+        if (!want_hittext)
+            return;
+
+        if (HITFLAG(SELF) ||
+            (HITFLAG(FRIENDLY) && !CVARF(fo_hittext_friendly)))
+            return;
+
+        entity te = spawn();
+
+        te.hittext_str = ftos((CVARF(fo_hittext_rawdamage)) ?  rawdmg : mitdmg);
+        te.classname = CN_HITTEXT;
+        te.hittext_expires = time + CVARF(fo_hittext_duration);
+        te.hittext_hitflags = hitflags;
+
+        setorigin(te,
+                  [targpos_x, targpos_y, targpos_z + CVARF(fo_hittext_offset)]);
+
+        NewHittext(te);
+};
+
+#undef HITFLAG
 
 void ParseSBAR()
 {
@@ -375,7 +548,6 @@ void ParseSBAR()
             break;
         case PC_SNIPER:
             SBAR.SniperDam = readfloat();
-            SBAR.SniperMax = readfloat();
             break;
         case PC_DEMOMAN:
             SBAR.IsDetpacking = readfloat();
@@ -446,22 +618,31 @@ void ParseSBAR()
     }
 }
 
-float(float entnum, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
-    // Filter out sounds we may have generated locally, unless we're just
-    // pretending to be that entity.
-    if (entnum != player_localentnum || is_spectator || is_observer)
+float(float ent_num, float channel, string soundname, float vol, float attenuation, vector pos, float pitchmod) CSQC_Event_Sound = {
+    // Sound sent to our predicted weapon is expected to have been client-side.
+    if (ent_num == pengine.pweap_ent.entnum)
+        return 1;
+
+    // Sounds from remote entities are not local and we should always play.
+    if (ent_num != player_localentnum || is_spectator || is_observer)
         return 0;
 
+    // Sounds below this line are conditionally filtered.
     switch(soundname) {
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
         case "player/h2ojump.wav":
-            if (CVARF(fo_csjumpsounds)) {
+        case "misc/water1.wav":
+        case "misc/water2.wav":
+        case "player/inlava.wav":
+        case "player/inh2o.wav":
+        case "player/slimbrn2.wav":
+        case "misc/outwater.wav":
+            if (CSQC_JumpSounds_Active())
                 return 1;
-            } else {
+            else
                 break;
-            }
     }
 
     return 0;

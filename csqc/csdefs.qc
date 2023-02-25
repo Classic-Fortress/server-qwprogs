@@ -241,8 +241,6 @@ const float CHAN_WEAPON = 1;
 const float CHAN_VOICE = 2;
 const float CHAN_ITEM = 3;
 const float CHAN_BODY = 4;
-const float CHAN_GREN1 = 5;
-const float CHAN_GREN2 = 6;
 const float ATTN_NONE = 0;	/* Sounds with this attenuation can be heard throughout the map */
 const float ATTN_NORM = 1;	/* Standard attenuation */
 const float ATTN_IDLE = 2;	/* Extra attenuation so that sounds don't travel too far. */
@@ -459,6 +457,7 @@ const float SLIST_TEST_GREATEREQUAL = 6;
 const float SLIST_TEST_NOTEQUAL = 7;
 const float SLIST_TEST_STARTSWITH = 8;
 const float SLIST_TEST_NOTSTARTSWITH = 9;
+
 void(vector vang) makevectors = #1; /*
 		Takes an angle vector (pitch,yaw,roll). Writes its results into v_forward, v_right, v_up vectors. */
 

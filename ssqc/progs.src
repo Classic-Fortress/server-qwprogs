@@ -1,6 +1,8 @@
 #pragma target fte_5768
 #pragma optimise 3
 #pragma flag enable subscope
+#pragma flag enable iffloat
+#pragma flag enable lo
 
 #pragma progs_dat "../qwprogs.dat"
 
@@ -8,15 +10,22 @@
 
 #includelist
 ../share/fteextensions.qc
+../share/debug.qc
 defs.qc
 ../share/commondefs.qc
 ../share/common_helpers.qc
 qw.qc
-antilag.qc
+debug.qc
+time.qc
+../share/physics.qc
+../share/weapons.qc
+../share/prediction.qc
+../share/classes.qc
+../share/animate.qc
+../share/mcp_precache.qc					
 events.qc
 roles.qc
 q3defs.qc
-debug.qc
 status.qc
 functions.qc
 menu.qc
@@ -26,9 +35,10 @@ vote.qc
 extraents.qc
 help.qc
 subs.qc
-combat.qc
 items.qc
 locfiles.qc
+rewind.qc
+combat.qc
 weapons.qc
 world.qc
 client.qc

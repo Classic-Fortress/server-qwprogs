@@ -1,9 +1,72 @@
 FortressOne Server
 ==================
 
-New features
-------
+New commands
+------------
 
+* `fo_hud_cache 1` less resource intensive hud
+* `fo_hud_fps 60` set hud refresh rate
+* `fo_grentimer_ping_frac 1` fraction of ping to correct for
+* `fo_grentimer_nostack 0` when set, only play the oldest timer
+* `fo_fte_hud 0` completely replace Quake engine hud with FO hud
+* `fo_legacy_sbar 0` use oldschool Team Fortress status bar
+* `fo_oldscoreboard 0` use oldschool Quake scoreboard
+* `fo_adminrefresh 2` time in seconds for admin menu to refresh
+* `fo_wpp_beta 0` client side weapon/projectile prediction
+* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled. -1 defaults to 40.
+* `wpp_weap_predict -1` weapon prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `wpp_proj_predict -1` projectile prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `fo_client_sniper_sight 1` client side sniper dot
+* `cl_p2r` for old weapon impulses
+* `cl_r2g` for old weapon impulses
+* `r_pyrotrail 0`
+* `r_rockettrail 0`
+* `r_grenadetrail 0`
+* `wpp_phys_adv_ms 0`
+* `wpp_phys_local_adv_ms 0`
+* `wpp_setspeed 1`
+* `wpp_debug 1` bitfield 0,1,2,4,8 for debugging
+* `fo_phys_debug 1` bitfield 0,1 for debugging
+
+* Added in `fo_hittext_friendly 0` - setting to 1 shows text when damaging friendlys
+* Added in `fo_hittext_colour3 "1 0 0"` - colour of friendly hittext if fo_hittext_friendly is set to 1 (rgb 0-1)
+
+* Added in csqc hitaudio and hittext for testing `localinfo zutmode 1` on server to enable.
+  
+Client commands, default shown:
+  
+=== Audio ===
+* `fo_hitaudio_enabled 1`      - toggle on/off
+* `fo_hitaudio_hurtself 1`     - play a sound when you hurt yourself
+* `fo_hitaudio_hurtteam 1`     - play a sound when you hurt a teammate   
+* `fo_hitaudio_hurtenemy 1`    - play a sound when you hurt an enemy
+* `fo_hitaudio_killself 1`     - play a sound when you kill yourself
+* `fo_hitaudio_killteam 1`     - play a sound when you kill a teammate
+* `fo_hitaudio_killenemy 1`    - play a sound when you kill an enemy
+* `fo_hitaudio_noarmour 1`     - play an extra sound if you hurt an enemy with no armour
+  
+also added a headshot sound for snipers, only plays for the client  
+sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announcer/`
+  
+=== Text ===
+* `fo_hittext_enabled 1`       - toggle on/off
+* `fo_hittext_size 32`         - size of text
+* `fo_hittext_speed 96`        - how fast text scrolls up
+* `fo_hittext_alpha 1`         - alpha
+* `fo_hittext_duration 2`      - how long before text disappears
+* `fo_hittext_rawdamage 1`     - setting to 0 shows damage AFTER armour mitigation
+* `fo_hittext_noarmour 1`      - changes colour of text if enemy has no armour, see `fo_hittext_colour2` to set
+* `fo_hittext_offset 32`       - how high text appears above target
+* `fo_hittext_friendly 0`      - toggles text above friendlys if you damage them
+* `fo_hittext_colour "1 1 1"`  - default colour of enemy text (rgb 0-1)
+* `fo_hittext_colour2 "1 0 1"` - overrides default colour of enemy text if `fo_hittext_noarmour 1` is set and target has no armour (rgb 0-1)
+* `fo_hittext_colour3 "1 0 0"` - colour of friendly hittext if fo_hittext_friendly is set to 1 (rgb 0-1)
+-------------------------------
+
+* Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
+* `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
+* `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
+* All-time attack and all-time defence team options.
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
 * `localinfo forcereload 0/1` Option to prevent forced reloads.
 * `+grenade1` and `+grenade2` grenade buttons (more reliable than impulses), push to prime, again to throw.
@@ -65,12 +128,12 @@ New features
 * CSQC - fo_menu_game in-game menu
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
-* CSQC - fo_grentimervolume
-* CSQC - fo_jumpvolume
+* CSQC - fo_grentimervolume 1
+* CSQC - fo_jumpvolume 1
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
 * CSQC - fo_hud_editor to move panels and save to config
-* CSQC - fo_csjumpsounds
+* CSQC - fo_csjumpsounds 1 for client side jump sounds (not delayed by ping)
 * `info_empblock` has a new field `goal_effects`. Setting it to 16 will prevent it from blocking emps if there is a wall between it and the explosion.
 * New map point entity `info_empblock` with `t_length` field that specifies its radius of effect. An EMP explosion within a range of one will not go through walls.
 * Server option for duelmode to allow draws on a double-ko `localinfo duel_allow_draw 1`/`localinfo dad 1` (default 1)
@@ -130,7 +193,6 @@ New features
 * Allow team changing.
 * Any non-valid impulse now closes the active menu.
 * Option to allow a demoman to place a detpack while reloading his weapon `localinfo detreload on`
-* Pyro types - `localinfo pyro_type val` - 0 = original tf2.9, 1 = oztf pyro style, 2 = FO pyro style
 * localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
 * localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
 * localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 1]

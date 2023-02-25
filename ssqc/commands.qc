@@ -386,7 +386,25 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 }
                 break;
             }
+
             if (arg2) {
+                local float final_round = (rounds == 1);
+
+                switch(arg2) {
+                    case "attack":
+                        self.all_time = ALL_TIME_ATTACK;
+                        arg2 = final_round ? "2" : "1";
+                        sprint(self, PRINT_HIGH, "Always on the attacking team\n");
+                        break;
+                    case "defence":
+                        self.all_time = ALL_TIME_DEFENCE;
+                        arg2 = final_round ? "1" : "2";
+                        sprint(self, PRINT_HIGH, "Always on the defending team\n");
+                        break;
+                    default:
+                        self.all_time = ALL_TIME_COLOUR;
+                }
+
                 if(arg2 == "auto") {
                     if(self.team_no == 0) {
                         TeamFortress_TeamPutPlayerInTeam();
@@ -398,6 +416,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         break;
                     }
                 }
+
                 if(arg2 == "1" || arg2 == "2" || arg2 == "3" || arg2 == "4") {
                     float newteam = stof(arg2), oldteam = self.team_no;
                     if(number_of_teams == 0 || newteam <= number_of_teams) {
@@ -414,6 +433,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 //UpdateClientMenu_Team(self);
                 Menu_Team(0);
             }
+
             break;
         case "changeclass":
             processedCmd = TRUE;
@@ -511,7 +531,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         //Menu_Spy_Color_Input(stof(arg3));
                         farg3 = stof(arg3);
                         if (farg3 > 0 && farg3 <= number_of_teams)
-                            CF_Spy_ChangeColor(self, farg3);
+                            CF_Spy_ChangeColor(self, farg3, TRUE);
                         else
                             Menu_Spy_Input(1);
                         break;
@@ -884,7 +904,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 sprint(self, PRINT_HIGH, "cmd showvotes\b: List current voting summary\b\n");
                 sprint(self, PRINT_HIGH, "cmd break\b: Cancel current vote\b\n");
             } else {
-                sprint(self, PRINT_HIGH, "cmd changeteam [#|auto]\n");
+                sprint(self, PRINT_HIGH, "cmd changeteam [#|auto|attack|defence]\n");
                 sprint(self, PRINT_HIGH, "cmd changeclass [#]\n");
                 sprint(self, PRINT_HIGH, "cmd dropammo [1-4] [amount]\n");
                 sprint(self, PRINT_HIGH, "cmd disguise [last|none|skin #|team #]\n");
@@ -923,6 +943,19 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 performLogin(self,arg2,arg3);
             }
             break;
+        case "fo-login":
+            processedCmd = TRUE;
+            if (self.fo_login != string_null) {
+                sprint (self, PRINT_HIGH, "You are logged in\n");
+            } else {
+                performFoLogin(self);
+            }
+            break;
+        case "fo-login-silent":
+            processedCmd = TRUE;
+            if (self.fo_login == string_null)
+                performFoLogin(self);
+            break;
         case "who":
             processedCmd = TRUE;
             pl = find (world, classname, "player");
@@ -937,7 +970,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             }
             break;
     }
-   
+
     if (self.is_admin)
     {
         switch (arg1)
@@ -1280,7 +1313,7 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 break;
         }
     }
-    
+
     return processedCmd;
 }
 
@@ -1289,7 +1322,7 @@ void (string cmd) SV_ParseClientCommand = {
     tokenize(cmd);
 
     isProcessed = ParseCmds(argv(0), argv(1), argv(2));
-    
+
     if (!isProcessed)
     {
         clientcommand(self, cmd);

@@ -1,6 +1,5 @@
 void Hud_WriteCfg(string path);
-float GetDrawPanel(string id);
-void SetDrawPanel(string id);
+void FO_Hud_InitSystemPanels();
 
 void FO_Hud_Editor()
 {
@@ -9,11 +8,14 @@ void FO_Hud_Editor()
         fo_hud_editor = FALSE;
         setcursormode(FALSE);
 
+        FO_Hud_InitSystemPanels();
         Hud_WriteCfg(FO_HUD_CONFIG_PATH);
     }
     else
     {
         fo_hud_editor = TRUE;
+        FO_Hud_InitSystemPanels();
+        FO_Hud_ShowPanel(HUDP_OPTIONS);
         setcursormode(TRUE);
     }
 }
@@ -30,7 +32,7 @@ float(float fo_align) fo_to_sui_aligntment = {
     return HUD_ALIGN_CENTER;
 };
 
-void(string id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
+void(PanelID id, vector pos, vector size, vector minmaxsteps, __inout float value) hud_slider =
 {
 	sui_push_frame(pos, size);
 	
@@ -47,31 +49,20 @@ void(string id, vector pos, vector size, vector minmaxsteps, __inout float value
 };
 
 
-vector UpdatePos(string id, vector mousepos)
+vector UpdatePos(PanelID id, vector mousepos)
 {
-    vector pos;
-//    switch (id)
-//    {
-//        case "flagiconpanel":
-//            if (HudSettings.MousePos != [0, 0])
-//            {
-//                pos = HudSettings.FlagIcon.Position + mousepos - HudSettings.MousePos;
-//                HudSettings.FlagIcon.Position = pos;
-//            }
-//            break;
+    if (id < HUDP_FIRST || id > HUDP_LAST)
+        return '0 0 0';
 
-//        default:
-            GetDrawPanel(id);
-            pos = DrawPanel.Position + mousepos - HudSettings.MousePos;
-            DrawPanel.Position = pos;
-            SetDrawPanel(id);
-//            break;
-//    }
+    vector pos;
+    FO_Hud_Panel* panel = getHudPanel(id);
+    pos = panel->Position + mousepos - HudSettings.MousePos;
+    panel->Position = pos;
 
     return pos;
 }
 
-float(string id, vector pos, vector size, float alpha, float enabled) hud_panel =
+float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel =
 {
     vector basecolor = MENU_BG;
     vector outlinecolour = enabled ? MENU_BORDER : MENU_UNSELECTED;
@@ -96,8 +87,6 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel 
         {
             alpha = 0.6;
             basecolor = MENU_BG + MENU_HIGHLIGHT * 0.1;
-            //FO_Hud_Panel hoverpanel = GetPanelById(id);
-            //drawstring([Mouse.x, Mouse.y], hoverpanel.Name, '8 8', '1 0 0', 1, 0);
         }
         
         if (sui_is_held(id))
@@ -106,8 +95,8 @@ float(string id, vector pos, vector size, float alpha, float enabled) hud_panel 
             basecolor = MENU_BG - MENU_DARKEN * 0.1;
         }
         // Make options panel switch back to last selected element after dragging
-        if(sui_is_released(id) && id == "hudoptionspanel") {
-            _last_clicked_actions[0] = Hud_Panels[Editor_SelectedPanel_Index].id;
+        if(sui_is_released(id) && id == HUDP_OPTIONS) {
+            _last_clicked_actions[0] = getHudPanel(Editor_SelectedPanel_Index)->id;
         }
     }
 
@@ -139,13 +128,13 @@ void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
         while(i<len) {
             i+=1;
             c = str2chr(s, len-i);
-            drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos - [i * size, 0, 0], sprintf("anum_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
     } else {    //use normal numbers
         while(i<len) {
             i+=1;
             c = str2chr(s, len-i);
-            drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos - [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
     }
 }
@@ -166,15 +155,15 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
         if (c == 47) // "/"
         {
             // because i'm dodgy
-            drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
         }
         else if (c == 37) // "%"
         {
-            drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
         }
         else
         {
-            drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
         }
         i+=1;
     }
@@ -225,43 +214,80 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
         if(intval < threshold) {
             lmpname = strcat("a", lmpname);
         }
-        drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
+        HRC_drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
         i+=1;
     }
 }
 
-string FormatCfgString(string line, string field, string value)
-{
+static string FormatCfgString(string line, string field, string value) {
     line = strcat(line, "\n", field, ":", value);
-
     return line;
 }
 
-string FormatCfgVector(string line, string field, vector value)
+static string FormatCfgVector(string line, string field, vector value)
 {
     line = strcat(line, "\n", field, ":", strcat(ftos(value_x), ",", ftos(value_y)));
 
     return line;
 }
 
-string GetPanelString(string line, string name)
+string GetPanelString(string line, FO_Hud_Panel* panel)
 {
-    line = FormatCfgVector(line, strcat(name, ".position"), DrawPanel.Position);
-    line = FormatCfgString(line, strcat(name, ".scale"), ftos(DrawPanel.Scale));
-    line = FormatCfgString(line, strcat(name, ".textscale"), ftos(DrawPanel.TextScale));
-    line = FormatCfgString(line, strcat(name, ".display"), ftos(DrawPanel.Display));
-    line = FormatCfgString(line, strcat(name, ".nodeinsertloc"), ftos(DrawPanel.Orientation));
-    line = FormatCfgString(line, strcat(name, ".snap"), ftos(DrawPanel.Snap));
-    line = FormatCfgString(line, strcat(name, ".style"), ftos(DrawPanel.Style));
+    string sn = panel->SaveName;
+    line = FormatCfgVector(line, strcat(sn, ".position"), panel->Position);
+    line = FormatCfgString(line, strcat(sn, ".scale"), ftos(panel->Scale));
+    line = FormatCfgString(line, strcat(sn, ".textscale"), ftos(panel->TextScale));
+    line = FormatCfgString(line, strcat(sn, ".display"), ftos(panel->Display));
+    line = FormatCfgString(line, strcat(sn, ".nodeinsertloc"), ftos(panel->Orientation));
+    line = FormatCfgString(line, strcat(sn, ".snap"), ftos(panel->Snap));
+    line = FormatCfgString(line, strcat(sn, ".style"), ftos(panel->Style));
 
     return line;
+}
+
+void FO_Hud_HidePanel(PanelID id) {
+    getHudPanel(id)->Display = FALSE;
+    HRC_Invalidate(id);
+}
+
+void FO_Hud_ShowPanel(PanelID id) {
+    getHudPanel(id)->Display = TRUE;
+}
+
+void FO_Hud_SetDisplay(PanelID id, float display) {
+    if (display)
+        FO_Hud_ShowPanel(id);
+    else
+        FO_Hud_HidePanel(id);
+}
+
+// Hide panels that are used by other systems, e.g. scores or map voting menu,
+// that we don't want bein inadvertently rendered.
+void FO_Hud_InitSystemPanels() {
+    for (float i = HUDP_FIRST; i <= HUDP_LAST; i++) {
+        FO_Hud_Panel* panel = getHudPanel(i);
+        if (panel->System) {
+            switch (panel->id) {
+                case HUDP_MOTD:
+                case HUDP_READY:
+                    FO_Hud_ShowPanel(i);
+                    break;
+
+                case HUDP_MAP_MENU: // Enumerated for readability, not necessity
+                case HUDP_MENU:
+                default:
+                    FO_Hud_HidePanel(i);
+                    break;
+            }
+        }
+    }
 }
 
 float firstrun;
 void FO_Hud_Editor_LoadSettings(string filename)
 {
     if(!filename || filename == "") return;
-    
+
     vector vsize = (vector)getproperty(VF_SCREENVSIZE);
     float width = vsize_x;
     float height = vsize_y;
@@ -276,14 +302,12 @@ void FO_Hud_Editor_LoadSettings(string filename)
     // fte does weird stuff and writes/reads this to/from a "gamedir/data/file"
     float filehandle;
     filehandle = fopen(filename, FILE_READ);
-	if (filehandle >= 0) {
+    if (filehandle >= 0) {
         // get number of lines                  
         string ln;
         ln = fgets(filehandle);
-        while (ln)
-        {
-            if (strlen(ln) > 0)
-            {
+        while (ln) {
+            if (strlen(ln) > 0) {
                 ln = strreplace("\n", "", ln);
                 string val, field;
 
@@ -294,79 +318,75 @@ void FO_Hud_Editor_LoadSettings(string filename)
                 val = argv(1);
                 val = strtrim(val);
 
-                //switch(field)
-                //{
+                count = tokenizebyseparator(field, ".");
+                string pnl;
+                pnl = argv(0);
+                panel = getHudPanelBySaveName(pnl);
+                if(!panel || panel == &NullPanel) {
+                    if(strlen(pnl) < 6) {
+                        ln = fgets(filehandle);
+                        continue;
+                    }
+                    pnl = substring(pnl, 0, strlen(pnl) - 5);
+                    panel = getHudPanelBySaveName(pnl);
+                    if(!panel || panel == &NullPanel) {
+                        ln = fgets(filehandle);
+                        continue;
+                    }
+                }
 
-                    //default:
-                        count = tokenizebyseparator(field, ".");
-                        string pnl;
-                        pnl = argv(0);
-                        panel = getAnyHudPanelByNamePointer(pnl);
-                        if(!panel || &panel == &NullPanel) {
-                            if(strlen(pnl) < 6) {
-                                ln = fgets(filehandle);
-                                continue;
-                            }
-                            pnl = substring(pnl, 0, strlen(pnl) - 5);
-                            panel = getAnyHudPanelByNamePointer(pnl);
-                            if(!panel || &panel == &NullPanel) {
-                                ln = fgets(filehandle);
-                                continue;
-                            }
-                        }
+                if (panel->id == HUDP_INVALID)
+                    continue;
 
-                        switch (argv(1))
-                        {
-                            case "position":
-                                count = tokenizebyseparator(val, ",");
-                                x = stof(argv(0));
-                                y = stof(argv(1));
-                                panel.Position = [x, y];
-                                break;
-                            case "scale":
-                                panel.Scale = stof(val);
-                                break;
-                            case "textscale":
-                                panel.TextScale = stof(val);
-                                break;
-                            case "display":
-                                panel.Display = stof(val);
-                                break;
-                            case "nodeinsertloc":
-                                panel.Orientation = stof(val);
-                                break;
-                            case "snap":
-                                panel.Snap = stof(val);
-                                break;
-                            case "style":
-                                panel.Style = stof(val);
-                                break;
-                        }
-                        
-                        //SetDrawPanel(pnl);
-                        //break;
-                //}
+                switch (argv(1))
+                {
+                    case "position":
+                        count = tokenizebyseparator(val, ",");
+                        x = stof(argv(0));
+                        y = stof(argv(1));
+                        panel.Position = [x, y];
+                        break;
+                    case "scale":
+                        panel.Scale = stof(val);
+                        break;
+                    case "textscale":
+                        panel.TextScale = stof(val);
+                        break;
+                    case "display":
+                        FO_Hud_SetDisplay(panel->id, stof(val));
+                        break;
+                    case "nodeinsertloc":
+                        panel.Orientation = stof(val);
+                        break;
+                    case "snap":
+                        panel.Snap = stof(val);
+                        break;
+                    case "style":
+                        panel.Style = stof(val);
+                        break;
+                }
             }
             ln = fgets(filehandle);
         }
         fclose(filehandle);
-    }
-    else
-    {
+    } else {
         // write a new file
         Hud_WriteCfg(filename);
     }
-    if(Hud_Panels[HUD_PANEL_MENU].Position.x < 0) Hud_Panels[HUD_PANEL_MENU].Position.x = 10;
-    if(Hud_Panels[HUD_PANEL_MENU].Position.y < 0) Hud_Panels[HUD_PANEL_MENU].Position.y = 10;
-    if(Hud_Panels[HUD_PANEL_MENU].Position.x + Hud_Panels[HUD_PANEL_MENU].FillSize.x > vsize_x) Hud_Panels[HUD_PANEL_MENU].Position.x = vsize_x / 2 - Hud_Panels[HUD_PANEL_MENU].FillSize.x / 2;
-    if(Hud_Panels[HUD_PANEL_MENU].Position.y + Hud_Panels[HUD_PANEL_MENU].FillSize.y > vsize_y) Hud_Panels[HUD_PANEL_MENU].Position.y = 64;
+    if (getHudPanel(HUDP_MENU)->Position.x < 0) getHudPanel(HUDP_MENU)->Position.x = 10;
+    if (getHudPanel(HUDP_MENU)->Position.y < 0) getHudPanel(HUDP_MENU)->Position.y = 10;
+    if (getHudPanel(HUDP_MENU)->Position.x + getHudPanel(HUDP_MENU)->FillSize.x > vsize_x) getHudPanel(HUDP_MENU)->Position.x = vsize_x / 2 - getHudPanel(HUDP_MENU)->FillSize.x / 2;
+    if (getHudPanel(HUDP_MENU)->Position.y + getHudPanel(HUDP_MENU)->FillSize.y > vsize_y) getHudPanel(HUDP_MENU)->Position.y = 64;
 
-
+    FO_Hud_InitSystemPanels();
 }
 
+static FO_Hud_Panel zero_panel;
+
+// Inherits active render cache id
 void GetNewPanel(vector pos, vector fillSize, float scale, float display, float orientation, string name)
 {
-    FO_Hud_Panel pnl;
+    FO_Hud_Panel pnl = zero_panel;
 
     pnl.Position = pos;
     pnl.FillSize = fillSize;
@@ -381,11 +401,11 @@ void GetNewPanel(vector pos, vector fillSize, float scale, float display, float 
 // draws value string using lmps
 void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_alpha)
 {
-    if (!panel || &panel == &NullPanel || (!panel.Display && !fo_hud_editor))
+    if (!panel.Display && !fo_hud_editor)
         return;
     
     vector pos;
-    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+    pos = getPanelPosition(panel); //getPosition(fid);
     vector scaledFillSize = panel.FillSize * panel.Scale;
     //if(scaledFill
 
@@ -398,11 +418,9 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
         }
     }
 
-    //vector size = FO_Hud_Icon_Size * panel.Scale;
     pos = [pos_x + 2, pos_y + 2, 0];
-    //drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-    drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
+    HRC_drawpic(pos, icon, scaledFillSize, '1 1 1', icon_alpha, 0);
 
     float len = strlen(val);
     
@@ -422,7 +440,7 @@ void Hud_DrawPanelLMP(FO_Hud_Panel* panel, string val, string icon, float icon_a
         } else if(panel.Orientation == FO_HUD_INSERT_MIDDLE) {
             offset = (scaledFillSize.x) / 2 - ((len * smallfont)/2);
         }
-        drawstring([pos_x + offset, pos_y + scaledFillSize.y - smallfont - 2, 0], val, [smallfont, smallfont], '1 1 1', 1, 0);
+        HRC_drawstring([pos_x + offset, pos_y + scaledFillSize.y - smallfont - 2, 0], val, [smallfont, smallfont], '1 1 1', 1, 0);
     }
 }
 
@@ -432,7 +450,7 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
         return;
     
     vector pos;
-    pos = getPanelPosition(panel); //getPosition(fid); //DrawPanel.Position;
+    pos = getPanelPosition(panel);
 
     float textScale = panel.TextScale ? panel.TextScale : panel.Scale;
     vector fillScale = panel.FillSize * textScale;
@@ -447,7 +465,6 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
     pos = [pos_x + 2, pos_y + 2, 0];
 /*
     vector size = FO_Hud_Icon_Size * panel.Scale;
-    //drawpic(pos, icon, size, '1 1 1', 1, 0);
 
 
     pos = [pos_x + offset, pos_y, 0];
@@ -466,49 +483,22 @@ void Hud_DrawLMPThreshold(FO_Hud_Panel* panel, string val, float threshold)
     Hud_DrawStringLMPThreshold(pos + [offset,0], val, textSize, threshold);
 }
 
-vector GetStringOffsetPos(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline)
+vector GetStringOffsetPos(float orientation, string msg, vector size, vector fontSize,
+                          vector pos, vector basepos, float newline)
 {
     float len, offset;
     len = strlen(msg);
-    offset = (DrawPanel.Orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
+    offset = (orientation == FO_HUD_INSERT_BEFORE) ? 2 + size_x : (2 + size_x + (fontSize_x * len)) * -1;
     pos = [basepos_x + offset, newline ? pos_y + 2 + ((size_y - fontSize_y) * .5) : pos_y + ((size_y - fontSize_y) * .5), 0];
 
     return pos;
 }
 
-vector DrawOffsetString(string msg, vector size, vector fontSize, vector pos, vector basepos, float newline, vector colour)
+vector HRC_drawOffsetString(float orientation, string msg, vector size,
+        vector fontSize, vector pos, vector basepos, float newline, vector colour)
 {
-    pos = GetStringOffsetPos(msg, size, fontSize, pos, basepos, newline);
-    drawstring(pos, msg, fontSize, colour, 1, 0);
+    pos = GetStringOffsetPos(orientation, msg, size, fontSize, pos, basepos, newline);
+    HRC_drawstring(pos, msg, fontSize, colour, 1, 0);
 
     return pos;
-}
-
-void AddGrenTimer(float grentype, float offset) {
-    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
-        return;
-
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if(FO_Hud_Grentimers[i].grentype == 0) {
-            StartGrenTimer(i, grentype, offset);
-            PlayGrenTimer(offset);
-            break;
-        }
-    }
-}
-
-void AddSilentGrenTimer(float grentype, float offset) {
-    for(float i = 0; i < FO_Hud_Grentimers.length; i++) {
-        if(FO_Hud_Grentimers[i].grentype == 0) {
-            StartGrenTimer(i, grentype, offset);
-            break;
-        }
-    }
-}
-
-void StartGrenTimer(float slot, float grentype, float offset) {
-    FO_Hud_Grentimers[slot].grentype = grentype;
-    FO_Hud_Grentimers[slot].icon_index = grentype;
-    FO_Hud_Grentimers[slot].alpha = 1;
-    FO_Hud_Grentimers[slot].expires = time + 3.8 - offset;
 }

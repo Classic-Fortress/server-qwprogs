@@ -6,7 +6,6 @@ string(float num) RedScoreToString;
 string(float num) YellowScoreToString;
 string(float num) GreenScoreToString;
 string(entity pl, float csqcactive) ClipSizeToString;
-float(entity pl) GetClipSize;
 string(entity pl) SniperPowerToString;
 string(entity pl) DetpackToString;
 string(entity pl) AuraToString;
@@ -695,13 +694,6 @@ void (entity Player, entity Item) UpdateClientFlagStatus = {
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }
 
-float(entity playerent, float changedflags) SendClientFlagStatus = {
-    bprint(PRINT_HIGH, "SendClientFlagStatus, for: ",playerent.netname,"\n");
-    WriteByte (MSG_ENTITY, MSG_FLAGINFO);
-    WriteString (MSG_ENTITY, self.mdl);
-    return TRUE;
-}
-
 string (entity Player, entity Item, float teamno) GetItemStatus = {
     local string st = "";
     switch (teamno)
@@ -748,31 +740,6 @@ string (entity Player, entity Item, float teamno) GetItemStatus = {
     return st;
 }
 
-string GetSBClipString(entity pl, float csqcactive)
-{
-    string msg = "";
-    if (pl.tfstate & TFSTATE_RELOADING) 
-    {
-        if ((sniperreloadpercent) && (reload_cliptick) && (pl.playerclass == PC_SNIPER)) {
-            msg = csqcactive ? strcat(ftos(25 * pl.reload_sniper_ticks), "%") : strcat(strpadl(ftos(25 * pl.reload_sniper_ticks), 3), "%  ");
-        } else {
-            if (reload_cliptick)
-                msg = csqcactive ? ftos(pl.reload_clipsize) : strpadl(ftos(pl.reload_clipsize), 2);
-            else
-                msg = csqcactive ? "0" : " 0";
-
-            msg = strcat(msg, "/");
-            msg = strcat(msg, (csqcactive ? ftos(GetClipSize(pl)) : strpadr(ftos(GetClipSize(pl)), 3)));
-        }
-    } 
-    else 
-    {
-        msg = ClipSizeToString(pl, csqcactive);
-    }
-
-    return msg;
-}
-
 string GetSBClassInfo(entity pl, float csqcactive)
 {
     string st1 = "";
@@ -796,23 +763,44 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
-void UpdateClientGrenadePrimed(entity pl, float grentype) = {
+// Temporary until we network player ents.
+static void TFxUpdateGrenadeTimer(entity player, float explodes_at) {
+    const float tfx_gren_mask =
+        TFX_SPEC_GRENTIMER | TFX_DEFENSE_GRENTIMER | TFX_OFFENSE_GRENTIMER;
+
+    if (!TFxEnabled(tfx_gren_mask))
+        return;
+
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_TFX_GRENTIMER);
+    WriteEntity(MSG_MULTICAST, player);
+    WriteFloat(MSG_MULTICAST, explodes_at);
+    multicast('0 0 0', MULTICAST_ALL_R);
+}
+
+void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
-    WriteFloat(MSG_MULTICAST, grentype);
+    WriteByte(MSG_MULTICAST, grentype);
+    WriteFloat(MSG_MULTICAST, time);
+    WriteFloat(MSG_MULTICAST, explodes_at);
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+
+    TFxUpdateGrenadeTimer(pl, explodes_at);
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
     msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
+    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+
+    TFxUpdateGrenadeTimer(pl, 0);
 }
 
 void UpdateClientPlayerDie(entity pl) = {
@@ -821,7 +809,8 @@ void UpdateClientPlayerDie(entity pl) = {
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    WriteFloat(MSG_MULTICAST, time);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientIDString(entity pl) {
@@ -851,7 +840,7 @@ void UpdateClientStatusBar(entity pl)
     string msg = "";
     msg_entity = pl;
 
-    string clipMsg = GetSBClipString(pl, TRUE);
+    string clipMsg = ClipSizeToString(pl, TRUE);
 
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SBAR);
@@ -885,17 +874,12 @@ void UpdateClientStatusBar(entity pl)
             }
             break;
         case PC_SNIPER:
-            float dam, max;
+            float dam;
             dam = 0;
-            max = FALSE;
             if (sniperpower)
-            {
                 dam = pl.heat;
-                max = pl.power_full;
-            }
-            
+
             WriteFloat(MSG_MULTICAST, dam);
-            WriteFloat(MSG_MULTICAST, max);
             break;
         case PC_DEMOMAN:
             WriteFloat(MSG_MULTICAST, pl.is_detpacking);
@@ -1267,7 +1251,7 @@ void (entity pl) RefreshStatusBar = {
         st2 = "";
 
         // status line 3 column 2 - clip size
-        st2 = strcat(Q"\sClip\s: ", GetSBClipString(pl, csqcactive));
+        st2 = strcat(Q"\sClip\s: ", ClipSizeToString(pl, csqcactive));
 
         // status line 3 column 3 - grenade 1 count
         st3 = strcat(Q"\sGren1\s: ", ftos(pl.no_grenades_1));
@@ -1328,88 +1312,23 @@ string(float num) GreenScoreToString =
 
 string(entity pl, float csqcactive) ClipSizeToString =
 {
-    local string st = "";
-    local float num = 0, max;
+    FO_WeapState ws;
+    FO_FillCurrentWeapState(&ws);
+    FO_WeapInfo* wi = ws->wi;
 
-    max = GetClipSize(pl);
-    if (pl.current_weapon == WEAP_SHOTGUN) {
-        if ((max - pl.reload_shotgun) > pl.ammo_shells)
-            pl.reload_shotgun = max - pl.ammo_shells;
-        num = max - pl.reload_shotgun;
-    } else if (pl.current_weapon == WEAP_SUPER_SHOTGUN) {
-        if ((max - pl.reload_super_shotgun) > pl.ammo_shells)
-            pl.reload_super_shotgun = max - pl.ammo_shells;
-        num = (max - pl.reload_super_shotgun);
-    } else if (pl.current_weapon == WEAP_SNIPER_RIFLE) {
-        if (!sniperreload)
-            return "";
-        if ((max - pl.reload_sniper_rifle) > pl.ammo_shells)
-            pl.reload_sniper_rifle = max - pl.ammo_shells;
-        num = (max - pl.reload_sniper_rifle);
-    } else if (pl.current_weapon == WEAP_GRENADE_LAUNCHER) {
-        if ((max - pl.reload_grenade_launcher) > pl.ammo_rockets)
-            pl.reload_grenade_launcher = (max - pl.ammo_rockets);
-        num = (max - pl.reload_grenade_launcher);
-    } else if (pl.current_weapon == WEAP_ROCKET_LAUNCHER) {
-        if ((max - pl.reload_rocket_launcher) > pl.ammo_rockets)
-            pl.reload_rocket_launcher = (max - pl.ammo_rockets);
-        num = (max - pl.reload_rocket_launcher);
-    } else if (pl.current_weapon == WEAP_ASSAULT_CANNON) {
-        if (fo_hwguy)
-        {
-            if ((max - pl.reload_assault_cannon) > pl.ammo_shells)
-                pl.reload_assault_cannon = (max - pl.ammo_shells);
-            num = (max - pl.reload_assault_cannon);
-        }
-    } else
+    if (!wi->needs_reload)
         return "";
 
-    if (num > 999)
-        num = 999;
+    float clip_rem = min(wi->clip_size - *ws->clip_fired - pl.last_still_loading, 999);
 
+    string st = "";
     if (csqcactive)
-    {
-        st = strcat(ftos(floor(num)), "/", ftos(max));
-    }
+        st = strcat(ftos(floor(clip_rem)), "/", ftos(wi->clip_size));
     else
-    {
-        st = strpadl(ftos(floor(num)), 2);
-        st = strcat(st, "/");
-        st = strcat(st, strpadr(ftos(max), 3));
-    }
-    
-    
+        st = strcat(strpadl(ftos(clip_rem), 2), "/", strpadr(ftos(wi->clip_size), 3));
 
     return st;
 };
-
-float GetClipSize(entity pl) 
-{
-    switch (pl.current_weapon)
-    {
-        case WEAP_SHOTGUN:
-            return 8;
-        case WEAP_SUPER_SHOTGUN:
-            return 16;
-        case WEAP_SNIPER_RIFLE:
-            return 1;
-        case WEAP_GRENADE_LAUNCHER:
-            return 6;
-        case WEAP_ROCKET_LAUNCHER:
-            return 4;
-        case WEAP_ASSAULT_CANNON:
-            if (fo_hwguy)
-            {
-                return PC_HVYWEAP_ASSCAN_CLIPSIZE;
-            }
-            else
-            {
-                return 0;
-            }
-        default:
-            return 0;
-    }
-}
 
 string(entity pl) DisguiseToString =
 {
@@ -1480,9 +1399,8 @@ string(entity pl) SniperPowerToString =
         st = Q"\spower\s: ";
         st = strcat(st, ftos(pl.heat));
         st = strcat(st, " dmg");
-        if (pl.power_full) {
+        if (pl.heat == PC_SNIPER_MAXDAM)
             st = strcat(st, " (max)");
-        }
     }
 
     return st;
@@ -1540,7 +1458,7 @@ string(entity pl) AuraToString =
 
 string(entity pl) AssaultCannonToString =
 {
-    if (pl.current_weapon == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_LOCK))
+    if (FO_CurrentWeapon() == WEAP_ASSAULT_CANNON && (pl.tfstate & TFSTATE_LOCK))
         return Q"\sAssault Cannon Locked\s";
     else
         return "";

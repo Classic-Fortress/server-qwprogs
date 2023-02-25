@@ -79,16 +79,16 @@ void () TeamFortress_MOTD = {
             return;
         }
 
-        //TeamFortress_Alias("menu", TF_CLASSMENU, 0);
-        if(csqcactive) {
+        if (csqcactive) {
             TeamFortress_AliasString("menu", "fo_menu_special");
         } else {
             TeamFortress_AliasString("menu", "cmd menu");
         }
-        TeamFortress_Alias("slot1", TF_SLOT1, 0);
-        TeamFortress_Alias("slot2", TF_SLOT2, 0);
-        TeamFortress_Alias("slot3", TF_SLOT3, 0);
-        TeamFortress_Alias("slot4", TF_SLOT4, 0);
+
+        TeamFortress_Alias("slot1", TF_IMPULSE_SLOT1, 0);
+        TeamFortress_Alias("slot2", TF_IMPULSE_SLOT2, 0);
+        TeamFortress_Alias("slot3", TF_IMPULSE_SLOT3, 0);
+        TeamFortress_Alias("slot4", TF_IMPULSE_SLOT4, 0);
 
         // you shouldn't use these in fte, use setinfo default_weapon and +quick instead
         // leaving in to prevent breaking change

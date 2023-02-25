@@ -78,40 +78,33 @@ void () LaserBolt_Touch = {
     dremove(self);
 };
 
-void () W_FireLaser = {
+void () W_FireRailgun = {
     local vector vec, org;
 
     self.ammo_nails = self.ammo_nails - 1;
-    self.currentammo = self.ammo_nails;
 
     makevectors(self.v_angle);
     org = self.origin + v_forward * 8;
     vec = aim(self, 10000);
     vec = normalize(vec);
 
-    newmis = spawn();
-    newmis.owner = self;
-    newmis.enemy = self;
-    newmis.movetype = MOVETYPE_FLYMISSILE;
-    newmis.solid = SOLID_TRIGGER;
+    entity proj = FOProj_Create(FPP_RAILGUN);
+    proj.owner = self;
+    proj.enemy = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_TRIGGER;
 
-    FO_SetModel(newmis, "progs/e_spike1.mdl");
-    setsize(newmis, '0 0 0', '0 0 0');
 
-    setorigin(newmis, org + '0 0 16');
+    proj.velocity = vec * FPP_Get(FPP_RAILGUN)->speed;
+    proj.angles = vectoangles(proj.velocity);
 
-    newmis.velocity = vec * PC_ENGINEER_RAILSPEED;
-    newmis.angles = vectoangles(newmis.velocity);
-    newmis.oldorigin = newmis.velocity;
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
+    proj.touch = LaserBolt_Touch;
+    proj.classname = "railslug";
+    setorigin(proj, org + '0 0 16');
 
-    newmis.nextthink = time + 5;
-    newmis.think = SUB_Remove;
-    newmis.touch = LaserBolt_Touch;
-    newmis.classname = "railslug";
-
-    if (project_weapons) {
-        AL_ProjectProjectile(newmis);
-    }
+    FOProj_Finalize(proj);
 };
 
 void () EMPExplode = {
@@ -261,9 +254,6 @@ void () EMPGrenadeExplode = {
                                 break;
                             case PC_MEDIC:
                                 expsize = expsize - te.maxammo_rockets * .75 * 2;
-                                if (!medicaura && old_medikit) {
-                                    expsize = expsize - te.maxammo_cells * .75;
-                                }
                                 break;
                             case PC_SNIPER:
                             case PC_SPY:
@@ -303,7 +293,6 @@ void () EMPGrenadeExplode = {
                             }
                             oldself = self;
                             self = te;
-                            W_SetCurrentAmmo(self);
                             self = oldself;
                         } else {
                             te.think = SUB_Remove;
@@ -407,11 +396,8 @@ void () TeamFortress_EngineerBuildStop = {
     self.is_building = 0;
     self.building_percentage = 0;
     if (!engineer_move) {
-        self.current_weapon = self.weapon;
-        self.tfstate = self.tfstate - TFSTATE_CANT_MOVE;
+        self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
         self.movetype = MOVETYPE_WALK;
-        TeamFortress_SetSpeed(self);
-        W_SetCurrentAmmo(self);
     }
 }
 
@@ -559,13 +545,9 @@ void (float objtobuild) TeamFortress_Build = {
     self.is_building = 1;
     if (!engineer_move) {
         self.immune_to_check = time + 5;
-        self.tfstate = self.tfstate | TFSTATE_CANT_MOVE;
+        self.tfstate |= TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON;
         self.movetype = MOVETYPE_NONE;
-        self.weapon = self.current_weapon;
-        self.current_weapon = 0;
-        self.weaponmodel = "";
-        self.weaponframe = 0;
-        TeamFortress_SetSpeed(self);
+
         Menu_Engineer_Cancel();
     }
 
@@ -608,7 +590,6 @@ void (float objtobuild) TeamFortress_Build = {
             newmis.classname = "building_sentrygun";
             newmis.weapon = 0;
         }
-        W_SetCurrentAmmo(self);
     }
 
     oldmis = newmis;
@@ -913,10 +894,8 @@ void () TeamFortress_FinishedBuilding = {
     self.is_building = FALSE;
     self.building_percentage = 0;
     if (!engineer_move) {
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_CANT_MOVE);
+        self.tfstate &= ~(TFSTATE_CANT_MOVE | TFSTATE_NO_WEAPON);
         self.movetype = MOVETYPE_WALK;
-        self.current_weapon = self.weapon;
-        TeamFortress_SetSpeed(self);
     }
     Status_Refresh(self);
 
@@ -1026,7 +1005,6 @@ void () TeamFortress_FinishedBuilding = {
             UpdateClient_Sentry(self, oldself);
         }
     }
-    W_SetCurrentAmmo(self);
     self = oldself;
 };
 
@@ -1108,7 +1086,6 @@ void (entity disp) Engineer_UseDispenser = {
         ThrowGib("progs/dgib1.mdl", -30);
         ThrowGib("progs/dgib2.mdl", -50);
         ThrowGib("progs/dgib3.mdl", -50);
-        W_SetCurrentAmmo(self);
         return;
     }
 
@@ -1118,7 +1095,6 @@ void (entity disp) Engineer_UseDispenser = {
             self.ammo_cells = self.ammo_cells + ENG_DISPENSER_COST;
             if (self.ammo_cells > self.maxammo_cells)
                 self.ammo_cells = self.maxammo_cells;
-            W_SetCurrentAmmo(self);
             self = disp.real_owner;
             TeamFortress_EngineerBuildStop();
             return;
@@ -1193,7 +1169,6 @@ void (entity disp) Engineer_Dispenser_InsertAmmo = {
     disp.ammo_cells = (disp.ammo_cells + cells);
 
     if ((shells + nails + rockets + cells) > 0) {
-        W_SetCurrentAmmo(self);
         sprint(self, PRINT_HIGH, "You insert ");
         if (shells > 0)
             sprint(self, PRINT_HIGH, ftos(shells), " shells");
@@ -1236,7 +1211,7 @@ void (entity disp) Engineer_Dispenser_InsertArmor = {
     if (self.armorvalue == 0) {
         self.armortype = 0;
         self.armorclass = 0;
-        self.items = (self.items - (self.items & ((IT_ARMOR1 | IT_ARMOR2) | IT_ARMOR3)));
+        self.items &= ~(IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3);
     }
 
     if (armor > 0)
@@ -1295,7 +1270,6 @@ void (entity gun) Engineer_UseSentryGun = {
                     self.ammo_cells = self.maxammo_cells;
                 if (gun.trigger_field != world)
                     dremove (gun.trigger_field);
-                W_SetCurrentAmmo(self);
                 self = gun.real_owner;
                 TeamFortress_EngineerBuildStop();
                 return;
@@ -1314,7 +1288,6 @@ void (entity gun) Engineer_UseSentryGun = {
             ThrowGib("progs/tgib1.mdl", -30);
             ThrowGib("progs/tgib2.mdl", -50);
             ThrowGib("progs/tgib3.mdl", -50);
-            W_SetCurrentAmmo(self);
             return;
         }
     }
@@ -1385,7 +1358,6 @@ void (entity gun) Engineer_SentryGun_InsertAmmo = {
     }
 
     if ((shells + rockets) > 0) {
-        W_SetCurrentAmmo(self);
         ammo = "You insert ";
         if (shells > 0)
             ammo = strcat(ammo, strcat(ftos(floor(shells)), " shells"));
@@ -1486,7 +1458,6 @@ void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
                 self = eng;
                 self.ammo_cells = self.ammo_cells + 100;
                 bound_other_ammo(self);
-                W_SetCurrentAmmo(self);
                 self = oldself;
             }
             if (te.real_owner.building == te) {

@@ -1,3 +1,159 @@
+struct FPPState {
+    int index;
+    float expires_at;
+
+#ifdef SSQC
+    int flags;
+    float dynamic_dt;
+#endif
+
+    union {
+        int aux;
+        int gren_type;
+        int ammo_index;
+    };
+};
+
+.FPPState fpp;
+
+enumflags {
+    FPF_NO_REWIND,
+    FPF_FIXED_DYNAMIC,
+};
+
+var struct {
+    float min_ping_ms;
+
+    float qc_physics;
+    float static_newmis_ms;
+    float dynamic_newmis_ms;
+    float rewind_flags;
+    float max_rewind_ms;
+    float max_rewind_slow_projectile_ms;
+    float max_rewind_fast_projectile_ms;
+    float max_rewind_grenade_ms;
+    float rewind_fast_projectile_thresh;
+    float wp_default_min_ping_ms;
+    float clown_flags;
+    float clown_grav;
+
+    float predict_flags;
+    float tfx_flags;
+
+    float wp_global_enable;
+    float wp_global_disable;
+    float pp_global_enable;
+    float pp_global_disable;
+    float wpp_global_enable;
+    float wpp_global_disable;
+    float gren_beta_disable;
+} fo_config;
+
+enumflags {
+    REWIND_PROJ_HIT,
+    REWIND_KNOCKBACK,
+    REWIND_SETSPEED,
+    REWIND_GRENADES,
+    REWIND_FORWARD_PROJ_SELFKNOCK,
+    REWIND_FORWARD_DOORS,
+};
+
+string REWIND_DESC[] = {
+    "rewind projectile hit",
+    "rewind pipe knockback",
+    "allow csqc to handle maxspeed",
+    "rewind grenade throws",
+    "forward projectile self-knockback",
+    "open doors earlier for hpbs [requires rfd=1]",
+};
+
+const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
+                                   REWIND_FORWARD_PROJ_SELFKNOCK |
+                                   REWIND_SETSPEED;
+
+
+float RewindFlagEnabled(float flag) {
+    return fo_config.rewind_flags & flag;
+}
+
+enumflags {
+    TFX_PREMATCH_EVERYTHING,
+    TFX_SPEC_OUTLINE,
+    TFX_SPEC_SEEFLAG,
+    TFX_SPEC_GRENTIMER,
+    TFX_OFFENSE_SEEFLAG,
+    TFX_DEFENSE_SEEFLAG,
+    TFX_OFFENSE_OUTLINE,
+    TFX_DEFENSE_OUTLINE,
+    TFX_OFFENSE_GRENTIMER,
+    TFX_DEFENSE_GRENTIMER,
+};
+
+string TFX_DESC[] = {
+    "Prematch see everything",
+    "Spectators see outlines",
+    "Spectators see flags",
+    "Spectators see grenade timers",
+    "Offense sees flag (always)",
+    "Defense sees flag, when not carried",
+    "Offense sees grentimers",
+    "Defense sees grentimers",
+    "Offense sees outlines",
+    "Defense sees outlines",
+};
+
+float TFxEnabled(float flag) {
+    return fo_config.tfx_flags & flag;
+}
+
+const float TFX_DEFAULT_FLAGS =
+        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG;
+
+enum CSQCFlags {
+    PREDICT_CSQC_SETSPEED,
+};
+
+string PREDICTF_DESC[] = {
+    "allow csqc to handle maxspeed"
+};
+
+inline float PredictEnabled(float flag) {
+    return fo_config.predict_flags & flag;
+};
+
+const float PREDICT_FLAGS_DEFAULT = 0;
+
+enumflags {
+    CLOWN_FAST_PROJECTILES,
+    CLOWN_RUBBERGREN,
+    CLOWN_PROJ_GRAVITY,
+    CLOWN_LETHAL_TRANQ,
+    CLOWN_STICKY_GRENS,
+    CLOWN_STICKY_PIPES,
+    CLOWN_SPAM_GRENADES,
+};
+
+string CLOWN_DESC[] = {
+    "fast projectiles",
+    "rubber grenades",
+    "projectile gravity",
+    "elephant tranq",
+    "sticky grenades",
+    "sticky pipes",
+    "no grenade prime-time",
+};
+
+inline float IsClownMode(int flag) {
+    return fo_config.clown_flags & flag;
+}
+
+const float SERVER_FPS = 77;
+const float SERVER_FRAME_DT = 1/SERVER_FPS;
+const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
+
+.vector s_origin;
+.float s_time;
+
 #define MAX_FLAGINFO_LINES  10
 #define ENG_BUILDING_DISMANTLE_DISTANCE 100
 #define ENG_BUILDING_MAINT_DISTANCE 80
@@ -32,8 +188,12 @@
 #define MSG_VOTE_MAP_ADD    20
 #define MSG_VOTE_MAP_DELETE 21
 #define MSG_PLAYERDIE       22
-#define MSG_QUAD_ROUND_BEGIN   23
-
+#define MSG_PAUSE           23
+#define MSG_UNPAUSE         24
+#define MSG_TFX_GRENTIMER   25
+#define MSG_QUAD_ROUND_BEGIN   26
+#define MSG_LOGIN           27
+#define MSG_HITFLAG	    	28
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
 #define FLAGINFO_DROPPED    3
@@ -90,4 +250,19 @@
 // #define BUTTON14 65536
 // #define BUTTON15 131072
 // #define BUTTON16 262144
+
+enumflags {
+    HITFLAG_NOARMOUR,
+    HITFLAG_KILLINGBLOW,
+    HITFLAG_MEATSHOT,
+    HITFLAG_HEADSHOT,
+    HITFLAG_SELF,
+    HITFLAG_FRIENDLY,
+    HITFLAG_CUSS,
+    HITFLAG_FEIGNEDENEMY,
+    HITFLAG_NOAUDIO,
+    HITFLAG_NOTEXT,
+    HITFLAG_IMFLASHED,
+    HITFLAG_KILLEDUNDERCOVERSPY,
+};
 

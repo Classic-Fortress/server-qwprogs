@@ -1,5 +1,176 @@
 void () info_player_teamspawn;
 
+void () PostFOQuadStarted = {
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
+	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
+
+	local string demo_uri = strcat(demo_files_address, game_filename, ".mvd");
+	data = strcat(data, "    \"demo_uri\": \"", demo_uri, "\",\n");
+
+	local string stats_uri = strcat(stats_files_address, game_filename, ".html");
+	data = strcat(data, "    \"stats_uri\": \"", stats_uri, "\",\n");
+
+	data = strcat(data, "    \"server\": {\n");
+	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
+	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
+	data = strcat(data, "    },\n");
+	data = strcat(data, "    \"discord_channel\": {\n");
+	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
+	data = strcat(data, "    },\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"players\": [\n");
+
+		prefix_comma = FALSE;
+
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(p.team_no == tn && p.all_time == ALL_TIME_COLOUR) {
+				if (prefix_comma)
+					data = strcat(data, ",");
+
+				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
+				data = strcat(data, "          {\n");
+				data = strcat(data, "            \"auth_token\": \"", token, "\",\n");
+				data = strcat(data, "            \"playerclass\": \"", ftos(p.playerclass), "\"\n");
+				data = strcat(data, "          }\n");
+				prefix_comma = TRUE;
+			}
+
+			p = find(p, classname, "player");
+		}
+
+		data = strcat(data, "        ]\n");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \n");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	local string backend_address = infokey(world, "backend_address");
+	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
+	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
+};
+
+void () PostFOQuadFinalRoundStarted = {
+	local string data = "";
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
+	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		local float score = TeamFortress_TeamGetScore(tn);
+
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"score\": \"", ftos(score), "\",");
+		data = strcat(data, "        \"players\": [\n");
+
+		prefix_comma = FALSE;
+
+		p = find(world, classname, "player");
+		while (p != world) {
+			if(p.team_no == tn && p.all_time == ALL_TIME_COLOUR) {
+				if (prefix_comma)
+					data = strcat(data, ",");
+
+				token = FO_GetUserSettingString(p, "_fo_token", "fo_token", "");
+				data = strcat(data, "          {\n");
+				data = strcat(data, "            \"auth_token\": \"", token, "\",\n");
+				data = strcat(data, "            \"playerclass\": \"", ftos(p.playerclass), "\"\n");
+				data = strcat(data, "          }\n");
+				prefix_comma = TRUE;
+			}
+
+			p = find(p, classname, "player");
+		}
+
+		data = strcat(data, "        ]\n");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+
+		data = strcat(data, "      \n");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	local string backend_address = infokey(world, "backend_address");
+	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
+	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
+};
+
+void (float winner) PostFOQuadFinished = {
+	if (!match_id)
+		return;
+
+	local string data = "";
+
+	local entity t = find(world, classname, "round");
+	local float timeleft = 0;
+	if (t != world) {
+		timeleft = t.cnt * 60 + t.cnt2;
+	}
+
+	data = strcat(data, "{\n");
+	data = strcat(data, "  \"match\": {\n");
+	data = strcat(data, "    \"id\": \"", match_id, "\",\n");
+	data = strcat(data, "    \"winner\": \"", ftos(winner), "\",\n");
+	data = strcat(data, "    \"timeleft\": \"", ftos(timeleft), "\",\n");
+	data = strcat(data, "    \"teams\": {\n");
+
+	local float tn;
+	local float prefix_comma;
+	local entity p;
+	local string token;
+
+	for (tn = 1; tn <= number_of_teams; ++tn) {
+		local float score = TeamFortress_TeamGetScore(tn);
+
+		data = strcat(data, "      \"", ftos(tn), "\": {\n");
+		data = strcat(data, "        \"score\": \"", ftos(score), "\"");
+		data = strcat(data, "      }");
+
+		if (tn < number_of_teams)
+			data = strcat(data, ",");
+	}
+
+	data = strcat(data, "    }\n");
+	data = strcat(data, "  }\n");
+	data = strcat(data, "}\n");
+
+	local string backend_address = infokey(world, "backend_address");
+	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
+	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
+};
+
 float () CheckWinningTeam = {
 	local float win_score = 0;
 	local float winning_team = 0;
@@ -249,7 +420,6 @@ void () QuadRoundThink = {
 };
 
 void () QuadRoundBegin = {
-
 	local entity te;
 	local entity oldself;
     //local entity tfdet;
@@ -269,6 +439,7 @@ void () QuadRoundBegin = {
 	round_over = 0;
     
     if(quad_roles) {
+        team_no_attack = 1 + (rounds % 2);
         //tfdet = find(world, classname, "info_tfdetect");
         if(rounds % 2) {
             Team1_Role = &Role_Defence;
@@ -299,7 +470,7 @@ void () QuadRoundBegin = {
 		self = oldself;
 		te = find (te, classname, "player");
 	}
-//	lightstyle (0, "m");
+	//	lightstyle (0, "m");
     te = find(world, classname, "observer");
     while (te) {
         if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
@@ -309,6 +480,9 @@ void () QuadRoundBegin = {
     }
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
+
+	if (rounds == 1)
+		PostFOQuadFinalRoundStarted();
 
     te = find(world, classname, "player");
     while (te) {
@@ -431,6 +605,16 @@ void () StartQuadRound =
 	round_over = 1;
 
 	if (rounds == 1) {
+		while (p != world) {
+			if (p.netname != "" && p.team_no && p.playerclass) {
+				if(infokeyf(p, INFOKEY_P_CSQCACTIVE)) {
+					UpdateClientPrematch(p, TRUE);
+				}
+			}
+
+			p = find(p, classname, "player");
+		}
+
 		quad_winner = CheckWinningTeam();
 		if (quad_winner == 0)
 			bprint (2, "Round Drawn!\n");
@@ -443,6 +627,10 @@ void () StartQuadRound =
 		else if (quad_winner == 4)
 			bprint(2, "Green Team Wins!\n");
 		p = find (world, classname, "player");
+
+		// send result to server
+		PostFOQuadFinished(quad_winner);
+
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
 				p.takedamage = DAMAGE_NO;
@@ -472,11 +660,49 @@ void () StartQuadRound =
             MapEndSequence();
             clan_scores_dumped = 1;
  		}
+
 		localcmd("stop\n");
 		return;
 	}
-	if (rounds > 1)
+
+	if (rounds > 1){
 		rounds = (rounds - 1);
+
+
+		p = find (world, classname, "player");
+
+		local float legit_players = 0;
+		while (p != world) {
+			if (p.team_no && p.playerclass)
+				legit_players++;
+
+			p = find(p, classname, "player");
+		}
+
+		if (rounds == 2 && legit_players > 1)
+			PostFOQuadStarted();
+
+		if (rounds == 1 /* final round */) {
+			te = find(world, classname, "player");
+			while (te != world) {
+				if (te.all_time != ALL_TIME_COLOUR) {
+					sprint(te, PRINT_HIGH, "Swapping teams.\n");
+
+					switch(te.all_time) {
+						case ALL_TIME_ATTACK:
+							stuffcmd(te, "cmd changeteam attack\n");
+							break;
+						case ALL_TIME_DEFENCE:
+							stuffcmd(te, "cmd changeteam defence\n");
+							break;
+					}
+				}
+
+				te = find(te, classname, "player");
+			}
+		}
+	}
+
 	if (intermission_running)
 		return;
 
@@ -530,7 +756,7 @@ void () StartQuadRound =
 	}
 	te = find(world, classname, "detpack");
 	while (te){
-		if (te.weaponmode == 1) {
+		if (te.is_disarming == 1) {
 			TeamFortress_SetSpeed (te.enemy);
 			dremove(te.oldenemy);
 			dremove(te.observer_list);
@@ -576,22 +802,3 @@ void () StartQuadRound =
 		te.nextthink = (time + 1);
 	}
 };
-
-void () EndQuadRound = {
-	if (infokey(world, "quadmode") == "on") {
-		if (infokey(world,"status") != "Countdown" && infokey(world,"status") != "Standby") {
-			if (rounds > 1) {			
-                local string st;
-                st = ftos(round_delay_time);
-                bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
-				lightstyle (0, "e");
-				self.think = QuadRoundOver;
-				self.nextthink = (time + 0.1);
-			}
-			else if (rounds == 1) {
-				StartQuadRound();
-			}
-		}
-	}
-};
-
