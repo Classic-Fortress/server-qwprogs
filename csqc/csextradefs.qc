@@ -804,7 +804,6 @@ class CsGrenTimer {
     static CsGrenTimer() GetLast { return last_; };
 };
 
-
 // scoreboard stuff
 struct FO_ScoreBoardLine{
     float ping;
