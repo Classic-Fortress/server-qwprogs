@@ -22,30 +22,30 @@ void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
 
-void PushToSlotSelectionHistory(float value) {
-    if (slot_selection_history_top >= MAX_SLOT_SELECTION_HISTORY_SIZE) {
+void PushToSlotHistory(float value) {
+    if (slot_history_top >= MAX_SLOT_HISTORY_SIZE) {
         // Stack is full
         return;
     }
 
-    slot_selection_history_top += 1;
-    slot_selection_history[slot_selection_history_top] = value;
+    slot_history_top += 1;
+    slot_history[slot_history_top] = value;
 }
 
-float RemoveSlotFromSelectionHistory(float slot) {
-    if (slot_selection_history_top == -1) {
+float RemoveFromSlotHistory(float slot) {
+    if (slot_history_top == -1) {
         // Stack is empty
         return -1;
     }
 
-    for (float i = slot_selection_history_top; i >= 0; i--) {
-        if (slot_selection_history[i] == slot) {
-            for (float j = i+1; j < MAX_SLOT_SELECTION_HISTORY_SIZE; j++) {
-                slot_selection_history[j-1] = slot_selection_history[j];
+    for (float i = slot_history_top; i >= 0; i--) {
+        if (slot_history[i] == slot) {
+            for (float j = i+1; j < MAX_SLOT_HISTORY_SIZE; j++) {
+                slot_history[j-1] = slot_history[j];
             }
 
-            slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE-1] = 0;
-            slot_selection_history_top--;
+            slot_history[MAX_SLOT_HISTORY_SIZE-1] = 0;
+            slot_history_top--;
             break;
         }
     }
@@ -77,7 +77,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
-    slot_selection_history_top = -1;
+    slot_history_top = -1;
 
     registercommand("+slot");
     registercommand("-slot");
@@ -199,15 +199,15 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 }
 
 void Slot_Keydown(float slot) {
-    PushToSlotSelectionHistory(slot);
+    PushToSlotHistory(slot);
     localcmd(sprintf("impulse %f\n", slot));
     localcmd("+attack\n");
 }
 
 void Slot_Keyup(float slot) {
-    RemoveSlotFromSelectionHistory(slot);
-    if (slot_selection_history_top >= 0) { // still holding another +slot bind
-        localcmd(sprintf("impulse %f\n", slot_selection_history[slot_selection_history_top]));
+    RemoveFromSlotHistory(slot);
+    if (slot_history_top >= 0) { // still holding another +slot bind
+        localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
     } else {
         if (CVARF(fo_default_weapon)) {
             localcmd(sprintf("impulse %f\n", CVARF(fo_default_weapon)));

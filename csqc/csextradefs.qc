@@ -68,7 +68,7 @@ const vector PLAYER_MAXS = [16, 16, 32];
 
 #define MAP_MAX_CHARS 20
 
-#define MAX_SLOT_SELECTION_HISTORY_SIZE 10
+#define MAX_SLOT_HISTORY_SIZE 10
 
 .void() removefunc;
 .float owned_by;
@@ -109,8 +109,8 @@ float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
 float zoomed_in;
-float slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE];
-float slot_selection_history_top;
+float slot_history[MAX_SLOT_HISTORY_SIZE];
+float slot_history_top;
 
 .string name;
 .string description;
