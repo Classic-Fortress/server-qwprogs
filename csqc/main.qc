@@ -45,6 +45,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
+    slot_selection_history_top = -1;
+
     registercommand("+zel1");
     registercommand("-zel1");
     registercommand("+zel2");
@@ -458,6 +460,48 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
+void PushSlotSelection(float value) {
+    if (slot_selection_history_top == MAX_SLOT_SELECTION_HISTORY_SIZE) {
+        // Stack is full
+        return;
+    }
+
+    slot_selection_history_top += 1;
+    slot_selection_history[slot_selection_history_top] = value;
+}
+
+float PopSlotSelectionHistoryIf(float slot) {
+    if (slot_selection_history_top == -1) {
+        // Stack is empty
+        return -1;
+    }
+
+    for (float i = slot_selection_history_top; i >= 0; i--) {
+        if (slot_selection_history[i] == slot) {
+            for (float j = i+1; j < MAX_SLOT_SELECTION_HISTORY_SIZE; j++) {
+                slot_selection_history[j-1] = slot_selection_history[j];
+            }
+
+            slot_selection_history_top--;
+            break;
+        }
+    }
+}
+
+void Handle_Slot_Key(float slot, float impulse) {
+    if (input_slots & slot) { // slot keydown
+        PushSlotSelection(impulse);
+        input_impulse = impulse;
+    } else { // slot keyup
+        PopSlotSelectionHistoryIf(impulse);
+        if(slot_selection_history_top >= 0) {
+            input_impulse = slot_selection_history[slot_selection_history_top];
+        } else {
+            input_impulse = default_weapon;
+        }
+    }
+}
+
 noref void CSQC_Input_Frame() {
     local float changed_slots = input_slots ^ oldslots;
     oldslots = input_slots;
@@ -465,25 +509,14 @@ noref void CSQC_Input_Frame() {
     local float slotdowns = changed_slots & input_buttons;
     local float slotups = changed_slots & ~input_buttons;
 
-    if (input_slots)
+    if (input_slots) { // if using slots, you definitely should be shooting
         input_buttons |= BUTTON0;
+    }
 
-    if (changed_slots & SLOT1) {
-        if (input_slots & SLOT1)
-            input_impulse = 1;
-        else
-
-    if ((changed_slots & SLOT2) && (input_slots & SLOT2))
-        input_impulse = 2;
-    if ((changed_slots & SLOT3) && (input_slots & SLOT3))
-        input_impulse = 3;
-    if ((changed_slots & SLOT4) && (input_slots & SLOT4))
-        input_impulse = 4;
-
-    /* if ((changed_slots & SLOT1) && !(input_buttons & SLOT1)) */
-    /* if ((changed_slots & SLOT2) && !(input_buttons & SLOT2)) */
-    /* if ((changed_slots & SLOT3) && !(input_buttons & SLOT3)) */
-    /* if ((changed_slots & SLOT4) && !(input_buttons & SLOT4)) */
+    if (changed_slots & SLOT1) { Handle_Slot_Key(SLOT1, 1); }
+    if (changed_slots & SLOT2) { Handle_Slot_Key(SLOT2, 2); }
+    if (changed_slots & SLOT3) { Handle_Slot_Key(SLOT3, 3); }
+    if (changed_slots & SLOT4) { Handle_Slot_Key(SLOT4, 4); }
 
     local float changed_buttons = input_buttons ^ oldbuttons;
     oldbuttons = input_buttons;

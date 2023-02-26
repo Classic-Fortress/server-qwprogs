@@ -71,6 +71,7 @@ const vector PLAYER_MAXS = [16, 16, 32];
 #define SLOT2 2
 #define SLOT3 4
 #define SLOT4 8
+#define MAX_SLOT_SELECTION_HISTORY_SIZE 10
 
 .void() removefunc;
 .float owned_by;
@@ -114,6 +115,8 @@ float oldbuttons;
 float zoomed_in;
 float input_slots;
 float oldslots;
+float slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE];
+float slot_selection_history_top;
 
 .string name;
 .string description;
@@ -801,9 +804,6 @@ class CsGrenTimer {
     static CsGrenTimer() GetLast { return last_; };
 };
 
-
-// slot selection history
-float slot_selection_history[10];
 
 // scoreboard stuff
 typedef struct {
