@@ -489,6 +489,7 @@ float PopSlotSelectionHistoryIf(float slot) {
                 slot_selection_history[j-1] = slot_selection_history[j];
             }
 
+            slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE-1] = 0;
             slot_selection_history_top--;
             break;
         }
