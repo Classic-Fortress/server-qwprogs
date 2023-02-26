@@ -4,7 +4,8 @@ FortressOne Server
 New commands
 ------------
 
-* `fo_default_weapon 0` default weapon when using +zelx binds
+* `+slot n` bind. fires nth weapon
+* `fo_default_weapon 0` default weapon when using `+slot` binds
 * `fo_hud_cache 1` less resource intensive hud
 * `fo_hud_fps 60` set hud refresh rate
 * `fo_grentimer_ping_frac 1` fraction of ping to correct for

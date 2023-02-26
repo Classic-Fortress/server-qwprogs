@@ -22,6 +22,37 @@ void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
 
+void PushToSlotSelectionHistory(float value) {
+    if (slot_selection_history_top >= MAX_SLOT_SELECTION_HISTORY_SIZE) {
+        // Stack is full
+        return;
+    }
+
+    slot_selection_history_top += 1;
+    print(sprintf("slot_selection_history_top: %f\n", slot_selection_history_top));
+    slot_selection_history[slot_selection_history_top] = value;
+}
+
+float RemoveSlotFromSelectionHistory(float slot) {
+    if (slot_selection_history_top == -1) {
+        // Stack is empty
+        return -1;
+    }
+
+    for (float i = slot_selection_history_top; i >= 0; i--) {
+        if (slot_selection_history[i] == slot) {
+            for (float j = i+1; j < MAX_SLOT_SELECTION_HISTORY_SIZE; j++) {
+                slot_selection_history[j-1] = slot_selection_history[j];
+            }
+
+            slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE-1] = 0;
+            slot_selection_history_top--;
+            break;
+        }
+    }
+}
+
+
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
@@ -49,14 +80,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     slot_selection_history_top = -1;
 
-    registercommand("+zel1");
-    registercommand("-zel1");
-    registercommand("+zel2");
-    registercommand("-zel2");
-    registercommand("+zel3");
-    registercommand("-zel3");
-    registercommand("+zel4");
-    registercommand("-zel4");
+    registercommand("+slot");
+    registercommand("-slot");
 
     registercommand("login");
     registercommand("fo_hud_editor");
@@ -174,6 +199,24 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     recent_pmove_vel_z = pmove_vel_z;
 }
 
+void Slot_Keydown(float slot) {
+    PushToSlotSelectionHistory(slot);
+    localcmd(sprintf("impulse %f\n", slot));
+    localcmd("+attack\n");
+}
+
+void Slot_Keyup(float slot) {
+    RemoveSlotFromSelectionHistory(slot);
+    if (slot_selection_history_top >= 0) {
+        localcmd(sprintf("impulse %f\n", slot_selection_history[slot_selection_history_top]));
+    } else {
+        if (CVARF(fo_default_weapon)) {
+            localcmd(sprintf("impulse %f\n", CVARF(fo_default_weapon)));
+        }
+        localcmd("-attack\n");
+    }
+}
+
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
     float val;
@@ -181,29 +224,11 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
-        case "+zel1":
-            input_slots |= SLOT1;
+        case "+slot":
+            Slot_Keydown(stof(argv(1)));
             break;
-        case "-zel1":
-            input_slots &= ~SLOT1;
-            break;
-        case "+zel2":
-            input_slots |= SLOT2;
-            break;
-        case "-zel2":
-            input_slots &= ~SLOT2;
-            break;
-        case "+zel3":
-            input_slots |= SLOT3;
-            break;
-        case "-zel3":
-            input_slots &= ~SLOT3;
-            break;
-        case "+zel4":
-            input_slots |= SLOT4;
-            break;
-        case "-zel4":
-            input_slots &= ~SLOT4;
+        case "-slot":
+            Slot_Keyup(stof(argv(1)));
             break;
         case "login":
             FoLogin(argv(1));
@@ -467,73 +492,7 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-void PushSlotSelection(float value) {
-    if (slot_selection_history_top == MAX_SLOT_SELECTION_HISTORY_SIZE) {
-        // Stack is full
-        return;
-    }
-
-    slot_selection_history_top += 1;
-    slot_selection_history[slot_selection_history_top] = value;
-}
-
-float PopSlotSelectionHistoryIf(float slot) {
-    if (slot_selection_history_top == -1) {
-        // Stack is empty
-        return -1;
-    }
-
-    for (float i = slot_selection_history_top; i >= 0; i--) {
-        if (slot_selection_history[i] == slot) {
-            for (float j = i+1; j < MAX_SLOT_SELECTION_HISTORY_SIZE; j++) {
-                slot_selection_history[j-1] = slot_selection_history[j];
-            }
-
-            slot_selection_history[MAX_SLOT_SELECTION_HISTORY_SIZE-1] = 0;
-            slot_selection_history_top--;
-            break;
-        }
-    }
-}
-
-void Handle_Slot_Key(float slot, float impulse) {
-    if (input_slots & slot) { // slot keydown
-        PushSlotSelection(impulse);
-        input_impulse = impulse;
-    } else { // slot keyup
-        PopSlotSelectionHistoryIf(impulse);
-        if (slot_selection_history_top >= 0) {
-            input_impulse = slot_selection_history[slot_selection_history_top];
-        } else {
-            if (CVARF(fo_default_weapon)) {
-                input_impulse = CVARF(fo_default_weapon);
-            }
-        }
-    }
-}
-
 noref void CSQC_Input_Frame() {
-    local float changed_slots = input_slots ^ oldslots;
-    oldslots = input_slots;
-
-    local float slotdowns = changed_slots & input_buttons;
-    local float slotups = changed_slots & ~input_buttons;
-
-    if (input_slots) { // if using slots, you definitely should be shooting
-        input_buttons |= BUTTON0;
-    }
-
-    if (changed_slots & SLOT1) { Handle_Slot_Key(SLOT1, 1); }
-    if (changed_slots & SLOT2) { Handle_Slot_Key(SLOT2, 2); }
-    if (changed_slots & SLOT3) { Handle_Slot_Key(SLOT3, 3); }
-    if (changed_slots & SLOT4) { Handle_Slot_Key(SLOT4, 4); }
-
-    local float changed_buttons = input_buttons ^ oldbuttons;
-    oldbuttons = input_buttons;
-
-    local float keydowns = changed_buttons & input_buttons;
-    local float keyups = changed_buttons & ~input_buttons;
-
     Sync_GameState();
 
     // Intercept rocket jump;
