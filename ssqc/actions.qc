@@ -466,13 +466,6 @@ void (entity pe_player, float f_type) CF_Identify = {
     }
 };
 
-void () RestoreDefaultWeapon = {
-    float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
-    if (default_weapon >= 1 && default_weapon <= TF_NUM_SLOTS) {
-        W_ChangeWeaponSlot(MakeSlot(default_weapon));
-    }
-};
-
 void () TeamFortress_ReloadNext = {
     Slot slot = self.current_slot;
 
@@ -481,7 +474,6 @@ void () TeamFortress_ReloadNext = {
 
         if (FO_CanReload(slot)) {
             FO_ReloadSlot(slot, FALSE);
-            RestoreDefaultWeapon();
             return;
         }
     } while (!IsSameSlot(slot, self.current_slot));

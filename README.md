@@ -4,6 +4,7 @@ FortressOne Server
 New commands
 ------------
 
+* `fo_default_weapon 0` default weapon when using +zelx binds
 * `fo_hud_cache 1` less resource intensive hud
 * `fo_hud_fps 60` set hud refresh rate
 * `fo_grentimer_ping_frac 1` fraction of ping to correct for
@@ -178,7 +179,6 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
 * Quick attack aliases (+quick1-4 will switch weapon and fire).
-* Set default weapon to select after firing (e.g. `setinfo default_weapon 1`).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.

@@ -2345,15 +2345,6 @@ void () ButtonFrame = {
     local float keydowns = changed_buttons & input_buttons;
     local float keyups = changed_buttons & ~input_buttons;
 
-    // +attack keyup
-    if (keyups & BUTTON0) {
-        local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
-
-        if (default_weapon >= 1 && default_weapon <= 4) {
-            self.impulse = InputHandlePyroSlotSwap(self.playerclass, default_weapon);
-        }
-    }
-
     // +special every frame
     if (input_buttons & BUTTON3) {
         if (!cb_prematch && !cease_fire) {

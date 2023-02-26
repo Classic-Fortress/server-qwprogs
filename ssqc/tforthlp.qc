@@ -90,8 +90,6 @@ void () TeamFortress_MOTD = {
         TeamFortress_Alias("slot3", TF_IMPULSE_SLOT3, 0);
         TeamFortress_Alias("slot4", TF_IMPULSE_SLOT4, 0);
 
-        // you shouldn't use these in fte, use setinfo default_weapon and +quick instead
-        // leaving in to prevent breaking change
         TeamFortress_AliasString("+slot1", "impulse 20;+attack");
         TeamFortress_AliasString("-slot1", "-attack;impulse 24");
         TeamFortress_AliasString("+slot2", "impulse 21;+attack");

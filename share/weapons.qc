@@ -549,9 +549,7 @@ float FO_CanReload(Slot slot) {
     return FALSE;
 }
 
-void () RestoreDefaultWeapon;
 void FO_ReloadSlot(Slot slot, float force) {
-    RestoreDefaultWeapon();
     if (self.tfstate & TFSTATE_RELOADING || IsSlotNull(slot))
         return;
 

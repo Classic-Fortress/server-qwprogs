@@ -501,10 +501,12 @@ void Handle_Slot_Key(float slot, float impulse) {
         input_impulse = impulse;
     } else { // slot keyup
         PopSlotSelectionHistoryIf(impulse);
-        if(slot_selection_history_top >= 0) {
+        if (slot_selection_history_top >= 0) {
             input_impulse = slot_selection_history[slot_selection_history_top];
         } else {
-            input_impulse = default_weapon;
+            if (CVARF(fo_default_weapon)) {
+                input_impulse = CVARF(fo_default_weapon);
+            }
         }
     }
 }

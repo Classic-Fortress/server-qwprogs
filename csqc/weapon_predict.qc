@@ -82,11 +82,6 @@ static float CalcPredEnabled(float current_enable,
                              float server_disable, float server_enable,
                              float client_value,
                              float dependent_enabled, string* set_by) {
-    if (csqc_get_user_setting("dw", "default_weapon", "0")) {
-        *set_by = "[default_weapon unsupported, talk to newby to fix your " \
-                  "config to not need it]";
-        return FALSE;
-    }
 
     if (!dependent_enabled) {
         // PP depends on WP, so !WP => !PP
