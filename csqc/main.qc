@@ -29,7 +29,6 @@ void PushToSlotSelectionHistory(float value) {
     }
 
     slot_selection_history_top += 1;
-    print(sprintf("slot_selection_history_top: %f\n", slot_selection_history_top));
     slot_selection_history[slot_selection_history_top] = value;
 }
 
@@ -207,7 +206,7 @@ void Slot_Keydown(float slot) {
 
 void Slot_Keyup(float slot) {
     RemoveSlotFromSelectionHistory(slot);
-    if (slot_selection_history_top >= 0) {
+    if (slot_selection_history_top >= 0) { // still holding another +slot bind
         localcmd(sprintf("impulse %f\n", slot_selection_history[slot_selection_history_top]));
     } else {
         if (CVARF(fo_default_weapon)) {
