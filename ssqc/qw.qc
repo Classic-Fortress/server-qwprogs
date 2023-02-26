@@ -85,6 +85,7 @@ float remote_client_time();
 .float vote_close;              // TRUE if player has closed the map vote, resets on spawn
 .float detpack_left;            // Seconds left to detpack explosion
 .float pipecooldown;            // Time when detpipe command can be issued
+.float detpipe_nesting;         // Used to avoid recursive detpipes when detting self
 .float disguise_skin;           // The skin the spy is changing to
 .float queue_skin;              // The skin the spy will change to after team disguise is finished
 .float last_selected_skin;      // The last skin the spy selected to disguise as
@@ -809,7 +810,7 @@ string settings_to_track_list[4] = {
     "al_max_remote_client_time_offset",
 };
 
-typedef struct setting_t {
+struct setting_t {
     string setting_name;
     string value;
 };

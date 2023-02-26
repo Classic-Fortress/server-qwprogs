@@ -166,7 +166,10 @@ void (float issilent, float force) FO_Spy_Feign = {
     }
 
     // Success.  We will feign.
-    self.next_feign_time = time + feign_rate_limit;
+    if (feign_rate_limit)
+        self.next_feign_time = time + feign_rate_limit;
+    else
+        self.next_feign_time = 0;
 
     // don't check for team color cheat for 5 seconds
     self.immune_to_check = time + 5;

@@ -5,7 +5,6 @@
  * but it gets us started.
  */
 .float waterlevel;
-.float playerclass;
 
 .float ammo_shells;
 .float ammo_nails;
@@ -15,22 +14,8 @@
 float sniperreload = FALSE;
 #endif
 
-// Some preprocessor bug is making __LINE__ not substitute right here most of
-// the time.  Oh well, even if we just get file it's good enough to narrow.
-#define CheckSlot(slot_num) _CheckSlot(__FILE__, __LINE__, slot_num)
-float _CheckSlot(string file, float line, float slot_num) {
-    if (slot_num < 1 || slot_num > TF_NUM_SLOTS) {
-        printf("%s:%d: Invalid slot (%d).  Continuing.\n",
-               file, line, slot_num);
-        return 4;
-    }
-    return slot_num;
-}
-
-#define MakeSlot(slot_num) _MakeSlot(CheckSlot(slot_num))
-// Careful: Slots are not 0-indexed they start from 1.
 // Use SlotIndex() to convert a slot if you're indexing an array.
-Slot _MakeSlot(float slot_num) {
+Slot MakeSlot(float slot_num) {
     if (slot_num < 1 || slot_num > TF_NUM_SLOTS)
         errorf("invalid slot %d\n", slot_num);
 
@@ -197,33 +182,32 @@ int TF_GREN_conv(int tf_gren) {
 
 struct FO_GrenInfo {
     int id;
-    string name;
+    string logname;
     string model;
     int skin;
     vector avelocity;
 
     // Automatically initialized below this line.
     float modelindex;
-    string logname;
 };
 
 FO_GrenInfo fo_grenades[] = {
-    { GREN_NORMAL,  "Grenade",    "hgren2.mdl",    0, '300 300 300',},
-    { GREN_CONC,    "Concussion", "hgren2.mdl",    1, '300 300 300'},
-    { GREN_BLAST,   "Blast",      "blastgren.mdl", 1, '300 300 300'},
-    { GREN_NAIL,    "Nail",       "biggren.mdl",   1, '0 300 0'},
-    { GREN_SHOCK,   "Shock",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_BURST,   "Burst",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_MIRV,    "Mirv",       "biggren.mdl",   0, '0 300 0'},
-    { GREN_NAPALM,  "Napalm",     "biggren.mdl",   2, '0 300 0'},
-    { GREN_FLARE,   "Flare",      "flare.mdl",     1, '300 300 300'},
-    { GREN_GAS,     "Gas",        "grenade2.mdl",  3, '300 300 300'},
-    { GREN_EMP,     "EMP",        "grenade2.mdl",  4, '300 300 300'},
-    { GREN_FLASH,   "Flash",      "flashgren.mdl", 0, '300 300 300'},
-    { GREN_CALTROP, "Caltrop",    "",              0, '300 300 300'},
-    { GREN_MIRVLET, "Mirvlet",    "grenade2.mdl",  1, '250 300 400'},
-    { GREN_RED,     "Red",        "grenade2.mdl",  1, '300 300 300'},
-    { GREN_PIPE,    "Pipe",       "grenade2.mdl",  2, '300 300 300'},
+    { GREN_NORMAL,  "normal",    "hgren2.mdl",    0, '300 300 300',},
+    { GREN_CONC,    "concussion", "hgren2.mdl",    1, '300 300 300'},
+    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, '300 300 300'},
+    { GREN_NAIL,    "nail",       "biggren.mdl",   1, '0 300 0'},
+    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_BURST,   "burst",      "biggren.mdl",   1, '0 300 0'},
+    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, '0 300 0'},
+    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, '0 300 0'},
+    { GREN_FLARE,   "flare",      "flare.mdl",     1, '300 300 300'},
+    { GREN_GAS,     "gas",        "grenade2.mdl",  3, '300 300 300'},
+    { GREN_EMP,     "emp",        "grenade2.mdl",  4, '300 300 300'},
+    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, '300 300 300'},
+    { GREN_CALTROP, "caltrop",    "",              0, '300 300 300'},
+    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, '250 300 400'},
+    { GREN_RED,     "gl",         "grenade2.mdl",  1, '300 300 300'},
+    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, '300 300 300'},
 };
 
 enum {
@@ -424,11 +408,6 @@ float FO_ClassWeaponBySlot(float class, Slot slot) {
     return wi->weapon;
 }
 
-float FO_WeaponSlot(Slot slot) {
-    return FO_ClassWeaponBySlot(self.playerclass, slot);
-}
-
-
 float FO_ClassWeapItemMask(float class) {
     float result = 0;
     for (int i = 1; i <= TF_NUM_SLOTS; i++) {
@@ -439,6 +418,7 @@ float FO_ClassWeapItemMask(float class) {
     return result;
 }
 
+#ifndef CSQC
 float FO_WeaponsMask(entity player) {
     float mask = 0;
     for (float i = 1; i <= TF_NUM_SLOTS; i++) {
@@ -448,6 +428,7 @@ float FO_WeaponsMask(entity player) {
     }
     return mask;
 }
+#endif
 
 // Slightly awkward construction, but convenient for calling from CSQC and SSQC.
 float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
@@ -654,17 +635,19 @@ ImpulseWeapon impulse_weapons[] = {
     { PC_HVYWEAP,
         { WEAP_AXE, WEAP_SHOTGUN, WEAP_SUPER_SHOTGUN, 0, 0, 0, WEAP_ASSAULT_CANNON } },
     { PC_PYRO,
-        { WEAP_AXE, WEAP_SHOTGUN, 0, 0, WEAP_FLAMETHROWER, WEAP_INCENDIARY } },
+        { WEAP_AXE, WEAP_SHOTGUN, 0, 0, 0, WEAP_FLAMETHROWER, WEAP_INCENDIARY } },
     { PC_SPY,
         { WEAP_KNIFE, WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN } },
     { PC_ENGINEER,
         { WEAP_SPANNER, WEAP_RAILGUN, WEAP_SUPER_SHOTGUN } },
+    { PC_RANDOM, { WEAP_AXE } },  // Never instantiated
     { PC_CIVILIAN,  { WEAP_AXE } },
 };
 
-Slot FO_ImpulseToSlot(float impulse) {
+Slot FO_ImpulseToSlot(float playerclass, float impulse) {
     if (impulse < 1 || impulse > 7) return SlotNull;
-    return impulse_weapons[self.playerclass].slots[impulse - 1];
+    Slot r = impulse_weapons[playerclass].slots[impulse - 1];
+    return r;
 }
 
 #ifdef SSQC
@@ -705,18 +688,18 @@ float IsHoldGrenades() {
 }
 #endif
 
-float InputHandlePyroSlotSwap(float input) {
+float InputHandlePyroSlotSwap(float playerclass, float input) {
     float cf_pyro_impulses = IsPyroSlotSwapped();
-    if (self.playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
+    if (playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
         input = 3 - input;
     return input;
 }
 
-Slot FO_SlotByInput(float input) {
+Slot FO_SlotByInput(float playerclass, float input) {
     if (IsUsingOldImpulses()) {
-        return FO_ImpulseToSlot(input);
+        return FO_ImpulseToSlot(playerclass, input);
     } else {
-        input = InputHandlePyroSlotSwap(input);
+        input = InputHandlePyroSlotSwap(playerclass, input);
         if (input >= 1 && input <= TF_NUM_SLOTS)
             return MakeSlot(input);
         else
@@ -752,12 +735,12 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
 
         // This is a little subtle, we need to transform the index both before
         // and after the walk so that we don't walk back into ourselves.
-        i = InputHandlePyroSlotSwap(SlotIndex(slot) + 1) - 1;
+        i = InputHandlePyroSlotSwap(playerclass, SlotIndex(slot) + 1) - 1;
         do {
             i = (i + direction + len) % len;
         } while (slot_weaps[i] == 0);
 
-        i = InputHandlePyroSlotSwap(i + 1);
+        i = InputHandlePyroSlotSwap(playerclass, i + 1);
         return MakeSlot(i);
     }
 }
@@ -830,10 +813,8 @@ void FO_Weapons_Init() {
         FO_GrenInfo* gdesc = &fo_grenades[i];
         ASSERTD_EQ(GREN_FIRST + i, gdesc->id);
 
-        if (gdesc->name != "") {
-            gdesc->name = strcat(gdesc->name, " grenade");
-            gdesc->logname = strcat(strtolower(gdesc->name), "grenade");
-        }
+        if (i < GREN_RED)
+            gdesc->logname = strcat(strtolower(gdesc->logname), "grenade");
 
         if (gdesc->model != "") {
             gdesc->model = strcat("progs/", gdesc->model);

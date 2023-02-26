@@ -170,6 +170,8 @@ void () SniperSight_Create = {
 
     sight.think = SniperSight_Update;
     sight.nextthink = time + 0.05;
+#pragma warning disable F326
     if (ClientPred_Enabled(self, CSQC_SNIPER_SIGHT))
         sight.customizeentityforclient = sight_send_filter;
+#pragma warning enable F326
 };

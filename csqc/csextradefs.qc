@@ -38,7 +38,8 @@ vector TEXT_TEAM_COLOUR[] = {
     MENU_TEXT_BLUE_FO,
     MENU_TEXT_RED_FO,
     MENU_TEXT_YELLOW_FO,
-    MENU_TEXT_GREEN_FO
+    MENU_TEXT_GREEN_FO,
+    MENU_TEXT_SPEC_FO,
 };
 
 const float DEFAULT_VIEWHEIGHT = 22;
@@ -530,7 +531,6 @@ enumflags {
     FL_GT_SOUND,
     FL_GT_THROWN,
     FL_GT_ADJPING,
-    FL_GT_FULL_RTT,
 };
 
 void(string identify) Hud_DrawIdentifyPanel;
@@ -566,9 +566,9 @@ struct {
     PanelID active_panel;
     float last_update;
     int draw_direct;
-    Draw_Args draw_cache[255];
+    Draw_Args draw_cache[1000];
     int draw_count;
-    float free_cache[255];
+    float free_cache[1000];
     int free_count;
 } hud_render_cache;
 
@@ -624,7 +624,7 @@ float HRC_NewFrame() {
     /* hud_render_cache.last_update = time; */
 
     if (!CVARF(fo_hud_cache) ||
-        fo_hud_menu_active || fo_hud_editor || showingscores ||
+        fo_hud_menu_active || fo_hud_editor ||
         getHudPanel(HUDP_MAP_MENU)->Display) {
         // Either explicitly disabled, or rendering a more complicated scene
         // like the editor for which we'll just display in place.
@@ -635,7 +635,6 @@ float HRC_NewFrame() {
     hud_render_cache.enabled = TRUE;
     return FALSE;
 }
-
 
 static Draw_Args* next_args() {
     float idx;
@@ -717,7 +716,8 @@ void HRC_Render() {
     }
 }
 
-DEFCVAR_FLOAT(fo_grentimer_nostack, 0);
+DEFCVAR_FLOAT(fo_grentimer_ping_frac, 1);  // Fraction of ping to correct for.
+DEFCVAR_FLOAT(fo_grentimer_nostack, 0);    // When set, only play soonest timer.
 
 class CsGrenTimer;
 CsGrenTimer grentimers[NUM_GREN_TIMERS];
@@ -806,7 +806,7 @@ class CsGrenTimer {
 
 
 // scoreboard stuff
-typedef struct {
+struct FO_ScoreBoardLine{
     float ping;
     float pl;
     string classtext;
@@ -824,7 +824,7 @@ typedef struct {
     float damagetaken;
     float ready;
     float chat;
-} FO_ScoreBoardLine;
+};
 
 // fte maxclients is 255, right?
 #define FO_SCOREBOARDLINES_LENGTH 32
@@ -846,6 +846,12 @@ string FO_ScoreBoardColumns[] = {
     "dmgt"
 };
 
+struct {
+    string icon_ready;
+    string icon_chat;
+    string icon_afk;
+} FO_ScoreBoardAssets;
+
 DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
@@ -857,8 +863,6 @@ float player_class;
 float is_observer;
 float is_player;
 float is_alive;
-//float health;
-float oldhealth;
 float painfinished;
 vector thisorigin;
 float jump_counter;

@@ -1898,7 +1898,7 @@ void W_ChangeWeaponByInput(float input) {
     if (input < 1 || input > GetMaxWeaponInput())
         return;
 
-    Slot slot = FO_SlotByInput(input);
+    Slot slot = FO_SlotByInput(self.playerclass, input);
     if (IsSlotNull(slot))
         return;
 
@@ -2350,7 +2350,7 @@ void () ButtonFrame = {
         local float default_weapon = FO_GetUserSetting(self, "default_weapon", "dw", "0");
 
         if (default_weapon >= 1 && default_weapon <= 4) {
-            self.impulse = InputHandlePyroSlotSwap(default_weapon);
+            self.impulse = InputHandlePyroSlotSwap(self.playerclass, default_weapon);
         }
     }
 
@@ -2528,14 +2528,12 @@ void () W_WeaponFrame = {
     }
 
     if (self.impulse == TF_CLASSMENU && self.playerclass != PC_MEDIC) {
-        if (self.playerclass == PC_ENGINEER)
-            Menu_Engineer(self);
-        else if (self.playerclass == PC_SCOUT)
-            Menu_Scout();
-        else if (self.playerclass == PC_SPY)
-            Menu_Spy(self);
-        else if (self.playerclass == PC_DEMOMAN)
-            TeamFortress_DetpackMenu();
+        switch (self.playerclass) {
+            case PC_ENGINEER: Menu_Engineer(self); break;
+            case PC_SCOUT: Menu_Scout(); break;
+            case PC_SPY: Menu_Spy(self); break;
+            case PC_DEMOMAN: TeamFortress_DetpackMenu(); break;
+        }
 
         self.impulse = 0;
         return;
@@ -2579,7 +2577,8 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     } else if (self.impulse >= TF_QUICKSLOT1 &&
                self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
-        float input = InputHandlePyroSlotSwap(self.impulse - TF_QUICKSLOT1 + 1);
+        float input = InputHandlePyroSlotSwap(self.playerclass,
+                                              self.impulse - TF_QUICKSLOT1 + 1);
         Slot slot = MakeSlot(input);
 
         if (IsSameSlot(slot, self.current_slot)) {

@@ -394,12 +394,9 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
     playing_ = FALSE;
 
     if (this.flags_ & FL_GT_ADJPING) {
-        float rtt = pstate_pred.client_ping;
+        float rtt = pstate_pred.client_ping * CVARF(fo_grentimer_ping_frac);
         if (RewindFlagEnabled(REWIND_GRENADES))
             rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
-        else if ((this.flags_ & FL_GT_FULL_RTT) == 0)
-            rtt /= 2;  // Not actually right, but preserve buggy behavior for
-                       // now as people are used to it.
         expires_at_ -= rtt / 1000;
     }
 
@@ -432,7 +429,6 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     switch (CVARF(fo_grentimer)) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
-        case 3: timer_flags = FL_GT_FULL_RTT;  // Intentional fall-through.
         // 2 [and something sane for anything we don't recognize.]
         default: timer_flags |= FL_GT_SOUND | FL_GT_ADJPING; break;
     }

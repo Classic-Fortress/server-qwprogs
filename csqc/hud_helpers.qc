@@ -381,11 +381,12 @@ void FO_Hud_Editor_LoadSettings(string filename)
     FO_Hud_InitSystemPanels();
 }
 
+static FO_Hud_Panel zero_panel;
 
 // Inherits active render cache id
 void GetNewPanel(vector pos, vector fillSize, float scale, float display, float orientation, string name)
 {
-    FO_Hud_Panel pnl;
+    FO_Hud_Panel pnl = zero_panel;
 
     pnl.Position = pos;
     pnl.FillSize = fillSize;

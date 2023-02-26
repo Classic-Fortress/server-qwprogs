@@ -422,13 +422,16 @@ inline FO_WeapInfo* WP_CurrentWeapon() {
     return SlotWI(CurrentSlot());
 }
 
-void Pred_Sound(SoundIndex snd, float vol = 1) {
-    if (snd == SND_NONE || !IsEffectFrame() || pstate_pred.tfstate & TFSTATE_FLASHED)
+void RawPred_Sound(SoundIndex snd, float vol = 1) {
+    if (snd == SND_NONE || pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
-    last_pred_sound = time;
-    setorigin(pred_sound_entity, pmove_org);
-    sound(pred_sound_entity, CHAN_WEAPON, Snd_Get(snd)->sound, vol, ATTN_NORM);
+    localsound(Snd_Get(snd)->sound, CHAN_WEAPON, vol);
+}
+
+void Pred_Sound(SoundIndex snd, float vol = 1) {
+    if (IsEffectFrame())
+        RawPred_Sound(snd, vol);
 }
 
 void PredProj_Sound(int proj_type, float vol = 1) {
@@ -458,7 +461,7 @@ void WP_ServerUpdate() {
 }
 
 static Slot InputToSlot(float input) {
-    Slot result = FO_SlotByInput(input);
+    Slot result = FO_SlotByInput(pstate_pred.playerclass, input);
     return result;
 }
 
@@ -962,7 +965,6 @@ void MP_SetSpeed() {
     // lower speeds.  Except for transitions where the maxspeed is reset.
     if (speed > last_set || fastest > speed) {
         last_set = speed;
-        CVARF(cl_forwardspeed) = CVARF(cl_backspeed) = CVARF(cl_sidespeed) = speed;
 
         string spd = ftos(speed);
         localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
@@ -1128,7 +1130,13 @@ void FPP_Init(int fpp_type, entity proj) {
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
 DEFCVAR_FLOAT(r_rocketlight, 1);
-DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");
+DEFCVAR_STRING(r_rocketlight_color, "2.0 1.0 0.25 200");  // Radius ignored.
+
+static float HasLight(int fpp_type) {
+    if (!CVARF(r_rocketlight))
+        return FALSE;
+    return fpp_type == FPP_ROCKET || fpp_type == FPP_INCENDIARY;
+}
 
 .float trail_started;
 float PP_PredrawActive() {
@@ -1154,11 +1162,8 @@ float PP_PredrawActive() {
         self.oldorigin = self.origin;
     }
 
-#if 0 // TODO
-    if (self.modelflags & MF_ROCKET && CVARF(r_rocketlight)) {
-        dynamiclight_add(self.origin, 200, CVARS(r_rocketlight_color), 0);
-    }
-#endif
+    if (HasLight(self.fpp.index))
+        dynamiclight_add(self.origin, 200, stov(CVARS(r_rocketlight_color)));
 
     return PREDRAW_AUTOADD;
 }
@@ -1320,7 +1325,7 @@ static float CanThrowGrenade(int gren_type) {
 }
 
 static void W_ThrowGren(float is_throw) {
-    if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES))
+    if (!QcPhysics() || !RewindFlagEnabled(REWIND_GRENADES) || getstatf(STAT_NOFIRE))
         return;
 
     if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
@@ -1363,6 +1368,9 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
 }
 
 void WP_Attack() {
+    if (getstatf(STAT_NOFIRE))
+        return;
+
     FO_WeapInfo* wi = WP_CurrentWeapon();
 
     if (wi->predict_type == NO_PREDICT)
@@ -1534,12 +1542,14 @@ void InitProjectileEnt(float sendflags) {
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
     float has_predicted = FALSE;
-    if (self.owner_entnum == pengine.player_entnum) {
+    if (PP_Enabled() && self.owner_entnum == pengine.player_entnum) {
         has_predicted = PredProjectile_MatchProjectile();
-        if (WP_Enabled() && !has_predicted &&
-            self.s_time > last_pred_sound + PP_EPS/2)
-            // Missing projectile implies we missed the local sound, patch it up.
-            PredProj_Sound(self.fpp.index);
+
+        // Either missed prediction, or not active.  We don't want to condition
+        // on effect frames here as this isn't predicted; stronger: if we missed
+        // the sound we probably missed an effect frame!
+        if (!has_predicted)
+            RawPred_Sound(FPP_Get(self.fpp.index)->snd);
     }
 
     if (!has_predicted) {

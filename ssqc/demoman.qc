@@ -20,6 +20,12 @@ float (float force) TeamFortress_DetonatePipebombs = {
     if (time < self.pipecooldown && !force)
         return impulse_queue ? FALSE : TRUE;
 
+    if (self.detpipe_nesting > 0)
+        return TRUE;
+    // It's possible that we'll kill ourselves when we detonate pipebombs and
+    // initiate a nested det; exclude this to avoid iterating removed ents.
+    self.detpipe_nesting++;
+
     int count;
     entity* pipes = find_list(classname, "pipebomb", EV_STRING, count);
 
@@ -42,9 +48,11 @@ float (float force) TeamFortress_DetonatePipebombs = {
         }
     }
 
+    // NOTE: nested death-dets would not trigger double unwind due to `force==1`
     if (rewound)
         FOPlayer::RestoreAll();
 
+    self.detpipe_nesting--;
     return TRUE;
 };
 

@@ -1104,6 +1104,7 @@ struct {
 
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample) {
     ScreenSize = [width, height, menushown];
+
     if (HRC_NewFrame()) {
         float hts = perf_start_sample(&hud_timing, perf_sample);
         sui_begin(width, height);
@@ -1116,6 +1117,19 @@ void Hud_UpdateView(float width, float height, float menushown, float perf_sampl
 
     if (!hud_render_cache.enabled)
         return;
+
+    // Handle appearance/removal of scoreboard.  Invalidate if it's disappearing
+    // and render it immediately for responsiveness if it's been brought up.
+    static float last_showingscores;
+    if (last_showingscores != showingscores) {
+        if (last_showingscores) {
+            HRC_Invalidate(HUDP_SHOWSCORES);
+        } else {
+            incremental_hud.idx = HUDP_SHOWSCORES - HUDP_FIRST;
+            incremental_hud.last_draw[incremental_hud.idx] = 0;
+        }
+        last_showingscores = showingscores;
+    }
 
     // Skip any not-displayed elements.
     float i = 0, idx = incremental_hud.idx;
