@@ -658,9 +658,6 @@ static void WP_ChangeIfQueued() {
 void WP_Impulse() {
     WP_HandleHeavyInputs();
 
-    // Note: We might have no impulse, but a queued slot here.
-    float quick_swap = FALSE;
-
     // Impulses that are NOT held by attack_finished / reloading.
     float match = TRUE;
     switch (pstate_pred.impulse) {
@@ -700,25 +697,14 @@ void WP_Impulse() {
             WP_ReloadNext();
             break;
 
-        case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
-            pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
-            quick_swap = TRUE;
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
             Slot slot = InputToSlot(pstate_pred.impulse);
             if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot)) {
-                if (quick_swap)
-                    pstate_pred.tfstate |= TFSTATE_QUICKSLOT;
                 pstate_pred.queue_slot = slot;
             }
             break;
         }
 
-        case TF_QUICKSTOP:
-            if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0) {
-                pstate_pred.impulse = 0;
-                break;
-            }
-            pstate_pred.tfstate &= ~TFSTATE_QUICKSLOT;  // Intentional fall-through.
         case TF_WEAPLAST:
             pstate_pred.queue_slot = pstate_pred.last_slot; break;
 
@@ -1185,17 +1171,6 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.owner_entnum = player_localentnum;
   proj.owner = pengine.player_ent;
   FPP_Init(fpp_type, proj);
-
-#if 0
-  // Packet loss doesnt guarantee the server will actually register quickslot
-  // since it's a separate command from the attack.  We can improve this in the
-  // future via either a button or just combining them on an impulse.  But for
-  // now just dont create the projectile, it's usually swapping to a hitscan
-  // weapon anyway.
-  if (pstate_pred.tfstate & TFSTATE_QUICKSLOT &&
-      !(pstate_server.tfstate & TFSTATE_QUICKSLOT))
-      return __NULL__;
-#endif
 
   ProjectResult push_t = Forward_ProjectOffset(fpp_type, interp_ms());
 
