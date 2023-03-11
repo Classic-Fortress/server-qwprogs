@@ -677,6 +677,8 @@ struct FO_ScoreBoard {
 
 static FO_ScoreBoard score_board;
 
+DEFCVAR_FLOAT(fo_simple_names, 0);
+
 vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                                 float padding, vector columnColour) {
     vector textcolour = MENU_TEXT_1;
@@ -786,6 +788,9 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         string n = lines[i].name;
+        if (CVARF(fo_simple_names))
+            n = strdecolorize(n);
+
         if (stringwidth(n, TRUE, smalltext) >= namespace - padding) {
             n = strdecolorize(n);
             n = substring(n, 0, floor(namespace - padding) / smalltext.x);
