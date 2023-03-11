@@ -2543,6 +2543,18 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     }
 
+    // +slot/-slot handle attack; we only need to swap back to last weapon.
+    // Let's see if we can get away with just treating this as last weapon;
+    // there were already so many edge cases in the old code such as swapping on
+    // an empty weapon.
+    if (self.impulse == TF_QUICKSTOP) {
+        if (self.tfstate & TFSTATE_QUICKSLOT)
+            self.impulse = TF_WEAPLAST;
+        else
+            self.impulse = 0;
+        self.tfstate &= ~TFSTATE_QUICKSLOT;
+    }
+
     float can_change_weapon = WeaponReady();
 
     // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
@@ -2553,6 +2565,19 @@ void () W_WeaponFrame = {
         can_change_weapon) {
         // slot 1-4 (or 1-7) binds
         W_ChangeWeaponByInput(self.impulse);
+        self.impulse = 0;
+    } else if (self.impulse >= TF_QUICKSLOT1 &&
+               self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
+        float input = InputHandlePyroSlotSwap(self.playerclass,
+                                              self.impulse - TF_QUICKSLOT1 + 1);
+        Slot slot = MakeSlot(input);
+
+        if (IsSameSlot(slot, self.current_slot)) {
+            self.tfstate &= ~TFSTATE_QUICKSLOT;
+        } else {
+            self.tfstate |= TFSTATE_QUICKSLOT;
+            W_ChangeWeaponSlot(slot);
+        }
         self.impulse = 0;
     }
 
