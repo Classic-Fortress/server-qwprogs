@@ -1,39 +1,30 @@
 void Menu_Cancel();
 void FO_Menu_Game(float);
 
-static float HudInputEscape() {
-    if (!fo_hud_menu_active && !fo_hud_editor)
-        return FALSE;
-
-    Menu_Cancel();
-    fo_hud_editor = FALSE;
-    return TRUE;
-}
-
+// TRUE --> capture input
+// FALSE --> pass input on
 float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
     if (fo_hud_editor || fo_hud_menu_active) {
         sui_input_event(evtype, scanx, chary, devid);
         float menu_mouse = (fo_hud_menu_active && (CurrentMenu.flags & FO_MENU_FLAG_USE_MOUSE));
+
         switch (evtype) {
-            case IE_KEYUP:
-                if (scanx == K_ESCAPE && HudInputEscape())
-                    return TRUE;
-                break;
             case IE_KEYDOWN:
-                if (scanx == K_ESCAPE)
-                    return TRUE;
-                if (scanx == K_MOUSE1 && !menu_mouse)
-                    return FALSE;
                 if (fo_hud_menu_active)
-                    return fo_menu_process_input(CurrentMenu, scanx);
+                    fo_menu_process_input(CurrentMenu, scanx);
+                if (scanx == K_ESCAPE) {
+                    Menu_Cancel();
+                    FO_Hud_Editor_Cancel();
+                    return TRUE;  // Always capture escape
+                }
                 break;
-            case IE_MOUSEDELTA:
-                return (fo_hud_editor || menu_mouse);
             case IE_MOUSEABS:
                 Mouse.x = scanx;
                 Mouse.y = chary;
-                return (fo_hud_editor || menu_mouse);
+                break;
         }
+
+        return fo_hud_editor;  // capture iff hud-editor
     } else if(getHudPanel(HUDP_MAP_MENU)->Display) {
         sui_input_event(evtype, scanx, chary, devid);
 
@@ -119,7 +110,7 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
     } else {
         switch (evtype)
         {
-            case IE_KEYUP:
+            case IE_KEYDOWN:
                 switch (scanx)
                 {
                     case K_ESCAPE:
@@ -127,34 +118,9 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
                         return TRUE;
                 }
                 break;
-            case IE_KEYDOWN:
-                switch (scanx)
-                {
-                    case K_ESCAPE:
-                        return TRUE;
-                }
-                break;
             default:
         }
     }
-/*
- * better not
-    if(evtype == IE_KEYUP) {
-        tokenize(findkeysforcommand("impulse 5"));
-        float imp5_1 = stof(argv(0));
-        float imp5_2 = stof(argv(1));
-        tokenize(findkeysforcommand("menu"));
-        float menucmd_1 = stof(argv(0));
-        float menucmd_2 = stof(argv(1));
-        switch (scanx) {
-            case imp5_1:
-            case imp5_2:
-            case menucmd_1:
-            case menucmd_2:
-                FO_Menu_Special(TRUE);
-                return TRUE;
-        }
-    }
-*/
+
     return FALSE;
 }
