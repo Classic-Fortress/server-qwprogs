@@ -55,6 +55,10 @@ void FO_Hud_Editor_LoadDefaultSettings()
     getHudPanel(HUDP_SPEEDBAR)->Scale = 1.00;
     getHudPanel(HUDP_SPEEDBAR)->Snap = HUD_SNAP_CENTER;
     getHudPanel(HUDP_SPEEDBAR)->Position = [0, 30];
+
+    getHudPanel(HUDP_PING)->Display = 0;
+    getHudPanel(HUDP_PING)->Snap = HUD_SNAP_TOP_RIGHT;
+    getHudPanel(HUDP_PING)->Scale = 1.00;
 }
 
 void FO_Hud_Editor_List_Panels() = {

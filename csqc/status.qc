@@ -677,6 +677,8 @@ struct FO_ScoreBoard {
 
 static FO_ScoreBoard score_board;
 
+DEFCVAR_FLOAT(fo_simple_names, 0);
+
 vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                                 float padding, vector columnColour) {
     vector textcolour = MENU_TEXT_1;
@@ -786,6 +788,9 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         string n = lines[i].name;
+        if (CVARF(fo_simple_names))
+            n = strdecolorize(n);
+
         if (stringwidth(n, TRUE, smalltext) >= namespace - padding) {
             n = strdecolorize(n);
             n = substring(n, 0, floor(namespace - padding) / smalltext.x);
@@ -1070,6 +1075,8 @@ void drawSpeedBar(PanelID panelid, string text) {
     HRC_drawstring(position + '3 0 0', ftos((int)tspeed), '9 9 0', '1 1 1');
 }
 
+string getPingPanelText();
+
 var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(PanelID panelid, string text, string icon),
@@ -1123,6 +1130,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
     {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? ftos((int)PlanarSpeed()) : "";}, 0, 4},
     {HUDP_SPEEDBAR, "speedbar", "Speed Bar",           '4 30',    '150 10',  1,1.4,0,0,0, drawSpeedBar, {return "";}, 0, 4},
+    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, 4},
     {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0,1, doNothing, {return "";}, 1},
 };
 
