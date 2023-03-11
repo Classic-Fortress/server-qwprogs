@@ -50,6 +50,11 @@ void FO_Hud_Editor_LoadDefaultSettings()
     getHudPanel(HUDP_MAP_MENU)->Position = [(width / 2) - (getHudPanel(HUDP_MAP_MENU)->FillSize.x / 2), 30];
     getHudPanel(HUDP_MAP_MENU)->Scale = 1.00;
     getHudPanel(HUDP_MAP_MENU)->Display = 0;
+
+    getHudPanel(HUDP_SPEEDBAR)->Display = 0;
+    getHudPanel(HUDP_SPEEDBAR)->Scale = 1.00;
+    getHudPanel(HUDP_SPEEDBAR)->Snap = HUD_SNAP_CENTER;
+    getHudPanel(HUDP_SPEEDBAR)->Position = [0, 30];
 }
 
 void FO_Hud_Editor_List_Panels() = {
