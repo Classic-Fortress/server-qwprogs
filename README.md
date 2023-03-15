@@ -4,6 +4,7 @@ FortressOne Server
 New commands
 ------------
 
+* `cmd updateserver` tell server to pull latest progs and maps
 * `fo_hud_cache 1` less resource intensive hud
 * `fo_hud_fps 60` set hud refresh rate
 * `fo_grentimer_ping_frac 1` fraction of ping to correct for

@@ -185,6 +185,14 @@ void () Admin_CeaseFire = {
     }
 };
 
+void () Admin_UpdateServer = {
+    bprint(PRINT_HIGH, "Server updating...\n");
+
+    float filehandle;
+    filehandle = fopen("upload_ready", FILE_WRITE);
+    fclose(filehandle);
+};
+
 void NotifyPauseUnpause(float is_pause) {
     int count;
     entity* p = find_list(classname, "player", EV_STRING, count);
