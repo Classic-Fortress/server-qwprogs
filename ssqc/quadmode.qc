@@ -662,11 +662,7 @@ void () StartQuadRound =
  		}
 
 		localcmd("stop\n");
-
-		// tell updater script to run
-		float filehandle;
-		filehandle = fopen("upload_ready", FILE_WRITE);
-		fclose(filehandle);
+		Admin_UpdateServer();
 
 		return;
 	}

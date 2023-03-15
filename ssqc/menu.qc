@@ -1211,6 +1211,7 @@ void () QuadMode;
 void () PubMode;
 void () DuelMode;
 void () RestartMap;
+void () Admin_UpdateServer;
 void () Menu_Admin =
 {
     if(self.is_admin && infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
@@ -1575,6 +1576,9 @@ void (float inp) Menu_Admin_Input =
 
                 case 7: // Restart Current Map Option
                     RestartMap();
+                    break;
+                case 9:
+                    Admin_UpdateServer();
                     break;
             }
         } 

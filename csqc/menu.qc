@@ -392,7 +392,7 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
         {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         {"8","End Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcebreak\n"); Menu_Cancel();},MENU_BORDER_WARNING},
-        MenuSpacer,
+        {"9","Update Server","","",FO_MENU_STATE_NORMAL,{localcmd("cmd updateserver\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
         {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},

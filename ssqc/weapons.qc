@@ -80,6 +80,7 @@ void () Admin_CycleDeal;
 void () Admin_DoKick;
 void () Admin_DoBan;
 void () Admin_CeaseFire;
+void () Admin_UpdateServer;
 void () Admin_ListIPs;
 
 void () fadetoblack;

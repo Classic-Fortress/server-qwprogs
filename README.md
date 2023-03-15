@@ -4,6 +4,7 @@ FortressOne Server
 New commands
 ------------
 
+* `cmd updateserver` tell server to pull latest progs and maps
 * `+slot n` bind. fires nth weapon
 * `fo_default_weapon 0` default weapon when using `+slot` binds
 * `fo_hud_cache 1` less resource intensive hud
