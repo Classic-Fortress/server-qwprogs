@@ -392,6 +392,8 @@ void (entity pe_player, float f_type) CF_Identify = {
             return;
         }
 
+        s_name = strdecolorize(s_name);
+
         // set name + health (if medic)
         if (f_maxhealth && (f_friendly || f_fakefriendly)) {
             s_id_string = strcat(s_name, "\n");

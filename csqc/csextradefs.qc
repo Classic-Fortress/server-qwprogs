@@ -456,6 +456,8 @@ enum PanelID:float {
     HUDP_GUN7,
     HUDP_GUN8,
     HUDP_SPEED,
+    HUDP_SPEEDBAR,
+    HUDP_PING,
     HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
     HUDP_LAST = HUDP_OPTIONS,
 

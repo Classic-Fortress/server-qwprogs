@@ -59,6 +59,16 @@ inline float interp_time() {
 
 DECLARE_MOVING_AVG(avg_ping, 20);
 
+string getPingPanelText() {
+    float minv, maxv, avg, varr;
+
+    read_online_avg(&avg_ping, &avg, &varr);
+    compute_maxmin(&avg_ping.samples, &minv, &maxv);
+    float pl = getplayerkeyfloat(player_localnum, INFOKEY_P_PACKETLOSS);
+
+    return sprintf("^7%d^1/^7%d^1/^7%d ^8ms ^7%d^8%%\n", minv, avg, maxv, pl);
+}
+
 static void update_avg_ping() {
     // We use a fairly low clamp here because:
     //  a) We want to limit the effect of momentary total loss
