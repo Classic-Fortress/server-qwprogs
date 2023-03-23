@@ -23,6 +23,11 @@ vector MENU_TEXT_WARNING = '0.8 0 0';
 vector MENU_TEXT_GREEN = '0 0.8 0';
 vector MENU_DARKEN = '1 1 1';
 
+vector SCOREB_HEADER = '0.7 0.7 0.7';
+vector SCOREB_NAME  = '1 1 1';
+vector SCOREB_FIELD  = '0.9 0.9 0.9';
+vector SCOREB_SELF_BG  = '0.8 0.8 0.8';
+
 vector MENU_TEXT_SMALL = '8 8 0';
 vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';

@@ -680,8 +680,7 @@ static FO_ScoreBoard score_board;
 DEFCVAR_FLOAT(fo_simple_names, 0);
 
 vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
-                                float padding, vector columnColour) {
-    vector textcolour = MENU_TEXT_1;
+                                float padding, vector team_colour) {
     vector smalltext = MENU_TEXT_SMALL * panel.Scale;
     vector yspacer = [0, 20];
     vector position = [0, 0];
@@ -709,11 +708,11 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                 case "ping":
                 case "pl":
                 case "name":
-                    sui_text(position, smalltext, colname, columnColour, .7, 0);
+                    sui_text(position, smalltext, colname, SCOREB_HEADER, .7, 0);
                     break;
             }
         } else {
-            sui_text(position, smalltext, colname, columnColour, .7, 0);
+            sui_text(position, smalltext, colname, SCOREB_HEADER, .7, 0);
         }
 
         txtlength = strlen(colname) * smalltext.x;
@@ -731,37 +730,27 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
             continue;
 
         lineCount++;
-        float trans = 1;
+        float alpha = 1;
         if (lineCount % 2 == 0)
-            trans = .7;
+            alpha = .7;
         else
-            trans = .3;
+            alpha = .3;
 
-        sui_fill(position, size, columnColour, trans, 0);
-
-        textcolour = MENU_TEXT_1;
-        if(lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
-            textcolour = MENU_TEXT_4;
-        } else if(lines[i].name == getplayerkeyvalue(player_localentnum - 1, "name")) {
-            textcolour = '0.8 0 0.8';
-        } else {
-            if (prematch && lines[i].team_no && !SBAR.CountdownStarted
-                && lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
-                float ready = lines[i].ready;
-                if (ready)
-                    textcolour = MENU_TEXT_GREEN_FO;
-                else
-                    textcolour = MENU_TEXT_RED_FO;
-            }
+        vector fill_colour = team_colour;
+        if (lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
+            alpha = 0.5;
+            fill_colour = SCOREB_SELF_BG;
         }
+
+        sui_fill(position, size, fill_colour, alpha, 0);
 
         float col = 0, alpha = 1, flags = 0;
         string val = AbbreviateNumberToString(lines[i].ping);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].pl);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
@@ -776,14 +765,14 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                 }
             }
 
-            sui_text(position, smalltext, c, textcolour, 1, 0);
+            sui_text(position, smalltext, c, SCOREB_FIELD, 1, 0);
         }
 
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
             val = AbbreviateNumberToString(lines[i].score);
-            drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+            drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         }
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
@@ -795,7 +784,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
             n = strdecolorize(n);
             n = substring(n, 0, floor(namespace - padding) / smalltext.x);
         }
-        sui_text(position, smalltext, n, textcolour, 1, 0);
+        sui_text(position, smalltext, n, SCOREB_NAME, 1, 0);
         position_x += namespace;
 
         vector iconpos = [size_x, position_y];
@@ -839,39 +828,39 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         }
 
         val = AbbreviateNumberToString(lines[i].caps);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].touches);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].kills);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].teamkills);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].deaths);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].afflicted);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].teamafflicted);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].damagegiven);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].damagetaken);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         position_x = 0;
