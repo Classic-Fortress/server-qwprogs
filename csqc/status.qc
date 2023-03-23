@@ -740,6 +740,9 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         if (lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
             alpha = 0.5;
             fill_colour = SCOREB_SELF_BG;
+        } else if (lines[i].name == getplayerkeyvalue(player_localentnum - 1, "name")) {
+            alpha = 0.5;
+            fill_colour = SCOREB_SPECTATED_BG;
         }
 
         sui_fill(position, size, fill_colour, alpha, 0);
