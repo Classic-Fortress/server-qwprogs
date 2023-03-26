@@ -529,6 +529,8 @@ void CSQC_Shutdown() {
 DEFCVAR_FLOAT(cl_delay_packets, 0);
 DEFCVAR_FLOAT(fov, 90);
 
+void WP_UpdatePings();
+
 float last_servercommandframe;
 void _Sync_ServerCommandFrame() {
     // Server command frames are monotonically unique, we can skip processing
@@ -558,10 +560,8 @@ void _Sync_ServerCommandFrame() {
     // Use an undocumented ezquake compat feature to figure out whether we
     // have focus or not, skip updates in this case due to lowered network fps.
     float is_unfocused = getplayerkeyfloat(player_localnum, "chat") & 2;
-    if (!is_unfocused) {
-        UpdateMinPing();
-        WPP_UpdateEnable(FALSE);
-    }
+    if (!is_unfocused)
+        WP_UpdatePings();
 
     CsGrenTimer::UpdateSoundStack();
 }

@@ -7,8 +7,8 @@ DEFCVAR_FLOAT(wpp_min_ping, -1);
 DEFCVAR_FLOAT(wpp_weap_predict, -1);
 DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
-DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
-DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
+DEFCVAR_FLOAT(wpp_adv_selfp_ms, 0);
+DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
 DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 struct pengine_t {
@@ -27,6 +27,9 @@ struct pengine_t {
     float view_mask;
 } pengine;
 
+static float inst_ping_ms;
+static float inst_ping_t;
+
 inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
 inline float WPP_ViewModelMask() { return pengine.view_mask; }
@@ -40,17 +43,55 @@ float WP_MinPing() {
 
 void WP_UpdateViewModel();
 
-inline float interp_ms() {
+inline float server_time_ms() {
     return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
 }
 
-inline float interp_dt() {
-    return interp_ms() / 1000.0;
+inline float server_time_dt() {
+    return server_time_ms() / 1000.0;
 }
 
-inline float interp_time() {
-    return time + interp_dt();
+inline float server_time() {
+    return time + server_time_dt();
 }
+
+DEFCVAR_FLOAT(cl_predict_players, 1);
+DEFCVAR_FLOAT(cl_predict_players_latency, 0.9);
+DEFCVAR_FLOAT(cl_predict_players_nudge, 0.02);
+DEFCVAR_FLOAT(cl_predict_players_frac, 0.9);
+
+static float pred_time_dt;  // delta-time that the world predicted forward by
+
+// Match up local interpolation of projectile position with that of players.
+static void update_interp_time_dt() {
+    if (CVARF(fo_wpp_beta) & 2 == 0)  // Temporary gate bit.
+        return;
+
+    if (!CVARF(cl_predict_players)) {
+        pred_time_dt = 0;
+        return;
+    }
+
+    // Maybe prefer smoothed value here?
+    pred_time_dt = inst_ping_t;
+
+    if (CVARF(cl_predict_players_latency) < 1)
+        pred_time_dt *= 1 - CVARF(cl_predict_players_latency);
+    pred_time_dt *= CVARF(cl_predict_players_frac);
+
+    pred_time_dt += CVARF(wpp_adv_selfp_ms) + CVARF(cl_predict_players_nudge);
+    pred_time_dt = min(pred_time_dt, inst_ping_t);
+}
+
+// Unlike server_time(), interp_time() is continuous and reflects how much we've
+// projected the local copy of the world forward.  Monotonic.
+static float interp_time() {
+    static float last_interp_time = 0;
+
+    last_interp_time = max(last_interp_time, time + pred_time_dt);
+    return last_interp_time;
+}
+
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -74,7 +115,7 @@ static void update_avg_ping() {
     //  a) We want to limit the effect of momentary total loss
     //  b) We actually want high pings to have low effective variance and
     //     trigger it on consistently.
-    float newv = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 300);
+    float newv = min(inst_ping_ms, 300);
 
     update_online_avg(&avg_ping, newv);
 }
@@ -188,11 +229,10 @@ void WPP_Status() {
     printf(" Projectile prediction %s %s\n",
             pp_enabled ? "enabled" : "disabled", pp_source);
 
-    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
     float avg, variance;
     fill_avg_ping(&avg, &variance);
     printf(" inst_ping = %d client_ping = %d avg_ping = %d var = %d\n",
-            ping, pstate_server.client_ping, avg, variance);
+            inst_ping_ms, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
     printf(" maxspeed = %d\n", pstate_server.csqc_maxspeed);
@@ -235,6 +275,7 @@ void WPP_UpdateEnable(float force) {
 
     if (time > next_ping_update) {
         update_avg_ping();
+        update_interp_time_dt();
         next_ping_update = time + PING_PERIOD / avg_ping.samples.max_count;
     }
 
@@ -413,7 +454,7 @@ void UpdateMinPing() {
     static float ping_cache[PING_SAMPLES];
     float cache_index = (num_samples++) % ping_cache.length;
 
-    float cping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    float cping = inst_ping_ms;
     ping_cache[cache_index] = max(0,  cping - DelayPacketState.last_val);
 
     float true_avg = 0;
@@ -426,6 +467,15 @@ void UpdateMinPing() {
 
     // Bound convergence steps
     DelayPacketState.minv = min(DelayPacketState.minv + 25, target);
+}
+
+void WP_UpdatePings() {
+    inst_ping_ms = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    inst_ping_t = inst_ping_ms / 1000.0;
+
+    update_interp_time_dt();
+    UpdateMinPing();
+    WPP_UpdateEnable(FALSE);
 }
 
 float IsEffectFrame() {
@@ -504,7 +554,7 @@ void WP_ServerUpdate() {
         pstate_server.weaponframe += 1;
     }
 
-    if (CVARF(fo_wpp_beta) == 2)
+    if (CVARF(fo_wpp_beta) & 4)
         phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
     else
         phys_sim_dt = -1;
@@ -1089,20 +1139,21 @@ trail_table_entry trail_table[] = {
     {{"TE_RAILTRAIL"}},
 };
 
-float get_phys_time_nudge_dt(entity e) {
-    if (!is_player)
-        return 0;
-
-    float nudge;
-    if (e.owner_entnum != pengine.player_entnum)
-        nudge = CVARF(wpp_phys_adv_ms);
-    else
-        nudge = CVARF(wpp_phys_local_adv_ms);
-    return min(nudge, interp_ms()) / 1000.0;
-}
-
 inline float get_phys_time(entity e) {
-    return time + get_phys_time_nudge_dt(e);
+    if (e.owner_entnum == pengine.player_entnum) {
+        // We want to align our own entities with remote player interp so that
+        // collisions feel correct.
+        return interp_time();
+    } else {
+        // Entities from other players.. we have choice.  For now, advance them
+        // up to wpp_adv_otherp_ms (bounded at ping, which is true position for
+        // hitting the client.. what they likely care about most... although
+        // this will offset explosions in the short term).
+        static float last_self_time;
+        float dt = min(inst_ping_ms, CVARF(wpp_adv_otherp_ms)) / 1000.0;
+        last_self_time = max(last_self_time, time + dt);
+        return last_self_time;
+    }
 }
 
 void FO_PP_Init() {
@@ -1241,29 +1292,17 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.owner = pengine.player_ent;
   FPP_Init(fpp_type, proj);
 
-#if 0
-  // Packet loss doesnt guarantee the server will actually register quickslot
-  // since it's a separate command from the attack.  We can improve this in the
-  // future via either a button or just combining them on an impulse.  But for
-  // now just dont create the projectile, it's usually swapping to a hitscan
-  // weapon anyway.
-  if (pstate_pred.tfstate & TFSTATE_QUICKSLOT &&
-      !(pstate_server.tfstate & TFSTATE_QUICKSLOT))
-      return __NULL__;
-#endif
+  float ms_ahead = server_time_ms();
+  ProjectResult push_t = Forward_ProjectOffset(fpp_type, ms_ahead);
 
-  ProjectResult push_t = Forward_ProjectOffset(fpp_type, interp_ms());
-
-  // Using interp_ms() to predict which packet it will arrive in, while using
-  // client_ping to predict when that packet will arrive, seems to produce
-  // more consistent results, possibly due to batching.
-  float uncorrected_dt = (pstate_server.client_ping - push_t.dynamic_ms) / 1000.0;
+  float uncorrected_dt = max(ms_ahead - push_t.dynamic_ms, 0) / 1000.0;
   float static_dt = push_t.static_ms / 1000.0;
+
   // Note: We use true time here as created projectiles exist outside of pred.
   proj.starttime = time + uncorrected_dt;
   proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
-  proj.server_live_time = time + interp_dt();
+  proj.server_live_time = server_time();
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -1515,6 +1554,24 @@ void WP_Attack() {
     WP_AnimateModel();
 }
 
+
+void PredProjectile_DebugMatch(entity cprj, entity sprj) {
+    string sgn =
+        vlen(cprj.origin - pmove_org) > vlen(sprj.origin- pmove_org) ? "+" : "-";
+
+    string s = sprintf(" p_diff: %s%-2.1f [%0.3f] ", sgn,
+                    vlen(cprj.origin - sprj.origin),
+                    vlen(cprj.origin - sprj.origin) / vlen(cprj.velocity));
+    s = strcat(s, sprintf("t=%0.3f / %0.3f p_t=[c:%0.3f s:%0.3f d=%0.3f]",
+                time, sprj.t_time, cprj.phys_time, sprj.phys_time,
+                sprj.phys_time - cprj.phys_time));
+
+    s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
+            vlen(cprj.origin - pmove_org), vlen(sprj.origin - pmove_org),
+            self.antilag_ms));
+    print(s);
+}
+
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
     float best = 64;
@@ -1546,16 +1603,8 @@ float PredProjectile_MatchProjectile() {
         if (FPP_IsGrenade(self.fpp.index))
             self.angles = match.angles;
 
-        if (CVARF(wpp_debug) & 1) {
-            string s = sprintf(" p_diff: %0.1f [%0.3f] t=%0.3f p_t=c:%0.3f s:%0.3f [%0.3f]",
-                    vlen(match.origin - self.origin),
-                    vlen(match.origin - self.origin) / vlen(self.velocity),
-                    time, match.phys_time, self.phys_time, match.phys_time - self.phys_time);
-            s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
-                    vlen(match.origin - pmove_org), vlen(self.origin - pmove_org),
-                    self.antilag_ms));
-            print(s);
-        }
+        if (CVARF(wpp_debug) & 1)
+            PredProjectile_DebugMatch(match, self);
 
         PP_Cleanup(match);
         return TRUE;
