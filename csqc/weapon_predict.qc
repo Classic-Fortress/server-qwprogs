@@ -580,7 +580,7 @@ static float AmmoToStat(float ammo_type) {
 }
 
 float WP_GetAmmo(float ammo_type) {
-    if (!WP_Enabled())
+    if (!WP_Enabled() || !is_alive)
         return getstatf(AmmoToStat(ammo_type));
 
     if (ammo_type == AMMO_NONE)
