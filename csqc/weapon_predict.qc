@@ -74,7 +74,7 @@ static void update_avg_ping() {
     //  a) We want to limit the effect of momentary total loss
     //  b) We actually want high pings to have low effective variance and
     //     trigger it on consistently.
-    float newv = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 200);
+    float newv = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 300);
 
     update_online_avg(&avg_ping, newv);
 }
@@ -144,14 +144,11 @@ static float CalcPredEnabled(float current_enable,
         }
     }
 
-    *set_by = "[default]";
+    *set_by = "[disabled]";
     return FALSE;
 }
 
-#define ENABLE_CHECK_PERIOD 2
 static float client_delay_packets;
-static float next_wpp_enable_check;
-static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
 #define PRINT_CONFIG(_field) \
@@ -233,9 +230,25 @@ void WPP_Status() {
 #undef PRINT_CONFIG
 
 void WPP_UpdateEnable(float force) {
+    static float next_ping_update;
+    static float PING_PERIOD = 0.250;
+
     if (time > next_ping_update) {
-        update_avg_ping();
-        next_ping_update = time + ENABLE_CHECK_PERIOD / avg_ping.samples.max_count;
+        // Use an undocumented ezquake compat feature to figure out whether we
+        // have focus or not, drop samples in this case due to lowered network
+        // fps.
+        float is_unfocused = getplayerkeyfloat(player_localnum, "chat") & 2;
+        if (!is_unfocused)
+            update_avg_ping();
+        next_ping_update = time + PING_PERIOD / avg_ping.samples.max_count;
+    }
+
+    // Immediate updates any time there's a cvar change.
+    static float next_wpp_enable_check;
+    static float last_fo_wpp_beta;
+    if (CVARF(fo_wpp_beta) != last_fo_wpp_beta) {
+        next_wpp_enable_check = 0;
+        last_fo_wpp_beta = CVARF(fo_wpp_beta);
     }
 
     if (avg_ping.samples.count < 5)
@@ -243,7 +256,7 @@ void WPP_UpdateEnable(float force) {
 
     if (!force && time < next_wpp_enable_check)
         return;
-    next_wpp_enable_check = time + ENABLE_CHECK_PERIOD;
+    next_wpp_enable_check = time + 1;
 
     // For wpp_weap_predict and wpp_proj_predict we use a tristate:
     //   1 => force on, 0 => force off, -1 => up to min_ping/server
@@ -279,6 +292,8 @@ void WPP_UpdateEnable(float force) {
         printf("FortressOne: Projectile prediction %s %s\n",
                 pp_new ? "enabled" : "disabled", pp_source);
         pengine.pp_enabled = pp_new;
+
+        next_wpp_enable_check += 9;
     }
     once = TRUE;
 
