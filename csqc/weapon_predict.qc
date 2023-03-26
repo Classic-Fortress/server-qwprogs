@@ -1562,8 +1562,8 @@ void PredProjectile_DebugMatch(entity cprj, entity sprj) {
     string s = sprintf(" p_diff: %s%-2.1f [%0.3f] ", sgn,
                     vlen(cprj.origin - sprj.origin),
                     vlen(cprj.origin - sprj.origin) / vlen(cprj.velocity));
-    s = strcat(s, sprintf("t=%0.3f / %0.3f p_t=[c:%0.3f s:%0.3f d=%0.3f]",
-                time, sprj.t_time, cprj.phys_time, sprj.phys_time,
+    s = strcat(s, sprintf("t=%0.3f p_t=[c:%0.3f s:%0.3f d=%0.3f]",
+                time, cprj.phys_time, sprj.phys_time,
                 sprj.phys_time - cprj.phys_time));
 
     s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
