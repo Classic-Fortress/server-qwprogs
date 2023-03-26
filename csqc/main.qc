@@ -102,6 +102,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
 
+    registercommand("fo_min_ping");
+
     registercommand("+aux_jump");
     registercommand("-aux_jump");
     registercommand("+special");
@@ -301,6 +303,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
+            break;
+        case "fo_min_ping":
+            UpdateFoMinPing(argv(1));
             break;
         case "fo_settings_check":
             ClientSettings_Check();
@@ -508,8 +513,6 @@ noref void CSQC_Input_Frame() {
 
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
-
-    WPP_UpdateEnable(FALSE);
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -552,7 +555,14 @@ void _Sync_ServerCommandFrame() {
     else
         is_alive = 1;
 
-    UpdateMinPing();
+    // Use an undocumented ezquake compat feature to figure out whether we
+    // have focus or not, skip updates in this case due to lowered network fps.
+    float is_unfocused = getplayerkeyfloat(player_localnum, "chat") & 2;
+    if (!is_unfocused) {
+        UpdateMinPing();
+        WPP_UpdateEnable(FALSE);
+    }
+
     CsGrenTimer::UpdateSoundStack();
 }
 
