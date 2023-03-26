@@ -234,12 +234,7 @@ void WPP_UpdateEnable(float force) {
     static float PING_PERIOD = 0.250;
 
     if (time > next_ping_update) {
-        // Use an undocumented ezquake compat feature to figure out whether we
-        // have focus or not, drop samples in this case due to lowered network
-        // fps.
-        float is_unfocused = getplayerkeyfloat(player_localnum, "chat") & 2;
-        if (!is_unfocused)
-            update_avg_ping();
+        update_avg_ping();
         next_ping_update = time + PING_PERIOD / avg_ping.samples.max_count;
     }
 
@@ -326,76 +321,111 @@ static void set_minping_delay_packets() {
     setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
 }
 
+struct {
+    float last_val;
+    float minv, user_controlled;
+    float fo_min_ping;
+} DelayPacketState;
+
+static void UpdateDelayPackets(float val, float user) {
+    string sv = sprintf("%d", val);
+    setlocaluserinfo(0, "csqc_dp", user ? "0" : "1");
+    setlocaluserinfo(0, "client_delay_packets", sv);
+
+    DelayPacketState.user_controlled = user;
+    DelayPacketState.last_val = val;
+
+    if (val != CVARF(cl_delay_packets)) {
+        CVARF(cl_delay_packets) = val;
+        localcmd("cl_delay_packets ", sv, "\n");
+    }
+}
+
+void UpdateFoMinPing(string arg) {
+    float fmp = DelayPacketState.fo_min_ping;
+
+    if (arg != "") {
+        float nv = stoi(arg);
+
+        // Don't bother posting if we'll ignore it.
+        if (nv != fmp && nv > fo_config.min_ping_ms)
+            localcmd(sprintf("say SET: fo_min_ping %d\n", nv));
+
+        DelayPacketState.fo_min_ping = fmp = nv;
+        DelayPacketState.user_controlled = FALSE;
+    }
+
+    float min_ping = max(fo_config.min_ping_ms, fmp);
+    printf("Min ping is: %d [%s specified]\n", min_ping,
+            min_ping == fmp ? "client" : "server");
+}
+
+string(float seat, string keyname) getlocaluserinfo = #0:getlocaluserinfo;
+void ModulateDelayPackets() {
+    static float once;
+
+    float dp = CVARF(cl_delay_packets), nv;
+
+    if (!once) {
+        if (getlocaluserinfo(0, "csqc_dp") == "1") {
+            // Set from a previous game, clear.
+            UpdateDelayPackets(0, TRUE);
+            return;
+        }
+
+        DelayPacketState.last_val = dp;
+        DelayPacketState.user_controlled = TRUE;
+        once = TRUE;
+    }
+
+    if (dp != DelayPacketState.last_val && dp > DelayPacketState.minv) {
+        UpdateDelayPackets(dp, TRUE);
+        localcmd(sprintf("say SET: cl_delay_packets %d\n", dp));
+    } else if (dp < DelayPacketState.minv ||
+        (dp > DelayPacketState.minv && !DelayPacketState.user_controlled)) {
+
+        if (dp != DelayPacketState.last_val)
+            localcmd(sprintf("say IGNORED: cl_delay_packets %d [< min of %d]\n",
+                        dp, DelayPacketState.minv));
+        UpdateDelayPackets(DelayPacketState.minv, FALSE);
+    }
+}
+
+
 void UpdateMinPing() {
     static float next_update;
 
-    if (!fo_config.min_ping_ms) {
-        // Clear, if-and-only-if, we control the value.
-        if (client_delay_packets) {
-            client_delay_packets = 0;
-            set_minping_delay_packets();
-        }
+    ModulateDelayPackets();
+
+    float min_ping = max(fo_config.min_ping_ms, DelayPacketState.fo_min_ping);
+
+    if (!min_ping) {
+        DelayPacketState.minv = 0;
         return;
     }
 
-    if (time < next_update)
+    if (time < next_update || !is_player)
         return;
-    next_update = time + 1;
+    next_update = time + 5;
 
     const float PING_SAMPLES = 10;
     static float num_samples;
     static float ping_cache[PING_SAMPLES];
-    static float once;
-
-    if (CVARF(cl_delay_packets) != client_delay_packets) {
-        // We expect to see a one-time mismatch, but after this, clients are
-        // trying to change it on us.  Make that noisy.
-        if (once)
-            localcmd(sprintf("say forced reset delay_packets %d -> %d\n",
-                        CVARF(cl_delay_packets), client_delay_packets));
-        once = TRUE;
-
-        next_update = time + 0.1;
-        set_minping_delay_packets();
-        return;
-    }
-
     float cache_index = (num_samples++) % ping_cache.length;
-    ping_cache[cache_index] =
-        max(0, getplayerkeyfloat(player_localnum, INFOKEY_P_PING));
 
-    if (num_samples < 10)
-        return;
+    float cping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    ping_cache[cache_index] = max(0,  cping - DelayPacketState.last_val);
 
-    float ping = ping_cache[0];
-    for (int i = 1; i < ping_cache.length; i++)
-        ping = min(ping, ping_cache[i]);
+    float true_avg = 0;
+    float N = min(num_samples, PING_SAMPLES);
+    for (int i = 0; i < N; i++)
+        true_avg += ping_cache[i];
+    true_avg /= N;
 
-    ping = max(ping - client_delay_packets, SERVER_FRAME_MS);
-    float target = max(fo_config.min_ping_ms - ping, 0);
+    float target = max(ceil(min_ping - true_avg), 0);
 
-    if (CVARF(fo_minping_min) > 0)
-        target = max(target, CVARF(fo_minping_min));
-
-    if (!is_player)
-        target = 0;
-
-    if (target == 0) {
-        client_delay_packets = 0;
-    } else {
-        float nv = (ceil((target - 0.1)/ 3)) * 3 + 1;
-        // Bound how much we'll step at once.
-        if (!client_delay_packets)
-            client_delay_packets = nv;
-        else
-            client_delay_packets = min(client_delay_packets + 10, nv);
-    }
-
-    if (CVARF(cl_delay_packets) != client_delay_packets) {
-        set_minping_delay_packets();
-        setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
-        num_samples = 0;
-    }
+    // Bound convergence steps
+    DelayPacketState.minv = min(DelayPacketState.minv + 25, target);
 }
 
 float IsEffectFrame() {
