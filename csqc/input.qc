@@ -10,13 +10,12 @@ float(float evtype, float scanx, float chary, float devid) CSQC_InputEvent = {
 
         switch (evtype) {
             case IE_KEYDOWN:
-                if (fo_hud_menu_active)
-                    fo_menu_process_input(CurrentMenu, scanx);
                 if (scanx == K_ESCAPE) {
                     Menu_Cancel();
                     FO_Hud_Editor_Cancel();
                     return TRUE;  // Always capture escape
-                }
+                } else if (fo_hud_menu_active)
+                    return fo_menu_process_input(CurrentMenu, scanx);
                 break;
             case IE_MOUSEABS:
                 Mouse.x = scanx;
