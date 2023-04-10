@@ -576,7 +576,7 @@ void Predict_InitDefaultConfig() {
     fo_config.max_rewind_fast_projectile_ms = 150;
     fo_config.max_rewind_grenade_ms = 50; // Only affects REWIND_GREN
     fo_config.rewind_fast_projectile_thresh = 1500;
-    fo_config.wp_default_min_ping_ms = 40;
+    fo_config.wp_default_min_ping_ms = 25;
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
 }
