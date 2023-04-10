@@ -547,9 +547,6 @@ void () DecodeLevelParms = {
         // allow scout dash [on]
         scoutdash = CF_GetSetting("sd", "scoutdash", "on");
 
-        // enable sniper rifle reload [off]
-        sniperreload = CF_GetSetting("sr", "sniperreload", "off");
-
         // spawn with full ammo/armor [off]
         spawnfull = CF_GetSetting("sf", "spawnfull", "off");
 
@@ -576,9 +573,6 @@ void () DecodeLevelParms = {
 
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
-
-        // display sniper rifle reload percentage in status bar [on]
-        sniperreloadpercent = CF_GetSetting("rp", "sniperreloadpercent", "on");
 
         // display build status in status bar [on]
         buildstatus = CF_GetSetting("bs", "buildstatus", "on");
@@ -850,7 +844,6 @@ void () DecodeLevelParms = {
             discammo_pickup = FALSE;
             old_dropflag = FALSE;
             scoutdash = TRUE;
-            sniperreload = TRUE;
             old_sniperrange = FALSE;
             Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
@@ -876,7 +869,6 @@ void () DecodeLevelParms = {
             stock_reload = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
-            sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
             superaxe = TRUE;
@@ -922,7 +914,6 @@ void () DecodeLevelParms = {
             discammo_pickup = TRUE;
             old_dropflag = TRUE;
             scoutdash = FALSE;
-            sniperreload = FALSE;
             old_sniperrange = TRUE;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
@@ -948,7 +939,6 @@ void () DecodeLevelParms = {
             stock_reload = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
-            sniperreloadpercent = FALSE;
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             superaxe = FALSE;

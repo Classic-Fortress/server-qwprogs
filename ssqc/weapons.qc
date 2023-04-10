@@ -849,93 +849,76 @@ void () W_FireSniperRifle = {
     src = self.origin + v_forward * 10;
     src_z = self.absmin_z + self.size_z * 0.7;
 
-    use_this = FALSE;
-
-    if (old_sniperrange)
-        traceline(src, src + dir * 8092, MOVE_LAGGED, self);
-    else
-        traceline(src, src + dir * 9192, MOVE_LAGGED, self);
-    if (trace_fraction != 1)
-        if (trace_ent != world)
-            if (trace_ent.classname == "player")
-                use_this = TRUE;
-
     KickPlayer(-4, self);
 
-    if (!use_this) {
-        dir = aim(self, 10000);
-        if (old_sniperrange)
-            traceline(src, src + dir * 3072, MOVE_LAGGED, self);
-        else
-            traceline(src, src + dir * 9192, MOVE_LAGGED, self);
-    }
+    dir = aim(self, 10000);
+    float range = old_sniperrange ? 3072 : 9192;  // Super arbitrary but ok.
+    traceline(src, src + dir * range, MOVE_LAGGED, self);
+
     deathmsg = DMSG_SNIPERRIFLE;
     dam_mult = 1;
-    if (trace_ent) {
-        if (trace_ent.classname == "player") {
+    if (trace_fraction < 1 && trace_ent && trace_ent.classname == "player") {
+        f = trace_endpos - src;
 
-            f = trace_endpos - src;
+        g_x = trace_endpos_x;
+        g_y = trace_endpos_y;
+        g_z = 0;
 
-            g_x = trace_endpos_x;
-            g_y = trace_endpos_y;
-            g_z = 0;
+        h_x = trace_ent.origin_x;
+        h_y = trace_ent.origin_y;
+        h_z = 0;
 
-            h_x = trace_ent.origin_x;
-            h_y = trace_ent.origin_y;
-            h_z = 0;
+        x = vlen(g - h);
+        f = (normalize(f) * x) + trace_endpos;
 
-            x = vlen(g - h);
-            f = (normalize(f) * x) + trace_endpos;
+        zdif = f_z - trace_ent.origin_z;
+        deathmsg = DMSG_SNIPERRIFLE;
 
-            zdif = f_z - trace_ent.origin_z;
+        trace_ent.head_shot_vector = '0 0 0';
+        if (zdif < 0) {
+
+            dam_mult = 0.5;
+            trace_ent.leg_damage = trace_ent.leg_damage + 1;
+            TeamFortress_SetSpeed(trace_ent);
+            deathmsg = DMSG_SNIPERLEGSHOT;
+            TF_T_Damage(trace_ent, self, self, self.heat * dam_mult, TF_TD_NOTTEAM,
+                    TF_TD_SHOT);
+
+            if (trace_ent.health > 0) {
+                sprint(trace_ent, PRINT_LOW, "Leg injury!\n");
+                sprint(self, PRINT_MEDIUM,
+                        "Leg shot - that'll slow him down!\n");
+            }
+            return;
+
+        } else if (zdif > 20) {
+
+            dam_mult = 2;
+            stuffcmd(trace_ent, "bf\n");
+            trace_ent.head_shot_vector =
+                trace_ent.origin - self.origin;
+            deathmsg = DMSG_SNIPERHEADSHOT;
+            TF_T_Damage(trace_ent, self, self, (self.heat * dam_mult),
+                    TF_TD_NOTTEAM, TF_TD_SHOT);
+
+            if (trace_ent.health > 0) {
+                sprint(trace_ent, PRINT_LOW, "Head injury!\n");
+                sprint(self, PRINT_MEDIUM,
+                        "Head shot - that's gotta hurt!\n");
+            }
+
+        } else {
             deathmsg = DMSG_SNIPERRIFLE;
-
-            trace_ent.head_shot_vector = '0 0 0';
-            if (zdif < 0) {
-
-                dam_mult = 0.5;
-                trace_ent.leg_damage = trace_ent.leg_damage + 1;
-                TeamFortress_SetSpeed(trace_ent);
-                deathmsg = DMSG_SNIPERLEGSHOT;
-                TF_T_Damage(trace_ent, self, self, self.heat * dam_mult, 2,
-                            1);
-
-                if (trace_ent.health > 0) {
-                    sprint(trace_ent, PRINT_LOW, "Leg injury!\n");
-                    sprint(self, PRINT_MEDIUM,
-                           "Leg shot - that'll slow him down!\n");
-                }
-                return;
-
-            } else if (zdif > 20) {
-
-                dam_mult = 2;
-                stuffcmd(trace_ent, "bf\n");
-                trace_ent.head_shot_vector =
-                    trace_ent.origin - self.origin;
-                deathmsg = DMSG_SNIPERHEADSHOT;
-                TF_T_Damage(trace_ent, self, self, (self.heat * dam_mult),
-                            2, 1);
-
-                if (trace_ent.health > 0) {
-                    sprint(trace_ent, PRINT_LOW, "Head injury!\n");
-                    sprint(self, PRINT_MEDIUM,
-                           "Head shot - that's gotta hurt!\n");
-                }
-                return;
-
-            } else
-                deathmsg = DMSG_SNIPERRIFLE;
         }
     }
-    ClearMultiDamage();
 
-    if (trace_fraction != 1)
+    if (trace_fraction < 1) {
+        ClearMultiDamage();
         TraceAttack(self.heat * dam_mult, dir);
-
-    FireBullets(1, dir, '0 0 0');
-
-    ApplyMultiDamage();
+        ApplyMultiDamage();
+    } else {
+        FireBullets(1, dir, '0 0 0');
+    }
 };
 
 void () W_FireAutoRifle = {
@@ -1726,9 +1709,6 @@ void () W_Attack = {
         if (self.flags & FL_ONGROUND) {
             player_shot1();
             W_FireSniperRifle();
-            if (sniperreload) {
-                Status_Refresh(self);
-            }
         }
     } else if (ws.weapon == WEAP_AUTO_RIFLE) {
         player_autorifle1();
@@ -2687,7 +2667,7 @@ void () W_WeaponFrame = {
         if (FO_CurrentWeapon() == WEAP_SNIPER_RIFLE) {
             if (self.tfstate & TFSTATE_AIMING) {
                 if (self.heat < PC_SNIPER_MAXDAM) {
-                    self.heat = max(self.heat + 3, PC_SNIPER_MAXDAM);
+                    self.heat = min(self.heat + 3, PC_SNIPER_MAXDAM);
                     if ((sniperpower) && (self.power_time < (time - 0.3))) {
                         self.power_time = time;
                         Status_Refresh(self);

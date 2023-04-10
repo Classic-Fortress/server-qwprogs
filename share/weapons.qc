@@ -10,8 +10,6 @@
 .float ammo_nails;
 .float ammo_rockets;
 .float ammo_cells;
-
-float sniperreload = FALSE;
 #endif
 
 // Use SlotIndex() to convert a slot if you're indexing an array.
@@ -754,7 +752,6 @@ void FO_Weapons_Init() {
     ASSERTD_EQ(weapon_names.length, weapon_info.length);
 
     FO_WeapInfo* WI_sr = FO_GetWeapInfo(WEAP_SNIPER_RIFLE);
-    WI_sr->clip_size = sniperreload ? 1 : 0;
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];

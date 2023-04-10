@@ -693,7 +693,7 @@ float WP_SniperCharge() {
         return 0;
 
     float heat = 50 + (pstate_pred.seq - SniperState.start_seq) * 3;
-    return min(PC_SNIPER_MAXDAM, heat);
+    return min(heat, PC_SNIPER_MAXDAM);
 }
 
 static void WP_Sniper_UpdateSight() {
