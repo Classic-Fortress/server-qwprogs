@@ -19,11 +19,11 @@ New commands
 * `fo_predict_projectiles 1` client-side projectile prediction
 * `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled.
 * `fo_client_sniper_sight 1` client side sniper dot
-* `cl_p2r` for old weapon impulses
-* `cl_r2g` for old weapon impulses
-* `r_pyrotrail 0`
-* `r_rockettrail 0`
-* `r_grenadetrail 0`
+* `cl_p2r` use rocket model for incendiary launcher
+* `cl_r2g` use grenade model for rockets
+* `r_pyrotrail 0` ezquake-compatible trail selection for incendiary launcher
+* `r_rockettrail 0` ezquake-compatible trail selection for rocket launcher
+* `r_grenadetrail 0` ezquake-compatible trail selection for grenade launcher
 * `wpp_phys_adv_ms 0`
 * `wpp_phys_local_adv_ms 0`
 * `wpp_setspeed 1`
