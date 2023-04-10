@@ -15,10 +15,9 @@ New commands
 * `fo_legacy_sbar 0` use oldschool Team Fortress status bar
 * `fo_oldscoreboard 0` use oldschool Quake scoreboard
 * `fo_adminrefresh 2` time in seconds for admin menu to refresh
-* `fo_wpp_beta 0` client side weapon/projectile prediction
-* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled. -1 defaults to 40.
-* `wpp_weap_predict -1` weapon prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
-* `wpp_proj_predict -1` projectile prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `fo_predict_weapons 1` client-side weapon prediction
+* `fo_predict_projectiles 1` client-side projectile prediction
+* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled.
 * `fo_client_sniper_sight 1` client side sniper dot
 * `cl_p2r` for old weapon impulses
 * `cl_r2g` for old weapon impulses

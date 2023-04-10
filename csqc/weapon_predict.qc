@@ -1,11 +1,12 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
+DEFCVAR_FLOAT(fo_predict_weapons, 1);
+DEFCVAR_FLOAT(fo_predict_projectiles, 1);
+
 DEFCVAR_FLOAT(fo_client_sniper_sight, 1);
 
 DEFCVAR_FLOAT(wpp_min_ping, -1);
-DEFCVAR_FLOAT(wpp_weap_predict, -1);
-DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
 DEFCVAR_FLOAT(wpp_adv_selfp_ms, 0);
 DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
@@ -64,9 +65,6 @@ static float pred_time_dt;  // delta-time that the world predicted forward by
 
 // Match up local interpolation of projectile position with that of players.
 static void update_interp_time_dt() {
-    if (CVARF(fo_wpp_beta) & 2 == 0)  // Temporary gate bit.
-        return;
-
     if (!CVARF(cl_predict_players)) {
         pred_time_dt = 0;
         return;
@@ -131,7 +129,6 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 static float CalcPredEnabled(float current_enable,
                              float unspec_default /* meaning of '-1' */,
                              float server_disable,
-                             float client_value,
                              float dependent_enabled, string* set_by) {
 
     if (!dependent_enabled) {
@@ -150,14 +147,9 @@ static float CalcPredEnabled(float current_enable,
         return FALSE;
     }
 
-    if (server_disable || client_value == 0) {
-        *set_by = server_disable ? "[server disable]" : "[cvar disable]";
-
+    if (server_disable) {
+        *set_by = "[server disable]";
         return FALSE;
-    }
-    if (client_value == 1) {
-        *set_by = sprintf("[cvar enable]");
-        return TRUE;
     }
 
     if (WP_MinPing() == 0)
@@ -215,13 +207,13 @@ void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
-    CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
+    CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
             fo_config.wp_global_disable,
-            CVARF(wpp_weap_predict), TRUE, &wp_source);
+            TRUE, &wp_source);
 
-    CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
+    CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
             fo_config.wp_global_disable,
-            CVARF(wpp_proj_predict), wp_enabled, &pp_source);
+            wp_enabled, &pp_source);
 
     printf("Prediction Status:\n");
     printf(" Weapon prediction %s %s\n",
@@ -277,10 +269,13 @@ void WPP_UpdateEnable(float force) {
 
     // Immediate updates any time there's a cvar change.
     static float next_wpp_enable_check;
-    static float last_fo_wpp_beta;
-    if (CVARF(fo_wpp_beta) != last_fo_wpp_beta) {
+    static float last_fo_predict_weapons, last_fo_predict_projectiles;
+
+    if (CVARF(fo_predict_weapons) != last_fo_predict_weapons ||
+        CVARF(fo_predict_projectiles) != last_fo_predict_projectiles) {
         next_wpp_enable_check = 0;
-        last_fo_wpp_beta = CVARF(fo_wpp_beta);
+        last_fo_predict_weapons = CVARF(fo_predict_weapons);
+        last_fo_predict_projectiles = CVARF(fo_predict_projectiles);
     }
 
     if (avg_ping.samples.count < 5)
@@ -290,19 +285,17 @@ void WPP_UpdateEnable(float force) {
         return;
     next_wpp_enable_check = time + 1;
 
-    // For wpp_weap_predict and wpp_proj_predict we use a tristate:
-    //   1 => force on, 0 => force off, -1 => up to min_ping/server
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
     float wp_new = -1, pp_new = -1;
     string wp_source, pp_source;
 
-    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
+    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
             fo_config.wp_global_disable,
-            CVARF(wpp_weap_predict), TRUE, &wp_source);
+            TRUE, &wp_source);
 
-    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
+    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
             fo_config.wp_global_disable,
-            CVARF(wpp_proj_predict), wp_new, &pp_source);
+            wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {

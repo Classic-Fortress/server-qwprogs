@@ -662,5 +662,9 @@ void ClientSettings_Check() {
         printf("RECOMMEND: Setting `fo_grentimer 2` for ping correction.\n");
     if (cvar("fo_hud_cache") != 1)
         printf("ERROR: Please set `fo_hud_cache 1` to improve fps.\n");
+    if (cvar("fo_predict_weapons") != 1)
+        printf("WARNING: client-side weapon prediction disabled [fo_predict_weapons 0]\n");
+    if (cvar("fo_predict_projectiles") != 1)
+        printf("WARNING: client-side projectile prediction disabled [fo_predict_projectiles 0]\n");
     printf("Finished checking settings...\n");
 }
