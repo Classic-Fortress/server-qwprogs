@@ -978,6 +978,7 @@ void () DecodeLevelParms = {
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
             scoutscanspike = FALSE;
+            fo_config.old_ng_rof = TRUE;
         }
 
         st = infokey(world, "huetf");
@@ -1029,6 +1030,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[8] = 3;
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
+            fo_config.old_ng_rof = TRUE;
         }
 
         // Must be after we've set up conditional options (e.g. hwguy reload).

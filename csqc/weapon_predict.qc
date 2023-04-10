@@ -251,6 +251,7 @@ void WPP_Status() {
     PRINT_CONFIG_ACTIVE(wpp_global_enable);
     PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
+    PRINT_CONFIG_ACTIVE(old_ng_rof);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);

@@ -219,8 +219,10 @@ void nail_extra_csqc_ssqc() {
     }
 
     float tidx = *thinkindex() % 2;  // 1 based, and incremented.
-    SuperDamageSound();
-    W_FireSpikes(tidx ? 4 : -4);
+    if (tidx == 0 || !OldNgRof()) {
+        SuperDamageSound();
+        W_FireSpikes(tidx ? 4 : -4);
+    }
 }
 
 void player_asscan_down1();

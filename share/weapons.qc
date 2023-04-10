@@ -430,6 +430,10 @@ float FO_WeaponsMask(entity player) {
 }
 #endif
 
+float OldNgRof() {
+    return fo_config.old_ng_rof;
+}
+
 // Slightly awkward construction, but convenient for calling from CSQC and SSQC.
 float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
     float tick = (wi->ammo_per_shot / wi->clip_size) * wi->full_reload_time;
@@ -786,6 +790,13 @@ void FO_Weapons_Init() {
             case AMMO_NAILS: wti->ammo_mask = IT_NAILS; break;
             case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
         }
+    }
+
+    if (OldNgRof()) {
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_NAILGUN);
+        wi->ammo_per_shot = 2;
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
+        wi->ammo_per_shot = 4;
     }
 
     for (i = 0; i < class_weapons.length; i++) {

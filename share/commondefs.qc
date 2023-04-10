@@ -37,6 +37,8 @@ var struct {
     float clown_flags;
     float clown_grav;
 
+    float old_ng_rof;
+
     float predict_flags;
     float tfx_flags;
 
