@@ -9,7 +9,7 @@ void FO_Hud_HidePanel(PanelID id);
 void FO_Hud_ShowPanel(PanelID id);
 
 void(PanelID ignored, string text) drawClipSize = {
-    if (SBAR.ClipSize != "" || fo_hud_editor)
+    if (is_alive || fo_hud_editor)
         Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, ICON_CLIPSIZE, 1);
 };
 

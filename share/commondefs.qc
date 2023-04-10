@@ -37,15 +37,12 @@ var struct {
     float clown_flags;
     float clown_grav;
 
+    float old_ng_rof;
+
     float predict_flags;
     float tfx_flags;
 
-    float wp_global_enable;
     float wp_global_disable;
-    float pp_global_enable;
-    float pp_global_disable;
-    float wpp_global_enable;
-    float wpp_global_disable;
     float gren_beta_disable;
 } fo_config;
 

@@ -391,13 +391,9 @@ void EntUpdate_Config() {
     COMM(Byte, clown_flags);
     COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
-    COMM(Byte, wp_global_enable);
     COMM(Byte, wp_global_disable);
-    COMM(Byte, pp_global_enable);
-    COMM(Byte, pp_global_disable);
-    COMM(Byte, wpp_global_enable);
-    COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
+    COMM(Byte, old_ng_rof);
 
 #ifdef SSQC
     return TRUE;
@@ -641,13 +637,18 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(FALSE, "mrg", max_rewind_grenade_ms);
     CONFIG_UPDATE(FALSE, "rfpt", rewind_fast_projectile_thresh);
     CONFIG_UPDATE(FALSE, "wpdmp", wp_default_min_ping_ms);
-    CONFIG_UPDATE(FALSE, "wpge", wp_global_enable);
     CONFIG_UPDATE(FALSE, "wpgd", wp_global_disable);
-    CONFIG_UPDATE(FALSE, "ppge", pp_global_enable);
-    CONFIG_UPDATE(FALSE, "ppgd", pp_global_disable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_enable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_disable);
     CONFIG_UPDATE(FALSE, "gbd", gren_beta_disable);
+
+    // Not dynamically updatable.
+    static float read_rof_once = FALSE;
+    if (!read_rof_once) {
+        if (!fo_config.old_ng_rof)  // Don't overwrite huetf setting this.
+            CONFIG_UPDATE(FALSE, "ongrof", old_ng_rof);
+        printf("reading ROF %d\n", fo_config.old_ng_rof);
+        read_rof_once = TRUE;
+    }
+
     CONFIG_UPDATE(TRUE,  "rewind", rewind_flags);
     CONFIG_UPDATE(TRUE,  "tfx", tfx_flags);
     CONFIG_UPDATE(TRUE,  "clown", clown_flags);
