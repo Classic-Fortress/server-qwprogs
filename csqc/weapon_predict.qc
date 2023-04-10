@@ -130,7 +130,7 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 //   server disable, client enable/disable, server/ping enable
 static float CalcPredEnabled(float current_enable,
                              float unspec_default /* meaning of '-1' */,
-                             float server_disable, float server_enable,
+                             float server_disable,
                              float client_value,
                              float dependent_enabled, string* set_by) {
 
@@ -174,7 +174,7 @@ static float CalcPredEnabled(float current_enable,
         return current_enable;  // variance too high, don't change anything.
 
 
-    if (unspec_default || server_enable) {
+    if (unspec_default) {
         if (ping_enable) {
             *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
                     WP_MinPing(), avg, variance);
@@ -216,11 +216,11 @@ void WPP_Status() {
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
     CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            fo_config.wp_global_disable,
             CVARF(wpp_weap_predict), TRUE, &wp_source);
 
     CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            fo_config.wp_global_disable,
             CVARF(wpp_proj_predict), wp_enabled, &pp_source);
 
     printf("Prediction Status:\n");
@@ -244,12 +244,7 @@ void WPP_Status() {
     PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(wp_default_min_ping_ms);
-    PRINT_CONFIG_ACTIVE(wp_global_enable);
     PRINT_CONFIG_ACTIVE(wp_global_disable);
-    PRINT_CONFIG_ACTIVE(pp_global_enable);
-    PRINT_CONFIG_ACTIVE(pp_global_disable);
-    PRINT_CONFIG_ACTIVE(wpp_global_enable);
-    PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
     PRINT_CONFIG_ACTIVE(old_ng_rof);
     PRINT_CONFIG(max_rewind_ms);
@@ -302,11 +297,11 @@ void WPP_UpdateEnable(float force) {
     string wp_source, pp_source;
 
     wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            fo_config.wp_global_disable, fo_config.wp_global_enable,
+            fo_config.wp_global_disable,
             CVARF(wpp_weap_predict), TRUE, &wp_source);
 
     pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            fo_config.pp_global_disable, fo_config.pp_global_enable,
+            fo_config.wp_global_disable,
             CVARF(wpp_proj_predict), wp_new, &pp_source);
 
     static float once;

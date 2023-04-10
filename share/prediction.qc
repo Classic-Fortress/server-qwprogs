@@ -391,12 +391,7 @@ void EntUpdate_Config() {
     COMM(Byte, clown_flags);
     COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
-    COMM(Byte, wp_global_enable);
     COMM(Byte, wp_global_disable);
-    COMM(Byte, pp_global_enable);
-    COMM(Byte, pp_global_disable);
-    COMM(Byte, wpp_global_enable);
-    COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
     COMM(Byte, old_ng_rof);
 
@@ -642,12 +637,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(FALSE, "mrg", max_rewind_grenade_ms);
     CONFIG_UPDATE(FALSE, "rfpt", rewind_fast_projectile_thresh);
     CONFIG_UPDATE(FALSE, "wpdmp", wp_default_min_ping_ms);
-    CONFIG_UPDATE(FALSE, "wpge", wp_global_enable);
     CONFIG_UPDATE(FALSE, "wpgd", wp_global_disable);
-    CONFIG_UPDATE(FALSE, "ppge", pp_global_enable);
-    CONFIG_UPDATE(FALSE, "ppgd", pp_global_disable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_enable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_disable);
     CONFIG_UPDATE(FALSE, "gbd", gren_beta_disable);
 
     // Not dynamically updatable.

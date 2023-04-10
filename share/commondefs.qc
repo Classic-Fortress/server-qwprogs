@@ -42,12 +42,7 @@ var struct {
     float predict_flags;
     float tfx_flags;
 
-    float wp_global_enable;
     float wp_global_disable;
-    float pp_global_enable;
-    float pp_global_disable;
-    float wpp_global_enable;
-    float wpp_global_disable;
     float gren_beta_disable;
 } fo_config;
 
