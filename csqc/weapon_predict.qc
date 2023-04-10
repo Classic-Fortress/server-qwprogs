@@ -430,7 +430,7 @@ void ModulateDelayPackets() {
 
 
 void UpdateMinPing() {
-    static float next_update;
+    static float next_ping_update, next_minv_update;
 
     ModulateDelayPackets();
 
@@ -441,13 +441,16 @@ void UpdateMinPing() {
         return;
     }
 
-    if (time < next_update || !is_player)
-        return;
-    next_update = time + 5;
-
-    const float PING_SAMPLES = 10;
+    // Ideally we want to span more than one update here to better handle
+    // averaging of clamping to server frames.
+    const float PING_SAMPLES = 50;
     static float num_samples;
     static float ping_cache[PING_SAMPLES];
+
+    if (time < next_ping_update || !is_player)
+        return;
+    next_ping_update = time + 0.2;
+
     float cache_index = (num_samples++) % ping_cache.length;
 
     float cping = inst_ping_ms;
@@ -459,10 +462,28 @@ void UpdateMinPing() {
         true_avg += ping_cache[i];
     true_avg /= N;
 
+    // Accuracy limitations hurt us here.
+    true_avg = max(true_avg, SERVER_FRAME_MS - 1);
+
+    if (time < next_minv_update)
+        return;
+
+    float old = DelayPacketState.minv;
     float target = max(ceil(min_ping - true_avg), 0);
 
-    // Bound convergence steps
-    DelayPacketState.minv = min(DelayPacketState.minv + 25, target);
+    if (target > 0)
+        target += 1; // Slightly bias up for stability and better equalization.
+
+    if (fabs(target - old) >= 25) {
+        target = floor(target * 0.975);  // Take big steps conservatively
+        next_ping_update = time + 3;              // Time to reconverge
+    } else {
+        target = max(min(target, old + 3), old - 3);  // Bound smaller updates.
+        next_ping_update = time + 3;              // Time to reconverge
+    }
+
+    DelayPacketState.minv = target;
+    next_minv_update = next_ping_update + 1;  // Limit modulation
 }
 
 void WP_UpdatePings() {
