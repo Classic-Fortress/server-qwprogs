@@ -73,7 +73,7 @@ static void update_interp_time_dt() {
     // Maybe prefer smoothed value here?
     pred_time_dt = inst_ping_t;
 
-    if (CVARF(cl_predict_players_latency) < 1)
+    if (CVARF(cl_predict_players_latency) <= 1)
         pred_time_dt *= 1 - CVARF(cl_predict_players_latency);
     pred_time_dt *= CVARF(cl_predict_players_frac);
 
