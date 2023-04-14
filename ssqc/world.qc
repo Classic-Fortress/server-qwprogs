@@ -422,7 +422,6 @@ void RemoveDeadBody(entity ent) {
     if (ent.bodyqueue == __NULL__)
         return;
 
-    printf("removing body\n");
     remove(ent.bodyqueue);
     ent.bodyqueue = __NULL__;
 }
@@ -431,11 +430,8 @@ void FilterBodyQueue(float clear) {
     int count, i;
     entity* bodies = find_list(classname, "bodyqueue", EV_STRING, count);
     for (i = 0; i < count; i++)
-        if (time > bodies[i].heat || clear) {
-            printf("FILTER %d %s h=%0.3f t=%0.3f\n", clear, bodies[i].owner.netname,
-                    bodies[i].heat, time);
+        if (time > bodies[i].heat || clear)
             RemoveDeadBody(bodies[i].owner);
-        }
 }
 
 void AddToBodyQueue(entity ent) {
@@ -447,9 +443,6 @@ void AddToBodyQueue(entity ent) {
 
     if (ent.bodyqueue)
         RemoveDeadBody(ent);
-
-    printf("ADDING %s to queue f=%d m=%s/%d\n", ent.netname, ent.frame,
-            ent.model, ent.modelindex);
 
     entity nb = spawn();
     nb.owner = ent;
