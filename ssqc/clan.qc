@@ -168,6 +168,8 @@ void () StartMatch =
         //ResetPlayers();
         CountMatchPlayersAndReset();
     }
+
+    FilterBodyQueue(TRUE);
 };
 
 float () GetPlayerCount
