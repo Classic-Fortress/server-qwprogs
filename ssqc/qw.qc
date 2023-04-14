@@ -797,19 +797,3 @@ string goal_class_names[7] = {
 
 // backend
 string match_id;
-
-// people complain about settings, let's track them
-
-string settings_to_track_list[4] = {
-    "sv_antilag",
-    "project_weapons",
-    "al_rewind_detpipe",
-    "al_max_remote_client_time_offset",
-};
-
-struct setting_t {
-    string setting_name;
-    string value;
-};
-
-setting_t *settings_to_track;

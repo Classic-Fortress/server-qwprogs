@@ -190,7 +190,6 @@ string string_null;             // null string, nothing should be held here
 entity activator;               // the entity that activated a trigger or brush
 
 entity damage_attacker;         // set by T_Damage
-float framecount;
 
 // cvars checked each frame
 float skill;

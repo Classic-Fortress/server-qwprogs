@@ -300,15 +300,6 @@ void (entity pl) PrintWho = {
     strunzone(msg);
 }
 
-void () OutputTrackedSettings = {
-    bprint(PRINT_HIGH, self.netname, " called for a settings check (fo_settings_status)\n");
-    for (float i = 0; i < settings_to_track_list.length; i++)
-    {
-        setting_t* s = &settings_to_track[i];
-        bprint(PRINT_HIGH, "Setting ", s.setting_name, " is currently ", s.value, "\n");
-    }
-}
-
 float (string arg1, string arg2, string arg3) ParseCmds = {
     local float arg_num = 0, processedCmd, inp;
     local string tmp;
@@ -327,9 +318,6 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             if (arg_num == 2) {
                 self.impulse = stof(arg2);
             }
-            break;
-        case "fo_settings_status":
-            OutputTrackedSettings();
             break;
         case "progsversion":
             // yy.mm.dd.incremented vers

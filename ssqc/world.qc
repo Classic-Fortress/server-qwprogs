@@ -1,4 +1,3 @@
-void () CheckTrackedSettings;
 void () TerminateStaleServer;
 
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
@@ -375,15 +374,6 @@ void () worldspawn = {
 
     dimension_send = DMN_NOFLASH;
     Predict_Init();
-
-    settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
-    for (float i = 0; i < settings_to_track_list.length; i++)
-    {
-        settings_to_track[i].setting_name = settings_to_track_list[i];
-        string val = infokey(world, settings_to_track_list[i]);
-        val = (val != "") ? val : "unset";
-        settings_to_track[i].value = val;
-    }
 };
 
 #if 0
@@ -488,11 +478,11 @@ void () StartFrame = {
     timelimit = cvar("timelimit") * 60;
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
-    framecount = framecount + 1;
 
-    if (framecount % 77 == 0) {
-        CheckTrackedSettings();
+    static float next_stale_check;
+    if (time > next_stale_check) {
         TerminateStaleServer();
+        next_stale_check = time + 60;
     }
 
     static float next_filter_bodyqueue;
@@ -517,21 +507,9 @@ void(void() fnc)CheckSpawn = {
     }
 };
 
-void () CheckTrackedSettings = {
-    for (float i = 0; i < settings_to_track_list.length; i++)
-    {
-        setting_t* s = &settings_to_track[i];
-        string new_val = infokey(world, s.setting_name);
-        if (new_val != s.value)
-        {
-            bprint(PRINT_HIGH, "Setting ", s.setting_name, " has been changed from ", s.value, " to ", new_val, "\n");
-            s.value = new_val;
-        }
-    }
-}
-
+static const float STALE_TIME_HOURS = 6;
 void () TerminateStaleServer = {
-    if (gettime() < 86400)
+    if (gettime() < STALE_TIME_HOURS * 3600)
         return;
 
     for (entity e = world; (e = find(e, classname, "player")); ) {
@@ -539,6 +517,7 @@ void () TerminateStaleServer = {
             return; //someone is around
     }
 
-    dprint("Terminating empty server with more than 24 hours uptime\n");
+    dprint(sprintf("Terminating empty server with more than %d hours uptime\n",
+                   STALE_TIME_HOURS));
     localcmd("quit\n");
 }
