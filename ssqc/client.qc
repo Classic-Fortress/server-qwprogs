@@ -1322,11 +1322,11 @@ void () respawn = {
     }
 
     if (coop) {
-        CopyToBodyQue(self);
+        AddToBodyQueue(self);
         setspawnparms(self);
         PutClientInServer();
     } else if (deathmatch) {
-        CopyToBodyQue(self);
+        AddToBodyQueue(self);
         SetNewParms();
         PutClientInServer();
     } else
@@ -1425,7 +1425,8 @@ void () RemovePlayerOwnedEnts = {
         if (self.tfstate & TFSTATE_RANDOMPC) {
             te.tfstate = TFSTATE_RANDOMPC;
         }
-    }  
+    }
+    RemoveDeadBody(self);
 }
 
 void (string cn) RemoveAllEntsByClassname = {
