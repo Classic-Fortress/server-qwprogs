@@ -167,6 +167,7 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+void FO_CussView();
 void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 
@@ -177,6 +178,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
+                                                 //
+    FO_CussView();
 
     if (zoomed_in)
         setviewprop(VF_AFOV, CVARF(fov)/3);
@@ -191,11 +194,12 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     addentities(mask);
 
     renderscene();
+
+    FO_CussCrosshair(width, height);
     TFxRenderGrenadeTimers();
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
 
-    FO_CussCrosshair(width, height);
     perf_finish_sample(&frame_timing, fts);
 
     // Work around bug in some versions of FTE.  See pmove.qc
@@ -498,12 +502,14 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-struct {
-    float old_x, old_y;
-    float cussed;
-    float end_time;
-    float amp;
-} cuss_state;
+static float IsConced() {
+    return pstate_pred.tfstate & TFSTATE_CONC;
+}
+
+
+static float BlendAmp(float start, float end, float rem, float D) {
+    return rem/D * end + (D-rem)/D * start;
+}
 
 vector FO_Conc_Offset() {
     const float P = 4;
@@ -513,7 +519,17 @@ vector FO_Conc_Offset() {
         return '0 0 0';
 
     float a = ((rem % P) / P) * 2 * M_PI;
-    float amp = 2 + cuss_state.amp * min(8, rem)/8;
+
+    float amp = pstate_server.conc_amp;
+    if (rem >= 6)
+        amp *= 1;
+    else if (rem >= 2)
+        amp *= BlendAmp(1.0, 0.5, rem - 2, 6 - 2);
+    else
+        amp *= BlendAmp(0.5, 0, rem, 2);
+
+
+    float amp = 2 + pstate_server.conc_amp * min(8, rem)/8;
 
     float x = amp * sin(a), y = amp * sin(a) * cos(a);
     return [x, y, 0];
@@ -524,11 +540,20 @@ vector FO_ConcAim() {
     vector o = FO_Conc_Offset();
 
     vector r = v_forward * 200 + o.x * v_right + o.y * v_up;
+
+    cuss_state.view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
+    cuss_state.view[0] *= -1;
+
     return normalize(r);
 }
 
 DEFCVAR_FLOAT(cl_crossx, 0);
 DEFCVAR_FLOAT(cl_crossy, 0);
+
+void FO_CussView() {
+    if (cuss_state.cussed)
+        setproperty(VF_ANGLES, cuss_state.view);
+};
 
 void FO_CussCrosshair(float width, float height) {
     // Limit the rendering speed to reduce blur
@@ -537,8 +562,7 @@ void FO_CussCrosshair(float width, float height) {
         return;
     next_update += 0.025;
 
-
-    if (time >= cuss_state.end_time) {
+    if (!IsConced()) {
         if (cuss_state.cussed) {
             // Make sure we restore crosshairs
             localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
@@ -565,13 +589,13 @@ void FO_CussCrosshair(float width, float height) {
 }
 
 void FO_UpdateCuss() {
-    if (time < cuss_state.end_time) {
-        makevectors(input_angles);
-        input_angles = vectoangles(FO_ConcAim());
-        makevectors(input_angles);
-        input_angles_x *= -1;
-    }
+    if (!IsConced())
+        return;
 
+    makevectors(input_angles);
+    input_angles = vectoangles(FO_ConcAim());
+    makevectors(input_angles);
+    input_angles_x *= -1;
 }
 
 noref void CSQC_Input_Frame() {

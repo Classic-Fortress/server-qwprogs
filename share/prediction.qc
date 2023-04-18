@@ -5,13 +5,14 @@
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
 
-string wp_version = "v0.4-phys";
+string wp_version = "v1.0";
 
 enumflags {
     FOWP_CTIME,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
     FOWP_LASTPRIME,
+    FOWP_CONCFINISH,
     FOWP_CLIP,
     FOWP_THINK,
     FOWP_WF,
@@ -53,6 +54,9 @@ struct predict_tf_state {
     float tfstate;
     float last_prime;
     float csqc_maxspeed;
+
+    float conc_amp;
+    float conc_finished;
 
     float client_time;
     float client_ping;
@@ -320,6 +324,7 @@ static float Prediction_ChangedMask(entity player) {
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
+    M2(FOWP_CONCFINISH, conc_finished, conc_amp);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
@@ -444,6 +449,11 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_LASTPRIME) {
         COMM(Float, last_prime);
+    }
+
+    if (sendflags & FOWP_CONCFINISH) {
+        COMM(Byte, conc_amp);
+        COMM(Float, conc_finished);
     }
 
     if (sendflags & FOWP_THINK) {
@@ -705,10 +715,6 @@ void Predict_InitPlayer(entity player) {
 
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
-    sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
-            fo_projectiles ? "enabled\n" : "disabled\n");
-    sprint(player, PRINT_HIGH, "FortressOne: QC Physics ",
-            fo_config.qc_physics ? "enabled\n" : "disabled\n");
 
     entity pe = spawn();
     pe.owner = player;

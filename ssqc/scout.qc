@@ -417,8 +417,10 @@ void () OldConcussionGrenadeTimer = {
     stuffcmd(self.owner, "fov ");
     stuffcmd(self.owner, st);
     stuffcmd(self.owner, "\n");
-    if (self.health == 0)
+    if (self.health == 0) {
+        self.tfstate &= ~TFSTATE_CONC;
         dremove(self);
+    }
 };
 
 void () ConcussionGrenadeTimer = {
@@ -430,7 +432,7 @@ void () ConcussionGrenadeTimer = {
     if (self.owner.invincible_finished > time) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
         self.owner.fixangle = 0;
-        self.owner.is_concussed = 0;
+        self.owner.tfstate &= ~TFSTATE_CONC;
         dremove(self);
         return;
     }
@@ -494,7 +496,7 @@ void () ConcussionGrenadeTimer = {
     }
     if (self.health <= 0) {
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
-        self.owner.is_concussed = 0;
+        self.owner.tfstate &= ~TFSTATE_CONC;
         dremove(self);
     }
 };
@@ -832,7 +834,9 @@ void (entity inflictor, entity attacker, float bounce,
                             }
                         }
 
-                        if (distance_based_cuss_duration 
+                        head.tfstate |= TFSTATE_CONC;
+
+                        if (distance_based_cuss_duration
                             && ((head.playerclass == PC_MEDIC) || (head.playerclass == PC_SCOUT))) {
                             entity speedbump;
                             speedbump = spawn();
@@ -892,7 +896,6 @@ void (entity inflictor, entity attacker, float bounce,
                                 te.classname = "timer";
                                 te.owner = head;
                                 te.health = 40 * actual_cuss_time;
-                                self.owner.is_concussed = 1;
                             }
                         }
                     }

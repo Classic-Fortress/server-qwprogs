@@ -83,7 +83,7 @@ static void update_interp_time_dt() {
 
 // Unlike server_time(), interp_time() is continuous and reflects how much we've
 // projected the local copy of the world forward.  Monotonic.
-static float interp_time() {
+float interp_time() {
     static float last_interp_time = 0;
 
     last_interp_time = max(last_interp_time, time + pred_time_dt);
@@ -126,8 +126,7 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 
 // Order of preference:
 //   server disable, client enable/disable, server/ping enable
-static float CalcPredEnabled(float current_enable,
-                             float unspec_default /* meaning of '-1' */,
+static float CalcPredEnabled(float current_enable, float cvar,
                              float server_disable,
                              float dependent_enabled, string* set_by) {
 
@@ -152,29 +151,39 @@ static float CalcPredEnabled(float current_enable,
         return FALSE;
     }
 
+    if (!cvar) {
+        *set_by = "[disabled]";
+        return FALSE;
+    }
+
     if (WP_MinPing() == 0)
         return current_enable;
 
     float ping_enable, avg, variance;
 
     fill_avg_ping(&avg, &variance);
-    // We wait until 5ms over target (or 5 ms under target) when flipping, to
-    // avoid flip flopping when ping is right at target.
-    if (variance < sq(15))
-        ping_enable = avg > WP_MinPing() + (current_enable ? -5 : 5);
-    else
-        return current_enable;  // variance too high, don't change anything.
 
+    if (variance > sq(15)) {
+        *set_by = "[ping not yet stable]";
+        return current_enable;  // variance too high, wait.
+    }
 
-    if (unspec_default) {
-        if (ping_enable) {
-            *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
-                    WP_MinPing(), avg, variance);
-            return TRUE;
-        } else {
-            *set_by = sprintf("[lan mode <%d]", WP_MinPing());
-            return FALSE;
-        }
+    static float hyst = 0;
+    ping_enable = avg > WP_MinPing() - hyst;
+    if (ping_enable != current_enable) {
+        if (!hyst)  // avoid flip-flopping on boundary values.
+            hyst = 10;
+        else
+            hyst += 5;
+    }
+
+    if (ping_enable) {
+        *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
+                WP_MinPing(), avg, variance);
+        return TRUE;
+    } else {
+        *set_by = sprintf("[lan mode <%d]", WP_MinPing());
+        return FALSE;
     }
 
     *set_by = "[disabled]";
@@ -299,8 +308,9 @@ void WPP_UpdateEnable(float force) {
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
-        printf("FortressOne: Weapon prediction %s %s\n",
-                wp_new ? "enabled" : "disabled", wp_source);
+        if (!CVARF(fo_predict_projectiles) && is_player)
+            printf("FortressOne: Weapon prediction (no projectiles) %s %s\n",
+                    wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
 
         if (wp_new) {
@@ -314,8 +324,9 @@ void WPP_UpdateEnable(float force) {
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
-        printf("FortressOne: Projectile prediction %s %s\n",
-                pp_new ? "enabled" : "disabled", pp_source);
+        if (is_player)
+            printf("FortressOne: Weapon/Projectile prediction %s %s\n",
+                    pp_new ? "enabled" : "disabled", pp_source);
         pengine.pp_enabled = pp_new;
 
         next_wpp_enable_check += 9;
@@ -1710,11 +1721,37 @@ void WP_UpdateViewModel() {
     viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
+struct {
+    float old_x, old_y;
+    float cussed;
+
+    float end_time;
+
+    vector view;
+} cuss_state;
+
+void PredictConc() {
+    if (pstate_server.tfstate & TFSTATE_CONC == 0)
+        return;
+
+    static float last_conc_finished;
+    if (pstate_server.conc_finished != last_conc_finished) {
+        // New conc, use a single fixed local finish time.
+        last_conc_finished = pstate_server.conc_finished;
+        cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
+    }
+
+    if (time > cuss_state.end_time) {
+        pstate_pred.tfstate &= ~TFSTATE_CONC;
+    }
+}
+
 float WP_ClientThink() {
+    pstate_pred = pstate_server;
+    PredictConc();
+
     if (!WP_Enabled())
         return PREDRAW_NEXT;
-
-    pstate_pred = pstate_server;
 
     getinputstate(servercommandframe); // Setup first read for old_buttons.
     pengine.last_effectframe2 = pengine.last_effectframe;
