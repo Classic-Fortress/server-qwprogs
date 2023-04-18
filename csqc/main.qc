@@ -167,6 +167,7 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 
 DEFCVAR_FLOAT(fov, 90);
@@ -194,6 +195,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
 
+    FO_CussCrosshair(width, height);
     perf_finish_sample(&frame_timing, fts);
 
     // Work around bug in some versions of FTE.  See pmove.qc
@@ -496,6 +498,82 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
+struct {
+    float old_x, old_y;
+    float cussed;
+    float end_time;
+    float amp;
+} cuss_state;
+
+vector FO_Conc_Offset() {
+    const float P = 4;
+
+    float rem = cuss_state.end_time - time;
+    if (rem < 0)
+        return '0 0 0';
+
+    float a = ((rem % P) / P) * 2 * M_PI;
+    float amp = 2 + cuss_state.amp * min(8, rem)/8;
+
+    float x = amp * sin(a), y = amp * sin(a) * cos(a);
+    return [x, y, 0];
+}
+
+
+vector FO_ConcAim() {
+    vector o = FO_Conc_Offset();
+
+    vector r = v_forward * 200 + o.x * v_right + o.y * v_up;
+    return normalize(r);
+}
+
+DEFCVAR_FLOAT(cl_crossx, 0);
+DEFCVAR_FLOAT(cl_crossy, 0);
+
+void FO_CussCrosshair(float width, float height) {
+    // Limit the rendering speed to reduce blur
+    static float next_update;
+    if (time < next_update)
+        return;
+    next_update += 0.025;
+
+
+    if (time >= cuss_state.end_time) {
+        if (cuss_state.cussed) {
+            // Make sure we restore crosshairs
+            localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
+                        cuss_state.old_x, cuss_state.old_y));
+            cuss_state.cussed = FALSE;
+        }
+        return;
+    }
+
+    if (!cuss_state.cussed) {
+        /* cuss_state.old_x = CVARF(cl_crossx); */
+        /* cuss_state.old_y = CVARF(cl_crossy); */
+        cuss_state.old_x = 0; // TODO: properly save and restore these
+        cuss_state.old_y = 0;
+        cuss_state.cussed = TRUE;
+    }
+
+    makevectors(input_angles);  // updated by input_frame
+    vector p = project(pmove_org + 8000 * v_forward);
+
+    localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
+                cuss_state.old_x + p_x - width / 2,
+                cuss_state.old_y + p_y - height / 2));
+}
+
+void FO_UpdateCuss() {
+    if (time < cuss_state.end_time) {
+        makevectors(input_angles);
+        input_angles = vectoangles(FO_ConcAim());
+        makevectors(input_angles);
+        input_angles_x *= -1;
+    }
+
+}
+
 noref void CSQC_Input_Frame() {
     Sync_GameState();
 
@@ -513,6 +591,8 @@ noref void CSQC_Input_Frame() {
 
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
+
+    FO_UpdateCuss();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {

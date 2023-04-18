@@ -571,6 +571,15 @@ void () DecodeLevelParms = {
         // medic immune to concussion grenade effects [on]
         medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
 
+        // aim based concussion grenade effect
+        fo_concuss = CF_GetSetting("foc", "fo_cuss", "0");
+
+        // Tie some of these other options together for convenience / other
+        if (fo_concuss & FOC_DISTANCE)
+            distance_based_cuss_duration = TRUE;
+        if (fo_concuss & FOC_AFF_MED)
+            medicnocuss = FALSE;
+
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
 
