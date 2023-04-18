@@ -655,7 +655,6 @@ enumflags {
     FOC_DISTANCE,
     FOC_AFF_MED,
     FOC_RED_MED,
-    FOC_RED_HVY,
 };
 float fo_concuss;
 
