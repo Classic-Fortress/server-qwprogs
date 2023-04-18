@@ -83,7 +83,7 @@ static void update_interp_time_dt() {
 
 // Unlike server_time(), interp_time() is continuous and reflects how much we've
 // projected the local copy of the world forward.  Monotonic.
-static float interp_time() {
+float interp_time() {
     static float last_interp_time = 0;
 
     last_interp_time = max(last_interp_time, time + pred_time_dt);
@@ -1721,11 +1721,35 @@ void WP_UpdateViewModel() {
     viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
+struct {
+    float old_x, old_y;
+    float cussed;
+
+    float end_time;
+} cuss_state;
+
+void PredictConc() {
+    if (pstate_server.tfstate & TFSTATE_CONC == 0)
+        return;
+
+    static float last_conc_finished;
+    if (pstate_server.conc_finished != last_conc_finished) {
+        // New conc, use a single fixed local finish time.
+        last_conc_finished = pstate_server.conc_finished;
+        cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
+    }
+
+    if (time > cuss_state.end_time) {
+        pstate_pred.tfstate &= ~TFSTATE_CONC;
+    }
+}
+
 float WP_ClientThink() {
+    pstate_pred = pstate_server;
+    PredictConc();
+
     if (!WP_Enabled())
         return PREDRAW_NEXT;
-
-    pstate_pred = pstate_server;
 
     getinputstate(servercommandframe); // Setup first read for old_buttons.
     pengine.last_effectframe2 = pengine.last_effectframe;

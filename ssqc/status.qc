@@ -617,6 +617,7 @@ void (entity Player) InitAllStatuses = {
 void UpdateClientConcussion(entity player, float duration) {
     msg_entity = player;
 
+    // TODO: obviously doesn't need to be server side
     float amp = 50;
 
     if ((player.playerclass == PC_HVYWEAP) && (fo_concuss & FOC_RED_HVY)) {
@@ -627,11 +628,9 @@ void UpdateClientConcussion(entity player, float duration) {
         duration /= 2;
     }
 
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_CONCUSSED);
-    WriteByte(MSG_MULTICAST, amp);
-    WriteFloat(MSG_MULTICAST, time + duration);
-    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+    // networked via prediction ent
+    player.conc_amp = amp;
+    player.conc_finished = time + duration;
 }
 
 float laststate;

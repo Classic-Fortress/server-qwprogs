@@ -498,12 +498,9 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-struct {
-    float old_x, old_y;
-    float cussed;
-    float end_time;
-    float amp;
-} cuss_state;
+static float IsConced() {
+    return pstate_pred.tfstate & TFSTATE_CONC;
+}
 
 vector FO_Conc_Offset() {
     const float P = 4;
@@ -513,7 +510,7 @@ vector FO_Conc_Offset() {
         return '0 0 0';
 
     float a = ((rem % P) / P) * 2 * M_PI;
-    float amp = 2 + cuss_state.amp * min(8, rem)/8;
+    float amp = 2 + pstate_server.conc_amp * min(8, rem)/8;
 
     float x = amp * sin(a), y = amp * sin(a) * cos(a);
     return [x, y, 0];
@@ -537,8 +534,7 @@ void FO_CussCrosshair(float width, float height) {
         return;
     next_update += 0.025;
 
-
-    if (time >= cuss_state.end_time) {
+    if (!IsConced()) {
         if (cuss_state.cussed) {
             // Make sure we restore crosshairs
             localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
@@ -565,13 +561,13 @@ void FO_CussCrosshair(float width, float height) {
 }
 
 void FO_UpdateCuss() {
-    if (time < cuss_state.end_time) {
-        makevectors(input_angles);
-        input_angles = vectoangles(FO_ConcAim());
-        makevectors(input_angles);
-        input_angles_x *= -1;
-    }
+    if (!IsConced())
+        return;
 
+    makevectors(input_angles);
+    input_angles = vectoangles(FO_ConcAim());
+    makevectors(input_angles);
+    input_angles_x *= -1;
 }
 
 noref void CSQC_Input_Frame() {

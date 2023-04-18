@@ -434,6 +434,7 @@ int () W_FireMedikit = {
                     if (te.team_no != self.team_no)
                         TF_AddFrags(self, 1);
 
+                    trace_ent.tfstate &= ~TFSTATE_CONC;
                     dremove(te);
                 }
                 if (trace_ent.tfstate & TFSTATE_HALLUCINATING) {

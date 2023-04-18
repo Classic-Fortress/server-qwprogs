@@ -1508,7 +1508,6 @@ void () TeamFortress_SetEquipment = {
     self.is_feigning = 0;
     self.next_feign_time = 0;
     self.is_unabletospy = 0;
-    self.is_concussed = 0;
     self.disguise_skin = 0;
     self.disguise_team = 0;
     self.detpack_left = 0;
@@ -2256,7 +2255,7 @@ void () TeamFortress_RemoveTimers = {
     local entity te;
 
     self.leg_damage = 0;
-    self.is_concussed = 0;
+    self.tfstate &= ~TFSTATE_CONC;
     self.is_undercover = 0;
 
     if (self.is_building && engineer_move) {
