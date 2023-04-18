@@ -511,7 +511,7 @@ static float BlendAmp(float start, float end, float rem, float D) {
     return rem/D * start + (D-rem)/D * end;
 }
 
-vector FO_Conc_Offset() {
+static vector FO_Conc_Offset() {
     const float P = 4;
 
     float rem = cuss_state.end_time - time;
@@ -533,26 +533,28 @@ vector FO_Conc_Offset() {
 }
 
 
-vector FO_ConcAim() {
+static void FO_UpdateConcAim() {
+    makevectors(input_angles);
     vector o = FO_Conc_Offset();
 
     vector r = v_forward * 200 + o.x * v_right + o.y * v_up;
 
-    cuss_state.view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
-    cuss_state.view[0] *= -1;
+    cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
+    cuss_state.c_view[0] *= -1;
 
-    return normalize(r);
+    cuss_state.c_forward = normalize(r);
 }
 
+DEFCVAR_FLOAT(fo_crossy, 0);  // For people who want to use crossy
 DEFCVAR_FLOAT(cl_crossx, 0);
 DEFCVAR_FLOAT(cl_crossy, 0);
 
-void FO_CussView() {
+static void FO_CussView() {
     if (cuss_state.cussed)
-        setproperty(VF_ANGLES, cuss_state.view);
+        setproperty(VF_ANGLES, cuss_state.c_view);
 };
 
-void FO_CussCrosshair(float width, float height) {
+static void FO_CussCrosshair(float width, float height) {
     const float conc_fps = 144;
     // Limit the rendering speed to reduce blur
     static float next_update;
@@ -561,39 +563,42 @@ void FO_CussCrosshair(float width, float height) {
     next_update = time + 1.0/conc_fps;
 
     if (!IsConced()) {
-        if (cuss_state.cussed) {
+        if (cuss_state.cussed || CVARF(cl_crossx) != 0 ||
+                CVARF(cl_crossy) != CVARF(fo_crossy)) {
             // Make sure we restore crosshairs
-            localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
-                        cuss_state.old_x, cuss_state.old_y));
+            localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n", 0, CVARF(fo_crossy)));
+            CVARF(cl_crossx) = 0;
+            CVARF(cl_crossy) = CVARF(fo_crossy);
             cuss_state.cussed = FALSE;
         }
         return;
     }
 
-    if (!cuss_state.cussed) {
-        /* cuss_state.old_x = CVARF(cl_crossx); */
-        /* cuss_state.old_y = CVARF(cl_crossy); */
-        cuss_state.old_x = 0; // TODO: properly save and restore these
-        cuss_state.old_y = 0;
-        cuss_state.cussed = TRUE;
-    }
-
+    cuss_state.cussed = TRUE;
     makevectors(input_angles);  // updated by input_frame
-    vector p = project(pmove_org + 8000 * v_forward);
+    vector p = project(pmove_org + 8000 * cuss_state.c_forward);
 
     localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
-                cuss_state.old_x + p_x - width / 2,
-                cuss_state.old_y + p_y - height / 2));
+                p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
 }
 
 void FO_UpdateCuss() {
     if (!IsConced())
         return;
 
-    makevectors(input_angles);
-    input_angles = vectoangles(FO_ConcAim());
-    makevectors(input_angles);
-    input_angles_x *= -1;
+    FO_UpdateConcAim();
+
+    float modify_forward = TRUE;
+
+    if ((!pmove_onground && (fo_config.fo_concuss & FOC_EASY_AIR)) ||
+        (pmove_onground && (fo_config.fo_concuss & FOC_EASY_GROUND)))
+        modify_forward = input_buttons & BUTTON0;
+
+    if (modify_forward) {
+        input_angles = vectoangles(cuss_state.c_forward);
+        input_angles_x *= -1;
+        makevectors(input_angles);
+    }
 }
 
 noref void CSQC_Input_Frame() {

@@ -573,6 +573,8 @@ void () DecodeLevelParms = {
 
         // aim based concussion grenade effect
         fo_concuss = CF_GetSetting("foc", "fo_cuss", "0");
+        if (fo_concuss & FOC_ON_DEF)
+            fo_concuss |= foc_defaults;
 
         // Tie some of these other options together for convenience / other
         if (fo_concuss & FOC_DISTANCE)

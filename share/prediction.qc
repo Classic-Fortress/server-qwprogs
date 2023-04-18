@@ -399,6 +399,7 @@ void EntUpdate_Config() {
     COMM(Byte, wp_global_disable);
     COMM(Byte, gren_beta_disable);
     COMM(Byte, old_ng_rof);
+    COMM(Short, fo_concuss);
 
 #ifdef SSQC
     return TRUE;
@@ -589,6 +590,7 @@ void Predict_InitDefaultConfig() {
     fo_config.wp_default_min_ping_ms = 25;
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
+    fo_config.fo_concuss = 0;
 }
 
 #ifdef SSQC
@@ -655,8 +657,12 @@ static void WeaponPred_CheckConfigUpdate() {
     if (!read_rof_once) {
         if (!fo_config.old_ng_rof)  // Don't overwrite huetf setting this.
             CONFIG_UPDATE(FALSE, "ongrof", old_ng_rof);
-        printf("reading ROF %d\n", fo_config.old_ng_rof);
         read_rof_once = TRUE;
+    }
+
+    if (fo_concuss != fo_config.fo_concuss) {
+        fo_config.fo_concuss = fo_concuss;
+        update = TRUE;
     }
 
     CONFIG_UPDATE(TRUE,  "rewind", rewind_flags);

@@ -845,7 +845,7 @@ void (entity inflictor, entity attacker, float bounce,
                             speedbump.owner = head;
                         }
 
-                        if (fo_concuss & FOC_ON) {
+                        if (fo_concuss) {
                             UpdateClientConcussion(head, actual_cuss_time);
 
                             head = head.chain;

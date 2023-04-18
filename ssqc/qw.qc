@@ -650,12 +650,6 @@ float engineer_move;
 
 float fo_projectiles;
 
-enumflags {
-    FOC_ON,
-    FOC_DISTANCE,
-    FOC_AFF_MED,
-    FOC_RED_MED,
-};
 float fo_concuss;
 
 float numlocs;
