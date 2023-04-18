@@ -1082,6 +1082,7 @@ void MP_SetSpeed() {
 }
 
 
+DEFCVAR_FLOAT(cl_crossx, 0);
 
 void WP_Frame() {
     if (!is_alive) {

@@ -614,6 +614,26 @@ void (entity Player) InitAllStatuses = {
     }
 };
 
+void UpdateClientConcussion(entity player, float duration) {
+    msg_entity = player;
+
+    float amp = 50;
+
+    if ((player.playerclass == PC_HVYWEAP) && (fo_concuss & FOC_RED_HVY)) {
+        amp /= 2;
+    }
+
+    if ((player.playerclass == PC_MEDIC) && (fo_concuss & FOC_RED_MED)) {
+        duration /= 2;
+    }
+
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
+    WriteByte(MSG_MULTICAST, MSG_CONCUSSED);
+    WriteByte(MSG_MULTICAST, amp);
+    WriteFloat(MSG_MULTICAST, time + duration);
+    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+}
+
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
     if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))

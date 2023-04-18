@@ -356,6 +356,11 @@ void() CSQC_Parse_Event = {
         case MSG_UNPAUSE:
             CsGrenTimer::SyncUnpause();
             break;
+        case MSG_CONCUSSED:
+            cuss_state.amp = readbyte();
+            cuss_state.end_time = readfloat();
+            break;
+
     }
 }
 

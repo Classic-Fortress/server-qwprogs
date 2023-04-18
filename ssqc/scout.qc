@@ -841,6 +841,13 @@ void (entity inflictor, entity attacker, float bounce,
                             speedbump.owner = head;
                         }
 
+                        if (fo_concuss & FOC_ON) {
+                            UpdateClientConcussion(head, actual_cuss_time);
+
+                            head = head.chain;
+                            continue;
+                        }
+
                         te = find(world, classname, "timer");
                         if (old_grens == TRUE)
                             while (((te.owner != head) ||
