@@ -618,7 +618,7 @@ void UpdateClientConcussion(entity player, float duration) {
     msg_entity = player;
 
     // TODO: obviously doesn't need to be server side
-    float amp = 50;
+    float amp = 100;
 
     if ((player.playerclass == PC_HVYWEAP) && (fo_concuss & FOC_RED_HVY)) {
         amp /= 2;
@@ -627,6 +627,9 @@ void UpdateClientConcussion(entity player, float duration) {
     if ((player.playerclass == PC_MEDIC) && (fo_concuss & FOC_RED_MED)) {
         duration /= 2;
     }
+
+    if (player.playerclass == PC_SCOUT)
+        amp *= 2;
 
     // networked via prediction ent
     player.conc_amp = amp;

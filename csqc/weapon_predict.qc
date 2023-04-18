@@ -1726,6 +1726,8 @@ struct {
     float cussed;
 
     float end_time;
+
+    vector view;
 } cuss_state;
 
 void PredictConc() {
