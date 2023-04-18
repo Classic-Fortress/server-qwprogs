@@ -1173,6 +1173,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     Admin_CeaseFire();
                 processedCmd = TRUE;
                 break;
+            case "updateserver":
+                Admin_UpdateServer();
+                processedCmd = TRUE;
+                break;
             case "map":
                 processedCmd = TRUE;
                 if (arg_num == 2) {

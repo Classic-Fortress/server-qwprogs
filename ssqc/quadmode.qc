@@ -662,6 +662,8 @@ void () StartQuadRound =
  		}
 
 		localcmd("stop\n");
+		Admin_UpdateServer();
+
 		return;
 	}
 
