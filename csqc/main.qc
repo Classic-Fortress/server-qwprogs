@@ -508,7 +508,7 @@ static float IsConced() {
 
 
 static float BlendAmp(float start, float end, float rem, float D) {
-    return rem/D * end + (D-rem)/D * start;
+    return rem/D * start + (D-rem)/D * end;
 }
 
 vector FO_Conc_Offset() {
@@ -521,15 +521,12 @@ vector FO_Conc_Offset() {
     float a = ((rem % P) / P) * 2 * M_PI;
 
     float amp = pstate_pred.conc_amp;
-    if (rem >= 6)
+    if (rem >= 8)
         amp *= 1;
     else if (rem >= 2)
-        amp *= BlendAmp(1.0, 0.5, rem - 2, 6 - 2);
+        amp *= BlendAmp(1.0, 0.5, rem - 2, 8 - 2);
     else
         amp *= BlendAmp(0.5, 0, rem, 2);
-
-
-    float amp = 2 + pstate_pred.conc_amp * min(8, rem)/8;
 
     float x = amp * sin(a), y = amp * sin(a) * cos(a);
     return [x, y, 0];
@@ -556,11 +553,12 @@ void FO_CussView() {
 };
 
 void FO_CussCrosshair(float width, float height) {
+    const float conc_fps = 144;
     // Limit the rendering speed to reduce blur
     static float next_update;
     if (time < next_update)
         return;
-    next_update += 0.025;
+    next_update = time + 1.0/conc_fps;
 
     if (!IsConced()) {
         if (cuss_state.cussed) {
