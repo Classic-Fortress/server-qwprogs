@@ -5,7 +5,7 @@
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
 
-string wp_version = "v0.4-phys";
+string wp_version = "v1.0";
 
 enumflags {
     FOWP_CTIME,
@@ -705,10 +705,6 @@ void Predict_InitPlayer(entity player) {
 
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
-    sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
-            fo_projectiles ? "enabled\n" : "disabled\n");
-    sprint(player, PRINT_HIGH, "FortressOne: QC Physics ",
-            fo_config.qc_physics ? "enabled\n" : "disabled\n");
 
     entity pe = spawn();
     pe.owner = player;

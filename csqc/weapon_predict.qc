@@ -126,8 +126,7 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 
 // Order of preference:
 //   server disable, client enable/disable, server/ping enable
-static float CalcPredEnabled(float current_enable,
-                             float unspec_default /* meaning of '-1' */,
+static float CalcPredEnabled(float current_enable, float cvar,
                              float server_disable,
                              float dependent_enabled, string* set_by) {
 
@@ -152,29 +151,39 @@ static float CalcPredEnabled(float current_enable,
         return FALSE;
     }
 
+    if (!cvar) {
+        *set_by = "[disabled]";
+        return FALSE;
+    }
+
     if (WP_MinPing() == 0)
         return current_enable;
 
     float ping_enable, avg, variance;
 
     fill_avg_ping(&avg, &variance);
-    // We wait until 5ms over target (or 5 ms under target) when flipping, to
-    // avoid flip flopping when ping is right at target.
-    if (variance < sq(15))
-        ping_enable = avg > WP_MinPing() + (current_enable ? -5 : 5);
-    else
-        return current_enable;  // variance too high, don't change anything.
 
+    if (variance > sq(15)) {
+        *set_by = "[ping not yet stable]";
+        return current_enable;  // variance too high, wait.
+    }
 
-    if (unspec_default) {
-        if (ping_enable) {
-            *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
-                    WP_MinPing(), avg, variance);
-            return TRUE;
-        } else {
-            *set_by = sprintf("[lan mode <%d]", WP_MinPing());
-            return FALSE;
-        }
+    static float hyst = 0;
+    ping_enable = avg > WP_MinPing() - hyst;
+    if (ping_enable != current_enable) {
+        if (!hyst)  // avoid flip-flopping on boundary values.
+            hyst = 10;
+        else
+            hyst += 5;
+    }
+
+    if (ping_enable) {
+        *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
+                WP_MinPing(), avg, variance);
+        return TRUE;
+    } else {
+        *set_by = sprintf("[lan mode <%d]", WP_MinPing());
+        return FALSE;
     }
 
     *set_by = "[disabled]";
@@ -299,8 +308,9 @@ void WPP_UpdateEnable(float force) {
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
-        printf("FortressOne: Weapon prediction %s %s\n",
-                wp_new ? "enabled" : "disabled", wp_source);
+        if (!CVARF(fo_predict_projectiles) && is_player)
+            printf("FortressOne: Weapon prediction (no projectiles) %s %s\n",
+                    wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
 
         if (wp_new) {
@@ -314,8 +324,9 @@ void WPP_UpdateEnable(float force) {
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
-        printf("FortressOne: Projectile prediction %s %s\n",
-                pp_new ? "enabled" : "disabled", pp_source);
+        if (is_player)
+            printf("FortressOne: Weapon/Projectile prediction %s %s\n",
+                    pp_new ? "enabled" : "disabled", pp_source);
         pengine.pp_enabled = pp_new;
 
         next_wpp_enable_check += 9;
