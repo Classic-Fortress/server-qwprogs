@@ -44,6 +44,8 @@ var struct {
 
     float wp_global_disable;
     float gren_beta_disable;
+
+    float fo_concuss;
 } fo_config;
 
 enumflags {
@@ -119,6 +121,28 @@ inline float PredictEnabled(float flag) {
 };
 
 const float PREDICT_FLAGS_DEFAULT = 0;
+
+enumflags {
+    FOC_ON_DEF,  // apply foc_defaults
+    FOC_ON_NODEF,
+    FOC_AFF_MED,
+    FOC_EASY_AIR,
+    FOC_EASY_GROUND,
+    FOC_DISTANCE,
+    FOC_RED_MED,
+};
+
+const float foc_defaults = FOC_AFF_MED | FOC_EASY_AIR;
+
+string FO_CONC[] = {
+    "on (w/ defaults)",
+    "on (no defaults)",
+    "affects medic",
+    "easy air control",
+    "easy ground control",
+    "distance based",
+    "reduce medic effect",
+};
 
 enumflags {
     CLOWN_FAST_PROJECTILES,

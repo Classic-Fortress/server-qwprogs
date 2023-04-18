@@ -263,6 +263,9 @@ void WPP_Status() {
 
     PrintFlagField("Clown mode [clown_flags=%d]\n",
                    fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
+
+    PrintFlagField("Concs [fo_concuss=%d]\n",
+                   fo_config.fo_concuss, FO_CONC.length, FO_CONC);
 }
 #undef PRINT_CONFIG
 
@@ -1722,12 +1725,10 @@ void WP_UpdateViewModel() {
 }
 
 struct {
-    float old_x, old_y;
     float cussed;
-
     float end_time;
-
-    vector view;
+    vector c_view;
+    vector c_forward;
 } cuss_state;
 
 void PredictConc() {
