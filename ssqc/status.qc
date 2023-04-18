@@ -617,16 +617,16 @@ void (entity Player) InitAllStatuses = {
 void UpdateClientConcussion(entity player, float duration) {
     msg_entity = player;
 
-    static float scout_mult = 1.5;
-    static float medic_mult = 0.5;
-    static float heavy_mult = 0.5;
+    static float scout_mult;
+    static float medic_mult;
+    static float heavy_mult;
     float amp = 100;
 
     // Once non debug, these should be once per map.
     amp = CF_GetSetting("foca", "fo_cuss_amp", "100");
     scout_mult = CF_GetSetting("focs", "fo_cuss_scout", "1.5");
     medic_mult = CF_GetSetting("focm", "fo_cuss_medic", "0.5");
-    heavy_mult = CF_GetSetting("foch", "fo_cuss_heavy", "0.75");
+    heavy_mult = CF_GetSetting("foch", "fo_cuss_heavy", "0.25");
 
     if (player.playerclass == PC_HVYWEAP) {
         amp *= heavy_mult;

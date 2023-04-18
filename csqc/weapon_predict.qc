@@ -185,9 +185,6 @@ static float CalcPredEnabled(float current_enable, float cvar,
         *set_by = sprintf("[lan mode <%d]", WP_MinPing());
         return FALSE;
     }
-
-    *set_by = "[disabled]";
-    return FALSE;
 }
 
 static float client_delay_packets;
@@ -1741,18 +1738,27 @@ void PredictConc() {
         return;
     }
 
+    if (!fo_config.fo_concuss)
+        return;  // Not enabled.
+
     if (pstate_server.tfstate & TFSTATE_CONC == 0)
         return;
 
-    static float last_conc_finished;
+    static float last_conc_finished, last_conc_printed = TRUE;
     if (pstate_server.conc_finished != last_conc_finished) {
         // New conc, use a single fixed local finish time.
         last_conc_finished = pstate_server.conc_finished;
         cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
+        last_conc_printed = FALSE;
     }
 
     if (time > cuss_state.end_time) {
         pstate_pred.tfstate &= ~TFSTATE_CONC;
+
+        if (!last_conc_printed) {
+            print("Your head feels better now\n");
+            last_conc_printed = TRUE;
+        }
     }
 }
 
