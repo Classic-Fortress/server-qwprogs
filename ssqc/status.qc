@@ -617,19 +617,26 @@ void (entity Player) InitAllStatuses = {
 void UpdateClientConcussion(entity player, float duration) {
     msg_entity = player;
 
-    // TODO: obviously doesn't need to be server side
+    static float scout_mult = 1.5;
+    static float medic_mult = 0.5;
+    static float heavy_mult = 0.5;
     float amp = 100;
 
-    if ((player.playerclass == PC_HVYWEAP) && (fo_concuss & FOC_RED_HVY)) {
-        amp /= 2;
-    }
+    // Once non debug, these should be once per map.
+    amp = CF_GetSetting("foca", "fo_cuss_amp", "100");
+    scout_mult = CF_GetSetting("focs", "fo_cuss_scout", "1.5");
+    medic_mult = CF_GetSetting("focm", "fo_cuss_medic", "0.5");
+    heavy_mult = CF_GetSetting("foch", "fo_cuss_heavy", "0.75");
 
-    if ((player.playerclass == PC_MEDIC) && (fo_concuss & FOC_RED_MED)) {
-        duration /= 2;
+    if (player.playerclass == PC_HVYWEAP) {
+        amp *= heavy_mult;
+    } else if (player.playerclass == PC_SCOUT) {
+        amp *= scout_mult;
+    } else if (player.playerclass == PC_MEDIC) {
+        if (fo_concuss & FOC_RED_MED)
+            duration /= 2;
+        amp *= medic_mult;
     }
-
-    if (player.playerclass == PC_SCOUT)
-        amp *= 2;
 
     // networked via prediction ent
     player.conc_amp = amp;
