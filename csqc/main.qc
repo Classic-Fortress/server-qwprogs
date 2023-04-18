@@ -520,7 +520,7 @@ vector FO_Conc_Offset() {
 
     float a = ((rem % P) / P) * 2 * M_PI;
 
-    float amp = pstate_server.conc_amp;
+    float amp = pstate_pred.conc_amp;
     if (rem >= 6)
         amp *= 1;
     else if (rem >= 2)
@@ -529,7 +529,7 @@ vector FO_Conc_Offset() {
         amp *= BlendAmp(0.5, 0, rem, 2);
 
 
-    float amp = 2 + pstate_server.conc_amp * min(8, rem)/8;
+    float amp = 2 + pstate_pred.conc_amp * min(8, rem)/8;
 
     float x = amp * sin(a), y = amp * sin(a) * cos(a);
     return [x, y, 0];

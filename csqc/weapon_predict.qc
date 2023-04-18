@@ -1731,6 +1731,15 @@ struct {
 } cuss_state;
 
 void PredictConc() {
+    if (fo_config.clown_flags & CLOWN_CONC) {
+        if (cuss_state.end_time < time + 6)
+            cuss_state.end_time += 4;  // Must align with period.
+
+        pstate_pred.conc_amp = 100;
+        pstate_pred.tfstate |= TFSTATE_CONC;
+        return;
+    }
+
     if (pstate_server.tfstate & TFSTATE_CONC == 0)
         return;
 
