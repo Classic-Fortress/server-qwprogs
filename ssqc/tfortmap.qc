@@ -979,6 +979,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                             }
                             dremove(te);
                         }
+                        Player.tfstate &= ~TFSTATE_CONC;
 
                         if (Player.tfstate & TFSTATE_HALLUCINATING) {
                             if (te.think == HallucinationTimer) {
