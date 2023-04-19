@@ -538,15 +538,14 @@ static vector FO_Conc_Offset() {
     return [x, y, 0];
 }
 
-
 static void FO_UpdateConcAim() {
     makevectors(input_angles);
     vector o = FO_Conc_Offset();
 
+    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
+
     cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
     cuss_state.c_view[0] *= -1;
-
-    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
 }
 
 DEFCVAR_FLOAT(fo_crossy, 0);  // For people who want to use crossy
@@ -554,17 +553,18 @@ DEFCVAR_FLOAT(cl_crossx, 0);
 DEFCVAR_FLOAT(cl_crossy, 0);
 
 static void FO_CussView() {
-    if (cuss_state.cussed)
+    if (cuss_state.cussed) {
+        FO_UpdateConcAim();
         setproperty(VF_ANGLES, cuss_state.c_view);
+    }
 };
 
 static void FO_CussCrosshair(float width, float height) {
-    const float conc_fps = 77;
-    // Limit the rendering speed to reduce blur
+    const float crosshair_hz = 200;
     static float next_update;
     if (time < next_update)
         return;
-    next_update = time + 1.0/conc_fps;
+    next_update = time + 1.0/crosshair_hz;
 
     if (!IsFoConced()) {
         if (cuss_state.cussed || CVARF(cl_crossx) != 0 ||
@@ -586,11 +586,9 @@ static void FO_CussCrosshair(float width, float height) {
                 p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
 }
 
-void FO_UpdateCuss() {
+void FO_ApplyCussInput() {
     if (!IsFoConced())
         return;
-
-    FO_UpdateConcAim();
 
     float modify_forward = TRUE;
 
@@ -623,7 +621,7 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
-    FO_UpdateCuss();
+    FO_ApplyCussInput();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
