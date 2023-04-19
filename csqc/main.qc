@@ -503,6 +503,9 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
 };
 
 static float IsFoConced() {
+    if (IsClownMode(CLOWN_CONC))
+        return TRUE;
+
     if (!fo_config.fo_concuss)
         return FALSE;
 
@@ -540,12 +543,10 @@ static void FO_UpdateConcAim() {
     makevectors(input_angles);
     vector o = FO_Conc_Offset();
 
-    vector r = v_forward * 200 + o.x * v_right + o.y * v_up;
-
     cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
     cuss_state.c_view[0] *= -1;
 
-    cuss_state.c_forward = normalize(r);
+    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
 }
 
 DEFCVAR_FLOAT(fo_crossy, 0);  // For people who want to use crossy
@@ -558,7 +559,7 @@ static void FO_CussView() {
 };
 
 static void FO_CussCrosshair(float width, float height) {
-    const float conc_fps = 144;
+    const float conc_fps = 77;
     // Limit the rendering speed to reduce blur
     static float next_update;
     if (time < next_update)
@@ -599,8 +600,8 @@ void FO_UpdateCuss() {
 
     if (modify_forward) {
         input_angles = vectoangles(cuss_state.c_forward);
-        input_angles_x *= -1;
         makevectors(input_angles);
+        input_angles_x *= -1;
     }
 }
 
