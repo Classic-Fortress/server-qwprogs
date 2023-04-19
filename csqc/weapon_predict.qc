@@ -1051,47 +1051,15 @@ void WPP_Dump() {
 
 void WP_Attack();
 
-DEFCVAR_FLOAT(cl_forwardspeed, 0);
-DEFCVAR_FLOAT(cl_backspeed, 0);
-DEFCVAR_FLOAT(cl_sidespeed, 0);
-
-void MP_SetSpeed() {
-    if (!CVARF(wpp_setspeed))
+void FO_ApplyMaxSpeed() {
+    if (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED))
         return;
 
-    static float last_playerclass, last_set;
+    if (pstate_pred.tfstate & TFSTATE_AIMING == 0)
+        return;
 
-    float speed = pstate_pred.csqc_maxspeed;
-
-    if (pstate_pred.playerclass != last_playerclass)
-        last_set = -1;  // Force update.
-    last_playerclass = pstate_pred.playerclass;
-
-    const float speed_aiming = 80;
-    const float speed_aiming2dir = ceil(speed_aiming/sqrt(2));
-
-    if (pstate_pred.tfstate & TFSTATE_AIMING) {
-        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
-
-        // Cap as maxspeed would, but client-side, when enabled.
-        if (RewindFlagEnabled(REWIND_SETSPEED))
-            if (input_movevalues.x && input_movevalues.y)
-                speed = min(speed, speed_aiming2dir);
-    }
-
-    float fastest =
-        max(CVARF(cl_forwardspeed), CVARF(cl_backspeed), CVARF(cl_sidespeed));
-
-    // We check >speed, not =speed as it's still valid for clients to control to
-    // lower speeds.  Except for transitions where the maxspeed is reset.
-    if (speed > last_set || fastest > speed) {
-        last_set = speed;
-
-        string spd = ftos(speed);
-        localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
-    }
+    input_movevalues = normalize(input_movevalues) * 80;
 }
-
 
 DEFCVAR_FLOAT(cl_crossx, 0);
 
@@ -1128,7 +1096,6 @@ void WP_Frame() {
         WP_Attack();
 
     WP_Sniper_UpdateSight();
-    MP_SetSpeed();
 }
 
 

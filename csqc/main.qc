@@ -603,6 +603,8 @@ void FO_ApplyCussInput() {
     }
 }
 
+void FO_ApplyMaxSpeed();
+
 noref void CSQC_Input_Frame() {
     Sync_GameState();
 
@@ -621,6 +623,7 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
+    FO_ApplyMaxSpeed();
     FO_ApplyCussInput();
 }
 
