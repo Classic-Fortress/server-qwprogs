@@ -1729,7 +1729,7 @@ struct {
 } cuss_state;
 
 void PredictConc() {
-    if (fo_config.clown_flags & CLOWN_CONC) {
+    if (IsClownMode(CLOWN_CONC)) {
         if (cuss_state.end_time < time + 6)
             cuss_state.end_time += 4;  // Must align with period.
 
