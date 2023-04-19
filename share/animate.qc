@@ -267,7 +267,7 @@ void asscan_fire_extra() {
 
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (vlen(get_velocity()) <= 90 && !(*tf_state () & TFSTATE_LOCK)) {
+    if (vlen(get_velocity()) <= 100 && !(*tf_state () & TFSTATE_LOCK)) {
         if (tidx % 2 == 1) {  // 1-based
             muzzleflash();
             Pred_Sound(SND_ASSCAN_FIRE);
