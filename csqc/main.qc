@@ -502,7 +502,10 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
-static float IsConced() {
+static float IsFoConced() {
+    if (!fo_config.fo_concuss)
+        return FALSE;
+
     return pstate_pred.tfstate & TFSTATE_CONC;
 }
 
@@ -562,7 +565,7 @@ static void FO_CussCrosshair(float width, float height) {
         return;
     next_update = time + 1.0/conc_fps;
 
-    if (!IsConced()) {
+    if (!IsFoConced()) {
         if (cuss_state.cussed || CVARF(cl_crossx) != 0 ||
                 CVARF(cl_crossy) != CVARF(fo_crossy)) {
             // Make sure we restore crosshairs
@@ -583,7 +586,7 @@ static void FO_CussCrosshair(float width, float height) {
 }
 
 void FO_UpdateCuss() {
-    if (!IsConced())
+    if (!IsFoConced())
         return;
 
     FO_UpdateConcAim();
