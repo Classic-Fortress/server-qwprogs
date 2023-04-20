@@ -1055,10 +1055,8 @@ void FO_ApplyMaxSpeed() {
     if (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED))
         return;
 
-    if (pstate_pred.tfstate & TFSTATE_AIMING == 0)
-        return;
-
-    input_movevalues = normalize(input_movevalues) * 80;
+    if (pstate_pred.tfstate & TFSTATE_AIMING)
+        input_movevalues = normalize(input_movevalues) * 80;
 }
 
 DEFCVAR_FLOAT(cl_crossx, 0);

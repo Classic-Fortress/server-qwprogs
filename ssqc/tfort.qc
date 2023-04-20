@@ -1258,7 +1258,7 @@ void (entity p) TeamFortress_SetSpeed = {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
         p.maxspeed = 0;
-        stuffcmd(p, "cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500\n");
+        stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;\n");
         return;
     }
 
@@ -1292,14 +1292,12 @@ void (entity p) TeamFortress_SetSpeed = {
     if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable) {
         if (p.tfstate & TFSTATE_AIMING)
             new_max = min(new_max, 80);
-
-        sp = ftos(new_max);
-        stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
-                 "; cl_sidespeed ", sp, "\n");
     }
 
     p.maxspeed = new_max;
-    p.csqc_maxspeed = new_max;  // Always set, need populated on transition.
+    p.csqc_maxspeed = new_max;  // Note: with new input_movevalues construction
+                                // this isn't technically needed until we do
+                                // something like client-side tranq pred.
 };
 
 void () TeamFortress_SetHealth = {
