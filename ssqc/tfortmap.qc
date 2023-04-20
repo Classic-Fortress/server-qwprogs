@@ -973,13 +973,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
 
                         te = find(Player, classname, "timer");
 
-                        if (te.think == ConcussionGrenadeTimer || te.think == OldConcussionGrenadeTimer) {
-                            if (old_grens == TRUE) {
-                                stuffcmd(Player, "v_idlescale 0\nfov 90\n");
-                            }
-                            dremove(te);
-                        }
-                        Player.tfstate &= ~TFSTATE_CONC;
+                        RemoveConc(Player);
 
                         if (Player.tfstate & TFSTATE_HALLUCINATING) {
                             if (te.think == HallucinationTimer) {

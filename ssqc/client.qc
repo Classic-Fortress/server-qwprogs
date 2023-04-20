@@ -563,7 +563,7 @@ void () DecodeLevelParms = {
         classtips = CF_GetSetting("ct", "classtips", "on");
 
         // concussion grenade effect time [19]
-        cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
+        cussgrentime = CF_GetSetting("cgt", "cussgrentime", "10");
 
         // concussion grenade effect time proportional to distance from explosion
         distance_based_cuss_duration = CF_GetSetting("dbcd", "distance_based_cuss_duration", "off");
@@ -572,7 +572,7 @@ void () DecodeLevelParms = {
         medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
 
         // aim based concussion grenade effect
-        fo_concuss = CF_GetSetting("foc", "fo_cuss", "0");
+        fo_concuss = CF_GetSetting("foc", "fo_concuss", "0");
         if (fo_concuss & FOC_ON_DEF)
             fo_concuss |= foc_defaults;
 
@@ -2498,6 +2498,23 @@ void () PlayerDeathThink = {
 
 void player_asscan_down1();
 
+enum ConcMode {
+    CONC_IDLESCALE,
+    CONC_CLASSIC,
+    CONC_AIM,
+};
+
+ConcMode GetConcMode() {
+    if (old_grens)
+        return CONC_IDLESCALE;
+    else if (fo_concuss)
+        return CONC_AIM;
+    else
+        return CONC_CLASSIC;
+}
+
+entity FindConcTimer(entity player);
+
 void () PlayerJump = {
     local entity te;
     local float stumble;
@@ -2548,22 +2565,15 @@ void () PlayerJump = {
         StopAssCan();
     }
 
-    if (old_grens != 1) {
-        te = find(world, classname, "timer");
-        while (((te.owner != self) || (te.think != ConcussionGrenadeTimer))
-               && (te != world))
-            te = find(te, classname, "timer");
-
-        if ((te != world) && (te != self)) {
-            crandom();
-            stumble = crandom() * (te.health / 100);
-            if (crandom() < 0) {
-                self.velocity_x = self.velocity_y + stumble;
-                self.velocity_y = self.velocity_x + stumble;
-            } else {
-                self.velocity_x = (-1 * self.velocity_y) + stumble;
-                self.velocity_y = (-1 * self.velocity_x) + stumble;
-            }
+    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC)) {
+        entity te = FindConcTimer(self);
+        stumble = crandom() * (te.health / 100);
+        if (crandom() < 0) {
+            self.velocity_x = self.velocity_y + stumble;
+            self.velocity_y = self.velocity_x + stumble;
+        } else {
+            self.velocity_x = (-1 * self.velocity_y) + stumble;
+            self.velocity_y = (-1 * self.velocity_x) + stumble;
         }
     }
 };

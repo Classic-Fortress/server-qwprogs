@@ -7,9 +7,6 @@ void (vector org, float damage) SpawnBlood;
 
 void () SuperDamageSound;
 
-void () ConcussionGrenadeTimer;
-void () OldConcussionGrenadeTimer;
-
 void (Slot slot) W_ChangeWeaponSlot;
 void () W_ChangeToBestWeapon;
 void () W_PrintWeaponMessage;
@@ -392,6 +389,9 @@ int () W_FireSpanner = {
     }
 };
 
+void RemoveConc(entity player, float remove_timer = TRUE);
+entity FindConcTimer(entity player);
+
 int () W_FireMedikit = {
     local vector source;
     local vector org;
@@ -414,29 +414,19 @@ int () W_FireMedikit = {
                  (self.team_no != 0)) || coop) {
 
                 healam = 200;
-                te = find(world, classname, "timer");
-                while (((te.owner != trace_ent)
-                        || ((te.think != ConcussionGrenadeTimer)
-                            && (te.think != OldConcussionGrenadeTimer)))
-                       && (te != world))
-                    te = find(te, classname, "timer");
-
-                if (te != world) {
-
-                    if (old_grens == TRUE)
-                        stuffcmd(trace_ent, "v_idlescale 0\nfov 90\n");
-
+                if (trace_ent.tfstate & TFSTATE_CONC) {
                     SpawnBlood(org, 20);
 
                     bprint(PRINT_MEDIUM, self.netname, " cured ",
                            trace_ent.netname, "'s concussion\n");
 
+                    entity te = FindConcTimer(trace_ent);
                     if (te.team_no != self.team_no)
                         TF_AddFrags(self, 1);
 
-                    trace_ent.tfstate &= ~TFSTATE_CONC;
-                    dremove(te);
+                    RemoveConc(trace_ent);
                 }
+
                 if (trace_ent.tfstate & TFSTATE_HALLUCINATING) {
 
                     te = find(world, classname, "timer");
