@@ -2255,8 +2255,8 @@ void () TeamFortress_RemoveTimers = {
     local entity te;
 
     self.leg_damage = 0;
-    self.tfstate &= ~TFSTATE_CONC;
     self.is_undercover = 0;
+    RemoveConc(self);
 
     if (self.is_building && engineer_move) {
         TeamFortress_EngineerBuildStop();
@@ -2328,7 +2328,6 @@ void () TeamFortress_RemoveTimers = {
         }
     }
     if (old_grens == 1) {
-        stuffcmd(self, "v_idlescale 0\n");
         stuffcmd(self, "v_cshift; wait; bf\n");
         self.FlashTime = 0;
     }

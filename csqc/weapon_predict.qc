@@ -1744,22 +1744,15 @@ void PredictConc() {
     if (pstate_server.tfstate & TFSTATE_CONC == 0)
         return;
 
-    static float last_conc_finished, last_conc_printed = TRUE;
+    static float last_conc_finished;
     if (pstate_server.conc_finished != last_conc_finished) {
         // New conc, use a single fixed local finish time.
         last_conc_finished = pstate_server.conc_finished;
         cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
-        last_conc_printed = FALSE;
     }
 
-    if (time > cuss_state.end_time) {
+    if (time > cuss_state.end_time)
         pstate_pred.tfstate &= ~TFSTATE_CONC;
-
-        if (!last_conc_printed) {
-            print("Your head feels better now\n");
-            last_conc_printed = TRUE;
-        }
-    }
 }
 
 float WP_ClientThink() {
