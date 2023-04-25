@@ -828,6 +828,57 @@ void (entity inflictor, entity attacker, float bounce,
     }
 };
 
+
+struct ClassConc {
+    float amp_mult;
+    float duration_mult;
+};
+
+static ClassConc class_mod[] = {
+    {  1.0, 1.0  },  // observer
+    {  1.5, 1.0  },  // scout
+    {  1.0, 1.0  },  // sniper
+    {  1.0, 1.0  },  // soldier
+    {  1.0, 1.0  },  // demoman
+    {  1.0, 0.5  },  // medic
+    {  0.75, 1.0  },  // hwguy
+    {  1.0, 1.0  },  // pyro
+    {  1.0, 1.0  },  // spy
+    {  1.0, 1.0  },  // engineer
+    {  1.0, 1.0  },  // randompc
+    {  1.0, 1.0  },  // civilian
+};
+
+static ClassConc get_class_mod(float playerclass) {
+    string short_a = sprintf("foc_a%d", playerclass);
+    string long_a = sprintf("fo_concuss_amp%d", playerclass);
+    string short_d = sprintf("foc_d%d", playerclass);
+    string long_d = sprintf("fo_concuss_dur%d", playerclass);
+
+    ClassConc r = class_mod[playerclass];
+
+    float amp_m = CF_GetSetting(short_a, long_a, "off");
+    if (amp_m)
+        r.amp_mult = amp_m;
+
+    float dur = CF_GetSetting(short_d, long_d, "off");
+    if (dur)
+        r.duration_mult = dur;
+
+    return r;
+}
+
+static void UpdateClientConcussion(entity player, float duration) {
+    float base_amp = CF_GetSetting("foca", "foc_amp", "110");
+
+    // Once non debug, these should be once per map.
+    ClassConc r = get_class_mod(player.playerclass);
+
+    // networked via prediction ent
+    player.conc_amp = base_amp * r.amp_mult;
+    player.conc_finished = time + duration * r.duration_mult;
+}
+
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce = {
     local float actual_cuss_time = cussgrentime;

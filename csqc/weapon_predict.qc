@@ -1691,12 +1691,16 @@ struct {
     float end_time;
     vector c_view;
     vector c_forward;
+
+    float last_a;
 } cuss_state;
+
+float ClownConcPeriod();
 
 void PredictConc() {
     if (IsClownMode(CLOWN_CONC)) {
-        if (cuss_state.end_time < time + 6)
-            cuss_state.end_time += 4;  // Must align with period.
+        if (cuss_state.end_time < time)
+            cuss_state.end_time = time + ClownConcPeriod();
 
         pstate_pred.conc_amp = 100;
         pstate_pred.tfstate |= TFSTATE_CONC;
@@ -1714,6 +1718,7 @@ void PredictConc() {
         // New conc, use a single fixed local finish time.
         last_conc_finished = pstate_server.conc_finished;
         cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
+        cuss_state.last_a = 0;
     }
 
     if (time > cuss_state.end_time)
