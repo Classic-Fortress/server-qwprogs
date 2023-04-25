@@ -565,20 +565,20 @@ static vector FO_Conc_Offset() {
     }
 
     float amp = Blend(table[i+1].amp_end, cur->amp_end, rem, cur->duration);
-    amp *= pstate_pred.conc_amp;
     float a = (cur->duration - rem) / cur->duration * cur->cycles * 2 * M_PI;
     a += cur->offset * 2 * M_PI;
 
-    return [amp * sin(a), amp * sin(a) * cos(a), 0];
+    return [sin(a), sin(a) * cos(a), amp * pstate_pred.conc_amp];
 }
 
 static void FO_UpdateConcAim() {
     makevectors(input_angles);
     vector o = FO_Conc_Offset();
 
-    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
+    cuss_state.c_forward = normalize(v_forward * 200 + o.x * o.z * v_right + o.y * o.z * v_up);
 
-    cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
+    vector vv = o * min(o.z / 4, 20);
+    cuss_state.c_view = vectoangles(v_forward * 200 + vv.x * v_right + vv.y * v_up);
     cuss_state.c_view[0] *= -1;
 }
 
