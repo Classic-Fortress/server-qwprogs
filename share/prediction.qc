@@ -652,17 +652,17 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(FALSE, "wpgd", wp_global_disable);
     CONFIG_UPDATE(FALSE, "gbd", gren_beta_disable);
 
+    if (fo_concuss != fo_config.fo_concuss) {
+        fo_config.fo_concuss = fo_concuss;
+        update = TRUE;
+    }
+
     // Not dynamically updatable.
     static float read_rof_once = FALSE;
     if (!read_rof_once) {
         if (!fo_config.old_ng_rof)  // Don't overwrite huetf setting this.
             CONFIG_UPDATE(FALSE, "ongrof", old_ng_rof);
         read_rof_once = TRUE;
-    }
-
-    if (fo_concuss != fo_config.fo_concuss) {
-        fo_config.fo_concuss = fo_concuss;
-        update = TRUE;
     }
 
     CONFIG_UPDATE(TRUE,  "rewind", rewind_flags);

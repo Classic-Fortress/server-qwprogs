@@ -614,35 +614,6 @@ void (entity Player) InitAllStatuses = {
     }
 };
 
-void UpdateClientConcussion(entity player, float duration) {
-    msg_entity = player;
-
-    static float scout_mult;
-    static float medic_mult;
-    static float heavy_mult;
-    float amp = 100;
-
-    // Once non debug, these should be once per map.
-    amp = CF_GetSetting("foca", "fo_cuss_amp", "100");
-    scout_mult = CF_GetSetting("focs", "fo_cuss_scout", "1.5");
-    medic_mult = CF_GetSetting("focm", "fo_cuss_medic", "0.5");
-    heavy_mult = CF_GetSetting("foch", "fo_cuss_heavy", "0.25");
-
-    if (player.playerclass == PC_HVYWEAP) {
-        amp *= heavy_mult;
-    } else if (player.playerclass == PC_SCOUT) {
-        amp *= scout_mult;
-    } else if (player.playerclass == PC_MEDIC) {
-        if (fo_concuss & FOC_RED_MED)
-            duration /= 2;
-        amp *= medic_mult;
-    }
-
-    // networked via prediction ent
-    player.conc_amp = amp;
-    player.conc_finished = time + duration;
-}
-
 float laststate;
 void (entity Player, entity Goal) UpdateClientButtonStatus = {
     if(!infokeyf(Player, INFOKEY_P_CSQCACTIVE))

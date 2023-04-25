@@ -512,30 +512,64 @@ static float IsFoConced() {
     return pstate_pred.tfstate & TFSTATE_CONC;
 }
 
+struct ConcCurve {
+    float duration;
+    float cycles;
+    float amp_end;
+    float offset;
+};
 
-static float BlendAmp(float start, float end, float rem, float D) {
+ConcCurve conc_curve[] = {
+    {1, 0.5, 0.0, 0.5},
+    {6, 4, 0.2, 0.5},
+    {2, 1.5, 0.75},
+    {1, 1, 1},
+    {0, 0, 1},  // Terminator
+};
+
+ConcCurve clown_curve[] = {
+    {10, 4, 0.75},
+    {0, 0, 0.75},  // Terminator
+};
+
+float ClownConcPeriod() { return clown_curve[0].duration; }
+
+static float Blend(float start, float end, float rem, float D) {
     return rem/D * start + (D-rem)/D * end;
 }
 
 static vector FO_Conc_Offset() {
-    const float P = 4;
-
+    static float last_rem;
     float rem = cuss_state.end_time - time;
     if (rem < 0)
         return '0 0 0';
 
-    float a = ((rem % P) / P) * 2 * M_PI;
+    ConcCurve* table;
+    float len;
+    ConcCurve* cur = __NULL__;
+    float i, rot = 0;
 
-    float amp = pstate_pred.conc_amp;
-    if (rem >= 8)
-        amp *= 1;
-    else if (rem >= 2)
-        amp *= BlendAmp(1.0, 0.5, rem - 2, 8 - 2);
-    else
-        amp *= BlendAmp(0.5, 0, rem, 2);
+    if (!IsClownMode(CLOWN_CONC)) {
+            table = conc_curve;
+            len = conc_curve.length;
+    } else {
+            table = clown_curve;
+            len = clown_curve.length;
+    }
 
-    float x = amp * sin(a), y = amp * sin(a) * cos(a);
-    return [x, y, 0];
+    for (i = 0; i < len - 1; i++) {
+        cur = &table[i];
+        if (rem <= cur->duration)
+            break;
+        rem -= cur->duration;
+    }
+
+    float amp = Blend(table[i+1].amp_end, cur->amp_end, rem, cur->duration);
+    amp *= pstate_pred.conc_amp;
+    float a = (cur->duration - rem) / cur->duration * cur->cycles * 2 * M_PI;
+    a += cur->offset * 2 * M_PI;
+
+    return [amp * sin(a), amp * sin(a) * cos(a), 0];
 }
 
 static void FO_UpdateConcAim() {
