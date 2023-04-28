@@ -5,13 +5,14 @@
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
 
-string wp_version = "v0.4-phys";
+string wp_version = "v1.0";
 
 enumflags {
     FOWP_CTIME,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
     FOWP_LASTPRIME,
+    FOWP_CONCFINISH,
     FOWP_CLIP,
     FOWP_THINK,
     FOWP_WF,
@@ -53,6 +54,9 @@ struct predict_tf_state {
     float tfstate;
     float last_prime;
     float csqc_maxspeed;
+
+    float conc_amp;
+    float conc_finished;
 
     float client_time;
     float client_ping;
@@ -320,6 +324,7 @@ static float Prediction_ChangedMask(entity player) {
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
+    M2(FOWP_CONCFINISH, conc_finished, conc_amp);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
@@ -391,13 +396,10 @@ void EntUpdate_Config() {
     COMM(Byte, clown_flags);
     COMM(Float, clown_grav);
     COMM(Byte, wp_default_min_ping_ms);
-    COMM(Byte, wp_global_enable);
     COMM(Byte, wp_global_disable);
-    COMM(Byte, pp_global_enable);
-    COMM(Byte, pp_global_disable);
-    COMM(Byte, wpp_global_enable);
-    COMM(Byte, wpp_global_disable);
     COMM(Byte, gren_beta_disable);
+    COMM(Byte, old_ng_rof);
+    COMM(Short, fo_concuss);
 
 #ifdef SSQC
     return TRUE;
@@ -448,6 +450,11 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_LASTPRIME) {
         COMM(Float, last_prime);
+    }
+
+    if (sendflags & FOWP_CONCFINISH) {
+        COMM(Byte, conc_amp);
+        COMM(Float, conc_finished);
     }
 
     if (sendflags & FOWP_THINK) {
@@ -580,9 +587,10 @@ void Predict_InitDefaultConfig() {
     fo_config.max_rewind_fast_projectile_ms = 150;
     fo_config.max_rewind_grenade_ms = 50; // Only affects REWIND_GREN
     fo_config.rewind_fast_projectile_thresh = 1500;
-    fo_config.wp_default_min_ping_ms = 40;
+    fo_config.wp_default_min_ping_ms = 25;
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
+    fo_config.fo_concuss = 0;
 }
 
 #ifdef SSQC
@@ -641,13 +649,22 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(FALSE, "mrg", max_rewind_grenade_ms);
     CONFIG_UPDATE(FALSE, "rfpt", rewind_fast_projectile_thresh);
     CONFIG_UPDATE(FALSE, "wpdmp", wp_default_min_ping_ms);
-    CONFIG_UPDATE(FALSE, "wpge", wp_global_enable);
     CONFIG_UPDATE(FALSE, "wpgd", wp_global_disable);
-    CONFIG_UPDATE(FALSE, "ppge", pp_global_enable);
-    CONFIG_UPDATE(FALSE, "ppgd", pp_global_disable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_enable);
-    CONFIG_UPDATE(FALSE, "wppge", wpp_global_disable);
     CONFIG_UPDATE(FALSE, "gbd", gren_beta_disable);
+
+    if (fo_concuss != fo_config.fo_concuss) {
+        fo_config.fo_concuss = fo_concuss;
+        update = TRUE;
+    }
+
+    // Not dynamically updatable.
+    static float read_rof_once = FALSE;
+    if (!read_rof_once) {
+        if (!fo_config.old_ng_rof)  // Don't overwrite huetf setting this.
+            CONFIG_UPDATE(FALSE, "ongrof", old_ng_rof);
+        read_rof_once = TRUE;
+    }
+
     CONFIG_UPDATE(TRUE,  "rewind", rewind_flags);
     CONFIG_UPDATE(TRUE,  "tfx", tfx_flags);
     CONFIG_UPDATE(TRUE,  "clown", clown_flags);
@@ -704,10 +721,6 @@ void Predict_InitPlayer(entity player) {
 
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
-    sprint(player, PRINT_HIGH, "FortressOne: CSQC projectiles ",
-            fo_projectiles ? "enabled\n" : "disabled\n");
-    sprint(player, PRINT_HIGH, "FortressOne: QC Physics ",
-            fo_config.qc_physics ? "enabled\n" : "disabled\n");
 
     entity pe = spawn();
     pe.owner = player;

@@ -9,7 +9,7 @@ void FO_Hud_HidePanel(PanelID id);
 void FO_Hud_ShowPanel(PanelID id);
 
 void(PanelID ignored, string text) drawClipSize = {
-    if (SBAR.ClipSize != "" || fo_hud_editor)
+    if (is_alive || fo_hud_editor)
         Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, ICON_CLIPSIZE, 1);
 };
 
@@ -677,9 +677,10 @@ struct FO_ScoreBoard {
 
 static FO_ScoreBoard score_board;
 
+DEFCVAR_FLOAT(fo_simple_names, 0);
+
 vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
-                                float padding, vector columnColour) {
-    vector textcolour = MENU_TEXT_1;
+                                float padding, vector team_colour) {
     vector smalltext = MENU_TEXT_SMALL * panel.Scale;
     vector yspacer = [0, 20];
     vector position = [0, 0];
@@ -707,11 +708,11 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                 case "ping":
                 case "pl":
                 case "name":
-                    sui_text(position, smalltext, colname, columnColour, .7, 0);
+                    sui_text(position, smalltext, colname, SCOREB_HEADER, .7, 0);
                     break;
             }
         } else {
-            sui_text(position, smalltext, colname, columnColour, .7, 0);
+            sui_text(position, smalltext, colname, SCOREB_HEADER, .7, 0);
         }
 
         txtlength = strlen(colname) * smalltext.x;
@@ -729,37 +730,30 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
             continue;
 
         lineCount++;
-        float trans = 1;
+        float alpha = 1;
         if (lineCount % 2 == 0)
-            trans = .7;
+            alpha = .7;
         else
-            trans = .3;
+            alpha = .3;
 
-        sui_fill(position, size, columnColour, trans, 0);
-
-        textcolour = MENU_TEXT_1;
-        if(lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
-            textcolour = MENU_TEXT_4;
-        } else if(lines[i].name == getplayerkeyvalue(player_localentnum - 1, "name")) {
-            textcolour = '0.8 0 0.8';
-        } else {
-            if (prematch && lines[i].team_no && !SBAR.CountdownStarted
-                && lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
-                float ready = lines[i].ready;
-                if (ready)
-                    textcolour = MENU_TEXT_GREEN_FO;
-                else
-                    textcolour = MENU_TEXT_RED_FO;
-            }
+        vector fill_colour = team_colour;
+        if (lines[i].name == getplayerkeyvalue(player_localnum, "name")) {
+            alpha = 0.5;
+            fill_colour = SCOREB_SELF_BG;
+        } else if (lines[i].name == getplayerkeyvalue(player_localentnum - 1, "name")) {
+            alpha = 0.5;
+            fill_colour = SCOREB_SPECTATED_BG;
         }
+
+        sui_fill(position, size, fill_colour, alpha, 0);
 
         float col = 0, alpha = 1, flags = 0;
         string val = AbbreviateNumberToString(lines[i].ping);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].pl);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
@@ -774,23 +768,26 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
                 }
             }
 
-            sui_text(position, smalltext, c, textcolour, 1, 0);
+            sui_text(position, smalltext, c, SCOREB_FIELD, 1, 0);
         }
 
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
             val = AbbreviateNumberToString(lines[i].score);
-            drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+            drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         }
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         string n = lines[i].name;
+        if (CVARF(fo_simple_names))
+            n = strdecolorize(n);
+
         if (stringwidth(n, TRUE, smalltext) >= namespace - padding) {
             n = strdecolorize(n);
             n = substring(n, 0, floor(namespace - padding) / smalltext.x);
         }
-        sui_text(position, smalltext, n, textcolour, 1, 0);
+        sui_text(position, smalltext, n, SCOREB_NAME, 1, 0);
         position_x += namespace;
 
         vector iconpos = [size_x, position_y];
@@ -834,39 +831,39 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         }
 
         val = AbbreviateNumberToString(lines[i].caps);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].touches);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].kills);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].teamkills);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].deaths);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].afflicted);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].teamafflicted);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].damagegiven);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         val = AbbreviateNumberToString(lines[i].damagetaken);
-        drawShowScoresColumnVal(position, smalltext, val, textcolour, alpha, flags, FO_ScoreBoardColumns[col]);
+        drawShowScoresColumnVal(position, smalltext, val, SCOREB_FIELD, alpha, flags, FO_ScoreBoardColumns[col]);
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         position_x = 0;
@@ -992,6 +989,86 @@ void (float show) FO_Show_Scores = {
     getHudPanel(HUDP_SHOWSCORES)->Display = show;
 };
 
+struct SpeedBarColors {
+    float max_speed;
+    float frac;
+    vector color;
+};
+
+const float SPEEDBAR_MAX = 3000;
+static SpeedBarColors speedbar_colors[] = {
+    { 300, 0.40,       '0.6 0.2 0.2'},
+    { 400, 0.10,       '0.7 0.2 0.2'},
+    { 500, 0.25,       '0.7 0.4 0.2'},
+    { 750, 0.1225,     '0.7 0.7 0.3'},
+    {1000, 0.1225,     '0.1 0.5 0.1'},
+    {SPEEDBAR_MAX, 1,  '0.1 0.7 0.1'},
+};
+
+static float PlanarSpeed() {
+    return vlen([pmove_vel.x, pmove_vel.y, 0]);
+}
+
+void drawSpeedBar(PanelID panelid, string text) {
+    FO_Hud_Panel* panel = getHudPanel(HUDP_SPEEDBAR);
+    vector fillsize = panel.FillSize * panel.Scale;
+    float alpha = fo_hud_editor ? 0.2:0.9;
+    vector position = getPanelPosition(panel);
+
+    if (hud_panel(panel->id, position, fillsize, alpha, panel.Display)) {
+        // click event
+    }
+
+    if (fo_hud_editor)
+        return;
+
+    HRC_drawfill(position, fillsize, '0.5 0.5 0.5');
+
+    position += '1 1 0';
+    fillsize -= '1 2 0';
+    float frac_start, frac_end = 1;
+
+    float tspeed = PlanarSpeed();
+    float rspeed = min(tspeed, SPEEDBAR_MAX);
+
+    float last_max = 0;
+    for (int i = 0; i < speedbar_colors.length; i++) {
+        SpeedBarColors* cur = &speedbar_colors[i];
+
+        if (frac_end > 0.99) {
+            frac_start = 0;
+            frac_end = cur.frac;
+        } else {
+            frac_start = frac_end;
+            frac_end = min(frac_start + cur.frac, 1);
+        }
+
+        float pos;
+        if (rspeed > cur.max_speed) {
+            pos = frac_end;
+            // When we know we're going to wrap, fill the prior color.
+            if (frac_end > 0.99)
+                frac_start = 0;
+        } else {
+            pos = (rspeed - last_max) / (cur.max_speed - last_max) *
+                  (frac_end - frac_start) + frac_start;
+        }
+
+        vector start = position, fill = fillsize;
+        start.x += frac_start * fill.x;
+        fill.x *= pos - frac_start;
+        HRC_drawfill(start, fill, cur.color);
+
+        last_max = cur.max_speed;
+        if (rspeed < last_max)
+            break;
+    }
+
+    HRC_drawstring(position + '3 0 0', ftos((int)tspeed), '9 9 0', '1 1 1');
+}
+
+string getPingPanelText();
+
 var FO_Hud_Panel Hud_Panels[] = {
 //  id, Name, Position, FillSize, Scale, TextScale, Display, Orientation,
 //  void drawPanel(PanelID panelid, string text, string icon),
@@ -1043,7 +1120,9 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_GUN6, "gun6", "Grenade Launcher",           '-4 -90',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_GRENADE_LAUNCHER);}, 0, 36},
     {HUDP_GUN7, "gun7", "Rocket Launcher",            '-4 -70',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_ROCKET_LAUNCHER);}, 0, 36},
     {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
-    {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? sprintf("%3.1f UPS", vlen(pmove_vel)) : "";}, 0, 4},
+    {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? ftos((int)PlanarSpeed()) : "";}, 0, 4},
+    {HUDP_SPEEDBAR, "speedbar", "Speed Bar",           '4 30',    '150 10',  1,1.4,0,0,0, drawSpeedBar, {return "";}, 0, 4},
+    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, 4},
     {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0,1, doNothing, {return "";}, 1},
 };
 

@@ -1,12 +1,14 @@
 void Hud_WriteCfg(string path);
 void FO_Hud_InitSystemPanels();
 
-void FO_Hud_Editor()
-{
-    if (fo_hud_editor)
-    {
-        fo_hud_editor = FALSE;
-        setcursormode(FALSE);
+void FO_Hud_Editor_Cancel() {
+    fo_hud_editor = FALSE;
+    setcursormode(FALSE);
+}
+
+void FO_Hud_Editor() {
+    if (fo_hud_editor) {
+        FO_Hud_Editor_Cancel();
 
         FO_Hud_InitSystemPanels();
         Hud_WriteCfg(FO_HUD_CONFIG_PATH);

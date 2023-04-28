@@ -547,9 +547,6 @@ void () DecodeLevelParms = {
         // allow scout dash [on]
         scoutdash = CF_GetSetting("sd", "scoutdash", "on");
 
-        // enable sniper rifle reload [off]
-        sniperreload = CF_GetSetting("sr", "sniperreload", "off");
-
         // spawn with full ammo/armor [off]
         spawnfull = CF_GetSetting("sf", "spawnfull", "off");
 
@@ -566,7 +563,7 @@ void () DecodeLevelParms = {
         classtips = CF_GetSetting("ct", "classtips", "on");
 
         // concussion grenade effect time [19]
-        cussgrentime = CF_GetSetting("cgt", "cussgrentime", "19");
+        cussgrentime = CF_GetSetting("cgt", "cussgrentime", "10");
 
         // concussion grenade effect time proportional to distance from explosion
         distance_based_cuss_duration = CF_GetSetting("dbcd", "distance_based_cuss_duration", "off");
@@ -574,11 +571,19 @@ void () DecodeLevelParms = {
         // medic immune to concussion grenade effects [on]
         medicnocuss = CF_GetSetting("mnc", "medicnocuss", "on");
 
+        // aim based concussion grenade effect
+        fo_concuss = CF_GetSetting("foc", "fo_concuss", "0");
+        if (fo_concuss & FOC_ON_DEF)
+            fo_concuss |= foc_defaults;
+
+        // Tie some of these other options together for convenience / other
+        if (fo_concuss & FOC_DISTANCE)
+            distance_based_cuss_duration = TRUE;
+        if (fo_concuss & FOC_AFF_MED)
+            medicnocuss = FALSE;
+
         // display sniper rifle power in status bar [on]
         sniperpower = CF_GetSetting("sp", "sniperpower", "on");
-
-        // display sniper rifle reload percentage in status bar [on]
-        sniperreloadpercent = CF_GetSetting("rp", "sniperreloadpercent", "on");
 
         // display build status in status bar [on]
         buildstatus = CF_GetSetting("bs", "buildstatus", "on");
@@ -850,7 +855,6 @@ void () DecodeLevelParms = {
             discammo_pickup = FALSE;
             old_dropflag = FALSE;
             scoutdash = TRUE;
-            sniperreload = TRUE;
             old_sniperrange = FALSE;
             Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
@@ -876,7 +880,6 @@ void () DecodeLevelParms = {
             stock_reload = TRUE;
             classtips = TRUE;
             sniperpower = TRUE;
-            sniperreloadpercent = TRUE;
             buildstatus = TRUE;
             old_hp_armor = FALSE;
             superaxe = TRUE;
@@ -922,7 +925,6 @@ void () DecodeLevelParms = {
             discammo_pickup = TRUE;
             old_dropflag = TRUE;
             scoutdash = FALSE;
-            sniperreload = FALSE;
             old_sniperrange = TRUE;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
@@ -948,7 +950,6 @@ void () DecodeLevelParms = {
             stock_reload = FALSE;
             classtips = FALSE;
             sniperpower = FALSE;
-            sniperreloadpercent = FALSE;
             buildstatus = FALSE;
             old_hp_armor = TRUE;
             superaxe = FALSE;
@@ -978,6 +979,7 @@ void () DecodeLevelParms = {
             walls_block_emp = FALSE;
             solid_nailgren = TRUE;
             scoutscanspike = FALSE;
+            fo_config.old_ng_rof = TRUE;
         }
 
         st = infokey(world, "huetf");
@@ -1029,6 +1031,7 @@ void () DecodeLevelParms = {
             Role_None.gren2_limits[8] = 3;
             max_active_gren2_soldier = 1;
             round_delay_time = 10;
+            fo_config.old_ng_rof = TRUE;
         }
 
         // Must be after we've set up conditional options (e.g. hwguy reload).
@@ -1330,11 +1333,11 @@ void () respawn = {
     }
 
     if (coop) {
-        CopyToBodyQue(self);
+        AddToBodyQueue(self);
         setspawnparms(self);
         PutClientInServer();
     } else if (deathmatch) {
-        CopyToBodyQue(self);
+        AddToBodyQueue(self);
         SetNewParms();
         PutClientInServer();
     } else
@@ -1433,7 +1436,8 @@ void () RemovePlayerOwnedEnts = {
         if (self.tfstate & TFSTATE_RANDOMPC) {
             te.tfstate = TFSTATE_RANDOMPC;
         }
-    }  
+    }
+    RemoveDeadBody(self);
 }
 
 void (string cn) RemoveAllEntsByClassname = {
@@ -2494,6 +2498,23 @@ void () PlayerDeathThink = {
 
 void player_asscan_down1();
 
+enum ConcMode {
+    CONC_IDLESCALE,
+    CONC_CLASSIC,
+    CONC_AIM,
+};
+
+ConcMode GetConcMode() {
+    if (old_grens)
+        return CONC_IDLESCALE;
+    else if (fo_concuss)
+        return CONC_AIM;
+    else
+        return CONC_CLASSIC;
+}
+
+entity FindConcTimer(entity player);
+
 void () PlayerJump = {
     local entity te;
     local float stumble;
@@ -2544,22 +2565,15 @@ void () PlayerJump = {
         StopAssCan();
     }
 
-    if (old_grens != 1) {
-        te = find(world, classname, "timer");
-        while (((te.owner != self) || (te.think != ConcussionGrenadeTimer))
-               && (te != world))
-            te = find(te, classname, "timer");
-
-        if ((te != world) && (te != self)) {
-            crandom();
-            stumble = crandom() * (te.health / 100);
-            if (crandom() < 0) {
-                self.velocity_x = self.velocity_y + stumble;
-                self.velocity_y = self.velocity_x + stumble;
-            } else {
-                self.velocity_x = (-1 * self.velocity_y) + stumble;
-                self.velocity_y = (-1 * self.velocity_x) + stumble;
-            }
+    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC)) {
+        entity te = FindConcTimer(self);
+        stumble = crandom() * (te.health / 100);
+        if (crandom() < 0) {
+            self.velocity_x = self.velocity_y + stumble;
+            self.velocity_y = self.velocity_x + stumble;
+        } else {
+            self.velocity_x = (-1 * self.velocity_y) + stumble;
+            self.velocity_y = (-1 * self.velocity_x) + stumble;
         }
     }
 };

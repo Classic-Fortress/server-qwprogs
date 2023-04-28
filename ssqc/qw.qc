@@ -60,7 +60,6 @@ float remote_client_time();
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
 .float is_zooming;              // TRUE for a SNIPER if they're currently zoomed in
-.float is_concussed;            // TRUE for a player who is affected by concussion grenade
 .float has_throwngren;          // TRUE for a player that has thrown a grenade (won't get a free suicide)
 .float has_changedteam;         // TRUE for a player that has changed team
 .float has_changedclass;        // TRUE for a player that has changed class
@@ -108,7 +107,6 @@ float remote_client_time();
 .float building_percentage;     // The building percentage shown in status bar
 .float fragstreak;              // Frag streak
 .float caps;                    // Caps during this game
-.float default_weapon;          // Weapon to select when not firing
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
@@ -579,7 +577,6 @@ float feign_pack;
 float feign_msg;
 float feign_rate_limit;
 float scoutdash;
-float sniperreload;
 float spawnfull;
 float stockfull;
 float stock_on_cap;
@@ -589,7 +586,6 @@ float cussgrentime;
 float medicnocuss;
 float distance_based_cuss_duration;
 float sniperpower;
-float sniperreloadpercent;
 float buildstatus;
 float server_default;
 float server_faithful;
@@ -653,6 +649,8 @@ float reverse_cap;
 float engineer_move;
 
 float fo_projectiles;
+
+float fo_concuss;
 
 float numlocs;
 typedef struct {vector pos; string desc;} loc_t;
@@ -778,6 +776,8 @@ float FO_FlashDimension;
 .entity grenade_timer;
 .float last_throw;
 .float last_prime;
+.float conc_amp;
+.float conc_finished;
 
 // allow for default goal state
 .float default_group_no;
@@ -800,19 +800,3 @@ string goal_class_names[7] = {
 
 // backend
 string match_id;
-
-// people complain about settings, let's track them
-
-string settings_to_track_list[4] = {
-    "sv_antilag",
-    "project_weapons",
-    "al_rewind_detpipe",
-    "al_max_remote_client_time_offset",
-};
-
-struct setting_t {
-    string setting_name;
-    string value;
-};
-
-setting_t *settings_to_track;

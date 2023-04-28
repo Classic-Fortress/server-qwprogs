@@ -10,8 +10,6 @@
 .float ammo_nails;
 .float ammo_rockets;
 .float ammo_cells;
-
-float sniperreload = FALSE;
 #endif
 
 // Use SlotIndex() to convert a slot if you're indexing an array.
@@ -430,6 +428,10 @@ float FO_WeaponsMask(entity player) {
 }
 #endif
 
+float OldNgRof() {
+    return fo_config.old_ng_rof;
+}
+
 // Slightly awkward construction, but convenient for calling from CSQC and SSQC.
 float FO_NumClipStillLoading(FO_WeapInfo* wi, float now, float reload_finished) {
     float tick = (wi->ammo_per_shot / wi->clip_size) * wi->full_reload_time;
@@ -549,9 +551,7 @@ float FO_CanReload(Slot slot) {
     return FALSE;
 }
 
-void () RestoreDefaultWeapon;
 void FO_ReloadSlot(Slot slot, float force) {
-    RestoreDefaultWeapon();
     if (self.tfstate & TFSTATE_RELOADING || IsSlotNull(slot))
         return;
 
@@ -752,7 +752,6 @@ void FO_Weapons_Init() {
     ASSERTD_EQ(weapon_names.length, weapon_info.length);
 
     FO_WeapInfo* WI_sr = FO_GetWeapInfo(WEAP_SNIPER_RIFLE);
-    WI_sr->clip_size = sniperreload ? 1 : 0;
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
@@ -788,6 +787,13 @@ void FO_Weapons_Init() {
             case AMMO_NAILS: wti->ammo_mask = IT_NAILS; break;
             case AMMO_ROCKETS: wti->ammo_mask = IT_ROCKETS; break;
         }
+    }
+
+    if (OldNgRof()) {
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_NAILGUN);
+        wi->ammo_per_shot = 2;
+        FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_SUPER_NAILGUN);
+        wi->ammo_per_shot = 4;
     }
 
     for (i = 0; i < class_weapons.length; i++) {

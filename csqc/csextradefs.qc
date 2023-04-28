@@ -23,6 +23,12 @@ vector MENU_TEXT_WARNING = '0.8 0 0';
 vector MENU_TEXT_GREEN = '0 0.8 0';
 vector MENU_DARKEN = '1 1 1';
 
+vector SCOREB_HEADER = '0.7 0.7 0.7';
+vector SCOREB_NAME  = '1 1 1';
+vector SCOREB_FIELD  = '0.9 0.9 0.9';
+vector SCOREB_SELF_BG  = '0.8 0.8 0.8';
+vector SCOREB_SPECTATED_BG  = '0.8 0.8 0.2';
+
 vector MENU_TEXT_SMALL = '8 8 0';
 vector MENU_TEXT_MEDIUM = '16 16 0';
 vector MENU_TEXT_LARGE = '24 24 0';
@@ -68,6 +74,8 @@ const vector PLAYER_MAXS = [16, 16, 32];
 
 #define MAP_MAX_CHARS 20
 
+#define MAX_SLOT_HISTORY_SIZE 10
+
 .void() removefunc;
 .float owned_by;
 .string netname;
@@ -106,8 +114,9 @@ float vote_selected_index;
 float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
-float oldbuttons;
 float zoomed_in;
+float slot_history[MAX_SLOT_HISTORY_SIZE];
+float slot_history_top;
 
 .string name;
 .string description;
@@ -453,6 +462,8 @@ enum PanelID:float {
     HUDP_GUN7,
     HUDP_GUN8,
     HUDP_SPEED,
+    HUDP_SPEEDBAR,
+    HUDP_PING,
     HUDP_OPTIONS,  // Should be the last HUD element so that it's always on top.
     HUDP_LAST = HUDP_OPTIONS,
 

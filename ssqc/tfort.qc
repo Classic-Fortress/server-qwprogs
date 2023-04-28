@@ -702,10 +702,8 @@ void () TeamFortress_ShowTF = {
     CF_PrintSetting("Scout dash ability", scoutdash, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Sniper ==\n");
-    CF_PrintSetting("Sniper reload", sniperreload, "", 1);
     CF_PrintSetting("Old sniper rifle range", old_sniperrange, "", 1);
     CF_PrintSetting("Sniper Rifle power in status bar", sniperpower, "", 1);
-    CF_PrintSetting("Reload percentage in status bar", sniperreloadpercent, "", 1);
 
     sprint(self, PRINT_HIGH, "\n== Medic ==\n");
     CF_PrintSetting("Medic immune to concussion grenade", medicnocuss, "", 1);
@@ -1260,7 +1258,7 @@ void (entity p) TeamFortress_SetSpeed = {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
         p.maxspeed = 0;
-        stuffcmd(p, "cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500\n");
+        stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;\n");
         return;
     }
 
@@ -1294,14 +1292,12 @@ void (entity p) TeamFortress_SetSpeed = {
     if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable) {
         if (p.tfstate & TFSTATE_AIMING)
             new_max = min(new_max, 80);
-
-        sp = ftos(new_max);
-        stuffcmd(p, "cl_backspeed ", sp, "; cl_forwardspeed ", sp,
-                 "; cl_sidespeed ", sp, "\n");
     }
 
     p.maxspeed = new_max;
-    p.csqc_maxspeed = new_max;  // Always set, need populated on transition.
+    p.csqc_maxspeed = new_max;  // Note: with new input_movevalues construction
+                                // this isn't technically needed until we do
+                                // something like client-side tranq pred.
 };
 
 void () TeamFortress_SetHealth = {
@@ -1510,7 +1506,6 @@ void () TeamFortress_SetEquipment = {
     self.is_feigning = 0;
     self.next_feign_time = 0;
     self.is_unabletospy = 0;
-    self.is_concussed = 0;
     self.disguise_skin = 0;
     self.disguise_team = 0;
     self.detpack_left = 0;
@@ -2258,8 +2253,8 @@ void () TeamFortress_RemoveTimers = {
     local entity te;
 
     self.leg_damage = 0;
-    self.is_concussed = 0;
     self.is_undercover = 0;
+    RemoveConc(self);
 
     if (self.is_building && engineer_move) {
         TeamFortress_EngineerBuildStop();
@@ -2331,7 +2326,6 @@ void () TeamFortress_RemoveTimers = {
         }
     }
     if (old_grens == 1) {
-        stuffcmd(self, "v_idlescale 0\n");
         stuffcmd(self, "v_cshift; wait; bf\n");
         self.FlashTime = 0;
     }

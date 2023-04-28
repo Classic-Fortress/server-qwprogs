@@ -1,14 +1,15 @@
 DEFCVAR_FLOAT(wpp_debug, 0);
 
 DEFCVAR_FLOAT(fo_wpp_beta, 0);
+DEFCVAR_FLOAT(fo_predict_weapons, 1);
+DEFCVAR_FLOAT(fo_predict_projectiles, 1);
+
 DEFCVAR_FLOAT(fo_client_sniper_sight, 1);
 
 DEFCVAR_FLOAT(wpp_min_ping, -1);
-DEFCVAR_FLOAT(wpp_weap_predict, -1);
-DEFCVAR_FLOAT(wpp_proj_predict, -1);
 
-DEFCVAR_FLOAT(wpp_phys_adv_ms, 0);
-DEFCVAR_FLOAT(wpp_phys_local_adv_ms, 0);
+DEFCVAR_FLOAT(wpp_adv_selfp_ms, 0);
+DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
 DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 struct pengine_t {
@@ -27,6 +28,9 @@ struct pengine_t {
     float view_mask;
 } pengine;
 
+static float inst_ping_ms;
+static float inst_ping_t;
+
 inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
 inline float WPP_ViewModelMask() { return pengine.view_mask; }
@@ -40,17 +44,52 @@ float WP_MinPing() {
 
 void WP_UpdateViewModel();
 
-inline float interp_ms() {
+inline float server_time_ms() {
     return (pstate_pred.seq - pstate_server.seq) * SERVER_FRAME_MS;
 }
 
-inline float interp_dt() {
-    return interp_ms() / 1000.0;
+inline float server_time_dt() {
+    return server_time_ms() / 1000.0;
 }
 
-inline float interp_time() {
-    return time + interp_dt();
+inline float server_time() {
+    return time + server_time_dt();
 }
+
+DEFCVAR_FLOAT(cl_predict_players, 1);
+DEFCVAR_FLOAT(cl_predict_players_latency, 0.9);
+DEFCVAR_FLOAT(cl_predict_players_nudge, 0.02);
+DEFCVAR_FLOAT(cl_predict_players_frac, 0.9);
+
+static float pred_time_dt;  // delta-time that the world predicted forward by
+
+// Match up local interpolation of projectile position with that of players.
+static void update_interp_time_dt() {
+    if (!CVARF(cl_predict_players)) {
+        pred_time_dt = 0;
+        return;
+    }
+
+    // Maybe prefer smoothed value here?
+    pred_time_dt = inst_ping_t;
+
+    if (CVARF(cl_predict_players_latency) <= 1)
+        pred_time_dt *= 1 - CVARF(cl_predict_players_latency);
+    pred_time_dt *= CVARF(cl_predict_players_frac);
+
+    pred_time_dt += CVARF(wpp_adv_selfp_ms) + CVARF(cl_predict_players_nudge);
+    pred_time_dt = min(pred_time_dt, inst_ping_t);
+}
+
+// Unlike server_time(), interp_time() is continuous and reflects how much we've
+// projected the local copy of the world forward.  Monotonic.
+float interp_time() {
+    static float last_interp_time = 0;
+
+    last_interp_time = max(last_interp_time, time + pred_time_dt);
+    return last_interp_time;
+}
+
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -59,12 +98,22 @@ inline float interp_time() {
 
 DECLARE_MOVING_AVG(avg_ping, 20);
 
+string getPingPanelText() {
+    float minv, maxv, avg, varr;
+
+    read_online_avg(&avg_ping, &avg, &varr);
+    compute_maxmin(&avg_ping.samples, &minv, &maxv);
+    float pl = getplayerkeyfloat(player_localnum, INFOKEY_P_PACKETLOSS);
+
+    return sprintf("^7%d^1/^7%d^1/^7%d ^8ms ^7%d^8%%\n", minv, avg, maxv, pl);
+}
+
 static void update_avg_ping() {
     // We use a fairly low clamp here because:
     //  a) We want to limit the effect of momentary total loss
     //  b) We actually want high pings to have low effective variance and
     //     trigger it on consistently.
-    float newv = min(getplayerkeyfloat(player_localnum, INFOKEY_P_PING), 200);
+    float newv = min(inst_ping_ms, 300);
 
     update_online_avg(&avg_ping, newv);
 }
@@ -77,16 +126,9 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 
 // Order of preference:
 //   server disable, client enable/disable, server/ping enable
-static float CalcPredEnabled(float current_enable,
-                             float unspec_default /* meaning of '-1' */,
-                             float server_disable, float server_enable,
-                             float client_value,
+static float CalcPredEnabled(float current_enable, float cvar,
+                             float server_disable,
                              float dependent_enabled, string* set_by) {
-    if (csqc_get_user_setting("dw", "default_weapon", "0")) {
-        *set_by = "[default_weapon unsupported, talk to newby to fix your " \
-                  "config to not need it]";
-        return FALSE;
-    }
 
     if (!dependent_enabled) {
         // PP depends on WP, so !WP => !PP
@@ -104,14 +146,14 @@ static float CalcPredEnabled(float current_enable,
         return FALSE;
     }
 
-    if (server_disable || client_value == 0) {
-        *set_by = server_disable ? "[server disable]" : "[cvar disable]";
-
+    if (server_disable) {
+        *set_by = "[server disable]";
         return FALSE;
     }
-    if (client_value == 1) {
-        *set_by = sprintf("[cvar enable]");
-        return TRUE;
+
+    if (!cvar) {
+        *set_by = "[disabled]";
+        return FALSE;
     }
 
     if (WP_MinPing() == 0)
@@ -120,33 +162,32 @@ static float CalcPredEnabled(float current_enable,
     float ping_enable, avg, variance;
 
     fill_avg_ping(&avg, &variance);
-    // We wait until 5ms over target (or 5 ms under target) when flipping, to
-    // avoid flip flopping when ping is right at target.
-    if (variance < sq(15))
-        ping_enable = avg > WP_MinPing() + (current_enable ? -5 : 5);
-    else
-        return current_enable;  // variance too high, don't change anything.
 
-
-    if (unspec_default || server_enable) {
-        if (ping_enable) {
-            *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
-                    WP_MinPing(), avg, variance);
-            return TRUE;
-        } else {
-            *set_by = sprintf("[lan mode <%d]", WP_MinPing());
-            return FALSE;
-        }
+    if (variance > sq(15)) {
+        *set_by = "[ping not yet stable]";
+        return current_enable;  // variance too high, wait.
     }
 
-    *set_by = "[default]";
-    return FALSE;
+    static float hyst = 0;
+    ping_enable = avg > WP_MinPing() - hyst;
+    if (ping_enable != current_enable) {
+        if (!hyst)  // avoid flip-flopping on boundary values.
+            hyst = 10;
+        else
+            hyst += 5;
+    }
+
+    if (ping_enable) {
+        *set_by = sprintf("[ping >%d] (avg=%0.0f var=%0.0f)",
+                WP_MinPing(), avg, variance);
+        return TRUE;
+    } else {
+        *set_by = sprintf("[lan mode <%d]", WP_MinPing());
+        return FALSE;
+    }
 }
 
-#define ENABLE_CHECK_PERIOD 2
 static float client_delay_packets;
-static float next_wpp_enable_check;
-static float next_ping_update;
 void(float seat, string keyname, string newvalue) setlocaluserinfo = #0:setlocaluserinfo;
 
 #define PRINT_CONFIG(_field) \
@@ -172,13 +213,13 @@ void WPP_Status() {
     string wp_source, pp_source;
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
-    CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            fo_config.wp_global_disable, fo_config.wp_global_enable,
-            CVARF(wpp_weap_predict), TRUE, &wp_source);
+    CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
+            fo_config.wp_global_disable,
+            TRUE, &wp_source);
 
-    CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            fo_config.pp_global_disable, fo_config.pp_global_enable,
-            CVARF(wpp_proj_predict), wp_enabled, &pp_source);
+    CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
+            fo_config.wp_global_disable,
+            wp_enabled, &pp_source);
 
     printf("Prediction Status:\n");
     printf(" Weapon prediction %s %s\n",
@@ -186,11 +227,10 @@ void WPP_Status() {
     printf(" Projectile prediction %s %s\n",
             pp_enabled ? "enabled" : "disabled", pp_source);
 
-    float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
     float avg, variance;
     fill_avg_ping(&avg, &variance);
     printf(" inst_ping = %d client_ping = %d avg_ping = %d var = %d\n",
-            ping, pstate_server.client_ping, avg, variance);
+            inst_ping_ms, pstate_server.client_ping, avg, variance);
     if (fo_config.min_ping_ms)
         printf(" client_delay_packets = %d\n", client_delay_packets);
     printf(" maxspeed = %d\n", pstate_server.csqc_maxspeed);
@@ -202,13 +242,9 @@ void WPP_Status() {
     PRINT_CONFIG(static_newmis_ms);
     PRINT_CONFIG(dynamic_newmis_ms);
     PRINT_CONFIG(wp_default_min_ping_ms);
-    PRINT_CONFIG_ACTIVE(wp_global_enable);
     PRINT_CONFIG_ACTIVE(wp_global_disable);
-    PRINT_CONFIG_ACTIVE(pp_global_enable);
-    PRINT_CONFIG_ACTIVE(pp_global_disable);
-    PRINT_CONFIG_ACTIVE(wpp_global_enable);
-    PRINT_CONFIG_ACTIVE(wpp_global_disable);
     PRINT_CONFIG_ACTIVE(gren_beta_disable);
+    PRINT_CONFIG_ACTIVE(old_ng_rof);
     PRINT_CONFIG(max_rewind_ms);
     PRINT_CONFIG(max_rewind_slow_projectile_ms);
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
@@ -224,13 +260,31 @@ void WPP_Status() {
 
     PrintFlagField("Clown mode [clown_flags=%d]\n",
                    fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
+
+    PrintFlagField("Concs [fo_concuss=%d]\n",
+                   fo_config.fo_concuss, FO_CONC.length, FO_CONC);
 }
 #undef PRINT_CONFIG
 
 void WPP_UpdateEnable(float force) {
+    static float next_ping_update;
+    static float PING_PERIOD = 0.250;
+
     if (time > next_ping_update) {
         update_avg_ping();
-        next_ping_update = time + ENABLE_CHECK_PERIOD / avg_ping.samples.max_count;
+        update_interp_time_dt();
+        next_ping_update = time + PING_PERIOD / avg_ping.samples.max_count;
+    }
+
+    // Immediate updates any time there's a cvar change.
+    static float next_wpp_enable_check;
+    static float last_fo_predict_weapons, last_fo_predict_projectiles;
+
+    if (CVARF(fo_predict_weapons) != last_fo_predict_weapons ||
+        CVARF(fo_predict_projectiles) != last_fo_predict_projectiles) {
+        next_wpp_enable_check = 0;
+        last_fo_predict_weapons = CVARF(fo_predict_weapons);
+        last_fo_predict_projectiles = CVARF(fo_predict_projectiles);
     }
 
     if (avg_ping.samples.count < 5)
@@ -238,26 +292,25 @@ void WPP_UpdateEnable(float force) {
 
     if (!force && time < next_wpp_enable_check)
         return;
-    next_wpp_enable_check = time + ENABLE_CHECK_PERIOD;
+    next_wpp_enable_check = time + 1;
 
-    // For wpp_weap_predict and wpp_proj_predict we use a tristate:
-    //   1 => force on, 0 => force off, -1 => up to min_ping/server
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
     float wp_new = -1, pp_new = -1;
     string wp_source, pp_source;
 
-    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_wpp_beta),
-            fo_config.wp_global_disable, fo_config.wp_global_enable,
-            CVARF(wpp_weap_predict), TRUE, &wp_source);
+    wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
+            fo_config.wp_global_disable,
+            TRUE, &wp_source);
 
-    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_wpp_beta),
-            fo_config.pp_global_disable, fo_config.pp_global_enable,
-            CVARF(wpp_proj_predict), wp_new, &pp_source);
+    pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
+            fo_config.wp_global_disable,
+            wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
-        printf("FortressOne: Weapon prediction %s %s\n",
-                wp_new ? "enabled" : "disabled", wp_source);
+        if (!CVARF(fo_predict_projectiles) && is_player)
+            printf("FortressOne: Weapon prediction (no projectiles) %s %s\n",
+                    wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
 
         if (wp_new) {
@@ -271,9 +324,12 @@ void WPP_UpdateEnable(float force) {
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
-        printf("FortressOne: Projectile prediction %s %s\n",
-                pp_new ? "enabled" : "disabled", pp_source);
+        if (is_player)
+            printf("FortressOne: Weapon/Projectile prediction %s %s\n",
+                    pp_new ? "enabled" : "disabled", pp_source);
         pengine.pp_enabled = pp_new;
+
+        next_wpp_enable_check += 9;
     }
     once = TRUE;
 
@@ -306,76 +362,141 @@ static void set_minping_delay_packets() {
     setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
 }
 
-void UpdateMinPing() {
-    static float next_update;
+struct {
+    float last_val;
+    float minv, user_controlled;
+    float fo_min_ping;
+} DelayPacketState;
 
-    if (!fo_config.min_ping_ms) {
-        // Clear, if-and-only-if, we control the value.
-        if (client_delay_packets) {
-            client_delay_packets = 0;
-            set_minping_delay_packets();
-        }
-        return;
+static void UpdateDelayPackets(float val, float user) {
+    string sv = sprintf("%d", val);
+    setlocaluserinfo(0, "csqc_dp", user ? "0" : "1");
+    setlocaluserinfo(0, "client_delay_packets", sv);
+
+    DelayPacketState.user_controlled = user;
+    DelayPacketState.last_val = val;
+
+    if (val != CVARF(cl_delay_packets)) {
+        CVARF(cl_delay_packets) = val;
+        localcmd("cl_delay_packets ", sv, "\n");
+    }
+}
+
+void UpdateFoMinPing(string arg) {
+    float fmp = DelayPacketState.fo_min_ping;
+
+    if (arg != "") {
+        float nv = stoi(arg);
+
+        // Don't bother posting if we'll ignore it.
+        if (nv != fmp && nv > fo_config.min_ping_ms)
+            localcmd(sprintf("say SET: fo_min_ping %d\n", nv));
+
+        DelayPacketState.fo_min_ping = fmp = nv;
+        DelayPacketState.user_controlled = FALSE;
     }
 
-    if (time < next_update)
-        return;
-    next_update = time + 1;
+    float min_ping = max(fo_config.min_ping_ms, fmp);
+    printf("Min ping is: %d [%s specified]\n", min_ping,
+            min_ping == fmp ? "client" : "server");
+}
 
-    const float PING_SAMPLES = 10;
-    static float num_samples;
-    static float ping_cache[PING_SAMPLES];
+string(float seat, string keyname) getlocaluserinfo = #0:getlocaluserinfo;
+void ModulateDelayPackets() {
     static float once;
 
-    if (CVARF(cl_delay_packets) != client_delay_packets) {
-        // We expect to see a one-time mismatch, but after this, clients are
-        // trying to change it on us.  Make that noisy.
-        if (once)
-            localcmd(sprintf("say forced reset delay_packets %d -> %d\n",
-                        CVARF(cl_delay_packets), client_delay_packets));
-        once = TRUE;
+    float dp = CVARF(cl_delay_packets), nv;
 
-        next_update = time + 0.1;
-        set_minping_delay_packets();
+    if (!once) {
+        if (getlocaluserinfo(0, "csqc_dp") == "1") {
+            // Set from a previous game, clear.
+            UpdateDelayPackets(0, TRUE);
+            return;
+        }
+
+        DelayPacketState.last_val = dp;
+        DelayPacketState.user_controlled = TRUE;
+        once = TRUE;
+    }
+
+    if (dp != DelayPacketState.last_val && dp > DelayPacketState.minv) {
+        UpdateDelayPackets(dp, TRUE);
+        localcmd(sprintf("say SET: cl_delay_packets %d\n", dp));
+    } else if (dp < DelayPacketState.minv ||
+        (dp > DelayPacketState.minv && !DelayPacketState.user_controlled)) {
+
+        if (dp != DelayPacketState.last_val)
+            localcmd(sprintf("say IGNORED: cl_delay_packets %d [< min of %d]\n",
+                        dp, DelayPacketState.minv));
+        UpdateDelayPackets(DelayPacketState.minv, FALSE);
+    }
+}
+
+
+void UpdateMinPing() {
+    static float next_ping_update, next_minv_update;
+
+    ModulateDelayPackets();
+
+    float min_ping = max(fo_config.min_ping_ms, DelayPacketState.fo_min_ping);
+
+    if (!min_ping) {
+        DelayPacketState.minv = 0;
         return;
     }
+
+    // Ideally we want to span more than one update here to better handle
+    // averaging of clamping to server frames.
+    const float PING_SAMPLES = 50;
+    static float num_samples;
+    static float ping_cache[PING_SAMPLES];
+
+    if (time < next_ping_update || !is_player)
+        return;
+    next_ping_update = time + 0.2;
 
     float cache_index = (num_samples++) % ping_cache.length;
-    ping_cache[cache_index] =
-        max(0, getplayerkeyfloat(player_localnum, INFOKEY_P_PING));
 
-    if (num_samples < 10)
+    float cping = inst_ping_ms;
+    ping_cache[cache_index] = max(0,  cping - DelayPacketState.last_val);
+
+    float true_avg = 0;
+    float N = min(num_samples, PING_SAMPLES);
+    for (int i = 0; i < N; i++)
+        true_avg += ping_cache[i];
+    true_avg /= N;
+
+    // Accuracy limitations hurt us here.
+    true_avg = max(true_avg, SERVER_FRAME_MS - 1);
+
+    if (time < next_minv_update)
         return;
 
-    float ping = ping_cache[0];
-    for (int i = 1; i < ping_cache.length; i++)
-        ping = min(ping, ping_cache[i]);
+    float old = DelayPacketState.minv;
+    float target = max(ceil(min_ping - true_avg), 0);
 
-    ping = max(ping - client_delay_packets, SERVER_FRAME_MS);
-    float target = max(fo_config.min_ping_ms - ping, 0);
+    if (target > 0)
+        target += 1; // Slightly bias up for stability and better equalization.
 
-    if (CVARF(fo_minping_min) > 0)
-        target = max(target, CVARF(fo_minping_min));
-
-    if (!is_player)
-        target = 0;
-
-    if (target == 0) {
-        client_delay_packets = 0;
+    if (fabs(target - old) >= 25) {
+        target = floor(target * 0.975);  // Take big steps conservatively
+        next_ping_update = time + 3;              // Time to reconverge
     } else {
-        float nv = (ceil((target - 0.1)/ 3)) * 3 + 1;
-        // Bound how much we'll step at once.
-        if (!client_delay_packets)
-            client_delay_packets = nv;
-        else
-            client_delay_packets = min(client_delay_packets + 10, nv);
+        target = max(min(target, old + 3), old - 3);  // Bound smaller updates.
+        next_ping_update = time + 3;              // Time to reconverge
     }
 
-    if (CVARF(cl_delay_packets) != client_delay_packets) {
-        set_minping_delay_packets();
-        setlocaluserinfo(0, "client_delay_packets", ftos(client_delay_packets));
-        num_samples = 0;
-    }
+    DelayPacketState.minv = target;
+    next_minv_update = next_ping_update + 1;  // Limit modulation
+}
+
+void WP_UpdatePings() {
+    inst_ping_ms = getplayerkeyfloat(player_localnum, INFOKEY_P_PING);
+    inst_ping_t = inst_ping_ms / 1000.0;
+
+    update_interp_time_dt();
+    UpdateMinPing();
+    WPP_UpdateEnable(FALSE);
 }
 
 float IsEffectFrame() {
@@ -454,7 +575,7 @@ void WP_ServerUpdate() {
         pstate_server.weaponframe += 1;
     }
 
-    if (CVARF(fo_wpp_beta) == 2)
+    if (CVARF(fo_wpp_beta) & 4)
         phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
     else
         phys_sim_dt = -1;
@@ -480,7 +601,7 @@ static float AmmoToStat(float ammo_type) {
 }
 
 float WP_GetAmmo(float ammo_type) {
-    if (!WP_Enabled())
+    if (!WP_Enabled() || !is_alive)
         return getstatf(AmmoToStat(ammo_type));
 
     if (ammo_type == AMMO_NONE)
@@ -592,7 +713,7 @@ float WP_SniperCharge() {
         return 0;
 
     float heat = 50 + (pstate_pred.seq - SniperState.start_seq) * 3;
-    return min(PC_SNIPER_MAXDAM, heat);
+    return min(heat, PC_SNIPER_MAXDAM);
 }
 
 static void WP_Sniper_UpdateSight() {
@@ -930,48 +1051,15 @@ void WPP_Dump() {
 
 void WP_Attack();
 
-DEFCVAR_FLOAT(cl_forwardspeed, 0);
-DEFCVAR_FLOAT(cl_backspeed, 0);
-DEFCVAR_FLOAT(cl_sidespeed, 0);
-
-void MP_SetSpeed() {
-    if (!CVARF(wpp_setspeed))
+void FO_ApplyMaxSpeed() {
+    if (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED))
         return;
 
-    static float last_playerclass, last_set;
-
-    float speed = pstate_pred.csqc_maxspeed;
-
-    if (pstate_pred.playerclass != last_playerclass)
-        last_set = -1;  // Force update.
-    last_playerclass = pstate_pred.playerclass;
-
-    const float speed_aiming = 80;
-    const float speed_aiming2dir = ceil(speed_aiming/sqrt(2));
-
-    if (pstate_pred.tfstate & TFSTATE_AIMING) {
-        speed = min(pstate_pred.csqc_maxspeed, speed_aiming);
-
-        // Cap as maxspeed would, but client-side, when enabled.
-        if (RewindFlagEnabled(REWIND_SETSPEED))
-            if (input_movevalues.x && input_movevalues.y)
-                speed = min(speed, speed_aiming2dir);
-    }
-
-    float fastest =
-        max(CVARF(cl_forwardspeed), CVARF(cl_backspeed), CVARF(cl_sidespeed));
-
-    // We check >speed, not =speed as it's still valid for clients to control to
-    // lower speeds.  Except for transitions where the maxspeed is reset.
-    if (speed > last_set || fastest > speed) {
-        last_set = speed;
-
-        string spd = ftos(speed);
-        localcmd("cl_forwardspeed ", spd, "; cl_backspeed ",spd, "; cl_sidespeed ", spd, "\n");
-    }
+    if (pstate_pred.tfstate & TFSTATE_AIMING)
+        input_movevalues = normalize(input_movevalues) * 80;
 }
 
-
+DEFCVAR_FLOAT(cl_crossx, 0);
 
 void WP_Frame() {
     if (!is_alive) {
@@ -1006,7 +1094,6 @@ void WP_Frame() {
         WP_Attack();
 
     WP_Sniper_UpdateSight();
-    MP_SetSpeed();
 }
 
 
@@ -1039,20 +1126,21 @@ trail_table_entry trail_table[] = {
     {{"TE_RAILTRAIL"}},
 };
 
-float get_phys_time_nudge_dt(entity e) {
-    if (!is_player)
-        return 0;
-
-    float nudge;
-    if (e.owner_entnum != pengine.player_entnum)
-        nudge = CVARF(wpp_phys_adv_ms);
-    else
-        nudge = CVARF(wpp_phys_local_adv_ms);
-    return min(nudge, interp_ms()) / 1000.0;
-}
-
 inline float get_phys_time(entity e) {
-    return time + get_phys_time_nudge_dt(e);
+    if (e.owner_entnum == pengine.player_entnum) {
+        // We want to align our own entities with remote player interp so that
+        // collisions feel correct.
+        return interp_time();
+    } else {
+        // Entities from other players.. we have choice.  For now, advance them
+        // up to wpp_adv_otherp_ms (bounded at ping, which is true position for
+        // hitting the client.. what they likely care about most... although
+        // this will offset explosions in the short term).
+        static float last_self_time;
+        float dt = min(inst_ping_ms, CVARF(wpp_adv_otherp_ms)) / 1000.0;
+        last_self_time = max(last_self_time, time + dt);
+        return last_self_time;
+    }
 }
 
 void FO_PP_Init() {
@@ -1191,29 +1279,17 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.owner = pengine.player_ent;
   FPP_Init(fpp_type, proj);
 
-#if 0
-  // Packet loss doesnt guarantee the server will actually register quickslot
-  // since it's a separate command from the attack.  We can improve this in the
-  // future via either a button or just combining them on an impulse.  But for
-  // now just dont create the projectile, it's usually swapping to a hitscan
-  // weapon anyway.
-  if (pstate_pred.tfstate & TFSTATE_QUICKSLOT &&
-      !(pstate_server.tfstate & TFSTATE_QUICKSLOT))
-      return __NULL__;
-#endif
+  float ms_ahead = server_time_ms();
+  ProjectResult push_t = Forward_ProjectOffset(fpp_type, ms_ahead);
 
-  ProjectResult push_t = Forward_ProjectOffset(fpp_type, interp_ms());
-
-  // Using interp_ms() to predict which packet it will arrive in, while using
-  // client_ping to predict when that packet will arrive, seems to produce
-  // more consistent results, possibly due to batching.
-  float uncorrected_dt = (pstate_server.client_ping - push_t.dynamic_ms) / 1000.0;
+  float uncorrected_dt = max(ms_ahead - push_t.dynamic_ms, 0) / 1000.0;
   float static_dt = push_t.static_ms / 1000.0;
+
   // Note: We use true time here as created projectiles exist outside of pred.
   proj.starttime = time + uncorrected_dt;
   proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
-  proj.server_live_time = time + interp_dt();
+  proj.server_live_time = server_time();
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -1465,6 +1541,24 @@ void WP_Attack() {
     WP_AnimateModel();
 }
 
+
+void PredProjectile_DebugMatch(entity cprj, entity sprj) {
+    string sgn =
+        vlen(cprj.origin - pmove_org) > vlen(sprj.origin- pmove_org) ? "+" : "-";
+
+    string s = sprintf(" p_diff: %s%-2.1f [%0.3f] ", sgn,
+                    vlen(cprj.origin - sprj.origin),
+                    vlen(cprj.origin - sprj.origin) / vlen(cprj.velocity));
+    s = strcat(s, sprintf("t=%0.3f p_t=[c:%0.3f s:%0.3f d=%0.3f]",
+                time, cprj.phys_time, sprj.phys_time,
+                sprj.phys_time - cprj.phys_time));
+
+    s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
+            vlen(cprj.origin - pmove_org), vlen(sprj.origin - pmove_org),
+            self.antilag_ms));
+    print(s);
+}
+
 float PredProjectile_MatchProjectile() {
     entity proj, match = __NULL__;
     float best = 64;
@@ -1496,16 +1590,8 @@ float PredProjectile_MatchProjectile() {
         if (FPP_IsGrenade(self.fpp.index))
             self.angles = match.angles;
 
-        if (CVARF(wpp_debug) & 1) {
-            string s = sprintf(" p_diff: %0.1f [%0.3f] t=%0.3f p_t=c:%0.3f s:%0.3f [%0.3f]",
-                    vlen(match.origin - self.origin),
-                    vlen(match.origin - self.origin) / vlen(self.velocity),
-                    time, match.phys_time, self.phys_time, match.phys_time - self.phys_time);
-            s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
-                    vlen(match.origin - pmove_org), vlen(self.origin - pmove_org),
-                    self.antilag_ms));
-            print(s);
-        }
+        if (CVARF(wpp_debug) & 1)
+            PredProjectile_DebugMatch(match, self);
 
         PP_Cleanup(match);
         return TRUE;
@@ -1600,11 +1686,51 @@ void WP_UpdateViewModel() {
     viewmodel.lerpfrac = max(0, viewmodel.lerpfrac - frametime * 10);
 }
 
+struct {
+    float cussed;
+    float end_time;
+    vector c_view;
+    vector c_forward;
+
+    float last_a;
+} cuss_state;
+
+float ClownConcPeriod();
+
+void PredictConc() {
+    if (IsClownMode(CLOWN_CONC)) {
+        if (cuss_state.end_time < time)
+            cuss_state.end_time = time + ClownConcPeriod();
+
+        pstate_pred.conc_amp = 100;
+        pstate_pred.tfstate |= TFSTATE_CONC;
+        return;
+    }
+
+    if (!fo_config.fo_concuss)
+        return;  // Not enabled.
+
+    if (pstate_server.tfstate & TFSTATE_CONC == 0)
+        return;
+
+    static float last_conc_finished;
+    if (pstate_server.conc_finished != last_conc_finished) {
+        // New conc, use a single fixed local finish time.
+        last_conc_finished = pstate_server.conc_finished;
+        cuss_state.end_time = pstate_server.conc_finished - server_time_dt();
+        cuss_state.last_a = 0;
+    }
+
+    if (time > cuss_state.end_time)
+        pstate_pred.tfstate &= ~TFSTATE_CONC;
+}
+
 float WP_ClientThink() {
+    pstate_pred = pstate_server;
+    PredictConc();
+
     if (!WP_Enabled())
         return PREDRAW_NEXT;
-
-    pstate_pred = pstate_server;
 
     getinputstate(servercommandframe); // Setup first read for old_buttons.
     pengine.last_effectframe2 = pengine.last_effectframe;

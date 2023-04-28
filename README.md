@@ -5,6 +5,8 @@ New commands
 ------------
 
 * `cmd updateserver` tell server to pull latest progs and maps
+* `+slot n` bind. fires nth weapon
+* `fo_default_weapon 0` default weapon when using `+slot` binds
 * `fo_hud_cache 1` less resource intensive hud
 * `fo_hud_fps 60` set hud refresh rate
 * `fo_grentimer_ping_frac 1` fraction of ping to correct for
@@ -13,16 +15,15 @@ New commands
 * `fo_legacy_sbar 0` use oldschool Team Fortress status bar
 * `fo_oldscoreboard 0` use oldschool Quake scoreboard
 * `fo_adminrefresh 2` time in seconds for admin menu to refresh
-* `fo_wpp_beta 0` client side weapon/projectile prediction
-* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled. -1 defaults to 40.
-* `wpp_weap_predict -1` weapon prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
-* `wpp_proj_predict -1` projectile prediction. 1 force on, 0 force off, -1 use fo_wpp_beta / server settings 
+* `fo_predict_weapons 1` client-side weapon prediction
+* `fo_predict_projectiles 1` client-side projectile prediction
+* `wpp_min_ping -1` minimum ping before `fo_wpp_beta` is enabled.
 * `fo_client_sniper_sight 1` client side sniper dot
-* `cl_p2r` for old weapon impulses
-* `cl_r2g` for old weapon impulses
-* `r_pyrotrail 0`
-* `r_rockettrail 0`
-* `r_grenadetrail 0`
+* `cl_p2r` use rocket model for incendiary launcher
+* `cl_r2g` use grenade model for rockets
+* `r_pyrotrail 0` ezquake-compatible trail selection for incendiary launcher
+* `r_rockettrail 0` ezquake-compatible trail selection for rocket launcher
+* `r_grenadetrail 0` ezquake-compatible trail selection for grenade launcher
 * `wpp_phys_adv_ms 0`
 * `wpp_phys_local_adv_ms 0`
 * `wpp_setspeed 1`
@@ -179,7 +180,6 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * Prime/throw grenades with one button (/gren1 and /gren2).
 * Weapon slots (1-4) where 1 is always primary and 4 is always melee.
 * Quick attack aliases (+quick1-4 will switch weapon and fire).
-* Set default weapon to select after firing (e.g. `setinfo default_weapon 1`).
 * Next/previous weapon (/weapprev and /weapnext).
 * Last weapon (/weaplast).
 * Remember current weapon and last weapon after dying.

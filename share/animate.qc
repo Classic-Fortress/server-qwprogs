@@ -219,8 +219,10 @@ void nail_extra_csqc_ssqc() {
     }
 
     float tidx = *thinkindex() % 2;  // 1 based, and incremented.
-    SuperDamageSound();
-    W_FireSpikes(tidx ? 4 : -4);
+    if (tidx == 0 || !OldNgRof()) {
+        SuperDamageSound();
+        W_FireSpikes(tidx ? 4 : -4);
+    }
 }
 
 void player_asscan_down1();
@@ -265,7 +267,7 @@ void asscan_fire_extra() {
 
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (vlen(get_velocity()) <= 100 && !(*tf_state () & TFSTATE_LOCK)) {
+    if (vlen(get_velocity()) <= 90 && !(*tf_state () & TFSTATE_LOCK)) {
         if (tidx % 2 == 1) {  // 1-based
             muzzleflash();
             Pred_Sound(SND_ASSCAN_FIRE);

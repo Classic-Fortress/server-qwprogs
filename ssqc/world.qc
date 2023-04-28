@@ -1,5 +1,3 @@
-void () InitBodyQue;
-void () CheckTrackedSettings;
 void () TerminateStaleServer;
 
 string (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSettingString;
@@ -99,7 +97,6 @@ void () worldspawn = {
     lastspawn = world;
     number_of_teams = 0;
 
-    InitBodyQue();
     if (self.model == "maps/e1m8.bsp")
         cvar_set("sv_gravity", "100");
     else
@@ -377,15 +374,96 @@ void () worldspawn = {
 
     dimension_send = DMN_NOFLASH;
     Predict_Init();
+};
 
-    settings_to_track = memalloc(sizeof(*settings_to_track)*settings_to_track_list.length);
-    for (float i = 0; i < settings_to_track_list.length; i++)
-    {
-        settings_to_track[i].setting_name = settings_to_track_list[i];
-        string val = infokey(world, settings_to_track_list[i]);
-        val = (val != "") ? val : "unset";
-        settings_to_track[i].value = val;
+#if 0
+// Alternate implementation, drop if simple version is sufficient.
+static const float BODYQUEUE_MAX = 32;
+
+static struct {
+    entity queue[BODYQUEUE_MAX];
+    float num;
+} bodies;
+
+
+void ClearBodyQueue() {
+    for (float i = 0; i < bodies.nun; i++)
+        remove(bodies.queue[i]);
+    bodies.num = 0;
+}
+
+
+void FilterBodyQueue(entity filter) {
+    float i = 0, j = 0, num = 0;
+
+    while (j < bodies.num) {
+        while (j < bodies.num && (bodies[j].heat > time || bodies[j].owner == filter))
+            j++;
+        if (j >= bodies.num)
+            break;
+
+        if (i != j) {
+            remove(bodies[i]);
+            bodies[i] = bodies[j];
+        }
+        num++;
+        i++;
+        j++;
     }
+
+    bodies.num = num;
+}
+#endif
+
+static const float BODYQUEUE_TIMEOUT = 15;
+.entity bodyqueue;
+
+void RemoveDeadBody(entity ent) {
+    if (ent.bodyqueue == __NULL__)
+        return;
+
+    remove(ent.bodyqueue);
+    ent.bodyqueue = __NULL__;
+}
+
+void FilterBodyQueue(float clear) {
+    int count, i;
+    entity* bodies = find_list(classname, "bodyqueue", EV_STRING, count);
+    for (i = 0; i < count; i++)
+        if (time > bodies[i].heat || clear)
+            RemoveDeadBody(bodies[i].owner);
+}
+
+void AddToBodyQueue(entity ent) {
+    if (cb_prematch)
+        return;
+
+    if (ent.model != "progs/player.mdl")
+        return;  // in particular, filters out suicides
+
+    if (ent.bodyqueue)
+        RemoveDeadBody(ent);
+
+    entity nb = spawn();
+    nb.owner = ent;
+    nb.heat = time + BODYQUEUE_TIMEOUT;
+    nb.classname = "bodyqueue";
+
+    nb.angles = ent.angles;
+    nb.model = ent.model;
+    nb.skin = ent.skin;
+    nb.modelindex = ent.modelindex;
+    nb.frame = ent.frame;
+    nb.colormap = ent.colormap;
+    nb.movetype = ent.movetype;
+    nb.velocity = ent.velocity;
+    nb.flags = 0;
+    setorigin(nb, ent.origin);
+    setsize(nb, ent.mins, ent.maxs);
+
+    nb.dimension_seen = DMN_NOFLASH;
+
+    ent.bodyqueue = nb;
 };
 
 void () StartFrame = {
@@ -393,50 +471,19 @@ void () StartFrame = {
     timelimit = cvar("timelimit") * 60;
     fraglimit = cvar("fraglimit");
     deathmatch = cvar("deathmatch");
-    framecount = framecount + 1;
 
-    if (framecount % 77 == 0) {
-        CheckTrackedSettings();
+    static float next_stale_check;
+    if (time > next_stale_check) {
         TerminateStaleServer();
+        next_stale_check = time + 60;
+    }
+
+    static float next_filter_bodyqueue;
+    if (time > next_filter_bodyqueue) {
+        FilterBodyQueue(FALSE);
+        next_filter_bodyqueue = time + 0.5;
     }
 };
-
-entity bodyque_head;
-
-void () bodyque = {
-};
-
-void () InitBodyQue = {
-    bodyque_head = spawn();
-    bodyque_head.classname = "bodyque";
-    bodyque_head.owner = spawn();
-    bodyque_head.owner.classname = "bodyque";
-    bodyque_head.owner.owner = spawn();
-    bodyque_head.owner.owner.classname = "bodyque";
-    bodyque_head.owner.owner.owner = spawn();
-    bodyque_head.owner.owner.owner.classname = "bodyque";
-    bodyque_head.owner.owner.owner.owner = bodyque_head;
-
-};
-
-void (entity ent) CopyToBodyQue = {
-    if (cb_prematch)
-        return;
-
-    bodyque_head.angles = ent.angles;
-    bodyque_head.model = ent.model;
-    bodyque_head.skin = ent.skin;
-    bodyque_head.modelindex = ent.modelindex;
-    bodyque_head.frame = ent.frame;
-    bodyque_head.colormap = ent.colormap;
-    bodyque_head.movetype = ent.movetype;
-    bodyque_head.velocity = ent.velocity;
-    bodyque_head.flags = 0;
-    setorigin(bodyque_head, ent.origin);
-    setsize(bodyque_head, ent.mins, ent.maxs);
-    bodyque_head = bodyque_head.owner;
-};
-
 
 // this is used for spawning world objects on map load.. not player, projectiles etc - also disables the engine's conditional spawning based on spawnflags, you're expected to do that part yourself
 void(void() fnc)CheckSpawn = {
@@ -453,21 +500,9 @@ void(void() fnc)CheckSpawn = {
     }
 };
 
-void () CheckTrackedSettings = {
-    for (float i = 0; i < settings_to_track_list.length; i++)
-    {
-        setting_t* s = &settings_to_track[i];
-        string new_val = infokey(world, s.setting_name);
-        if (new_val != s.value)
-        {
-            bprint(PRINT_HIGH, "Setting ", s.setting_name, " has been changed from ", s.value, " to ", new_val, "\n");
-            s.value = new_val;
-        }
-    }
-}
-
+static const float STALE_TIME_HOURS = 6;
 void () TerminateStaleServer = {
-    if (gettime() < 86400)
+    if (gettime() < STALE_TIME_HOURS * 3600)
         return;
 
     for (entity e = world; (e = find(e, classname, "player")); ) {
@@ -475,6 +510,7 @@ void () TerminateStaleServer = {
             return; //someone is around
     }
 
-    dprint("Terminating empty server with more than 24 hours uptime\n");
+    dprint(sprintf("Terminating empty server with more than %d hours uptime\n",
+                   STALE_TIME_HOURS));
     localcmd("quit\n");
 }

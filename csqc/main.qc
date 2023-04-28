@@ -22,6 +22,36 @@ void GetSelf() = {
     self = findfloat(world, entnum, player_localentnum);
 }
 
+void PushToSlotHistory(float value) {
+    if (slot_history_top >= MAX_SLOT_HISTORY_SIZE) {
+        // Stack is full
+        return;
+    }
+
+    slot_history_top += 1;
+    slot_history[slot_history_top] = value;
+}
+
+float RemoveFromSlotHistory(float slot) {
+    if (slot_history_top == -1) {
+        // Stack is empty
+        return -1;
+    }
+
+    for (float i = slot_history_top; i >= 0; i--) {
+        if (slot_history[i] == slot) {
+            for (float j = i+1; j < MAX_SLOT_HISTORY_SIZE; j++) {
+                slot_history[j-1] = slot_history[j];
+            }
+
+            slot_history[MAX_SLOT_HISTORY_SIZE-1] = 0;
+            slot_history_top--;
+            break;
+        }
+    }
+}
+
+
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
@@ -47,6 +77,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_PP_Init();       // Some of this is always used by custom projectiles.
     CsGrenTimer::Init();
 
+    slot_history_top = -1;
+
+    registercommand("+slot");
+    registercommand("-slot");
+
     registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
@@ -66,6 +101,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("fo_menu_build");
     registercommand("fo_menu_dropammo");
     registercommand("fo_menu_cancel");
+
+    registercommand("fo_min_ping");
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
@@ -130,6 +167,8 @@ noref void() CSQC_WorldLoaded = {
     localcmd("menu_restart\n");
 }
 
+void FO_CussView();
+void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 
 DEFCVAR_FLOAT(fov, 90);
@@ -139,6 +178,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
+                                                 //
+    FO_CussView();
 
     if (zoomed_in)
         setviewprop(VF_AFOV, CVARF(fov)/3);
@@ -153,6 +194,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     addentities(mask);
 
     renderscene();
+
+    FO_CussCrosshair(width, height);
     TFxRenderGrenadeTimers();
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
@@ -163,6 +206,24 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     recent_pmove_vel_z = pmove_vel_z;
 }
 
+void Slot_Keydown(float slot) {
+    PushToSlotHistory(slot);
+    localcmd(sprintf("impulse %f\n", slot));
+    localcmd("+attack\n");
+}
+
+void Slot_Keyup(float slot) {
+    RemoveFromSlotHistory(slot);
+    if (slot_history_top >= 0) { // still holding another +slot bind
+        localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
+    } else {
+        if (CVARF(fo_default_weapon)) {
+            localcmd(sprintf("impulse %f\n", CVARF(fo_default_weapon)));
+        }
+        localcmd("-attack\n");
+    }
+}
+
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
     float val;
@@ -170,6 +231,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
     local float grentype;
 
     switch(argv(0)) {
+        case "+slot":
+            Slot_Keydown(stof(argv(1)));
+            break;
+        case "-slot":
+            Slot_Keyup(stof(argv(1)));
+            break;
         case "login":
             FoLogin(argv(1));
             break;
@@ -242,6 +309,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "fo_menu_cancel":
             Menu_Cancel();
+            break;
+        case "fo_min_ping":
+            UpdateFoMinPing(argv(1));
             break;
         case "fo_settings_check":
             ClientSettings_Check();
@@ -432,13 +502,144 @@ void() CSQC_Ent_Remove = {   //the entity in question left the player's pvs, and
     remove(self);
 };
 
+static float IsFoConced() {
+    if (IsClownMode(CLOWN_CONC))
+        return TRUE;
+
+    if (!fo_config.fo_concuss)
+        return FALSE;
+
+    return pstate_pred.tfstate & TFSTATE_CONC;
+}
+
+struct ConcCurve {
+    float duration;
+    float cycles;
+    float amp_end;
+    float offset;
+};
+
+ConcCurve conc_curve[] = {
+    {1, 0.5, 0.0, 0.5},
+    {6, 4, 0.2, 0.5},
+    {2, 1.5, 0.75},
+    {1, 1, 1},
+    {0, 0, 1},  // Terminator
+};
+
+ConcCurve clown_curve[] = {
+    {10, 4, 0.75},
+    {0, 0, 0.75},  // Terminator
+};
+
+float ClownConcPeriod() { return clown_curve[0].duration; }
+
+static float Blend(float start, float end, float rem, float D) {
+    return rem/D * start + (D-rem)/D * end;
+}
+
+static vector FO_Conc_Offset() {
+    static float last_rem;
+    float rem = cuss_state.end_time - time;
+    if (rem < 0)
+        return '0 0 0';
+
+    ConcCurve* table;
+    float len;
+    ConcCurve* cur = __NULL__;
+    float i, rot = 0;
+
+    if (!IsClownMode(CLOWN_CONC)) {
+            table = conc_curve;
+            len = conc_curve.length;
+    } else {
+            table = clown_curve;
+            len = clown_curve.length;
+    }
+
+    for (i = 0; i < len - 1; i++) {
+        cur = &table[i];
+        if (rem <= cur->duration)
+            break;
+        rem -= cur->duration;
+    }
+
+    float amp = Blend(table[i+1].amp_end, cur->amp_end, rem, cur->duration);
+    amp *= pstate_pred.conc_amp;
+    float a = (cur->duration - rem) / cur->duration * cur->cycles * 2 * M_PI;
+    a += cur->offset * 2 * M_PI;
+
+    return [amp * sin(a), amp * sin(a) * cos(a), 0];
+}
+
+static void FO_UpdateConcAim() {
+    makevectors(input_angles);
+    vector o = FO_Conc_Offset();
+
+    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
+
+    cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
+    cuss_state.c_view[0] *= -1;
+}
+
+DEFCVAR_FLOAT(fo_crossy, 0);  // For people who want to use crossy
+DEFCVAR_FLOAT(cl_crossx, 0);
+DEFCVAR_FLOAT(cl_crossy, 0);
+
+static void FO_CussView() {
+    if (cuss_state.cussed) {
+        FO_UpdateConcAim();
+        setproperty(VF_ANGLES, cuss_state.c_view);
+    }
+};
+
+static void FO_CussCrosshair(float width, float height) {
+    const float crosshair_hz = 200;
+    static float next_update;
+    if (time < next_update)
+        return;
+    next_update = time + 1.0/crosshair_hz;
+
+    if (!IsFoConced()) {
+        if (cuss_state.cussed || CVARF(cl_crossx) != 0 ||
+                CVARF(cl_crossy) != CVARF(fo_crossy)) {
+            // Make sure we restore crosshairs
+            localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n", 0, CVARF(fo_crossy)));
+            CVARF(cl_crossx) = 0;
+            CVARF(cl_crossy) = CVARF(fo_crossy);
+            cuss_state.cussed = FALSE;
+        }
+        return;
+    }
+
+    cuss_state.cussed = TRUE;
+    makevectors(input_angles);  // updated by input_frame
+    vector p = project(pmove_org + 8000 * cuss_state.c_forward);
+
+    localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
+                p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
+}
+
+void FO_ApplyCussInput() {
+    if (!IsFoConced())
+        return;
+
+    float modify_forward = TRUE;
+
+    if ((!pmove_onground && (fo_config.fo_concuss & FOC_EASY_AIR)) ||
+        (pmove_onground && (fo_config.fo_concuss & FOC_EASY_GROUND)))
+        modify_forward = input_buttons & BUTTON0;
+
+    if (modify_forward) {
+        input_angles = vectoangles(cuss_state.c_forward);
+        makevectors(input_angles);
+        input_angles_x *= -1;
+    }
+}
+
+void FO_ApplyMaxSpeed();
+
 noref void CSQC_Input_Frame() {
-    local float changed_buttons = input_buttons ^ oldbuttons;
-    oldbuttons = input_buttons;
-
-    local float keydowns = changed_buttons & input_buttons;
-    local float keyups = changed_buttons & ~input_buttons;
-
     Sync_GameState();
 
     // Intercept rocket jump;
@@ -456,7 +657,8 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
-    WPP_UpdateEnable(FALSE);
+    FO_ApplyMaxSpeed();
+    FO_ApplyCussInput();
 }
 
 float(float save, float take, vector inflictororg) CSQC_Parse_Damage = {
@@ -472,6 +674,8 @@ void CSQC_Shutdown() {
 // We can query, but not set via an autocvar.
 DEFCVAR_FLOAT(cl_delay_packets, 0);
 DEFCVAR_FLOAT(fov, 90);
+
+void WP_UpdatePings();
 
 float last_servercommandframe;
 void _Sync_ServerCommandFrame() {
@@ -499,7 +703,12 @@ void _Sync_ServerCommandFrame() {
     else
         is_alive = 1;
 
-    UpdateMinPing();
+    // Use an undocumented ezquake compat feature to figure out whether we
+    // have focus or not, skip updates in this case due to lowered network fps.
+    float is_unfocused = getplayerkeyfloat(player_localnum, "chat") & 2;
+    if (!is_unfocused)
+        WP_UpdatePings();
+
     CsGrenTimer::UpdateSoundStack();
 }
 
@@ -599,5 +808,9 @@ void ClientSettings_Check() {
         printf("RECOMMEND: Setting `fo_grentimer 2` for ping correction.\n");
     if (cvar("fo_hud_cache") != 1)
         printf("ERROR: Please set `fo_hud_cache 1` to improve fps.\n");
+    if (cvar("fo_predict_weapons") != 1)
+        printf("WARNING: client-side weapon prediction disabled [fo_predict_weapons 0]\n");
+    if (cvar("fo_predict_projectiles") != 1)
+        printf("WARNING: client-side projectile prediction disabled [fo_predict_projectiles 0]\n");
     printf("Finished checking settings...\n");
 }

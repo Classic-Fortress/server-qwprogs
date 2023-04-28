@@ -37,16 +37,15 @@ var struct {
     float clown_flags;
     float clown_grav;
 
+    float old_ng_rof;
+
     float predict_flags;
     float tfx_flags;
 
-    float wp_global_enable;
     float wp_global_disable;
-    float pp_global_enable;
-    float pp_global_disable;
-    float wpp_global_enable;
-    float wpp_global_disable;
     float gren_beta_disable;
+
+    float fo_concuss;
 } fo_config;
 
 enumflags {
@@ -124,10 +123,33 @@ inline float PredictEnabled(float flag) {
 const float PREDICT_FLAGS_DEFAULT = 0;
 
 enumflags {
+    FOC_ON_DEF,  // apply foc_defaults
+    FOC_ON_NODEF,
+    FOC_AFF_MED,
+    FOC_EASY_AIR,
+    FOC_EASY_GROUND,
+    FOC_DISTANCE,
+    FOC_RED_MED,
+};
+
+const float foc_defaults = FOC_AFF_MED | FOC_EASY_AIR;
+
+string FO_CONC[] = {
+    "on (w/ defaults)",
+    "on (no defaults)",
+    "affects medic",
+    "easy air control",
+    "easy ground control",
+    "distance based",
+    "reduce medic effect",
+};
+
+enumflags {
     CLOWN_FAST_PROJECTILES,
     CLOWN_RUBBERGREN,
     CLOWN_PROJ_GRAVITY,
     CLOWN_LETHAL_TRANQ,
+    CLOWN_CONC,
     CLOWN_STICKY_GRENS,
     CLOWN_STICKY_PIPES,
     CLOWN_SPAM_GRENADES,
@@ -138,6 +160,7 @@ string CLOWN_DESC[] = {
     "rubber grenades",
     "projectile gravity",
     "elephant tranq",
+    "perma conc",
     "sticky grenades",
     "sticky pipes",
     "no grenade prime-time",
@@ -193,7 +216,7 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 #define MSG_TFX_GRENTIMER   25
 #define MSG_QUAD_ROUND_BEGIN   26
 #define MSG_LOGIN           27
-#define MSG_HITFLAG	    	28
+#define MSG_HITFLAG         28
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
 #define FLAGINFO_DROPPED    3

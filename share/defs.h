@@ -248,6 +248,7 @@ enumflags {
     TFSTATE_GRENTHROWING,  // is throwing a grenade
     TFSTATE_AIMING,        // is using the laser sight or spinning
     TFSTATE_CANT_MOVE,
+    TFSTATE_CONC,
     TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)

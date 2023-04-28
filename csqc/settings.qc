@@ -2,6 +2,7 @@ DEFCVAR_FLOAT(fo_grentimer, 2);  // Sound + Ping adjust
 DEFCVAR_STRING(fo_grentimersound, "grentimer.wav");
 DEFCVAR_FLOAT(fo_grentimervolume, 1);
 DEFCVAR_FLOAT(fo_oldscoreboard, 0);
+DEFCVAR_FLOAT(fo_default_weapon, 0);
 
 DEFCVAR_FLOAT(fo_hitaudio_enabled, 1);
 DEFCVAR_FLOAT(fo_hitaudio_hurtself, 1);
