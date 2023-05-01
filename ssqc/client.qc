@@ -526,7 +526,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
