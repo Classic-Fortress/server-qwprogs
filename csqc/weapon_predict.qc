@@ -899,7 +899,15 @@ string WP_GetClip() {
                                                pstate_pred.reload_finished);
 
     float clip = capacity - fired - still_loading;
-    return sprintf("%d/%d", clip, wi->clip_size);
+    float rem = WP_GetAmmo(wi->ammo_type);
+
+    // It's possible for the amount in clip to exceed remaining ammo (this
+    // occurs because we load before we drop for example).  Render a clipped
+    // clip when this occurs, with a visual indicator.
+    if (clip > rem)
+        return sprintf("*%d*/%d", rem, wi->clip_size);
+    else
+        return sprintf("%d/%d", clip, wi->clip_size);
 }
 
 float WP_CanReload(Slot slot, string* msg = __NULL__) {

@@ -8,9 +8,12 @@ FO_Hud_Panel* getHudPanel(PanelID);
 void FO_Hud_HidePanel(PanelID id);
 void FO_Hud_ShowPanel(PanelID id);
 
+DEFCVAR_FLOAT(fo_hud_noclipicon, 0);
+
 void(PanelID ignored, string text) drawClipSize = {
+    string icon = CVARF(fo_hud_noclipicon) ? "" : ICON_CLIPSIZE;
     if (is_alive || fo_hud_editor)
-        Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, ICON_CLIPSIZE, 1);
+        Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, icon, 1);
 };
 
 void(PanelID ignored, string text) drawIdentify = {
