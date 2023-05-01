@@ -469,6 +469,9 @@ void (entity pe_player, float f_type) CF_Identify = {
 };
 
 void () TeamFortress_ReloadNext = {
+    if (self.playerclass < 1 || self.playerclass > 9)
+        return;
+
     Slot slot = self.current_slot;
 
     do {
