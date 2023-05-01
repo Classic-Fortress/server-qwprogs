@@ -178,28 +178,32 @@ void Hud_DrawStringLMP(vector pos, string value, float size)
             continue;
         }
 
-        j++;
         if (lmp != "")
             HRC_drawpic(pos + [j * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
+        j++;
     }
 }
 
 void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float threshold)
 {
-    float len, i, intval;
+    float len, i, j, intval, use_red = FALSE;
     string s, lmp;
     if (!size) size = 24;
     vector vsize = [size, size, 0];
     s = value;
     intval = stof(value);
     len = strlen(s);
-    i = 0;
 
-    while(i<len) {
-        lmp = lmp_lookup(str2chr(s,i), intval < threshold);
+    for (i = 0, j = 0; i < len; i++) {
+        string lmp = lmp_lookup(str2chr(s,i), use_red || intval < threshold);
+        if (lmp == "use_red") {
+            use_red = !use_red;
+            continue;
+        }
+
         if (lmp != "")
             HRC_drawpic(pos + [i * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
-        i+=1;
+        j++;
     }
 }
 
