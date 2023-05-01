@@ -113,6 +113,26 @@ float(PanelID id, vector pos, vector size, float alpha, float enabled) hud_panel
     return sui_is_clicked(id);
 };
 
+static string lmp_lookup(float c, float use_red) {
+    string lmp = "";
+    switch (c) {
+        case ' ': return "";
+        case '*': return "use_red";  // Caller must handle
+        case '-': lmp = "num_minus"; break;
+        case '/': lmp = "num_slash"; break;
+        case ':': lmp = "num_colon"; break;
+        default: {
+                 if (c >= '0' && c <= '9')
+                     lmp = sprintf("num_%g", c-'0');
+                 else
+                     return "sb_quad";  // Unrecognized.
+        }
+    }
+    if (use_red)
+        lmp = strcat("a", lmp);
+    return lmp;
+}
+
 // this draws backwards, haven't bothered to change as we don't use it
 void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
 {
@@ -143,39 +163,31 @@ void Hud_DrawLargeValue(vector pos, float value, float threshhold, float size)
 
 void Hud_DrawStringLMP(vector pos, string value, float size)
 {
-    float c;
-    float len, i;
+    float len, i, j;
     string s;
     if (!size) size = 24;
     vector vsize = [size, size, 0];
     s = value;
     len = strlen(s);
-    i = 0;
+    float use_red = FALSE;
 
-    while(i<len) {
-        c = str2chr(s, i);
-        if (c == 47) // "/"
-        {
-            // because i'm dodgy
-            HRC_drawpic(pos + [i * size, 0, 0], "NUM_SLASH", vsize, '1 1 1', 1, 0);
+    for (i = 0, j = 0; i < len; i++) {
+        string lmp = lmp_lookup(str2chr(s,i), use_red);
+        if (lmp == "use_red") {
+            use_red = !use_red;
+            continue;
         }
-        else if (c == 37) // "%"
-        {
-            HRC_drawpic(pos + [i * size, 0, 0], "num_percent", vsize, '1 1 1', 1, 0);
-        }
-        else
-        {
-            HRC_drawpic(pos + [i * size, 0, 0], sprintf("num_%g", c-'0'), vsize, '1 1 1', 1, 0);
-        }
-        i+=1;
+
+        j++;
+        if (lmp != "")
+            HRC_drawpic(pos + [j * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
     }
 }
 
 void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float threshold)
 {
-    float c;
     float len, i, intval;
-    string s, lmpname;
+    string s, lmp;
     if (!size) size = 24;
     vector vsize = [size, size, 0];
     s = value;
@@ -184,39 +196,9 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
     i = 0;
 
     while(i<len) {
-        c = str2chr(s, i);
-        lmpname = "";
-        switch (c) {
-            case 37: // "%"
-            {
-                lmpname = "num_percent";
-                break;
-            }
-            case 45: // "-"
-            {
-                lmpname = "num_minus";
-                break;
-            }
-            case 47: // "/"
-            {
-                lmpname = "num_slash";
-                break;
-            }
-            case 58: // ":"
-            {
-                lmpname = "num_colon";
-                break;
-            }
-            default:
-            {
-                lmpname = sprintf("num_%g", c-'0');
-                break;
-            }
-        }
-        if(intval < threshold) {
-            lmpname = strcat("a", lmpname);
-        }
-        HRC_drawpic(pos + [i * size, 0, 0], lmpname, vsize, '1 1 1', 1, 0);
+        lmp = lmp_lookup(str2chr(s,i), intval < threshold);
+        if (lmp != "")
+            HRC_drawpic(pos + [i * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
         i+=1;
     }
 }

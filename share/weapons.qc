@@ -335,19 +335,6 @@ static FO_WeapModels weapon_models[] = {
 // REQUIRES: Order must match above.
 static string AMMO_to_s[] = {"none", "shells", "nails", "cells", "rockets"};
 
-static float* AMMO_to_p(entity player, AmmoType ammo_type) {
-    switch (ammo_type) {
-        case AMMO_SHELLS: return &player.ammo_shells;
-        case AMMO_CELLS: return &player.ammo_cells;
-        case AMMO_NAILS: return &player.ammo_nails;
-        case AMMO_ROCKETS:  return &player.ammo_rockets;
-        default:
-        case AMMO_NONE:
-                        return __NULL__;
-    }
-    return __NULL__;
-}
-
 Slot WEAP_to_slot(float playerclass, float weapon) {
     for (float i = 0; i < TF_NUM_SLOTS; i++) {
         if (class_weapons[playerclass].slots[i] == weapon)
@@ -466,6 +453,8 @@ struct FO_WeapState {
 };
 
 
+float* W_ammo_to_p(entity player, AmmoType ammo_type);
+
 void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
     FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, slot);
 
@@ -473,7 +462,7 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
     result->slot = slot;
     result->wi = wi;
 
-    result->ammo_remaining = AMMO_to_p(player, wi->ammo_type);
+    result->ammo_remaining = W_ammo_to_p(player, wi->ammo_type);
 
     if (!IsSlotNull(slot))
         result->clip_fired = &player.clip_fired[SlotIndex(slot)];

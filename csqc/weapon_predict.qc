@@ -631,7 +631,7 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
         return FALSE;
 
     int ammo = WP_GetAmmo(wi->ammo_type);
-    return ammo > wi->ammo_per_shot;
+    return ammo >= wi->ammo_per_shot;
 }
 
 void WP_ChangeWeapon(Slot slot) {
@@ -899,7 +899,15 @@ string WP_GetClip() {
                                                pstate_pred.reload_finished);
 
     float clip = capacity - fired - still_loading;
-    return sprintf("%d/%d", clip, wi->clip_size);
+    float rem = WP_GetAmmo(wi->ammo_type);
+
+    // It's possible for the amount in clip to exceed remaining ammo (this
+    // occurs because we load before we drop for example).  Render a clipped
+    // clip when this occurs, with a visual indicator.
+    if (clip > rem)
+        return sprintf("*%d*/%d", rem, wi->clip_size);
+    else
+        return sprintf("%d/%d", clip, wi->clip_size);
 }
 
 float WP_CanReload(Slot slot, string* msg = __NULL__) {
@@ -985,6 +993,14 @@ float WP_ConsumeAmmo(Slot slot) {
 
     WP_ReloadIfNeeded(slot);
 
+    return TRUE;
+}
+
+float W_ConsumeAmmoIfPossible(float ammo_type, float amount) {
+    if (WP_GetAmmo(ammo_type) < amount)
+        return FALSE;
+
+    pstate_pred.ammo_used[ammo_type] += amount;
     return TRUE;
 }
 
@@ -1518,8 +1534,12 @@ void WP_Attack() {
 
     // Start the AC state machine when necessary.
     if (wi->weapon == WEAP_ASSAULT_CANNON &&
-        (pstate_pred.tfstate & TFSTATE_AC_MASK) == 0)
-        pstate_pred.tfstate |= TFSTATE_AC_SPINUP;
+        (pstate_pred.tfstate & TFSTATE_AC_MASK) == 0) {
+        if (W_ConsumeAmmoIfPossible(AMMO_CELLS, PC_HVYWEAP_CELL_FIRE))
+            pstate_pred.tfstate |= TFSTATE_AC_SPINUP;
+        else
+          pstate_pred.client_thinkindex = 0;  // Just kidding, no cells.
+    }
 #if 0
     // If our latency is higher than forward projection, synchronize animation
     // with when it will actually start/finish.  The projectile internally

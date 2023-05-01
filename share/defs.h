@@ -1065,6 +1065,7 @@ enumflags {
 #define PC_HVYWEAP_GRENADE_MAX_1	4
 #define PC_HVYWEAP_GRENADE_MAX_2	1
 #define PC_HVYWEAP_TF_ITEMS		0
+#define PC_HVYWEAP_CELL_FIRE		7
 
 
 // Class Details for PYRO
