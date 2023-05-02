@@ -202,7 +202,7 @@ void Hud_DrawStringLMPThreshold(vector pos, string value, float size, float thre
         }
 
         if (lmp != "")
-            HRC_drawpic(pos + [i * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
+            HRC_drawpic(pos + [j * size, 0, 0], lmp, vsize, '1 1 1', 1, 0);
         j++;
     }
 }
