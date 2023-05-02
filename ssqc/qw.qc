@@ -600,9 +600,6 @@ float old_dispenser;
 float old_hp_armor;
 float max_armor_hwguy;
 
-float project_weapons;
-float project_weapons_max_latency;
-
 float ng_damage;
 float sng_damage;
 float superaxe;
