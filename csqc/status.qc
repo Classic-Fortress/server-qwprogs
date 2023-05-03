@@ -644,7 +644,8 @@ string (float val) AbbreviateNumberToString = {
 
 void (vector position, vector size, string val, vector textcolour, float alpha
     , float flags, string colname) drawShowScoresColumnVal = {
-    val = strpad(strlen(colname) * -1, val);
+    if (strlen(val) < strlen(colname))
+        val = strpad(strlen(colname) * -1, val);
     sui_text(position, size, val, textcolour, 1, 0);
 };
 
