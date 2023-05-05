@@ -2,6 +2,7 @@ void ParseSBAR();
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
 void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag);														 
 float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
+float FoLogin(string token, float print_error);
 
 void() CSQC_Parse_Event = {
     float msgtype = readbyte();
@@ -342,13 +343,8 @@ void() CSQC_Parse_Event = {
             RemoveVoteMap(readstring(), FALSE);
             break;
         case MSG_LOGIN:
-            local float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
-            if (filehandle != -1) {
-                localcmd("setinfo _fo_token ", fgets(filehandle), "\n");
-                localcmd("cmd fo-login-silent\n");
-            } else {
+            if (!FoLogin("", FALSE))
                 print("You are not logged in\n");
-            }
             break;
         case MSG_PAUSE:
             CsGrenTimer::SyncPause();
