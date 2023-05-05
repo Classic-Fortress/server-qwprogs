@@ -10,7 +10,7 @@ void AddGrenTimer(float grentype, float offset);
 void StopGrenTimers();
 float IsValidToUseGrenades();
 void Sync_GameState();
-void FoLogin(string token);
+float FoLogin(string token, float print_error);
 void Perf_Status();
 void FO_Hud_Init();
 float InFluid(vector point);
@@ -238,7 +238,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Slot_Keyup(stof(argv(1)));
             break;
         case "login":
-            FoLogin(argv(1));
+            FoLogin(argv(1), TRUE);
             break;
         case "fo_hud_editor":
             FO_Hud_Editor();
@@ -720,25 +720,35 @@ void Sync_GameState() {
     PM_PredictJump();
 }
 
-void FoLogin(string token) {
-    local float filehandle;
+static string FoLogin_GetToken() {
+    float filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
+    if (filehandle == -1)
+        return "";
 
+    string token = fgets(filehandle);
+    fclose(filehandle);
+    return token;
+}
+
+// Doesn't actually return success, just whether it sent a token.
+float FoLogin(string token, float print_error) {
     if (token != "") {
-        filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
+        float filehandle = fopen(FO_TOKEN_PATH, FILE_WRITE);
         fputs(filehandle, token);
         fclose(filehandle);
     } else {
-        filehandle = fopen(FO_TOKEN_PATH, FILE_READ);
-        if (filehandle == -1) {
-            print("Can't login without valid token\n");
-            return;
-        } else {
-            token = fgets(filehandle);
-        }
+        token = FoLogin_GetToken();
+    }
+
+    if (token == "") {
+       if (print_error)
+            print("Token required: Please sign-up at FortressOne.org and follow the instructions to generate your login token.\n");
+        return FALSE;
     }
 
     localcmd("setinfo _fo_token ", token, "\n");
     localcmd("cmd fo-login-silent\n");
+    return TRUE;
 }
 
 static string to_precision(float f, float p) {
