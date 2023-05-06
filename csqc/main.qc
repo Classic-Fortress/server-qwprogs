@@ -742,7 +742,7 @@ float FoLogin(string token, float print_error) {
 
     if (token == "") {
        if (print_error)
-            print("Token required: Please sign-up at FortressOne.org and follow the instructions to generate your login token.\n");
+            print("Token required: Please sign-up at fortressone.org and follow the instructions to generate your login token.\n");
         return FALSE;
     }
 
