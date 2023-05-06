@@ -736,7 +736,6 @@ float captainmode;
 .float captain;
 
 // fortressone.org API
-float foLoginRequired;
 .string fo_login;
 
 //Player ID

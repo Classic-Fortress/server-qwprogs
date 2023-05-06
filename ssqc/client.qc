@@ -2045,9 +2045,7 @@ void (float all_dimensions) SetDimensions = {
 
 void () PutClientInServer = {
     if (self.fo_login == string_null) {
-        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
-
-        if (foLoginRequired)
+        if (foLoginRequired())
             UpdateClient_Login(self);
     }
 
