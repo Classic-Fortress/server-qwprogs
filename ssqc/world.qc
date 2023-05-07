@@ -340,6 +340,11 @@ void () worldspawn = {
     globalstat(STAT_NOFIRE, EV_FLOAT, "no_fire_mode");
     globalstat(STAT_TEAMNO_ATTACK, EV_FLOAT, "team_no_attack");
 
+    // login required cache
+    local float flr = CF_GetSetting("flr", "fologinrequired", "1");
+    backend_address = CF_GetSettingRaw("ba", "backend_address", "");
+    fo_login_required = (flr && (backend_address != ""));
+
     entity worldspawnent;
     worldspawnent = spawn();
     worldspawnent.think = WorldSpawnPost;

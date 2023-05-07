@@ -367,7 +367,7 @@ void UpdateClient_Login(entity pl) = {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
 
-    if(!foLoginRequired())
+    if(!fo_login_required)
         return;
 
     msg_entity = pl;

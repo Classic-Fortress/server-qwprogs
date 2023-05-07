@@ -169,13 +169,3 @@ void () MapEndSequence = {
 	maprestarttimer.think = EndGameThink;
 	maprestarttimer.nextthink = time + map_restart_time;
 }
-
-float () foLoginRequired = {
-	if (!CF_GetSetting("fologreq", "fologinrequired", "1"))
-		return 0;
-
-	if (CF_GetSettingRaw("ba", "backend_address", "") == "")
-		return 0;
-
-	return 1;
-}
