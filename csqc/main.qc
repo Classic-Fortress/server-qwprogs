@@ -32,10 +32,10 @@ void PushToSlotHistory(float value) {
     slot_history[slot_history_top] = value;
 }
 
-float RemoveFromSlotHistory(float slot) {
+void RemoveFromSlotHistory(float slot) {
     if (slot_history_top == -1) {
         // Stack is empty
-        return -1;
+        return;
     }
 
     for (float i = slot_history_top; i >= 0; i--) {
@@ -214,6 +214,7 @@ void Slot_Keydown(float slot) {
 
 void Slot_Keyup(float slot) {
     RemoveFromSlotHistory(slot);
+
     if (slot_history_top >= 0) { // still holding another +slot bind
         localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
     } else {
