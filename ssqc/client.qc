@@ -757,16 +757,6 @@ void () DecodeLevelParms = {
             loginRequired = 0;
         }
 
-        // I don't actually define these because their values are sometimes needed before this code is called.
-        // Use admin menu to 'end map', DecodeLevelParms() doesn't get called until later. These setting
-        // globals should probably moved earlier.
-
-        // specify API host for backend [""]
-        // backend_address = FO_GetUserSettingString(world, "backend_address", "https://www.fortressone.org/");
-
-        // enforce API login [""]
-        // foLoginRequired = CF_GetSetting("fologinrequired", "1");
-
         // specify demo filehost address e.g. https://fortressone-demos.s3.amazonaws.com/sydney/staging/
         demo_files_address = FO_GetUserSettingString(world, "demo_files_address", "demofileaddy", "");
 
@@ -2051,12 +2041,8 @@ void (float all_dimensions) SetDimensions = {
 };
 
 void () PutClientInServer = {
-    if (self.fo_login == string_null) {
-        foLoginRequired = CF_GetSetting("fologinrequired", "fologreq", "1");
-
-        if (foLoginRequired)
-            UpdateClient_Login(self);
-    }
+    if (fo_login_required && self.fo_login == string_null)
+        UpdateClient_Login(self);
 
     local float oldclass;
     local entity spot;

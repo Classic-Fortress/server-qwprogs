@@ -14,7 +14,6 @@ void (entity player, string login, string secret) performLogin = {
 }
 
 void (entity player) performFoLogin = {
-	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/fo_login", backend_address);
 	local string token = FO_GetUserSettingString(player, "_fo_token", "fo_token", "");
 	uri_get(uri, FO_LOGIN_REQUEST, "application/json", sprintf("{ \"auth_token\": \"%s\" }", token));

@@ -64,7 +64,6 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
@@ -122,7 +121,6 @@ void () PostFOQuadFinalRoundStarted = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
@@ -166,7 +164,6 @@ void (float winner) PostFOQuadFinished = {
 	data = strcat(data, "  }\n");
 	data = strcat(data, "}\n");
 
-	local string backend_address = infokey(world, "backend_address");
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
 	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
 };

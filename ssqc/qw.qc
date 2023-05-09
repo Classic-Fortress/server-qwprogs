@@ -739,7 +739,6 @@ float captainmode;
 .float captain;
 
 // fortressone.org API
-float foLoginRequired;
 .string fo_login;
 
 //Player ID
@@ -797,6 +796,7 @@ string goal_class_names[7] = {
 .float special_cooldown;
 .float airblast_cooldown;
 
-
 // backend
 string match_id;
+string backend_address;
+float fo_login_required;

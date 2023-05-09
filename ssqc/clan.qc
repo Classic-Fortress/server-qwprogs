@@ -1094,7 +1094,7 @@ float () CheckAllPlayersReady = {
 }
 
 void () PlayerReady = {
-    if (self.fo_login == string_null && foLoginRequired) {
+    if (fo_login_required && self.fo_login == string_null) {
         sprint(self, PRINT_HIGH, "You need to log in to ready up. See fortressone.org\n");
         return;
     }
