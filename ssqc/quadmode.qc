@@ -8,9 +8,8 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
-	local float game_filename_extension;
-
-	if (cvar("sv_demoAutoCompress"))) {
+	local string game_filename_extension;
+	if (cvar("sv_demoAutoCompress")) {
 		game_filename_extension = ".mvd.gz";
 	} else {
 		game_filename_extension = ".mvd";
