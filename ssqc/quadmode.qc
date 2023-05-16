@@ -485,7 +485,7 @@ void () QuadRoundBegin = {
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
 
-	if (rounds == 1)
+	if (rounds == 1 && fo_login_required)
 		PostFOQuadFinalRoundStarted();
 
     te = find(world, classname, "player");
@@ -633,7 +633,8 @@ void () StartQuadRound =
 		p = find (world, classname, "player");
 
 		// send result to server
-		PostFOQuadFinished(quad_winner);
+		if (fo_login_required)
+			PostFOQuadFinished(quad_winner);
 
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
@@ -685,7 +686,7 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 
-		if (rounds == 2 && legit_players > 1)
+		if (rounds == 2 && legit_players > 1 && fo_login_required)
 			PostFOQuadStarted();
 
 		if (rounds == 1 /* final round */) {
