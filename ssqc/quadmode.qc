@@ -1,6 +1,15 @@
 void () info_player_teamspawn;
 
 void () PostFOQuadStarted = {
+	if (!fo_login_required)
+		return;
+	
+	if !(TeamFortress_TeamGetNoPlayersExcludingAllTime(1) == TeamFortress_TeamGetNoPlayersExcludingAllTime(2)) {
+		bprint(PRINT_HIGH, "Uneven teams, match can't be recorded\n");
+		fo_login_required = FALSE;
+		return;
+	}
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -76,6 +85,9 @@ void () PostFOQuadStarted = {
 };
 
 void () PostFOQuadFinalRoundStarted = {
+	if (!fo_login_required)
+		return;
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -133,6 +145,9 @@ void () PostFOQuadFinalRoundStarted = {
 };
 
 void (float winner) PostFOQuadFinished = {
+	if (!fo_login_required)
+		return;
+
 	if (!match_id)
 		return;
 
@@ -485,7 +500,7 @@ void () QuadRoundBegin = {
 
 	bprint(2, "QUAD ROUND BEGINS NOW\n");
 
-	if (rounds == 1 && fo_login_required)
+	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
     te = find(world, classname, "player");
@@ -633,8 +648,7 @@ void () StartQuadRound =
 		p = find (world, classname, "player");
 
 		// send result to server
-		if (fo_login_required)
-			PostFOQuadFinished(quad_winner);
+		PostFOQuadFinished(quad_winner);
 
 		while (p != world) {
 			if (p.netname != "" && p.team_no && p.playerclass) {
@@ -686,7 +700,7 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 
-		if (rounds == 2 && legit_players > 1 && fo_login_required)
+		if (rounds == 2 && legit_players > 1)
 			PostFOQuadStarted();
 
 		if (rounds == 1 /* final round */) {
