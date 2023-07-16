@@ -2066,6 +2066,7 @@ void () PutClientInServer = {
     self.saveme_time = 0;
     self.display_tip = 0;
     self.tip_type = 0;
+    self.feign_next_damage = 0;
 
     FO_InstantReloadAllWeapons(self);
 
@@ -2197,7 +2198,7 @@ void () PutClientInServer = {
 
     if ((spot.classname == "info_player_teamspawn") &&
         (!cb_prematch)) {
-        
+
         if (spot.items != 0) {
             te = Finditem(spot.items);
             if (te)
@@ -2222,7 +2223,7 @@ void () PutClientInServer = {
             spot.think = SUB_Remove;
         }
     }
-    
+
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
 
@@ -2236,6 +2237,7 @@ void () PutClientInServer = {
         self.modelindex = modelindex_null;
         self.menu_input = nil;
     }
+
     setsize(self, VEC_HULL_MIN, VEC_HULL_MAX);
     self.view_ofs = '0 0 22';
     self.velocity = '0 0 0';
