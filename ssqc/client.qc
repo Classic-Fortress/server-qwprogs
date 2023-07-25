@@ -2114,6 +2114,8 @@ void () PutClientInServer = {
         TeamFortress_ChangeClass(11);
     }
 
+    int prev_playerclass = self.playerclass;
+
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
             if (self.playerclass != 0) {
@@ -2294,6 +2296,11 @@ void () PutClientInServer = {
         if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
+
+    // Activate medic aura by default when changing to class and off
+    if (self.playerclass == PC_MEDIC && prev_playerclass != PC_MEDIC &&
+        !self.aura_active)
+        CF_Medic_AuraToggle();
 
     UpdateReadyStatus();
 };
