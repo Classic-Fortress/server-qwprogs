@@ -165,6 +165,9 @@ noref void() CSQC_WorldLoaded = {
     print("CSQC World Loaded\n");
     ClientSettings_Check();
     localcmd("menu_restart\n");
+    // Resolve race condition where models packed into map package sometimes do
+    // not resolve correctly.
+    localcmd("flush\n");
 }
 
 void FO_CussView();
