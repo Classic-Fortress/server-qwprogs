@@ -515,6 +515,8 @@ void () TerminateStaleServer = {
             return; //someone is around
     }
 
+    Admin_UpdateServer();
+
     dprint(sprintf("Terminating empty server with more than %d hours uptime\n",
                    STALE_TIME_HOURS));
     localcmd("quit\n");
