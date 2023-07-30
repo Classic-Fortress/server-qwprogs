@@ -2199,6 +2199,7 @@ void () item_tfgoal_touch = {
         newmis.movetype = MOVETYPE_FOLLOW;
         newmis.aiment = other;
         newmis.view_ofs = newmis.origin - other.origin;
+        newmis.nodrawtoclient = other;
     }
 };
 
