@@ -154,7 +154,7 @@ static inline float is_attacking() { return input_buttons & BUTTON0; }
 static inline float is_intermission() { return intermission; }
 static void SuperDamageSound() {} // TODO
 static inline vector get_velocity() { return pmove_vel; }
-static inline void set_weapon_frame(int f) { self.frame = f; }
+static inline void set_weapon_frame(float f) { pstate_pred.weaponframe = f; }
 static inline void muzzleflash() {}
 float WP_CurrentClipFired();
 static inline float get_clip_fired() { return WP_CurrentClipFired(); }
