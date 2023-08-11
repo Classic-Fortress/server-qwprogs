@@ -644,6 +644,23 @@ void WP_ChangeWeapon(Slot slot) {
     // UpdateViewModel will propagate.
 }
 
+// Alternate between opt1/opt2, activating opt1 if neither is active.
+// Useful for demoman to have red/yellows bound to 1 key.
+void W_ChangeToSlotAlternate(string opt1, string opt2) {
+    float v1 = strlen(opt1) > 0 ? stof(opt1) : 0;
+    float v2 = strlen(opt2) > 0 ? stof(opt2) : v1;
+
+    if ((v1 < 1 || v1 > TF_NUM_SLOTS) || (v2 < 1 || v2 > TF_NUM_SLOTS))
+        return;
+
+    // The OWI/slot mess rears its head again here.  We convert to a slot for
+    // comparison but use the naked input value which will then be converted per
+    // OWI if active.
+    Slot slot = FO_SlotByInput(pstate_pred.playerclass, v1);
+    float imp = IsSameSlot(pstate_pred.current_slot, slot) ? v2 : v1;
+    localcmd(sprintf("impulse %d\n", imp));
+}
+
 Slot WP_BestWeaponSlot() {
     for (float i = 1; i <= TF_NUM_SLOTS; i++) {
         Slot slot = MakeSlot(i);
