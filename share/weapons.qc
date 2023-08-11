@@ -34,7 +34,8 @@ float SlotIndex(Slot slot) {
         printf("ERROR: OOB slot id (%d) found.  Continuing.\n", (float)slot.id);
         return TF_NUM_SLOTS - 1;
     }
-    return slot.id - 1; }
+    return slot.id - 1; 
+}
 
 // Convert a weapon-bit to a linear index.
 static float WEAP_to_index(float weapon) {

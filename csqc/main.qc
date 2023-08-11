@@ -118,6 +118,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
+
+    registercommand("slot_a");
+
     // registercommand("+quick1");
     // registercommand("-quick1");
     // registercommand("+quick2");
@@ -227,6 +230,8 @@ void Slot_Keyup(float slot) {
         localcmd("-attack\n");
     }
 }
+
+void W_ChangeToSlotAlternate(string opt1, string opt2);
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
@@ -476,6 +481,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "vote_removemap":
             RemoveVoteMap(argv(1), TRUE);
+            break;
+        case "slot_a":  // Alternate between passed options
+            W_ChangeToSlotAlternate(argv(1), argv(2));
             break;
     }
 
