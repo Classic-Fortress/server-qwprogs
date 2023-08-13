@@ -12,7 +12,6 @@
 void () SpectatorDisconnect;
 void () SpectatorImpulseCommand;
 void () SpectatorThink;
-void () Quick_Aliases;
 void () Admin_Aliases;
 
 void () SpectatorConnect = {
@@ -28,8 +27,6 @@ void () SpectatorConnect = {
         self.login = infokey(self,"*login");
     if (infokey(self,"*admin"))
         self.is_admin = stof(infokey(self, "*admin"));
-
-    Quick_Aliases();
 
     st = infokey(self, "apw");
     if (st == string_null)
@@ -160,8 +157,6 @@ void () SpectatorThink = {
     if (self.impulse)
         SpectatorImpulseCommand();
 
-    //if (self.motd <= 400)
-    //    TeamFortress_MOTD();
     if (time >= self.StatusRefreshTime) {
         RefreshStatusBar(self);
     }

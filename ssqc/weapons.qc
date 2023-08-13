@@ -88,7 +88,6 @@ void () fadefromwhite;
 void (entity disp) Engineer_UseDispenser;
 void (entity gun) Engineer_UseSentryGun;
 
-void () TeamFortress_MOTD;
 void () TeamFortress_HelpMap;
 void () TeamFortress_NailGrenInfo;
 
@@ -2294,10 +2293,6 @@ void () DeadImpulses = {
             }
         }
         Status_Refresh(self);
-    } else if (self.impulse == TF_ALIAS_CHECK) {
-        sprint(self, PRINT_HIGH, "Aliases checked\n");
-        self.got_aliases = 1;
-        self.impulse = 0;
     }
     if (self.impulse == TF_PLAYER_READY) {
         if (clanbattle == 1) {

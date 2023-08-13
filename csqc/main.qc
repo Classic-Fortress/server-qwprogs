@@ -52,6 +52,23 @@ void RemoveFromSlotHistory(float slot) {
 }
 
 
+static void BindAlias(TFAlias* tfa) {
+    if (tfa->impulse == 0 && tfa->cmd == "")  // Some aliases are !csqc-only
+        return;
+
+    if (tfa->impulse)
+        localcmd(sprintf("alias %s impulse %d\n", tfa->alias, tfa->impulse));
+    else
+        localcmd(strcat("alias ", tfa->alias, " \"", tfa->cmd, "\"\n"));
+}
+
+static void SetupAliases() {
+    for (float i = 0; i < client_aliases.length; i++)
+        BindAlias(&client_aliases[i]);
+
+    print("Aliases set\n");
+}
+
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
@@ -162,11 +179,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_filter = "";
 
     TF_Init();
+
+    ClientSettings_Check();
+    SetupAliases();
+    print("CSQC initialization finished\n");
 };
 
 noref void() CSQC_WorldLoaded = {
-    print("CSQC World Loaded\n");
-    ClientSettings_Check();
     localcmd("menu_restart\n");
     // Resolve race condition where models packed into map package sometimes do
     // not resolve correctly.
