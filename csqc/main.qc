@@ -52,6 +52,28 @@ void RemoveFromSlotHistory(float slot) {
 }
 
 
+static void BindAlias(TFAlias* tfa) {
+    if (tfa->impulse == 0 && tfa->cmd == "")  // Some aliases are !csqc-only
+        return;
+
+    if (tfa->impulse)
+        localcmd(sprintf("alias %s impulse %d\n", tfa->alias, tfa->impulse));
+    else
+        localcmd(strcat("alias ", tfa->alias, " \"", tfa->cmd, "\"\n"));
+}
+
+static void SetupAliases() {
+    float i;
+
+    for (i = 0; i < client_aliases.length; i++)
+        BindAlias(&client_aliases[i]);
+
+    for (i = 0; i < csqc_aliases.length; i++)
+        BindAlias(&csqc_aliases[i]);
+
+    print("Aliases set\n");
+}
+
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_partial_timing, 60, 0.1);
@@ -106,30 +128,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
-    registercommand("+special");
-    registercommand("-special");
-    registercommand("+special2");
-    registercommand("-special2");
-    registercommand("+grenade1");
-    registercommand("-grenade1");
-    registercommand("+grenade2");
-    registercommand("-grenade2");
-    registercommand("+dropflag");
-    registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
 
     registercommand("slot_a");
 
-    // registercommand("+quick1");
-    // registercommand("-quick1");
-    // registercommand("+quick2");
-    // registercommand("-quick2");
-    // registercommand("+quick3");
-    // registercommand("-quick3");
-    // registercommand("+quick4");
-    // registercommand("-quick4");
-    registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
     registercommand("fo_settings_check");
@@ -162,11 +165,13 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_filter = "";
 
     TF_Init();
+
+    ClientSettings_Check();
+    SetupAliases();
+    print("CSQC initialization finished\n");
 };
 
 noref void() CSQC_WorldLoaded = {
-    print("CSQC World Loaded\n");
-    ClientSettings_Check();
     localcmd("menu_restart\n");
     // Resolve race condition where models packed into map package sometimes do
     // not resolve correctly.
@@ -387,9 +392,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 FO_Show_Scores(FALSE);
             }
             break;
-        case "tracktarget":
-            localcmd("cmd tracktarget\n");
-            break;
         case "+aux_jump":
             jump_counter++;
             localcmd("+jump\n");
@@ -406,60 +408,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
 
             break;
-        case "+special":
-            localcmd("+button3\n");
-            break;
-        case "-special":
-            localcmd("-button3\n");
-            break;
-        case "+special2":
-            localcmd("+button4\n");
-            break;
-        case "-special2":
-            localcmd("-button4\n");
-            break;
-        case "+grenade1":
-            localcmd("+button5\n");
-            break;
-        case "-grenade1":
-            localcmd("-button5\n");
-            break;
-        case "+grenade2":
-            localcmd("+button6\n");
-            break;
-        case "-grenade2":
-            localcmd("-button6\n");
-            break;
-        case "+dropflag":
-            localcmd("+button7\n");
-            break;
-        case "-dropflag":
-            localcmd("-button7\n");
-            break;
-            // case "+quick1":
-            //     localcmd("+button8\n");
-            //     break;
-            // case "-quick1":
-            //     localcmd("-button8\n");
-            //     break;
-            // case "+quick2":
-            //     localcmd("+button9\n");
-            //     break;
-            // case "-quick2":
-            //     localcmd("-button9\n");
-            //     break;
-            // case "+quick3":
-            //     localcmd("+button10\n");
-            //     break;
-            // case "-quick3":
-            //     localcmd("-button10\n");
-            //     break;
-            // case "+quick4":
-            //     localcmd("+button11\n");
-            //     break;
-            // case "-quick4":
-            //     localcmd("-button11\n");
-            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");

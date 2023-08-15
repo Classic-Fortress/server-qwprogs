@@ -2944,6 +2944,8 @@ void FO_HandleTFStateUpdate() {
     self.last_tfstate = self.tfstate;
 }
 
+void TeamFortress_MOTD();
+
 void () PlayerPostThink = {
     FO_CheckClientThink();
     UpdateScoreboardInfo(self);
@@ -3007,7 +3009,7 @@ void () PlayerPostThink = {
         FO_ReloadFrame();
         ButtonFrame();
         W_WeaponFrame();
-        if (self.motd <= 400) {
+        if (self.motd >= 0) {
             TeamFortress_MOTD();
         } else {
             if (self.cheat_check == 0) {
@@ -3051,7 +3053,6 @@ void () ClientConnect = {
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
-    self.got_aliases = 0;
 
     if (self.netname == string_null)
         KickCheater(self);
