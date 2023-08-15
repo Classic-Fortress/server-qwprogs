@@ -63,8 +63,13 @@ static void BindAlias(TFAlias* tfa) {
 }
 
 static void SetupAliases() {
-    for (float i = 0; i < client_aliases.length; i++)
+    float i;
+
+    for (i = 0; i < client_aliases.length; i++)
         BindAlias(&client_aliases[i]);
+
+    for (i = 0; i < csqc_aliases.length; i++)
+        BindAlias(&csqc_aliases[i]);
 
     print("Aliases set\n");
 }
@@ -123,30 +128,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
-    registercommand("+special");
-    registercommand("-special");
-    registercommand("+special2");
-    registercommand("-special2");
-    registercommand("+grenade1");
-    registercommand("-grenade1");
-    registercommand("+grenade2");
-    registercommand("-grenade2");
-    registercommand("+dropflag");
-    registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
 
     registercommand("slot_a");
 
-    // registercommand("+quick1");
-    // registercommand("-quick1");
-    // registercommand("+quick2");
-    // registercommand("-quick2");
-    // registercommand("+quick3");
-    // registercommand("-quick3");
-    // registercommand("+quick4");
-    // registercommand("-quick4");
-    registercommand("tracktarget");
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
     registercommand("fo_settings_check");
@@ -406,9 +392,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 FO_Show_Scores(FALSE);
             }
             break;
-        case "tracktarget":
-            localcmd("cmd tracktarget\n");
-            break;
         case "+aux_jump":
             jump_counter++;
             localcmd("+jump\n");
@@ -425,60 +408,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
 
             break;
-        case "+special":
-            localcmd("+button3\n");
-            break;
-        case "-special":
-            localcmd("-button3\n");
-            break;
-        case "+special2":
-            localcmd("+button4\n");
-            break;
-        case "-special2":
-            localcmd("-button4\n");
-            break;
-        case "+grenade1":
-            localcmd("+button5\n");
-            break;
-        case "-grenade1":
-            localcmd("-button5\n");
-            break;
-        case "+grenade2":
-            localcmd("+button6\n");
-            break;
-        case "-grenade2":
-            localcmd("-button6\n");
-            break;
-        case "+dropflag":
-            localcmd("+button7\n");
-            break;
-        case "-dropflag":
-            localcmd("-button7\n");
-            break;
-            // case "+quick1":
-            //     localcmd("+button8\n");
-            //     break;
-            // case "-quick1":
-            //     localcmd("-button8\n");
-            //     break;
-            // case "+quick2":
-            //     localcmd("+button9\n");
-            //     break;
-            // case "-quick2":
-            //     localcmd("-button9\n");
-            //     break;
-            // case "+quick3":
-            //     localcmd("+button10\n");
-            //     break;
-            // case "-quick3":
-            //     localcmd("-button10\n");
-            //     break;
-            // case "+quick4":
-            //     localcmd("+button11\n");
-            //     break;
-            // case "-quick4":
-            //     localcmd("-button11\n");
-            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");

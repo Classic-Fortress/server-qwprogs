@@ -1690,6 +1690,18 @@ TFAlias client_aliases[] = {
     {"fo_settings_status",      0,  "cmd fo_settings_status"},
     {"placepracspawn",          TF_PRACSPAWN_PLACE},
     {"removepracspawn",         TF_PRACSPAWN_REMOVE},
-    {"tracktarget",             0, "", 0, "cmd track target"},
+    {"tracktarget",             0, "cmd tracktarget", 0, "cmd track target"},
 };
 
+TFAlias csqc_aliases[] = {
+    {"+special",                0, "+button3"},
+    {"-special",                0, "-button3"},
+    {"+special2",               0, "+button4"},
+    {"-special2",               0, "-button4"},
+    {"+grenade1",               0, "+button5"},
+    {"-grenade1",               0, "-button5"},
+    {"+grenade2",               0, "+button6"},
+    {"-grenade2",               0, "-button6"},
+    {"+dropflag",               0, "+button7"},
+    {"-dropflag",               0, "-button7"},
+};
