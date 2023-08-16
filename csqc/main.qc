@@ -769,7 +769,7 @@ void Perf_Status() {
 }
 
 void ClientSettings_Check() {
-    localcmd("cl_movespeedkey 1");
+    localcmd("cl_movespeedkey 1\n");
     if (cvar("worker_count") == 0)
         printf("ERROR: Please set `worker_count 4` to reduce stuttering!\n");
     if (cvar("r_temporalscenecache") == 0)
