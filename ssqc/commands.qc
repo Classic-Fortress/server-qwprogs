@@ -27,6 +27,11 @@ void () RestartMap = {
 }
 
 void () ForceStartMatch = {
+    if (fo_login_required) {
+        bprint(PRINT_HIGH, "Can't forcestart while logins enabled.\n");
+        return;
+    }
+
     if (clanbattle == 1 && cb_prematch == 1) {
         bprint(PRINT_HIGH, self.netname);
         bprint(PRINT_HIGH, " has forced the match start.\n");

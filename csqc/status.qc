@@ -8,9 +8,12 @@ FO_Hud_Panel* getHudPanel(PanelID);
 void FO_Hud_HidePanel(PanelID id);
 void FO_Hud_ShowPanel(PanelID id);
 
+DEFCVAR_FLOAT(fo_hud_noclipicon, 0);
+
 void(PanelID ignored, string text) drawClipSize = {
+    string icon = CVARF(fo_hud_noclipicon) ? "" : ICON_CLIPSIZE;
     if (is_alive || fo_hud_editor)
-        Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, ICON_CLIPSIZE, 1);
+        Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, icon, 1);
 };
 
 void(PanelID ignored, string text) drawIdentify = {
@@ -618,42 +621,31 @@ void(PanelID panelid, string text) drawReadyPanel = {
     }
 }
 
-float (float val) AbbreviateNumber = {
-    val = val / 1000;
-    val = rint(val);
-    return val;
-};
-
 string (float val) AbbreviateNumberToString = {
-    string abbr = "";
+    val = rint(val);
+    if (val < 10000)
+        return ftos(rint(val));
 
-    int count = 0;
-    while (val >= 1000)
-    {
-        val = AbbreviateNumber(val);
+    float count = 0;
+    while (val >= 1000) {
+        val /= 1000;
         count++;
     }
 
-    switch (count)
-    {
-        case 1:
-            abbr = "k";
-            break;
-        case 2:
-            abbr = "m";
-            break;
-        case 3:
-            abbr = "b";
-            break;
-    }
-    
-    string s = strcat(ftos(val), abbr);
-    return s;
+    // Try to (with max density) use up to 4 characters.
+    const string abbr = "kmb";
+    if (count == 0)
+        return ftos(val);
+    else if (val < 100)
+        return sprintf("%0.1f%c", val, abbr[min(count - 1, 2)]);
+    else
+        return sprintf("%d%c", val, abbr[min(count - 1, 2)]);
 };
 
 void (vector position, vector size, string val, vector textcolour, float alpha
     , float flags, string colname) drawShowScoresColumnVal = {
-    val = strpad(strlen(colname) * -1, val);
+    if (strlen(val) < strlen(colname))
+        val = strpad(strlen(colname) * -1, val);
     sui_text(position, size, val, textcolour, 1, 0);
 };
 

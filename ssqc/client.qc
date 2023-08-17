@@ -526,7 +526,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
@@ -607,12 +607,6 @@ void () DecodeLevelParms = {
 
         // CSQC projectiles
         fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
-
-        // project projectile weapons by player ping
-        project_weapons = CF_GetSetting("pw", "project_weapons", "off");
-
-        // max projectile projection latency (default 100ms)
-        project_weapons_max_latency = CF_GetSetting("pwml", "project_weapons_max_latency", ftos(0.1));
 
         // delay respawning by this many seconds [0]
         Role_None.respawn_delay_time = CF_GetSetting("rd", "respawn_delay", "0");
@@ -992,7 +986,6 @@ void () DecodeLevelParms = {
             detpipe_limit_world = 7;
             medicaura = FALSE;
             medicnocuss = FALSE;
-            project_weapons = FALSE;
             distance_based_cuss_duration = FALSE;
             drop_grenades = FALSE;
             drop_grenpack = FALSE;
@@ -2121,6 +2114,8 @@ void () PutClientInServer = {
         TeamFortress_ChangeClass(11);
     }
 
+    int prev_playerclass = self.playerclass;
+
     if (deathmatch == 3) {
         if(self.nextpc != self.playerclass) {
             if (self.playerclass != 0) {
@@ -2301,6 +2296,11 @@ void () PutClientInServer = {
         if (!(self.tf_items_flags & NIT_SCANNER_ENEMY))
             self.tf_items_flags = self.tf_items_flags | NIT_SCANNER_ENEMY;
     }
+
+    // Activate medic aura by default when changing to class and off
+    if (self.playerclass == PC_MEDIC && prev_playerclass != PC_MEDIC &&
+        !self.aura_active)
+        CF_Medic_AuraToggle();
 
     UpdateReadyStatus();
 };
@@ -2944,6 +2944,8 @@ void FO_HandleTFStateUpdate() {
     self.last_tfstate = self.tfstate;
 }
 
+void TeamFortress_MOTD();
+
 void () PlayerPostThink = {
     FO_CheckClientThink();
     UpdateScoreboardInfo(self);
@@ -3007,7 +3009,7 @@ void () PlayerPostThink = {
         FO_ReloadFrame();
         ButtonFrame();
         W_WeaponFrame();
-        if (self.motd <= 400) {
+        if (self.motd >= 0) {
             TeamFortress_MOTD();
         } else {
             if (self.cheat_check == 0) {
@@ -3051,7 +3053,6 @@ void () ClientConnect = {
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
-    self.got_aliases = 0;
 
     if (self.netname == string_null)
         KickCheater(self);

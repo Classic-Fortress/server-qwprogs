@@ -1,6 +1,15 @@
 void () info_player_teamspawn;
 
 void () PostFOQuadStarted = {
+	if (!fo_login_required)
+		return;
+	
+	if !(TeamFortress_TeamGetNoPlayersExcludingAllTime(1) == TeamFortress_TeamGetNoPlayersExcludingAllTime(2)) {
+		bprint(PRINT_HIGH, "Uneven teams, match can't be recorded\n");
+		fo_login_required = FALSE;
+		return;
+	}
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -76,6 +85,9 @@ void () PostFOQuadStarted = {
 };
 
 void () PostFOQuadFinalRoundStarted = {
+	if (!fo_login_required)
+		return;
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -133,6 +145,9 @@ void () PostFOQuadFinalRoundStarted = {
 };
 
 void (float winner) PostFOQuadFinished = {
+	if (!fo_login_required)
+		return;
+
 	if (!match_id)
 		return;
 

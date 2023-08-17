@@ -88,7 +88,6 @@ void () fadefromwhite;
 void (entity disp) Engineer_UseDispenser;
 void (entity gun) Engineer_UseSentryGun;
 
-void () TeamFortress_MOTD;
 void () TeamFortress_HelpMap;
 void () TeamFortress_NailGrenInfo;
 
@@ -189,6 +188,29 @@ void (float att_delay) Attack_Finished = {
 
     self.attack_finished = self.client_time + att_delay;
 };
+
+float* W_ammo_to_p(entity player, AmmoType ammo_type) {
+    switch (ammo_type) {
+        case AMMO_SHELLS: return &player.ammo_shells;
+        case AMMO_CELLS: return &player.ammo_cells;
+        case AMMO_NAILS: return &player.ammo_nails;
+        case AMMO_ROCKETS:  return &player.ammo_rockets;
+        default:
+        case AMMO_NONE:
+                        return __NULL__;
+    }
+    return __NULL__;
+}
+
+float W_ConsumeAmmoIfPossible(float ammo_type, float amount) {
+    float *ammo = W_ammo_to_p(self, ammo_type);
+
+    if (*ammo < amount)
+        return FALSE;
+    *ammo -= amount;
+    return TRUE;
+}
+
 
 int () W_FireAxe = {
     local vector source;
@@ -1621,6 +1643,8 @@ void () player_asscan_up1;
 void () player_medikit1;
 void () player_medikitb1;
 
+float AssCanTryBeginFire();
+
 void () W_Attack = {
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
@@ -1705,19 +1729,9 @@ void () W_Attack = {
         player_autorifle1();
         W_FireAutoRifle();
     } else if (ws.weapon == WEAP_ASSAULT_CANNON) {
-        if (self.ammo_cells < 7) {
-            if (time >= self.antispam_assault_cannon) {
-                sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
-                self.antispam_assault_cannon = time + 3;
-            }
+        self.immune_to_check = time + 5;
+        if (!AssCanTryBeginFire())
             W_ChangeToBestWeapon();
-        } else {
-            self.ammo_cells -= - 7;
-            self.count = 0;
-            self.immune_to_check = time + 5;
-            self.tfstate |= TFSTATE_AIMING;
-            player_asscan_up1();
-        }
     } else if (ws.weapon == WEAP_FLAMETHROWER) {
         player_flamethrower1();
         W_FireFlame();
@@ -2279,10 +2293,6 @@ void () DeadImpulses = {
             }
         }
         Status_Refresh(self);
-    } else if (self.impulse == TF_ALIAS_CHECK) {
-        sprint(self, PRINT_HIGH, "Aliases checked\n");
-        self.got_aliases = 1;
-        self.impulse = 0;
     }
     if (self.impulse == TF_PLAYER_READY) {
         if (clanbattle == 1) {

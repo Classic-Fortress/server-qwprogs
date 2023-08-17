@@ -98,3 +98,23 @@ void FO_LockToggle () {
     /* this shouldn't be here, I think we just need to allow this impulse while shooting */
     /* worth checking detpipes for this too */
 }
+
+float AssCanTryBeginFire() {
+    if (get_shells() < 1)
+        return FALSE;
+
+    if (FO_CheckForReload())
+        return FALSE;
+
+    if (!W_ConsumeAmmoIfPossible(AMMO_CELLS, PC_HVYWEAP_CELL_FIRE)) {
+        // Not worth optimizing w/ client side.
+        if (time >= self.antispam_assault_cannon) {
+            sprint(self, PRINT_MEDIUM, "Not enough cells to power up the Assault Cannon\n");
+            self.antispam_assault_cannon = time + 3;
+        }
+        return FALSE;
+    }
+
+    player_asscan_up1();
+    return TRUE;
+}

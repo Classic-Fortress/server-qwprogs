@@ -631,7 +631,7 @@ float WP_CheckAmmo(FO_WeapInfo* wi) {
         return FALSE;
 
     int ammo = WP_GetAmmo(wi->ammo_type);
-    return ammo > wi->ammo_per_shot;
+    return ammo >= wi->ammo_per_shot;
 }
 
 void WP_ChangeWeapon(Slot slot) {
@@ -642,6 +642,23 @@ void WP_ChangeWeapon(Slot slot) {
     pstate_pred.current_slot = slot;
     pstate_pred.weaponframe = 0;
     // UpdateViewModel will propagate.
+}
+
+// Alternate between opt1/opt2, activating opt1 if neither is active.
+// Useful for demoman to have red/yellows bound to 1 key.
+void W_ChangeToSlotAlternate(string opt1, string opt2) {
+    float v1 = strlen(opt1) > 0 ? stof(opt1) : 0;
+    float v2 = strlen(opt2) > 0 ? stof(opt2) : v1;
+
+    if ((v1 < 1 || v1 > TF_NUM_SLOTS) || (v2 < 1 || v2 > TF_NUM_SLOTS))
+        return;
+
+    // The OWI/slot mess rears its head again here.  We convert to a slot for
+    // comparison but use the naked input value which will then be converted per
+    // OWI if active.
+    Slot slot = FO_SlotByInput(pstate_pred.playerclass, v1);
+    float imp = IsSameSlot(pstate_pred.current_slot, slot) ? v2 : v1;
+    localcmd(sprintf("impulse %d\n", imp));
 }
 
 Slot WP_BestWeaponSlot() {
@@ -899,7 +916,15 @@ string WP_GetClip() {
                                                pstate_pred.reload_finished);
 
     float clip = capacity - fired - still_loading;
-    return sprintf("%d/%d", clip, wi->clip_size);
+    float rem = WP_GetAmmo(wi->ammo_type);
+
+    // It's possible for the amount in clip to exceed remaining ammo (this
+    // occurs because we load before we drop for example).  Render a clipped
+    // clip when this occurs, with a visual indicator.
+    if (clip > rem)
+        return sprintf("*%d*/%d", rem, wi->clip_size);
+    else
+        return sprintf("%d/%d", clip, wi->clip_size);
 }
 
 float WP_CanReload(Slot slot, string* msg = __NULL__) {
@@ -985,6 +1010,14 @@ float WP_ConsumeAmmo(Slot slot) {
 
     WP_ReloadIfNeeded(slot);
 
+    return TRUE;
+}
+
+float W_ConsumeAmmoIfPossible(float ammo_type, float amount) {
+    if (WP_GetAmmo(ammo_type) < amount)
+        return FALSE;
+
+    pstate_pred.ammo_used[ammo_type] += amount;
     return TRUE;
 }
 
@@ -1518,8 +1551,12 @@ void WP_Attack() {
 
     // Start the AC state machine when necessary.
     if (wi->weapon == WEAP_ASSAULT_CANNON &&
-        (pstate_pred.tfstate & TFSTATE_AC_MASK) == 0)
-        pstate_pred.tfstate |= TFSTATE_AC_SPINUP;
+        (pstate_pred.tfstate & TFSTATE_AC_MASK) == 0) {
+        if (W_ConsumeAmmoIfPossible(AMMO_CELLS, PC_HVYWEAP_CELL_FIRE))
+            pstate_pred.tfstate |= TFSTATE_AC_SPINUP;
+        else
+          pstate_pred.client_thinkindex = 0;  // Just kidding, no cells.
+    }
 #if 0
     // If our latency is higher than forward projection, synchronize animation
     // with when it will actually start/finish.  The projectile internally

@@ -32,10 +32,10 @@ void PushToSlotHistory(float value) {
     slot_history[slot_history_top] = value;
 }
 
-float RemoveFromSlotHistory(float slot) {
+void RemoveFromSlotHistory(float slot) {
     if (slot_history_top == -1) {
         // Stack is empty
-        return -1;
+        return;
     }
 
     for (float i = slot_history_top; i >= 0; i--) {
@@ -51,6 +51,28 @@ float RemoveFromSlotHistory(float slot) {
     }
 }
 
+
+static void BindAlias(TFAlias* tfa) {
+    if (tfa->impulse == 0 && tfa->cmd == "")  // Some aliases are !csqc-only
+        return;
+
+    if (tfa->impulse)
+        localcmd(sprintf("alias %s impulse %d\n", tfa->alias, tfa->impulse));
+    else
+        localcmd(strcat("alias ", tfa->alias, " \"", tfa->cmd, "\"\n"));
+}
+
+static void SetupAliases() {
+    float i;
+
+    for (i = 0; i < client_aliases.length; i++)
+        BindAlias(&client_aliases[i]);
+
+    for (i = 0; i < csqc_aliases.length; i++)
+        BindAlias(&csqc_aliases[i]);
+
+    print("Aliases set\n");
+}
 
 DECLARE_PERF_SAMPLER(frame_timing, 60, 0.1);
 DECLARE_PERF_SAMPLER(hud_timing, 60, 0.1);
@@ -106,27 +128,11 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     registercommand("+aux_jump");
     registercommand("-aux_jump");
-    registercommand("+special");
-    registercommand("-special");
-    registercommand("+special2");
-    registercommand("-special2");
-    registercommand("+grenade1");
-    registercommand("-grenade1");
-    registercommand("+grenade2");
-    registercommand("-grenade2");
-    registercommand("+dropflag");
-    registercommand("-dropflag");
     registercommand("+rj");
     registercommand("-rj");
-    // registercommand("+quick1");
-    // registercommand("-quick1");
-    // registercommand("+quick2");
-    // registercommand("-quick2");
-    // registercommand("+quick3");
-    // registercommand("-quick3");
-    // registercommand("+quick4");
-    // registercommand("-quick4");
-    registercommand("tracktarget");
+
+    registercommand("slot_a");
+
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
     registercommand("fo_settings_check");
@@ -159,12 +165,17 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     vote_list_filter = "";
 
     TF_Init();
+
+    ClientSettings_Check();
+    SetupAliases();
+    print("CSQC initialization finished\n");
 };
 
 noref void() CSQC_WorldLoaded = {
-    print("CSQC World Loaded\n");
-    ClientSettings_Check();
     localcmd("menu_restart\n");
+    // Resolve race condition where models packed into map package sometimes do
+    // not resolve correctly.
+    localcmd("flush\n");
 }
 
 void FO_CussView();
@@ -214,6 +225,7 @@ void Slot_Keydown(float slot) {
 
 void Slot_Keyup(float slot) {
     RemoveFromSlotHistory(slot);
+
     if (slot_history_top >= 0) { // still holding another +slot bind
         localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
     } else {
@@ -223,6 +235,8 @@ void Slot_Keyup(float slot) {
         localcmd("-attack\n");
     }
 }
+
+void W_ChangeToSlotAlternate(string opt1, string opt2);
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
@@ -378,9 +392,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
                 FO_Show_Scores(FALSE);
             }
             break;
-        case "tracktarget":
-            localcmd("cmd tracktarget\n");
-            break;
         case "+aux_jump":
             jump_counter++;
             localcmd("+jump\n");
@@ -397,60 +408,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             }
 
             break;
-        case "+special":
-            localcmd("+button3\n");
-            break;
-        case "-special":
-            localcmd("-button3\n");
-            break;
-        case "+special2":
-            localcmd("+button4\n");
-            break;
-        case "-special2":
-            localcmd("-button4\n");
-            break;
-        case "+grenade1":
-            localcmd("+button5\n");
-            break;
-        case "-grenade1":
-            localcmd("-button5\n");
-            break;
-        case "+grenade2":
-            localcmd("+button6\n");
-            break;
-        case "-grenade2":
-            localcmd("-button6\n");
-            break;
-        case "+dropflag":
-            localcmd("+button7\n");
-            break;
-        case "-dropflag":
-            localcmd("-button7\n");
-            break;
-            // case "+quick1":
-            //     localcmd("+button8\n");
-            //     break;
-            // case "-quick1":
-            //     localcmd("-button8\n");
-            //     break;
-            // case "+quick2":
-            //     localcmd("+button9\n");
-            //     break;
-            // case "-quick2":
-            //     localcmd("-button9\n");
-            //     break;
-            // case "+quick3":
-            //     localcmd("+button10\n");
-            //     break;
-            // case "-quick3":
-            //     localcmd("-button10\n");
-            //     break;
-            // case "+quick4":
-            //     localcmd("+button11\n");
-            //     break;
-            // case "-quick4":
-            //     localcmd("-button11\n");
-            //     break;
         case "+rj":
             if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
                 localcmd("+button4\n");
@@ -472,6 +429,9 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             break;
         case "vote_removemap":
             RemoveVoteMap(argv(1), TRUE);
+            break;
+        case "slot_a":  // Alternate between passed options
+            W_ChangeToSlotAlternate(argv(1), argv(2));
             break;
     }
 
@@ -565,20 +525,20 @@ static vector FO_Conc_Offset() {
     }
 
     float amp = Blend(table[i+1].amp_end, cur->amp_end, rem, cur->duration);
-    amp *= pstate_pred.conc_amp;
     float a = (cur->duration - rem) / cur->duration * cur->cycles * 2 * M_PI;
     a += cur->offset * 2 * M_PI;
 
-    return [amp * sin(a), amp * sin(a) * cos(a), 0];
+    return [sin(a), sin(a) * cos(a), amp * pstate_pred.conc_amp];
 }
 
 static void FO_UpdateConcAim() {
     makevectors(input_angles);
     vector o = FO_Conc_Offset();
 
-    cuss_state.c_forward = normalize(v_forward * 200 + o.x * v_right + o.y * v_up);
+    cuss_state.c_forward = normalize(v_forward * 200 + o.x * o.z * v_right + o.y * o.z * v_up);
 
-    cuss_state.c_view = vectoangles(v_forward * 200 + o.x/4 * v_right + o.y/4 * v_up);
+    vector vv = o * min(o.z / 4, 20);
+    cuss_state.c_view = vectoangles(v_forward * 200 + vv.x * v_right + vv.y * v_up);
     cuss_state.c_view[0] *= -1;
 }
 
@@ -809,7 +769,7 @@ void Perf_Status() {
 }
 
 void ClientSettings_Check() {
-    localcmd("cl_movespeedkey 1");
+    localcmd("cl_movespeedkey 1\n");
     if (cvar("worker_count") == 0)
         printf("ERROR: Please set `worker_count 4` to reduce stuttering!\n");
     if (cvar("r_temporalscenecache") == 0)
