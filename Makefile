@@ -1,3 +1,6 @@
+# New variable for compile flags
+CFLAGS := -Ono-cf
+
 ifndef VER
     VER := $(shell ./version.sh --version)
 endif
@@ -7,9 +10,9 @@ ifndef REV
 endif
 
 all:
-	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./ssqc/progs.src
-	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./csqc/csprogs.src
-	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" ./menu/menu.src
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" $(CFLAGS) ./ssqc/progs.src
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" $(CFLAGS) ./csqc/csprogs.src
+	fteqcc64 -DVER=\"$(VER)\" -DREV=\"$(REV)\" $(CFLAGS) ./menu/menu.src
 
 clean:
 	rm -f $(TARGET) qwprogs.lno files.dat progdefs.h
