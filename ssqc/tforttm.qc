@@ -180,37 +180,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
         return 0;
     }
 
-    if (TeamFortress_TeamGetColor(tno) == 0 && !teamplay) {
-        TeamFortress_TeamSetColor(tno);
-        if (TeamFortress_TeamGetColor(tno) == 0) {
-            sprint(pe, PRINT_HIGH,
-                   "You cannot start a new team with your color, since another ");
-            sprint(pe, PRINT_HIGH,
-                   "already using that color. Change your pants color, then try again.\n");
-            return (0);
-        }
-        bprint(PRINT_HIGH, pe.netname, " has started the ");
-        bprint(PRINT_HIGH, team, "\n");
-        pe.immune_to_check = time + 10;
-        if ((toggleflags & TFLAG_TEAMFRAGS) ||
-            (toggleflags & TFLAG_FULLTEAMSCORE)) {
-            pe.frags = TeamFortress_TeamGetScore(tno);
-        }
-        stuffcmd(pe, "color ");
-        tc = TeamFortress_TeamGetColor(tno) - 1;
-        st = ftos(tc);
-        stuffcmd(pe, st);
-        stuffcmd(pe, "\n");
-        pe.team_no = tno;
-        pe.lives = TeamFortress_TeamGetLives(tno);
-        SetTeamName(pe);
-        if (pe.playerclass == 0) {
-            if (TeamFortress_TeamIsCivilian(pe.team_no)) {
-                TeamFortress_ChangeClass(11);
-            }
-        }
-        return (1);
-    }
     if (!pe.deadflag) {
         if (pe.health == pe.max_health && (pe.spawn_time + 10) > time && CloseToSpawnPoint() && pe.suicide_time <= time) {
             pe.has_changedteam = 1;
@@ -290,6 +259,27 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 
     forceinfokey(pe, "team_no", ftos(tno));
     UpdateReadyStatus();
+
+    if (FO_GetUserSetting(pe, "team_color_crosshair", "tcc", "off")) {
+        string team_color = "0xffffff";
+
+        switch (tno) {
+            case 1:
+                team_color = "0x0066ff";
+                break;
+            case 2:
+                team_color = "0xff0000";
+                break;
+            case 3:
+                team_color = "0xffff00";
+                break;
+            case 4:
+                team_color = "0x00ff00";
+                break;
+        }
+
+        stuffcmd(pe, "crosshaircolor ", team_color, "\n");
+    }
 
     return (1);
 };
