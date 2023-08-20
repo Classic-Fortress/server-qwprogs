@@ -4,10 +4,10 @@ FortressOne Server
 New commands
 ------------
 
-* `setinfo reloadvolume 0` volume for reloading sounds
-* `cmd updateserver` tell server to pull latest progs and maps
-* `cmd updateserver` tell server to pull latest progs and maps
-* `cmd updateserver` tell server to pull latest progs and maps
+* `setinfo reloadvolume 0` 0 - 1 volume for reloading sounds
+* `setinfo reloadalpha 0` enable visible view weapon while reloading
+* `setinfo reloadalphaready 1` view weapon alpha when not reloading
+* `setinfo reloadalphareloading 0.3` view weapon alpha when reloading
 * `cmd updateserver` tell server to pull latest progs and maps
 * `+slot n` bind. fires nth weapon
 * `fo_default_weapon 0` default weapon when using `+slot` binds
