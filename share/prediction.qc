@@ -782,8 +782,6 @@ void FO_CustomPhysics() {
     } while (1);
 }
 
-void FO_Sound(entity e, float chan, string samp, float vol, float atten);
-
 void Pred_Sound(SoundIndex snd, float vol = 1) {
     if (snd == SND_NONE)
         return;

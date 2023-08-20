@@ -497,6 +497,8 @@ void (float att_delay) Attack_Finished;
 void W_UpdateCurrentWeapon(entity pl);
 void sprint_pred(entity client, float msglevel, string s);
 
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+
 void FO_ReloadFrame() {
     if (self.tfstate & TFSTATE_RELOADING == 0)
         return;
@@ -504,11 +506,13 @@ void FO_ReloadFrame() {
     FO_WeapState ws;
     FO_FillWeapState(self, self.current_slot, &ws);
     FO_WeapInfo* wi = ws.wi;
+    local float reloadvolume = FO_GetUserSetting(self, "reloadvolume", "rv", "0");
 
-    if (self.client_time >= self.reload_finished) {
+    if (self.reload_finished && (self.client_time >= self.reload_finished)) {
         self.tfstate &= ~TFSTATE_RELOADING;
         W_UpdateCurrentWeapon(self);
         self.last_still_loading = 0;
+        FO_Sound(self, CHAN_WEAPON, "weapons/pkup.wav", reloadvolume, ATTN_NORM);
         Status_Refresh(self);
         sprint_pred(self, PRINT_HIGH, "Finished reloading\n");
 
@@ -522,6 +526,7 @@ void FO_ReloadFrame() {
                                                      self.reload_finished);
     if (self.last_still_loading != still_loading) {
         self.last_still_loading = still_loading;
+        FO_Sound(self, CHAN_WEAPON, "weapons/pkup.wav", reloadvolume, ATTN_NORM);
         Status_Refresh(self);
     }
 }
@@ -643,7 +648,6 @@ Slot FO_ImpulseToSlot(float playerclass, float impulse) {
 #ifdef SSQC
 float IsUsingOldImpulses();
 
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
 static float IsPyroSlotSwapped() {
     return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }
