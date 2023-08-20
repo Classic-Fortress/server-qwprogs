@@ -5,6 +5,10 @@ New commands
 ------------
 
 * `team_color_crosshair` change crosshair to team colour
+* `setinfo reloadvolume 0` volume for reloading sounds
+* `cmd updateserver` tell server to pull latest progs and maps
+* `cmd updateserver` tell server to pull latest progs and maps
+* `cmd updateserver` tell server to pull latest progs and maps
 * `cmd updateserver` tell server to pull latest progs and maps
 * `+slot n` bind. fires nth weapon
 * `fo_default_weapon 0` default weapon when using `+slot` binds

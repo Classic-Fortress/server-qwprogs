@@ -1569,10 +1569,23 @@ void W_UpdateWeaponModel(entity pl) {
     FO_FillWeapState(pl, pl.current_slot, &ws);
     FO_WeapInfo* wi = ws.wi;
 
-    if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0)
+    local float ra = FO_GetUserSetting(pl, "reloadalpha", "ra", "0");
+
+    if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0) {
         pl.weaponmodel = (wi->models)->model;
-    else
-        pl.weaponmodel = "";
+
+        if (ra) {
+            local float ra_ready = FO_GetUserSetting(pl, "reloadalphaready", "rard", "1");
+            stuffcmd(pl, sprintf("r_drawviewmodel %f\n", ra_ready));
+        }
+    } else {
+        if (ra) {
+            local float ra_reloading = FO_GetUserSetting(pl, "reloadalphareloading", "rarl", "0.3");
+            stuffcmd(pl, sprintf("r_drawviewmodel %f\n", ra_reloading));
+        } else {
+            pl.weaponmodel = "";
+        }
+    }
 }
 
 void (entity pl) W_UpdateCurrentWeapon = {

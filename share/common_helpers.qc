@@ -23,3 +23,5 @@ string TeamToString(float num)
     if (num == 4) return "Green";
     return " ";
 }
+
+void FO_Sound(entity e, float chan, string samp, float vol, float atten);
