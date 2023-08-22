@@ -12,6 +12,12 @@ DEFCVAR_FLOAT(wpp_adv_selfp_ms, 0);
 DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
 DEFCVAR_FLOAT(wpp_setspeed, 1);
 
+DEFCVAR_FLOAT(r_drawviewmodel, 1);
+DEFCVAR_FLOAT(reloadalpha, 0);
+DEFCVAR_FLOAT(reloadalphaready, 1);
+DEFCVAR_FLOAT(reloadalphareloading, 0.3);
+DEFCVAR_FLOAT(reloadvolume, 1);
+
 struct pengine_t {
     float pp_enabled;
     float wp_enabled;
@@ -30,6 +36,7 @@ struct pengine_t {
 
 static float inst_ping_ms;
 static float inst_ping_t;
+static float last_still_loading;
 
 inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
@@ -543,16 +550,16 @@ inline FO_WeapInfo* WP_CurrentWeapon() {
     return SlotWI(CurrentSlot());
 }
 
-void RawPred_Sound(SoundIndex snd, float vol = 1) {
+void RawPred_Sound(SoundIndex snd, float channel, float vol = 1) {
     if (snd == SND_NONE || pstate_pred.tfstate & TFSTATE_FLASHED)
         return;
 
-    localsound(Snd_Get(snd)->sound, CHAN_WEAPON, vol);
+    localsound(Snd_Get(snd)->sound, channel, vol);
 }
 
 void Pred_Sound(SoundIndex snd, float vol = 1) {
     if (IsEffectFrame())
-        RawPred_Sound(snd, vol);
+        RawPred_Sound(snd, CHAN_WEAPON, vol);
 }
 
 void PredProj_Sound(int proj_type, float vol = 1) {
@@ -826,6 +833,7 @@ void WP_Impulse() {
     HandleButtonThrowgren(1, BUTTON5);
     HandleButtonThrowgren(2, BUTTON6);
 
+    // TODO: is this blocking a /ready while reloading?
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
 
@@ -914,6 +922,14 @@ string WP_GetClip() {
     if (WP_IsReloading())
         still_loading = FO_NumClipStillLoading(wi, pstate_pred.client_time,
                                                pstate_pred.reload_finished);
+
+    if (last_still_loading != still_loading) {
+        last_still_loading = still_loading;
+
+        if (still_loading) {
+            RawPred_Sound(SND_RELOAD, CHAN_AUTO, CVARF(reloadvolume));
+        }
+    }
 
     float clip = capacity - fired - still_loading;
     float rem = WP_GetAmmo(wi->ammo_type);
@@ -1672,7 +1688,7 @@ void InitProjectileEnt(float sendflags) {
         // on effect frames here as this isn't predicted; stronger: if we missed
         // the sound we probably missed an effect frame!
         if (!has_predicted)
-            RawPred_Sound(FPP_Get(self.fpp.index)->snd);
+            RawPred_Sound(FPP_Get(self.fpp.index)->snd, CHAN_WEAPON);
     }
 
     if (!has_predicted) {
@@ -1682,8 +1698,6 @@ void InitProjectileEnt(float sendflags) {
         self.oldorigin = self.s_origin - trail_ms * self.velocity;
     }
 }
-
-DEFCVAR_FLOAT(r_drawviewmodel, 1);
 
 void WP_UpdateViewModel() {
     entity viewmodel = pengine.viewmodel;
@@ -1700,13 +1714,27 @@ void WP_UpdateViewModel() {
         pengine.view_mask &= ~MASK_VIEWMODEL;
     }
 
-    static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_RELOADING | TFSTATE_FLASHED;
+    static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_FLASHED;
     if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
         viewmodel.modelindex = 0;
         return;
     }
 
-    viewmodel.alpha = CVARF(r_drawviewmodel);
+    if (pstate_pred.tfstate & TFSTATE_RELOADING) {
+        if (CVARF(reloadalpha)) {
+            viewmodel.alpha = CVARF(reloadalphareloading);
+        } else {
+            viewmodel.modelindex = 0;
+        }
+        return;
+    }
+
+    if (CVARF(reloadalpha)) {
+        viewmodel.alpha = CVARF(reloadalphaready);
+    } else {
+        viewmodel.alpha = CVARF(r_drawviewmodel);
+    }
+
     pmodelindex = (wi->models)->modelindex;
     pframe = pstate_pred.weaponframe;
 

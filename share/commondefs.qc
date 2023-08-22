@@ -289,3 +289,9 @@ enumflags {
     HITFLAG_KILLEDUNDERCOVERSPY,
 };
 
+enumflags {
+    CSQC_WEAP_PRED,
+    CSQC_PROJ_PRED,
+    CSQC_SETSPEED,
+    CSQC_SNIPER_SIGHT,
+};
