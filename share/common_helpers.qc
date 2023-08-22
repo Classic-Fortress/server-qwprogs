@@ -25,3 +25,11 @@ string TeamToString(float num)
 }
 
 void FO_Sound(entity e, float chan, string samp, float vol, float atten);
+
+#ifdef SSQC
+
+inline float ClientPred_Enabled(entity client, float pred_flag) {
+    return infokeyf(client, "fo_wpp_status") & pred_flag;
+}
+
+#endif

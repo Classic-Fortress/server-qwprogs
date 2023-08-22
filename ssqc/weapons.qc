@@ -1570,16 +1570,17 @@ void W_UpdateWeaponModel(entity pl) {
     FO_WeapInfo* wi = ws.wi;
 
     local float ra = FO_GetUserSetting(pl, "reloadalpha", "ra", "0");
+    local float wp_enabled = ClientPred_Enabled(pl, CSQC_WEAP_PRED);
 
     if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0) {
         pl.weaponmodel = (wi->models)->model;
 
-        if (ra) {
+        if (ra && !wp_enabled) {
             local float ra_ready = FO_GetUserSetting(pl, "reloadalphaready", "rard", "1");
             stuffcmd(pl, sprintf("r_drawviewmodel %f\n", ra_ready));
         }
     } else {
-        if (ra) {
+        if (ra && !wp_enabled) {
             local float ra_reloading = FO_GetUserSetting(pl, "reloadalphareloading", "rarl", "0.3");
             stuffcmd(pl, sprintf("r_drawviewmodel %f\n", ra_reloading));
         } else {
