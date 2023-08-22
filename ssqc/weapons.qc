@@ -1569,7 +1569,7 @@ void W_UpdateWeaponModel(entity pl) {
     FO_FillWeapState(pl, pl.current_slot, &ws);
     FO_WeapInfo* wi = ws.wi;
 
-    local float ra = FO_GetUserSetting(pl, "reloadalpha", "ra", "0");
+    local float ra = FO_GetUserSetting(pl, "reloadalpha", "ra", "off");
     local float wp_enabled = ClientPred_Enabled(pl, CSQC_WEAP_PRED);
 
     if (pl.tfstate & (TFSTATE_RELOADING | TFSTATE_NO_WEAPON) == 0) {
