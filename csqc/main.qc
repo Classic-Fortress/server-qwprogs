@@ -181,6 +181,7 @@ noref void() CSQC_WorldLoaded = {
 void FO_CussView();
 void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
+void UpdateTeamColorCrosshair();
 
 DEFCVAR_FLOAT(fov, 90);
 
@@ -207,6 +208,8 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     renderscene();
 
     FO_CussCrosshair(width, height);
+    UpdateTeamColorCrosshair();
+
     TFxRenderGrenadeTimers();
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
@@ -580,6 +583,31 @@ static void FO_CussCrosshair(float width, float height) {
                 p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
 }
 
+static void UpdateTeamColorCrosshair() {
+    if (!CVARF(team_color_crosshair))
+        return;
+
+    if (crosshair_team_no == team_no)
+        return;
+
+    string crosshair_color = "0xffffff";
+    switch (team_no) {
+        case 1:
+            crosshair_color = "0x0066ff";
+            break;
+        case 2:
+            crosshair_color = "0xff0000";
+            break;
+        case 3:
+            crosshair_color = "0xffff00";
+            break;
+        case 4:
+            crosshair_color = "0x00ff00";
+    }
+    localcmd("crosshaircolor ", crosshair_color, "\n");
+    crosshair_team_no = team_no;
+}
+
 void FO_ApplyCussInput() {
     if (!IsFoConced())
         return;
@@ -657,7 +685,6 @@ void _Sync_ServerCommandFrame() {
     if (is_spectator)
         is_observer = FALSE;
     is_player = (!is_spectator && !is_observer);
-
     if (!is_player || getstatf(STAT_HEALTH) <= 0)
         is_alive = 0;
     else

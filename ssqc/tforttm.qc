@@ -259,28 +259,6 @@ float (entity pe, float tno, float skipclasscheck) TeamFortress_TeamSet_Options 
 
     forceinfokey(pe, "team_no", ftos(tno));
     UpdateReadyStatus();
-
-    if (FO_GetUserSetting(pe, "team_color_crosshair", "tcc", "off")) {
-        string team_color = "0xffffff";
-
-        switch (tno) {
-            case 1:
-                team_color = "0x0066ff";
-                break;
-            case 2:
-                team_color = "0xff0000";
-                break;
-            case 3:
-                team_color = "0xffff00";
-                break;
-            case 4:
-                team_color = "0x00ff00";
-                break;
-        }
-
-        stuffcmd(pe, "crosshaircolor ", team_color, "\n");
-    }
-
     return (1);
 };
 
