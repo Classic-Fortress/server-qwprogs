@@ -208,7 +208,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     renderscene();
 
     FO_CussCrosshair(width, height);
-    UpdateTeamColorCrosshair();
 
     TFxRenderGrenadeTimers();
     RenderHitTexts();
@@ -697,6 +696,7 @@ void _Sync_ServerCommandFrame() {
         WP_UpdatePings();
 
     CsGrenTimer::UpdateSoundStack();
+    UpdateTeamColorCrosshair();
 }
 
 
