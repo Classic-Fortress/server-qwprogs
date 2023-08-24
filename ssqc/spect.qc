@@ -15,9 +15,6 @@ void () SpectatorThink;
 void () Admin_Aliases;
 
 void () SpectatorConnect = {
-    if (FO_GetUserSetting(self, "team_color_crosshair", "tcc", "off"))
-        stuffcmd(self, "crosshaircolor 0xffffff\n");
-
     SetDimensions(TRUE);
 
     local string st;
