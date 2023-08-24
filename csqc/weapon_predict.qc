@@ -16,7 +16,7 @@ DEFCVAR_FLOAT(r_drawviewmodel, 1);
 DEFCVAR_FLOAT(reloadalpha, 0);
 DEFCVAR_FLOAT(reloadalphaready, 1);
 DEFCVAR_FLOAT(reloadalphareloading, 0.3);
-DEFCVAR_FLOAT(reloadvolume, 1);
+DEFCVAR_FLOAT(reloadvolume, 0);
 
 struct pengine_t {
     float pp_enabled;
