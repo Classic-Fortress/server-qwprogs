@@ -2649,6 +2649,8 @@ void () W_WeaponFrame = {
         case TF_SPY_DIE_ON:
         case TF_SPY_DIE_OFF:
         case TF_SPY_SILENT_DIE:
+        case TF_PLAYER_READY:
+        case TF_PLAYER_NOT_READY:
             ImpulseCommands();
             return;
             // allows setting detpack while reloading on toggle, defaults to off
