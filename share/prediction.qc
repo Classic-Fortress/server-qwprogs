@@ -100,7 +100,11 @@ enum SoundIndex:float {
     SND_ASSCAN_FIRE,
     SND_ASSCAN_DOWN,
     SND_ASSCAN_SPIN,
-    SND_RELOAD
+    SND_RELOAD_GREN,
+    SND_RELOAD_ROCKET,
+    SND_RELOAD_SHOTGUN,
+    SND_RELOAD_SUPER_SHOTGUN,
+    SND_RELOAD_ASSAULT_CANNON
 };
 
 struct fo_predsnd {
@@ -125,7 +129,11 @@ static fo_predsnd snd_types[] = {
     { SND_ASSCAN_FIRE, "asscan2.wav" },
     { SND_ASSCAN_DOWN, "asscan3.wav" },
     { SND_ASSCAN_SPIN, "asscan4.wav" },
-    { SND_RELOAD, "pkup.wav" }
+    { SND_RELOAD_GREN, "reload_gren.wav" },
+    { SND_RELOAD_ROCKET, "reload_rocket.wav" },
+    { SND_RELOAD_SHOTGUN, "reload_shotgun.wav" },
+    { SND_RELOAD_SUPER_SHOTGUN, "reload_super_shotgun.wav" },
+    { SND_RELOAD_ASSAULT_CANNON, "reload_assault_cannon.wav" },
 };
 
 enum {

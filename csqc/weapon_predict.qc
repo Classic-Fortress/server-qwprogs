@@ -928,7 +928,25 @@ string WP_GetClip() {
 
         if (still_loading) {
             local float reloadvolume = getplayerkeyfloat(player_localnum, "reloadvolume", 0);
-            RawPred_Sound(SND_RELOAD, CHAN_AUTO, reloadvolume);
+            local float sample;
+            switch (WP_CurrentWeapon()->weapon) {
+                case WEAP_ROCKET_LAUNCHER:
+                    sample = SND_RELOAD_ROCKET;
+                    break;
+                case WEAP_GRENADE_LAUNCHER:
+                case WEAP_PIPE_LAUNCHER:
+                    sample = SND_RELOAD_GREN;
+                    break;
+                case WEAP_SHOTGUN:
+                    sample = SND_RELOAD_SHOTGUN;
+                    break;
+                case WEAP_SUPER_SHOTGUN:
+                    sample = SND_RELOAD_SUPER_SHOTGUN;
+                    break;
+                case WEAP_ASSAULT_CANNON:
+                    sample = SND_RELOAD_ASSAULT_CANNON;
+            }
+            RawPred_Sound(sample, CHAN_AUTO, reloadvolume);
         }
     }
 
