@@ -528,7 +528,26 @@ void FO_ReloadFrame() {
 
         if (!ClientPred_Enabled(self, CSQC_WEAP_PRED)) {
             local float reloadvolume = FO_GetUserSetting(self, "reloadvolume", "rv", "0");
-            FO_Sound(self, CHAN_AUTO, "weapons/pkup.wav", reloadvolume, ATTN_NORM);
+            local string sample;
+
+            switch (FO_CurrentWeapon()) {
+                case WEAP_ROCKET_LAUNCHER:
+                    sample = "weapons/reload_rocket.wav";
+                    break;
+                case WEAP_GRENADE_LAUNCHER:
+                case WEAP_PIPE_LAUNCHER:
+                    sample = "weapons/reload_gren.wav";
+                    break;
+                case WEAP_SHOTGUN:
+                    sample = "weapons/reload_shotgun.wav";
+                    break;
+                case WEAP_SUPER_SHOTGUN:
+                    sample = "weapons/reload_super_shotgun.wav";
+                    break;
+                case WEAP_ASSAULT_CANNON:
+                    sample = "weapons/reload_assault_cannon.wav";
+            }
+            FO_Sound(self, CHAN_AUTO, sample, reloadvolume, ATTN_NORM);
         }
 
         Status_Refresh(self);
