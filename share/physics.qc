@@ -32,6 +32,11 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (other.solid == SOLID_NOT)
         return;
 
+    if (pointcontents(self.origin) == CONTENT_SKY) {
+        dremove_sent(self);
+        return;
+    }
+
     if (e.touch) {
         if (phys_flags & PHYSF_FORWARD_KNOCK)
             e.flags |= FL_FORWARD_KNOCK;

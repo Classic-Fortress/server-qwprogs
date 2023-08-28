@@ -16,11 +16,6 @@ void AssCanBulletTouch()
         return;  // Marked for removal
     self.voided = TRUE;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove(self);
-        return;
-    }
-
     if (other == self.owner)
         return;  // Touching self, do nothing
 
