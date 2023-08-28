@@ -121,8 +121,8 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 	fr.add(menuitemslider_spawn(_("Sensitivity"),		"sensitivity", 			'3 20 1',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("FOV"),			"fov", 				'80 130 5',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("Weapon FOV"),		"r_viewmodel_fov", 		'80 130 5',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Weapon Alpha"),		"reloadalphaready", 		'0 1 0.05',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemslider_spawn(_("Reloading Alpha"),	"reloadalphareloading", '0 1 0.05',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemslider_spawn(_("Weapon Alpha"),		"r_drawviewmodel", 		'0 1 0.05',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemslider_spawn(_("Reloading Alpha"),	"fo_reloadalpha", '0 1 0.05',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("Gamma"),			dp("v_gamma", "gamma"), 	'0.8 1.2 0.05',	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("Contrast"),		dp("v_contrast", "contrast"), 	'0.8 1.2 0.05', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemslider_spawn(_("Brightness"),		dp("v_brightness", "brightness"),'-0.2 0.2 0.05', '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
@@ -193,9 +193,6 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
 
 
 	/* fr.add(menuitemcheck_spawn (_("Simple Bunnyhop"),		"fo_autohop", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8; */
-	fr.add(menuitemslider_spawn(_("Type"),		"crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcolour_spawn(_("Color"), 		"crosshaircolor", 			'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcheck_spawn (_("Use Team Color"),		"team_color_crosshair", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	//fr.add(menuitemcheck_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	/* fr.add(menuitemcombo_spawn (_("Grenade Timer"),		"fo_grentimer", 					'280 8', _( */
 	/* 																	"0	\"None\" " */
