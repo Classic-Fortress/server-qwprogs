@@ -1,6 +1,6 @@
 #pragma target fte_5768
-#pragma optimise no-cf
 #pragma optimise 3
+#pragma optimise no-cf
 #pragma flag enable subscope
 #pragma flag enable iffloat
 #pragma flag enable lo
