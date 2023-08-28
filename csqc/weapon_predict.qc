@@ -13,9 +13,7 @@ DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
 DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
-DEFCVAR_FLOAT(reloadalpha, 0);
-DEFCVAR_FLOAT(reloadalphaready, 1);
-DEFCVAR_FLOAT(reloadalphareloading, 0.3);
+DEFCVAR_FLOAT(fo_reloadalpha, 0);
 /* DEFCVAR_FLOAT(reloadvolume, 0); */
 
 struct pengine_t {
@@ -1740,16 +1738,12 @@ void WP_UpdateViewModel() {
     }
 
     if (pstate_pred.tfstate & TFSTATE_RELOADING) {
-        if (CVARF(reloadalpha)) {
-            viewmodel.alpha = CVARF(reloadalphareloading);
-        } else {
+        float ra = CVARF(fo_reloadalpha);
+        if (ra > 0)
+            viewmodel.alpha = ra;
+        else
             viewmodel.modelindex = 0;
-        }
         return;
-    }
-
-    if (CVARF(reloadalpha)) {
-        viewmodel.alpha = CVARF(reloadalphaready);
     } else {
         viewmodel.alpha = CVARF(r_drawviewmodel);
     }
