@@ -498,29 +498,11 @@ void W_UpdateCurrentWeapon(entity pl);
 void sprint_pred(entity client, float msglevel, string s);
 
 float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+void (entity pl, float weapon) UpdateClientReloadSound;
 
 void FO_ReloadSound() {
-    local float reloadvolume = FO_GetUserSetting(self, "reloadvolume", "rv", "0");
-    local string sample;
-
-    switch (FO_CurrentWeapon()) {
-        case WEAP_ROCKET_LAUNCHER:
-            sample = "weapons/reload_rocket.wav";
-            break;
-        case WEAP_GRENADE_LAUNCHER:
-        case WEAP_PIPE_LAUNCHER:
-            sample = "weapons/reload_gren.wav";
-            break;
-        case WEAP_SHOTGUN:
-            sample = "weapons/reload_shotgun.wav";
-            break;
-        case WEAP_SUPER_SHOTGUN:
-            sample = "weapons/reload_super_shotgun.wav";
-            break;
-        case WEAP_ASSAULT_CANNON:
-            sample = "weapons/reload_assault_cannon.wav";
-    }
-    FO_Sound(self, CHAN_AUTO, sample, reloadvolume, ATTN_NORM);
+    if (!ClientPred_Enabled(self, CSQC_WEAP_PRED))
+        UpdateClientReloadSound(self, FO_CurrentWeapon());
 }
 
 void FO_ReloadFrame() {
@@ -549,10 +531,7 @@ void FO_ReloadFrame() {
 
     if (self.last_still_loading != still_loading) {
         self.last_still_loading = still_loading;
-
-        if (!ClientPred_Enabled(self, CSQC_WEAP_PRED))
-            FO_ReloadSound();
-
+        FO_ReloadSound();
         Status_Refresh(self);
     }
 }
@@ -592,10 +571,9 @@ void FO_ReloadSlot(Slot slot, float force) {
     sprint_pred(self, PRINT_HIGH,
            strcat("Reloading ", FO_GetWeapName(ws->weapon), "...\n"));
 
-    if (!ClientPred_Enabled(self, CSQC_WEAP_PRED))
-        FO_ReloadSound();
-
     Attack_Finished(wi->attack_time);  // Carried.. but not sure it's necessary.
+
+    FO_ReloadSound();
 
     self.tfstate |= TFSTATE_RELOADING;
     Status_Refresh(self);
