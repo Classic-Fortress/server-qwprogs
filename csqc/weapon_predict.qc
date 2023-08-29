@@ -14,7 +14,7 @@ DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
 DEFCVAR_FLOAT(fo_reloadalpha, 0);
-DEFCVAR_FLOAT(reloadvolume, 0);
+DEFCVAR_FLOAT(fo_reloadvolume, 0);
 
 struct pengine_t {
     float pp_enabled;
@@ -592,7 +592,7 @@ static Slot InputToSlot(float input) {
 }
 
 void FO_ReloadSound(float weapon) {
-    local float reloadvolume = CVARF(reloadvolume);
+    local float reloadvolume = CVARF(fo_reloadvolume);
 
     if (reloadvolume ==  0)
         return;
