@@ -4,7 +4,8 @@ FortressOne Server
 New commands
 ------------
 
-* `reloadvolume 0` 0 - 1 volume for reloading sounds
+* `team_color_crosshair` change crosshair to team colour
+* `fo_reloadvolume 0` 0 - 1 volume for reloading sounds
 * `fo_reloadalpha x` alpha of viewmodel when reloading, 0 for invisible
 * `cmd updateserver` tell server to pull latest progs and maps
 * `+slot n` bind. fires nth weapon
