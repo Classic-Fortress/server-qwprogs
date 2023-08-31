@@ -1745,10 +1745,12 @@ void WP_UpdateViewModel() {
 
     if (pstate_pred.tfstate & TFSTATE_RELOADING) {
         float ra = CVARF(fo_reloadalpha);
-        if (ra > 0)
+        if (ra > 0) {
             viewmodel.alpha = ra;
-        else
+        } else {
             viewmodel.modelindex = 0;
+            return;
+        }
     } else {
         viewmodel.alpha = CVARF(r_drawviewmodel);
     }
