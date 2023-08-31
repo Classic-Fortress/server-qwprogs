@@ -857,6 +857,7 @@ DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
 
 float team_no;
+float crosshair_team_no;
 float all_time;
 float is_spectator;
 float player_class;
