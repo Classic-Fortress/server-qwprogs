@@ -3,7 +3,7 @@ DEFCVAR_STRING(fo_grentimersound, "grentimer.wav");
 DEFCVAR_FLOAT(fo_grentimervolume, 1);
 DEFCVAR_FLOAT(fo_oldscoreboard, 0);
 DEFCVAR_FLOAT(fo_default_weapon, 0);
-DEFCVAR_FLOAT(team_color_crosshair, 0);
+DEFCVAR_FLOAT(fo_team_color_crosshair, 0);
 
 DEFCVAR_FLOAT(fo_hitaudio_enabled, 1);
 DEFCVAR_FLOAT(fo_hitaudio_hurtself, 1);

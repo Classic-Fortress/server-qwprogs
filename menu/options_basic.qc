@@ -140,7 +140,7 @@ nonstatic void(mitem_desktop desktop) M_Options_Basic =
     pos += 8;
 	fr.add(menuitemslider_spawn(_("Type"),		        "crosshair", 			'0.0 19 1', 	'280 8'),	fl, [0, pos], [0, 8]); pos += 8;
 	fr.add(menuitemcolour_spawn(_("Color"), 		    "crosshaircolor", 		'280 8'), 	fl, [0, pos], [0, 8]); pos += 8;
-	fr.add(menuitemcheck_spawn (_("Use Team Color"),    "team_color_crosshair", '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
+	fr.add(menuitemcheck_spawn (_("Use Team Color"),    "fo_team_color_crosshair", '280 8'),	fl, [0, pos], [0, 8]); pos += 8;
     pos += 8;
     fr.add(
             spawn(
