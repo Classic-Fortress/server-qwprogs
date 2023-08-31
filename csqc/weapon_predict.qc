@@ -1744,12 +1744,13 @@ void WP_UpdateViewModel() {
     }
 
     if (pstate_pred.tfstate & TFSTATE_RELOADING) {
-        float ra;
-        if (CVARF(fo_reloadalpha))
-            ra = CVARF(fo_reloadalpha);
-        else
-            ra = 0.0001; // 0 is same as 1 for compatability reasons
-        viewmodel.alpha = ra;
+        float ra = CVARF(fo_reloadalpha);
+        if (ra > 0) {
+            viewmodel.alpha = ra;
+        } else {
+            viewmodel.modelindex = 0;
+            return;
+        }
     } else {
         viewmodel.alpha = CVARF(r_drawviewmodel);
     }
