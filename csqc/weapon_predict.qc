@@ -858,7 +858,6 @@ void WP_Impulse() {
     HandleButtonThrowgren(1, BUTTON5);
     HandleButtonThrowgren(2, BUTTON6);
 
-    // TODO: is this blocking a /ready while reloading?
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
 
@@ -1002,7 +1001,7 @@ float WP_ReloadSlot(Slot slot) {
 }
 
 void WP_CheckReloadFinished() {
-    if (WP_IsReloading() && pstate_pred.client_time >= pstate_pred.reload_finished) {
+    if (WP_IsReloading() && pstate_pred.reload_finished && pstate_pred.client_time >= pstate_pred.reload_finished) {
         pstate_pred.tfstate &= ~TFSTATE_RELOADING;
 
         if (IsEffectFrame())
@@ -1739,7 +1738,7 @@ void WP_UpdateViewModel() {
     }
 
     static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_FLASHED;
-    if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
+    if (pstate_pred.tfstate & no_weap_mask) {
         viewmodel.modelindex = 0;
         return;
     }
@@ -1750,7 +1749,6 @@ void WP_UpdateViewModel() {
             viewmodel.alpha = ra;
         else
             viewmodel.modelindex = 0;
-        return;
     } else {
         viewmodel.alpha = CVARF(r_drawviewmodel);
     }
