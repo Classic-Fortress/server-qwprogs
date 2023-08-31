@@ -583,7 +583,7 @@ static void FO_CussCrosshair(float width, float height) {
 }
 
 static void UpdateTeamColorCrosshair() {
-    if (!CVARF(team_color_crosshair))
+    if (!CVARF(fo_team_color_crosshair))
         return;
 
     if (crosshair_team_no == team_no)
