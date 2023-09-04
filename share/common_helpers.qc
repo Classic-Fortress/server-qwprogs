@@ -23,3 +23,13 @@ string TeamToString(float num)
     if (num == 4) return "Green";
     return " ";
 }
+
+void FO_Sound(entity e, float chan, string samp, float vol, float atten);
+
+#ifdef SSQC
+
+inline float ClientPred_Enabled(entity client, float pred_flag) {
+    return infokeyf(client, "fo_wpp_status") & pred_flag;
+}
+
+#endif

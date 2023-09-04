@@ -100,6 +100,11 @@ enum SoundIndex:float {
     SND_ASSCAN_FIRE,
     SND_ASSCAN_DOWN,
     SND_ASSCAN_SPIN,
+    SND_RELOAD_GREN,
+    SND_RELOAD_ROCKET,
+    SND_RELOAD_SHOTGUN,
+    SND_RELOAD_SUPER_SHOTGUN,
+    SND_RELOAD_ASSAULT_CANNON
 };
 
 struct fo_predsnd {
@@ -124,6 +129,11 @@ static fo_predsnd snd_types[] = {
     { SND_ASSCAN_FIRE, "asscan2.wav" },
     { SND_ASSCAN_DOWN, "asscan3.wav" },
     { SND_ASSCAN_SPIN, "asscan4.wav" },
+    { SND_RELOAD_GREN, "reload_gren.wav" },
+    { SND_RELOAD_ROCKET, "reload_rocket.wav" },
+    { SND_RELOAD_SHOTGUN, "reload_shotgun.wav" },
+    { SND_RELOAD_SUPER_SHOTGUN, "reload_super_shotgun.wav" },
+    { SND_RELOAD_ASSAULT_CANNON, "reload_assault_cannon.wav" },
 };
 
 enum {
@@ -284,9 +294,6 @@ float FO_MaxRewindGrenWinDt() {
 .predict_tf_state predict_state;
 .entity predict_entity;
 
-inline float ClientPred_Enabled(entity client, float pred_flag) {
-    return infokeyf(client, "fo_wpp_status") & pred_flag;
-}
 #else
 
 predict_tf_state pstate_pred, pstate_server;
@@ -781,8 +788,6 @@ void FO_CustomPhysics() {
             return;
     } while (1);
 }
-
-void FO_Sound(entity e, float chan, string samp, float vol, float atten);
 
 void Pred_Sound(SoundIndex snd, float vol = 1) {
     if (snd == SND_NONE)

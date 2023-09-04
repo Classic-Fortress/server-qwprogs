@@ -497,6 +497,14 @@ void (float att_delay) Attack_Finished;
 void W_UpdateCurrentWeapon(entity pl);
 void sprint_pred(entity client, float msglevel, string s);
 
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+void (entity pl, float weapon) UpdateClientReloadSound;
+
+void FO_ReloadSound() {
+    if (!ClientPred_Enabled(self, CSQC_WEAP_PRED))
+        UpdateClientReloadSound(self, FO_CurrentWeapon());
+}
+
 void FO_ReloadFrame() {
     if (self.tfstate & TFSTATE_RELOADING == 0)
         return;
@@ -505,7 +513,7 @@ void FO_ReloadFrame() {
     FO_FillWeapState(self, self.current_slot, &ws);
     FO_WeapInfo* wi = ws.wi;
 
-    if (self.client_time >= self.reload_finished) {
+    if (self.reload_finished && (self.client_time >= self.reload_finished)) {
         self.tfstate &= ~TFSTATE_RELOADING;
         W_UpdateCurrentWeapon(self);
         self.last_still_loading = 0;
@@ -520,8 +528,10 @@ void FO_ReloadFrame() {
 
     float still_loading = FO_NumClipStillLoading(wi, self.client_time,
                                                      self.reload_finished);
+
     if (self.last_still_loading != still_loading) {
         self.last_still_loading = still_loading;
+        FO_ReloadSound();
         Status_Refresh(self);
     }
 }
@@ -562,6 +572,8 @@ void FO_ReloadSlot(Slot slot, float force) {
            strcat("Reloading ", FO_GetWeapName(ws->weapon), "...\n"));
 
     Attack_Finished(wi->attack_time);  // Carried.. but not sure it's necessary.
+
+    FO_ReloadSound();
 
     self.tfstate |= TFSTATE_RELOADING;
     Status_Refresh(self);
@@ -643,7 +655,6 @@ Slot FO_ImpulseToSlot(float playerclass, float impulse) {
 #ifdef SSQC
 float IsUsingOldImpulses();
 
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
 static float IsPyroSlotSwapped() {
     return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
 }

@@ -193,7 +193,6 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 
 #define MSG_SBAR            4
 #define MSG_GRENPRIMED      5
-
 #define MSG_CLIENT_MENU     6
 #define MSG_TEAMS_UPDATE    7
 #define MSG_CLASSES_UPDATE  8
@@ -217,6 +216,8 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 #define MSG_QUAD_ROUND_BEGIN   26
 #define MSG_LOGIN           27
 #define MSG_HITFLAG         28
+#define MSG_RELOADSOUND     29
+
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
 #define FLAGINFO_DROPPED    3
@@ -289,3 +290,9 @@ enumflags {
     HITFLAG_KILLEDUNDERCOVERSPY,
 };
 
+enumflags {
+    CSQC_WEAP_PRED,
+    CSQC_PROJ_PRED,
+    CSQC_SETSPEED,
+    CSQC_SNIPER_SIGHT,
+};
