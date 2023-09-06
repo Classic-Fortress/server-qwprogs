@@ -1249,6 +1249,19 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                     }
                 }
                 break;
+            case "fologinrequired":
+                processedCmd = TRUE;
+                if(arg2) {
+                    localcmd ("localinfo fologinrequired ",arg2,"\n");
+                    if (stof(arg2)) {
+                        bprint(PRINT_HIGH, "Logins will be required. Matches can be reported\n");
+                    } else {
+                        bprint(PRINT_HIGH, "Allow unregistered players. Matches won't be reported\n");
+                    }
+                    bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+                    UpdateAllAdmins();
+                }
+                break;
             case "captainmode":
                 processedCmd = TRUE;
                 if(arg2 && arg3) {
