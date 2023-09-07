@@ -1738,7 +1738,7 @@ void WP_UpdateViewModel() {
     }
 
     static float no_weap_mask = TFSTATE_NO_WEAPON | TFSTATE_FLASHED;
-    if (pstate_pred.tfstate & no_weap_mask) {
+    if (pstate_pred.tfstate & no_weap_mask || CVARF(r_drawviewmodel) == 0) {
         viewmodel.modelindex = 0;
         return;
     }
