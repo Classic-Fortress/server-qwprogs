@@ -16,6 +16,8 @@ DEFCVAR_FLOAT(r_drawviewmodel, 1);
 DEFCVAR_FLOAT(fo_reloadalpha, 0);
 DEFCVAR_FLOAT(fo_reloadvolume, 0);
 
+static float wp_ready;
+
 struct pengine_t {
     float pp_enabled;
     float wp_enabled;
@@ -284,6 +286,9 @@ void WPP_UpdateEnable(float force) {
         update_interp_time_dt();
         next_ping_update = time + PING_PERIOD / avg_ping.samples.max_count;
     }
+
+    if (!wp_ready)
+        return;
 
     // Immediate updates any time there's a cvar change.
     static float next_wpp_enable_check;
@@ -1880,4 +1885,6 @@ void InitWeapPredEnt(entity pe) {
     viewmodel.drawmask = MASK_PRED_ENT;
     viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
     pengine.viewmodel = viewmodel;
+
+    wp_ready = TRUE;
 }
