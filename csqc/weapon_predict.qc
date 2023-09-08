@@ -1700,6 +1700,12 @@ void InitProjectileEnt(float sendflags) {
     else
         setorigin(self, self.origin);
 
+    if (sendflags & FOPP_NEW == 0) {
+        // Retransmit.  Patch up trail, but no predicted / sound / etc.
+        self.oldorigin = self.s_origin;
+        return;
+    }
+
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the
     // off case since the projectile list will just be empty.
