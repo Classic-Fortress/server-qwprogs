@@ -296,8 +296,10 @@ void WPP_UpdateEnable(float force) {
         last_fo_predict_projectiles = CVARF(fo_predict_projectiles);
     }
 
+#ifdef 0
     if (avg_ping.samples.count < 5)
         return;  // Skip until we have a useful number of samples.
+#endif
 
     if (!force && time < next_wpp_enable_check)
         return;
@@ -358,6 +360,10 @@ void WPP_UpdateEnable(float force) {
 
     if (pengine.viewmodel != __NULL__)
         WP_UpdateViewModel();
+}
+
+void WP_PlayerTransition() {
+    WPP_UpdateEnable(TRUE);
 }
 
 DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
