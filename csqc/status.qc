@@ -1059,6 +1059,32 @@ void drawSpeedBar(PanelID panelid, string text) {
     HRC_drawstring(position + '3 0 0', ftos((int)tspeed), '9 9 0', '1 1 1');
 }
 
+void drawReloadProgress(PanelID panelid, string text) {
+    FO_Hud_Panel* panel = getHudPanel(HUDP_RELOADPROGRESS);
+    vector fillsize = panel.FillSize * panel.Scale;
+    vector position = getPanelPosition(panel);
+
+    if (fo_hud_editor &&
+        hud_panel(panel->id, position, fillsize, 0.2, panel.Display)) {
+        // click event
+    }
+
+    float per = WP_ReloadPercent();
+    if (per == 1)
+        return;
+
+    HRC_drawfill(position, fillsize, '0.5 0.5 0.5');
+    vector progress = fillsize;
+    progress.x *= per;
+
+    position += '1 1 0';
+    HRC_drawfill(position, progress - '1 2 0', '0.9 0.9 0.9');
+    const string text = "Reloading";
+    const vector fontsize = '8 8 0';
+    position.x += (fillsize.x - stringwidth(text, 0, fontsize)) / 2;
+    HRC_drawstring(position, text, fontsize, '1 0.4 0.4');
+}
+
 string getPingPanelText();
 
 var FO_Hud_Panel Hud_Panels[] = {
@@ -1073,6 +1099,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0,1, drawSimplePanel, {return "";}},
     {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0,1, drawTextPanel, {return SBAR.Hint;}},
     {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0,0, drawClipSize, { return WP_GetClip(); }},
+    {HUDP_RELOADPROGRESS, "reload_progress", "Reload Progress",  '0 0',  '100 10', 1,1,1,0,0, drawReloadProgress, {return "";}, 0, HUD_SNAP_CENTER},
     {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
     {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
@@ -1114,7 +1141,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
     {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? ftos((int)PlanarSpeed()) : "";}, 0, 4},
     {HUDP_SPEEDBAR, "speedbar", "Speed Bar",           '4 30',    '150 10',  1,1.4,0,0,0, drawSpeedBar, {return "";}, 0, 4},
-    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, 4},
+    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, HUD_SNAP_TOP_RIGHT},
     {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0,1, doNothing, {return "";}, 1},
 };
 

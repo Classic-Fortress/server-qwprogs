@@ -587,6 +587,7 @@ void FO_ReloadSlot(Slot slot, float force) {
     (*ws->clip_fired) -= reload_count;
 
     self.last_still_loading = reload_count;
+    self.reload_started = self.client_time;
     self.reload_finished = self.client_time + reload_duration;
 }
 

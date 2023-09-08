@@ -2123,7 +2123,6 @@ void () TeamFortress_SetEquipment = {
         self.modelindex = 0;
         self.weaponmodel = string_null;
         modelindex_player = 0;
-        self.tfstate = self.tfstate | TFSTATE_RELOADING;
 
         setmodel(self, string_null);
     }
