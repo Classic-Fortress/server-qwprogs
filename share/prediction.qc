@@ -64,6 +64,7 @@ struct predict_tf_state {
     float client_nextthink;
     float client_thinkindex;
 
+    float reload_started;
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
@@ -334,7 +335,7 @@ static float Prediction_ChangedMask(entity player) {
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
-    M1(FOWP_RELOAD, reload_finished);
+    M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
 
@@ -482,8 +483,10 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Byte, clip_fired[3]);
     }
 
-    if (sendflags & FOWP_RELOAD)
+    if (sendflags & FOWP_RELOAD) {
+        COMM(Float, reload_started);
         COMM(Float, reload_finished);
+    }
 
     if (sendflags & FOWP_RNG0)
         COMM(Int, prng_base[PRNG_WEAP]);

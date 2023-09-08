@@ -227,6 +227,7 @@ float coop;
 .float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
+.float reload_started;          // when the reload started
 .float reload_finished;         // when the reload will finish
 
 // Only use below for map ent compatibility.

@@ -942,6 +942,14 @@ float WP_CurrentClipFired() {
     return *WP_ClipFired(CurrentSlot());
 }
 
+float WP_ReloadPercent() {
+    if (!WP_IsReloading())
+        return 1;
+
+    return (pstate_pred.client_time - pstate_pred.reload_started) /
+           (pstate_pred.reload_finished - pstate_pred.reload_started);
+}
+
 string WP_GetClip() {
     if (!WP_Enabled())
         return SBAR.ClipSize;
@@ -1007,6 +1015,7 @@ float WP_ReloadSlot(Slot slot) {
     float amt = min(*WP_ClipFired(slot), WP_GetAmmo(wi->ammo_type));
     (*WP_ClipFired(slot)) -= amt;
 
+    pstate_pred.reload_started = pstate_pred.client_time;
     pstate_pred.reload_finished = pstate_pred.client_time +
         (amt / wi->clip_size) * wi->full_reload_time;
 
