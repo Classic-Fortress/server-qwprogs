@@ -683,7 +683,15 @@ void _Sync_ServerCommandFrame() {
     is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
     if (is_spectator)
         is_observer = FALSE;
+
+    static float last_is_player;
+
+    last_is_player = is_player;
     is_player = (!is_spectator && !is_observer);
+
+    if (last_is_player != is_player)
+        WP_PlayerTransition();
+
     if (!is_player || getstatf(STAT_HEALTH) <= 0)
         is_alive = 0;
     else
