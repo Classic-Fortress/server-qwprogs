@@ -565,11 +565,7 @@ void () T_IncendiaryTouch = {
         return;
     self.voided = 1;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
-    self.effects = self.effects | 4;
+    self.effects |= EF_BRIGHTLIGHT;
     damg = 42 + random() * 20;
 
     if (other.health) {

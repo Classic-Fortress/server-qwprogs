@@ -1107,10 +1107,6 @@ void () T_TranqDartTouch = {
         return;
     self.voided = 1;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     if (other.takedamage) {
         if ((other.classname == "player") &&
                 !((other.team_no == self.owner.team_no) &&

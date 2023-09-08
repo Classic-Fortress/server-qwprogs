@@ -1080,10 +1080,6 @@ void () T_MissileTouch = {
         return;
     self.voided = 1;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     damg = 92 + random() * 20;
 
     deathmsg = self.weapon;
@@ -1479,10 +1475,6 @@ void () spike_touch = {
     if (other.solid == SOLID_TRIGGER)
         return;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     if (other.takedamage) {
         spawn_touchblood(9);
         deathmsg = self.weapon;
@@ -1533,10 +1525,6 @@ void () superspike_touch = {
     if (other.solid == SOLID_TRIGGER)
         return;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     if (other.takedamage) {
         spawn_touchblood(18);
         deathmsg = self.weapon;

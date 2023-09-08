@@ -42,7 +42,7 @@ inline float WPP_ViewModelMask() { return pengine.view_mask; }
 
 float WP_MinPing() {
     if (CVARF(wpp_min_ping) == -1)
-            return fo_config.wp_default_min_ping_ms;
+        return fo_config.wp_default_min_ping_ms;
     else
         return CVARF(wpp_min_ping);
 }
@@ -132,8 +132,8 @@ float csqc_get_user_setting(string s_short, string s_long, string def);
 // Order of preference:
 //   server disable, client enable/disable, server/ping enable
 static float CalcPredEnabled(float current_enable, float cvar,
-                             float server_disable,
-                             float dependent_enabled, string* set_by) {
+                             float server_disable, float dependent_enabled,
+                             string* set_by) {
 
     if (!dependent_enabled) {
         // PP depends on WP, so !WP => !PP
@@ -160,6 +160,11 @@ static float CalcPredEnabled(float current_enable, float cvar,
         *set_by = "[disabled]";
         return FALSE;
     }
+
+    *set_by = "[default]";
+    return TRUE;
+
+#if 0
 
     if (WP_MinPing() == 0)
         return current_enable;
@@ -190,6 +195,7 @@ static float CalcPredEnabled(float current_enable, float cvar,
         *set_by = sprintf("[lan mode <%d]", WP_MinPing());
         return FALSE;
     }
+#endif
 }
 
 static float client_delay_packets;
@@ -219,12 +225,10 @@ void WPP_Status() {
     float wp_enabled = pengine.wp_enabled, pp_enabled = pengine.pp_enabled;
 
     CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
-            fo_config.wp_global_disable,
-            TRUE, &wp_source);
+            fo_config.wp_global_disable, TRUE, &wp_source);
 
     CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
-            fo_config.wp_global_disable,
-            wp_enabled, &pp_source);
+            fo_config.wp_global_disable, wp_enabled, &pp_source);
 
     printf("Prediction Status:\n");
     printf(" Weapon prediction %s %s\n",
@@ -304,12 +308,10 @@ void WPP_UpdateEnable(float force) {
     string wp_source, pp_source;
 
     wp_new = CalcPredEnabled(wp_enabled, CVARF(fo_predict_weapons),
-            fo_config.wp_global_disable,
-            TRUE, &wp_source);
+            fo_config.wp_global_disable, TRUE, &wp_source);
 
     pp_new = CalcPredEnabled(pp_enabled, CVARF(fo_predict_projectiles),
-            fo_config.wp_global_disable,
-            wp_new, &pp_source);
+            fo_config.wp_global_disable, wp_new, &pp_source);
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
@@ -1699,6 +1701,12 @@ void InitProjectileEnt(float sendflags) {
         Phys_Advance(self, ptime, 0);
     else
         setorigin(self, self.origin);
+
+    if (sendflags & FOPP_NEW == 0) {
+        // Retransmit.  Patch up trail, but no predicted / sound / etc.
+        self.oldorigin = self.s_origin;
+        return;
+    }
 
     // We still check this with projectile prediction as there could be in
     // flight projectiles on the transition.  This is effectively a nop in the

@@ -22,10 +22,10 @@ enumflags {
     FOWP_RNG0,
     FOWP_RNG1,
     FOWP_PREDICT_FLAGS,
-    FOWP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
 enumflags {
+    FOPP_NEW,
     FOPP_INIT,
     FOPP_POS,
     FOPP_AUX,
@@ -33,10 +33,8 @@ enumflags {
     FOPP_AVEL,
     FOPP_MOVETYPE,
     FOPP_EXPIRY,
-    FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
 };
 
-#define FOWP_ALL 0xFFFF
 
 enumflags {
     CSQC_WEAP_PRED,
@@ -507,24 +505,33 @@ void EntUpdate_WeaponPred(float isnew) {
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
-float PP_SendEntity(entity to_player, float sendflags) {
-    if (sendflags & FOPP_NEW) {
-        sendflags = FOPP_INIT | FOPP_POS;
+float PP_SendEntity(entity to_player, float sendmask) {
+    float sendflags = self.SendFlags & sendmask;
+
+    if (sendflags & FOPP_NEW || sendflags == 0 /* retransmit */) {
+        sendflags |= FOPP_INIT | FOPP_POS;
         if (self.fpp.aux)
             sendflags |= FOPP_AUX;
         if (self.fpp.expires_at)
             sendflags |= FOPP_EXPIRY;
+
+        // Make sure we carry all the state on a retransmit (normally PVS).
+        if (sendflags & FOPP_NEW == 0) {
+            sendflags |= FOPP_ANGLES | FOPP_MOVETYPE;
+            if (vlen(self.avelocity) > 0)
+                sendflags |= FOPP_AVEL;
+        }
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
-    WriteByte(MSG_ENTITY, sendflags);
+    WriteShort(MSG_ENTITY, sendflags);
 #else
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
 
 void EntUpdate_Projectile(float isnew) {
-    float sendflags = readbyte();
+    float sendflags = readshort();
 #endif
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp.index);
