@@ -439,7 +439,6 @@ void () GibPlayer = {
 
 void () PlayerDie = {
     self.spawn_gen += 1;
-    UpdateClientPlayerDie(self);
 
     local float i;
     local entity te;

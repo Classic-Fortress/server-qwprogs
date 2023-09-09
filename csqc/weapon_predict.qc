@@ -1960,7 +1960,13 @@ void InitWeapPredEnt(entity pe) {
     wp_ready = TRUE;
 }
 
+void StopGrenTimers();
+
 void WP_ServerFrame() {
     if (game_state.is_player != prev_game_state.is_player)
         WPP_UpdateEnable(TRUE);
+
+    if (game_state.spawn_gen != prev_game_state.spawn_gen &&
+        game_state.is_alive)
+        StopGrenTimers();
 }

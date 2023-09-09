@@ -102,18 +102,23 @@ void() CSQC_Parse_Event = {
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
+            float entno = readentitynum();
             float grentype = readbyte();
             float primed_at = readfloat();
             float explodes_at = readfloat();
+
+            if (entno != player_localentnum)
+                return;
+
             ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
+            float entno = readentitynum();
+            if (entno != player_localentnum)
+                return;
+
             CsGrenTimer last = CsGrenTimer::GetLast();
             last.set_thrown();
-            break;
-        case MSG_PLAYERDIE:
-            last_death_time = readfloat();
-            StopGrenTimers();
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
@@ -421,9 +426,6 @@ void StopGrenTimers() {
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
-        return;
-
-    if (primed_at < last_death_time)
         return;
 
     // Very rough (but good enough for now) filter to disambiguate local

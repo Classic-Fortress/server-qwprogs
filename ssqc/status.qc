@@ -790,38 +790,28 @@ void UpdateClientReloadSound(entity pl, float weapon) {
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
+    WriteEntity(MSG_MULTICAST, pl);
     WriteByte(MSG_MULTICAST, grentype);
     WriteFloat(MSG_MULTICAST, time);
     WriteFloat(MSG_MULTICAST, explodes_at);
-    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+
+    // Let's see if we can get away with avoiding _R here.
+    multicast('0 0 0', MULTICAST_ALL);
 
     TFxUpdateGrenadeTimer(pl, explodes_at);
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    WriteEntity(MSG_MULTICAST, pl);
+    multicast('0 0 0', MULTICAST_ALL);
 
     TFxUpdateGrenadeTimer(pl, 0);
-}
-
-void UpdateClientPlayerDie(entity pl) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
-    WriteFloat(MSG_MULTICAST, time);
-    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 }
 
 void UpdateClientIDString(entity pl) {
