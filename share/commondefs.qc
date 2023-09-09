@@ -105,8 +105,7 @@ float TFxEnabled(float flag) {
     return fo_config.tfx_flags & flag;
 }
 
-const float TFX_DEFAULT_FLAGS =
-        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG;
+const float TFX_DEFAULT_FLAGS = 0;
 
 enum CSQCFlags {
     PREDICT_CSQC_SETSPEED,
