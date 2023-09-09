@@ -827,20 +827,18 @@ void UpdateClientPlayerDie(entity pl) = {
 void UpdateClientIDString(entity pl) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
+
+    string ident = time < pl.ident_time ? pl.ident_string : "";
     // only send updates
-    //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
-    //    return;
+    if (ident == pl.last_ident_string)
+        return;
+    pl.last_ident_string = ident;
+
     msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_ID);
-    // identify
-    if (pl.ident_string && time < pl.ident_time) {
-        WriteString(MSG_MULTICAST, pl.ident_string);
-    } else {
-        WriteString(MSG_MULTICAST, "");
-    }
+    WriteString(MSG_MULTICAST, ident);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS);
-    pl.last_ident_string = pl.ident_string;
 }
 
 void UpdateClientStatusBar(entity pl)
@@ -1034,6 +1032,8 @@ void (entity pl) RefreshStatusBar = {
     if (height > 300)
         height = 300;
     height = height - pl.StatusStringLines - 13;
+
+    pl.StatusRefreshTime = time + 1.5;
 
     csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
     if(pl.classname == "observer" && csqcactive) {
@@ -1285,7 +1285,6 @@ void (entity pl) RefreshStatusBar = {
         }
     }
     centerprint(pl, pl.StatusString, pad, ident, ct, s1, s2, s3);
-    pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(ct); strunzone(s1); strunzone(s2); strunzone(s3);
 };
 

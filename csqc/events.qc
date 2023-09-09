@@ -426,8 +426,9 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (primed_at < last_death_time)
         return;
 
-    local float timer_flags = 0;
-    switch (CVARF(fo_grentimer)) {
+    float timer_flags = 0;
+    float timer_mode = is_player ? CVARF(fo_grentimer) : 1;
+    switch (timer_mode) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
