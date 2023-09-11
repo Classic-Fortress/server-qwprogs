@@ -872,6 +872,7 @@ struct GameState {
     float is_alive;
     float is_observer;
     float is_spectator;
+    float spawn_gen;
 };
 
 GameState game_state, prev_game_state;

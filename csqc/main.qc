@@ -696,6 +696,7 @@ void _Sync_ServerCommandFrame() {
 
     // Note: When spectating someone, refers to them.
     game_state.is_alive = getstatf(STAT_HEALTH) >= 0;
+    game_state.spawn_gen = getstatf(STAT_SPAWN_GEN);
 
     WP_ServerFrame();
 

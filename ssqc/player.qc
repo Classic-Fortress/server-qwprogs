@@ -402,7 +402,7 @@ void (string gibname) HeadShotThrowHead = {
 };
 
 void () KillPlayer = {
-    self.owner.deadflag = 2;
+    self.owner.deadflag = DEAD_DEAD;
     dremove(self);
 };
 
@@ -417,7 +417,7 @@ void () GibPlayer = {
         newmis.think = KillPlayer;
         newmis.nextthink = time + 1;
     } else {
-        self.deadflag = 2;
+        self.deadflag = DEAD_DEAD;
     }
     TeamFortress_SetupRespawn(0);
     if (damage_attacker.classname == "teledeath") {
@@ -438,6 +438,7 @@ void () GibPlayer = {
 };
 
 void () PlayerDie = {
+    self.spawn_gen += 1;
     UpdateClientPlayerDie(self);
 
     local float i;

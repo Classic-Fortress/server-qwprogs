@@ -1959,6 +1959,4 @@ void InitWeapPredEnt(entity pe) {
 void WP_ServerFrame() {
     if (game_state.is_player != prev_game_state.is_player)
         WPP_UpdateEnable(TRUE);
-
 }
-

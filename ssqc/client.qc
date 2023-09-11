@@ -2041,6 +2041,8 @@ void () PutClientInServer = {
     local entity spot;
     local entity te;
 
+    self.spawn_gen += 1;
+
     self.touch = player_touch;
     self.classname = "player";
     self.health = 100;
@@ -2458,8 +2460,7 @@ void () PlayerDeathThink = {
         if (self.button2 || self.button1 || self.button0)
             return;
         self.deadflag = DEAD_RESPAWNABLE;
-        self.tfstate =
-            self.tfstate - (self.tfstate & TFSTATE_RESPAWN_READY);
+        self.tfstate &= ~TFSTATE_RESPAWN_READY;
         return;
     }
     if ((!self.button2 && !self.button1) && !self.button0) {
@@ -2705,7 +2706,7 @@ void () PlayerPreThink = {
         WaterMove();
     }
 
-    if (self.deadflag >= 2) {
+    if (self.deadflag >= DEAD_DEAD) {
         PlayerDeathThink();
         return;
     }
@@ -2717,7 +2718,7 @@ void () PlayerPreThink = {
             Spy_RemoveDisguise(self);
         }
     }
-    if (self.deadflag == 1) {
+    if (self.deadflag == DEAD_DYING) {
         return;
     }
 

@@ -92,7 +92,7 @@ void (entity pe_player, float dontstopdead) Spy_CheckForFuncTouch = {
 void () CF_Spy_AirThink = {
     local float area_check = 0;
 
-    if(self.owner.deadflag >= 2) {
+    if(self.owner.deadflag >= DEAD_DEAD) {
         // reset the movetype just in case you die while in the TOSS or the WALK states (eg mbasesr lift squish)
         self.owner.movetype = MOVETYPE_NONE;
         self.owner.tfstate |= TFSTATE_CANT_MOVE;
