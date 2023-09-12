@@ -441,7 +441,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     last_explodes_at = explodes_at;
 
     float timer_flags = 0;
-    float timer_mode = is_player ? CVARF(fo_grentimer) : 1;
+    float timer_mode = game_state.is_player ? CVARF(fo_grentimer) : 1;
     switch (timer_mode) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
@@ -640,7 +640,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         return 1;
 
     // Sounds from remote entities are not local and we should always play.
-    if (ent_num != player_localentnum || is_spectator || is_observer)
+    if (ent_num != player_localentnum || !game_state.is_player)
         return 0;
 
     // Sounds below this line are conditionally filtered.

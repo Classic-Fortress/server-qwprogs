@@ -636,7 +636,7 @@ noref void CSQC_Input_Frame() {
 
     // Handle zoom
     float prev_zoomed_in = zoomed_in;
-    if (player_class == PC_SNIPER && is_alive)
+    if (player_class == PC_SNIPER)
         zoomed_in = input_buttons & BUTTON3;
     else
         zoomed_in = 0;
@@ -672,30 +672,32 @@ void _Sync_ServerCommandFrame() {
         return;
     last_servercommandframe = servercommandframe;
 
+    prev_game_state = game_state;
+
     team_no = getstatf(STAT_TEAMNO);
     all_time = getstatf(STAT_ALL_TIME);
-    is_observer = FALSE;
-    if (team_no == 0)
-        is_observer = TRUE;
+    game_state.is_observer = team_no == 0;
     player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
 
-    is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
-    if (is_spectator)
-        is_observer = FALSE;
+    game_state.localentnum = player_localentnum;
 
-    static float last_is_player;
+    if (game_state.is_observer) {
+        game_state.is_player = 0;
+        if (stof(getplayerkeyvalue(player_localnum, "*spectator"))) {
+            game_state.is_spectator = 1;
+            game_state.is_observer = 0;
+        } else {
+            game_state.is_spectator = 0;
+        }
+    } else {
+        game_state.is_player = 1;
+    }
 
-    last_is_player = is_player;
-    is_player = (!is_spectator && !is_observer);
+    // Note: When spectating someone, refers to them.
+    game_state.is_alive = getstatf(STAT_HEALTH) >= 0;
 
-    if (last_is_player != is_player)
-        WP_PlayerTransition();
-
-    if (!is_player || getstatf(STAT_HEALTH) <= 0)
-        is_alive = 0;
-    else
-        is_alive = 1;
+    WP_ServerFrame();
 
     // Use an undocumented ezquake compat feature to figure out whether we
     // have focus or not, skip updates in this case due to lowered network fps.

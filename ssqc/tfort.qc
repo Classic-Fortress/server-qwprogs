@@ -1352,7 +1352,7 @@ void () TeamFortress_SetHealth = {
         else
             self.max_health = PC_ENGINEER_MAXHEALTH;
     } else {
-        self.max_health = 1;
+        self.max_health = 0;
         self.takedamage = DAMAGE_NO;
     }
     self.health = self.max_health;

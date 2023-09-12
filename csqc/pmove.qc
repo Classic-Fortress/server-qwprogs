@@ -39,7 +39,7 @@ void PM_PredictJump() {
     float landing = onground && !last_onground;
     float vel_z = pmove_vel_z ?: recent_pmove_vel_z;
 
-    if (!is_alive) {
+    if (!game_state.is_alive) {
         last_onground = 1;
         last_vel_z = 0;
         last_waterlevel = 0;
