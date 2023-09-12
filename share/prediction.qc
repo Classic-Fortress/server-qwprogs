@@ -767,9 +767,29 @@ void WeaponPred_DoServerClientThink() {
     }
 }
 
+void ProjRewindForTravel(entity e, float target_time);
+void NoRewindSyncFn(entity e, float target_time);
+void RW_StashAll();
+void RW_RestoreAll();
+
 void FO_CustomPhysics() {
     if (!self.voided) {
-        Phys_Advance(self, time, 0);
+        float physf = 0;
+        if (RewindFlagEnabled(REWIND_PROJ_TRAVEL)) {
+            // This is a little inside out, it would be nice to do this by time
+            // then by projectile/player, but structure makes that difficult
+            // without more aggressive change.
+            RW_StashAll();
+            physf = PHYSF_REWIND_PLAYERS;
+            RewindSyncTime = ProjRewindForTravel;
+        }
+
+        Phys_Advance(self, time, physf);
+
+        if (RewindFlagEnabled(REWIND_PROJ_TRAVEL)) {
+            RewindSyncTime = NoRewindSyncFn;
+            RW_RestoreAll();
+        }
 
         // Moving platforms don't get properly reflected into the entities CSQC
         // sees so just blast the client with updates when on one (in motion).

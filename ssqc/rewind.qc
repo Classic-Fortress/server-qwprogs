@@ -274,6 +274,20 @@ class FOPlayer {
     };
 };
 
+// TODO: untangle and decide whether the class stuff is adding any value
+void RW_RewindAll(float when) {
+    FOPlayer::RewindAll(when);
+}
+
+void RW_StashAll() {
+    RL_StashPositions(rewind_players);
+}
+
+void RW_RestoreAll() {
+    FOPlayer::RestoreAll();
+
+}
+
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float RewindPlayersExceptSelf(float farthest_rewind_point) {
@@ -296,8 +310,16 @@ float RewindPlayersExceptSelf(float farthest_rewind_point) {
     return TRUE;
 }
 
-void ProjRewindForPhys(entity e, float step) {
-    RL_RewindTo(rewind_players, e.owner, e.phys_time + step / 2);
+void ProjRewindForTravel(entity e, float target_time) {
+    RL_RewindTo(rewind_players, world, target_time);
+}
+
+void ProjRewindForPhys(entity e, float target_time) {
+    RL_RewindTo(rewind_players, e.owner, target_time);
+}
+
+void NoRewindSyncFn(entity e, float target_time) {
+    error("not set\n");
 }
 
 void Forward_Projectile(int fpp_type, entity proj) {
@@ -312,7 +334,7 @@ void Forward_Projectile(int fpp_type, entity proj) {
     float stime = time - dynamic_dt;
 
     float no_rewind = proj.fpp.flags & FPF_NO_REWIND;
-    float rewind_hit = !no_rewind && RewindFlagEnabled(REWIND_PROJ_HIT);
+    float rewind_hit = !no_rewind && RewindFlagEnabled(REWIND_PROJ_FIRE);
     float phys_flags = PHYSF_CONSUME_ALL;
     if (rewind_hit) {
         phys_flags |= PHYSF_REWIND_PLAYERS;
@@ -337,6 +359,7 @@ void Forward_Projectile(int fpp_type, entity proj) {
     if (!proj.voided) {
         RewindSyncTime = ProjRewindForPhys;
         ft += Phys_Advance(proj, time, phys_flags);
+        RewindSyncTime = NoRewindSyncFn;
     }
 
     if (rewind_hit)
