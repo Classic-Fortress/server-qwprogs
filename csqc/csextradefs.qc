@@ -755,6 +755,14 @@ class CsGrenTimer {
     };
     nonvirtual void() StartSound;
 
+    nonvirtual void(float offset) adj_sync {
+      if (!playing_)
+          return;
+
+      expires_at_ += offset;
+      StartSound();
+    };
+
     static float next_index_;
     static CsGrenTimer last_;
 

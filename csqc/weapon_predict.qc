@@ -97,6 +97,11 @@ float interp_time() {
     return last_interp_time;
 }
 
+// The server time of the current predicted clientcomandframe
+inline float cpredict_time() {
+    return time + pstate_pred.client_time - pstate_server.client_time;
+}
+
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -818,17 +823,22 @@ static float WP_Sniper_IsAttack() {
 }
 
 void W_ThrowGren(float is_throw);
+void W_PrimeGren(float index);
 
 static void HandleButtonThrowgren(float index, float button) {
     float b_down = pstate_pred.buttons_down & button;
     float b_up = pstate_pred.buttons_up & button;
 
     if (IsHoldGrenades()) {
-        if (b_up)
+        if (b_down)
+            W_PrimeGren(index);
+        else if (b_up)
             W_ThrowGren(TRUE);
-    } else {
-        if ((pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED) && b_down)
+    } else if (b_down) {
+        if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
             W_ThrowGren(TRUE);
+        else
+            W_PrimeGren(index);
     }
 }
 
@@ -843,7 +853,45 @@ static void WP_ChangeIfQueued() {
     }
 }
 
+
+DEFCVAR_FLOAT(fo_beta_local_grenade, 0);
+
+void WP_HandleGrenadeInputs() {
+    if (!CVARF(fo_beta_local_grenade))
+        return;
+
+    float clear_impulse = TRUE;
+
+    switch (pstate_pred.impulse) {
+        case TF_GRENADE_1: W_PrimeGren(1); break;
+        case TF_GRENADE_2: W_PrimeGren(2); break;
+        case TF_GRENADE_T: W_ThrowGren(TRUE); break;
+
+        case TF_GRENADE_PT_1:
+            if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
+                W_ThrowGren(TRUE);
+            else
+                W_PrimeGren(1);
+            break;
+        case TF_GRENADE_PT_2:
+            if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
+                W_ThrowGren(TRUE);
+            else
+                W_PrimeGren(2);
+            break;
+
+        default: clear_impulse = FALSE; break;
+    }
+
+    HandleButtonThrowgren(1, BUTTON5);
+    HandleButtonThrowgren(2, BUTTON6);
+
+    if (clear_impulse)
+        pstate_pred.impulse = 0;
+}
+
 void WP_Impulse() {
+    WP_HandleGrenadeInputs();
     WP_HandleHeavyInputs();
 
     // Note: We might have no impulse, but a queued slot here.
@@ -867,9 +915,6 @@ void WP_Impulse() {
 
     if (match)
         pstate_pred.impulse = 0;
-
-    HandleButtonThrowgren(1, BUTTON5);
-    HandleButtonThrowgren(2, BUTTON6);
 
     if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
         return;
@@ -1492,6 +1537,23 @@ static float CanThrowGrenade(int gren_type) {
         return FALSE;  // Buckle up... probably.
 
     return TRUE;
+}
+
+void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+
+static void W_PrimeGren(float index) {
+    if (!is_alive || getstatf(STAT_NOFIRE))
+        return;
+
+    if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
+        return;
+
+    index -= 1;
+    float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
+
+    pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
+    if (IsEffectFrame())
+        ParseGrenPrimed(gren - GREN_FIRST + 1, time, time + 3.8);
 }
 
 static void W_ThrowGren(float is_throw) {

@@ -426,6 +426,20 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (primed_at < last_death_time)
         return;
 
+    // Very rough (but good enough for now) filter to disambiguate local
+    // predicted primes versus matched server primes.
+    static float last_explodes_at;
+    float delta = explodes_at - last_explodes_at;
+    if (fabs(delta) < 50 * MSEC) {
+        // Experimental patch up if prediction too far off.
+        if (CVARF(fo_beta_local_grenade) == 2 && delta > 10 * MSEC) {
+            CsGrenTimer last = CsGrenTimer::GetLast();
+            last.adj_sync(delta);
+        }
+        return;
+    }
+    last_explodes_at = explodes_at;
+
     float timer_flags = 0;
     float timer_mode = is_player ? CVARF(fo_grentimer) : 1;
     switch (timer_mode) {
