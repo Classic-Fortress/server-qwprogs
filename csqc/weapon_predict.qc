@@ -153,11 +153,6 @@ static float CalcPredEnabled(float current_enable, float cvar,
         return FALSE;
     }
 
-    if (game_state.is_observer) {
-        *set_by = "[observer]";
-        return FALSE;
-    }
-
     if (server_disable) {
         *set_by = "[server disable]";
         return FALSE;

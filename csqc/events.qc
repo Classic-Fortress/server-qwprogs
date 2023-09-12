@@ -645,7 +645,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         return 1;
 
     // Sounds from remote entities are not local and we should always play.
-    if (ent_num != player_localentnum || !game_state.is_player)
+    if (ent_num != player_localentnum || game_state.is_spectator)
         return 0;
 
     // Sounds below this line are conditionally filtered.

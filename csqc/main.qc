@@ -678,21 +678,16 @@ void _Sync_ServerCommandFrame() {
 
     team_no = getstatf(STAT_TEAMNO);
     all_time = getstatf(STAT_ALL_TIME);
-    game_state.is_observer = team_no == 0;
     player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
 
     game_state.localentnum = player_localentnum;
 
-    if (game_state.is_observer) {
+    if (team_no == 0 ||stof(getplayerkeyvalue(player_localnum, "*spectator"))) {
+        game_state.is_spectator = 1;
         game_state.is_player = 0;
-        if (stof(getplayerkeyvalue(player_localnum, "*spectator"))) {
-            game_state.is_spectator = 1;
-            game_state.is_observer = 0;
-        } else {
-            game_state.is_spectator = 0;
-        }
     } else {
+        game_state.is_spectator = 0;
         game_state.is_player = 1;
     }
 
