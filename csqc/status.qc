@@ -12,7 +12,7 @@ DEFCVAR_FLOAT(fo_hud_noclipicon, 0);
 
 void(PanelID ignored, string text) drawClipSize = {
     string icon = CVARF(fo_hud_noclipicon) ? "" : ICON_CLIPSIZE;
-    if (is_alive || fo_hud_editor)
+    if (game_state.is_alive || fo_hud_editor)
         Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, icon, 1);
 };
 
@@ -534,7 +534,8 @@ void(PanelID panelid, string text) drawReadyPanel = {
         if(showingscores || !panel.Display) {
             return;
         }
-        if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
+        if (prematch && team_no && player_class && !SBAR.CountdownStarted &&
+              game_state.is_player) {
             if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
@@ -749,7 +750,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
-            || is_spectator || is_observer) {
+            || !game_state.is_player) {
             string c = lines[i].classtext;
             if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
                 float cspace = strlen(c) * smalltext.x;

@@ -102,18 +102,23 @@ void() CSQC_Parse_Event = {
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
+            float entno = readentitynum();
             float grentype = readbyte();
             float primed_at = readfloat();
             float explodes_at = readfloat();
+
+            if (entno != player_localentnum)
+                return;
+
             ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
+            float entno = readentitynum();
+            if (entno != player_localentnum)
+                return;
+
             CsGrenTimer last = CsGrenTimer::GetLast();
             last.set_thrown();
-            break;
-        case MSG_PLAYERDIE:
-            last_death_time = readfloat();
-            StopGrenTimers();
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
@@ -423,9 +428,6 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
         return;
 
-    if (primed_at < last_death_time)
-        return;
-
     // Very rough (but good enough for now) filter to disambiguate local
     // predicted primes versus matched server primes.
     static float last_explodes_at;
@@ -441,7 +443,7 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     last_explodes_at = explodes_at;
 
     float timer_flags = 0;
-    float timer_mode = is_player ? CVARF(fo_grentimer) : 1;
+    float timer_mode = game_state.is_player ? CVARF(fo_grentimer) : 1;
     switch (timer_mode) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
@@ -640,7 +642,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         return 1;
 
     // Sounds from remote entities are not local and we should always play.
-    if (ent_num != player_localentnum || is_spectator || is_observer)
+    if (ent_num != player_localentnum || !game_state.is_player)
         return 0;
 
     // Sounds below this line are conditionally filtered.

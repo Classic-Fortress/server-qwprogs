@@ -148,12 +148,12 @@ static float CalcPredEnabled(float current_enable, float cvar,
         return FALSE;
     }
 
-    if (is_spectator) {
+    if (game_state.is_spectator) {
         *set_by = "[spectator]";
         return FALSE;
     }
 
-    if (is_observer) {
+    if (game_state.is_observer) {
         *set_by = "[observer]";
         return FALSE;
     }
@@ -327,7 +327,7 @@ void WPP_UpdateEnable(float force) {
 
     static float once;
     if (wp_new != pengine.wp_enabled || !once) {
-        if (!CVARF(fo_predict_projectiles) && is_player)
+        if (!CVARF(fo_predict_projectiles) && game_state.is_player)
             printf("FortressOne: Weapon prediction (no projectiles) %s %s\n",
                     wp_new ? "enabled" : "disabled", wp_source);
         pengine.wp_enabled = wp_new;
@@ -343,7 +343,7 @@ void WPP_UpdateEnable(float force) {
     }
 
     if (pp_new != pengine.pp_enabled || !once) {
-        if (is_player)
+        if (game_state.is_player)
             printf("FortressOne: Weapon/Projectile prediction %s %s\n",
                     pp_new ? "enabled" : "disabled", pp_source);
         pengine.pp_enabled = pp_new;
@@ -370,10 +370,6 @@ void WPP_UpdateEnable(float force) {
 
     if (pengine.viewmodel != __NULL__)
         WP_UpdateViewModel();
-}
-
-void WP_PlayerTransition() {
-    WPP_UpdateEnable(TRUE);
 }
 
 DEFCVAR_FLOAT(fo_minping_min, 0);    // Can be used to set a lower-bound on
@@ -474,7 +470,7 @@ void UpdateMinPing() {
     static float num_samples;
     static float ping_cache[PING_SAMPLES];
 
-    if (time < next_ping_update || !is_player)
+    if (time < next_ping_update || !game_state.is_player)
         return;
     next_ping_update = time + 0.2;
 
@@ -651,7 +647,7 @@ static float AmmoToStat(float ammo_type) {
 }
 
 float WP_GetAmmo(float ammo_type) {
-    if (!WP_Enabled() || !is_alive)
+    if (!WP_Enabled() || !game_state.is_alive)
         return getstatf(AmmoToStat(ammo_type));
 
     if (ammo_type == AMMO_NONE)
@@ -1201,7 +1197,7 @@ void FO_ApplyMaxSpeed() {
 DEFCVAR_FLOAT(cl_crossx, 0);
 
 void WP_Frame() {
-    if (!is_alive) {
+    if (!game_state.is_alive) {
         pstate_pred.current_slot = SlotNull;
         return;
     }
@@ -1542,13 +1538,17 @@ static float CanThrowGrenade(int gren_type) {
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
 
 static void W_PrimeGren(float index) {
-    if (!is_alive || getstatf(STAT_NOFIRE))
+    if (!game_state.is_alive || getstatf(STAT_NOFIRE))
         return;
 
     if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
         return;
 
-    index -= 1;
+    index -= 1;  // We work with zero-based index here.
+    float stat = index == 0 ? STAT_NO_GREN1 : STAT_NO_GREN2;
+    if (getstatf(stat) < 1)
+        return;  // No grenades left
+
     float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
 
     pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
@@ -1958,4 +1958,15 @@ void InitWeapPredEnt(entity pe) {
     pengine.viewmodel = viewmodel;
 
     wp_ready = TRUE;
+}
+
+void StopGrenTimers();
+
+void WP_ServerFrame() {
+    if (game_state.is_player != prev_game_state.is_player)
+        WPP_UpdateEnable(TRUE);
+
+    if (game_state.spawn_gen != prev_game_state.spawn_gen &&
+        game_state.is_alive)
+        StopGrenTimers();
 }

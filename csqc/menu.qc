@@ -870,7 +870,7 @@ void FO_Menu_Game(float force) = {
     }
     if(fo_hud_menu_active && !force)
         return;
-    if(is_spectator) {
+    if(game_state.is_spectator) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
         //FO_MENU_GAME_SPECTATOR.num_opts = 3;
         FO_MENU_GAME_SPECTATOR.options[2].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED;
@@ -890,7 +890,7 @@ void FO_Menu_Game(float force) = {
 }
 
 void FO_Menu_Track() = {
-    if(!is_spectator)
+    if(!game_state.is_spectator)
         return;
 
     local float i = 0;

@@ -335,6 +335,7 @@ void () worldspawn = {
     clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
     clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
     clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
+    clientstat(STAT_SPAWN_GEN,EV_FLOAT, spawn_gen);
 
     globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");
     globalstat(STAT_NOFIRE, EV_FLOAT, "no_fire_mode");

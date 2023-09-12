@@ -866,19 +866,25 @@ DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
 
+struct GameState {
+    float localentnum;
+    float is_player;
+    float is_alive;
+    float is_observer;
+    float is_spectator;
+    float spawn_gen;
+};
+
+GameState game_state, prev_game_state;
+
 float team_no;
 float crosshair_team_no;
 float all_time;
-float is_spectator;
 float player_class;
-float is_observer;
-float is_player;
-float is_alive;
 float painfinished;
 vector thisorigin;
 float jump_counter;
 float grentimer_waiting;
-float last_death_time;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
