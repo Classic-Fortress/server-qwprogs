@@ -49,7 +49,8 @@ var struct {
 } fo_config;
 
 enumflags {
-    REWIND_PROJ_HIT,
+    REWIND_PROJ_FIRE,
+    REWIND_PROJ_TRAVEL,
     REWIND_KNOCKBACK,
     REWIND_SETSPEED,
     REWIND_GRENADES,
@@ -58,7 +59,8 @@ enumflags {
 };
 
 string REWIND_DESC[] = {
-    "rewind projectile hit",
+    "rewind projectile on firing",
+    "rewind on projectile travel",
     "rewind pipe knockback",
     "allow csqc to handle maxspeed",
     "rewind grenade throws",
@@ -66,7 +68,8 @@ string REWIND_DESC[] = {
     "open doors earlier for hpbs [requires rfd=1]",
 };
 
-const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
+const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_FIRE |
+                                   REWIND_PROJ_TRAVEL |
                                    REWIND_FORWARD_PROJ_SELFKNOCK |
                                    REWIND_SETSPEED;
 
