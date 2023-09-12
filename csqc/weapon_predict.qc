@@ -1544,7 +1544,11 @@ static void W_PrimeGren(float index) {
     if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED)
         return;
 
-    index -= 1;
+    index -= 1;  // We work with zero-based index here.
+    float stat = index == 0 ? STAT_NO_GREN1 : STAT_NO_GREN2;
+    if (getstatf(stat) < 1)
+        return;  // No grenades left
+
     float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
 
     pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
