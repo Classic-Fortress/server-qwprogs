@@ -118,7 +118,10 @@ void() CSQC_Parse_Event = {
                 return;
 
             CsGrenTimer last = CsGrenTimer::GetLast();
-            last.set_thrown();
+            // It's possible to get THROWN without PRIMED when spectating a
+            // player that primed before you started watching them.
+            if (last != world && last.active())
+                last.set_thrown();
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
