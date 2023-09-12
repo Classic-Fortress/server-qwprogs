@@ -168,6 +168,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     ClientSettings_Check();
     SetupAliases();
+
+    pengine.view_mask = MASK_VIEWMODEL;  // Start with engine models.
     print("CSQC initialization finished\n");
 };
 
