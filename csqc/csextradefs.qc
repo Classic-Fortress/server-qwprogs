@@ -870,7 +870,6 @@ struct GameState {
     float localentnum;
     float is_player;
     float is_alive;
-    float is_observer;
     float is_spectator;
     float spawn_gen;
 };

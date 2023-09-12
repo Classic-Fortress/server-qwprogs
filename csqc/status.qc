@@ -750,7 +750,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
-            || !game_state.is_player) {
+            || game_state.is_spectator) {
             string c = lines[i].classtext;
             if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
                 float cspace = strlen(c) * smalltext.x;
