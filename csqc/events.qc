@@ -99,6 +99,7 @@ void() CSQC_Parse_Event = {
             ParseSBAR();
             break;
         case MSG_ID:
+            last_id_time = time;
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:

@@ -815,20 +815,20 @@ void UpdateClientGrenadeThrown(entity pl) = {
 }
 
 void UpdateClientIDString(entity pl) {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
-
     string ident = time < pl.ident_time ? pl.ident_string : "";
-    // only send updates
-    if (ident == pl.last_ident_string)
+
+    if (ident == pl.last_ident_string)  // only send updates
         return;
     pl.last_ident_string = ident;
+
+    if (ident == "")  // No need to send null, we'll expire clientside.
+        return;
 
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_ID);
     WriteString(MSG_MULTICAST, ident);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    multicast('0 0 0', MULTICAST_ONE);
 }
 
 void UpdateClientStatusBar(entity pl)
