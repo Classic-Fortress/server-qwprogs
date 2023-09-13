@@ -154,7 +154,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     CurrentMenu = &FO_MENU_TEAM;
     player_menu_type = 0;
     is_admin = FALSE;
-    grentimer_waiting = FALSE;
     jump_counter = 0;
 
     num_mapvotes = 0;

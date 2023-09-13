@@ -10,6 +10,11 @@ void () PostFOQuadStarted = {
 		return;
 	}
 
+	// Override 2v2 to go to scrim results for now.
+	string channel_id = discord_channel_id;
+	if (TeamFortress_TeamGetNoPlayersExcludingAllTime(1) <= 2)
+		channel_id = "1147341454851719219";
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -35,7 +40,7 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
 	data = strcat(data, "    },\n");
 	data = strcat(data, "    \"discord_channel\": {\n");
-	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
+	data = strcat(data, "      \"channel_id\": \"", channel_id, "\"\n");
 	data = strcat(data, "    },\n");
 	data = strcat(data, "    \"teams\": {\n");
 
@@ -416,6 +421,7 @@ void () QuadRoundThink = {
             {
                 local string st;
                 st = ftos(round_delay_time);
+								round_end_time = time + round_delay_time + 1;
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
@@ -503,13 +509,8 @@ void () QuadRoundBegin = {
 	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
-    te = find(world, classname, "player");
-    while (te) {
-        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
-            UpdateClientQuadRoundBegin(te, round_time);
-        }
-        te = find(te, classname, "player");
-    }
+	round_end_time = time + round_time * 60 + 1;
+	UpdateClientQuadRoundBegin(te, round_time);
 
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;

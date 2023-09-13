@@ -434,6 +434,7 @@ void () StartTimer =
     if (timer.cnt2 < 1) {
         //By default, 10 seconds of countdown
         timer.cnt2 = 10;
+        round_end_time = time + 11;
     }
     timer.cnt2 = (timer.cnt2 + 1);
     timer.nextthink = (time + 0.1);
