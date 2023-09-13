@@ -405,7 +405,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
     if (this.flags_ & FL_GT_ADJPING) {
         float rtt = pstate_pred.client_ping * CVARF(fo_grentimer_ping_frac);
         if (RewindFlagEnabled(REWIND_GRENADES))
-            rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
+            rtt = max(0, rtt - (100 + FO_RewindGrenMs(_grentype)));
         expires_at_ -= rtt / 1000;
     }
 
@@ -428,7 +428,7 @@ void StopGrenTimers() {
 }
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
-    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
+    if (grentype == GREN_FLARE || grentype == GREN_CALTROP)
         return;
 
     // Very rough (but good enough for now) filter to disambiguate local

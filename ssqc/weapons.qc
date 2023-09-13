@@ -25,7 +25,6 @@ void () TeamFortress_ShowTF;
 void (float inp, float is_player) TeamFortress_PrimeGrenade;
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
-void () TeamFortress_GrenadeSwitch;
 
 void () PipebombTouch;
 
@@ -2024,8 +2023,6 @@ void () ImpulseCommands = {
         TeamFortress_SaveMe();
     else if (self.impulse == TF_GRENADE_T)
         TeamFortress_ThrowGrenade();
-    else if (self.impulse == TF_GRENADE_SWITCH)
-        TeamFortress_GrenadeSwitch();
     else if (self.impulse == TF_ID)
         CF_Identify(self, 1);
     else if (self.impulse == TF_ID_TEAM)
@@ -2641,7 +2638,7 @@ void () W_WeaponFrame = {
     }
 
     //  grenade impulses always possible
-    if ((self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
+    if ((self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_PT_2)) {
         ImpulseCommands();
         return;
     }

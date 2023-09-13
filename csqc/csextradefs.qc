@@ -233,23 +233,6 @@ FO_Hud_Icons HudIcons2[39] = {
     {"textures/wad/anum_percent"}
 };
 
-FO_Hud_Icons GrenadeIcons[14] = {
-    {ICON_GREN_NONE},
-    {ICON_GREN_NORMAL},
-    {ICON_GREN_CONCUSSION},
-    {ICON_GREN_NAIL},
-    {ICON_GREN_MIRV},
-    {ICON_GREN_NAPALM},
-    {ICON_GREN_FLARE},
-    {ICON_GREN_GAS},
-    {ICON_GREN_EMP},
-    {ICON_GREN_FLASH},
-    {ICON_GREN_CALTROP},
-    {ICON_GREN_BLAST},
-    {ICON_GREN_SHOCK},
-    {ICON_GREN_BURST},
-};
-
 FO_Hud_Icons FaceIcons[] = {
     //normal
     {"textures/wad/face1"},
