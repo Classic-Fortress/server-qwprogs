@@ -469,6 +469,7 @@ float rounds;
 float round_active;
 float round_over;
 float round_delay_time;
+float round_end_time;
 float map_restart_time;
 float gametime;
 float is_countdown;

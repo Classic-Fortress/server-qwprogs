@@ -1498,6 +1498,7 @@ enumflags {
 #define STAT_TEAMNO_ATTACK      42
 #define STAT_ALL_TIME           43
 #define STAT_SPAWN_GEN          44
+#define STAT_ROUND_END          45
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this

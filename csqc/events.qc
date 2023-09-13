@@ -318,7 +318,6 @@ void() CSQC_Parse_Event = {
             FO_Hud_ShowPanel(HUDP_MOTD);
             break;
         case MSG_QUAD_ROUND_BEGIN:
-            round_ending = readfloat() * 60 + time + 1;
             break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();

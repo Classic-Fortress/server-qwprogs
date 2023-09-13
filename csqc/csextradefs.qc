@@ -883,7 +883,6 @@ float player_class;
 float painfinished;
 vector thisorigin;
 float jump_counter;
-float grentimer_waiting;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];

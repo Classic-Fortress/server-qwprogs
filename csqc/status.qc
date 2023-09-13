@@ -302,27 +302,22 @@ string gameClockString() {
     float seconds = 0;
     float timelimit = stof(serverkey("timelimit"));
 
-    if(round_ending) {
-        float t = round_ending - time;
-        if(t < 0) t = t * -1;
-        minutes = floor(t/60);
-        seconds = floor(t - (minutes*60));
-    } else if(timelimit) {
-        minutes = floor(time/60);
-        seconds = 60 - floor(time - (minutes*60));
-        minutes = timelimit - ceil(time/60);
-        if(minutes < 0) minutes = minutes * -1;
-        if(seconds < 0) seconds = seconds * -1;
+    float end = getstatf(STAT_ROUND_END);
+    if (!end)
+        end = timelimit * 60;
+
+    if (end) {
+        minutes = (end - time)/60;
+        seconds = (end - time)%60;
     } else {
-        minutes = floor(time/60);
-        seconds = floor(time - (minutes*60));
+        minutes = time/60;
+        seconds = time%60;
     }
 
-    string sm = strcat((minutes<10?"0":""),ftos(minutes));
-    string ss = strcat((seconds<10?"0":""),ftos(seconds));
+    string sm = strcat((minutes<10?"0":""),ftos(floor(minutes)));
+    string ss = strcat((seconds<10?"0":""),ftos(floor(seconds)));
 
-    string tmp = strcat(sm,":",ss);
-    return tmp;
+    return strcat(sm,":",ss);
 };
 
 static void(PanelID panelid, string text) doNothing = {};

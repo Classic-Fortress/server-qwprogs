@@ -416,6 +416,7 @@ void () QuadRoundThink = {
             {
                 local string st;
                 st = ftos(round_delay_time);
+								round_end_time = time + round_delay_time + 1;
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
@@ -503,13 +504,8 @@ void () QuadRoundBegin = {
 	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
-    te = find(world, classname, "player");
-    while (te) {
-        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
-            UpdateClientQuadRoundBegin(te, round_time);
-        }
-        te = find(te, classname, "player");
-    }
+	round_end_time = time + round_time * 60 + 1;
+	UpdateClientQuadRoundBegin(te, round_time);
 
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
