@@ -1548,7 +1548,7 @@ static void W_PrimeGren(float index) {
 
     pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
     if (IsEffectFrame())
-        ParseGrenPrimed(gren - GREN_FIRST + 1, time, time + 3.8);
+        ParseGrenPrimed(gren, time, time + 3.8);
 }
 
 static void W_ThrowGren(float is_throw) {

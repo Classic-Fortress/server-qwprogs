@@ -418,7 +418,7 @@ struct Slot { int id; };
 #define TF_GRENADE_T                16  // Throw primed grenade
 #define TF_GRENADE_PT_1             17  // Prime and throw grenade type 1 (two clicks)
 #define TF_GRENADE_PT_2             18  // Prime and throw grenade type 2 (two clicks)
-#define TF_GRENADE_SWITCH           19  // Switch grenade mode 1/2
+// unused
 #define TF_QUICKSLOT1               20  // Fire weapon slot 1 and then switch back to current weapon
 #define TF_QUICKSLOT2               21  // Fire weapon slot 2 and then switch back to current weapon
 #define TF_QUICKSLOT3               22  // Fire weapon slot 3 and then switch back to current weapon
@@ -796,24 +796,6 @@ enumflags {
 // Tranquiliser Gun
 #define TRANQ_TIME		15
 
-// Grenades
-#define GR_PRIMETIME		3
-
-#define GR_TYPE_NONE		0
-#define GR_TYPE_NORMAL		1
-#define GR_TYPE_CONCUSSION	2
-#define GR_TYPE_NAIL		3
-#define GR_TYPE_MIRV		4
-#define GR_TYPE_NAPALM		5
-#define GR_TYPE_FLARE		6
-#define GR_TYPE_GAS		7
-#define GR_TYPE_EMP		8
-#define GR_TYPE_FLASH		9
-#define GR_TYPE_CALTROP		10
-#define GR_TYPE_BLAST	11
-#define GR_TYPE_SHOCK	12
-#define GR_TYPE_BURST	13
-
 // Defines for NailGren Types
 #define NGR_TYPE_NAIL	0
 #define NGR_TYPE_LASER		1
@@ -906,7 +888,7 @@ enumflags {
 #define PC_SCOUT_INITAMMO_CELL		50 	// Amount of cell ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_ROCKET	0 	// Amount of rocket ammo this class has when respawned
 /* #define PC_SCOUT_GRENADE_TYPE_1	 	// Configured in TeamFortress_SetEquipment() */
-#define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_CONCUSSION	//    <- 2nd Type of Grenade this class has
+#define PC_SCOUT_GRENADE_TYPE_2		GREN_CONC	//    <- 2nd Type of Grenade this class has
 #define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
 #define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
 #define PC_SCOUT_GRENADE_MAX_1		3
@@ -934,8 +916,8 @@ enumflags {
 #define PC_SNIPER_INITAMMO_NAIL		50
 #define PC_SNIPER_INITAMMO_CELL		0
 #define PC_SNIPER_INITAMMO_ROCKET	0
-#define PC_SNIPER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_SNIPER_GRENADE_TYPE_2	GR_TYPE_FLARE
+#define PC_SNIPER_GRENADE_TYPE_1	GREN_NORMAL
+#define PC_SNIPER_GRENADE_TYPE_2	GREN_FLARE
 #define PC_SNIPER_GRENADE_INIT_1	2
 #define PC_SNIPER_GRENADE_INIT_2	3
 #define PC_SNIPER_GRENADE_MAX_1	        4
@@ -962,7 +944,7 @@ enumflags {
 #define PC_SOLDIER_INITAMMO_NAIL	0
 #define PC_SOLDIER_INITAMMO_CELL	0
 #define PC_SOLDIER_INITAMMO_ROCKET	10
-#define PC_SOLDIER_GRENADE_TYPE_1	GR_TYPE_NORMAL
+#define PC_SOLDIER_GRENADE_TYPE_1	GREN_NORMAL
 /* #define PC_SOLDIER_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_SOLDIER_GRENADE_INIT_1	4
 #define PC_SOLDIER_GRENADE_INIT_2	1
@@ -991,8 +973,8 @@ enumflags {
 #define PC_DEMOMAN_INITAMMO_CELL	0
 #define PC_DEMOMAN_INITAMMO_ROCKET	20
 #define PC_DEMOMAN_INITAMMO_DETPACK	1
-#define PC_DEMOMAN_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_DEMOMAN_GRENADE_TYPE_2	GR_TYPE_MIRV
+#define PC_DEMOMAN_GRENADE_TYPE_1	GREN_NORMAL
+#define PC_DEMOMAN_GRENADE_TYPE_2	GREN_MIRV
 #define PC_DEMOMAN_GRENADE_INIT_1	4
 #define PC_DEMOMAN_GRENADE_INIT_2	4
 #define PC_DEMOMAN_GRENADE_MAX_1	4
@@ -1020,7 +1002,7 @@ enumflags {
 #define PC_MEDIC_INITAMMO_CELL		0
 #define PC_MEDIC_INITAMMO_ROCKET	0
 #define PC_MEDIC_INITAMMO_MEDIKIT	50
-#define PC_MEDIC_GRENADE_TYPE_1		GR_TYPE_NORMAL
+#define PC_MEDIC_GRENADE_TYPE_1		GREN_NORMAL
 /* #define PC_MEDIC_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		3
@@ -1058,8 +1040,8 @@ enumflags {
 #define PC_HVYWEAP_INITAMMO_NAIL	0
 #define PC_HVYWEAP_INITAMMO_CELL	30
 #define PC_HVYWEAP_INITAMMO_ROCKET	0
-#define PC_HVYWEAP_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_HVYWEAP_GRENADE_TYPE_2	GR_TYPE_MIRV
+#define PC_HVYWEAP_GRENADE_TYPE_1	GREN_NORMAL
+#define PC_HVYWEAP_GRENADE_TYPE_2	GREN_MIRV
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
 #define PC_HVYWEAP_GRENADE_MAX_1	4
@@ -1086,8 +1068,8 @@ enumflags {
 #define PC_PYRO_INITAMMO_NAIL		0
 #define PC_PYRO_INITAMMO_CELL		120
 #define PC_PYRO_INITAMMO_ROCKET		15
-#define PC_PYRO_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_PYRO_GRENADE_TYPE_2		GR_TYPE_NAPALM
+#define PC_PYRO_GRENADE_TYPE_1		GREN_NORMAL
+#define PC_PYRO_GRENADE_TYPE_2		GREN_NAPALM
 #define PC_PYRO_GRENADE_INIT_1		1
 #define PC_PYRO_GRENADE_INIT_2		4
 #define PC_PYRO_GRENADE_MAX_1		4
@@ -1124,8 +1106,8 @@ enumflags {
 #define PC_SPY_INITAMMO_NAIL		50
 #define PC_SPY_INITAMMO_CELL		10
 #define PC_SPY_INITAMMO_ROCKET		0
-#define PC_SPY_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_SPY_GRENADE_TYPE_2		GR_TYPE_GAS
+#define PC_SPY_GRENADE_TYPE_1		GREN_NORMAL
+#define PC_SPY_GRENADE_TYPE_2		GREN_GAS
 #define PC_SPY_GRENADE_INIT_1		2
 #define PC_SPY_GRENADE_INIT_2		2
 #define PC_SPY_GRENADE_MAX_1		4
@@ -1155,8 +1137,8 @@ enumflags {
 #define PC_ENGINEER_INITAMMO_NAIL	25
 #define PC_ENGINEER_INITAMMO_CELL	100	// synonymous with metal
 #define PC_ENGINEER_INITAMMO_ROCKET	0
-#define PC_ENGINEER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_ENGINEER_GRENADE_TYPE_2	GR_TYPE_EMP
+#define PC_ENGINEER_GRENADE_TYPE_1	GREN_NORMAL
+#define PC_ENGINEER_GRENADE_TYPE_2	GREN_EMP
 #define PC_ENGINEER_GRENADE_INIT_1	2
 #define PC_ENGINEER_GRENADE_INIT_2	2
 #define PC_ENGINEER_GRENADE_MAX_1	4
@@ -1491,14 +1473,12 @@ enumflags {
 #define STAT_CLASS              35
 #define STAT_NO_GREN1           36
 #define STAT_NO_GREN2           37
-#define STAT_TP_GREN1           38
-#define STAT_TP_GREN2           39
-#define STAT_PAUSED             40
-#define STAT_NOFIRE             41
-#define STAT_TEAMNO_ATTACK      42
-#define STAT_ALL_TIME           43
-#define STAT_SPAWN_GEN          44
-#define STAT_ROUND_END          45
+#define STAT_PAUSED             38
+#define STAT_NOFIRE             39
+#define STAT_TEAMNO_ATTACK      40
+#define STAT_ALL_TIME           41
+#define STAT_SPAWN_GEN          42
+#define STAT_ROUND_END          43
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
@@ -1623,7 +1603,6 @@ TFAlias client_aliases[] = {
     {"reload2",                 TF_RELOAD_SLOT2},
     {"reload3",                 TF_RELOAD_SLOT3},
     {"reloadnext",              TF_RELOAD_NEXT},
-    {"grenswitch",              TF_GRENADE_SWITCH},
     {"throwgren",               TF_GRENADE_T},
     {"primeone",                TF_GRENADE_1},
     {"primetwo",                TF_GRENADE_2},

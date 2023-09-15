@@ -452,46 +452,46 @@ string GetGrenName(float type)
     string s = "";
     switch (type)
     {
-        case GR_TYPE_NORMAL:
+        case GREN_NORMAL:
             s = "normal grenade";
             break;
-        case GR_TYPE_NAIL:
+        case GREN_NAIL:
             s = "nail grenade";
             break;
-        case GR_TYPE_MIRV:
+        case GREN_MIRV:
             s = "mirv grenade";
             break;
-        case GR_TYPE_NAPALM:
+        case GREN_NAPALM:
             s = "napalm grenade";
             break;
-        case GR_TYPE_FLARE:
+        case GREN_FLARE:
             s = "flare";
             break;
-        case GR_TYPE_GAS:
+        case GREN_GAS:
             s = "hallucinogenic grenade";
             break;
-        case GR_TYPE_EMP:
+        case GREN_EMP:
             s = "EMP grenade";
             break;
-        case GR_TYPE_CALTROP:
+        case GREN_CALTROP:
             s = "caltrop canister";
             break;
-        case GR_TYPE_FLASH:
+        case GREN_FLASH:
             s = "flash grenade";
             break;
-        case GR_TYPE_CONCUSSION:
+        case GREN_CONC:
             s = "concussion grenade";
             break;
-        case GR_TYPE_BLAST:
+        case GREN_BLAST:
             s = "blast grenade";
             break;
-        case GR_TYPE_SHOCK:
+        case GREN_SHOCK:
             s = "shock grenade";
             break;
-        case GR_TYPE_BURST:
+        case GREN_BURST:
             s = "burst grenade";
             break;
-        case GR_TYPE_NONE:
+        case GREN_NONE:
             s = "no grenade";
             break;
     }
@@ -831,7 +831,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
     proj.classname = "grenade";
     makevectors(user.v_angle);
     if (user.deadflag) {
-        if (timer.weapon == GR_TYPE_NORMAL)
+        if (timer.weapon == GREN_NORMAL)
             proj.velocity = '0 0 200';
         else
             return;
@@ -870,7 +870,7 @@ void (float inp) TeamFortress_PrimeThrowGrenade = {
         TeamFortress_PrimeGrenade(inp, TRUE);
 
     if ( ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1))
-                && self.tp_grenades_1 == GR_TYPE_CALTROP)
+                && self.tp_grenades_1 == GREN_CALTROP)
         TeamFortress_ThrowGrenade();
     }
 };
@@ -896,29 +896,29 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
 
         gtype = self.tp_grenades_1;
 
-        if (gtype == GR_TYPE_CONCUSSION)
+        if (gtype == GREN_CONC)
             gs = "Concussion grenade";
-        else if (gtype == GR_TYPE_NAIL) {
+        else if (gtype == GREN_NAIL) {
             gs = "Nail grenade";
-        } else if (gtype == GR_TYPE_MIRV)
+        } else if (gtype == GREN_MIRV)
             gs = "Mirv grenade";
-        else if (gtype == GR_TYPE_NAPALM)
+        else if (gtype == GREN_NAPALM)
             gs = "Napalm grenade";
-        else if (gtype == GR_TYPE_FLARE)
+        else if (gtype == GREN_FLARE)
             gs = "Flare";
-        else if (gtype == GR_TYPE_GAS)
+        else if (gtype == GREN_GAS)
             gs = "Gas grenade";
-        else if (gtype == GR_TYPE_EMP)
+        else if (gtype == GREN_EMP)
             gs = "EMP grenade";
-        else if (gtype == GR_TYPE_FLASH)
+        else if (gtype == GREN_FLASH)
             gs = "Flash grenade";
-        else if (gtype == GR_TYPE_CALTROP)
+        else if (gtype == GREN_CALTROP)
             gs = "Caltrop canister";
-        else if (gtype == GR_TYPE_BLAST)
+        else if (gtype == GREN_BLAST)
             gs = "Blast grenade";
-        else if (gtype == GR_TYPE_SHOCK)
+        else if (gtype == GREN_SHOCK)
             gs = "Shock grenade";
-        else if (gtype == GR_TYPE_BURST)
+        else if (gtype == GREN_BURST)
             gs = "Burst grenade";
         else
             gs = "Grenade";
@@ -926,7 +926,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
         if (self.no_grenades_1 > 0) {
             self.has_throwngren = TRUE;
             self.no_grenades_1 = self.no_grenades_1 - 1;
-            if (gtype == GR_TYPE_FLARE) {
+            if (gtype == GREN_FLARE) {
                 newmis = spawn();
                 newmis.owner = self;
                 newmis.movetype = 6;
@@ -948,7 +948,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 setorigin(newmis, self.origin);
                 return;
             }
-            if (gtype == GR_TYPE_CALTROP) {
+            if (gtype == GREN_CALTROP) {
                 ptime = ftos(0.5);
                 sprint(self, PRINT_HIGH, "Opening ", gs, "...\n");
             } else {
@@ -966,27 +966,27 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
 
         gtype = self.tp_grenades_2;
 
-        if (gtype == GR_TYPE_CONCUSSION)
+        if (gtype == GREN_CONC)
             gs = "Concussion grenade";
-        else if (gtype == GR_TYPE_NAIL)
+        else if (gtype == GREN_NAIL)
             gs = "Nail grenade";
-        else if (gtype == GR_TYPE_MIRV)
+        else if (gtype == GREN_MIRV)
             gs = "Mirv grenade";
-        else if (gtype == GR_TYPE_NAPALM)
+        else if (gtype == GREN_NAPALM)
             gs = "Napalm grenade";
-        else if (gtype == GR_TYPE_FLARE)
+        else if (gtype == GREN_FLARE)
             gs = "Flare";
-        else if (gtype == GR_TYPE_GAS)
+        else if (gtype == GREN_GAS)
             gs = "Gas grenade";
-        else if (gtype == GR_TYPE_EMP)
+        else if (gtype == GREN_EMP)
             gs = "EMP grenade";
-        else if (gtype == GR_TYPE_FLASH)
+        else if (gtype == GREN_FLASH)
             gs = "Flash grenade";
-        else if (gtype == GR_TYPE_BLAST)
+        else if (gtype == GREN_BLAST)
             gs = "Blast grenade";
-        else if (gtype == GR_TYPE_SHOCK)
+        else if (gtype == GREN_SHOCK)
             gs = "Shock grenade";
-        else if (gtype == GR_TYPE_BURST)
+        else if (gtype == GREN_BURST)
             gs = "Burst grenade";
         else
             gs = "Grenade";
@@ -994,7 +994,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
         if (self.no_grenades_2 > 0) {
             self.has_throwngren = TRUE;
             self.no_grenades_2 = self.no_grenades_2 - 1;
-            if (gtype == GR_TYPE_FLARE) {
+            if (gtype == GREN_FLARE) {
                 newmis = spawn();
                 newmis.owner = self;
                 newmis.movetype = 6;
@@ -1021,7 +1021,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
                 setorigin(newmis, self.origin);
                 return;
             }
-            if (gtype == GR_TYPE_CALTROP) {
+            if (gtype == GREN_CALTROP) {
                 ptime = ftos(0.5);
                 sprint(self, PRINT_HIGH, "Opening ", gs, "...\n");
             } else {
@@ -1038,7 +1038,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
     tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gtype;
-    tGrenade.fpp.gren_type = TF_GREN_conv(gtype);
+    tGrenade.fpp.gren_type = gtype;
 
     tGrenade.classname = "primetimer";
     if (inp == 1)
@@ -1048,7 +1048,7 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
 
     float time_base = max(remote_time(), self.last_throw);
     tGrenade.nextthink = time_base + 0.8;
-    if (gtype == GR_TYPE_CALTROP)
+    if (gtype == GREN_CALTROP)
         tGrenade.heat = time_base + 0.5 + 0.5;
     else {
         tGrenade.heat = time_base + 3 + 0.8;
@@ -1108,7 +1108,7 @@ void () FO_GrenadeThink = {
             self.nextthink = expiry;
         }
     } else {
-        if (self.weapon != GR_TYPE_CALTROP)
+        if (self.weapon != GREN_CALTROP)
             TeamFortress_ExplodePerson();
         dremove(self);
     }
@@ -1143,68 +1143,6 @@ void () TeamFortress_ThrowGrenade = {
 
     self.tfstate |= TFSTATE_GRENTHROWING;
     FO_ThrowGrenade();
-};
-
-void () TeamFortress_GrenadeSwitch = {
-    local string gs;
-
-    if (self.tp_grenade_switch == 1) {
-        self.tp_grenade_switch = 0;
-        if (self.tp_grenades_1 == 2)
-            gs = "Concussion grenade";
-        else if (self.tp_grenades_1 == 3) {
-            gs = "Nail grenade";
-        } else if (self.tp_grenades_1 == 4)
-            gs = "Mirv grenade";
-        else if (self.tp_grenades_1 == 5)
-            gs = "Napalm grenade";
-        else if (self.tp_grenades_1 == 6)
-            gs = "Flare";
-        else if (self.tp_grenades_1 == 7)
-            gs = "Gas grenade";
-        else if (self.tp_grenades_1 == 8)
-            gs = "EMP grenade";
-        else if (self.tp_grenades_1 == 11)
-            gs = "Blast grenade";
-        else if (self.tp_grenades_1 == 12)
-            gs = "Shock grenade";
-        else if (self.tp_grenades_1 == 13)
-            gs = "Burst grenade";
-        else
-            gs = "Grenade";
-    } else {
-        self.tp_grenade_switch = 1;
-        if (self.tp_grenades_2 == 2)
-            gs = "Concussion grenade";
-        else if (self.tp_grenades_2 == 3) {
-            gs = "Nail grenade";
-        } else if (self.tp_grenades_2 == 4)
-            gs = "Mirv grenade";
-        else if (self.tp_grenades_2 == 5)
-            gs = "Napalm grenade";
-        else if (self.tp_grenades_2 == 6)
-            gs = "Flare";
-        else if (self.tp_grenades_2 == 7)
-            gs = "Gas grenade";
-        else if (self.tp_grenades_2 == 8)
-            gs = "EMP grenade";
-        else if (self.tp_grenades_2 == 9)
-            gs = "Flash grenade";
-        else if (self.tp_grenades_2 == 10)
-            gs = "Caltrop canister";
-        else if (self.tp_grenades_2 == 11)
-            gs = "Blast grenade";
-        else if (self.tp_grenades_2 == 12)
-            gs = "Shock grenade";
-        else if (self.tp_grenades_2 == 13)
-            gs = "Burst grenade";
-        else
-            gs = "Grenade";
-    }
-    if (gs == "Caltrop canister" || gs == "Flare")
-        sprint(self, PRINT_HIGH, gs, " is now the primary throwable item\n");
-    else
-        sprint(self, PRINT_HIGH, gs, " is now the primary grenade\n");
 };
 
 float (float pc) IsLegalClass = {
@@ -1568,11 +1506,11 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_2 = role.gren2_limits[1];
 
         if (old_grens == 1 || fo_flash == TRUE)
-            self.tp_grenades_1 = GR_TYPE_FLASH;
+            self.tp_grenades_1 = GREN_FLASH;
         else
-            self.tp_grenades_1 = GR_TYPE_CALTROP;
+            self.tp_grenades_1 = GREN_CALTROP;
 
-        self.tp_grenades_2 = GR_TYPE_CONCUSSION;
+        self.tp_grenades_2 = GREN_CONC;
 
         self.tf_items = PC_SCOUT_TF_ITEMS;
 
@@ -1679,13 +1617,13 @@ void () TeamFortress_SetEquipment = {
 
         switch (nailgren_type) {
             case NGR_TYPE_NAIL:
-                self.tp_grenades_2 = GR_TYPE_NAIL;
+                self.tp_grenades_2 = GREN_NAIL;
                 break;
             case NGR_TYPE_LASER:
-                self.tp_grenades_2 = GR_TYPE_SHOCK;
+                self.tp_grenades_2 = GREN_SHOCK;
                 break;
             case NGR_TYPE_BURST:
-                self.tp_grenades_2 = GR_TYPE_BURST;
+                self.tp_grenades_2 = GREN_BURST;
                 break;
         }
 
@@ -1792,9 +1730,9 @@ void () TeamFortress_SetEquipment = {
 
         self.tp_grenades_1 = PC_MEDIC_GRENADE_TYPE_1;
         if(medic_type == MEDIC_TYPE_BLAST) {
-            self.tp_grenades_2 = GR_TYPE_BLAST;
+            self.tp_grenades_2 = GREN_BLAST;
         } else {
-            self.tp_grenades_2 = GR_TYPE_CONCUSSION;
+            self.tp_grenades_2 = GREN_CONC;
         }
 
         self.tf_items = PC_MEDIC_TF_ITEMS;
@@ -2709,7 +2647,7 @@ void () TeamFortress_ExplodePerson = {
     }
     proj.nextthink = expires;
 
-    if (self.weapon == GR_TYPE_FLARE) {
+    if (self.weapon == GREN_FLARE) {
         sprint(self.owner, PRINT_HIGH, "Flare lit\n");
         te = spawn();
         te.touch = SUB_Null;
@@ -2747,7 +2685,7 @@ void () TeamFortress_ExplodePerson = {
         bprint(PRINT_MEDIUM, "Ack! ", self.owner.netname,
                 "! The grenade is your friend for another reason!\n");
     else if (self.owner.playerclass == PC_MEDIC) {
-        if (self.weapon == GR_TYPE_BLAST) {
+        if (self.weapon == GREN_BLAST) {
             if (medic_type == MEDIC_TYPE_BLAST) {
                 bprint(PRINT_MEDIUM, "Nice one ", self.owner.netname,
                         ", you forgot to throw your blast grenade!\n");

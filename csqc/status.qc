@@ -49,26 +49,22 @@ void(PanelID ignored, string text) drawCapsPanel = {
 };
 
 void(PanelID panelid, string text) drawGren1Panel = {
-    local float playerclass = SBAR.PlayerClass;
+    float playerclass = SBAR.PlayerClass;
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
 
-    local float gren_type = getstatf(STAT_TP_GREN1);
-    local string icon = GrenadeIcons[gren_type].icon;
-
+    string icon = FO_ClassGren(playerclass, 0)->icon;
     drawIconPanel(HUDP_GREN1, text, icon);
 };
 
 void(PanelID ignored, string text) drawGren2Panel = {
-    local float playerclass = SBAR.PlayerClass;
+    float playerclass = SBAR.PlayerClass;
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
 
-    local float gren_type = getstatf(STAT_TP_GREN2);
-    local string icon = GrenadeIcons[gren_type].icon;
-
+    string icon = FO_ClassGren(playerclass, 1)->icon;
     drawIconPanel(HUDP_GREN2, text, icon);
 };
 
@@ -114,8 +110,8 @@ void(PanelID panelid, string text) drawGrenTimerPanel = {
         // grenade primed, we can obscure this by always considering
         // grenades after the first as primed.
         float alpha = (gt.is_thrown() || timercount) ? 0.3 : 1.0;
-        Hud_DrawPanelLMP(&panel2, ftos(timeleft),
-                GrenadeIcons[gt.grentype()].icon, alpha);
+        string icon = FO_GrenDesc(gt.grentype())->icon;
+        Hud_DrawPanelLMP(&panel2, ftos(timeleft), icon, alpha);
         panel2.Position = panel2.Position +
             [0, panel2.FillSize.y * panel2.Scale];
         timercount++;

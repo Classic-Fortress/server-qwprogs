@@ -157,33 +157,12 @@ enum {
     GREN_NONE,
 };
 
-// TODO: Just remove this legacy encoding.
-int TF_GREN_conv(int tf_gren) {
-    switch (tf_gren) {
-        case GR_TYPE_NORMAL: return GREN_NORMAL;
-        case GR_TYPE_CONCUSSION: return GREN_CONC;
-        case GR_TYPE_BLAST: return GREN_BLAST;
-        case GR_TYPE_NAIL: return GREN_NAIL;
-        case GR_TYPE_SHOCK: return GREN_SHOCK;
-        case GR_TYPE_BURST: return GREN_BURST;
-        case GR_TYPE_MIRV: return GREN_MIRV;
-        case GR_TYPE_NAPALM: return GREN_NAPALM;
-        case GR_TYPE_FLARE: return GREN_FLARE;
-        case GR_TYPE_GAS: return GREN_GAS;
-        case GR_TYPE_EMP: return GREN_EMP;
-        case GR_TYPE_FLASH: return GREN_FLASH;
-        case GR_TYPE_CALTROP: return GREN_CALTROP;
-    };
-
-    error("unrecognized grenade type");
-    return -1;
-}
-
 struct FO_GrenInfo {
     int id;
     string logname;
     string model;
     int skin;
+    string icon;
     vector avelocity;
 
     // Automatically initialized below this line.
@@ -191,22 +170,22 @@ struct FO_GrenInfo {
 };
 
 FO_GrenInfo fo_grenades[] = {
-    { GREN_NORMAL,  "normal",    "hgren2.mdl",    0, '300 300 300',},
-    { GREN_CONC,    "concussion", "hgren2.mdl",    1, '300 300 300'},
-    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, '300 300 300'},
-    { GREN_NAIL,    "nail",       "biggren.mdl",   1, '0 300 0'},
-    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_BURST,   "burst",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, '0 300 0'},
-    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, '0 300 0'},
-    { GREN_FLARE,   "flare",      "flare.mdl",     1, '300 300 300'},
-    { GREN_GAS,     "gas",        "grenade2.mdl",  3, '300 300 300'},
-    { GREN_EMP,     "emp",        "grenade2.mdl",  4, '300 300 300'},
-    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, '300 300 300'},
-    { GREN_CALTROP, "caltrop",    "",              0, '300 300 300'},
-    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, '250 300 400'},
-    { GREN_RED,     "gl",         "grenade2.mdl",  1, '300 300 300'},
-    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, '300 300 300'},
+    { GREN_NORMAL,  "normal",    "hgren2.mdl",     0, ICON_GREN_NORMAL, '300 300 300',},
+    { GREN_CONC,    "concussion", "hgren2.mdl",    1, ICON_GREN_CONCUSSION, '300 300 300'},
+    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, ICON_GREN_NAIL, '300 300 300'},
+    { GREN_NAIL,    "nail",       "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_BURST,   "burst",      "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, ICON_GREN_MIRV, '0 300 0'},
+    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, ICON_GREN_NAPALM, '0 300 0'},
+    { GREN_FLARE,   "flare",      "flare.mdl",     1, ICON_GREN_FLARE, '300 300 300'},
+    { GREN_GAS,     "gas",        "grenade2.mdl",  3, ICON_GREN_GAS, '300 300 300'},
+    { GREN_EMP,     "emp",        "grenade2.mdl",  4, ICON_GREN_EMP, '300 300 300'},
+    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, ICON_GREN_FLASH, '300 300 300'},
+    { GREN_CALTROP, "caltrop",    "",              0, ICON_GREN_CALTROP, '300 300 300'},
+    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, ICON_GREN_NONE, '250 300 400'},
+    { GREN_RED,     "gl",         "grenade2.mdl",  1, ICON_GREN_NONE, '300 300 300'},
+    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, ICON_GREN_NONE, '300 300 300'},
 };
 
 enum {
@@ -267,9 +246,9 @@ FO_ClassGrenades class_grenades[] = {
     { PC_CIVILIAN,  {GREN_NONE,   GREN_NONE} },
 };
 
-FO_GrenInfo* FO_GrenDesc(int gren_type) {
+FO_GrenInfo* FO_GrenDesc(float gren_type) {
     if (gren_type < GREN_FIRST) {
-        printf("proj missing gren_type, tell newby\n");
+        printf("proj missing gren_type [%d], tell newby\n", gren_type);
         gren_type = GREN_FIRST;
     }
     return &fo_grenades[gren_type - GREN_FIRST];

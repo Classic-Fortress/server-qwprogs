@@ -712,37 +712,9 @@ void () weapon_lightning = {
     StartItem();
 };
 
-void (entity pl, float typ) PrintGrenadeType = {
-    local string st;
-    st = "";
-
-    if (typ == GR_TYPE_NORMAL) {
-        st = "normal";
-    } else if (typ == GR_TYPE_CONCUSSION) {
-        st = "concussion";
-    } else if (typ == GR_TYPE_NAIL) {
-        st = "nail";
-    } else if (typ == GR_TYPE_MIRV) {
-        st = "mirv";
-    } else if (typ == GR_TYPE_NAPALM) {
-        st = "napalm";
-    } else if (typ == GR_TYPE_FLARE) {
-        st = "flare";
-    } else if (typ == GR_TYPE_GAS) {
-        st = "gas";
-    } else if (typ == GR_TYPE_EMP) {
-        st = "EMP";
-    } else if (typ == GR_TYPE_CALTROP) {
-        st = "caltrop";
-    } else if (typ == GR_TYPE_FLASH) {
-        st = "flash";
-    } else if (typ == GR_TYPE_BLAST) {
-        st = "blast";
-    } else if (typ == GR_TYPE_SHOCK) {
-        st = "shock";
-    } else if (typ == GR_TYPE_BURST) {
-        st = "burst";
-    }
+void (entity pl, float type) PrintGrenadeType = {
+    // TODO: this is still awful
+    string st = FO_GrenDesc(type)->logname;
     sprint(pl, PRINT_HIGH, st);
 };
 
@@ -756,7 +728,7 @@ void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoun
     else
         sprint(pe_player, PRINT_HIGH, "a ");
     PrintGrenadeType(pe_player, pf_grenade_type);
-    if (pf_grenade_type == GR_TYPE_CALTROP)
+    if (pf_grenade_type == GREN_CALTROP)
         sprint(pe_player, PRINT_HIGH, " canister");
     else
         sprint(pe_player, PRINT_HIGH, " grenade");
