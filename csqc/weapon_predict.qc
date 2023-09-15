@@ -42,6 +42,10 @@ inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
 inline float WPP_ViewModelMask() { return pengine.view_mask; }
 
+float WP_PlayerClass() {
+    return pstate_server.playerclass;
+}
+
 float WP_MinPing() {
     if (CVARF(wpp_min_ping) == -1)
         return fo_config.wp_default_min_ping_ms;

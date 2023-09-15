@@ -49,7 +49,7 @@ void(PanelID ignored, string text) drawCapsPanel = {
 };
 
 void(PanelID panelid, string text) drawGren1Panel = {
-    float playerclass = SBAR.PlayerClass;
+    float playerclass = WP_PlayerClass();
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
@@ -59,7 +59,7 @@ void(PanelID panelid, string text) drawGren1Panel = {
 };
 
 void(PanelID ignored, string text) drawGren2Panel = {
-    float playerclass = SBAR.PlayerClass;
+    float playerclass = WP_PlayerClass();
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
@@ -69,8 +69,8 @@ void(PanelID ignored, string text) drawGren2Panel = {
 };
 
 void(PanelID ignored, string text) drawSpecial = {
-    if (SBAR.PlayerClass || fo_hud_editor)
-        Hud_DrawClassInfoPanel(SBAR.PlayerClass);
+    if (WP_PlayerClass() || fo_hud_editor)
+        Hud_DrawClassInfoPanel(WP_PlayerClass());
 };
 
 void(PanelID panelid, string text) drawGrenTimerPanel = {
@@ -125,7 +125,7 @@ void(PanelID panelid, string text) drawFacePanel = {
     if (!CVARF(fo_fte_hud))
         return;
 
-    local float playerclass = SBAR.PlayerClass; //we could add different faces per class?
+    local float playerclass = WP_PlayerClass(); //we could add different faces per class?
 
     local string icon = FaceInvisibleInvulnerableIcon.icon;
     
@@ -164,7 +164,7 @@ void(PanelID panelid, string text) drawArmourPanel = {
     if(!CVARF(fo_fte_hud))
         return;
 
-    local float playerclass = SBAR.PlayerClass;
+    local float playerclass = WP_PlayerClass();
 
     local string icon = fo_hud_editor?ArmourIcons[1].icon:"";
     
@@ -1099,7 +1099,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
     {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0,0, drawGren1Panel, {return ftos(WP_GrenCount(1));}},
     {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0,0, drawGren2Panel, {return ftos(WP_GrenCount(2));}},
-    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0,0, drawSpecial, {return ftos(WP_PlayerClass());}},
     {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, 0, drawIdentify, {return SBAR.Identify;}},
     {HUDP_FLAGINFO, "flaginfo", FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0,0, drawFlagInfo, {return "";}},
     {HUDP_GRENTIMER, "grentimer", FO_HUD_GRENTIMER_NAME,   '100 110', '26 26',  1,0,1,0,0, drawGrenTimerPanel, {return "";}},

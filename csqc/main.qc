@@ -412,14 +412,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
             break;
         case "+rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+            if (WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO)
                 localcmd("+button4\n");
-            }
             break;
         case "-rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+            if (WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO)
                 localcmd("-button4\n");
-            }
             break;
         case "wpp_status":
             WPP_Status();
@@ -677,7 +675,6 @@ void _Sync_ServerCommandFrame() {
 
     team_no = getstatf(STAT_TEAMNO);
     all_time = getstatf(STAT_ALL_TIME);
-    player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
 
     game_state.localentnum = player_localentnum;

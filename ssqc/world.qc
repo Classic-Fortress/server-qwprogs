@@ -332,7 +332,6 @@ void () worldspawn = {
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
     clientstat(STAT_ALL_TIME, EV_FLOAT, all_time);
     clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
-    clientstat(STAT_CLASS, EV_FLOAT, playerclass);
     clientstat(STAT_SPAWN_GEN,EV_FLOAT, spawn_gen);
 
     globalstat(STAT_ROUND_END, EV_FLOAT, "round_end_time");
