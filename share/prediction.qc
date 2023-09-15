@@ -5,7 +5,7 @@
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
 
-string wp_version = "v1.0";
+string wp_version = "v1.1";
 
 enumflags {
     FOWP_CTIME,
@@ -14,6 +14,7 @@ enumflags {
     FOWP_LASTPRIME,
     FOWP_CONCFINISH,
     FOWP_CLIP,
+    FOWP_GREN,
     FOWP_THINK,
     FOWP_WF,
     FOWP_AF,
@@ -22,6 +23,7 @@ enumflags {
     FOWP_RNG0,
     FOWP_RNG1,
     FOWP_PREDICT_FLAGS,
+    FOWP_LAST,
 };
 
 enumflags {
@@ -68,6 +70,8 @@ struct predict_tf_state {
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
+
+    float no_grenades_1, no_grenades_2, gren_exp;
 
 #ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
@@ -303,7 +307,7 @@ predict_tf_state pstate_pred, pstate_server;
 #endif
 
 #ifdef SSQC
-#define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
+#define OP1(_op, _f1)                       (player.predict_state.##_f1 _op src.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
 #define OP3(_op, _j, _f1, _f2, _f3)         OP2(_op, _j, _f2, _f3)      _j OP1(_op, _f1)
 #define OP4(_op, _j, _f1, _f2, _f3, _f4)    OP3(_op, _j, _f2, _f3, _f4) _j OP1(_op, _f1)
@@ -312,19 +316,14 @@ predict_tf_state pstate_pred, pstate_server;
 #define M3(_bit, _f1, _f2, _f3) if (OP3(!=, ||, _f1, _f2, _f3)) { mask |= _bit; OP3(=, ;, _f1, _f2, _f3); }
 #define M4(_bit, _f1, _f2, _f3, _f4) if (OP4(!=, ||, _f1, _f2, _f3, _f4)) { mask |= _bit; OP4(=, ;, _f1, _f2, _f3, _f4); }
 
-.float last_full_predict_refresh;
+.float pred_lastforce;
+.float pred_forcebit;
 
-void Predict_Update() {
-    entity pe = self.predict_entity;
-    if (pe != __NULL__)
-        pe.SendFlags = 1;  // Will compute what to send.
-}
-
-static float Prediction_ChangedMask(entity player) {
+static float Prediction_ChangedMask(entity player, entity src) {
     float mask = FOWP_CTIME;
 
-    player.predict_state.client_time = player.client_time;
-    player.predict_state.client_ping = player.client_ping;
+    player.predict_state.client_time = src.client_time;
+    player.predict_state.client_ping = src.client_ping;
 
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
@@ -337,14 +336,33 @@ static float Prediction_ChangedMask(entity player) {
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
     M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
-    M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
+    M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
+    M3(FOWP_GREN, no_grenades_1, no_grenades_2, gren_exp)
 
-    if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
-        player.last_full_predict_refresh = time;
-        return 0xFFFFFF;
+    // Rotate through forced update fields.
+    if (time - player.pred_lastforce >= 100 * MSEC) {
+        player.pred_lastforce = time;
+
+        player.pred_forcebit <<= 1;
+        if (player.pred_forcebit >= FOWP_LAST)
+            player.pred_forcebit = 1;
+
+        mask |= player.pred_forcebit;
     }
 
     return mask;
+}
+
+void Predict_InitPlayer(entity player);
+void Predict_Update() {
+    Predict_InitPlayer(self);
+
+    // When spectating, goalentity is our target.
+    entity src = self.goalentity;
+    if (!src)
+        src = self;
+
+    self.predict_entity.SendFlags |= Prediction_ChangedMask(self, src);
 }
 
 #undef OP1
@@ -417,11 +435,9 @@ void EntUpdate_Config() {
 
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
-float WP_SendEntity(entity to_player, float ignored) {
+float WP_SendEntity(entity to_player, float sendflags) {
     if (to_player != self.owner)
         return FALSE;
-
-    float sendflags = Prediction_ChangedMask(self.owner);
 
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
@@ -492,6 +508,12 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Int, prng_base[PRNG_WEAP]);
     if (sendflags & FOWP_RNG1)
         COMM(Int, prng_base[PRNG_HWGUY]);
+
+    if (sendflags & FOWP_GREN) {
+        COMM(Short, no_grenades_1);
+        COMM(Short, no_grenades_2);
+        COMM(Float, gren_exp);
+    }
 
 #ifdef SSQC
     return TRUE;
@@ -722,19 +744,9 @@ void Predict_Init() {
     config_entity.nextthink = time + 0.5;
 }
 
-.float wpp_init;
 void Predict_InitPlayer(entity player) {
-    // PutClientInServer is called every spawn.  At some point we'll clean up
-    // parameter decode so that it can happen earlier and this nonsense goes
-    // away.
-    if (player.wpp_init)
+    if (player.predict_entity)
         return;
-    player.wpp_init = TRUE;
-
-    if (!infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
-        bprint(PRINT_HIGH, player.netname, " is using a legacy non-CSQC client.\n");
-        return;
-    }
 
     sprint(player, PRINT_HIGH,
             "FortressOne: Weapon Prediction ", wp_version, "\n");
@@ -747,6 +759,7 @@ void Predict_InitPlayer(entity player) {
     pe.SendEntity = WP_SendEntity;
     setorigin(pe, [0, 0, 0]);
 
+    player.pred_forcebit = 1;
     player.predict_entity = pe;
 }
 

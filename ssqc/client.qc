@@ -20,7 +20,6 @@ float (float pc) IsLegalClass;
 void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
-void () RemoveGrenadeTimers;
 void () RemovePrimeTimers;
 void () RemoveGasTimers;
 void () RemoveGrenades;
@@ -450,9 +449,6 @@ void () DecodeLevelParms = {
         // maximum grenades type 2 to drop in backpack [0]
         drop_gren2 = CF_GetSetting("dg2", "drop_gren2", "0");
 
-        // display grenade timer in status bar [on]
-        grentimers = CF_GetSetting("gt", "grentimers", "on");
-
         // show sentry gun health + misc extras in id string [on]
         id_extended = CF_GetSetting("ie", "id_extended", "on");
 
@@ -833,7 +829,6 @@ void () DecodeLevelParms = {
             drop_grenpack = TRUE;
             drop_gren1 = 1;
             drop_gren2 = 0;
-            grentimers = TRUE;
             id_extended = TRUE;
             remember_weapon = TRUE;
             discammo_pickup = FALSE;
@@ -903,7 +898,6 @@ void () DecodeLevelParms = {
             drop_grenpack = FALSE;
             drop_gren1 = 0;
             drop_gren2 = 0;
-            grentimers = FALSE;
             id_extended = FALSE;
             remember_weapon = FALSE;
             discammo_pickup = TRUE;
@@ -1006,7 +1000,6 @@ void () DecodeLevelParms = {
             localcmd("localinfo server_sbflaginfo 0\n");
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
-            grentimers = FALSE;
             Role_None.gren2_limits[1] = 3;
             Role_None.gren2_limits[3] = 2;
             Role_None.gren2_limits[4] = 4;
@@ -1486,7 +1479,6 @@ void () StartSpawnGuard = {
 void () DuelFinish = {
     FO_Sound(world, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NONE);
     NextLevel();
-    RemoveGrenadeTimers();
     RemovePrimeTimers();
     RemoveGrenades();
 };
@@ -2431,7 +2423,6 @@ void () CheckRules = {
         if ((timelimit && (time >= timelimit)))
         {
             NextLevel();
-            RemoveGrenadeTimers();
             RemovePrimeTimers();
             RemoveGrenades();
         }
@@ -2439,7 +2430,6 @@ void () CheckRules = {
     if ((fraglimit && (self.frags >= fraglimit)))
     {
         NextLevel();
-        RemoveGrenadeTimers();
         RemovePrimeTimers();
         RemoveGrenades();
     }
@@ -3046,12 +3036,15 @@ void () UpdateAllClientsTeamScores = {
 
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void () ClientConnect = {
-    local float csqc_active = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-    local string st;
-    local float got_one;
+    if (!infokeyf(self,INFOKEY_P_CSQCACTIVE)) {
+        sprint(self, PRINT_HIGH, "FTE/CSQC is required for this server, please download the latest client package at www.fortressone.org\n");
+        dropclient(self);
+        return;
+    }
+
+    bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     spawnfunc_FOPlayer();
-    bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
 
@@ -3065,8 +3058,6 @@ void () ClientConnect = {
     if (loginRequired && self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
-    TeamFortress_Alias("id", TF_ID, 0);
-
     TeamFortress_ExecMapScript(self);
     self.has_disconnected = 0;
 
@@ -3075,39 +3066,33 @@ void () ClientConnect = {
         GotoNextMap();
     }
 
-    st = infokey(self, "apw");
+    string st = infokey(self, "apw");
     if (st == string_null)
         st = infokey(self, "adminpwd");
     if (st) {
         Admin_Check(st);
-        if (self.is_admin) 
+        if (self.is_admin)
             Admin_Aliases();
         else
             self.is_admin = FALSE;
     }
 
     if (clanbattle && (self.has_disconnected != 1)) {
-        got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
         if (!loginRequired) {
-            if ((st != string_null) && (self.tf_id != 0)) {
-                got_one = RejoinWithTfId();
-            }
-            if (!got_one) {
+            if ((st != string_null) && (self.tf_id != 0))
+                RejoinWithTfId();
+            else
                 CreateTfIdAndJoin();
-            }
         }
     }
 
-    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        InitAllStatuses(self);
-        UpdateClientMOTD(self);
-        UpdateClientTeamScores(self);
-        //if(quadmode)
-        UpdateClientPrematch(self, !cb_prematch);
-        UpdateClient_VoteMap_AddAll(self);
-    }
+    InitAllStatuses(self);
+    UpdateClientMOTD(self);
+    UpdateClientTeamScores(self);
+    UpdateClientPrematch(self, !cb_prematch);
+    UpdateClient_VoteMap_AddAll(self);
 
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

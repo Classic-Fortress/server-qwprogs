@@ -160,4 +160,6 @@ void () SpectatorThink = {
     if (time >= self.StatusRefreshTime) {
         RefreshStatusBar(self);
     }
+
+    Predict_Update();
 };

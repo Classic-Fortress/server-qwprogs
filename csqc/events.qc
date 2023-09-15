@@ -549,9 +549,9 @@ void ParseSBAR()
     SBAR.ClipSize = readstring();
     SBAR.FragStreak = readfloat();
     SBAR.Caps = readfloat();
-    SBAR.PlayerClass = readfloat();
+    float class_info = readfloat();
 
-    switch (SBAR.PlayerClass)
+    switch (class_info)
     {
         case PC_SCOUT:
             SBAR.ScannerOn = readfloat();

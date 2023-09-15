@@ -1273,8 +1273,7 @@ void FO_Menu_Special(float force) = {
         return;
     
     fo_menu* NewMenu = __NULL__;
-    //void(float) nm;
-    switch (SBAR.PlayerClass) {
+    switch (WP_PlayerClass()) {
         case PC_SCOUT:
             NewMenu = &FO_MENU_SCOUT;
             //nm = FO_Menu_Scout;
@@ -1300,8 +1299,7 @@ void FO_Menu_Special(float force) = {
         Menu_Cancel();
         return;
     }
-    //CurrentMenu = NewMenu;
-    switch (SBAR.PlayerClass) {
+    switch (WP_PlayerClass()) {
         case PC_SCOUT:
             FO_Menu_Scout(force, FALSE, FALSE); //TODO: fix scanner settings
             break;

@@ -42,6 +42,10 @@ inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
 inline float WPP_ViewModelMask() { return pengine.view_mask; }
 
+float WP_PlayerClass() {
+    return pstate_server.playerclass;
+}
+
 float WP_MinPing() {
     if (CVARF(wpp_min_ping) == -1)
         return fo_config.wp_default_min_ping_ms;
@@ -987,9 +991,6 @@ float WP_ReloadPercent() {
 }
 
 string WP_GetClip() {
-    if (!WP_Enabled())
-        return SBAR.ClipSize;
-
     Slot slot = CurrentSlot();
     FO_WeapInfo* wi = SlotWI(slot);
 
@@ -1532,6 +1533,10 @@ static float CanThrowGrenade(int gren_type) {
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
 
+float WP_GrenCount(float index) {
+    return index == 1 ? pstate_pred.no_grenades_1 : pstate_pred.no_grenades_2;
+}
+
 static void W_PrimeGren(float index) {
     if (!game_state.is_alive || getstatf(STAT_NOFIRE))
         return;
@@ -1540,13 +1545,15 @@ static void W_PrimeGren(float index) {
         return;
 
     index -= 1;  // We work with zero-based index here.
-    float stat = index == 0 ? STAT_NO_GREN1 : STAT_NO_GREN2;
-    if (getstatf(stat) < 1)
+    float* gc = index == 0 ? &pstate_pred.no_grenades_1 :
+                             &pstate_pred.no_grenades_2;
+    if (*gc < 1)
         return;  // No grenades left
 
     float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
 
     pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
+    *gc -= 1;
     if (IsEffectFrame())
         ParseGrenPrimed(gren, time, time + 3.8);
 }
