@@ -987,9 +987,6 @@ float WP_ReloadPercent() {
 }
 
 string WP_GetClip() {
-    if (!WP_Enabled())
-        return SBAR.ClipSize;
-
     Slot slot = CurrentSlot();
     FO_WeapInfo* wi = SlotWI(slot);
 

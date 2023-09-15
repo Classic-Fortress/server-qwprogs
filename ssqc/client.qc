@@ -3055,7 +3055,6 @@ void () ClientConnect = {
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     spawnfunc_FOPlayer();
-    Predict_InitPlayer(self);
 
     self.motd = 0;
 
