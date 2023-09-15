@@ -248,7 +248,8 @@ class FOPlayer {
     };
 
     nonvirtual void() RewindUpdate = {
-        RewindLog(rewind_);
+        if (rewind_)
+            RewindLog(rewind_);
     };
 
     nonvirtual void(float when) RewindExcept = {

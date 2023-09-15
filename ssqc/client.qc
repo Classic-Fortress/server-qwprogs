@@ -3046,12 +3046,16 @@ void () UpdateAllClientsTeamScores = {
 
 //do not rely on csqcactive - it may misbehave when using `join` from spectator
 void () ClientConnect = {
-    local float csqc_active = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-    local string st;
-    local float got_one;
+    if (!infokeyf(self,INFOKEY_P_CSQCACTIVE)) {
+        sprint(self, PRINT_HIGH, "FTE/CSQC is required for this server, please download the latest client package at www.fortressone.org\n");
+        dropclient(self);
+        return;
+    }
+
+    bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     spawnfunc_FOPlayer();
-    bprint(PRINT_HIGH, self.netname, " entered the game\n");
+    Predict_InitPlayer(self);
 
     self.motd = 0;
 
@@ -3065,8 +3069,6 @@ void () ClientConnect = {
     if (loginRequired && self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
-    TeamFortress_Alias("id", TF_ID, 0);
-
     TeamFortress_ExecMapScript(self);
     self.has_disconnected = 0;
 
@@ -3075,39 +3077,33 @@ void () ClientConnect = {
         GotoNextMap();
     }
 
-    st = infokey(self, "apw");
+    string st = infokey(self, "apw");
     if (st == string_null)
         st = infokey(self, "adminpwd");
     if (st) {
         Admin_Check(st);
-        if (self.is_admin) 
+        if (self.is_admin)
             Admin_Aliases();
         else
             self.is_admin = FALSE;
     }
 
     if (clanbattle && (self.has_disconnected != 1)) {
-        got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
         if (!loginRequired) {
-            if ((st != string_null) && (self.tf_id != 0)) {
-                got_one = RejoinWithTfId();
-            }
-            if (!got_one) {
+            if ((st != string_null) && (self.tf_id != 0))
+                RejoinWithTfId();
+            else
                 CreateTfIdAndJoin();
-            }
         }
     }
 
-    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        InitAllStatuses(self);
-        UpdateClientMOTD(self);
-        UpdateClientTeamScores(self);
-        //if(quadmode)
-        UpdateClientPrematch(self, !cb_prematch);
-        UpdateClient_VoteMap_AddAll(self);
-    }
+    InitAllStatuses(self);
+    UpdateClientMOTD(self);
+    UpdateClientTeamScores(self);
+    UpdateClientPrematch(self, !cb_prematch);
+    UpdateClient_VoteMap_AddAll(self);
 
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");
