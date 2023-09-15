@@ -887,8 +887,6 @@ enumflags {
 #define PC_SCOUT_INITAMMO_NAIL		100	// Amount of nail ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_CELL		50 	// Amount of cell ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_ROCKET	0 	// Amount of rocket ammo this class has when respawned
-/* #define PC_SCOUT_GRENADE_TYPE_1	 	// Configured in TeamFortress_SetEquipment() */
-#define PC_SCOUT_GRENADE_TYPE_2		GREN_CONC	//    <- 2nd Type of Grenade this class has
 #define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
 #define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
 #define PC_SCOUT_GRENADE_MAX_1		3
@@ -916,8 +914,6 @@ enumflags {
 #define PC_SNIPER_INITAMMO_NAIL		50
 #define PC_SNIPER_INITAMMO_CELL		0
 #define PC_SNIPER_INITAMMO_ROCKET	0
-#define PC_SNIPER_GRENADE_TYPE_1	GREN_NORMAL
-#define PC_SNIPER_GRENADE_TYPE_2	GREN_FLARE
 #define PC_SNIPER_GRENADE_INIT_1	2
 #define PC_SNIPER_GRENADE_INIT_2	3
 #define PC_SNIPER_GRENADE_MAX_1	        4
@@ -944,8 +940,6 @@ enumflags {
 #define PC_SOLDIER_INITAMMO_NAIL	0
 #define PC_SOLDIER_INITAMMO_CELL	0
 #define PC_SOLDIER_INITAMMO_ROCKET	10
-#define PC_SOLDIER_GRENADE_TYPE_1	GREN_NORMAL
-/* #define PC_SOLDIER_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_SOLDIER_GRENADE_INIT_1	4
 #define PC_SOLDIER_GRENADE_INIT_2	1
 #define PC_SOLDIER_GRENADE_MAX_1	4
@@ -973,8 +967,6 @@ enumflags {
 #define PC_DEMOMAN_INITAMMO_CELL	0
 #define PC_DEMOMAN_INITAMMO_ROCKET	20
 #define PC_DEMOMAN_INITAMMO_DETPACK	1
-#define PC_DEMOMAN_GRENADE_TYPE_1	GREN_NORMAL
-#define PC_DEMOMAN_GRENADE_TYPE_2	GREN_MIRV
 #define PC_DEMOMAN_GRENADE_INIT_1	4
 #define PC_DEMOMAN_GRENADE_INIT_2	4
 #define PC_DEMOMAN_GRENADE_MAX_1	4
@@ -1002,8 +994,6 @@ enumflags {
 #define PC_MEDIC_INITAMMO_CELL		0
 #define PC_MEDIC_INITAMMO_ROCKET	0
 #define PC_MEDIC_INITAMMO_MEDIKIT	50
-#define PC_MEDIC_GRENADE_TYPE_1		GREN_NORMAL
-/* #define PC_MEDIC_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		3
 #define PC_MEDIC_GRENADE_MAX_1		4
@@ -1040,8 +1030,6 @@ enumflags {
 #define PC_HVYWEAP_INITAMMO_NAIL	0
 #define PC_HVYWEAP_INITAMMO_CELL	30
 #define PC_HVYWEAP_INITAMMO_ROCKET	0
-#define PC_HVYWEAP_GRENADE_TYPE_1	GREN_NORMAL
-#define PC_HVYWEAP_GRENADE_TYPE_2	GREN_MIRV
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
 #define PC_HVYWEAP_GRENADE_MAX_1	4
@@ -1068,8 +1056,6 @@ enumflags {
 #define PC_PYRO_INITAMMO_NAIL		0
 #define PC_PYRO_INITAMMO_CELL		120
 #define PC_PYRO_INITAMMO_ROCKET		15
-#define PC_PYRO_GRENADE_TYPE_1		GREN_NORMAL
-#define PC_PYRO_GRENADE_TYPE_2		GREN_NAPALM
 #define PC_PYRO_GRENADE_INIT_1		1
 #define PC_PYRO_GRENADE_INIT_2		4
 #define PC_PYRO_GRENADE_MAX_1		4
@@ -1106,8 +1092,6 @@ enumflags {
 #define PC_SPY_INITAMMO_NAIL		50
 #define PC_SPY_INITAMMO_CELL		10
 #define PC_SPY_INITAMMO_ROCKET		0
-#define PC_SPY_GRENADE_TYPE_1		GREN_NORMAL
-#define PC_SPY_GRENADE_TYPE_2		GREN_GAS
 #define PC_SPY_GRENADE_INIT_1		2
 #define PC_SPY_GRENADE_INIT_2		2
 #define PC_SPY_GRENADE_MAX_1		4
@@ -1137,8 +1121,6 @@ enumflags {
 #define PC_ENGINEER_INITAMMO_NAIL	25
 #define PC_ENGINEER_INITAMMO_CELL	100	// synonymous with metal
 #define PC_ENGINEER_INITAMMO_ROCKET	0
-#define PC_ENGINEER_GRENADE_TYPE_1	GREN_NORMAL
-#define PC_ENGINEER_GRENADE_TYPE_2	GREN_EMP
 #define PC_ENGINEER_GRENADE_INIT_1	2
 #define PC_ENGINEER_GRENADE_INIT_2	2
 #define PC_ENGINEER_GRENADE_MAX_1	4
@@ -1165,8 +1147,6 @@ enumflags {
 #define PC_CIVILIAN_INITAMMO_NAIL	0
 #define PC_CIVILIAN_INITAMMO_CELL	0
 #define PC_CIVILIAN_INITAMMO_ROCKET	0
-#define PC_CIVILIAN_GRENADE_TYPE_1	0
-#define PC_CIVILIAN_GRENADE_TYPE_2	0
 #define PC_CIVILIAN_GRENADE_INIT_1	0
 #define PC_CIVILIAN_GRENADE_INIT_2	0
 #define PC_CIVILIAN_GRENADE_MAX_1	0
@@ -1471,8 +1451,6 @@ enumflags {
 #define STAT_TEAMNO             33
 #define STAT_FLAGS              34
 #define STAT_CLASS              35
-#define STAT_NO_GREN1           36
-#define STAT_NO_GREN2           37
 #define STAT_PAUSED             38
 #define STAT_NOFIRE             39
 #define STAT_TEAMNO_ATTACK      40

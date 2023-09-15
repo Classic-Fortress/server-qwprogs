@@ -738,28 +738,24 @@ void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoun
 };
 
 float () GetGrenadePossibility = {
-    local float maxg;
-
-    if (random() < 0.500) {
+    if (random() < 0.500)
         return 0;
-    }
-    if (random() < 0.500) {
-        maxg = other.max_grenades_1;
-        if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
-            other.no_grenades_1 = other.no_grenades_1 + 1;
-            PrintFoundGrenade(other, other.tp_grenades_1, 1);
-            return 1;
-        }
-    } else {
-        maxg = other.max_grenades_2;
-        if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
-            other.no_grenades_2 = other.no_grenades_2 + 1;
-            PrintFoundGrenade(other, other.tp_grenades_2, 1);
-            return 1;
-        }
-    }
-    return 0;
-};
+
+    float index = random() < 0.5 ? 0 : 1;
+    FO_GrenInfo* gt = FO_PlayerGren(other, index);
+    if (gt->id == GREN_NONE)
+        return 0;
+
+    if (index == 0 && other.no_grenades_1 < other.max_grenades_1)
+        other.no_grenades_1 += 1;
+    else if (index == 1 && other.no_grenades_2 < other.max_grenades_2)
+        other.no_grenades_2 += 1;
+    else
+        return 0;
+
+    PrintFoundGrenade(other, gt->id, 1);
+    return 1;
+}
 
 void () ammo_touch = {
     local float gotgren;
@@ -1242,7 +1238,7 @@ void () BackpackTouch = {
         else
             giveg = self.no_grenades_1;
         other.no_grenades_1 = other.no_grenades_1 + giveg;
-        PrintFoundGrenade(other, other.tp_grenades_1, giveg);
+        PrintFoundGrenade(other, FO_PlayerGren(other, 0)->id, giveg);
 
         // give grenade type 2
         maxg = other.max_grenades_2;
@@ -1251,7 +1247,7 @@ void () BackpackTouch = {
         else
             giveg = self.no_grenades_2;
         other.no_grenades_2 = other.no_grenades_2 + giveg;
-        PrintFoundGrenade(other, other.tp_grenades_2, giveg);
+        PrintFoundGrenade(other, FO_PlayerGren(other, 1)->id, giveg);
 
     }
     bound_other_ammo(other);

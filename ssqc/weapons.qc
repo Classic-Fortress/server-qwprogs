@@ -22,7 +22,7 @@ void () TeamFortress_DisplayLegalClasses;
 void () TeamFortress_ShowIDs;
 void () TeamFortress_ShowTF;
 
-void (float inp, float is_player) TeamFortress_PrimeGrenade;
+void TeamFortress_PrimeGrenade(float inp, float is_player);
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
 

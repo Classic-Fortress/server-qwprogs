@@ -188,6 +188,24 @@ FO_GrenInfo fo_grenades[] = {
     { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, ICON_GREN_NONE, '300 300 300'},
 };
 
+string FO_GrenName(float gtype) {
+    switch (gtype) {
+      case GREN_CONC: return "Concussion grenade";
+      case GREN_NAIL: return "Nail grenade";
+      case GREN_MIRV: return "Mirv grenade";
+      case GREN_NAPALM: return "Napalm grenade";
+      case GREN_FLARE: return "Flare";
+      case GREN_GAS: return "Gas grenade";
+      case GREN_EMP: return "EMP grenade";
+      case GREN_FLASH: return "Flash grenade";
+      case GREN_CALTROP: return "Caltrop canister";
+      case GREN_BLAST: return "Blast grenade";
+      case GREN_SHOCK: return "Shock grenade";
+      case GREN_BURST: return "Burst grenade";
+      default: return "Grenade";
+  }
+}
+
 enum {
     kRadiusDamage,
     kRadiusBounce,
@@ -257,6 +275,12 @@ FO_GrenInfo* FO_GrenDesc(float gren_type) {
 FO_GrenInfo* FO_ClassGren(int playerclass, int index) {
     return FO_GrenDesc(class_grenades[playerclass].gren[index]);
 }
+
+#ifdef SSQC
+FO_GrenInfo* FO_PlayerGren(entity player, int index) {
+    return FO_ClassGren(player.playerclass, index);
+}
+#endif
 
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.

@@ -14,6 +14,7 @@ enumflags {
     FOWP_LASTPRIME,
     FOWP_CONCFINISH,
     FOWP_CLIP,
+    FOWP_GREN,
     FOWP_THINK,
     FOWP_WF,
     FOWP_AF,
@@ -69,6 +70,8 @@ struct predict_tf_state {
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
+
+    float no_grenades_1, no_grenades_2, gren_exp;
 
 #ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
@@ -333,7 +336,8 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
     M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
-    M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
+    M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
+    M3(FOWP_GREN, no_grenades_1, no_grenades_2, gren_exp)
 
     // Rotate through forced update fields.
     if (time - player.pred_lastforce >= 100 * MSEC) {
@@ -504,6 +508,12 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Int, prng_base[PRNG_WEAP]);
     if (sendflags & FOWP_RNG1)
         COMM(Int, prng_base[PRNG_HWGUY]);
+
+    if (sendflags & FOWP_GREN) {
+        COMM(Short, no_grenades_1);
+        COMM(Short, no_grenades_2);
+        COMM(Float, gren_exp);
+    }
 
 #ifdef SSQC
     return TRUE;

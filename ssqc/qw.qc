@@ -43,11 +43,9 @@ float remote_client_time();
 .float armorclass;              // Type of armor being worn
 .float tf_items;                // Another flag for player items
 .float tf_items_flags;          // Flags for the player items
+.float gren_exp;                // Expiry of last primed grenade
 .float no_grenades_1;           // Number of grenades of type 1 being carried
 .float no_grenades_2;           // Number of grenades of type 2 being carried
-.float tp_grenades_1;           // 1st type of grenades being carried
-.float tp_grenades_2;           // 2nd type of grenades being carried
-.float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
 .float hook_out;                // Dummy field for hook to silence error messages
 .float cheat_check;             // Time when we'll next check for team cheats
 .float is_removed;              // TRUE if the entity has been removed
@@ -554,7 +552,6 @@ float max_gren2_spy;
 float max_gren2_engineer;
 */
 float max_active_gren2_soldier;
-float grentimers;
 float id_extended;
 float remember_weapon;
 float discammo_pickup;

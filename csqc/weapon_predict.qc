@@ -1529,6 +1529,10 @@ static float CanThrowGrenade(int gren_type) {
 
 void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
 
+float WP_GrenCount(float index) {
+    return index == 1 ? pstate_pred.no_grenades_1 : pstate_pred.no_grenades_2;
+}
+
 static void W_PrimeGren(float index) {
     if (!game_state.is_alive || getstatf(STAT_NOFIRE))
         return;
@@ -1537,13 +1541,15 @@ static void W_PrimeGren(float index) {
         return;
 
     index -= 1;  // We work with zero-based index here.
-    float stat = index == 0 ? STAT_NO_GREN1 : STAT_NO_GREN2;
-    if (getstatf(stat) < 1)
+    float* gc = index == 0 ? &pstate_pred.no_grenades_1 :
+                             &pstate_pred.no_grenades_2;
+    if (*gc < 1)
         return;  // No grenades left
 
     float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
 
     pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
+    *gc -= 1;
     if (IsEffectFrame())
         ParseGrenPrimed(gren, time, time + 3.8);
 }

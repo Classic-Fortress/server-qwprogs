@@ -133,15 +133,6 @@ void () RemoveAutoIdTimer = {
     }
 };
 
-void () RemoveGrenadeTimers = {
-    local entity te = find(world, classname, "gtimer");
-    while (te != world) {
-        if (te.owner == self)
-            dremove(te);
-        te = find(te, classname, "gtimer");
-    }
-};
-
 void () RemovePrimeTimers = {
     if (!drop_grenades) {
         local entity te = find(world, classname, "primetimer");
@@ -447,58 +438,6 @@ void () TeamFortress_DisplayLegalClasses = {
     sprint(self, PRINT_HIGH, "\n");
 };
 
-string GetGrenName(float type)
-{
-    string s = "";
-    switch (type)
-    {
-        case GREN_NORMAL:
-            s = "normal grenade";
-            break;
-        case GREN_NAIL:
-            s = "nail grenade";
-            break;
-        case GREN_MIRV:
-            s = "mirv grenade";
-            break;
-        case GREN_NAPALM:
-            s = "napalm grenade";
-            break;
-        case GREN_FLARE:
-            s = "flare";
-            break;
-        case GREN_GAS:
-            s = "hallucinogenic grenade";
-            break;
-        case GREN_EMP:
-            s = "EMP grenade";
-            break;
-        case GREN_CALTROP:
-            s = "caltrop canister";
-            break;
-        case GREN_FLASH:
-            s = "flash grenade";
-            break;
-        case GREN_CONC:
-            s = "concussion grenade";
-            break;
-        case GREN_BLAST:
-            s = "blast grenade";
-            break;
-        case GREN_SHOCK:
-            s = "shock grenade";
-            break;
-        case GREN_BURST:
-            s = "burst grenade";
-            break;
-        case GREN_NONE:
-            s = "no grenade";
-            break;
-    }
-
-    return s;
-}
-
 void () TeamFortress_Inventory = {
     local entity en;
     local string st;
@@ -523,7 +462,7 @@ void () TeamFortress_Inventory = {
 
     fl = self.no_grenades_1;
     if (fl > 0) {
-        string g1 = strcat(ftos(fl), " ", GetGrenName(self.tp_grenades_1));
+        string g1 = strcat(ftos(fl), " ", FO_GrenName(FO_ClassGren(self.playerclass, 0)->id));
         if (fl > 1)
             g1 = strcat(g1, "s");
 
@@ -533,7 +472,7 @@ void () TeamFortress_Inventory = {
 
     fl = self.no_grenades_2;
     if (fl > 0) {
-        string g2 = strcat(ftos(fl), " ", GetGrenName(self.tp_grenades_2));
+        string g2 = strcat(ftos(fl), " ", FO_GrenName(FO_ClassGren(self.playerclass, 1)->id));
         if (fl > 1)
             g2 = strcat(g2, "s");
 
@@ -672,7 +611,6 @@ void () TeamFortress_ShowTF = {
         CF_PrintSetting("- Grenades type 1", drop_gren1, "", 0);
         CF_PrintSetting("- Grenades type 2", drop_gren2, "", 0);
     }
-    CF_PrintSetting("Grenade timers", grentimers, "", 1);
 
     CF_PrintSetting("Scout max grenades type 1 (caltrops)", Role_None.gren1_limits[1], "", PC_SCOUT_GRENADE_MAX_1);
     CF_PrintSetting("Sniper max grenades type 1 (normal)", Role_None.gren1_limits[2], "", PC_SNIPER_GRENADE_MAX_1);
@@ -780,17 +718,6 @@ void () NormalGrenadeTouch = {
         self.avelocity = '0 0 0';
 };
 
-void () GrenadeTimer = {
-    self.heat = self.heat - 1;
-    self.nextthink = time + 1;
-    self.owner.StatusGrenTime = self.heat;
-    Status_Refresh(self.owner);
-
-    if (!self.heat) {
-        dremove(self);
-    }
-};
-
 static struct stg_table_entry {
     int id;
     void() touch;
@@ -819,9 +746,7 @@ void (entity timer) FO_SpawnThrownGrenade = {
     user.tfstate &= ~TFSTATE_GREN_MASK_ALL;
     user.last_throw = time;
 
-    if (grentimers && infokeyf(user, INFOKEY_P_CSQCACTIVE)) {
-        UpdateClientGrenadeThrown(user);
-    }
+    UpdateClientGrenadeThrown(user);
 
     KickPlayer(-1, user);
     entity proj = FOProj_Create(FPP_HANDGRENADE);
@@ -866,179 +791,71 @@ void (entity timer) FO_SpawnThrownGrenade = {
 void (float inp) TeamFortress_PrimeThrowGrenade = {
     if (self.tfstate & TFSTATE_GREN_MASK_PRIMED)
         TeamFortress_ThrowGrenade();
-    else {
+    else
         TeamFortress_PrimeGrenade(inp, TRUE);
 
-    if ( ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1))
-                && self.tp_grenades_1 == GREN_CALTROP)
+    if (FO_ClassGren(self.playerclass, inp - 1)->id == GREN_CALTROP)
         TeamFortress_ThrowGrenade();
-    }
-};
+}
 
 void () FO_GrenadeThink;
 
 // is_player defines whether this originated from the player or server.
-void (float inp, float is_player) TeamFortress_PrimeGrenade = {
-    local float gtype;
-    local string gs;
-    local string ptime;
-    local entity tGrenade;
-    local entity timer;
-    gtype = 0;
-
+void TeamFortress_PrimeGrenade(float inp, float is_player) {
     if (self.tfstate & TFSTATE_GREN_MASK_PRIMED)
         return;
 
     if (no_fire_mode)
         return;
 
-    if ((inp == 1 && self.tp_grenade_switch != 1) || (inp == 2 && self.tp_grenade_switch == 1)) {
+    FO_GrenInfo* gdesc = FO_PlayerGren(self, inp - 1);
+    float *numg = (inp == 1) ? &self.no_grenades_1 : &self.no_grenades_2;
+    string gs = FO_GrenName(gdesc->id);
 
-        gtype = self.tp_grenades_1;
-
-        if (gtype == GREN_CONC)
-            gs = "Concussion grenade";
-        else if (gtype == GREN_NAIL) {
-            gs = "Nail grenade";
-        } else if (gtype == GREN_MIRV)
-            gs = "Mirv grenade";
-        else if (gtype == GREN_NAPALM)
-            gs = "Napalm grenade";
-        else if (gtype == GREN_FLARE)
-            gs = "Flare";
-        else if (gtype == GREN_GAS)
-            gs = "Gas grenade";
-        else if (gtype == GREN_EMP)
-            gs = "EMP grenade";
-        else if (gtype == GREN_FLASH)
-            gs = "Flash grenade";
-        else if (gtype == GREN_CALTROP)
-            gs = "Caltrop canister";
-        else if (gtype == GREN_BLAST)
-            gs = "Blast grenade";
-        else if (gtype == GREN_SHOCK)
-            gs = "Shock grenade";
-        else if (gtype == GREN_BURST)
-            gs = "Burst grenade";
-        else
-            gs = "Grenade";
-
-        if (self.no_grenades_1 > 0) {
-            self.has_throwngren = TRUE;
-            self.no_grenades_1 = self.no_grenades_1 - 1;
-            if (gtype == GREN_FLARE) {
-                newmis = spawn();
-                newmis.owner = self;
-                newmis.movetype = 6;
-                newmis.solid = 2;
-                newmis.classname = "grenade";
-                newmis.fpp.gren_type = GREN_FLARE;
-                makevectors(self.v_angle);
-                newmis.velocity = (v_forward * 600) + (v_up * 25);
-                newmis.velocity = newmis.velocity * 700;
-                newmis.angles = vectoangles(newmis.velocity);
-                newmis.weapon = self.team_no;
-                newmis.think = FlareGrenadeExplode;
-                newmis.nextthink = time + 0.8;
-                newmis.touch = FlareGrenadeTouch;
-                newmis.skin = 1;
-                newmis.mdl = "flare";
-                FO_SetModel(newmis, "progs/flare.mdl");
-                setsize(newmis, '0 0 0', '0 0 0');
-                setorigin(newmis, self.origin);
-                return;
-            }
-            if (gtype == GREN_CALTROP) {
-                ptime = ftos(0.5);
-                sprint(self, PRINT_HIGH, "Opening ", gs, "...\n");
+    if (*numg > 0) {
+        self.has_throwngren = TRUE;
+        *numg -= 1;
+        if (gdesc->id == GREN_FLARE) {
+            newmis = spawn();
+            newmis.owner = self;
+            newmis.movetype = MOVETYPE_TOSS;
+            newmis.solid = SOLID_BBOX;
+            newmis.classname = "grenade";
+            newmis.fpp.gren_type = GREN_FLARE;
+            makevectors(self.v_angle);
+            if (self.v_angle_x) {
+                newmis.velocity = v_forward * 1200 + v_up * 200;
             } else {
-                ptime = ftos(3);
-                sprint(self, PRINT_HIGH, gs, " primed, ", ptime,
-                       " seconds...\n");
+                newmis.velocity = aim(self, 10000);
+                newmis.velocity = newmis.velocity * 1200;
+                newmis.velocity_z = 75;
             }
-        } else {
-            sprint(self, PRINT_HIGH, "No ", gs, "s left\n");
+            newmis.angles = vectoangles(newmis.velocity);
+            newmis.weapon = self.team_no;
+            newmis.think = FlareGrenadeExplode;
+            newmis.nextthink = time + 0.8;
+            newmis.touch = FlareGrenadeTouch;
+            newmis.skin = 1;
+            newmis.mdl = "flare";
+            FO_SetModel(newmis, "progs/flare.mdl");
+            setsize(newmis, '0 0 0', '0 0 0');
+            setorigin(newmis, self.origin);
             return;
+        } if (gdesc->id == GREN_CALTROP) {
+            sprint(self, PRINT_HIGH, "Opening ", gs, "...\n");
+        } else {
+            sprint(self, PRINT_HIGH, gs, " primed, 3 seconds...\n");
         }
+    } else {
+        sprint(self, PRINT_HIGH, "No ", gs, "s left\n");
+        return;
     }
 
-    if (    (inp == 2 && self.tp_grenade_switch != 1) || (inp == 1 && self.tp_grenade_switch == 1)) {
-
-        gtype = self.tp_grenades_2;
-
-        if (gtype == GREN_CONC)
-            gs = "Concussion grenade";
-        else if (gtype == GREN_NAIL)
-            gs = "Nail grenade";
-        else if (gtype == GREN_MIRV)
-            gs = "Mirv grenade";
-        else if (gtype == GREN_NAPALM)
-            gs = "Napalm grenade";
-        else if (gtype == GREN_FLARE)
-            gs = "Flare";
-        else if (gtype == GREN_GAS)
-            gs = "Gas grenade";
-        else if (gtype == GREN_EMP)
-            gs = "EMP grenade";
-        else if (gtype == GREN_FLASH)
-            gs = "Flash grenade";
-        else if (gtype == GREN_BLAST)
-            gs = "Blast grenade";
-        else if (gtype == GREN_SHOCK)
-            gs = "Shock grenade";
-        else if (gtype == GREN_BURST)
-            gs = "Burst grenade";
-        else
-            gs = "Grenade";
-
-        if (self.no_grenades_2 > 0) {
-            self.has_throwngren = TRUE;
-            self.no_grenades_2 = self.no_grenades_2 - 1;
-            if (gtype == GREN_FLARE) {
-                newmis = spawn();
-                newmis.owner = self;
-                newmis.movetype = 6;
-                newmis.solid = 2;
-                newmis.classname = "grenade";
-                newmis.fpp.gren_type = GREN_FLARE;
-                makevectors(self.v_angle);
-                if (self.v_angle_x) {
-                    newmis.velocity = v_forward * 1200 + v_up * 200;
-                } else {
-                    newmis.velocity = aim(self, 10000);
-                    newmis.velocity = newmis.velocity * 1200;
-                    newmis.velocity_z = 75;
-                }
-                newmis.angles = vectoangles(newmis.velocity);
-                newmis.weapon = self.team_no;
-                newmis.think = FlareGrenadeExplode;
-                newmis.nextthink = time + 0.8;
-                newmis.touch = FlareGrenadeTouch;
-                newmis.skin = 1;
-                newmis.mdl = "flare";
-                FO_SetModel(newmis, "progs/flare.mdl");
-                setsize(newmis, '0 0 0', '0 0 0');
-                setorigin(newmis, self.origin);
-                return;
-            }
-            if (gtype == GREN_CALTROP) {
-                ptime = ftos(0.5);
-                sprint(self, PRINT_HIGH, "Opening ", gs, "...\n");
-            } else {
-                ptime = ftos(3);
-                sprint(self, PRINT_HIGH, gs, " primed, ", ptime,
-                       " seconds...\n");
-            }
-        } else {
-            sprint(self, PRINT_HIGH, "No ", gs, "s left\n");
-            return;
-        }
-    }
     self.tfstate |= (inp == 1) ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED;
-    tGrenade = spawn();
+    entity tGrenade = spawn();
     tGrenade.owner = self;
-    tGrenade.weapon = gtype;
-    tGrenade.fpp.gren_type = gtype;
+    tGrenade.weapon = gdesc->id;
+    tGrenade.fpp.gren_type = gdesc->id;
 
     tGrenade.classname = "primetimer";
     if (inp == 1)
@@ -1048,36 +865,18 @@ void (float inp, float is_player) TeamFortress_PrimeGrenade = {
 
     float time_base = max(remote_time(), self.last_throw);
     tGrenade.nextthink = time_base + 0.8;
-    if (gtype == GREN_CALTROP)
+    if (gdesc->id == GREN_CALTROP)
         tGrenade.heat = time_base + 0.5 + 0.5;
     else {
         tGrenade.heat = time_base + 3 + 0.8;
 
-        RemoveGrenadeTimers();
-
-        local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-        local float notimers = stof(infokey(self, "nt"));
-        if (grentimers && notimers != 1) {
-            timer = spawn();
-            timer.nextthink = time_base + 0.8;
-            timer.think = GrenadeTimer;
-            timer.heat = 4;
-            timer.owner = self;
-            timer.classname = "gtimer";
-            if (!notimers && !csqcactive) {
-                stuffcmd(self, "play grentimer\n");
-            }
-        }
-        if (grentimers && csqcactive) {
-            UpdateClientGrenadePrimed(self, gtype, tGrenade.heat);
-        }
+        UpdateClientGrenadePrimed(self, gdesc->id, tGrenade.heat);
     }
 
     tGrenade.think = FO_GrenadeThink;
     self.grenade_timer = tGrenade;
     self.last_prime = global_to_client_time(time_base);
-};
-
+}
 
 void () FO_GrenadeThink = {
     local entity user = self.owner;
@@ -1505,13 +1304,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[1];
         self.max_grenades_2 = role.gren2_limits[1];
 
-        if (old_grens == 1 || fo_flash == TRUE)
-            self.tp_grenades_1 = GREN_FLASH;
-        else
-            self.tp_grenades_1 = GREN_CALTROP;
-
-        self.tp_grenades_2 = GREN_CONC;
-
         self.tf_items = PC_SCOUT_TF_ITEMS;
 
         if (self.tf_items_flags <= 0)
@@ -1562,9 +1354,7 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_cells = PC_SNIPER_MAXAMMO_CELL;
         self.max_grenades_1 = role.gren1_limits[2];
         self.max_grenades_2 = role.gren2_limits[2];
-        
-        self.tp_grenades_1 = PC_SNIPER_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_SNIPER_GRENADE_TYPE_2;
+
         self.tf_items = PC_SNIPER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SNIPER_INITARMORCLASS;
@@ -1612,20 +1402,6 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_cells = PC_SOLDIER_MAXAMMO_CELL;
         self.max_grenades_1 = role.gren1_limits[3];
         self.max_grenades_2 = role.gren2_limits[3];
-
-        self.tp_grenades_1 = PC_SOLDIER_GRENADE_TYPE_1;
-
-        switch (nailgren_type) {
-            case NGR_TYPE_NAIL:
-                self.tp_grenades_2 = GREN_NAIL;
-                break;
-            case NGR_TYPE_LASER:
-                self.tp_grenades_2 = GREN_SHOCK;
-                break;
-            case NGR_TYPE_BURST:
-                self.tp_grenades_2 = GREN_BURST;
-                break;
-        }
 
         self.tf_items = PC_SOLDIER_TF_ITEMS;
 
@@ -1675,8 +1451,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[4];
         self.max_grenades_2 = role.gren2_limits[4];
 
-        self.tp_grenades_1 = PC_DEMOMAN_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_DEMOMAN_GRENADE_TYPE_2;
         self.tf_items = PC_DEMOMAN_TF_ITEMS;
 
         self.ammo_detpack = PC_DEMOMAN_INITAMMO_DETPACK;
@@ -1727,13 +1501,6 @@ void () TeamFortress_SetEquipment = {
         self.maxammo_cells = PC_MEDIC_MAXAMMO_CELL;
         self.max_grenades_1 = role.gren1_limits[5];
         self.max_grenades_2 = role.gren2_limits[5];
-
-        self.tp_grenades_1 = PC_MEDIC_GRENADE_TYPE_1;
-        if(medic_type == MEDIC_TYPE_BLAST) {
-            self.tp_grenades_2 = GREN_BLAST;
-        } else {
-            self.tp_grenades_2 = GREN_CONC;
-        }
 
         self.tf_items = PC_MEDIC_TF_ITEMS;
 
@@ -1808,9 +1575,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[6];
         self.max_grenades_2 = role.gren2_limits[6];
 
-        self.tp_grenades_1 = PC_HVYWEAP_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_HVYWEAP_GRENADE_TYPE_2;
-
         self.armorclass = self.armorclass | PC_HVYWEAP_INITARMORCLASS;
         self.armor_allowed = PC_HVYWEAP_MAXARMORTYPE;
 
@@ -1860,9 +1624,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[7];
         self.max_grenades_2 = role.gren2_limits[7];
 
-        self.tp_grenades_1 = PC_PYRO_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_PYRO_GRENADE_TYPE_2;
-
         self.armorclass = self.armorclass | PC_PYRO_INITARMORCLASS;
         self.armor_allowed = PC_PYRO_MAXARMORTYPE;
         if (old_hp_armor)
@@ -1909,8 +1670,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = PC_CIVILIAN_GRENADE_MAX_1;
         self.max_grenades_2 = PC_CIVILIAN_GRENADE_MAX_2;
 
-        self.tp_grenades_1 = PC_CIVILIAN_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_CIVILIAN_GRENADE_TYPE_2;
         self.tf_items = PC_CIVILIAN_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_CIVILIAN_INITARMORCLASS;
@@ -1961,8 +1720,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[8];
         self.max_grenades_2 = role.gren2_limits[8];
         
-        self.tp_grenades_1 = PC_SPY_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_SPY_GRENADE_TYPE_2;
         self.tf_items = PC_SPY_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_SPY_INITARMORCLASS;
@@ -2020,8 +1777,6 @@ void () TeamFortress_SetEquipment = {
         self.max_grenades_1 = role.gren1_limits[9];
         self.max_grenades_2 = role.gren2_limits[9];
 
-        self.tp_grenades_1 = PC_ENGINEER_GRENADE_TYPE_1;
-        self.tp_grenades_2 = PC_ENGINEER_GRENADE_TYPE_2;
         self.tf_items = PC_ENGINEER_TF_ITEMS;
 
         self.armorclass = self.armorclass | PC_ENGINEER_INITARMORCLASS;
@@ -2039,8 +1794,6 @@ void () TeamFortress_SetEquipment = {
 
         self.no_grenades_1 = 0;
         self.no_grenades_2 = 0;
-        self.tp_grenades_1 = 0;
-        self.tp_grenades_2 = 0;
         self.max_grenades_1 = 0;
         self.max_grenades_2 = 0;
 
@@ -2219,7 +1972,6 @@ void () TeamFortress_RemoveTimers = {
     }
 
     RemoveAutoIdTimer();
-    RemoveGrenadeTimers();
     RemovePrimeTimers();
     self.StatusGrenTime = 0;
     Status_Refresh(self);

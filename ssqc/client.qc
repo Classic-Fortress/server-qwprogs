@@ -20,7 +20,6 @@ float (float pc) IsLegalClass;
 void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
-void () RemoveGrenadeTimers;
 void () RemovePrimeTimers;
 void () RemoveGasTimers;
 void () RemoveGrenades;
@@ -450,9 +449,6 @@ void () DecodeLevelParms = {
         // maximum grenades type 2 to drop in backpack [0]
         drop_gren2 = CF_GetSetting("dg2", "drop_gren2", "0");
 
-        // display grenade timer in status bar [on]
-        grentimers = CF_GetSetting("gt", "grentimers", "on");
-
         // show sentry gun health + misc extras in id string [on]
         id_extended = CF_GetSetting("ie", "id_extended", "on");
 
@@ -833,7 +829,6 @@ void () DecodeLevelParms = {
             drop_grenpack = TRUE;
             drop_gren1 = 1;
             drop_gren2 = 0;
-            grentimers = TRUE;
             id_extended = TRUE;
             remember_weapon = TRUE;
             discammo_pickup = FALSE;
@@ -903,7 +898,6 @@ void () DecodeLevelParms = {
             drop_grenpack = FALSE;
             drop_gren1 = 0;
             drop_gren2 = 0;
-            grentimers = FALSE;
             id_extended = FALSE;
             remember_weapon = FALSE;
             discammo_pickup = TRUE;
@@ -1006,7 +1000,6 @@ void () DecodeLevelParms = {
             localcmd("localinfo server_sbflaginfo 0\n");
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
-            grentimers = FALSE;
             Role_None.gren2_limits[1] = 3;
             Role_None.gren2_limits[3] = 2;
             Role_None.gren2_limits[4] = 4;
@@ -1486,7 +1479,6 @@ void () StartSpawnGuard = {
 void () DuelFinish = {
     FO_Sound(world, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NONE);
     NextLevel();
-    RemoveGrenadeTimers();
     RemovePrimeTimers();
     RemoveGrenades();
 };
@@ -2431,7 +2423,6 @@ void () CheckRules = {
         if ((timelimit && (time >= timelimit)))
         {
             NextLevel();
-            RemoveGrenadeTimers();
             RemovePrimeTimers();
             RemoveGrenades();
         }
@@ -2439,7 +2430,6 @@ void () CheckRules = {
     if ((fraglimit && (self.frags >= fraglimit)))
     {
         NextLevel();
-        RemoveGrenadeTimers();
         RemovePrimeTimers();
         RemoveGrenades();
     }
