@@ -43,7 +43,8 @@ float remote_client_time();
 .float armorclass;              // Type of armor being worn
 .float tf_items;                // Another flag for player items
 .float tf_items_flags;          // Flags for the player items
-.float gren_exp;                // Expiry of last primed grenade
+.float primed_gren_type;        // Type of (last) primed grenate
+.float primed_gren_exp;         // Expiry of (last) primed grenade
 .float no_grenades_1;           // Number of grenades of type 1 being carried
 .float no_grenades_2;           // Number of grenades of type 2 being carried
 .float hook_out;                // Dummy field for hook to silence error messages

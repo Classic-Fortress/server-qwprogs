@@ -516,6 +516,7 @@ enumflags {
     FL_GT_SOUND,
     FL_GT_THROWN,
     FL_GT_ADJPING,
+    FL_GT_LOCAL,
 };
 
 void(string identify) Hud_DrawIdentifyPanel;
@@ -709,8 +710,8 @@ CsGrenTimer grentimers[NUM_GREN_TIMERS];
 
 class CsGrenTimer {
     float index_;
-    float primed_at_;
     float expires_at_;
+    float raw_expires_at_;
     float flags_;
     float grentype_;
     float playing_;
@@ -718,16 +719,19 @@ class CsGrenTimer {
     nonvirtual float() index { return index_; };
     nonvirtual float() active { return expires_at_ > time; };
     nonvirtual float() expiry { return expires_at_; };
+    nonvirtual float() raw_expiry { return raw_expires_at_; };
     nonvirtual float() grentype { return grentype_; };
-    nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
-    nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
+
+    nonvirtual float(float flag) test_flag { return flags_ & flag; };
+    nonvirtual void(float flag) set_flag { flags_ |= flag; };
+    nonvirtual void(float flag) clear_flag { flags_ &= ~flag; };
+
     nonvirtual float() sound_offset {
         float offset = max(3.8 - (expires_at_ - time), 0);
         return offset;
     };
 
-    nonvirtual void(float primed_at, float expires_at,
-                    float grentype, float timer_flags) Set;
+    nonvirtual void(float expires_at, float grentype, float timer_flags) Set;
     nonvirtual void() Stop;
 
     nonvirtual void() PauseSound {
@@ -737,12 +741,15 @@ class CsGrenTimer {
     };
     nonvirtual void() StartSound;
 
-    nonvirtual void(float offset) adj_sync {
+    nonvirtual void(float offset, float adj_sound) adj_sync {
       if (!playing_)
           return;
 
-      expires_at_ += offset;
-      StartSound();
+      raw_expires_at_ += offset;
+      if (adj_sound) {  // Not yet working well
+          expires_at_ += offset;
+          StartSound();
+      }
     };
 
     static float next_index_;
@@ -762,6 +769,20 @@ class CsGrenTimer {
         next_index_ = (next_index_ + 1) % grentimers.length;
         last_ = grentimers[next_index_];
         return last_;
+    };
+
+    static CsGrenTimer(float exp, float eps) Match {
+        CsGrenTimer result = world;
+        float best = eps;
+
+        for (float i = 0; i < grentimers.length; i++) {
+            float d = fabs(exp - grentimers[i].raw_expiry());
+            if (d < best) {
+                best = d;
+                result = grentimers[i];
+            }
+        }
+        return result;
     };
 
     static void() SyncPause {

@@ -2069,6 +2069,7 @@ void () PutClientInServer = {
         self.prng_base[PRNG_WEAP] = 65535 * random();
     // For hwguy we rotate the seed value, each seed generates many random nums.
     self.prng_base[PRNG_HWGUY] = 65535 * random();
+    self.primed_gren_exp = 0;
 
     self.immune_to_check = time + 10;
     SetDimensions(TRUE);

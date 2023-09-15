@@ -763,21 +763,6 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
-// Temporary until we network player ents.
-static void TFxUpdateGrenadeTimer(entity player, float explodes_at) {
-    const float tfx_gren_mask =
-        TFX_SPEC_GRENTIMER | TFX_DEFENSE_GRENTIMER | TFX_OFFENSE_GRENTIMER;
-
-    if (!TFxEnabled(tfx_gren_mask))
-        return;
-
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TFX_GRENTIMER);
-    WriteEntity(MSG_MULTICAST, player);
-    WriteFloat(MSG_MULTICAST, explodes_at);
-    multicast('0 0 0', MULTICAST_ALL_R);
-}
-
 void UpdateClientReloadSound(entity pl, float weapon) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
@@ -795,13 +780,10 @@ void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
     WriteEntity(MSG_MULTICAST, pl);
     WriteByte(MSG_MULTICAST, grentype);
-    WriteFloat(MSG_MULTICAST, time);
     WriteFloat(MSG_MULTICAST, explodes_at);
 
     // Let's see if we can get away with avoiding _R here.
     multicast('0 0 0', MULTICAST_ALL);
-
-    TFxUpdateGrenadeTimer(pl, explodes_at);
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
@@ -810,8 +792,6 @@ void UpdateClientGrenadeThrown(entity pl) = {
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
     WriteEntity(MSG_MULTICAST, pl);
     multicast('0 0 0', MULTICAST_ALL);
-
-    TFxUpdateGrenadeTimer(pl, 0);
 }
 
 void UpdateClientIDString(entity pl) {

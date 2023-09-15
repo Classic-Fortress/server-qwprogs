@@ -852,6 +852,7 @@ void TeamFortress_PrimeGrenade(float inp, float is_player) {
     }
 
     self.tfstate |= (inp == 1) ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED;
+
     entity tGrenade = spawn();
     tGrenade.owner = self;
     tGrenade.weapon = gdesc->id;
@@ -870,6 +871,8 @@ void TeamFortress_PrimeGrenade(float inp, float is_player) {
     else {
         tGrenade.heat = time_base + 3 + 0.8;
 
+        self.primed_gren_type = gdesc->id;
+        self.primed_gren_exp = tGrenade.heat;
         UpdateClientGrenadePrimed(self, gdesc->id, tGrenade.heat);
     }
 
