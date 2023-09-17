@@ -16,6 +16,14 @@ DEFCVAR_FLOAT(r_drawviewmodel, 1);
 DEFCVAR_FLOAT(fo_reloadalpha, 0);
 DEFCVAR_FLOAT(fo_reloadvolume, 0);
 
+// Alpha of weapon when unable to attck (e.g. time < attack_finished).
+// Default: -1 means no change to alpha when in this state.
+DEFCVAR_FLOAT(fo_nofirealpha, -1);
+
+// HueTF style -- does not wait for attack finished to render the queued weapon;
+// purely visual, still have to wait for attack_finished.
+DEFCVAR_FLOAT(fo_hue_weaponswap, 0);
+
 static float wp_ready;
 
 struct pengine_t {
@@ -841,6 +849,12 @@ float WP_ReloadSlot(Slot slot);
 void WP_ReloadNext();
 void WPP_Dump();
 
+float WP_WeaponReady() {
+    const float not_ready_mask = TFSTATE_RELOADING | TFSTATE_NO_WEAPON;
+    return pstate_pred.client_time >= pstate_pred.attack_finished &&
+           (pstate_pred.tfstate & not_ready_mask) == 0;
+}
+
 static void WP_ChangeIfQueued() {
     if (!IsSlotNull(pstate_pred.queue_slot)) {
         WP_ChangeWeapon(pstate_pred.queue_slot);
@@ -886,40 +900,29 @@ void WP_HandleGrenadeInputs() {
 }
 
 void WP_Impulse() {
+    float match;
+
     WP_HandleGrenadeInputs();
     WP_HandleHeavyInputs();
 
     // Note: We might have no impulse, but a queued slot here.
     float quick_swap = FALSE;
 
-    // Impulses that are NOT held by attack_finished / reloading.
-    float match = TRUE;
-    switch (pstate_pred.impulse) {
-        case TF_GRENADE_T:
-            W_ThrowGren(TRUE);
-            break;
+    if (pstate_pred.impulse >= TF_QUICKSLOT1 && pstate_pred.impulse <= TF_QUICKSTOP &&
+        !WP_WeaponReady()) {
+        // Filter these out because of potential double queuing pain; should
+        // probably try and deprecate.
+        return;
+    }
 
+    // Impulses that are NOT held by attack_finished / reloading.
+    // * with a hacky exception for TF_QUICKSLOTs
+    match = TRUE;
+    switch (pstate_pred.impulse) {
         case TF_DEBUG_CSQC:
             WPP_Dump();
             break;
 
-        default:
-            match = FALSE;
-            break;
-    }
-
-    if (match)
-        pstate_pred.impulse = 0;
-
-    if (pstate_pred.client_time < pstate_pred.attack_finished || WP_IsReloading())
-        return;
-
-    WP_ChangeIfQueued();  // Might have something previously buffered.
-
-    // Impulses that ARE held by attack_finished / reloading.
-    match = TRUE;
-    switch (pstate_pred.impulse) {
-        case 0: break;  // Handled above.
         case TF_RELOAD:
             WP_ReloadSlot(CurrentSlot());
             break;
@@ -959,15 +962,37 @@ void WP_Impulse() {
                     pstate_pred.playerclass, CurrentSlot(), TRUE);
             break;
 
+        case TF_GRENADE_T:
+            W_ThrowGren(TRUE);
+            break;
+
         default:
             match = FALSE;
             break;
     }
 
-    WP_ChangeIfQueued();  // Might have something newly buffered.
+    // Impulse below this line depend on ready weapon.
+    if (!WP_WeaponReady())
+        return;
+
+    WP_ChangeIfQueued();
 
     if (match)
-        pstate_pred.impulse = 0;
+        return;
+
+    match = TRUE;
+    switch (pstate_pred.impulse) {
+        case TF_RELOAD:
+            WP_ReloadSlot(CurrentSlot());
+            break;
+
+        case TF_RELOAD_NEXT:
+            WP_ReloadNext();
+            break;
+        default:
+            match = FALSE;
+            break;
+    }
 }
 
 static float* WP_ClipFired(Slot slot) {
@@ -1835,20 +1860,29 @@ void WP_UpdateViewModel() {
         return;
     }
 
+    float alph;
     if (pstate_pred.tfstate & TFSTATE_RELOADING) {
-        float ra = CVARF(fo_reloadalpha);
-        if (ra > 0) {
-            viewmodel.alpha = ra;
-        } else {
-            viewmodel.modelindex = 0;
-            return;
-        }
+        alph = CVARF(fo_reloadalpha);
     } else {
-        viewmodel.alpha = CVARF(r_drawviewmodel);
+        alph = CVARF(r_drawviewmodel);
+        if (!WP_WeaponReady() && CVARF(fo_nofirealpha) != -1)
+            alph = CVARF(fo_nofirealpha);
+    }
+
+    if (alph > 0) {
+        viewmodel.alpha = alph;
+    } else {
+        viewmodel.modelindex = 0;
+        return;
+    }
+
+    pframe = pstate_pred.weaponframe;
+    if (CVARF(fo_hue_weaponswap) && !IsSlotNull(pstate_pred.queue_slot)) {
+        wi = SlotWI(pstate_pred.queue_slot);
+        pframe = 0;
     }
 
     pmodelindex = (wi->models)->modelindex;
-    pframe = pstate_pred.weaponframe;
 
     if (viewmodel.modelindex != pmodelindex) {
         viewmodel.frame = pframe;

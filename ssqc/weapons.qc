@@ -1917,6 +1917,11 @@ void W_ChangeWeaponSlot(Slot slot) {
     Status_Refresh(self);
 };
 
+void W_ChangeQueuedWeaponIfReady() {
+    if (!IsSlotNull(self.queue_slot) && WeaponReady())
+        W_ChangeWeaponSlot(self.queue_slot);
+}
+
 void W_ChangeWeaponLast() {
     if (!IsSlotNull(self.last_slot))
         W_ChangeWeaponSlot(self.last_slot);
@@ -2522,19 +2527,12 @@ void () W_WeaponFrame = {
         self.tfstate &= ~TFSTATE_QUICKSLOT;
     }
 
-    float can_change_weapon = WeaponReady();
-
-    // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
-    if (!IsSlotNull(self.queue_slot) && can_change_weapon)
-        W_ChangeWeaponSlot(self.queue_slot);
-
-    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
-        can_change_weapon) {
+    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput()) {
         // slot 1-4 (or 1-7) binds
         W_ChangeWeaponByInput(self.impulse);
         self.impulse = 0;
     } else if (self.impulse >= TF_QUICKSLOT1 &&
-               self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
+               self.impulse <= TF_QUICKSLOT4 && WeaponReady()) {
         float input = InputHandlePyroSlotSwap(self.playerclass,
                                               self.impulse - TF_QUICKSLOT1 + 1);
         Slot slot = MakeSlot(input);
@@ -2547,6 +2545,8 @@ void () W_WeaponFrame = {
         }
         self.impulse = 0;
     }
+
+    W_ChangeQueuedWeaponIfReady();
 
     if (self.impulse == TF_CHANGETEAM) {
         Menu_Team(0);
