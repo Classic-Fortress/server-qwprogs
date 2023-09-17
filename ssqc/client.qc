@@ -3043,6 +3043,7 @@ void () ClientConnect = {
     }
 
     bprint(PRINT_HIGH, self.netname, " entered the game\n");
+    sprint(self, PRINT_HIGH, "FortressOne: Weapon Prediction ", wp_version, "\n");
 
     spawnfunc_FOPlayer();
 
