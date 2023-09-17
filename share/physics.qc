@@ -270,7 +270,8 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
         total += dt;
     }
 
-    setorigin(e, e.origin);
+    if (step > 0)  // Origin can have moved.
+        setorigin(e, e.origin);
     return total;
 }
 

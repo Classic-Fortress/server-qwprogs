@@ -629,13 +629,13 @@ noref void CSQC_Input_Frame() {
     Sync_GameState();
 
     // Intercept rocket jump;
-    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) &&
+    if ((WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO) &&
         (input_buttons & BUTTON4))
         input_buttons |= BUTTON0 | BUTTON2;
 
     // Handle zoom
     float prev_zoomed_in = zoomed_in;
-    if (player_class == PC_SNIPER)
+    if (WP_PlayerClass() == PC_SNIPER)
         zoomed_in = input_buttons & BUTTON3;
     else
         zoomed_in = 0;

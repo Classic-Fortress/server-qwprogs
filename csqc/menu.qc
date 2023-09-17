@@ -105,7 +105,7 @@ var fo_menu FO_MENU_SPECTATOR_TRACK = {
 void teamChosen(string team) = {
     localcmd("cmd changeteam ", team, "\n");
 
-    if(player_class) {
+    if(WP_PlayerClass()) {
         Menu_Cancel();
     } else {
         FO_Menu_Class(TRUE);
@@ -1000,7 +1000,7 @@ void FO_Menu_DropAmmo(float force) {
         }
         return;
     }
-    if (player_class == PC_ENGINEER) {
+    if (WP_PlayerClass() == PC_ENGINEER) {
         FO_MENU_DROPAMMO.title = "Drop or Make Ammo";
         if ((getstatf(STAT_SHELLS) < DROP_SHELLS) && ((getstatf(STAT_CELLS) / AMMO_COST_SHELLS) > (DROP_SHELLS - getstatf(STAT_SHELLS)))) {
             FO_MENU_DROPAMMO.options[0].value = "(make)";

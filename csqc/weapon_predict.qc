@@ -22,7 +22,7 @@ struct pengine_t {
     float pp_enabled;
     float wp_enabled;
     float is_effectframe;
-    float last_effectframe, last_effectframe2;
+    float last_effectframe;
 
     float player_entnum;  // player_localentnum iff is_player == 1
     entity player_ent;
@@ -1902,15 +1902,9 @@ void PredictConc() {
         pstate_pred.tfstate &= ~TFSTATE_CONC;
 }
 
-float WP_ClientThink() {
-    pstate_pred = pstate_server;
-    PredictConc();
-
-    if (!WP_Enabled())
-        return PREDRAW_NEXT;
-
+static void WP_UpdatePredict() {
+    PredictConc(); // Looks like this is missing time/prediction interp
     getinputstate(servercommandframe); // Setup first read for old_buttons.
-    pengine.last_effectframe2 = pengine.last_effectframe;
 
     float old_input_buttons;
     int pframe = servercommandframe + 1;
@@ -1944,7 +1938,20 @@ float WP_ClientThink() {
     }
 
     WP_UpdateViewModel();
-    return PREDRAW_AUTOADD;
+}
+
+DEFCVAR_FLOAT(fo_beta_noskip_predict, 0);
+float WP_ClientThink() {
+    static float lsf, lcf;
+    if (lsf == servercommandframe && lcf == clientcommandframe &&
+        !CVARF(fo_beta_noskip_predict))
+        return PREDRAW_NEXT;
+
+    pstate_pred = pstate_server;
+
+    if (WP_Enabled())
+        WP_UpdatePredict();
+    return PREDRAW_NEXT;
 }
 
 void InitWeapPredEnt(entity pe) {
