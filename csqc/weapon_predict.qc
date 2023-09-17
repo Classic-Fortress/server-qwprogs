@@ -1303,7 +1303,14 @@ inline float get_phys_time(entity e) {
     }
 }
 
-void FO_PP_Init() {
+void FO_Predict_Init() {
+    entity viewmodel = spawn();
+    viewmodel.drawmask = MASK_PRED_ENT;
+    viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
+    pengine.viewmodel = viewmodel;
+
+    WP_InitSniper();
+
     // Entity we'll attach locally generated sound to.
     pred_sound_entity = spawn();
 
@@ -1993,16 +2000,13 @@ float WP_ClientThink() {
 }
 
 void InitWeapPredEnt(entity pe) {
-    WP_InitSniper();
+    if (pengine.pweap_ent != world) {
+        remove(pengine.pweap_ent);
+    }
 
     pe.predraw = WP_ClientThink;
-    pengine.pweap_ent = pe;
     pe.drawmask = MASK_PRED_ENT;
-
-    entity viewmodel = spawn();
-    viewmodel.drawmask = MASK_PRED_ENT;
-    viewmodel.renderflags = RF_VIEWMODEL | RF_DEPTHHACK;
-    pengine.viewmodel = viewmodel;
+    pengine.pweap_ent = pe;
 
     wp_ready = TRUE;
 }

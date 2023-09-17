@@ -25,6 +25,7 @@ enumflags {
     FOWP_PREDICT_FLAGS,
     FOWP_LAST,
 };
+const float FOWP_ALL = FOWP_LAST - 1;
 
 enumflags {
     FOPP_NEW,
@@ -318,8 +319,14 @@ predict_tf_state pstate_pred, pstate_server;
 
 .float pred_lastforce;
 .float pred_forcebit;
+.entity last_pred_src;
 
 static float Prediction_ChangedMask(entity player, entity src) {
+    if (src != player.last_pred_src) {
+        player.last_pred_src = src;
+        return FOWP_ALL;
+    }
+
     float mask = FOWP_CTIME;
 
     player.predict_state.client_time = src.client_time;
@@ -747,9 +754,6 @@ void Predict_Init() {
 void Predict_InitPlayer(entity player) {
     if (player.predict_entity)
         return;
-
-    sprint(player, PRINT_HIGH,
-            "FortressOne: Weapon Prediction ", wp_version, "\n");
 
     entity pe = spawn();
     pe.owner = player;

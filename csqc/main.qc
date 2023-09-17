@@ -96,7 +96,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_Hud_Init();
     FO_Weapons_Init();
     Predict_InitDefaultConfig();
-    FO_PP_Init();       // Some of this is always used by custom projectiles.
+    FO_Predict_Init();
     CsGrenTimer::Init();
 
     slot_history_top = -1;
