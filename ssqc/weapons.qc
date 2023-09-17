@@ -1923,7 +1923,10 @@ void W_ChangeQueuedWeaponIfReady() {
 }
 
 void W_ChangeWeaponLast() {
-    if (!IsSlotNull(self.last_slot))
+    // Clearing queued counts as swap to whatever was pre-queued.
+    if (!IsSlotNull(self.queue_slot))
+        self.queue_slot = SlotNull;
+    else if (!IsSlotNull(self.last_slot))
         W_ChangeWeaponSlot(self.last_slot);
 };
 
