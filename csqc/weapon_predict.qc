@@ -900,7 +900,7 @@ void WP_HandleGrenadeInputs() {
 }
 
 void WP_Impulse() {
-    float match;
+    float local_impulse;
 
     WP_HandleGrenadeInputs();
     WP_HandleHeavyInputs();
@@ -917,8 +917,9 @@ void WP_Impulse() {
 
     // Impulses that are NOT held by attack_finished / reloading.
     // * with a hacky exception for TF_QUICKSLOTs
-    match = TRUE;
-    switch (pstate_pred.impulse) {
+    local_impulse = pstate_pred.impulse;
+    pstate_pred.impulse = 0;
+    switch (local_impulse) {
         case TF_DEBUG_CSQC:
             WPP_Dump();
             break;
@@ -932,10 +933,10 @@ void WP_Impulse() {
             break;
 
         case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
-            pstate_pred.impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
+            local_impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
             quick_swap = TRUE;
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
-            Slot slot = InputToSlot(pstate_pred.impulse);
+            Slot slot = InputToSlot(local_impulse);
             if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot)) {
                 if (quick_swap)
                     pstate_pred.tfstate |= TFSTATE_QUICKSLOT;
@@ -945,14 +946,16 @@ void WP_Impulse() {
         }
 
         case TF_QUICKSTOP:
-            if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0) {
-                pstate_pred.impulse = 0;
+            if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0)
                 break;
-            }
             pstate_pred.tfstate &= ~TFSTATE_QUICKSLOT;  // Intentional fall-through.
         case TF_WEAPLAST:
-            pstate_pred.queue_slot = pstate_pred.last_slot; break;
-
+            // Clearing queued counts as swap to whatever was pre-queued.
+            if (!IsSlotNull(pstate_pred.queue_slot))
+                pstate_pred.queue_slot = SlotNull;
+            else
+                pstate_pred.queue_slot = pstate_pred.last_slot;
+            break;
         case TF_WEAPNEXT:
             pstate_pred.queue_slot = FO_FindPrevNextWeaponSlot(
                     pstate_pred.playerclass,CurrentSlot(), FALSE);
@@ -967,21 +970,22 @@ void WP_Impulse() {
             break;
 
         default:
-            match = FALSE;
+            pstate_pred.impulse = local_impulse;
             break;
     }
 
-    // Impulse below this line depend on ready weapon.
+    // Impulses below this line depend on ready weapon.
     if (!WP_WeaponReady())
         return;
 
     WP_ChangeIfQueued();
 
-    if (match)
+    if (!pstate_pred.impulse)  // Handled above.
         return;
 
-    match = TRUE;
-    switch (pstate_pred.impulse) {
+    local_impulse = pstate_pred.impulse;
+    pstate_pred.impulse = 0;
+    switch (local_impulse) {
         case TF_RELOAD:
             WP_ReloadSlot(CurrentSlot());
             break;
@@ -990,7 +994,7 @@ void WP_Impulse() {
             WP_ReloadNext();
             break;
         default:
-            match = FALSE;
+            pstate_pred.impulse = local_impulse;
             break;
     }
 }
