@@ -528,7 +528,7 @@ void(PanelID panelid, string text) drawReadyPanel = {
         if(showingscores || !panel.Display) {
             return;
         }
-        if (prematch && team_no && player_class && !SBAR.CountdownStarted &&
+        if (prematch && team_no && WP_PlayerClass() && !SBAR.CountdownStarted &&
               game_state.is_player) {
             if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";

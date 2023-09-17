@@ -861,7 +861,6 @@ GameState game_state, prev_game_state;
 float team_no;
 float crosshair_team_no;
 float all_time;
-float player_class;
 float painfinished;
 vector thisorigin;
 float jump_counter;
