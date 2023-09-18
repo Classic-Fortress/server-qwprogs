@@ -27,18 +27,17 @@ void PushToSlotHistory(float value) {
         // Stack is full
         return;
     }
-
-    slot_history_top += 1;
     slot_history[slot_history_top] = value;
+    if (slot_history_top == 0) {
+        Slot slot = !IsSlotNull(pstate_pred.queue_slot) ?
+            pstate_pred.queue_slot : pstate_pred.current_slot;
+        slot_under_stack = SlotIndex(slot) + 1;
+    }
+    slot_history_top += 1;
 }
 
-void RemoveFromSlotHistory(float slot) {
-    if (slot_history_top == -1) {
-        // Stack is empty
-        return;
-    }
-
-    for (float i = slot_history_top; i >= 0; i--) {
+float RemoveFromSlotHistory(float slot) {
+    for (float i = slot_history_top - 1; i >= 0; i--) {
         if (slot_history[i] == slot) {
             for (float j = i+1; j < MAX_SLOT_HISTORY_SIZE; j++) {
                 slot_history[j-1] = slot_history[j];
@@ -48,6 +47,15 @@ void RemoveFromSlotHistory(float slot) {
             slot_history_top--;
             break;
         }
+    }
+
+    if (slot_history_top > 0) {
+        return slot_history[slot_history_top - 1];
+    } else {
+        if (CVARF(fo_default_weapon))
+            return CVARF(fo_default_weapon);
+        else
+            return slot_under_stack;
     }
 }
 
@@ -98,8 +106,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     Predict_InitDefaultConfig();
     FO_Predict_Init();
     CsGrenTimer::Init();
-
-    slot_history_top = -1;
 
     registercommand("+slot");
     registercommand("-slot");
@@ -228,18 +234,13 @@ void Slot_Keydown(float slot) {
 }
 
 void Slot_Keyup(float slot) {
-    RemoveFromSlotHistory(slot);
+    float prev = RemoveFromSlotHistory(slot);
+    float still_attack = slot_history_top > 0;  // Empty stack check
 
-    if (slot_history_top >= 0) { // still holding another +slot bind
-        float impulse = FO_SlotToImpulse(WP_PlayerClass(),
-                                         MakeSlot(slot_history[slot_history_top]));
-        localcmd(sprintf("impulse %d\n", impulse));
-    } else {
-        if (CVARF(fo_default_weapon)) {
-            localcmd(sprintf("impulse %d\n", CVARF(fo_default_weapon)));
-        }
+    float impulse = FO_SlotToImpulse(WP_PlayerClass(), MakeSlot(prev));
+    localcmd(sprintf("impulse %d\n", impulse));
+    if (!still_attack)
         localcmd("-attack\n");
-    }
 }
 
 void W_ChangeToSlotAlternate(string opt1, string opt2);

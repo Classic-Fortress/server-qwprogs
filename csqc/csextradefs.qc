@@ -115,8 +115,9 @@ float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
 float zoomed_in;
+
 float slot_history[MAX_SLOT_HISTORY_SIZE];
-float slot_history_top;
+float slot_history_top, slot_under_stack;
 
 .string name;
 .string description;
