@@ -1,5 +1,6 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
+                            float timer_flags = 0);
 void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag);														 
 float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 float FoLogin(string token, float print_error);
@@ -105,24 +106,25 @@ void() CSQC_Parse_Event = {
         case MSG_GRENPRIMED:
             float entno = readentitynum();
             float grentype = readbyte();
-            float primed_at = readfloat();
             float explodes_at = readfloat();
 
-            if (entno != player_localentnum)
+            // The current player (inc spectated) handled via prediction ent.
+            if (game_state.is_player || entno == player_localentnum)
                 return;
 
-            ParseGrenPrimed(grentype, primed_at, explodes_at);
+            ParseGrenPrimed(grentype, explodes_at);
             break;
         case MSG_GRENTHROWN:
             float entno = readentitynum();
-            if (entno != player_localentnum)
+            // Current player (or spectated) handled via prediction ent.
+            if (game_state.is_player || entno == player_localentnum)
                 return;
 
             CsGrenTimer last = CsGrenTimer::GetLast();
             // It's possible to get THROWN without PRIMED when spectating a
             // player that primed before you started watching them.
             if (last != world && last.active())
-                last.set_thrown();
+                last.set_flag(FL_GT_THROWN);
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
@@ -368,8 +370,6 @@ void() CSQC_Parse_Event = {
     }
 }
 
-DEFCVAR_FLOAT(fo_grentimer_debug, 0);
-
 string cached_timer;
 string GetGrenTimerSound() {
     string wav = CVARS(fo_grentimersound);
@@ -394,11 +394,9 @@ void CsGrenTimer::StartSound() {
     this.playing_ = TRUE;
 }
 
-void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
-                      float timer_flags) {
+void CsGrenTimer::Set(float expires_at, float _grentype, float timer_flags) {
     grentype_ = _grentype;
-    primed_at_ = primed_at;
-    expires_at_ = expires_at;
+    raw_expires_at_ = expires_at_ = expires_at;
     flags_ = timer_flags;
     playing_ = FALSE;
 
@@ -416,6 +414,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
 }
 
 void CsGrenTimer::Stop() {
+    raw_expires_at_ = -1;
     expires_at_ = -1;
     PauseSound();  // Pause is really stop.
     flags_ = 0;
@@ -427,25 +426,11 @@ void StopGrenTimers() {
         grentimers[i].Stop();
 }
 
-void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
+CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
+                            float timer_flags = 0) {
     if (grentype == GREN_FLARE || grentype == GREN_CALTROP)
-        return;
+        return world;
 
-    // Very rough (but good enough for now) filter to disambiguate local
-    // predicted primes versus matched server primes.
-    static float last_explodes_at;
-    float delta = explodes_at - last_explodes_at;
-    if (fabs(delta) < 50 * MSEC) {
-        // Experimental patch up if prediction too far off.
-        if (CVARF(fo_beta_local_grenade) == 2 && delta > 10 * MSEC) {
-            CsGrenTimer last = CsGrenTimer::GetLast();
-            last.adj_sync(delta);
-        }
-        return;
-    }
-    last_explodes_at = explodes_at;
-
-    float timer_flags = 0;
     float timer_mode = game_state.is_player ? CVARF(fo_grentimer) : 1;
     switch (timer_mode) {
         case 0: break;
@@ -457,16 +442,17 @@ void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
 
     CsGrenTimer timer = CsGrenTimer::GetNext();
-    timer.Set(primed_at, explodes_at, grentype, timer_flags);
+    timer.Set(explodes_at, grentype, timer_flags);
 
     if (debug_print_state) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
 
         float expires_at = timer.expiry();
 
-        print(sprintf("primed_at=%0.2f expires_at=%0.2f explodes_at=%0.2f tfuse=%0.2f\n",
-                      primed_at, expires_at, explodes_at, expires_at - primed_at));
+        print(sprintf("expires_at=%0.2f explodes_at=%0.2f\n", expires_at, explodes_at));
     }
+
+    return timer;
 }
 #define HITFLAG(_fl_name) (hitflags & (HITFLAG_##_fl_name))
 

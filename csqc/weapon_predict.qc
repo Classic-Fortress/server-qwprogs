@@ -1567,11 +1567,12 @@ static float CanThrowGrenade(int gren_type) {
     return TRUE;
 }
 
-void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
-
 float WP_GrenCount(float index) {
     return index == 1 ? pstate_pred.no_grenades_1 : pstate_pred.no_grenades_2;
 }
+
+CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
+                            float timer_flags = 0);
 
 static void W_PrimeGren(float index) {
     if (!game_state.is_alive || getstatf(STAT_NOFIRE))
@@ -1586,12 +1587,17 @@ static void W_PrimeGren(float index) {
     if (*gc < 1)
         return;  // No grenades left
 
-    float gren = FO_ClassGren(pstate_pred.playerclass, index)->id;
-
-    pstate_pred.tfstate |= (index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED);
     *gc -= 1;
-    if (IsEffectFrame())
-        ParseGrenPrimed(gren, time, time + 3.8);
+    pstate_pred.tfstate |= index ? TFSTATE_GREN1_PRIMED : TFSTATE_GREN2_PRIMED;
+
+    pstate_pred.primed_gren_type = FO_ClassGren(pstate_pred.playerclass, index)->id;
+
+    static float held_gren_exp;
+    if (IsEffectFrame()) {
+        held_gren_exp = time + 3.8 + input_timelength / 2;
+        ParseGrenPrimed(pstate_pred.primed_gren_type, held_gren_exp, FL_GT_LOCAL);
+    }
+    pstate_pred.primed_gren_exp = held_gren_exp;
 }
 
 static void W_ThrowGren(float is_throw) {
@@ -1918,8 +1924,48 @@ struct {
 } cuss_state;
 
 float ClownConcPeriod();
+void StopGrenTimers();
 
-void PredictConc() {
+DEFCVAR_FLOAT(fo_grentimer_debug, 0);
+
+static void WP_GrenadeTimers() {
+    static float last_gen;
+    static float last_server_exp;
+
+    // New life or player, reset and resync.
+    if (game_state.spawn_gen != last_gen) {
+        last_gen = game_state.spawn_gen;
+        StopGrenTimers();
+        last_server_exp = 0;
+    }
+
+    float server_exp = pstate_server.primed_gren_exp;
+    CsGrenTimer srv = CsGrenTimer::Match(server_exp, 25*MSEC);
+
+    if (server_exp != last_server_exp) {
+        last_server_exp = server_exp;
+
+        if (srv == world) {
+            srv = ParseGrenPrimed(pstate_server.primed_gren_type, server_exp);
+        } else {
+            if (CVARF(fo_grentimer_debug) & 2)
+                printf("gt update local: delta=%0.3f\n", server_exp - srv.raw_expiry());
+
+            // Previous local
+            if (!srv.test_flag(FL_GT_LOCAL))
+                printf("Warning: local grenade mismatch! %0.3f %0.3f\n", server_exp, srv.raw_expiry());
+            srv.clear_flag(FL_GT_LOCAL);
+            // Sound sync below not yet working well.
+            srv.adj_sync(server_exp - srv.raw_expiry(),
+                         CVARF(fo_beta_local_grenade) == 2);
+        }
+    }
+
+    if (srv != world && (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0))
+        srv.set_flag(FL_GT_THROWN);
+}
+
+static void PredictConc() {
     if (IsClownMode(CLOWN_CONC)) {
         if (cuss_state.end_time < time)
             cuss_state.end_time = time + ClownConcPeriod();
@@ -1957,6 +2003,7 @@ static void WP_UpdatePredict() {
     int effect_frame = clientcommandframe - 1;
 
     pstate_server.seq = servercommandframe;
+    pstate_server.server_time = time;
     for(; pframe <= eframe; pframe++) {
         old_input_buttons = input_buttons;
         if (!getinputstate(pframe) || input_timelength <= 0)
@@ -1976,6 +2023,7 @@ static void WP_UpdatePredict() {
         }
 
         pstate_pred.client_time += input_timelength;
+        pstate_pred.server_time += input_timelength;
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
@@ -1996,6 +2044,8 @@ float WP_ClientThink() {
 
     if (WP_Enabled())
         WP_UpdatePredict();
+
+    WP_GrenadeTimers();
     return PREDRAW_NEXT;
 }
 
@@ -2011,13 +2061,7 @@ void InitWeapPredEnt(entity pe) {
     wp_ready = TRUE;
 }
 
-void StopGrenTimers();
-
 void WP_ServerFrame() {
     if (game_state.is_player != prev_game_state.is_player)
         WPP_UpdateEnable(TRUE);
-
-    if (game_state.spawn_gen != prev_game_state.spawn_gen &&
-        game_state.is_alive)
-        StopGrenTimers();
 }

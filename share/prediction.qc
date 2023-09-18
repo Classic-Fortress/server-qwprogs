@@ -72,13 +72,14 @@ struct predict_tf_state {
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
 
-    float no_grenades_1, no_grenades_2, gren_exp;
+    float no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp;
 
 #ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
     int seq;
     float ammo_used[AMMO_NUM_TYPES];
     float buttons_down, buttons_up, buttons_held;
+    float server_time;
 #endif
 };
 
@@ -344,7 +345,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
-    M3(FOWP_GREN, no_grenades_1, no_grenades_2, gren_exp)
+    M4(FOWP_GREN, no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp)
 
     // Rotate through forced update fields.
     if (time - player.pred_lastforce >= 100 * MSEC) {
@@ -519,7 +520,8 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_GREN) {
         COMM(Short, no_grenades_1);
         COMM(Short, no_grenades_2);
-        COMM(Float, gren_exp);
+        COMM(Byte, primed_gren_type);
+        COMM(Float, primed_gren_exp);
     }
 
 #ifdef SSQC

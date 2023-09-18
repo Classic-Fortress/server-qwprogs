@@ -109,7 +109,7 @@ void(PanelID panelid, string text) drawGrenTimerPanel = {
         // if things get reordered, but since we can only ever have one
         // grenade primed, we can obscure this by always considering
         // grenades after the first as primed.
-        float alpha = (gt.is_thrown() || timercount) ? 0.3 : 1.0;
+        float alpha = (gt.test_flag(FL_GT_THROWN) || timercount) ? 0.3 : 1.0;
         string icon = FO_GrenDesc(gt.grentype())->icon;
         Hud_DrawPanelLMP(&panel2, ftos(timeleft), icon, alpha);
         panel2.Position = panel2.Position +
