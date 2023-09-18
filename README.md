@@ -134,6 +134,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
 * CSQC - fo_grentimervolume 1
+* CSQC - fo_specgrentimervolume -1 [ignored when -1]
 * CSQC - fo_jumpvolume 1
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration
