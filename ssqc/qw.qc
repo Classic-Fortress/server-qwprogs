@@ -14,6 +14,8 @@ struct antilag_settings_t {
 } antilag_settings;
 
 .vector antilag_origin;
+.float last_death_ctime;
+.float last_attack_ctime;
 
 .float client_time;              // A stable/predictable client clock
 .float client_ping;              // ping used for prediction

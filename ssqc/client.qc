@@ -68,17 +68,10 @@ float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
 void () NextLevel;
-void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
 void Predict_InitPlayer(entity player);
 void Predict_Destroy(entity player);
-
-void (float n) CSEv_SetPlayerImpulse_f = {
-    bprint(PRINT_HIGH, self.netname, "\n");
-    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
-    self.impulse = n;
-};
 
 void () info_intermission =
 {
