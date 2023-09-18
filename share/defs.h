@@ -253,7 +253,6 @@ enumflags {
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)
     TFSTATE_FLASHED,
-    TFSTATE_QUICKSLOT,     // QUICKSTOP should change to last weapon.
     TFSTATE_AC_SPINUP,     // These cover the 3 assault cannon states.
     TFSTATE_AC_SPINNING,
     TFSTATE_AC_SPINDOWN,
@@ -419,11 +418,6 @@ struct Slot { int id; };
 #define TF_GRENADE_PT_1             17  // Prime and throw grenade type 1 (two clicks)
 #define TF_GRENADE_PT_2             18  // Prime and throw grenade type 2 (two clicks)
 // unused
-#define TF_QUICKSLOT1               20  // Fire weapon slot 1 and then switch back to current weapon
-#define TF_QUICKSLOT2               21  // Fire weapon slot 2 and then switch back to current weapon
-#define TF_QUICKSLOT3               22  // Fire weapon slot 3 and then switch back to current weapon
-#define TF_QUICKSLOT4               23  // Fire weapon slot 4 and then switch back to current weapon
-#define TF_QUICKSTOP                24  // Used to tell server that quick firing has stopped
 #define TF_RELOAD_SLOT1             25  // Reload weapon slot 1
 #define TF_RELOAD_SLOT2             26  // Reload weapon slot 2
 #define TF_RELOAD_SLOT3             27  // Reload weapon slot 3
