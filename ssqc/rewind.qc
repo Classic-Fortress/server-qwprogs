@@ -323,8 +323,14 @@ void NoRewindSyncFn(entity e, float target_time) {
     error("not set\n");
 }
 
-void Forward_Projectile(int fpp_type, entity proj) {
+void Forward_Projectile(int fpp_type, entity proj, float use_ctime) {
     float ping = proj.owner.client_ping;
+    if (use_ctime) {
+        // These can be pretty late with sendevent latency on top so let's be
+        // conservative.
+        ping = min((proj.owner.client_time - use_ctime) * 1000,
+                   fo_config.max_rewind_ms - 25);
+    }
 
     ProjectResult offset = Forward_ProjectOffset(fpp_type, ping);
     float static_dt = offset.static_ms / 1000.0;

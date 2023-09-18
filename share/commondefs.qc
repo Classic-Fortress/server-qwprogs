@@ -54,6 +54,7 @@ enumflags {
     REWIND_KNOCKBACK,
     REWIND_SETSPEED,
     REWIND_GRENADES,
+    REWIND_SENDEVENT,
     REWIND_FORWARD_PROJ_SELFKNOCK,
     REWIND_FORWARD_DOORS,
 };
@@ -64,6 +65,7 @@ string REWIND_DESC[] = {
     "rewind pipe knockback",
     "allow csqc to handle maxspeed",
     "rewind grenade throws",
+    "use sendevent augmentation (allows race w/ death rewind)",
     "forward projectile self-knockback",
     "open doors earlier for hpbs [requires rfd=1]",
 };
@@ -71,7 +73,7 @@ string REWIND_DESC[] = {
 const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_FIRE |
                                    REWIND_PROJ_TRAVEL |
                                    REWIND_FORWARD_PROJ_SELFKNOCK |
-                                   REWIND_SETSPEED;
+                                   REWIND_SETSPEED | REWIND_SENDEVENT;
 
 
 float RewindFlagEnabled(float flag) {
