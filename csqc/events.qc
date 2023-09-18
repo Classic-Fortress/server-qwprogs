@@ -381,16 +381,21 @@ string GetGrenTimerSound() {
     return wav;
 }
 
+static float GrenTimerVolume() {
+    if (game_state.is_spectator && CVARF(fo_spec_grentimervolume) != -1)
+        return CVARF(fo_spec_grentimervolume);
+    return CVARF(fo_grentimervolume);
+}
+
 void CsGrenTimer::StartSound() {
     if !(this.flags_ & FL_GT_SOUND)
         return;
 
     string wav = GetGrenTimerSound();
-    float volume = CVARF(fo_grentimervolume);
 
     // Note there's a bug where soundupdate returns false for a new sample, even
     // though it's started.
-    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    soundupdate(this, CHAN_VOICE, wav, GrenTimerVolume(), 0, 0, 0, sound_offset());
     this.playing_ = TRUE;
 }
 
