@@ -229,18 +229,15 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 void Slot_Keydown(float slot) {
     PushToSlotHistory(slot);
 
-    float impulse = FO_SlotToImpulse(WP_PlayerClass(), MakeSlot(slot));
-    localcmd(sprintf("impulse %d\n+attack\n", impulse));
+    localcmd(sprintf("impulse %d\n+attack\n", TF_SLOT1 + slot - 1));
 }
 
 void Slot_Keyup(float slot) {
     float prev = RemoveFromSlotHistory(slot);
     float still_attack = slot_history_top > 0;  // Empty stack check
 
-    if (prev) {
-        float impulse = FO_SlotToImpulse(WP_PlayerClass(), MakeSlot(prev));
-        localcmd(sprintf("impulse %d\n", impulse));
-    }
+    if (prev)
+        localcmd(sprintf("impulse %d\n", TF_SLOT1 + prev - 1));
     if (!still_attack)
         localcmd("-attack\n");
 }

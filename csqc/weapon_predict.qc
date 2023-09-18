@@ -607,11 +607,6 @@ void WP_ServerUpdate() {
         phys_sim_dt = -1;
 }
 
-static Slot InputToSlot(float input) {
-    Slot result = FO_SlotByInput(pstate_pred.playerclass, input);
-    return result;
-}
-
 void FO_ReloadSound(float weapon) {
     local float reloadvolume = CVARF(fo_reloadvolume);
 
@@ -912,8 +907,9 @@ void WP_Impulse() {
             WPP_Dump();
             break;
 
+        case TF_SLOT1: case TF_SLOT2: case TF_SLOT3: case TF_SLOT4:
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
-            Slot slot = InputToSlot(local_impulse);
+            Slot slot = FO_SlotByInput(pstate_pred.playerclass, local_impulse);
             if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot))
                 pstate_pred.queue_slot = slot;
             break;

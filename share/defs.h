@@ -397,10 +397,10 @@ struct Slot { int id; };
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
-#define TF_IMPULSE_SLOT1            1   // Changes weapon to slot 1 (primary weapon)
-#define TF_IMPULSE_SLOT2            2   // Changes weapon to slot 2 (secondary weapon)
-#define TF_IMPULSE_SLOT3            3   // Changes weapon to slot 3 (tertiary weapon)
-#define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
+#define TF_IMPULSE1                 1   // Ambiguous impulses that can be either
+#define TF_IMPULSE2                 2   // slots or classical weapons.  Prefer
+#define TF_IMPULSE3                 3   // TF_SLOT1 .. TF_SLOT4
+#define TF_IMPULSE4                 4
 #define TF_NUM_SLOTS                4
 
 #define TF_CLASSMENU                5   // Brings up class menu
@@ -593,6 +593,10 @@ struct Slot { int id; };
 // unused                           197
 // unused                           198
 #define TF_ADMIN_LISTIPS            199
+#define TF_SLOT1                    200   // Changes weapon to slot 1 (primary weapon)
+#define TF_SLOT2                    201   // Changes weapon to slot 2 (secondary weapon)
+#define TF_SLOT3                    202   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_SLOT4                    203   // Changes weapon to slot 4 (melee weapon)
 // unused                           200
 // unused                           201
 // unused                           202
@@ -1500,10 +1504,10 @@ struct TFAlias {
 };
 
 TFAlias client_aliases[] = {
-    {"slot1",                   TF_IMPULSE_SLOT1},
-    {"slot2",                   TF_IMPULSE_SLOT2},
-    {"slot3",                   TF_IMPULSE_SLOT3},
-    {"slot4",                   TF_IMPULSE_SLOT4},
+    {"slot1",                   TF_SLOT1},
+    {"slot2",                   TF_SLOT2},
+    {"slot3",                   TF_SLOT3},
+    {"slot4",                   TF_SLOT4},
     {"+slot1",                  0,  "+slot 1"},
     {"-slot1",                  0,  "-slot 1"},
     {"+slot2",                  0,  "+slot 2"},
@@ -1512,13 +1516,13 @@ TFAlias client_aliases[] = {
     {"-slot3",                  0,  "-slot 3"},
     {"+slot4",                  0,  "+slot 4"},
     {"-slot4",                  0,  "-slot 4"},
-    {"+quick1",                 0,  "impulse 1;+attack"},
+    {"+quick1",                 0,  "slot1;+attack"},
     {"-quick1",                 0,  "-attack"},
-    {"+quick2",                 0,  "impulse 2;+attack"},
+    {"+quick2",                 0,  "slot2;+attack"},
     {"-quick2",                 0,  "-attack"},
-    {"+quick3",                 0,  "impulse 3;+attack"},
+    {"+quick3",                 0,  "slot3;+attack"},
     {"-quick3",                 0,  "-attack"},
-    {"+quick4",                 0,  "impulse 4;+attack"},
+    {"+quick4",                 0,  "slot4;+attack"},
     {"-quick4",                 0,  "-attack"},
     {"menu",                    0,  "fo_menu_special", 0, "cmd menu"},
     {"changeteam",              0,  "fo_menu_team", TF_CHANGETEAM},
