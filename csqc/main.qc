@@ -237,7 +237,7 @@ void Slot_Keyup(float slot) {
     float prev = RemoveFromSlotHistory(slot);
     float still_attack = slot_history_top > 0;  // Empty stack check
 
-    float impulse = FO_SlotToImpulse(WP_PlayerClass(), MakeSlot(prev));
+    float impulse = FO_SlotToImpulse(WP_PlayerClass(), MakeSlot(prev ?: 1));
     localcmd(sprintf("impulse %d\n", impulse));
     if (!still_attack)
         localcmd("-attack\n");
