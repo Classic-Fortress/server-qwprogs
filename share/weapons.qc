@@ -34,7 +34,7 @@ float SlotIndex(Slot slot) {
         printf("ERROR: OOB slot id (%d) found.  Continuing.\n", (float)slot.id);
         return TF_NUM_SLOTS - 1;
     }
-    return slot.id - 1; 
+    return slot.id - 1;
 }
 
 // Convert a weapon-bit to a linear index.
@@ -698,6 +698,19 @@ float InputHandlePyroSlotSwap(float playerclass, float input) {
     if (playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
         input = 3 - input;
     return input;
+}
+
+float FO_SlotToImpulse(float playerclass, Slot slot) {
+    if (!IsUsingOldImpulses())
+        return SlotIndex(slot) + 1;
+
+    float weap = FO_SlotWeapInfo(playerclass, slot)->weapon;
+    if (weap != WEAP_NONE)
+        for (float i = 0; i < impulse_weapons[playerclass].weapons.length; i++)
+            if (impulse_weapons[playerclass].weapons[i] == weap)
+                return i + 1;
+
+    return -1;
 }
 
 Slot FO_SlotByInput(float playerclass, float input) {
