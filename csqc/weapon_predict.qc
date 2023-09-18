@@ -924,14 +924,6 @@ void WP_Impulse() {
             WPP_Dump();
             break;
 
-        case TF_RELOAD:
-            WP_ReloadSlot(CurrentSlot());
-            break;
-
-        case TF_RELOAD_NEXT:
-            WP_ReloadNext();
-            break;
-
         case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
             local_impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
             quick_swap = TRUE;
@@ -989,10 +981,10 @@ void WP_Impulse() {
         case TF_RELOAD:
             WP_ReloadSlot(CurrentSlot());
             break;
-
         case TF_RELOAD_NEXT:
             WP_ReloadNext();
             break;
+
         default:
             pstate_pred.impulse = local_impulse;
             break;
