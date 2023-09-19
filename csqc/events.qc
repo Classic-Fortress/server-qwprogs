@@ -107,24 +107,9 @@ void() CSQC_Parse_Event = {
             float entno = readentitynum();
             float grentype = readbyte();
             float explodes_at = readfloat();
-
-            // The current player (inc spectated) handled via prediction ent.
-            if (game_state.is_player || entno == player_localentnum)
-                return;
-
-            ParseGrenPrimed(grentype, explodes_at);
             break;
         case MSG_GRENTHROWN:
             float entno = readentitynum();
-            // Current player (or spectated) handled via prediction ent.
-            if (game_state.is_player || entno == player_localentnum)
-                return;
-
-            CsGrenTimer last = CsGrenTimer::GetLast();
-            // It's possible to get THROWN without PRIMED when spectating a
-            // player that primed before you started watching them.
-            if (last != world && last.active())
-                last.set_flag(FL_GT_THROWN);
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
@@ -436,13 +421,16 @@ CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
     if (grentype == GREN_FLARE || grentype == GREN_CALTROP)
         return world;
 
-    float timer_mode = game_state.is_player ? CVARF(fo_grentimer) : 1;
+    float timer_mode = CVARF(fo_grentimer);
     switch (timer_mode) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
         default: timer_flags |= FL_GT_SOUND | FL_GT_ADJPING; break;
     }
+
+    if (game_state.is_spectator)
+        timer_flags &= ~FL_GT_ADJPING;
 
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
 
