@@ -775,6 +775,8 @@ void UpdateClientReloadSound(entity pl, float weapon) {
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
+    return;  // Not needed until we re-enable TFX.
+
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
@@ -782,11 +784,12 @@ void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     WriteByte(MSG_MULTICAST, grentype);
     WriteFloat(MSG_MULTICAST, explodes_at);
 
-    // Let's see if we can get away with avoiding _R here.
-    multicast('0 0 0', MULTICAST_ALL);
+    multicast('0 0 0', MULTICAST_ALL);  // Actual primer has reliable transport.
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
+    return;  // Not needed until we re-enable TFX.
+
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
