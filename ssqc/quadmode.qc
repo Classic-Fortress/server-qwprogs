@@ -1,5 +1,7 @@
 void () info_player_teamspawn;
 
+void Activate2v2_Ruleset();
+
 void () PostFOQuadStarted = {
 	if (!fo_login_required)
 		return;
@@ -701,8 +703,11 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 
-		if (rounds == 2 && legit_players > 1)
+		if (rounds == 2 && legit_players > 1) {
 			PostFOQuadStarted();
+			if (legit_players == 4)
+				Activate2v2_Ruleset();
+		}
 
 		if (rounds == 1 /* final round */) {
 			te = find(world, classname, "player");
@@ -824,3 +829,7 @@ void () StartQuadRound =
 		te.nextthink = (time + 1);
 	}
 };
+
+void Activate2v2_Ruleset() {
+    disable_resup_gren = 3;  // Disable gren1 and gren2 pickups
+}

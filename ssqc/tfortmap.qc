@@ -871,19 +871,14 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                         Player.tfstate &= ~TFSTATE_RELOADING;
                         *ws->clip_fired = max(*ws->clip_fired - Goal.ammo_rockets, 0);
                     }
+                }
 
-                }
-                Player.no_grenades_1 =
-                    Player.no_grenades_1 + Goal.no_grenades_1;
-                Player.no_grenades_2 =
-                    Player.no_grenades_2 + Goal.no_grenades_2;
-                
-                if (Player.no_grenades_1 > Player.max_grenades_1) {
-                    Player.no_grenades_1 = Player.max_grenades_1;
-                }
-                if (Player.no_grenades_2 > Player.max_grenades_2) {
-                    Player.no_grenades_2 = Player.max_grenades_2;
-                }
+                if (disable_resup_gren & 1 == 0)
+                    Player.no_grenades_1 = min(Player.no_grenades_1 + 1,
+                                               Player.max_grenades_1);
+                if (disable_resup_gren & 2 == 0)
+                    Player.no_grenades_2 = min(Player.no_grenades_2 + 1,
+                                               Player.max_grenades_2);
 
                 if (Player.ammo_detpack > Player.maxammo_detpack) {
                     Player.ammo_detpack = Player.maxammo_detpack;

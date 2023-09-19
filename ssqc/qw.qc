@@ -795,6 +795,7 @@ string goal_class_names[7] = {
 
 .float special_cooldown;
 .float airblast_cooldown;
+float disable_resup_gren;
 
 // backend
 string match_id;
