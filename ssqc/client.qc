@@ -2931,32 +2931,13 @@ void FO_HandleTFStateUpdate() {
 
 void TeamFortress_MOTD();
 
-void () PlayerPostThink = {
-    FO_CheckClientThink();
-    UpdateScoreboardInfo(self);
-    FOPlayer fop = (FOPlayer)self;
-    fop.RewindUpdate();
-    Forward_OpenDoors(self);
+static void PlayerPostThinkAlive() {
+    float fdmg;
 
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
-
-    Predict_Update();
-
-    if (self.view_ofs == '0 0 0') {
-        return;
-    }
-
-    if (self.deadflag) {
-        DeadImpulses();
-        self.impulse = 0;
-        return;
-    }
-
-    local float fdmg;
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
     if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
@@ -2984,6 +2965,8 @@ void () PlayerPostThink = {
     }
     self.jump_flag = self.velocity_z;
 
+    Forward_OpenDoors(self);
+
     if(votemode) {
         CheckPowerups();
         FO_ReloadFrame();
@@ -3010,6 +2993,22 @@ void () PlayerPostThink = {
     FO_HandleTFStateUpdate();
     if (time >= self.StatusRefreshTime)
         RefreshStatusBar(self);
+}
+
+void () PlayerPostThink = {
+    FO_CheckClientThink();
+    UpdateScoreboardInfo(self);
+
+    if (self.deadflag) {
+        DeadImpulses();
+        self.impulse = 0;
+    } else {
+        PlayerPostThinkAlive();
+    }
+
+    FOPlayer fop = (FOPlayer)self;
+    fop.RewindUpdate();
+    Predict_Update();
 };
 
 void () UpdateAllClientsTeamScores = {
@@ -3028,7 +3027,6 @@ void () UpdateAllClientsTeamScores = {
     }
 }
 
-//do not rely on csqcactive - it may misbehave when using `join` from spectator
 void () ClientConnect = {
     if (!infokeyf(self,INFOKEY_P_CSQCACTIVE)) {
         sprint(self, PRINT_HIGH, "FTE/CSQC is required for this server, please download the latest client package at www.fortressone.org\n");
