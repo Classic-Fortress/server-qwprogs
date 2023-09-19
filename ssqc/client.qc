@@ -682,6 +682,9 @@ void () DecodeLevelParms = {
         Role_None.gren2_limits[8] = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
         Role_None.gren2_limits[9] = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
 
+        // disable resupply giving grenades (1-bit for gren1, 2-bit for gren2)
+        disable_resup_gren = CF_GetSetting("drg", "disable_resup_gren", "0");
+
         // solid detpack toggle [0]
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
         // All Walls Block EMP [0]
