@@ -1870,17 +1870,6 @@ static void W_AmmoError() {
     }
 }
 
-void W_ChangeWeaponByInput(float input) {
-    if (input < 1 || input > GetMaxWeaponInput())
-        return;
-
-    Slot slot = FO_SlotByInput(self.playerclass, input);
-    if (IsSlotNull(slot))
-        return;
-
-    W_ChangeWeaponSlot(slot);
-}
-
 void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
@@ -2373,14 +2362,14 @@ void () ButtonFrame = {
     if (input_buttons & BUTTON4) {
         switch (self.playerclass) {
             case PC_SOLDIER:
-                self.impulse = TF_IMPULSE_SLOT1;
+                self.impulse = TF_SLOT1;
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_PYRO:
                 if (IsUsingCFImpulses()) {
-                    self.impulse = TF_IMPULSE_SLOT2;
+                    self.impulse = TF_SLOT2;
                 } else {
-                    self.impulse = TF_IMPULSE_SLOT1;
+                    self.impulse = TF_SLOT1;
                 }
                 // Intercepted by InterceptRocketJump()
                 break;
@@ -2521,37 +2510,14 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     }
 
-    // +slot/-slot handle attack; we only need to swap back to last weapon.
-    // Let's see if we can get away with just treating this as last weapon;
-    // there were already so many edge cases in the old code such as swapping on
-    // an empty weapon.
-    if (self.impulse == TF_QUICKSTOP) {
-        if (self.tfstate & TFSTATE_QUICKSLOT)
-            self.impulse = TF_WEAPLAST;
-        else
-            self.impulse = 0;
-        self.tfstate &= ~TFSTATE_QUICKSLOT;
-    }
-
-    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput()) {
-        // slot 1-4 (or 1-7) binds
-        W_ChangeWeaponByInput(self.impulse);
-        self.impulse = 0;
-    } else if (self.impulse >= TF_QUICKSLOT1 &&
-               self.impulse <= TF_QUICKSLOT4 && WeaponReady()) {
-        float input = InputHandlePyroSlotSwap(self.playerclass,
-                                              self.impulse - TF_QUICKSLOT1 + 1);
-        Slot slot = MakeSlot(input);
-
-        if (IsSameSlot(slot, self.current_slot)) {
-            self.tfstate &= ~TFSTATE_QUICKSLOT;
-        } else {
-            self.tfstate |= TFSTATE_QUICKSLOT;
+    // slot 1-4 (or 1-7) binds
+    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() ||
+        self.impulse >= TF_SLOT1 && self.impulse <= TF_SLOT4) {
+        Slot slot = FO_SlotByInput(self.playerclass, self.impulse);
+        if (!IsSlotNull(slot))
             W_ChangeWeaponSlot(slot);
-        }
         self.impulse = 0;
     }
-
     W_ChangeQueuedWeaponIfReady();
 
     if (self.impulse == TF_CHANGETEAM) {

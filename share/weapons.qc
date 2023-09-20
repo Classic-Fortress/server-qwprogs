@@ -277,11 +277,46 @@ FO_GrenInfo* FO_ClassGren(int playerclass, int index) {
 }
 
 #ifdef SSQC
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+float IsUsingOldImpulses();
+
+static float IsPyroSlotSwapped() {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
+}
+
 FO_GrenInfo* FO_PlayerGren(entity player, int index) {
     return FO_ClassGren(player.playerclass, index);
 }
-#endif
+#else
+string(entity e, string key) infokey = #80;
 
+float csqc_get_user_setting(string s_short, string s_long, string def) {
+    string s = getplayerkeyvalue(player_localnum, s_short);
+    if (s == "") {
+        s = getplayerkeyvalue(player_localnum, s_long);
+        if (s == "")
+            s = def;
+    }
+
+    switch (s) {
+        case "on": return TRUE;
+        case "off": return FALSE;
+        default: return stof(s);
+    }
+}
+
+float IsUsingOldImpulses() {
+    return csqc_get_user_setting("owi", "old_weapon_impulses", "off");
+}
+
+static float IsPyroSlotSwapped() {
+    return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
+}
+
+float IsHoldGrenades() {
+    return csqc_get_user_setting("hg", "hold_grens", "off");
+}
+#endif
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
@@ -380,21 +415,17 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_RAILGUN,          IT_SHOTGUN},
 };
 
-FO_WeapInfo* FO_SlotWeapInfo(float class, Slot slot) {
+FO_WeapInfo* FO_SlotWeapInfo(float playerclass, Slot slot) {
     if (IsSlotNull(slot))
         return FO_GetWeapInfo(WEAP_NONE);
 
-    FO_ClassWeapons* cw = &class_weapons[class];
-    return cw->info[SlotIndex(slot)] ? cw->info[SlotIndex(slot)] :
-                                       FO_GetWeapInfo(WEAP_NONE);
-}
+    float idx = SlotIndex(slot);
+    float cf_pyro_impulses = IsPyroSlotSwapped();
+    float si = SlotIndex(slot);
+    if (playerclass == PC_PYRO && cf_pyro_impulses && (idx == 0 || idx == 1))
+        idx = 1 - idx;
 
-float FO_ClassWeaponBySlot(float class, Slot slot) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(class, slot);
-    if (!wi)
-        return WEAP_NONE;
-
-    return wi->weapon;
+    return class_weapons[playerclass]->info[idx] ?: FO_GetWeapInfo(WEAP_NONE);
 }
 
 float FO_ClassWeapItemMask(float class) {
@@ -478,14 +509,16 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[0];
 }
 
-float FO_ClassWeaponBySlot(float class, Slot slot);
 
-inline float FO_CurrentWeapon() {
-    return FO_ClassWeaponBySlot(self.playerclass, self.current_slot);
+float FO_PlayerCurrentWeapon(entity player) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, player.current_slot);
+    if (!wi)
+        return WEAP_NONE;
+    return wi->weapon;
 }
 
-inline float FO_PlayerCurrentWeapon(entity player) {
-    return FO_ClassWeaponBySlot(player.playerclass, player.current_slot);
+inline float FO_CurrentWeapon() {
+    return FO_PlayerCurrentWeapon(self);
 }
 
 inline void FO_FillCurrentWeapState(FO_WeapState* result) {
@@ -500,7 +533,6 @@ void (float att_delay) Attack_Finished;
 void W_UpdateCurrentWeapon(entity pl);
 void sprint_pred(entity client, float msglevel, string s);
 
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
 void (entity pl, float weapon) UpdateClientReloadSound;
 
 void FO_ReloadSound() {
@@ -656,72 +688,15 @@ Slot FO_ImpulseToSlot(float playerclass, float impulse) {
     return r;
 }
 
-#ifdef SSQC
-float IsUsingOldImpulses();
-
-static float IsPyroSlotSwapped() {
-    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-}
-#else
-string(entity e, string key) infokey = #80;
-
-float csqc_get_user_setting(string s_short, string s_long, string def) {
-    string s = getplayerkeyvalue(player_localnum, s_short);
-    if (s == "") {
-        s = getplayerkeyvalue(player_localnum, s_long);
-        if (s == "")
-            s = def;
-    }
-
-    switch (s) {
-        case "on": return TRUE;
-        case "off": return FALSE;
-        default: return stof(s);
-    }
-}
-
-float IsUsingOldImpulses() {
-    return csqc_get_user_setting("owi", "old_weapon_impulses", "off");
-}
-
-static float IsPyroSlotSwapped() {
-    return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
-}
-
-float IsHoldGrenades() {
-    return csqc_get_user_setting("hg", "hold_grens", "off");
-}
-#endif
-
-float InputHandlePyroSlotSwap(float playerclass, float input) {
-    float cf_pyro_impulses = IsPyroSlotSwapped();
-    if (playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
-        input = 3 - input;
-    return input;
-}
-
-float FO_SlotToImpulse(float playerclass, Slot slot) {
-    if (!IsUsingOldImpulses())
-        return SlotIndex(slot) + 1;
-
-    float weap = FO_SlotWeapInfo(playerclass, slot)->weapon;
-    if (weap != WEAP_NONE)
-        for (float i = 0; i < impulse_weapons[playerclass].weapons.length; i++)
-            if (impulse_weapons[playerclass].weapons[i] == weap)
-                return i + 1;
-
-    return -1;
-}
-
 Slot FO_SlotByInput(float playerclass, float input) {
-    if (IsUsingOldImpulses()) {
-        return FO_ImpulseToSlot(playerclass, input);
+    if (input >= TF_SLOT1 && input <= TF_SLOT4)
+        return MakeSlot(input - TF_SLOT1 + 1);
+    else if (IsUsingOldImpulses() && (input >= 1 && input <= 7)) {
+        return impulse_weapons[playerclass].slots[input - 1];
+    } else if (input >= 1 && input <= TF_NUM_SLOTS) {
+        return MakeSlot(input - 1);
     } else {
-        input = InputHandlePyroSlotSwap(playerclass, input);
-        if (input >= 1 && input <= TF_NUM_SLOTS)
-            return MakeSlot(input);
-        else
-            return SlotNull;
+        return SlotNull;
     }
 }
 
@@ -735,6 +710,7 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
         // impulse_table[offset] return junk so we use a pointer cursor.
         Slot* cur;
         len = 7;
+        direction = (direction + len) % len;
 
         for (i = 0; i < len; i++) {
             cur = &impulse_table[i];
@@ -742,24 +718,25 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
                 break;
         }
         do {
-            i = (i + direction + len) % len;
+            i = (i + direction) % len;
             cur = &impulse_table[i];
         } while (IsSlotNull(*cur));
 
+        // Technically this will flip OWI+CFPI, but this is a nonsense combo.
         return *cur;
     } else {
-        float* slot_weaps = class_weapons[playerclass].slots;
         len = 4;
+        direction = (direction + len) % len;
+        float idx = SlotIndex(slot);
+        for (i = 0; i < len - 1; i++) {
+            idx += direction;
+            Slot c = MakeSlot(1 + (idx % len));
+            FO_WeapInfo* wi = FO_SlotWeapInfo(playerclass, c);
+            if (wi->weapon != WEAP_NONE)
+                return c;
+        }
 
-        // This is a little subtle, we need to transform the index both before
-        // and after the walk so that we don't walk back into ourselves.
-        i = InputHandlePyroSlotSwap(playerclass, SlotIndex(slot) + 1) - 1;
-        do {
-            i = (i + direction + len) % len;
-        } while (slot_weaps[i] == 0);
-
-        i = InputHandlePyroSlotSwap(playerclass, i + 1);
-        return MakeSlot(i);
+        return slot;
     }
 }
 

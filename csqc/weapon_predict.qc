@@ -607,11 +607,6 @@ void WP_ServerUpdate() {
         phys_sim_dt = -1;
 }
 
-static Slot InputToSlot(float input) {
-    Slot result = FO_SlotByInput(pstate_pred.playerclass, input);
-    return result;
-}
-
 void FO_ReloadSound(float weapon) {
     local float reloadvolume = CVARF(fo_reloadvolume);
 
@@ -905,18 +900,6 @@ void WP_Impulse() {
     WP_HandleGrenadeInputs();
     WP_HandleHeavyInputs();
 
-    // Note: We might have no impulse, but a queued slot here.
-    float quick_swap = FALSE;
-
-    if (pstate_pred.impulse >= TF_QUICKSLOT1 && pstate_pred.impulse <= TF_QUICKSTOP &&
-        !WP_WeaponReady()) {
-        // Filter these out because of potential double queuing pain; should
-        // probably try and deprecate.
-        return;
-    }
-
-    // Impulses that are NOT held by attack_finished / reloading.
-    // * with a hacky exception for TF_QUICKSLOTs
     local_impulse = pstate_pred.impulse;
     pstate_pred.impulse = 0;
     switch (local_impulse) {
@@ -924,23 +907,14 @@ void WP_Impulse() {
             WPP_Dump();
             break;
 
-        case TF_QUICKSLOT1: case TF_QUICKSLOT2: case TF_QUICKSLOT3: case TF_QUICKSLOT4:
-            local_impulse -= TF_QUICKSLOT1 - 1;  // Intentional fall-through.
-            quick_swap = TRUE;
+        case TF_SLOT1: case TF_SLOT2: case TF_SLOT3: case TF_SLOT4:
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
-            Slot slot = InputToSlot(local_impulse);
-            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot)) {
-                if (quick_swap)
-                    pstate_pred.tfstate |= TFSTATE_QUICKSLOT;
+            Slot slot = FO_SlotByInput(pstate_pred.playerclass, local_impulse);
+            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot))
                 pstate_pred.queue_slot = slot;
-            }
             break;
         }
 
-        case TF_QUICKSTOP:
-            if (pstate_pred.tfstate & TFSTATE_QUICKSLOT == 0)
-                break;
-            pstate_pred.tfstate &= ~TFSTATE_QUICKSLOT;  // Intentional fall-through.
         case TF_WEAPLAST:
             // Clearing queued counts as swap to whatever was pre-queued.
             if (!IsSlotNull(pstate_pred.queue_slot))
