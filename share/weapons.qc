@@ -694,7 +694,7 @@ Slot FO_SlotByInput(float playerclass, float input) {
     else if (IsUsingOldImpulses() && (input >= 1 && input <= 7)) {
         return impulse_weapons[playerclass].slots[input - 1];
     } else if (input >= 1 && input <= TF_NUM_SLOTS) {
-        return MakeSlot(input - 1);
+        return MakeSlot(input);
     } else {
         return SlotNull;
     }
