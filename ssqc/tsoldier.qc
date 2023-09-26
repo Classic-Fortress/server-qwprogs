@@ -103,7 +103,7 @@ void () ShockGrenadeExplode = {
     self.nextthink = time + 0.7;
     self.playerclass = 0;
     self.think = NailGrenLaser;
-    self.SendFlags |= FOPP_POS | FOPP_MOVETYPE | FOPP_AVEL;
+    self.SendFlags |= FOPP_POS | FOPP_MOVETYPE | FOPP_ANGLES;
 };
 
 void () BurstGrenadeExplode = {

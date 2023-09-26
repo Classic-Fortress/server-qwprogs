@@ -1064,6 +1064,9 @@ void drawReloadProgress(PanelID panelid, string text) {
         // click event
     }
 
+    if (!game_state.is_alive)
+        return;
+
     float per = WP_ReloadPercent();
     if (per == 1)
         return;

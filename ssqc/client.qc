@@ -3002,7 +3002,10 @@ void () PlayerPostThink = {
     FO_CheckClientThink();
     UpdateScoreboardInfo(self);
 
-    if (self.deadflag) {
+    if (self.motd >= 0)
+        TeamFortress_MOTD();
+
+    if (self.deadflag || self.playerclass == 0) {
         DeadImpulses();
         self.impulse = 0;
     } else {

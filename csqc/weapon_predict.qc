@@ -981,8 +981,8 @@ float WP_ReloadPercent() {
     if (!WP_IsReloading())
         return 1;
 
-    return (pstate_pred.client_time - pstate_pred.reload_started) /
-           (pstate_pred.reload_finished - pstate_pred.reload_started);
+    return min(1, (pstate_pred.client_time - pstate_pred.reload_started) /
+                  (pstate_pred.reload_finished - pstate_pred.reload_started));
 }
 
 string WP_GetClip() {
@@ -1807,7 +1807,7 @@ void InitProjectileEnt(float sendflags) {
     else
         setorigin(self, self.origin);
 
-    if (sendflags & FOPP_NEW == 0) {
+    if (self.created_at > time + 0.05) {
         // Retransmit.  Patch up trail, but no predicted / sound / etc.
         self.oldorigin = self.s_origin;
         return;

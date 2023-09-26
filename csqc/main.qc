@@ -157,8 +157,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     MenuPanel = getHudPanel(HUDP_MENU);
 
-    CurrentMenu = &FO_MENU_TEAM;
-    player_menu_type = 0;
     is_admin = FALSE;
     jump_counter = 0;
 
@@ -176,6 +174,8 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     pengine.view_mask = MASK_VIEWMODEL;  // Start with engine models.
     print("CSQC initialization finished\n");
+
+    FO_Menu_Game(TRUE);
 };
 
 noref void() CSQC_WorldLoaded = {

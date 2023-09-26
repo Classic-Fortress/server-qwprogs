@@ -4,6 +4,7 @@
 
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
+.float created_at;
 
 string wp_version = "v1.1";
 
@@ -28,12 +29,10 @@ enumflags {
 const float FOWP_ALL = FOWP_LAST - 1;
 
 enumflags {
-    FOPP_NEW,
     FOPP_INIT,
     FOPP_POS,
     FOPP_AUX,
     FOPP_ANGLES,
-    FOPP_AVEL,
     FOPP_MOVETYPE,
     FOPP_EXPIRY,
 };
@@ -540,36 +539,32 @@ void EntUpdate_WeaponPred(float isnew) {
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
 float PP_SendEntity(entity to_player, float sendmask) {
-    float sendflags = self.SendFlags & sendmask;
+    float sendflags = sendmask;
 
-    if (sendflags & FOPP_NEW || sendflags == 0 /* retransmit */) {
-        sendflags |= FOPP_INIT | FOPP_POS;
+    if (sendflags & FOPP_INIT) {
+        sendflags = FOPP_INIT | FOPP_POS;  // Note: replaces sendmask
         if (self.fpp.aux)
             sendflags |= FOPP_AUX;
         if (self.fpp.expires_at)
             sendflags |= FOPP_EXPIRY;
-
-        // Make sure we carry all the state on a retransmit (normally PVS).
-        if (sendflags & FOPP_NEW == 0) {
-            sendflags |= FOPP_ANGLES | FOPP_MOVETYPE;
-            if (vlen(self.avelocity) > 0)
-                sendflags |= FOPP_AVEL;
-        }
+        if (FPP_Get(self.fpp.index)->movetype != self.movetype)
+            sendflags |= FOPP_MOVETYPE;
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
-    WriteShort(MSG_ENTITY, sendflags);
+    WriteByte(MSG_ENTITY, sendflags);
 #else
 #define COMMD(_type, _dest, _field) self.##_dest = Read##_type()
 #define COMMO(_type, _dest, _src) ##_dest = Read##_type()
 #define COMM(_type, _field) COMMD(_type, _field, _field)
 
 void EntUpdate_Projectile(float isnew) {
-    float sendflags = readshort();
+    float sendflags = readbyte();
 #endif
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp.index);
         COMM(Short, antilag_ms);
+        COMM(Float, created_at);
         COMMD(Entity, owner_entnum, owner);
     }
 
@@ -597,12 +592,9 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, angles[0]);
         COMM(Coord, angles[1]);
         COMM(Coord, angles[2]);
-    }
-
-    if (sendflags & FOPP_AVEL) {
-        COMM(Coord, avelocity[0]);
-        COMM(Coord, avelocity[1]);
-        COMM(Coord, avelocity[2]);
+        COMM(Short, avelocity[0]);
+        COMM(Short, avelocity[1]);
+        COMM(Short, avelocity[2]);
     }
 
     if (sendflags & FOPP_MOVETYPE) {
@@ -867,6 +859,7 @@ entity FOProj_Create(int fpp_type) {
 
     prj.fpp.index = fpp_type;
     prj.dimension_seen = DMN_NOFLASH;
+    prj.created_at = time;
     setmodel(prj, FPP_Get(fpp_type)->model);
     setsize(prj, '0 0 0', '0 0 0');
 
@@ -911,7 +904,7 @@ void FOProj_Finalize(entity mis, float use_ctime=0) {
     // Below is conditional on using custom SendEntity.
     if (csqc_networking) {
         mis.SendEntity = PP_SendEntity;
-        mis.SendFlags = FOPP_NEW;
+        mis.SendFlags = FOPP_INIT;
     } else if (fpp_type == FPP_HANDGRENADE) {
         entity target = self;
         if (target.classname != "player")
