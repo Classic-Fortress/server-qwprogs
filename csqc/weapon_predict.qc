@@ -981,8 +981,8 @@ float WP_ReloadPercent() {
     if (!WP_IsReloading())
         return 1;
 
-    return (pstate_pred.client_time - pstate_pred.reload_started) /
-           (pstate_pred.reload_finished - pstate_pred.reload_started);
+    return min(1, (pstate_pred.client_time - pstate_pred.reload_started) /
+                  (pstate_pred.reload_finished - pstate_pred.reload_started));
 }
 
 string WP_GetClip() {
