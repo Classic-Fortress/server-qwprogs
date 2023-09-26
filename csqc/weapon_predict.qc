@@ -910,8 +910,10 @@ void WP_Impulse() {
         case TF_SLOT1: case TF_SLOT2: case TF_SLOT3: case TF_SLOT4:
         case 1: case 2: case 3: case 4: case 5: case 6: case 7: {
             Slot slot = FO_SlotByInput(pstate_pred.playerclass, local_impulse);
-            if (!IsSlotNull(slot) && !IsSameSlot(pstate_pred.current_slot, slot))
-                pstate_pred.queue_slot = slot;
+            if (IsSameSlot(pstate_pred.current_slot, slot))
+                    pstate_pred.queue_slot = SlotNull;
+            else if (!IsSlotNull(slot))
+                    pstate_pred.queue_slot = slot;
             break;
         }
 
