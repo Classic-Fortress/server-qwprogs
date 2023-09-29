@@ -515,7 +515,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "1");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
@@ -2709,7 +2709,7 @@ void () PlayerPreThink = {
         return;
     }
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
             if (!self.feign_areachecked) {

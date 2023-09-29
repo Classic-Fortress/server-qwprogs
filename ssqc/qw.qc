@@ -55,7 +55,6 @@ float remote_client_time();
 .float is_undercover;           // TRUE for a SPY if they're undercover
 .float is_building;             // TRUE for an ENGINEER if they're building something
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
-.float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover

@@ -10,6 +10,7 @@ void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+float IsFeigned(entity ent);
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
@@ -510,7 +511,7 @@ void () ClassicConcussionGrenadeTimer = {
     pos = pointcontents(src);
 
     if ((self.owner.flags & 512) || (self.owner.flags & 16)) {
-        if (!self.owner.is_feigning &&
+        if (!IsFeigned(self.owner) &&
             !(FO_PlayerCurrentWeapon(self.owner) == WEAP_ASSAULT_CANNON &&
             !cannon_conc && self.owner.button0)) {
             makevectors(self.owner.v_angle);
@@ -1018,8 +1019,7 @@ entity(entity scanner, float scanrange, float enemies,
                                 (scanner.team_no > 0)) {
                                 if ((head.playerclass == 8) &&
                                     (head.team_no != scanner.team_no)) {
-                                    if ((head.is_feigning != 1) &&
-                                        (invis_only != 1)) {
+                                    if (!IsFeigned(head) && (invis_only != 1)) {
                                         if (head.undercover_team ==
                                             scanner.team_no) {
                                             return (head);
@@ -1033,8 +1033,7 @@ entity(entity scanner, float scanrange, float enemies,
                                 (scanner.team_no > 0)) {
                                 if ((head.playerclass == 8) &&
                                     (head.team_no != scanner.team_no)) {
-                                    if ((head.is_feigning != 1) &&
-                                        (invis_only != 1)) {
+                                    if (!IsFeigned(head) && (invis_only != 1)) {
                                         if (head.undercover_team !=
                                             scanner.team_no) {
                                             return (head);

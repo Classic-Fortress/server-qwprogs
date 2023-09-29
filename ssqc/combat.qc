@@ -191,13 +191,8 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                     crit = 1;
                 }
 
-                if (targ.playerclass == PC_SPY)
-                {
-                    if (targ.is_feigning)
-                    {
+                if (targ.playerclass == PC_SPY && IsFeigned(targ))
                         return;
-                    }
-                }
 
                 float targteam;
                 targteam = (targ.undercover_team == 0) ? targ.team_no : targ.undercover_team;
@@ -293,7 +288,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker,
         return;
 
     // Feigned spies act as corpses unless they're a teammate
-    if (targ.playerclass == PC_SPY && targ.is_feigning && targ.health > 0 &&
+    if (targ.playerclass == PC_SPY && IsFeigned(targ) && targ.health > 0 &&
         targ.team_no != attacker.team_no)
         return;
 
@@ -321,7 +316,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker,
                hitflag |= HITFLAG_KILLEDUNDERCOVERSPY;
                hitflag &= ~HITFLAG_FRIENDLY;
            }
-           if (targ.is_feigning)
+           if (IsFeigned(targ))
                hitflag |= HITFLAG_FEIGNEDENEMY;
         }
     }
@@ -773,9 +768,8 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         }
     }
 
-    if (self.feign_next_damage && !self.is_feigning){
+    if (self.feign_next_damage && !IsFeigned(self))
         FO_Spy_Feign(0, /* ignore rate-limit */ 1);
-    }
 
     self = oldself;
 };

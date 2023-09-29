@@ -1237,7 +1237,6 @@ void () TeamFortress_SetEquipment = {
     self.is_detpacking = 0;
     self.airblast_cooldown = 0;
     self.is_undercover = 0;
-    self.is_feigning = 0;
     self.next_feign_time = 0;
     self.is_unabletospy = 0;
     self.disguise_skin = 0;
@@ -1255,7 +1254,7 @@ void () TeamFortress_SetEquipment = {
     self.maxarmor = 0;
     self.respawn_time = 0;
     self.heat = 0;
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
+    self.tfstate &= (TFSTATE_RELOADING | TFSTATE_FEIGNED);
 
     if (self.team_no == 0)
         self.lives = -1;

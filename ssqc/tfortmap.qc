@@ -2087,7 +2087,7 @@ void () item_tfgoal_touch = {
         return;
     if (cb_prematch)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if (other == self.owner)
         return;
