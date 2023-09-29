@@ -674,7 +674,6 @@ void () TeamFortress_ShowTF = {
         CF_PrintSetting("Allow Assault Cannon while moving", cannon_move, "", 1);
     }
     CF_PrintSetting("Spin Assault Cannon while moving", cannon_movespin, "", 1);
-    CF_PrintSetting("Allow Assault Cannon concussion", cannon_conc, "", 1);
     if (cannon_movespin == 0) {
         sprint(self, PRINT_HIGH, "Assault Cannon accuracy:                CF style\n");
     } else if (cannon_movespin == 1) {

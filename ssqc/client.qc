@@ -499,9 +499,6 @@ void () DecodeLevelParms = {
             cannon_move = TRUE; // required for this to work
         }
 
-        // make hwguy susceptible to concussion grenade while firing assault cannon [on]
-        cannon_conc = CF_GetSetting("cc", "cannon_conc", "on");
-
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
@@ -840,7 +837,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = FALSE;
-            cannon_conc = TRUE;
             cannon_accuracy = 0;
             flame_knockback = TRUE;
             old_spanner = FALSE;
@@ -909,7 +905,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = TRUE;
-            cannon_conc = TRUE;
             cannon_accuracy = 1;
             flame_knockback = FALSE;
             old_spanner = TRUE;

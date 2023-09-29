@@ -570,7 +570,6 @@ float cannon_lock;
 float cannon_air;
 float cannon_move;
 float cannon_movespin;
-float cannon_conc;
 float cannon_accuracy;
 float feign_air;
 float feign_pack;
