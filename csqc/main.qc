@@ -15,7 +15,6 @@ void Perf_Status();
 void FO_Hud_Init();
 float InFluid(vector point);
 float CalculateWaterLevel();
-void PlayCSJumpSounds();
 void RenderHitTexts();
 
 void GetSelf() = {
@@ -110,6 +109,9 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("+slot");
     registercommand("-slot");
 
+    registercommand("fo_beta_pmove");
+    registercommand("fopm_cmd");
+
     registercommand("login");
     registercommand("fo_hud_editor");
     registercommand("fo_hud_reload");
@@ -167,6 +169,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
 
+    PM_Init();
     TF_Init();
 
     ClientSettings_Check();
@@ -189,6 +192,7 @@ void FO_CussView();
 void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 void UpdateTeamColorCrosshair();
+void PMD_DrawGraphs(float width);
 
 DEFCVAR_FLOAT(fov, 90);
 
@@ -197,7 +201,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-                                                 //
     FO_CussView();
 
     if (zoomed_in)
@@ -212,6 +215,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         mask |= WPP_ViewModelMask();
     addentities(mask);
 
+    if (PM_Enabled())
+        PM_UpdateView();
+
     renderscene();
 
     FO_CussCrosshair(width, height);
@@ -219,6 +225,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     TFxRenderGrenadeTimers();
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
+    PMD_DrawGraphs(width);
 
     perf_finish_sample(&frame_timing, fts);
 
@@ -257,6 +264,15 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-slot":
             Slot_Keyup(stof(argv(1)));
             break;
+
+        case "fopm_cmd":
+            PM_PmCmd(stof(argv(1)));
+            break;
+
+        case "fo_beta_pmove":
+            PM_PmCmd(!!stof(argv(1)));
+            break;
+
         case "login":
             FoLogin(argv(1), TRUE);
             break;
@@ -578,7 +594,7 @@ static void FO_CussCrosshair(float width, float height) {
 
     cuss_state.cussed = TRUE;
     makevectors(input_angles);  // updated by input_frame
-    vector p = project(pmove_org + 8000 * cuss_state.c_forward);
+    vector p = project(PM_Org() + 8000 * cuss_state.c_forward);
 
     localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
                 p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
@@ -626,7 +642,7 @@ void FO_ApplyCussInput() {
     }
 }
 
-void FO_ApplyMaxSpeed();
+void FO_ApplyMaxSpeed(float force);
 
 noref void CSQC_Input_Frame() {
     Sync_GameState();
@@ -646,7 +662,7 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
-    FO_ApplyMaxSpeed();
+    FO_ApplyMaxSpeed(FALSE);
     FO_ApplyCussInput();
 }
 
@@ -711,7 +727,7 @@ void _Sync_ServerCommandFrame() {
 // synchronized with server and predicted state.
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
-    PM_PredictJump();
+    PM_PredictJump_Engine();
 }
 
 static string FoLogin_GetToken() {

@@ -907,3 +907,7 @@ float(float playernum, string keyname, optional float assumevalue) getplayerkeyf
 		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */
 float(string key, optional float assumevalue) serverkeyfloat = #0:serverkeyfloat; /*
 		Version of serverkey that returns the value as a float (which avoids tempstrings). */
+
+
+vector PM_Org();
+vector PM_Vel();

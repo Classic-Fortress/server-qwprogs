@@ -10,6 +10,7 @@ string wp_version = "v1.1";
 
 enumflags {
     FOWP_CTIME,
+    FOWP_PMOVE,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
     FOWP_LASTPRIME,
@@ -43,6 +44,12 @@ enumflags {
     CSQC_PROJ_PRED,
     CSQC_SETSPEED,
     CSQC_SNIPER_SIGHT,
+};
+
+enumflags {
+    PF_PMOVE,
+    PF_POS,
+    PF_PMOVE_ACTIVATING,
 };
 
 struct predict_tf_state {
@@ -320,6 +327,7 @@ predict_tf_state pstate_pred, pstate_server;
 .float pred_lastforce;
 .float pred_forcebit;
 .entity last_pred_src;
+.float predict_flags;
 
 static float Prediction_ChangedMask(entity player, entity src) {
     if (src != player.last_pred_src) {
@@ -331,6 +339,9 @@ static float Prediction_ChangedMask(entity player, entity src) {
 
     player.predict_state.client_time = src.client_time;
     player.predict_state.client_ping = src.client_ping;
+
+    if (player.predict_flags & PF_POS)
+        mask |= FOWP_PMOVE;
 
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
@@ -344,6 +355,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
+    M1(FOWP_PREDICT_FLAGS, predict_flags);
     M4(FOWP_GREN, no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp)
 
     // Rotate through forced update fields.
@@ -354,7 +366,8 @@ static float Prediction_ChangedMask(entity player, entity src) {
         if (player.pred_forcebit >= FOWP_LAST)
             player.pred_forcebit = 1;
 
-        mask |= player.pred_forcebit;
+        if (player.pred_forcebit != FOWP_PMOVE)
+            mask |= player.pred_forcebit;
     }
 
     return mask;
@@ -398,7 +411,7 @@ float() ReadEntity = #368;
 int() ReadInt = #0:readint;
 
 void InitWeapPredEnt(entity e);
-void WP_ServerUpdate();
+void WP_ServerUpdate(float sendflags);
 void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
@@ -442,6 +455,7 @@ void EntUpdate_Config() {
 
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
+#define COMM_PM(_type, _field) Write##_type(MSG_ENTITY, self.owner.##_field)
 float WP_SendEntity(entity to_player, float sendflags) {
     if (to_player != self.owner)
         return FALSE;
@@ -449,7 +463,10 @@ float WP_SendEntity(entity to_player, float sendflags) {
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
 #else
+entity PM_Ent();
 #define COMM(_type, _field) pstate_server.##_field = Read##_type()
+#define COMM_PM(_type, _field) PM_Ent().##_field = Read##_type()
+
 void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
 #endif
@@ -459,6 +476,15 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
         COMM(Short, client_ping);
+    }
+
+    if (sendflags & FOWP_PMOVE) {
+        COMM_PM(Coord, origin[0]);
+        COMM_PM(Coord, origin[1]);
+        COMM_PM(Coord, origin[2]);
+        COMM_PM(Short, velocity[0]);
+        COMM_PM(Short, velocity[1]);
+        COMM_PM(Short, velocity[2]);
     }
 
     if (sendflags & FOWP_CLASS) {
@@ -529,7 +555,7 @@ void EntUpdate_WeaponPred(float isnew) {
     if (isnew)
         InitWeapPredEnt(self);
     else
-        WP_ServerUpdate();
+        WP_ServerUpdate(sendflags);
 #endif
 }
 #undef COMM

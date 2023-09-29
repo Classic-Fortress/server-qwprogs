@@ -27,7 +27,7 @@ float shared_crandom(int type) {
 #ifdef CSQC
 float WP_GetAmmo(float ammo_type);
 float get_shells() { return WP_GetAmmo(AMMO_SHELLS); }
-static inline vector get_origin() { return pmove_org; }
+static inline vector get_origin() { return PM_Org(); }
 #else
 float get_shells() { return self.ammo_shells; }
 static inline vector get_origin() { return self.origin; }

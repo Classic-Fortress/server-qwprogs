@@ -154,7 +154,7 @@ static float next_grenlist_update;
 static float RenderGrenTimer(entity p, float test_only) {
     const float maxd = 1000, mind = 200;
     vector po = p.origin + '0 0 40';
-    vector o = pmove_org;
+    vector o = PM_Org();
 
     if (p == local_player)
         return FALSE;
