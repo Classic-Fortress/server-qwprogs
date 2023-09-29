@@ -19,14 +19,12 @@ void (entity inflictor, entity attacker, float bounce,
 entity(entity scanner, float scanrange, float enemies,
        float friends) T_RadiusScan;
 
-void ClassicConcussionGrenadeTimer();
 void OldConcussionGrenadeTimer();
 void FoConcussionGrenadeTimer();
 
 void ConcThink() {
     switch (GetConcMode()) {
         case CONC_IDLESCALE: return OldConcussionGrenadeTimer();
-        case CONC_CLASSIC: return ClassicConcussionGrenadeTimer();
         case CONC_AIM: return FoConcussionGrenadeTimer();
     }
 }
@@ -464,7 +462,7 @@ void () OldConcussionGrenadeTimer = {
     }
 };
 
-static void SpawnBubble(vector origin) {
+void SpawnBubble(vector origin) {
     newmis = spawn();
     FO_SetModel(newmis, "progs/s_bubble.spr");
     setorigin(newmis, origin);
@@ -479,60 +477,6 @@ static void SpawnBubble(vector origin) {
     newmis.cnt = 0;
     setsize(newmis, '-8 -8 -8', '8 8 8');
 }
-
-void () ClassicConcussionGrenadeTimer = {
-    local vector src;
-    local float pos;
-    local float stumble;
-
-    if (self.owner.invincible_finished > time) {
-        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
-        RemoveConc(self.owner, FALSE);
-        dremove(self);
-        return;
-    }
-
-    if (self.health > 0 && self.health % 200 == 0)
-        SpawnBubble(self.owner.origin);
-
-    self.health = self.health - 10;
-    if (self.owner.playerclass == PC_MEDIC)
-        self.health = self.health - 10;
-
-    if (self.health < 0)
-        self.health = 0;
-
-    self.nextthink = time + 0.25;
-
-    pos = pointcontents(self.owner.origin);
-    src_x = self.owner.origin_x + self.owner.maxs_x + 2;
-    src_y = self.owner.origin_y + self.owner.maxs_y + 2;
-    src_z = self.owner.origin_z;
-    pos = pointcontents(src);
-
-    if ((self.owner.flags & (FL_INWATER | FL_ONGROUND)) && !IsFeigned(self.owner)) {
-        makevectors(self.owner.v_angle);
-        stumble = crandom() * self.health;
-        if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
-            if ((crandom() < 0)) {
-                self.owner.velocity_x =
-                    self.owner.velocity_y + stumble;
-                self.owner.velocity_y =
-                    self.owner.velocity_x + stumble;
-            } else {
-                self.owner.velocity_x =
-                    -1 * self.owner.velocity_y + stumble;
-                self.owner.velocity_y =
-                    -1 * self.owner.velocity_x + stumble;
-            }
-        }
-    }
-    if (self.health <= 0) {
-        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
-        RemoveConc(self.owner, FALSE);
-        dremove(self);
-    }
-};
 
 void FoConcussionGrenadeTimer() {
     const float bubble_int = 1;
@@ -943,43 +887,52 @@ void (entity inflictor, entity attacker, float bounce,
                         }
 
                         head.tfstate |= TFSTATE_CONC;
-                        if (fo_concuss)
-                            UpdateClientConcussion(head, actual_cuss_time);
-                        else  // not used currently, but populate anyway
-                            head.conc_finished = time + actual_cuss_time;
 
-                        entity te = FindConcTimer(head);
-                        if (te != world) {
-                            if (GetConcMode() == CONC_IDLESCALE) {
-                                stuffcmd(head, "v_idlescale 100\n");
-                                stuffcmd(head, "fov 130\n");
-                                te.health = 100;
-                                te.nextthink = time + 5;
+                        switch (GetConcMode()) {
+                            case CONC_AIM:
+                                UpdateClientConcussion(head, actual_cuss_time);
+                                break;
+                            case CONC_CLASSIC:
+                                // Activate and/or extend
+                                head.conc_state.next = time + CONC_P;
+                                head.conc_state.mag = ceil(1/CONC_P) * actual_cuss_time;
+                                break;
+                        }
+
+                        if (GetConcMode() != CONC_CLASSIC) {
+                            entity te = FindConcTimer(head);
+                            if (te != world) {
+                                if (GetConcMode() == CONC_IDLESCALE) {
+                                    stuffcmd(head, "v_idlescale 100\n");
+                                    stuffcmd(head, "fov 130\n");
+                                    te.health = 100;
+                                    te.nextthink = time + 5;
+                                } else {
+                                    te.health = 40 * cussgrentime;
+                                    te.nextthink = time + 0.25;
+                                }
                             } else {
-                                te.health = 40 * cussgrentime;
-                                te.nextthink = time + 0.25;
-                            }
-                        } else {
-                            // LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
-                            if (GetConcMode() == CONC_IDLESCALE) {
-                                stuffcmd(head, "v_idlescale 100\n");
-                                stuffcmd(head, "fov 130\n");
-                                stuffcmd(head, "bf\n");
-                                te = spawn();
-                                te.nextthink = time + 5;
-                                te.think = ConcThink;
-                                te.team_no = attacker.team_no;
-                                te.classname = "timer";
-                                te.owner = head;
-                                te.health = 100;
-                            } else {
-                                te = spawn();
-                                te.nextthink = time + 0.25;
-                                te.think = ConcThink;
-                                te.team_no = attacker.team_no;
-                                te.classname = "timer";
-                                te.owner = head;
-                                te.health = 40 * actual_cuss_time;
+                                // LogEventAffliction(attacker, head, TFSTATE_CONCUSSED);
+                                if (GetConcMode() == CONC_IDLESCALE) {
+                                    stuffcmd(head, "v_idlescale 100\n");
+                                    stuffcmd(head, "fov 130\n");
+                                    stuffcmd(head, "bf\n");
+                                    te = spawn();
+                                    te.nextthink = time + 5;
+                                    te.think = ConcThink;
+                                    te.team_no = attacker.team_no;
+                                    te.classname = "timer";
+                                    te.owner = head;
+                                    te.health = 100;
+                                } else {
+                                    te = spawn();
+                                    te.nextthink = time + 0.25;
+                                    te.think = ConcThink;
+                                    te.team_no = attacker.team_no;
+                                    te.classname = "timer";
+                                    te.owner = head;
+                                    te.health = 40 * actual_cuss_time;
+                                }
                             }
                         }
                     }

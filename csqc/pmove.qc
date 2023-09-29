@@ -169,6 +169,7 @@ DEFCVAR_FLOAT(fo_smartjump, 1);
 DEFCVAR_FLOAT(fopm_noerror, 0);
 DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
+DEFCVAR_FLOAT(fopm_nonudge, 0);
 
 DEFCVAR_FLOAT(fopmd_graph_x, -10);
 DEFCVAR_FLOAT(fopmd_graph_y, 100);
@@ -210,6 +211,53 @@ static inline void PM_ActivatePMS(PMS_Data *pms) {
 
 void PM_InputFrame();
 
+enum {
+    NT_CONC,
+};
+
+struct PM_Nudge {
+    float itime, type;
+    vector nudge;
+};
+
+static PM_Nudge nudges[10];
+static float num_nudges;
+
+void PM_AddConcNudge(float itime, float mag, float flip) {
+    // This is kind of painful but not much easier..
+    static float filter_itime;
+    if (itime <= filter_itime)
+        return;
+    filter_itime = itime;
+
+    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+
+    n->type = NT_CONC;
+    n->itime = itime;
+    n->nudge.x = mag;
+    n->nudge.y = flip;
+}
+
+static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
+    if (pointcontents(ent.origin) == CONTENT_WATER)
+        ent.flags |= FL_INWATER;  // pmove doesn't usually maintain this.
+    Conc_Stumble(ent, nudge->nudge.x, nudge->nudge.y);
+}
+
+// TODO: This obviously wants to be smarter
+static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
+    for (float i = 0; i < nudges.length; i++) {
+        PM_Nudge* n = &nudges[i];
+        if (n->itime >= sitime && n->itime < eitime) {
+            switch (n->type) {
+                case NT_CONC:
+                    PM_NudgeConc(n, ent);
+                    break;
+            }
+        }
+    }
+}
+
 static void PM_RunMovement(float endframe) {
     entity ent = pm.ent;
     if (servercommandframe >= pm_s.seq + 63) {
@@ -248,6 +296,9 @@ static void PM_RunMovement(float endframe) {
         if (pm.seq == clientcommandframe)
             PM_InputFrame();
 
+        if (!CVARF(fopm_nonudge))
+            PM_ApplyNudges(ent, pm.interp_t, pm.interp_t + input_timelength);
+
         pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
         runstandardplayerphysics(ent);
 
@@ -257,7 +308,7 @@ static void PM_RunMovement(float endframe) {
 
     // Add in anything that was applied after (for low packet rate protocols)
     input_angles = view_angles;
-};
+}
 
 static void PM_SetEnabled(float enabled) {
     pm_enabled = enabled;
@@ -305,7 +356,6 @@ static void PM_UpdateError() {
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
 
-    /* PM_ActivatePMS(&pm_c); */
     PM_RunMovement(clientcommandframe);
     vector org = pm.ent.origin;
 
@@ -380,7 +430,7 @@ void PM_Update(float sendflags) {
 
     pm_so = pm_s;
     pm.seq = servercommandframe + 1;  // server state includes move
-    pm.interp_t = time;
+    pm.interp_t = pstate_server.server_time;
     PM_SavePMS(&pm_s);
 
     // Pre-compute predicted movement for all locked frames (e.g. seq <
@@ -534,6 +584,24 @@ static void PMD_UpdateImpulse(int seq) {
 
     if (!vlen(pv) && !vlen(sv))
         return;
+
+#if 0
+    static vector last_sv, last_pv;
+    float p = FALSE;
+    if (vlen(sv - last_sv) > 200) {
+        printf("[%0.3f] S sf=%d st=%0.3f i=%0.3f\n", time, servercommandframe, pm_s.interp_t, vlen(sv-last_sv));
+        p = TRUE;
+    }
+    last_sv = sv;
+
+    if (vlen(pv - last_pv) > 200) {
+        printf("[%0.3f] C cf=%d ct=%0.3f i=%0.3f\n", time, clientcommandframe, 
+                pm.interp_t, vlen(pv-last_pv));
+        p = TRUE;
+    }
+    last_pv = pv;
+    if (p) printf("\n");
+#endif
 
     PMD_AddPoint(SERVER, vlen(sv));
     PMD_AddPoint(PMOVE,  vlen(pv));

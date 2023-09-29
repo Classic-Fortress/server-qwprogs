@@ -2052,14 +2052,14 @@ void () PutClientInServer = {
     self.display_tip = 0;
     self.tip_type = 0;
     self.feign_next_damage = 0;
+    self.conc_state.mag = 0;
 
     FO_InstantReloadAllWeapons(self);
 
     // Only need initial init here.
-    if (!self.prng_base[PRNG_WEAP])
-        self.prng_base[PRNG_WEAP] = 65535 * random();
     // For hwguy we rotate the seed value, each seed generates many random nums.
-    self.prng_base[PRNG_HWGUY] = 65535 * random();
+    for (int i = 0; i < PRNG_NUM_STATES; i++)
+        self.prng_base[i] = 65535 * random();
     self.primed_gren_exp = 0;
 
     self.immune_to_check = time + 10;
@@ -2651,6 +2651,7 @@ void () CheckWaterJump = {
 
 void () PlayerPreThink = {
     FO_UpdateClientTime();
+    Conc_Update(&self.conc_state, self, time);
 
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {

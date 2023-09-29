@@ -94,3 +94,67 @@ float Class_MaxSpeed(float playerclass) {
         default: return 0;
     }
 }
+
+static float NextToWall(entity ent) {
+    if ((pointcontents(ent.origin + [ent.maxs_x + 2, 0, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [ent.mins_x - 2, 0, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [0, ent.maxs_y + 2, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [0, ent.mins_y - 2, 0]) == CONTENT_SOLID))
+        return TRUE;
+    return FALSE;
+}
+
+const float CONC_P = 0.25;
+const float CONC_HZ = 1/CONC_P;
+
+void Conc_Stumble(entity ent, float imp, float flip) {
+    if ((ent.flags & (FL_INWATER | FL_ONGROUND) == 0) ||
+        (*self_tf_state() & TFSTATE_FEIGNED))
+        return;
+
+    if (NextToWall(ent) && ent.velocity ==  '0 0 0')
+        return;
+
+    ent.velocity = [flip * ent.velocity_y + imp, flip * ent.velocity_x + imp,
+        ent.velocity_z];
+}
+
+#ifdef SSQC
+void SpawnBubble(vector origin);
+static inline void ConcAction(entity ent, float itime, float mag, float flip) {
+    Conc_Stumble(ent, mag, flip);
+}
+#else
+void PM_AddConcNudge(float itime, float mag, float flip);
+
+static inline void ConcAction(entity ent, float itime, float mag, float flip) {
+    PM_AddConcNudge(itime, mag, flip);
+}
+#endif
+
+void Conc_Update(ConcState *cs, entity ent, float ctime) {
+    if (!cs->mag  || ctime < cs->next)
+        return;
+
+    while (ctime >= cs->next) {
+        cs->mag = max(cs->mag - 1, 0);
+        if (!cs->mag) {
+            *self_tf_state() &= ~TFSTATE_CONC;
+            break;
+        }
+
+        float mag = shared_crandom(PRNG_CONC) * cs->mag * 10;
+        float flip = (shared_prng(PRNG_CONC) < 0.5) ? -1 : 1;
+        ConcAction(ent, cs->next, mag, flip);
+        cs->next += CONC_P;
+    }
+
+#ifdef SSQC
+    if (cs->mag) {
+        if (cs->mag % CONC_HZ == 0)
+            SpawnBubble(ent.origin);
+    } else {
+        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
+    }
+#endif
+}
