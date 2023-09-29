@@ -993,7 +993,9 @@ static SpeedBarColors speedbar_colors[] = {
 };
 
 static float PlanarSpeed() {
-    return vlen([pmove_vel.x, pmove_vel.y, 0]);
+    vector pvel = PM_Vel();
+    pvel.z = 0;  // compiler bug: pvel becomes [1 0 0] if this is inlined
+    return vlen(pvel);
 }
 
 void drawSpeedBar(PanelID panelid, string text) {

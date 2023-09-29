@@ -17,11 +17,11 @@ void NewHittext(entity hittext) {
 static void RenderHitText(entity p) {
     const float maxd = 1500, mind = 0;
     vector po = p.origin;
-    vector o = pmove_org;
+    vector o = PM_Org();
 
     float rem = p.hittext_expires - time;
     po.z += (CVARF(fo_hittext_duration) - rem) * CVARF(fo_hittext_speed);
-    vector direc = normalize(po - pmove_org);
+    vector direc = normalize(po - PM_Org());
     makevectors(getviewprop(VF_ANGLES));
 
     float d = v_forward * direc;

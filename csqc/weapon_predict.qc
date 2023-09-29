@@ -585,7 +585,9 @@ void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
-void WP_ServerUpdate() {
+void PM_Update(float sendflags);
+
+void WP_ServerUpdate(float sendflags) {
     // Force WF to zero, in case we missed a packet.
     if (pstate_server.attack_finished < pstate_server.client_time)
         pstate_server.weaponframe = 0;
@@ -605,6 +607,8 @@ void WP_ServerUpdate() {
         phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
     else
         phys_sim_dt = -1;
+
+    PM_Update(sendflags);
 }
 
 void FO_ReloadSound(float weapon) {
@@ -789,7 +793,7 @@ static void WP_Sniper_UpdateSight() {
     }
 
     SniperState.sight.drawmask = MASK_ENGINE;
-    vector org = pmove_org + v_forward * 10;
+    vector org = PM_Org() + v_forward * 10;
     org.z += PLAYER_MINS.z - 1 + (PLAYER_MAXS.z - PLAYER_MINS.z) * 0.7;
     traceline(org, org + v_forward * 9192, MOVE_NORMAL, 0);
     setorigin(SniperState.sight, trace_endpos);
@@ -1179,12 +1183,16 @@ void WPP_Dump() {
 
 void WP_Attack();
 
-void FO_ApplyMaxSpeed() {
-    if (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED))
+void FO_ApplyMaxSpeed(float force) {
+    if (!force &&
+        (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED)))
         return;
 
+    float max_speed = pstate_pred.csqc_maxspeed;
     if (pstate_pred.tfstate & TFSTATE_AIMING)
-        input_movevalues = normalize(input_movevalues) * 80;
+        max_speed = 80;
+    if (vlen(input_movevalues) > max_speed)
+        input_movevalues = normalize(input_movevalues) * max_speed;
 }
 
 DEFCVAR_FLOAT(cl_crossx, 0);
@@ -1430,7 +1438,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.drawmask = MASK_PRED_PROJECTILE;
 
   setsize(proj, [0,0,0], [0,0,0]);
-  proj.origin = pmove_org + offset;
+  proj.origin = PM_Org() + offset;
 
   float proj_speed = FPP_Get(fpp_type)->speed;
   if (!FPP_IsGrenade(fpp_type)) {
@@ -1596,7 +1604,7 @@ static void W_ThrowGren(float is_throw) {
 
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
-    vector offset = org - pmove_org - '0 0 16';
+    vector offset = org - PM_Org() - '0 0 16';
     entity proj = PP_CreateProjectile(FPP_ASSAULT_CANNON, offset);
 
     if (proj == __NULL__)
@@ -1690,7 +1698,7 @@ void WP_Attack() {
             // Tested both ways and this seems to be more stable.
             sendevent("Attack", "ifvv",
                       (float)wi->weapon, pstate_server.client_time,
-                      pmove_org, input_angles);
+                      PM_Org(), input_angles);
         }
     }
 
@@ -1729,7 +1737,7 @@ void WP_Attack() {
 
 void PredProjectile_DebugMatch(entity cprj, entity sprj) {
     string sgn =
-        vlen(cprj.origin - pmove_org) > vlen(sprj.origin- pmove_org) ? "+" : "-";
+        vlen(cprj.origin - PM_Org()) > vlen(sprj.origin- PM_Org()) ? "+" : "-";
 
     string s = sprintf(" p_diff: %s%-2.1f [%0.3f] ", sgn,
                     vlen(cprj.origin - sprj.origin),
@@ -1739,7 +1747,7 @@ void PredProjectile_DebugMatch(entity cprj, entity sprj) {
                 sprj.phys_time - cprj.phys_time));
 
     s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
-            vlen(cprj.origin - pmove_org), vlen(sprj.origin - pmove_org),
+            vlen(cprj.origin - PM_Org()), vlen(sprj.origin - PM_Org()),
             self.antilag_ms));
     print(s);
 }
@@ -1974,6 +1982,9 @@ static void PredictConc() {
         pstate_pred.tfstate &= ~TFSTATE_CONC;
 }
 
+void PM_SyncTo(float seq);
+void PM_TestJump();
+
 static void WP_UpdatePredict() {
     PredictConc(); // Looks like this is missing time/prediction interp
     getinputstate(servercommandframe); // Setup first read for old_buttons.
@@ -1999,6 +2010,7 @@ static void WP_UpdatePredict() {
         if (pframe == effect_frame && pframe > pengine.last_effectframe) {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
+            PM_SyncTo(pframe);
         } else {
             pengine.is_effectframe = FALSE;
         }
@@ -2030,9 +2042,12 @@ float WP_ClientThink() {
     return PREDRAW_NEXT;
 }
 
+entity WP_pmove_ent();
+
 void InitWeapPredEnt(entity pe) {
     if (pengine.pweap_ent != world) {
         remove(pengine.pweap_ent);
+        pengine.pweap_ent = world;
     }
 
     pe.predraw = WP_ClientThink;

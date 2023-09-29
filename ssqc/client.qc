@@ -3890,3 +3890,49 @@ void() SV_RunClientCommand = {
     self.jump_flag = self.velocity_z;
 }
 */
+
+static void DeferredPmoveAction() {
+    entity player = self.owner;
+    player.predict_flags &= ~PF_PMOVE_ACTIVATING;
+
+    if (self.heat) {
+        sprint(player, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
+        player.nodrawtoclient = player;
+        player.predict_flags |= PF_PMOVE;
+    } else {
+        sprint(self, PRINT_HIGH, "*** PMOVE INACTIVE\n");
+        player.predict_flags &= ~PF_PMOVE;
+    }
+    remove(self);
+}
+
+void (float active) CSEv_PmCmd_f = {
+    sprint(self, PRINT_HIGH, sprintf("*** PMCMD %d\n", active));
+    if (self.predict_flags & PF_PMOVE_ACTIVATING) {
+        sprint(self, PRINT_HIGH, "Please wait for prior activation to complete...\n");
+        return;
+    }
+
+    if (active & PF_PMOVE)
+        active |= PF_POS;
+
+    self.predict_flags &= ~PF_POS;
+    self.predict_flags |= (active & PF_POS);
+
+    if ((active & PF_PMOVE) == (self.predict_flags & PF_PMOVE))
+        return;
+
+    float enable = active & PF_PMOVE;
+    if (enable) {
+        self.maxspeed = PC_SCOUT_MAXSPEED;  // Handled clientside.
+    } else {
+        self.nodrawtoclient = world;
+    }
+
+    self.predict_flags |= PF_PMOVE_ACTIVATING;
+    entity defer = spawn();
+    defer.owner = self;
+    defer.think = DeferredPmoveAction;
+    defer.heat = enable;
+    defer.nextthink = time + 0.1;
+}
