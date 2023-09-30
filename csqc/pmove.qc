@@ -178,7 +178,6 @@ DEFCVAR_FLOAT(fopmd_graph, 0);
 void PM_Init() {
     pm.ent = spawn();
     pm.ent.solid = SOLID_NOT;
-    pm.ent.movetype = MOVETYPE_WALK;
     setsize(pm.ent, '-16 -16 -24', '16 16 32');
 }
 
@@ -248,7 +247,8 @@ static void PM_RunMovement(float endframe) {
 
 static void PM_SetEnabled(float enabled) {
     pm_enabled = enabled;
-    pm.ent.solid = enabled ? SOLID_SLIDEBOX : SOLID_NOT;
+
+    PM_Refresh();
 
     if (!enabled)
         return;
@@ -261,6 +261,7 @@ static void PM_SetEnabled(float enabled) {
 static void PM_UpdateError() {
     entity ent = pm.ent;
 
+    ent.owner = edict_num(player_localentnum);
     if (CVARF(fopm_noerror)) {
         pm.error = '0 0 0';
         pm.errortime = 0;
@@ -391,6 +392,23 @@ void PM_UpdateView() {
 
     makevectors(view_angles);
     SetListener(pm.vieworg, v_forward, v_right, v_up);
+}
+
+void PM_Refresh() {
+    if (!PM_Enabled())
+        return;
+
+    entity ent = pm.ent;
+    setorigin(ent, ent.origin);
+    if (game_state.is_player) {
+        ent.owner = edict_num(player_localentnum);
+        ent.movetype = MOVETYPE_WALK;
+        ent.solid = SOLID_SLIDEBOX;
+    } else {
+        ent.owner = world;  // Needs more than this for spec..
+        ent.movetype = MOVETYPE_FLY;
+        ent.solid = SOLID_NOT;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
