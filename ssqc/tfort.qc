@@ -990,15 +990,15 @@ void (entity p) TeamFortress_SetSpeed = {
 
     if (p.tfstate & TFSTATE_CANT_MOVE) {
         p.velocity = '0 0 0';
-        p.maxspeed = 0;
+        p.csqc_maxspeed = p.maxspeed = 0;
         return;
     }
 
     if (p.playerclass == PC_UNDEFINED) {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
-        p.csqc_maxspeed = p.maxspeed = 1000;
-        stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;\n");
+        p.csqc_maxspeed = p.maxspeed = SPEC_MAXSPEED;
+        stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;cl_upspeed 500;\n");
         return;
     }
 
@@ -1022,22 +1022,16 @@ void (entity p) TeamFortress_SetSpeed = {
     if (p.leg_damage)
         new_max *= (10 - min(p.leg_damage, 6)) / 10;
 
-    float client_enable = ClientPred_Enabled(p, CSQC_SETSPEED);
-
-    // When the client is co-operating (and enabled), allow it to handle
-    // TFSTATE_AIMING transitions due to the frequent edges here and negative
-    // maxspeed/pmove interaction (bounds client prediction until maxspeed makes
-    // it to client, even though released on unpredicted earlier frame, leading
-    // to lots of skipping).
-    if (!RewindFlagEnabled(REWIND_SETSPEED) || !client_enable) {
+#if 0
+    // Clients cooperate to handle TFSTATE_AIMING transitions locally due to the
+    // frequent edges here and negative maxspeed/pmove interaction (bounds
+    // client prediction until maxspeed makes it to client, even though released
+    // on unpredicted earlier frame, leading to lots of skipping).
         if (p.tfstate & TFSTATE_AIMING)
             new_max = min(new_max, 80);
-    }
+#endif
 
-    p.maxspeed = new_max;
-    p.csqc_maxspeed = new_max;  // Note: with new input_movevalues construction
-                                // this isn't technically needed until we do
-                                // something like client-side tranq pred.
+    p.maxspeed = p.csqc_maxspeed = new_max;
 };
 
 void () TeamFortress_SetHealth = {

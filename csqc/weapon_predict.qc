@@ -364,8 +364,6 @@ void WPP_UpdateEnable(float force) {
         wpp_status |= CSQC_WEAP_PRED;
         if (pengine.pp_enabled)
             wpp_status |= CSQC_PROJ_PRED;
-        if (CVARF(wpp_setspeed))
-            wpp_status |= CSQC_SETSPEED;
         if (CVARF(fo_client_sniper_sight))
             wpp_status |= CSQC_SNIPER_SIGHT;
     }
@@ -1182,18 +1180,6 @@ void WPP_Dump() {
 }
 
 void WP_Attack();
-
-void FO_ApplyMaxSpeed(float force) {
-    if (!force &&
-        (!WP_Enabled() || !CVARF(wpp_setspeed) || !RewindFlagEnabled(REWIND_SETSPEED)))
-        return;
-
-    float max_speed = pstate_pred.csqc_maxspeed;
-    if (pstate_pred.tfstate & TFSTATE_AIMING)
-        max_speed = 80;
-    if (vlen(input_movevalues) > max_speed)
-        input_movevalues = normalize(input_movevalues) * max_speed;
-}
 
 DEFCVAR_FLOAT(cl_crossx, 0);
 

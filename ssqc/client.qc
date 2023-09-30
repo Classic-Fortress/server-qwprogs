@@ -3901,14 +3901,13 @@ static void DeferredPmoveAction() {
         player.predict_flags |= PF_PMOVE;
         TeamFortress_SetSpeed(player);
     } else {
-        sprint(self, PRINT_HIGH, "*** PMOVE INACTIVE\n");
+        sprint(player, PRINT_HIGH, "*** PMOVE INACTIVE\n");
         player.predict_flags &= ~PF_PMOVE;
     }
     remove(self);
 }
 
 void (float active) CSEv_PmCmd_f = {
-    sprint(self, PRINT_HIGH, sprintf("*** PMCMD %d\n", active));
     if (self.predict_flags & PF_PMOVE_ACTIVATING) {
         sprint(self, PRINT_HIGH, "Please wait for prior activation to complete...\n");
         return;
@@ -3929,7 +3928,7 @@ void (float active) CSEv_PmCmd_f = {
         // with the client.  We need to push a high value to the client before
         // we obscure the client since it won't see further updates (which might
         // increase when changing classes).
-        self.maxspeed = 1000;
+        self.maxspeed = SPEC_MAXSPEED;
     } else {
         self.nodrawtoclient = world;
     }

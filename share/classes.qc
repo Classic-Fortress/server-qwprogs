@@ -80,6 +80,7 @@ void WeapPred_FireAssCan(vector vangle, float shotcount,
 
 float Class_MaxSpeed(float playerclass) {
     switch (playerclass) {
+        case PC_UNDEFINED: return SPEC_MAXSPEED;
         case PC_SCOUT: return PC_SCOUT_MAXSPEED;
         case PC_SNIPER: return PC_SNIPER_MAXSPEED;
         case PC_SOLDIER: return PC_SOLDIER_MAXSPEED;
