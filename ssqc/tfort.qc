@@ -997,7 +997,7 @@ void (entity p) TeamFortress_SetSpeed = {
     if (p.playerclass == PC_UNDEFINED) {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
-        p.maxspeed = 0;
+        p.csqc_maxspeed = p.maxspeed = 1000;
         stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;\n");
         return;
     }

@@ -217,7 +217,7 @@ static void PM_RunMovement(float endframe) {
     }
 
 
-    if (!game_state.is_alive) {
+    if (!game_state.is_spectator && !game_state.is_alive) {
         pm.seq = clientcommandframe;
         //just update the angles
         if (!getinputstate(pm.seq-1)) { }
@@ -358,8 +358,7 @@ void PM_SyncTo(float seq) {
 
 void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
-    float enabled = ((pstate_server.predict_flags & PF_PMOVE) &&
-                     (game_state.is_player));
+    float enabled = pstate_server.predict_flags & PF_PMOVE;
 
     if (enabled != was_enabled)
         PM_SetEnabled(enabled);
@@ -397,7 +396,7 @@ void PM_Refresh() {
         ent.solid = SOLID_SLIDEBOX;
     } else {
         ent.owner = world;  // Needs more than this for spec..
-        ent.movetype = MOVETYPE_FLY;
+        ent.movetype = MOVETYPE_NOCLIP;
         ent.solid = SOLID_NOT;
     }
 }

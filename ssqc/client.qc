@@ -3899,6 +3899,7 @@ static void DeferredPmoveAction() {
         sprint(player, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
         player.nodrawtoclient = player;
         player.predict_flags |= PF_PMOVE;
+        TeamFortress_SetSpeed(player);
     } else {
         sprint(self, PRINT_HIGH, "*** PMOVE INACTIVE\n");
         player.predict_flags &= ~PF_PMOVE;
@@ -3924,7 +3925,11 @@ void (float active) CSEv_PmCmd_f = {
 
     float enable = active & PF_PMOVE;
     if (enable) {
-        self.maxspeed = PC_SCOUT_MAXSPEED;  // Handled clientside.
+        // This is messy; maxspeed exists only in hidden inband communication
+        // with the client.  We need to push a high value to the client before
+        // we obscure the client since it won't see further updates (which might
+        // increase when changing classes).
+        self.maxspeed = 1000;
     } else {
         self.nodrawtoclient = world;
     }
