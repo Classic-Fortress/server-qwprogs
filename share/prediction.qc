@@ -54,7 +54,7 @@ enumflags {
 
 struct predict_tf_state {
     int playerclass;
-    int predict_flags;
+    int predict_flags, effects;
     int impulse;
     Slot current_slot, queue_slot, last_slot;
 
@@ -355,7 +355,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_RELOAD, reload_started, reload_finished);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
-    M1(FOWP_PREDICT_FLAGS, predict_flags);
+    M2(FOWP_PREDICT_FLAGS, predict_flags, effects);
     M4(FOWP_GREN, no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp)
 
     // Rotate through forced update fields.
@@ -470,8 +470,10 @@ entity PM_Ent();
 void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
 #endif
-    if (sendflags & FOWP_PREDICT_FLAGS)
+    if (sendflags & FOWP_PREDICT_FLAGS) {
         COMM(Byte, predict_flags);
+        COMM(Short, effects);
+    }
 
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
