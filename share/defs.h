@@ -1495,6 +1495,8 @@ enumflags {
 #define FO_QUAD_FINISHED_REQUEST	3
 #define FO_LOGIN_REQUEST			4
 
+#define SPEC_MAXSPEED 1000
+
 struct TFAlias {
     string alias;
     float impulse;

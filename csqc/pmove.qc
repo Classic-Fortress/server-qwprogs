@@ -159,14 +159,16 @@ enum {
     NUM_DBG_GRAPH_TYPES,
 };
 
-DEFCVAR_FLOAT(fopmd_graph_x, -10);
-DEFCVAR_FLOAT(fopmd_graph_y, 100);
-DEFCVAR_FLOAT(fopmd_graph_w, 200);
-DEFCVAR_FLOAT(fopmd_graph_h, 100);
+DEFCVAR_FLOAT(fo_smartjump, 1);
 
 DEFCVAR_FLOAT(fopm_noerror, 0);
 DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
+
+DEFCVAR_FLOAT(fopmd_graph_x, -10);
+DEFCVAR_FLOAT(fopmd_graph_y, 100);
+DEFCVAR_FLOAT(fopmd_graph_w, 200);
+DEFCVAR_FLOAT(fopmd_graph_h, 100);
 
 DEFCVAR_FLOAT(v_viewheight, 0);
 
@@ -198,6 +200,8 @@ static inline void PM_ActivatePMS(PMS_Data *pms) {
     pm.seq = pms->seq;
 };
 
+void PM_InputFrame();
+
 static void PM_RunMovement(float endframe) {
     entity ent = pm.ent;
     if (servercommandframe >= pm_s.seq + 63) {
@@ -217,7 +221,7 @@ static void PM_RunMovement(float endframe) {
     }
 
 
-    if (!game_state.is_alive) {
+    if (!game_state.is_spectator && !game_state.is_alive) {
         pm.seq = clientcommandframe;
         //just update the angles
         if (!getinputstate(pm.seq-1)) { }
@@ -234,7 +238,7 @@ static void PM_RunMovement(float endframe) {
         // We have to apply this on the leading edge since INPUT_FRAME
         // modifications do not occur until the frame is finalized.
         if (pm.seq == clientcommandframe)
-            FO_ApplyMaxSpeed(TRUE);
+            PM_InputFrame();
 
         pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
         runstandardplayerphysics(ent);
@@ -358,8 +362,7 @@ void PM_SyncTo(float seq) {
 
 void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
-    float enabled = ((pstate_server.predict_flags & PF_PMOVE) &&
-                     (game_state.is_player));
+    float enabled = pstate_server.predict_flags & PF_PMOVE;
 
     if (enabled != was_enabled)
         PM_SetEnabled(enabled);
@@ -397,9 +400,36 @@ void PM_Refresh() {
         ent.solid = SOLID_SLIDEBOX;
     } else {
         ent.owner = world;  // Needs more than this for spec..
-        ent.movetype = MOVETYPE_FLY;
+        ent.movetype = MOVETYPE_NOCLIP;
         ent.solid = SOLID_NOT;
     }
+}
+
+DEFCVAR_FLOAT(cl_upspeed, 400);
+void PM_InputFrame() {
+    float iz = input_movevalues.z;
+    input_movevalues.z = 0;
+    float max_speed = pstate_pred.csqc_maxspeed;
+
+    // cl_smartjump replacement
+    float type;
+    if (input_buttons & BUTTON2) {
+        if ((game_state.is_player && CVARF(fo_smartjump) &&
+            (PM_GetWaterLevel(PM_Org(), &type) >= 2))
+              || game_state.is_spectator) {
+            input_buttons &= ~BUTTON2;
+            iz = min(CVARF(cl_upspeed), Class_MaxSpeed(WP_PlayerClass()));
+        }
+    }
+
+    // Technically the sync with pstate_pred being on the right frame is loose..
+    if (pstate_pred.tfstate & TFSTATE_AIMING)
+        max_speed = 80;
+
+    if (vlen(input_movevalues) > max_speed)
+        input_movevalues = normalize(input_movevalues) * max_speed;
+    if (iz)
+        input_movevalues.z = min(max_speed, input_movevalues.z + iz);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

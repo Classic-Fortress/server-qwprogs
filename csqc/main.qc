@@ -186,6 +186,7 @@ noref void() CSQC_WorldLoaded = {
     // Resolve race condition where models packed into map package sometimes do
     // not resolve correctly.
     localcmd("flush\n");
+    localcmd("cl_smartjump 0\n");  // replaced by fo_smartjump
 }
 
 void FO_CussView();
@@ -642,7 +643,7 @@ void FO_ApplyCussInput() {
     }
 }
 
-void FO_ApplyMaxSpeed(float force);
+void PM_InputFrame();
 
 noref void CSQC_Input_Frame() {
     Sync_GameState();
@@ -662,7 +663,7 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
-    FO_ApplyMaxSpeed(FALSE);
+    PM_InputFrame();
     FO_ApplyCussInput();
 }
 
