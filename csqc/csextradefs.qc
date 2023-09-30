@@ -911,3 +911,16 @@ float(string key, optional float assumevalue) serverkeyfloat = #0:serverkeyfloat
 
 vector PM_Org();
 vector PM_Vel();
+
+struct veci {
+    vector v;
+    float i;
+};
+
+void cvar_parse4(string s, __out veci target) {
+    tokenize(s);
+    target.v[0] = stof(argv(0));
+    target.v[1] = stof(argv(1));
+    target.v[2] = stof(argv(2));
+    target.i = stof(argv(3));
+}

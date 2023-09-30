@@ -386,21 +386,11 @@ void PM_Update(float sendflags) {
     PMD_UpdateImpulse(servercommandframe);
 }
 
-void PM_UpdateView() {
-    PM_UpdateLocalMovement();
-    setviewprop(VF_ORIGIN, pm.vieworg);
-    setviewprop(VF_ANGLES, view_angles);
-
-    makevectors(view_angles);
-    SetListener(pm.vieworg, v_forward, v_right, v_up);
-}
-
 void PM_Refresh() {
     if (!PM_Enabled())
         return;
 
     entity ent = pm.ent;
-    setorigin(ent, ent.origin);
     if (game_state.is_player) {
         ent.owner = edict_num(player_localentnum);
         ent.movetype = MOVETYPE_WALK;
@@ -410,6 +400,64 @@ void PM_Refresh() {
         ent.movetype = MOVETYPE_FLY;
         ent.solid = SOLID_NOT;
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// View/Render
+////////////////////////////////////////////////////////////////////////////////
+
+DEFCVAR_STRING(r_brightlight_colour, "2.0 1.0 0.5 400");
+DEFCVAR_STRING(r_dimlight_colour, "2.0 1.0 0.5 200");
+DEFCVAR_STRING(r_redlight_colour, "3.0 0.5 0.5 200");
+DEFCVAR_STRING(r_bluelight_colour, "0.5 0.5 3.0 200");
+veci brightlight_l, dimlight_l, redlight_l, bluelight_l;
+
+static void ParseCvars() {
+    static float next_refresh;
+
+    if (time < next_refresh)
+        return;
+    next_refresh = time + 0.5;
+
+    cvar_parse4(CVARS(r_brightlight_colour), brightlight_l);
+    cvar_parse4(CVARS(r_dimlight_colour), dimlight_l);
+    cvar_parse4(CVARS(r_redlight_colour), redlight_l);
+    cvar_parse4(CVARS(r_bluelight_colour), bluelight_l);
+}
+
+#define MUX_IN(ef, bit, src) \
+    do { if ((ef) & (bit)) { rad = max(rad, src.i); col += src.v; } } while (0)
+static void LocalEffects() {
+    float effects = pstate_server.effects;
+    float rad = 0;
+    vector col = '0 0 0';
+
+    const float MASK_ALL = EF_BRIGHTLIGHT | EF_DIMLIGHT | EF_RED | EF_BLUE;
+
+    if (effects & MASK_ALL == 0)
+        return;
+
+    ParseCvars();
+
+    MUX_IN(effects, EF_BRIGHTLIGHT, brightlight_l);
+    MUX_IN(effects, EF_DIMLIGHT, dimlight_l);
+    MUX_IN(effects, EF_RED, redlight_l);
+    MUX_IN(effects, EF_BLUE, bluelight_l);
+
+    rad = min(rad, 400);
+    dynamiclight_add(pm.vieworg, rad, col);
+}
+#undef MUX_IN
+
+void PM_UpdateView() {
+    PM_UpdateLocalMovement();
+    setviewprop(VF_ORIGIN, pm.vieworg);
+    setviewprop(VF_ANGLES, view_angles);
+
+    makevectors(view_angles);
+    SetListener(pm.vieworg, v_forward, v_right, v_up);
+
+    LocalEffects();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
