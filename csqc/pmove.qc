@@ -33,7 +33,6 @@ struct {
 } pm;
 
 void PM_PmCmd(float arg) {
-    localcmd(sprintf("cl_smartjump %d\n", (arg & 1) ? 0 : 1));
     sendevent("PmCmd", "f", arg);
 }
 
