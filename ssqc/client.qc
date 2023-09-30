@@ -499,9 +499,6 @@ void () DecodeLevelParms = {
             cannon_move = TRUE; // required for this to work
         }
 
-        // make hwguy susceptible to concussion grenade while firing assault cannon [on]
-        cannon_conc = CF_GetSetting("cc", "cannon_conc", "on");
-
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
@@ -515,7 +512,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "1");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
@@ -840,7 +837,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = FALSE;
-            cannon_conc = TRUE;
             cannon_accuracy = 0;
             flame_knockback = TRUE;
             old_spanner = FALSE;
@@ -909,7 +905,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = TRUE;
-            cannon_conc = TRUE;
             cannon_accuracy = 1;
             flame_knockback = FALSE;
             old_spanner = TRUE;
@@ -2709,7 +2704,7 @@ void () PlayerPreThink = {
         return;
     }
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
             if (!self.feign_areachecked) {

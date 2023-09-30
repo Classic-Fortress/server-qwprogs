@@ -235,7 +235,7 @@ void (entity et, float f) player_pain = {
     if (self.invisible_finished > time)
         return;
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         PainSound();
         return;
     }
@@ -297,7 +297,7 @@ void () DeathSound = {
     local float rs;
 
     if (self.waterlevel == 3) {
-        if (self.is_feigning)
+        if (IsFeigned(self))
             DeathBubbles(2);
         else
             DeathBubbles(10);

@@ -346,7 +346,7 @@ void (entity pe_player, float f_type) CF_Identify = {
                 if (trace_ent.playerclass == PC_SPY && !f_friendly) {
 
                     // don't identify feigning enemy spies
-                    if (trace_ent.is_feigning)
+                    if (IsFeigned(trace_ent))
                         return;
 
                     // use undercover name if available

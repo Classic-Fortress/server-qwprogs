@@ -4,6 +4,7 @@ float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 string(float tno) GetTeamName;
 void () item_tfgoal_touch;
 void CenterPrint(entity, string);
+float IsFeigned(entity ent);
 
 
 float quad_roles;
@@ -125,7 +126,7 @@ void () item_tfgoal_hidden_touch = {
         return;
     if (cb_prematch)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if (other == self.owner)
         return;

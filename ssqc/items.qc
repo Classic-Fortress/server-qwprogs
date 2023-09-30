@@ -1,6 +1,7 @@
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo;
 float (entity Retriever, float WeaponType) TeamFortress_CanGetWeapon;
 void (entity Retriever, entity Items) TeamFortress_AddBackpackItems;
+float IsFeigned(entity ent);
 
 void (entity p) TeamFortress_SetSpeed;
 
@@ -217,18 +218,14 @@ void () health_touch = {
     local float medi;
     local string s;
 
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     medi = 0;
     if (self.healtype == 2) {
         if (!(other.tfstate & 16)) {
@@ -318,21 +315,16 @@ void () armor_touch = {
     local float bit;
     local string s;
 
-    if (other.health <= 0) {
+    if (other.health <= 0)
         return;
-    }
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     if (self.classname == "item_armor1") {
         type = 0.300;
         value = 100;
@@ -419,7 +411,7 @@ void () armor_touch = {
     stuffcmd(other, "bf\n");
     activator = other;
     SUB_UseTargets();
-};
+}
 
 void () item_armor1 = {
     if (CheckExistence() == FALSE) {
@@ -534,7 +526,7 @@ void () weapon_touch = {
 
     if (!(other.flags & 8))
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -954,24 +946,18 @@ void () item_weapon = {
 };
 
 void () key_touch = {
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.health <= 0) {
+    if (other.health <= 0)
         return;
-    }
-    if (other.items & self.items) {
+    if (other.items & self.items)
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
     FO_Sound(other, CHAN_ITEM, self.noise, 1, 1);
     stuffcmd(other, "bf\n");
@@ -1065,7 +1051,7 @@ void () sigil_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -1087,7 +1073,7 @@ void () powerup_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -1218,7 +1204,7 @@ void () BackpackTouch = {
     local string s;
     local float maxg, giveg;
 
-    if (other.classname != "player" || other.is_feigning)
+    if (other.classname != "player" || IsFeigned(other))
         return;
     if (other.health <= 0)
         return;

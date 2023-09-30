@@ -263,6 +263,7 @@ enumflags {
     TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
     TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
+    TFSTATE_FEIGNED,       // Is feigned
     TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die

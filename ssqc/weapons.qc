@@ -1942,7 +1942,7 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if (!self.is_feigning) {
+    if (!IsFeigned(self)) {
         if (self.impulse == TF_GRENADE_1)
             TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
@@ -2497,7 +2497,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if ((self.is_feigning) &&
+    if (IsFeigned(self) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
             (self.impulse != TF_MEDIC_HELPME) &&

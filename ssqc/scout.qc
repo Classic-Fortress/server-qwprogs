@@ -10,6 +10,7 @@ void () FlashTimer;
 void () FlashGrenadeExplode;
 void () ConcussionGrenadeTouch;
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
+float IsFeigned(entity ent);
 
 void (entity inflictor, entity attacker, float bounce,
       entity ignore) T_RadiusBounce;
@@ -509,24 +510,20 @@ void () ClassicConcussionGrenadeTimer = {
     src_z = self.owner.origin_z;
     pos = pointcontents(src);
 
-    if ((self.owner.flags & 512) || (self.owner.flags & 16)) {
-        if (!self.owner.is_feigning &&
-            !(FO_PlayerCurrentWeapon(self.owner) == WEAP_ASSAULT_CANNON &&
-            !cannon_conc && self.owner.button0)) {
-            makevectors(self.owner.v_angle);
-            stumble = crandom() * self.health;
-            if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
-                if ((crandom() < 0)) {
-                    self.owner.velocity_x =
-                        self.owner.velocity_y + stumble;
-                    self.owner.velocity_y =
-                        self.owner.velocity_x + stumble;
-                } else {
-                    self.owner.velocity_x =
-                        -1 * self.owner.velocity_y + stumble;
-                    self.owner.velocity_y =
-                        -1 * self.owner.velocity_x + stumble;
-                }
+    if ((self.owner.flags & (FL_INWATER | FL_ONGROUND)) && !IsFeigned(self.owner)) {
+        makevectors(self.owner.v_angle);
+        stumble = crandom() * self.health;
+        if (!((pos == -2) && (self.owner.velocity == '0 0 0'))) {
+            if ((crandom() < 0)) {
+                self.owner.velocity_x =
+                    self.owner.velocity_y + stumble;
+                self.owner.velocity_y =
+                    self.owner.velocity_x + stumble;
+            } else {
+                self.owner.velocity_x =
+                    -1 * self.owner.velocity_y + stumble;
+                self.owner.velocity_y =
+                    -1 * self.owner.velocity_x + stumble;
             }
         }
     }
@@ -1018,8 +1015,7 @@ entity(entity scanner, float scanrange, float enemies,
                                 (scanner.team_no > 0)) {
                                 if ((head.playerclass == 8) &&
                                     (head.team_no != scanner.team_no)) {
-                                    if ((head.is_feigning != 1) &&
-                                        (invis_only != 1)) {
+                                    if (!IsFeigned(head) && (invis_only != 1)) {
                                         if (head.undercover_team ==
                                             scanner.team_no) {
                                             return (head);
@@ -1033,8 +1029,7 @@ entity(entity scanner, float scanrange, float enemies,
                                 (scanner.team_no > 0)) {
                                 if ((head.playerclass == 8) &&
                                     (head.team_no != scanner.team_no)) {
-                                    if ((head.is_feigning != 1) &&
-                                        (invis_only != 1)) {
+                                    if (!IsFeigned(head) && (invis_only != 1)) {
                                         if (head.undercover_team !=
                                             scanner.team_no) {
                                             return (head);
