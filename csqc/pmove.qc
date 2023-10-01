@@ -4,7 +4,7 @@ static float pm_enabled;
 inline float PM_Enabled() { return pm_enabled; }
 
 #define ERRORTIME 0.05
-#define STEPTIME 8
+#define STEPTIME 0.125
 
 enumflags {
     PMF_JUMP_HELD,
@@ -18,11 +18,13 @@ enumflags {
 struct PMS_Data {
     vector org, vel;
     float seq;
+    float interp_t;
 } pm_s, pm_so, pm_c;
 
 struct {
     entity ent;
     float seq;
+    float interp_t;
 
     vector error;
     float errortime;
@@ -189,7 +191,9 @@ static inline void PM_SavePMS(PMS_Data *pms) {
     entity ent = pm.ent;
     pms->org = ent.origin;
     pms->vel = ent.velocity;
+
     pms->seq = pm.seq;
+    pms->interp_t = pm.interp_t;
 }
 
 static inline void PM_ActivatePMS(PMS_Data *pms) {
@@ -197,6 +201,7 @@ static inline void PM_ActivatePMS(PMS_Data *pms) {
     ent.origin = pms->org;
     ent.velocity = pms->vel;
     pm.seq = pms->seq;
+    pm.interp_t = pms->interp_t;
 };
 
 void PM_InputFrame();
@@ -243,6 +248,7 @@ static void PM_RunMovement(float endframe) {
         runstandardplayerphysics(ent);
 
         pm.seq++;
+        pm.interp_t += input_timelength;
     }
 
     // Add in anything that was applied after (for low packet rate protocols)
@@ -257,8 +263,7 @@ static void PM_SetEnabled(float enabled) {
     if (!enabled)
         return;
 
-    pm.errortime = 0;
-    pm.steptime = 0;
+    pm.errortime = pm.steptime  = 0;
     pm.step_oldz = pm.ent.origin_z;
 }
 
@@ -305,13 +310,13 @@ static void PM_UpdateLocalMovement() {
     if (org_z > pm.step_oldz + 8 && org_z < pm.step_oldz + 24 &&
         ent.velocity_z == 0) { // Evaluate out the remaining old step
         if (pm.steptime - time > 0)
-            pm.step = (pm.steptime - time) * STEPTIME * pm.step;
+            pm.step = (pm.steptime - time) * (1 / STEPTIME) * pm.step;
         else
             pm.step = 0;
 
         // Work out the new step
         pm.step += (pm.step_oldz - org_z);
-        pm.steptime = time + 1 / STEPTIME;
+        pm.steptime = time + STEPTIME;
     }
     pm.step_oldz = org_z;
 
@@ -371,6 +376,7 @@ void PM_Update(float sendflags) {
 
     pm_so = pm_s;
     pm.seq = servercommandframe + 1;  // server state includes move
+    pm.interp_t = time;
     PM_SavePMS(&pm_s);
 
     // Pre-compute predicted movement for all locked frames (e.g. seq <
