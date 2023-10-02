@@ -16,6 +16,12 @@ struct FPPState {
 
 .FPPState fpp;
 
+struct ConcState {
+    float next, mag;
+};
+.ConcState conc_state;
+
+
 enumflags {
     FPF_NO_REWIND,
     FPF_FIXED_DYNAMIC,

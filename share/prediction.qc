@@ -14,6 +14,7 @@ enumflags {
     FOWP_IMPULSE,
     FOWP_TFSTATE,
     FOWP_LASTPRIME,
+    FOWP_CLASSIC_CONC,
     FOWP_CONCFINISH,
     FOWP_CLIP,
     FOWP_GREN,
@@ -22,8 +23,10 @@ enumflags {
     FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
+    FOWP_SPECIAL,
     FOWP_RNG0,
     FOWP_RNG1,
+    FOWP_RNG2,
     FOWP_PREDICT_FLAGS,
     FOWP_LAST,
 };
@@ -58,14 +61,17 @@ struct predict_tf_state {
     int impulse;
     Slot current_slot, queue_slot, last_slot;
 
+    ConcState conc_state;
+
     float tfstate;
     float last_prime;
     float csqc_maxspeed;
 
     float conc_amp;
     float conc_finished;
+    float special_next;
 
-    float client_time;
+    float client_time, server_time;
     float client_ping;
     float weaponframe;
 
@@ -85,7 +91,6 @@ struct predict_tf_state {
     int seq;
     float ammo_used[AMMO_NUM_TYPES];
     float buttons_down, buttons_up, buttons_held;
-    float server_time;
 #endif
 };
 
@@ -305,9 +310,14 @@ float FO_MaxRewindGrenWinDt() {
 .predict_tf_state predict_state;
 .entity predict_entity;
 
+inline float *self_tf_state() { return &self.tfstate; }
+
 #else
 
 predict_tf_state pstate_pred, pstate_server;
+
+inline float *self_tf_state() { return &pstate_pred.tfstate; }
+
 #define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512
 #define MASK_OUTLINE        1024
@@ -337,6 +347,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
 
     float mask = FOWP_CTIME;
 
+    player.predict_state.server_time = time;
     player.predict_state.client_time = src.client_time;
     player.predict_state.client_ping = src.client_ping;
 
@@ -347,14 +358,17 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
+    M2(FOWP_CLASSIC_CONC, conc_state.next, conc_state.mag);
     M2(FOWP_CONCFINISH, conc_finished, conc_amp);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
     M2(FOWP_RELOAD, reload_started, reload_finished);
+    M1(FOWP_SPECIAL, special_next);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
+    M1(FOWP_RNG2, prng_base[PRNG_CONC]);
     M2(FOWP_PREDICT_FLAGS, predict_flags, effects);
     M4(FOWP_GREN, no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp)
 
@@ -477,6 +491,7 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
+        COMM(Float, server_time);
         COMM(Short, client_ping);
     }
 
@@ -509,6 +524,11 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Float, last_prime);
     }
 
+    if (sendflags & FOWP_CLASSIC_CONC) {
+        COMM(Float, conc_state.next);
+        COMM(Byte, conc_state.mag);
+    }
+
     if (sendflags & FOWP_CONCFINISH) {
         COMM(Byte, conc_amp);
         COMM(Float, conc_finished);
@@ -539,10 +559,16 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Float, reload_finished);
     }
 
+    if (sendflags & FOWP_SPECIAL) {
+        COMM(Float, special_next);
+    }
+
     if (sendflags & FOWP_RNG0)
         COMM(Int, prng_base[PRNG_WEAP]);
     if (sendflags & FOWP_RNG1)
         COMM(Int, prng_base[PRNG_HWGUY]);
+    if (sendflags & FOWP_RNG2)
+        COMM(Int, prng_base[PRNG_CONC]);
 
     if (sendflags & FOWP_GREN) {
         COMM(Short, no_grenades_1);
@@ -967,19 +993,12 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     if (IsClownMode(CLOWN_FAST_PROJECTILES) && !FPP_IsGrenade(fpp_type))
         static_credit = 9999;
 
-    float frame_nudge = 0;
-#ifdef CSQC
-    // Account for the fact that the server usually has a physics frame that's
-    // going to be credited to the new projectile.
-    if (!fo_config.qc_physics)
-        frame_nudge = SERVER_FRAME_MS * 1.5;
-#endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
     float adj_ping = max(ping - SERVER_FRAME_MS, 0);
 
     ProjectResult result;
-    result.static_ms = static_credit + frame_nudge;
+    result.static_ms = static_credit;
     result.dynamic_ms = min(adj_ping, max_ping_credit);
     return result;
 }
@@ -1020,4 +1039,3 @@ void AugmentGrenadeImpact() {
         self.SendFlags |= FOPP_MOVETYPE;
 #endif
 }
-

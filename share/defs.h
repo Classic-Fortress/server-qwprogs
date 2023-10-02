@@ -283,6 +283,7 @@ enumflags {
 enum {
     PRNG_WEAP,
     PRNG_HWGUY,
+    PRNG_CONC,
     PRNG_NUM_STATES,
 };
 

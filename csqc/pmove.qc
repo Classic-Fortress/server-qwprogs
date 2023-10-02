@@ -4,7 +4,7 @@ static float pm_enabled;
 inline float PM_Enabled() { return pm_enabled; }
 
 #define ERRORTIME 0.05
-#define STEPTIME 8
+#define STEPTIME 0.125
 
 enumflags {
     PMF_JUMP_HELD,
@@ -18,11 +18,13 @@ enumflags {
 struct PMS_Data {
     vector org, vel;
     float seq;
+    float interp_t;
 } pm_s, pm_so, pm_c;
 
 struct {
     entity ent;
     float seq;
+    float interp_t;
 
     vector error;
     float errortime;
@@ -33,7 +35,6 @@ struct {
 } pm;
 
 void PM_PmCmd(float arg) {
-    localcmd(sprintf("cl_smartjump %d\n", (arg & 1) ? 0 : 1));
     sendevent("PmCmd", "f", arg);
 }
 
@@ -41,7 +42,11 @@ vector PM_Org() { return PM_Enabled() ? pm.ent.origin : pmove_org; }
 vector PM_Vel() { return PM_Enabled() ? pm.ent.velocity : pmove_vel; }
 inline entity PM_Ent() { return pm.ent; }
 
-inline float CSQC_JumpSounds_Active() { return CVARF(fo_csjumpsounds); }
+float CSQC_JumpSounds_Active() {
+    if (PM_Enabled())
+            return TRUE;  // PM sounds are accurate.
+    return CVARF(fo_csjumpsounds);
+}
 
 // Sets *type to whatever is at the feet of `point`.
 static float PM_GetWaterLevel(vector point, float* type) {
@@ -164,6 +169,7 @@ DEFCVAR_FLOAT(fo_smartjump, 1);
 DEFCVAR_FLOAT(fopm_noerror, 0);
 DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
+DEFCVAR_FLOAT(fopm_nonudge, 0);
 
 DEFCVAR_FLOAT(fopmd_graph_x, -10);
 DEFCVAR_FLOAT(fopmd_graph_y, 100);
@@ -190,7 +196,9 @@ static inline void PM_SavePMS(PMS_Data *pms) {
     entity ent = pm.ent;
     pms->org = ent.origin;
     pms->vel = ent.velocity;
+
     pms->seq = pm.seq;
+    pms->interp_t = pm.interp_t;
 }
 
 static inline void PM_ActivatePMS(PMS_Data *pms) {
@@ -198,9 +206,74 @@ static inline void PM_ActivatePMS(PMS_Data *pms) {
     ent.origin = pms->org;
     ent.velocity = pms->vel;
     pm.seq = pms->seq;
+    pm.interp_t = pms->interp_t;
 };
 
 void PM_InputFrame();
+
+enum {
+    NT_CONC,
+    NT_DASH,
+};
+
+struct PM_Nudge {
+    float itime, type;
+    vector nudge;
+};
+
+static PM_Nudge nudges[10];
+static float num_nudges;
+
+void PM_AddConcNudge(float itime, float mag, float flip) {
+    // This is kind of painful but not much easier..
+    static float filter_itime;
+    if (itime <= filter_itime)
+        return;
+    filter_itime = itime;
+
+    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+
+    n->type = NT_CONC;
+    n->itime = itime;
+    n->nudge.x = mag;
+    n->nudge.y = flip;
+}
+
+static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
+    if (pointcontents(ent.origin) == CONTENT_WATER)
+        ent.flags |= FL_INWATER;  // pmove doesn't usually maintain this.
+    Conc_Stumble(ent, nudge->nudge.x, nudge->nudge.y);
+}
+
+static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
+    ent.velocity = nudge->nudge;
+}
+
+void PM_AddDashNudge(float itime) {
+    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+    n->type = NT_DASH;
+    n->itime = itime;
+
+    n->nudge = v_forward * 540;
+    n->nudge.z = 181 + SERVER_FRAME_DT * 800;  // TODO: fix this...
+}
+
+// TODO: This obviously wants to be smarter
+static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
+    for (float i = 0; i < nudges.length; i++) {
+        PM_Nudge* n = &nudges[i];
+        if (n->itime >= sitime && n->itime < eitime) {
+            switch (n->type) {
+                case NT_CONC:
+                    PM_NudgeConc(n, ent);
+                    break;
+                case NT_DASH:
+                    PM_NudgeDash(n, ent);
+                    break;
+            }
+        }
+    }
+}
 
 static void PM_RunMovement(float endframe) {
     entity ent = pm.ent;
@@ -241,14 +314,18 @@ static void PM_RunMovement(float endframe) {
             PM_InputFrame();
 
         pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
+        if (!CVARF(fopm_nonudge) && pm.seq < clientcommandframe)
+            PM_ApplyNudges(ent, pm.interp_t, pm.interp_t + input_timelength);
+
         runstandardplayerphysics(ent);
 
         pm.seq++;
+        pm.interp_t += input_timelength;
     }
 
     // Add in anything that was applied after (for low packet rate protocols)
     input_angles = view_angles;
-};
+}
 
 static void PM_SetEnabled(float enabled) {
     pm_enabled = enabled;
@@ -258,8 +335,7 @@ static void PM_SetEnabled(float enabled) {
     if (!enabled)
         return;
 
-    pm.errortime = 0;
-    pm.steptime = 0;
+    pm.errortime = pm.steptime  = 0;
     pm.step_oldz = pm.ent.origin_z;
 }
 
@@ -297,7 +373,6 @@ static void PM_UpdateError() {
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
 
-    /* PM_ActivatePMS(&pm_c); */
     PM_RunMovement(clientcommandframe);
     vector org = pm.ent.origin;
 
@@ -306,13 +381,13 @@ static void PM_UpdateLocalMovement() {
     if (org_z > pm.step_oldz + 8 && org_z < pm.step_oldz + 24 &&
         ent.velocity_z == 0) { // Evaluate out the remaining old step
         if (pm.steptime - time > 0)
-            pm.step = (pm.steptime - time) * STEPTIME * pm.step;
+            pm.step = (pm.steptime - time) * (1 / STEPTIME) * pm.step;
         else
             pm.step = 0;
 
         // Work out the new step
         pm.step += (pm.step_oldz - org_z);
-        pm.steptime = time + 1 / STEPTIME;
+        pm.steptime = time + STEPTIME;
     }
     pm.step_oldz = org_z;
 
@@ -372,6 +447,7 @@ void PM_Update(float sendflags) {
 
     pm_so = pm_s;
     pm.seq = servercommandframe + 1;  // server state includes move
+    pm.interp_t = pstate_server.server_time;
     PM_SavePMS(&pm_s);
 
     // Pre-compute predicted movement for all locked frames (e.g. seq <
@@ -525,6 +601,24 @@ static void PMD_UpdateImpulse(int seq) {
 
     if (!vlen(pv) && !vlen(sv))
         return;
+
+#if 0
+    static vector last_sv, last_pv;
+    float p = FALSE;
+    if (vlen(sv - last_sv) > 200) {
+        printf("[%0.3f] S sf=%d st=%0.3f i=%0.3f\n", time, servercommandframe, pm_s.interp_t, vlen(sv-last_sv));
+        p = TRUE;
+    }
+    last_sv = sv;
+
+    if (vlen(pv - last_pv) > 200) {
+        printf("[%0.3f] C cf=%d ct=%0.3f i=%0.3f\n", time, clientcommandframe, 
+                pm.interp_t, vlen(pv-last_pv));
+        p = TRUE;
+    }
+    last_pv = pv;
+    if (p) printf("\n");
+#endif
 
     PMD_AddPoint(SERVER, vlen(sv));
     PMD_AddPoint(PMOVE,  vlen(pv));

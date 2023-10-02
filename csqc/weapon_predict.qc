@@ -10,7 +10,6 @@ DEFCVAR_FLOAT(wpp_min_ping, -1);
 
 DEFCVAR_FLOAT(wpp_adv_selfp_ms, 0);
 DEFCVAR_FLOAT(wpp_adv_otherp_ms, 0);
-DEFCVAR_FLOAT(wpp_setspeed, 1);
 
 DEFCVAR_FLOAT(r_drawviewmodel, 1);
 DEFCVAR_FLOAT(fo_reloadalpha, 0);
@@ -108,12 +107,6 @@ float interp_time() {
     last_interp_time = max(last_interp_time, time + pred_time_dt);
     return last_interp_time;
 }
-
-// The server time of the current predicted clientcomandframe
-inline float cpredict_time() {
-    return time + pstate_pred.client_time - pstate_server.client_time;
-}
-
 
 #define csqc_print(...) \
     do { if (CVARF(wpp_debug) & 4) { \
@@ -586,6 +579,8 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 void PM_Update(float sendflags);
 
 void WP_ServerUpdate(float sendflags) {
+    pstate_server.seq = servercommandframe;
+
     // Force WF to zero, in case we missed a packet.
     if (pstate_server.attack_finished < pstate_server.client_time)
         pstate_server.weaponframe = 0;
@@ -896,6 +891,30 @@ void WP_HandleGrenadeInputs() {
         pstate_pred.impulse = 0;
 }
 
+float PM_Enabled();
+void PM_AddDashNudge(float itime);
+
+static void WP_Special() {
+    if (pstate_pred.server_time < pstate_pred.special_next)
+        return;
+
+    float cooldown = 0;
+    switch (WP_PlayerClass()) {
+        case PC_SCOUT:
+            cooldown = 1;
+            if (PM_Enabled() && IsEffectFrame()) {
+                // Want to land in this frame
+                PM_AddDashNudge(pstate_pred.server_time - 1 * MSEC);
+                localsound("dash.wav", CHAN_BODY, 1);
+            }
+            break;
+        // Note: hwguy handled by WP_HandleHeavyInputs
+    }
+
+    if (cooldown)
+        pstate_pred.special_next = pstate_pred.server_time + cooldown;
+}
+
 void WP_Impulse() {
     float local_impulse;
 
@@ -907,6 +926,11 @@ void WP_Impulse() {
     switch (local_impulse) {
         case TF_DEBUG_CSQC:
             WPP_Dump();
+            break;
+
+        case TF_SPECIAL_SKILL:
+        case TF_DASH:  // This could use a clean-up server side
+            WP_Special();
             break;
 
         case TF_SLOT1: case TF_SLOT2: case TF_SLOT3: case TF_SLOT4:
@@ -943,6 +967,9 @@ void WP_Impulse() {
             pstate_pred.impulse = local_impulse;
             break;
     }
+
+    if (input_buttons & BUTTON3)
+        WP_Special();
 
     // Impulses below this line depend on ready weapon.
     if (!WP_WeaponReady())
@@ -1408,7 +1435,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.owner = pengine.player_ent;
   FPP_Init(fpp_type, proj);
 
-  float ms_ahead = server_time_ms();
+  float ms_ahead = pstate_server.client_ping;
   ProjectResult push_t = Forward_ProjectOffset(fpp_type, ms_ahead);
 
   float uncorrected_dt = max(ms_ahead - push_t.dynamic_ms, 0) / 1000.0;
@@ -1722,8 +1749,16 @@ void WP_Attack() {
 
 
 void PredProjectile_DebugMatch(entity cprj, entity sprj) {
+    static float S = 0, N = 0;
+
+    S += vlen(cprj.origin - sprj.origin); N++;
+    if (N > 1000) {
+        S /= 1000;
+        N /= 1000;
+    }
+
     string sgn =
-        vlen(cprj.origin - PM_Org()) > vlen(sprj.origin- PM_Org()) ? "+" : "-";
+        vlen(cprj.origin - PM_Org()) > vlen(sprj.origin - PM_Org()) ? "+" : "-";
 
     string s = sprintf(" p_diff: %s%-2.1f [%0.3f] ", sgn,
                     vlen(cprj.origin - sprj.origin),
@@ -1732,9 +1767,9 @@ void PredProjectile_DebugMatch(entity cprj, entity sprj) {
                 time, cprj.phys_time, sprj.phys_time,
                 sprj.phys_time - cprj.phys_time));
 
-    s = strcat(s, sprintf(" [c=%d s=%d] al=%d\n",
+    s = strcat(s, sprintf(" [c=%d s=%d] err=%0.3f al=%d\n",
             vlen(cprj.origin - PM_Org()), vlen(sprj.origin - PM_Org()),
-            self.antilag_ms));
+            S/N, self.antilag_ms));
     print(s);
 }
 
@@ -1752,7 +1787,7 @@ float PredProjectile_MatchProjectile() {
         if (time > proj.endtime - 0.01)
             break;   // Projectile list is time ordered
 
-        Phys_Advance(proj, get_phys_time(proj), PHYSF_CONSUME_ALL);
+        Phys_Advance(proj, get_phys_time(self), PHYSF_CONSUME_ALL);
 
         float d = vlen(proj.origin - self.origin);
         if (!best || d < best) {
@@ -1799,7 +1834,7 @@ void InitProjectileEnt(float sendflags) {
 
     float ptime = get_phys_time(self);
     if (ptime > self.phys_time /* from server */)
-        Phys_Advance(self, ptime, 0);
+        Phys_Advance(self, ptime, PHYSF_CONSUME_ALL);
     else
         setorigin(self, self.origin);
 
@@ -1980,8 +2015,6 @@ static void WP_UpdatePredict() {
     int eframe = clientcommandframe - 1;
     int effect_frame = clientcommandframe - 1;
 
-    pstate_server.seq = servercommandframe;
-    pstate_server.server_time = time;
     for(; pframe <= eframe; pframe++) {
         old_input_buttons = input_buttons;
         if (!getinputstate(pframe) || input_timelength <= 0)
@@ -1989,6 +2022,9 @@ static void WP_UpdatePredict() {
         makevectors(input_angles);
 
         pstate_pred.seq = pframe;
+        pstate_pred.client_time += input_timelength;
+        pstate_pred.server_time += input_timelength;
+
         pstate_pred.buttons_held = input_buttons;
         pstate_pred.buttons_up = old_input_buttons & (~input_buttons);
         pstate_pred.buttons_down = (~old_input_buttons) & input_buttons;
@@ -1997,12 +2033,11 @@ static void WP_UpdatePredict() {
             pengine.is_effectframe = TRUE;
             pengine.last_effectframe = pframe;
             PM_SyncTo(pframe);
+            Conc_Update(&pstate_pred.conc_state, world, pstate_pred.server_time);
         } else {
             pengine.is_effectframe = FALSE;
         }
 
-        pstate_pred.client_time += input_timelength;
-        pstate_pred.server_time += input_timelength;
         if (input_impulse)
           pstate_pred.impulse = input_impulse;
 
