@@ -162,5 +162,5 @@ void () SpectatorThink = {
         RefreshStatusBar(self);
     }
 
-    Predict_Update();
+    Predict_Update(FALSE);
 };

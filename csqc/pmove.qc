@@ -34,10 +34,6 @@ struct {
     vector vieworg;
 } pm;
 
-void PM_PmCmd(float arg) {
-    sendevent("PmCmd", "f", arg);
-}
-
 vector PM_Org() { return PM_Enabled() ? pm.ent.origin : pmove_org; }
 vector PM_Vel() { return PM_Enabled() ? pm.ent.velocity : pmove_vel; }
 inline entity PM_Ent() { return pm.ent; }
@@ -160,7 +156,7 @@ void PM_PredictJump_Engine() {
 enum {
     SERVER,
     PMOVE,
-    VIEW,
+    ERROR,
     NUM_DBG_GRAPH_TYPES,
 };
 
@@ -366,7 +362,13 @@ static void PM_UpdateError() {
     } else { // figure out the error amount, and add it to accumulated lerp
         pm.error *= max(pm.errortime - time, 0) / ERRORTIME;
         pm.error += err;
-        pm.errortime = vlen(pm.error) > 1 ? time + ERRORTIME : 0;
+
+        if (vlen(pm.error) > 1)
+            pm.errortime = time + ERRORTIME;
+        else {
+            pm.error = '0 0 0';
+            pm.errortime = 0;
+        }
     }
 }
 
@@ -439,7 +441,8 @@ void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
     float enabled = pstate_server.predict_flags & PF_PMOVE;
 
-    if (enabled != was_enabled)
+    if (enabled != was_enabled ||
+        game_state.is_player != prev_game_state.is_player)
         PM_SetEnabled(enabled);
 
     if (sendflags & FOWP_PMOVE == 0)
@@ -622,7 +625,7 @@ static void PMD_UpdateImpulse(int seq) {
 
     PMD_AddPoint(SERVER, vlen(sv));
     PMD_AddPoint(PMOVE,  vlen(pv));
-    PMD_AddPoint(VIEW, vlen(pm.error) / 128 * 1200);
+    PMD_AddPoint(ERROR, vlen(pm.error) / 128 * 1200);
 }
 
 static void PMD_Graph(int type, int offset, vector c1, vector c2, vector rgb) {
@@ -656,6 +659,11 @@ static void PMD_Graph(int type, int offset, vector c1, vector c2, vector rgb) {
 }
 
 void PMD_DrawGraphs(float width) {
+    float pmove_on = pstate_server.predict_flags & PF_PMOVE;
+    if (pmove_on)
+        drawstring([width - 100, 20, 0], sprintf("PM err: %0.1f", vlen(pm.error)),
+                   '8 8 0', '1 1 1', 1, 0);
+
     if (!CVARF(fopmd_graph))
         return;
 
@@ -673,6 +681,7 @@ void PMD_DrawGraphs(float width) {
 
     offset = max(0, offset);
     PMD_Graph(PMOVE, 0, c1, c2, '0 0 1');
-    PMD_Graph(VIEW, 0, c1, c2, '0 1 0');
     PMD_Graph(SERVER, offset, c1, c2, '1 0 0');
+    if (pstate_server.predict_flags & PF_PMOVE)
+        PMD_Graph(ERROR, 0, c1, c2, '0 1 0');
 }
