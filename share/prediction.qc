@@ -967,19 +967,12 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     if (IsClownMode(CLOWN_FAST_PROJECTILES) && !FPP_IsGrenade(fpp_type))
         static_credit = 9999;
 
-    float frame_nudge = 0;
-#ifdef CSQC
-    // Account for the fact that the server usually has a physics frame that's
-    // going to be credited to the new projectile.
-    if (!fo_config.qc_physics)
-        frame_nudge = SERVER_FRAME_MS * 1.5;
-#endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
     float adj_ping = max(ping - SERVER_FRAME_MS, 0);
 
     ProjectResult result;
-    result.static_ms = static_credit + frame_nudge;
+    result.static_ms = static_credit;
     result.dynamic_ms = min(adj_ping, max_ping_credit);
     return result;
 }
