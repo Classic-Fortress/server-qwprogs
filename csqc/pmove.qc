@@ -42,7 +42,11 @@ vector PM_Org() { return PM_Enabled() ? pm.ent.origin : pmove_org; }
 vector PM_Vel() { return PM_Enabled() ? pm.ent.velocity : pmove_vel; }
 inline entity PM_Ent() { return pm.ent; }
 
-inline float CSQC_JumpSounds_Active() { return CVARF(fo_csjumpsounds); }
+float CSQC_JumpSounds_Active() {
+    if (PM_Enabled())
+            return TRUE;  // PM sounds are accurate.
+    return CVARF(fo_csjumpsounds);
+}
 
 // Sets *type to whatever is at the feet of `point`.
 static float PM_GetWaterLevel(vector point, float* type) {
