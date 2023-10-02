@@ -490,6 +490,7 @@ void PM_InputFrame() {
     input_movevalues.z = 0;
     float max_speed = pstate_pred.csqc_maxspeed;
 
+#if 0  // Quick fix
     // cl_smartjump replacement
     float type;
     if (input_buttons & BUTTON2) {
@@ -500,6 +501,7 @@ void PM_InputFrame() {
             iz = min(CVARF(cl_upspeed), Class_MaxSpeed(WP_PlayerClass()));
         }
     }
+#endif
 
     // Technically the sync with pstate_pred being on the right frame is loose..
     if (pstate_pred.tfstate & TFSTATE_AIMING)

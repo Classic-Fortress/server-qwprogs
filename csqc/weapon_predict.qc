@@ -811,7 +811,7 @@ static float WP_Sniper_IsAttack() {
 
     if (pstate_pred.buttons_held & BUTTON0) {
         // Start charging when possible/necessary.
-        if (!aiming && pmove_onground && vlen(pmove_vel) <= 50) {
+        if (!aiming && pmove_onground && vlen(PM_Vel()) <= 50) {
             pstate_pred.tfstate |= TFSTATE_AIMING;
             SniperState.start_seq = pstate_pred.seq;
         }
