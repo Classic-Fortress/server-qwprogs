@@ -891,6 +891,30 @@ void WP_HandleGrenadeInputs() {
         pstate_pred.impulse = 0;
 }
 
+float PM_Enabled();
+void PM_AddDashNudge(float itime);
+
+static void WP_Special() {
+    if (pstate_pred.server_time < pstate_pred.special_next)
+        return;
+
+    float cooldown = 0;
+    switch (WP_PlayerClass()) {
+        case PC_SCOUT:
+            cooldown = 1;
+            if (PM_Enabled() && IsEffectFrame()) {
+                // Want to land in this frame
+                PM_AddDashNudge(pstate_pred.server_time - 1 * MSEC);
+                localsound("dash.wav", CHAN_BODY, 1);
+            }
+            break;
+        // Note: hwguy handled by WP_HandleHeavyInputs
+    }
+
+    if (cooldown)
+        pstate_pred.special_next = pstate_pred.server_time + cooldown;
+}
+
 void WP_Impulse() {
     float local_impulse;
 
@@ -902,6 +926,11 @@ void WP_Impulse() {
     switch (local_impulse) {
         case TF_DEBUG_CSQC:
             WPP_Dump();
+            break;
+
+        case TF_SPECIAL_SKILL:
+        case TF_DASH:  // This could use a clean-up server side
+            WP_Special();
             break;
 
         case TF_SLOT1: case TF_SLOT2: case TF_SLOT3: case TF_SLOT4:
@@ -938,6 +967,9 @@ void WP_Impulse() {
             pstate_pred.impulse = local_impulse;
             break;
     }
+
+    if (input_buttons & BUTTON3)
+        WP_Special();
 
     // Impulses below this line depend on ready weapon.
     if (!WP_WeaponReady())

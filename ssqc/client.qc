@@ -2064,7 +2064,7 @@ void () PutClientInServer = {
 
     self.immune_to_check = time + 10;
     SetDimensions(TRUE);
-    self.special_cooldown = 0;
+    self.special_next = 0;
 
     setmodel(self, string_null);
     modelindex_null = self.modelindex;

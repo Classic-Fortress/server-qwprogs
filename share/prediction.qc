@@ -23,6 +23,7 @@ enumflags {
     FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
+    FOWP_SPECIAL,
     FOWP_RNG0,
     FOWP_RNG1,
     FOWP_RNG2,
@@ -68,6 +69,7 @@ struct predict_tf_state {
 
     float conc_amp;
     float conc_finished;
+    float special_next;
 
     float client_time, server_time;
     float client_ping;
@@ -363,6 +365,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
     M2(FOWP_RELOAD, reload_started, reload_finished);
+    M1(FOWP_SPECIAL, special_next);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
     M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
     M1(FOWP_RNG2, prng_base[PRNG_CONC]);
@@ -554,6 +557,10 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_RELOAD) {
         COMM(Float, reload_started);
         COMM(Float, reload_finished);
+    }
+
+    if (sendflags & FOWP_SPECIAL) {
+        COMM(Float, special_next);
     }
 
     if (sendflags & FOWP_RNG0)

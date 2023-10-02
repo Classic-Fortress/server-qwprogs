@@ -62,14 +62,14 @@ void () CF_Scout_Dash = {
         return;
 
     // check if dash is allowed in rules and if cooldown has ended
-    if (!scoutdash || time < self.dash_cooldown)
+    if (!scoutdash || time < self.special_next)
         return;
 
-        self.dash_cooldown = time + 1;
-        makevectors(self.angles);
-        self.velocity = v_forward * 540;
-        self.velocity_z = 181;
-        FO_Sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
+    self.special_next = time + 1;
+    makevectors(self.angles);
+    self.velocity = v_forward * 540;
+    self.velocity_z = 181;
+    FO_Sound(self, CHAN_BODY, "dash.wav", 1, ATTN_NORM);
 }
 
 void () CanisterTouch =

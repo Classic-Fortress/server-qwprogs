@@ -213,6 +213,7 @@ void PM_InputFrame();
 
 enum {
     NT_CONC,
+    NT_DASH,
 };
 
 struct PM_Nudge {
@@ -244,6 +245,19 @@ static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
     Conc_Stumble(ent, nudge->nudge.x, nudge->nudge.y);
 }
 
+static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
+    ent.velocity = nudge->nudge;
+}
+
+void PM_AddDashNudge(float itime) {
+    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+    n->type = NT_DASH;
+    n->itime = itime;
+
+    n->nudge = v_forward * 540;
+    n->nudge.z = 181 + SERVER_FRAME_DT * 800;  // TODO: fix this...
+}
+
 // TODO: This obviously wants to be smarter
 static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
     for (float i = 0; i < nudges.length; i++) {
@@ -252,6 +266,9 @@ static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
             switch (n->type) {
                 case NT_CONC:
                     PM_NudgeConc(n, ent);
+                    break;
+                case NT_DASH:
+                    PM_NudgeDash(n, ent);
                     break;
             }
         }
@@ -296,10 +313,10 @@ static void PM_RunMovement(float endframe) {
         if (pm.seq == clientcommandframe)
             PM_InputFrame();
 
-        if (!CVARF(fopm_nonudge))
+        pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
+        if (!CVARF(fopm_nonudge) && pm.seq < clientcommandframe)
             PM_ApplyNudges(ent, pm.interp_t, pm.interp_t + input_timelength);
 
-        pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
         runstandardplayerphysics(ent);
 
         pm.seq++;

@@ -98,7 +98,6 @@ float remote_client_time();
 .float regen_time;              // Time when the medic last regenerated cells
 .float regen_cooldown;          // Time to cooldown cell regeneration after using medikit heal
 .float saveme_time;             // Time when player issued /saveme command
-.float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
 .float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
@@ -791,7 +790,7 @@ string goal_class_names[7] = {
 
 .string broadcast_high;
 
-.float special_cooldown;
+.float special_next;
 .float airblast_cooldown;
 float disable_resup_gren;
 

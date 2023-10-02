@@ -629,6 +629,10 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
 
     // Sounds below this line are conditionally filtered.
     switch(soundname) {
+        case "dash.wav":
+            if (PM_Enabled() & !CVARF(fopm_nonudge))
+                return 1;
+            break;
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
@@ -641,8 +645,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         case "misc/outwater.wav":
             if (CSQC_JumpSounds_Active())
                 return 1;
-            else
-                break;
+            break;
     }
 
     return 0;

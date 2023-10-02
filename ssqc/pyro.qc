@@ -629,11 +629,11 @@ void FO_Airblast() = {
         return;
     }
 
-    if (time < self.special_cooldown)
+    if (time < self.special_next)
         return;
 
     self.airblast_cooldown = 1;
-    self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+    self.special_next = time + PC_PYRO_AIRBLAST_COOLDOWN;
     entity timer = spawn();
     timer.owner = self;
     timer.classname = "timer";
