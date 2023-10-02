@@ -982,6 +982,14 @@ float (float pc) IsLegalClass = {
     return (TRUE);
 };
 
+float PmtBlockMaxSpeed();
+
+static void SetMaxSpeed(entity p, float speed) {
+    p.csqc_maxspeed = speed;
+    if (!PmtBlockMaxSpeed())
+        p.maxspeed = speed;
+}
+
 void (entity p) TeamFortress_SetSpeed = {
     string sp;
     float tf;
@@ -989,14 +997,14 @@ void (entity p) TeamFortress_SetSpeed = {
 
     if (p.tfstate & TFSTATE_CANT_MOVE) {
         p.velocity = '0 0 0';
-        p.csqc_maxspeed = p.maxspeed = 0;
+        SetMaxSpeed(p, 0);
         return;
     }
 
     if (p.playerclass == PC_UNDEFINED) {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
-        p.csqc_maxspeed = p.maxspeed = SPEC_MAXSPEED;
+        SetMaxSpeed(p, SPEC_MAXSPEED);
         stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;cl_upspeed 500;\n");
         return;
     }
@@ -1030,8 +1038,8 @@ void (entity p) TeamFortress_SetSpeed = {
             new_max = min(new_max, 80);
 #endif
 
-    p.maxspeed = p.csqc_maxspeed = new_max;
-};
+    SetMaxSpeed(p, new_max);
+}
 
 void () TeamFortress_SetHealth = {
     if (self.playerclass == PC_SCOUT) {

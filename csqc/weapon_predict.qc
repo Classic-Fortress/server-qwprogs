@@ -4,6 +4,9 @@ DEFCVAR_FLOAT(fo_wpp_beta, 0);
 DEFCVAR_FLOAT(fo_predict_weapons, 1);
 DEFCVAR_FLOAT(fo_predict_projectiles, 1);
 
+DEFCVAR_FLOAT(fo_pmove, 0);
+DEFCVAR_FLOAT(fopmd_force_pos, 0);
+
 DEFCVAR_FLOAT(fo_client_sniper_sight, 1);
 
 DEFCVAR_FLOAT(wpp_min_ping, -1);
@@ -360,6 +363,12 @@ void WPP_UpdateEnable(float force) {
         if (CVARF(fo_client_sniper_sight))
             wpp_status |= CSQC_SNIPER_SIGHT;
     }
+
+    // Set this independently of init above so that it can come up faster.
+    if (CVARF(fo_pmove))
+        wpp_status |= CSQC_PMOVE;
+    if (CVARF(fopmd_force_pos))
+        wpp_status |= CSQC_FORCE_POS;
 
     setlocaluserinfo(0, "fo_wpp_status", ftos(wpp_status));
     // We always need to "render" the view model to trigger predraw compute.

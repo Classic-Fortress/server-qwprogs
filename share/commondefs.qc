@@ -116,20 +116,6 @@ float TFxEnabled(float flag) {
 
 const float TFX_DEFAULT_FLAGS = 0;
 
-enum CSQCFlags {
-    PREDICT_CSQC_SETSPEED,
-};
-
-string PREDICTF_DESC[] = {
-    "allow csqc to handle maxspeed"
-};
-
-inline float PredictEnabled(float flag) {
-    return fo_config.predict_flags & flag;
-};
-
-const float PREDICT_FLAGS_DEFAULT = 0;
-
 enumflags {
     FOC_ON_DEF,  // apply foc_defaults
     FOC_ON_NODEF,
@@ -300,6 +286,7 @@ enumflags {
 enumflags {
     CSQC_WEAP_PRED,
     CSQC_PROJ_PRED,
-    CSQC_SETSPEED,
+    CSQC_PMOVE,
+    CSQC_FORCE_POS,
     CSQC_SNIPER_SIGHT,
 };

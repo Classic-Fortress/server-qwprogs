@@ -3010,7 +3010,7 @@ void () PlayerPostThink = {
 
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
-    Predict_Update();
+    Predict_Update(TRUE);
 };
 
 void () UpdateAllClientsTeamScores = {
@@ -3886,53 +3886,3 @@ void() SV_RunClientCommand = {
     self.jump_flag = self.velocity_z;
 }
 */
-
-static void DeferredPmoveAction() {
-    entity player = self.owner;
-    player.predict_flags &= ~PF_PMOVE_ACTIVATING;
-
-    if (self.heat) {
-        sprint(player, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
-        player.nodrawtoclient = player;
-        player.predict_flags |= PF_PMOVE;
-        TeamFortress_SetSpeed(player);
-    } else {
-        sprint(player, PRINT_HIGH, "*** PMOVE INACTIVE\n");
-        player.predict_flags &= ~PF_PMOVE;
-    }
-    remove(self);
-}
-
-void (float active) CSEv_PmCmd_f = {
-    if (self.predict_flags & PF_PMOVE_ACTIVATING) {
-        sprint(self, PRINT_HIGH, "Please wait for prior activation to complete...\n");
-        return;
-    }
-
-    if (active & PF_PMOVE)
-        active |= PF_POS;
-
-    self.predict_flags &= ~PF_POS;
-    self.predict_flags |= (active & PF_POS);
-
-    if ((active & PF_PMOVE) == (self.predict_flags & PF_PMOVE))
-        return;
-
-    float enable = active & PF_PMOVE;
-    if (enable) {
-        // This is messy; maxspeed exists only in hidden inband communication
-        // with the client.  We need to push a high value to the client before
-        // we obscure the client since it won't see further updates (which might
-        // increase when changing classes).
-        self.maxspeed = SPEC_MAXSPEED;
-    } else {
-        self.nodrawtoclient = world;
-    }
-
-    self.predict_flags |= PF_PMOVE_ACTIVATING;
-    entity defer = spawn();
-    defer.owner = self;
-    defer.think = DeferredPmoveAction;
-    defer.heat = enable;
-    defer.nextthink = time + 0.1;
-}

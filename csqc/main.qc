@@ -266,12 +266,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Slot_Keyup(stof(argv(1)));
             break;
 
-        case "fopm_cmd":
-            PM_PmCmd(stof(argv(1)));
-            break;
-
         case "fo_beta_pmove":
-            PM_PmCmd(!!stof(argv(1)));
+            printf("Please set `fo_pmove 1` instead.\n");
             break;
 
         case "login":

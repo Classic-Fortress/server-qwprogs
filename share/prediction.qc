@@ -43,13 +43,6 @@ enumflags {
 
 
 enumflags {
-    CSQC_WEAP_PRED,
-    CSQC_PROJ_PRED,
-    CSQC_SETSPEED,
-    CSQC_SNIPER_SIGHT,
-};
-
-enumflags {
     PF_PMOVE,
     PF_POS,
     PF_PMOVE_ACTIVATING,
@@ -351,7 +344,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     player.predict_state.client_time = src.client_time;
     player.predict_state.client_ping = src.client_ping;
 
-    if (player.predict_flags & PF_POS)
+    if (player.predict_flags & (PF_PMOVE | PF_POS))
         mask |= FOWP_PMOVE;
 
     M1(FOWP_CLASS, playerclass);
@@ -388,7 +381,10 @@ static float Prediction_ChangedMask(entity player, entity src) {
 }
 
 void Predict_InitPlayer(entity player);
-void Predict_Update() {
+void Predict_SyncPmove(float is_player);
+
+void Predict_Update(float is_player) {
+    Predict_SyncPmove(is_player);
     Predict_InitPlayer(self);
 
     // When spectating, goalentity is our target.
@@ -965,6 +961,77 @@ void FOProj_Finalize(entity mis, float use_ctime=0) {
             target = target.owner;  // Handle call from timer on latched throw.
         FO_Sound(target, CHAN_WEAPON, Snd_Get(SND_THROWGREN)->sound, 1, ATTN_NORM);
     }
+}
+
+.float pmt_nexttime;
+.float pmt_nextstate;
+
+enum PmtState {
+    PMT_INACTIVE,
+    PMT_ACTIVE,
+    PMT_ACTIVATE1,
+    PMT_ACTIVATE2,
+    PMT_DEACTIVATE1,
+    PMT_DEACTIVATE2,
+};
+
+float PmtBlockMaxSpeed() {
+    return self.pmt_nexttime != 0;  // When set, we're in transition edges.
+}
+
+void TeamFortress_SetSpeed(entity ent);
+void Predict_SyncPmove(float is_player) {
+    if (time < self.pmt_nexttime)
+        return;
+
+    float active = self.predict_flags & PF_PMOVE;
+    float want_active = (ClientPred_Enabled(self, CSQC_PMOVE)) && is_player;
+    float state = self.pmt_nextstate;
+
+    if (!active && want_active && state == PMT_INACTIVE)
+        state = PMT_ACTIVATE1;
+    else if (active && !want_active && state == PMT_ACTIVE)
+        state = PMT_DEACTIVATE1;
+
+    if (state == PMT_ACTIVE || state == PMT_INACTIVE) {
+        self.pmt_nexttime = 0;
+
+        if (state == PMT_INACTIVE) {
+            if (ClientPred_Enabled(self, CSQC_FORCE_POS))
+                self.predict_flags |= PF_POS;
+            else
+                self.predict_flags &= ~PF_POS;
+        }
+        return;
+    }
+
+    float next_step = 0.1;
+    switch (state) {
+        case PMT_ACTIVATE1:
+            self.predict_flags |= PF_POS;
+            self.maxspeed = SPEC_MAXSPEED;
+            self.pmt_nextstate = PMT_ACTIVATE2;
+            break;
+        case PMT_ACTIVATE2:
+            self.predict_flags |= PF_PMOVE;
+            self.nodrawtoclient = self;
+            TeamFortress_SetSpeed(self);
+            sprint(self, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
+            self.pmt_nextstate = PMT_ACTIVE;
+            break;
+        case PMT_DEACTIVATE1:
+            next_step = 2;
+            self.nodrawtoclient = world;
+            TeamFortress_SetSpeed(self);
+            self.pmt_nextstate = PMT_DEACTIVATE2;
+            break;
+        case PMT_DEACTIVATE2:
+            self.predict_flags &= ~(PF_PMOVE | PF_POS);
+            sprint(self, PRINT_HIGH, "*** PMOVE DEACTIVATED\n");
+            self.pmt_nextstate = PMT_INACTIVE;
+            break;
+    }
+    self.pmt_nexttime = time + next_step;
 }
 #endif
 
