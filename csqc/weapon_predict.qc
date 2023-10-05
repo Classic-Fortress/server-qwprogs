@@ -1379,6 +1379,8 @@ void FPP_Init(int fpp_type, entity proj) {
 
     proj.traileffectnum = FPP_FindTrail(proj);
     proj.movetype = desc->movetype;
+
+    setsize(proj, [0,0,0], [0,0,0]);
 }
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
@@ -1433,7 +1435,7 @@ float PP_PredrawPredicted() {
 
 static float PP_EPS = 0.05;
 
-entity PP_CreateProjectile(int fpp_type, vector offset) {
+entity PP_CreateProjectile(int fpp_type, vector org) {
   PredProj_Sound(fpp_type);
 
   if (!PP_Enabled())
@@ -1442,6 +1444,7 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   entity proj = spawn();
   proj.owner_entnum = player_localentnum;
   proj.owner = pengine.player_ent;
+  proj.origin = org;
   FPP_Init(fpp_type, proj);
 
   float ms_ahead = pstate_server.client_ping;
@@ -1459,13 +1462,9 @@ entity PP_CreateProjectile(int fpp_type, vector offset) {
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
 
-  setsize(proj, [0,0,0], [0,0,0]);
-  proj.origin = PM_Org() + offset;
-
   float proj_speed = FPP_Get(fpp_type)->speed;
   if (!FPP_IsGrenade(fpp_type)) {
       proj.velocity = v_forward * proj_speed;
-      proj.origin[2] += 16;
   } else {
       if (!input_angles_x) {
           proj.velocity = v_forward * proj_speed;
@@ -1511,7 +1510,7 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
 }
 
 void W_FireGrenade(int gren_type) {
-    entity proj = PP_CreateProjectile(FPP_GRENADE, '0 0 0');
+    entity proj = PP_CreateProjectile(FPP_GRENADE, PM_Org());
     proj.fpp.gren_type = gren_type;
     FPP_ApplyGrenadeProperties(proj);
 }
@@ -1541,9 +1540,9 @@ void (float ox) W_FireSpikes = {
         return;
 
     if (wi->weapon == WEAP_NAILGUN)
-        PP_CreateProjectile(FPP_NAIL, ox * v_right);
+        PP_CreateProjectile(FPP_NAIL, PM_Org() + ox * v_right + '0 0 16');
     else
-        PP_CreateProjectile(FPP_SUPER_NAIL, '0 0 0');
+        PP_CreateProjectile(FPP_SUPER_NAIL, PM_Org() + '0 0 16');
 
 };
 
@@ -1626,8 +1625,7 @@ static void W_ThrowGren(float is_throw) {
 
 
 void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
-    vector offset = org - PM_Org() - '0 0 16';
-    entity proj = PP_CreateProjectile(FPP_ASSAULT_CANNON, offset);
+    entity proj = PP_CreateProjectile(FPP_ASSAULT_CANNON, org);
 
     if (proj == __NULL__)
         return;
@@ -1671,21 +1669,21 @@ void WP_Attack() {
         float send_event = FALSE;
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
-                PP_CreateProjectile(FPP_ROCKET, v_forward * 8);
+                PP_CreateProjectile(FPP_ROCKET, PM_Org() + v_forward * 8 + '0 0 16');
                 send_event = TRUE;
                 break;
             case WEAP_INCENDIARY:
-                PP_CreateProjectile(FPP_INCENDIARY, v_forward * 8);
+                PP_CreateProjectile(FPP_INCENDIARY, PM_Org() + v_forward * 8 + '0 0 16');
                 send_event = TRUE;
                 break;
             case WEAP_FLAMETHROWER:
-                PP_CreateProjectile(FPP_FLAMETHROWER, v_forward * 16);
+                PP_CreateProjectile(FPP_FLAMETHROWER, PM_Org() + v_forward * 16 + '0 0 16');
                 break;
             case WEAP_TRANQ:
-                PP_CreateProjectile(FPP_TRANQ, v_forward * 8);
+                PP_CreateProjectile(FPP_TRANQ, PM_Org() + v_forward * 8 + '0 0 16');
                 break;
             case WEAP_RAILGUN:
-                PP_CreateProjectile(FPP_RAILGUN, '0 0 0');
+                PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
                 break;
 
             case WEAP_ASSAULT_CANNON:
