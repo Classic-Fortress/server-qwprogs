@@ -158,3 +158,9 @@ void Conc_Update(ConcState *cs, entity ent, float ctime) {
     }
 #endif
 }
+
+float Class_ScaleMoment(float playerclass, float damage) {
+    if (playerclass != PC_HVYWEAP)
+        return damage;
+    return damage <= 50 ? 0 : damage / 4;
+}

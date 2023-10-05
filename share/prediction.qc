@@ -759,6 +759,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(TRUE,  "tfx", tfx_flags);
     CONFIG_UPDATE(TRUE,  "clown", clown_flags);
     CONFIG_UPDATE(FALSE, "clown_grav", clown_grav);
+    CONFIG_UPDATE(FALSE, "rj", rj);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);

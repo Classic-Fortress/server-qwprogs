@@ -52,6 +52,7 @@ var struct {
     float gren_beta_disable;
 
     float fo_concuss;
+    float rj;
 } fo_config;
 
 enumflags {
