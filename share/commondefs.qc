@@ -57,7 +57,6 @@ var struct {
 enumflags {
     REWIND_PROJ_FIRE,
     REWIND_PROJ_TRAVEL,
-    REWIND_KNOCKBACK,
     REWIND_GRENADES,
     REWIND_SENDEVENT,
     REWIND_FORWARD_PROJ_SELFKNOCK,
@@ -67,14 +66,13 @@ enumflags {
 string REWIND_DESC[] = {
     "rewind projectile on firing",
     "rewind on projectile travel",
-    "rewind pipe knockback",
     "rewind grenade throws",
     "use sendevent augmentation (allows race w/ death rewind)",
     "forward projectile self-knockback",
     "open doors earlier for hpbs [requires rfd=1]",
 };
 
-const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_FIRE |
+const float REWIND_DEFAULT_FLAGS = REWIND_PROJ_FIRE |
                                    REWIND_PROJ_TRAVEL |
                                    REWIND_FORWARD_PROJ_SELFKNOCK |
                                    REWIND_SENDEVENT;

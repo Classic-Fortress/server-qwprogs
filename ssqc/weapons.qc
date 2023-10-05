@@ -1246,9 +1246,6 @@ void FO_T_GrenExplode() {
     dremove(self);
 }
 
-void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
-                            entity ignore);
-
 void () GrenadeExplode = {
     local entity te;
     float use_antilag = FALSE;
