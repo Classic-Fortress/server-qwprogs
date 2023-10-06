@@ -1845,7 +1845,7 @@ void InitProjectileEnt(float sendflags) {
     else
         setorigin(self, self.origin);
 
-    if (self.created_at > time + 0.05) {
+    if (self.created_at < pstate_server.server_time - 0.05) {
         // Retransmit.  Patch up trail, but no predicted / sound / etc.
         self.oldorigin = self.s_origin;
         return;
