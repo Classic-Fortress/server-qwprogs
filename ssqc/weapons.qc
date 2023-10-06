@@ -1048,6 +1048,10 @@ float AntilagKnock(entity e, float dmg) {
     if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
         return FALSE;
 
+    // Only applies during initial antilag forward
+    if (e.flags & FL_FORWARD_KNOCK == 0)
+        return FALSE;
+
     entity knock_e = spawn();
 
     setorigin(knock_e, e.origin);
@@ -1059,13 +1063,10 @@ float AntilagKnock(entity e, float dmg) {
 
     vector diff = e.origin - e.s_origin;
     float ttime = vlen(diff) / vlen(e.velocity);
-    float dtime = time - e.s_time;
 
-    float delay = ttime - dtime;
-
-    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+    if (ttime > SERVER_FRAME_DT) {
         knock_e.think = T_Knock_Antilag;
-        knock_e.nextthink = time + delay;
+        knock_e.nextthink = time + ttime;
     } else {
         Antilag_Knock(knock_e);
     }
@@ -1244,9 +1245,6 @@ void FO_T_GrenExplode() {
     FO_GrenExplode(self);
     dremove(self);
 }
-
-void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
-                            entity ignore);
 
 void () GrenadeExplode = {
     local entity te;

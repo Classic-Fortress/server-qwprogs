@@ -38,7 +38,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
             deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
                                                       DMSG_GREN_PIPE_AIR;
 
-            T_RadiusDamage_Antilag(pipes[i], pipes[i].owner, 120, world);
+            T_RadiusDamage(pipes[i], pipes[i].owner, 120, world);
 
             // This maintains some sort of awful hack that we'll remove.
             pipes[i].voided = 1;
