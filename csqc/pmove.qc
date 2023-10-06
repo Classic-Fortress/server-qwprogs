@@ -160,7 +160,9 @@ void PM_PredictJump_Engine() {
 enum {
     SERVER,
     PMOVE,
-    ERROR,
+    ERROR_POS,
+    ERROR_VEL,
+    ERROR_VIEW,
     NUM_DBG_GRAPH_TYPES,
 };
 
@@ -179,10 +181,32 @@ DEFCVAR_FLOAT(fopmd_graph_h, 100);
 DEFCVAR_FLOAT(v_viewheight, 0);
 
 enumflags {
-    PMDG_ON,
-    PMDG_NO_ALIGN_INTERP,
+    PMDG_ON,              //  1 for laziness..
+    PMDG_NO_ALIGN_INTERP, //  2
+    PMDG_ERROR_VEL,       //  4
+    PMDG_ERROR_POS,       //  8
+    PMDG_ERROR_VIEW,      // 16
 };
 DEFCVAR_FLOAT(fopmd_graph, 0);
+
+static const float NHIST = 21;
+struct PM_History {
+    vector org, vel;
+    vector seq;
+};
+static PM_History hist[NHIST];
+
+void PMH_Log(float seq) {
+    PM_History* pmh = &hist[seq % NHIST];
+    pmh->org = PM_Org();
+    pmh->vel = PM_Vel();
+    pmh->seq = seq;
+}
+
+PM_History* PMH_Get(float seq) {
+    PM_History* pmh = &hist[seq % NHIST];
+    return pmh->seq == seq ? pmh : 0;
+}
 
 void PM_Init() {
     pm.ent = spawn();
@@ -595,14 +619,26 @@ static void PMD_UpdateImpulse(int seq) {
         return;
     old_seq = seq;
 
+    float cseq = clientcommandframe - 1;
     if (PM_Enabled())
-        PM_RunMovement(SimPMSD(), clientcommandframe);
+        PM_RunMovement(SimPMSD(), cseq);
+
+    PMH_Log(cseq);
 
     vector sv = pm_s.vel;
     vector pv = PM_Vel();
 
     if (!vlen(pv) && !vlen(sv))
         return;
+
+    PMD_AddPoint(SERVER, vlen(sv));
+    PMD_AddPoint(PMOVE,  vlen(pv));
+
+    PMD_AddPoint(ERROR_VIEW, vlen(pm.error) / 128 * 1200);
+
+    PM_History* hist = PMH_Get(servercommandframe);
+    PMD_AddPoint(ERROR_POS, hist ? vlen(pm_s.org - hist.org) : 0);
+    PMD_AddPoint(ERROR_VEL, hist ? vlen(pm_s.vel - hist.vel) : 0);
 
 #if 0
     static vector last_sv, last_pv;
@@ -621,10 +657,6 @@ static void PMD_UpdateImpulse(int seq) {
     last_pv = pv;
     if (p) printf("\n");
 #endif
-
-    PMD_AddPoint(SERVER, vlen(sv));
-    PMD_AddPoint(PMOVE,  vlen(pv));
-    PMD_AddPoint(ERROR, vlen(pm.error) / 128 * 1200);
 }
 
 static void PMD_Graph(int type, int offset, vector c1, vector c2, vector rgb) {
@@ -676,11 +708,18 @@ void PMD_DrawGraphs(float width) {
     drawfill(c2, '5 5 5', '1 0 0', 1);
 
     float offset = (CVARF(fopmd_graph) & PMDG_NO_ALIGN_INTERP) ? 0 :
-        clientcommandframe - servercommandframe;
+        clientcommandframe - servercommandframe - 1;
 
     offset = max(0, offset);
     PMD_Graph(PMOVE, 0, c1, c2, '0 0 1');
-    PMD_Graph(SERVER, offset, c1, c2, '1 0 0');
-    if (pstate_server.predict_flags & PF_PMOVE)
-        PMD_Graph(ERROR, 0, c1, c2, '0 1 0');
+    PMD_Graph(SERVER, offset, c1, c2, '0 1 0');
+
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_VIEW) &&
+            (pstate_server.predict_flags & PF_PMOVE))
+        PMD_Graph(ERROR_VIEW, 0, c1, c2, '1 0 1');
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_VEL))
+        PMD_Graph(ERROR_VEL, 0, c1, c2, '1 1 0');
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_POS))
+        PMD_Graph(ERROR_POS, 0, c1, c2, '1 0 0');
+
 }
