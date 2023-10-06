@@ -3,7 +3,6 @@ DEFCVAR_FLOAT(fo_jumpvolume, 1);
 static float pm_enabled;
 inline float PM_Enabled() { return pm_enabled; }
 
-#define ERRORTIME 0.05
 #define STEPTIME 0.125
 
 enumflags {
@@ -172,6 +171,7 @@ DEFCVAR_FLOAT(fopm_noerror, 0);
 DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
 DEFCVAR_FLOAT(fopm_nonudge, 0);
+DEFCVAR_FLOAT(fopm_errortime, 0);
 
 DEFCVAR_FLOAT(fopmd_graph_x, -10);
 DEFCVAR_FLOAT(fopmd_graph_y, 100);
@@ -365,6 +365,16 @@ static void PM_SetEnabled(float enabled) {
     pm.step_oldz = pm.ent.origin_z;
 }
 
+static float ErrorTime() {
+    static float kDefault = 25 * MSEC;
+    static float kMax = 50 * MSEC;
+
+    if (!CVARF(fopm_errortime))
+        return kDefault;
+
+    return min(CVARF(fopm_errortime), kMax);
+}
+
 static void PM_UpdateError() {
     entity ent = pm.ent;
 
@@ -388,11 +398,11 @@ static void PM_UpdateError() {
         pm.error = '0 0 0';
         pm.errortime = 0;
     } else { // figure out the error amount, and add it to accumulated lerp
-        pm.error *= max(pm.errortime - time, 0) / ERRORTIME;
+        pm.error *= max(pm.errortime - time, 0) / ErrorTime();
         pm.error += err;
 
         if (vlen(pm.error) > 1)
-            pm.errortime = time + ERRORTIME;
+            pm.errortime = time + ErrorTime();
         else {
             pm.error = '0 0 0';
             pm.errortime = 0;
@@ -429,9 +439,9 @@ static void PM_UpdateLocalMovement() {
     pm.vieworg = org;
     pm.vieworg.z += getstatf(STAT_VIEWHEIGHT) + viewheight;
 
-    // Correct view position over ERRORTIME
+    // Correct view position over ErrorTime()
     if (pm.errortime - time > 0)
-        pm.vieworg += (pm.errortime - time) * (1 / ERRORTIME) * pm.error;
+        pm.vieworg += (pm.errortime - time) * (1 / ErrorTime()) * pm.error;
 
     if (!CVARF(fopm_nostep))
         if (pm.steptime - time > 0)
