@@ -3,7 +3,6 @@ DEFCVAR_FLOAT(fo_jumpvolume, 1);
 static float pm_enabled;
 inline float PM_Enabled() { return pm_enabled; }
 
-#define ERRORTIME 0.05
 #define STEPTIME 0.125
 
 enumflags {
@@ -17,13 +16,17 @@ enumflags {
 // constant for this frame.
 struct PMS_Data {
     vector org, vel;
-    float seq;
+    float seq, server_seq;
     float interp_t;
 } pm_s, pm_so, pm_c;
 
 struct {
     entity ent;
-    float seq;
+    float last_vel_z;
+    PMS_Data* active_pmsd;
+
+
+    float seq, server_seq;
     float interp_t;
 
     vector error;
@@ -156,7 +159,9 @@ void PM_PredictJump_Engine() {
 enum {
     SERVER,
     PMOVE,
-    ERROR,
+    ERROR_POS,
+    ERROR_VEL,
+    ERROR_VIEW,
     NUM_DBG_GRAPH_TYPES,
 };
 
@@ -166,6 +171,7 @@ DEFCVAR_FLOAT(fopm_noerror, 0);
 DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
 DEFCVAR_FLOAT(fopm_nonudge, 0);
+DEFCVAR_FLOAT(fopm_errortime, 0);
 
 DEFCVAR_FLOAT(fopmd_graph_x, -10);
 DEFCVAR_FLOAT(fopmd_graph_y, 100);
@@ -175,10 +181,32 @@ DEFCVAR_FLOAT(fopmd_graph_h, 100);
 DEFCVAR_FLOAT(v_viewheight, 0);
 
 enumflags {
-    PMDG_ON,
-    PMDG_NO_ALIGN_INTERP,
+    PMDG_ON,              //  1 for laziness..
+    PMDG_NO_ALIGN_INTERP, //  2
+    PMDG_ERROR_VEL,       //  4
+    PMDG_ERROR_POS,       //  8
+    PMDG_ERROR_VIEW,      // 16
 };
 DEFCVAR_FLOAT(fopmd_graph, 0);
+
+static const float NHIST = 21;
+struct PM_History {
+    vector org, vel;
+    vector seq;
+};
+static PM_History hist[NHIST];
+
+void PMH_Log(float seq) {
+    PM_History* pmh = &hist[seq % NHIST];
+    pmh->org = PM_Org();
+    pmh->vel = PM_Vel();
+    pmh->seq = seq;
+}
+
+PM_History* PMH_Get(float seq) {
+    PM_History* pmh = &hist[seq % NHIST];
+    return pmh->seq == seq ? pmh : 0;
+}
 
 void PM_Init() {
     pm.ent = spawn();
@@ -188,22 +216,32 @@ void PM_Init() {
 
 // Should be invoked immediately after RunMovement() to ensure correctness of
 // `seq` versus state.  On server packets we manually set `seq` to sf + 1.
-static inline void PM_SavePMS(PMS_Data *pms) {
+static void PM_SavePMS(PMS_Data *pmsd) {
     entity ent = pm.ent;
-    pms->org = ent.origin;
-    pms->vel = ent.velocity;
+    pmsd->org = ent.origin;
+    pmsd->vel = ent.velocity;
 
-    pms->seq = pm.seq;
-    pms->interp_t = pm.interp_t;
+    pmsd->seq = pm.seq;
+    pmsd->server_seq = pm.server_seq;
+    pmsd->interp_t = pm.interp_t;
 }
 
-static inline void PM_ActivatePMS(PMS_Data *pms) {
+static void PM_ActivatePMS(PMS_Data *pmsd) {
     entity ent = pm.ent;
-    ent.origin = pms->org;
-    ent.velocity = pms->vel;
-    pm.seq = pms->seq;
-    pm.interp_t = pms->interp_t;
+    ent.origin = pmsd->org;
+    ent.velocity = pmsd->vel;
+
+    pm.seq = pmsd->seq;
+    pm.server_seq = pmsd->server_seq;
+    pm.interp_t = pmsd->interp_t;
+    pm.active_pmsd = pmsd;
+
+    pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
 };
+
+static PMS_Data* SimPMSD() {
+    return CVARF(fopm_nocache) ? &pm_s : &pm_c;
+}
 
 void PM_InputFrame();
 
@@ -271,24 +309,20 @@ static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
     }
 }
 
-static void PM_RunMovement(float endframe) {
+static void RunPlayerPhysics() {
     entity ent = pm.ent;
-    if (servercommandframe >= pm_s.seq + 63) {
-        // We're meant to be updating the player faster than this
-        // hopefully its just that we're throttled...
-        // Uncommenting this block will result in the player continuing to be
-        // predicted rather than frozen.
-        pm_s.seq = servercommandframe - 63;
-        return;
-    }
 
-    if (endframe < pm.seq) {
-        if (endframe >= pm_c.seq && !CVARF(fopm_nocache))
-            PM_ActivatePMS(&pm_c);
-        else
-            PM_ActivatePMS(&pm_s);
-    }
+    pm.last_vel_z = ent.velocity_z;
+    runstandardplayerphysics(ent);
+}
 
+static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
+    entity ent = pm.ent;
+
+    if (pm.active_pmsd != pmsd || endframe < pm.seq) {
+        ASSERTF_GT(endframe, pm.server_seq);
+        PM_ActivatePMS(pmsd);
+    }
 
     if (!game_state.is_spectator && !game_state.is_alive) {
         pm.seq = clientcommandframe;
@@ -296,9 +330,6 @@ static void PM_RunMovement(float endframe) {
         if (!getinputstate(pm.seq-1)) { }
         return;
     }
-
-    if (pm.seq < clientcommandframe - 128)
-        pm.seq = clientcommandframe - 128;
 
     while (pm.seq <= endframe) {
         if (!getinputstate(pm.seq))
@@ -309,11 +340,10 @@ static void PM_RunMovement(float endframe) {
         if (pm.seq == clientcommandframe)
             PM_InputFrame();
 
-        pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
+        RunPlayerPhysics();
+
         if (!CVARF(fopm_nonudge) && pm.seq < clientcommandframe)
             PM_ApplyNudges(ent, pm.interp_t, pm.interp_t + input_timelength);
-
-        runstandardplayerphysics(ent);
 
         pm.seq++;
         pm.interp_t += input_timelength;
@@ -335,6 +365,16 @@ static void PM_SetEnabled(float enabled) {
     pm.step_oldz = pm.ent.origin_z;
 }
 
+static float ErrorTime() {
+    static float kDefault = 25 * MSEC;
+    static float kMax = 50 * MSEC;
+
+    if (!CVARF(fopm_errortime))
+        return kDefault;
+
+    return min(CVARF(fopm_errortime), kMax);
+}
+
 static void PM_UpdateError() {
     entity ent = pm.ent;
 
@@ -346,13 +386,11 @@ static void PM_UpdateError() {
     }
 
     // Run prior prediction to present.
-    PM_ActivatePMS(&pm_so);
-    PM_RunMovement(clientcommandframe);
+    PM_RunMovement(&pm_so, clientcommandframe);
     vector err = ent.origin;
 
     // Repeat with updated state.
-    PM_ActivatePMS(&pm_s);
-    PM_RunMovement(clientcommandframe);
+    PM_RunMovement(&pm_s, clientcommandframe);
 
     err -= ent.origin;
     float nerr = vlen(err);
@@ -360,11 +398,11 @@ static void PM_UpdateError() {
         pm.error = '0 0 0';
         pm.errortime = 0;
     } else { // figure out the error amount, and add it to accumulated lerp
-        pm.error *= max(pm.errortime - time, 0) / ERRORTIME;
+        pm.error *= max(pm.errortime - time, 0) / ErrorTime();
         pm.error += err;
 
         if (vlen(pm.error) > 1)
-            pm.errortime = time + ERRORTIME;
+            pm.errortime = time + ErrorTime();
         else {
             pm.error = '0 0 0';
             pm.errortime = 0;
@@ -375,9 +413,8 @@ static void PM_UpdateError() {
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
 
-    PM_RunMovement(clientcommandframe);
+    PM_RunMovement(SimPMSD(), clientcommandframe);
     vector org = pm.ent.origin;
-
 
     // Smooth stair stepping
     if (org_z > pm.step_oldz + 8 && org_z < pm.step_oldz + 24 &&
@@ -402,9 +439,9 @@ static void PM_UpdateLocalMovement() {
     pm.vieworg = org;
     pm.vieworg.z += getstatf(STAT_VIEWHEIGHT) + viewheight;
 
-    // Correct view position over ERRORTIME
+    // Correct view position over ErrorTime()
     if (pm.errortime - time > 0)
-        pm.vieworg += (pm.errortime - time) * (1 / ERRORTIME) * pm.error;
+        pm.vieworg += (pm.errortime - time) * (1 / ErrorTime()) * pm.error;
 
     if (!CVARF(fopm_nostep))
         if (pm.steptime - time > 0)
@@ -418,23 +455,14 @@ void PM_SyncTo(float seq) {
         return;
 
     entity ent = pm.ent;
-
-    PM_RunMovement(seq - 1);
-    float of = ent.flags;
-    float last_vel_z = ent.velocity_z;
-
-    PM_RunMovement(seq);
-    float nf = ent.flags;
-
-    if (!CSQC_JumpSounds_Active())
-        return;
+    PM_RunMovement(SimPMSD(), seq);
 
     // Note: ~FL_ONGROUND and jump occur in same frame, produces JUMP_HELD
     float jumping = input_buttons & BUTTON2;
-    float landing = (!(of & FL_ONGROUND) && (nf & FL_ONGROUND));
+    float landing = pm.last_vel_z < 0 && (ent.flags & FL_ONGROUND);
     float jump_frame = ent.pmove_flags & PMF_JUMP_HELD;
 
-    PM_Sounds(jumping, jump_frame, landing, last_vel_z);
+    PM_Sounds(jumping, jump_frame, landing, pm.last_vel_z);
 }
 
 void PM_Update(float sendflags) {
@@ -449,18 +477,21 @@ void PM_Update(float sendflags) {
         return;
 
     pm_so = pm_s;
+    pm.server_seq = servercommandframe;
     pm.seq = servercommandframe + 1;  // server state includes move
     pm.interp_t = pstate_server.server_time;
     PM_SavePMS(&pm_s);
 
-    // Pre-compute predicted movement for all locked frames (e.g. seq <
-    // clientcommandframe) so that we can accelerate the common case of
-    // computation at clientcommandframe (which does require constant
-    // re-evaluation).  In the case there's no separation (e.g. lan pings) then
-    // the server frame is directly used as the cache frame.
-    if (clientcommandframe > servercommandframe + 1)
-        PM_RunMovement(clientcommandframe - 1);
-    PM_SavePMS(&pm_c);
+    if (!CVARF(fopm_nocache)) {
+        // Pre-compute predicted movement for all locked frames (e.g. seq <
+        // clientcommandframe) so that we can accelerate the common case of
+        // computation at clientcommandframe (which does require constant
+        // re-evaluation).  In the case there's no separation (e.g. lan pings) then
+        // the server frame is directly used as the cache frame.
+        if (clientcommandframe > servercommandframe + 1)
+            PM_RunMovement(&pm_s, clientcommandframe - 1);
+        PM_SavePMS(&pm_c);
+    }
 
     if (enabled && was_enabled)
         PM_UpdateError();
@@ -598,14 +629,26 @@ static void PMD_UpdateImpulse(int seq) {
         return;
     old_seq = seq;
 
+    float cseq = clientcommandframe - 1;
     if (PM_Enabled())
-        PM_RunMovement(clientcommandframe);
+        PM_RunMovement(SimPMSD(), cseq);
+
+    PMH_Log(cseq);
 
     vector sv = pm_s.vel;
     vector pv = PM_Vel();
 
     if (!vlen(pv) && !vlen(sv))
         return;
+
+    PMD_AddPoint(SERVER, vlen(sv));
+    PMD_AddPoint(PMOVE,  vlen(pv));
+
+    PMD_AddPoint(ERROR_VIEW, vlen(pm.error) / 128 * 1200);
+
+    PM_History* hist = PMH_Get(servercommandframe);
+    PMD_AddPoint(ERROR_POS, hist ? vlen(pm_s.org - hist.org) : 0);
+    PMD_AddPoint(ERROR_VEL, hist ? vlen(pm_s.vel - hist.vel) : 0);
 
 #if 0
     static vector last_sv, last_pv;
@@ -624,10 +667,6 @@ static void PMD_UpdateImpulse(int seq) {
     last_pv = pv;
     if (p) printf("\n");
 #endif
-
-    PMD_AddPoint(SERVER, vlen(sv));
-    PMD_AddPoint(PMOVE,  vlen(pv));
-    PMD_AddPoint(ERROR, vlen(pm.error) / 128 * 1200);
 }
 
 static void PMD_Graph(int type, int offset, vector c1, vector c2, vector rgb) {
@@ -679,11 +718,18 @@ void PMD_DrawGraphs(float width) {
     drawfill(c2, '5 5 5', '1 0 0', 1);
 
     float offset = (CVARF(fopmd_graph) & PMDG_NO_ALIGN_INTERP) ? 0 :
-        clientcommandframe - servercommandframe;
+        clientcommandframe - servercommandframe - 1;
 
     offset = max(0, offset);
     PMD_Graph(PMOVE, 0, c1, c2, '0 0 1');
-    PMD_Graph(SERVER, offset, c1, c2, '1 0 0');
-    if (pstate_server.predict_flags & PF_PMOVE)
-        PMD_Graph(ERROR, 0, c1, c2, '0 1 0');
+    PMD_Graph(SERVER, offset, c1, c2, '0 1 0');
+
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_VIEW) &&
+            (pstate_server.predict_flags & PF_PMOVE))
+        PMD_Graph(ERROR_VIEW, 0, c1, c2, '1 0 1');
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_VEL))
+        PMD_Graph(ERROR_VEL, 0, c1, c2, '1 1 0');
+    if ((CVARF(fopmd_graph) & PMDG_ERROR_POS))
+        PMD_Graph(ERROR_POS, 0, c1, c2, '1 0 0');
+
 }
