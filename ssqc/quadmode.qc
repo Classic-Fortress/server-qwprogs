@@ -12,6 +12,11 @@ void () PostFOQuadStarted = {
 		return;
 	}
 
+	// Override 2v2 to go to scrim results for now.
+	string channel_id = discord_channel_id;
+	if (TeamFortress_TeamGetNoPlayersExcludingAllTime(1) <= 2)
+		channel_id = "1147341454851719219";
+
 	local string data = "";
 
 	data = strcat(data, "{\n");
@@ -37,7 +42,7 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
 	data = strcat(data, "    },\n");
 	data = strcat(data, "    \"discord_channel\": {\n");
-	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
+	data = strcat(data, "      \"channel_id\": \"", channel_id, "\"\n");
 	data = strcat(data, "    },\n");
 	data = strcat(data, "    \"teams\": {\n");
 
