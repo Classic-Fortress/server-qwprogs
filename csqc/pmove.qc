@@ -384,17 +384,23 @@ static void PM_UpdateError() {
         pm.errortime = 0;
         return;
     }
+    static PMS_Data last;
+
+    if (!last.seq)
+        last = pm_so;
 
     // Run prior prediction to present.
-    PM_RunMovement(&pm_so, clientcommandframe);
+    PM_RunMovement(&last, clientcommandframe);
     vector err = ent.origin;
 
     // Repeat with updated state.
-    PM_RunMovement(&pm_s, clientcommandframe);
+    PM_RunMovement(SimPMSD(), clientcommandframe - 1);
+    PM_SavePMS(&last);  // Save at -1 since the construction for #cf will be partial
+    PM_RunMovement(SimPMSD(), clientcommandframe);
 
     err -= ent.origin;
     float nerr = vlen(err);
-    if (nerr > 128) {  // teleport
+    if (nerr > 64) {  // teleport
         pm.error = '0 0 0';
         pm.errortime = 0;
     } else { // figure out the error amount, and add it to accumulated lerp
@@ -629,7 +635,7 @@ static void PMD_UpdateImpulse(int seq) {
         return;
     old_seq = seq;
 
-    float cseq = clientcommandframe - 1;
+    float cseq = clientcommandframe;
     if (PM_Enabled())
         PM_RunMovement(SimPMSD(), cseq);
 
