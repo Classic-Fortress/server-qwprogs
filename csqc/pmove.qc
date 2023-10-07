@@ -14,17 +14,16 @@ enumflags {
 // state.  In the case that `seq == commandclientframe` this could only be
 // partially true since the input_*s (in particular, timelength) are not
 // constant for this frame.
-struct PMS_Data {
+static struct PMS_Data {
     vector org, vel;
     float seq, server_seq;
     float interp_t;
 } pm_s, pm_so, pm_c;
 
-struct {
+static struct {
     entity ent;
     float last_vel_z;
     PMS_Data* active_pmsd;
-
 
     float seq, server_seq;
     float interp_t;
@@ -172,6 +171,7 @@ DEFCVAR_FLOAT(fopm_nocache, 0);
 DEFCVAR_FLOAT(fopm_nostep, 0);
 DEFCVAR_FLOAT(fopm_nonudge, 0);
 DEFCVAR_FLOAT(fopm_errortime, 0);
+DEFCVAR_FLOAT(fopm_debug, 0);
 
 DEFCVAR_FLOAT(fopmd_graph_x, -10);
 DEFCVAR_FLOAT(fopmd_graph_y, 100);
@@ -192,7 +192,7 @@ DEFCVAR_FLOAT(fopmd_graph, 0);
 static const float NHIST = 21;
 struct PM_History {
     vector org, vel;
-    vector seq;
+    float seq;
 };
 static PM_History hist[NHIST];
 
@@ -246,67 +246,236 @@ static PMS_Data* SimPMSD() {
 void PM_InputFrame();
 
 enum {
+    NT_EMPTY,
     NT_CONC,
     NT_DASH,
+    NT_EXPLOSION,
+};
+
+enum {
+    NA_NONE,
+    NA_SEQ,
+    NA_SEQTIME,
+    NA_ITIME,
 };
 
 struct PM_Nudge {
-    float itime, type;
-    vector nudge;
+    entity src;
+    float src_no;
+
+    float nat;
+    float seq, itime, type;
+    float expire_frame;
+
+    vector vec;
+    float aux;
 };
 
-static PM_Nudge nudges[10];
+static PM_Nudge nudges[5];
 static float num_nudges;
 
-void PM_AddConcNudge(float itime, float mag, float flip) {
+static float nudge_expired(PM_Nudge* n) {
+    // Below all actually expire at <= so this is conservative.
+    if (n->expire_frame && n->expire_frame < servercommandframe)
+        return TRUE;
+
+    switch (n->nat) {
+        case NA_NONE: return TRUE;
+        case NA_SEQ: return n->seq < servercommandframe;
+        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) < servercommandframe;
+        case NA_ITIME: return n->itime < pstate_server.server_time;
+    }
+
+    return TRUE;
+}
+
+static PM_Nudge* find_nudge_slot() {
+    for (float i = 0; i < nudges.length; i++) {
+        PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+
+        if (!nudge_expired(n))
+            continue;
+
+        n->nat = NA_NONE;
+        n->src_no = 0;
+        n->src = 0;
+        n->expire_frame = 0;
+        return n;
+    }
+
+    if (CVARF(fopm_debug))
+        printf("ERROR: no nudge slots!\n");
+    return 0;
+}
+
+.PM_Nudge* nudge;
+
+static void PM_RemoveSelfNudges() {
+    if (!self.nudge)
+        return;
+
+    PM_Nudge* n = self.nudge;
+    n->expire_frame = -servercommandframe;
+}
+
+void PM_AddNudgeConc(float itime, float mag, float flip) {
     // This is kind of painful but not much easier..
     static float filter_itime;
     if (itime <= filter_itime)
         return;
     filter_itime = itime;
 
-    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+    PM_Nudge* n = find_nudge_slot();
+    if (!n)
+        return;
 
     n->type = NT_CONC;
     n->itime = itime;
-    n->nudge.x = mag;
-    n->nudge.y = flip;
+    n->vec.x = mag;
+    n->vec.y = flip;
 }
 
 static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
     if (pointcontents(ent.origin) == CONTENT_WATER)
         ent.flags |= FL_INWATER;  // pmove doesn't usually maintain this.
-    Conc_Stumble(ent, nudge->nudge.x, nudge->nudge.y);
+    Conc_Stumble(ent, nudge->vec.x, nudge->vec.y);
 }
 
 static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
-    ent.velocity = nudge->nudge;
+    ent.velocity = nudge->vec;
 }
 
-void PM_AddDashNudge(float itime) {
-    PM_Nudge* n = &nudges[(num_nudges++) % nudges.length];
+void PM_AddNudgeDash(float itime) {
+    PM_Nudge* n = find_nudge_slot();
+    if (!n)
+        return;
     n->type = NT_DASH;
     n->itime = itime;
 
-    n->nudge = v_forward * 540;
-    n->nudge.z = 181 + SERVER_FRAME_DT * 800;  // TODO: fix this...
+    n->vec = v_forward * 540;
+    n->vec.z = 181 + SERVER_FRAME_DT * 800;  // TODO: fix this...
+}
+
+float nudge_i(PM_Nudge* n) {
+    for (float i = 0; i < nudges.length; i++)
+        if (&nudges[i] == n)
+            return i;
+    return -1;
+}
+
+static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
+    float dmg = nudge->aux;
+    if (vlen(ent.origin - nudge->vec) > dmg + 40)
+        return;
+
+    float flg = KF_BOTH_PLAYER;
+    if (nudge->src.owner == pengine.player_ent)
+       flg |= KF_SELF;
+
+    dmg *= 0.9;  // Assume everything is from a player
+    float moment = CalcRadiusDamage(nudge->src, ent, flg, dmg);
+    vector knock = CalcKnock(nudge->src, ent, flg, moment);
+
+    pm.ent.velocity += knock;
+}
+
+// Can be either by {seq + itime} for predicted projectiles, or by {itime} for
+// server projectiles.
+void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float dmg) {
+    if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
+        return;
+
+    PM_Nudge* n = find_nudge_slot();
+    if (!n)
+        return;
+
+    n->type = NT_EXPLOSION;
+    n->nat = nat;
+    n->seq = seq;
+    n->itime = itime;
+    n->vec = ent.origin;  // We end up mostly using the ent here
+    n->aux = dmg;
+
+    n->src = ent;
+    n->src_no = ent.entnum;
+
+    ent.nudge = n;
+
+    ent.removefunc = PM_RemoveSelfNudges;
+}
+
+DEFCVAR_FLOAT(fo_beta_nudge_explosion, 0);
+void PM_AddSimExplosion(float itime, entity ent) {
+    if (!PM_Enabled() || !CVARF(fo_beta_nudge_explosion))
+        return;
+
+    if (ent.owner != pengine.player_ent)  // Just player ents in version 0
+        return;
+
+    float dmg = 0;
+    switch (ent.fpp.index) {
+        case FPP_ROCKET:
+        case FPP_INCENDIARY:
+            dmg = 92;
+            break;
+        default:
+            return;  // Not recognized
+    }
+
+    float seq = 0, nat = NA_ITIME;
+    if (ent.forward_knock && ent.owner == pengine.player_ent) {
+        if (ent.forward_knock == -1)
+            return;
+        itime = ent.forward_knock;
+    } else if (ent.created_seq && ent.entnum == 0) {
+        float dtime = 0;
+        if (ent.s_time)
+            dtime = max(itime - ent.s_time - SERVER_FRAME_DT, 0);
+        seq = ent.created_seq;
+        itime = dtime;
+        nat = NA_SEQTIME;  // Same as NA_SEQ when itime == 0
+    }
+
+    PM_AddNudgeExplosion(nat, seq, itime, ent, dmg);
+}
+
+float MatchNudge(PM_Nudge* n, float seq, float sitime, float eitime) {
+    if (n->expire_frame && n->expire_frame < pm.server_seq) {
+        return FALSE;
+    }
+
+    switch (n->nat) {
+        case NA_SEQ: return n->seq == seq;
+        case NA_SEQTIME: return n->seq + floor(n->itime / SERVER_FRAME_DT) == seq;
+        case NA_ITIME: return n->itime > sitime && n->itime <= eitime;
+        default:
+            return FALSE;
+    }
 }
 
 // TODO: This obviously wants to be smarter
-static void PM_ApplyNudges(entity ent, float sitime, float eitime) {
+static vector PM_ApplyNudges(entity ent, float seq, float sitime, float eitime) {
+    vector result = '0 0 0';
     for (float i = 0; i < nudges.length; i++) {
         PM_Nudge* n = &nudges[i];
-        if (n->itime >= sitime && n->itime < eitime) {
-            switch (n->type) {
-                case NT_CONC:
-                    PM_NudgeConc(n, ent);
-                    break;
-                case NT_DASH:
-                    PM_NudgeDash(n, ent);
-                    break;
-            }
+
+        if (!MatchNudge(n, seq, sitime, eitime))
+            continue;
+
+        switch (n->type) {
+            case NT_CONC:
+                PM_NudgeConc(n, ent);
+                break;
+            case NT_DASH:
+                PM_NudgeDash(n, ent);
+                break;
+            case NT_EXPLOSION:
+                PM_NudgeExplosion(n, ent);
+                break;
         }
     }
+
+    return result;
 }
 
 static void RunPlayerPhysics() {
@@ -316,10 +485,12 @@ static void RunPlayerPhysics() {
     runstandardplayerphysics(ent);
 }
 
+// End state:
+//   pmsd.seq --> endframe + 1
 static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
     entity ent = pm.ent;
 
-    if (pm.active_pmsd != pmsd || endframe < pm.seq) {
+    if (pm.active_pmsd != pmsd || pm.seq > endframe) {
         ASSERTF_GT(endframe, pm.server_seq);
         PM_ActivatePMS(pmsd);
     }
@@ -328,9 +499,12 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
         pm.seq = clientcommandframe;
         //just update the angles
         if (!getinputstate(pm.seq-1)) { }
-        return;
+            return;
     }
 
+    ASSERTF_GT(pm.seq, 0);
+
+    pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
     while (pm.seq <= endframe) {
         if (!getinputstate(pm.seq))
             break;
@@ -342,8 +516,9 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
 
         RunPlayerPhysics();
 
-        if (!CVARF(fopm_nonudge) && pm.seq < clientcommandframe)
-            PM_ApplyNudges(ent, pm.interp_t, pm.interp_t + input_timelength);
+        if (!CVARF(fopm_nonudge)) {
+            PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength);
+        }
 
         pm.seq++;
         pm.interp_t += input_timelength;
@@ -379,14 +554,15 @@ static void PM_UpdateError() {
     entity ent = pm.ent;
 
     ent.owner = edict_num(player_localentnum);
-    if (CVARF(fopm_noerror)) {
+    if (CVARF(fopm_noerror) ||
+        (clientcommandframe == servercommandframe + 1)) {
         pm.error = '0 0 0';
         pm.errortime = 0;
         return;
     }
     static PMS_Data last;
 
-    if (!last.seq)
+    if (last.server_seq != pm_s.server_seq - 1)
         last = pm_so;
 
     // Run prior prediction to present.
@@ -400,6 +576,7 @@ static void PM_UpdateError() {
 
     err -= ent.origin;
     float nerr = vlen(err);
+
     if (nerr > 64) {  // teleport
         pm.error = '0 0 0';
         pm.errortime = 0;
@@ -407,9 +584,9 @@ static void PM_UpdateError() {
         pm.error *= max(pm.errortime - time, 0) / ErrorTime();
         pm.error += err;
 
-        if (vlen(pm.error) > 1)
+        if (vlen(pm.error) > 1) {
             pm.errortime = time + ErrorTime();
-        else {
+        } else {
             pm.error = '0 0 0';
             pm.errortime = 0;
         }
@@ -471,6 +648,24 @@ void PM_SyncTo(float seq) {
     PM_Sounds(jumping, jump_frame, landing, pm.last_vel_z);
 }
 
+static void PM_HandleRemovedNudges() {
+    if (!pstate_server.num_filter_ents)
+        return;
+
+    for (float i = 0; i < nudges.length; i++) {
+        PM_Nudge* n = &nudges[i];
+        if (nudge_expired(n))
+            continue;
+
+        for (float j = 0; j < pstate_server.num_filter_ents; j++) {
+            if (n->src_no == pstate_server.filter_ents[j]) {
+                n->nat = NA_SEQ;
+                n->seq = n->expire_frame = pstate_server.seq;
+            }
+        }
+    }
+}
+
 void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
     float enabled = (pstate_server.predict_flags & PF_PMOVE) &&
@@ -483,6 +678,8 @@ void PM_Update(float sendflags) {
     if (sendflags & FOWP_PMOVE == 0)
         return;
 
+    PM_HandleRemovedNudges();
+
     pm_so = pm_s;
     pm.server_seq = servercommandframe;
     pm.seq = servercommandframe + 1;  // server state includes move
@@ -490,11 +687,10 @@ void PM_Update(float sendflags) {
     PM_SavePMS(&pm_s);
 
     if (!CVARF(fopm_nocache)) {
-        // Pre-compute predicted movement for all locked frames (e.g. seq <
         // clientcommandframe) so that we can accelerate the common case of
         // computation at clientcommandframe (which does require constant
-        // re-evaluation).  In the case there's no separation (e.g. lan pings) then
-        // the server frame is directly used as the cache frame.
+        // re-evaluation).  In the case there's no separation (e.g. lan pings)
+        // then the server frame is directly used as the cache frame.
         if (clientcommandframe > servercommandframe + 1)
             PM_RunMovement(&pm_s, clientcommandframe - 1);
         PM_SavePMS(&pm_c);
@@ -502,7 +698,6 @@ void PM_Update(float sendflags) {
 
     if (enabled && was_enabled)
         PM_UpdateError();
-
     PMD_UpdateImpulse(servercommandframe);
 }
 
@@ -654,26 +849,11 @@ static void PMD_UpdateImpulse(int seq) {
     PMD_AddPoint(ERROR_VIEW, vlen(pm.error) / 128 * 1200);
 
     PM_History* hist = PMH_Get(servercommandframe);
+    if (!hist)
+        return;
+
     PMD_AddPoint(ERROR_POS, hist ? vlen(pm_s.org - hist.org) : 0);
     PMD_AddPoint(ERROR_VEL, hist ? vlen(pm_s.vel - hist.vel) : 0);
-
-#if 0
-    static vector last_sv, last_pv;
-    float p = FALSE;
-    if (vlen(sv - last_sv) > 200) {
-        printf("[%0.3f] S sf=%d st=%0.3f i=%0.3f\n", time, servercommandframe, pm_s.interp_t, vlen(sv-last_sv));
-        p = TRUE;
-    }
-    last_sv = sv;
-
-    if (vlen(pv - last_pv) > 200) {
-        printf("[%0.3f] C cf=%d ct=%0.3f i=%0.3f\n", time, clientcommandframe, 
-                pm.interp_t, vlen(pv-last_pv));
-        p = TRUE;
-    }
-    last_pv = pv;
-    if (p) printf("\n");
-#endif
 }
 
 static void PMD_Graph(int type, int offset, vector c1, vector c2, vector rgb) {

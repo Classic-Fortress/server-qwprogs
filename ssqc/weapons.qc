@@ -1033,10 +1033,8 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
-.float al_dmg;
-
 static void Antilag_Knock(entity e) {
-    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    T_RadiusDamage(e, e.owner, e.heat, __NULL__, __NULL__, e.owner);
     dremove(e);
 }
 
@@ -1055,11 +1053,13 @@ float AntilagKnock(entity e, float dmg) {
     entity knock_e = spawn();
 
     setorigin(knock_e, e.origin);
+    setsize(knock_e, '0 0 0', '0 0 0');
     knock_e.s_origin = e.s_origin;
     knock_e.owner = e.owner;
     knock_e.classname = e.classname;
     knock_e.oldenemy = other;
-    knock_e.al_dmg = dmg;
+    knock_e.heat = dmg;
+    knock_e.filter_ent = e;
 
     vector diff = e.origin - e.s_origin;
     float ttime = vlen(diff) / vlen(e.velocity);
@@ -1067,8 +1067,10 @@ float AntilagKnock(entity e, float dmg) {
     if (ttime > SERVER_FRAME_DT) {
         knock_e.think = T_Knock_Antilag;
         knock_e.nextthink = time + ttime;
+        e.forward_knock = time + ttime;
     } else {
         Antilag_Knock(knock_e);
+        e.forward_knock = -1;
     }
 
     return TRUE;
@@ -1092,6 +1094,9 @@ void () T_MissileTouch = {
     float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
     entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
     T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
+
+    if (!self.s_time)
+        self.forward_knock = -1;
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 

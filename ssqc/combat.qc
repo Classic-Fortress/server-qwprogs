@@ -611,6 +611,7 @@ void TF_T_Damage(entity targ, entity inflictor, entity attacker,
 
                 float moment = Class_ScaleMoment(targ.playerclass, damage);
                 targ.velocity += CalcKnock(inflictor, targ, fl, moment);
+                Predict_AddFilterEnt(targ, inflictor.filter_ent ?: inflictor);
             }
         }
     }
@@ -760,7 +761,6 @@ void (entity inflictor, entity attacker, float damage,
 
         float fl = e == attacker ? KF_SELF : 0;
         points = CalcRadiusDamage(inflictor, e, fl, damage);
-
         if (points > 0) {
             if (CanDamage(e, inflictor)) {
                 // shambler takes half damage from all explosions

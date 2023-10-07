@@ -28,6 +28,7 @@ enumflags {
     FOWP_RNG1,
     FOWP_RNG2,
     FOWP_PREDICT_FLAGS,
+    FOWP_FILTER_ENTS,
     FOWP_LAST,
 };
 const float FOWP_ALL = FOWP_LAST - 1;
@@ -39,8 +40,10 @@ enumflags {
     FOPP_ANGLES,
     FOPP_MOVETYPE,
     FOPP_EXPIRY,
+    FOPP_FORWARDKNOCK,
 };
 
+.float forward_knock;
 
 enumflags {
     PF_PMOVE,
@@ -78,6 +81,13 @@ struct predict_tf_state {
     int prng_base[PRNG_NUM_STATES];
 
     float no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp;
+
+    float num_filter_ents;
+#ifdef SSQC
+    entity filter_ents[4];
+#else
+    float filter_ents[4];
+#endif
 
 #ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
@@ -347,6 +357,9 @@ static float Prediction_ChangedMask(entity player, entity src) {
     if (player.predict_flags & (PF_PMOVE | PF_POS))
         mask |= FOWP_PMOVE;
 
+    if (player == src)
+        mask |= FOWP_FILTER_ENTS;
+
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
@@ -373,11 +386,19 @@ static float Prediction_ChangedMask(entity player, entity src) {
         if (player.pred_forcebit >= FOWP_LAST)
             player.pred_forcebit = 1;
 
-        if (player.pred_forcebit != FOWP_PMOVE)
+        if (player.pred_forcebit & (FOWP_PMOVE | FOWP_FILTER_ENTS) == 0)
             mask |= player.pred_forcebit;
     }
 
     return mask;
+}
+
+void Predict_AddFilterEnt(entity p, entity filter) {
+    if (p.predict_flags & PF_PMOVE == 0)
+        return;
+
+    predict_tf_state* ps = &p.predict_state;
+    ps->filter_ents[ps->num_filter_ents++] = filter;
 }
 
 void Predict_InitPlayer(entity player);
@@ -464,7 +485,8 @@ void EntUpdate_Config() {
 #undef COMM
 
 #ifdef SSQC
-#define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
+#define GETF(_field) self.owner.predict_state.##_field
+#define COMM(_type, _field) Write##_type(MSG_ENTITY, GETF(_field))
 #define COMM_PM(_type, _field) Write##_type(MSG_ENTITY, self.owner.##_field)
 float WP_SendEntity(entity to_player, float sendflags) {
     if (to_player != self.owner)
@@ -474,7 +496,8 @@ float WP_SendEntity(entity to_player, float sendflags) {
     WriteFloat(MSG_ENTITY, sendflags);
 #else
 entity PM_Ent();
-#define COMM(_type, _field) pstate_server.##_field = Read##_type()
+#define GETF(_field) pstate_server.##_field
+#define COMM(_type, _field) GETF(_field) = Read##_type()
 #define COMM_PM(_type, _field) PM_Ent().##_field = Read##_type()
 
 void EntUpdate_WeaponPred(float isnew) {
@@ -498,6 +521,15 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM_PM(Short, velocity[0]);
         COMM_PM(Short, velocity[1]);
         COMM_PM(Short, velocity[2]);
+    }
+
+    if (sendflags & FOWP_FILTER_ENTS) {
+        COMM(Byte, num_filter_ents);
+        for (float i = 0; i < GETF(num_filter_ents); i++)
+            COMM(Entity, filter_ents[i]);
+#ifdef SSQC
+        GETF(num_filter_ents) = 0;  // Destructive transmission
+#endif
     }
 
     if (sendflags & FOWP_CLASS) {
@@ -583,6 +615,8 @@ void EntUpdate_WeaponPred(float isnew) {
 #endif
 }
 #undef COMM
+#undef COMM_PM
+#undef GETF
 
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
@@ -599,6 +633,8 @@ float PP_SendEntity(entity to_player, float sendmask) {
             sendflags |= FOPP_EXPIRY;
         if (FPP_Get(self.fpp.index)->movetype != self.movetype)
             sendflags |= FOPP_MOVETYPE;
+        if (self.forward_knock)
+            sendflags |= FOPP_FORWARDKNOCK;
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
@@ -652,6 +688,9 @@ void EntUpdate_Projectile(float isnew) {
         if (self.movetype == MOVETYPE_FOLLOW)
             COMMD(Entity, aiment_num, aiment);
     }
+
+    if (sendflags & FOPP_FORWARDKNOCK)
+        COMM(Float, forward_knock);
 
 #ifdef SSQC
     return TRUE;
