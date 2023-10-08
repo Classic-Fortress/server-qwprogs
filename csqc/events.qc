@@ -266,6 +266,7 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.quad_rounds = readfloat();
             SERVER_ADMIN.quad_round_time = readfloat();
             SERVER_ADMIN.fo_login_required = readfloat();
+            SERVER_ADMIN.fo_matchrated = readfloat();
             SERVER_ADMIN.timelimit = readfloat();
             SERVER_ADMIN.fraglimit = readfloat();
             SERVER_ADMIN.clanmode = readfloat();
