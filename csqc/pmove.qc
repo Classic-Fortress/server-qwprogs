@@ -473,7 +473,8 @@ void PM_SyncTo(float seq) {
 
 void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
-    float enabled = pstate_server.predict_flags & PF_PMOVE;
+    float enabled = (pstate_server.predict_flags & PF_PMOVE) &&
+                    game_state.is_player;
 
     if (enabled != was_enabled ||
         game_state.is_player != prev_game_state.is_player)
