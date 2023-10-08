@@ -6,7 +6,7 @@ void (float force) FO_Menu_Admin_Rounds;
 void (float force) FO_Menu_Admin_Timelimit;
 void (float force) FO_Menu_Admin_Fraglimit;
 void (float force) FO_Menu_Admin_QuadTimelimit;
-void (float force) FO_Menu_Admin_FoLoginRequired;
+void (float force) FO_Menu_Admin_FoMatchRated;
 void (float force) FO_Menu_Spy;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
@@ -420,6 +420,18 @@ string (float m) modeStatus = {
     return "";
 }
 
+string (float m) ratedStatus = {
+    switch(m) {
+        case 0:
+            return "unrated";
+        case 1:
+            return "rated";
+        case 2:
+            return "default";
+    }
+    return "";
+}
+
 var fo_menu FO_MENU_ADMIN_MODES = {
     [0,0], [300,300], "Server Modes [2/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Pub Mode","","Public play, anything goes",FO_MENU_STATE_NORMAL,{localcmd("cmd pubmode\n");},MENU_BORDER_WARNING},
@@ -428,7 +440,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"4","Duel Mode","","Simplifies 1 on 1 action",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
         {"5","Quad Rounds...","","Number of rounds in Quad mode. Usually 2",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Rounds(TRUE);},MENU_BORDER_WARNING},
         {"6","Quad Round Time...","","Round time for each quad round",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_QuadTimelimit(TRUE);},MENU_BORDER_WARNING},
-        {"7","Login Required","","Require players to log in",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_FoLoginRequired(TRUE);},MENU_BORDER_WARNING},
+        {"7","Rated/Unrated","","Will player ratings be affected?",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_FoMatchRated(TRUE);},MENU_BORDER_WARNING},
         {"8","Captains Mode","","Select captains who can then pick their teams",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_1, 0);},MENU_BG_DARK},
         {"9","Force Start","","Skip prematch and start the game\nPlease use sparingly",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
         MenuSpacer,
@@ -443,7 +455,7 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         FO_MENU_ADMIN_MODES.options[3].value = modeStatus(SERVER_ADMIN.duelmode);
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
-        FO_MENU_ADMIN_MODES.options[6].value = modeStatus(SERVER_ADMIN.fo_login_required);
+        FO_MENU_ADMIN_MODES.options[6].value = ratedStatus(SERVER_ADMIN.fo_matchrated);
         FO_MENU_ADMIN_MODES.options[7].value = SERVER_ADMIN.captainmode?"on":"off";
     }
 };
@@ -606,10 +618,11 @@ var fo_menu FO_MENU_ADMIN_QUAD_TIMELIMIT = {
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
     }, 11, TRUE
 };
-var fo_menu FO_MENU_ADMIN_FO_LOGIN_REQUIRED = {
-    [0,0], [300,200], "Login Required?", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
-        {"1","On","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fologinrequired 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
-        {"2","Off (Match Not Reported)","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fologinrequired 0\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+var fo_menu FO_MENU_ADMIN_MATCH_RATED = {
+    [0,0], [300,200], "Match Rated?", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
+        {"1","Rated","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"2","Unrated","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 0\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"3","Default","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 2\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
         MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
     }, 4, TRUE
@@ -1195,10 +1208,10 @@ void FO_Menu_Admin_QuadTimelimit(float force) = {
     CurrentMenu = &FO_MENU_ADMIN_QUAD_TIMELIMIT;
     fo_hud_menu_active = TRUE;
 }
-void FO_Menu_Admin_FoLoginRequired(float force) = {
+void FO_Menu_Admin_FoMatchRated(float force) = {
     if(fo_hud_menu_active && !force)
         return;
-    CurrentMenu = &FO_MENU_ADMIN_FO_LOGIN_REQUIRED;
+    CurrentMenu = &FO_MENU_ADMIN_MATCH_RATED;
     fo_hud_menu_active = TRUE;
 }
 void FO_Menu_Admin_Timelimit(float force) = {
@@ -1380,7 +1393,7 @@ void FO_Hud_Init() {
     INIT_MENU_IDS(FO_MENU_ADMIN_PLAYERS);
     INIT_MENU_IDS(FO_MENU_ADMIN_ROUNDS);
     INIT_MENU_IDS(FO_MENU_ADMIN_QUAD_TIMELIMIT);
-    INIT_MENU_IDS(FO_MENU_ADMIN_FO_LOGIN_REQUIRED);
+    INIT_MENU_IDS(FO_MENU_ADMIN_MATCH_RATED);
     INIT_MENU_IDS(FO_MENU_ADMIN_TIMELIMIT);
     INIT_MENU_IDS(FO_MENU_ADMIN_FRAGLIMIT);
     INIT_MENU_IDS(FO_MENU_VOTE);
