@@ -621,10 +621,15 @@ var fo_menu FO_MENU_ADMIN_MATCH_RATED = {
     [0,0], [300,200], "Match Rated?", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Rated","","Match result will affect player ratings",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
         {"2","Unrated","","Match result will not affect player ratings",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 0\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
-        {"3","Default","Only matches with a teamsize of three or more will be rated","",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 2\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"3","Default","","Only matches with a teams of three or more players will be rated",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 2\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
         MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
-    }, 5, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_ADMIN_TIMELIMIT = {
     [0,0], [300,200], "Set Timelimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
@@ -637,9 +642,8 @@ var fo_menu FO_MENU_ADMIN_TIMELIMIT = {
         {"7","45","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 45\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"8","60","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 60\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"9","120","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 120\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
-        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
     [0,0], [300,200], "Set Fraglimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
@@ -652,9 +656,8 @@ var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
         {"7","50","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 50\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"8","100","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 100\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"9","200","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 200\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
-        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_VOTE = {
     [0,0], [300,200], "Map Vote", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -662,11 +665,14 @@ var fo_menu FO_MENU_VOTE = {
         {"2","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[1].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"4","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[3].name,"\n");Menu_Cancel();},MENU_BUTTON},
-        MenuSpacer,
         {"5","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[5].name,"\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE, {
+    }, 10, TRUE, {
         FO_MENU_VOTE.title = strcat("Map Vote (", ftos(ceil(mapvote_expiry - time)), "s left)");
         if((mapvote_expiry - time) < 0) {
             Menu_Cancel();
