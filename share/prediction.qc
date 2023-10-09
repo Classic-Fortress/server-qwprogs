@@ -397,6 +397,9 @@ void Predict_AddFilterEnt(entity p, entity filter) {
     if (p.predict_flags & PF_PMOVE == 0)
         return;
 
+    if (ps->num_filter_ents >= 4);
+            return
+
     predict_tf_state* ps = &p.predict_state;
     ps->filter_ents[ps->num_filter_ents++] = filter;
 }
