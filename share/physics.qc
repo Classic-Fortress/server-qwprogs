@@ -67,15 +67,23 @@ DEFCVAR_FLOAT(fo_phys_debug, 0);
 .float aiment_num;
 .float voided;
 
+.float phys_sim_last;
+.float phys_sim_voided_at;
+var float phys_sim_dt;
+
 float get_phys_time(entity);
+void PM_AddSimExplosion(float itime, entity ent);
 
 static void Phys_Impact(entity e, float dt, float phys_flags) {
     other = trace_ent;
     if (other.solid == SOLID_NOT)
         return;
 
-    if (e.movetype == MOVETYPE_FLYMISSILE)
+    if (e.movetype == MOVETYPE_FLYMISSILE) {
         e.voided = TRUE;
+        if (!e.phys_sim_voided_at)  // want only one of sim or !sim
+            PM_AddSimExplosion(e.phys_time + dt, e);
+    }
 
     AugmentGrenadeImpact();
 
@@ -287,10 +295,6 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
 }
 
 #ifdef CSQC
-.float phys_sim_last;
-.float phys_sim_voided_at;
-var float phys_sim_dt;
-
 void Phys_Sim(entity e) {
     // TODO: Unvoid+undo if we make it past the void point.
     if (phys_sim_dt < 0 || e.phys_sim_voided_at)

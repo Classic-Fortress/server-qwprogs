@@ -829,3 +829,40 @@ void FO_Weapons_Init() {
     }
 }
 
+enumflags {
+    KF_SRC_PLAYER,
+    KF_TARG_PLAYER,
+    KF_SELF,
+    KF_QUAD,
+};
+
+const float KF_BOTH_PLAYER = KF_SRC_PLAYER | KF_TARG_PLAYER;
+
+// (*) Unbelievably knock-direction and moment calculation use different origins
+// (centroid vs origin).  For now just preserve what I can only assume is an old
+// terrible mistake.
+
+float CalcRadiusDamage(entity src, entity targ, float flags, float damage) {
+    vector targ_origin = (targ.absmin + targ.absmax) * 0.5;  // (*)
+    damage -= vlen(src.origin - targ_origin) / 2;
+
+    if (flags & KF_SELF)
+        damage *= 0.75;
+
+    return damage;
+}
+
+vector CalcKnock(entity src, entity targ, float flags, float moment) {
+    float mult = 8;
+    if (moment < 60 && (flags & (KF_BOTH_PLAYER | KF_SELF) == KF_BOTH_PLAYER))
+            mult = 11;
+
+    vector src_origin = (src.absmin + src.absmax) * 0.5;  // (*)
+    vector dir = normalize(targ.origin - src_origin);
+
+    vector result = dir * moment * mult;
+    if (fo_config.rj > 1)
+        result += dir * moment * fo_config.rj;
+
+    return result;
+}

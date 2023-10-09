@@ -799,3 +799,4 @@ float disable_resup_gren;
 string match_id;
 string backend_address;
 float fo_login_required;
+.entity filter_ent;

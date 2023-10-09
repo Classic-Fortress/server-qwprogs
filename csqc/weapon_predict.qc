@@ -141,7 +141,6 @@ static void update_avg_ping() {
 static float fill_avg_ping(float* mean, float* variance) {
     return read_online_avg(&avg_ping, mean, variance);
 }
-
 float csqc_get_user_setting(string s_short, string s_long, string def);
 
 // Order of preference:
@@ -1264,6 +1263,7 @@ entity predicted_projectiles;
 
 .float starttime, endtime, p_time;
 .float traileffectnum;
+.float created_seq;
 
 struct trail_table_entry {
     string eff_name[2];
@@ -1338,6 +1338,12 @@ void PP_Cleanup(entity proj) {
   if (proj.pred_next)
       proj.pred_next.pred_prev = proj.pred_prev;
 
+  if (proj.removefunc) {
+      entity tmp = self;
+      self = proj;
+      self.removefunc();
+      self = tmp;
+  }
   remove(proj);
 }
 
@@ -1455,7 +1461,6 @@ entity PP_CreateProjectile(int fpp_type, vector org) {
 
   // Note: We use true time here as created projectiles exist outside of pred.
   proj.starttime = time + uncorrected_dt;
-  proj.s_time = proj.starttime - static_dt;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
   proj.server_live_time = server_time();
 
@@ -1478,10 +1483,14 @@ entity PP_CreateProjectile(int fpp_type, vector org) {
   proj.angles = input_angles; proj.angles[0] *= -1;
 
   proj.s_origin = proj.origin;
+  proj.created_seq = pstate_pred.seq;
 
   // Trail starts at 0.05, we, split physics calcs longer than this.
   float sdt2 = max(static_dt - 0.05, 0);
   Phys_Init(proj, proj.starttime - sdt2, static_dt - sdt2, PHYSF_CONSUME_ALL);
+
+  proj.s_time = proj.phys_time;  // Set after static_dt processed.
+
   proj.oldorigin = proj.origin;
   if (sdt2 > 0)
       Phys_Advance(proj, sdt2, PHYSF_CONSUME_ALL);
@@ -1828,6 +1837,9 @@ void InitProjectileEnt(float sendflags) {
       self.fpp.index = FPP_RAILGUN;  // Something people will notice.
     }
 
+    self.server_live_time = self.created_at;
+    self.created_seq = servercommandframe;
+
     self.drawmask = MASK_ENGINE;
     self.predraw = PP_PredrawActive;
     if (sendflags & FOPP_ANGLES == 0)
@@ -1838,6 +1850,11 @@ void InitProjectileEnt(float sendflags) {
 
     if (self.owner_entnum == pengine.player_entnum)
         self.owner = pengine.player_ent;
+
+    if (self.forward_knock) {
+        self.phys_sim_voided_at = self.forward_knock;
+        PM_AddSimExplosion(self.forward_knock, self);
+    }
 
     float ptime = get_phys_time(self);
     if (ptime > self.phys_time /* from server */)
