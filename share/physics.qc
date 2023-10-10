@@ -32,8 +32,8 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (other.solid == SOLID_NOT)
         return;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
+    if (pointcontents(e.origin) == CONTENT_SKY) {
+        dremove_sent(e);
         return;
     }
 
@@ -315,9 +315,9 @@ void Phys_Sim(entity e) {
         return;
 
     float ptime = time + phys_sim_dt;
-    if (ptime < self.phys_sim_last + SERVER_FRAME_DT)
+    if (ptime < e.phys_sim_last + SERVER_FRAME_DT)
         return;
-    self.phys_sim_last = ptime;
+    e.phys_sim_last = ptime;
 
     float held_phys_time = e.phys_time;
     vector held_org = e.origin;
