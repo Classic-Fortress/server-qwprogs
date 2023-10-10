@@ -988,6 +988,9 @@ void FOProj_Finalize(entity mis, float use_ctime=0) {
         csqc_networking = (csqc_networking && fo_config.qc_physics);
     }
 
+    // After any model updates have occurred
+    setsize(mis, '0 0 0', '0 0 0');
+
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
     if (fo_config.qc_physics)
