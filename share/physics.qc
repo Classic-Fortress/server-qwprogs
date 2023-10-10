@@ -233,16 +233,17 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
         return 0;
     }
 
+    static float limit_eps = 0.00001;
     // If there's an expiry, make sure we get to the exact position.
     if (e.fpp.expires_at && target_time >= e.fpp.expires_at) {
         target_time = e.fpp.expires_at;
         phys_flags |= PHYSF_CONSUME_ALL;
     }
 
-    static float limit_eps = 0.0005;
     float limit = (phys_flags & PHYSF_CONSUME_ALL) ? limit_eps : phys_tic;
     float total = 0, dt = 0, step = 0, delta;
 
+    target_time += limit_eps;
     while ((delta = target_time - e.phys_time) >= limit) {
         if (e.voided) {
             e.phys_time = target_time;
@@ -309,15 +310,20 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
 }
 
 #ifdef CSQC
-void Phys_Sim(entity e) {
+void Phys_Sim(entity e, float target_time = 0) {
     // TODO: Unvoid+undo if we make it past the void point.
     if (phys_sim_dt < 0 || e.phys_sim_voided_at)
         return;
 
-    float ptime = time + phys_sim_dt;
-    if (ptime < e.phys_sim_last + SERVER_FRAME_DT)
+    float min_gran = 0;
+    if (!target_time) {
+        target_time = time + phys_sim_dt;
+        min_gran = SERVER_FRAME_DT;
+    }
+
+    if (target_time < e.phys_sim_last + min_gran)
         return;
-    e.phys_sim_last = ptime;
+    e.phys_sim_last = target_time;
 
     float held_phys_time = e.phys_time;
     vector held_org = e.origin;
@@ -325,7 +331,7 @@ void Phys_Sim(entity e) {
     vector held_angles = e.angles;
     float held_flags = e.flags;
 
-    Phys_Advance(e, ptime, PHYSF_SIM | PHYSF_CONSUME_ALL);
+    Phys_Advance(e, target_time, PHYSF_SIM | PHYSF_CONSUME_ALL);
 
     if (e.voided) {
         e.phys_sim_voided_at = e.phys_time;

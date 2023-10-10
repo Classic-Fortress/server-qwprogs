@@ -1217,7 +1217,7 @@ void WPP_Dump() {
 }
 
 void WP_Attack();
-
+void WP_ExplodeGren();
 DEFCVAR_FLOAT(cl_crossx, 0);
 
 void WP_Frame() {
@@ -1238,6 +1238,7 @@ void WP_Frame() {
 
     WP_CheckReloadFinished();
     WP_Impulse();
+    WP_ExplodeGren();
     W_ThrowGren(FALSE);
 
     float is_attack = 0;
@@ -1442,7 +1443,11 @@ float PP_PredrawPredicted() {
 
 static float PP_EPS = 0.05;
 
-entity PP_CreateProjectile(int fpp_type, vector org) {
+enumflags {
+    CP_DROP
+};
+
+entity PP_CreateProjectile(int fpp_type, vector org, float cp_flags=0) {
   PredProj_Sound(fpp_type);
 
   if (!PP_Enabled())
@@ -1458,6 +1463,8 @@ entity PP_CreateProjectile(int fpp_type, vector org) {
   ProjectResult push_t = Forward_ProjectOffset(fpp_type, ms_ahead);
 
   float uncorrected_dt = max(ms_ahead - push_t.dynamic_ms, 0) / 1000.0;
+  if (cp_flags & CP_DROP)
+      uncorrected_dt = 0;
   float static_dt = push_t.static_ms / 1000.0;
 
   // Note: We use true time here as created projectiles exist outside of pred.
@@ -1471,6 +1478,8 @@ entity PP_CreateProjectile(int fpp_type, vector org) {
   float proj_speed = FPP_Get(fpp_type)->speed;
   if (!FPP_IsGrenade(fpp_type)) {
       proj.velocity = v_forward * proj_speed;
+  } else if (cp_flags & CP_DROP) {
+      proj.velocity = '0 0 0';
   } else {
       if (!input_angles_x) {
           proj.velocity = v_forward * proj_speed;
@@ -1606,6 +1615,35 @@ static void W_PrimeGren(float index) {
         ParseGrenPrimed(pstate_pred.primed_gren_type, held_gren_exp, FL_GT_LOCAL);
     }
     pstate_pred.primed_gren_exp = held_gren_exp;
+}
+
+static void WP_ExplodeGren() {
+    if (pstate_pred.tfstate & TFSTATE_GREN_MASK_PRIMED == 0)
+        return;
+
+    float explode_at = pstate_server.primed_gren_exp;
+    float tfstate = pstate_pred.tfstate;
+
+    if (!explode_at || explode_at > pstate_pred.server_time)
+        return;
+
+    pstate_pred.primed_gren_exp = 0;
+    pstate_pred.tfstate &= ~TFSTATE_GREN_MASK_ALL;
+
+    if (!IsEffectFrame())
+        return;
+
+    int type_index = (tfstate & TFSTATE_GREN1_PRIMED) ? 0 : 1;
+    int gren_type = FO_ClassGren(pstate_pred.playerclass, type_index)->id;
+    entity gren = PP_CreateProjectile(FPP_HANDGRENADE, PM_Org(), CP_DROP);
+    gren.fpp.gren_type = gren_type;
+    FPP_ApplyGrenadeProperties(gren);
+
+    gren.starttime = explode_at;
+    gren.phys_time = explode_at;
+    gren.fpp.expires_at = explode_at + 0.1;
+
+    Phys_Sim(gren, explode_at + 0.1);
 }
 
 static void W_ThrowGren(float is_throw) {
@@ -1853,16 +1891,16 @@ void InitProjectileEnt(float sendflags) {
     if (self.owner_entnum == pengine.player_entnum)
         self.owner = pengine.player_ent;
 
-    if (self.forward_knock) {
-        self.phys_sim_voided_at = self.forward_knock;
-        PM_AddSimExplosion(self.forward_knock, self);
-    }
-
     float ptime = get_phys_time(self);
     if (ptime > self.phys_time /* from server */)
         Phys_Advance(self, ptime, PHYSF_CONSUME_ALL);
     else
         setorigin(self, self.origin);
+
+    float simto = max(self.forward_knock, self.fpp.expires_at);
+    if (PM_Enabled())
+        Phys_Sim(self, simto);
+
 
     if (self.created_at < pstate_server.server_time - 0.05) {
         // Retransmit.  Patch up trail, but no predicted / sound / etc.

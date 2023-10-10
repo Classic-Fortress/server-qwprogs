@@ -473,14 +473,9 @@ void PM_AddGrenadeExplosion(float itime, entity ent) {
 
     PM_Nudge* n;
     if (exp.type == kRadiusDamage)
-        n = PM_AddNudgeExplosion(NA_ITIME, 0, itime, ent, dmg);
+        PM_AddNudgeExplosion(NA_ITIME, 0, itime, ent, dmg);
     else
-        n = PM_AddNudgeBounce(itime, ent, dmg);
-
-    if (n) {
-        n->nat = NA_ITIME_EXPLICIT_EXPIRE;  // Grenades are exact
-        n->expire_time = itime;
-    }
+        PM_AddNudgeBounce(itime, ent, dmg);
 }
 
 void PM_AddSimExplosion(float itime, entity ent) {
