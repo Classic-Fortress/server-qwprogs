@@ -239,8 +239,9 @@ static void PM_ActivatePMS(PMS_Data *pmsd) {
     pm.ent.pmove_flags = 0;  // With auto-bunny we only care about clearing
 };
 
+static float cache_invalidated;
 static PMS_Data* SimPMSD() {
-    return CVARF(fopm_nocache) ? &pm_s : &pm_c;
+    return (cache_invalidated || CVARF(fopm_nocache)) ? &pm_s : &pm_c;
 }
 
 void PM_InputFrame();
@@ -250,6 +251,7 @@ enum {
     NT_CONC,
     NT_DASH,
     NT_EXPLOSION,
+    NT_BOUNCE,
 };
 
 enum {
@@ -271,6 +273,7 @@ struct PM_Nudge {
     float aux;
 };
 
+const static float NUDGE_EPS = 3 * SERVER_FRAME_DT;
 static PM_Nudge nudges[5];
 static float num_nudges;
 
@@ -281,9 +284,9 @@ static float nudge_expired(PM_Nudge* n) {
 
     switch (n->nat) {
         case NA_NONE: return TRUE;
-        case NA_SEQ: return n->seq < servercommandframe;
-        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) < servercommandframe;
-        case NA_ITIME: return n->itime < pstate_server.server_time;
+        case NA_SEQ: return n->seq >= servercommandframe;
+        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) >= servercommandframe;
+        case NA_ITIME: return n->itime >= pstate_server.server_time + NUDGE_EPS;  // Slack
     }
 
     return TRUE;
@@ -296,6 +299,7 @@ static PM_Nudge* find_nudge_slot() {
         if (!nudge_expired(n))
             continue;
 
+        cache_invalidated = TRUE;
         n->nat = NA_NONE;
         n->src_no = 0;
         n->src = 0;
@@ -381,7 +385,7 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
 
 // Can be either by {seq + itime} for predicted projectiles, or by {itime} for
 // server projectiles.
-void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float dmg) {
+static void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float dmg) {
     if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
         return;
 
@@ -400,11 +404,58 @@ void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float d
     n->src_no = ent.entnum;
 
     ent.nudge = n;
-
     ent.removefunc = PM_RemoveSelfNudges;
 }
 
-DEFCVAR_FLOAT(fo_beta_nudge_explosion, 0);
+static void PM_AddNudgeBounce(float itime, entity ent, float dmg) {
+    if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
+        return;
+
+    PM_Nudge* n = find_nudge_slot();
+    if (!n)
+        return;
+
+    n->type = NT_BOUNCE;
+    n->nat = NA_ITIME;
+    n->itime = itime;
+    n->aux = dmg;
+
+    n->src = ent;
+    n->src_no = ent.entnum;
+
+    ent.nudge = n;
+    ent.removefunc = PM_RemoveSelfNudges;
+}
+
+static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
+    float dmg = nudge->aux;
+    entity src = nudge->src;
+
+    if (vlen(ent.origin - src.origin) > dmg + 40)
+        return;
+
+    vector targ_org = ent.origin + (ent.mins + ent.maxs) * 0.5;
+    float points = dmg - vlen(targ_org - src.origin) / 2;
+
+    ent.velocity = (targ_org - src.origin) * points/20;
+}
+
+
+void PM_AddGrenadeExplosion(float itime, entity ent) {
+    if (!PM_Enabled() || !CVARF(fo_beta_nudge_explosion))
+        return;
+
+    FO_GrenExp exp;
+    FO_GrenGetExp(ent.fpp.gren_type, exp);
+
+    float dmg = exp.dmg;
+
+    if (exp.type == kRadiusDamage)
+        PM_AddNudgeExplosion(NA_ITIME, 0, itime, ent, dmg);
+    else
+        PM_AddNudgeBounce(itime, ent, dmg);
+}
+
 void PM_AddSimExplosion(float itime, entity ent) {
     if (!PM_Enabled() || !CVARF(fo_beta_nudge_explosion))
         return;
@@ -454,8 +505,7 @@ float MatchNudge(PM_Nudge* n, float seq, float sitime, float eitime) {
 }
 
 // TODO: This obviously wants to be smarter
-static vector PM_ApplyNudges(entity ent, float seq, float sitime, float eitime) {
-    vector result = '0 0 0';
+static void PM_ApplyNudges(entity ent, float seq, float sitime, float eitime) {
     for (float i = 0; i < nudges.length; i++) {
         PM_Nudge* n = &nudges[i];
 
@@ -472,10 +522,11 @@ static vector PM_ApplyNudges(entity ent, float seq, float sitime, float eitime) 
             case NT_EXPLOSION:
                 PM_NudgeExplosion(n, ent);
                 break;
+            case NT_BOUNCE:
+                PM_NudgeBounce(n, ent);
+                break;
         }
     }
-
-    return result;
 }
 
 static void RunPlayerPhysics() {
@@ -517,6 +568,9 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
         RunPlayerPhysics();
 
         if (!CVARF(fopm_nonudge)) {
+            float start_time = pm.interp_t;
+            if (pm.seq == pm.server_seq + 1)
+                start_time -= NUDGE_EPS;
             PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength);
         }
 
@@ -576,7 +630,6 @@ static void PM_UpdateError() {
 
     err -= ent.origin;
     float nerr = vlen(err);
-
     if (nerr > 64) {  // teleport
         pm.error = '0 0 0';
         pm.errortime = 0;
@@ -694,6 +747,7 @@ void PM_Update(float sendflags) {
         if (clientcommandframe > servercommandframe + 1)
             PM_RunMovement(&pm_s, clientcommandframe - 1);
         PM_SavePMS(&pm_c);
+        cache_invalidated = FALSE;
     }
 
     if (enabled && was_enabled)

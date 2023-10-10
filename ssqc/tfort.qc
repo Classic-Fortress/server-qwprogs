@@ -2420,6 +2420,7 @@ void () TeamFortress_ExplodePerson = {
 
     proj.fpp.gren_type = gtype;
     proj.fpp.flags |= FPF_NO_REWIND;
+    proj.fpp.expires_at = expires;
     proj.skin = gdesc->skin;
     proj.avelocity = gdesc->avelocity;
     proj.touch = ste->touch;

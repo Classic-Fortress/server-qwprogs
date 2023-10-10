@@ -586,6 +586,8 @@ void PredProj_Sound(int proj_type, float vol = 1) {
 
 void PM_Update(float sendflags);
 
+DEFCVAR_FLOAT(fo_beta_nudge_explosion, 0);
+
 void WP_ServerUpdate(float sendflags) {
     pstate_server.seq = servercommandframe;
 
@@ -604,8 +606,8 @@ void WP_ServerUpdate(float sendflags) {
         pstate_server.weaponframe += 1;
     }
 
-    if (CVARF(fo_wpp_beta) & 4)
-        phys_sim_dt = (pstate_server.client_ping + 2 * SERVER_FRAME_MS) / 1000.0;
+    if (CVARF(fo_beta_nudge_explosion))
+        phys_sim_dt = (pstate_server.client_ping + 4 * SERVER_FRAME_MS) / 1000.0;
     else
         phys_sim_dt = -1;
 

@@ -843,7 +843,7 @@ const float KF_BOTH_PLAYER = KF_SRC_PLAYER | KF_TARG_PLAYER;
 // terrible mistake.
 
 float CalcRadiusDamage(entity src, entity targ, float flags, float damage) {
-    vector targ_origin = (targ.absmin + targ.absmax) * 0.5;  // (*)
+    vector targ_origin = targ.origin + (targ.mins + targ.maxs) * 0.5;  // (*)
     damage -= vlen(src.origin - targ_origin) / 2;
 
     if (flags & KF_SELF)
@@ -857,7 +857,7 @@ vector CalcKnock(entity src, entity targ, float flags, float moment) {
     if (moment < 60 && (flags & (KF_BOTH_PLAYER | KF_SELF) == KF_BOTH_PLAYER))
             mult = 11;
 
-    vector src_origin = (src.absmin + src.absmax) * 0.5;  // (*)
+    vector src_origin = src.origin + (src.mins + src.maxs) * 0.5;  // (*)
     vector dir = normalize(targ.origin - src_origin);
 
     vector result = dir * moment * mult;
