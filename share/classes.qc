@@ -125,10 +125,10 @@ static inline void ConcAction(entity ent, float itime, float mag, float flip) {
     Conc_Stumble(ent, mag, flip);
 }
 #else
-void PM_AddConcNudge(float itime, float mag, float flip);
+void PM_AddNudgeConc(float itime, float mag, float flip);
 
 static inline void ConcAction(entity ent, float itime, float mag, float flip) {
-    PM_AddConcNudge(itime, mag, flip);
+    PM_AddNudgeConc(itime, mag, flip);
 }
 #endif
 

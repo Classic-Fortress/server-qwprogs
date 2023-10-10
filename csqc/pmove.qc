@@ -259,6 +259,7 @@ enum {
     NA_SEQ,
     NA_SEQTIME,
     NA_ITIME,
+    NA_CONC,  // itime but with expiration driven by conc_state
 };
 
 struct PM_Nudge {
@@ -287,6 +288,7 @@ static float nudge_expired(PM_Nudge* n) {
         case NA_SEQ: return n->seq >= servercommandframe;
         case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) >= servercommandframe;
         case NA_ITIME: return n->itime >= pstate_server.server_time + NUDGE_EPS;  // Slack
+        case NA_CONC: return n->itime <= pstate_server.conc_state.next;
     }
 
     return TRUE;
@@ -334,6 +336,7 @@ void PM_AddNudgeConc(float itime, float mag, float flip) {
         return;
 
     n->type = NT_CONC;
+    n->nat = NA_CONC;
     n->itime = itime;
     n->vec.x = mag;
     n->vec.y = flip;
@@ -498,6 +501,7 @@ float MatchNudge(PM_Nudge* n, float seq, float sitime, float eitime) {
     switch (n->nat) {
         case NA_SEQ: return n->seq == seq;
         case NA_SEQTIME: return n->seq + floor(n->itime / SERVER_FRAME_DT) == seq;
+        case NA_CONC:
         case NA_ITIME: return n->itime > sitime && n->itime <= eitime;
         default:
             return FALSE;
@@ -709,6 +713,11 @@ static void PM_HandleRemovedNudges() {
         PM_Nudge* n = &nudges[i];
         if (nudge_expired(n))
             continue;
+
+        if (n->type == NT_CONC && n->itime < pstate_server.conc_state.next) {
+            n->expire_frame = -1;
+            continue;
+        }
 
         for (float j = 0; j < pstate_server.num_filter_ents; j++) {
             if (n->src_no == pstate_server.filter_ents[j]) {
