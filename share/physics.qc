@@ -60,6 +60,8 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
 static vector get_followed_origin() {
     return self.aiment.origin;
 }
+
+static void Phys_Expired(entity e, float phys_flags) {}
 #else
 DEFCVAR_FLOAT(fo_phys_debug, 0);
 
@@ -93,7 +95,15 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
                 get_phys_time(e));
 }
 
-static void Phys_Expired(entity e, float phys_flags) {}
+void PM_AddGrenadeExplosion(float itime, entity ent);
+
+static void Phys_Expired(entity e, float phys_flags) {
+    e.voided = TRUE;
+    if (e.phys_sim_voided_at)  // Only one of sim or !sim
+        return;
+
+    PM_AddGrenadeExplosion(e.fpp.expires_at, e);
+}
 
 static vector get_followed_origin() {
     if (!(float)getentity(self.aiment_num, GE_ACTIVE))
@@ -224,7 +234,7 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
     }
 
     // If there's an expiry, make sure we get to the exact position.
-    if (e.fpp.expires_at && target_time > e.fpp.expires_at) {
+    if (e.fpp.expires_at && target_time >= e.fpp.expires_at) {
         target_time = e.fpp.expires_at;
         phys_flags |= PHYSF_CONSUME_ALL;
     }
@@ -280,6 +290,10 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
 
     if (step > 0)  // Origin can have moved.
         setorigin(e, e.origin);
+
+    if (e.fpp.expires_at && e.phys_time >= e.fpp.expires_at)
+        Phys_Expired(e, phys_flags);
+
     return total;
 }
 
@@ -301,7 +315,7 @@ void Phys_Sim(entity e) {
         return;
 
     float ptime = time + phys_sim_dt;
-    if (ptime < self.phys_sim_last + SERVER_FRAME_MS)
+    if (ptime < self.phys_sim_last + SERVER_FRAME_DT)
         return;
     self.phys_sim_last = ptime;
 

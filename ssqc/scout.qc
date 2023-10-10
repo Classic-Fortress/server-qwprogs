@@ -858,6 +858,8 @@ void (entity inflictor, entity attacker, float bounce,
                     && (points > 0)) {
                     head.velocity = org - inflictor.origin;
                     head.velocity = head.velocity * (points / 20);
+                    Predict_AddFilterEnt(head, inflictor);
+
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;

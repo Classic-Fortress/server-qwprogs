@@ -51,6 +51,8 @@ enumflags {
     PF_PMOVE_ACTIVATING,
 };
 
+static float MAX_FILTER_ENTS = 4;
+
 struct predict_tf_state {
     int playerclass;
     int predict_flags, effects;
@@ -84,9 +86,9 @@ struct predict_tf_state {
 
     float num_filter_ents;
 #ifdef SSQC
-    entity filter_ents[4];
+    entity filter_ents[MAX_FILTER_ENTS];
 #else
-    float filter_ents[4];
+    float filter_ents[MAX_FILTER_ENTS];
 #endif
 
 #ifdef CSQC
@@ -398,8 +400,8 @@ void Predict_AddFilterEnt(entity p, entity filter) {
         return;
 
     predict_tf_state* ps = &p.predict_state;
-    if (ps->num_filter_ents >= 4)
-            return
+    if (ps->num_filter_ents >= MAX_FILTER_ENTS)
+            return;
     ps->filter_ents[ps->num_filter_ents++] = filter;
 }
 
