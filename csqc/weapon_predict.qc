@@ -903,7 +903,7 @@ void WP_HandleGrenadeInputs() {
 }
 
 float PM_Enabled();
-void PM_AddDashNudge(float itime);
+void PM_AddNudgeDash(float cseq);
 
 static void WP_Special() {
     if (pstate_pred.server_time < pstate_pred.special_next)
@@ -914,8 +914,7 @@ static void WP_Special() {
         case PC_SCOUT:
             cooldown = 1;
             if (PM_Enabled() && IsEffectFrame()) {
-                // Want to land in this frame
-                PM_AddDashNudge(pstate_pred.server_time - 1 * MSEC);
+                PM_AddNudgeDash(pstate_pred.seq);
                 localsound("dash.wav", CHAN_BODY, 1);
             }
             break;

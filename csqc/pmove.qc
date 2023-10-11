@@ -285,9 +285,9 @@ static float nudge_expired(PM_Nudge* n) {
 
     switch (n->nat) {
         case NA_NONE: return TRUE;
-        case NA_SEQ: return n->seq >= servercommandframe;
-        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) >= servercommandframe;
-        case NA_ITIME: return n->itime >= pstate_server.server_time + NUDGE_EPS;  // Slack
+        case NA_SEQ: return n->seq <= servercommandframe;
+        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) <= servercommandframe;
+        case NA_ITIME: return n->itime - NUDGE_EPS <= pstate_server.server_time;  // Slack
         case NA_CONC: return n->itime <= pstate_server.conc_state.next;
     }
 
@@ -352,15 +352,16 @@ static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
     ent.velocity = nudge->vec;
 }
 
-void PM_AddNudgeDash(float itime) {
+void PM_AddNudgeDash(float cseq) {
     PM_Nudge* n = find_nudge_slot();
     if (!n)
         return;
     n->type = NT_DASH;
-    n->itime = itime;
+    n->nat = NA_SEQ;
+    n->seq = cseq;
 
     n->vec = v_forward * 540;
-    n->vec.z = 181 + SERVER_FRAME_DT * 800;  // TODO: fix this...
+    n->vec.z = 181;
 }
 
 float nudge_i(PM_Nudge* n) {
