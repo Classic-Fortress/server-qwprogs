@@ -773,6 +773,7 @@ static void WP_InitSniper() {
     sight.drawmask = 0;
     float index = getmodelindex("progs/sight.spr");
     setmodelindex(sight, index);
+    setsize(sight, [0,0,0], [0,0,0]);
 
     SniperState.sight = sight;
 }
@@ -1384,11 +1385,10 @@ void FPP_Init(int fpp_type, entity proj) {
         render_type = FPP_GRENADE;
 
     setmodelindex(proj, FPP_Get(render_type)->modelindex);
+    setsize(proj, [0,0,0], [0,0,0]);
 
     proj.traileffectnum = FPP_FindTrail(proj);
     proj.movetype = desc->movetype;
-
-    setsize(proj, [0,0,0], [0,0,0]);
 }
 
 DEFCVAR_FLOAT(r_rocketlight, 1);
@@ -1516,6 +1516,7 @@ static void FPP_ApplyGrenadeProperties(entity proj) {
     FO_GrenInfo* gdesc = FO_GrenDesc(proj.fpp.gren_type);
 
     setmodelindex(proj, gdesc->modelindex);
+    setsize(proj, [0,0,0], [0,0,0]);
     proj.skin = gdesc->skin;
     proj.avelocity = gdesc->avelocity;
 }
