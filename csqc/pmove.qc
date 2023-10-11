@@ -445,7 +445,7 @@ static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
 
 
 void PM_AddGrenadeExplosion(float itime, entity ent) {
-    if (!PM_Enabled() || !CVARF(fo_beta_nudge_explosion))
+    if (!PM_Enabled())
         return;
 
     FO_GrenExp exp;
@@ -461,7 +461,7 @@ void PM_AddGrenadeExplosion(float itime, entity ent) {
 }
 
 void PM_AddSimExplosion(float itime, entity ent) {
-    if (!PM_Enabled() || !CVARF(fo_beta_nudge_explosion))
+    if (!PM_Enabled())
         return;
 
     if (ent.owner != pengine.player_ent)  // Just player ents in version 0
