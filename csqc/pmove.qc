@@ -449,7 +449,8 @@ void PM_AddGrenadeExplosion(float itime, entity ent) {
         return;
 
     FO_GrenExp exp;
-    FO_GrenGetExp(ent.fpp.gren_type, exp);
+    if (!FO_GrenGetExp(ent.fpp.gren_type, exp))
+        return;
 
     float dmg = exp.dmg;
 
