@@ -840,11 +840,11 @@ const float KF_BOTH_PLAYER = KF_SRC_PLAYER | KF_TARG_PLAYER;
 
 // (*) Unbelievably knock-direction and moment calculation use different origins
 // (centroid vs origin).  For now just preserve what I can only assume is an old
-// terrible mistake.
+// terrible mistake.  We undo half of this by ignoring on src as mins/maxs==0.
 
-float CalcRadiusDamage(entity src, entity targ, float flags, float damage) {
+float CalcRadiusDamage(vector src, entity targ, float flags, float damage) {
     vector targ_origin = targ.origin + (targ.mins + targ.maxs) * 0.5;  // (*)
-    damage -= vlen(src.origin - targ_origin) / 2;
+    damage -= vlen(src - targ_origin) / 2;
 
     if (flags & KF_SELF)
         damage *= 0.75;
@@ -852,13 +852,12 @@ float CalcRadiusDamage(entity src, entity targ, float flags, float damage) {
     return damage;
 }
 
-vector CalcKnock(entity src, entity targ, float flags, float moment) {
+vector CalcKnock(vector src, entity targ, float flags, float moment) {
     float mult = 8;
     if (moment < 60 && (flags & (KF_BOTH_PLAYER | KF_SELF) == KF_BOTH_PLAYER))
             mult = 11;
 
-    vector src_origin = src.origin + (src.mins + src.maxs) * 0.5;  // (*)
-    vector dir = normalize(targ.origin - src_origin);
+    vector dir = normalize(targ.origin - src);
 
     vector result = dir * moment * mult;
     if (fo_config.rj > 1)

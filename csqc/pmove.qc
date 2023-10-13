@@ -264,14 +264,15 @@ enum {
 };
 
 struct PM_Nudge {
+    float type;
+
     entity src;
     float src_no;
 
-    float nat;
-    float seq, itime, type;
+    float nat, seq, itime;
     float expire_frame, expire_time;
 
-    vector vec;
+    vector org;
     float aux;
 };
 
@@ -346,18 +347,18 @@ void PM_AddNudgeConc(float itime, float mag, float flip) {
     n->expire_time = itime;
 
     n->itime = itime;
-    n->vec.x = mag;
-    n->vec.y = flip;
+    n->org.x = mag;
+    n->org.y = flip;
 }
 
 static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
     if (pointcontents(ent.origin) == CONTENT_WATER)
         ent.flags |= FL_INWATER;  // pmove doesn't usually maintain this.
-    Conc_Stumble(ent, nudge->vec.x, nudge->vec.y);
+    Conc_Stumble(ent, nudge->org.x, nudge->org.y);
 }
 
 static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
-    ent.velocity = nudge->vec;
+    ent.velocity = nudge->org;
 }
 
 void PM_AddNudgeDash(float cseq) {
@@ -368,8 +369,8 @@ void PM_AddNudgeDash(float cseq) {
     n->nat = NA_SEQ;
     n->seq = cseq;
 
-    n->vec = v_forward * 540;
-    n->vec.z = 181;
+    n->org = v_forward * 540;
+    n->org.z = 181;
 }
 
 float nudge_i(PM_Nudge* n) {
@@ -381,17 +382,17 @@ float nudge_i(PM_Nudge* n) {
 
 static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     float dmg = nudge->aux;
-    if (vlen(ent.origin - nudge->vec) > dmg + 40)
+    if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
     float flg = KF_BOTH_PLAYER;  // Assumes everything is from a player for now
     if (nudge->src.owner == pengine.player_ent)
        flg |= KF_SELF;
 
-    dmg = CalcRadiusDamage(nudge->src, ent, flg, dmg);
+    dmg = CalcRadiusDamage(nudge->org, ent, flg, dmg);
     if (flg & KF_SRC_PLAYER)
         dmg *= 0.9;
-    vector knock = CalcKnock(nudge->src, ent, flg, dmg);
+    vector knock = CalcKnock(nudge->org, ent, flg, dmg);
 
     pm.ent.velocity += knock;
 }
@@ -410,7 +411,8 @@ static PM_Nudge* PM_AddNudgeExplosion(float nat, float seq, float itime, entity 
     n->nat = nat;
     n->seq = seq;
     n->itime = itime;
-    n->vec = ent.origin;  // We end up mostly using the ent here
+
+    n->org = ent.origin;  // We end up mostly using the ent here
     n->aux = dmg;
 
     n->src = ent;
@@ -433,6 +435,8 @@ static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
     n->type = NT_BOUNCE;
     n->nat = NA_ITIME;
     n->itime = itime;
+
+    n->org = ent.origin;
     n->aux = dmg;
 
     n->src = ent;
@@ -446,15 +450,14 @@ static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
 
 static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
     float dmg = nudge->aux;
-    entity src = nudge->src;
 
-    if (vlen(ent.origin - src.origin) > dmg + 40)
+    if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
     vector targ_org = ent.origin + (ent.mins + ent.maxs) * 0.5;
-    float points = dmg - vlen(targ_org - src.origin) / 2;
+    float points = dmg - vlen(targ_org - nudge->org) / 2;
 
-    ent.velocity = (targ_org - src.origin) * points/20;
+    ent.velocity = (targ_org - nudge->org) * points/20;
 }
 
 
