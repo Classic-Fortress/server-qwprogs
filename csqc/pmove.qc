@@ -1,8 +1,5 @@
 DEFCVAR_FLOAT(fo_jumpvolume, 1);
 
-static float pm_enabled;
-inline float PM_Enabled() { return pm_enabled; }
-
 #define STEPTIME 0.125
 
 enumflags {
@@ -482,7 +479,8 @@ void PM_AddSimExplosion(float itime, entity ent) {
     if (!PM_Enabled())
         return;
 
-    if (ent.owner != pengine.player_ent)  // Just player ents in version 0
+    if ((CVARF(fo_beta_nudge_explosion) & 2 == 0) &&
+            ent.owner != pengine.player_ent)
         return;
 
     float dmg = 0;
@@ -603,7 +601,7 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
 }
 
 static void PM_SetEnabled(float enabled) {
-    pm_enabled = enabled;
+    pengine.pm_enabled = enabled;
 
     PM_Refresh();
 

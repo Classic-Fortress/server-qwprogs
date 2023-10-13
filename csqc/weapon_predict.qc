@@ -31,6 +31,7 @@ static float wp_ready;
 struct pengine_t {
     float pp_enabled;
     float wp_enabled;
+    float pm_enabled;
     float is_effectframe;
     float last_effectframe;
 
@@ -51,6 +52,8 @@ static float last_still_loading;
 inline float PP_Enabled() { return pengine.pp_enabled; }
 inline float WP_Enabled() { return pengine.wp_enabled; }
 inline float WPP_ViewModelMask() { return pengine.view_mask; }
+
+inline float PM_Enabled() { return pengine.pm_enabled; }
 
 float WP_PlayerClass() {
     return pstate_server.playerclass;
@@ -606,8 +609,8 @@ void WP_ServerUpdate(float sendflags) {
         pstate_server.weaponframe += 1;
     }
 
-    if (CVARF(fo_beta_nudge_explosion))
-        phys_sim_dt = (pstate_server.client_ping + 4 * SERVER_FRAME_MS) / 1000.0;
+    if (PM_Enabled())
+        phys_sim_dt = 3 * SERVER_FRAME_DT;
     else
         phys_sim_dt = -1;
 
@@ -1299,6 +1302,8 @@ inline float get_phys_time(entity e) {
         // this will offset explosions in the short term).
         static float last_self_time;
         float dt = min(inst_ping_ms, CVARF(wpp_adv_otherp_ms)) / 1000.0;
+        if (PM_Enabled() && (CVARF(fo_beta_nudge_explosion) & 2))
+            dt = (clientcommandframe - servercommandframe - 1) * SERVER_FRAME_DT;
         last_self_time = max(last_self_time, time + dt);
         return last_self_time;
     }
