@@ -284,7 +284,7 @@ var fo_menu FO_MENU_BUILD = {
         }
         if(SBAR.HasSentry) {
             FO_MENU_BUILD.options[0].state = FO_MENU_STATE_HIDDEN;  //Build
-            if(vlen(thisorigin - sentry_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
+            if(vlen(PM_Org() - sentry_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[2].state = FO_MENU_STATE_HIDDEN;  //Destroy
                 FO_MENU_BUILD.options[3].state = FO_MENU_STATE_NORMAL;  //Dismantle
             } else {
@@ -302,7 +302,7 @@ var fo_menu FO_MENU_BUILD = {
         }
         if(SBAR.HasDispenser) {
             FO_MENU_BUILD.options[1].state = FO_MENU_STATE_HIDDEN;
-            if(vlen(thisorigin - dispenser_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
+            if(vlen(PM_Org() - dispenser_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[4].state = FO_MENU_STATE_HIDDEN;
                 FO_MENU_BUILD.options[5].state = FO_MENU_STATE_NORMAL;
             } else {
@@ -328,7 +328,7 @@ var fo_menu FO_MENU_SENTRY_MAINTAIN = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -343,7 +343,7 @@ var fo_menu FO_MENU_SENTRY_ROTATE = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -357,7 +357,7 @@ var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -370,7 +370,7 @@ var fo_menu FO_MENU_DISPENSER_USE = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE, {
-        if(vlen(thisorigin - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -697,7 +697,6 @@ vector fo_menu_draw(fo_menu * menu) = {
     FO_Hud_ShowPanel(HUDP_MENU_HINT);
     SBAR.Hint = "";
 
-    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
     if(menu.update) {
