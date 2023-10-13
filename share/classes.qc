@@ -133,6 +133,10 @@ static inline void ConcAction(entity ent, float itime, float mag, float flip) {
 #endif
 
 void Conc_Update(ConcState *cs, entity ent, float ctime) {
+#ifdef SSQC
+    if (ent.invincible_finished > time)  // TODO: Is this worth sharing?
+        cs->mag = 0;
+#endif
     if (!cs->mag  || ctime < cs->next)
         return;
 
