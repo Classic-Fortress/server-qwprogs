@@ -715,7 +715,7 @@ static void PM_UpdateLocalMovement() {
 
     if (!CVARF(fopm_nostep))
         if (pm.steptime - time > 0)
-            pm.vieworg.z += (pm.steptime - time) * STEPTIME * pm.step;
+            pm.vieworg.z += (pm.steptime - time) * (1 / STEPTIME) * pm.step;
 }
 
 void PMD_UpdateImpulse(int seq);
