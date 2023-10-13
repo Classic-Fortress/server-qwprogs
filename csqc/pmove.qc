@@ -27,6 +27,7 @@ static struct {
 
     float seq, server_seq;
     float interp_t;
+    float last_nudge;
 
     vector error;
     float errortime;
@@ -259,36 +260,41 @@ enum {
     NA_SEQ,
     NA_SEQTIME,
     NA_ITIME,
-    NA_CONC,  // itime but with expiration driven by conc_state
+    NA_ITIME_EXPLICIT_EXPIRE,
 };
 
 struct PM_Nudge {
+    float type;
+
     entity src;
     float src_no;
 
-    float nat;
-    float seq, itime, type;
-    float expire_frame;
+    float nat, seq, itime;
+    float expire_frame, expire_time;
 
-    vector vec;
+    vector org;
     float aux;
 };
 
-const static float NUDGE_EPS = 3 * SERVER_FRAME_DT;
-static PM_Nudge nudges[5];
+const static float NUDGE_SEQ = 3;
+const static float NUDGE_EPS = NUDGE_SEQ * SERVER_FRAME_DT;
+static PM_Nudge nudges[8];
 static float num_nudges;
 
 static float nudge_expired(PM_Nudge* n) {
-    // Below all actually expire at <= so this is conservative.
-    if (n->expire_frame && n->expire_frame < servercommandframe)
+    if (n->expire_frame && n->expire_frame <= pstate_server.seq)
+        return TRUE;
+
+    if (n->expire_time && n->expire_time <= pstate_server.server_time)
         return TRUE;
 
     switch (n->nat) {
         case NA_NONE: return TRUE;
-        case NA_SEQ: return n->seq <= servercommandframe;
-        case NA_SEQTIME: return n->seq + ceil(n->itime / SERVER_FRAME_DT) <= servercommandframe;
-        case NA_ITIME: return n->itime - NUDGE_EPS <= pstate_server.server_time;  // Slack
-        case NA_CONC: return n->itime <= pstate_server.conc_state.next;
+        case NA_SEQ: return n->seq + NUDGE_SEQ <= pstate_server.seq;
+        case NA_SEQTIME:
+            return n->seq + ceil(n->itime / SERVER_FRAME_DT) + NUDGE_SEQ <= pstate_server.seq;
+        case NA_ITIME: return n->itime + NUDGE_EPS <= pstate_server.server_time;  // Slack
+        case NA_ITIME_EXPLICIT_EXPIRE: return FALSE;  // TRUE handled above
     }
 
     return TRUE;
@@ -306,6 +312,7 @@ static PM_Nudge* find_nudge_slot() {
         n->src_no = 0;
         n->src = 0;
         n->expire_frame = 0;
+        n->expire_time = 0;
         return n;
     }
 
@@ -321,7 +328,7 @@ static void PM_RemoveSelfNudges() {
         return;
 
     PM_Nudge* n = self.nudge;
-    n->expire_frame = -servercommandframe;
+    n->expire_frame = servercommandframe;
 }
 
 void PM_AddNudgeConc(float itime, float mag, float flip) {
@@ -336,20 +343,22 @@ void PM_AddNudgeConc(float itime, float mag, float flip) {
         return;
 
     n->type = NT_CONC;
-    n->nat = NA_CONC;
+    n->nat = NA_ITIME_EXPLICIT_EXPIRE;
+    n->expire_time = itime;
+
     n->itime = itime;
-    n->vec.x = mag;
-    n->vec.y = flip;
+    n->org.x = mag;
+    n->org.y = flip;
 }
 
 static void PM_NudgeConc(PM_Nudge* nudge, entity ent) {
     if (pointcontents(ent.origin) == CONTENT_WATER)
         ent.flags |= FL_INWATER;  // pmove doesn't usually maintain this.
-    Conc_Stumble(ent, nudge->vec.x, nudge->vec.y);
+    Conc_Stumble(ent, nudge->org.x, nudge->org.y);
 }
 
 static void PM_NudgeDash(PM_Nudge* nudge, entity ent) {
-    ent.velocity = nudge->vec;
+    ent.velocity = nudge->org;
 }
 
 void PM_AddNudgeDash(float cseq) {
@@ -360,8 +369,8 @@ void PM_AddNudgeDash(float cseq) {
     n->nat = NA_SEQ;
     n->seq = cseq;
 
-    n->vec = v_forward * 540;
-    n->vec.z = 181;
+    n->org = v_forward * 540;
+    n->org.z = 181;
 }
 
 float nudge_i(PM_Nudge* n) {
@@ -373,35 +382,37 @@ float nudge_i(PM_Nudge* n) {
 
 static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     float dmg = nudge->aux;
-    if (vlen(ent.origin - nudge->vec) > dmg + 40)
+    if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
-    float flg = KF_BOTH_PLAYER;
+    float flg = KF_BOTH_PLAYER;  // Assumes everything is from a player for now
     if (nudge->src.owner == pengine.player_ent)
        flg |= KF_SELF;
 
-    dmg *= 0.9;  // Assume everything is from a player
-    float moment = CalcRadiusDamage(nudge->src, ent, flg, dmg);
-    vector knock = CalcKnock(nudge->src, ent, flg, moment);
+    dmg = CalcRadiusDamage(nudge->org, ent, flg, dmg);
+    if (flg & KF_SRC_PLAYER)
+        dmg *= 0.9;
+    vector knock = CalcKnock(nudge->org, ent, flg, dmg);
 
     pm.ent.velocity += knock;
 }
 
 // Can be either by {seq + itime} for predicted projectiles, or by {itime} for
 // server projectiles.
-static void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float dmg) {
+static PM_Nudge* PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, float dmg) {
     if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
-        return;
+        return 0;
 
     PM_Nudge* n = find_nudge_slot();
     if (!n)
-        return;
+        return 0;
 
     n->type = NT_EXPLOSION;
     n->nat = nat;
     n->seq = seq;
     n->itime = itime;
-    n->vec = ent.origin;  // We end up mostly using the ent here
+
+    n->org = ent.origin;  // We end up mostly using the ent here
     n->aux = dmg;
 
     n->src = ent;
@@ -409,19 +420,23 @@ static void PM_AddNudgeExplosion(float nat, float seq, float itime, entity ent, 
 
     ent.nudge = n;
     ent.removefunc = PM_RemoveSelfNudges;
+
+    return n;
 }
 
-static void PM_AddNudgeBounce(float itime, entity ent, float dmg) {
+static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
     if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
         return;
 
     PM_Nudge* n = find_nudge_slot();
     if (!n)
-        return;
+        return 0;
 
     n->type = NT_BOUNCE;
     n->nat = NA_ITIME;
     n->itime = itime;
+
+    n->org = ent.origin;
     n->aux = dmg;
 
     n->src = ent;
@@ -429,19 +444,20 @@ static void PM_AddNudgeBounce(float itime, entity ent, float dmg) {
 
     ent.nudge = n;
     ent.removefunc = PM_RemoveSelfNudges;
+
+    return n;
 }
 
 static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
     float dmg = nudge->aux;
-    entity src = nudge->src;
 
-    if (vlen(ent.origin - src.origin) > dmg + 40)
+    if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
     vector targ_org = ent.origin + (ent.mins + ent.maxs) * 0.5;
-    float points = dmg - vlen(targ_org - src.origin) / 2;
+    float points = dmg - vlen(targ_org - nudge->org) / 2;
 
-    ent.velocity = (targ_org - src.origin) * points/20;
+    ent.velocity = (targ_org - nudge->org) * points/20;
 }
 
 
@@ -455,6 +471,7 @@ void PM_AddGrenadeExplosion(float itime, entity ent) {
 
     float dmg = exp.dmg;
 
+    PM_Nudge* n;
     if (exp.type == kRadiusDamage)
         PM_AddNudgeExplosion(NA_ITIME, 0, itime, ent, dmg);
     else
@@ -482,11 +499,12 @@ void PM_AddSimExplosion(float itime, entity ent) {
     if (ent.forward_knock && ent.owner == pengine.player_ent) {
         if (ent.forward_knock == -1)
             return;
+        nat = NA_ITIME_EXPLICIT_EXPIRE;  // Knock forwards are synchronized
         itime = ent.forward_knock;
     } else if (ent.created_seq && ent.entnum == 0) {
         float dtime = 0;
         if (ent.s_time)
-            dtime = max(itime - ent.s_time - SERVER_FRAME_DT, 0);
+            dtime = max(itime - ent.s_time, 0);
         seq = ent.created_seq;
         itime = dtime;
         nat = NA_SEQTIME;  // Same as NA_SEQ when itime == 0
@@ -495,29 +513,29 @@ void PM_AddSimExplosion(float itime, entity ent) {
     PM_AddNudgeExplosion(nat, seq, itime, ent, dmg);
 }
 
-float MatchNudge(PM_Nudge* n, float seq, float sitime, float eitime) {
-    if (n->expire_frame && n->expire_frame < pm.server_seq) {
+float MatchNudge(PM_Nudge* n, float seq, float sitime, float eitime, float slack = 0) {
+    if (nudge_expired(n))
         return FALSE;
-    }
 
     switch (n->nat) {
-        case NA_SEQ: return n->seq == seq;
-        case NA_SEQTIME: return n->seq + floor(n->itime / SERVER_FRAME_DT) == seq;
-        case NA_CONC:
-        case NA_ITIME: return n->itime > sitime && n->itime <= eitime;
+        case NA_SEQ: return seq == n->seq;
+        case NA_SEQTIME: return seq == n->seq + floor(n->itime / SERVER_FRAME_DT);
+        case NA_ITIME_EXPLICIT_EXPIRE: return n->itime > sitime && n->itime <= eitime;
+        case NA_ITIME: return (n->itime > sitime - slack) && (n->itime <= eitime);
         default:
             return FALSE;
     }
 }
 
 // TODO: This obviously wants to be smarter
-static void PM_ApplyNudges(entity ent, float seq, float sitime, float eitime) {
+static void PM_ApplyNudges(entity ent, float seq, float sitime, float eitime, float slack = 0) {
     for (float i = 0; i < nudges.length; i++) {
         PM_Nudge* n = &nudges[i];
 
-        if (!MatchNudge(n, seq, sitime, eitime))
+        if (!MatchNudge(n, seq, sitime, eitime, slack))
             continue;
 
+        pm.last_nudge = seq;
         switch (n->type) {
             case NT_CONC:
                 PM_NudgeConc(n, ent);
@@ -553,10 +571,8 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
     }
 
     if (!game_state.is_spectator && !game_state.is_alive) {
-        pm.seq = clientcommandframe;
-        //just update the angles
-        if (!getinputstate(pm.seq-1)) { }
-            return;
+        pm.seq = clientcommandframe;  // Dead, no prediction.
+        return;
     }
 
     ASSERTF_GT(pm.seq, 0);
@@ -574,10 +590,8 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
         RunPlayerPhysics();
 
         if (!CVARF(fopm_nonudge)) {
-            float start_time = pm.interp_t;
-            if (pm.seq == pm.server_seq + 1)
-                start_time -= NUDGE_EPS;
-            PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength);
+            float slack = (pm.seq == pm.server_seq + 1) ? NUDGE_EPS : 0;
+            PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength, slack);
         }
 
         pm.seq++;
@@ -614,14 +628,14 @@ static void PM_UpdateError() {
     entity ent = pm.ent;
 
     ent.owner = edict_num(player_localentnum);
-    if (CVARF(fopm_noerror) ||
+    if (CVARF(fopm_noerror) || !game_state.is_alive ||
         (clientcommandframe == servercommandframe + 1)) {
         pm.error = '0 0 0';
         pm.errortime = 0;
         return;
     }
-    static PMS_Data last;
 
+    static PMS_Data last;
     if (last.server_seq != pm_s.server_seq - 1)
         last = pm_so;
 
@@ -630,11 +644,18 @@ static void PM_UpdateError() {
     vector err = ent.origin;
 
     // Repeat with updated state.
-    PM_RunMovement(SimPMSD(), clientcommandframe - 1);
-    PM_SavePMS(&last);  // Save at -1 since the construction for #cf will be partial
+    PM_RunMovement(SimPMSD(), clientcommandframe - 2);
+    PM_SavePMS(&last);  // Save at -2 to replay nudges going into -1
     PM_RunMovement(SimPMSD(), clientcommandframe);
 
-    err -= ent.origin;
+    // New nudges can result in small errors on replay due to timeshift, we
+    // could backdate all the nudges and recompute the world but as a first
+    // simpler pass let's just filter them out.
+    if (pm.last_nudge == clientcommandframe - 1)
+        err = '0 0 0';
+    else
+        err -= ent.origin;
+
     float nerr = vlen(err);
     if (nerr > 64) {  // teleport
         pm.error = '0 0 0';
@@ -651,6 +672,8 @@ static void PM_UpdateError() {
         }
     }
 }
+
+DEFCVAR_FLOAT(v_deathtilt, 1);
 
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
@@ -681,13 +704,16 @@ static void PM_UpdateLocalMovement() {
     pm.vieworg = org;
     pm.vieworg.z += getstatf(STAT_VIEWHEIGHT) + viewheight;
 
+    if (!game_state.is_alive && WP_PlayerClass())
+        view_angles.z = CVARF(v_deathtilt) * 80;
+
     // Correct view position over ErrorTime()
     if (pm.errortime - time > 0)
         pm.vieworg += (pm.errortime - time) * (1 / ErrorTime()) * pm.error;
 
     if (!CVARF(fopm_nostep))
         if (pm.steptime - time > 0)
-            pm.vieworg.z += (pm.steptime - time) * STEPTIME * pm.step;
+            pm.vieworg.z += (pm.steptime - time) * (1 / STEPTIME) * pm.step;
 }
 
 void PMD_UpdateImpulse(int seq);
@@ -711,6 +737,7 @@ static void PM_HandleRemovedNudges() {
     if (!pstate_server.num_filter_ents)
         return;
 
+    float c = 0;
     for (float i = 0; i < nudges.length; i++) {
         PM_Nudge* n = &nudges[i];
         if (nudge_expired(n))
@@ -800,6 +827,12 @@ void PM_InputFrame() {
         }
     }
 #endif
+    if (input_buttons & BUTTON2) {
+        if (game_state.is_spectator) {
+            input_buttons &= ~BUTTON2;
+            iz = CVARF(cl_upspeed);
+        }
+    }
 
     // Technically the sync with pstate_pred being on the right frame is loose..
     if (pstate_pred.tfstate & TFSTATE_AIMING)
