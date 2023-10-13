@@ -312,11 +312,13 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
 #ifdef CSQC
 void Phys_Sim(entity e, float target_time = 0) {
     // TODO: Unvoid+undo if we make it past the void point.
-    if (phys_sim_dt < 0 || e.phys_sim_voided_at)
+    if (e.phys_sim_voided_at)
         return;
 
     float min_gran = 0;
     if (!target_time) {
+        if (phys_sim_dt < 0)
+            return;
         target_time = time + phys_sim_dt;
         min_gran = SERVER_FRAME_DT;
     }
