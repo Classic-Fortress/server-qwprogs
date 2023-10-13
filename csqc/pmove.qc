@@ -390,7 +390,7 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
 
     dmg = CalcRadiusDamage(nudge->src, ent, flg, dmg);
     if (flg & KF_SRC_PLAYER)
-            dmg *= 0.9;
+        dmg *= 0.9;
     vector knock = CalcKnock(nudge->src, ent, flg, dmg);
 
     pm.ent.velocity += knock;
@@ -573,10 +573,8 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
     }
 
     if (!game_state.is_spectator && !game_state.is_alive) {
-        pm.seq = clientcommandframe;
-        //just update the angles
-        if (!getinputstate(pm.seq-1)) { }
-            return;
+        pm.seq = clientcommandframe;  // Dead, no prediction.
+        return;
     }
 
     ASSERTF_GT(pm.seq, 0);
@@ -632,7 +630,7 @@ static void PM_UpdateError() {
     entity ent = pm.ent;
 
     ent.owner = edict_num(player_localentnum);
-    if (CVARF(fopm_noerror) ||
+    if (CVARF(fopm_noerror) || !game_state.is_alive ||
         (clientcommandframe == servercommandframe + 1)) {
         pm.error = '0 0 0';
         pm.errortime = 0;
@@ -677,6 +675,8 @@ static void PM_UpdateError() {
     }
 }
 
+DEFCVAR_FLOAT(v_deathtilt, 1);
+
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
 
@@ -705,6 +705,9 @@ static void PM_UpdateLocalMovement() {
 
     pm.vieworg = org;
     pm.vieworg.z += getstatf(STAT_VIEWHEIGHT) + viewheight;
+
+    if (!game_state.is_alive && WP_PlayerClass())
+        view_angles.z = CVARF(v_deathtilt) * 80;
 
     // Correct view position over ErrorTime()
     if (pm.errortime - time > 0)
