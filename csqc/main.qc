@@ -334,10 +334,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "fo_menu_disguise":
-            FO_Menu_Spy_Skin(TRUE);
+            if (WP_PlayerClass() == PC_SPY)
+                FO_Menu_Spy_Skin(TRUE);
             break;
         case "fo_menu_build":
-            FO_Menu_Build(TRUE);
+            if (WP_PlayerClass() == PC_ENGINEER)
+                FO_Menu_Build(TRUE);
             break;
         case "fo_menu_dropammo":
             FO_Menu_DropAmmo(TRUE);
