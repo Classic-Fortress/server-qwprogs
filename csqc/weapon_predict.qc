@@ -1473,9 +1473,8 @@ entity PP_CreateProjectile(int fpp_type, vector org, float cp_flags=0) {
   float static_dt = push_t.static_ms / 1000.0;
 
   // Note: We use true time here as created projectiles exist outside of pred.
-  proj.starttime = time + uncorrected_dt;
+  proj.starttime = time + uncorrected_dt - input_timelength / 2;
   proj.endtime = proj.starttime + pstate_server.client_ping / 1000.0 + PP_EPS;
-  proj.server_live_time = server_time();
 
   proj.predraw = PP_PredrawPredicted;
   proj.drawmask = MASK_PRED_PROJECTILE;
@@ -1882,7 +1881,6 @@ void InitProjectileEnt(float sendflags) {
       self.fpp.index = FPP_RAILGUN;  // Something people will notice.
     }
 
-    self.server_live_time = self.created_at;
     self.created_seq = servercommandframe;
 
     self.drawmask = MASK_ENGINE;

@@ -3,8 +3,6 @@
 static const float phys_tic = 0.005;
 
 .float phys_time;  // Current physics time
-.float server_live_time;  // When an entity can first appear on server.  0 for
-                          // server-side ents.
 
 enumflags {
     PHYSB_ENABLED,
