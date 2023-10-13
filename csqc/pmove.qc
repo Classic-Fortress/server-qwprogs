@@ -827,6 +827,12 @@ void PM_InputFrame() {
         }
     }
 #endif
+    if (input_buttons & BUTTON2) {
+        if (game_state.is_spectator) {
+            input_buttons &= ~BUTTON2;
+            iz = CVARF(cl_upspeed);
+        }
+    }
 
     // Technically the sync with pstate_pred being on the right frame is loose..
     if (pstate_pred.tfstate & TFSTATE_AIMING)
