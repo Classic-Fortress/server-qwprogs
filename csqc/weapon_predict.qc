@@ -909,6 +909,9 @@ float PM_Enabled();
 void PM_AddNudgeDash(float cseq);
 
 static void WP_Special() {
+    if (prematch)
+        return;
+
     if (pstate_pred.server_time < pstate_pred.special_next)
         return;
 
