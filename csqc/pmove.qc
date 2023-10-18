@@ -389,6 +389,7 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     dmg = CalcRadiusDamage(nudge->org, ent, flg, dmg);
     if (flg & KF_SRC_PLAYER)
         dmg *= 0.9;
+    dmg = Class_ScaleMoment(WP_PlayerClass(), dmg);
     vector knock = CalcKnock(nudge->org, ent, flg, dmg);
 
     pm.ent.velocity += knock;
