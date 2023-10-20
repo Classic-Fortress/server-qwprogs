@@ -559,6 +559,28 @@ static void RunPlayerPhysics() {
     runstandardplayerphysics(ent);
 }
 
+static void RunDeadMovement(float endframe) {
+    entity ent = pm.ent;
+    float held_movetype = ent.movetype;
+    float held_solid = ent.solid;
+    float held_buttons = input_buttons;
+    vector held_movevalues = input_movevalues;
+
+    ent.movetype = MOVETYPE_TOSS;
+    ent.solid = SOLID_NOT;
+    input_buttons = 0;
+    input_movevalues = '0 0 0';
+    while (pm.seq <= endframe) {
+        runstandardplayerphysics(ent);
+        pm.seq++;
+    }
+
+    ent.movetype = held_movetype;
+    ent.solid = held_solid;
+    input_buttons = held_buttons;
+    input_movevalues = held_movevalues;
+}
+
 // End state:
 //   pmsd.seq --> endframe + 1
 static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
@@ -570,7 +592,7 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
     }
 
     if (!game_state.is_spectator && !game_state.is_alive) {
-        pm.seq = clientcommandframe;  // Dead, no prediction.
+        RunDeadMovement(endframe);
         return;
     }
 
