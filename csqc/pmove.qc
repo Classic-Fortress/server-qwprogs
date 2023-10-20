@@ -699,7 +699,12 @@ DEFCVAR_FLOAT(v_deathtilt, 1);
 static void PM_UpdateLocalMovement() {
     entity ent = pm.ent;
 
-    PM_RunMovement(SimPMSD(), clientcommandframe);
+    if (game_state.is_ceasefire || clientcommandframe > servercommandframe + 63) {
+        PM_ActivatePMS(&pm_s);
+    } else {
+        PM_RunMovement(SimPMSD(), clientcommandframe);
+    }
+
     vector org = pm.ent.origin;
 
     // Smooth stair stepping
