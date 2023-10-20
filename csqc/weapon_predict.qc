@@ -87,6 +87,10 @@ DEFCVAR_FLOAT(cl_predict_players_frac, 0.9);
 
 static float pred_time_dt;  // delta-time that the world predicted forward by
 
+// Allows temporarily disabling prediction around events that we do not yet
+// fully implement a client-side state machine for, e.g. priming a detpack.
+static float filter_pproj_time;
+
 // Match up local interpolation of projectile position with that of players.
 static void update_interp_time_dt() {
     if (!CVARF(cl_predict_players)) {
@@ -857,8 +861,11 @@ void WPP_Dump();
 
 float WP_WeaponReady() {
     const float not_ready_mask = TFSTATE_RELOADING | TFSTATE_NO_WEAPON;
-    return pstate_pred.client_time >= pstate_pred.attack_finished &&
-           (pstate_pred.tfstate & not_ready_mask) == 0;
+    if (pstate_pred.client_time < pstate_pred.attack_finished)
+        return FALSE;
+    if (pstate_pred.tfstate & not_ready_mask)
+        return FALSE;
+    return TRUE;
 }
 
 static void WP_ChangeIfQueued() {
@@ -977,6 +984,13 @@ void WP_Impulse() {
 
         case TF_GRENADE_T:
             W_ThrowGren(TRUE);
+            break;
+
+        case TF_DETPACK:
+        case TF_DETPACK_5:
+        case TF_DETPACK_20:
+        case TF_DETPACK_50:
+            filter_pproj_time = time + server_time_dt() + 3 * SERVER_FRAME_DT;
             break;
 
         default:
@@ -1250,9 +1264,7 @@ void WP_Frame() {
     float is_attack = 0;
 
     if (pstate_pred.playerclass != PC_SNIPER)
-        is_attack = ((input_buttons & BUTTON0) &&
-                     (pstate_pred.client_time >= pstate_pred.attack_finished) &&
-                     !WP_IsReloading());
+        is_attack = ((input_buttons & BUTTON0) && WP_WeaponReady());
     else
         is_attack = WP_Sniper_IsAttack();
 
@@ -1721,7 +1733,7 @@ void WP_Attack() {
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 1;
 
-    if (IsEffectFrame() && !in_anim) {
+    if (IsEffectFrame() && !in_anim && (time > filter_pproj_time)) {
         float send_event = FALSE;
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
