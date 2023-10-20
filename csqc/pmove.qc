@@ -267,7 +267,7 @@ struct PM_Nudge {
     float src_no;
 
     float nat, seq, itime;
-    float expire_frame, expire_time;
+    float expire_frame, expire_time, expire_spawnseq;
 
     vector org;
     float aux;
@@ -283,6 +283,9 @@ static float nudge_expired(PM_Nudge* n) {
         return TRUE;
 
     if (n->expire_time && n->expire_time <= pstate_server.server_time)
+        return TRUE;
+
+    if (n->expire_spawnseq && n->expire_spawnseq != game_state.spawn_gen)
         return TRUE;
 
     switch (n->nat) {
@@ -310,6 +313,7 @@ static PM_Nudge* find_nudge_slot() {
         n->src = 0;
         n->expire_frame = 0;
         n->expire_time = 0;
+        n->expire_spawnseq = 0;
         return n;
     }
 
@@ -342,6 +346,7 @@ void PM_AddNudgeConc(float itime, float mag, float flip) {
     n->type = NT_CONC;
     n->nat = NA_ITIME_EXPLICIT_EXPIRE;
     n->expire_time = itime;
+    n->expire_spawnseq = game_state.spawn_gen;
 
     n->itime = itime;
     n->org.x = mag;
@@ -409,6 +414,12 @@ static PM_Nudge* PM_AddNudgeExplosion(float nat, float seq, float itime, entity 
     n->nat = nat;
     n->seq = seq;
     n->itime = itime;
+
+    // This is slightly imprecise, since you could throw a grenade then spawn
+    // and jump on it, but it's more right than wrong; and the wrong cases lead
+    // to false lerps.
+    if (ent.owner == pengine.player_ent)
+        n->expire_spawnseq = game_state.spawn_gen;
 
     n->org = ent.origin;  // We end up mostly using the ent here
     n->aux = dmg;
