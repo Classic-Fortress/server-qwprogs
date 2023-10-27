@@ -15,7 +15,6 @@ void Perf_Status();
 void FO_Hud_Init();
 float InFluid(vector point);
 float CalculateWaterLevel();
-void PlayCSJumpSounds();
 void RenderHitTexts();
 
 void GetSelf() = {
@@ -27,18 +26,17 @@ void PushToSlotHistory(float value) {
         // Stack is full
         return;
     }
-
-    slot_history_top += 1;
     slot_history[slot_history_top] = value;
+    if (slot_history_top == 0) {
+        Slot slot = !IsSlotNull(pstate_pred.queue_slot) ?
+            pstate_pred.queue_slot : pstate_pred.current_slot;
+        slot_under_stack = SlotIndex(slot) + 1;
+    }
+    slot_history_top += 1;
 }
 
-void RemoveFromSlotHistory(float slot) {
-    if (slot_history_top == -1) {
-        // Stack is empty
-        return;
-    }
-
-    for (float i = slot_history_top; i >= 0; i--) {
+float RemoveFromSlotHistory(float slot) {
+    for (float i = slot_history_top - 1; i >= 0; i--) {
         if (slot_history[i] == slot) {
             for (float j = i+1; j < MAX_SLOT_HISTORY_SIZE; j++) {
                 slot_history[j-1] = slot_history[j];
@@ -48,6 +46,15 @@ void RemoveFromSlotHistory(float slot) {
             slot_history_top--;
             break;
         }
+    }
+
+    if (slot_history_top > 0) {
+        return slot_history[slot_history_top - 1];
+    } else {
+        if (CVARF(fo_default_weapon))
+            return CVARF(fo_default_weapon);
+        else
+            return slot_under_stack;
     }
 }
 
@@ -96,13 +103,14 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     FO_Hud_Init();
     FO_Weapons_Init();
     Predict_InitDefaultConfig();
-    FO_PP_Init();       // Some of this is always used by custom projectiles.
+    FO_Predict_Init();
     CsGrenTimer::Init();
-
-    slot_history_top = -1;
 
     registercommand("+slot");
     registercommand("-slot");
+
+    registercommand("fo_beta_pmove");
+    registercommand("fopm_cmd");
 
     registercommand("login");
     registercommand("fo_hud_editor");
@@ -151,10 +159,7 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
 
     MenuPanel = getHudPanel(HUDP_MENU);
 
-    CurrentMenu = &FO_MENU_TEAM;
-    player_menu_type = 0;
     is_admin = FALSE;
-    grentimer_waiting = FALSE;
     jump_counter = 0;
 
     num_mapvotes = 0;
@@ -164,10 +169,17 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     current_vote = world;
     vote_list_filter = "";
 
+    PM_Init();
     TF_Init();
 
     ClientSettings_Check();
     SetupAliases();
+
+    CurrentMenu = &FO_MENU_TEAM;
+    player_menu_type = 0;
+    FO_Menu_Game(TRUE);
+
+    pengine.view_mask = MASK_VIEWMODEL;  // Start with engine models.
     print("CSQC initialization finished\n");
 };
 
@@ -176,12 +188,14 @@ noref void() CSQC_WorldLoaded = {
     // Resolve race condition where models packed into map package sometimes do
     // not resolve correctly.
     localcmd("flush\n");
+    localcmd("cl_smartjump 0\n");  // replaced by fo_smartjump
 }
 
 void FO_CussView();
 void FO_CussCrosshair(float width, float height);
 void Hud_UpdateView(float width, float height, float menushown, float perf_sample);
 void UpdateTeamColorCrosshair();
+void PMD_DrawGraphs(float width);
 
 DEFCVAR_FLOAT(fov, 90);
 
@@ -190,7 +204,6 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     clearscene();
     setproperty(VF_DRAWWORLD, 1); 		// we want to draw our world!
     setproperty(VF_DRAWCROSSHAIR, 1);		 // we want to draw our crosshair!
-                                                 //
     FO_CussView();
 
     if (zoomed_in)
@@ -205,6 +218,9 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
         mask |= WPP_ViewModelMask();
     addentities(mask);
 
+    if (PM_Enabled())
+        PM_UpdateView();
+
     renderscene();
 
     FO_CussCrosshair(width, height);
@@ -212,6 +228,7 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
     TFxRenderGrenadeTimers();
     RenderHitTexts();
     Hud_UpdateView(width, height, menushown, fts);
+    PMD_DrawGraphs(width);
 
     perf_finish_sample(&frame_timing, fts);
 
@@ -221,21 +238,18 @@ noref void(float width, float height, float menushown) CSQC_UpdateView = {
 
 void Slot_Keydown(float slot) {
     PushToSlotHistory(slot);
-    localcmd(sprintf("impulse %f\n", slot));
-    localcmd("+attack\n");
+
+    localcmd(sprintf("impulse %d\n+attack\n", TF_SLOT1 + slot - 1));
 }
 
 void Slot_Keyup(float slot) {
-    RemoveFromSlotHistory(slot);
+    float prev = RemoveFromSlotHistory(slot);
+    float still_attack = slot_history_top > 0;  // Empty stack check
 
-    if (slot_history_top >= 0) { // still holding another +slot bind
-        localcmd(sprintf("impulse %f\n", slot_history[slot_history_top]));
-    } else {
-        if (CVARF(fo_default_weapon)) {
-            localcmd(sprintf("impulse %f\n", CVARF(fo_default_weapon)));
-        }
+    if (prev)
+        localcmd(sprintf("impulse %d\n", TF_SLOT1 + prev - 1));
+    if (!still_attack)
         localcmd("-attack\n");
-    }
 }
 
 void W_ChangeToSlotAlternate(string opt1, string opt2);
@@ -253,6 +267,11 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "-slot":
             Slot_Keyup(stof(argv(1)));
             break;
+
+        case "fo_beta_pmove":
+            printf("Please set `fo_pmove 1` instead.\n");
+            break;
+
         case "login":
             FoLogin(argv(1), TRUE);
             break;
@@ -315,10 +334,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "fo_menu_disguise":
-            FO_Menu_Spy_Skin(TRUE);
+            if (WP_PlayerClass() == PC_SPY)
+                FO_Menu_Spy_Skin(TRUE);
             break;
         case "fo_menu_build":
-            FO_Menu_Build(TRUE);
+            if (WP_PlayerClass() == PC_ENGINEER)
+                FO_Menu_Build(TRUE);
             break;
         case "fo_menu_dropammo":
             FO_Menu_DropAmmo(TRUE);
@@ -411,14 +432,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
 
             break;
         case "+rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+            if (WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO)
                 localcmd("+button4\n");
-            }
             break;
         case "-rj":
-            if (player_class == PC_SOLDIER || player_class == PC_PYRO) {
+            if (WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO)
                 localcmd("-button4\n");
-            }
             break;
         case "wpp_status":
             WPP_Status();
@@ -576,7 +595,7 @@ static void FO_CussCrosshair(float width, float height) {
 
     cuss_state.cussed = TRUE;
     makevectors(input_angles);  // updated by input_frame
-    vector p = project(pmove_org + 8000 * cuss_state.c_forward);
+    vector p = project(PM_Org() + 8000 * cuss_state.c_forward);
 
     localcmd(sprintf("cl_crossx %d; cl_crossy %d;\n",
                 p_x - width / 2, CVARF(fo_crossy) + p_y - height / 2));
@@ -624,19 +643,19 @@ void FO_ApplyCussInput() {
     }
 }
 
-void FO_ApplyMaxSpeed();
+void PM_InputFrame();
 
 noref void CSQC_Input_Frame() {
     Sync_GameState();
 
     // Intercept rocket jump;
-    if ((player_class == PC_SOLDIER || player_class == PC_PYRO) &&
+    if ((WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO) &&
         (input_buttons & BUTTON4))
         input_buttons |= BUTTON0 | BUTTON2;
 
     // Handle zoom
     float prev_zoomed_in = zoomed_in;
-    if (player_class == PC_SNIPER && is_alive)
+    if (WP_PlayerClass() == PC_SNIPER)
         zoomed_in = input_buttons & BUTTON3;
     else
         zoomed_in = 0;
@@ -644,7 +663,7 @@ noref void CSQC_Input_Frame() {
     if (prev_zoomed_in != zoomed_in)
         setsensitivityscaler(zoomed_in ? 1/3 : 1);
 
-    FO_ApplyMaxSpeed();
+    PM_InputFrame();
     FO_ApplyCussInput();
 }
 
@@ -672,22 +691,28 @@ void _Sync_ServerCommandFrame() {
         return;
     last_servercommandframe = servercommandframe;
 
+    prev_game_state = game_state;
+
     team_no = getstatf(STAT_TEAMNO);
     all_time = getstatf(STAT_ALL_TIME);
-    is_observer = FALSE;
-    if (team_no == 0)
-        is_observer = TRUE;
-    player_class = getstatf(STAT_CLASS);
     SBAR.ReadyStatus = getstatf(STAT_FLAGS);
 
-    is_spectator = stof(getplayerkeyvalue(player_localnum, "*spectator"));
-    if (is_spectator)
-        is_observer = FALSE;
-    is_player = (!is_spectator && !is_observer);
-    if (!is_player || getstatf(STAT_HEALTH) <= 0)
-        is_alive = 0;
-    else
-        is_alive = 1;
+    game_state.localentnum = player_localentnum;
+
+    if (team_no == 0 ||stof(getplayerkeyvalue(player_localnum, "*spectator"))) {
+        game_state.is_spectator = 1;
+        game_state.is_player = 0;
+    } else {
+        game_state.is_spectator = 0;
+        game_state.is_player = 1;
+    }
+
+    // Note: When spectating someone, refers to them.
+    game_state.is_alive = getstatf(STAT_HEALTH) > 0;
+    game_state.spawn_gen = getstatf(STAT_SPAWN_GEN);
+
+    game_state.is_ceasefire = serverkeyfloat("pausestate");
+    WP_ServerFrame();
 
     // Use an undocumented ezquake compat feature to figure out whether we
     // have focus or not, skip updates in this case due to lowered network fps.
@@ -704,7 +729,7 @@ void _Sync_ServerCommandFrame() {
 // synchronized with server and predicted state.
 void Sync_GameState() {
     _Sync_ServerCommandFrame();
-    PM_PredictJump();
+    PM_PredictJump_Engine();
 }
 
 static string FoLogin_GetToken() {

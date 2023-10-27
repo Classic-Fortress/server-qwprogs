@@ -261,11 +261,7 @@ void (entity pe_player) FO_Spectator_Identify = {
         pe_player.ident_time = time + 0.5;
         if(pe_player.ident_string != s_id_string) {
             pe_player.ident_string = s_id_string;
-            //if(infokeyf(pe_player, INFOKEY_P_CSQCACTIVE)) {
-                UpdateClientIDString(pe_player);
-            //} else {
-            //    Status_Refresh(pe_player);
-            //}
+            UpdateClientIDString(pe_player);
         }
     }
 }
@@ -350,7 +346,7 @@ void (entity pe_player, float f_type) CF_Identify = {
                 if (trace_ent.playerclass == PC_SPY && !f_friendly) {
 
                     // don't identify feigning enemy spies
-                    if (trace_ent.is_feigning)
+                    if (IsFeigned(trace_ent))
                         return;
 
                     // use undercover name if available

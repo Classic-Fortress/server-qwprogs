@@ -56,9 +56,9 @@ void FO_Hud_Editor_LoadDefaultSettings()
     getHudPanel(HUDP_SPEEDBAR)->Snap = HUD_SNAP_CENTER;
     getHudPanel(HUDP_SPEEDBAR)->Position = [0, 30];
 
-    getHudPanel(HUDP_PING)->Display = 0;
-    getHudPanel(HUDP_PING)->Snap = HUD_SNAP_TOP_RIGHT;
-    getHudPanel(HUDP_PING)->Scale = 1.00;
+    getHudPanel(HUDP_RELOADPROGRESS)->Display = 1;
+    getHudPanel(HUDP_RELOADPROGRESS)->Snap = HUD_SNAP_CENTER;
+    getHudPanel(HUDP_RELOADPROGRESS)->Position = [0, yoffset - 30];
 }
 
 void FO_Hud_Editor_List_Panels() = {
@@ -791,244 +791,245 @@ void Hud_DrawClassInfoPanel(float playerclass)
     if (!fo_hud_editor && !panel->Display)
         return;
 
-    switch (SBAR.PlayerClass) {
+    switch (WP_PlayerClass()) {
         case PC_SOLDIER:
             return;
     }
 
-    if (SBAR.PlayerClass) {
-        if (hud_panel(id, pos, panel->FillSize * panel->Scale, 0, panel->Display)) {
-            // click event
-        }
+    if (!WP_PlayerClass() || WP_PlayerClass() == PC_SOLDIER)
+        return;
 
-        float val;
-        vector size = FO_Hud_Icon_Size * panel->Scale;
-        vector fontSize = FO_Hud_Icon_Font_Size * (panel->TextScale ? panel->TextScale : panel->Scale);
-        pos = [pos_x + 2, pos_y + 2, 0];
-        vector basepos = pos;
-        vector colour = '1 1 1';
-        string icon = "";
-        string msg = "";
+    if (hud_panel(id, pos, panel->FillSize * panel->Scale, 0, panel->Display)) {
+        // click event
+    }
 
-        //icon = HudIcons[playerclass-1].icon;
-        /* icon = HudIcons[playerclass+6].icon; */
-        /* HRC_drawpic(pos, icon, size, '1 1 1', 1, 0); */
+    float val;
+    vector size = FO_Hud_Icon_Size * panel->Scale;
+    vector fontSize = FO_Hud_Icon_Font_Size * (panel->TextScale ? panel->TextScale : panel->Scale);
+    pos = [pos_x + 2, pos_y + 2, 0];
+    vector basepos = pos;
+    vector colour = '1 1 1';
+    string icon = "";
+    string msg = "";
 
-        float len = 0, offset = 0;
+    //icon = HudIcons[playerclass-1].icon;
+    /* icon = HudIcons[playerclass+6].icon; */
+    /* HRC_drawpic(pos, icon, size, '1 1 1', 1, 0); */
 
-        switch (playerclass)
-        {
-            case PC_SCOUT:
-                icon = ICON_SCOUT; //HudIcons[playerclass+6].icon;
-                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+    float len = 0, offset = 0;
 
-                msg = SBAR.ScannerOn ? "Scanning" : "Offline";
-                pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                if (SBAR.ScannerOn)
+    switch (playerclass)
+    {
+        case PC_SCOUT:
+            icon = ICON_SCOUT; //HudIcons[playerclass+6].icon;
+            HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+            msg = SBAR.ScannerOn ? "Scanning" : "Offline";
+            pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            if (SBAR.ScannerOn)
+            {
+                msg = SBAR.ScannerRange ? strcat("Dist: ", ftos(SBAR.ScannerRange)) : "No targets";
+                pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                if (SBAR.ScannerRange)
                 {
-                    msg = SBAR.ScannerRange ? strcat("Dist: ", ftos(SBAR.ScannerRange)) : "No targets";
-                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                    if (SBAR.ScannerRange)
-                    {
-                        msg = (SBAR.ScannerTeamNo == team_no) ? "Friendly" : "Enemy";
-                        msg = strcat(msg, " ", ClassToString(SBAR.ScannerPlayerClass));
-                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                    }
-                }
-                break;
-            case PC_SNIPER:
-                float sniper_dam = WP_SniperCharge();
-                if (sniper_dam)
-                {
-                    icon = ICON_SNIPER; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = strcat("Dam: ", ftos(sniper_dam));
-                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                    
-                    if (sniper_dam == PC_SNIPER_MAXDAM) {
-                        msg = "(100%)";
-                        colour = '1 0 0';
-                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                    }
-                }
-                break;
-            case PC_DEMOMAN:
-                if (SBAR.IsDetpacking)
-                {
-                    icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = "Setting";
-                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-
-                    msg = strcat(ftos(SBAR.DetpackLeft), " (", ftos(SBAR.IsDetpacking), ") secs left");
+                    msg = (SBAR.ScannerTeamNo == team_no) ? "Friendly" : "Enemy";
+                    msg = strcat(msg, " ", ClassToString(SBAR.ScannerPlayerClass));
                     HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                 }
-                else if (SBAR.DetpackLeft)
-                {
-                    icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                }
-                break;
-            case PC_MEDIC:
-                icon = ICON_MEDIC; //HudIcons[playerclass+6].icon;
+            }
+            break;
+        case PC_SNIPER:
+            float sniper_dam = WP_SniperCharge();
+            if (sniper_dam)
+            {
+                icon = ICON_SNIPER; //HudIcons[playerclass+6].icon;
                 HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-                msg = SBAR.AuraActive ? "On" : "Off";
+                msg = strcat("Dam: ", ftos(sniper_dam));
                 pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                if (SBAR.AuraActive)
-                {
-                    if (SBAR.HealCount)
-                    {
-                        msg = strcat(ftos(SBAR.HealCount), " players healed");
-                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
 
-                        msg = strcat("for ", ftos(SBAR.HealAmount), " hp");
+                if (sniper_dam == PC_SNIPER_MAXDAM) {
+                    msg = "(100%)";
+                    colour = '1 0 0';
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                }
+            }
+            break;
+        case PC_DEMOMAN:
+            if (SBAR.IsDetpacking)
+            {
+                icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = "Setting";
+                pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+
+                msg = strcat(ftos(SBAR.DetpackLeft), " (", ftos(SBAR.IsDetpacking), ") secs left");
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+            }
+            else if (SBAR.DetpackLeft)
+            {
+                icon = ICON_DEMOMAN; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = strcat(ftos(SBAR.DetpackLeft), " secs left");
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            }
+            break;
+        case PC_MEDIC:
+            icon = ICON_MEDIC; //HudIcons[playerclass+6].icon;
+            HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+            msg = SBAR.AuraActive ? "On" : "Off";
+            pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            if (SBAR.AuraActive)
+            {
+                if (SBAR.HealCount)
+                {
+                    msg = strcat(ftos(SBAR.HealCount), " players healed");
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+
+                    msg = strcat("for ", ftos(SBAR.HealAmount), " hp");
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                }
+                else
+                {
+                    if (SBAR.AuraStatus == PC_MEDIC_AURA_OUTOFPOWER)
+                    {
+                        msg = "Out of power";
                         HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
-                    else
+                    else if (SBAR.AuraStatus == PC_MEDIC_AURA_RECHARGING)
                     {
-                        if (SBAR.AuraStatus == PC_MEDIC_AURA_OUTOFPOWER)
-                        {
-                            msg = "Out of power";
-                            HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                        }
-                        else if (SBAR.AuraStatus == PC_MEDIC_AURA_RECHARGING)
-                        {
-                            msg = "Recharging";
-                            HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                        }
-                    }
-                }
-                break;
-            case PC_HVYWEAP:
-                if (WP_LockedCannon())
-                {
-                    icon = ICON_HWGUY; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = "Assault Cannon Locked";
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
-                }
-                break;
-            case PC_PYRO:
-                if (SBAR.AirBlast)
-                {
-                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = "Airblast Cooling Down";
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
-                }
-                else if (!SBAR.AirBlast)
-                {
-                    icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = "Airblast Ready";
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
-                }
-                break;
-            case PC_SPY:
-                if (SBAR.IsUndercover == 1)
-                {
-                    icon = ICON_SPY; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    if (SBAR.InvisOnly)
-                    {
-                        msg = "Invisible";
-                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                    }
-                    else
-                    {
-                        msg = "Undercover";
-                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                        msg = strcat(TeamToString(SBAR.UndercoverTeam), " ", ClassToString(SBAR.UndercoverSkin));
+                        msg = "Recharging";
                         HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                     }
                 }
-                else if (SBAR.IsUndercover == 2)
-                {
-                    icon = ICON_SPY; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+            }
+            break;
+        case PC_HVYWEAP:
+            if (WP_LockedCannon())
+            {
+                icon = ICON_HWGUY; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-                    if (SBAR.InvisOnly)
-                    {
-                        msg = "Invisible";
-                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                        msg = strcat("In ", ftos(SBAR.UndercoverTimer), " secs");
-                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                    }
-                    else
-                    {
-                        msg = "Disguising";
-                        pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
-                        if (SBAR.DisguiseTeam)
-                        {
-                            msg = strcat("(", TeamToString(SBAR.DisguiseTeam), SBAR.QueueSkin ? "" : ") ");
-                        }
-                        else if (SBAR.QueueTeam)
-                        {
-                            msg = strcat("(", TeamToString(SBAR.QueueTeam), " ");
-                        }
-                        else if (SBAR.UndercoverTeam)
-                        {
-                            msg = strcat(TeamToString(SBAR.UndercoverTeam), " ");
-                        }
-                        string msg2 = "";
-                        if (SBAR.DisguiseSkin)
-                        {
-                            msg2 = strcat(SBAR.QueueTeam ? "" : "(", ClassToString(SBAR.DisguiseSkin), ")");
-                        }
-                        else if (SBAR.QueueSkin)
-                        {
-                            msg2 = strcat(" ", ClassToString(SBAR.QueueSkin), ")");
-                        }
-                        else if (SBAR.UndercoverSkin)
-                        {
-                            msg2 = strcat(ClassToString(SBAR.UndercoverSkin));
-                        }
-                        msg = strcat(msg, msg2);
-                        HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
-                    }
-                }
-                break;
-            case PC_ENGINEER:
-                if (SBAR.HasSentry)
-                {
-                    icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+                msg = "Assault Cannon Locked";
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+            }
+            break;
+        case PC_PYRO:
+            if (SBAR.AirBlast)
+            {
+                icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
 
-                    msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
+                msg = "Airblast Cooling Down";
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+            }
+            else if (!SBAR.AirBlast)
+            {
+                icon = ICON_PYRO; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = "Airblast Ready";
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);    
+            }
+            break;
+        case PC_SPY:
+            if (SBAR.IsUndercover == 1)
+            {
+                icon = ICON_SPY; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                if (SBAR.InvisOnly)
+                {
+                    msg = "Invisible";
                     HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
                 }
-                else if (SBAR.IsBuilding)
+                else
                 {
-                    icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = strcat(ftos(SBAR.BuildingPercentage), "%");
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    msg = "Undercover";
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    msg = strcat(TeamToString(SBAR.UndercoverTeam), " ", ClassToString(SBAR.UndercoverSkin));
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                 }
-                
-                // disp
-                pos = [pos_x, pos_y + size_y + 2];
-                basepos = pos;
-                if (SBAR.HasDispenser)
+            }
+            else if (SBAR.IsUndercover == 2)
+            {
+                icon = ICON_SPY; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                if (SBAR.InvisOnly)
                 {
-                    icon = ICON_ENGINEER_DISP; //HudIcons[playerclass + 7].icon;
-                    HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
-
-                    msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
-                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    msg = "Invisible";
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    msg = strcat("In ", ftos(SBAR.UndercoverTimer), " secs");
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
                 }
-                break;
-        }
+                else
+                {
+                    msg = "Disguising";
+                    pos = HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+                    if (SBAR.DisguiseTeam)
+                    {
+                        msg = strcat("(", TeamToString(SBAR.DisguiseTeam), SBAR.QueueSkin ? "" : ") ");
+                    }
+                    else if (SBAR.QueueTeam)
+                    {
+                        msg = strcat("(", TeamToString(SBAR.QueueTeam), " ");
+                    }
+                    else if (SBAR.UndercoverTeam)
+                    {
+                        msg = strcat(TeamToString(SBAR.UndercoverTeam), " ");
+                    }
+                    string msg2 = "";
+                    if (SBAR.DisguiseSkin)
+                    {
+                        msg2 = strcat(SBAR.QueueTeam ? "" : "(", ClassToString(SBAR.DisguiseSkin), ")");
+                    }
+                    else if (SBAR.QueueSkin)
+                    {
+                        msg2 = strcat(" ", ClassToString(SBAR.QueueSkin), ")");
+                    }
+                    else if (SBAR.UndercoverSkin)
+                    {
+                        msg2 = strcat(ClassToString(SBAR.UndercoverSkin));
+                    }
+                    msg = strcat(msg, msg2);
+                    HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, TRUE, colour);
+                }
+            }
+            break;
+        case PC_ENGINEER:
+            if (SBAR.HasSentry)
+            {
+                icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = strcat("L: ", ftos(SBAR.SentryLevel), " H: ", ftos(rint(SBAR.SentryHealth)), " S: ", ftos(rint(SBAR.SentryAmmoShells)), " R: ", ftos(rint(SBAR.SentryAmmoRockets)));
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            }
+            else if (SBAR.IsBuilding)
+            {
+                icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = strcat(ftos(SBAR.BuildingPercentage), "%");
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            }
+
+            // disp
+            pos = [pos_x, pos_y + size_y + 2];
+            basepos = pos;
+            if (SBAR.HasDispenser)
+            {
+                icon = ICON_ENGINEER_DISP; //HudIcons[playerclass + 7].icon;
+                HRC_drawpic(pos, icon, size, '1 1 1', 1, 0);
+
+                msg = strcat("H: ", ftos(rint(SBAR.DispenserHealth)));
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize, pos, basepos, FALSE, colour);
+            }
+            break;
     }
 }
 

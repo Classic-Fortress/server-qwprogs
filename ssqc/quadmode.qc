@@ -1,5 +1,7 @@
 void () info_player_teamspawn;
 
+void Activate2v2_Ruleset();
+
 void () PostFOQuadStarted = {
 	if (!fo_login_required)
 		return;
@@ -11,9 +13,19 @@ void () PostFOQuadStarted = {
 	}
 
 	local string data = "";
-
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
+
+	local float rated = CF_GetSetting("mra", "fo_matchrated", "2");
+	if (rated == 2) {
+		if(TeamFortress_TeamGetNoPlayersExcludingAllTime(1) > 2) {
+			rated = 1;
+		} else {
+			rated = 0;
+		}
+	}
+	data = strcat(data, "    \"rated\": \"", ftos(rated), "\",\n");
+
 	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
@@ -34,9 +46,11 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
 	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
 	data = strcat(data, "    },\n");
+
 	data = strcat(data, "    \"discord_channel\": {\n");
 	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
 	data = strcat(data, "    },\n");
+
 	data = strcat(data, "    \"teams\": {\n");
 
 	local float tn;
@@ -416,6 +430,7 @@ void () QuadRoundThink = {
             {
                 local string st;
                 st = ftos(round_delay_time);
+								round_end_time = time + round_delay_time + 1;
                 bprint(2, "ROUND TIME OVER\nNext round begins in ", st, " seconds\n");
             }
 
@@ -503,13 +518,8 @@ void () QuadRoundBegin = {
 	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
-    te = find(world, classname, "player");
-    while (te) {
-        if(infokeyf(te, INFOKEY_P_CSQCACTIVE)) {
-            UpdateClientQuadRoundBegin(te, round_time);
-        }
-        te = find(te, classname, "player");
-    }
+	round_end_time = time + round_time * 60 + 1;
+	UpdateClientQuadRoundBegin(te, round_time);
 
 	if (!self.cnt) {
 		self.cnt = stof(infokey (world, "round_time")) - 1;
@@ -700,8 +710,11 @@ void () StartQuadRound =
 			p = find(p, classname, "player");
 		}
 
-		if (rounds == 2 && legit_players > 1)
+		if (rounds == 2 && legit_players > 1) {
 			PostFOQuadStarted();
+			if (legit_players == 4)
+				Activate2v2_Ruleset();
+		}
 
 		if (rounds == 1 /* final round */) {
 			te = find(world, classname, "player");
@@ -823,3 +836,7 @@ void () StartQuadRound =
 		te.nextthink = (time + 1);
 	}
 };
+
+void Activate2v2_Ruleset() {
+    disable_resup_gren = 3;  // Disable gren1 and gren2 pickups
+}

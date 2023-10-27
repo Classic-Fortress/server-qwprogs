@@ -115,8 +115,9 @@ float vote_list_offset;
 entity current_vote;
 string vote_list_filter;
 float zoomed_in;
+
 float slot_history[MAX_SLOT_HISTORY_SIZE];
-float slot_history_top;
+float slot_history_top, slot_under_stack;
 
 .string name;
 .string description;
@@ -233,23 +234,6 @@ FO_Hud_Icons HudIcons2[39] = {
     {"textures/wad/anum_percent"}
 };
 
-FO_Hud_Icons GrenadeIcons[14] = {
-    {ICON_GREN_NONE},
-    {ICON_GREN_NORMAL},
-    {ICON_GREN_CONCUSSION},
-    {ICON_GREN_NAIL},
-    {ICON_GREN_MIRV},
-    {ICON_GREN_NAPALM},
-    {ICON_GREN_FLARE},
-    {ICON_GREN_GAS},
-    {ICON_GREN_EMP},
-    {ICON_GREN_FLASH},
-    {ICON_GREN_CALTROP},
-    {ICON_GREN_BLAST},
-    {ICON_GREN_SHOCK},
-    {ICON_GREN_BURST},
-};
-
 FO_Hud_Icons FaceIcons[] = {
     //normal
     {"textures/wad/face1"},
@@ -289,7 +273,6 @@ typedef struct {
     float FragStreak;
     float Caps;
     string Identify;
-    float PlayerClass;
     string MOTD;
     string Hint;
     //1 = Clanmode, 2 = Quadmode, 4 = Duelmode, 8 = Prematch
@@ -347,6 +330,8 @@ typedef struct {
     float duelmode;
     float quad_rounds;
     float quad_round_time;
+    float fo_login_required;
+    float fo_matchrated;
     float captainmode;
     float timelimit;
     float fraglimit;
@@ -422,6 +407,7 @@ enum PanelID:float {
     HUDP_MENU,
     HUDP_MENU_HINT,
     HUDP_CLIPSIZE,
+    HUDP_RELOADPROGRESS,
     HUDP_FRAGSTREAK,
     HUDP_CAPS,
     HUDP_GREN1,
@@ -532,6 +518,7 @@ enumflags {
     FL_GT_SOUND,
     FL_GT_THROWN,
     FL_GT_ADJPING,
+    FL_GT_LOCAL,
 };
 
 void(string identify) Hud_DrawIdentifyPanel;
@@ -725,8 +712,8 @@ CsGrenTimer grentimers[NUM_GREN_TIMERS];
 
 class CsGrenTimer {
     float index_;
-    float primed_at_;
     float expires_at_;
+    float raw_expires_at_;
     float flags_;
     float grentype_;
     float playing_;
@@ -734,16 +721,19 @@ class CsGrenTimer {
     nonvirtual float() index { return index_; };
     nonvirtual float() active { return expires_at_ > time; };
     nonvirtual float() expiry { return expires_at_; };
+    nonvirtual float() raw_expiry { return raw_expires_at_; };
     nonvirtual float() grentype { return grentype_; };
-    nonvirtual void() set_thrown { flags_ |= FL_GT_THROWN; };
-    nonvirtual float() is_thrown { return flags_ & FL_GT_THROWN; };
+
+    nonvirtual float(float flag) test_flag { return flags_ & flag; };
+    nonvirtual void(float flag) set_flag { flags_ |= flag; };
+    nonvirtual void(float flag) clear_flag { flags_ &= ~flag; };
+
     nonvirtual float() sound_offset {
         float offset = max(3.8 - (expires_at_ - time), 0);
         return offset;
     };
 
-    nonvirtual void(float primed_at, float expires_at,
-                    float grentype, float timer_flags) Set;
+    nonvirtual void(float expires_at, float grentype, float timer_flags) Set;
     nonvirtual void() Stop;
 
     nonvirtual void() PauseSound {
@@ -752,6 +742,17 @@ class CsGrenTimer {
             soundupdate(this, CHAN_VOICE, "", -1, 0, 0, 0, 0);
     };
     nonvirtual void() StartSound;
+
+    nonvirtual void(float offset, float adj_sound) adj_sync {
+      if (!playing_)
+          return;
+
+      raw_expires_at_ += offset;
+      if (adj_sound) {  // Not yet working well
+          expires_at_ += offset;
+          StartSound();
+      }
+    };
 
     static float next_index_;
     static CsGrenTimer last_;
@@ -770,6 +771,20 @@ class CsGrenTimer {
         next_index_ = (next_index_ + 1) % grentimers.length;
         last_ = grentimers[next_index_];
         return last_;
+    };
+
+    static CsGrenTimer(float exp, float eps) Match {
+        CsGrenTimer result = world;
+        float best = eps;
+
+        for (float i = 0; i < grentimers.length; i++) {
+            float d = fabs(exp - grentimers[i].raw_expiry());
+            if (d < best) {
+                best = d;
+                result = grentimers[i];
+            }
+        }
+        return result;
     };
 
     static void() SyncPause {
@@ -856,19 +871,24 @@ DEFCVAR_FLOAT(fo_fte_hud, 0);
 DEFCVAR_FLOAT(fo_legacy_sbar, 0);
 DEFCVAR_FLOAT(fo_csjumpsounds, 1);
 
+struct GameState {
+    float localentnum;
+    float is_player;
+    float is_alive;
+    float is_spectator;
+    float is_ceasefire;
+    float spawn_gen;
+};
+
+GameState game_state, prev_game_state;
+
 float team_no;
 float crosshair_team_no;
 float all_time;
-float is_spectator;
-float player_class;
-float is_observer;
-float is_player;
-float is_alive;
 float painfinished;
 vector thisorigin;
 float jump_counter;
-float grentimer_waiting;
-float last_death_time;
+float last_id_time;
 
 vector FO_Hud_Icon_Size = [24, 24, 0];
 vector FO_Hud_Icon_Font_Size = [8, 8, 0];
@@ -889,3 +909,20 @@ float(float playernum, string keyname, optional float assumevalue) getplayerkeyf
 		Cheaper version of getplayerkeyvalue that avoids the need for so many tempstrings. */
 float(string key, optional float assumevalue) serverkeyfloat = #0:serverkeyfloat; /*
 		Version of serverkey that returns the value as a float (which avoids tempstrings). */
+
+
+vector PM_Org();
+vector PM_Vel();
+
+struct veci {
+    vector v;
+    float i;
+};
+
+void cvar_parse4(string s, __out veci target) {
+    tokenize(s);
+    target.v[0] = stof(argv(0));
+    target.v[1] = stof(argv(1));
+    target.v[2] = stof(argv(2));
+    target.i = stof(argv(3));
+}

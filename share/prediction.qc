@@ -4,52 +4,62 @@
 
 // Below apply to both CSQC & SSQC ents
 .float antilag_ms;
+.float created_at;
 
-string wp_version = "v1.0";
+string wp_version = "v1.1";
 
 enumflags {
     FOWP_CTIME,
+    FOWP_PMOVE,
     FOWP_IMPULSE,
     FOWP_TFSTATE,
     FOWP_LASTPRIME,
+    FOWP_CLASSIC_CONC,
     FOWP_CONCFINISH,
     FOWP_CLIP,
+    FOWP_GREN,
     FOWP_THINK,
     FOWP_WF,
     FOWP_AF,
     FOWP_CLASS,
     FOWP_RELOAD,
+    FOWP_SPECIAL,
     FOWP_RNG0,
     FOWP_RNG1,
+    FOWP_RNG2,
     FOWP_PREDICT_FLAGS,
-    FOWP_NEW,  // We only use this for a new entity, which is FFF... anyway.
+    FOWP_FILTER_ENTS,
+    FOWP_LAST,
 };
+const float FOWP_ALL = FOWP_LAST - 1;
 
 enumflags {
     FOPP_INIT,
     FOPP_POS,
     FOPP_AUX,
     FOPP_ANGLES,
-    FOPP_AVEL,
     FOPP_MOVETYPE,
     FOPP_EXPIRY,
-    FOPP_NEW,  // We only use this for a new entity, which is FFF... anyway.
+    FOPP_FORWARDKNOCK,
 };
 
-#define FOWP_ALL 0xFFFF
+.float forward_knock;
 
 enumflags {
-    CSQC_WEAP_PRED,
-    CSQC_PROJ_PRED,
-    CSQC_SETSPEED,
-    CSQC_SNIPER_SIGHT,
+    PF_PMOVE,
+    PF_POS,
+    PF_PMOVE_ACTIVATING,
 };
+
+static float MAX_FILTER_ENTS = 4;
 
 struct predict_tf_state {
     int playerclass;
-    int predict_flags;
+    int predict_flags, effects;
     int impulse;
     Slot current_slot, queue_slot, last_slot;
+
+    ConcState conc_state;
 
     float tfstate;
     float last_prime;
@@ -57,8 +67,9 @@ struct predict_tf_state {
 
     float conc_amp;
     float conc_finished;
+    float special_next;
 
-    float client_time;
+    float client_time, server_time;
     float client_ping;
     float weaponframe;
 
@@ -66,9 +77,19 @@ struct predict_tf_state {
     float client_nextthink;
     float client_thinkindex;
 
+    float reload_started;
     float reload_finished;
     float clip_fired[4];
     int prng_base[PRNG_NUM_STATES];
+
+    float no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp;
+
+    float num_filter_ents;
+#ifdef SSQC
+    entity filter_ents[MAX_FILTER_ENTS];
+#else
+    float filter_ents[MAX_FILTER_ENTS];
+#endif
 
 #ifdef CSQC
     // Used for prediction, not actually communicated.  Reset each frame.
@@ -294,9 +315,14 @@ float FO_MaxRewindGrenWinDt() {
 .predict_tf_state predict_state;
 .entity predict_entity;
 
+inline float *self_tf_state() { return &self.tfstate; }
+
 #else
 
 predict_tf_state pstate_pred, pstate_server;
+
+inline float *self_tf_state() { return &pstate_pred.tfstate; }
+
 #define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512
 #define MASK_OUTLINE        1024
@@ -304,7 +330,7 @@ predict_tf_state pstate_pred, pstate_server;
 #endif
 
 #ifdef SSQC
-#define OP1(_op, _f1)                       (player.predict_state.##_f1 _op player.##_f1)
+#define OP1(_op, _f1)                       (player.predict_state.##_f1 _op src.##_f1)
 #define OP2(_op, _j, _f1, _f2)              OP1(_op, _f2)               _j OP1(_op, _f1)
 #define OP3(_op, _j, _f1, _f2, _f3)         OP2(_op, _j, _f2, _f3)      _j OP1(_op, _f1)
 #define OP4(_op, _j, _f1, _f2, _f3, _f4)    OP3(_op, _j, _f2, _f3, _f4) _j OP1(_op, _f1)
@@ -313,39 +339,85 @@ predict_tf_state pstate_pred, pstate_server;
 #define M3(_bit, _f1, _f2, _f3) if (OP3(!=, ||, _f1, _f2, _f3)) { mask |= _bit; OP3(=, ;, _f1, _f2, _f3); }
 #define M4(_bit, _f1, _f2, _f3, _f4) if (OP4(!=, ||, _f1, _f2, _f3, _f4)) { mask |= _bit; OP4(=, ;, _f1, _f2, _f3, _f4); }
 
-.float last_full_predict_refresh;
+.float pred_lastforce;
+.float pred_forcebit;
+.entity last_pred_src;
+.float predict_flags;
 
-void Predict_Update() {
-    entity pe = self.predict_entity;
-    if (pe != __NULL__)
-        pe.SendFlags = 1;  // Will compute what to send.
-}
+static float Prediction_ChangedMask(entity player, entity src) {
+    if (src != player.last_pred_src) {
+        player.last_pred_src = src;
+        return FOWP_ALL;
+    }
 
-static float Prediction_ChangedMask(entity player) {
     float mask = FOWP_CTIME;
 
-    player.predict_state.client_time = player.client_time;
-    player.predict_state.client_ping = player.client_ping;
+    player.predict_state.server_time = time;
+    player.predict_state.client_time = src.client_time;
+    player.predict_state.client_ping = src.client_ping;
+
+    if (player.predict_flags & (PF_PMOVE | PF_POS))
+        mask |= FOWP_PMOVE;
+
+    if (player == src)
+        mask |= FOWP_FILTER_ENTS;
 
     M1(FOWP_CLASS, playerclass);
     M4(FOWP_IMPULSE, impulse, current_slot.id, queue_slot.id, last_slot.id);
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
+    M2(FOWP_CLASSIC_CONC, conc_state.next, conc_state.mag);
     M2(FOWP_CONCFINISH, conc_finished, conc_amp);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
     M4(FOWP_CLIP, clip_fired[0], clip_fired[1], clip_fired[2], clip_fired[3]);
-    M1(FOWP_RELOAD, reload_finished);
+    M2(FOWP_RELOAD, reload_started, reload_finished);
+    M1(FOWP_SPECIAL, special_next);
     M1(FOWP_RNG0, prng_base[PRNG_WEAP]);
-    M1(FOWP_RNG1, prng_base[PRNG_HWGUY])
+    M1(FOWP_RNG1, prng_base[PRNG_HWGUY]);
+    M1(FOWP_RNG2, prng_base[PRNG_CONC]);
+    M2(FOWP_PREDICT_FLAGS, predict_flags, effects);
+    M4(FOWP_GREN, no_grenades_1, no_grenades_2, primed_gren_type, primed_gren_exp)
 
-    if (time - player.last_full_predict_refresh >= 1000 * MSEC) {
-        player.last_full_predict_refresh = time;
-        return 0xFFFFFF;
+    // Rotate through forced update fields.
+    if (time - player.pred_lastforce >= 100 * MSEC) {
+        player.pred_lastforce = time;
+
+        player.pred_forcebit <<= 1;
+        if (player.pred_forcebit >= FOWP_LAST)
+            player.pred_forcebit = 1;
+
+        if (player.pred_forcebit & (FOWP_PMOVE | FOWP_FILTER_ENTS) == 0)
+            mask |= player.pred_forcebit;
     }
 
     return mask;
+}
+
+void Predict_AddFilterEnt(entity p, entity filter) {
+    if (p.predict_flags & PF_PMOVE == 0)
+        return;
+
+    predict_tf_state* ps = &p.predict_state;
+    if (ps->num_filter_ents >= MAX_FILTER_ENTS)
+            return;
+    ps->filter_ents[ps->num_filter_ents++] = filter;
+}
+
+void Predict_InitPlayer(entity player);
+void Predict_SyncPmove(float is_player);
+
+void Predict_Update(float is_player) {
+    Predict_SyncPmove(is_player);
+    Predict_InitPlayer(self);
+
+    // When spectating, goalentity is our target.
+    entity src = self.goalentity;
+    if (!src)
+        src = self;
+
+    self.predict_entity.SendFlags |= Prediction_ChangedMask(self, src);
 }
 
 #undef OP1
@@ -374,7 +446,7 @@ float() ReadEntity = #368;
 int() ReadInt = #0:readint;
 
 void InitWeapPredEnt(entity e);
-void WP_ServerUpdate();
+void WP_ServerUpdate(float sendflags);
 void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
@@ -417,26 +489,51 @@ void EntUpdate_Config() {
 #undef COMM
 
 #ifdef SSQC
-#define COMM(_type, _field) Write##_type(MSG_ENTITY, self.owner.predict_state.##_field)
-float WP_SendEntity(entity to_player, float ignored) {
+#define GETF(_field) self.owner.predict_state.##_field
+#define COMM(_type, _field) Write##_type(MSG_ENTITY, GETF(_field))
+#define COMM_PM(_type, _field) Write##_type(MSG_ENTITY, self.owner.##_field)
+float WP_SendEntity(entity to_player, float sendflags) {
     if (to_player != self.owner)
         return FALSE;
-
-    float sendflags = Prediction_ChangedMask(self.owner);
 
     WriteByte(MSG_ENTITY, ENT_WEAPONPRED);
     WriteFloat(MSG_ENTITY, sendflags);
 #else
-#define COMM(_type, _field) pstate_server.##_field = Read##_type()
+entity PM_Ent();
+#define GETF(_field) pstate_server.##_field
+#define COMM(_type, _field) GETF(_field) = Read##_type()
+#define COMM_PM(_type, _field) PM_Ent().##_field = Read##_type()
+
 void EntUpdate_WeaponPred(float isnew) {
     float sendflags = readfloat();
 #endif
-    if (sendflags & FOWP_PREDICT_FLAGS)
+    if (sendflags & FOWP_PREDICT_FLAGS) {
         COMM(Byte, predict_flags);
+        COMM(Short, effects);
+    }
 
     if (sendflags & FOWP_CTIME) {
         COMM(Float, client_time);
+        COMM(Float, server_time);
         COMM(Short, client_ping);
+    }
+
+    if (sendflags & FOWP_PMOVE) {
+        COMM_PM(Coord, origin[0]);
+        COMM_PM(Coord, origin[1]);
+        COMM_PM(Coord, origin[2]);
+        COMM_PM(Short, velocity[0]);
+        COMM_PM(Short, velocity[1]);
+        COMM_PM(Short, velocity[2]);
+    }
+
+    if (sendflags & FOWP_FILTER_ENTS) {
+        COMM(Byte, num_filter_ents);
+        for (float i = 0; i < GETF(num_filter_ents); i++)
+            COMM(Entity, filter_ents[i]);
+#ifdef SSQC
+        GETF(num_filter_ents) = 0;  // Destructive transmission
+#endif
     }
 
     if (sendflags & FOWP_CLASS) {
@@ -457,6 +554,11 @@ void EntUpdate_WeaponPred(float isnew) {
 
     if (sendflags & FOWP_LASTPRIME) {
         COMM(Float, last_prime);
+    }
+
+    if (sendflags & FOWP_CLASSIC_CONC) {
+        COMM(Float, conc_state.next);
+        COMM(Byte, conc_state.mag);
     }
 
     if (sendflags & FOWP_CONCFINISH) {
@@ -484,13 +586,28 @@ void EntUpdate_WeaponPred(float isnew) {
         COMM(Byte, clip_fired[3]);
     }
 
-    if (sendflags & FOWP_RELOAD)
+    if (sendflags & FOWP_RELOAD) {
+        COMM(Float, reload_started);
         COMM(Float, reload_finished);
+    }
+
+    if (sendflags & FOWP_SPECIAL) {
+        COMM(Float, special_next);
+    }
 
     if (sendflags & FOWP_RNG0)
         COMM(Int, prng_base[PRNG_WEAP]);
     if (sendflags & FOWP_RNG1)
         COMM(Int, prng_base[PRNG_HWGUY]);
+    if (sendflags & FOWP_RNG2)
+        COMM(Int, prng_base[PRNG_CONC]);
+
+    if (sendflags & FOWP_GREN) {
+        COMM(Short, no_grenades_1);
+        COMM(Short, no_grenades_2);
+        COMM(Byte, primed_gren_type);
+        COMM(Float, primed_gren_exp);
+    }
 
 #ifdef SSQC
     return TRUE;
@@ -498,22 +615,30 @@ void EntUpdate_WeaponPred(float isnew) {
     if (isnew)
         InitWeapPredEnt(self);
     else
-        WP_ServerUpdate();
+        WP_ServerUpdate(sendflags);
 #endif
 }
 #undef COMM
+#undef COMM_PM
+#undef GETF
 
 #ifdef SSQC
 #define COMM(_type, _field) Write##_type(MSG_ENTITY, self.##_field)
 #define COMMD(_type, _dest, _field) COMM(_type, _field)
 #define COMMO(_type, _dest, _src) Write##_type(MSG_ENTITY, _src)
-float PP_SendEntity(entity to_player, float sendflags) {
-    if (sendflags & FOPP_NEW) {
-        sendflags = FOPP_INIT | FOPP_POS;
+float PP_SendEntity(entity to_player, float sendmask) {
+    float sendflags = sendmask;
+
+    if (sendflags & FOPP_INIT) {
+        sendflags = FOPP_INIT | FOPP_POS;  // Note: replaces sendmask
         if (self.fpp.aux)
             sendflags |= FOPP_AUX;
         if (self.fpp.expires_at)
             sendflags |= FOPP_EXPIRY;
+        if (FPP_Get(self.fpp.index)->movetype != self.movetype)
+            sendflags |= FOPP_MOVETYPE;
+        if (self.forward_knock)
+            sendflags |= FOPP_FORWARDKNOCK;
     }
 
     WriteByte(MSG_ENTITY, ENT_PROJECTILE);
@@ -529,6 +654,7 @@ void EntUpdate_Projectile(float isnew) {
     if (sendflags & FOPP_INIT) {
         COMM(Byte, fpp.index);
         COMM(Short, antilag_ms);
+        COMM(Float, created_at);
         COMMD(Entity, owner_entnum, owner);
     }
 
@@ -556,12 +682,9 @@ void EntUpdate_Projectile(float isnew) {
         COMM(Coord, angles[0]);
         COMM(Coord, angles[1]);
         COMM(Coord, angles[2]);
-    }
-
-    if (sendflags & FOPP_AVEL) {
-        COMM(Coord, avelocity[0]);
-        COMM(Coord, avelocity[1]);
-        COMM(Coord, avelocity[2]);
+        COMM(Short, avelocity[0]);
+        COMM(Short, avelocity[1]);
+        COMM(Short, avelocity[2]);
     }
 
     if (sendflags & FOPP_MOVETYPE) {
@@ -569,6 +692,9 @@ void EntUpdate_Projectile(float isnew) {
         if (self.movetype == MOVETYPE_FOLLOW)
             COMMD(Entity, aiment_num, aiment);
     }
+
+    if (sendflags & FOPP_FORWARDKNOCK)
+        COMM(Float, forward_knock);
 
 #ifdef SSQC
     return TRUE;
@@ -676,6 +802,7 @@ static void WeaponPred_CheckConfigUpdate() {
     CONFIG_UPDATE(TRUE,  "tfx", tfx_flags);
     CONFIG_UPDATE(TRUE,  "clown", clown_flags);
     CONFIG_UPDATE(FALSE, "clown_grav", clown_grav);
+    CONFIG_UPDATE(FALSE, "rj", rj);
 
     CLAMP_UPDATE(dynamic_newmis_ms, 0, fo_config.static_newmis_ms);
     CLAMP_UPDATE(max_rewind_ms, 0, 250);
@@ -712,22 +839,9 @@ void Predict_Init() {
     config_entity.nextthink = time + 0.5;
 }
 
-.float wpp_init;
 void Predict_InitPlayer(entity player) {
-    // PutClientInServer is called every spawn.  At some point we'll clean up
-    // parameter decode so that it can happen earlier and this nonsense goes
-    // away.
-    if (player.wpp_init)
+    if (player.predict_entity)
         return;
-    player.wpp_init = TRUE;
-
-    if (!infokeyf(player, INFOKEY_P_CSQCACTIVE)) {
-        bprint(PRINT_HIGH, player.netname, " is using a legacy non-CSQC client.\n");
-        return;
-    }
-
-    sprint(player, PRINT_HIGH,
-            "FortressOne: Weapon Prediction ", wp_version, "\n");
 
     entity pe = spawn();
     pe.owner = player;
@@ -737,6 +851,7 @@ void Predict_InitPlayer(entity player) {
     pe.SendEntity = WP_SendEntity;
     setorigin(pe, [0, 0, 0]);
 
+    player.pred_forcebit = 1;
     player.predict_entity = pe;
 }
 
@@ -757,9 +872,29 @@ void WeaponPred_DoServerClientThink() {
     }
 }
 
+void ProjRewindForTravel(entity e, float target_time);
+void NoRewindSyncFn(entity e, float target_time);
+void RW_StashAll();
+void RW_RestoreAll();
+
 void FO_CustomPhysics() {
     if (!self.voided) {
-        Phys_Advance(self, time, 0);
+        float physf = 0;
+        if (RewindFlagEnabled(REWIND_PROJ_TRAVEL)) {
+            // This is a little inside out, it would be nice to do this by time
+            // then by projectile/player, but structure makes that difficult
+            // without more aggressive change.
+            RW_StashAll();
+            physf = PHYSF_REWIND_PLAYERS;
+            RewindSyncTime = ProjRewindForTravel;
+        }
+
+        Phys_Advance(self, time, physf);
+
+        if (RewindFlagEnabled(REWIND_PROJ_TRAVEL)) {
+            RewindSyncTime = NoRewindSyncFn;
+            RW_RestoreAll();
+        }
 
         // Moving platforms don't get properly reflected into the entities CSQC
         // sees so just blast the client with updates when on one (in motion).
@@ -811,20 +946,21 @@ void PredProj_Sound(int proj_type, float vol = 1) {
     Pred_Sound(FPP_Get(proj_type)->snd, vol);
 }
 
-void Forward_Projectile(int fpp_type, entity projectile);
+void Forward_Projectile(int fpp_type, entity projectile, float use_ctime=0);
 
 entity FOProj_Create(int fpp_type) {
     entity prj = spawn();
 
     prj.fpp.index = fpp_type;
     prj.dimension_seen = DMN_NOFLASH;
+    prj.created_at = time;
     setmodel(prj, FPP_Get(fpp_type)->model);
     setsize(prj, '0 0 0', '0 0 0');
 
     return prj;
 }
 
-void FOProj_Finalize(entity mis) {
+void FOProj_Finalize(entity mis, float use_ctime=0) {
     int fpp_type = mis.fpp.index;
     // We explicitly do not use newmis.  Newmis internally implements a fixed
     // 50m forward of physics handling (equivalent to our projection below)
@@ -852,23 +988,97 @@ void FOProj_Finalize(entity mis) {
         csqc_networking = (csqc_networking && fo_config.qc_physics);
     }
 
+    // After any model updates have occurred
+    setsize(mis, '0 0 0', '0 0 0');
+
     // We always need to init some of the state here (e.g. phys_time) as we
     // always use the physics code client-side.
     if (fo_config.qc_physics)
         mis.customphysics = FO_CustomPhysics;
 
-    Forward_Projectile(mis.fpp.index, mis);
+    Forward_Projectile(mis.fpp.index, mis, use_ctime);
 
     // Below is conditional on using custom SendEntity.
     if (csqc_networking) {
         mis.SendEntity = PP_SendEntity;
-        mis.SendFlags = FOPP_NEW;
+        mis.SendFlags = FOPP_INIT;
     } else if (fpp_type == FPP_HANDGRENADE) {
         entity target = self;
         if (target.classname != "player")
             target = target.owner;  // Handle call from timer on latched throw.
         FO_Sound(target, CHAN_WEAPON, Snd_Get(SND_THROWGREN)->sound, 1, ATTN_NORM);
     }
+}
+
+.float pmt_nexttime;
+.float pmt_nextstate;
+
+enum PmtState {
+    PMT_INACTIVE,
+    PMT_ACTIVE,
+    PMT_ACTIVATE1,
+    PMT_ACTIVATE2,
+    PMT_DEACTIVATE1,
+    PMT_DEACTIVATE2,
+};
+
+float PmtBlockMaxSpeed() {
+    return self.pmt_nexttime != 0;  // When set, we're in transition edges.
+}
+
+void TeamFortress_SetSpeed(entity ent);
+void Predict_SyncPmove(float is_player) {
+    if (time < self.pmt_nexttime)
+        return;
+
+    float active = self.predict_flags & PF_PMOVE;
+    float want_active = (ClientPred_Enabled(self, CSQC_PMOVE)) && is_player;
+    float state = self.pmt_nextstate;
+
+    if (!active && want_active && state == PMT_INACTIVE)
+        state = PMT_ACTIVATE1;
+    else if (active && !want_active && state == PMT_ACTIVE)
+        state = PMT_DEACTIVATE1;
+
+    if (state == PMT_ACTIVE || state == PMT_INACTIVE) {
+        self.pmt_nexttime = 0;
+
+        if (state == PMT_INACTIVE) {
+            if (ClientPred_Enabled(self, CSQC_FORCE_POS))
+                self.predict_flags |= PF_POS;
+            else
+                self.predict_flags &= ~PF_POS;
+        }
+        return;
+    }
+
+    float next_step = 0.1;
+    switch (state) {
+        case PMT_ACTIVATE1:
+            self.predict_flags |= PF_POS;
+            self.maxspeed = SPEC_MAXSPEED;
+            self.pmt_nextstate = PMT_ACTIVATE2;
+            break;
+        case PMT_ACTIVATE2:
+            self.predict_flags |= PF_PMOVE;
+            self.nodrawtoclient = self;
+            TeamFortress_SetSpeed(self);
+            sprint(self, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
+            self.pmt_nextstate = PMT_ACTIVE;
+            break;
+        case PMT_DEACTIVATE1:
+            next_step = 2;
+            self.nodrawtoclient = world;
+            TeamFortress_SetSpeed(self);
+            self.pmt_nextstate = PMT_DEACTIVATE2;
+            break;
+        case PMT_DEACTIVATE2:
+            self.predict_flags &= ~(PF_PMOVE | PF_POS);
+            sprint(self, PRINT_HIGH, "*** PMOVE DEACTIVATED\n");
+            self.pmt_nextstate = PMT_INACTIVE;
+            break;
+    }
+    self.pmt_nexttime = time + next_step;
 }
 #endif
 
@@ -897,19 +1107,12 @@ ProjectResult Forward_ProjectOffset(int fpp_type, float ping) {
     if (IsClownMode(CLOWN_FAST_PROJECTILES) && !FPP_IsGrenade(fpp_type))
         static_credit = 9999;
 
-    float frame_nudge = 0;
-#ifdef CSQC
-    // Account for the fact that the server usually has a physics frame that's
-    // going to be credited to the new projectile.
-    if (!fo_config.qc_physics)
-        frame_nudge = SERVER_FRAME_MS * 1.5;
-#endif
     // Everything lower than SERVER_FRAME_MS falls into the next frame (and we
     // have no resolution anyway), linearize beyond that.
     float adj_ping = max(ping - SERVER_FRAME_MS, 0);
 
     ProjectResult result;
-    result.static_ms = static_credit + frame_nudge;
+    result.static_ms = static_credit;
     result.dynamic_ms = min(adj_ping, max_ping_credit);
     return result;
 }
@@ -950,4 +1153,3 @@ void AugmentGrenadeImpact() {
         self.SendFlags |= FOPP_MOVETYPE;
 #endif
 }
-

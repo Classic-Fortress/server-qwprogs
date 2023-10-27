@@ -22,10 +22,9 @@ void () TeamFortress_DisplayLegalClasses;
 void () TeamFortress_ShowIDs;
 void () TeamFortress_ShowTF;
 
-void (float inp, float is_player) TeamFortress_PrimeGrenade;
+void TeamFortress_PrimeGrenade(float inp, float is_player);
 void () TeamFortress_ThrowGrenade;
 void (float inp) TeamFortress_PrimeThrowGrenade;
-void () TeamFortress_GrenadeSwitch;
 
 void () PipebombTouch;
 
@@ -97,7 +96,7 @@ void () BioInfection_MonsterDecay;
 float (float weap) W_GetSlot;
 float (float weap) W_OldGetSlot;
 void () W_FireFlame;
-void () W_FireIncendiaryCannon;
+void W_FireIncendiaryCannon(vector org, vector angles, float use_ctime=0);
 void () W_FireTranq;
 void () W_FireRailgun;
 
@@ -187,6 +186,7 @@ void (float att_delay) Attack_Finished = {
         att_delay *= 2;
 
     self.attack_finished = self.client_time + att_delay;
+    self.last_attack_ctime = self.client_time;
 };
 
 float* W_ammo_to_p(entity player, AmmoType ammo_type) {
@@ -1033,10 +1033,8 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
-.float al_dmg;
-
 static void Antilag_Knock(entity e) {
-    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    T_RadiusDamage(e, e.owner, e.heat, __NULL__, __NULL__, e.owner);
     dremove(e);
 }
 
@@ -1048,26 +1046,31 @@ float AntilagKnock(entity e, float dmg) {
     if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
         return FALSE;
 
+    // Only applies during initial antilag forward
+    if (e.flags & FL_FORWARD_KNOCK == 0)
+        return FALSE;
+
     entity knock_e = spawn();
 
     setorigin(knock_e, e.origin);
+    setsize(knock_e, '0 0 0', '0 0 0');
     knock_e.s_origin = e.s_origin;
     knock_e.owner = e.owner;
     knock_e.classname = e.classname;
     knock_e.oldenemy = other;
-    knock_e.al_dmg = dmg;
+    knock_e.heat = dmg;
+    knock_e.filter_ent = e;
 
     vector diff = e.origin - e.s_origin;
     float ttime = vlen(diff) / vlen(e.velocity);
-    float dtime = time - e.s_time;
 
-    float delay = ttime - dtime;
-
-    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+    if (ttime > SERVER_FRAME_DT) {
         knock_e.think = T_Knock_Antilag;
-        knock_e.nextthink = time + delay;
+        knock_e.nextthink = time + ttime;
+        e.forward_knock = time + ttime;
     } else {
         Antilag_Knock(knock_e);
+        e.forward_knock = -1;
     }
 
     return TRUE;
@@ -1080,10 +1083,6 @@ void () T_MissileTouch = {
         return;
     self.voided = 1;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     damg = 92 + random() * 20;
 
     deathmsg = self.weapon;
@@ -1095,6 +1094,9 @@ void () T_MissileTouch = {
     float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
     entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
     T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
+
+    if (!self.s_time)
+        self.forward_knock = -1;
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
@@ -1108,13 +1110,13 @@ void () T_MissileTouch = {
     dremove_sent(self);
 };
 
-void () W_FireRocket = {
+void W_FireRocket(vector org, vector v_ang, float use_ctime=0) = {
     entity proj = FOProj_Create(FPP_ROCKET);
     proj.owner = self;
     proj.movetype = MOVETYPE_FLYMISSILE;
     proj.solid = SOLID_BBOX;
 
-    makevectors(self.v_angle);
+    makevectors(v_ang);
     proj.velocity = v_forward * FPP_Get(FPP_ROCKET)->speed;
     proj.angles = vectoangles(proj.velocity);
 
@@ -1126,11 +1128,10 @@ void () W_FireRocket = {
 
     proj.weapon = DMSG_ROCKETL;
     proj.classname = "proj_rocket";
-    proj.origin = self.origin + v_forward * 8 + '0 0 16';
+    proj.origin = org + v_forward * 8 + '0 0 16';
 
-    FOProj_Finalize(proj);
+    FOProj_Finalize(proj, use_ctime);
 
-    self.ammo_rockets = self.ammo_rockets - 1;
     KickPlayer(-2, self);
 };
 
@@ -1250,9 +1251,6 @@ void FO_T_GrenExplode() {
     dremove(self);
 }
 
-void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
-                            entity ignore);
-
 void () GrenadeExplode = {
     local entity te;
     float use_antilag = FALSE;
@@ -1325,8 +1323,7 @@ void () ExplodeOldestPipebomb = {
     }
 };
 
-void () W_FireGrenade = {
-    self.ammo_rockets = self.ammo_rockets - 1;
+void W_FireGrenade(vector org, vector v_ang, float use_ctime=0) {
     Pred_Sound(SND_GREN);
     KickPlayer(-2, self);
 
@@ -1354,7 +1351,7 @@ void () W_FireGrenade = {
         proj.team_no = self.team_no;
         proj.fpp.gren_type = GREN_PIPE;
     }
-    makevectors(self.v_angle);
+    makevectors(v_ang);
     if (self.v_angle_x) {
         proj.velocity = (v_forward * 600) +
             (200 + shared_crandom(PRNG_WEAP) * 10) * v_up +
@@ -1366,9 +1363,9 @@ void () W_FireGrenade = {
     }
     proj.angles = vectoangles(proj.velocity);
     proj.think = GrenadeExplode;
-    setorigin(proj, self.origin);
+    setorigin(proj, org);
 
-    FOProj_Finalize(proj);
+    FOProj_Finalize(proj, use_ctime);
 };
 
 void () spike_touch;
@@ -1479,10 +1476,6 @@ void () spike_touch = {
     if (other.solid == SOLID_TRIGGER)
         return;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     if (other.takedamage) {
         spawn_touchblood(9);
         deathmsg = self.weapon;
@@ -1533,10 +1526,6 @@ void () superspike_touch = {
     if (other.solid == SOLID_TRIGGER)
         return;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
     if (other.takedamage) {
         spawn_touchblood(18);
         deathmsg = self.weapon;
@@ -1707,15 +1696,18 @@ void () W_Attack = {
         player_nail1();
     } else if (ws.weapon == WEAP_GRENADE_LAUNCHER) {
         player_rocket1();
-        W_FireGrenade();
+        self.ammo_rockets = self.ammo_rockets - 1;
+        W_FireGrenade(self.origin, self.v_angle);
         Status_Refresh(self);
     } else if (ws.weapon == WEAP_PIPE_LAUNCHER) {
         player_rocket1();
-        W_FireGrenade();
+        self.ammo_rockets = self.ammo_rockets - 1;
+        W_FireGrenade(self.origin, self.v_angle);
         Status_Refresh(self);
     } else if (ws.weapon == WEAP_ROCKET_LAUNCHER) {
         player_rocket1();
-        W_FireRocket();
+        self.ammo_rockets = self.ammo_rockets - 1;
+        W_FireRocket(self.origin, self.v_angle);
         Status_Refresh(self);
     } else if (ws.weapon == WEAP_LIGHTNING) {
         player_light1();
@@ -1742,7 +1734,8 @@ void () W_Attack = {
     } else if (ws.weapon == WEAP_INCENDIARY) {
         if (self.ammo_rockets >= 3) {
             player_rocket1();
-            W_FireIncendiaryCannon();
+            self.ammo_rockets = self.ammo_rockets - 3;
+            W_FireIncendiaryCannon(self.origin, self.v_angle);
         } else if (time >= self.antispam_incendiary_cannon) {
             sprint(self, PRINT_HIGH, "Not enough ammo\n");
             self.antispam_incendiary_cannon = time + 3;
@@ -1880,17 +1873,6 @@ static void W_AmmoError() {
     }
 }
 
-void W_ChangeWeaponByInput(float input) {
-    if (input < 1 || input > GetMaxWeaponInput())
-        return;
-
-    Slot slot = FO_SlotByInput(self.playerclass, input);
-    if (IsSlotNull(slot))
-        return;
-
-    W_ChangeWeaponSlot(slot);
-}
-
 void W_ChangeWeaponSlot(Slot slot) {
     if (self.playerclass == 0)
         return;
@@ -1930,8 +1912,16 @@ void W_ChangeWeaponSlot(Slot slot) {
     Status_Refresh(self);
 };
 
+void W_ChangeQueuedWeaponIfReady() {
+    if (!IsSlotNull(self.queue_slot) && WeaponReady())
+        W_ChangeWeaponSlot(self.queue_slot);
+}
+
 void W_ChangeWeaponLast() {
-    if (!IsSlotNull(self.last_slot))
+    // Clearing queued counts as swap to whatever was pre-queued.
+    if (!IsSlotNull(self.queue_slot))
+        self.queue_slot = SlotNull;
+    else if (!IsSlotNull(self.last_slot))
         W_ChangeWeaponSlot(self.last_slot);
 };
 
@@ -1955,7 +1945,7 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if (!self.is_feigning) {
+    if (!IsFeigned(self)) {
         if (self.impulse == TF_GRENADE_1)
             TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
@@ -2036,8 +2026,6 @@ void () ImpulseCommands = {
         TeamFortress_SaveMe();
     else if (self.impulse == TF_GRENADE_T)
         TeamFortress_ThrowGrenade();
-    else if (self.impulse == TF_GRENADE_SWITCH)
-        TeamFortress_GrenadeSwitch();
     else if (self.impulse == TF_ID)
         CF_Identify(self, 1);
     else if (self.impulse == TF_ID_TEAM)
@@ -2377,14 +2365,14 @@ void () ButtonFrame = {
     if (input_buttons & BUTTON4) {
         switch (self.playerclass) {
             case PC_SOLDIER:
-                self.impulse = TF_IMPULSE_SLOT1;
+                self.impulse = TF_SLOT1;
                 // Intercepted by InterceptRocketJump()
                 break;
             case PC_PYRO:
                 if (IsUsingCFImpulses()) {
-                    self.impulse = TF_IMPULSE_SLOT2;
+                    self.impulse = TF_SLOT2;
                 } else {
-                    self.impulse = TF_IMPULSE_SLOT1;
+                    self.impulse = TF_SLOT1;
                 }
                 // Intercepted by InterceptRocketJump()
                 break;
@@ -2512,7 +2500,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if ((self.is_feigning) &&
+    if (IsFeigned(self) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
             (self.impulse != TF_MEDIC_HELPME) &&
@@ -2525,43 +2513,15 @@ void () W_WeaponFrame = {
         self.impulse = 0;
     }
 
-    // +slot/-slot handle attack; we only need to swap back to last weapon.
-    // Let's see if we can get away with just treating this as last weapon;
-    // there were already so many edge cases in the old code such as swapping on
-    // an empty weapon.
-    if (self.impulse == TF_QUICKSTOP) {
-        if (self.tfstate & TFSTATE_QUICKSLOT)
-            self.impulse = TF_WEAPLAST;
-        else
-            self.impulse = 0;
-        self.tfstate &= ~TFSTATE_QUICKSLOT;
-    }
-
-    float can_change_weapon = WeaponReady();
-
-    // TODO: Open up queueing by moving queue can_change to ChangeWeapon?
-    if (!IsSlotNull(self.queue_slot) && can_change_weapon)
-        W_ChangeWeaponSlot(self.queue_slot);
-
-    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() &&
-        can_change_weapon) {
-        // slot 1-4 (or 1-7) binds
-        W_ChangeWeaponByInput(self.impulse);
-        self.impulse = 0;
-    } else if (self.impulse >= TF_QUICKSLOT1 &&
-               self.impulse <= TF_QUICKSLOT4 && can_change_weapon) {
-        float input = InputHandlePyroSlotSwap(self.playerclass,
-                                              self.impulse - TF_QUICKSLOT1 + 1);
-        Slot slot = MakeSlot(input);
-
-        if (IsSameSlot(slot, self.current_slot)) {
-            self.tfstate &= ~TFSTATE_QUICKSLOT;
-        } else {
-            self.tfstate |= TFSTATE_QUICKSLOT;
+    // slot 1-4 (or 1-7) binds
+    if (self.impulse >= 1 && self.impulse <= GetMaxWeaponInput() ||
+        self.impulse >= TF_SLOT1 && self.impulse <= TF_SLOT4) {
+        Slot slot = FO_SlotByInput(self.playerclass, self.impulse);
+        if (!IsSlotNull(slot))
             W_ChangeWeaponSlot(slot);
-        }
         self.impulse = 0;
     }
+    W_ChangeQueuedWeaponIfReady();
 
     if (self.impulse == TF_CHANGETEAM) {
         Menu_Team(0);
@@ -2653,7 +2613,7 @@ void () W_WeaponFrame = {
     }
 
     //  grenade impulses always possible
-    if ((self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_SWITCH)) {
+    if ((self.impulse >= TF_GRENADE_1 && self.impulse <= TF_GRENADE_PT_2)) {
         ImpulseCommands();
         return;
     }
@@ -2726,5 +2686,31 @@ void () ToggleInvincibility = {
         self.invincible_time = 1;
         self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
         self.invincible_finished = time + 666;
+    }
+};
+
+// TODO: trust the client less, validate more.
+// TODO: Could support hitscan (e.g. sg/ssg)
+void (float weap, float ctime, vector pos, vector angles) CSEv_Attack_ifvv = {
+    if (!RewindFlagEnabled(REWIND_SENDEVENT))
+        return;
+
+    // Only applies to attacks before the last death.   We can't use
+    // attack_finished here as there's an 0.3s lockout on spawn that obscures.
+    float lockout = 15*MSEC;  // Be a tiny bit conservative
+    if (ctime >= self.last_death_ctime - lockout ||
+        ctime < self.last_attack_ctime - lockout)
+        return;
+
+    switch (weap) {
+        case WEAP_ROCKET_LAUNCHER:
+            W_FireRocket(pos, angles, ctime);
+            break;
+        case WEAP_INCENDIARY:
+            W_FireIncendiaryCannon(pos, angles, ctime);
+            break;
+        case WEAP_GRENADE_LAUNCHER:
+            W_FireGrenade(pos, angles, ctime);
+            break;
     }
 };

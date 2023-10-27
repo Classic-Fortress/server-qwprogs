@@ -12,11 +12,14 @@ DEFCVAR_FLOAT(fo_hud_noclipicon, 0);
 
 void(PanelID ignored, string text) drawClipSize = {
     string icon = CVARF(fo_hud_noclipicon) ? "" : ICON_CLIPSIZE;
-    if (is_alive || fo_hud_editor)
+    if (game_state.is_alive || fo_hud_editor)
         Hud_DrawPanelLMP(getHudPanel(HUDP_CLIPSIZE), text, icon, 1);
 };
 
 void(PanelID ignored, string text) drawIdentify = {
+    if (time > last_id_time + 5)
+        return;
+
     if (strlen(text) > 0 || fo_hud_editor)
         Hud_DrawIdentifyPanel(text);
 };
@@ -46,32 +49,28 @@ void(PanelID ignored, string text) drawCapsPanel = {
 };
 
 void(PanelID panelid, string text) drawGren1Panel = {
-    local float playerclass = SBAR.PlayerClass;
+    float playerclass = WP_PlayerClass();
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
 
-    local float gren_type = getstatf(STAT_TP_GREN1);
-    local string icon = GrenadeIcons[gren_type].icon;
-
+    string icon = FO_ClassGren(playerclass, 0)->icon;
     drawIconPanel(HUDP_GREN1, text, icon);
 };
 
 void(PanelID ignored, string text) drawGren2Panel = {
-    local float playerclass = SBAR.PlayerClass;
+    float playerclass = WP_PlayerClass();
 
     if (playerclass < PC_SCOUT || playerclass > PC_ENGINEER)
         return;
 
-    local float gren_type = getstatf(STAT_TP_GREN2);
-    local string icon = GrenadeIcons[gren_type].icon;
-
+    string icon = FO_ClassGren(playerclass, 1)->icon;
     drawIconPanel(HUDP_GREN2, text, icon);
 };
 
 void(PanelID ignored, string text) drawSpecial = {
-    if (SBAR.PlayerClass || fo_hud_editor)
-        Hud_DrawClassInfoPanel(SBAR.PlayerClass);
+    if (WP_PlayerClass() || fo_hud_editor)
+        Hud_DrawClassInfoPanel(WP_PlayerClass());
 };
 
 void(PanelID panelid, string text) drawGrenTimerPanel = {
@@ -110,9 +109,9 @@ void(PanelID panelid, string text) drawGrenTimerPanel = {
         // if things get reordered, but since we can only ever have one
         // grenade primed, we can obscure this by always considering
         // grenades after the first as primed.
-        float alpha = (gt.is_thrown() || timercount) ? 0.3 : 1.0;
-        Hud_DrawPanelLMP(&panel2, ftos(timeleft),
-                GrenadeIcons[gt.grentype()].icon, alpha);
+        float alpha = (gt.test_flag(FL_GT_THROWN) || timercount) ? 0.3 : 1.0;
+        string icon = FO_GrenDesc(gt.grentype())->icon;
+        Hud_DrawPanelLMP(&panel2, ftos(timeleft), icon, alpha);
         panel2.Position = panel2.Position +
             [0, panel2.FillSize.y * panel2.Scale];
         timercount++;
@@ -126,7 +125,7 @@ void(PanelID panelid, string text) drawFacePanel = {
     if (!CVARF(fo_fte_hud))
         return;
 
-    local float playerclass = SBAR.PlayerClass; //we could add different faces per class?
+    local float playerclass = WP_PlayerClass(); //we could add different faces per class?
 
     local string icon = FaceInvisibleInvulnerableIcon.icon;
     
@@ -165,7 +164,7 @@ void(PanelID panelid, string text) drawArmourPanel = {
     if(!CVARF(fo_fte_hud))
         return;
 
-    local float playerclass = SBAR.PlayerClass;
+    local float playerclass = WP_PlayerClass();
 
     local string icon = fo_hud_editor?ArmourIcons[1].icon:"";
     
@@ -302,27 +301,22 @@ string gameClockString() {
     float seconds = 0;
     float timelimit = stof(serverkey("timelimit"));
 
-    if(round_ending) {
-        float t = round_ending - time;
-        if(t < 0) t = t * -1;
-        minutes = floor(t/60);
-        seconds = floor(t - (minutes*60));
-    } else if(timelimit) {
-        minutes = floor(time/60);
-        seconds = 60 - floor(time - (minutes*60));
-        minutes = timelimit - ceil(time/60);
-        if(minutes < 0) minutes = minutes * -1;
-        if(seconds < 0) seconds = seconds * -1;
+    float end = getstatf(STAT_ROUND_END);
+    if (!end)
+        end = timelimit * 60;
+
+    if (end) {
+        minutes = (end - time)/60;
+        seconds = (end - time)%60;
     } else {
-        minutes = floor(time/60);
-        seconds = floor(time - (minutes*60));
+        minutes = time/60;
+        seconds = time%60;
     }
 
-    string sm = strcat((minutes<10?"0":""),ftos(minutes));
-    string ss = strcat((seconds<10?"0":""),ftos(seconds));
+    string sm = strcat((minutes<10?"0":""),ftos(floor(minutes)));
+    string ss = strcat((seconds<10?"0":""),ftos(floor(seconds)));
 
-    string tmp = strcat(sm,":",ss);
-    return tmp;
+    return strcat(sm,":",ss);
 };
 
 static void(PanelID panelid, string text) doNothing = {};
@@ -534,7 +528,8 @@ void(PanelID panelid, string text) drawReadyPanel = {
         if(showingscores || !panel.Display) {
             return;
         }
-        if(prematch && team_no && player_class && !SBAR.CountdownStarted && !is_spectator) {
+        if (prematch && team_no && WP_PlayerClass() && !SBAR.CountdownStarted &&
+              game_state.is_player) {
             if(SBAR.ReadyStatus & PLAYER_READY) {
                 message = "Ready";
                 textcolour = MENU_TEXT_GREEN;
@@ -749,7 +744,7 @@ vector drawShowScoresTeamPanel (FO_Hud_Panel *panel, FO_ScoreBoardTeam* team,
         position_x += strlen(FO_ScoreBoardColumns[col++]) * smalltext.x + padding;
 
         if (team_no == lines[i].team_no || lines[i].team_no == TEAM_SPECTATOR || lines[i].team_no == TEAM_OBSERVER
-            || is_spectator || is_observer) {
+            || game_state.is_spectator) {
             string c = lines[i].classtext;
             if (lines[i].team_no != TEAM_SPECTATOR && lines[i].team_no != TEAM_OBSERVER) {
                 float cspace = strlen(c) * smalltext.x;
@@ -998,7 +993,9 @@ static SpeedBarColors speedbar_colors[] = {
 };
 
 static float PlanarSpeed() {
-    return vlen([pmove_vel.x, pmove_vel.y, 0]);
+    vector pvel = PM_Vel();
+    pvel.z = 0;  // compiler bug: pvel becomes [1 0 0] if this is inlined
+    return vlen(pvel);
 }
 
 void drawSpeedBar(PanelID panelid, string text) {
@@ -1059,6 +1056,35 @@ void drawSpeedBar(PanelID panelid, string text) {
     HRC_drawstring(position + '3 0 0', ftos((int)tspeed), '9 9 0', '1 1 1');
 }
 
+void drawReloadProgress(PanelID panelid, string text) {
+    FO_Hud_Panel* panel = getHudPanel(HUDP_RELOADPROGRESS);
+    vector fillsize = panel.FillSize * panel.Scale;
+    vector position = getPanelPosition(panel);
+
+    if (fo_hud_editor &&
+        hud_panel(panel->id, position, fillsize, 0.2, panel.Display)) {
+        // click event
+    }
+
+    if (!game_state.is_alive)
+        return;
+
+    float per = WP_ReloadPercent();
+    if (per == 1)
+        return;
+
+    HRC_drawfill(position, fillsize, '0.5 0.5 0.5');
+    vector progress = fillsize;
+    progress.x *= per;
+
+    position += '1 1 0';
+    HRC_drawfill(position, progress - '1 2 0', '0.9 0.9 0.9');
+    const string text = "Reloading";
+    const vector fontsize = '8 8 0';
+    position.x += (fillsize.x - stringwidth(text, 0, fontsize)) / 2;
+    HRC_drawstring(position, text, fontsize, '1 0.4 0.4');
+}
+
 string getPingPanelText();
 
 var FO_Hud_Panel Hud_Panels[] = {
@@ -1073,11 +1099,12 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_MENU, "menu", "Menu",                       '10 110',  '300 200',1,0,1,0,1, drawSimplePanel, {return "";}},
     {HUDP_MENU_HINT, "menuhint", FO_HUD_MENU_HINT_NAME,    '100 300', '300 24', 1,0,1,0,1, drawTextPanel, {return SBAR.Hint;}},
     {HUDP_CLIPSIZE, "clipsize", FO_HUD_CLIPSIZE_NAME,     '464 455', '26 26',  0.75,0,1,0,0, drawClipSize, { return WP_GetClip(); }},
+    {HUDP_RELOADPROGRESS, "reload_progress", "Reload Progress",  '0 0',  '100 10', 1,1,1,0,0, drawReloadProgress, {return "";}, 0, HUD_SNAP_CENTER},
     {HUDP_FRAGSTREAK, "fragstreak", FO_HUD_FRAGSTREAK_NAME, '10 50',   '26 26',  1,0,1,0,0, drawFragStreakPanel, {return ftos(SBAR.FragStreak);}},
     {HUDP_CAPS, "caps", FO_HUD_CAPS_NAME,             '10 80',   '26 26',  1,0,1,0,0, drawCapsPanel, {return ftos(SBAR.Caps);}},
-    {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0,0, drawGren1Panel, {return ftos(getstatf(STAT_NO_GREN1));}},
-    {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0,0, drawGren2Panel, {return ftos(getstatf(STAT_NO_GREN2));}},
-    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0,0, drawSpecial, {return ftos(SBAR.PlayerClass);}},
+    {HUDP_GREN1, "gren1", FO_HUD_GREN1_NAME,           '10 110',  '26 26',  1,0,1,0,0, drawGren1Panel, {return ftos(WP_GrenCount(1));}},
+    {HUDP_GREN2, "gren2", FO_HUD_GREN2_NAME,           '10 140',  '26 26',  1,0,1,0,0, drawGren2Panel, {return ftos(WP_GrenCount(2));}},
+    {HUDP_SPECIAL, "playerclass", FO_HUD_SPECIAL_NAME,   '10 170',  '50 26',  1,0,1,0,0, drawSpecial, {return ftos(WP_PlayerClass());}},
     {HUDP_IDENTIFY, "identify", FO_HUD_IDENTIFY_NAME,     '10 200',  '50 26',  1,0,1,FO_HUD_INSERT_MIDDLE, 0, drawIdentify, {return SBAR.Identify;}},
     {HUDP_FLAGINFO, "flaginfo", FO_HUD_FLAGINFO_NAME,     '10 230',  '26 260', 1,0,1,0,0, drawFlagInfo, {return "";}},
     {HUDP_GRENTIMER, "grentimer", FO_HUD_GRENTIMER_NAME,   '100 110', '26 26',  1,0,1,0,0, drawGrenTimerPanel, {return "";}},
@@ -1114,7 +1141,7 @@ var FO_Hud_Panel Hud_Panels[] = {
     {HUDP_GUN8, "gun8", "Lighning Gun",               '-4 -50',  '36 24',  0.8,1.4,1,0,0, drawInvIconPanel, {return getGunIcon(IT_LIGHTNING);}, 0, 36},
     {HUDP_SPEED, "speed", "Speed",                     '4 15',    '26 26',  1,1.4,0,0,0, drawTextPanel, {return CVARF(fo_fte_hud) ? ftos((int)PlanarSpeed()) : "";}, 0, 4},
     {HUDP_SPEEDBAR, "speedbar", "Speed Bar",           '4 30',    '150 10',  1,1.4,0,0,0, drawSpeedBar, {return "";}, 0, 4},
-    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, 4},
+    {HUDP_PING, "ping", "Ping",           '4 15',    '120 12',  1,1.4,0,0,0, drawTextPanel, getPingPanelText, 0, HUD_SNAP_TOP_RIGHT},
     {HUDP_OPTIONS, "hudoptions", FO_HUD_OPTIONS_NAME,    '10 10',   '150 182',1,   0,1,0,1, doNothing, {return "";}, 1},
 };
 

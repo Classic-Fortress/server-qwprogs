@@ -6,6 +6,7 @@ void (float force) FO_Menu_Admin_Rounds;
 void (float force) FO_Menu_Admin_Timelimit;
 void (float force) FO_Menu_Admin_Fraglimit;
 void (float force) FO_Menu_Admin_QuadTimelimit;
+void (float force) FO_Menu_Admin_FoMatchRated;
 void (float force) FO_Menu_Spy;
 void (float force) FO_Menu_Spy_Skin;
 void (float force) FO_Menu_Spy_Team;
@@ -104,7 +105,7 @@ var fo_menu FO_MENU_SPECTATOR_TRACK = {
 void teamChosen(string team) = {
     localcmd("cmd changeteam ", team, "\n");
 
-    if(player_class) {
+    if(WP_PlayerClass()) {
         Menu_Cancel();
     } else {
         FO_Menu_Class(TRUE);
@@ -283,7 +284,7 @@ var fo_menu FO_MENU_BUILD = {
         }
         if(SBAR.HasSentry) {
             FO_MENU_BUILD.options[0].state = FO_MENU_STATE_HIDDEN;  //Build
-            if(vlen(thisorigin - sentry_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
+            if(vlen(PM_Org() - sentry_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[2].state = FO_MENU_STATE_HIDDEN;  //Destroy
                 FO_MENU_BUILD.options[3].state = FO_MENU_STATE_NORMAL;  //Dismantle
             } else {
@@ -301,7 +302,7 @@ var fo_menu FO_MENU_BUILD = {
         }
         if(SBAR.HasDispenser) {
             FO_MENU_BUILD.options[1].state = FO_MENU_STATE_HIDDEN;
-            if(vlen(thisorigin - dispenser_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
+            if(vlen(PM_Org() - dispenser_pos) <= ENG_BUILDING_DISMANTLE_DISTANCE) {
                 FO_MENU_BUILD.options[4].state = FO_MENU_STATE_HIDDEN;
                 FO_MENU_BUILD.options[5].state = FO_MENU_STATE_NORMAL;
             } else {
@@ -327,7 +328,7 @@ var fo_menu FO_MENU_SENTRY_MAINTAIN = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -342,7 +343,7 @@ var fo_menu FO_MENU_SENTRY_ROTATE = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - sentry_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -356,7 +357,7 @@ var fo_menu FO_MENU_DISPENSER_MAINTAIN = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 5, TRUE, {
-        if(vlen(thisorigin - dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -369,7 +370,7 @@ var fo_menu FO_MENU_DISPENSER_USE = {
         MenuSpacer,
         {"5","Nothing","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
     }, 4, TRUE, {
-        if(vlen(thisorigin - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
+        if(vlen(PM_Org() - touched_dispenser_pos) > ENG_BUILDING_MAINT_DISTANCE) {
             Menu_Cancel();
             return;
         }
@@ -389,12 +390,12 @@ var fo_menu FO_MENU_ADMIN_MAIN = {
         {"2","Kick...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_KICK, 0);},MENU_BORDER_WARNING},
         {"3","Ban...","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_BAN, 0);},MENU_BORDER_WARNING},
         {"4","Force Spectate...","","Force someone to be a spectator",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_ADMIN_FORCE_SPEC, 0);},MENU_BORDER_WARNING},
-        {"6","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
-        {"7","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
-        {"8","End Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcebreak\n"); Menu_Cancel();},MENU_BORDER_WARNING},
-        {"9","Update Server","","",FO_MENU_STATE_NORMAL,{localcmd("cmd updateserver\n"); Menu_Cancel();},MENU_BORDER_WARNING},
-        {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
+        {"5","Randomize Teams","","",FO_MENU_STATE_NORMAL,{localcmd("cmd randomise\n");},MENU_BORDER_WARNING},
+        {"6","Restart Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd restart\n"); Menu_Cancel();},MENU_BORDER_WARNING},
+        {"7","End Current Map","","",FO_MENU_STATE_NORMAL,{localcmd("cmd forcebreak\n"); Menu_Cancel();},MENU_BORDER_WARNING},
+        {"8","Update Server","","",FO_MENU_STATE_NORMAL,{localcmd("cmd updateserver\n"); Menu_Cancel();},MENU_BORDER_WARNING},
         MenuSpacer,
+        {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
         {"+","Next - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
         {"-","Prev - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
     }, 12, TRUE, {
@@ -419,6 +420,18 @@ string (float m) modeStatus = {
     return "";
 }
 
+string (float m) ratedStatus = {
+    switch(m) {
+        case 0:
+            return "unrated";
+        case 1:
+            return "rated";
+        case 2:
+            return "default";
+    }
+    return "";
+}
+
 var fo_menu FO_MENU_ADMIN_MODES = {
     [0,0], [300,300], "Server Modes [2/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Pub Mode","","Public play, anything goes",FO_MENU_STATE_NORMAL,{localcmd("cmd pubmode\n");},MENU_BORDER_WARNING},
@@ -427,14 +440,13 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         {"4","Duel Mode","","Simplifies 1 on 1 action",FO_MENU_STATE_NORMAL,{localcmd("cmd duelmode\n");},MENU_BORDER_WARNING},
         {"5","Quad Rounds...","","Number of rounds in Quad mode. Usually 2",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Rounds(TRUE);},MENU_BORDER_WARNING},
         {"6","Quad Round Time...","","Round time for each quad round",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_QuadTimelimit(TRUE);},MENU_BORDER_WARNING},
-        {"7","Captains Mode","","Select captains who can then pick their teams",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_1, 0);},MENU_BG_DARK},
-        {"8","Force Start","","Skip prematch and start the game\nPlease use sparingly",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
-        MenuSpacer,
+        {"7","Rated/Unrated","","Will player ratings be affected?",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_FoMatchRated(TRUE);},MENU_BORDER_WARNING},
+        {"8","Captains Mode","","Select captains who can then pick their teams",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Players(TRUE, CLIENT_MENU_CAPTAIN_1, 0);},MENU_BORDER_WARNING},
+        {"9","Force Start","","Skip prematch and start the game\nPlease use sparingly",FO_MENU_STATE_NORMAL,{localcmd("cmd forcestart\n");},MENU_BORDER_WARNING},
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-        MenuSpacer,
         {"+","Next - Settings","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
         {"-","Prev - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
-    }, 13, TRUE, {
+    }, 12, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_MODES.options[0].value = modeStatus(SERVER_ADMIN.pubmode);
         FO_MENU_ADMIN_MODES.options[1].value = modeStatus(SERVER_ADMIN.clanmode);
@@ -442,23 +454,25 @@ var fo_menu FO_MENU_ADMIN_MODES = {
         FO_MENU_ADMIN_MODES.options[3].value = modeStatus(SERVER_ADMIN.duelmode);
         FO_MENU_ADMIN_MODES.options[4].value = ftos(SERVER_ADMIN.quad_rounds);
         FO_MENU_ADMIN_MODES.options[5].value = ftos(SERVER_ADMIN.quad_round_time);
-        FO_MENU_ADMIN_MODES.options[6].value = SERVER_ADMIN.captainmode?"on":"off";
+        FO_MENU_ADMIN_MODES.options[6].value = ratedStatus(SERVER_ADMIN.fo_matchrated);
+        FO_MENU_ADMIN_MODES.options[7].value = SERVER_ADMIN.captainmode?"on":"off";
     }
 };
 var fo_menu FO_MENU_ADMIN_SETTINGS = {
     [0,0], [300,300], "Settings [3/3]", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","Timelimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Timelimit(TRUE);},MENU_BORDER_WARNING},
         {"2","Fraglimit","","",FO_MENU_STATE_NORMAL,{FO_Menu_Admin_Fraglimit(TRUE);},MENU_BORDER_WARNING},
-//        {"3","Override Classes","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-//        {"4","Class Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-//        {"5","Spurs","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
-//        {"6","Spur Settings...","","",FO_MENU_STATE_NORMAL,{print("not implemented\n");},MENU_BG_DARK},
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
         MenuSpacer,
         {"0","Close Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-        MenuSpacer,
         {"+","Next - Main","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
         {"-","Prev - Modes","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
-    }, 7, TRUE, {
+    }, 12, TRUE, {
         updateAdminMenuInfo();
         FO_MENU_ADMIN_SETTINGS.options[0].value = ftos(SERVER_ADMIN.timelimit);
         FO_MENU_ADMIN_SETTINGS.options[1].value = ftos(SERVER_ADMIN.fraglimit);
@@ -516,12 +530,10 @@ var fo_menu FO_MENU_ADMIN_PLAYERS = {
         {"7","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(6, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
         {"8","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(7, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
         {"9","","","",FO_MENU_STATE_NORMAL,{execute_admin_players(8, FO_MENU_ADMIN_PLAYERS.page);},MENU_BG_DARK},
-        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Main(TRUE);},MENU_BUTTON},
-        MenuSpacer,
         {"+","Next","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page + 1);},MENU_BUTTON},
         {"-","Prev","","",FO_MENU_STATE_NORMAL,{Menu_Cancel(); FO_Menu_Admin_Players(TRUE, player_menu_type, FO_MENU_ADMIN_PLAYERS.page - 1);},MENU_BUTTON},
-    }, 14, TRUE
+    }, 12, TRUE
 };
 void action_admin_players(float type) = {
     string n, team;
@@ -605,6 +617,20 @@ var fo_menu FO_MENU_ADMIN_QUAD_TIMELIMIT = {
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
     }, 11, TRUE
 };
+var fo_menu FO_MENU_ADMIN_MATCH_RATED = {
+    [0,0], [300,200], "Match Rated?", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
+        {"1","Rated","","Match result will affect player ratings",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 1\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"2","Unrated","","Match result will not affect player ratings",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 0\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        {"3","Default","","Only matches with a teams of three or more players will be rated",FO_MENU_STATE_NORMAL,{localcmd("cmd fo_matchrated 2\n");FO_Menu_Admin_Modes(TRUE);},MENU_BORDER_WARNING},
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Modes(TRUE);},MENU_BUTTON},
+    }, 10, TRUE
+};
 var fo_menu FO_MENU_ADMIN_TIMELIMIT = {
     [0,0], [300,200], "Set Timelimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
         {"1","0 (infinite)","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 0\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
@@ -616,9 +642,8 @@ var fo_menu FO_MENU_ADMIN_TIMELIMIT = {
         {"7","45","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 45\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"8","60","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 60\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"9","120","","",FO_MENU_STATE_NORMAL,{localcmd("cmd timelimit 120\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
-        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
     [0,0], [300,200], "Set Fraglimit", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES | FO_MENU_FLAG_WARNING | FO_MENU_FLAG_ALLOW_INTERMISSION, {
@@ -631,9 +656,8 @@ var fo_menu FO_MENU_ADMIN_FRAGLIMIT = {
         {"7","50","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 50\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"8","100","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 100\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
         {"9","200","","",FO_MENU_STATE_NORMAL,{localcmd("cmd fraglimit 200\n");FO_Menu_Admin_Settings(TRUE);},MENU_BORDER_WARNING},
-        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();FO_Menu_Admin_Settings(TRUE);},MENU_BUTTON},
-    }, 11, TRUE
+    }, 10, TRUE
 };
 var fo_menu FO_MENU_VOTE = {
     [0,0], [300,200], "Map Vote", FO_MENU_FLAG_USE_MOUSE | FO_MENU_FLAG_CENTER | FO_MENU_FLAG_SHOW_SHORTCUTS | FO_MENU_FLAG_SHOW_VALUES, {
@@ -641,11 +665,14 @@ var fo_menu FO_MENU_VOTE = {
         {"2","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[1].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"3","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[2].name,"\n");Menu_Cancel();},MENU_BUTTON},
         {"4","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[3].name,"\n");Menu_Cancel();},MENU_BUTTON},
-        MenuSpacer,
         {"5","","","",FO_MENU_STATE_NORMAL,{localcmd("cmd votemap ",FO_MENU_VOTE.options[5].name,"\n");Menu_Cancel();},MENU_BUTTON},
         MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
+        MenuSpacer,
         {"0","Back to Main Menu","","",FO_MENU_STATE_NORMAL,{Menu_Cancel();},MENU_BUTTON},
-    }, 8, TRUE, {
+    }, 10, TRUE, {
         FO_MENU_VOTE.title = strcat("Map Vote (", ftos(ceil(mapvote_expiry - time)), "s left)");
         if((mapvote_expiry - time) < 0) {
             Menu_Cancel();
@@ -670,7 +697,6 @@ vector fo_menu_draw(fo_menu * menu) = {
     FO_Hud_ShowPanel(HUDP_MENU_HINT);
     SBAR.Hint = "";
 
-    thisorigin = (vector)getentity(player_localentnum, GE_ORIGIN);
     setcursormode(menu.flags & FO_MENU_FLAG_USE_MOUSE);
     
     if(menu.update) {
@@ -861,7 +887,11 @@ void FO_Menu_Game(float force) = {
     }
     if(fo_hud_menu_active && !force)
         return;
-    if(is_spectator) {
+
+    // Here we care about distinguishing connecting as spectator vs observer, so
+    // query it rather than using game_state which mixes.
+    float true_spec = stof(getplayerkeyvalue(player_localnum, "*spectator"));
+    if (true_spec) {
         //print(getplayerkeyvalue(player_localnum, "name"), " is a spectator!\n");
         //FO_MENU_GAME_SPECTATOR.num_opts = 3;
         FO_MENU_GAME_SPECTATOR.options[2].state = is_admin?FO_MENU_STATE_NORMAL:FO_MENU_STATE_DISABLED;
@@ -881,7 +911,7 @@ void FO_Menu_Game(float force) = {
 }
 
 void FO_Menu_Track() = {
-    if(!is_spectator)
+    if (!game_state.is_spectator)
         return;
 
     local float i = 0;
@@ -987,7 +1017,7 @@ void FO_Menu_DropAmmo(float force) {
         }
         return;
     }
-    if (player_class == PC_ENGINEER) {
+    if (WP_PlayerClass() == PC_ENGINEER) {
         FO_MENU_DROPAMMO.title = "Drop or Make Ammo";
         if ((getstatf(STAT_SHELLS) < DROP_SHELLS) && ((getstatf(STAT_CELLS) / AMMO_COST_SHELLS) > (DROP_SHELLS - getstatf(STAT_SHELLS)))) {
             FO_MENU_DROPAMMO.options[0].value = "(make)";
@@ -1182,6 +1212,12 @@ void FO_Menu_Admin_QuadTimelimit(float force) = {
     CurrentMenu = &FO_MENU_ADMIN_QUAD_TIMELIMIT;
     fo_hud_menu_active = TRUE;
 }
+void FO_Menu_Admin_FoMatchRated(float force) = {
+    if(fo_hud_menu_active && !force)
+        return;
+    CurrentMenu = &FO_MENU_ADMIN_MATCH_RATED;
+    fo_hud_menu_active = TRUE;
+}
 void FO_Menu_Admin_Timelimit(float force) = {
     if(fo_hud_menu_active && !force)
         return;
@@ -1254,8 +1290,7 @@ void FO_Menu_Special(float force) = {
         return;
     
     fo_menu* NewMenu = __NULL__;
-    //void(float) nm;
-    switch (SBAR.PlayerClass) {
+    switch (WP_PlayerClass()) {
         case PC_SCOUT:
             NewMenu = &FO_MENU_SCOUT;
             //nm = FO_Menu_Scout;
@@ -1281,8 +1316,7 @@ void FO_Menu_Special(float force) = {
         Menu_Cancel();
         return;
     }
-    //CurrentMenu = NewMenu;
-    switch (SBAR.PlayerClass) {
+    switch (WP_PlayerClass()) {
         case PC_SCOUT:
             FO_Menu_Scout(force, FALSE, FALSE); //TODO: fix scanner settings
             break;
@@ -1363,6 +1397,7 @@ void FO_Hud_Init() {
     INIT_MENU_IDS(FO_MENU_ADMIN_PLAYERS);
     INIT_MENU_IDS(FO_MENU_ADMIN_ROUNDS);
     INIT_MENU_IDS(FO_MENU_ADMIN_QUAD_TIMELIMIT);
+    INIT_MENU_IDS(FO_MENU_ADMIN_MATCH_RATED);
     INIT_MENU_IDS(FO_MENU_ADMIN_TIMELIMIT);
     INIT_MENU_IDS(FO_MENU_ADMIN_FRAGLIMIT);
     INIT_MENU_IDS(FO_MENU_VOTE);

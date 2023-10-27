@@ -29,7 +29,6 @@ void player_asscan_fire();
 void player_asscan_down1();
 
 inline void *thinkindex() { return &self.client_thinkindex; }
-static inline float *tf_state() { return &self.tfstate; }
 static inline float is_attacking() { return self.button0; }
 static inline float is_intermission() { return intermission_running; }
 static inline vector get_velocity() { return self.velocity; }
@@ -149,11 +148,10 @@ void player_stand1() {
 };
 #else /* CSQC */
 static inline void *thinkindex() { return &pstate_pred.client_thinkindex; }
-static inline float *tf_state() { return &pstate_pred.tfstate; }
 static inline float is_attacking() { return input_buttons & BUTTON0; }
 static inline float is_intermission() { return intermission; }
 static void SuperDamageSound() {} // TODO
-static inline vector get_velocity() { return pmove_vel; }
+static inline vector get_velocity() { return PM_Vel(); }
 static inline void set_weapon_frame(float f) { pstate_pred.weaponframe = f; }
 static inline void muzzleflash() {}
 float WP_CurrentClipFired();
@@ -239,7 +237,7 @@ static float CheckNeedAssaultCannonDown() {
 
 void asscan_up_extra() {
     float tidx = *thinkindex() - 1;  // Already incremented.
-    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+    *self_tf_state() = (*self_tf_state() & ~TFSTATE_AC_MASK) |
                    (TFSTATE_AC_SPINUP | TFSTATE_AIMING);
 
     if (CheckNeedAssaultCannonDown())
@@ -259,7 +257,7 @@ void asscan_up_extra() {
 void W_FireAssaultCannon();
 void asscan_fire_extra() {
     float tidx = *thinkindex() - 1;  // Already incremented.
-    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+    *self_tf_state() = (*self_tf_state() & ~TFSTATE_AC_MASK) |
                   (TFSTATE_AC_SPINNING | TFSTATE_AIMING);
 
     if (CheckNeedAssaultCannonDown())
@@ -267,7 +265,7 @@ void asscan_fire_extra() {
 
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
 
-    if (vlen(get_velocity()) <= 90 && !(*tf_state () & TFSTATE_LOCK)) {
+    if (vlen(get_velocity()) <= 90 && !(*self_tf_state () & TFSTATE_LOCK)) {
         if (tidx % 2 == 1) {  // 1-based
             muzzleflash();
             Pred_Sound(SND_ASSCAN_FIRE);
@@ -289,14 +287,14 @@ void asscan_fire_extra() {
 void asscan_down_extra() {
     float tidx = *thinkindex() - 1;  // Already incremented.
     FO_WeapInfo* wi = FO_GetWeapInfo(WEAP_ASSAULT_CANNON);
-    *tf_state() = (*tf_state() & ~TFSTATE_AC_MASK) |
+    *self_tf_state() = (*self_tf_state() & ~TFSTATE_AC_MASK) |
                   TFSTATE_AIMING | TFSTATE_AC_SPINDOWN;
 
     if (tidx == 1)
         Pred_Sound(SND_ASSCAN_DOWN, 0.8);
 
     if (tidx >= 15) {  // 1.5s down
-        *tf_state() &= ~(TFSTATE_AC_MASK | TFSTATE_AIMING);
+        *self_tf_state() &= ~(TFSTATE_AC_MASK | TFSTATE_AIMING);
         player_run();
         if (self.ammo_cells < 7 || !FO_CheckForReload())
             W_ChangeToBestWeapon();

@@ -61,6 +61,7 @@ void () SpectatorConnect = {
 
     TeamFortress_StartTimers();
     TeamFortress_RemovePracticeSpawn(self);
+    TeamFortress_SetSpeed(self);
 };
 
 void () SpectatorDisconnect = {
@@ -160,4 +161,6 @@ void () SpectatorThink = {
     if (time >= self.StatusRefreshTime) {
         RefreshStatusBar(self);
     }
+
+    Predict_Update(FALSE);
 };

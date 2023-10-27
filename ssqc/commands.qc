@@ -363,9 +363,13 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "changeteam":
             processedCmd = TRUE;
-            if(self.classname == "observer") {
+           if (self.classname == "observer") {
+#if 0
                 sprint(self, PRINT_HIGH, "You can't join a team while spectating! Join the game first.\n");
                 break;
+#else
+                clientcommand(self, "join");
+#endif
             }
             if(teamplay == 0) {
                 sprint(self, PRINT_HIGH, "You can't join a team when teamplay is disabled!\n");
@@ -1247,6 +1251,37 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         localcmd ("localinfo round_time ",arg2,"\n");
                         UpdateAllAdmins();
                     }
+                }
+                break;
+            case "fologinrequired":
+                processedCmd = TRUE;
+                if(arg2) {
+                    localcmd ("localinfo fologinrequired ",arg2,"\n");
+                    if (stof(arg2)) {
+                        bprint(PRINT_HIGH, "Logins will be required. Matches can be reported\n");
+                    } else {
+                        bprint(PRINT_HIGH, "Allow unregistered players. Matches won't be reported\n");
+                    }
+                    bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+                    UpdateAllAdmins();
+                }
+                break;
+            case "fo_matchrated":
+                processedCmd = TRUE;
+                if(arg2) {
+                    localcmd ("localinfo fo_matchrated ",arg2,"\n");
+
+                    switch(stof(arg2)) {
+                        case 0:
+                            bprint(PRINT_HIGH, "Next match will not be rated\n");
+                            break;
+                        case 1:
+                            bprint(PRINT_HIGH, "Next match will be rated\n");
+                            break;
+                        case 2:
+                            bprint(PRINT_HIGH, "Next match will only be rated if more there are than 2 players on each team\n");
+                    }
+                    UpdateAllAdmins();
                 }
                 break;
             case "captainmode":

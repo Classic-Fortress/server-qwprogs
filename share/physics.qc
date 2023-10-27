@@ -3,8 +3,6 @@
 static const float phys_tic = 0.005;
 
 .float phys_time;  // Current physics time
-.float server_live_time;  // When an entity can first appear on server.  0 for
-                          // server-side ents.
 
 enumflags {
     PHYSB_ENABLED,
@@ -32,6 +30,11 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
     if (other.solid == SOLID_NOT)
         return;
 
+    if (pointcontents(e.origin) == CONTENT_SKY) {
+        dremove_sent(e);
+        return;
+    }
+
     if (e.touch) {
         if (phys_flags & PHYSF_FORWARD_KNOCK)
             e.flags |= FL_FORWARD_KNOCK;
@@ -55,6 +58,8 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
 static vector get_followed_origin() {
     return self.aiment.origin;
 }
+
+static void Phys_Expired(entity e, float phys_flags) {}
 #else
 DEFCVAR_FLOAT(fo_phys_debug, 0);
 
@@ -62,15 +67,23 @@ DEFCVAR_FLOAT(fo_phys_debug, 0);
 .float aiment_num;
 .float voided;
 
+.float phys_sim_last;
+.float phys_sim_voided_at;
+var float phys_sim_dt;
+
 float get_phys_time(entity);
+void PM_AddSimExplosion(float itime, entity ent);
 
 static void Phys_Impact(entity e, float dt, float phys_flags) {
     other = trace_ent;
     if (other.solid == SOLID_NOT)
         return;
 
-    if (e.movetype == MOVETYPE_FLYMISSILE)
+    if (e.movetype == MOVETYPE_FLYMISSILE) {
         e.voided = TRUE;
+        if (!e.phys_sim_voided_at)  // want only one of sim or !sim
+            PM_AddSimExplosion(e.phys_time + dt, e);
+    }
 
     AugmentGrenadeImpact();
 
@@ -80,7 +93,15 @@ static void Phys_Impact(entity e, float dt, float phys_flags) {
                 get_phys_time(e));
 }
 
-static void Phys_Expired(entity e, float phys_flags) {}
+void PM_AddGrenadeExplosion(float itime, entity ent);
+
+static void Phys_Expired(entity e, float phys_flags) {
+    e.voided = TRUE;
+    if (e.phys_sim_voided_at)  // Only one of sim or !sim
+        return;
+
+    PM_AddGrenadeExplosion(e.fpp.expires_at, e);
+}
 
 static vector get_followed_origin() {
     if (!(float)getentity(self.aiment_num, GE_ACTIVE))
@@ -190,7 +211,7 @@ float Phys_Adv_Linear(entity e, float dt, float phys_flags) {
     return dt;
 }
 
-var void(entity e, float step) RewindSyncTime;
+var void(entity e, float target_time) RewindSyncTime;
 
 static void Phys_CapVel(entity e) {
     static const float limit = 32 / phys_tic;
@@ -210,16 +231,17 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
         return 0;
     }
 
+    static float limit_eps = 0.00001;
     // If there's an expiry, make sure we get to the exact position.
-    if (e.fpp.expires_at && target_time > e.fpp.expires_at) {
+    if (e.fpp.expires_at && target_time >= e.fpp.expires_at) {
         target_time = e.fpp.expires_at;
         phys_flags |= PHYSF_CONSUME_ALL;
     }
 
-    static float limit_eps = 0.0005;
     float limit = (phys_flags & PHYSF_CONSUME_ALL) ? limit_eps : phys_tic;
     float total = 0, dt = 0, step = 0, delta;
 
+    target_time += limit_eps;
     while ((delta = target_time - e.phys_time) >= limit) {
         if (e.voided) {
             e.phys_time = target_time;
@@ -228,7 +250,7 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
 
         step = min(phys_tic, delta);
         if (phys_flags & PHYSF_REWIND_PLAYERS)
-            RewindSyncTime(e, step);
+            RewindSyncTime(e, e.phys_time + step/2);
 
         if (IsClownMode(CLOWN_PROJ_GRAVITY))
             e.velocity_z += -fo_config.clown_grav * step;
@@ -265,7 +287,12 @@ float Phys_Advance(entity e, float target_time, float phys_flags) {
         total += dt;
     }
 
-    setorigin(e, e.origin);
+    if (step > 0)  // Origin can have moved.
+        setorigin(e, e.origin);
+
+    if (e.fpp.expires_at && e.phys_time >= e.fpp.expires_at)
+        Phys_Expired(e, phys_flags);
+
     return total;
 }
 
@@ -281,19 +308,22 @@ float Phys_Init(entity e, float target_time, float delta, float phys_flags) {
 }
 
 #ifdef CSQC
-.float phys_sim_last;
-.float phys_sim_voided_at;
-var float phys_sim_dt;
-
-void Phys_Sim(entity e) {
+void Phys_Sim(entity e, float target_time = 0) {
     // TODO: Unvoid+undo if we make it past the void point.
-    if (phys_sim_dt < 0 || e.phys_sim_voided_at)
+    if (e.phys_sim_voided_at)
         return;
 
-    float ptime = time + phys_sim_dt;
-    if (ptime < self.phys_sim_last + SERVER_FRAME_MS)
+    float min_gran = 0;
+    if (!target_time) {
+        if (phys_sim_dt < 0)
+            return;
+        target_time = time + phys_sim_dt;
+        min_gran = SERVER_FRAME_DT;
+    }
+
+    if (target_time < e.phys_sim_last + min_gran)
         return;
-    self.phys_sim_last = ptime;
+    e.phys_sim_last = target_time;
 
     float held_phys_time = e.phys_time;
     vector held_org = e.origin;
@@ -301,7 +331,7 @@ void Phys_Sim(entity e) {
     vector held_angles = e.angles;
     float held_flags = e.flags;
 
-    Phys_Advance(e, ptime, PHYSF_SIM | PHYSF_CONSUME_ALL);
+    Phys_Advance(e, target_time, PHYSF_SIM | PHYSF_CONSUME_ALL);
 
     if (e.voided) {
         e.phys_sim_voided_at = e.phys_time;

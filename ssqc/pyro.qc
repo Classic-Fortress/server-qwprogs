@@ -565,11 +565,7 @@ void () T_IncendiaryTouch = {
         return;
     self.voided = 1;
 
-    if (pointcontents(self.origin) == CONTENT_SKY) {
-        dremove_sent(self);
-        return;
-    }
-    self.effects = self.effects | 4;
+    self.effects |= EF_BRIGHTLIGHT;
     damg = 42 + random() * 20;
 
     if (other.health) {
@@ -597,18 +593,17 @@ void () T_IncendiaryTouch = {
     dremove_sent(self);
 };
 
-void () W_FireIncendiaryCannon = {
+void W_FireIncendiaryCannon(vector org, vector v_ang, float use_ctime=0) {
     if (self.ammo_rockets < 3) {
         return;
     }
-    self.ammo_rockets = self.ammo_rockets - 3;
     KickPlayer(-3, self);
     entity proj = FOProj_Create(FPP_INCENDIARY);
     proj.owner = self;
     proj.movetype = MOVETYPE_FLYMISSILE;
     proj.solid = SOLID_BBOX;
 
-    makevectors(self.v_angle);
+    makevectors(v_ang);
     proj.velocity = aim(self, 1000) * FPP_Get(FPP_INCENDIARY)->speed;
     proj.angles = vectoangles(proj.velocity);
     proj.touch = T_IncendiaryTouch;
@@ -616,9 +611,9 @@ void () W_FireIncendiaryCannon = {
     proj.nextthink = time + 5;
     proj.weapon = DMSG_INCENDIARY;
     proj.classname = "pyro_rocket";
-    setorigin(proj, self.origin + v_forward * 8 + '0 0 16');
+    setorigin(proj, org + v_forward * 8 + '0 0 16');
 
-    FOProj_Finalize(proj);
+    FOProj_Finalize(proj, use_ctime);
 };
 
 void () AirBlastReloadFinished = {
@@ -634,11 +629,11 @@ void FO_Airblast() = {
         return;
     }
 
-    if (time < self.special_cooldown)
+    if (time < self.special_next)
         return;
 
     self.airblast_cooldown = 1;
-    self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+    self.special_next = time + PC_PYRO_AIRBLAST_COOLDOWN;
     entity timer = spawn();
     timer.owner = self;
     timer.classname = "timer";

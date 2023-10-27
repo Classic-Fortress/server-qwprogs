@@ -1,6 +1,7 @@
 float (entity Retriever, float AmmoType) TeamFortress_GetMaxAmmo;
 float (entity Retriever, float WeaponType) TeamFortress_CanGetWeapon;
 void (entity Retriever, entity Items) TeamFortress_AddBackpackItems;
+float IsFeigned(entity ent);
 
 void (entity p) TeamFortress_SetSpeed;
 
@@ -217,18 +218,14 @@ void () health_touch = {
     local float medi;
     local string s;
 
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     medi = 0;
     if (self.healtype == 2) {
         if (!(other.tfstate & 16)) {
@@ -318,21 +315,16 @@ void () armor_touch = {
     local float bit;
     local string s;
 
-    if (other.health <= 0) {
+    if (other.health <= 0)
         return;
-    }
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     if (self.classname == "item_armor1") {
         type = 0.300;
         value = 100;
@@ -419,7 +411,7 @@ void () armor_touch = {
     stuffcmd(other, "bf\n");
     activator = other;
     SUB_UseTargets();
-};
+}
 
 void () item_armor1 = {
     if (CheckExistence() == FALSE) {
@@ -534,7 +526,7 @@ void () weapon_touch = {
 
     if (!(other.flags & 8))
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -712,37 +704,9 @@ void () weapon_lightning = {
     StartItem();
 };
 
-void (entity pl, float typ) PrintGrenadeType = {
-    local string st;
-    st = "";
-
-    if (typ == GR_TYPE_NORMAL) {
-        st = "normal";
-    } else if (typ == GR_TYPE_CONCUSSION) {
-        st = "concussion";
-    } else if (typ == GR_TYPE_NAIL) {
-        st = "nail";
-    } else if (typ == GR_TYPE_MIRV) {
-        st = "mirv";
-    } else if (typ == GR_TYPE_NAPALM) {
-        st = "napalm";
-    } else if (typ == GR_TYPE_FLARE) {
-        st = "flare";
-    } else if (typ == GR_TYPE_GAS) {
-        st = "gas";
-    } else if (typ == GR_TYPE_EMP) {
-        st = "EMP";
-    } else if (typ == GR_TYPE_CALTROP) {
-        st = "caltrop";
-    } else if (typ == GR_TYPE_FLASH) {
-        st = "flash";
-    } else if (typ == GR_TYPE_BLAST) {
-        st = "blast";
-    } else if (typ == GR_TYPE_SHOCK) {
-        st = "shock";
-    } else if (typ == GR_TYPE_BURST) {
-        st = "burst";
-    }
+void (entity pl, float type) PrintGrenadeType = {
+    // TODO: this is still awful
+    string st = FO_GrenDesc(type)->logname;
     sprint(pl, PRINT_HIGH, st);
 };
 
@@ -756,7 +720,7 @@ void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoun
     else
         sprint(pe_player, PRINT_HIGH, "a ");
     PrintGrenadeType(pe_player, pf_grenade_type);
-    if (pf_grenade_type == GR_TYPE_CALTROP)
+    if (pf_grenade_type == GREN_CALTROP)
         sprint(pe_player, PRINT_HIGH, " canister");
     else
         sprint(pe_player, PRINT_HIGH, " grenade");
@@ -766,28 +730,24 @@ void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoun
 };
 
 float () GetGrenadePossibility = {
-    local float maxg;
-
-    if (random() < 0.500) {
+    if (random() < 0.500)
         return 0;
-    }
-    if (random() < 0.500) {
-        maxg = other.max_grenades_1;
-        if ((other.tp_grenades_1 != 0) && (other.no_grenades_1 < maxg)) {
-            other.no_grenades_1 = other.no_grenades_1 + 1;
-            PrintFoundGrenade(other, other.tp_grenades_1, 1);
-            return 1;
-        }
-    } else {
-        maxg = other.max_grenades_2;
-        if ((other.tp_grenades_2 != 0) && (other.no_grenades_2 < maxg)) {
-            other.no_grenades_2 = other.no_grenades_2 + 1;
-            PrintFoundGrenade(other, other.tp_grenades_2, 1);
-            return 1;
-        }
-    }
-    return 0;
-};
+
+    float index = random() < 0.5 ? 0 : 1;
+    FO_GrenInfo* gt = FO_PlayerGren(other, index);
+    if (gt->id == GREN_NONE)
+        return 0;
+
+    if (index == 0 && other.no_grenades_1 < other.max_grenades_1)
+        other.no_grenades_1 += 1;
+    else if (index == 1 && other.no_grenades_2 < other.max_grenades_2)
+        other.no_grenades_2 += 1;
+    else
+        return 0;
+
+    PrintFoundGrenade(other, gt->id, 1);
+    return 1;
+}
 
 void () ammo_touch = {
     local float gotgren;
@@ -986,24 +946,18 @@ void () item_weapon = {
 };
 
 void () key_touch = {
-    if (other.classname != "player") {
+    if (other.classname != "player")
         return;
-    }
-    if (other.health <= 0) {
+    if (other.health <= 0)
         return;
-    }
-    if (other.items & self.items) {
+    if (other.items & self.items)
         return;
-    }
-    if (other.is_feigning) {
+    if (IsFeigned(other))
         return;
-    }
-    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING)) {
+    if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
-    }
-    if (cb_prematch == 1) {
+    if (cb_prematch == 1)
         return;
-    }
     sprint(other, PRINT_LOW, "You got the ", self.netname, "\n");
     FO_Sound(other, CHAN_ITEM, self.noise, 1, 1);
     stuffcmd(other, "bf\n");
@@ -1097,7 +1051,7 @@ void () sigil_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -1119,7 +1073,7 @@ void () powerup_touch = {
         return;
     if (other.health <= 0)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if ((other.tfstate & TFSTATE_CANT_MOVE) || (other.tfstate & TFSTATE_AIMING))
         return;
@@ -1250,7 +1204,7 @@ void () BackpackTouch = {
     local string s;
     local float maxg, giveg;
 
-    if (other.classname != "player" || other.is_feigning)
+    if (other.classname != "player" || IsFeigned(other))
         return;
     if (other.health <= 0)
         return;
@@ -1270,7 +1224,7 @@ void () BackpackTouch = {
         else
             giveg = self.no_grenades_1;
         other.no_grenades_1 = other.no_grenades_1 + giveg;
-        PrintFoundGrenade(other, other.tp_grenades_1, giveg);
+        PrintFoundGrenade(other, FO_PlayerGren(other, 0)->id, giveg);
 
         // give grenade type 2
         maxg = other.max_grenades_2;
@@ -1279,7 +1233,7 @@ void () BackpackTouch = {
         else
             giveg = self.no_grenades_2;
         other.no_grenades_2 = other.no_grenades_2 + giveg;
-        PrintFoundGrenade(other, other.tp_grenades_2, giveg);
+        PrintFoundGrenade(other, FO_PlayerGren(other, 1)->id, giveg);
 
     }
     bound_other_ammo(other);

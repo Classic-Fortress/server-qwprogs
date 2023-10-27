@@ -65,7 +65,7 @@ static float ShowPlayerOutline(entity player) {
     if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))
         return TRUE;
 
-    if (!is_player)
+    if (!game_state.is_player)
         return TFxEnabled(TFX_SPEC_OUTLINE);
 
     if ((TFxEnabled(TFX_DEFENSE_OUTLINE) && !IsAttacking(player)) ||
@@ -112,7 +112,7 @@ static void UpdateOutline(entity player) {
 
 float UpdatePlayer(float isnew) {
     if (isnew) {
-        if (self.entnum == player_localentnum && is_player)
+        if (self.entnum == player_localentnum && game_state.is_player)
             local_player = self;
 
         AddOutline(self);
@@ -130,7 +130,7 @@ float UpdatePlayer(float isnew) {
 }
 
 static float ShowTeamGrenTimer(float team, float my_team) {
-    if (!is_player && TFxEnabled(TFX_SPEC_GRENTIMER))
+    if (!game_state.is_player && TFxEnabled(TFX_SPEC_GRENTIMER))
         return TRUE;
 
     if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))
@@ -154,7 +154,7 @@ static float next_grenlist_update;
 static float RenderGrenTimer(entity p, float test_only) {
     const float maxd = 1000, mind = 200;
     vector po = p.origin + '0 0 40';
-    vector o = pmove_org;
+    vector o = PM_Org();
 
     if (p == local_player)
         return FALSE;
@@ -221,7 +221,7 @@ void TFxRenderGrenadeTimers() {
 }
 
 static float ShowFlagOutline() {
-    if (!is_player && TFxEnabled(TFX_SPEC_SEEFLAG))
+    if (!game_state.is_player && TFxEnabled(TFX_SPEC_SEEFLAG))
         return TRUE;
 
     if (prematch && TFxEnabled(TFX_PREMATCH_EVERYTHING))

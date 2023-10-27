@@ -763,21 +763,6 @@ string GetSBClassInfo(entity pl, float csqcactive)
     return st1;
 }
 
-// Temporary until we network player ents.
-static void TFxUpdateGrenadeTimer(entity player, float explodes_at) {
-    const float tfx_gren_mask =
-        TFX_SPEC_GRENTIMER | TFX_DEFENSE_GRENTIMER | TFX_OFFENSE_GRENTIMER;
-
-    if (!TFxEnabled(tfx_gren_mask))
-        return;
-
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_TFX_GRENTIMER);
-    WriteEntity(MSG_MULTICAST, player);
-    WriteFloat(MSG_MULTICAST, explodes_at);
-    multicast('0 0 0', MULTICAST_ALL_R);
-}
-
 void UpdateClientReloadSound(entity pl, float weapon) {
     if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
         return;
@@ -790,57 +775,43 @@ void UpdateClientReloadSound(entity pl, float weapon) {
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
+    return;  // Not needed until we re-enable TFX.
+
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
+    WriteEntity(MSG_MULTICAST, pl);
     WriteByte(MSG_MULTICAST, grentype);
-    WriteFloat(MSG_MULTICAST, time);
     WriteFloat(MSG_MULTICAST, explodes_at);
-    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 
-    TFxUpdateGrenadeTimer(pl, explodes_at);
+    multicast('0 0 0', MULTICAST_ALL);  // Actual primer has reliable transport.
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
+    return;  // Not needed until we re-enable TFX.
+
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
-
-    TFxUpdateGrenadeTimer(pl, 0);
-}
-
-void UpdateClientPlayerDie(entity pl) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
-    msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
-    WriteByte(MSG_MULTICAST, MSG_PLAYERDIE);
-    WriteFloat(MSG_MULTICAST, time);
-    multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
+    WriteEntity(MSG_MULTICAST, pl);
+    multicast('0 0 0', MULTICAST_ALL);
 }
 
 void UpdateClientIDString(entity pl) {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
+    string ident = time < pl.ident_time ? pl.ident_string : "";
+
+    if (ident == pl.last_ident_string)  // only send updates
         return;
-    // only send updates
-    //if(time < pl.ident_time && pl.ident_string == pl.last_ident_string)
-    //    return;
+    pl.last_ident_string = ident;
+
+    if (ident == "")  // No need to send null, we'll expire clientside.
+        return;
+
     msg_entity = pl;
-    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
+    WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_ID);
-    // identify
-    if (pl.ident_string && time < pl.ident_time) {
-        WriteString(MSG_MULTICAST, pl.ident_string);
-    } else {
-        WriteString(MSG_MULTICAST, "");
-    }
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
-    pl.last_ident_string = pl.ident_string;
+    WriteString(MSG_MULTICAST, ident);
+    multicast('0 0 0', MULTICAST_ONE);
 }
 
 void UpdateClientStatusBar(entity pl)
@@ -1034,6 +1005,8 @@ void (entity pl) RefreshStatusBar = {
     if (height > 300)
         height = 300;
     height = height - pl.StatusStringLines - 13;
+
+    pl.StatusRefreshTime = time + 1.5;
 
     csqcactive = infokeyf(pl, INFOKEY_P_CSQCACTIVE);
     if(pl.classname == "observer" && csqcactive) {
@@ -1285,7 +1258,6 @@ void (entity pl) RefreshStatusBar = {
         }
     }
     centerprint(pl, pl.StatusString, pad, ident, ct, s1, s2, s3);
-    pl.StatusRefreshTime = time + 1.5;
     strunzone(pad); strunzone(ct); strunzone(s1); strunzone(s2); strunzone(s3);
 };
 

@@ -253,7 +253,6 @@ enumflags {
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)
     TFSTATE_FLASHED,
-    TFSTATE_QUICKSLOT,     // QUICKSTOP should change to last weapon.
     TFSTATE_AC_SPINUP,     // These cover the 3 assault cannon states.
     TFSTATE_AC_SPINNING,
     TFSTATE_AC_SPINDOWN,
@@ -264,6 +263,7 @@ enumflags {
     TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
     TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
+    TFSTATE_FEIGNED,       // Is feigned
     TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die
@@ -283,6 +283,7 @@ enumflags {
 enum {
     PRNG_WEAP,
     PRNG_HWGUY,
+    PRNG_CONC,
     PRNG_NUM_STATES,
 };
 
@@ -398,10 +399,10 @@ struct Slot { int id; };
 /*======================================================*/
 /* Impulse Defines                                      */
 /*======================================================*/
-#define TF_IMPULSE_SLOT1            1   // Changes weapon to slot 1 (primary weapon)
-#define TF_IMPULSE_SLOT2            2   // Changes weapon to slot 2 (secondary weapon)
-#define TF_IMPULSE_SLOT3            3   // Changes weapon to slot 3 (tertiary weapon)
-#define TF_IMPULSE_SLOT4            4   // Changes weapon to slot 4 (melee weapon)
+#define TF_IMPULSE1                 1   // Ambiguous impulses that can be either
+#define TF_IMPULSE2                 2   // slots or classical weapons.  Prefer
+#define TF_IMPULSE3                 3   // TF_SLOT1 .. TF_SLOT4
+#define TF_IMPULSE4                 4
 #define TF_NUM_SLOTS                4
 
 #define TF_CLASSMENU                5   // Brings up class menu
@@ -418,12 +419,7 @@ struct Slot { int id; };
 #define TF_GRENADE_T                16  // Throw primed grenade
 #define TF_GRENADE_PT_1             17  // Prime and throw grenade type 1 (two clicks)
 #define TF_GRENADE_PT_2             18  // Prime and throw grenade type 2 (two clicks)
-#define TF_GRENADE_SWITCH           19  // Switch grenade mode 1/2
-#define TF_QUICKSLOT1               20  // Fire weapon slot 1 and then switch back to current weapon
-#define TF_QUICKSLOT2               21  // Fire weapon slot 2 and then switch back to current weapon
-#define TF_QUICKSLOT3               22  // Fire weapon slot 3 and then switch back to current weapon
-#define TF_QUICKSLOT4               23  // Fire weapon slot 4 and then switch back to current weapon
-#define TF_QUICKSTOP                24  // Used to tell server that quick firing has stopped
+// unused
 #define TF_RELOAD_SLOT1             25  // Reload weapon slot 1
 #define TF_RELOAD_SLOT2             26  // Reload weapon slot 2
 #define TF_RELOAD_SLOT3             27  // Reload weapon slot 3
@@ -599,6 +595,10 @@ struct Slot { int id; };
 // unused                           197
 // unused                           198
 #define TF_ADMIN_LISTIPS            199
+#define TF_SLOT1                    200   // Changes weapon to slot 1 (primary weapon)
+#define TF_SLOT2                    201   // Changes weapon to slot 2 (secondary weapon)
+#define TF_SLOT3                    202   // Changes weapon to slot 3 (tertiary weapon)
+#define TF_SLOT4                    203   // Changes weapon to slot 4 (melee weapon)
 // unused                           200
 // unused                           201
 // unused                           202
@@ -796,24 +796,6 @@ enumflags {
 // Tranquiliser Gun
 #define TRANQ_TIME		15
 
-// Grenades
-#define GR_PRIMETIME		3
-
-#define GR_TYPE_NONE		0
-#define GR_TYPE_NORMAL		1
-#define GR_TYPE_CONCUSSION	2
-#define GR_TYPE_NAIL		3
-#define GR_TYPE_MIRV		4
-#define GR_TYPE_NAPALM		5
-#define GR_TYPE_FLARE		6
-#define GR_TYPE_GAS		7
-#define GR_TYPE_EMP		8
-#define GR_TYPE_FLASH		9
-#define GR_TYPE_CALTROP		10
-#define GR_TYPE_BLAST	11
-#define GR_TYPE_SHOCK	12
-#define GR_TYPE_BURST	13
-
 // Defines for NailGren Types
 #define NGR_TYPE_NAIL	0
 #define NGR_TYPE_LASER		1
@@ -905,8 +887,6 @@ enumflags {
 #define PC_SCOUT_INITAMMO_NAIL		100	// Amount of nail ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_CELL		50 	// Amount of cell ammo this class has when respawned
 #define PC_SCOUT_INITAMMO_ROCKET	0 	// Amount of rocket ammo this class has when respawned
-/* #define PC_SCOUT_GRENADE_TYPE_1	 	// Configured in TeamFortress_SetEquipment() */
-#define PC_SCOUT_GRENADE_TYPE_2		GR_TYPE_CONCUSSION	//    <- 2nd Type of Grenade this class has
 #define PC_SCOUT_GRENADE_INIT_1		2 	// Number of grenades of Type 1 this class has when respawned
 #define PC_SCOUT_GRENADE_INIT_2		3 	// Number of grenades of Type 2 this class has when respawned
 #define PC_SCOUT_GRENADE_MAX_1		3
@@ -934,8 +914,6 @@ enumflags {
 #define PC_SNIPER_INITAMMO_NAIL		50
 #define PC_SNIPER_INITAMMO_CELL		0
 #define PC_SNIPER_INITAMMO_ROCKET	0
-#define PC_SNIPER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_SNIPER_GRENADE_TYPE_2	GR_TYPE_FLARE
 #define PC_SNIPER_GRENADE_INIT_1	2
 #define PC_SNIPER_GRENADE_INIT_2	3
 #define PC_SNIPER_GRENADE_MAX_1	        4
@@ -962,8 +940,6 @@ enumflags {
 #define PC_SOLDIER_INITAMMO_NAIL	0
 #define PC_SOLDIER_INITAMMO_CELL	0
 #define PC_SOLDIER_INITAMMO_ROCKET	10
-#define PC_SOLDIER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-/* #define PC_SOLDIER_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_SOLDIER_GRENADE_INIT_1	4
 #define PC_SOLDIER_GRENADE_INIT_2	1
 #define PC_SOLDIER_GRENADE_MAX_1	4
@@ -991,8 +967,6 @@ enumflags {
 #define PC_DEMOMAN_INITAMMO_CELL	0
 #define PC_DEMOMAN_INITAMMO_ROCKET	20
 #define PC_DEMOMAN_INITAMMO_DETPACK	1
-#define PC_DEMOMAN_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_DEMOMAN_GRENADE_TYPE_2	GR_TYPE_MIRV
 #define PC_DEMOMAN_GRENADE_INIT_1	4
 #define PC_DEMOMAN_GRENADE_INIT_2	4
 #define PC_DEMOMAN_GRENADE_MAX_1	4
@@ -1020,8 +994,6 @@ enumflags {
 #define PC_MEDIC_INITAMMO_CELL		0
 #define PC_MEDIC_INITAMMO_ROCKET	0
 #define PC_MEDIC_INITAMMO_MEDIKIT	50
-#define PC_MEDIC_GRENADE_TYPE_1		GR_TYPE_NORMAL
-/* #define PC_MEDIC_GRENADE_TYPE_2	 	// Configured in TeamFortress_SetEquipment() */
 #define PC_MEDIC_GRENADE_INIT_1		3
 #define PC_MEDIC_GRENADE_INIT_2		3
 #define PC_MEDIC_GRENADE_MAX_1		4
@@ -1058,8 +1030,6 @@ enumflags {
 #define PC_HVYWEAP_INITAMMO_NAIL	0
 #define PC_HVYWEAP_INITAMMO_CELL	30
 #define PC_HVYWEAP_INITAMMO_ROCKET	0
-#define PC_HVYWEAP_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_HVYWEAP_GRENADE_TYPE_2	GR_TYPE_MIRV
 #define PC_HVYWEAP_GRENADE_INIT_1	4
 #define PC_HVYWEAP_GRENADE_INIT_2	1
 #define PC_HVYWEAP_GRENADE_MAX_1	4
@@ -1086,8 +1056,6 @@ enumflags {
 #define PC_PYRO_INITAMMO_NAIL		0
 #define PC_PYRO_INITAMMO_CELL		120
 #define PC_PYRO_INITAMMO_ROCKET		15
-#define PC_PYRO_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_PYRO_GRENADE_TYPE_2		GR_TYPE_NAPALM
 #define PC_PYRO_GRENADE_INIT_1		1
 #define PC_PYRO_GRENADE_INIT_2		4
 #define PC_PYRO_GRENADE_MAX_1		4
@@ -1124,8 +1092,6 @@ enumflags {
 #define PC_SPY_INITAMMO_NAIL		50
 #define PC_SPY_INITAMMO_CELL		10
 #define PC_SPY_INITAMMO_ROCKET		0
-#define PC_SPY_GRENADE_TYPE_1		GR_TYPE_NORMAL
-#define PC_SPY_GRENADE_TYPE_2		GR_TYPE_GAS
 #define PC_SPY_GRENADE_INIT_1		2
 #define PC_SPY_GRENADE_INIT_2		2
 #define PC_SPY_GRENADE_MAX_1		4
@@ -1155,8 +1121,6 @@ enumflags {
 #define PC_ENGINEER_INITAMMO_NAIL	25
 #define PC_ENGINEER_INITAMMO_CELL	100	// synonymous with metal
 #define PC_ENGINEER_INITAMMO_ROCKET	0
-#define PC_ENGINEER_GRENADE_TYPE_1	GR_TYPE_NORMAL
-#define PC_ENGINEER_GRENADE_TYPE_2	GR_TYPE_EMP
 #define PC_ENGINEER_GRENADE_INIT_1	2
 #define PC_ENGINEER_GRENADE_INIT_2	2
 #define PC_ENGINEER_GRENADE_MAX_1	4
@@ -1183,8 +1147,6 @@ enumflags {
 #define PC_CIVILIAN_INITAMMO_NAIL	0
 #define PC_CIVILIAN_INITAMMO_CELL	0
 #define PC_CIVILIAN_INITAMMO_ROCKET	0
-#define PC_CIVILIAN_GRENADE_TYPE_1	0
-#define PC_CIVILIAN_GRENADE_TYPE_2	0
 #define PC_CIVILIAN_GRENADE_INIT_1	0
 #define PC_CIVILIAN_GRENADE_INIT_2	0
 #define PC_CIVILIAN_GRENADE_MAX_1	0
@@ -1488,15 +1450,12 @@ enumflags {
 // first 32 are reserved
 #define STAT_TEAMNO             33
 #define STAT_FLAGS              34
-#define STAT_CLASS              35
-#define STAT_NO_GREN1           36
-#define STAT_NO_GREN2           37
-#define STAT_TP_GREN1           38
-#define STAT_TP_GREN2           39
-#define STAT_PAUSED             40
-#define STAT_NOFIRE             41
-#define STAT_TEAMNO_ATTACK      42
-#define STAT_ALL_TIME           43
+#define STAT_PAUSED             35
+#define STAT_NOFIRE             36
+#define STAT_TEAMNO_ATTACK      37
+#define STAT_ALL_TIME           38
+#define STAT_SPAWN_GEN          39
+#define STAT_ROUND_END          40
 
 // Dimensions
 #define DMN_FLASH 1 // when flashed, we set dimension see to this
@@ -1538,6 +1497,8 @@ enumflags {
 #define FO_QUAD_FINISHED_REQUEST	3
 #define FO_LOGIN_REQUEST			4
 
+#define SPEC_MAXSPEED 1000
+
 struct TFAlias {
     string alias;
     float impulse;
@@ -1547,25 +1508,25 @@ struct TFAlias {
 };
 
 TFAlias client_aliases[] = {
-    {"slot1",                   TF_IMPULSE_SLOT1},
-    {"slot2",                   TF_IMPULSE_SLOT2},
-    {"slot3",                   TF_IMPULSE_SLOT3},
-    {"slot4",                   TF_IMPULSE_SLOT4},
-    {"+slot1",                  0,  "impulse 20;+attack"},
-    {"-slot1",                  0,  "-attack;impulse 24"},
-    {"+slot2",                  0,  "impulse 21;+attack"},
-    {"-slot2",                  0,  "-attack;impulse 24"},
-    {"+slot3",                  0,  "impulse 22;+attack"},
-    {"-slot3",                  0,  "-attack;impulse 24"},
-    {"+slot4",                  0,  "impulse 23;+attack"},
-    {"-slot4",                  0,  "-attack;impulse 24"},
-    {"+quick1",                 0,  "impulse 1;+attack"},
+    {"slot1",                   TF_SLOT1},
+    {"slot2",                   TF_SLOT2},
+    {"slot3",                   TF_SLOT3},
+    {"slot4",                   TF_SLOT4},
+    {"+slot1",                  0,  "+slot 1"},
+    {"-slot1",                  0,  "-slot 1"},
+    {"+slot2",                  0,  "+slot 2"},
+    {"-slot2",                  0,  "-slot 2"},
+    {"+slot3",                  0,  "+slot 3"},
+    {"-slot3",                  0,  "-slot 3"},
+    {"+slot4",                  0,  "+slot 4"},
+    {"-slot4",                  0,  "-slot 4"},
+    {"+quick1",                 0,  "slot1;+attack"},
     {"-quick1",                 0,  "-attack"},
-    {"+quick2",                 0,  "impulse 2;+attack"},
+    {"+quick2",                 0,  "slot2;+attack"},
     {"-quick2",                 0,  "-attack"},
-    {"+quick3",                 0,  "impulse 3;+attack"},
+    {"+quick3",                 0,  "slot3;+attack"},
     {"-quick3",                 0,  "-attack"},
-    {"+quick4",                 0,  "impulse 4;+attack"},
+    {"+quick4",                 0,  "slot4;+attack"},
     {"-quick4",                 0,  "-attack"},
     {"menu",                    0,  "fo_menu_special", 0, "cmd menu"},
     {"changeteam",              0,  "fo_menu_team", TF_CHANGETEAM},
@@ -1621,7 +1582,6 @@ TFAlias client_aliases[] = {
     {"reload2",                 TF_RELOAD_SLOT2},
     {"reload3",                 TF_RELOAD_SLOT3},
     {"reloadnext",              TF_RELOAD_NEXT},
-    {"grenswitch",              TF_GRENADE_SWITCH},
     {"throwgren",               TF_GRENADE_T},
     {"primeone",                TF_GRENADE_1},
     {"primetwo",                TF_GRENADE_2},

@@ -170,12 +170,15 @@ void Update_ServerAdminInfo(entity pl) = {
     msg_entity = pl;
     local float cm = CF_GetSetting("c", "clan", "off"), 
                 qm = CF_GetSetting("quadmode", "quadmode", "off"), 
-                dm = CF_GetSetting("duelmode", "duelmode", "off");
+                dm = CF_GetSetting("duelmode", "duelmode", "off"),
+                flr = CF_GetSetting("flr", "fologinrequired", "off");
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET); 
     WriteByte(MSG_MULTICAST, MSG_SERVER_ADMIN_INFO);
     WriteByte(MSG_MULTICAST, is_paused || cease_fire);
     WriteFloat(MSG_MULTICAST, infokeyf(world, "rounds"));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "round_time"));
+    WriteFloat(MSG_MULTICAST, (fo_login_required?1:0) + (flr?2:0));
+    WriteFloat(MSG_MULTICAST, CF_GetSetting("mra", "fo_matchrated", "2"));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "timelimit"));
     WriteFloat(MSG_MULTICAST, infokeyf(world, "fraglimit"));
     WriteFloat(MSG_MULTICAST, (clanbattle?1:0) + (cm?2:0));
@@ -270,14 +273,9 @@ void UpdateClientTeamScores(entity e) = {
 }
 
 void UpdateClientQuadRoundBegin(entity pl, float round_time) = {
-    if(!infokeyf(pl, INFOKEY_P_CSQCACTIVE))
-        return;
-
-    msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_QUAD_ROUND_BEGIN);
-    WriteFloat(MSG_MULTICAST, round_time);
-    multicast('0 0 0', MULTICAST_ONE_NOSPECS);
+    multicast('0 0 0', MULTICAST_ALL_R);
 }
 
 void UpdateClientPrematch(entity pl, float countdownstarted) = {

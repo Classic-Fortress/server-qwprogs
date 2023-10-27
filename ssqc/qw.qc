@@ -14,6 +14,8 @@ struct antilag_settings_t {
 } antilag_settings;
 
 .vector antilag_origin;
+.float last_death_ctime;
+.float last_attack_ctime;
 
 .float client_time;              // A stable/predictable client clock
 .float client_ping;              // ping used for prediction
@@ -43,18 +45,16 @@ float remote_client_time();
 .float armorclass;              // Type of armor being worn
 .float tf_items;                // Another flag for player items
 .float tf_items_flags;          // Flags for the player items
+.float primed_gren_type;        // Type of (last) primed grenate
+.float primed_gren_exp;         // Expiry of (last) primed grenade
 .float no_grenades_1;           // Number of grenades of type 1 being carried
 .float no_grenades_2;           // Number of grenades of type 2 being carried
-.float tp_grenades_1;           // 1st type of grenades being carried
-.float tp_grenades_2;           // 2nd type of grenades being carried
-.float tp_grenade_switch;       // Set to 1 if +gren1 and +gren2 switch places
 .float hook_out;                // Dummy field for hook to silence error messages
 .float cheat_check;             // Time when we'll next check for team cheats
 .float is_removed;              // TRUE if the entity has been removed
 .float is_undercover;           // TRUE for a SPY if they're undercover
 .float is_building;             // TRUE for an ENGINEER if they're building something
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
-.float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
@@ -98,7 +98,6 @@ float remote_client_time();
 .float regen_time;              // Time when the medic last regenerated cells
 .float regen_cooldown;          // Time to cooldown cell regeneration after using medikit heal
 .float saveme_time;             // Time when player issued /saveme command
-.float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
 .float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
@@ -227,6 +226,7 @@ float coop;
 .float noammo;                  // used for no ammo error messages
 
 // variables used for reloading
+.float reload_started;          // when the reload started
 .float reload_finished;         // when the reload will finish
 
 // Only use below for map ent compatibility.
@@ -468,6 +468,7 @@ float rounds;
 float round_active;
 float round_over;
 float round_delay_time;
+float round_end_time;
 float map_restart_time;
 float gametime;
 float is_countdown;
@@ -552,7 +553,6 @@ float max_gren2_spy;
 float max_gren2_engineer;
 */
 float max_active_gren2_soldier;
-float grentimers;
 float id_extended;
 float remember_weapon;
 float discammo_pickup;
@@ -569,7 +569,6 @@ float cannon_lock;
 float cannon_air;
 float cannon_move;
 float cannon_movespin;
-float cannon_conc;
 float cannon_accuracy;
 float feign_air;
 float feign_pack;
@@ -622,6 +621,7 @@ float walls_block_emp;
 float new_emp;
 float fo_sentry_targeting; // new improved targeting for sentry guns
 float cb_keepteams;
+float fo_matchrated;
 float fo_flashtime;
 float fo_repair_ratio;
 float solid_nailgren;
@@ -682,6 +682,8 @@ float intermission_exittime;
 // used to remember last spawn
 .entity last_spawn_spot;
 .float spawn_at_last_spawn_spot;
+
+.float spawn_gen;
 
 .float max_grenades_1;
 .float max_grenades_2;
@@ -789,10 +791,12 @@ string goal_class_names[7] = {
 
 .string broadcast_high;
 
-.float special_cooldown;
+.float special_next;
 .float airblast_cooldown;
+float disable_resup_gren;
 
 // backend
 string match_id;
 string backend_address;
 float fo_login_required;
+.entity filter_ent;

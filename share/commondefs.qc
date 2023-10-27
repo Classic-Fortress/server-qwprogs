@@ -16,6 +16,12 @@ struct FPPState {
 
 .FPPState fpp;
 
+struct ConcState {
+    float next, mag;
+};
+.ConcState conc_state;
+
+
 enumflags {
     FPF_NO_REWIND,
     FPF_FIXED_DYNAMIC,
@@ -46,29 +52,31 @@ var struct {
     float gren_beta_disable;
 
     float fo_concuss;
+    float rj;
 } fo_config;
 
 enumflags {
-    REWIND_PROJ_HIT,
-    REWIND_KNOCKBACK,
-    REWIND_SETSPEED,
+    REWIND_PROJ_FIRE,
+    REWIND_PROJ_TRAVEL,
     REWIND_GRENADES,
+    REWIND_SENDEVENT,
     REWIND_FORWARD_PROJ_SELFKNOCK,
     REWIND_FORWARD_DOORS,
 };
 
 string REWIND_DESC[] = {
-    "rewind projectile hit",
-    "rewind pipe knockback",
-    "allow csqc to handle maxspeed",
+    "rewind projectile on firing",
+    "rewind on projectile travel",
     "rewind grenade throws",
+    "use sendevent augmentation (allows race w/ death rewind)",
     "forward projectile self-knockback",
     "open doors earlier for hpbs [requires rfd=1]",
 };
 
-const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_HIT |
+const float REWIND_DEFAULT_FLAGS = REWIND_PROJ_FIRE |
+                                   REWIND_PROJ_TRAVEL |
                                    REWIND_FORWARD_PROJ_SELFKNOCK |
-                                   REWIND_SETSPEED;
+                                   REWIND_SENDEVENT;
 
 
 float RewindFlagEnabled(float flag) {
@@ -105,22 +113,7 @@ float TFxEnabled(float flag) {
     return fo_config.tfx_flags & flag;
 }
 
-const float TFX_DEFAULT_FLAGS =
-        TFX_SPEC_OUTLINE | TFX_SPEC_GRENTIMER | TFX_SPEC_SEEFLAG;
-
-enum CSQCFlags {
-    PREDICT_CSQC_SETSPEED,
-};
-
-string PREDICTF_DESC[] = {
-    "allow csqc to handle maxspeed"
-};
-
-inline float PredictEnabled(float flag) {
-    return fo_config.predict_flags & flag;
-};
-
-const float PREDICT_FLAGS_DEFAULT = 0;
+const float TFX_DEFAULT_FLAGS = 0;
 
 enumflags {
     FOC_ON_DEF,  // apply foc_defaults
@@ -209,14 +202,13 @@ const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 #define MSG_VOTE_UPDATE     19
 #define MSG_VOTE_MAP_ADD    20
 #define MSG_VOTE_MAP_DELETE 21
-#define MSG_PLAYERDIE       22
-#define MSG_PAUSE           23
-#define MSG_UNPAUSE         24
-#define MSG_TFX_GRENTIMER   25
-#define MSG_QUAD_ROUND_BEGIN   26
-#define MSG_LOGIN           27
-#define MSG_HITFLAG         28
-#define MSG_RELOADSOUND     29
+#define MSG_PAUSE           22
+#define MSG_UNPAUSE         23
+#define MSG_TFX_GRENTIMER   24
+#define MSG_QUAD_ROUND_BEGIN 25
+#define MSG_LOGIN           26
+#define MSG_HITFLAG         27
+#define MSG_RELOADSOUND     28
 
 #define FLAGINFO_HOME       1
 #define FLAGINFO_CARRIED    2
@@ -293,6 +285,7 @@ enumflags {
 enumflags {
     CSQC_WEAP_PRED,
     CSQC_PROJ_PRED,
-    CSQC_SETSPEED,
+    CSQC_PMOVE,
+    CSQC_FORCE_POS,
     CSQC_SNIPER_SIGHT,
 };

@@ -91,6 +91,8 @@ void () worldspawn = {
     WriteByte(MSG_INIT, 9/*svc_stufftext*/);
     WriteString(MSG_INIT, "set fo_serverscripts 1\n");
 
+    round_end_time = 0;
+
     vote_started = -1;
     local string st;
 
@@ -330,12 +332,9 @@ void () worldspawn = {
     clientstat(STAT_TEAMNO, EV_FLOAT, team_no);
     clientstat(STAT_ALL_TIME, EV_FLOAT, all_time);
     clientstat(STAT_FLAGS, EV_FLOAT, stat_flags);
-    clientstat(STAT_CLASS, EV_FLOAT, playerclass);
-    clientstat(STAT_NO_GREN1, EV_FLOAT, no_grenades_1);
-    clientstat(STAT_NO_GREN2, EV_FLOAT, no_grenades_2);
-    clientstat(STAT_TP_GREN1, EV_FLOAT, tp_grenades_1);
-    clientstat(STAT_TP_GREN2, EV_FLOAT, tp_grenades_2);
+    clientstat(STAT_SPAWN_GEN,EV_FLOAT, spawn_gen);
 
+    globalstat(STAT_ROUND_END, EV_FLOAT, "round_end_time");
     globalstat(STAT_PAUSED, EV_FLOAT, "cs_paused");
     globalstat(STAT_NOFIRE, EV_FLOAT, "no_fire_mode");
     globalstat(STAT_TEAMNO_ATTACK, EV_FLOAT, "team_no_attack");

@@ -20,7 +20,6 @@ float (float pc) IsLegalClass;
 void () SetupTeamEqualiser;
 void () CeaseFire_think;
 
-void () RemoveGrenadeTimers;
 void () RemovePrimeTimers;
 void () RemoveGasTimers;
 void () RemoveGrenades;
@@ -69,17 +68,10 @@ float () RejoinWithTfId;
 void () CreateTfIdAndJoin;
 entity (entity e)TeamFortress_GetPracticeSpawn;
 void () NextLevel;
-void CSEv_SetPlayerImpulse_f(float n);
 
 void StopAssCan();
 void Predict_InitPlayer(entity player);
 void Predict_Destroy(entity player);
-
-void (float n) CSEv_SetPlayerImpulse_f = {
-    bprint(PRINT_HIGH, self.netname, "\n");
-    bprint(PRINT_HIGH, "setting impulse ", ftos(n), "\n");
-    self.impulse = n;
-};
 
 void () info_intermission =
 {
@@ -450,9 +442,6 @@ void () DecodeLevelParms = {
         // maximum grenades type 2 to drop in backpack [0]
         drop_gren2 = CF_GetSetting("dg2", "drop_gren2", "0");
 
-        // display grenade timer in status bar [on]
-        grentimers = CF_GetSetting("gt", "grentimers", "on");
-
         // show sentry gun health + misc extras in id string [on]
         id_extended = CF_GetSetting("ie", "id_extended", "on");
 
@@ -510,9 +499,6 @@ void () DecodeLevelParms = {
             cannon_move = TRUE; // required for this to work
         }
 
-        // make hwguy susceptible to concussion grenade while firing assault cannon [on]
-        cannon_conc = CF_GetSetting("cc", "cannon_conc", "on");
-
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
@@ -526,7 +512,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "1");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
@@ -693,6 +679,9 @@ void () DecodeLevelParms = {
         Role_None.gren2_limits[8] = CF_GetSetting("mg2_8", "max_gren2_spy", ftos(PC_SPY_GRENADE_MAX_2));
         Role_None.gren2_limits[9] = CF_GetSetting("mg2_9", "max_gren2_engineer", ftos(PC_ENGINEER_GRENADE_MAX_2));
 
+        // disable resupply giving grenades (1-bit for gren1, 2-bit for gren2)
+        disable_resup_gren = CF_GetSetting("drg", "disable_resup_gren", "0");
+
         // solid detpack toggle [0]
         solid_detpack = CF_GetSetting("sdp", "solid_detpack", "0");
         // All Walls Block EMP [0]
@@ -833,7 +822,6 @@ void () DecodeLevelParms = {
             drop_grenpack = TRUE;
             drop_gren1 = 1;
             drop_gren2 = 0;
-            grentimers = TRUE;
             id_extended = TRUE;
             remember_weapon = TRUE;
             discammo_pickup = FALSE;
@@ -849,7 +837,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = FALSE;
-            cannon_conc = TRUE;
             cannon_accuracy = 0;
             flame_knockback = TRUE;
             old_spanner = FALSE;
@@ -903,7 +890,6 @@ void () DecodeLevelParms = {
             drop_grenpack = FALSE;
             drop_gren1 = 0;
             drop_gren2 = 0;
-            grentimers = FALSE;
             id_extended = FALSE;
             remember_weapon = FALSE;
             discammo_pickup = TRUE;
@@ -919,7 +905,6 @@ void () DecodeLevelParms = {
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = TRUE;
-            cannon_conc = TRUE;
             cannon_accuracy = 1;
             flame_knockback = FALSE;
             old_spanner = TRUE;
@@ -1006,7 +991,6 @@ void () DecodeLevelParms = {
             localcmd("localinfo server_sbflaginfo 0\n");
             solid_detpack = TRUE;
             walls_block_emp = FALSE;
-            grentimers = FALSE;
             Role_None.gren2_limits[1] = 3;
             Role_None.gren2_limits[3] = 2;
             Role_None.gren2_limits[4] = 4;
@@ -1486,7 +1470,6 @@ void () StartSpawnGuard = {
 void () DuelFinish = {
     FO_Sound(world, CHAN_AUTO, "boss1/sight1.wav", 1, ATTN_NONE);
     NextLevel();
-    RemoveGrenadeTimers();
     RemovePrimeTimers();
     RemoveGrenades();
 };
@@ -2041,6 +2024,8 @@ void () PutClientInServer = {
     local entity spot;
     local entity te;
 
+    self.spawn_gen += 1;
+
     self.touch = player_touch;
     self.classname = "player";
     self.health = 100;
@@ -2067,18 +2052,19 @@ void () PutClientInServer = {
     self.display_tip = 0;
     self.tip_type = 0;
     self.feign_next_damage = 0;
+    self.conc_state.mag = 0;
 
     FO_InstantReloadAllWeapons(self);
 
     // Only need initial init here.
-    if (!self.prng_base[PRNG_WEAP])
-        self.prng_base[PRNG_WEAP] = 65535 * random();
     // For hwguy we rotate the seed value, each seed generates many random nums.
-    self.prng_base[PRNG_HWGUY] = 65535 * random();
+    for (int i = 0; i < PRNG_NUM_STATES; i++)
+        self.prng_base[i] = 65535 * random();
+    self.primed_gren_exp = 0;
 
     self.immune_to_check = time + 10;
     SetDimensions(TRUE);
-    self.special_cooldown = 0;
+    self.special_next = 0;
 
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -2429,7 +2415,6 @@ void () CheckRules = {
         if ((timelimit && (time >= timelimit)))
         {
             NextLevel();
-            RemoveGrenadeTimers();
             RemovePrimeTimers();
             RemoveGrenades();
         }
@@ -2437,7 +2422,6 @@ void () CheckRules = {
     if ((fraglimit && (self.frags >= fraglimit)))
     {
         NextLevel();
-        RemoveGrenadeTimers();
         RemovePrimeTimers();
         RemoveGrenades();
     }
@@ -2458,8 +2442,7 @@ void () PlayerDeathThink = {
         if (self.button2 || self.button1 || self.button0)
             return;
         self.deadflag = DEAD_RESPAWNABLE;
-        self.tfstate =
-            self.tfstate - (self.tfstate & TFSTATE_RESPAWN_READY);
+        self.tfstate &= ~TFSTATE_RESPAWN_READY;
         return;
     }
     if ((!self.button2 && !self.button1) && !self.button0) {
@@ -2668,6 +2651,7 @@ void () CheckWaterJump = {
 
 void () PlayerPreThink = {
     FO_UpdateClientTime();
+    Conc_Update(&self.conc_state, self, time);
 
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
@@ -2705,7 +2689,7 @@ void () PlayerPreThink = {
         WaterMove();
     }
 
-    if (self.deadflag >= 2) {
+    if (self.deadflag >= DEAD_DEAD) {
         PlayerDeathThink();
         return;
     }
@@ -2717,11 +2701,11 @@ void () PlayerPreThink = {
             Spy_RemoveDisguise(self);
         }
     }
-    if (self.deadflag == 1) {
+    if (self.deadflag == DEAD_DYING) {
         return;
     }
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
             if (!self.feign_areachecked) {
@@ -2946,32 +2930,13 @@ void FO_HandleTFStateUpdate() {
 
 void TeamFortress_MOTD();
 
-void () PlayerPostThink = {
-    FO_CheckClientThink();
-    UpdateScoreboardInfo(self);
-    FOPlayer fop = (FOPlayer)self;
-    fop.RewindUpdate();
-    Forward_OpenDoors(self);
+static void PlayerPostThinkAlive() {
+    float fdmg;
 
     FO_WeapState ws;
     FO_FillCurrentWeapState(&ws);
     self.currentammo =
         (ws->wi)->ammo_type != AMMO_NONE ? *ws->ammo_remaining : 0;
-
-    Predict_Update();
-
-    if (self.view_ofs == '0 0 0') {
-        return;
-    }
-
-    if (self.deadflag) {
-        DeadImpulses();
-        self.impulse = 0;
-        return;
-    }
-
-    local float fdmg;
-    local float csqcactive = infokeyf(self, INFOKEY_P_CSQCACTIVE);
 
     if (((self.jump_flag < -300) && (self.flags & FL_ONGROUND)) &&
         (self.health > 0)) {
@@ -2999,6 +2964,8 @@ void () PlayerPostThink = {
     }
     self.jump_flag = self.velocity_z;
 
+    Forward_OpenDoors(self);
+
     if(votemode) {
         CheckPowerups();
         FO_ReloadFrame();
@@ -3025,6 +2992,25 @@ void () PlayerPostThink = {
     FO_HandleTFStateUpdate();
     if (time >= self.StatusRefreshTime)
         RefreshStatusBar(self);
+}
+
+void () PlayerPostThink = {
+    FO_CheckClientThink();
+    UpdateScoreboardInfo(self);
+
+    if (self.motd >= 0)
+        TeamFortress_MOTD();
+
+    if (self.deadflag || self.playerclass == 0) {
+        DeadImpulses();
+        self.impulse = 0;
+    } else {
+        PlayerPostThinkAlive();
+    }
+
+    FOPlayer fop = (FOPlayer)self;
+    fop.RewindUpdate();
+    Predict_Update(TRUE);
 };
 
 void () UpdateAllClientsTeamScores = {
@@ -3043,14 +3029,17 @@ void () UpdateAllClientsTeamScores = {
     }
 }
 
-//do not rely on csqcactive - it may misbehave when using `join` from spectator
 void () ClientConnect = {
-    local float csqc_active = infokeyf(self, INFOKEY_P_CSQCACTIVE);
-    local string st;
-    local float got_one;
+    if (!infokeyf(self,INFOKEY_P_CSQCACTIVE)) {
+        sprint(self, PRINT_HIGH, "FTE/CSQC is required for this server, please download the latest client package at www.fortressone.org\n");
+        dropclient(self);
+        return;
+    }
+
+    bprint(PRINT_HIGH, self.netname, " entered the game\n");
+    sprint(self, PRINT_HIGH, "FortressOne: Weapon Prediction ", wp_version, "\n");
 
     spawnfunc_FOPlayer();
-    bprint(PRINT_HIGH, self.netname, " entered the game\n");
 
     self.motd = 0;
 
@@ -3064,8 +3053,6 @@ void () ClientConnect = {
     if (loginRequired && self.login == string_null)
         sprint(self,2, "Login required, please use \"cmd login <login> <secret>\" \nbefore joining the game\n");
 
-    TeamFortress_Alias("id", TF_ID, 0);
-
     TeamFortress_ExecMapScript(self);
     self.has_disconnected = 0;
 
@@ -3074,39 +3061,33 @@ void () ClientConnect = {
         GotoNextMap();
     }
 
-    st = infokey(self, "apw");
+    string st = infokey(self, "apw");
     if (st == string_null)
         st = infokey(self, "adminpwd");
     if (st) {
         Admin_Check(st);
-        if (self.is_admin) 
+        if (self.is_admin)
             Admin_Aliases();
         else
             self.is_admin = FALSE;
     }
 
     if (clanbattle && (self.has_disconnected != 1)) {
-        got_one = 0;
         st = infokey(self, "tf_id");
         self.tf_id = stof(st);
         if (!loginRequired) {
-            if ((st != string_null) && (self.tf_id != 0)) {
-                got_one = RejoinWithTfId();
-            }
-            if (!got_one) {
+            if ((st != string_null) && (self.tf_id != 0))
+                RejoinWithTfId();
+            else
                 CreateTfIdAndJoin();
-            }
         }
     }
 
-    if(infokeyf(self, INFOKEY_P_CSQCACTIVE)) {
-        InitAllStatuses(self);
-        UpdateClientMOTD(self);
-        UpdateClientTeamScores(self);
-        //if(quadmode)
-        UpdateClientPrematch(self, !cb_prematch);
-        UpdateClient_VoteMap_AddAll(self);
-    }
+    InitAllStatuses(self);
+    UpdateClientMOTD(self);
+    UpdateClientTeamScores(self);
+    UpdateClientPrematch(self, !cb_prematch);
+    UpdateClient_VoteMap_AddAll(self);
 
     if (cb_prematch)
         sprint(self, PRINT_HIGH, "Currently in \sprematch\s time\n");

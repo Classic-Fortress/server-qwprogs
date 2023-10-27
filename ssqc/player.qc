@@ -235,7 +235,7 @@ void (entity et, float f) player_pain = {
     if (self.invisible_finished > time)
         return;
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         PainSound();
         return;
     }
@@ -297,7 +297,7 @@ void () DeathSound = {
     local float rs;
 
     if (self.waterlevel == 3) {
-        if (self.is_feigning)
+        if (IsFeigned(self))
             DeathBubbles(2);
         else
             DeathBubbles(10);
@@ -402,7 +402,7 @@ void (string gibname) HeadShotThrowHead = {
 };
 
 void () KillPlayer = {
-    self.owner.deadflag = 2;
+    self.owner.deadflag = DEAD_DEAD;
     dremove(self);
 };
 
@@ -417,7 +417,7 @@ void () GibPlayer = {
         newmis.think = KillPlayer;
         newmis.nextthink = time + 1;
     } else {
-        self.deadflag = 2;
+        self.deadflag = DEAD_DEAD;
     }
     TeamFortress_SetupRespawn(0);
     if (damage_attacker.classname == "teledeath") {
@@ -438,7 +438,8 @@ void () GibPlayer = {
 };
 
 void () PlayerDie = {
-    UpdateClientPlayerDie(self);
+    self.spawn_gen += 1;
+    self.last_death_ctime = self.client_time;
 
     local float i;
     local entity te;

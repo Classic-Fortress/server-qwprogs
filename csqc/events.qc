@@ -1,5 +1,6 @@
 void ParseSBAR();
-void ParseGrenPrimed(float grentype, float primed_at, float explodes_at);
+CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
+                            float timer_flags = 0);
 void ParseHitFlag(vector targpos, float mitdmg, float rawdmg, float hitflag);														 
 float StartGrenTimer(float primed_at, float expires_at, float grentype, float play_sound);
 float FoLogin(string token, float print_error);
@@ -99,21 +100,16 @@ void() CSQC_Parse_Event = {
             ParseSBAR();
             break;
         case MSG_ID:
+            last_id_time = time;
             SBAR.Identify = readstring();
             break;
         case MSG_GRENPRIMED:
+            float entno = readentitynum();
             float grentype = readbyte();
-            float primed_at = readfloat();
             float explodes_at = readfloat();
-            ParseGrenPrimed(grentype, primed_at, explodes_at);
             break;
         case MSG_GRENTHROWN:
-            CsGrenTimer last = CsGrenTimer::GetLast();
-            last.set_thrown();
-            break;
-        case MSG_PLAYERDIE:
-            last_death_time = readfloat();
-            StopGrenTimers();
+            float entno = readentitynum();
             break;
         case MSG_TFX_GRENTIMER:
             float entnum = readentitynum();
@@ -269,6 +265,8 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.ceasefire = readbyte();
             SERVER_ADMIN.quad_rounds = readfloat();
             SERVER_ADMIN.quad_round_time = readfloat();
+            SERVER_ADMIN.fo_login_required = readfloat();
+            SERVER_ADMIN.fo_matchrated = readfloat();
             SERVER_ADMIN.timelimit = readfloat();
             SERVER_ADMIN.fraglimit = readfloat();
             SERVER_ADMIN.clanmode = readfloat();
@@ -309,7 +307,6 @@ void() CSQC_Parse_Event = {
             FO_Hud_ShowPanel(HUDP_MOTD);
             break;
         case MSG_QUAD_ROUND_BEGIN:
-            round_ending = readfloat() * 60 + time + 1;
             break;
         case MSG_TEAM_SCORES:
             TeamScore[0] = readfloat();
@@ -359,8 +356,6 @@ void() CSQC_Parse_Event = {
     }
 }
 
-DEFCVAR_FLOAT(fo_grentimer_debug, 0);
-
 string cached_timer;
 string GetGrenTimerSound() {
     string wav = CVARS(fo_grentimersound);
@@ -372,31 +367,34 @@ string GetGrenTimerSound() {
     return wav;
 }
 
+static float GrenTimerVolume() {
+    if (game_state.is_spectator && CVARF(fo_spec_grentimervolume) != -1)
+        return CVARF(fo_spec_grentimervolume);
+    return CVARF(fo_grentimervolume);
+}
+
 void CsGrenTimer::StartSound() {
     if !(this.flags_ & FL_GT_SOUND)
         return;
 
     string wav = GetGrenTimerSound();
-    float volume = CVARF(fo_grentimervolume);
 
     // Note there's a bug where soundupdate returns false for a new sample, even
     // though it's started.
-    soundupdate(this, CHAN_VOICE, wav, volume, 0, 0, 0, sound_offset());
+    soundupdate(this, CHAN_VOICE, wav, GrenTimerVolume(), 0, 0, 0, sound_offset());
     this.playing_ = TRUE;
 }
 
-void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
-                      float timer_flags) {
+void CsGrenTimer::Set(float expires_at, float _grentype, float timer_flags) {
     grentype_ = _grentype;
-    primed_at_ = primed_at;
-    expires_at_ = expires_at;
+    raw_expires_at_ = expires_at_ = expires_at;
     flags_ = timer_flags;
     playing_ = FALSE;
 
     if (this.flags_ & FL_GT_ADJPING) {
         float rtt = pstate_pred.client_ping * CVARF(fo_grentimer_ping_frac);
         if (RewindFlagEnabled(REWIND_GRENADES))
-            rtt = max(0, rtt - (100 + FO_RewindGrenMs(TF_GREN_conv(_grentype))));
+            rtt = max(0, rtt - (100 + FO_RewindGrenMs(_grentype)));
         expires_at_ -= rtt / 1000;
     }
 
@@ -407,6 +405,7 @@ void CsGrenTimer::Set(float primed_at, float expires_at, float _grentype,
 }
 
 void CsGrenTimer::Stop() {
+    raw_expires_at_ = -1;
     expires_at_ = -1;
     PauseSound();  // Pause is really stop.
     flags_ = 0;
@@ -418,34 +417,36 @@ void StopGrenTimers() {
         grentimers[i].Stop();
 }
 
-void ParseGrenPrimed(float grentype, float primed_at, float explodes_at) {
-    if (grentype == GR_TYPE_FLARE || grentype == GR_TYPE_CALTROP)
-        return;
+CsGrenTimer ParseGrenPrimed(float grentype, float explodes_at,
+                            float timer_flags = 0) {
+    if (grentype == GREN_FLARE || grentype == GREN_CALTROP)
+        return world;
 
-    if (primed_at < last_death_time)
-        return;
-
-    local float timer_flags = 0;
-    switch (CVARF(fo_grentimer)) {
+    float timer_mode = CVARF(fo_grentimer);
+    switch (timer_mode) {
         case 0: break;
         case 1: timer_flags = FL_GT_SOUND; break;
         // 2 [and something sane for anything we don't recognize.]
         default: timer_flags |= FL_GT_SOUND | FL_GT_ADJPING; break;
     }
 
+    if (game_state.is_spectator)
+        timer_flags &= ~FL_GT_ADJPING;
+
     float debug_print_state = CVARF(fo_grentimer_debug) & 1;
 
     CsGrenTimer timer = CsGrenTimer::GetNext();
-    timer.Set(primed_at, explodes_at, grentype, timer_flags);
+    timer.Set(explodes_at, grentype, timer_flags);
 
     if (debug_print_state) {
         float ping = getplayerkeyfloat(player_localnum, INFOKEY_P_PING) / 1000;
 
         float expires_at = timer.expiry();
 
-        print(sprintf("primed_at=%0.2f expires_at=%0.2f explodes_at=%0.2f tfuse=%0.2f\n",
-                      primed_at, expires_at, explodes_at, expires_at - primed_at));
+        print(sprintf("expires_at=%0.2f explodes_at=%0.2f\n", expires_at, explodes_at));
     }
+
+    return timer;
 }
 #define HITFLAG(_fl_name) (hitflags & (HITFLAG_##_fl_name))
 
@@ -528,9 +529,9 @@ void ParseSBAR()
     SBAR.ClipSize = readstring();
     SBAR.FragStreak = readfloat();
     SBAR.Caps = readfloat();
-    SBAR.PlayerClass = readfloat();
+    float class_info = readfloat();
 
-    switch (SBAR.PlayerClass)
+    switch (class_info)
     {
         case PC_SCOUT:
             SBAR.ScannerOn = readfloat();
@@ -624,11 +625,15 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         return 1;
 
     // Sounds from remote entities are not local and we should always play.
-    if (ent_num != player_localentnum || is_spectator || is_observer)
+    if (ent_num != player_localentnum || game_state.is_spectator)
         return 0;
 
     // Sounds below this line are conditionally filtered.
     switch(soundname) {
+        case "dash.wav":
+            if (PM_Enabled() & !CVARF(fopm_nonudge))
+                return 1;
+            break;
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
@@ -641,8 +646,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         case "misc/outwater.wav":
             if (CSQC_JumpSounds_Active())
                 return 1;
-            else
-                break;
+            break;
     }
 
     return 0;

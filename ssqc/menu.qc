@@ -583,7 +583,7 @@ void (float inp) Menu_Spy_Input = {
         FO_Spy_DisguiseLast(self, TRUE);
     } else if (inp == 3) {
         FO_Spy_Feign(1, 0);
-        if (self.is_feigning) {
+        if (IsFeigned(self)) {
             Menu_Spy(self);
         }
     } else if (inp == 4) {
@@ -622,7 +622,7 @@ void (entity pe_player) Menu_Spy = {
     if ((!pe_player.last_selected_skin && !pe_player.last_team) || invis_only)
         s_last = "\n";
 
-    if (pe_player.is_feigning)
+    if (IsFeigned(pe_player))
         s_feign = Q"\s[3]\s Stop feigning          \n";
     else
         s_feign = Q"\s[3]\s Start feigning (silent)\n";

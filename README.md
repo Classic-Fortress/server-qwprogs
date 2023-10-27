@@ -70,6 +70,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 
 * Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
 * `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
+* `localinfo fo_matchrated 2` whether match is rated / affects trueskill. 2 is false for 1v1 and 2v2 only.
 * `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
 * All-time attack and all-time defence team options.
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
@@ -134,6 +135,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * CSQC - fo_grentimer 0 - none, 1 - starts on server prime message, 2 - starts on prime button press
 * CSQC - fo_grentimersound grentimer.wav
 * CSQC - fo_grentimervolume 1
+* CSQC - fo_specgrentimervolume -1 [ignored when -1]
 * CSQC - fo_jumpvolume 1
 * CSQC - fo_hud_reset resets HUD to defaults
 * CSQC - fo_hud_reload reloads last-saved hud configuration

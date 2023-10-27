@@ -34,7 +34,7 @@ float SlotIndex(Slot slot) {
         printf("ERROR: OOB slot id (%d) found.  Continuing.\n", (float)slot.id);
         return TF_NUM_SLOTS - 1;
     }
-    return slot.id - 1; 
+    return slot.id - 1;
 }
 
 // Convert a weapon-bit to a linear index.
@@ -157,33 +157,12 @@ enum {
     GREN_NONE,
 };
 
-// TODO: Just remove this legacy encoding.
-int TF_GREN_conv(int tf_gren) {
-    switch (tf_gren) {
-        case GR_TYPE_NORMAL: return GREN_NORMAL;
-        case GR_TYPE_CONCUSSION: return GREN_CONC;
-        case GR_TYPE_BLAST: return GREN_BLAST;
-        case GR_TYPE_NAIL: return GREN_NAIL;
-        case GR_TYPE_SHOCK: return GREN_SHOCK;
-        case GR_TYPE_BURST: return GREN_BURST;
-        case GR_TYPE_MIRV: return GREN_MIRV;
-        case GR_TYPE_NAPALM: return GREN_NAPALM;
-        case GR_TYPE_FLARE: return GREN_FLARE;
-        case GR_TYPE_GAS: return GREN_GAS;
-        case GR_TYPE_EMP: return GREN_EMP;
-        case GR_TYPE_FLASH: return GREN_FLASH;
-        case GR_TYPE_CALTROP: return GREN_CALTROP;
-    };
-
-    error("unrecognized grenade type");
-    return -1;
-}
-
 struct FO_GrenInfo {
     int id;
     string logname;
     string model;
     int skin;
+    string icon;
     vector avelocity;
 
     // Automatically initialized below this line.
@@ -191,23 +170,41 @@ struct FO_GrenInfo {
 };
 
 FO_GrenInfo fo_grenades[] = {
-    { GREN_NORMAL,  "normal",    "hgren2.mdl",    0, '300 300 300',},
-    { GREN_CONC,    "concussion", "hgren2.mdl",    1, '300 300 300'},
-    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, '300 300 300'},
-    { GREN_NAIL,    "nail",       "biggren.mdl",   1, '0 300 0'},
-    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_BURST,   "burst",      "biggren.mdl",   1, '0 300 0'},
-    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, '0 300 0'},
-    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, '0 300 0'},
-    { GREN_FLARE,   "flare",      "flare.mdl",     1, '300 300 300'},
-    { GREN_GAS,     "gas",        "grenade2.mdl",  3, '300 300 300'},
-    { GREN_EMP,     "emp",        "grenade2.mdl",  4, '300 300 300'},
-    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, '300 300 300'},
-    { GREN_CALTROP, "caltrop",    "",              0, '300 300 300'},
-    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, '250 300 400'},
-    { GREN_RED,     "gl",         "grenade2.mdl",  1, '300 300 300'},
-    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, '300 300 300'},
+    { GREN_NORMAL,  "normal",    "hgren2.mdl",     0, ICON_GREN_NORMAL, '300 300 300',},
+    { GREN_CONC,    "concussion", "hgren2.mdl",    1, ICON_GREN_CONCUSSION, '300 300 300'},
+    { GREN_BLAST,   "blast",      "blastgren.mdl", 1, ICON_GREN_NAIL, '300 300 300'},
+    { GREN_NAIL,    "nail",       "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_SHOCK,   "shock",      "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_BURST,   "burst",      "biggren.mdl",   1, ICON_GREN_NAIL, '0 300 0'},
+    { GREN_MIRV,    "mirv",       "biggren.mdl",   0, ICON_GREN_MIRV, '0 300 0'},
+    { GREN_NAPALM,  "napalm",     "biggren.mdl",   2, ICON_GREN_NAPALM, '0 300 0'},
+    { GREN_FLARE,   "flare",      "flare.mdl",     1, ICON_GREN_FLARE, '300 300 300'},
+    { GREN_GAS,     "gas",        "grenade2.mdl",  3, ICON_GREN_GAS, '300 300 300'},
+    { GREN_EMP,     "emp",        "grenade2.mdl",  4, ICON_GREN_EMP, '300 300 300'},
+    { GREN_FLASH,   "flash",      "flashgren.mdl", 0, ICON_GREN_FLASH, '300 300 300'},
+    { GREN_CALTROP, "caltrop",    "",              0, ICON_GREN_CALTROP, '300 300 300'},
+    { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, ICON_GREN_NONE, '250 300 400'},
+    { GREN_RED,     "gl",         "grenade2.mdl",  1, ICON_GREN_NONE, '300 300 300'},
+    { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, ICON_GREN_NONE, '300 300 300'},
 };
+
+string FO_GrenName(float gtype) {
+    switch (gtype) {
+      case GREN_CONC: return "Concussion grenade";
+      case GREN_NAIL: return "Nail grenade";
+      case GREN_MIRV: return "Mirv grenade";
+      case GREN_NAPALM: return "Napalm grenade";
+      case GREN_FLARE: return "Flare";
+      case GREN_GAS: return "Gas grenade";
+      case GREN_EMP: return "EMP grenade";
+      case GREN_FLASH: return "Flash grenade";
+      case GREN_CALTROP: return "Caltrop canister";
+      case GREN_BLAST: return "Blast grenade";
+      case GREN_SHOCK: return "Shock grenade";
+      case GREN_BURST: return "Burst grenade";
+      default: return "Grenade";
+  }
+}
 
 enum {
     kRadiusDamage,
@@ -267,9 +264,9 @@ FO_ClassGrenades class_grenades[] = {
     { PC_CIVILIAN,  {GREN_NONE,   GREN_NONE} },
 };
 
-FO_GrenInfo* FO_GrenDesc(int gren_type) {
+FO_GrenInfo* FO_GrenDesc(float gren_type) {
     if (gren_type < GREN_FIRST) {
-        printf("proj missing gren_type, tell newby\n");
+        printf("proj missing gren_type [%d], tell newby\n", gren_type);
         gren_type = GREN_FIRST;
     }
     return &fo_grenades[gren_type - GREN_FIRST];
@@ -279,6 +276,47 @@ FO_GrenInfo* FO_ClassGren(int playerclass, int index) {
     return FO_GrenDesc(class_grenades[playerclass].gren[index]);
 }
 
+#ifdef SSQC
+float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
+float IsUsingOldImpulses();
+
+static float IsPyroSlotSwapped() {
+    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
+}
+
+FO_GrenInfo* FO_PlayerGren(entity player, int index) {
+    return FO_ClassGren(player.playerclass, index);
+}
+#else
+string(entity e, string key) infokey = #80;
+
+float csqc_get_user_setting(string s_short, string s_long, string def) {
+    string s = getplayerkeyvalue(player_localnum, s_short);
+    if (s == "") {
+        s = getplayerkeyvalue(player_localnum, s_long);
+        if (s == "")
+            s = def;
+    }
+
+    switch (s) {
+        case "on": return TRUE;
+        case "off": return FALSE;
+        default: return stof(s);
+    }
+}
+
+float IsUsingOldImpulses() {
+    return csqc_get_user_setting("owi", "old_weapon_impulses", "off");
+}
+
+static float IsPyroSlotSwapped() {
+    return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
+}
+
+float IsHoldGrenades() {
+    return csqc_get_user_setting("hg", "hold_grens", "off");
+}
+#endif
 // Indexed by WEAP_to_index().  We keep them out of the main table just to keep
 // things a little more wieldly/readable.
 static string weapon_names[] = {
@@ -377,21 +415,17 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_RAILGUN,          IT_SHOTGUN},
 };
 
-FO_WeapInfo* FO_SlotWeapInfo(float class, Slot slot) {
+FO_WeapInfo* FO_SlotWeapInfo(float playerclass, Slot slot) {
     if (IsSlotNull(slot))
         return FO_GetWeapInfo(WEAP_NONE);
 
-    FO_ClassWeapons* cw = &class_weapons[class];
-    return cw->info[SlotIndex(slot)] ? cw->info[SlotIndex(slot)] :
-                                       FO_GetWeapInfo(WEAP_NONE);
-}
+    float idx = SlotIndex(slot);
+    float cf_pyro_impulses = IsPyroSlotSwapped();
+    float si = SlotIndex(slot);
+    if (playerclass == PC_PYRO && cf_pyro_impulses && (idx == 0 || idx == 1))
+        idx = 1 - idx;
 
-float FO_ClassWeaponBySlot(float class, Slot slot) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(class, slot);
-    if (!wi)
-        return WEAP_NONE;
-
-    return wi->weapon;
+    return class_weapons[playerclass]->info[idx] ?: FO_GetWeapInfo(WEAP_NONE);
 }
 
 float FO_ClassWeapItemMask(float class) {
@@ -475,14 +509,16 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[0];
 }
 
-float FO_ClassWeaponBySlot(float class, Slot slot);
 
-inline float FO_CurrentWeapon() {
-    return FO_ClassWeaponBySlot(self.playerclass, self.current_slot);
+float FO_PlayerCurrentWeapon(entity player) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, player.current_slot);
+    if (!wi)
+        return WEAP_NONE;
+    return wi->weapon;
 }
 
-inline float FO_PlayerCurrentWeapon(entity player) {
-    return FO_ClassWeaponBySlot(player.playerclass, player.current_slot);
+inline float FO_CurrentWeapon() {
+    return FO_PlayerCurrentWeapon(self);
 }
 
 inline void FO_FillCurrentWeapState(FO_WeapState* result) {
@@ -497,7 +533,6 @@ void (float att_delay) Attack_Finished;
 void W_UpdateCurrentWeapon(entity pl);
 void sprint_pred(entity client, float msglevel, string s);
 
-float (entity ent, string ps_short, string ps_setting, string ps_default) FO_GetUserSetting;
 void (entity pl, float weapon) UpdateClientReloadSound;
 
 void FO_ReloadSound() {
@@ -587,6 +622,7 @@ void FO_ReloadSlot(Slot slot, float force) {
     (*ws->clip_fired) -= reload_count;
 
     self.last_still_loading = reload_count;
+    self.reload_started = self.client_time;
     self.reload_finished = self.client_time + reload_duration;
 }
 
@@ -652,59 +688,15 @@ Slot FO_ImpulseToSlot(float playerclass, float impulse) {
     return r;
 }
 
-#ifdef SSQC
-float IsUsingOldImpulses();
-
-static float IsPyroSlotSwapped() {
-    return FO_GetUserSetting(self, "cf_pyro_impulses", "cfpi", "off");
-}
-#else
-string(entity e, string key) infokey = #80;
-
-float csqc_get_user_setting(string s_short, string s_long, string def) {
-    string s = getplayerkeyvalue(player_localnum, s_short);
-    if (s == "") {
-        s = getplayerkeyvalue(player_localnum, s_long);
-        if (s == "")
-            s = def;
-    }
-
-    switch (s) {
-        case "on": return TRUE;
-        case "off": return FALSE;
-        default: return stof(s);
-    }
-}
-
-float IsUsingOldImpulses() {
-    return csqc_get_user_setting("owi", "old_weapon_impulses", "off");
-}
-
-static float IsPyroSlotSwapped() {
-    return csqc_get_user_setting("cfpi", "cf_pyro_impulses", "off");
-}
-
-float IsHoldGrenades() {
-    return csqc_get_user_setting("hg", "hold_grens", "off");
-}
-#endif
-
-float InputHandlePyroSlotSwap(float playerclass, float input) {
-    float cf_pyro_impulses = IsPyroSlotSwapped();
-    if (playerclass == PC_PYRO && cf_pyro_impulses && (input == 1 || input == 2))
-        input = 3 - input;
-    return input;
-}
-
 Slot FO_SlotByInput(float playerclass, float input) {
-    if (IsUsingOldImpulses()) {
-        return FO_ImpulseToSlot(playerclass, input);
+    if (input >= TF_SLOT1 && input <= TF_SLOT4)
+        return MakeSlot(input - TF_SLOT1 + 1);
+    else if (IsUsingOldImpulses() && (input >= 1 && input <= 7)) {
+        return impulse_weapons[playerclass].slots[input - 1];
+    } else if (input >= 1 && input <= TF_NUM_SLOTS) {
+        return MakeSlot(input);
     } else {
-        input = InputHandlePyroSlotSwap(playerclass, input);
-        if (input >= 1 && input <= TF_NUM_SLOTS)
-            return MakeSlot(input);
-        else
-            return SlotNull;
+        return SlotNull;
     }
 }
 
@@ -718,6 +710,7 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
         // impulse_table[offset] return junk so we use a pointer cursor.
         Slot* cur;
         len = 7;
+        direction = (direction + len) % len;
 
         for (i = 0; i < len; i++) {
             cur = &impulse_table[i];
@@ -725,24 +718,25 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
                 break;
         }
         do {
-            i = (i + direction + len) % len;
+            i = (i + direction) % len;
             cur = &impulse_table[i];
         } while (IsSlotNull(*cur));
 
+        // Technically this will flip OWI+CFPI, but this is a nonsense combo.
         return *cur;
     } else {
-        float* slot_weaps = class_weapons[playerclass].slots;
         len = 4;
+        direction = (direction + len) % len;
+        float idx = SlotIndex(slot);
+        for (i = 0; i < len - 1; i++) {
+            idx += direction;
+            Slot c = MakeSlot(1 + (idx % len));
+            FO_WeapInfo* wi = FO_SlotWeapInfo(playerclass, c);
+            if (wi->weapon != WEAP_NONE)
+                return c;
+        }
 
-        // This is a little subtle, we need to transform the index both before
-        // and after the walk so that we don't walk back into ourselves.
-        i = InputHandlePyroSlotSwap(playerclass, SlotIndex(slot) + 1) - 1;
-        do {
-            i = (i + direction + len) % len;
-        } while (slot_weaps[i] == 0);
-
-        i = InputHandlePyroSlotSwap(playerclass, i + 1);
-        return MakeSlot(i);
+        return slot;
     }
 }
 
@@ -835,3 +829,39 @@ void FO_Weapons_Init() {
     }
 }
 
+enumflags {
+    KF_SRC_PLAYER,
+    KF_TARG_PLAYER,
+    KF_SELF,
+    KF_QUAD,
+};
+
+const float KF_BOTH_PLAYER = KF_SRC_PLAYER | KF_TARG_PLAYER;
+
+// (*) Unbelievably knock-direction and moment calculation use different origins
+// (centroid vs origin).  For now just preserve what I can only assume is an old
+// terrible mistake.  We undo half of this by ignoring on src as mins/maxs==0.
+
+float CalcRadiusDamage(vector src, entity targ, float flags, float damage) {
+    vector targ_origin = targ.origin + (targ.mins + targ.maxs) * 0.5;  // (*)
+    damage -= vlen(src - targ_origin) / 2;
+
+    if (flags & KF_SELF)
+        damage *= 0.75;
+
+    return damage;
+}
+
+vector CalcKnock(vector src, entity targ, float flags, float moment) {
+    float mult = 8;
+    if (moment < 60 && (flags & (KF_BOTH_PLAYER | KF_SELF) == KF_BOTH_PLAYER))
+            mult = 11;
+
+    vector dir = normalize(targ.origin - src);
+
+    vector result = dir * moment * mult;
+    if (fo_config.rj > 1)
+        result += dir * moment * fo_config.rj;
+
+    return result;
+}
