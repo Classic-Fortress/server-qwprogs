@@ -141,9 +141,9 @@ static inline void ConcAction(entity ent, float itime, float mag, float flip) {
 }
 #endif
 
-float Conc_Update(ConcState *cs, entity ent, float ctime) {
+void Conc_Update(ConcState *cs, entity ent, float ctime) {
     if (!cs->mag  || ctime < cs->next)
-        return FALSE;
+        return;
 
     while (ctime >= cs->next) {
         cs->mag = max(cs->mag - 1, 0);
@@ -157,8 +157,6 @@ float Conc_Update(ConcState *cs, entity ent, float ctime) {
         ConcAction(ent, cs->next, mag, flip);
         cs->next += CONC_P;
     }
-
-    return TRUE;
 }
 
 float Class_ScaleMoment(float playerclass, float damage) {
