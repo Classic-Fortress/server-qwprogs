@@ -45,6 +45,7 @@ void RemoveConc(entity player, float remove_timer = TRUE) {
         return;
 
     player.tfstate &= ~TFSTATE_CONC;
+    player.conc_state.mag = 0;
     player.conc_finished = 0;
 
     if (GetConcMode() == CONC_IDLESCALE)

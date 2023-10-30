@@ -624,6 +624,9 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
         if (!CVARF(fopm_nonudge)) {
             float slack = (pm.seq == pm.server_seq + 1) ? NUDGE_EPS : 0;
             PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength, slack);
+
+            if ((ent.pmove_flags & PMF_JUMP_HELD) && (pstate_pred.tfstate & TFSTATE_CONC))
+                Conc_Jump(&pstate_pred.conc_state, ent);
         }
 
         pm.seq++;

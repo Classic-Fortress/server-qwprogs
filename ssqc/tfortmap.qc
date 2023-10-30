@@ -1179,28 +1179,25 @@ void (entity Goal, entity Player) RemoveResults = {
         te = find(te, classname, "item_tfgoal");
     }
     if ((Goal.invincible_finished > 0) && !puinvin) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_INVINCIBLE);
+        Player.tfstate &= ~TFSTATE_INVINCIBLE;
         Player.items = Player.items | IT_INVULNERABILITY;
         Player.invincible_time = 1;
         Player.invincible_finished = time + Goal.invincible_finished;
     }
     if ((Goal.invisible_finished > 0) && !puinvis) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_INVISIBLE);
+        Player.tfstate &= ~TFSTATE_INVISIBLE;
         Player.items = Player.items | IT_INVISIBILITY;
         Player.invisible_time = 1;
         Player.invisible_finished = time + Goal.invisible_finished;
     }
     if ((Goal.super_damage_finished > 0) && !puquad) {
-        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_QUAD);
+        Player.tfstate &= ~TFSTATE_QUAD;
         Player.items = Player.items | IT_QUAD;
         Player.super_time = 1;
         Player.super_damage_finished = time + Goal.super_damage_finished;
     }
     if ((Goal.radsuit_finished > 0) && !purad) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_RADSUIT);
+        Player.tfstate &= ~TFSTATE_RADSUIT;
         Player.items = Player.items | IT_SUIT;
         Player.rad_time = 1;
         Player.radsuit_finished = time + Goal.radsuit_finished;
