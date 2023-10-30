@@ -2647,17 +2647,16 @@ static void ConcUpdate() {
         return;
 
     if (self.invincible_finished > time) {
-        RemoveConc(self, FALSE);
-        return;
+        self.conc_state.mag = 0;
+    } else {
+        Conc_Update(&self.conc_state, self, time);
     }
-
-    if (!Conc_Update(&self.conc_state, self, time))
-        return;
 
     if (self.conc_state.mag) {
         if (self.conc_state.mag % CONC_HZ == 0)
             SpawnBubble(self.origin);
     } else {
+        RemoveConc(self, FALSE);
         sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
     }
 }
