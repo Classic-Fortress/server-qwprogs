@@ -762,6 +762,9 @@ void PM_SyncTo(float seq) {
     if (!PM_Enabled())
         return;
 
+    if (!game_state.is_alive)
+        return;
+
     entity ent = pm.ent;
     PM_RunMovement(SimPMSD(), seq);
 
