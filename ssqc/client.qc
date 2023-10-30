@@ -2649,7 +2649,8 @@ static void ConcUpdate() {
     if (self.invincible_finished > time) {
         self.conc_state.mag = 0;
     } else {
-        Conc_Update(&self.conc_state, self, time);
+        if (!Conc_Update(&self.conc_state, self, time))
+            return;
     }
 
     if (self.conc_state.mag) {
