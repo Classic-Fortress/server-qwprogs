@@ -2536,17 +2536,8 @@ void () PlayerJump = {
         StopAssCan();
     }
 
-    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC)) {
-        entity te = FindConcTimer(self);
-        stumble = crandom() * (te.health / 100);
-        if (crandom() < 0) {
-            self.velocity_x = self.velocity_y + stumble;
-            self.velocity_y = self.velocity_x + stumble;
-        } else {
-            self.velocity_x = (-1 * self.velocity_y) + stumble;
-            self.velocity_y = (-1 * self.velocity_x) + stumble;
-        }
-    }
+    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC))
+        Conc_Jump(&self.conc_state, self);
 };
 
 .float dmgtime;
@@ -2649,9 +2640,31 @@ void () CheckWaterJump = {
     }
 };
 
+void SpawnBubble(vector origin);
+
+static void ConcUpdate() {
+    if (self.tfstate & TFSTATE_CONC == 0)
+        return;
+
+    if (self.invincible_finished > time) {
+        RemoveConc(self, FALSE);
+        return;
+    }
+
+    if (!Conc_Update(&self.conc_state, self, time))
+        return;
+
+    if (self.conc_state.mag) {
+        if (self.conc_state.mag % CONC_HZ == 0)
+            SpawnBubble(self.origin);
+    } else {
+        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
+    }
+}
+
 void () PlayerPreThink = {
     FO_UpdateClientTime();
-    Conc_Update(&self.conc_state, self, time);
+    ConcUpdate();
 
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
@@ -2767,7 +2780,7 @@ void () CheckPowerups = {
             self.modelindex = modelindex_eyes;
         } else {
             if (self.invisible_finished) {
-                if (self.tfstate & 64) {
+                if (self.tfstate & TFSTATE_INVISIBLE) {
                     if (self.invisible_finished < (time + 10)) {
                         self.invisible_finished = time + 666;
                     }
@@ -2802,7 +2815,7 @@ void () CheckPowerups = {
         }
     }
     if (self.invincible_finished) {
-        if (self.tfstate & 32) {
+        if (self.tfstate & TFSTATE_INVINCIBLE) {
             if (self.invincible_finished < (time + 10)) {
                 self.invincible_finished = time + 666;
             }
@@ -2846,7 +2859,7 @@ void () CheckPowerups = {
         }
     }
     if (self.super_damage_finished) {
-        if (self.tfstate & 128) {
+        if (self.tfstate & TFSTATE_QUAD) {
             if (self.super_damage_finished == (time + 10)) {
                 self.super_damage_finished = time + 666;
             }
@@ -2869,8 +2882,7 @@ void () CheckPowerups = {
             self.super_time = 0;
         }
         if (self.super_damage_finished > time) {
-            self.effects = self.effects | 8;
-            self.effects = self.effects | 64;
+            self.effects |= EF_DIMLIGHT | EF_BLUE;
         } else {
             lighton = 0;
             te = find(world, classname, "item_tfgoal");
@@ -2889,7 +2901,7 @@ void () CheckPowerups = {
     }
     if (self.radsuit_finished) {
         self.air_finished = time + 12;
-        if (self.tfstate & 256) {
+        if (self.tfstate & TFSTATE_RADSUIT) {
             if (self.radsuit_finished == (time + 10)) {
                 self.radsuit_finished = time + 666;
             }

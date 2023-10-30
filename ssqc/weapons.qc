@@ -2676,15 +2676,15 @@ void () SuperDamageSound = {
 
 void () ToggleInvincibility = {
     if(self.tfstate & TFSTATE_INVINCIBLE) {
-        self.items = self.items - (self.items & IT_INVULNERABILITY);
+        self.items &= ~IT_INVULNERABILITY;
         self.invincible_time = 0;
         self.invincible_finished = 0;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
-        self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
+        self.tfstate &= ~TFSTATE_INVINCIBLE;
+        self.effects &= ~(EF_RED | EF_DIMLIGHT | EF_BRIGHTLIGHT);
     } else {
-        self.items = self.items | IT_INVULNERABILITY;
+        self.items |= IT_INVULNERABILITY;
         self.invincible_time = 1;
-        self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+        self.tfstate |= TFSTATE_INVINCIBLE;
         self.invincible_finished = time + 666;
     }
 };
