@@ -433,13 +433,13 @@ static PM_Nudge* PM_AddNudgeExplosion(float nat, float seq, float itime, entity 
     return n;
 }
 
-static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
+static void PM_AddNudgeBounce(float itime, entity ent, float dmg) {
     if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
         return;
 
     PM_Nudge* n = find_nudge_slot();
     if (!n)
-        return 0;
+        return;
 
     n->type = NT_BOUNCE;
     n->nat = NA_ITIME;
@@ -453,8 +453,6 @@ static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
 
     ent.nudge = n;
     ent.removefunc = PM_RemoveSelfNudges;
-
-    return n;
 }
 
 static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
