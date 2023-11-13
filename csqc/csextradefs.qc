@@ -886,7 +886,6 @@ float team_no;
 float crosshair_team_no;
 float all_time;
 float painfinished;
-vector thisorigin;
 float jump_counter;
 float last_id_time;
 

@@ -1785,7 +1785,7 @@ void WP_Attack() {
             // but this includes the ping adjustment that would occur at pred.
             // Tested both ways and this seems to be more stable.
             sendevent("Attack", "ifvv",
-                      (float)wi->weapon, pstate_server.client_time,
+                      wi->weapon, pstate_server.client_time,
                       PM_Org(), input_angles);
         }
     }
