@@ -2691,7 +2691,7 @@ void () ToggleInvincibility = {
 
 // TODO: trust the client less, validate more.
 // TODO: Could support hitscan (e.g. sg/ssg)
-void (float weap, float ctime, vector pos, vector angles) CSEv_Attack_ifvv = {
+void (int weap, float ctime, vector pos, vector angles) CSEv_Attack_ifvv = {
     if (!RewindFlagEnabled(REWIND_SENDEVENT))
         return;
 
