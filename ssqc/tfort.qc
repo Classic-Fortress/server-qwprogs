@@ -808,6 +808,10 @@ void TeamFortress_PrimeGrenade(float inp, float is_player) {
         return;
 
     FO_GrenInfo* gdesc = FO_PlayerGren(self, inp - 1);
+
+    if (gdesc->id == GREN_NONE)
+        return;
+
     float *numg = (inp == 1) ? &self.no_grenades_1 : &self.no_grenades_2;
     string gs = FO_GrenName(gdesc->id);
 

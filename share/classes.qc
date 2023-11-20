@@ -107,7 +107,7 @@ static float NextToWall(entity ent) {
 const float CONC_P = 0.25;
 const float CONC_HZ = 1/CONC_P;
 
-void Conc_Stumble(entity ent, float imp, float flip) {
+void Conc_Stumble(entity ent, float stumble, float flip) {
     if ((ent.flags & (FL_INWATER | FL_ONGROUND) == 0) ||
         (*self_tf_state() & TFSTATE_FEIGNED))
         return;
@@ -115,30 +115,35 @@ void Conc_Stumble(entity ent, float imp, float flip) {
     if (NextToWall(ent) && ent.velocity ==  '0 0 0')
         return;
 
-    ent.velocity = [flip * ent.velocity_y + imp, flip * ent.velocity_x + imp,
-        ent.velocity_z];
+    // [*]: This preserves what looks to be a long-standing bug where y-vel ends
+    // up propagating due to missed temporary to hold vel_x.
+    ent.velocity_x = flip * ent.velocity_y + stumble;
+    ent.velocity_y = flip * ent.velocity_x + stumble;
+}
+
+void Conc_Jump(ConcState* cs, entity ent) {
+    float stumble = shared_crandom(PRNG_CONC) * cs->mag / 10;
+    float flip = (shared_prng(PRNG_CONC) < 0.5) ? -1 : 1;
+
+    // See [*] above.
+    ent.velocity_x = flip * ent.velocity_y + stumble;
+    ent.velocity_y = flip * ent.velocity_x + stumble;
 }
 
 #ifdef SSQC
-void SpawnBubble(vector origin);
 static inline void ConcAction(entity ent, float itime, float mag, float flip) {
     Conc_Stumble(ent, mag, flip);
 }
 #else
 void PM_AddNudgeConc(float itime, float mag, float flip);
-
 static inline void ConcAction(entity ent, float itime, float mag, float flip) {
     PM_AddNudgeConc(itime, mag, flip);
 }
 #endif
 
-void Conc_Update(ConcState *cs, entity ent, float ctime) {
-#ifdef SSQC
-    if (ent.invincible_finished > time)  // TODO: Is this worth sharing?
-        cs->mag = 0;
-#endif
+float Conc_Update(ConcState *cs, entity ent, float ctime) {
     if (!cs->mag  || ctime < cs->next)
-        return;
+        return FALSE;
 
     while (ctime >= cs->next) {
         cs->mag = max(cs->mag - 1, 0);
@@ -153,14 +158,7 @@ void Conc_Update(ConcState *cs, entity ent, float ctime) {
         cs->next += CONC_P;
     }
 
-#ifdef SSQC
-    if (cs->mag) {
-        if (cs->mag % CONC_HZ == 0)
-            SpawnBubble(ent.origin);
-    } else {
-        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
-    }
-#endif
+    return TRUE;
 }
 
 float Class_ScaleMoment(float playerclass, float damage) {

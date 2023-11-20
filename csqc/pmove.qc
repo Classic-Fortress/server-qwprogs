@@ -433,13 +433,13 @@ static PM_Nudge* PM_AddNudgeExplosion(float nat, float seq, float itime, entity 
     return n;
 }
 
-static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
+static void PM_AddNudgeBounce(float itime, entity ent, float dmg) {
     if (vlen(PM_Org() - ent.origin) > dmg * 3)  // Fine tune this..
         return;
 
     PM_Nudge* n = find_nudge_slot();
     if (!n)
-        return 0;
+        return;
 
     n->type = NT_BOUNCE;
     n->nat = NA_ITIME;
@@ -453,8 +453,6 @@ static PM_Nudge* PM_AddNudgeBounce(float itime, entity ent, float dmg) {
 
     ent.nudge = n;
     ent.removefunc = PM_RemoveSelfNudges;
-
-    return n;
 }
 
 static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
@@ -624,6 +622,9 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
         if (!CVARF(fopm_nonudge)) {
             float slack = (pm.seq == pm.server_seq + 1) ? NUDGE_EPS : 0;
             PM_ApplyNudges(ent, pm.seq, pm.interp_t, pm.interp_t + input_timelength, slack);
+
+            if ((ent.pmove_flags & PMF_JUMP_HELD) && (pstate_pred.tfstate & TFSTATE_CONC))
+                Conc_Jump(&pstate_pred.conc_state, ent);
         }
 
         pm.seq++;
@@ -757,6 +758,9 @@ void PMD_UpdateImpulse(int seq);
 
 void PM_SyncTo(float seq) {
     if (!PM_Enabled())
+        return;
+
+    if (!game_state.is_alive)
         return;
 
     entity ent = pm.ent;

@@ -186,6 +186,7 @@ FO_GrenInfo fo_grenades[] = {
     { GREN_MIRVLET, "mirv",       "grenade2.mdl",  1, ICON_GREN_NONE, '250 300 400'},
     { GREN_RED,     "gl",         "grenade2.mdl",  1, ICON_GREN_NONE, '300 300 300'},
     { GREN_PIPE,    "pipe",       "grenade2.mdl",  2, ICON_GREN_NONE, '300 300 300'},
+    { GREN_NONE,    "none",       "",          0, ICON_GREN_NONE, '0 0 0'},
 };
 
 string FO_GrenName(float gtype) {
