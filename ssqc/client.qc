@@ -223,6 +223,23 @@ void InitPrematch()
     }
 }
 
+float ActivateNewBalance() {
+    disable_resup_gren = 2;  // No gren2 pickups
+    if (fo_config.min_ping_ms < 50) // 50 min-ping
+        localcmd("localinfo mpm 50");
+
+    drop_gren1 = 0;  // No grenades in backpacks
+
+    int i;
+    for (i = 1; i <= 9; i++)  // 3 gren spawn
+        Role_None.gren1_limits[i] = 3;
+
+    Role_None.gren2_limits[4] = 1;  // 1 mirv for demoman
+    Role_None.gren2_limits[6] = 0;  // 0 mirv for heavy
+
+    PC_PYRO_AIRBLAST_COOLDOWN = 20;
+}
+
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -328,6 +345,15 @@ void () DecodeLevelParms = {
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
+        new_balance = CF_GetSetting("new_balance", "new_balance", "4");
+
+
+        if (new_balance == 4) {
+            ServerIsStaging();
+            new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
+        }
+        // mirror current state into desired state bit
+        new_balance |= (new_balance << 1);
 
         disable_voting = clanbattle || quadmode;
 
@@ -1037,6 +1063,10 @@ void () DecodeLevelParms = {
         p = find(p, classname, "player");
     }
 */
+
+    // Overrides other settings.
+    if (new_balance)
+        ActivateNewBalance();
 };
 
 entity() FindIntermission =

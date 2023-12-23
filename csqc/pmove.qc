@@ -387,6 +387,11 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
+    const float MOVE_WORLDONLY = 3;
+    traceline(ent.origin, nudge->org, MOVE_WORLDONLY, pm.ent);
+    if (trace_fraction < 1)  // No knock from occluded explosions
+        return;
+
     float flg = KF_BOTH_PLAYER;  // Assumes everything is from a player for now
     if (nudge->src.owner == pengine.player_ent)
        flg |= KF_SELF;
@@ -802,6 +807,9 @@ void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
     float enabled = (pstate_server.predict_flags & PF_PMOVE) &&
                     game_state.is_player;
+
+    if (isdemo())
+        enabled = 0;
 
     if (enabled != was_enabled ||
         game_state.is_player != prev_game_state.is_player)

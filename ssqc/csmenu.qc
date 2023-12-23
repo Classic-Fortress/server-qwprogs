@@ -184,6 +184,7 @@ void Update_ServerAdminInfo(entity pl) = {
     WriteFloat(MSG_MULTICAST, (clanbattle?1:0) + (cm?2:0));
     WriteFloat(MSG_MULTICAST, (quadmode?1:0) + (qm?2:0));
     WriteFloat(MSG_MULTICAST, (duelmode?1:0) + (dm?2:0));
+    WriteFloat(MSG_MULTICAST, new_balance);
     WriteFloat(MSG_MULTICAST, captainmode);
     multicast('0 0 0', MULTICAST_ONE_NOSPECS); 
 }

@@ -123,6 +123,14 @@ void () DuelMode =
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
 }
 
+void new_balance_mode() {
+    new_balance ^= 2;
+    if (new_balance & 2)
+        localcmd("localinfo new_balance 1\n");
+    else
+        localcmd("localinfo new_balance 0\n");
+}
+
 void (entity pe) SetEquipmentForPlayer = {
     entity oldself = self;
     self = pe;
@@ -1227,6 +1235,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             case "duelmode":
                 processedCmd = TRUE;
                 DuelMode();
+                break;
+            case "new_balance":
+                processedCmd = TRUE;
+                new_balance_mode();
                 break;
             case "forcestart":
                 processedCmd = TRUE;
