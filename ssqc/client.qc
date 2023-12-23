@@ -345,15 +345,6 @@ void () DecodeLevelParms = {
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
-        new_balance = CF_GetSetting("new_balance", "new_balance", "4");
-
-
-        if (new_balance == 4) {
-            ServerIsStaging();
-            new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
-        }
-        // mirror current state into desired state bit
-        new_balance |= (new_balance << 1);
 
         disable_voting = clanbattle || quadmode;
 
@@ -1065,7 +1056,16 @@ void () DecodeLevelParms = {
 */
 
     // Overrides other settings.
-    if (new_balance)
+    new_balance = CF_GetSetting("new_balance", "new_balance", "4");
+
+    if (new_balance == 4) {
+        printf("Staging = %d\n", ServerIsStaging());
+        new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
+    }
+
+    // mirror current state into desired state bit
+    new_balance |= (new_balance << 1);
+    if (ServerIsNewBalance())
         ActivateNewBalance();
 };
 
