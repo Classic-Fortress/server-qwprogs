@@ -1058,10 +1058,8 @@ void () DecodeLevelParms = {
     // Overrides other settings.
     new_balance = CF_GetSetting("new_balance", "new_balance", "4");
 
-    if (new_balance == 4) {
-        printf("Staging = %d\n", ServerIsStaging());
+    if (new_balance == 4)
         new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
-    }
 
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
