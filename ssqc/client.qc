@@ -328,6 +328,9 @@ void () DecodeLevelParms = {
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
+        new_balance = CF_GetSetting("new_balance", "new_balance", "off");
+        // mirror current state into desired state bit
+        new_balance |= (new_balance << 1);
 
         disable_voting = clanbattle || quadmode;
 
@@ -1037,6 +1040,10 @@ void () DecodeLevelParms = {
         p = find(p, classname, "player");
     }
 */
+
+    // Overrides other settings.
+    if (new_balance) {
+    }
 };
 
 entity() FindIntermission =
