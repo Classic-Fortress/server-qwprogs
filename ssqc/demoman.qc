@@ -146,6 +146,10 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
+
+    if (new_balance & 1)  // No detpacks
+        self.ammo_detpack = 0;
+
     if (self.ammo_detpack <= 0) {
         sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
