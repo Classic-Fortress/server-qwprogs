@@ -803,6 +803,9 @@ void PM_Update(float sendflags) {
     float enabled = (pstate_server.predict_flags & PF_PMOVE) &&
                     game_state.is_player;
 
+    if (isdemo())
+        enabled = 0;
+
     if (enabled != was_enabled ||
         game_state.is_player != prev_game_state.is_player)
         PM_SetEnabled(enabled);
