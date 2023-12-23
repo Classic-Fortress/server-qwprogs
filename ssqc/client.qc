@@ -328,7 +328,13 @@ void () DecodeLevelParms = {
         clanbattle = CF_GetSetting("c", "clan", "off");
         quadmode = CF_GetSetting("quadmode", "quadmode", "off");
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
-        new_balance = CF_GetSetting("new_balance", "new_balance", "off");
+        new_balance = CF_GetSetting("new_balance", "new_balance", "4");
+
+
+        if (new_balance == 4) {
+            ServerIsStaging();
+            new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
+        }
         // mirror current state into desired state bit
         new_balance |= (new_balance << 1);
 
