@@ -387,6 +387,11 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
+    const float MOVE_WORLDONLY = 3;
+    traceline(ent.origin, nudge->org, MOVE_WORLDONLY, pm.ent);
+    if (trace_fraction < 1)  // No knock from occluded explosions
+        return;
+
     float flg = KF_BOTH_PLAYER;  // Assumes everything is from a player for now
     if (nudge->src.owner == pengine.player_ent)
        flg |= KF_SELF;
