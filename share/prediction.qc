@@ -479,6 +479,7 @@ void EntUpdate_Config() {
     COMM(Byte, gren_beta_disable);
     COMM(Byte, old_ng_rof);
     COMM(Short, fo_concuss);
+    COMM(Byte, new_balance);
 
 #ifdef SSQC
     return TRUE;
@@ -724,6 +725,7 @@ void Predict_InitDefaultConfig() {
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
     fo_config.fo_concuss = 0;
+    fo_config.new_balance = 0;
 }
 
 #ifdef SSQC
@@ -787,6 +789,11 @@ static void WeaponPred_CheckConfigUpdate() {
 
     if (fo_concuss != fo_config.fo_concuss) {
         fo_config.fo_concuss = fo_concuss;
+        update = TRUE;
+    }
+
+    if ((new_balance & 1) != fo_config.new_balance) {
+        fo_config.new_balance = new_balance & 1;
         update = TRUE;
     }
 
