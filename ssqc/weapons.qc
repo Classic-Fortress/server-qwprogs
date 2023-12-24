@@ -1744,6 +1744,9 @@ void () W_Attack = {
         player_shot1();
         W_FireTranq();
     } else if (ws.weapon == WEAP_RAILGUN) {
+        if (new_balance && time < self.special_next)
+            return;
+
         player_shot1();
         W_FireRailgun();
     }

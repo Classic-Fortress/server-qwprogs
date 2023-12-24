@@ -78,7 +78,65 @@ void () LaserBolt_Touch = {
     dremove(self);
 };
 
+static void NBRailTouch() {
+    self.owner = self.real_owner;
+
+    if (other.health) {
+        deathmsg = DMSG_LASERBOLT;
+        TF_T_Damage(other, self, self.enemy, 15, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
+
+        float mag = 250;
+        if (other.has_flag)
+            mag *= 2;
+        other.velocity += normalize(self.velocity) * mag;
+    }
+    dremove(self);
+}
+
+void W_FireNBRail() {
+    vector vec, org;
+
+    makevectors(self.v_angle);
+    org = (self.absmin + self.absmax) / 2;
+
+    traceline(org, org + 1500 * v_forward, MOVE_WORLDONLY, world);
+
+    self.special_next = time + 3;
+
+    if (trace_fraction == 1)
+        return;
+
+    if (pointcontents(trace_endpos) == CONTENT_SKY)
+        return;
+
+    vector term = trace_endpos;
+    vector vec = normalize(term - org);
+
+    pointparticles(particleeffectnum("fo_airblast"), term);
+
+    entity proj = FOProj_Create(FPP_RAILGUN);
+    proj.owner = proj;  // Want collisions with everyone
+    proj.real_owner = self;
+    proj.enemy = self;
+    proj.movetype = MOVETYPE_FLYMISSILE;
+    proj.solid = SOLID_BBOX;
+
+    proj.velocity = -vec * 2250;
+    proj.angles = vectoangles(proj.velocity);
+
+    proj.nextthink = time + 5;
+    proj.think = SUB_Remove;
+    proj.touch = NBRailTouch;
+    proj.classname = "railslug";
+
+    setorigin(proj, term);
+    FOProj_Finalize(proj);
+}
+
 void () W_FireRailgun = {
+    if (new_balance)
+        return W_FireNBRail();
+
     local vector vec, org;
 
     self.ammo_nails = self.ammo_nails - 1;

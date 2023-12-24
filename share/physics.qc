@@ -27,6 +27,7 @@ void AugmentGrenadeImpact();
 
 static void Phys_Impact(entity e, float dt, float phys_flags) {
     other = trace_ent;
+
     if (other.solid == SOLID_NOT)
         return;
 

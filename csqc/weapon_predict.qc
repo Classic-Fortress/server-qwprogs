@@ -1707,6 +1707,13 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     proj.fpp.ammo_index = WP_GetAmmo(AMMO_SHELLS) * 100 + index;
 }
 
+float NB_RailCoolDown(FO_WeapInfo* wi) {
+    if (!fo_config.new_balance || wi->weapon != WEAP_RAILGUN)
+        return FALSE;
+
+    return pstate_pred.client_time < pstate_pred.special_next;
+}
+
 void WP_Attack() {
     if (getstatf(STAT_NOFIRE))
         return;
@@ -1717,6 +1724,9 @@ void WP_Attack() {
         return;
 
     if (!WP_CheckAmmo(wi))
+        return;
+
+    if (NB_RailCoolDown(wi))
         return;
 
     // Whether firing occurs here, or is embedded in the frame animation code
@@ -1751,7 +1761,8 @@ void WP_Attack() {
                 PP_CreateProjectile(FPP_TRANQ, PM_Org() + v_forward * 8 + '0 0 16');
                 break;
             case WEAP_RAILGUN:
-                PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
+                if (!fo_config.new_balance)
+                    PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
                 break;
 
             case WEAP_ASSAULT_CANNON:
@@ -1974,7 +1985,8 @@ void WP_UpdateViewModel() {
         alph = CVARF(fo_reloadalpha);
     } else {
         alph = CVARF(r_drawviewmodel);
-        if (!WP_WeaponReady() && CVARF(fo_nofirealpha) != -1)
+        float ready = WP_WeaponReady() && !NB_RailCoolDown(wi);
+        if (!ready && CVARF(fo_nofirealpha) != -1)
             alph = CVARF(fo_nofirealpha);
     }
 
