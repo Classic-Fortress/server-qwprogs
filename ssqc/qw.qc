@@ -803,3 +803,4 @@ float fo_login_required;
 
 float new_balance;
 var float PC_PYRO_AIRBLAST_COOLDOWN = 5;
+var float PC_ENGINEER_GRENADE_TYPE_2_RANGE = 240;
