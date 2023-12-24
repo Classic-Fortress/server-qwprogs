@@ -237,7 +237,7 @@ float ActivateNewBalance() {
     Role_None.gren2_limits[4] = 1;  // 1 mirv for demoman
     Role_None.gren2_limits[6] = 0;  // 0 mirv for heavy
 
-    PC_PYRO_AIRBLAST_COOLDOWN = 20;
+    PC_PYRO_AIRBLAST_COOLDOWN = 15;
 }
 
 void () DecodeLevelParms = {
