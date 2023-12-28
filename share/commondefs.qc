@@ -53,6 +53,8 @@ var struct {
 
     float fo_concuss;
     float rj;
+
+    float new_balance;
 } fo_config;
 
 enumflags {
