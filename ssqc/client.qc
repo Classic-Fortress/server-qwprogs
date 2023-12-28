@@ -223,6 +223,15 @@ void InitPrematch()
     }
 }
 
+static void SetAllRoles(float pc, float gren, float limit) {
+    if (gren == 1)
+        Role_None.gren1_limits[pc] = Role_Attack.gren1_limits[pc] =
+            Role_Defence.gren1_limits[pc] = limit;
+    else
+        Role_None.gren2_limits[pc] = Role_Attack.gren2_limits[pc] =
+            Role_Defence.gren2_limits[pc] = limit;
+}
+
 float ActivateNewBalance() {
     disable_resup_gren = 2;  // No gren2 pickups
     if (fo_config.min_ping_ms < 50) // 50 min-ping
@@ -231,11 +240,11 @@ float ActivateNewBalance() {
     drop_gren1 = 0;  // No grenades in backpacks
 
     int i;
-    for (i = 1; i <= 9; i++)  // 3 gren spawn
-        Role_None.gren1_limits[i] = 3;
+    for (i = 1; i <= 9; i++) // 3 gren spawn
+        SetAllRoles(i, 1, 3);
 
-    Role_None.gren2_limits[4] = 1;  // 1 mirv for demoman
-    Role_None.gren2_limits[6] = 0;  // 0 mirv for heavy
+    SetAllRoles(4, 2, 1);  // 1 mirv for demoman
+    SetAllRoles(6, 2, 0);  // 0 mirv for hwguy
 
     PC_PYRO_AIRBLAST_COOLDOWN = 15;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
@@ -262,7 +271,6 @@ void () DecodeLevelParms = {
     self.armortype = parm9 * 0.01;
 
     if (!(toggleflags & TFLAG_FIRSTENTRY)) {
-
         toggleflags = parm10;
         flagem_checked = 0;
         invis_only = 0;

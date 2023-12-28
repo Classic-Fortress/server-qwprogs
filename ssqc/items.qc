@@ -733,7 +733,14 @@ float () GetGrenadePossibility = {
     if (random() < 0.500)
         return 0;
 
-    float index = random() < 0.5 ? 0 : 1;
+    float index;
+    switch (disable_resup_gren) {
+        case 0: index = random() < 0.5 ? 0 : 1; break;
+        case 1: index = 1; break;
+        case 2: index = 0; break;
+        case 3: return 0;
+    }
+
     FO_GrenInfo* gt = FO_PlayerGren(other, index);
     if (gt->id == GREN_NONE)
         return 0;
