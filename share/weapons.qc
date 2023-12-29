@@ -159,7 +159,7 @@ enum {
 
 struct FO_GrenInfo {
     int id;
-    string logname;
+    string name;
     string model;
     int skin;
     string icon;
@@ -167,6 +167,7 @@ struct FO_GrenInfo {
 
     // Automatically initialized below this line.
     float modelindex;
+    string logname;
 };
 
 FO_GrenInfo fo_grenades[] = {
@@ -815,6 +816,7 @@ void FO_Weapons_Init() {
         FO_GrenInfo* gdesc = &fo_grenades[i];
         ASSERTD_EQ(GREN_FIRST + i, gdesc->id);
 
+        gdesc->logname = gdesc->name;
         if (i < GREN_RED)
             gdesc->logname = strcat(strtolower(gdesc->logname), "grenade");
 

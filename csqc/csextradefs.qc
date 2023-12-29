@@ -918,3 +918,5 @@ void cvar_parse4(string s, __out veci target) {
     target.v[2] = stof(argv(2));
     target.i = stof(argv(3));
 }
+
+float servertime;
