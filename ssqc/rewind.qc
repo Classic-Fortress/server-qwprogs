@@ -104,6 +104,31 @@ static SeekResult RewindSeek(RewindState* rstate, float rtime) {
     return r;
 }
 
+static void DoubleCheckCollision(entity player,
+                                 RewindSnapshot* a,
+                                 RewindSnapshot* b) {
+
+    if (vlen(b->origin - a->origin) > 48)
+        return;  // Teleport
+
+    const vector PLAYER_MINS = [-16, -16, -24], PLAYER_MAXS = [16, 16, 32];
+    tracebox(a->origin, PLAYER_MINS, PLAYER_MAXS, b->origin, 0, player);
+    if (trace_fraction == 1)
+        return;
+
+    entity hit = trace_ent;
+
+    if (!hit.voided && hit.fpp.index && hit.touch) {
+        setorigin(player, trace_endpos);
+
+        entity held_self = self;
+        self = hit;
+        other = player;
+        self.touch();
+        self = held_self;
+    }
+}
+
 RewindSnapshot* RewindLog(RewindState* target) {
     if (target->owner != self)
         error("Log mismatch\n");
@@ -111,6 +136,7 @@ RewindSnapshot* RewindLog(RewindState* target) {
     target->owner->client_lastupdate = time;
 
     RewindSnapshot* rs = &target->snapshot[target->cur];
+    RewindSnapshot* last = rs;
     if (time > rs->time) {
         if (rs->time) {
             target->cur = NextRewindIdx(target->cur);
@@ -124,6 +150,9 @@ RewindSnapshot* RewindLog(RewindState* target) {
 
     rs->origin = target->owner.origin;
     rs->velocity = target->owner.velocity;
+
+    if (RewindFlagEnabled(REWIND_DOUBLE_COL) && rs != last)
+        DoubleCheckCollision(target->owner, last, rs);
 
     return rs;
 }
