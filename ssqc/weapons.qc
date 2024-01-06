@@ -1043,9 +1043,7 @@ void T_Knock_Antilag() {
 }
 
 float AntilagKnock(entity e, float dmg) {
-    if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
-        return FALSE;
-
+    e.forward_knock = -1;
     // Only applies during initial antilag forward
     if (e.flags & FL_FORWARD_KNOCK == 0)
         return FALSE;
@@ -1070,7 +1068,6 @@ float AntilagKnock(entity e, float dmg) {
         e.forward_knock = time + ttime;
     } else {
         Antilag_Knock(knock_e);
-        e.forward_knock = -1;
     }
 
     return TRUE;
@@ -1094,9 +1091,6 @@ void () T_MissileTouch = {
     float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
     entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
     T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
-
-    if (!self.s_time)
-        self.forward_knock = -1;
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
