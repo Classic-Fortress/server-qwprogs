@@ -336,8 +336,6 @@ void Forward_Projectile(int fpp_type, entity proj, float use_ctime) {
     float static_dt = offset.static_ms / 1000.0;
     float dynamic_dt = offset.dynamic_ms / 1000.0;
 
-    if (proj.fpp.flags & FPF_FIXED_DYNAMIC)
-        dynamic_dt = proj.fpp.dynamic_dt;
     float stime = time - dynamic_dt;
 
     float no_rewind = proj.fpp.flags & FPF_NO_REWIND;
