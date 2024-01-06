@@ -107,7 +107,8 @@ static SeekResult RewindSeek(RewindState* rstate, float rtime) {
 static void DoubleCheckCollision(entity player,
                                  RewindSnapshot* a,
                                  RewindSnapshot* b) {
-
+    if (player.deadflag)
+        return;  // Dead
     if (vlen(b->origin - a->origin) > 48)
         return;  // Teleport
 
