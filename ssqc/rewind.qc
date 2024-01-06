@@ -8,7 +8,7 @@
 #define rw_printd(...)
 #endif
 
-#define MAX_SNAPSHOTS 25
+#define MAX_SNAPSHOTS 50
 
 inline int NextRewindIdx(int idx) {
     return (idx + 1) % MAX_SNAPSHOTS;
@@ -111,7 +111,7 @@ RewindSnapshot* RewindLog(RewindState* target) {
     target->owner->client_lastupdate = time;
 
     RewindSnapshot* rs = &target->snapshot[target->cur];
-    if (time > rs->time + 0.05) {
+    if (time > rs->time) {
         if (rs->time) {
             target->cur = NextRewindIdx(target->cur);
             rs = &target->snapshot[target->cur];
@@ -336,32 +336,31 @@ void Forward_Projectile(int fpp_type, entity proj, float use_ctime) {
     float static_dt = offset.static_ms / 1000.0;
     float dynamic_dt = offset.dynamic_ms / 1000.0;
 
-    if (proj.fpp.flags & FPF_FIXED_DYNAMIC)
-        dynamic_dt = proj.fpp.dynamic_dt;
-    float stime = time - dynamic_dt;
 
-    float no_rewind = proj.fpp.flags & FPF_NO_REWIND;
-    float rewind_hit = !no_rewind && RewindFlagEnabled(REWIND_PROJ_FIRE);
+    float rewind_hit = RewindFlagEnabled(REWIND_PROJ_FIRE) &&
+                       !(proj.fpp.flags & FPF_NO_REWIND) &&
+                       dynamic_dt > 0;
+
     float phys_flags = PHYSF_CONSUME_ALL;
+    float stime = time;
+
     if (rewind_hit) {
+        stime -= dynamic_dt;
         phys_flags |= PHYSF_REWIND_PLAYERS;
         RL_StashPositions(rewind_players);
         RL_RewindTo(rewind_players, proj.owner, stime);
     }
 
-    if (!no_rewind && RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK))
-            phys_flags |= PHYSF_FORWARD_KNOCK;
-
     // Static projection happens instantly.  If rewind is active, we'll do it at
     // a prior point in time, but we don't advance time while stepping.
-    proj.s_origin = proj.origin;
-    proj.s_time = 0;
     float ft = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
 
     // We initialize s_origin/s_time after Phys_Init, they are used when
     // knockback forwarding is on to determine delay.
-    proj.s_origin = proj.origin;
-    proj.s_time = time;
+    if (rewind_hit && RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK)) {
+        phys_flags |= PHYSF_FORWARD_KNOCK;
+        proj.s_origin = proj.origin;
+    }
 
     if (!proj.voided) {
         RewindSyncTime = ProjRewindForPhys;

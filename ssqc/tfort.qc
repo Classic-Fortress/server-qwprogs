@@ -2398,12 +2398,6 @@ void () TeamFortress_ExplodePerson = {
     proj.angles = vectoangles(proj.velocity);
     proj.think = SUB_Null;
     float expires = time + 0.1;  // Server generated, no client time here.
-    float rw_dt = FO_RewindGrenWinDt(gtype);
-    if (rw_dt > 0) {
-        proj.fpp.flags |= FPF_FIXED_DYNAMIC;
-        proj.fpp.dynamic_dt = rw_dt;
-        expires -= rw_dt;
-    }
     proj.nextthink = expires;
 
     if (self.weapon == GREN_FLARE) {

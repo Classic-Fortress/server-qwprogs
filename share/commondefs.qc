@@ -24,7 +24,6 @@ struct ConcState {
 
 enumflags {
     FPF_NO_REWIND,
-    FPF_FIXED_DYNAMIC,
 };
 
 var struct {
