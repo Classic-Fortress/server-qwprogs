@@ -234,8 +234,6 @@ static void SetAllRoles(float pc, float gren, float limit) {
 
 float ActivateNewBalance() {
     disable_resup_gren = 2;  // No gren2 pickups
-    if (fo_config.min_ping_ms < 50) // 50 min-ping
-        localcmd("localinfo mpm 50");
 
     drop_gren1 = 0;  // No grenades in backpacks
 
@@ -248,6 +246,11 @@ float ActivateNewBalance() {
 
     PC_PYRO_AIRBLAST_COOLDOWN = 15;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
+
+    if (ServerRegion() == kRegionUS || ServerRegion() == kRegionEU) {
+        if (fo_config.min_ping_ms < 50) // 50 min-ping
+            localcmd("localinfo mpm 50");
+    }
 }
 
 void () DecodeLevelParms = {
