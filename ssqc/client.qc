@@ -232,7 +232,16 @@ static void SetAllRoles(float pc, float gren, float limit) {
             Role_Defence.gren2_limits[pc] = limit;
 }
 
-float ActivateNewBalance() {
+static float NB_UseMinPing() {
+    if (ServerIsOCE())
+        return FALSE;
+
+    if (ServerRegion() == kRegionUnknown)
+        return FALSE;  // e.g. random server, including LAN
+    return TRUE;
+}
+
+void ActivateNewBalance() {
     disable_resup_gren = 2;  // No gren2 pickups
 
     drop_gren1 = 0;  // No grenades in backpacks
@@ -247,7 +256,7 @@ float ActivateNewBalance() {
     PC_PYRO_AIRBLAST_COOLDOWN = 15;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
 
-    if (ServerRegion() == kRegionUS || ServerRegion() == kRegionEU) {
+    if (NB_UseMinPing()) {
         if (fo_config.min_ping_ms < 50) // 50 min-ping
             localcmd("localinfo mpm 50");
     }
