@@ -2,6 +2,7 @@ enum {
     kRegionUS = 1,
     kRegionEU,
     kRegionOCE,
+    kRegionLeague,
     kRegionUnknown,
 };
 
@@ -11,9 +12,11 @@ struct RegionMatch {
 };
 
 static RegionMatch region_matches[] = {
-    { "504171613793681408", kRegionUS },   // US pug
-    { "513699536846323712", kRegionEU },   // EU pug
-    { "542237808895459338", kRegionOCE },  // OCE pug
+    { "504171613793681408",  kRegionUS },     // US pug
+    { "513699536846323712",  kRegionEU },     // EU pug
+    { "542237808895459338",  kRegionOCE },    // OCE pug
+    { "1147341454851719219", kRegionLeague }, // Scrim
+    { "1026405619231625257", kRegionLeague }, // Tourney
 };
 
 float ServerRegion() {
@@ -33,6 +36,20 @@ float ServerRegion() {
     }
 
     return region;
+}
+
+float ServerIsOCE() {
+    if (ServerRegion() == kRegionOCE)
+        return TRUE;
+
+    // Additional check beyond kRegion for picking up OCE Scrim/Tourney etc
+    // This is pretty awful, for at least these servers we should just fix FO_REGION
+    // to be consistent in the future.
+    string hostname = serverkey("hostname");
+
+    return strstrofs(hostname, "Sydney") >= 0 ||
+           strstrofs(hostname, "Melbourne") >= 0 ||
+           strstrofs(hostname, "New Zealand") >= 0;
 }
 
 float ServerIsStaging() {
