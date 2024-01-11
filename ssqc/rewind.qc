@@ -385,7 +385,7 @@ void Forward_Projectile(int fpp_type, entity proj, float use_ctime) {
     // a prior point in time, but we don't advance time while stepping.
     float ft = Phys_Init(proj, stime, static_dt, PHYSF_CONSUME_ALL);
 
-    // We initialize s_origin/s_time after Phys_Init, they are used when
+    // We initialize s_origin after Phys_Init, they are used when
     // knockback forwarding is on to determine delay.
     if (rewind_hit && RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK)) {
         phys_flags |= PHYSF_FORWARD_KNOCK;
