@@ -145,6 +145,8 @@ float remote_client_time();
 .float menu_displaytime;
 .f_void_float menu_input;
 
+.float has_flag;
+
 float toggleflags;              // toggleable flags
 
 string nextmap;

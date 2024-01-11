@@ -2265,6 +2265,7 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
     AP.goalrunningtime = gametime;
+    AP.has_flag = TRUE;
     LogEventPickupGoal(AP);
 };
 
@@ -2337,6 +2338,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     //Flag
     if ((Item.goal_activation & 1)) {
         local float timecarried = gametime - AP.goalrunningtime;
+        AP.has_flag = FALSE;
         RemoveFlagFollow(AP);
         LogEventFumble(AP, timecarried);
     }
@@ -2928,6 +2930,7 @@ void () DropGoalItems = {
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & TFGI_ALLOWTHROW) {
                 timecarried = gametime - self.goalrunningtime;
+                self.has_flag = FALSE;
                 RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';

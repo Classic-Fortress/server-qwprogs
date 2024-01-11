@@ -251,7 +251,10 @@ void ActivateNewBalance() {
         SetAllRoles(i, 1, 3);
 
     SetAllRoles(4, 2, 1);  // 1 mirv for demoman
-    SetAllRoles(6, 2, 0);  // 0 mirv for hwguy
+    SetAllRoles(6, 2, 1);  // 1 mirv for hwguy
+    SetAllRoles(9, 2, 1);  // 1 emp for engineer
+    SetAllRoles(9, 1, 4);  // 4 gren1 for engineer
+    SetAllRoles(3, 1, 4);  // 4 gren1 for soldier
 
     PC_PYRO_AIRBLAST_COOLDOWN = 15;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
