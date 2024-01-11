@@ -451,6 +451,7 @@ void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
+.float s_time;
 #endif
 
 #ifdef SSQC
