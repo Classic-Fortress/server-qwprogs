@@ -1218,7 +1218,6 @@ void () TeamFortress_SetEquipment = {
     Team_Role * role = GetTeamRole(self.team_no);
     
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
-    self.items = FO_ClassWeapItemMask(self.playerclass) | kept_items;
 
     if (!remember_weapon || self.last_playerclass != self.playerclass ||
         (self.tfstate & TFSTATE_RANDOMPC)) {

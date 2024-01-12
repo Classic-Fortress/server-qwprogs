@@ -37,18 +37,6 @@ float SlotIndex(Slot slot) {
     return slot.id - 1;
 }
 
-// Convert a weapon-bit to a linear index.
-static float WEAP_to_index(float weapon) {
-    float index = 0;
-    for (; weapon > 0; weapon >>= 1, index++) {
-        if (weapon >= 64) {
-            weapon >>= 6;
-            index += 6;
-        }
-    }
-    return index;
-}
-
 enum AmmoType {
     AMMO_NONE,
     AMMO_SHELLS,
@@ -83,7 +71,6 @@ struct FO_WeapInfo {
     FO_WeapToItem* items;
 };
 
-// REQUIRES: weapon at index i == WEAP_to_index(weap)
 // -ve values are placeholders signifying conditional init based on game modes.
 FO_WeapInfo weapon_info[] = {
     { WEAP_NONE,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
@@ -111,7 +98,7 @@ FO_WeapInfo weapon_info[] = {
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
-    return &weapon_info[WEAP_to_index(weapon)];
+    return &weapon_info[weapon];
 }
 
 struct FO_ClassWeapons {
@@ -319,8 +306,8 @@ float IsHoldGrenades() {
     return csqc_get_user_setting("hg", "hold_grens", "off");
 }
 #endif
-// Indexed by WEAP_to_index().  We keep them out of the main table just to keep
-// things a little more wieldly/readable.
+// We keep these out of the main table just to keep things a little more
+// wieldly/readable.
 static string weapon_names[] = {
     "None", "Hook", "Knife", "Medikit", "Spanner", "Axe", "Sniper Rifle",
     "Auto Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
@@ -330,11 +317,7 @@ static string weapon_names[] = {
 };
 
 string FO_GetWeapName(float weapon) {
-    // Seeing a weird compiler bug here, passing WEAP_to_index directly to the
-    // array dereference will randomly cause OOB with length 13 limit, which is
-    // much smaller than `weapon_names`.
-    int index = WEAP_to_index(weapon);
-    return weapon_names[index];
+    return weapon_names[weapon];
 }
 
 
@@ -347,7 +330,6 @@ struct FO_WeapModels {
 
 };
 
-// Indexed by WEAP_to_index()
 static FO_WeapModels weapon_models[] = {
   { WEAP_NONE,             ""},
   { WEAP_HOOK,             "progs/v_grap.mdl" },
@@ -428,16 +410,6 @@ FO_WeapInfo* FO_SlotWeapInfo(float playerclass, Slot slot) {
         idx = 1 - idx;
 
     return class_weapons[playerclass]->info[idx] ?: FO_GetWeapInfo(WEAP_NONE);
-}
-
-float FO_ClassWeapItemMask(float class) {
-    float result = 0;
-    for (int i = 1; i <= TF_NUM_SLOTS; i++) {
-        FO_WeapInfo* wi = FO_SlotWeapInfo(class, MakeSlot(i));
-        if (wi)
-            result |= (wi->items)->it_weapon;
-    }
-    return result;
 }
 
 #ifndef CSQC
@@ -752,7 +724,6 @@ void FO_Weapons_Init() {
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
-        ASSERTD_EQ(WEAP_to_index(wi->weapon), i);
 
         if (wi->weapon == WEAP_PIPE_LAUNCHER) {
             FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
@@ -767,7 +738,6 @@ void FO_Weapons_Init() {
         }
 
         FO_WeapModels* wm = &weapon_models[i];
-        ASSERTD_EQ(WEAP_to_index(wm->weapon), i);
         precache_model(wm->model);
 #ifdef CSQC
         wm->modelindex = getmodelindex(wm->model);
@@ -775,7 +745,6 @@ void FO_Weapons_Init() {
         wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];
-        ASSERTD_EQ(WEAP_to_index(wti->weapon), i);
 
         wi->items = wti;
         switch (wi->ammo_type) {
@@ -798,7 +767,7 @@ void FO_Weapons_Init() {
             FO_ClassWeapons* cw = &class_weapons[i];
 
             if (cw->slots[j])
-                cw->info[j] = &weapon_info[WEAP_to_index(cw->slots[j])];
+                cw->info[j] = &weapon_info[cw->slots[j]];
             else
                 cw->info[j] = &weapon_info[0];  // WEAP_NONE
         }

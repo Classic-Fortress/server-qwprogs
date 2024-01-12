@@ -733,8 +733,8 @@ struct Slot { int id; };
 /*======================================================*/
 
 #define WEAP_NONE 0
-enumflags {
-    WEAP_HOOK,
+enum {
+    WEAP_HOOK = 1,
     WEAP_KNIFE,
     WEAP_MEDIKIT,
     WEAP_SPANNER,
