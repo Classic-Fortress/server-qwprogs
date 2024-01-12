@@ -78,12 +78,12 @@ void () LaserBolt_Touch = {
     dremove(self);
 };
 
-static void NBRailTouch() {
+static void ImpellerTouch() {
     self.owner = self.real_owner;
 
     if (other.health) {
         deathmsg = DMSG_LASERBOLT;
-        TF_T_Damage(other, self, self.enemy, 15, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
+        TF_T_Damage(other, self, self.owner, 15, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
 
         float mag = 250;
         if (other.has_flag)
@@ -93,7 +93,7 @@ static void NBRailTouch() {
     dremove(self);
 }
 
-void W_FireNBRail() {
+void W_FireImpeller() {
     vector vec, org;
 
     makevectors(self.v_angle);
@@ -126,17 +126,16 @@ void W_FireNBRail() {
 
     proj.nextthink = time + 5;
     proj.think = SUB_Remove;
-    proj.touch = NBRailTouch;
+    proj.touch = ImpellerTouch;
     proj.classname = "railslug";
 
     setorigin(proj, term);
     FOProj_Finalize(proj);
+
+    Pred_Sound(SND_RAILGUN);
 }
 
 void () W_FireRailgun = {
-    if (new_balance)
-        return W_FireNBRail();
-
     local vector vec, org;
 
     self.ammo_nails = self.ammo_nails - 1;

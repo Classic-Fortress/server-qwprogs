@@ -37,18 +37,6 @@ float SlotIndex(Slot slot) {
     return slot.id - 1;
 }
 
-// Convert a weapon-bit to a linear index.
-static float WEAP_to_index(float weapon) {
-    float index = 0;
-    for (; weapon > 0; weapon >>= 1, index++) {
-        if (weapon >= 64) {
-            weapon >>= 6;
-            index += 6;
-        }
-    }
-    return index;
-}
-
 enum AmmoType {
     AMMO_NONE,
     AMMO_SHELLS,
@@ -83,7 +71,6 @@ struct FO_WeapInfo {
     FO_WeapToItem* items;
 };
 
-// REQUIRES: weapon at index i == WEAP_to_index(weap)
 // -ve values are placeholders signifying conditional init based on game modes.
 FO_WeapInfo weapon_info[] = {
     { WEAP_NONE,             NO_PREDICT, AMMO_NONE,    0, 0,  0.5,  0 },
@@ -107,11 +94,12 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,             PRED_PROJ, AMMO_SHELLS,  0, 1,  1.5,  0 },
-    { WEAP_RAILGUN,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.4,  0 },
+    { WEAP_RAILGUN,           PRED_PROJ, AMMO_NAILS,    0, 1,  0.4,  0 },
+    { WEAP_IMPELLER,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.6,  0 },
 };
 
 inline var FO_WeapInfo* FO_GetWeapInfo(float weapon) {
-    return &weapon_info[WEAP_to_index(weapon)];
+    return &weapon_info[weapon];
 }
 
 struct FO_ClassWeapons {
@@ -131,7 +119,7 @@ FO_ClassWeapons class_weapons[] = {
     { PC_HVYWEAP, { WEAP_ASSAULT_CANNON, WEAP_SUPER_SHOTGUN, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_PYRO, { WEAP_INCENDIARY, WEAP_FLAMETHROWER, WEAP_SHOTGUN, WEAP_AXE } },
     { PC_SPY, { WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN, WEAP_KNIFE } },
-    { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, 0, WEAP_SPANNER } },
+    { PC_ENGINEER, { WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, WEAP_IMPELLER, WEAP_SPANNER } },
     { PC_RANDOM, { 0, 0, 0, WEAP_AXE } },  // TODO: Probably needs attention
     { PC_CIVILIAN, { 0, 0, 0, WEAP_AXE } },
 };
@@ -319,22 +307,18 @@ float IsHoldGrenades() {
     return csqc_get_user_setting("hg", "hold_grens", "off");
 }
 #endif
-// Indexed by WEAP_to_index().  We keep them out of the main table just to keep
-// things a little more wieldly/readable.
+// We keep these out of the main table just to keep things a little more
+// wieldly/readable.
 static string weapon_names[] = {
     "None", "Hook", "Knife", "Medikit", "Spanner", "Axe", "Sniper Rifle",
     "Auto Rifle", "Shotgun", "Super Shotgun", "Nailgun", "Super Nailgun",
     "Grenade Launcher", "Pipebomb Launcher", "Flamethrower", "Rocket Launcher",
     "Incendiary Launcher", "Assault Cannon", "Lightning Gun", "Detpack",
-    "Tranquilizer", "Railgun"
+    "Tranquilizer", "Railgun", "Impeller"
 };
 
 string FO_GetWeapName(float weapon) {
-    // Seeing a weird compiler bug here, passing WEAP_to_index directly to the
-    // array dereference will randomly cause OOB with length 13 limit, which is
-    // much smaller than `weapon_names`.
-    int index = WEAP_to_index(weapon);
-    return weapon_names[index];
+    return weapon_names[weapon];
 }
 
 
@@ -347,7 +331,6 @@ struct FO_WeapModels {
 
 };
 
-// Indexed by WEAP_to_index()
 static FO_WeapModels weapon_models[] = {
   { WEAP_NONE,             ""},
   { WEAP_HOOK,             "progs/v_grap.mdl" },
@@ -371,6 +354,7 @@ static FO_WeapModels weapon_models[] = {
   { WEAP_DETPACK,          "" },
   { WEAP_TRANQ,            "progs/v_tranq.mdl" },
   { WEAP_RAILGUN,          "progs/v_rail.mdl" },
+  { WEAP_IMPELLER,          "progs/v_rail.mdl" },
 };
 
 // REQUIRES: Order must match above.
@@ -415,29 +399,35 @@ FO_WeapToItem weapon_to_items[] = {
     { WEAP_DETPACK,          0},
     { WEAP_TRANQ,            IT_SHOTGUN},
     { WEAP_RAILGUN,          IT_SHOTGUN},
+    { WEAP_IMPELLER,          IT_SHOTGUN},
 };
+
+float FO_WeapAvailable(float weapon) {
+    if (weapon == WEAP_IMPELLER && !fo_config.new_balance)
+        return FALSE;
+
+    return TRUE;
+}
 
 FO_WeapInfo* FO_SlotWeapInfo(float playerclass, Slot slot) {
     if (IsSlotNull(slot))
         return FO_GetWeapInfo(WEAP_NONE);
 
+    float si = SlotIndex(slot);
+    if (playerclass == PC_ENGINEER && si == 2 && !fo_config.new_balance)
+        return FO_GetWeapInfo(WEAP_NONE);
+
     float idx = SlotIndex(slot);
     float cf_pyro_impulses = IsPyroSlotSwapped();
-    float si = SlotIndex(slot);
     if (playerclass == PC_PYRO && cf_pyro_impulses && (idx == 0 || idx == 1))
         idx = 1 - idx;
 
-    return class_weapons[playerclass]->info[idx] ?: FO_GetWeapInfo(WEAP_NONE);
-}
+    FO_WeapInfo* wi = class_weapons[playerclass]->info[idx];
 
-float FO_ClassWeapItemMask(float class) {
-    float result = 0;
-    for (int i = 1; i <= TF_NUM_SLOTS; i++) {
-        FO_WeapInfo* wi = FO_SlotWeapInfo(class, MakeSlot(i));
-        if (wi)
-            result |= (wi->items)->it_weapon;
-    }
-    return result;
+    if (!wi || !FO_WeapAvailable(wi->weapon))
+        return FO_GetWeapInfo(WEAP_NONE);
+
+    return wi;
 }
 
 #ifndef CSQC
@@ -679,7 +669,7 @@ ImpulseWeapon impulse_weapons[] = {
     { PC_SPY,
         { WEAP_KNIFE, WEAP_TRANQ, WEAP_SUPER_SHOTGUN, WEAP_NAILGUN } },
     { PC_ENGINEER,
-        { WEAP_SPANNER, WEAP_RAILGUN, WEAP_SUPER_SHOTGUN } },
+        { WEAP_SPANNER, WEAP_RAILGUN, WEAP_SUPER_SHOTGUN, WEAP_IMPELLER } },
     { PC_RANDOM, { WEAP_AXE } },  // Never instantiated
     { PC_CIVILIAN,  { WEAP_AXE } },
 };
@@ -707,7 +697,7 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
     float direction = is_prev ? -1 : 1;
 
     if (IsUsingOldImpulses()) {
-        Slot* impulse_table = impulse_weapons[playerclass].slots;
+        ImpulseWeapon* impulse_table = &impulse_weapons[playerclass];
         // For reasons that seem to rhyme with -ompilerbug, reads from
         // impulse_table[offset] return junk so we use a pointer cursor.
         Slot* cur;
@@ -715,13 +705,15 @@ Slot FO_FindPrevNextWeaponSlot(float playerclass, Slot slot, float is_prev) {
         direction = (direction + len) % len;
 
         for (i = 0; i < len; i++) {
-            cur = &impulse_table[i];
+            cur = &impulse_table.slots[i];
             if (IsSameSlot(*cur, slot))
                 break;
         }
         do {
             i = (i + direction) % len;
-            cur = &impulse_table[i];
+            if (!FO_WeapAvailable(impulse_table.weapons[i]))
+                continue;
+            cur = &impulse_table.slots[i];
         } while (IsSlotNull(*cur));
 
         // Technically this will flip OWI+CFPI, but this is a nonsense combo.
@@ -752,7 +744,6 @@ void FO_Weapons_Init() {
 
     for (i = 0; i < weapon_info.length; i++) {
         FO_WeapInfo* wi = &weapon_info[i];
-        ASSERTD_EQ(WEAP_to_index(wi->weapon), i);
 
         if (wi->weapon == WEAP_PIPE_LAUNCHER) {
             FO_WeapInfo* parent = FO_GetWeapInfo(WEAP_GRENADE_LAUNCHER);
@@ -767,7 +758,6 @@ void FO_Weapons_Init() {
         }
 
         FO_WeapModels* wm = &weapon_models[i];
-        ASSERTD_EQ(WEAP_to_index(wm->weapon), i);
         precache_model(wm->model);
 #ifdef CSQC
         wm->modelindex = getmodelindex(wm->model);
@@ -775,7 +765,6 @@ void FO_Weapons_Init() {
         wi->models = wm;
 
         FO_WeapToItem* wti = &weapon_to_items[i];
-        ASSERTD_EQ(WEAP_to_index(wti->weapon), i);
 
         wi->items = wti;
         switch (wi->ammo_type) {
@@ -798,7 +787,7 @@ void FO_Weapons_Init() {
             FO_ClassWeapons* cw = &class_weapons[i];
 
             if (cw->slots[j])
-                cw->info[j] = &weapon_info[WEAP_to_index(cw->slots[j])];
+                cw->info[j] = &weapon_info[cw->slots[j]];
             else
                 cw->info[j] = &weapon_info[0];  // WEAP_NONE
         }

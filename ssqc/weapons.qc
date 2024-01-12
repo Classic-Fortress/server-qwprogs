@@ -99,6 +99,7 @@ void () W_FireFlame;
 void W_FireIncendiaryCannon(vector org, vector angles, float use_ctime=0);
 void () W_FireTranq;
 void () W_FireRailgun;
+void () W_FireImpeller;
 
 void () HallucinationTimer;
 void () TranquiliserTimer;
@@ -1744,11 +1745,14 @@ void () W_Attack = {
         player_shot1();
         W_FireTranq();
     } else if (ws.weapon == WEAP_RAILGUN) {
-        if (new_balance && time < self.special_next)
+        player_shot1();
+        W_FireRailgun();
+    } else if (ws.weapon == WEAP_IMPELLER) {
+        if (!new_balance || time < self.special_next)
             return;
 
         player_shot1();
-        W_FireRailgun();
+        W_FireImpeller();
     }
 
     if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
@@ -1879,7 +1883,7 @@ void W_ChangeWeaponSlot(Slot slot) {
 
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
-    if (ws.weapon == WEAP_NONE)
+    if (ws.weapon == WEAP_NONE || !FO_WeapAvailable(ws.weapon))
         return;
 
     // queue next weapon if queue is not empty or has changed
