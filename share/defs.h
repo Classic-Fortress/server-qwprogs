@@ -249,6 +249,7 @@ enumflags {
     TFSTATE_AIMING,        // is using the laser sight or spinning
     TFSTATE_CANT_MOVE,
     TFSTATE_CONC,
+    TFSTATE_CONC_CAP,      // Speed-cap next jump
     TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)
@@ -1664,3 +1665,6 @@ TFAlias csqc_aliases[] = {
     {"+dropflag",               0, "+button7"},
     {"-dropflag",               0, "-button7"},
 };
+
+#define NB_CONC_CAP_AIR 1050
+#define NB_CONC_CAP_LAND 950

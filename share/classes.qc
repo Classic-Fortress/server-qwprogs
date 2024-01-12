@@ -166,3 +166,34 @@ float Class_ScaleMoment(float playerclass, float damage) {
         return damage;
     return damage <= 50 ? 0 : damage / 4;
 }
+
+enum {
+    kLaunch,
+    kLand
+};
+
+void NB_ConcCap(entity ent, float speed) {
+    vector planar_vel = [ent.velocity_x, ent.velocity_y, 0];
+
+    if (vlen(planar_vel) > speed) {
+        planar_vel = normalize(planar_vel) * speed;
+    }
+
+    ent.velocity_x = planar_vel.x;
+    ent.velocity_y = planar_vel.y;
+}
+
+void NB_ConcCapAction(entity ent, float player_class, float* tfstate, float action) {
+    if (!NewBalanceActive())
+        return;
+
+    if (action == kLaunch) {
+        if (player_class = PC_MEDIC)
+            *tfstate |= TFSTATE_CONC_CAP;
+
+        NB_ConcCap(ent, NB_CONC_CAP_AIR);
+    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP)) {
+        *tfstate &= ~TFSTATE_CONC_CAP;
+        NB_ConcCap(ent, NB_CONC_CAP_LAND);
+    }
+}

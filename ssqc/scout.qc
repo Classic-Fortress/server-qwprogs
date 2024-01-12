@@ -861,12 +861,19 @@ void (entity inflictor, entity attacker, float bounce,
                     head.velocity = head.velocity * (points / 20);
                     Predict_AddFilterEnt(head, inflictor);
 
+                    NB_ConcCapAction(head, head.playerclass, &head.tfstate, kLaunch);
+
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
                         if (head.playerclass == PC_MEDIC)
                         {
+                            if (NewBalanceActive()) {
+                                head = head.chain;
+                                continue;
+                            }
+
                             if (medicnocuss && (medic_type != MEDIC_TYPE_BLAST))
                             {
                                 entity speedbump;
