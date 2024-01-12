@@ -170,7 +170,7 @@ void () NapalmGrenadeExplode2 = {
                 deathmsg = DMSG_FLAME;
 
                 float aflags = TF_TD_FIRE;
-                if (ServerIsNewBalance())
+                if (NewBalanceActive())
                     aflags |= TF_TD_NOMOMENTUM;
 
                 TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM, aflags);

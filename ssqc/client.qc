@@ -1087,7 +1087,7 @@ void () DecodeLevelParms = {
 
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
-    if (ServerIsNewBalance())
+    if (NewBalanceActive())
         ActivateNewBalance();
 };
 

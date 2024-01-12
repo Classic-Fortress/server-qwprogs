@@ -292,3 +292,15 @@ enumflags {
     CSQC_FORCE_POS,
     CSQC_SNIPER_SIGHT,
 };
+
+#ifdef SSQC
+float new_balance;
+#endif
+
+float NewBalanceActive() {
+#ifdef CSQC
+    return fo_config.new_balance;
+#else
+    return new_balance & 1;
+#endif
+}

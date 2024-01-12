@@ -57,7 +57,3 @@ float ServerIsStaging() {
 
     return strstrofs(hostname, "Staging") >= 0;
 }
-
-float ServerIsNewBalance() {
-    return new_balance & 1;
-}

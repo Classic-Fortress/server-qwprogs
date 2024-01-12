@@ -1125,7 +1125,7 @@ void WP_CheckSpecialReady() {
 
     switch (pstate_pred.playerclass) {
         case PC_ENGINEER:
-            if (fo_config.new_balance)
+            if (NewBalanceActive())
                 printf("Impeller ready\n");
             break;
     }
@@ -1724,7 +1724,7 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
 }
 
 float NB_ImpellerCoolDown(FO_WeapInfo* wi) {
-    if (!fo_config.new_balance || wi->weapon != WEAP_IMPELLER)
+    if (!NewBalanceActive() || wi->weapon != WEAP_IMPELLER)
         return FALSE;
 
     return pstate_pred.server_time < pstate_pred.special_next;
@@ -1777,7 +1777,7 @@ void WP_Attack() {
                 PP_CreateProjectile(FPP_TRANQ, PM_Org() + v_forward * 8 + '0 0 16');
                 break;
             case WEAP_RAILGUN:
-                if (!fo_config.new_balance)
+                if (!NewBalanceActive())
                     PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
                 break;
 

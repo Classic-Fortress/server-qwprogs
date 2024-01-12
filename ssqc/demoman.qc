@@ -205,7 +205,7 @@ void (float timer) TeamFortress_SetDetpack = {
 
     float quad_limit = quadmode && round_active &&
                 (time < round_end_time) && (rounds % 2) != (self.team_no - 1);
-    if (ServerIsNewBalance() && quad_limit) {
+    if (NewBalanceActive() && quad_limit) {
         float last = max(self.detpack_last, round_start_time);
         float next = last + 30;  // TODO: tunable if this sticks
         if (next > time) {
