@@ -1115,6 +1115,22 @@ float WP_ReloadSlot(Slot slot) {
     return TRUE;
 }
 
+void WP_CheckSpecialReady() {
+    if (!IsEffectFrame())
+        return;
+
+    if (pstate_pred.special_next > pstate_pred.server_time ||
+        pstate_pred.special_next < pstate_pred.server_time - input_timelength)
+        return;
+
+    switch (pstate_pred.playerclass) {
+        case PC_ENGINEER:
+            if (fo_config.new_balance)
+                printf("Impeller ready\n");
+            break;
+    }
+}
+
 void WP_CheckReloadFinished() {
     if (WP_IsReloading() && pstate_pred.reload_finished && pstate_pred.client_time >= pstate_pred.reload_finished) {
         pstate_pred.tfstate &= ~TFSTATE_RELOADING;
@@ -1707,11 +1723,11 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     proj.fpp.ammo_index = WP_GetAmmo(AMMO_SHELLS) * 100 + index;
 }
 
-float NB_RailCoolDown(FO_WeapInfo* wi) {
-    if (!fo_config.new_balance || wi->weapon != WEAP_RAILGUN)
+float NB_ImpellerCoolDown(FO_WeapInfo* wi) {
+    if (!fo_config.new_balance || wi->weapon != WEAP_IMPELLER)
         return FALSE;
 
-    return pstate_pred.client_time < pstate_pred.special_next;
+    return pstate_pred.server_time < pstate_pred.special_next;
 }
 
 void WP_Attack() {
@@ -1726,7 +1742,7 @@ void WP_Attack() {
     if (!WP_CheckAmmo(wi))
         return;
 
-    if (NB_RailCoolDown(wi))
+    if (NB_ImpellerCoolDown(wi))
         return;
 
     // Whether firing occurs here, or is embedded in the frame animation code
@@ -1985,7 +2001,7 @@ void WP_UpdateViewModel() {
         alph = CVARF(fo_reloadalpha);
     } else {
         alph = CVARF(r_drawviewmodel);
-        float ready = WP_WeaponReady() && !NB_RailCoolDown(wi);
+        float ready = WP_WeaponReady() && !NB_ImpellerCoolDown(wi);
         if (!ready && CVARF(fo_nofirealpha) != -1)
             alph = CVARF(fo_nofirealpha);
     }

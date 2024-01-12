@@ -755,7 +755,8 @@ enum {
     WEAP_DETPACK,
     WEAP_TRANQ,
     WEAP_RAILGUN,
-    WEAP_LAST = WEAP_RAILGUN,
+    WEAP_IMPELLER,
+    WEAP_LAST = WEAP_IMPELLER,
 };
 
 // still room for 12 more weapons
