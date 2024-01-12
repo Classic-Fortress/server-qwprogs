@@ -1161,3 +1161,4 @@ void AugmentGrenadeImpact() {
         self.SendFlags |= FOPP_MOVETYPE;
 #endif
 }
+

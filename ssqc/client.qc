@@ -1087,7 +1087,7 @@ void () DecodeLevelParms = {
 
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
-    if (ServerIsNewBalance())
+    if (NewBalanceActive())
         ActivateNewBalance();
 };
 
@@ -2547,6 +2547,7 @@ void () PlayerJump = {
     if (self.flags & FL_WATERJUMP)
         return;
 
+
     if (self.waterlevel >= 2) {
         if (self.watertype == CONTENT_WATER)
             self.velocity_z = 100;
@@ -2578,6 +2579,7 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
+    NB_ConcCapAction(self, self.playerclass, &self.tfstate, kLand);
     FO_Sound(self, CHAN_AUTO, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (!cannon_air && self.tfstate & TFSTATE_AC_FIRING) {
