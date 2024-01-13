@@ -183,16 +183,24 @@ void NB_ConcCap(entity ent, float speed) {
     ent.velocity_y = planar_vel.y;
 }
 
-void NB_ConcCapAction(entity ent, float player_class, float* tfstate, float action) {
+void NB_ConcCapAction(entity ent, float player_class, float* tfstate,
+                      float gtime, float* cap_time, float action) {
     if (!NewBalanceActive())
         return;
 
+    const float kLockout = 0.5;
+
     if (action == kLaunch) {
-        if (player_class = PC_MEDIC)
+        if (player_class == PC_MEDIC) {
             *tfstate |= TFSTATE_CONC_CAP;
+            *cap_time = gtime + kLockout;
+        }
 
         NB_ConcCap(ent, NB_CONC_CAP_AIR);
-    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP)) {
+
+    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP) &&
+               gtime > *cap_time) {
+        float cap = *cap_time;
         *tfstate &= ~TFSTATE_CONC_CAP;
         NB_ConcCap(ent, NB_CONC_CAP_LAND);
     }

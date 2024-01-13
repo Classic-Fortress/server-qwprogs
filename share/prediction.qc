@@ -67,6 +67,7 @@ struct predict_tf_state {
 
     float conc_amp;
     float conc_finished;
+    float conc_cap_time;
     float special_next;
 
     float client_time, server_time;
@@ -314,6 +315,7 @@ float FO_MaxRewindGrenWinDt() {
 
 .predict_tf_state predict_state;
 .entity predict_entity;
+.float conc_cap_time;
 
 inline float *self_tf_state() { return &self.tfstate; }
 
@@ -367,7 +369,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
     M2(FOWP_CLASSIC_CONC, conc_state.next, conc_state.mag);
-    M2(FOWP_CONCFINISH, conc_finished, conc_amp);
+    M3(FOWP_CONCFINISH, conc_finished, conc_amp, conc_cap_time);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
@@ -566,6 +568,7 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_CONCFINISH) {
         COMM(Byte, conc_amp);
         COMM(Float, conc_finished);
+        COMM(Float, conc_cap_time);
     }
 
     if (sendflags & FOWP_THINK) {

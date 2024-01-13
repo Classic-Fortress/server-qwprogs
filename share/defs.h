@@ -1666,5 +1666,5 @@ TFAlias csqc_aliases[] = {
     {"-dropflag",               0, "-button7"},
 };
 
-#define NB_CONC_CAP_AIR 1050
+#define NB_CONC_CAP_AIR 1100
 #define NB_CONC_CAP_LAND 950

@@ -2579,7 +2579,8 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
-    NB_ConcCapAction(self, self.playerclass, &self.tfstate, kLand);
+    NB_ConcCapAction(self, self.playerclass, &self.tfstate,
+                     time, &self.conc_cap_time, kLand);
     FO_Sound(self, CHAN_AUTO, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (!cannon_air && self.tfstate & TFSTATE_AC_FIRING) {

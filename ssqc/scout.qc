@@ -861,7 +861,8 @@ void (entity inflictor, entity attacker, float bounce,
                     head.velocity = head.velocity * (points / 20);
                     Predict_AddFilterEnt(head, inflictor);
 
-                    NB_ConcCapAction(head, head.playerclass, &head.tfstate, kLaunch);
+                    NB_ConcCapAction(head, head.playerclass, &head.tfstate,
+                                     time, &head.conc_cap_time, kLaunch);
 
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
