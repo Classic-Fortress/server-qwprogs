@@ -1001,6 +1001,15 @@ void Hud_DrawClassInfoPanel(float playerclass)
             }
             break;
         case PC_ENGINEER:
+            if (NewBalanceActive()) {
+                basepos = pos;
+                msg = pstate_pred.server_time >= pstate_pred.special_next ?
+                    "Impeller charged" : "Impeller recharging";
+                HRC_drawOffsetString(panel->Orientation, msg, size, fontSize,
+                        pos, basepos, FALSE, colour);
+
+                pos = [pos_x, pos_y + size_y + 4];
+            }
             if (SBAR.HasSentry)
             {
                 icon = ICON_ENGINEER_SG; //HudIcons[playerclass+6].icon;
