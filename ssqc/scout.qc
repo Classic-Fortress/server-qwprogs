@@ -870,7 +870,7 @@ void (entity inflictor, entity attacker, float bounce,
                     } else {
                         if (head.playerclass == PC_MEDIC)
                         {
-                            if (NewBalanceActive()) {
+                            if ((NewBalanceActive() && NB_UseNewConc()) || NB_NoCap()) {
                                 head = head.chain;
                                 continue;
                             }

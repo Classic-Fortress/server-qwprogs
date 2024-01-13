@@ -259,6 +259,13 @@ void ActivateNewBalance() {
     PC_PYRO_AIRBLAST_COOLDOWN = 15;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
 
+    float use_new_conc = CF_GetSetting("nbc", "new_balance_concs", "1");
+    if (!use_new_conc)
+        fo_config.new_balance_flags |= NBF_OLD_CONC;
+    float no_cap = CF_GetSetting("nbnc", "new_balance_no_cap", "0");
+    if (no_cap)
+        fo_config.new_balance_flags |= NBF_NO_CAP;
+
     if (NB_UseMinPing()) {
         if (fo_config.min_ping_ms < 50) // 50 min-ping
             localcmd("localinfo mpm 50");
