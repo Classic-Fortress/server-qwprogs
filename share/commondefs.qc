@@ -54,6 +54,7 @@ var struct {
     float rj;
 
     float new_balance;
+    float new_balance_flags;
 } fo_config;
 
 enumflags {
@@ -304,3 +305,8 @@ float NewBalanceActive() {
     return new_balance & 1;
 #endif
 }
+
+enumflags {
+    NBF_OLD_CONC,
+    NBF_NO_CAP,
+};

@@ -472,7 +472,7 @@ static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
     ent.velocity = (targ_org - nudge->org) * points/20;
 
     NB_ConcCapAction(ent, pstate_pred.playerclass, &pstate_pred.tfstate,
-            kLaunch);
+                     pm.interp_t, &pstate_pred.conc_cap_time, kLaunch);
 }
 
 
@@ -636,6 +636,7 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
 
             if ((ent.pmove_flags & PMF_JUMP_HELD) && (pstate_pred.tfstate & TFSTATE_CONC_CAP)) {
                 NB_ConcCapAction(ent, pstate_pred.playerclass, &pstate_pred.tfstate,
+                                 pm.interp_t, &pstate_pred.conc_cap_time,
                                  kLand);
             }
         }

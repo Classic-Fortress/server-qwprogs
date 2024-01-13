@@ -172,6 +172,15 @@ enum {
     kLand
 };
 
+float NB_UseNewConc() {
+    return fo_config.new_balance_flags & NBF_OLD_CONC == 0;
+}
+
+float NB_NoCap() {
+    return fo_config.new_balance_flags & NBF_NO_CAP;
+}
+
+
 void NB_ConcCap(entity ent, float speed) {
     vector planar_vel = [ent.velocity_x, ent.velocity_y, 0];
 
@@ -183,16 +192,23 @@ void NB_ConcCap(entity ent, float speed) {
     ent.velocity_y = planar_vel.y;
 }
 
-void NB_ConcCapAction(entity ent, float player_class, float* tfstate, float action) {
-    if (!NewBalanceActive())
+void NB_ConcCapAction(entity ent, float player_class, float* tfstate,
+                      float gtime, float* cap_time, float action) {
+    if (!NewBalanceActive() || !NB_UseNewConc())
         return;
 
+    const float kLockout = 0.5;
+
     if (action == kLaunch) {
-        if (player_class = PC_MEDIC)
+        if (player_class == PC_MEDIC && !NB_NoCap()) {
             *tfstate |= TFSTATE_CONC_CAP;
+            *cap_time = gtime + kLockout;
+        }
 
         NB_ConcCap(ent, NB_CONC_CAP_AIR);
-    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP)) {
+    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP) &&
+               gtime > *cap_time) {
+        float cap = *cap_time;
         *tfstate &= ~TFSTATE_CONC_CAP;
         NB_ConcCap(ent, NB_CONC_CAP_LAND);
     }
