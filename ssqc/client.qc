@@ -256,7 +256,7 @@ void ActivateNewBalance() {
     SetAllRoles(9, 1, 4);  // 4 gren1 for engineer
     SetAllRoles(3, 1, 4);  // 4 gren1 for soldier
 
-    PC_PYRO_AIRBLAST_COOLDOWN = 15;
+    PC_PYRO_AIRBLAST_COOLDOWN = 10;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
 
     float use_new_conc = CF_GetSetting("nbc", "new_balance_concs", "1");
