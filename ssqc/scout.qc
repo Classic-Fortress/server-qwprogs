@@ -830,6 +830,9 @@ void (entity inflictor, entity attacker, float bounce,
     local entity te;
     local vector org;
 
+    if (NewBalanceActive() && inflictor.owner.playerclass == PC_MEDIC)
+        actual_cuss_time = 2;
+
     head = findradius(inflictor.origin, bounce + 40);
     while (head) {
         if (head != ignore) {
