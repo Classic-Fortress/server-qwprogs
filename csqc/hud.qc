@@ -1058,6 +1058,9 @@ void Hud_DrawIdentifyPanel(string identify) {
         // click event
     }
 
+    if (time > last_id_time + 3)
+        return;
+
     vector fontSize = FO_Hud_Icon_Font_Size * panel->Scale;
 
     float count = tokenizebyseparator(identify, "\n");
