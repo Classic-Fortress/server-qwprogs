@@ -93,46 +93,135 @@ static void ImpellerTouch() {
     dremove(self);
 }
 
+
+static float ValidImpellerTarget(entity t) {
+    if (t.classname != "player")
+        return FALSE;
+
+    if (cb_prematch)  // Shoot anyone in prematch
+        return TRUE;
+
+    return (t.team_no != self.team_no && t.has_flag);
+}
+
+static entity FindImpellerTarget(vector org, float min_a, float* direct) {
+
+    traceline(org, org + 1500 * v_forward, MOVE_NORMAL, world);
+    if (trace_fraction != 1 && ValidImpellerTarget(trace_ent))
+        return trace_ent;
+
+    int count;
+    entity* players;
+    float best_a = min_a;
+    entity best_p = world;
+
+    players = find_list(classname, "player", EV_STRING, count);
+    for (int i = 0; i < count; i++) {
+        entity p = players[i];
+
+        if (!ValidImpellerTarget(p))
+            continue;
+
+        vector dir = normalize(p.origin - org);
+        float a = v_forward * dir;
+
+        traceline(org, p.origin, MOVE_NORMAL, world);
+        if (trace_fraction < 1) {
+            if (trace_ent != p) {
+                continue; // Something in the way
+            } else {
+                *direct = TRUE;
+                return p;
+            }
+        }
+
+        if (a < best_a)
+            continue;  // Not in AA cone
+
+        best_a = a;
+        best_p = p;
+    }
+
+    return best_p;
+}
+
+static vector find_closest(vector a, vector b, vector p) {
+    vector v = b - a, u = a - p;
+    float t = -(v * u) / (v * v);
+
+    if (t >= 0 && t <= 1)
+        return (1 - t) * a + t * b;
+    return b;
+}
+
+static void draw_beam(vector a, vector b, int effect) {
+    WriteByte(MSG_MULTICAST, SVC_TEMPENTITY);
+    WriteByte(MSG_MULTICAST, effect);
+    WriteEntity(MSG_MULTICAST, world);
+    WriteCoord(MSG_MULTICAST, a_x);
+    WriteCoord(MSG_MULTICAST, a_y);
+    WriteCoord(MSG_MULTICAST, a_z);
+    WriteCoord(MSG_MULTICAST, b_x);
+    WriteCoord(MSG_MULTICAST, b_y);
+    WriteCoord(MSG_MULTICAST, b_z);
+    multicast(a, MULTICAST_PHS);
+}
+
 void W_FireImpeller() {
-    vector vec, org;
+    if (!cb_prematch) {
+        self.special_next = time + 3;
+    }
 
+    FO_Sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
     makevectors(self.v_angle);
-    org = (self.absmin + self.absmax) / 2;
 
-    traceline(org, org + 1500 * v_forward, MOVE_WORLDONLY, world);
+    vector org = self.origin + '0 0 16';
+    float direct = FALSE, jump = FALSE;
+    entity t = FindImpellerTarget(org, 0.985, &direct);
+    vector end = t.origin;
+    vector imp;
 
-    self.special_next = time + 3;
+    float mag = 250;
+    entity hit;
 
-    if (trace_fraction == 1)
-        return;
+    if (t == world) {
+        traceline(org, org + 350 * v_forward, MOVE_WORLDONLY, world);
+        if (trace_fraction == 1)
+            return;
 
-    if (pointcontents(trace_endpos) == CONTENT_SKY)
-        return;
+        end = trace_endpos;
+        hit = self;
+        draw_beam(org, trace_endpos, TE_LIGHTNING2);
+    } else {
+        hit = t;
 
-    vector term = trace_endpos;
-    vector vec = normalize(term - org);
+        if (direct) {
+            end = t.origin;
+            draw_beam(org, t.origin, TE_LIGHTNING2);
+        } else {
+            vector a = org, b = org + 1000 * v_forward;
+            traceline(a, b, MOVE_WORLDONLY, world);
+            if (trace_fraction == 1)
+                return;
+            end = trace_endpos;
+            vector x = find_closest(a, end, t.origin);
 
-    pointparticles(particleeffectnum("fo_airblast"), term);
+            draw_beam(a, x, TE_LIGHTNING2);
+            draw_beam(x, t.origin, TE_LIGHTNING2);
 
-    entity proj = FOProj_Create(FPP_RAILGUN);
-    proj.owner = proj;  // Want collisions with everyone
-    proj.real_owner = self;
-    proj.enemy = self;
-    proj.movetype = MOVETYPE_FLYMISSILE;
-    proj.solid = SOLID_BBOX;
+            // Discount knockback by help given
+            mag -= max(10, vlen(t.origin - x));
+        }
 
-    proj.velocity = -vec * 2250;
-    proj.angles = vectoangles(proj.velocity);
+        hit = t;
+        end = t.origin;
+    }
 
-    proj.nextthink = time + 5;
-    proj.think = SUB_Remove;
-    proj.touch = ImpellerTouch;
-    proj.classname = "railslug";
-
-    setorigin(proj, term);
-    FOProj_Finalize(proj);
-
-    Pred_Sound(SND_RAILGUN);
+    TF_T_Damage(hit, self, self, 5, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
+    hit.flags &= ~FL_ONGROUND;
+    hit.velocity -= mag * normalize(end - org);
+    if (other.has_flag)
+        mag *= 2;
 }
 
 void () W_FireRailgun = {
