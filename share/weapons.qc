@@ -354,7 +354,7 @@ static FO_WeapModels weapon_models[] = {
   { WEAP_DETPACK,          "" },
   { WEAP_TRANQ,            "progs/v_tranq.mdl" },
   { WEAP_RAILGUN,          "progs/v_rail.mdl" },
-  { WEAP_IMPELLER,          "progs/v_rail.mdl" },
+  { WEAP_IMPELLER,          "progs/v_light.mdl" },
 };
 
 // REQUIRES: Order must match above.
