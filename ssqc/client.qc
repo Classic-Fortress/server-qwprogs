@@ -256,7 +256,7 @@ void ActivateNewBalance() {
     SetAllRoles(9, 1, 4);  // 4 gren1 for engineer
     SetAllRoles(3, 1, 4);  // 4 gren1 for soldier
 
-    PC_PYRO_AIRBLAST_COOLDOWN = 15;
+    PC_PYRO_AIRBLAST_COOLDOWN = 10;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
 
     float use_new_conc = CF_GetSetting("nbc", "new_balance_concs", "1");
@@ -1089,8 +1089,10 @@ void () DecodeLevelParms = {
     // Overrides other settings.
     new_balance = CF_GetSetting("new_balance", "new_balance", "4");
 
+    float new_balance_region = (ServerRegion() == kRegionUS ||
+                                ServerRegion() == kRegionOCE);
     if (new_balance == 4)
-        new_balance = ((ServerRegion() == kRegionUS) && ServerIsStaging()) ? 1 : 0;
+        new_balance = (new_balance_region && ServerIsStaging()) ? 1 : 0;
 
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
