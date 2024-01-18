@@ -2844,7 +2844,7 @@ void () CheckPowerups = {
             self.modelindex = modelindex_eyes;
         } else {
             if (self.invisible_finished) {
-                if (self.tfstate & TFSTATE_INVISIBLE) {
+                if (self.pstate & PSTATE_INVISIBLE) {
                     if (self.invisible_finished < (time + 10)) {
                         self.invisible_finished = time + 666;
                     }
@@ -2879,7 +2879,7 @@ void () CheckPowerups = {
         }
     }
     if (self.invincible_finished) {
-        if (self.tfstate & TFSTATE_INVINCIBLE) {
+        if (self.pstate & PSTATE_INVINCIBLE) {
             if (self.invincible_finished < (time + 10)) {
                 self.invincible_finished = time + 666;
             }
@@ -2923,7 +2923,7 @@ void () CheckPowerups = {
         }
     }
     if (self.super_damage_finished) {
-        if (self.tfstate & TFSTATE_QUAD) {
+        if (self.pstate & PSTATE_QUAD) {
             if (self.super_damage_finished == (time + 10)) {
                 self.super_damage_finished = time + 666;
             }
@@ -2965,7 +2965,7 @@ void () CheckPowerups = {
     }
     if (self.radsuit_finished) {
         self.air_finished = time + 12;
-        if (self.tfstate & TFSTATE_RADSUIT) {
+        if (self.pstate & PSTATE_RADSUIT) {
             if (self.radsuit_finished == (time + 10)) {
                 self.radsuit_finished = time + 666;
             }

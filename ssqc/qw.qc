@@ -108,6 +108,7 @@ float remote_client_time();
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
+.float pstate;                  // Player state flags
 .float tfstate;                 // State flags for TeamFortress
 .float last_tfstate;             // Internal cache of tfstate for detecting updates
 .entity linked_list;            // Used just like chain. Has to be separate so
