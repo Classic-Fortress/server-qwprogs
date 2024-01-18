@@ -259,21 +259,25 @@ enumflags {
     TFSTATE_AC_SPINDOWN,
     TFSTATE_LOCK,          // assault cannon locked
     TFSTATE_INFECTED,      // set when player is infected by the bioweapon
-    TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
-    TFSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
-    TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
-    TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
     TFSTATE_FEIGNED,       // Is feigned
     TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die
     TFSTATE_HALLUCINATING, // set when player is hallucinating
-    TFSTATE_TRANQUILISED,  // set when player is tranquilised
+
     TFSTATE_FLAMES_MAX,    // Peak burnination.
+    TFSTATE_TRANQUILISED,  // set when player is tranquilised
     TFSTATE_RANDOMPC,
+    // QC/Compiler limitation: Bits past-24 unsafe with bitops
 };
 
+enumflags {
+    PSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
+    PSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
+    PSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
+    PSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
+};
 
 #define TFSTATE_GREN_MASK_PRIMED (TFSTATE_GREN1_PRIMED|TFSTATE_GREN2_PRIMED)
 #define TFSTATE_GREN_MASK_ALL (TFSTATE_GREN_MASK_PRIMED|TFSTATE_GRENTHROWING)
