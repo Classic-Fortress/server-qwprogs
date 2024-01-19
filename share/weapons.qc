@@ -466,6 +466,21 @@ float FO_CanReloadMsg(FO_WeapInfo* wi, int ammo_remaining, int clip_fired,
     return FALSE;  // msg filled in above.
 }
 
+float self_class();
+Slot self_current_slot();
+float* self_clip_fired(Slot slot);
+
+float FO_PlayerCurrentWeapon(entity player) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(self_class(), self_current_slot());
+    if (!wi)
+        return WEAP_NONE;
+    return wi->weapon;
+}
+
+inline float FO_CurrentWeapon() {
+    return FO_PlayerCurrentWeapon(self);
+}
+
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
@@ -501,17 +516,6 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[0];
 }
 
-
-float FO_PlayerCurrentWeapon(entity player) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, player.current_slot);
-    if (!wi)
-        return WEAP_NONE;
-    return wi->weapon;
-}
-
-inline float FO_CurrentWeapon() {
-    return FO_PlayerCurrentWeapon(self);
-}
 
 inline void FO_FillCurrentWeapState(FO_WeapState* result) {
     FO_FillWeapState(self, self.current_slot, result);

@@ -1031,11 +1031,10 @@ void WP_Impulse() {
 }
 
 static float* WP_ClipFired(Slot slot) {
-    float index = SlotIndex(slot);
-    if (pstate_pred.playerclass == PC_DEMOMAN && index == 1)
-        index = 0;  // Special case: Pipebomb shares with Grenadel launcher.
+    if (self_class() == PC_DEMOMAN && SlotIndex(slot) == 1)
+        slot = MakeSlot(1);  // Special case: pipebomb shares with grenade launcher.
 
-    return &pstate_pred.clip_fired[index];
+    return self_clip_fired(slot);
 }
 
 float WP_CurrentClipFired() {
