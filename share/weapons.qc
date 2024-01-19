@@ -471,18 +471,21 @@ float self_class();
 Slot self_current_slot();
 float* self_clip_fired(Slot slot);
 
-float FO_PlayerCurrentWeapon(entity player) {
+float FO_CurrentWeapon() {
     FO_WeapInfo* wi = FO_SlotWeapInfo(self_class(), self_current_slot());
     if (!wi)
         return WEAP_NONE;
     return wi->weapon;
 }
 
-inline float FO_CurrentWeapon() {
-    return FO_PlayerCurrentWeapon(self);
+#ifdef SSQC
+float FO_PlayerCurrentWeapon(entity player) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, player.current_slot);
+    if (!wi)
+        return WEAP_NONE;
+    return wi->weapon;
 }
 
-#ifdef SSQC
 struct FO_WeapState {
     float weapon;
     Slot slot;
