@@ -46,8 +46,10 @@ void FO_SetClientThink(void() func, float offset, float override = TRUE) {
 }
 
 void client_anim_frames(void() parent_thunk, void() extra, anim_t* anim) {
-    if (self.deadflag)
+    if (self.deadflag) {
+        player_run();
         return;
+    }
 
     float tidx = *thinkindex()++ - 1;
 
