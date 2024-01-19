@@ -78,24 +78,13 @@ void () LaserBolt_Touch = {
     dremove(self);
 };
 
-static void ImpellerTouch() {
-    self.owner = self.real_owner;
-
-    if (other.health) {
-        deathmsg = DMSG_LASERBOLT;
-        TF_T_Damage(other, self, self.owner, 15, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
-
-        float mag = 250;
-        if (other.has_flag)
-            mag *= 2;
-        other.velocity += normalize(self.velocity) * mag;
-    }
-    dremove(self);
-}
-
+static const float kImpellerTargetRange = 1500;
 
 static float ValidImpellerTarget(entity t) {
     if (t.classname != "player")
+        return FALSE;
+
+    if (vlen(t.origin - self.origin) > kImpellerTargetRange)
         return FALSE;
 
     if (cb_prematch)  // Shoot anyone in prematch
@@ -103,6 +92,7 @@ static float ValidImpellerTarget(entity t) {
 
     return (t.team_no != self.team_no && t.has_flag);
 }
+
 
 static entity FindImpellerTarget(vector org, float min_a, float* direct) {
 
@@ -199,7 +189,7 @@ void W_FireImpeller() {
             end = t.origin;
             draw_beam(org, t.origin, TE_LIGHTNING2);
         } else {
-            vector a = org, b = org + 1000 * v_forward;
+            vector a = org, b = org + kImpellerTargetRange * v_forward;
             traceline(a, b, MOVE_WORLDONLY, world);
             if (trace_fraction == 1)
                 return;
@@ -217,7 +207,8 @@ void W_FireImpeller() {
         end = t.origin;
     }
 
-    TF_T_Damage(hit, self, self, 5, 2, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
+    deathmsg = DMSG_IMPELLER;
+    TF_T_Damage(hit, self, self, 5, TF_TD_NOTTEAM, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
     hit.flags &= ~FL_ONGROUND;
     hit.velocity -= mag * normalize(end - org);
     if (other.has_flag)

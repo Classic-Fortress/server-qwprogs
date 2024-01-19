@@ -3391,6 +3391,8 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gets too friendly with his sentry gun\n";
                 else if (pf_deathmsg == DMSG_DISPENSER_EXPLODE)
                     s_deathstring = " dispenses with himself\n";
+                else if (pf_deathmsg == DMSG_IMPELLER)
+                    s_deathstring = " couldn't resist their inner impelsions\n";
 
                 return strcat(pe_target.netname, s_deathstring);
 
@@ -3658,6 +3660,9 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                 } else if (pf_deathmsg == DMSG_LASERBOLT) {
                     s_deathstring = " gets a hole in his heart from ";
                     s_deathstring2 = "'s railgun\n";
+                } else if (pf_deathmsg == DMSG_IMPELLER) {
+                    s_deathstring = " gets pushed around by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_INCENDIARY) {
                     s_deathstring = " gets well done by ";
                     s_deathstring2 = "'s incendiary rocket\n";
