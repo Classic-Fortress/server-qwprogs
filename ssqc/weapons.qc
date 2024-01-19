@@ -1407,6 +1407,9 @@ void (float ox) W_FireSpikes = {
     }
 
     *ws->ammo_remaining -= wi->ammo_per_shot;
+    if (wi->needs_reload)
+        *ws->clip_fired += wi->ammo_per_shot;
+
     if (wi->weapon == WEAP_NAILGUN)
         W_FireNail(FPP_NAIL, v_right * ox);
     else

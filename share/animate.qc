@@ -219,6 +219,12 @@ void nail_extra_csqc_ssqc() {
         return;
     }
 
+    FO_WeapInfo* wi = FO_GetWeapInfo(FO_CurrentWeapon());
+    if (wi->needs_reload && FO_CheckForReload()) {
+        player_run();
+        return;
+    }
+
     float tidx = *thinkindex() % 2;  // 1 based, and incremented.
     if (tidx == 0 || !OldNgRof()) {
         SuperDamageSound();

@@ -85,7 +85,7 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_SHOTGUN,          PRED_MODEL, AMMO_SHELLS,  8, 1,  0.5,  2 },
     { WEAP_SUPER_SHOTGUN,    PRED_MODEL, AMMO_SHELLS, 16, 2,  0.7,  3 },
     { WEAP_NAILGUN,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.2,  0, 1 },
-    { WEAP_SUPER_NAILGUN,     PRED_PROJ, AMMO_NAILS,   0, 2,  0.2,  0, 1 },
+    { WEAP_SUPER_NAILGUN,     PRED_PROJ, AMMO_NAILS,   50, 2,  0.2,  1, 1 },
     { WEAP_GRENADE_LAUNCHER , PRED_PROJ, AMMO_ROCKETS, 6, 1,  0.6,  4 },
     { WEAP_PIPE_LAUNCHER,     PRED_PROJ, AMMO_ROCKETS, 6, 1,  0.6,  4 },  // Overlaps GL
     { WEAP_FLAMETHROWER,      PRED_PROJ, AMMO_CELLS,   0, 1,  0.15, 0, 1 },
