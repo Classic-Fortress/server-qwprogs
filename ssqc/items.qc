@@ -720,13 +720,11 @@ float () GetGrenadePossibility = {
     if (random() < 0.500)
         return 0;
 
-    float index;
+    float index = -1;
     switch (disable_resup_gren) {
         case 0: index = random() < 0.5 ? 0 : 1; break;
         case 1: index = 1; break;
         case 2: index = 0; break;
-
-        case 3:
         default:
                 return 0;
     }
