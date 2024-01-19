@@ -63,6 +63,7 @@ struct FO_WeapInfo {
     float ammo_per_shot;
     float attack_time;
     float full_reload_time;
+    float fire_in_anim;  // firing triggered from animation (e.g. continuous fire)
 
     // Fields below this are automatically initialized by Init.
     // ** Do not include in table. **
@@ -80,17 +81,17 @@ FO_WeapInfo weapon_info[] = {
     { WEAP_SPANNER,          PRED_MODEL, AMMO_CELLS,   0, 0,  0.5,  0 },
     { WEAP_AXE,              PRED_MODEL, AMMO_NONE,    0, 0,  0.5,  0 },
     { WEAP_SNIPER_RIFLE,     PRED_MODEL, AMMO_SHELLS, -9, 1,  1.5,  4 },
-    { WEAP_AUTO_RIFLE,       PRED_MODEL, AMMO_SHELLS,  0, 1,  0.1,  0 },
+    { WEAP_AUTO_RIFLE,       PRED_MODEL, AMMO_SHELLS,  0, 1,  0.1,  0, 1 },
     { WEAP_SHOTGUN,          PRED_MODEL, AMMO_SHELLS,  8, 1,  0.5,  2 },
     { WEAP_SUPER_SHOTGUN,    PRED_MODEL, AMMO_SHELLS, 16, 2,  0.7,  3 },
-    { WEAP_NAILGUN,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.2,  0 },
-    { WEAP_SUPER_NAILGUN,     PRED_PROJ, AMMO_NAILS,   0, 2,  0.2,  0 },
+    { WEAP_NAILGUN,           PRED_PROJ, AMMO_NAILS,   0, 1,  0.2,  0, 1 },
+    { WEAP_SUPER_NAILGUN,     PRED_PROJ, AMMO_NAILS,   0, 2,  0.2,  0, 1 },
     { WEAP_GRENADE_LAUNCHER , PRED_PROJ, AMMO_ROCKETS, 6, 1,  0.6,  4 },
     { WEAP_PIPE_LAUNCHER,     PRED_PROJ, AMMO_ROCKETS, 6, 1,  0.6,  4 },  // Overlaps GL
-    { WEAP_FLAMETHROWER,      PRED_PROJ, AMMO_CELLS,   0, 1,  0.15, 0 },
+    { WEAP_FLAMETHROWER,      PRED_PROJ, AMMO_CELLS,   0, 1,  0.15, 0, 1 },
     { WEAP_ROCKET_LAUNCHER,   PRED_PROJ, AMMO_ROCKETS, 4, 1,  0.8,  5 },
     { WEAP_INCENDIARY,        PRED_PROJ, AMMO_ROCKETS, 0, 3,  0.9,    0 },
-    { WEAP_ASSAULT_CANNON,    PRED_PROJ, AMMO_SHELLS, 100, 1,  0.2,  4 },
+    { WEAP_ASSAULT_CANNON,    PRED_PROJ, AMMO_SHELLS, 100, 1,  0.2,  4, 1 },
     { WEAP_LIGHTNING,        NO_PREDICT, AMMO_CELLS,   0, 1,  0.1,  0 },
     { WEAP_DETPACK,          NO_PREDICT, AMMO_NONE,    0, 0,  0,    0 },
     { WEAP_TRANQ,             PRED_PROJ, AMMO_SHELLS,  0, 1,  1.5,  0 },
@@ -466,6 +467,21 @@ float FO_CanReloadMsg(FO_WeapInfo* wi, int ammo_remaining, int clip_fired,
     return FALSE;  // msg filled in above.
 }
 
+float self_class();
+Slot self_current_slot();
+float* self_clip_fired(Slot slot);
+
+float FO_PlayerCurrentWeapon(entity player) {
+    FO_WeapInfo* wi = FO_SlotWeapInfo(self_class(), self_current_slot());
+    if (!wi)
+        return WEAP_NONE;
+    return wi->weapon;
+}
+
+inline float FO_CurrentWeapon() {
+    return FO_PlayerCurrentWeapon(self);
+}
+
 #ifdef SSQC
 struct FO_WeapState {
     float weapon;
@@ -501,17 +517,6 @@ void FO_FillWeapState(entity player, Slot slot, FO_WeapState* result) {
         result->clip_fired = &player.clip_fired[0];
 }
 
-
-float FO_PlayerCurrentWeapon(entity player) {
-    FO_WeapInfo* wi = FO_SlotWeapInfo(player.playerclass, player.current_slot);
-    if (!wi)
-        return WEAP_NONE;
-    return wi->weapon;
-}
-
-inline float FO_CurrentWeapon() {
-    return FO_PlayerCurrentWeapon(self);
-}
 
 inline void FO_FillCurrentWeapState(FO_WeapState* result) {
     FO_FillWeapState(self, self.current_slot, result);

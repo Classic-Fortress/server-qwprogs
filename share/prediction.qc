@@ -318,12 +318,20 @@ float FO_MaxRewindGrenWinDt() {
 .float conc_cap_time;
 
 inline float *self_tf_state() { return &self.tfstate; }
+float self_class() { return self.playerclass; }
+Slot self_current_slot() { return self.current_slot; }
+Slot self_queue_slot() { return self.queue_slot; }
+float* self_clip_fired(Slot slot) { return &self.clip_fired[SlotIndex(slot)]; }
 
 #else
 
 predict_tf_state pstate_pred, pstate_server;
 
 inline float *self_tf_state() { return &pstate_pred.tfstate; }
+float self_class() { return pstate_pred.playerclass; }
+Slot self_current_slot() { return pstate_pred.current_slot; }
+Slot self_queue_slot() { return pstate_pred.queue_slot; }
+float* self_clip_fired(Slot slot) { return &pstate_pred.clip_fired[SlotIndex(slot)]; }
 
 #define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512

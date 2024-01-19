@@ -169,7 +169,6 @@ void W_FireImpeller() {
     float direct = FALSE, jump = FALSE;
     entity t = FindImpellerTarget(org, 0.985, &direct);
     vector end = t.origin;
-    vector imp;
 
     float mag = 250;
     entity hit;
