@@ -275,6 +275,7 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(max_rewind_grenade_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(new_balance);
     printf("\n");
 
     PrintFlagField("Rewind Settings [rewind_flags=%d]\n",
@@ -285,6 +286,9 @@ void WPP_Status() {
 
     PrintFlagField("Clown mode [clown_flags=%d]\n",
                    fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
+
+    PrintFlagField("NewBalance Flags [newbalance_flags=%d]:\n",
+                   fo_config.new_balance_flags, NBF_DESC.length, NBF_DESC);
 
     PrintFlagField("Concs [fo_concuss=%d]\n",
                    fo_config.fo_concuss, FO_CONC.length, FO_CONC);

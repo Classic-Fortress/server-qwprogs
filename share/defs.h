@@ -1312,6 +1312,7 @@ enum {
 #define DMSG_GREN_SHOCK			42
 #define DMSG_GREN_BURST			43
 #define DMSG_KNIFE			44
+#define DMSG_IMPELLER			45
 
 /*======================================================*/
 /* Menus						*/
