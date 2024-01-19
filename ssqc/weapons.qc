@@ -1755,19 +1755,16 @@ void () W_Attack = {
         W_FireImpeller();
     }
 
-    if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
-        ws.weapon != WEAP_ASSAULT_CANNON &&  // In animation
-        ws.weapon != WEAP_NAILGUN &&         // In animation
-        ws.weapon != WEAP_SUPER_NAILGUN)     // In animation
+    if (!wi->fire_in_anim) {
         Attack_Finished(wi->attack_time);
-
-    if (wi->needs_reload) {
-        if (ws.weapon != WEAP_ASSAULT_CANNON)  // In animation
+        if (wi->needs_reload) {
             *ws->clip_fired += wi->ammo_per_shot;
-        FO_CheckForReload();
+            FO_CheckForReload();
+        }
     }
 
     //These weapons have to log each projectile launched/bullet fired
+    // TODO: probably equivalent to fire_in_anim...
     if (ws.weapon != WEAP_ASSAULT_CANNON || ws.weapon != WEAP_NAILGUN ||
         ws.weapon != WEAP_SUPER_NAILGUN)
         LogEventAttack(self);

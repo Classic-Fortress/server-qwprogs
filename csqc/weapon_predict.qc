@@ -1754,7 +1754,7 @@ void WP_Attack() {
                   wi->weapon == WEAP_SUPER_NAILGUN ||
                   wi->weapon == WEAP_ASSAULT_CANNON;
 
-    if (!in_anim && !WP_ConsumeAmmo(CurrentSlot()))
+    if (!wi->fire_in_anim && !WP_ConsumeAmmo(CurrentSlot()))
         return;
 
     // OK.  We're ready to pew.
@@ -1762,7 +1762,7 @@ void WP_Attack() {
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 1;
 
-    if (IsEffectFrame() && !in_anim && (time > filter_pproj_time)) {
+    if (IsEffectFrame() && !wi->fire_in_anim && (time > filter_pproj_time)) {
         float send_event = FALSE;
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
@@ -1773,17 +1773,11 @@ void WP_Attack() {
                 PP_CreateProjectile(FPP_INCENDIARY, PM_Org() + v_forward * 8 + '0 0 16');
                 send_event = TRUE;
                 break;
-            case WEAP_FLAMETHROWER:
-                PP_CreateProjectile(FPP_FLAMETHROWER, PM_Org() + v_forward * 16 + '0 0 16');
-                break;
             case WEAP_TRANQ:
                 PP_CreateProjectile(FPP_TRANQ, PM_Org() + v_forward * 8 + '0 0 16');
                 break;
             case WEAP_RAILGUN:
                 PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
-                break;
-
-            case WEAP_ASSAULT_CANNON:
                 break;
 
             case WEAP_GRENADE_LAUNCHER:
@@ -1819,7 +1813,7 @@ void WP_Attack() {
         }
     }
 
-    if (!in_anim)
+    if (!wi->fire_in_anim)
         Attack_Finished(wi->attack_time);
 
     // Start the AC state machine when necessary.
