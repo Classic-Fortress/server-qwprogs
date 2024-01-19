@@ -307,6 +307,11 @@ float NewBalanceActive() {
 }
 
 enumflags {
-    NBF_OLD_CONC,
+    NBF_CONC_NEW_CAP,
     NBF_NO_CAP,
+};
+
+string NBF_DESC[] = {
+    "Reworked conc speed cap",
+    "No conc speed cap",
 };

@@ -259,16 +259,16 @@ void ActivateNewBalance() {
     PC_PYRO_AIRBLAST_COOLDOWN = 10;
     PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
 
-    float use_new_conc = CF_GetSetting("nbc", "new_balance_concs", "4");
-    if (use_new_conc == 4 && ServerRegion() == kRegionOCE)
-        use_new_conc = 1;
+    float use_new_cap = CF_GetSetting("nbcc", "new_balance_conc_cap", "4");
+    if (use_new_cap == 4 && ServerRegion() == kRegionOCE)
+        use_new_cap = 1;
     else
-        use_new_conc = 0;
+        use_new_cap = 0;
 
-    if (!use_new_conc)
-        fo_config.new_balance_flags |= NBF_OLD_CONC;
-    float no_cap = CF_GetSetting("nbnc", "new_balance_no_cap", "0");
-    if (no_cap)
+    if (use_new_cap)
+        fo_config.new_balance_flags |= NBF_CONC_NEW_CAP;
+
+    if (CF_GetSetting("nbnc", "new_balance_no_cap", "0"))
         fo_config.new_balance_flags |= NBF_NO_CAP;
 
     if (NB_UseMinPing()) {

@@ -173,7 +173,7 @@ enum {
 };
 
 float NB_UseNewConc() {
-    return fo_config.new_balance_flags & NBF_OLD_CONC == 0;
+    return fo_config.new_balance_flags & NBF_CONC_NEW_CAP;
 }
 
 float NB_NoCap() {
