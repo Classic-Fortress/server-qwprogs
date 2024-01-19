@@ -2680,7 +2680,7 @@ void () ToggleInvincibility = {
         self.items &= ~IT_INVULNERABILITY;
         self.invincible_time = 0;
         self.invincible_finished = 0;
-        self.tfstate &= ~PSTATE_INVINCIBLE;
+        self.pstate &= ~PSTATE_INVINCIBLE;
         self.effects &= ~(EF_RED | EF_DIMLIGHT | EF_BRIGHTLIGHT);
     } else {
         self.items |= IT_INVULNERABILITY;
