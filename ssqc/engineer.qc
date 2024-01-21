@@ -340,7 +340,7 @@ void () FO_Engineer_ToggleDispenser = {
 
 void () FO_Engineer_ToggleSentry = {
     if (self.has_sentry) {
-        DestroyBuilding(self, "building_sentrygun");
+        Menu_Engineer_Input(3);
     } else {
         if (self.health <= 0) {
             sprint(self, PRINT_HIGH, "Can't build while dead.\n");
