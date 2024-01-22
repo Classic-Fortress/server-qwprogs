@@ -158,60 +158,57 @@ static void draw_beam(vector a, vector b, int effect) {
 }
 
 void W_FireImpeller() {
-    if (!cb_prematch) {
-        self.special_next = time + 3;
-    }
-
     FO_Sound(self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
-    makevectors(self.v_angle);
+
+    float rewound = RewindPlayersExceptSelf(0);
+
+    if (!cb_prematch)
+        self.special_next = time + 3;
 
     vector org = self.origin + '0 0 16';
-    float direct = FALSE, jump = FALSE;
-    entity t = FindImpellerTarget(org, 0.985, &direct);
-    vector end = t.origin;
+    float direct = FALSE;
+    entity hit = FindImpellerTarget(org, 0.985, &direct);
+
+    if (rewound)
+        FOPlayer::RestoreAll();
 
     float mag = 250;
-    entity hit;
+    vector end;
 
-    if (t == world) {
+    if (hit == world) {
         traceline(org, org + 350 * v_forward, MOVE_WORLDONLY, world);
         if (trace_fraction == 1)
             return;
 
         end = trace_endpos;
         hit = self;
-        draw_beam(org, trace_endpos, TE_LIGHTNING2);
+        draw_beam(org, end, TE_LIGHTNING2);
     } else {
-        hit = t;
-
         if (direct) {
-            end = t.origin;
-            draw_beam(org, t.origin, TE_LIGHTNING2);
+            end = hit.origin;
+            draw_beam(org, end, TE_LIGHTNING2);
         } else {
             vector a = org, b = org + kImpellerTargetRange * v_forward;
             traceline(a, b, MOVE_WORLDONLY, world);
-            if (trace_fraction == 1)
-                return;
             end = trace_endpos;
-            vector x = find_closest(a, end, t.origin);
+            vector x = find_closest(a, end, hit.origin);
 
             draw_beam(a, x, TE_LIGHTNING2);
-            draw_beam(x, t.origin, TE_LIGHTNING2);
+            draw_beam(x, hit.origin, TE_LIGHTNING2);
 
             // Discount knockback by help given
-            mag -= max(10, vlen(t.origin - x));
+            mag -= max(10, vlen(hit.origin - x));
         }
 
-        hit = t;
-        end = t.origin;
+        end = hit.origin;
     }
 
     deathmsg = DMSG_IMPELLER;
     TF_T_Damage(hit, self, self, 5, TF_TD_NOTTEAM, TF_TD_ELECTRICITY | TF_TD_NOMOMENTUM);
     hit.flags &= ~FL_ONGROUND;
-    hit.velocity -= mag * normalize(end - org);
-    if (other.has_flag)
+    if (hit.has_flag)
         mag *= 2;
+    hit.velocity -= mag * normalize(end - org);
 }
 
 void () W_FireRailgun = {
