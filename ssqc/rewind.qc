@@ -322,9 +322,6 @@ void RW_RestoreAll() {
 float (string ps_short, string ps_setting, string ps_default) CF_GetSetting;
 
 float RewindPlayersExceptSelf(float farthest_rewind_point) {
-    if (!antilag_settings.rewind_detpipe)
-        return FALSE;
-
     float rewind_max_offset = (MAX_SNAPSHOTS - 1) * SERVER_FRAME_DT;
     farthest_rewind_point = max(farthest_rewind_point,
                                 time - rewind_max_offset);

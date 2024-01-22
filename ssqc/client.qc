@@ -640,10 +640,6 @@ void () DecodeLevelParms = {
         asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
         
-        // remote_client_time max delta
-        antilag_settings.rewind_detpipe =
-            CF_GetSetting("alrd", "al_rewind_detpipe", "on");
-
         // CSQC projectiles
         fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
 
