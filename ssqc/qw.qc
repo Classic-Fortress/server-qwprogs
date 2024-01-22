@@ -9,11 +9,6 @@ enum {
     CT_FAST_PROJECTILE,   // Fast proj => less judder (e.g. heavy bullet)
 };
 
-struct antilag_settings_t {
-    float rewind_detpipe;
-} antilag_settings;
-
-.vector antilag_origin;
 .float last_death_ctime;
 .float last_attack_ctime;
 
