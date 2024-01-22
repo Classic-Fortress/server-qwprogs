@@ -95,6 +95,8 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
+	dprint("POST to ", uri, "\n");
+	dprint(data);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
 
