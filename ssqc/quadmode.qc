@@ -518,7 +518,8 @@ void () QuadRoundBegin = {
 	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
-	round_end_time = time + round_time * 60 + 1;
+	round_start_time = time;
+	round_end_time = round_start_time + round_time * 60 + 1;
 	UpdateClientQuadRoundBegin(te, round_time);
 
 	if (!self.cnt) {

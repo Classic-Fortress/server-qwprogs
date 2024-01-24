@@ -1218,7 +1218,6 @@ void () TeamFortress_SetEquipment = {
     Team_Role * role = GetTeamRole(self.team_no);
     
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
-    self.items = FO_ClassWeapItemMask(self.playerclass) | kept_items;
 
     if (!remember_weapon || self.last_playerclass != self.playerclass ||
         (self.tfstate & TFSTATE_RANDOMPC)) {
@@ -2398,12 +2397,6 @@ void () TeamFortress_ExplodePerson = {
     proj.angles = vectoangles(proj.velocity);
     proj.think = SUB_Null;
     float expires = time + 0.1;  // Server generated, no client time here.
-    float rw_dt = FO_RewindGrenWinDt(gtype);
-    if (rw_dt > 0) {
-        proj.fpp.flags |= FPF_FIXED_DYNAMIC;
-        proj.fpp.dynamic_dt = rw_dt;
-        expires -= rw_dt;
-    }
     proj.nextthink = expires;
 
     if (self.weapon == GREN_FLARE) {

@@ -67,6 +67,7 @@ struct predict_tf_state {
 
     float conc_amp;
     float conc_finished;
+    float conc_cap_time;
     float special_next;
 
     float client_time, server_time;
@@ -314,14 +315,23 @@ float FO_MaxRewindGrenWinDt() {
 
 .predict_tf_state predict_state;
 .entity predict_entity;
+.float conc_cap_time;
 
 inline float *self_tf_state() { return &self.tfstate; }
+float self_class() { return self.playerclass; }
+Slot self_current_slot() { return self.current_slot; }
+Slot self_queue_slot() { return self.queue_slot; }
+float* self_clip_fired(Slot slot) { return &self.clip_fired[SlotIndex(slot)]; }
 
 #else
 
 predict_tf_state pstate_pred, pstate_server;
 
 inline float *self_tf_state() { return &pstate_pred.tfstate; }
+float self_class() { return pstate_pred.playerclass; }
+Slot self_current_slot() { return pstate_pred.current_slot; }
+Slot self_queue_slot() { return pstate_pred.queue_slot; }
+float* self_clip_fired(Slot slot) { return &pstate_pred.clip_fired[SlotIndex(slot)]; }
 
 #define MASK_PRED_ENT        256
 #define MASK_PRED_PROJECTILE 512
@@ -367,7 +377,7 @@ static float Prediction_ChangedMask(entity player, entity src) {
     M2(FOWP_TFSTATE, tfstate, csqc_maxspeed);
     M1(FOWP_LASTPRIME, last_prime);
     M2(FOWP_CLASSIC_CONC, conc_state.next, conc_state.mag);
-    M2(FOWP_CONCFINISH, conc_finished, conc_amp);
+    M3(FOWP_CONCFINISH, conc_finished, conc_amp, conc_cap_time);
     M1(FOWP_WF, weaponframe);
     M1(FOWP_AF, attack_finished);
     M2(FOWP_THINK, client_nextthink, client_thinkindex);
@@ -451,6 +461,7 @@ void InitProjectileEnt(float sendflags);
 void WPP_UpdateEnable(float force);
 
 .float owner_entnum;
+.float s_time;
 #endif
 
 #ifdef SSQC
@@ -479,6 +490,8 @@ void EntUpdate_Config() {
     COMM(Byte, gren_beta_disable);
     COMM(Byte, old_ng_rof);
     COMM(Short, fo_concuss);
+    COMM(Byte, new_balance);
+    COMM(Byte, new_balance_flags);
 
 #ifdef SSQC
     return TRUE;
@@ -564,6 +577,7 @@ void EntUpdate_WeaponPred(float isnew) {
     if (sendflags & FOWP_CONCFINISH) {
         COMM(Byte, conc_amp);
         COMM(Float, conc_finished);
+        COMM(Float, conc_cap_time);
     }
 
     if (sendflags & FOWP_THINK) {
@@ -724,6 +738,8 @@ void Predict_InitDefaultConfig() {
     fo_config.clown_flags = 0;
     fo_config.clown_grav = 400;
     fo_config.fo_concuss = 0;
+    fo_config.new_balance = 0;
+    fo_config.new_balance_flags = 0;
 }
 
 #ifdef SSQC
@@ -787,6 +803,11 @@ static void WeaponPred_CheckConfigUpdate() {
 
     if (fo_concuss != fo_config.fo_concuss) {
         fo_config.fo_concuss = fo_concuss;
+        update = TRUE;
+    }
+
+    if ((new_balance & 1) != fo_config.new_balance) {
+        fo_config.new_balance = new_balance & 1;
         update = TRUE;
     }
 
@@ -1153,3 +1174,4 @@ void AugmentGrenadeImpact() {
         self.SendFlags |= FOPP_MOVETYPE;
 #endif
 }
+

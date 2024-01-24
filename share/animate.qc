@@ -211,7 +211,13 @@ static inline float FO_CheckForReload() { return WP_ReloadCurrentIfNeeded(); }
 void W_FireSpikes(float ox);
 // Shared by both client and server side.
 void nail_extra_csqc_ssqc() {
-    if (!is_attacking() || is_intermission()) {
+    if (!is_attacking() || is_intermission() || !IsSlotNull(self_queue_slot())) {
+        player_run();
+        return;
+    }
+
+    FO_WeapInfo* wi = FO_GetWeapInfo(FO_CurrentWeapon());
+    if (wi->needs_reload && FO_CheckForReload()) {
         player_run();
         return;
     }

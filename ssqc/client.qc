@@ -223,6 +223,60 @@ void InitPrematch()
     }
 }
 
+static void SetAllRoles(float pc, float gren, float limit) {
+    if (gren == 1)
+        Role_None.gren1_limits[pc] = Role_Attack.gren1_limits[pc] =
+            Role_Defence.gren1_limits[pc] = limit;
+    else
+        Role_None.gren2_limits[pc] = Role_Attack.gren2_limits[pc] =
+            Role_Defence.gren2_limits[pc] = limit;
+}
+
+static float NB_UseMinPing() {
+    if (ServerIsOCE())
+        return FALSE;
+
+    if (ServerRegion() == kRegionUnknown)
+        return FALSE;  // e.g. random server, including LAN
+    return TRUE;
+}
+
+void ActivateNewBalance() {
+    disable_resup_gren = 2;  // No gren2 pickups
+
+    drop_gren1 = 0;  // No grenades in backpacks
+
+    int i;
+    for (i = 1; i <= 9; i++) // 3 gren spawn
+        SetAllRoles(i, 1, 3);
+
+    SetAllRoles(4, 2, 1);  // 1 mirv for demoman
+    SetAllRoles(6, 2, 1);  // 1 mirv for hwguy
+    SetAllRoles(9, 2, 1);  // 1 emp for engineer
+    SetAllRoles(9, 1, 4);  // 4 gren1 for engineer
+    SetAllRoles(3, 1, 4);  // 4 gren1 for soldier
+
+    PC_PYRO_AIRBLAST_COOLDOWN = 10;
+    PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
+
+    float use_new_cap = CF_GetSetting("nbcc", "new_balance_conc_cap", "4");
+    if (use_new_cap == 4 && ServerRegion() == kRegionOCE)
+        use_new_cap = 1;
+    else
+        use_new_cap = 0;
+
+    if (use_new_cap)
+        fo_config.new_balance_flags |= NBF_CONC_NEW_CAP;
+
+    if (CF_GetSetting("nbnc", "new_balance_no_cap", "0"))
+        fo_config.new_balance_flags |= NBF_NO_CAP;
+
+    if (NB_UseMinPing()) {
+        if (fo_config.min_ping_ms < 50) // 50 min-ping
+            localcmd("localinfo mpm 50");
+    }
+}
+
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -244,7 +298,6 @@ void () DecodeLevelParms = {
     self.armortype = parm9 * 0.01;
 
     if (!(toggleflags & TFLAG_FIRSTENTRY)) {
-
         toggleflags = parm10;
         flagem_checked = 0;
         invis_only = 0;
@@ -587,10 +640,6 @@ void () DecodeLevelParms = {
         asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
         
-        // remote_client_time max delta
-        antilag_settings.rewind_detpipe =
-            CF_GetSetting("alrd", "al_rewind_detpipe", "on");
-
         // CSQC projectiles
         fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
 
@@ -1037,6 +1086,19 @@ void () DecodeLevelParms = {
         p = find(p, classname, "player");
     }
 */
+
+    // Overrides other settings.
+    new_balance = CF_GetSetting("new_balance", "new_balance", "4");
+
+    float new_balance_region = (ServerRegion() == kRegionUS ||
+                                ServerRegion() == kRegionOCE);
+    if (new_balance == 4)
+        new_balance = (new_balance_region && ServerIsStaging()) ? 1 : 0;
+
+    // mirror current state into desired state bit
+    new_balance |= (new_balance << 1);
+    if (NewBalanceActive())
+        ActivateNewBalance();
 };
 
 entity() FindIntermission =
@@ -2495,6 +2557,7 @@ void () PlayerJump = {
     if (self.flags & FL_WATERJUMP)
         return;
 
+
     if (self.waterlevel >= 2) {
         if (self.watertype == CONTENT_WATER)
             self.velocity_z = 100;
@@ -2526,6 +2589,8 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
+    NB_ConcCapAction(self, self.playerclass, &self.tfstate,
+                     time, &self.conc_cap_time, kLand);
     FO_Sound(self, CHAN_AUTO, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (!cannon_air && self.tfstate & TFSTATE_AC_FIRING) {
@@ -2780,7 +2845,7 @@ void () CheckPowerups = {
             self.modelindex = modelindex_eyes;
         } else {
             if (self.invisible_finished) {
-                if (self.tfstate & TFSTATE_INVISIBLE) {
+                if (self.pstate & PSTATE_INVISIBLE) {
                     if (self.invisible_finished < (time + 10)) {
                         self.invisible_finished = time + 666;
                     }
@@ -2815,7 +2880,7 @@ void () CheckPowerups = {
         }
     }
     if (self.invincible_finished) {
-        if (self.tfstate & TFSTATE_INVINCIBLE) {
+        if (self.pstate & PSTATE_INVINCIBLE) {
             if (self.invincible_finished < (time + 10)) {
                 self.invincible_finished = time + 666;
             }
@@ -2859,7 +2924,7 @@ void () CheckPowerups = {
         }
     }
     if (self.super_damage_finished) {
-        if (self.tfstate & TFSTATE_QUAD) {
+        if (self.pstate & PSTATE_QUAD) {
             if (self.super_damage_finished == (time + 10)) {
                 self.super_damage_finished = time + 666;
             }
@@ -2901,7 +2966,7 @@ void () CheckPowerups = {
     }
     if (self.radsuit_finished) {
         self.air_finished = time + 12;
-        if (self.tfstate & TFSTATE_RADSUIT) {
+        if (self.pstate & PSTATE_RADSUIT) {
             if (self.radsuit_finished == (time + 10)) {
                 self.radsuit_finished = time + 666;
             }
@@ -3322,6 +3387,8 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gets too friendly with his sentry gun\n";
                 else if (pf_deathmsg == DMSG_DISPENSER_EXPLODE)
                     s_deathstring = " dispenses with himself\n";
+                else if (pf_deathmsg == DMSG_IMPELLER)
+                    s_deathstring = " couldn't resist their inner impelsions\n";
 
                 return strcat(pe_target.netname, s_deathstring);
 
@@ -3589,6 +3656,9 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                 } else if (pf_deathmsg == DMSG_LASERBOLT) {
                     s_deathstring = " gets a hole in his heart from ";
                     s_deathstring2 = "'s railgun\n";
+                } else if (pf_deathmsg == DMSG_IMPELLER) {
+                    s_deathstring = " gets pushed around by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_INCENDIARY) {
                     s_deathstring = " gets well done by ";
                     s_deathstring2 = "'s incendiary rocket\n";

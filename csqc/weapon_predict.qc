@@ -275,6 +275,7 @@ void WPP_Status() {
     PRINT_CONFIG(max_rewind_fast_projectile_ms);
     PRINT_CONFIG(max_rewind_grenade_ms);
     PRINT_CONFIG(rewind_fast_projectile_thresh);
+    PRINT_CONFIG(new_balance);
     printf("\n");
 
     PrintFlagField("Rewind Settings [rewind_flags=%d]\n",
@@ -285,6 +286,9 @@ void WPP_Status() {
 
     PrintFlagField("Clown mode [clown_flags=%d]\n",
                    fo_config.clown_flags, CLOWN_DESC.length, CLOWN_DESC);
+
+    PrintFlagField("NewBalance Flags [newbalance_flags=%d]:\n",
+                   fo_config.new_balance_flags, NBF_DESC.length, NBF_DESC);
 
     PrintFlagField("Concs [fo_concuss=%d]\n",
                    fo_config.fo_concuss, FO_CONC.length, FO_CONC);
@@ -1027,11 +1031,10 @@ void WP_Impulse() {
 }
 
 static float* WP_ClipFired(Slot slot) {
-    float index = SlotIndex(slot);
-    if (pstate_pred.playerclass == PC_DEMOMAN && index == 1)
-        index = 0;  // Special case: Pipebomb shares with Grenadel launcher.
+    if (self_class() == PC_DEMOMAN && SlotIndex(slot) == 1)
+        slot = MakeSlot(1);  // Special case: pipebomb shares with grenade launcher.
 
-    return &pstate_pred.clip_fired[index];
+    return self_clip_fired(slot);
 }
 
 float WP_CurrentClipFired() {
@@ -1113,6 +1116,22 @@ float WP_ReloadSlot(Slot slot) {
         (amt / wi->clip_size) * wi->full_reload_time;
 
     return TRUE;
+}
+
+void WP_CheckSpecialReady() {
+    if (!IsEffectFrame())
+        return;
+
+    if (pstate_pred.special_next > pstate_pred.server_time ||
+        pstate_pred.special_next < pstate_pred.server_time - input_timelength)
+        return;
+
+    switch (pstate_pred.playerclass) {
+        case PC_ENGINEER:
+            if (NewBalanceActive())
+                printf("Impeller ready\n");
+            break;
+    }
 }
 
 void WP_CheckReloadFinished() {
@@ -1707,6 +1726,13 @@ void FO_FireAssCanPellet(vector org, vector dir, float proj_speed, int index) {
     proj.fpp.ammo_index = WP_GetAmmo(AMMO_SHELLS) * 100 + index;
 }
 
+float NB_ImpellerCoolDown(FO_WeapInfo* wi) {
+    if (!NewBalanceActive() || wi->weapon != WEAP_IMPELLER)
+        return FALSE;
+
+    return pstate_pred.server_time < pstate_pred.special_next;
+}
+
 void WP_Attack() {
     if (getstatf(STAT_NOFIRE))
         return;
@@ -1719,13 +1745,16 @@ void WP_Attack() {
     if (!WP_CheckAmmo(wi))
         return;
 
+    if (NB_ImpellerCoolDown(wi))
+        return;
+
     // Whether firing occurs here, or is embedded in the frame animation code
     // (because continuous fire).
     int in_anim = wi->weapon == WEAP_NAILGUN ||
                   wi->weapon == WEAP_SUPER_NAILGUN ||
                   wi->weapon == WEAP_ASSAULT_CANNON;
 
-    if (!in_anim && !WP_ConsumeAmmo(CurrentSlot()))
+    if (!wi->fire_in_anim && !WP_ConsumeAmmo(CurrentSlot()))
         return;
 
     // OK.  We're ready to pew.
@@ -1733,7 +1762,7 @@ void WP_Attack() {
     // Must be set prior to animation code, which might internally modify.
     pstate_pred.client_thinkindex = 1;
 
-    if (IsEffectFrame() && !in_anim && (time > filter_pproj_time)) {
+    if (IsEffectFrame() && !wi->fire_in_anim && (time > filter_pproj_time)) {
         float send_event = FALSE;
         switch (wi->weapon) {
             case WEAP_ROCKET_LAUNCHER:
@@ -1744,17 +1773,11 @@ void WP_Attack() {
                 PP_CreateProjectile(FPP_INCENDIARY, PM_Org() + v_forward * 8 + '0 0 16');
                 send_event = TRUE;
                 break;
-            case WEAP_FLAMETHROWER:
-                PP_CreateProjectile(FPP_FLAMETHROWER, PM_Org() + v_forward * 16 + '0 0 16');
-                break;
             case WEAP_TRANQ:
                 PP_CreateProjectile(FPP_TRANQ, PM_Org() + v_forward * 8 + '0 0 16');
                 break;
             case WEAP_RAILGUN:
                 PP_CreateProjectile(FPP_RAILGUN, PM_Org() + '0 0 16');
-                break;
-
-            case WEAP_ASSAULT_CANNON:
                 break;
 
             case WEAP_GRENADE_LAUNCHER:
@@ -1790,7 +1813,7 @@ void WP_Attack() {
         }
     }
 
-    if (!in_anim)
+    if (!wi->fire_in_anim)
         Attack_Finished(wi->attack_time);
 
     // Start the AC state machine when necessary.
@@ -1974,7 +1997,8 @@ void WP_UpdateViewModel() {
         alph = CVARF(fo_reloadalpha);
     } else {
         alph = CVARF(r_drawviewmodel);
-        if (!WP_WeaponReady() && CVARF(fo_nofirealpha) != -1)
+        float ready = WP_WeaponReady() && !NB_ImpellerCoolDown(wi);
+        if (!ready && CVARF(fo_nofirealpha) != -1)
             alph = CVARF(fo_nofirealpha);
     }
 

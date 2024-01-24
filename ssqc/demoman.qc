@@ -146,6 +146,7 @@ void (float timer) TeamFortress_SetDetpack = {
 
     self.impulse = 0;
     self.last_impulse = 0;
+
     if (self.ammo_detpack <= 0) {
         sprint(self, PRINT_HIGH, "You don't have any detpacks left\n");
         return;
@@ -202,6 +203,17 @@ void (float timer) TeamFortress_SetDetpack = {
         return;
     }
 
+    float quad_limit = quadmode && round_active &&
+                (time < round_end_time) && (rounds % 2) != (self.team_no - 1);
+    if (NewBalanceActive() && quad_limit) {
+        float last = max(self.detpack_last, round_start_time);
+        float next = last + 30;  // TODO: tunable if this sticks
+        if (next > time) {
+            sprint(self, PRINT_HIGH, sprintf("%0.1f seconds until next detpack\n", next - time));
+            return;
+        }
+    }
+
     self.is_detpacking = 3;
     self.detpack_left = timer;
     self.ammo_detpack = self.ammo_detpack - 1;
@@ -217,6 +229,7 @@ void (float timer) TeamFortress_SetDetpack = {
            " seconds...\n");
     Menu_Demoman_Cancel();
 
+    self.detpack_last = time;
     newmis = spawn();
     newmis.owner = self;
     newmis.classname = "timer";

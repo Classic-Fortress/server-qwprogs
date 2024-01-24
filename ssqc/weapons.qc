@@ -99,6 +99,7 @@ void () W_FireFlame;
 void W_FireIncendiaryCannon(vector org, vector angles, float use_ctime=0);
 void () W_FireTranq;
 void () W_FireRailgun;
+void () W_FireImpeller;
 
 void () HallucinationTimer;
 void () TranquiliserTimer;
@@ -1043,9 +1044,7 @@ void T_Knock_Antilag() {
 }
 
 float AntilagKnock(entity e, float dmg) {
-    if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
-        return FALSE;
-
+    e.forward_knock = -1;
     // Only applies during initial antilag forward
     if (e.flags & FL_FORWARD_KNOCK == 0)
         return FALSE;
@@ -1070,7 +1069,6 @@ float AntilagKnock(entity e, float dmg) {
         e.forward_knock = time + ttime;
     } else {
         Antilag_Knock(knock_e);
-        e.forward_knock = -1;
     }
 
     return TRUE;
@@ -1094,9 +1092,6 @@ void () T_MissileTouch = {
     float dmg = (self.owner.classname == "building_sentrygun") ? 150 : 92;
     entity ignore_self = AntilagKnock(self, dmg) ? self.owner : __NULL__;
     T_RadiusDamage(self, self.owner, dmg, other, ignore_self);
-
-    if (!self.s_time)
-        self.forward_knock = -1;
 
     self.origin = self.origin - 8 * normalize(self.velocity);
 
@@ -1412,6 +1407,9 @@ void (float ox) W_FireSpikes = {
     }
 
     *ws->ammo_remaining -= wi->ammo_per_shot;
+    if (wi->needs_reload)
+        *ws->clip_fired += wi->ammo_per_shot;
+
     if (wi->weapon == WEAP_NAILGUN)
         W_FireNail(FPP_NAIL, v_right * ox);
     else
@@ -1752,21 +1750,24 @@ void () W_Attack = {
     } else if (ws.weapon == WEAP_RAILGUN) {
         player_shot1();
         W_FireRailgun();
+    } else if (ws.weapon == WEAP_IMPELLER) {
+        if (!new_balance || time < self.special_next)
+            return;
+
+        player_shot1();
+        W_FireImpeller();
     }
 
-    if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
-        ws.weapon != WEAP_ASSAULT_CANNON &&  // In animation
-        ws.weapon != WEAP_NAILGUN &&         // In animation
-        ws.weapon != WEAP_SUPER_NAILGUN)     // In animation
+    if (!wi->fire_in_anim) {
         Attack_Finished(wi->attack_time);
-
-    if (wi->needs_reload) {
-        if (ws.weapon != WEAP_ASSAULT_CANNON)  // In animation
+        if (wi->needs_reload) {
             *ws->clip_fired += wi->ammo_per_shot;
-        FO_CheckForReload();
+            FO_CheckForReload();
+        }
     }
 
     //These weapons have to log each projectile launched/bullet fired
+    // TODO: probably equivalent to fire_in_anim...
     if (ws.weapon != WEAP_ASSAULT_CANNON || ws.weapon != WEAP_NAILGUN ||
         ws.weapon != WEAP_SUPER_NAILGUN)
         LogEventAttack(self);
@@ -1882,7 +1883,7 @@ void W_ChangeWeaponSlot(Slot slot) {
 
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
-    if (ws.weapon == WEAP_NONE)
+    if (ws.weapon == WEAP_NONE || !FO_WeapAvailable(ws.weapon))
         return;
 
     // queue next weapon if queue is not empty or has changed
@@ -2675,16 +2676,16 @@ void () SuperDamageSound = {
 };
 
 void () ToggleInvincibility = {
-    if(self.tfstate & TFSTATE_INVINCIBLE) {
+    if(self.pstate & PSTATE_INVINCIBLE) {
         self.items &= ~IT_INVULNERABILITY;
         self.invincible_time = 0;
         self.invincible_finished = 0;
-        self.tfstate &= ~TFSTATE_INVINCIBLE;
+        self.pstate &= ~PSTATE_INVINCIBLE;
         self.effects &= ~(EF_RED | EF_DIMLIGHT | EF_BRIGHTLIGHT);
     } else {
         self.items |= IT_INVULNERABILITY;
         self.invincible_time = 1;
-        self.tfstate |= TFSTATE_INVINCIBLE;
+        self.pstate |= PSTATE_INVINCIBLE;
         self.invincible_finished = time + 666;
     }
 };

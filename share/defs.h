@@ -249,6 +249,7 @@ enumflags {
     TFSTATE_AIMING,        // is using the laser sight or spinning
     TFSTATE_CANT_MOVE,
     TFSTATE_CONC,
+    TFSTATE_CONC_CAP,      // Speed-cap next jump
     TFSTATE_NO_WEAPON,     // Weapon is disabled and not visible (e.g. detpack)
                            // (Note: We don't use NO_WEAPON for reloading
                            // as it could result in stacked no-weapon states.)
@@ -258,21 +259,25 @@ enumflags {
     TFSTATE_AC_SPINDOWN,
     TFSTATE_LOCK,          // assault cannon locked
     TFSTATE_INFECTED,      // set when player is infected by the bioweapon
-    TFSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
-    TFSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
-    TFSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
-    TFSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
     TFSTATE_BURNING,       // Is on fire
     TFSTATE_FEIGNED,       // Is feigned
     TFSTATE_AIMING,        // is using the laser sight or spinning cannon
     TFSTATE_RESPAWN_READY, // is waiting for respawn, and has pressed fire,
                            // as sentry gun,indicate it needs to die
     TFSTATE_HALLUCINATING, // set when player is hallucinating
-    TFSTATE_TRANQUILISED,  // set when player is tranquilised
+
     TFSTATE_FLAMES_MAX,    // Peak burnination.
+    TFSTATE_TRANQUILISED,  // set when player is tranquilised
     TFSTATE_RANDOMPC,
+    // QC/Compiler limitation: Bits past-24 unsafe with bitops
 };
 
+enumflags {
+    PSTATE_INVINCIBLE,    // Player has permanent Invincibility (Usually by GoalItem)
+    PSTATE_INVISIBLE,     // Player has permanent Invisibility (Usually by GoalItem)
+    PSTATE_QUAD,          // Player has permanent Quad Damage (Usually by GoalItem)
+    PSTATE_RADSUIT,       // Player has permanent Radsuit (Usually by GoalItem)
+};
 
 #define TFSTATE_GREN_MASK_PRIMED (TFSTATE_GREN1_PRIMED|TFSTATE_GREN2_PRIMED)
 #define TFSTATE_GREN_MASK_ALL (TFSTATE_GREN_MASK_PRIMED|TFSTATE_GRENTHROWING)
@@ -733,8 +738,8 @@ struct Slot { int id; };
 /*======================================================*/
 
 #define WEAP_NONE 0
-enumflags {
-    WEAP_HOOK,
+enum {
+    WEAP_HOOK = 1,
     WEAP_KNIFE,
     WEAP_MEDIKIT,
     WEAP_SPANNER,
@@ -755,7 +760,8 @@ enumflags {
     WEAP_DETPACK,
     WEAP_TRANQ,
     WEAP_RAILGUN,
-    WEAP_LAST = WEAP_RAILGUN,
+    WEAP_IMPELLER,
+    WEAP_LAST = WEAP_IMPELLER,
 };
 
 // still room for 12 more weapons
@@ -1062,7 +1068,6 @@ enumflags {
 #define PC_PYRO_GRENADE_MAX_2		4
 #define PC_PYRO_TF_ITEMS		0
 #define PC_PYRO_AIRBLAST_RANGE	        400
-#define PC_PYRO_AIRBLAST_COOLDOWN	5
 #define PC_PYRO_AIRBLAST_CELLS			55
 #define PC_PYRO_AIRBLASTJUMP_CELLS		75
 #define PC_PYRO_LAVA_LIFETIME	3
@@ -1126,7 +1131,6 @@ enumflags {
 #define PC_ENGINEER_GRENADE_MAX_1	4
 #define PC_ENGINEER_GRENADE_MAX_2	4
 #define PC_ENGINEER_TF_ITEMS		0
-#define PC_ENGINEER_GRENADE_TYPE_2_RANGE	240
 #define PC_ENGINEER_RAILSPEED		1500
 
 // Class Details for CIVILIAN
@@ -1308,6 +1312,7 @@ enumflags {
 #define DMSG_GREN_SHOCK			42
 #define DMSG_GREN_BURST			43
 #define DMSG_KNIFE			44
+#define DMSG_IMPELLER			45
 
 /*======================================================*/
 /* Menus						*/
@@ -1665,3 +1670,6 @@ TFAlias csqc_aliases[] = {
     {"+dropflag",               0, "+button7"},
     {"-dropflag",               0, "-button7"},
 };
+
+#define NB_CONC_CAP_AIR 1100
+#define NB_CONC_CAP_LAND 950

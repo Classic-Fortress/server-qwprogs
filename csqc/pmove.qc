@@ -387,6 +387,11 @@ static void PM_NudgeExplosion(PM_Nudge* nudge, entity ent) {
     if (vlen(ent.origin - nudge->org) > dmg + 40)
         return;
 
+    const float MOVE_WORLDONLY = 3;
+    traceline(ent.origin, nudge->org, MOVE_WORLDONLY, pm.ent);
+    if (trace_fraction < 1)  // No knock from occluded explosions
+        return;
+
     float flg = KF_BOTH_PLAYER;  // Assumes everything is from a player for now
     if (nudge->src.owner == pengine.player_ent)
        flg |= KF_SELF;
@@ -465,6 +470,9 @@ static void PM_NudgeBounce(PM_Nudge* nudge, entity ent) {
     float points = dmg - vlen(targ_org - nudge->org) / 2;
 
     ent.velocity = (targ_org - nudge->org) * points/20;
+
+    NB_ConcCapAction(ent, pstate_pred.playerclass, &pstate_pred.tfstate,
+                     pm.interp_t, &pstate_pred.conc_cap_time, kLaunch);
 }
 
 
@@ -625,6 +633,12 @@ static void PM_RunMovement(PMS_Data* pmsd, float endframe) {
 
             if ((ent.pmove_flags & PMF_JUMP_HELD) && (pstate_pred.tfstate & TFSTATE_CONC))
                 Conc_Jump(&pstate_pred.conc_state, ent);
+
+            if ((ent.pmove_flags & PMF_JUMP_HELD) && (pstate_pred.tfstate & TFSTATE_CONC_CAP)) {
+                NB_ConcCapAction(ent, pstate_pred.playerclass, &pstate_pred.tfstate,
+                                 pm.interp_t, &pstate_pred.conc_cap_time,
+                                 kLand);
+            }
         }
 
         pm.seq++;
@@ -802,6 +816,9 @@ void PM_Update(float sendflags) {
     float was_enabled = PM_Enabled();
     float enabled = (pstate_server.predict_flags & PF_PMOVE) &&
                     game_state.is_player;
+
+    if (isdemo())
+        enabled = 0;
 
     if (enabled != was_enabled ||
         game_state.is_player != prev_game_state.is_player)

@@ -704,36 +704,31 @@ void () weapon_lightning = {
     StartItem();
 };
 
-void (entity pl, float type) PrintGrenadeType = {
-    // TODO: this is still awful
-    string st = FO_GrenDesc(type)->logname;
-    sprint(pl, PRINT_HIGH, st);
-};
-
 void (entity pe_player, float pf_grenade_type, float pf_grenade_count) PrintFoundGrenade = {
     if (!pf_grenade_count)
         return;
 
-    sprint(pe_player, PRINT_HIGH, "You found ");
-    if (pf_grenade_count > 1)
-        sprint(pe_player, PRINT_HIGH, ftos(pf_grenade_count), " ");
-    else
-        sprint(pe_player, PRINT_HIGH, "a ");
-    PrintGrenadeType(pe_player, pf_grenade_type);
-    if (pf_grenade_type == GREN_CALTROP)
-        sprint(pe_player, PRINT_HIGH, " canister");
-    else
-        sprint(pe_player, PRINT_HIGH, " grenade");
-    if (pf_grenade_count > 1)
-        sprint(pe_player, PRINT_HIGH, "s");
-    sprint(pe_player, PRINT_HIGH, "\n");
+    string buf = sprintf("You found %s%s %s%s\n",
+            pf_grenade_count > 1 ? " " : "a ",
+            FO_GrenDesc(pf_grenade_type)->name,
+            pf_grenade_type == GREN_CALTROP ? "cannister" : "grenade",
+            pf_grenade_count > 1 ? "s" : "");
+    sprint(pe_player, PRINT_HIGH, buf);
 };
 
 float () GetGrenadePossibility = {
     if (random() < 0.500)
         return 0;
 
-    float index = random() < 0.5 ? 0 : 1;
+    float index = -1;
+    switch (disable_resup_gren) {
+        case 0: index = random() < 0.5 ? 0 : 1; break;
+        case 1: index = 1; break;
+        case 2: index = 0; break;
+        default:
+                return 0;
+    }
+
     FO_GrenInfo* gt = FO_PlayerGren(other, index);
     if (gt->id == GREN_NONE)
         return 0;

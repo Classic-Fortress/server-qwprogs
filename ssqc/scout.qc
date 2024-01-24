@@ -830,6 +830,9 @@ void (entity inflictor, entity attacker, float bounce,
     local entity te;
     local vector org;
 
+    if (NewBalanceActive() && inflictor.owner.playerclass == PC_MEDIC)
+        actual_cuss_time = 2;
+
     head = findradius(inflictor.origin, bounce + 40);
     while (head) {
         if (head != ignore) {
@@ -861,12 +864,20 @@ void (entity inflictor, entity attacker, float bounce,
                     head.velocity = head.velocity * (points / 20);
                     Predict_AddFilterEnt(head, inflictor);
 
+                    NB_ConcCapAction(head, head.playerclass, &head.tfstate,
+                                     time, &head.conc_cap_time, kLaunch);
+
                     if (head.classname != "player") {
                         if (head.flags & FL_ONGROUND)
                             head.flags = head.flags - FL_ONGROUND;
                     } else {
                         if (head.playerclass == PC_MEDIC)
                         {
+                            if ((NewBalanceActive() && NB_UseNewConc()) || NB_NoCap()) {
+                                head = head.chain;
+                                continue;
+                            }
+
                             if (medicnocuss && (medic_type != MEDIC_TYPE_BLAST))
                             {
                                 entity speedbump;

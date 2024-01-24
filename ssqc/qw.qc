@@ -9,11 +9,6 @@ enum {
     CT_FAST_PROJECTILE,   // Fast proj => less judder (e.g. heavy bullet)
 };
 
-struct antilag_settings_t {
-    float rewind_detpipe;
-} antilag_settings;
-
-.vector antilag_origin;
 .float last_death_ctime;
 .float last_attack_ctime;
 
@@ -108,6 +103,7 @@ float remote_client_time();
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
+.float pstate;                  // Player state flags
 .float tfstate;                 // State flags for TeamFortress
 .float last_tfstate;             // Internal cache of tfstate for detecting updates
 .entity linked_list;            // Used just like chain. Has to be separate so
@@ -117,7 +113,6 @@ float remote_client_time();
 
 // Identify variables
 .string ident_string;           // Status bar string for identify
-.string last_ident_string;      // Last Status bar string for identify
 .float ident_time;              // The time when last identify found a player
 .float autoid_type;             // 0 = ignore noone, 1 = ignore teammates, 2 = ignore enemies
 .float autoid_time;             // Time when autoid settings were last checked
@@ -144,6 +139,8 @@ float remote_client_time();
 .float menu_count;
 .float menu_displaytime;
 .f_void_float menu_input;
+
+.float has_flag;
 
 float toggleflags;              // toggleable flags
 
@@ -468,6 +465,7 @@ float rounds;
 float round_active;
 float round_over;
 float round_delay_time;
+float round_start_time;
 float round_end_time;
 float map_restart_time;
 float gametime;
@@ -621,7 +619,6 @@ float walls_block_emp;
 float new_emp;
 float fo_sentry_targeting; // new improved targeting for sentry guns
 float cb_keepteams;
-float fo_matchrated;
 float fo_flashtime;
 float fo_repair_ratio;
 float solid_nailgren;
@@ -800,3 +797,7 @@ string match_id;
 string backend_address;
 float fo_login_required;
 .entity filter_ent;
+
+var float PC_PYRO_AIRBLAST_COOLDOWN = 5;
+var float PC_ENGINEER_GRENADE_TYPE_2_RANGE = 240;
+.float detpack_last;
