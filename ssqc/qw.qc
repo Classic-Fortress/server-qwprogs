@@ -640,6 +640,7 @@ float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
+float grenade_lockout;
 
 float fo_projectiles;
 
