@@ -202,6 +202,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
 * localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
 * localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 1]
+* localinfo grenade_lockout / gl : Time in seconds grenade throw is locked out [default: 0.1]
 * localinfo round_delay_time : interval time between rounds in quadmode - seconds [default: 30]
 * localinfo max_gren2_soldier : maximum number of active nail/shock grenades (TF 2.8 = 3, OzTF = 1) [default: 3]
 * localinfo distance_based_cuss_duration : on/off - enables cuss duration to be proportional to the distance from the explosion [default: off]
