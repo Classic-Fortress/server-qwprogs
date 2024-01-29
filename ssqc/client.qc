@@ -1092,12 +1092,7 @@ void () DecodeLevelParms = {
 */
 
     // Overrides other settings.
-    new_balance = CF_GetSetting("new_balance", "new_balance", "4");
-
-    float new_balance_region = (ServerRegion() == kRegionUS ||
-                                ServerRegion() == kRegionOCE);
-    if (new_balance == 4)
-        new_balance = (new_balance_region && ServerIsStaging()) ? 1 : 0;
+    new_balance = CF_GetSetting("new_balance", "new_balance", "1");
 
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
