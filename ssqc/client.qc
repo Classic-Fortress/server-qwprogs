@@ -516,8 +516,11 @@ void () DecodeLevelParms = {
         // maximum amount of pipebombs in game [unlimited]
         detpipe_limit_world = CF_GetSetting("dw", "detpipe_limit_world", "-1");
 
-        // use old tf pipebomb cooldown (0.8 seconds) [off]
-        old_pipecooldown = CF_GetSetting("op", "old_pipecooldown", "off");
+        // set pipe cooldown time [0.5]
+        pipecooldown_time = CF_GetSetting("pcdt", "pipecooldown_time", "0.5");
+
+        // cooldown applies to all pipes [off]
+        allpipes_cooldown = CF_GetSetting("apcd", "allpipes_cooldown", "off");
 
         // allow medic aura [on]
         medicaura = CF_GetSetting("ma", "medicaura", "on");
@@ -880,7 +883,7 @@ void () DecodeLevelParms = {
             old_sniperrange = FALSE;
             Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
-            old_pipecooldown = FALSE;
+            pipecooldown_time = 0.5;
             medicaura = TRUE;
             old_biodamage = FALSE;
             cannon_lock = TRUE;
@@ -948,7 +951,7 @@ void () DecodeLevelParms = {
             old_sniperrange = TRUE;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
-            old_pipecooldown = TRUE;
+            pipecooldown_time = 0.8;
             medicaura = FALSE;
             old_biodamage = TRUE;
             cannon_lock = FALSE;

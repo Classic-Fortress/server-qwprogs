@@ -17,7 +17,7 @@ void () TeamFortress_DetpackCountDown;
 void CheckStateQ3Goal(entity trig);
 
 float (float force) TeamFortress_DetonatePipebombs = {
-    if (time < self.pipecooldown && !force)
+    if (allpipes_cooldown && time < self.pipecooldown && !force)
         return impulse_queue ? FALSE : TRUE;
 
     if (self.detpipe_nesting > 0)
@@ -34,7 +34,7 @@ float (float force) TeamFortress_DetonatePipebombs = {
         rewound = RewindPlayersExceptSelf(self.pipecooldown);
 
     for (float i = 0; i < count; i++) {
-        if (pipes[i].owner == self) {
+        if (pipes[i].owner == self && pipes[i].created_at < time - pipecooldown_time) {
             deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
                                                       DMSG_GREN_PIPE_AIR;
 

@@ -69,6 +69,10 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 -------------------------------
 
 * Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
+
+
+* `localinfo pipecooldown_time <number>` time in seconds for demo pipe cooldown
+* `localinfo allpipes_cooldown on/off` whether cooldown is applied to individual pipes or all pipes. i.e. with this on the demo can not det any of his pipes immediately after firing. (default off)
 * `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
 * `localinfo fo_matchrated 2` whether match is rated / affects trueskill. 2 is false for 1v1 and 2v2 only.
 * `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
