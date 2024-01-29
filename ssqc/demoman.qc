@@ -17,7 +17,7 @@ void () TeamFortress_DetpackCountDown;
 void CheckStateQ3Goal(entity trig);
 
 float (float force) TeamFortress_DetonatePipebombs = {
-    if (allpipes_cooldown && time < self.pipecooldown && !force)
+    if (!force && allpipes_cooldown && time < self.pipecooldown)
         return impulse_queue ? FALSE : TRUE;
 
     if (self.detpipe_nesting > 0)
@@ -34,18 +34,21 @@ float (float force) TeamFortress_DetonatePipebombs = {
         rewound = RewindPlayersExceptSelf(self.pipecooldown);
 
     for (float i = 0; i < count; i++) {
-        if (pipes[i].owner == self && pipes[i].created_at < time - pipecooldown_time) {
-            deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
-                                                      DMSG_GREN_PIPE_AIR;
+        if (pipes[i].owner != self)
+            continue;
 
-            T_RadiusDamage(pipes[i], pipes[i].owner, 120, world);
+        if (!force && pipes[i].created_at > time - pipecooldown_time)
+            continue;
 
-            // This maintains some sort of awful hack that we'll remove.
-            pipes[i].voided = 1;
+        deathmsg = pipes[i].flags & FL_ONGROUND ? pipes[i].weapon :
+            DMSG_GREN_PIPE_AIR;
 
-            RenderExplosion(pipes[i].origin);
-            dremove(pipes[i]);
-        }
+        T_RadiusDamage(pipes[i], pipes[i].owner, 120, world);
+
+        // This maintains some sort of awful hack that we'll remove.
+        pipes[i].voided = 1;
+        RenderExplosion(pipes[i].origin);
+        dremove(pipes[i]);
     }
 
     // NOTE: nested death-dets would not trigger double unwind due to `force==1`
