@@ -558,7 +558,8 @@ float old_dropflag;
 float old_sniperrange;
 //float detpipe_limit;
 float detpipe_limit_world;
-float old_pipecooldown;
+float pipecooldown_time;
+float allpipes_cooldown;
 float medicaura;
 float old_biodamage;
 float flame_knockback;
@@ -640,6 +641,7 @@ float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
+float grenade_lockout;
 
 float fo_projectiles;
 

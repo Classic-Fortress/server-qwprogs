@@ -661,7 +661,7 @@ void () TeamFortress_ShowTF = {
     } else {
         sprint(self, PRINT_HIGH, "Pipebomb limit (team):                  unlimited\n");
     }
-    CF_PrintSetting("Old pipebomb cooldown", old_pipecooldown, "", 1);
+    CF_PrintSetting("Pipebomb cooldown time", pipecooldown_time, "", 0.5);
 
     sprint(self, PRINT_HIGH, "\n== Combat Medic ==\n");
     CF_PrintSetting("Medic aura ability", medicaura, "", 1);
@@ -922,11 +922,11 @@ void () FO_GrenadeThink = {
 void () FO_ThrowGrenade = {
     entity timer = self.grenade_timer;
 
-    float throwtime = time, lockout = 0.1;
+    float throwtime = time;
     if (RewindFlagEnabled(REWIND_GRENADES))
         throwtime = bounded_remote_time(FO_RewindGrenDt(timer.fpp.gren_type));
 
-    if ((timer.nextthink < timer.heat || throwtime > timer.heat - lockout) &&
+    if ((timer.nextthink < timer.heat || throwtime > timer.heat - grenade_lockout) &&
         !IsClownMode(CLOWN_SPAM_GRENADES)) {
         // We do not allow throwing within the 0.8s, or the last 0.1s.
         // The former is a priming time, the latter is so that client side

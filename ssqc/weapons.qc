@@ -1334,10 +1334,7 @@ void W_FireGrenade(vector org, vector v_ang, float use_ctime=0) {
         proj.nextthink = time + 2.5;
         proj.fpp.gren_type = GREN_RED;
     } else {
-        if (old_pipecooldown)
-            self.pipecooldown = time + 0.8;
-        else
-            self.pipecooldown = time + 0.5;
+        self.pipecooldown = time + pipecooldown_time;
         ExplodeOldestPipebomb();
         proj.classname = "pipebomb";
         proj.touch = PipebombTouch;
@@ -1596,6 +1593,7 @@ Slot W_BestWeaponSlot()  {
     for (float i = 1; i <= TF_NUM_SLOTS; i++) {
         Slot slot = MakeSlot(i);
         FO_FillWeapState(self, slot, &ws);
+        FO_WeapInfo* wi = ws->wi;
 
         // AC also takes cells to fire.
         if (ws->weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
@@ -1604,7 +1602,7 @@ Slot W_BestWeaponSlot()  {
         // We don't need to handle out of ammo medi/spanner here because of
         // fallback below.
         if (ws.weapon != WEAP_NONE &&
-            ((ws.wi)->ammo_type == AMMO_NONE || *ws.ammo_remaining))
+            (wi->ammo_type == AMMO_NONE || (*ws.ammo_remaining >= wi->ammo_per_shot)))
             return slot;
     }
     return SlotMelee;

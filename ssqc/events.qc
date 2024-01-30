@@ -195,7 +195,7 @@ void (entity attacker, entity target, entity inflictor, float damage, float true
 
         part2 = sprintf("\"inflictor\": \"%s\", \"damage\": %s, \"time\": %s, \"gameTimeStamp\": \"%s\"}", 
                 inflictorId,
-                ftos(damage),
+                ftos(truedam),
                 ftos(gametime),
                 gametimestamp
                 );
