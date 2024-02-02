@@ -712,19 +712,25 @@ void WP_ChangeWeapon(Slot slot) {
 
 // Alternate between opt1/opt2, activating opt1 if neither is active.
 // Useful for demoman to have red/yellows bound to 1 key.
-void W_ChangeToSlotAlternate(string opt1, string opt2) {
-    float v1 = strlen(opt1) > 0 ? stof(opt1) : 0;
-    float v2 = strlen(opt2) > 0 ? stof(opt2) : v1;
+void W_ChangeToSlotAlternate(string opt1, string opt2, string opt3, string opt4) {
+    float v[4], nv = 0, idx = -1;
+    string s[4] = {opt1, opt2, opt3, opt4};
 
-    if ((v1 < 1 || v1 > TF_NUM_SLOTS) || (v2 < 1 || v2 > TF_NUM_SLOTS))
-        return;
+    for (int i = 0; i < s.length; i++) {
+        if (strlen(s[i]) == 0)
+            break;
 
-    // The OWI/slot mess rears its head again here.  We convert to a slot for
-    // comparison but use the naked input value which will then be converted per
-    // OWI if active.
-    Slot slot = FO_SlotByInput(pstate_pred.playerclass, v1);
-    float imp = IsSameSlot(pstate_pred.current_slot, slot) ? v2 : v1;
-    localcmd(sprintf("impulse %d\n", imp));
+        float t = stof(s[i]);
+        if (t < 1 || t > TF_NUM_SLOTS)
+            return;
+
+        if (SlotIndex(pstate_pred.current_slot) + 1 == t)
+            idx = nv;
+        v[nv++] = t;
+    }
+
+    idx = (idx + 1) % nv;
+    localcmd(sprintf("impulse %d\n", TF_SLOT1 + v[idx] - 1));
 }
 
 Slot WP_BestWeaponSlot() {

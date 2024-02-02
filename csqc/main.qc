@@ -252,7 +252,7 @@ void Slot_Keyup(float slot) {
         localcmd("-attack\n");
 }
 
-void W_ChangeToSlotAlternate(string opt1, string opt2);
+void W_ChangeToSlotAlternate(string opt1, string opt2, string opt3, string opt4);
 
 noref float(string cmd) CSQC_ConsoleCommand = {
     tokenize_console(cmd);
@@ -452,7 +452,7 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             RemoveVoteMap(argv(1), TRUE);
             break;
         case "slot_a":  // Alternate between passed options
-            W_ChangeToSlotAlternate(argv(1), argv(2));
+            W_ChangeToSlotAlternate(argv(1), argv(2), argv(3), argv(4));
             break;
     }
 
