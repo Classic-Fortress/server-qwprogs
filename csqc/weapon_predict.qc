@@ -719,12 +719,9 @@ void W_ChangeToSlotAlternate(string opt1, string opt2) {
     if ((v1 < 1 || v1 > TF_NUM_SLOTS) || (v2 < 1 || v2 > TF_NUM_SLOTS))
         return;
 
-    // The OWI/slot mess rears its head again here.  We convert to a slot for
-    // comparison but use the naked input value which will then be converted per
-    // OWI if active.
-    Slot slot = FO_SlotByInput(pstate_pred.playerclass, v1);
-    float imp = IsSameSlot(pstate_pred.current_slot, slot) ? v2 : v1;
-    localcmd(sprintf("impulse %d\n", imp));
+    Slot slot = MakeSlot(v1);
+    float si = IsSameSlot(pstate_pred.current_slot, slot) ? v2 : v1;
+    localcmd(sprintf("impulse %d\n", TF_SLOT1 + si - 1));
 }
 
 Slot WP_BestWeaponSlot() {
