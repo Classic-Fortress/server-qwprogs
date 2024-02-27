@@ -1,0 +1,1296 @@
+----------------------------------------------------------------------------
+The New TeamFortress Entity Reference Sheet                  TF Version 2.6
+----------------------------------------------------------------------------
+
+This is a reference sheet for people who're trying to read/debug the
+entities on their TF map. It's simply a quick description of every variable
+for all the TF entities. It's simply a quick-reference. For full details,
+see the tfortmap.txt file.
+
+Print this out, and keep it by you whenever you're reading through someone
+else's .map file to see how they did something :)  Also get Raistlan's EntEd
+which supports TeamFortress Entities at http://www.lockandload.com/ented/
+
+Robin (walker@netspace.net.au) | Network (network@lockandload.com)
+----------------------------------------------------------------------------
+
+GLOSSARY
+--------
+AP  :  Activating Player. The player who activated a Goal/Trigger, or picked
+       up the GoalItem.
+
+APA :  Any Player Affected. Any player who is affected by the current
+       Goal/Trigger/Item's activation.
+
+
+INDEX
+--------
+  I. :  DETECTION ENTITY VARIABLES (info_tfdetect)
+ II. :  TEAM SPAWNPOINT VARIABLES (info_player_teamspawn)
+III. :  GOAL VARIABLES (info_tfgoal)
+ IV. :  GOALITEM VARIABLES (item_tfgoal)
+  V. :  TIMER GOAL VARIABLES (info_tfgoal_timer)
+ VI. :  OTHER QUAKE ENTITY VARIABLES
+VII. :  VARIABLE ABBREVIATION LIST
+
+
+============================================================================
+DETECTION ENTITY VARIABLES (info_tfdetect)
+============================================================================
+
+broadcast               The TF version string. e.g. "TeamFortress v2.6"
+
+impulse                 Initial Toggleflags status. Bitfields: (Unspecified = OFF)
+                                  1 : ClasSkin          Off/On   
+                                  2 : ClassPersistence  Off/On
+                                  4 : CheatChecking     Off/On
+                                  8 : FortressMap       Off/On
+                                 16 : RespawnDelay  See tfortmap.txt
+                                 32 : RespawnDelay  See tfortmap.txt
+                                 64 : AutoTeam          Off/On
+                                128 : Individual Frags  Off/On
+
+message                 Commands that are localcmd'd into the server when the map
+                        first starts. e.g.  "sv_gravity 300\nsv_friction 0.1\n"
+                        Be sure to end all commands with '\n'.
+
+ammo_shells             Max number of lives for each player in Team 1.
+ammo_nails              Max number of lives for each player in Team 2.
+ammo_rockets            Max number of lives for each player in Team 3.
+ammo_cells              Max number of lives for each player in Team 4.
+                                (0 = Unlimited number of lives)
+
+ammo_medikit            Maximum number of players allowed in Team 1.
+ammo_detpack            Maximum number of players allowed in Team 2.
+maxammo_medikit         Maximum number of players allowed in Team 3.
+maxammo_detpack         Maximum number of players allowed in Team 4.
+                                (0 = Unlimited number of players)
+
+maxammo_shells          Illegal Classes for Team 1.
+maxammo_nails           Illegal Classes for Team 2.
+maxammo_rockets         Illegal Classes for Team 3.
+maxammo_cells           Illegal Classes for Team 4.
+                                 -1 : Civilian Only. (Cannot Specify Others)
+                                  1 : No Scout            
+                                  2 : No Sniper        
+                                  4 : No Soldier       
+                                  8 : No Demolitions Man
+                                 16 : No Combat Medic
+                                 32 : No Heavy Weapons Guy
+                                 64 : No Pyro
+                                128 : No Random PlayerClass
+                                256 : No Spy
+                                512 : No Engineer
+
+hook_out                If 1, the grappling hook cannot be used on this map.
+                        Else, this does not need to be specified.
+
+display_item_status1    On FlagInfo command, display this GoalItem status
+display_item_status2    On FlagInfo command, display this GoalItem status
+display_item_status3    On FlagInfo command, display this GoalItem status
+display_item_status4    On FlagInfo command, display this GoalItem status
+
+team_str_home           String displayed to the owners of an Item
+                        in an Item Status if the Item is at it's origin.
+                        If not the owner of the Item, non_team_str_home
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is in it's base"
+
+team_str_moved          String displayed to the owners of an Item in an
+                        Item Status if the Item is not at it's origin.
+                        If not the owner of the Item, non_team_str_moved
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is lying around"
+
+team_str_carried        String displayed to the owners of an Item in an Item 
+                        Status if the Item is being carried by a player. The
+                        player's name is appended to the String. If not the
+                        owner of the Item, non_team_str_carried will be used.
+                        Refer to the "owned_by" variable for GoalItems.
+                        e.g. "Your flag is being carried by" < players's_name>
+
+non_team_str_home       String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is at it's origin.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is in it's base"
+
+non_team_str_moved      String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is not at it's origin.
+                        If they are owner of the Item, team_str_moved will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is lying around"
+
+non_team_str_carried    String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is being carried by a
+                        player. The player's name is appended to the String.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is being carried by" < player's_name>
+
+team_broadcast          String that replaces the Team Menu.
+                        (Line breaks should be used: \n)
+
+non_team_broadcast      String that is displayed in the Map Help command.
+                        (Line breaks could be used: \n)
+
+noise1                  String that replaces the Class Menu for Team 1.
+noise2                  String that replaces the Class Menu for Team 2.
+noise3                  String that replaces the Class Menu for Team 3.
+noise4                  String that replaces the Class Menu for Team 4.
+                        (Line breaks should be used: \n)
+
+
+============================================================================
+TEAM SPAWNPOINT VARIABLES (info_player_teamspawn)
+============================================================================
+
+netname                 The name of the spawn point. (A reference)
+
+goal_no                 Unique ID number of this spawn.
+
+group_no                ID Number of the spawn group this spawn belongs to.
+
+team_no                 Only players on this team spawn here.
+
+items                   GoalItem ID is given to the first player who
+                        spawn here.
+
+axhitme                 Goal removes this GoalItem from APA that has it.
+
+message                 A String displayed to the first player who
+                        spawns here.
+
+goal_activation         Bitfields:
+                        1 : Give the GoalItem in "items" to every player who
+                                spawns here instead of just the first player.
+                        2 : Display the "message" to every player who spawns
+                                here instead of just the first player.
+
+goal_effects            Bitfields:
+                        1 : The spawnpoint removes itself after the first
+                                player has spawned here.
+
+activate_goal_no        Activate this Goal.
+
+items_allowed           AP needs this GoalItem to meet this Goal's criteria.
+
+has_item_from_group     AP must have GoalItem from group "group_no".
+
+playerclass             AP must be this playerclass to meet this Goal's criteria.
+                        You can not add these up, you can only specify one player
+                        class. Bitfields:
+                                1 : Only allow a Scout to activate
+                                2 : Only allow a Sniper to activate
+                                3 : Only allow a Soldier to activate
+                                4 : Only allow a Demolition Man to activate
+                                5 : Only allow a Medic to activate
+                                6 : Only allow a Heavy Weapons Guy to activate
+                                7 : Only allow a Pyro to activate
+                                8 : Only allow a Spy to activate
+                                9 : Only allow an Engineer to activate
+
+if_goal_is_active       This Goal must be in ACTIVE state.
+if_goal_is_inactive     This Goal must be in INACTIVE state.
+if_goal_is_removed      This Goal must be in REMOVED state.
+if_group_is_active      All Goals in this Group must be in ACTIVE state.
+if_group_is_inactive    All Goals in this Group must be in INACTIVE state.
+if_group_is_removed     All Goals in this Group must be in REMOVED state.
+if_item_has_moved       This GoalItem must not have moved from it's origin,
+                                and must not be being carried.
+if_item_hasnt_moved     This GoalItem must have moved from it's origin,
+                                or be being carried.
+
+target                  Activate any Goal/Quake Trigger with this targetname
+
+killtarget              Remove any Goal/Quake Trigger with this targetname
+
+goal_state              The initial state of this entity. The default
+                        (nothing specified) is Inactive the same as if
+                        you specified a value of 2.  Bitfields:
+                                1 : Active (Already On)
+                                2 : Inactive (Ready to be used)
+                                3 : Removed (Unmanipulatable until restored)
+
+ex_skill_min            This entity is removed when the map starts if the game's "skill"
+                        variable is >= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+ex_skill_max            This entity is removed when the map starts if the game's "skill"
+                        variable is <= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+count                   Specified score given to the AP's team.
+
+increase_team1          Specified score given to team 1
+increase_team2          Specified score given to team 2
+increase_team3          Specified score given to team 3
+increase_team4          Specified score given to team 4
+
+noise                   WAV file played when this Goal is activated.
+
+lives                   Added to APA's lives.
+
+health                  Added to APA's health.
+
+armortype               The APA's armortype is set to the Goals "armortype".
+                        Armortype Bitfields:   
+                                0.3 : Green
+                                0.6 : Yellow
+                                0.8 : Red
+
+armorvalue              APA's armorvalue is set to this value. (0-250)
+
+armorclass              APA's armorclass is set to this type(s).
+                                 1 : Shell Resistant
+                                 2 : Nail Resistant
+                                 4 : Explosion Resistant
+                                 8 : Electricity Resistant
+                                16 : Fire Resistant
+
+frags                   Added to APA's frags.
+
+ammo_shells             Added this number of shells to the APA's ammo supply.
+ammo_nails              Added this number of nails to the APA's ammo supply.
+ammo_rockets            Added this number of rockets to the APA's ammo supply.
+ammo_cells              Added this number of cells to the APA's ammo supply.
+ammo_detpack            Added this number of det packs to the APA's supply.
+ammo_medikit            Added this number of medikits to the APA's supply.
+
+no_grenades_1           Added to APA's number of type 1 TF grenades.
+no_grenades_2           Added to APA's number of type 2 TF grenades.
+
+invincible_finished     Number of seconds of invincibility APA gets.
+invisible_finished      Number of seconds of invisibility APA gets.
+super_damage_finished   Number of seconds of quad APA gets.
+radsuit_finished        Number of seconds of radsuit APA gets.
+
+activate_goal_no        Activate this Goal.
+inactivate_goal_no      Inactivate this Goal.
+remove_goal_no          Remove this Goal.
+restore_goal_no         Restore this Goal.
+
+activate_group_no       Activate all Goals in this GoalGroup.
+inactivate_group_no     Inactivate all Goals in this GoalGroup.
+remove_group_no         Remove all Goals in this GoalGroup.
+restore_group_no        Restore all Goals in this GoalGroup.
+
+remove_item_group       Removes a GoalItems APA has from GoalGroup
+
+all_active              If all Goals in this GoalGroup are ACTIVE, activate
+                        the Goal in the "last_impulse" variable.
+
+last_impulse            If all Goals in the "all_active" GoalGroup are ACTIVE,
+                        activate this Goal.
+
+remove_spawnpoint       Remove the spawnpoint with this "goal_no".
+
+restore_spawnpoint      Restore the spawnpoint with this "goal_no", if it's
+                        in the REMOVED state.
+
+remove_spawngroup       Remove all spawnpoints with this "group_no".
+
+restore_spawngroup      Restore all spawnpoints with this "group_no", if
+                        they're in the REMOVED state.
+
+
+============================================================================
+GOAL VARIABLES (info_tfgoal)
+============================================================================
+
+netname                 The name of the Goal. (A reference)
+
+goal_no                 Unique ID number of this goal.
+
+group_no                ID Number of the goal group this goal belongs to.
+
+owned_by                The Team that own this entity.
+
+goal_state              The initial state of this entity. The default
+                        (nothing specified) is Inactive the same as if
+                        you specified a value of 2.  Bitfields:
+                                1 : Active (Already On)
+                                2 : Inactive (Ready to be used)
+                                3 : Removed (Unmanipulatable until restored)
+
+mdl                     The mdl used by this Goal. (Unspecified = Invisible Goal.)
+
+skin                    The number of the skin to be used in the specified model.
+
+goal_activation         Determines how the Goal is activated. Bitfields:
+                                   1 : Activated when touched by a player.
+                                   2 : Activated when touched by a detpack explosion.
+                                   4 : Only activated if the AP fails Criteria.
+                                2048 : If this bit is set, the Goal drops to the
+                                        ground when it first spawns.
+
+team_no                 AP must be of this team to meet this Goal's criteria.
+
+items_allowed           AP needs this GoalItem to meet this Goal's criteria.
+
+has_item_from_group     AP must have GoalItem from group "group_no".
+
+playerclass             AP must be this playerclass to meet this Goal's criteria.
+                        You can not add these up, you can only specify one player
+                        class. Bitfields:
+                                1 : Only allow a Scout to activate
+                                2 : Only allow a Sniper to activate
+                                3 : Only allow a Soldier to activate
+                                4 : Only allow a Demolition Man to activate
+                                5 : Only allow a Medic to activate
+                                6 : Only allow a Heavy Weapons Guy to activate
+                                7 : Only allow a Pyro to activate
+                                8 : Only allow a Spy to activate
+                                9 : Only allow an Engineer to activate
+                                
+spawnflags              1 :     By default, when a GoalItem has a .mdl set, it will glow based on team_no.  
+                                This spawnflag will stop that glow. (TFGI_NOGLOW)
+                        2 :     Allow this goal to work even in clan battle/quadmode prematch (TFGI_CB_IGNORE)
+if_goal_is_active       This Goal must be in ACTIVE state.
+if_goal_is_inactive     This Goal must be in INACTIVE state.
+if_goal_is_removed      This Goal must be in REMOVED state.
+if_group_is_active      All Goals in this Group must be in ACTIVE state.
+if_group_is_inactive    All Goals in this Group must be in INACTIVE state.
+if_group_is_removed     All Goals in this Group must be in REMOVED state.
+if_item_has_moved       This GoalItem must not have moved from it's origin,
+                                and must not be being carried.
+if_item_hasnt_moved     This GoalItem must have moved from it's origin,
+                                or be being carried.
+
+else_goal               If the AP fails the Criteria of this entity, then
+                        attempt to activate the Goal with this ID.
+
+goal_min                The minimum bounding box size of a Goal can be set using
+                        this. The default is:  "goal_min" "-16 -16 -24"
+
+goal_max                The maximum bounding box size of a Goal can be set using
+                        this. The default is:  "goal_max" "16 16 32"
+
+-------------------------------------------
+When this Goal is successfully activated
+up, the following variables may be executed
+-------------------------------------------
+
+return_item_no          Return this GoalItem, if it's not being carried.
+
+broadcast               Message centerprinted to everyone except the AP.
+                        e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
+                        e.g. "Clean-up on isle 4!"
+
+message                 Message centerprinted to AP.
+                        e.g. "You activated this goal!"
+
+team_broadcast          Message centerprinted to players on the AP's team,
+                        except the AP. e.g. "Your team has the enemy flag!"
+
+non_team_broadcast      Message centerprinted to players not on the AP's team.
+                        If there is a "owners_team_broadcast" specified, this
+                        message isn't centerprinted to the owners of the entity.
+                        e.g. "An enemy flag was taken!"
+
+owners_team_broadcast   Gets centerprinted to all the members of the
+                        team that own the goal/item.
+                        e.g. "Your flag was taken!"
+
+netname_broadcast       Broadcast to all players, prepended to the AP's name.
+                        A line break should be used at the end.
+                        e.g. <player's_name> " activated this goal!\n"
+
+netname_team_broadcast  Broadcast to all players on the AP's team, except
+                        the AP, prepended by the AP's name. A line break should
+                        be used at the end.
+                        e.g. <player's_name> " activated your team's goal!\n"
+
+netname_non_team_broadcast
+                        Broadcast to all players on the AP's team, prepended by the
+                        AP's name.  If there is a "netname_owners_team_broadcast"
+                        specified, this message isn't broadcast to the owners of
+                        the entity. A line break should be used at the end.
+                        e.g. <player's_name> " took an enemy flag!\n"
+
+netname_owners_team_broadcast
+                        Broadcast to all members of the team that own this entity
+                        (see "owned_by" above), prepended by the AP's name.
+                        e.g. <player's_name> " took your flag!\n"
+
+deathtype               Death message appended to the AP's name and broadcasted, if the
+                        AP is killed by the Goal. A line break should be used at the end.
+                        e.g. <player's_name> " was killed by this goal!\n"
+
+target                  Activate any Goal/Quake Trigger with this targetname
+
+killtarget              Remove any Goal/Quake Trigger with this targetname
+
+ex_skill_min            This entity is removed when the map starts if the game's "skill"
+                        variable is >= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+ex_skill_max            This entity is removed when the map starts if the game's "skill"
+                        variable is <= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+goal_effects            Determines what players are affected. If nothing is specified
+                        the goal will not effect anybody. Bitfields:
+                                 1 : AP is affected.
+                                 2 : Everyone on the AP's team is affected.
+                                 4 : Everyone not on the AP's team is affected.
+                                 8 : Everyone except the AP is affected.
+                                16 : Radius effect (see "t_length") does not go
+                                        through walls.
+                                32 : If APA is not in the same environment as the
+                                        Goal, don't affect him. Environments are air,
+                                        water, slime, lava. e.g. If a Goal is above
+                                        some water, and does a radius effect with
+                                        "t_length", and a player in the water is within
+                                        the radius, he won't be affected if this bit
+                                        is set.
+                                64 : If this bit is set, then instead of just applying
+                                        this Goal's results to the group of players
+                                        specified by the other "goal_effects" variable,
+                                        this Goal checks it's criteria for each player
+                                        in the group and then applies it's results
+                                        invididually to any of them that pass.
+
+maxammo_shells          All members of this team are affected.
+
+maxammo_nails           All members not of this team are affected.
+
+t_length                Everyone within this radius is affected.  To specify whether
+                        the radius should go through walls or not see bit 16
+                        in "goal_effects"
+
+
+goal_result            Determines what results are applied to APA. Bitfields:
+                                 1 : Goal is removed after activation.
+                                 2 : Goals activated by this one apply their
+                                        results to the AP.
+                                 4 : Display scores and end the level.
+                                 8 : Activated goals will not apply their results to
+                                        the APA
+                                16 : Disable/Stop the spy's undercover mask.
+                                32 : This forces APA to simply respawn. The player
+                                        doesn't die... just respawns.
+
+count                   Specified score given to the AP's team.
+
+increase_team1          Specified score given to team 1
+increase_team2          Specified score given to team 2
+increase_team3          Specified score given to team 3
+increase_team4          Specified score given to team 4
+
+noise                   WAV file played when this Goal is activated.
+
+lives                   Added to APA's lives.
+
+health                  Added to APA's health.
+
+armortype               The APA's armortype is set to the Goals "armortype".
+                        Armortype Bitfields:   
+                                0.3 : Green
+                                0.6 : Yellow
+                                0.8 : Red
+
+armorvalue              APA's armorvalue is set to this value. (0-250)
+
+armorclass              APA's armorclass is set to this type(s).
+                                 1 : Shell Resistant
+                                 2 : Nail Resistant
+                                 4 : Explosion Resistant
+                                 8 : Electricity Resistant
+                                16 : Fire Resistant
+
+frags                   Added to APA's frags.
+
+ammo_shells             Added this number of shells to the APA's ammo supply.
+ammo_nails              Added this number of nails to the APA's ammo supply.
+ammo_rockets            Added this number of rockets to the APA's ammo supply.
+ammo_cells              Added this number of cells to the APA's ammo supply.
+ammo_detpack            Added this number of det packs to the APA's supply.
+ammo_medikit            Added this number of medikits to the APA's supply.
+
+no_grenades_1           Added to APA's number of type 1 TF grenades.
+no_grenades_2           Added to APA's number of type 2 TF grenades.
+
+invincible_finished     Number of seconds of invincibility APA gets.
+invisible_finished      Number of seconds of invisibility APA gets.
+super_damage_finished   Number of seconds of quad APA gets.
+radsuit_finished        Number of seconds of radsuit APA gets.
+
+items                   Goal gives this GoalItem to APA.
+axhitme                 Goal removes this GoalItem from APA that has it.
+
+delay_time              If the criteria is meant for activation, the goal waits
+                        this amount of time before activating, in seconds.
+
+wait                    Goal stays ACTIVE for this amount of time, in seconds.
+
+activate_goal_no        Activate this Goal.
+inactivate_goal_no      Inactivate this Goal.
+remove_goal_no          Remove this Goal.
+restore_goal_no         Restore this Goal.
+
+activate_group_no       Activate all Goals in this GoalGroup.
+inactivate_group_no     Inactivate all Goals in this GoalGroup.
+remove_group_no         Remove all Goals in this GoalGroup.
+restore_group_no        Restore all Goals in this GoalGroup.
+
+remove_item_group       Removes a GoalItems APA has from GoalGroup
+
+all_active              If all Goals in this GoalGroup are ACTIVE, activate
+                        the Goal in the "last_impulse" variable.
+
+last_impulse            If all Goals in the "all_active" GoalGroup are ACTIVE,
+                        activate this Goal.
+
+remove_spawnpoint       Remove the spawnpoint with this "goal_no".
+
+restore_spawnpoint      Restore the spawnpoint with this "goal_no", if it's
+                        in the REMOVED state.
+
+remove_spawngroup       Remove all spawnpoints with this "group_no".
+
+restore_spawngroup      Restore all spawnpoints with this "group_no", if
+                        they're in the REMOVED state.
+
+display_item_status1    Display this GoalItem Status when this goal is activated
+display_item_status2    Display this GoalItem Status when this goal is activated
+display_item_status3    Display this GoalItem Status when this goal is activated
+display_item_status4    Display this GoalItem Status when this goal is activated
+
+team_str_home           String displayed to the owners of an Item
+                        in an Item Status if the Item is at it's origin.
+                        If not the owner of the Item, non_team_str_home
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is in it's base"
+
+team_str_moved          String displayed to the owners of an Item in an
+                        Item Status if the Item is not at it's origin.
+                        If not the owner of the Item, non_team_str_moved
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is lying around"
+
+team_str_carried        String displayed to the owners of an Item in an Item 
+                        Status if the Item is being carried by a player. The
+                        player's name is appended to the String. If not the
+                        owner of the Item, non_team_str_carried will be used.
+                        Refer to the "owned_by" variable for GoalItems.
+                        e.g. "Your flag is being carried by" < players's_name>
+
+non_team_str_home       String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is at it's origin.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is in it's base"
+
+non_team_str_moved      String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is not at it's origin.
+                        If they are owner of the Item, team_str_moved will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is lying around"
+
+non_team_str_carried    String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is being carried by a
+                        player. The player's name is appended to the String.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is being carried by" < player's_name>
+
+
+============================================================================
+GOALITEM VARIABLES (item_tfgoal)
+============================================================================
+
+netname                 The name of the GoalItem. (A reference)
+
+goal_no                 Unique ID number of this GoalItem.
+
+group_no                ID Number of the goal group this GoalItem belongs to.
+
+owned_by                The Team that own this entity.
+
+goal_state              The initial state of this item. The default
+                        (nothing specified) is Inactive the same as if
+                        you specified a value of 2.  Bitfields:
+                                1 : Active (Already On)
+                                2 : Inactive (Ready to be used)
+                                3 : Removed (Unmanipulatable until restored)
+
+mdl                     The mdl used by this GoalItem. (Unspecified = Invisible)
+
+skin                    The number of the skin to be used in the specified model.
+
+goal_activation         Bitfields:
+                           1 : Carrying Player glows.
+                           2 : Carrying Player moves at half speed.
+                           4 : Item is dropped when a player with it dies.
+                           8 : Item is returned when dropped.
+                          16 : Item is returned when removed from players by a Goal
+                          32 : Item is returned due to "pausetime" (see below)
+                          64 : Only activated (picked-up) if AP fails Criteria.
+                         128 : Enable "pausetime" removing.
+                         256 : Players keep this item when they die.
+                         512 : If this Item isn't being carried, it glows dimly.
+                        1024 : Don't remove the results of this Item when it's
+                                removed from a player.
+                        2048 : If this bit is set, the GoalItem drops to the
+                                ground when it first spawns.
+                        8192 : If this bit is set, the GoalItem is Solid while not
+                                being carried by a player. This means it blocks
+                                bullets, grenades, and those that do not pass it's
+                                criteria.  Others will simply pick it up.
+
+playerclass             AP must be this playerclass to meet this GoalItem's criteria.
+                        You can not add these up, you can only specify one player
+                        class. Bitfields:
+                                1 : Only allow a Scout to activate
+                                2 : Only allow a Sniper to activate
+                                3 : Only allow a Soldier to activate
+                                4 : Only allow a Demolition Man to activate
+                                5 : Only allow a Medic to activate
+                                6 : Only allow a Heavy Weapons Guy to activate
+                                7 : Only allow a Pyro to activate
+                                8 : Only allow a Spy to activate
+                                9 : Only allow an Engineer to activate
+
+if_goal_is_active       This Goal must be in ACTIVE state.
+if_goal_is_inactive     This Goal must be in INACTIVE state.
+if_goal_is_removed      This Goal must be in REMOVED state.
+if_group_is_active      All Goals in this Group must be in ACTIVE state.
+if_group_is_inactive    All Goals in this Group must be in INACTIVE state.
+if_group_is_removed     All Goals in this Group must be in REMOVED state.
+if_item_has_moved       This GoalItem must not have moved from it's origin,
+                                and must not be being carried.
+if_item_hasnt_moved     This GoalItem must have moved from it's origin,
+                                or be being carried.
+
+else_goal               If the AP fails the Criteria of this entity, then
+                        attempt to activate the Goal with this ID.
+
+has_item_from_group     AP must have GoalItem from group "group_no"
+
+goal_min                The minimum bounding box size of a GoalItem can be set
+                        using this. The default is:  "goal_min" "-16 -16 -24"
+
+goal_max                The maximum bounding box size of a GoalItem can be set
+                        using this. The default is:  "goal_max" "16 16 32"
+
+-------------------------------------------
+When this GoalItem is successfully picked
+up, the following variables may be executed
+-------------------------------------------
+
+return_item_no          Return this GoalItem, if it's not being carried.
+
+target                  Activate any Goal/Quake Trigger with this targetname
+
+killtarget              Remove any Goal/Quake Trigger with this targetname
+
+ex_skill_min            This entity is removed when the map starts if the game's "skill"
+                        variable is >= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+ex_skill_max            This entity is removed when the map starts if the game's "skill"
+                        variable is <= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+goal_effects            Determines what players are affected. If nothing is specified
+                        the goal will not effect anybody. Bitfields:
+                                 1 : AP is affected.
+                                 2 : Everyone on the AP's team is affected.
+                                 4 : Everyone not on the AP's team is affected.
+                                 8 : Everyone except the AP is affected.
+                                16 : Radius effect (see "t_length") does not go
+                                        through walls.
+                                32 : If APA is not in the same environment as the
+                                        Goal, don't affect him. Environments are air,
+                                        water, slime, lava. e.g. If a Goal is above
+                                        some water, and does a radius effect with
+                                        "t_length", and a player in the water is within
+                                        the radius, he won't be affected if this bit
+                                        is set.
+                                64 : If this bit is set, then instead of just applying
+                                        this Goal's results to the group of players
+                                        specified by the other "goal_effects" variable,
+                                        this Goal checks it's criteria for each player
+                                        in the group and then applies it's results
+                                        invididually to any of them that pass.
+
+spawnflags              1 :     By default, when a GoalItem has a .mdl set, it will glow based on team_no.  
+                                This spawnflag will stop that glow.
+
+maxammo_shells          All members of this team are affected.
+
+maxammo_nails           All members not of this team are affected.
+
+t_length                Everyone within this radius is affected.  To specify whether
+                        the radius should go through walls or not see bit 16
+                        in "goal_effects"
+
+impulse                 When the GoalItem is Returned, activate this Goal.
+
+pausetime               Item is removed if not touched for this time after being
+                        dropped by a dying player. Also, see bit 32 in
+                        "goal_activation" above. N.B. This will not be used if
+                        bit 128 in "goal_activation" is not enabled.
+
+
+maxammo_shells          All members of this team are affected.
+
+maxammo_nails           All members not of this team are affected.
+
+goal_result            Determines what results are applied to APA. Bitfields:
+                                   1 : Goal is removed after activation.
+                                   2 : Goals activated by this one apply their
+                                        results to the AP.
+                                   4 : Display scores and end the level.
+                                   8 : Activated goals will not apply their results to
+                                        the APA
+                                  16 : Disable/Stop the spy's undercover mask.
+                                  32 : This forces APA to simply respawn. The player
+                                        doesn't die... just respawns.
+                                4096 : If this bit is set, any player carrying this
+                                        item can drop it using the "dropitems" command.
+
+count                   Specified score given to the AP's team.
+
+increase_team1          Specified score given to team 1
+increase_team2          Specified score given to team 2
+increase_team3          Specified score given to team 3
+increase_team4          Specified score given to team 4
+
+noise                   WAV file played when this Goal is activated.
+
+lives                   Added to APA's lives.
+
+health                  Added to APA's health.
+
+armortype               The APA's armortype is set to the Goals "armortype".
+                        Armortype Bitfields:   
+                                0.3 : Green
+                                0.6 : Yellow
+                                0.8 : Red
+
+armorvalue              APA's armorvalue is set to this value. (0-250)
+
+armorclass              APA's armorclass is set to this type(s).
+                                 1 : Shell Resistant
+                                 2 : Nail Resistant
+                                 4 : Explosion Resistant
+                                 8 : Electricity Resistant
+                                16 : Fire Resistant
+
+frags                   Added to APA's frags.
+
+ammo_shells             Added this number of shells to the APA's ammo supply.
+ammo_nails              Added this number of nails to the APA's ammo supply.
+ammo_rockets            Added this number of rockets to the APA's ammo supply.
+ammo_cells              Added this number of cells to the APA's ammo supply.
+ammo_detpack            Added this number of det packs to the APA's supply.
+ammo_medikit            Added this number of medikits to the APA's supply.
+
+no_grenades_1           Added to APA's number of type 1 TF grenades.
+no_grenades_2           Added to APA's number of type 2 TF grenades.
+
+invincible_finished     Number of seconds of invincibility APA gets.
+invisible_finished      Number of seconds of invisibility APA gets.
+super_damage_finished   Number of seconds of quad APA gets.
+radsuit_finished        Number of seconds of radsuit APA gets.
+
+delay_time              If the criteria is meant for activation, the goal waits
+                        this amount of time before activating, in seconds.
+
+items                   Goal gives this GoalItem to APA.
+axhitme                 Goal removes this GoalItem from APA that has it.
+
+distance                If all GoalItems in this GoalItem Group are being carried
+                        by players, activate the Goal in the "pain_finished" variable.
+
+pain_finished           If all GoalItems in the GoalItem Group specified in the
+                        "distance" variable are being carried by players, activate
+                        this Goal.
+
+speed                   If all GoalItems in this GoalItem Group are being
+                        carried by one player, activate the Goal in the
+                        "attack_finished" variable.
+
+attack_finished         If all GoalItems in the GoalItem Group specified in the "speed"
+                        variable are being carried by one player, activate this Goal.
+
+noise3                  String centerprinted to the all the members of the team
+                        that own this GoalItem whenever it returns.
+                        e.g. "Your flag has been returned to base\n"
+
+noise4                  String centerprinted to the everyone except all the members
+                        of the team that own this GoalItem whenever it returns.
+                        e.g. "An enemy flag has been returned to base\n"
+
+team_drop               Centerprinted to all members of the team that own this Item,
+                        whenever this Item is dropped by a player.
+                        e.g. "Your flag is lying around!\n"
+
+non_team_drop           Centerprinted to all members not in the team that own this
+                        Item, whenever this Item is dropped by a player.
+                        e.g. "An enemy flag is lying around!\n"
+
+netname_team_drop       Broadcast to all members of the team that own this item,
+                        prepended by the name of the player who dropped the item.
+                        A line break should be used at the end.
+                        e.g. <player's_name> " lost your flag!\n"
+
+netname_non_team_drop   Broadcast to all members not in the team that own this item,
+                        prepended by the name of the player who dropped the item.
+                        A line break should be used at the end.
+                        e.g. <player's_name> " lost the enemy flag!\n"
+
+broadcast               Message centerprinted to everyone except the AP.
+                        e.g. "Clean-up on isle 4!"
+broadcast_high          Message printed high to everyone.
+                        e.g. "Clean-up on isle 4!"
+
+message                 Message centerprinted to AP.
+                        e.g. "You activated this goal!"
+
+team_broadcast          Message centerprinted to players on the AP's team,
+                        except the AP. e.g. "Your team has the enemy flag!"
+
+non_team_broadcast      Message centerprinted to players not on the AP's team.
+                        If there is a "owners_team_broadcast" specified, this
+                        message isn't centerprinted to the owners of the entity.
+                        e.g. "An enemy flag was taken!"
+
+owners_team_broadcast   Gets centerprinted to all the members of the
+                        team that own the goal/item.
+                        e.g. "Your flag was taken!"
+
+netname_broadcast       Broadcast to all players, prepended to the AP's name.
+                        A line break should be used at the end.
+                        e.g. <player's_name> " activated this goal!\n"
+
+netname_team_broadcast  Broadcast to all players on the AP's team, except
+                        the AP, prepended by the AP's name. A line break should
+                        be used at the end.
+                        e.g. <player's_name> " activated your team's goal!\n"
+
+netname_non_team_broadcast
+                        Broadcast to all players on the AP's team, prepended by the
+                        AP's name.  If there is a "netname_owners_team_broadcast"
+                        specified, this message isn't broadcast to the owners of
+                        the entity. A line break should be used at the end.
+                        e.g. <player's_name> " took an enemy flag!\n"
+
+netname_owners_team_broadcast
+                        Broadcast to all members of the team that own this entity
+                        (see "owned_by" above), prepended by the AP's name.
+                        e.g. <player's_name> " took your flag!\n"
+
+deathtype               Death message appended to the AP's name and broadcasted, if the
+                        AP is killed by the Goal. A line break should be used at the end.
+                        e.g. <player's_name> " was killed by this goal!\n"
+
+activate_goal_no        Activate this Goal.
+inactivate_goal_no      Inactivate this Goal.
+remove_goal_no          Remove this Goal.
+restore_goal_no         Restore this Goal.
+
+activate_group_no       Activate all Goals in this GoalGroup.
+inactivate_group_no     Inactivate all Goals in this GoalGroup.
+remove_group_no         Remove all Goals in this GoalGroup.
+restore_group_no        Restore all Goals in this GoalGroup.
+
+remove_item_group       Removes a GoalItems APA has from GoalGroup
+
+all_active              If all Goals in this GoalGroup are ACTIVE, activate
+                        the Goal in the "last_impulse" variable.
+
+last_impulse            If all Goals in the "all_active" GoalGroup are ACTIVE,
+                        activate this Goal.
+
+remove_spawnpoint       Remove the spawnpoint with this "goal_no".
+
+restore_spawnpoint      Restore the spawnpoint with this "goal_no", if it's
+                        in the REMOVED state.
+
+remove_spawngroup       Remove all spawnpoints with this "group_no".
+
+restore_spawngroup      Restore all spawnpoints with this "group_no", if
+                        they're in the REMOVED state.
+
+display_item_status1    Display this GoalItem Status when this goal is activated
+display_item_status2    Display this GoalItem Status when this goal is activated
+display_item_status3    Display this GoalItem Status when this goal is activated
+display_item_status4    Display this GoalItem Status when this goal is activated
+
+team_str_home           String displayed to the owners of an Item
+                        in an Item Status if the Item is at it's origin.
+                        If not the owner of the Item, non_team_str_home
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is in it's base"
+
+team_str_moved          String displayed to the owners of an Item in an
+                        Item Status if the Item is not at it's origin.
+                        If not the owner of the Item, non_team_str_moved
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is lying around"
+
+team_str_carried        String displayed to the owners of an Item in an Item 
+                        Status if the Item is being carried by a player. The
+                        player's name is appended to the String. If not the
+                        owner of the Item, non_team_str_carried will be used.
+                        Refer to the "owned_by" variable for GoalItems.
+                        e.g. "Your flag is being carried by" < players's_name>
+
+non_team_str_home       String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is at it's origin.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is in it's base"
+
+non_team_str_moved      String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is not at it's origin.
+                        If they are owner of the Item, team_str_moved will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is lying around"
+
+non_team_str_carried    String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is being carried by a
+                        player. The player's name is appended to the String.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is being carried by" < player's_name>
+
+
+============================================================================
+TIMER GOAL VARIABLES (info_tfgoal_timer)
+============================================================================
+
+goal_effects            Determines what players are affected. If nothing is specified
+                        the goal will not effect anybody. Bitfields:
+                                 1 : Illegal for Timer Goals
+                                 2 : Illegal for Timer Goals
+                                 4 : Illegal for Timer Goals
+                                 8 : Illegal for Timer Goals
+                                16 : Radius effect (see "t_length") does not go
+                                        through walls.
+                                32 : If APA is not in the same environment as the
+                                        Goal, don't affect him. Environments are air,
+                                        water, slime, lava. e.g. If a Goal is above
+                                        some water, and does a radius effect with
+                                        "t_length", and a player in the water is within
+                                        the radius, he won't be affected if this bit
+                                        is set.
+                                64 : If this bit is set, then instead of just applying
+                                        this Goal's results to the group of players
+                                        specified by the other "goal_effects" variable,
+                                        this Goal checks it's criteria for each player
+                                        in the group and then applies it's results
+                                        invididually to any of them that pass.
+
+search_time             Period between Timer activations.
+
+netname                 The name of the Timer Goal. (A reference)
+
+goal_no                 Unique ID number of this Timer Goal.
+
+group_no                ID Number of the goal group this Timer Goal belongs to.
+
+goal_state              The initial state of this entity. The default
+                        (nothing specified) is Inactive the same as if
+                        you specified a value of 2.  Bitfields:
+                                1 : Active (Already On)
+                                2 : Inactive (Ready to be used)
+                                3 : Removed (Unmanipulatable until restored)
+
+items_allowed           AP needs this GoalItem to be effected by the results.
+
+playerclass             AP must be this playerclass to meet this Goal's criteria.
+                        You can not add these up, you can only specify one player
+                        class. Bitfields:
+                                1 : Only allow a Scout to activate
+                                2 : Only allow a Sniper to activate
+                                3 : Only allow a Soldier to activate
+                                4 : Only allow a Demolition Man to activate
+                                5 : Only allow a Medic to activate
+                                6 : Only allow a Heavy Weapons Guy to activate
+                                7 : Only allow a Pyro to activate
+                                8 : Only allow a Spy to activate
+                                9 : Only allow an Engineer to activate
+
+if_goal_is_active       This Goal must be in ACTIVE state.
+if_goal_is_inactive     This Goal must be in INACTIVE state.
+if_goal_is_removed      This Goal must be in REMOVED state.
+if_group_is_active      All Goals in this Group must be in ACTIVE state.
+if_group_is_inactive    All Goals in this Group must be in INACTIVE state.
+if_group_is_removed     All Goals in this Group must be in REMOVED state.
+
+if_item_has_moved       This GoalItem must not have moved from it's origin,
+                        and must not be being carried.
+
+if_item_hasnt_moved     This GoalItem must have moved from it's origin,
+                        or be being carried.
+
+has_item_from_group     APA will be effected if they have GoalItem
+                        from group "group_no"
+
+maxammo_shells          All members of this team are checked for meeting the criteria.
+
+maxammo_nails           All members not on this team are checked for meeting the
+                        criteria.
+
+t_length                Everyone within this radius is affected.  To specify whether
+                        the radius should go through walls or not see bit 16
+                        in "goal_effects"
+
+-------------------------------------------
+When this Goal is successfully activated
+up, the following variables may be executed
+-------------------------------------------
+
+return_item_no          Return this GoalItem, if it's not being carried.
+
+deathtype               Death message appended to the AP's name and broadcasted, if the
+                        AP is killed by the Goal. A line break should be used at the end.
+                        e.g. <player's_name> " was killed by this goal!\n"
+
+target                  Activate any Goal/Quake Trigger with this targetname
+
+killtarget              Remove any Goal/Quake Trigger with this targetname
+
+ex_skill_min            This entity is removed when the map starts if the game's "skill"
+                        variable is >= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+ex_skill_max            This entity is removed when the map starts if the game's "skill"
+                        variable is <= to this value. To specify a skill of 0, use
+                        -1 instead.
+
+goal_result            Determines what results are applied to APA. Bitfields:
+                                 1 : Goal is removed after activation.
+                                 2 : Goals activated by this one apply their
+                                        results to APA.
+                                 4 : Display scores and end the level.
+                                 8 : Activated goals will not apply their results to
+                                        the APA
+                                16 : Disable/Stop the spy's undercover mask.
+                                32 : This forces APA to simply respawn. The player
+                                        doesn't die... just respawns.
+                                64 : If this bit is set, the results are applied to all the
+                                        players that do NOT fit the criteria.
+
+increase_team1          Specified score given to team 1
+increase_team2          Specified score given to team 2
+increase_team3          Specified score given to team 3
+increase_team4          Specified score given to team 4
+
+noise                   WAV file played when this Goal is activated.
+
+lives                   Added to APA's lives.
+
+health                  Added to APA's health.
+
+armortype               The APA's armortype is set to the Goals "armortype".
+                        Armortype Bitfields:   
+                                0.3 : Green
+                                0.6 : Yellow
+                                0.8 : Red
+
+armorvalue              APA's armorvalue is set to this value. (0-250)
+
+armorclass              APA's armorclass is set to this type(s).
+                                 1 : Shell Resistant
+                                 2 : Nail Resistant
+                                 4 : Explosion Resistant
+                                 8 : Electricity Resistant
+                                16 : Fire Resistant
+
+frags                   Added to APA's frags.
+
+ammo_shells             Added this number of shells to the APA's ammo supply.
+ammo_nails              Added this number of nails to the APA's ammo supply.
+ammo_rockets            Added this number of rockets to the APA's ammo supply.
+ammo_cells              Added this number of cells to the APA's ammo supply.
+ammo_detpack            Added this number of det packs to the APA's supply.
+ammo_medikit            Added this number of medikits to the APA's supply.
+
+no_grenades_1           Added to APA's number of type 1 TF grenades.
+no_grenades_2           Added to APA's number of type 2 TF grenades.
+
+invincible_finished     Number of seconds of invincibility APA gets.
+invisible_finished      Number of seconds of invisibility APA gets.
+super_damage_finished   Number of seconds of quad APA gets.
+radsuit_finished        Number of seconds of radsuit APA gets.
+
+items                   Goal gives this GoalItem to APA.
+axhitme                 Goal removes this GoalItem from APA that has it.
+
+delay_time              If the criteria is meant for activation, the goal waits
+                        this amount of time before activating, in seconds.
+
+wait                    Goal stays ACTIVE for this amount of time, in seconds.
+
+activate_goal_no        Activate this Goal.
+inactivate_goal_no      Inactivate this Goal.
+remove_goal_no          Remove this Goal.
+restore_goal_no         Restore this Goal.
+
+activate_group_no       Activate all Goals in this GoalGroup.
+inactivate_group_no     Inactivate all Goals in this GoalGroup.
+remove_group_no         Remove all Goals in this GoalGroup.
+restore_group_no        Restore all Goals in this GoalGroup.
+
+all_active              If all Goals in this GoalGroup are ACTIVE, activate
+                        the Goal in the "last_impulse" variable.
+
+last_impulse            If all Goals in the "all_active" GoalGroup are ACTIVE,
+                        activate this Goal.
+
+remove_item_group       Removes a GoalItems APA has from GoalGroup
+
+remove_spawnpoint       Remove the spawnpoint with this "goal_no".
+
+restore_spawnpoint      Restore the spawnpoint with this "goal_no", if it's
+                        in the REMOVED state.
+
+remove_spawngroup       Remove all spawnpoints with this "group_no".
+
+restore_spawngroup      Restore all spawnpoints with this "group_no", if
+                        they're in the REMOVED state.
+
+display_item_status1    Display this GoalItem Status when this goal is activated
+display_item_status2    Display this GoalItem Status when this goal is activated
+display_item_status3    Display this GoalItem Status when this goal is activated
+display_item_status4    Display this GoalItem Status when this goal is activated
+
+team_str_home           String displayed to the owners of an Item
+                        in an Item Status if the Item is at it's origin.
+                        If not the owner of the Item, non_team_str_home
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is in it's base"
+
+team_str_moved          String displayed to the owners of an Item in an
+                        Item Status if the Item is not at it's origin.
+                        If not the owner of the Item, non_team_str_moved
+                        will be used. Refer to the "owned_by" variable
+                        for GoalItems.
+                        e.g. "Your flag is lying around"
+
+team_str_carried        String displayed to the owners of an Item in an Item 
+                        Status if the Item is being carried by a player. The
+                        player's name is appended to the String. If not the
+                        owner of the Item, non_team_str_carried will be used.
+                        Refer to the "owned_by" variable for GoalItems.
+                        e.g. "Your flag is being carried by" < players's_name>
+
+non_team_str_home       String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is at it's origin.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is in it's base"
+
+non_team_str_moved      String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is not at it's origin.
+                        If they are owner of the Item, team_str_moved will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is lying around"
+
+non_team_str_carried    String displayed to everyone except the owners of an
+                        Item in an Item Status if the Item is being carried by a
+                        player. The player's name is appended to the String.
+                        If they are owner of the Item, team_str_home will be
+                        used. Refer to the "owned_by" variable for GoalItems.
+                        e.g. "The enemy flag is being carried by" < player's_name>
+
+============================================================================
+OTHER QUAKE ENTITY VARIABLES
+============================================================================
+
+
+func_button / func_door
+                        This works the same as info_tfgoal except for obvious
+                        variables such as "model".  Additional Bitfields:
+        goal_activation         8 : only activated when hit by an engineer's spanner
+        forcecloseonblock       1 : when blocked by a player or item, keep attempting to close
+
+trigger_push
+        This can now be paired with a targetname of a point entity called target_position - this will create Q3 style jumppads
+        spawnflags:     2 : include TFItems (So flags can be affected)
+                        4 : exclude "other" (So only TFItems are affected)
+                        8 : "no noise" make sure no default noise is added
+
+func_wall
+        spawnflags:     1 : make wall non solid
+                        2 : WALL_HIDE_ON_USE
+trigger_jumppad
+        Rename of trigger_push, can be used to allow for "Fortress One" only trigger_push entities that won't be misinterpreted by other fortress mods
+
+
+OTHER ENTITIES          Most Quake entities work the same as info_tfgoal except
+                        for obvious variables such as "model", "goal_no", and
+                        "goal_activation" fields.  So you can limit func_doors to
+                        certain team_nos and so on...
+
+
+============================================================================
+VARIABLE ABBREVIATION LIST
+============================================================================
+
+Abbreviations can be used in replace of certain full named variables to save
+entity space due to many Quake limits.  Here is a complete list of all the
+variables:
+
+
+        Classnames
+                "i_p_t"   for  "info_player_teamspawn"
+                "i_t_g"   for  "info_tfgoal"
+                "i_t_t"   for  "info_tfgoal_timer"
+
+        Floats
+                "g_a"     for  "goal_activation"
+                "g_e"     for  "goal_effects"
+
+                "h_i_g"   for  "has_item_from_group"
+                "r_i_g"   for  "remove_item_group"
+
+                "a_s"     for  "ammo_shells"
+                "a_n"     for  "ammo_nails"
+                "a_r"     for  "ammo_rockets"
+                "a_c"     for  "ammo_cells"
+
+                "rv_s_h"  for  "remove_spawngroup"
+                "rs_s_h"  for  "restore_spawngroup"
+                "rv_gr"   for  "remove_group_no"
+                "rs_gr"   for  "restore_group_no"
+                "rv_g"    for  "remove_goal_no"
+                "rs_g"    for  "restore_goal_no"
+
+        Strings
+                "t_s_h"   for  "team_str_home"
+                "t_s_m"   for  "team_str_moved"
+                "t_s_c"   for  "team_str_carried"
+                "n_s_h"   for  "non_team_str_home"
+                "n_s_m"   for  "non_team_str_moved"
+                "n_s_c"   for  "non_team_str_carried"
+
+                "b_b"     for  "broadcast"
+                "b_t"     for  "team_broadcast"
+                "b_n"     for  "non_team_broadcast"
+                "b_o"     for  "owners_team_broadcast"
+                "n_b"     for  "netname_broadcast"
+                "n_t"     for  "netname_team_broadcast"
+                "n_n"     for  "netname_non_team_broadcast"
+                "n_o"     for  "netname_owners_team_broadcast"
+
+                "d_t"     for  "team_drop"
+                "d_n"     for  "non_team_drop"
+                "d_n_t"   for  "netname_team_drop"
+                "d_n_n"   for  "netname_non_team_drop"
+
+EOF
+
