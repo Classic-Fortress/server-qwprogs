@@ -5,6 +5,13 @@ static void Apply(entity* targets, int tcount, int(entity) filter_fn,
         apply_fn(targets[i]);
 }
 
+static entity EntityOwner(entity e) {
+  if (e.real_owner != world)
+    return e.real_owner;
+  else
+    return e.owner;
+}
+
 static void ApplyList(entity* targets, int count,
     int(entity) player_filter_fn, void(entity) player_apply_fn,
     int(entity) other_filter_fn, void(entity) other_apply_fn) {
@@ -14,7 +21,7 @@ static void ApplyList(entity* targets, int count,
     if (e.classname == "player") {
      if (player_filter_fn(e))
        player_apply_fn(e);
-    } else if (e.owner.classname == "player") {
+    } else if (EntityOwner(e).classname == "player") {
      if (other_filter_fn(e))
        other_apply_fn(e);
     }
@@ -40,13 +47,20 @@ static void EffStrip(entity player) {
   player.current_slot = player.queue_slot = MakeSlot(4);
 }
 
+float IsEngEnt(entity ent);
+void RemoveEngEnt(entity bld, float explode);
+
 static void EffRemove(entity non_player) {
   if (non_player.classname == "player") {
     printf("ERROR! Tried to remove player [%s]\n", non_player.netname);
     return;
   }
 
-  dremove(non_player);
+  pointparticles(particleeffectnum("fo_airblast"), non_player.origin);
+  if (IsEngEnt(non_player))
+    RemoveEngEnt(non_player, FALSE);
+  else
+    dremove(non_player);
 }
 
 static int(entity p) FilTeamEQ[] = {
@@ -63,26 +77,18 @@ static int(entity p) FilTeamNEQ[] = {
   { return p.team_no != 4; },
 };
 
-
-static void FilTrue(entity ignored) { return TRUE; }
-
-struct LocalFn {
-  union {
-    int(entity) int_fn_ent;
-    void(entity) void_fn_ent;
-  };
+static int(entity p) FilOwnerTeamNEQ[] = {
+  { return EntityOwner(p).team_no != 1; },
+  { return EntityOwner(p).team_no != 2; },
+  { return EntityOwner(p).team_no != 3; },
+  { return EntityOwner(p).team_no != 4; },
 };
 
-void ApplyAll() {
-  entity* players;
-  int count;
+void TeamPlay_Cap(vector origin, entity player) {
+  if (!org_game || !new_balance)
+    return;
 
-  LocalFn foo = { .int_fn_ent = {return TRUE; } };
-
-  players = find_list(classname, "player", EV_STRING, count);
-  Apply(players, count, foo.int_fn_ent, EffStrip);
-}
-
-void TeamPlay_Cap(vector origin, int cap_team) {
-
+  ApplyRadius(origin, 1500,
+      FilTeamNEQ[player.team_no - 1], EffStrip,
+      FilOwnerTeamNEQ[player.team_no - 1], EffRemove);
 }

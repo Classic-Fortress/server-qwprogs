@@ -1577,6 +1577,33 @@ void () CheckDistance = {
     self.nextthink = time + 0.3;
 };
 
+float IsEngEnt(entity ent) {
+    return ent.classname == "building_dispenser" ||
+           ent.classname == "building_sentrygun";
+
+}
+
+void RemoveEngEnt(entity bld, float explode) {
+    entity owner = bld.real_owner;
+    if (owner.building == bld) {
+        Menu_Close(owner);
+        owner.building = world;
+    }
+
+    if (explode) {
+        TF_T_Damage(bld, world, world, 500, 0, 0);
+    } else {
+        if(bld.classname == "building_dispenser")
+            owner.has_dispenser = 0;
+        if(bld.classname == "building_sentrygun") {
+            owner.has_sentry = 0;
+            if (bld.trigger_field != world)
+                dremove (bld.trigger_field);
+        }
+        dremove (bld);
+    }
+}
+
 void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
     local entity te;
     local entity oldself;
@@ -1593,23 +1620,10 @@ void (entity eng, string bld, float explode) DestroyBuildingWithOptions = {
                 bound_other_ammo(self);
                 self = oldself;
             }
-            if (te.real_owner.building == te) {
-                Menu_Close(te.real_owner);
-                te.real_owner.building = world;
-            }
-            if(explode) {
-                TF_T_Damage(te, world, world, 500, 0, 0);
-            } else {
-                if(bld == "building_dispenser")
-                    te.real_owner.has_dispenser = 0;
-                if(bld == "building_sentrygun") {
-                    te.real_owner.has_sentry = 0;
-                    if (te.trigger_field != world)
-                        dremove (te.trigger_field);
-                }
-                spawn_tfog(te.origin);
-                dremove (te);
-            }
+
+            spawn_tfog(te.origin);
+            RemoveEngEnt(te, explode);
+
         }
         te = find(te, classname, bld);
     }
