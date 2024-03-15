@@ -846,7 +846,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
             break;
         case "break":
             processedCmd = TRUE;
-            if(self.vote_map) {
+
+            if (disable_voting) {
+                // Do nothing
+            } else if (self.vote_map) {
                 UnvoteForMap(self);
             } else {
                 if(votemode) {
