@@ -2047,7 +2047,7 @@ void (float Suicided) TeamFortress_SetupRespawn = {
                 self.lives = self.lives - 1;
 
             if (!allowpracspawns)
-                restime = restime + (new_balance ? 4 : 7);
+                restime = restime + (new_balance ? 5 : 7);
         }
     }
 
