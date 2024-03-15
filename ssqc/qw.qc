@@ -450,6 +450,7 @@ float clanbattle;
 float clan_scores_dumped;
 float cb_prematch;
 float disable_voting;
+float org_game;
 float v_break;
 float v_ready;
 .float allowvote;

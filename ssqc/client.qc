@@ -241,7 +241,7 @@ static float NB_UseMinPing() {
     return TRUE;
 }
 
-void ActivateNewBalance() {
+void ActivateOrgGame() {
     disable_resup_gren = 2;  // No gren2 pickups
 
     drop_gren1 = 0;  // No grenades in backpacks
@@ -383,6 +383,7 @@ void () DecodeLevelParms = {
         duelmode = CF_GetSetting("duelmode", "duelmode", "off");
 
         disable_voting = clanbattle || quadmode;
+        org_game = clanbattle || quadmode;
 
         rounds = CF_GetSetting("rounds","rounds","on");
         if (!rounds)
@@ -1093,11 +1094,12 @@ void () DecodeLevelParms = {
 
     // Overrides other settings.
     new_balance = CF_GetSetting("new_balance", "new_balance", "1");
-
     // mirror current state into desired state bit
     new_balance |= (new_balance << 1);
-    if (NewBalanceActive())
-        ActivateNewBalance();
+
+    if (org_game)  // This used to depend on new balance
+        ActivateOrgGame();
+
 };
 
 entity() FindIntermission =

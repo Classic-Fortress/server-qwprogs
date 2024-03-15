@@ -29,6 +29,7 @@ events.qc
 roles.qc
 q3defs.qc
 status.qc
+teamplay.qc
 functions.qc
 menu.qc
 csmenu.qc
