@@ -681,7 +681,6 @@ void DefaultGoalState (entity Goal)
 }
 
 void (entity Goal) RestoreGoal = {
-
     if (Goal.goal_state == TFGS_REMOVED) {
         Goal.dimension_seen = DMN_NOFLASH;
 
@@ -2076,7 +2075,12 @@ void () tfgoal_timer_tick = {
 };
 
 void () item_tfgoal_touch = {
-    local entity te;
+    // I can't see where exactly, but when a flag ends up in a door it's min
+    // and maxs are set to (0, 0, -16) thus reducing it to a single point 16
+    // units below origin. This restores the correct size.
+    if (self.classname == "item_tfgoal" && other.classname == "worldspawn") {
+        setsize(self, self.goal_min, self.goal_max);
+    }
 
     if (other.classname != "player")
         return;
@@ -2089,6 +2093,7 @@ void () item_tfgoal_touch = {
     if (other == self.owner)
         return;
 
+    local entity te;
     // check if a wall or something is in the way of the flag
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
