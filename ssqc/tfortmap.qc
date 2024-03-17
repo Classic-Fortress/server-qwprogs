@@ -2099,8 +2099,6 @@ void () item_tfgoal_touch = {
         return;
 
     local entity te;
-
-    local entity te;
     // check if a wall or something is in the way of the flag
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
