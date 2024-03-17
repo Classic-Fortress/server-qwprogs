@@ -2253,7 +2253,7 @@ void (float type, float ammo) TeamFortress_DropAmmo = {
         newmis.velocity_z = 200;
     }
     newmis.avelocity = '0 300 0';
-    setsize(newmis, '0 0 0', '0 0 0');
+    setsize(newmis, '-16 -16 0', '16 16 56');
     setorigin(newmis, self.origin);
     newmis.nextthink = time + 30;
     newmis.think = SUB_Remove;
