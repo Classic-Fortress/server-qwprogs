@@ -681,7 +681,6 @@ void DefaultGoalState (entity Goal)
 }
 
 void (entity Goal) RestoreGoal = {
-
     if (Goal.goal_state == TFGS_REMOVED) {
         Goal.dimension_seen = DMN_NOFLASH;
 
@@ -2099,6 +2098,7 @@ void () item_tfgoal_touch = {
 
     local entity te;
 
+    local entity te;
     // check if a wall or something is in the way of the flag
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
