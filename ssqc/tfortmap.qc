@@ -2082,6 +2082,7 @@ void () item_tfgoal_touch = {
     // units below origin. This restores the correct size.
     if (self.classname == "item_tfgoal" && other.classname == "worldspawn") {
         setsize(self, self.goal_min, self.goal_max);
+        return;
     }
 
     if (other.classname != "player")
@@ -2094,6 +2095,10 @@ void () item_tfgoal_touch = {
         return;
     if (other == self.owner)
         return;
+    if (other == self.dropped_by && time < self.dropped_at + 0.75)
+        return;
+
+    local entity te;
 
     local entity te;
     // check if a wall or something is in the way of the flag
@@ -2527,12 +2532,6 @@ void () tfgoalitem_dropthink = {
     }
 };
 
-void () tfgoalitem_droptouch = {
-    self.touch = item_tfgoal_touch;
-    self.nextthink = time + 4.25;
-    self.think = tfgoalitem_dropthink;
-};
-
 void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
     entity oldself;
     oldself = self;
@@ -2567,10 +2566,12 @@ void (entity Item, float PAlive, entity P) tfgoalitem_drop = {
             Item.velocity = Item.velocity * 400;
             Item.velocity_z = 200;
         }
-        Item.touch = SUB_Null;
-        Item.nextthink = time + 0.75;
+        Item.touch = item_tfgoal_touch;
+        Item.dropped_by = Item.owner;
+        Item.dropped_at = time;
+        Item.nextthink = time + 4.25;
         Item.bubble_count = time + Item.pausetime + 0.75 + 4.25; //used by the return timer
-        Item.think = tfgoalitem_droptouch;
+        Item.think = tfgoalitem_dropthink;
     } else {
         Item.touch = item_tfgoal_touch;
         Item.nextthink = time + 5;
@@ -2964,7 +2965,7 @@ void () DropGoalItems = {
                             bprint(PRINT_HIGH, self.netname, Q" \sdropped the enemy's flag!\s\n");
                     }
                 }
-                
+
                 Status_Print(self, "\n\n\n", "You dropped the flag!");
                 search = find(world, classname, "player");
                 while (search) {
