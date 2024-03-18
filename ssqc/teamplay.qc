@@ -37,6 +37,8 @@ static void ApplyRadius(vector org, float rad,
       player_filter_fn, player_apply_fn, other_filter_fn, other_apply_fn);
 }
 
+void RemovePrimedGrenades(entity player);
+
 static void EffStrip(entity player) {
   player.ammo_cells = 0;
   player.ammo_rockets = 0;
@@ -45,6 +47,13 @@ static void EffStrip(entity player) {
 
   player.no_grenades_1 = player.no_grenades_2 = 0;
   player.current_slot = player.queue_slot = MakeSlot(4);
+
+  RemovePrimedGrenades(player);
+
+  string msg = "The enemy captured! You are afflicted by the Curse of Isma!";
+  stuffcmd(player, "bf\n");
+  sprint(player, PRINT_HIGH, msg, "\n");
+  centerprint(player, msg);
 }
 
 float IsEngEnt(entity ent);
