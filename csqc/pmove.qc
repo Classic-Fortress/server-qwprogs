@@ -409,7 +409,13 @@ DEFCVAR_FLOAT(cl_upspeed, 400);
 void PM_InputFrame() {
     float iz = input_movevalues.z;
     input_movevalues.z = 0;
-    float max_speed = pstate_pred.csqc_maxspeed;
+
+    float max_speed;
+    if (isdemo) {
+        max_speed = SPEC_MAXSPEED;
+    } else {
+        max_speed = pstate_pred.csqc_maxspeed;
+    }
 
     // cl_smartjump replacement
     float type;
