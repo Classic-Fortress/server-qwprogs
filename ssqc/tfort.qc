@@ -133,15 +133,21 @@ void () RemoveAutoIdTimer = {
     }
 };
 
+void RemovePrimedGrenades(entity player) {
+    entity* ents;
+    int count;
+
+    ents = find_list(classname, "primetimer", EV_STRING, count);
+    for (int i = 0; i < count; i++)
+        if (ents[i].owner == player)
+            dremove(ents[i]);
+
+    player.tfstate &= ~(TFSTATE_GREN1_PRIMED | TFSTATE_GREN2_PRIMED);
+}
+
 void () RemovePrimeTimers = {
-    if (!drop_grenades) {
-        local entity te = find(world, classname, "primetimer");
-        while (te != world) {
-            if (te.owner == self)
-                dremove(te);
-            te = find(te, classname, "primetimer");
-        }
-    }
+    if (!drop_grenades)
+        RemovePrimedGrenades(self);
 };
 
 void () RemoveGasTimers = {
