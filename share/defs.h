@@ -1574,7 +1574,7 @@ TFAlias client_aliases[] = {
     {"dropflag",                TF_DROPFLAG},
     {"dropitems",               TF_DROPFLAG},
     {"showloc",                 TF_DISPLAYLOCATION},
-    {"special",                 TF_SPECIAL_SKILL},
+    /* {"special",                 TF_SPECIAL_SKILL}, */
     {"special2",                TF_SPECIAL_SKILL_2},
     {"saveme",                  TF_MEDIC_HELPME},
     {"discard",                 TF_DISCARD},
