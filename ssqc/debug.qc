@@ -16,17 +16,17 @@ void (entity te) dremove =
     remove(te);
 };
 
+.float created_at;  // Forward dec
 void dremove_sent(entity te) {
-    static const float epsilon = 3*SERVER_FRAME_DT;
-    float stime = te.s_time;
-    if (!stime)
-        stime = time;
+    static const float epsilon = 2*SERVER_FRAME_DT;
 
-    if (time > stime + epsilon) {
-        dremove(self);
+    float expires = te.created_at + epsilon;  // In the past for 0 created at
+
+    if (time > expires) {
+        dremove(te);
     } else {
-        self.nextthink = stime + epsilon;
-        self.think = SUB_Remove;
+        te.nextthink = expires;
+        te.think = SUB_Remove;
     }
 }
 

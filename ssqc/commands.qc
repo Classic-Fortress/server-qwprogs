@@ -123,6 +123,14 @@ void () DuelMode =
 	bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
 }
 
+void new_balance_mode() {
+    new_balance ^= 2;
+    if (new_balance & 2)
+        localcmd("localinfo new_balance 1\n");
+    else
+        localcmd("localinfo new_balance 0\n");
+}
+
 void (entity pe) SetEquipmentForPlayer = {
     entity oldself = self;
     self = pe;
@@ -1228,6 +1236,10 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                 processedCmd = TRUE;
                 DuelMode();
                 break;
+            case "new_balance":
+                processedCmd = TRUE;
+                new_balance_mode();
+                break;
             case "forcestart":
                 processedCmd = TRUE;
                 ForceStartMatch();
@@ -1263,6 +1275,24 @@ float (string arg1, string arg2, string arg3) ParseCmds = {
                         bprint(PRINT_HIGH, "Allow unregistered players. Matches won't be reported\n");
                     }
                     bprint(PRINT_HIGH, "Map Restart needed to take effect!\n");
+                    UpdateAllAdmins();
+                }
+                break;
+            case "fo_matchrated":
+                processedCmd = TRUE;
+                if(arg2) {
+                    localcmd ("localinfo fo_matchrated ",arg2,"\n");
+
+                    switch(stof(arg2)) {
+                        case 0:
+                            bprint(PRINT_HIGH, "Next match will not be rated\n");
+                            break;
+                        case 1:
+                            bprint(PRINT_HIGH, "Next match will be rated\n");
+                            break;
+                        case 2:
+                            bprint(PRINT_HIGH, "Next match will only be rated if more there are than 2 players on each team\n");
+                    }
                     UpdateAllAdmins();
                 }
                 break;

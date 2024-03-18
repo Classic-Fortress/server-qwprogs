@@ -169,8 +169,11 @@ void () NapalmGrenadeExplode2 = {
             if (head.takedamage) {
                 deathmsg = DMSG_FLAME;
 
-                TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM,
-                            TF_TD_FIRE);
+                float aflags = TF_TD_FIRE;
+                if (NewBalanceActive())
+                    aflags |= TF_TD_NOMOMENTUM;
+
+                TF_T_Damage(head, self, self.owner, explodeDam, TF_TD_NOTTEAM, aflags);
                 other = head;
                 Napalm_touch();
                 if (other.classname == "player") {
@@ -629,11 +632,11 @@ void FO_Airblast() = {
         return;
     }
 
-    if (time < self.special_cooldown)
+    if (time < self.special_next)
         return;
 
     self.airblast_cooldown = 1;
-    self.special_cooldown = time + PC_PYRO_AIRBLAST_COOLDOWN;
+    self.special_next = time + PC_PYRO_AIRBLAST_COOLDOWN;
     entity timer = spawn();
     timer.owner = self;
     timer.classname = "timer";

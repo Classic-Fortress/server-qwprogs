@@ -9,11 +9,6 @@ enum {
     CT_FAST_PROJECTILE,   // Fast proj => less judder (e.g. heavy bullet)
 };
 
-struct antilag_settings_t {
-    float rewind_detpipe;
-} antilag_settings;
-
-.vector antilag_origin;
 .float last_death_ctime;
 .float last_attack_ctime;
 
@@ -55,7 +50,6 @@ float remote_client_time();
 .float is_undercover;           // TRUE for a SPY if they're undercover
 .float is_building;             // TRUE for an ENGINEER if they're building something
 .float is_detpacking;           // TRUE for a DEMOMAN if they're setting a detpack
-.float is_feigning;             // TRUE for a SPY if they're feigning death
 .float is_button_feigning;      // TRUE for a SPY if they're feigning death with +feign or +special
 .float feign_next_damage;       // TRUE for a SPY if they're going to feign death on next damage
 .float is_unabletospy;          // TRUE for a SPY if they can't go undercover
@@ -99,7 +93,6 @@ float remote_client_time();
 .float regen_time;              // Time when the medic last regenerated cells
 .float regen_cooldown;          // Time to cooldown cell regeneration after using medikit heal
 .float saveme_time;             // Time when player issued /saveme command
-.float dash_cooldown;           // Cooldown for Scout dash
 .float undercover_timer;        // Seconds left until disguised
 .float power_time;              // The time when sniper power in status bar was last updated
 .float sentry_ticks;            // Used to indicate when engineer's sentry gun is finished building
@@ -110,6 +103,7 @@ float remote_client_time();
 
 .entity nopickup;               // Don't pick up this backpack/ammobox because it doesn't contain any of your ammo types
 
+.float pstate;                  // Player state flags
 .float tfstate;                 // State flags for TeamFortress
 .float last_tfstate;             // Internal cache of tfstate for detecting updates
 .entity linked_list;            // Used just like chain. Has to be separate so
@@ -119,7 +113,6 @@ float remote_client_time();
 
 // Identify variables
 .string ident_string;           // Status bar string for identify
-.string last_ident_string;      // Last Status bar string for identify
 .float ident_time;              // The time when last identify found a player
 .float autoid_type;             // 0 = ignore noone, 1 = ignore teammates, 2 = ignore enemies
 .float autoid_time;             // Time when autoid settings were last checked
@@ -146,6 +139,8 @@ float remote_client_time();
 .float menu_count;
 .float menu_displaytime;
 .f_void_float menu_input;
+
+.float has_flag;
 
 float toggleflags;              // toggleable flags
 
@@ -470,6 +465,7 @@ float rounds;
 float round_active;
 float round_over;
 float round_delay_time;
+float round_start_time;
 float round_end_time;
 float map_restart_time;
 float gametime;
@@ -562,7 +558,8 @@ float old_dropflag;
 float old_sniperrange;
 //float detpipe_limit;
 float detpipe_limit_world;
-float old_pipecooldown;
+float pipecooldown_time;
+float allpipes_cooldown;
 float medicaura;
 float old_biodamage;
 float flame_knockback;
@@ -571,7 +568,6 @@ float cannon_lock;
 float cannon_air;
 float cannon_move;
 float cannon_movespin;
-float cannon_conc;
 float cannon_accuracy;
 float feign_air;
 float feign_pack;
@@ -645,6 +641,7 @@ float deathammo_cells;
 //float server_sbflaginfo;
 float reverse_cap;
 float engineer_move;
+float grenade_lockout;
 
 float fo_projectiles;
 
@@ -793,7 +790,7 @@ string goal_class_names[7] = {
 
 .string broadcast_high;
 
-.float special_cooldown;
+.float special_next;
 .float airblast_cooldown;
 float disable_resup_gren;
 
@@ -801,3 +798,8 @@ float disable_resup_gren;
 string match_id;
 string backend_address;
 float fo_login_required;
+.entity filter_ent;
+
+var float PC_PYRO_AIRBLAST_COOLDOWN = 5;
+var float PC_ENGINEER_GRENADE_TYPE_2_RANGE = 240;
+.float detpack_last;

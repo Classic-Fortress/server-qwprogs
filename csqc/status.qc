@@ -305,9 +305,9 @@ string gameClockString() {
     if (!end)
         end = timelimit * 60;
 
-    if (end) {
-        minutes = (end - time)/60;
-        seconds = (end - time)%60;
+    if (end && end > servertime) {
+        minutes = (end - servertime)/60;
+        seconds = (end - servertime)%60;
     } else {
         minutes = time/60;
         seconds = time%60;

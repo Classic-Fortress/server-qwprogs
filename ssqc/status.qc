@@ -775,8 +775,7 @@ void UpdateClientReloadSound(entity pl, float weapon) {
 }
 
 void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
-    return;  // Not needed until we re-enable TFX.
-
+#if 0  // Not needed until we re-enable TFX.
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENPRIMED);
@@ -785,24 +784,21 @@ void UpdateClientGrenadePrimed(entity pl, float grentype, float explodes_at) = {
     WriteFloat(MSG_MULTICAST, explodes_at);
 
     multicast('0 0 0', MULTICAST_ALL);  // Actual primer has reliable transport.
+#endif
 }
 
 void UpdateClientGrenadeThrown(entity pl) = {
-    return;  // Not needed until we re-enable TFX.
-
+#if 0  // Not needed until we re-enable TFX.
     msg_entity = pl;
     WriteByte(MSG_MULTICAST, SVC_CGAMEPACKET);
     WriteByte(MSG_MULTICAST, MSG_GRENTHROWN);
     WriteEntity(MSG_MULTICAST, pl);
     multicast('0 0 0', MULTICAST_ALL);
+#endif
 }
 
 void UpdateClientIDString(entity pl) {
     string ident = time < pl.ident_time ? pl.ident_string : "";
-
-    if (ident == pl.last_ident_string)  // only send updates
-        return;
-    pl.last_ident_string = ident;
 
     if (ident == "")  // No need to send null, we'll expire clientside.
         return;

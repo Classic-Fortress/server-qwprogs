@@ -191,13 +191,8 @@ void (entity targ, entity inflictor, entity attacker, float damage) HitSound = {
                     crit = 1;
                 }
 
-                if (targ.playerclass == PC_SPY)
-                {
-                    if (targ.is_feigning)
-                    {
+                if (targ.playerclass == PC_SPY && IsFeigned(targ))
                         return;
-                    }
-                }
 
                 float targteam;
                 targteam = (targ.undercover_team == 0) ? targ.team_no : targ.undercover_team;
@@ -293,7 +288,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker,
         return;
 
     // Feigned spies act as corpses unless they're a teammate
-    if (targ.playerclass == PC_SPY && targ.is_feigning && targ.health > 0 &&
+    if (targ.playerclass == PC_SPY && IsFeigned(targ) && targ.health > 0 &&
         targ.team_no != attacker.team_no)
         return;
 
@@ -321,7 +316,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker,
                hitflag |= HITFLAG_KILLEDUNDERCOVERSPY;
                hitflag &= ~HITFLAG_FRIENDLY;
            }
-           if (targ.is_feigning)
+           if (IsFeigned(targ))
                hitflag |= HITFLAG_FEIGNEDENEMY;
         }
     }
@@ -357,8 +352,7 @@ void BroadcastHitFlag(entity targ, entity inflictor, entity attacker,
     multicast('0 0 0', MULTICAST_ONE_R_NOSPECS);
 };
 
-void (entity targ, entity inflictor, entity attacker,
-      float damage, float knock_damage) T_DamageKnock = {
+void (entity targ, entity inflictor, entity attacker, float damage) T_Damage = {
     local vector dir;
     local entity oldself, te;
     local float save;
@@ -413,22 +407,22 @@ void (entity targ, entity inflictor, entity attacker,
     }
     if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK)) {
 
-        targ.immune_to_check = time + (knock_damage / 20);
+        targ.immune_to_check = time + (damage / 20);
         dir = targ.origin - ((inflictor.absmin + inflictor.absmax) * 0.5);
         dir = normalize(dir);
-        if (((knock_damage < 60) &&
+        if (((damage < 60) &&
              ((attacker.classname == "player") &&
               (targ.classname == "player")))
             && (attacker.netname != targ.netname))
-            targ.velocity = targ.velocity + dir * knock_damage * 11;
+            targ.velocity = targ.velocity + dir * damage * 11;
         else
-            targ.velocity = targ.velocity + dir * knock_damage * 8;
+            targ.velocity = targ.velocity + dir * damage * 8;
 
         if (((rj > 1) &&
              ((attacker.classname == "player") &&
               (targ.classname == "player")))
             && (attacker.netname == targ.netname))
-            targ.velocity = (targ.velocity + ((dir * knock_damage) * rj));
+            targ.velocity = (targ.velocity + ((dir * damage) * rj));
     }
     if (targ.flags & FL_GODMODE)
         return;
@@ -484,13 +478,8 @@ void (entity targ, entity inflictor, entity attacker,
     self = oldself;
 };
 
-void (entity targ, entity inflictor, entity attacker,
-      float damage) T_Damage = {
-    T_DamageKnock(targ, inflictor, attacker, damage, damage);
-}
-
-void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
-      float damage, float knock_damage, float T_flags, float T_AttackType) {
+void TF_T_Damage(entity targ, entity inflictor, entity attacker,
+      float damage, float T_flags, float T_AttackType) {
     local vector dir;
     local entity oldself;
     local entity te;
@@ -498,8 +487,8 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
     local float take;
     local float olddmsg;
     local float no_damage;
-    local float moment;
     local float original_damage = damage;
+
 
     if (targ.takedamage == 0)
         return;
@@ -511,19 +500,26 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
     if (cease_fire)
         return;
 
+    float fl = 0;
+    if (attacker.classname == "player")
+        fl |= KF_SRC_PLAYER;
+    if (targ.classname == "player")
+        fl |= KF_TARG_PLAYER;
+    if (targ == attacker)
+        fl |= KF_SELF;
+
     no_damage = 0;
 
     if (targ.tfstate & TFSTATE_BURNING)
         damage *= PC_PYRO_BURN_DAMAGE_AMP;
 
-    if (attacker.classname == "player") {
-
+    if (fl & KF_SRC_PLAYER) {
         damage = damage * 0.9;
 
         if (attacker.super_damage_finished > time)
             damage = damage * 4;
 
-        if ((targ.classname != "player")
+        if ((fl & KF_TARG_PLAYER == 0)
             && (targ.classname != "bot")
             && (targ.classname != "building_sentrygun")
             && (targ.classname != "building_dispenser")
@@ -549,35 +545,24 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         damage = TeamEqualiseDamage(targ, attacker, damage);
 
     if ((targ.armorclass != 0) && (T_AttackType != 0)) {
-
-        if ((targ.armorclass & AT_SAVESHOT) && (T_AttackType & TF_TD_SHOT)) {
+        if ((targ.armorclass & AT_SAVESHOT) && (T_AttackType & TF_TD_SHOT))
             damage = floor(damage * 0.5);
-        }
-        if ((targ.armorclass & AT_SAVENAIL) && (T_AttackType & TF_TD_NAIL)) {
+        if ((targ.armorclass & AT_SAVENAIL) && (T_AttackType & TF_TD_NAIL))
             damage = floor(damage * 0.5);
-        }
-        if ((targ.armorclass & AT_SAVEEXPLOSION) &&
-            (T_AttackType & TF_TD_EXPLOSION)) {
+        if ((targ.armorclass & AT_SAVEEXPLOSION) && (T_AttackType & TF_TD_EXPLOSION))
             damage = floor(damage * 0.5);
-        }
-        if ((targ.armorclass & AT_SAVEELECTRICITY) &&
-            (T_AttackType & TF_TD_ELECTRICITY)) {
+        if ((targ.armorclass & AT_SAVEELECTRICITY) && (T_AttackType & TF_TD_ELECTRICITY))
             damage = floor(damage * 0.5);
-        }
-        if ((targ.armorclass & AT_SAVEFIRE) && (T_AttackType & TF_TD_FIRE)) {
+        if ((targ.armorclass & AT_SAVEFIRE) && (T_AttackType & TF_TD_FIRE))
             damage = floor(damage * 0.5);
-        }
     }
 
     if (T_flags & TF_TD_IGNOREARMOR) {
-
         take = damage;
         save = 0;
-
     } else {
-
         save = ceil(targ.armortype * damage);
-        if ((attacker.classname == "player")
+        if ((fl & KF_SRC_PLAYER)
             && (targ.team_no > 0)
             && (targ.team_no == attacker.team_no)
             && (targ != attacker)
@@ -618,38 +603,15 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         targ.dmg_inflictor = inflictor;
 
     }
-    knock_damage = floor(damage / original_damage * knock_damage);
-    if (!(T_AttackType & TF_TD_NOMOMENTUM) && knock_damage) {
+
+    if (!(T_AttackType & TF_TD_NOMOMENTUM) && damage) {
         if ((inflictor != world) && (targ.movetype == MOVETYPE_WALK) && !(targ.tfstate & TFSTATE_CANT_MOVE)) {
             if (deathmsg != DMSG_GREN_NAIL && deathmsg != DMSG_GREN_SHOCK && deathmsg != DMSG_GREN_BURST) {
                 targ.immune_to_check = time + damage / 20;
-                dir = targ.origin - (inflictor.absmin + inflictor.absmax) * 0.5;
-                dir = normalize(dir);
-                moment = knock_damage;
 
-                if (targ.playerclass == PC_HVYWEAP) {
-                    moment = moment / 4;
-
-                    if (damage <= 50)
-                        moment = 0;
-                } 
-
-                if ((moment < 60)
-                    && (attacker.classname == "player")
-                    && (targ.classname == "player")
-                    && (attacker.netname != targ.netname)) {
-
-                    targ.velocity = targ.velocity + dir * moment * 11;
-
-                } else
-                    targ.velocity = targ.velocity + dir * moment * 8;
-
-                if ((rj > 1) && (attacker.classname == "player")
-                    && (targ.classname == "player")
-                    && (attacker.netname == targ.netname)) {
-
-                    targ.velocity = targ.velocity + dir * moment * rj;
-                }
+                float moment = Class_ScaleMoment(targ.playerclass, damage);
+                targ.velocity += CalcKnock(inflictor.origin, targ, fl, moment);
+                Predict_AddFilterEnt(targ, inflictor.filter_ent ?: inflictor);
             }
         }
     }
@@ -773,18 +735,11 @@ void TF_T_DamageKnock(entity targ, entity inflictor, entity attacker,
         }
     }
 
-    if (self.feign_next_damage && !self.is_feigning){
+    if (self.feign_next_damage && !IsFeigned(self))
         FO_Spy_Feign(0, /* ignore rate-limit */ 1);
-    }
 
     self = oldself;
 };
-
-void TF_T_Damage(entity targ, entity inflictor, entity attacker,
-                 float damage, float T_flags, float T_AttackType) {
-    TF_T_DamageKnock(targ, inflictor, attacker, damage, damage,
-                     T_flags, T_AttackType);
-}
 
 void (entity inflictor, entity attacker, float damage,
       entity ignore1, entity ignore2 = __NULL__, entity only = __NULL__)
@@ -804,14 +759,8 @@ void (entity inflictor, entity attacker, float damage,
         if (!e.takedamage)
             continue;
 
-        org = e.origin + (e.mins + e.maxs) * 0.5;
-        points = 0.5 * vlen(inflictor.origin - org);
-        if (points < 0)
-            points = 0;
-        points = damage - points;
-        if (e == attacker)
-            points = points * 0.75;
-
+        float fl = e == attacker ? KF_SELF : 0;
+        points = CalcRadiusDamage(inflictor.origin, e, fl, damage);
         if (points > 0) {
             if (CanDamage(e, inflictor)) {
                 // shambler takes half damage from all explosions
@@ -819,63 +768,13 @@ void (entity inflictor, entity attacker, float damage,
                     T_Damage(e, inflictor, attacker,
                             points * 0.5);
                 else
-                    TF_T_DamageKnock(e, inflictor, attacker, points,
-                            points,
+                    TF_T_Damage(e, inflictor, attacker, points,
                             TF_TD_NOTTEAM, TF_TD_EXPLOSION);
             }
         }
     }
 };
 
-
-// Implements T_RadiusDamage but with awareness that the rewound player position
-// for damage and the current player position for knockback may not be the
-// same.
-//
-// Will merge with RadiusDamage in time.
-void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
-                            entity ignore) {
-    float dmg[2];
-    vector org[2];
-
-    int count;
-    entity* list = findradius_list(inflictor.origin, damage + 40, count);
-    for (int i = 0; i < count; i++) {
-        entity c = list[i];
-        if (c == ignore || !c.takedamage || !CanDamage(c, inflictor))
-            continue;
-
-        FOPlayer fc = (FOPlayer)c;
-
-        org[0] = c.origin + (c.mins + c.maxs) * 0.5;
-        if (RewindFlagEnabled(REWIND_KNOCKBACK))
-            org[1] = org[0];
-        else
-            org[1] = fc.UnrewoundOrigin() + (c.mins + c.maxs) * 0.5;
-
-        for (int j = 0; j < 2; j++) {
-            float points = 0.5 * vlen(inflictor.origin - org[j]);
-            if (points < 0)
-                points = 0;
-            points = damage - points;
-            if (c == attacker)
-                points = points * 0.75;
-            dmg[j] = points;
-        }
-
-        vector held_pos = c.origin;
-        if (!RewindFlagEnabled(REWIND_KNOCKBACK)) {
-            c.origin = fc.UnrewoundOrigin();
-            dmg[1] = min(dmg[0], dmg[1]);  // Limit Kerbal.
-        }
-
-        if (dmg[0] > 0)
-            TF_T_DamageKnock(c, inflictor, attacker, dmg[0], dmg[1],
-                             TF_TD_NOTTEAM, TF_TD_EXPLOSION);
-
-        c.origin = held_pos;
-    }
-}
 
 void (entity attacker, float damage) T_BeamDamage = {
     local float points;

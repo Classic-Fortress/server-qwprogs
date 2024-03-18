@@ -235,7 +235,7 @@ void (entity et, float f) player_pain = {
     if (self.invisible_finished > time)
         return;
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         PainSound();
         return;
     }
@@ -297,7 +297,7 @@ void () DeathSound = {
     local float rs;
 
     if (self.waterlevel == 3) {
-        if (self.is_feigning)
+        if (IsFeigned(self))
             DeathBubbles(2);
         else
             DeathBubbles(10);
@@ -411,7 +411,7 @@ void () GibPlayer = {
     ThrowGib("progs/gib1.mdl", self.health);
     ThrowGib("progs/gib2.mdl", self.health);
     ThrowGib("progs/gib3.mdl", self.health);
-    if (deathmsg == 36) {
+    if (deathmsg == DMSG_TRIGGER) {
         newmis = spawn();
         newmis.owner = self;
         newmis.think = KillPlayer;
@@ -424,8 +424,7 @@ void () GibPlayer = {
         FO_Sound(self, CHAN_VOICE, "player/teledth1.wav", 1, 0);
         self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
-    }
-    if (damage_attacker.classname == "teledeath2") {
+    } else if (damage_attacker.classname == "teledeath2") {
         FO_Sound(self, CHAN_VOICE, "player/teledth1.wav", 1, 0);
         self.respawn_time = (self.respawn_time + 2) + (random() * 2);
         return;
@@ -435,6 +434,8 @@ void () GibPlayer = {
     } else {
         FO_Sound(self, CHAN_VOICE, "player/udeath.wav", 1, 0);
     }
+
+    FO_SetClientThink(think_nop, 0);
 };
 
 void () PlayerDie = {

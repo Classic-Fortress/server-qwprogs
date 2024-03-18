@@ -328,9 +328,11 @@ typedef struct {
     float clanmode;
     float quadmode;
     float duelmode;
+    float new_balance;
     float quad_rounds;
     float quad_round_time;
     float fo_login_required;
+    float fo_matchrated;
     float captainmode;
     float timelimit;
     float fraglimit;
@@ -344,14 +346,6 @@ typedef struct {
     float class_limit_pyro;
     float class_limit_spy;
     float class_limit_engineer;
-    float spurs_on;
-    float spurs_scout;
-    float spurs_spy;
-    float spurs_engineer;
-    float spurs_duration;
-    float spurs_boost;
-    float spurs_consume;
-    float spurs_flag;
 } SERVER_SETTINGS;
 SERVER_SETTINGS SERVER_ADMIN;
 
@@ -875,6 +869,7 @@ struct GameState {
     float is_player;
     float is_alive;
     float is_spectator;
+    float is_ceasefire;
     float spawn_gen;
 };
 
@@ -884,7 +879,6 @@ float team_no;
 float crosshair_team_no;
 float all_time;
 float painfinished;
-vector thisorigin;
 float jump_counter;
 float last_id_time;
 
@@ -924,3 +918,5 @@ void cvar_parse4(string s, __out veci target) {
     target.v[2] = stof(argv(2));
     target.i = stof(argv(3));
 }
+
+float servertime;

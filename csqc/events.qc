@@ -266,11 +266,13 @@ void() CSQC_Parse_Event = {
             SERVER_ADMIN.quad_rounds = readfloat();
             SERVER_ADMIN.quad_round_time = readfloat();
             SERVER_ADMIN.fo_login_required = readfloat();
+            SERVER_ADMIN.fo_matchrated = readfloat();
             SERVER_ADMIN.timelimit = readfloat();
             SERVER_ADMIN.fraglimit = readfloat();
             SERVER_ADMIN.clanmode = readfloat();
             SERVER_ADMIN.quadmode = readfloat();
             SERVER_ADMIN.duelmode = readfloat();
+            SERVER_ADMIN.new_balance = readfloat();
             SERVER_ADMIN.pubmode =  (((SERVER_ADMIN.clanmode & 1) || (SERVER_ADMIN.quadmode & 1) || (SERVER_ADMIN.duelmode & 1))?1:0) + 
                                     (((SERVER_ADMIN.clanmode & 2) || (SERVER_ADMIN.quadmode & 2) || (SERVER_ADMIN.duelmode & 2))?2:0);
             SERVER_ADMIN.pubmode = 3 - SERVER_ADMIN.pubmode; //Invert
@@ -629,6 +631,10 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
 
     // Sounds below this line are conditionally filtered.
     switch(soundname) {
+        case "dash.wav":
+            if (PM_Enabled() & !CVARF(fopm_nonudge))
+                return 1;
+            break;
         case "player/plyrjmp8.wav":
         case "player/land.wav":
         case "player/land2.wav":
@@ -641,8 +647,7 @@ float(float ent_num, float channel, string soundname, float vol, float attenuati
         case "misc/outwater.wav":
             if (CSQC_JumpSounds_Active())
                 return 1;
-            else
-                break;
+            break;
     }
 
     return 0;

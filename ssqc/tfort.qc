@@ -661,7 +661,7 @@ void () TeamFortress_ShowTF = {
     } else {
         sprint(self, PRINT_HIGH, "Pipebomb limit (team):                  unlimited\n");
     }
-    CF_PrintSetting("Old pipebomb cooldown", old_pipecooldown, "", 1);
+    CF_PrintSetting("Pipebomb cooldown time", pipecooldown_time, "", 0.5);
 
     sprint(self, PRINT_HIGH, "\n== Combat Medic ==\n");
     CF_PrintSetting("Medic aura ability", medicaura, "", 1);
@@ -674,7 +674,6 @@ void () TeamFortress_ShowTF = {
         CF_PrintSetting("Allow Assault Cannon while moving", cannon_move, "", 1);
     }
     CF_PrintSetting("Spin Assault Cannon while moving", cannon_movespin, "", 1);
-    CF_PrintSetting("Allow Assault Cannon concussion", cannon_conc, "", 1);
     if (cannon_movespin == 0) {
         sprint(self, PRINT_HIGH, "Assault Cannon accuracy:                CF style\n");
     } else if (cannon_movespin == 1) {
@@ -809,6 +808,10 @@ void TeamFortress_PrimeGrenade(float inp, float is_player) {
         return;
 
     FO_GrenInfo* gdesc = FO_PlayerGren(self, inp - 1);
+
+    if (gdesc->id == GREN_NONE)
+        return;
+
     float *numg = (inp == 1) ? &self.no_grenades_1 : &self.no_grenades_2;
     string gs = FO_GrenName(gdesc->id);
 
@@ -919,11 +922,11 @@ void () FO_GrenadeThink = {
 void () FO_ThrowGrenade = {
     entity timer = self.grenade_timer;
 
-    float throwtime = time, lockout = 0.1;
+    float throwtime = time;
     if (RewindFlagEnabled(REWIND_GRENADES))
         throwtime = bounded_remote_time(FO_RewindGrenDt(timer.fpp.gren_type));
 
-    if ((timer.nextthink < timer.heat || throwtime > timer.heat - lockout) &&
+    if ((timer.nextthink < timer.heat || throwtime > timer.heat - grenade_lockout) &&
         !IsClownMode(CLOWN_SPAM_GRENADES)) {
         // We do not allow throwing within the 0.8s, or the last 0.1s.
         // The former is a priming time, the latter is so that client side
@@ -983,6 +986,14 @@ float (float pc) IsLegalClass = {
     return (TRUE);
 };
 
+float PmtBlockMaxSpeed();
+
+static void SetMaxSpeed(entity p, float speed) {
+    p.csqc_maxspeed = speed;
+    if (!PmtBlockMaxSpeed())
+        p.maxspeed = speed;
+}
+
 void (entity p) TeamFortress_SetSpeed = {
     string sp;
     float tf;
@@ -990,14 +1001,14 @@ void (entity p) TeamFortress_SetSpeed = {
 
     if (p.tfstate & TFSTATE_CANT_MOVE) {
         p.velocity = '0 0 0';
-        p.csqc_maxspeed = p.maxspeed = 0;
+        SetMaxSpeed(p, 0);
         return;
     }
 
     if (p.playerclass == PC_UNDEFINED) {
         // Typically this hits spectators and then spec movetype --> maxspeed
         // actually ignored.
-        p.csqc_maxspeed = p.maxspeed = SPEC_MAXSPEED;
+        SetMaxSpeed(p, SPEC_MAXSPEED);
         stuffcmd(p, "cl_movespeedkey 1;cl_backspeed 500; cl_forwardspeed 500; cl_sidespeed 500;cl_upspeed 500;\n");
         return;
     }
@@ -1031,8 +1042,8 @@ void (entity p) TeamFortress_SetSpeed = {
             new_max = min(new_max, 80);
 #endif
 
-    p.maxspeed = p.csqc_maxspeed = new_max;
-};
+    SetMaxSpeed(p, new_max);
+}
 
 void () TeamFortress_SetHealth = {
     if (self.playerclass == PC_SCOUT) {
@@ -1207,7 +1218,6 @@ void () TeamFortress_SetEquipment = {
     Team_Role * role = GetTeamRole(self.team_no);
     
     kept_items = self.tf_items & (IT_KEY1 | IT_KEY2);
-    self.items = FO_ClassWeapItemMask(self.playerclass) | kept_items;
 
     if (!remember_weapon || self.last_playerclass != self.playerclass ||
         (self.tfstate & TFSTATE_RANDOMPC)) {
@@ -1237,7 +1247,6 @@ void () TeamFortress_SetEquipment = {
     self.is_detpacking = 0;
     self.airblast_cooldown = 0;
     self.is_undercover = 0;
-    self.is_feigning = 0;
     self.next_feign_time = 0;
     self.is_unabletospy = 0;
     self.disguise_skin = 0;
@@ -1255,7 +1264,7 @@ void () TeamFortress_SetEquipment = {
     self.maxarmor = 0;
     self.respawn_time = 0;
     self.heat = 0;
-    self.tfstate = self.tfstate - (self.tfstate & TFSTATE_RELOADING);
+    self.tfstate &= (TFSTATE_RELOADING | TFSTATE_FEIGNED);
 
     if (self.team_no == 0)
         self.lives = -1;
@@ -2388,12 +2397,6 @@ void () TeamFortress_ExplodePerson = {
     proj.angles = vectoangles(proj.velocity);
     proj.think = SUB_Null;
     float expires = time + 0.1;  // Server generated, no client time here.
-    float rw_dt = FO_RewindGrenWinDt(gtype);
-    if (rw_dt > 0) {
-        proj.fpp.flags |= FPF_FIXED_DYNAMIC;
-        proj.fpp.dynamic_dt = rw_dt;
-        expires -= rw_dt;
-    }
     proj.nextthink = expires;
 
     if (self.weapon == GREN_FLARE) {
@@ -2414,6 +2417,7 @@ void () TeamFortress_ExplodePerson = {
 
     proj.fpp.gren_type = gtype;
     proj.fpp.flags |= FPF_NO_REWIND;
+    proj.fpp.expires_at = expires;
     proj.skin = gdesc->skin;
     proj.avelocity = gdesc->avelocity;
     proj.touch = ste->touch;

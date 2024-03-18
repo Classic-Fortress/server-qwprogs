@@ -69,7 +69,12 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 -------------------------------
 
 * Website backend for match results, stats. Get a token at fortressone.org, connect to a FortressOne server, and `login <token>`.
+
+
+* `localinfo pipecooldown_time <number>` time in seconds for demo pipe cooldown
+* `localinfo allpipes_cooldown on/off` whether cooldown is applied to individual pipes or all pipes. i.e. with this on the demo can not det any of his pipes immediately after firing. (default off)
 * `localinfo discord_channel_id <number>` to specify discord_channel. Required for autoreporting.
+* `localinfo fo_matchrated 2` whether match is rated / affects trueskill. 2 is false for 1v1 and 2v2 only.
 * `localinfo backend_address <uri>` to specify backend API endpoint. Default: https://www.fortressone.org/
 * All-time attack and all-time defence team options.
 * `setinfo precise_grenades on/off` to enable precise timing when throwing grenades.  This removes a random, up to, 100ms input delay.  (default on)
@@ -201,6 +206,7 @@ sound files are found in `fortress/sound/hitaudio/` and  `fortress/sound/announc
 * localinfo server_sbflaginfo : 0 - disables sbar flaginfo, 1 enables it [default: 1]
 * localinfo reverse_cap : 0 - normal gameplay, 1: you have to take your flag and capture in the enemy base [default: 0]
 * localinfo engineer_move / em : 0 - normal gameplay, 1: engineers can move while building [default: 1]
+* localinfo grenade_lockout / gl : Time in seconds grenade throw is locked out [default: 0.1]
 * localinfo round_delay_time : interval time between rounds in quadmode - seconds [default: 30]
 * localinfo max_gren2_soldier : maximum number of active nail/shock grenades (TF 2.8 = 3, OzTF = 1) [default: 3]
 * localinfo distance_based_cuss_duration : on/off - enables cuss duration to be proportional to the distance from the explosion [default: off]

@@ -223,6 +223,60 @@ void InitPrematch()
     }
 }
 
+static void SetAllRoles(float pc, float gren, float limit) {
+    if (gren == 1)
+        Role_None.gren1_limits[pc] = Role_Attack.gren1_limits[pc] =
+            Role_Defence.gren1_limits[pc] = limit;
+    else
+        Role_None.gren2_limits[pc] = Role_Attack.gren2_limits[pc] =
+            Role_Defence.gren2_limits[pc] = limit;
+}
+
+static float NB_UseMinPing() {
+    if (ServerIsOCE())
+        return FALSE;
+
+    if (ServerRegion() == kRegionUnknown)
+        return FALSE;  // e.g. random server, including LAN
+    return TRUE;
+}
+
+void ActivateNewBalance() {
+    disable_resup_gren = 2;  // No gren2 pickups
+
+    drop_gren1 = 0;  // No grenades in backpacks
+
+    int i;
+    for (i = 1; i <= 9; i++) // 3 gren spawn
+        SetAllRoles(i, 1, 3);
+
+    SetAllRoles(4, 2, 1);  // 1 mirv for demoman
+    SetAllRoles(6, 2, 1);  // 1 mirv for hwguy
+    SetAllRoles(9, 2, 1);  // 1 emp for engineer
+    SetAllRoles(9, 1, 4);  // 4 gren1 for engineer
+    SetAllRoles(3, 1, 4);  // 4 gren1 for soldier
+
+    PC_PYRO_AIRBLAST_COOLDOWN = 10;
+    PC_ENGINEER_GRENADE_TYPE_2_RANGE = 200;
+
+    float use_new_cap = CF_GetSetting("nbcc", "new_balance_conc_cap", "4");
+    if (use_new_cap == 4 && ServerRegion() == kRegionOCE)
+        use_new_cap = 1;
+    else
+        use_new_cap = 0;
+
+    if (use_new_cap)
+        fo_config.new_balance_flags |= NBF_CONC_NEW_CAP;
+
+    if (CF_GetSetting("nbnc", "new_balance_no_cap", "0"))
+        fo_config.new_balance_flags |= NBF_NO_CAP;
+
+    if (NB_UseMinPing()) {
+        if (fo_config.min_ping_ms < 50) // 50 min-ping
+            localcmd("localinfo mpm 50");
+    }
+}
+
 void () DecodeLevelParms = {
     local float fl;
     local string st;
@@ -244,7 +298,6 @@ void () DecodeLevelParms = {
     self.armortype = parm9 * 0.01;
 
     if (!(toggleflags & TFLAG_FIRSTENTRY)) {
-
         toggleflags = parm10;
         flagem_checked = 0;
         invis_only = 0;
@@ -463,8 +516,11 @@ void () DecodeLevelParms = {
         // maximum amount of pipebombs in game [unlimited]
         detpipe_limit_world = CF_GetSetting("dw", "detpipe_limit_world", "-1");
 
-        // use old tf pipebomb cooldown (0.8 seconds) [off]
-        old_pipecooldown = CF_GetSetting("op", "old_pipecooldown", "off");
+        // set pipe cooldown time [0.5]
+        pipecooldown_time = CF_GetSetting("pcdt", "pipecooldown_time", "0.5");
+
+        // cooldown applies to all pipes [on]
+        allpipes_cooldown = CF_GetSetting("apcd", "allpipes_cooldown", "on");
 
         // allow medic aura [on]
         medicaura = CF_GetSetting("ma", "medicaura", "on");
@@ -499,9 +555,6 @@ void () DecodeLevelParms = {
             cannon_move = TRUE; // required for this to work
         }
 
-        // make hwguy susceptible to concussion grenade while firing assault cannon [on]
-        cannon_conc = CF_GetSetting("cc", "cannon_conc", "on");
-
         // assault cannon accuracy (0 = cf, 1 = tf 2.8, 2 = tf 2.9) [0]
         cannon_accuracy = CF_GetSetting("cac", "cannon_accuracy", "0");
 
@@ -515,7 +568,7 @@ void () DecodeLevelParms = {
         feign_msg = CF_GetSetting("fm", "feign_msg", "on");
 
         // rate limit on feign
-        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "0.5");
+        feign_rate_limit = CF_GetSetting("frl", "feign_rate_limit", "1");
 
         // turn off spy [off]
         spy_off = CF_GetSetting("spy", "spy", "off");
@@ -590,10 +643,6 @@ void () DecodeLevelParms = {
         asscanrange = CF_GetSetting("acr", "asscanrange", "0");
         asscanrangedie = CF_GetSetting("acrd", "asscanrangedie", "0");
         
-        // remote_client_time max delta
-        antilag_settings.rewind_detpipe =
-            CF_GetSetting("alrd", "al_rewind_detpipe", "on");
-
         // CSQC projectiles
         fo_projectiles = CF_GetSetting("focp", "fo_csqc_projectiles", "on");
 
@@ -813,6 +862,7 @@ void () DecodeLevelParms = {
         }
 
         engineer_move = CF_GetSetting("em","engineer_move", "1");
+		grenade_lockout = CF_GetSetting("gl","grenade_lockout", "0.1");
 
         max_active_gren2_soldier = CF_GetSetting("mg2s","max_active_gren2_soldier", "3");
 
@@ -833,14 +883,13 @@ void () DecodeLevelParms = {
             old_sniperrange = FALSE;
             Role_None.detpipe_limit = 6;
             detpipe_limit_world = -1;
-            old_pipecooldown = FALSE;
+            pipecooldown_time = 0.5;
             medicaura = TRUE;
             old_biodamage = FALSE;
             cannon_lock = TRUE;
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = FALSE;
-            cannon_conc = TRUE;
             cannon_accuracy = 0;
             flame_knockback = TRUE;
             old_spanner = FALSE;
@@ -902,14 +951,13 @@ void () DecodeLevelParms = {
             old_sniperrange = TRUE;
             Role_None.detpipe_limit = 7;
             detpipe_limit_world = 7;
-            old_pipecooldown = TRUE;
+            pipecooldown_time = 0.8;
             medicaura = FALSE;
             old_biodamage = TRUE;
             cannon_lock = FALSE;
             cannon_air = TRUE;
             cannon_move = TRUE;
             cannon_movespin = TRUE;
-            cannon_conc = TRUE;
             cannon_accuracy = 1;
             flame_knockback = FALSE;
             old_spanner = TRUE;
@@ -1042,6 +1090,14 @@ void () DecodeLevelParms = {
         p = find(p, classname, "player");
     }
 */
+
+    // Overrides other settings.
+    new_balance = CF_GetSetting("new_balance", "new_balance", "1");
+
+    // mirror current state into desired state bit
+    new_balance |= (new_balance << 1);
+    if (NewBalanceActive())
+        ActivateNewBalance();
 };
 
 entity() FindIntermission =
@@ -2057,19 +2113,19 @@ void () PutClientInServer = {
     self.display_tip = 0;
     self.tip_type = 0;
     self.feign_next_damage = 0;
+    self.conc_state.mag = 0;
 
     FO_InstantReloadAllWeapons(self);
 
     // Only need initial init here.
-    if (!self.prng_base[PRNG_WEAP])
-        self.prng_base[PRNG_WEAP] = 65535 * random();
     // For hwguy we rotate the seed value, each seed generates many random nums.
-    self.prng_base[PRNG_HWGUY] = 65535 * random();
+    for (int i = 0; i < PRNG_NUM_STATES; i++)
+        self.prng_base[i] = 65535 * random();
     self.primed_gren_exp = 0;
 
     self.immune_to_check = time + 10;
     SetDimensions(TRUE);
-    self.special_cooldown = 0;
+    self.special_next = 0;
 
     setmodel(self, string_null);
     modelindex_null = self.modelindex;
@@ -2500,6 +2556,7 @@ void () PlayerJump = {
     if (self.flags & FL_WATERJUMP)
         return;
 
+
     if (self.waterlevel >= 2) {
         if (self.watertype == CONTENT_WATER)
             self.velocity_z = 100;
@@ -2531,6 +2588,8 @@ void () PlayerJump = {
     self.flags = self.flags - (self.flags & FL_JUMPRELEASED);
     self.button2 = 0;
 
+    NB_ConcCapAction(self, self.playerclass, &self.tfstate,
+                     time, &self.conc_cap_time, kLand);
     FO_Sound(self, CHAN_AUTO, "player/plyrjmp8.wav", 1, ATTN_NORM);
 
     if (!cannon_air && self.tfstate & TFSTATE_AC_FIRING) {
@@ -2541,17 +2600,8 @@ void () PlayerJump = {
         StopAssCan();
     }
 
-    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC)) {
-        entity te = FindConcTimer(self);
-        stumble = crandom() * (te.health / 100);
-        if (crandom() < 0) {
-            self.velocity_x = self.velocity_y + stumble;
-            self.velocity_y = self.velocity_x + stumble;
-        } else {
-            self.velocity_x = (-1 * self.velocity_y) + stumble;
-            self.velocity_y = (-1 * self.velocity_x) + stumble;
-        }
-    }
+    if (GetConcMode() == CONC_CLASSIC && (self.tfstate & TFSTATE_CONC))
+        Conc_Jump(&self.conc_state, self);
 };
 
 .float dmgtime;
@@ -2654,8 +2704,31 @@ void () CheckWaterJump = {
     }
 };
 
+void SpawnBubble(vector origin);
+
+static void ConcUpdate() {
+    if (self.tfstate & TFSTATE_CONC == 0)
+        return;
+
+    if (self.invincible_finished > time) {
+        self.conc_state.mag = 0;
+    } else {
+        if (!Conc_Update(&self.conc_state, self, time))
+            return;
+    }
+
+    if (self.conc_state.mag) {
+        if (self.conc_state.mag % CONC_HZ == 0)
+            SpawnBubble(self.origin);
+    } else {
+        RemoveConc(self, FALSE);
+        sprint(self.owner, PRINT_HIGH, "Your head feels better now\n");
+    }
+}
+
 void () PlayerPreThink = {
     FO_UpdateClientTime();
+    ConcUpdate();
 
     if (self.impulse) {
         if (self.impulse == TF_VOTENEXT) {
@@ -2709,7 +2782,7 @@ void () PlayerPreThink = {
         return;
     }
 
-    if (self.is_feigning) {
+    if (IsFeigned(self)) {
         if (self.flags & FL_ONGROUND) {
             // check area for entities - if found, bounce player forward
             if (!self.feign_areachecked) {
@@ -2771,7 +2844,7 @@ void () CheckPowerups = {
             self.modelindex = modelindex_eyes;
         } else {
             if (self.invisible_finished) {
-                if (self.tfstate & 64) {
+                if (self.pstate & PSTATE_INVISIBLE) {
                     if (self.invisible_finished < (time + 10)) {
                         self.invisible_finished = time + 666;
                     }
@@ -2806,7 +2879,7 @@ void () CheckPowerups = {
         }
     }
     if (self.invincible_finished) {
-        if (self.tfstate & 32) {
+        if (self.pstate & PSTATE_INVINCIBLE) {
             if (self.invincible_finished < (time + 10)) {
                 self.invincible_finished = time + 666;
             }
@@ -2850,7 +2923,7 @@ void () CheckPowerups = {
         }
     }
     if (self.super_damage_finished) {
-        if (self.tfstate & 128) {
+        if (self.pstate & PSTATE_QUAD) {
             if (self.super_damage_finished == (time + 10)) {
                 self.super_damage_finished = time + 666;
             }
@@ -2873,8 +2946,7 @@ void () CheckPowerups = {
             self.super_time = 0;
         }
         if (self.super_damage_finished > time) {
-            self.effects = self.effects | 8;
-            self.effects = self.effects | 64;
+            self.effects |= EF_DIMLIGHT | EF_BLUE;
         } else {
             lighton = 0;
             te = find(world, classname, "item_tfgoal");
@@ -2893,7 +2965,7 @@ void () CheckPowerups = {
     }
     if (self.radsuit_finished) {
         self.air_finished = time + 12;
-        if (self.tfstate & 256) {
+        if (self.pstate & PSTATE_RADSUIT) {
             if (self.radsuit_finished == (time + 10)) {
                 self.radsuit_finished = time + 666;
             }
@@ -3014,7 +3086,7 @@ void () PlayerPostThink = {
 
     FOPlayer fop = (FOPlayer)self;
     fop.RewindUpdate();
-    Predict_Update();
+    Predict_Update(TRUE);
 };
 
 void () UpdateAllClientsTeamScores = {
@@ -3314,6 +3386,8 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                     s_deathstring = " gets too friendly with his sentry gun\n";
                 else if (pf_deathmsg == DMSG_DISPENSER_EXPLODE)
                     s_deathstring = " dispenses with himself\n";
+                else if (pf_deathmsg == DMSG_IMPELLER)
+                    s_deathstring = " couldn't resist their inner impelsions\n";
 
                 return strcat(pe_target.netname, s_deathstring);
 
@@ -3581,6 +3655,9 @@ string (entity pe_target, entity pe_attacker, float pf_deathmsg) GetDeathMessage
                 } else if (pf_deathmsg == DMSG_LASERBOLT) {
                     s_deathstring = " gets a hole in his heart from ";
                     s_deathstring2 = "'s railgun\n";
+                } else if (pf_deathmsg == DMSG_IMPELLER) {
+                    s_deathstring = " gets pushed around by ";
+                    s_deathstring2 = "\n";
                 } else if (pf_deathmsg == DMSG_INCENDIARY) {
                     s_deathstring = " gets well done by ";
                     s_deathstring2 = "'s incendiary rocket\n";
@@ -3890,53 +3967,3 @@ void() SV_RunClientCommand = {
     self.jump_flag = self.velocity_z;
 }
 */
-
-static void DeferredPmoveAction() {
-    entity player = self.owner;
-    player.predict_flags &= ~PF_PMOVE_ACTIVATING;
-
-    if (self.heat) {
-        sprint(player, PRINT_HIGH, "*** PMOVE ACTIVATED\n");
-        player.nodrawtoclient = player;
-        player.predict_flags |= PF_PMOVE;
-        TeamFortress_SetSpeed(player);
-    } else {
-        sprint(player, PRINT_HIGH, "*** PMOVE INACTIVE\n");
-        player.predict_flags &= ~PF_PMOVE;
-    }
-    remove(self);
-}
-
-void (float active) CSEv_PmCmd_f = {
-    if (self.predict_flags & PF_PMOVE_ACTIVATING) {
-        sprint(self, PRINT_HIGH, "Please wait for prior activation to complete...\n");
-        return;
-    }
-
-    if (active & PF_PMOVE)
-        active |= PF_POS;
-
-    self.predict_flags &= ~PF_POS;
-    self.predict_flags |= (active & PF_POS);
-
-    if ((active & PF_PMOVE) == (self.predict_flags & PF_PMOVE))
-        return;
-
-    float enable = active & PF_PMOVE;
-    if (enable) {
-        // This is messy; maxspeed exists only in hidden inband communication
-        // with the client.  We need to push a high value to the client before
-        // we obscure the client since it won't see further updates (which might
-        // increase when changing classes).
-        self.maxspeed = SPEC_MAXSPEED;
-    } else {
-        self.nodrawtoclient = world;
-    }
-
-    self.predict_flags |= PF_PMOVE_ACTIVATING;
-    entity defer = spawn();
-    defer.owner = self;
-    defer.think = DeferredPmoveAction;
-    defer.heat = enable;
-    defer.nextthink = time + 0.1;
-}

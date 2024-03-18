@@ -681,7 +681,6 @@ void DefaultGoalState (entity Goal)
 }
 
 void (entity Goal) RestoreGoal = {
-
     if (Goal.goal_state == TFGS_REMOVED) {
         Goal.dimension_seen = DMN_NOFLASH;
 
@@ -874,10 +873,10 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                 }
 
                 if (disable_resup_gren & 1 == 0)
-                    Player.no_grenades_1 = min(Player.no_grenades_1 + 1,
+                    Player.no_grenades_1 = min(Player.no_grenades_1 + Goal.no_grenades_1,
                                                Player.max_grenades_1);
                 if (disable_resup_gren & 2 == 0)
-                    Player.no_grenades_2 = min(Player.no_grenades_2 + 1,
+                    Player.no_grenades_2 = min(Player.no_grenades_2 + Goal.no_grenades_2,
                                                Player.max_grenades_2);
 
                 if (Player.ammo_detpack > Player.maxammo_detpack) {
@@ -908,7 +907,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     Player.invincible_finished =
                         time + Goal.invincible_finished;
                     if (Goal.classname == "item_tfgoal") {
-                        Player.tfstate = Player.tfstate | TFSTATE_INVINCIBLE;
+                        Player.pstate |= PSTATE_INVINCIBLE;
                         Player.invincible_finished = time + 666;
                     }
                 }
@@ -917,7 +916,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     Player.invisible_time = 1;
                     Player.invisible_finished = time + Goal.invisible_finished;
                     if (Goal.classname == "item_tfgoal") {
-                        Player.tfstate = Player.tfstate | TFSTATE_INVISIBLE;
+                        Player.pstate |= PSTATE_INVISIBLE;
                         Player.invisible_finished = time + 666;
                     }
                 }
@@ -927,7 +926,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     Player.super_damage_finished =
                         time + Goal.super_damage_finished;
                     if (Goal.classname == "item_tfgoal") {
-                        Player.tfstate = Player.tfstate | TFSTATE_QUAD;
+                        Player.pstate |= PSTATE_QUAD;
                         Player.super_damage_finished = time + 666;
                     }
                 }
@@ -936,7 +935,7 @@ void (entity Goal, entity Player, entity AP, float addb) Apply_Results = {
                     Player.rad_time = 1;
                     Player.radsuit_finished = time + Goal.radsuit_finished;
                     if (Goal.classname == "item_tfgoal") {
-                        Player.tfstate = Player.tfstate | TFSTATE_RADSUIT;
+                        Player.pstate |= PSTATE_RADSUIT;
                         Player.radsuit_finished = time + 666;
                     }
                 }
@@ -1179,28 +1178,25 @@ void (entity Goal, entity Player) RemoveResults = {
         te = find(te, classname, "item_tfgoal");
     }
     if ((Goal.invincible_finished > 0) && !puinvin) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_INVINCIBLE);
+        Player.pstate &= ~PSTATE_INVINCIBLE;
         Player.items = Player.items | IT_INVULNERABILITY;
         Player.invincible_time = 1;
         Player.invincible_finished = time + Goal.invincible_finished;
     }
     if ((Goal.invisible_finished > 0) && !puinvis) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_INVISIBLE);
+        Player.pstate &= ~PSTATE_INVISIBLE;
         Player.items = Player.items | IT_INVISIBILITY;
         Player.invisible_time = 1;
         Player.invisible_finished = time + Goal.invisible_finished;
     }
     if ((Goal.super_damage_finished > 0) && !puquad) {
-        Player.tfstate = Player.tfstate - (Player.tfstate & TFSTATE_QUAD);
+        Player.pstate &= ~PSTATE_QUAD;
         Player.items = Player.items | IT_QUAD;
         Player.super_time = 1;
         Player.super_damage_finished = time + Goal.super_damage_finished;
     }
     if ((Goal.radsuit_finished > 0) && !purad) {
-        Player.tfstate =
-            Player.tfstate - (Player.tfstate & TFSTATE_RADSUIT);
+        Player.pstate &= ~PSTATE_RADSUIT;
         Player.items = Player.items | IT_SUIT;
         Player.rad_time = 1;
         Player.radsuit_finished = time + Goal.radsuit_finished;
@@ -2079,7 +2075,12 @@ void () tfgoal_timer_tick = {
 };
 
 void () item_tfgoal_touch = {
-    local entity te;
+    // I can't see where exactly, but when a flag ends up in a door it's min
+    // and maxs are set to (0, 0, -16) thus reducing it to a single point 16
+    // units below origin. This restores the correct size.
+    if (self.classname == "item_tfgoal" && other.classname == "worldspawn") {
+        setsize(self, self.goal_min, self.goal_max);
+    }
 
     if (other.classname != "player")
         return;
@@ -2087,11 +2088,12 @@ void () item_tfgoal_touch = {
         return;
     if (cb_prematch)
         return;
-    if (other.is_feigning)
+    if (IsFeigned(other))
         return;
     if (other == self.owner)
         return;
 
+    local entity te;
     // check if a wall or something is in the way of the flag
     traceline(other.origin, self.origin, TRUE, world);
     if (trace_fraction < 1)
@@ -2268,6 +2270,7 @@ void (entity Item, entity AP, entity Goal) tfgoalitem_GiveToPlayer = {
     DoResults(Item, AP, 1);
     DoItemGroupWork(Item, AP);
     AP.goalrunningtime = gametime;
+    AP.has_flag = TRUE;
     LogEventPickupGoal(AP);
 };
 
@@ -2340,6 +2343,7 @@ void (entity Item, entity AP, float method) tfgoalitem_RemoveFromPlayer = {
     //Flag
     if ((Item.goal_activation & 1)) {
         local float timecarried = gametime - AP.goalrunningtime;
+        AP.has_flag = FALSE;
         RemoveFlagFollow(AP);
         LogEventFumble(AP, timecarried);
     }
@@ -2931,6 +2935,7 @@ void () DropGoalItems = {
             //Always allow dropping 4096
             else if (self.effects & EF_DIMLIGHT || te.goal_activation & TFGI_ALLOWTHROW) {
                 timecarried = gametime - self.goalrunningtime;
+                self.has_flag = FALSE;
                 RemoveFlagFollow(self);
                 LogEventFumble(self, timecarried);
                 te.angles = '0 0 0';

@@ -12,15 +12,20 @@ void () PostFOQuadStarted = {
 		return;
 	}
 
-	// Override 2v2 to go to scrim results for now.
-	string channel_id = discord_channel_id;
-	if (TeamFortress_TeamGetNoPlayersExcludingAllTime(1) <= 2)
-		channel_id = "1147341454851719219";
-
 	local string data = "";
-
 	data = strcat(data, "{\n");
 	data = strcat(data, "  \"match\": {\n");
+
+	local float rated = CF_GetSetting("mra", "fo_matchrated", "2");
+	if (rated == 2) {
+		if(TeamFortress_TeamGetNoPlayersExcludingAllTime(1) > 2) {
+			rated = 1;
+		} else {
+			rated = 0;
+		}
+	}
+	data = strcat(data, "    \"rated\": \"", ftos(rated), "\",\n");
+
 	data = strcat(data, "    \"round\": \"", ftos(rounds), "\",\n");
 	data = strcat(data, "    \"map\": \"", mapname, "\",\n");
 
@@ -41,9 +46,11 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "      \"name\": \"", infokey(world, "hostname"), "\",\n");
 	data = strcat(data, "      \"address\": \"", cvar_string("sv_serverip"), "\"\n");
 	data = strcat(data, "    },\n");
+
 	data = strcat(data, "    \"discord_channel\": {\n");
-	data = strcat(data, "      \"channel_id\": \"", channel_id, "\"\n");
+	data = strcat(data, "      \"channel_id\": \"", discord_channel_id, "\"\n");
 	data = strcat(data, "    },\n");
+
 	data = strcat(data, "    \"teams\": {\n");
 
 	local float tn;
@@ -88,6 +95,8 @@ void () PostFOQuadStarted = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches", backend_address);
+	dprint("POST to ", uri, "\n");
+	dprint(data);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
 
@@ -148,6 +157,8 @@ void () PostFOQuadFinalRoundStarted = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
+	dprint("POST to ", uri, "\n");
+	dprint(data);
 	uri_post(uri, FO_QUAD_STARTED_REQUEST, "application/json", data);
 };
 
@@ -194,6 +205,8 @@ void (float winner) PostFOQuadFinished = {
 	data = strcat(data, "}\n");
 
 	local string uri = sprintf("%s/results/api/v1/matches/%s", backend_address, match_id);
+	dprint("POST to ", uri, "\n");
+	dprint(data);
 	uri_post(uri, FO_QUAD_FINISHED_REQUEST, "application/json", data);
 };
 
@@ -511,7 +524,8 @@ void () QuadRoundBegin = {
 	if (rounds == 1)
 		PostFOQuadFinalRoundStarted();
 
-	round_end_time = time + round_time * 60 + 1;
+	round_start_time = time;
+	round_end_time = round_start_time + round_time * 60 + 1;
 	UpdateClientQuadRoundBegin(te, round_time);
 
 	if (!self.cnt) {

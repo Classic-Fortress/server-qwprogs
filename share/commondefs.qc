@@ -16,9 +16,14 @@ struct FPPState {
 
 .FPPState fpp;
 
+struct ConcState {
+    float next, mag;
+};
+.ConcState conc_state;
+
+
 enumflags {
     FPF_NO_REWIND,
-    FPF_FIXED_DYNAMIC,
 };
 
 var struct {
@@ -46,32 +51,37 @@ var struct {
     float gren_beta_disable;
 
     float fo_concuss;
+    float rj;
+
+    float new_balance;
+    float new_balance_flags;
 } fo_config;
 
 enumflags {
     REWIND_PROJ_FIRE,
     REWIND_PROJ_TRAVEL,
-    REWIND_KNOCKBACK,
     REWIND_GRENADES,
     REWIND_SENDEVENT,
     REWIND_FORWARD_PROJ_SELFKNOCK,
+    REWIND_DOUBLE_COL,
     REWIND_FORWARD_DOORS,
 };
 
 string REWIND_DESC[] = {
     "rewind projectile on firing",
     "rewind on projectile travel",
-    "rewind pipe knockback",
     "rewind grenade throws",
     "use sendevent augmentation (allows race w/ death rewind)",
     "forward projectile self-knockback",
+    "additional collision checks",
     "open doors earlier for hpbs [requires rfd=1]",
 };
 
-const float REWIND_DEFAULT_FLAGS = REWIND_KNOCKBACK | REWIND_PROJ_FIRE |
+const float REWIND_DEFAULT_FLAGS = REWIND_PROJ_FIRE |
                                    REWIND_PROJ_TRAVEL |
                                    REWIND_FORWARD_PROJ_SELFKNOCK |
-                                   REWIND_SENDEVENT;
+                                   REWIND_SENDEVENT |
+                                   REWIND_DOUBLE_COL;
 
 
 float RewindFlagEnabled(float flag) {
@@ -109,20 +119,6 @@ float TFxEnabled(float flag) {
 }
 
 const float TFX_DEFAULT_FLAGS = 0;
-
-enum CSQCFlags {
-    PREDICT_CSQC_SETSPEED,
-};
-
-string PREDICTF_DESC[] = {
-    "allow csqc to handle maxspeed"
-};
-
-inline float PredictEnabled(float flag) {
-    return fo_config.predict_flags & flag;
-};
-
-const float PREDICT_FLAGS_DEFAULT = 0;
 
 enumflags {
     FOC_ON_DEF,  // apply foc_defaults
@@ -177,7 +173,6 @@ const float SERVER_FRAME_DT = 1/SERVER_FPS;
 const float SERVER_FRAME_MS = SERVER_FRAME_DT * 1000.0;
 
 .vector s_origin;
-.float s_time;
 
 #define MAX_FLAGINFO_LINES  10
 #define ENG_BUILDING_DISMANTLE_DISTANCE 100
@@ -294,6 +289,29 @@ enumflags {
 enumflags {
     CSQC_WEAP_PRED,
     CSQC_PROJ_PRED,
-    CSQC_SETSPEED,
+    CSQC_PMOVE,
+    CSQC_FORCE_POS,
     CSQC_SNIPER_SIGHT,
+};
+
+#ifdef SSQC
+float new_balance;
+#endif
+
+float NewBalanceActive() {
+#ifdef CSQC
+    return fo_config.new_balance;
+#else
+    return new_balance & 1;
+#endif
+}
+
+enumflags {
+    NBF_CONC_NEW_CAP,
+    NBF_NO_CAP,
+};
+
+string NBF_DESC[] = {
+    "Reworked conc speed cap",
+    "No conc speed cap",
 };

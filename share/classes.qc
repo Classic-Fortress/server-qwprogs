@@ -94,3 +94,122 @@ float Class_MaxSpeed(float playerclass) {
         default: return 0;
     }
 }
+
+static float NextToWall(entity ent) {
+    if ((pointcontents(ent.origin + [ent.maxs_x + 2, 0, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [ent.mins_x - 2, 0, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [0, ent.maxs_y + 2, 0]) == CONTENT_SOLID) ||
+        (pointcontents(ent.origin + [0, ent.mins_y - 2, 0]) == CONTENT_SOLID))
+        return TRUE;
+    return FALSE;
+}
+
+const float CONC_P = 0.25;
+const float CONC_HZ = 1/CONC_P;
+
+void Conc_Stumble(entity ent, float stumble, float flip) {
+    if ((ent.flags & (FL_INWATER | FL_ONGROUND) == 0) ||
+        (*self_tf_state() & TFSTATE_FEIGNED))
+        return;
+
+    if (NextToWall(ent) && ent.velocity ==  '0 0 0')
+        return;
+
+    // [*]: This preserves what looks to be a long-standing bug where y-vel ends
+    // up propagating due to missed temporary to hold vel_x.
+    ent.velocity_x = flip * ent.velocity_y + stumble;
+    ent.velocity_y = flip * ent.velocity_x + stumble;
+}
+
+void Conc_Jump(ConcState* cs, entity ent) {
+    float stumble = shared_crandom(PRNG_CONC) * cs->mag / 10;
+    float flip = (shared_prng(PRNG_CONC) < 0.5) ? -1 : 1;
+
+    // See [*] above.
+    ent.velocity_x = flip * ent.velocity_y + stumble;
+    ent.velocity_y = flip * ent.velocity_x + stumble;
+}
+
+#ifdef SSQC
+static inline void ConcAction(entity ent, float itime, float mag, float flip) {
+    Conc_Stumble(ent, mag, flip);
+}
+#else
+void PM_AddNudgeConc(float itime, float mag, float flip);
+static inline void ConcAction(entity ent, float itime, float mag, float flip) {
+    PM_AddNudgeConc(itime, mag, flip);
+}
+#endif
+
+float Conc_Update(ConcState *cs, entity ent, float ctime) {
+    if (!cs->mag  || ctime < cs->next)
+        return FALSE;
+
+    while (ctime >= cs->next) {
+        cs->mag = max(cs->mag - 1, 0);
+        if (!cs->mag) {
+            *self_tf_state() &= ~TFSTATE_CONC;
+            break;
+        }
+
+        float mag = shared_crandom(PRNG_CONC) * cs->mag * 10;
+        float flip = (shared_prng(PRNG_CONC) < 0.5) ? -1 : 1;
+        ConcAction(ent, cs->next, mag, flip);
+        cs->next += CONC_P;
+    }
+
+    return TRUE;
+}
+
+float Class_ScaleMoment(float playerclass, float damage) {
+    if (playerclass != PC_HVYWEAP)
+        return damage;
+    return damage <= 50 ? 0 : damage / 4;
+}
+
+enum {
+    kLaunch,
+    kLand
+};
+
+float NB_UseNewConc() {
+    return fo_config.new_balance_flags & NBF_CONC_NEW_CAP;
+}
+
+float NB_NoCap() {
+    return fo_config.new_balance_flags & NBF_NO_CAP;
+}
+
+
+void NB_ConcCap(entity ent, float speed) {
+    vector planar_vel = [ent.velocity_x, ent.velocity_y, 0];
+
+    if (vlen(planar_vel) > speed) {
+        planar_vel = normalize(planar_vel) * speed;
+    }
+
+    ent.velocity_x = planar_vel.x;
+    ent.velocity_y = planar_vel.y;
+}
+
+void NB_ConcCapAction(entity ent, float player_class, float* tfstate,
+                      float gtime, float* cap_time, float action) {
+    if (!NewBalanceActive() || !NB_UseNewConc())
+        return;
+
+    const float kLockout = 0.5;
+
+    if (action == kLaunch) {
+        if (player_class == PC_MEDIC && !NB_NoCap()) {
+            *tfstate |= TFSTATE_CONC_CAP;
+            *cap_time = gtime + kLockout;
+        }
+
+        NB_ConcCap(ent, NB_CONC_CAP_AIR);
+    } else if (action == kLand && (*tfstate & TFSTATE_CONC_CAP) &&
+               gtime > *cap_time) {
+        float cap = *cap_time;
+        *tfstate &= ~TFSTATE_CONC_CAP;
+        NB_ConcCap(ent, NB_CONC_CAP_LAND);
+    }
+}

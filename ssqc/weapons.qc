@@ -99,6 +99,7 @@ void () W_FireFlame;
 void W_FireIncendiaryCannon(vector org, vector angles, float use_ctime=0);
 void () W_FireTranq;
 void () W_FireRailgun;
+void () W_FireImpeller;
 
 void () HallucinationTimer;
 void () TranquiliserTimer;
@@ -1033,10 +1034,8 @@ void () BecomeExplosion = {
     dremove(self);
 };
 
-.float al_dmg;
-
 static void Antilag_Knock(entity e) {
-    T_RadiusDamage(e, e.owner, e.al_dmg, __NULL__, __NULL__, e.owner);
+    T_RadiusDamage(e, e.owner, e.heat, __NULL__, __NULL__, e.owner);
     dremove(e);
 }
 
@@ -1045,27 +1044,29 @@ void T_Knock_Antilag() {
 }
 
 float AntilagKnock(entity e, float dmg) {
-    if (!RewindFlagEnabled(REWIND_FORWARD_PROJ_SELFKNOCK) || e.s_time == 0)
+    e.forward_knock = -1;
+    // Only applies during initial antilag forward
+    if (e.flags & FL_FORWARD_KNOCK == 0)
         return FALSE;
 
     entity knock_e = spawn();
 
     setorigin(knock_e, e.origin);
+    setsize(knock_e, '0 0 0', '0 0 0');
     knock_e.s_origin = e.s_origin;
     knock_e.owner = e.owner;
     knock_e.classname = e.classname;
     knock_e.oldenemy = other;
-    knock_e.al_dmg = dmg;
+    knock_e.heat = dmg;
+    knock_e.filter_ent = e;
 
     vector diff = e.origin - e.s_origin;
     float ttime = vlen(diff) / vlen(e.velocity);
-    float dtime = time - e.s_time;
 
-    float delay = ttime - dtime;
-
-    if (delay > SERVER_FRAME_DT && dtime < 0.25) {
+    if (ttime > SERVER_FRAME_DT) {
         knock_e.think = T_Knock_Antilag;
-        knock_e.nextthink = time + delay;
+        knock_e.nextthink = time + ttime;
+        e.forward_knock = time + ttime;
     } else {
         Antilag_Knock(knock_e);
     }
@@ -1245,9 +1246,6 @@ void FO_T_GrenExplode() {
     dremove(self);
 }
 
-void T_RadiusDamage_Antilag(entity inflictor, entity attacker, float damage,
-                            entity ignore);
-
 void () GrenadeExplode = {
     local entity te;
     float use_antilag = FALSE;
@@ -1336,10 +1334,7 @@ void W_FireGrenade(vector org, vector v_ang, float use_ctime=0) {
         proj.nextthink = time + 2.5;
         proj.fpp.gren_type = GREN_RED;
     } else {
-        if (old_pipecooldown)
-            self.pipecooldown = time + 0.8;
-        else
-            self.pipecooldown = time + 0.5;
+        self.pipecooldown = time + pipecooldown_time;
         ExplodeOldestPipebomb();
         proj.classname = "pipebomb";
         proj.touch = PipebombTouch;
@@ -1409,6 +1404,9 @@ void (float ox) W_FireSpikes = {
     }
 
     *ws->ammo_remaining -= wi->ammo_per_shot;
+    if (wi->needs_reload)
+        *ws->clip_fired += wi->ammo_per_shot;
+
     if (wi->weapon == WEAP_NAILGUN)
         W_FireNail(FPP_NAIL, v_right * ox);
     else
@@ -1595,6 +1593,7 @@ Slot W_BestWeaponSlot()  {
     for (float i = 1; i <= TF_NUM_SLOTS; i++) {
         Slot slot = MakeSlot(i);
         FO_FillWeapState(self, slot, &ws);
+        FO_WeapInfo* wi = ws->wi;
 
         // AC also takes cells to fire.
         if (ws->weapon == WEAP_ASSAULT_CANNON && self.ammo_cells < 7)
@@ -1603,7 +1602,7 @@ Slot W_BestWeaponSlot()  {
         // We don't need to handle out of ammo medi/spanner here because of
         // fallback below.
         if (ws.weapon != WEAP_NONE &&
-            ((ws.wi)->ammo_type == AMMO_NONE || *ws.ammo_remaining))
+            (wi->ammo_type == AMMO_NONE || (*ws.ammo_remaining >= wi->ammo_per_shot)))
             return slot;
     }
     return SlotMelee;
@@ -1749,21 +1748,24 @@ void () W_Attack = {
     } else if (ws.weapon == WEAP_RAILGUN) {
         player_shot1();
         W_FireRailgun();
+    } else if (ws.weapon == WEAP_IMPELLER) {
+        if (!new_balance || time < self.special_next)
+            return;
+
+        player_shot1();
+        W_FireImpeller();
     }
 
-    if (ws.weapon != WEAP_FLAMETHROWER &&    // Variable
-        ws.weapon != WEAP_ASSAULT_CANNON &&  // In animation
-        ws.weapon != WEAP_NAILGUN &&         // In animation
-        ws.weapon != WEAP_SUPER_NAILGUN)     // In animation
+    if (!wi->fire_in_anim) {
         Attack_Finished(wi->attack_time);
-
-    if (wi->needs_reload) {
-        if (ws.weapon != WEAP_ASSAULT_CANNON)  // In animation
+        if (wi->needs_reload) {
             *ws->clip_fired += wi->ammo_per_shot;
-        FO_CheckForReload();
+            FO_CheckForReload();
+        }
     }
 
     //These weapons have to log each projectile launched/bullet fired
+    // TODO: probably equivalent to fire_in_anim...
     if (ws.weapon != WEAP_ASSAULT_CANNON || ws.weapon != WEAP_NAILGUN ||
         ws.weapon != WEAP_SUPER_NAILGUN)
         LogEventAttack(self);
@@ -1879,7 +1881,7 @@ void W_ChangeWeaponSlot(Slot slot) {
 
     FO_WeapState ws;
     FO_FillWeapState(self, slot, &ws);
-    if (ws.weapon == WEAP_NONE)
+    if (ws.weapon == WEAP_NONE || !FO_WeapAvailable(ws.weapon))
         return;
 
     // queue next weapon if queue is not empty or has changed
@@ -1942,7 +1944,7 @@ void () ImpulseCommands = {
     if ((self.last_impulse == TF_DETPACK) && self.impulse)
         TeamFortress_SetDetpack(self.impulse);
 
-    if (!self.is_feigning) {
+    if (!IsFeigned(self)) {
         if (self.impulse == TF_GRENADE_1)
             TeamFortress_PrimeGrenade(1, TRUE);
         else if (self.impulse == TF_GRENADE_2)
@@ -2497,7 +2499,7 @@ void () W_WeaponFrame = {
         return;
     }
 
-    if ((self.is_feigning) &&
+    if (IsFeigned(self) &&
             (self.impulse != TF_SPECIAL_SKILL) &&
             (self.impulse != TF_SPECIAL_SKILL_2) &&
             (self.impulse != TF_MEDIC_HELPME) &&
@@ -2672,23 +2674,23 @@ void () SuperDamageSound = {
 };
 
 void () ToggleInvincibility = {
-    if(self.tfstate & TFSTATE_INVINCIBLE) {
-        self.items = self.items - (self.items & IT_INVULNERABILITY);
+    if(self.pstate & PSTATE_INVINCIBLE) {
+        self.items &= ~IT_INVULNERABILITY;
         self.invincible_time = 0;
         self.invincible_finished = 0;
-        self.tfstate = self.tfstate - (self.tfstate & TFSTATE_INVINCIBLE);
-        self.effects = self.effects - (self.effects & (EF_RED + EF_DIMLIGHT + EF_BRIGHTLIGHT));
+        self.pstate &= ~PSTATE_INVINCIBLE;
+        self.effects &= ~(EF_RED | EF_DIMLIGHT | EF_BRIGHTLIGHT);
     } else {
-        self.items = self.items | IT_INVULNERABILITY;
+        self.items |= IT_INVULNERABILITY;
         self.invincible_time = 1;
-        self.tfstate = self.tfstate | TFSTATE_INVINCIBLE;
+        self.pstate |= PSTATE_INVINCIBLE;
         self.invincible_finished = time + 666;
     }
 };
 
 // TODO: trust the client less, validate more.
 // TODO: Could support hitscan (e.g. sg/ssg)
-void (float weap, float ctime, vector pos, vector angles) CSEv_Attack_ifvv = {
+void (int weap, float ctime, vector pos, vector angles) CSEv_Attack_ifvv = {
     if (!RewindFlagEnabled(REWIND_SENDEVENT))
         return;
 

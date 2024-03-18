@@ -175,10 +175,12 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     ClientSettings_Check();
     SetupAliases();
 
+    CurrentMenu = &FO_MENU_TEAM;
+    player_menu_type = 0;
+    FO_Menu_Game(TRUE);
+
     pengine.view_mask = MASK_VIEWMODEL;  // Start with engine models.
     print("CSQC initialization finished\n");
-
-    FO_Menu_Game(TRUE);
 };
 
 noref void() CSQC_WorldLoaded = {
@@ -266,12 +268,8 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             Slot_Keyup(stof(argv(1)));
             break;
 
-        case "fopm_cmd":
-            PM_PmCmd(stof(argv(1)));
-            break;
-
         case "fo_beta_pmove":
-            PM_PmCmd(!!stof(argv(1)));
+            printf("Please set `fo_pmove 1` instead.\n");
             break;
 
         case "login":
@@ -336,10 +334,12 @@ noref float(string cmd) CSQC_ConsoleCommand = {
             FO_Menu_Special(TRUE);
             break;
         case "fo_menu_disguise":
-            FO_Menu_Spy_Skin(TRUE);
+            if (WP_PlayerClass() == PC_SPY)
+                FO_Menu_Spy_Skin(TRUE);
             break;
         case "fo_menu_build":
-            FO_Menu_Build(TRUE);
+            if (WP_PlayerClass() == PC_ENGINEER)
+                FO_Menu_Build(TRUE);
             break;
         case "fo_menu_dropammo":
             FO_Menu_DropAmmo(TRUE);
@@ -711,6 +711,7 @@ void _Sync_ServerCommandFrame() {
     game_state.is_alive = getstatf(STAT_HEALTH) > 0;
     game_state.spawn_gen = getstatf(STAT_SPAWN_GEN);
 
+    game_state.is_ceasefire = serverkeyfloat("pausestate");
     WP_ServerFrame();
 
     // Use an undocumented ezquake compat feature to figure out whether we
