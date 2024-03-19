@@ -920,4 +920,3 @@ void cvar_parse4(string s, __out veci target) {
 }
 
 float servertime;
-float special_until;

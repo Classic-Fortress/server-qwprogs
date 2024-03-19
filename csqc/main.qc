@@ -140,7 +140,6 @@ noref void(float apiver, string enginename, float enginever) CSQC_Init = {
     registercommand("-rj");
 
     registercommand("slot_a");
-    registercommand("special");
 
     registercommand("+fo_showscores");
     registercommand("-fo_showscores");
@@ -455,9 +454,6 @@ noref float(string cmd) CSQC_ConsoleCommand = {
         case "slot_a":  // Alternate between passed options
             W_ChangeToSlotAlternate(argv(1), argv(2), argv(3), argv(4));
             break;
-        case "special":
-            special_until = time + 0.150;
-            break;
     }
 
     return FALSE;
@@ -656,10 +652,6 @@ noref void CSQC_Input_Frame() {
     if ((WP_PlayerClass() == PC_SOLDIER || WP_PlayerClass() == PC_PYRO) &&
         (input_buttons & BUTTON4))
         input_buttons |= BUTTON0 | BUTTON2;
-
-    // Set +special when special used
-    if (time < special_until)
-        input_buttons |= BUTTON3;
 
     // Handle zoom
     float prev_zoomed_in = zoomed_in;
