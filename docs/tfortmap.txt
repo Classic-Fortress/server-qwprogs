@@ -1,0 +1,1648 @@
+*==============================================================*
+* TeamFortress v2.8                             tfortmap.txt   *
+*==============================================================*
+Introduction
+------------
+
+NOTE: If you're interested in seeing what was added since version 2.1,
+      I suggest you check out the "Summary of Changes" at the bottom
+      of the file.
+
+If you haven't read the readme.txt by now, please do.
+
+This file contains details about making Maps specifically
+for TeamFortress. You don't need to know these details to 
+play the game, even on a TeamFortress Map.
+
+Beware! This is not for the faint-hearted!
+
+There are few maps on the WWW page that use these specs to
+do interesting things. Don't forget you can simply view the 
+.bsp file to look at the entities inside the map, so if
+you want to see some examples of Goals, etc, I suggest you
+look at those maps.
+
+Oh, and some variables we use for the Goal entities are variables
+used for completely different things for other entities. We did
+this to preserve variable space.
+
+Also, this document has been re-hashed so many times that it's
+almost certain that I missed updating a bitfield number or 
+something. If you see anything that looks wierd, or is 
+contradicted somewhere else in the document, please tell me.
+
+Finally, The TeamFortress Entity Editor is available on
+the WWW page. It's a Windows program that creates goals, items, 
+etc for you. I suggest you read these specs, and skip over
+the Technical Info. Then, just use the Entity Editor to make 
+your goals.
+Reading the Technical Info is good, since it will give you a 
+better understanding of Goal entities and their uses, but don't 
+bother trying to remember it all.
+
+Robin.
+
+----------------------------------------------------------------------------
+TeamFortressMap Specification
+----------------------------------------------------------------------------
+Apart from being a normal map, TeamFortress Maps 
+have the following changes:
+
+	Auto Detection
+	Team SpawnPoints
+	Armor 				 
+
+	Goals
+	GoalItems
+	Timer Goals
+
+If you are only interested in the changes made to the map specs
+since the last version, to update your maps etc, then check
+out the section entitled "Summary of Changes"
+
+----------------------------------------------------------------------------
+Notes about using existing Entities
+----------------------------------------------------------------------------
+In TeamFortress, we have an Observer mode, where players who haven't
+chosen a class, or have run out of lives, are able to cycle through 
+all the Intermission points to watch the action.
+Because of this, make sure you have a few Intermission points at
+interesting viewing locations around the map. If you don't have some
+of these, Observers won't have much fun.
+
+----------------------------------------------------------------------------
+Auto Detection
+----------------------------------------------------------------------------
+TeamFortress maps will be automatically detected by the TeamFortress patch
+if you put an entity in the map with a classname of "info_tfdetect".
+This makes TeamFortress automatically turn on the FORTRESSMAP toggleflag,
+and turn on teamplay.
+
+Also, once the TeamFortress map has been detected, the patch will look
+for any spawnpoints dedicated to teams (see below).
+If it finds any, it will look for the highest team number that is used.
+Once found, it will limit anybody attempting to join a team to that 
+number.
+At the moment, Maps are limited to a maximum of 4 teams.
+E.g. If the highest team number used by a Team Spawnpoint is 3, then
+	 the patch will only allow players to join teams 1, 2, and 3.
+
+
+The detection entity can also do the following:
+	- specify a version string in the "broadcast" variable.
+	  This will be compared with the version string for the TeamFortress
+	  patch. If the don't match, a warning will be displayed to the
+	  player that their patch and the map are incompatible.
+	  The version string is in the format as follows:
+		TeamFortress v2.1
+	  The string is case sensitive, so make sure you've got it right.
+	  Don't put a \n on the end of it.
+
+	- Set the state of the toggleflags when the map starts up. The
+	  value of the toggleflags should be in the "impulse" variable.
+          The bits for the toggleflags are:
+
+    Bit 1 (1)   :   Off - ClasSkin              , On - Multiskin
+    Bit 2 (2)   :   Off - ClassPersistence Off  , On - ClassPersistence On
+    Bit 3 (4)   :   Off - CheatChecking Off     , On - CheatChecking On
+    Bit 4 (8)   :   Off - FortressMap Off       , On - FortressMap On
+    Bit 5 (16)  :   Off - RespawnDelay Off      , On - RespawnDelay (See below)
+    Bit 6 (32)  :   Off - RespawnDelay Off      , On - RespawnDelay (See below)
+    Bit 7 (64)  :   Off - AutoTeam Off          , On - AutoTeam On
+	Bit 8 (128)	:	Off - Individual Frags		, On - Frags = TeamScore
+
+        N.B. FortressMap will be set On automatically by the the
+             Detection entity anyway, so just ignore that Bit.
+
+		N.B. The RespawnDelay settings takes 2 bits. The value of both of
+			 them determines the level of respawn delay, as follows:
+				Bit 5  		Bit 6		Result
+				 Off		 Off		No Respawn delays
+				 On			 Off		5 Second respawn delay
+				 Off		 On			10 Second respawn delay
+				 On			 On			20 Second respawn delay
+
+	- Specify a string which is then "localcmd"ed. This allows you
+	  to automatically set gravity, friction, etc.
+	  The string should be stored in the "message" variable.
+
+	- Put a limit on the number of lives each player has. When a player
+	  runs out of lives, they are stuck in observer mode for the rest
+	  of the level.
+	  Lives for each player depend on the setting for the team they
+	  belong to. The number of lives players of each team be should
+	  be specified in the following variables:
+	  	Team 1	:	"ammo_shells"
+	  	Team 2	:	"ammo_nails"
+	  	Team 3	:	"ammo_rockets"
+	  	Team 4	:	"ammo_cells"
+	  If the value of any team is 0, then the players of that team get
+	  infinite lives.
+
+	- Specify any playerclass that is _not_ allowed on this map
+	  for each particular team.
+	  The bits of the four variables are used for this.
+	  The variables are as follows:
+	  	Team 1	:	"maxammo_shells"
+	  	Team 2	:	"maxammo_nails"
+	  	Team 3	:	"maxammo_rockets"
+	  	Team 4	:	"maxammo_cells"
+	  Also, the "playerclass" variable can be used to restrict classes
+	  for all teams.
+	  The bits for all the variables are as follows:
+      	Bit 1 (1)	:   No Scout            
+        Bit 2 (2)	:	No Sniper        
+        Bit 3 (4)	:	No Soldier       
+        Bit 4 (8)	:	No Demolitions Man
+        Bit 5 (16)	:	No Combat Medic
+        Bit 6 (32)	:	No Heavy Weapons Guy
+        Bit 7 (64)	:	No Pyro
+        Bit 8 (128)	:	No Random PlayerClass
+		Bit 9 (256) :	No Spy
+		Bit 10(512) :	No Engineer
+	  E.g. If the "maxammo_nails" variable is set to 3, then players 
+	       in Team 2 will be unable to play Scouts or Snipers.
+
+	  Finally, if you want the Team to be a special team for a fancy
+	  map, such as the President in President-Quake, then you can 
+	  restrict the team to only play Civilian Class. Do this by setting
+	  the team's variable to "-1".
+
+Notes:
+	When using the "message" variable to set do localcmd's, you
+	can issue more than one command by seperating them with \n
+	Make sure you end it with a \n too.
+	E.g. The following changes the gravity and the friction.
+		"message" "sv_gravity 200\nsv_friction .5\n"
+
+----------------------------------------------------------------------------
+Team Spawnpoints
+----------------------------------------------------------------------------
+There is now a new entity for Team Spawnpoints. Team Spawnpoints are used
+to make players only spawn in points designated for their team. Use it
+to make players spawn inside their own base/fortress.
+The entity is called "info_player_teamspawn", and the "team_no" variable
+sets the team_no that owns this spawnpoint.
+
+Also, spawnpoints allow you to give any player the spawns from this
+point a GoalItem. This is done using the following variables:
+	"items"				:	Contains the ID of the GoalItem to give
+	"message"			:	Message displayed to anyone who spawns on this
+							point.
+
+The "goal_activation" of the Spawnpoint determines how the above works:
+
+	1	:	If set, then every player who spawns on this point
+			will be given a copy of the GoalItem. Otherwise, only 
+			the first player to spawn will be given it.
+	2	:	If set, then every player who spawns on this point
+			will have the "message" displayed to them. Otherwise, only 
+			the first player to spawn will be see it.
+
+Also, the "goal_effects" variable of the spawnpoint sets the re-use
+behaviour of the spawnpoint. If it's 1, then the spawnpoint removes
+itself after someone has spawned on it.
+
+
+----------------------------------------------------------------------------
+Armor
+----------------------------------------------------------------------------
+TeamFortress supports not only armor levels and absorption percentages the
+same way Quake does: it also supports armor classes. E.g. Armor can be designed
+to prevent particular attack types.
+The Armor Types are as follows:
+
+		Kevlar		:		Better protection against Bullets
+		Wooden ;)	:		Better protection against Nails
+		Blast		:		Better protection against Explosions
+		Shock		:		Better protection against Electricity
+		Ceramic		:		Better protection against Fire
+
+To use these armor types, just create an armor entity on the map as usual,
+and set it's "armorclass" variable. The "armorclass" is used as bitfields,
+as follows:
+      	Bit 1 (1)	:   Kevlar
+        Bit 2 (2)	:	Wooden
+        Bit 3 (4)	:	Blast
+        Bit 4 (8)	:	Shock
+        Bit 5 (16)	:	Ceramic
+
+Any combination of armor is legal, but try not to have armor which
+is too good.
+
+----------------------------------------------------------------------------
+Goal Summary / Terminology
+----------------------------------------------------------------------------
+Goals are the really fun things you can do with TeamFortressMaps.
+A goal is simply an entity you place in a map. It is then handled
+in the game based on the flags you give it. They're essentially
+more complex triggers. I've kept all the code separate from 
+the triggers tho, to allow us to toggle the use of them ingame.
+The flags and variables set for a Goal allow us to create powerful
+maps without changing the QuakeC code at all.
+-----------
+Goals 
+-----------
+Goals are always in one of the following states:
+
+ACTIVE	:	The goal has been activated in some way. 
+			It cannot be touched by a player.
+			Active goals return to the INACTIVE state based on their
+			result criteria, or when they're forced into INACTIVE state
+			by another goal.
+
+INACTIVE:	The goal is not active. 
+			It can be activated by players, and if the players meet the 
+			activation criteria, the goal moves	to the ACTIVE state.
+
+REMOVED :	The goal is not active.
+			It cannot be touched by players.
+			Removed goals can still be activated by other goals, in which
+			case they move to the ACTIVE state.
+			Removed goals can be restored to the INACTIVE by being restored
+			by another goal.
+
+Terminology
+-----------
+
+activated	: Goal moves to the ACTIVE state
+inactivate	: If the Goal is in ACTIVE state, it moves to the INACTIVE state
+removed		: Goal moves to the REMOVED state
+restored	: If the Goal is in REMOVED state, it moves to the INACTIVE state
+
+returned	: GoalItems can be returned to their starting point, based on
+			  a number of settings.
+
+Goal Group  : A group of goals that can be altered as one.
+
+Activating Player(AP): The player who either touched the Goal, or set the
+					   detpack which touched the Goal. In the case of GoalItems,
+					   the player that's attempting to pick up the GoalItem.
+
+Actions
+-------
+When goals go to ACTIVE state, they can perform various actions.
+These include:
+
+	- Increase the score of the team the AP belongs to.
+	- Display a message to all players
+	- Display a message just to the AP
+
+	- Alter the details of one or more players, as follows:
+		- Give the player extra lives (if applicable)
+		- Alter a player's health/ammo/armor/powerups
+		- Give the player(s) a GoalItem
+		- Remove a GoalItem from the player(s)
+
+		The player can be the AP, all the members of a Team the AP is/isn't in,
+		all the players on the map, everyone but the AP, all the players 
+		within a specified distance from the goal, or everyone in/not in one 
+		particular team.
+
+	- Activate another goal, applying the bonuses of the goal to the AP
+	- Activate another goal, without applying the bonuses of the goal to the AP
+	- Inactivate another goal
+	- Remove another goal
+	- Restore another goal
+
+	- Activate a goal if all the goals in a goal group are now ACTIVE
+	- Activate a group of goals
+	- Inactivate a group of goals
+	- Remove a group of goals
+	- Restore a group of goals
+
+	- Display team's scores and End the Level
+
+Activation
+----------
+Goals can be activated in one of the following ways:
+
+	- Touched by a player
+	- Touched by a detpack explosion
+	- Activated by another Goal
+	- Activated by a Goal Group command from another Goal
+	- Activated by a Quake Trigger
+
+Additionally, the AP's details can be checked.
+This allows you to have goals that are only activated if:
+
+	- The AP is of a particular class
+	- The AP has a particular GoalItem
+	- The AP is of a particular team
+
+Goals can also be activated only if the AP details _don't_ 
+meet the criteria specified.
+
+Inactivation
+------------
+Goals can be inactivated in one of the following ways:
+
+	- Inactivated after being ACTIVE for a specified time
+	- Inactivated by another Goal
+	- Inactivated by a Goal Group command from another Goal
+
+Also, some goals are marked as Multiple Goals. They return to INACTIVE
+state immediately after they become ACTIVE.
+
+Removal
+-------
+Goals can be removed in one of the following ways:
+
+	- Removed after being activated
+	- Removed by another Goal
+	- Removed by a Goal Group command from another Goal
+	- Removed by a Quake Trigger
+
+Restoration
+-----------
+Goals can be restored in one of the following ways:
+
+	- Restored by a GoalItem when it Returns (See below).
+	- Restored by another Goal
+	- Restored by a Goal Group command from another Goal
+
+----------------------------------------------------------------------------
+GoalItems
+----------------------------------------------------------------------------
+GoalItems are items that players can carry around.
+GoalItems can be placed directly into a map, where a player
+can collect them as usual.
+Also, on activation, Goals can give/remove GoalItems from the AP.
+The details of players attempting to collect the GoalItems can
+also be checked.
+This allows you to have GoalItems that can only be picked up if:
+
+	- The Player is of a particular class
+	- The Player has a particular GoalItem
+	- The Player is of a particular team
+
+GoalItems can also be set to only be picked up by players who
+meet the AP criteria.
+
+GoalItems can be returned to their starting position in any of the
+following circumstances:
+
+	- When it's dropped by a dying player
+	- When it's removed from an AP by a Goal activation
+	- When it's untouched for a specified time
+
+GoalItems can affect players in the same way Goals can, except that
+any modifications done by the GoalItem are permanent, until the 
+GoalItem is dropped.
+E.g. if a GoalItem grants invisibility to any players, they stay
+invisible until the GoalItem is dropped/removed.
+
+Also, when they're picked up by a player, GoalItems can perform the
+following actions on Goals:
+
+	- Activate another goal, applying the bonuses of the goal to the AP
+	- Activate another goal, without applying the bonuses of the goal to the AP
+	- Inactivate another goal
+	- Remove another goal
+	- Restore another goal
+
+	- Activate a group of goals
+	- Inactivate a group of goals
+	- Remove a group of goals
+	- Restore a group of goals
+
+GoalItems can also belong to Groups. GoalItems groups are kept
+separate from Goal Groups. Operations on either of them do not
+affect the other type, even if the Group No is the same.
+Using GoalItem groups, GoalItems can:
+
+	- Activate a goal if all the Items in a GoalItem group are being
+	  carried by players.
+	- Activate a goal if all the Items in a GoalItem group are being
+	  carried by one particular player.
+
+----------------------------------------------------------------------------
+Timer Goals
+----------------------------------------------------------------------------
+There is also a special type of goal called a Timer Goal. TG's 
+have a Timer Delay. TG's start INACTIVE, and then every Timer
+Delay seconds they activate, do their results, and inactivate.
+They can also be forced to activate by other Goals. They cannot
+be activated by player or detpack touches.
+N.B. When a TG goes ACTIVE, it does not have any AP, and hence
+	 _cannot_ activate other goals, or apply modifications to
+	 individual players.
+
+N.B. When a TG is forced to activate by another goal, they reset
+	 their internal timer that decides when they are next going
+	 to activate. 
+	 E.g. If a TG with a setting of 5 seconds is forced to activate,
+		  it will reset it's  timer, and still activate 5 seconds after
+		  it was forced to activate.
+
+So, as a quick summary, TG's can have their state altered as 
+usual by other goals, and when they activate, they can:
+
+	- Display a message to all players
+
+	- Alter the details of one or more players, as follows:
+		- Give a player extra lives (if applicable)
+		- Alter a player's health/ammo/armor/powerups
+		- Give a player a GoalItem
+		- Remove a player from an AP
+
+		The player can be all the members of a Team, all the players 
+		on the map, or all the players within a specified distance from 
+		the goal.
+
+	- Inactivate another goal
+	- Remove another goal
+	- Restore another goal
+
+	- Inactivate a group of goals
+	- Remove a group of goals
+	- Restore a group of goals
+
+	- Display team's scores and End the Level
+
+----------------------------------------------------------------------------
+Standard Quake Triggers and TeamFortress Goals
+----------------------------------------------------------------------------
+Quake triggers can be linked into TF Goals and vice versa. 
+When they are activated, a trigger can affect Goals 
+in the following ways:
+
+	- Activate a goal, applying the bonuses of the goal to the AP
+	- Activate a goal, without applying the bonuses of the goal to the AP
+	- Inactivate another goal
+	- Remove another goal
+	- Restore another goal
+
+	- Activate a group of goals
+	- Inactivate a group of goals
+	- Remove a group of goals
+	- Restore a group of goals
+
+When a Goal is activated, it can affect Quake Triggers
+in the following ways:
+	
+	- Activate Quake Trigger(s)
+	- Remove Quake Trigger(s)
+
+Don't forget that Quake Triggers include Buttons, Doors,
+Platforms, Health Boxes, Backpacks, Weapons, Armor, Keys, Sigils, 
+Monsters, Spikeshooters, Lights, Special Walls, and
+Teleporters..
+The 'activation' of any of these things can affect goals
+if you want it to.
+Triggers Activate when: 
+
+	- Collected by a player
+		Health Boxes, Weapons, Armor, Keys, Sigils, Backpacks
+	- Touched by a player or hit by a weapon
+		Buttons, Doors, Platforms, Special Walls,Teleporters
+	- Killed
+		Monsters
+
+Also, Quake Triggers have been enhanced so that any Trigger
+can be made to triggered only by a player if:
+	- The Player is of a particular class
+	- The Player has a particular GoalItem
+	- The Player is of a particular team
+
+This means that if the player does not match the criteria,
+the following happens:
+	- Health Boxes, Weapons, Armor, Keys, Sigils, Backpacks
+		Player cannot pick them up.
+	- Buttons, Doors, Platforms, Special Walls,	Teleporters
+		Player cannot activate/open/use them.
+	- Monsters
+		Player cannot hurt them.
+
+The result of 'Activation' of Triggers are as follows:
+
+	- Health Boxes, Weapons, Armor, Keys, Sigils
+		Bad. These items should never be activated by
+		Goals or Triggers. They should only be used
+		to activate other Goals/Triggers.
+
+	- Buttons
+		The button, if not already depressed, depressed
+		and sets off whatever it was designed to do.
+
+	- Doors
+		If the door is a DOOR_TOGGLE type door, it reveres it's 
+		current state. e.g. Opens if it's closed, closes if it's open.
+		It not, if it's closed, it opens.
+	
+	- Platforms
+		If it has not been triggered before, it will lower. Otherwise,
+		it does nothing.
+
+	- Special Walls
+		Changes it's texture.
+
+	- Teleporters
+		Doesn't do anything.
+
+	- Monsters
+		Wakes the monster.
+
+These are a rough guide. You should look at the qc code which handles
+trigger activation to see the details. Every Trigger that can be 
+activated by another trigger/goal has a .use function.
+Look inside it to see how activations for that type of Trigger 
+are handled.
+
+----------------------------------------------------------------------------
+Order of Actions
+----------------------------------------------------------------------------
+You don't really need to know the order in which the actions are applied,
+and they're far too complex now to describe them in any useful way. The
+only important thing of note is:
+
+	The Group Goal alterations are applied _before_ the single goal 
+	alterations. This is so you can do things like: 
+	Inactivate an entire group, and then activate one goal in that group.
+	Remove an entire group, and then restore one goal in that group.
+
+----------------------------------------------------------------------------
+Goal Technical Info
+----------------------------------------------------------------------------
+Goal behaviour is entirely defined by the variables of the Goal object
+when it is spawned at the start of the level. These variables are set
+in the map file. Just add up the flags that you want and set the 
+variable to that. 
+E.g. If you want a goal that can be activated by a Player touch(1) and
+	 a detpack explosion(2), you would set the "goal_activation" variable
+	 to 3.
+
+Don't worry! It's actually fairly easy :)
+N.B. Bit descriptions marked with (*) are dangerous, and should
+	 be handled with care.
+
+The variables of the Goals are handled as follows:
+
+	classname 	:	"info_tfgoal"
+	broadcast   :	Message broadcasted when this goal is activated, if any.
+				    Don't forget to put the \n at the end of it.
+	message		:	Message displayed to the activating player, if any.
+				    Don't forget to put the \n at the end of it.
+	deathtype	:	Message broadcasted if the goal	kills the activating
+					player. It is appended to the name of the player.
+					E.g. deathtype = " gets killed by a goal!\n" displays
+						 Bro gets killed by a goal!
+					Not needed if this goal doesn't do damage to a player.
+					Don't forget to put the \n at the end of it. 
+	target		:	If set, any Quake Triggers with the same name as this
+					will be activated.
+	killtarget	:	If set, any Quake Triggers with the same name as this
+					will be removed.
+	count		:	Score the team of the player who activates this goal gets.
+					Use negative numbers for penalty goals.
+	goal_no		:	A unique number ID identifying this goal. Used to make
+					references to this goal in other goals.
+	group_no	:	The number of the goal group this goal belongs to.
+	netname		:	This isn't used in Quake, but in the TeamFortress 
+					Entity Editor, it's used as the name for this goal.
+	noise		:	A .wav file played when the goal is activated. 
+					Make sure it's a .wav file you've got. It's probably 
+					best to use one of Quake's .wavs. 
+					If unspecified, no sound is played.
+	mdl			:	The .mdl file used for this item. Make sure it's a .mdl
+					file you've got. It's probably best to use one of Quake's
+					.mdls. If unspecified, the Goal is invisible.
+	
+All the following attributes are applied to the attributes of
+every player specified by the "goal_effect"(see below). 
+(e.g. the self.health is added to the health of the player)
+	lives		 :	Use negative values to remove lives from the player
+	health		 :	Use negative values to hurt the player
+	armortype	 : 	The player's armortype is set to this value
+	armorvalue	 :	The player's armorvalue is set to this value
+ 				    Armortypes are:   
+						0.3 : Green
+						0.6 : Yellow
+						0.8 : Red
+	armorclass	 :	The type of armor the player gets. (See Armor Types above)
+	frags		 :	Use negative values to lower frag count
+	ammo_shells  :	Use negative values to remove ammo
+	ammo_nails   :	Use negative values to remove ammo
+	ammo_rockets : 	Use negative values to remove ammo
+	ammo_cells   :	Use negative values to remove ammo
+	ammo_medikit :	Use negative values to remove ammo
+	ammo_detpack :	Use negative values to remove ammo
+
+Note A:	After applying all these values to the player, the playerclass 
+		limitations of the player are applied. So if you set the health of 
+		the player over that allowed, by his/her playerclass, it will then 
+		be lowered to the max_health for that playerclass.
+
+Note B: "lives" allows you to give/remove lives from players. This is only
+		useful if the current map limits the number of lives each player
+		has. See the Auto Detection section above.
+
+TeamFortress Grenades can be given/removed to/from the player by setting
+the following two variables.
+	no_grenades_1	:	Use negative values to remove grenades
+	no_grenades_2	:	Use negative values to remove grenades
+
+And finally, the following attributes are added to the global time
+and applied to every player specified by the "goal_effect"(see below). 
+(e.g. if the goal's invincible_finished is 5, then the player will
+get invincibility for 5 seconds after activating the goal.)
+	invincible_finished		:	Pentagram of Protection 	
+	invisible_finished		:	Ring of Shadows
+	super_damage_finished	:	Quad Damage
+	radsuit_finished		:	Environmental Suit
+
+---------------------------
+Goal Activation
+---------------------------
+The "goal_activation" of the goals determine how the goal is activated. 
+The bitfields are as follows:
+
+Activation Details
+	1	:	Activated when touched by a player.
+	2	:	Activated when touched by a detpack explosion.
+
+AP Details
+	-   If the "items_allowed" variable is non-zero, the AP must be 
+        carrying a GoalItem with an ID of "items_allowed".
+    -   If the "playerclass" variable is non-zero, the AP must be
+        be of the same class specified in "playerclass".
+        Classes are:
+            Scout             : 1
+            Sniper            : 2
+            Soldier           : 3
+            Demolitions Man   : 4
+            Medic             : 5
+            Heavy Weapons Guy : 6
+    -   If the "team_no" variable is non-zero, the AP must belong
+        to the same team as the number specified in "team_no".
+
+	4	:   This goal is only activated if the AP details above are _not_ met.
+
+    2048:   If this bit is set, the Goal/Item drops to the ground when it
+            first spawns.
+
+---------------------------
+Goal Effects
+---------------------------
+The "goal_effects" of the goal defines which players are affected by
+the activation of the goal. It defaults to 1, so that only the AP is
+affected. 
+The player modifications of this Goal are applied to every player
+that matches these criteria. GoalItems will also be given/removed
+to/from every one of the players matching the criteria.
+The bitfields are as follows:
+
+Basics
+	1	:	The AP is affected
+	2	:	Everyone on the AP's team is affected
+	4	:	Everyone not on the AP's team is affected
+	8	:	Everyone except the AP is affected
+
+Specific Groups
+	- If the "maxammo_shells" variable is non-zero, then all members of that
+	  team are affected.
+	- If the "maxammo_nails" variable is non-zero, then all members of any
+	  team except that one are affected.
+
+Radius
+	- If the "t_length" variable is non-zero, then everyone within 
+	  "t_length" distance of the goal is affected, unless the above
+	  bitfields are in use.
+	  If they are, then the bitfield check is applied only to those 
+	  caught in the radius.
+	  E.g. if "t_length" is 50, and "goal_effects" is 4, then everyone
+	  within 50 who isn't on the AP's team is affected.
+
+	16	:	If set, the radius effect is obstructed by walls.
+
+  	32	:	If a player who fits one of the other "goal_effects" variables
+			is not in the same environment as the Goal, don't affect him.
+			Environments are air, water, slime, lava.
+			e.g. If a Goal is above some water, and does a radius effect
+			     with "t_length", and a player in the water is within the
+				 radius, he won't be affected if this bit is set.
+
+Note A: If the Goal gives out a GoalItem, then every player who matches
+		this criteria will get the GoalItem. This can result in lots of these
+		GoalItems, so be careful.
+		
+---------------------------
+Goal Results
+---------------------------
+The "goal_result" of the goals determine how the goal behaves when it is 
+activated, and the results of it's activation. It also determines what it
+will do to any players that match it's "goal_effects" criteria.
+The bitfields are as follows:
+
+Respawn behaviour
+	1   :	The goal is immediately removed after it is activated.
+
+    - If the "wait" variable is non-zero, then the Goal stays ACTIVE for
+      the "wait" seconds, and then inactivates.
+	  If "wait" is -1, the Goal stays active permanently.
+
+GoalItem behaviour
+    - If the "items" variable is non-zero, the Goal gives a GoalItem
+      to the player. The GoalItem it gives is the Item with a GoalNo
+      of "items".
+    - If the "axhitme" variable is non-zero, the Goal removes a GoalItem
+      from the player. The GoalItem it removes is the Item with a GoalNo
+      of "axhitme".
+      If the player does not have the GoalItem, nothing happens.
+
+Goal behaviour
+	2   :   If this is set, the goals activated by this one apply
+            their AP modifications. Otherwise, they don't.
+
+    - If the "activate_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is activated.
+    - If the "inactivate_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is inactivated.
+    - If the "remove_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is removed.
+    - If the "restore_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is restored.
+
+Miscellaneous
+	4   :	Display teamscores, fire intermission, and end the level
+
+	8	:	GoalItems given out by this Goal don't apply their results.
+
+	16	:	If the player these results are being applied to is a Spy,
+			reset his/her skin and color.
+
+----
+Note A: If (1) is not set and their is no "wait" specified, then the 
+        goal is a Multiple Goal.
+		After it activates, it will automatically inactivate.
+		This is not always a good idea. When a player runs over an entity,
+		the touch function will usually be run about 6 or 7 times, so the
+		player will activate the goal multiple times. If you want a player
+		to be able to activate it over and over again, make it respawn 
+		every 2-3 seconds.
+		This is especially dangerous if the goal gives out an item on
+		activation, since you will end up with a _lot_ of items.
+		Of course, you may want this for a goal that is activated remotely
+		by another goal at certain times.
+
+Note B:	When a goal is activated by another goal, _no_ checking is done
+		based on the "goal_activation" variable of the target goal. It is
+		simply activated. The AP who activated the original goal is used
+		as the activator for all the goals, but the stats of an activated
+		goal are only added to the player's if (2) is set on the goal
+        that activates it.
+		GoalItems are always given/removed.
+
+---------------------------
+Goal Groups
+---------------------------
+Goal groups allow you to do operations of multiple goals in one go.
+The "group_no" of a Goal defines the ID of goal group it is in.
+Any goal group operation affects all goals with the specified ID.
+A goal's "goal_group" specifies what operations, if any, it performs
+on any goal groups.
+Since I've cleaned up the goal group handling to get rid of bitflags
+which aren't needed, there are no bits used in the "goal_group"
+variable anymore :)
+I've left it in anyway, since some may come along later.
+Goal Group handling is as follows:
+
+    - If the "all_active" variable is non-zero, then when this goal is activated,
+      a check is done. If all the goals in the group specified in the "all_active"
+      variable are ACTIVE, activate a goal with a goal number equal to the
+      value of the "last_impulse" variable.
+
+    - If the "activate_group_no" variable is non-zero, activate all the
+      goals in that Group.
+    - If the "inactivate_group_no" variable is non-zero, inactivate all the
+      goals in that Group.
+    - If the "remove_group_no" variable is non-zero, remove all the
+      goals in that Group.
+    - If the "restore_group_no" variable is non-zero, restore all the
+      goals in that Group.
+
+----
+Note A: When a goal is activated by another goal, _no_ checking is done
+        based on the "goal_activation" variable of the target goal. It is
+		simply activated. The AP who activated the original goal is used
+		as the activator for all the group goals.
+		Bonuses of goals in groups are _never_ applied to the activating player.
+		GoalItems are always given/removed.
+
+----------------------------------------------------------------------------
+Timer Goal Technical Info
+----------------------------------------------------------------------------
+Timer Goals are basically identical to Goals, except they are never activated
+by players or detpack explosions. They automatically activate every 
+"search_time" seconds. They can also be activated by other goals and triggers.
+The variables of Timer Goals are the same as Goals, except for:
+
+	classname	:	"info_tfgoal_timer"
+
+	search_time :	The time in seconds that this goal activates.
+					e.g. a search_time of 2 makes this goal activate every
+						 2 seconds.
+
+As a result of their method of activation, Timer Goals can _never_ do
+anything that requires an AP, and they can't activate any other Goals.
+They _can_ do operations on groups of players, such as all the players
+on the map, or all the players in a team, etc.
+This is done using the "goal_effect" variable in much the same way
+as Goals, as follows:
+Basics
+	1	:	Illegal for Timer Goals.
+	2	:	Illegal for Timer Goals.
+	4	:	Illegal for Timer Goals.
+	8	:	Illegal for Timer Goals.
+
+Specific Groups
+	- If the "maxammo_shells" variable is non-zero, then all members of that
+	  team are affected.
+	- If the "maxammo_nails" variable is non-zero, then all members of any
+	  team except that one are affected.
+
+Radius
+	- If the "t_length" variable is non-zero, then everyone within 
+	  "t_length" distance of the goal is affected, unless the above
+	  bitfields are in use.
+	  If they are, then the bitfield check is applied only to those 
+	  caught in the radius.
+	  E.g. if "t_length" is 50, and "goal_effects" is 4, then everyone
+	  within 50 who isn't on the AP's team is affected.
+
+	16	:	If set, the radius effect is obstructed by walls.
+
+  	32	:	If a player who fits one of the other "goal_effects" variables
+			is not in the same environment as the Goal, don't affect him.
+			Environments are air, water, slime, lava.
+			e.g. If a Goal is above some water, and does a radius effect
+			     with "t_length", and a player in the water is within the
+				 radius, he won't be affected if this bit is set.
+
+  	64 :	If this bit is set, then instead of just applying this Goal's
+			results to the group of players specified by the other 
+			"goal_effects" variable, this Goal checks it's criteria for
+			each player in the group and then applies it's results invididually 
+			to any of them that pass.
+
+Note A : The first 4 bits in the "goal_effects" are illegal for Timer Goals,
+		 and should _never_ be set, because they involve an AP.
+
+----------------------------------------------------------------------------
+Goal Items Technical Info
+----------------------------------------------------------------------------
+GoalItems do not have to be given to a player by a Goal activation.
+They can be placed directly into a map.
+The variables of the GoalItems are as follows:
+
+	classname 	:	"item_tfgoal"
+	netname  	:	Name of this GoalItem.
+	broadcast	:	Message broadcasted when this goalitem is retrieved, if any.
+				    Don't forget to put the \n at the end of it.
+	message		:	Message displayed to a player when they get the Item, if any.
+				    Don't forget to put the \n at the end of it.
+	noise		:	A .wav file played when the item is collected. 
+					Make sure it's a .wav file you've got. It's probably 
+					best to use one of Quake's .wavs. 
+					If unspecified, no sound is played.
+	mdl			:	The .mdl file used for this item. Make sure it's a .mdl
+					file you've got. It's probably best to use one of Quake's
+					.mdls. It defaults to the silver key.
+	goal_no		:	A unique number identifying this GoalItem. Used to make
+					references to this Item in goals.
+    goal_group  :   The number of the goalitem group this goal belongs to.
+
+GoalItems can also modify player details in the same Goals can, using
+the "goal_effects" variable (see above). 
+The tricky bit is that any Player Modifications done by goals are added 
+when the player first picks the item up, and are _removed_ when the player 
+loses the item.
+E.g. If the item has a health of 40, then the player gets 40 health
+     added to their health when he/she picks it up. Then, when they
+     drop it, he/she loses 40 health.
+There are two exceptions to this: 
+
+	1.	Power-Ups. Items give the players a powerup for the entire time the 
+		player has the item. The time specified in the _finished variable 
+		is ignored: If it's non-zero, then all players the GoalItem specifies
+		get the power-up while item is still carried.
+
+	2.  GoalItems. Items given/removed by another GoalItem when it's picked up
+		are not removed/given back when the original GoalItem is dropped/removed.
+
+With the "goal_effects" variable you can make Items affect more than
+one player. This is done exactly as if it was just one person.
+E.g. If the Item adds health to everyone, then as soon as any player
+picks it up, the modifications are applied to everyone, and as soon as
+it's dropped, the modifications are removed from everyone.
+
+Also, GoalItems can affect Goals in much the same way as other Goals, 
+as follows:
+
+    - If the "activate_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is activated.
+    - If the "inactivate_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is inactivated.
+    - If the "remove_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is removed.
+    - If the "restore_goal_no" variable is non-zero, then the Goal with
+      a Goal_No equal to the variable is restored.
+
+    - If the "activate_group_no" variable is non-zero, activate all the
+      goals in that Group.
+    - If the "inactivate_group_no" variable is non-zero, inactivate all the
+      goals in that Group.
+    - If the "remove_group_no" variable is non-zero, remove all the
+      goals in that Group.
+    - If the "restore_group_no" variable is non-zero, restore all the
+      goals in that Group.
+
+GoalItems can use the "goal_result" variable. The Bitfields are as follows:
+
+	2	:	Goals activated by this Item don't apply bonuses to the AP.
+
+	16	:	If the player these results are being applied to is a Spy,
+			reset his/her skin and color.
+			When a Spy is carrying a GoalItem with this bit set, he/she
+			will be unable to change skin and color.
+
+When Goals are activated by a GoalItem, the AP used to activate the Goals
+is the Player who picked up the Item. AP Modifications are applied if (512)
+is set it the "goal_activation" variable (see below).
+GoalItems themselves have various bitfields to depict the GoalItem's
+behaviour. The bitfields are stored in the GoalItem's "goal_activation"
+variable, and are:
+
+Carrying Details
+    1	:   Any player carrying this item will glow.
+    2	:   Any player carrying this item will move at half-speed.
+(*) 4	:   When a player carrying this is killed, the item will be dropped
+
+Returning
+    8	:   Return the item if dropped by a dying player
+    16	:   Return the item if removed from a player by a goal activation.
+    32	:   Return the item if removed from the map by the action of the
+            (128) (see below).
+
+    - If the "impulse" variable is non-zero, then when the GoalItem
+      is returned by one of the above, the goal with a Goal No equal to
+      the "impulse" is restored.
+
+Pickup Details
+     - If the "items_allowed" variable is non-zero, the Player must be 
+       carrying a GoalItem with an ID matching the variable. If not,
+       he/she will not be able to get this item.
+     - If the "playerclass" variable is non-zero, the Player must be
+       be of the same class specified in the variable. If not,
+       he/she will not be able to get this item.
+       Classes are:
+             Scout             : 1
+             Sniper            : 2
+             Soldier           : 3
+             Demolitions Man   : 4
+             Medic             : 5
+             Heavy Weapons Guy : 6
+     - If the "team_no" variable is non-zero, the Player must belong
+       to the same team as the number specified in the variable.
+       If not, he/she will not be able to get this item.
+
+	64	:	This GoalItem can only be picked up by a player if they _don't_
+			match the player details above.
+
+Miscellaneous
+    128 :   If this is set, then, after the goal is dropped by a player, 
+            if it has not been touched for the time specified in the 
+            "pausetime" variable, in seconds, it is removed.
+
+    - If the "distance" variable is non-zero, then, If all GoalItems in the 
+      goalitem group specified by "distance" are being carried by players, 
+      activate a goal, the Goal No of which is specified in "pain_finished".
+    - If the "speed" variable is non-zero, then, If all GoalItems in the 
+      goalitem group specified by "speed" are being carried by one player,
+      activate a goal, the Goal No of which is specified in "attack_finished".
+
+	256 :	If a player carrying this Item dies, they keep it, even after
+			they respawn.
+
+	512 :   If this Item is not being carried by a goal, it glows.
+
+	1024: 	When this item is removed from a player, don't remove the 
+			effects this item gave the player.
+
+    2048: If this bit is set, the Goal/Item drops to the ground when it
+          first spawns.
+
+    4096: If this bit is set, any player carrying this item can drop
+          it using the "dropitems" command.
+
+----
+Note A: (4) is dangerous. If you have goals giving out this item multiple
+        times, make sure the item is getting removed somehow, or you could
+        end up with too many items on the map.
+
+Note B: The Pickup Details are only used when a player picks up this 
+        item directly. If this item is given to an AP by a goal, these
+        are ignored.
+
+Note D: (128) allows you to make items that are untouched for a while 
+		disappear. This should be set if you have Goals that give out 
+		multiple copies of GoalItems that are dropped when players 
+	    carrying them are killed. Otherwise you could end up with too many 
+	    entities on the map :)
+	    If you have a GoalItem that is only given out once and is dropped
+	    when players with it die, you will probably want to set (128)
+	    and (32), so that if it falls in lava or something, it'll be 
+		returned.
+	    If you don't specify a value, "pausetime" defaults to 2 minutes.
+
+----------------------------------------------------------------------------
+Quake Triggers that use TeamFortress Goals Technical Details
+----------------------------------------------------------------------------
+For Triggers to use Goals, you need to use various variables. 
+Triggers can use the same AP criteria matching as Goals, as follows:
+
+	-   If the "items_allowed" variable is non-zero, the AP must be 
+        carrying a GoalItem with an ID of "items_allowed".
+    -   If the "playerclass" variable is non-zero, the AP must be
+        be of the same class specified in "playerclass".
+        Classes are:
+            Scout             : 1
+            Sniper            : 2
+            Soldier           : 3
+            Demolitions Man   : 4
+            Medic             : 5
+            Heavy Weapons Guy : 6
+    -   If the "team_no" variable is non-zero, the AP must belong
+        to the same team as the number specified in "team_no".
+
+
+If any of the following variables is not set, or 0, then the effect of that
+variable is simply not used.
+The variables are:
+
+	activate_goal_no	:	Activates a goal with a goal_no equal to this.
+	inactivate_goal_no	:	Inactivates a goal with a goal_no equal to this.
+	remove_goal_no		:	Removes a goal with a goal_no equal to this.
+	restore_goal_no		:	Restores a goal with a goal_no equal to this.
+								   
+	activate_group_no	:	Activates a group of goals with a goal_group equal to this.
+	inactivate_group_no	:	Inactivates a group of goals with a goal_group equal to this.
+	remove_group_no		:	Removes a group of goals with a goal_group equal to this.
+	restore_group_no	:	Restores a group of goals with a goal_group equal to this.
+
+
+Also:
+
+	- If the "goal_result" variable of the Trigger is 0, then any Goals 
+	  activated by this Trigger _don't_ add bonuses to the AP. If it's 2, they do.
+
+    - If the "all_active" variable is non-zero, then when this Trigger is activated,
+      a check is done. If all the goals in the group specified in the "all_active"
+      variable are ACTIVE, activate a goal with a goal number equal to the
+      value of the "last_impulse" variable.
+
+In all cases, the AP for the goals will be set to the "activator". If the 
+AP is not a player, then no player-related operations will be performed by
+the Goals, or any Goals activated by those Goals.
+This stuff is kind of dangerous, if the Trigger isn't activated by a player,
+and the Goals your playing with alter other Goals. Just be careful :)
+
+----------------------------------------------------------------------------
+Summary of Changes
+----------------------------------------------------------------------------
+This is a summary of changes in the map specs from TeamFortress v1.3x
+to TeamFortress v2.x :
+
+	- All entities, most especially GoalItems, can specify the team
+	  they belong to by putting the team number in the "owned_by" variable.
+
+	- The "goal_state" variable allows you to set the starting state
+	  of a goal. The available states are:
+			Active 	 				1 
+			Inactive (default) 		2 
+			Removed					3 
+
+	- Activation criteria for Goals/Items/Timers/Triggers can
+	  now include the Checking of the state of other Goals
+	  The following variables are used:
+	   "if_goal_is_active"   : If this is non-zero, the goal will only activate
+							   if the goal with a "goal_no" matching 
+							   "if_goal_is_active" is active.
+	   "if_goal_is_inactive" : As above, if the goal is inactive.
+	   "if_goal_is_removed"  : As above, if the goal is removed.
+
+	   "if_group_is_active"  : As above, except that all goals with a "group_no"
+							   matching "if_group_is_active" must be active.
+	   "if_group_is_inactive": As above, if all the group is inactive.
+	   "if_group_is_removed" : As above, if all the group is removed.
+
+	- Upon activation, Goals can now centerprint more intelligently,
+	  as follows:
+		"broadcast"			 : Instead of being bprinted, it now gets
+							   centerprinted to everyone, except the AP.
+							   You'll probably want to use "team_broadcast"
+							   and "non_team_broadcast" instead.
+		"message"			 : Instead of sprinting to the AP, it now
+							   centerprints.
+		"team_broadcast"	 : Gets centerprinted to all of the AP's team,
+							   except the AP.
+		"non_team_broadcast" : Gets centerprinted to all non-AP-teammembers.
+							   If there is a "owners_team_broadcast" specified,
+							   it isn't centerprinted to members of the team
+							   that own the goal/item.
+		"owners_team_broadcast" : Gets centerprinted to all the members of the
+							      team that own the goal/item.
+
+	- The detection entity can now supply the Team Menu string, which
+	  effectively allows you to provide names for team.
+	  The string should be put in the detection entity's "team_broadcast" var.
+	  It gets centerprinted when player's are asked to join a team, 
+	  so it should be similar to the following format:
+
+		"=== Choose your team ===\n\n1.. Team One  \n\n\n\n\n7.. Bind my keys for me!\n\nFor full details on this patch:\nhttp://yallara.cs.rmit.edu.au/~cookj\n"
+		"=== Choose your team ===\n\n2.. Team One  \n2.. Team Two  \n\n\n\n\n7.. Bind my keys for me!\n\nFor full details on this patch:\nhttp://yallara.cs.rmit.edu.au/~cookj\n"
+		"=== Choose your team ===\n\n2.. Team One  \n2.. Team Two  \n3.. Team Three\n\n\n\n\n7.. Bind my keys for me!\n\nFor full details on this patch:\nhttp://yallara.cs.rmit.edu.au/~cookj\n"
+		"=== Choose your team ===\n\n3.. Team One  \n2.. Team Two  \n3.. Team Three\n4.. Team Four \n\n\n\n\n7.. Bind my keys for me!\n\nFor full details on this patch:\nhttp://yallara.cs.rmit.edu.au/~cookj\n"
+
+	  Other examples are:
+
+	  	"=== Choose your team ===\n\n1.. Blue Team \n2.. Red Team  \n\n\n\n7.. Bind keys"
+		"=== Choose your team ===\n\n1.. Attackers \n2.. Defenders \n\n\n\n7.. Bind keys"
+
+	  You need to have a team number and choice for every team on your map.
+	  Don't forget that TF determines the number of teams on a map based upon
+	  the Teamspawn points. If there are spawn points for 3 teams, then you
+	  should have three teams in the team menu string.
+	
+	  N.B. Unfortunately, qbsp prevents you from having large strings, so you
+	       have to be curt. If you get a "Token too large" error when qbsping,
+		   then you've got the string too long.
+
+	- The detection entity can now specify a Map Help string in it's
+	  "non_team_broadcast" variable.
+	  Player's can do the Map Help impulse, and the Map Help string will
+	  be printed. The string can be anything you like, but it should be
+	  a quick description of the goal of the map, such as:
+  		"Havoc: Get into the enemy's castle and destroy their computer room!\n"
+
+	  End the string with a \n.
+	  N.B. Unfortunately, qbsp prevents you from having large strings, so you
+	       have to be curt. If you get a "Token too large" error when qbsping,
+		   then you've got the string too long.
+
+	- All Entities can specify whether they exist for different skill 
+	  settings, as follows:
+		"ex_skill_min" 	: The entity only exists when the skill variable
+						  is >= to this value.
+		"ex_skill_max" 	: The entity only exists when the skill variable
+						  is <= to this value.
+
+	  N.B. The checking is done in the initial spawning, so if the skill
+		   changes during the level, it will have no effect on the entities.
+
+	  You can use this to do so many things, such as making plats move
+	  in different trains at different skill levels, more/less monsters
+	  and ammo and different levels, more secrets at higher levels, etc.
+
+	- Team Spawnpoints can set their "goal_effects" variable to 1, which
+	  makes them remove themselves after someone has spawned on them.
+	  Use this to make a team spawn inside their base initially, and then
+	  spawn throughout the level for the rest of the game.
+	
+	- Items now have a ItemGlow flag, which makes the Item glow when it's
+	  not being carried by a player.
+	  The flag is Bit 10 (512) in the Goalitem's "goal_activation" variable.
+
+	- The Detection entity can now restrict the classes available to
+	  members of particular teams, in the following variables:
+	  	Team 1	:	"maxammo_shells"
+	  	Team 2	:	"maxammo_nails"
+	  	Team 3	:	"maxammo_rockets"
+	  	Team 4	:	"maxammo_cells"
+	
+	- The Detection entity can now specify a Class Selection string for
+	  any team. The default string allows them to pick any class, but you
+	  may want to refine it for teams that have a limited selection of
+	  classes.
+	  If you don't supply one, the default will be used.
+	  The strings should be put in following Detection entity variables :
+	  	Team 1 String	:	"noise1"
+	  	Team 2 String	:	"noise2"
+	  	Team 3 String	:	"noise3"
+	  	Team 4 String	:	"noise4"
+
+	  The default string looks like this:
+                                                                                                                                        
+		"=== Choose your class ===\n\n1.. Scout   \n2.. Sniper  \n3.. Soldier \n4.. Demoman \n5.. Medic   \n6.. Hvwep   \n7.. Pyro    \n8.. Spy     \n9.. Engineer\n0.. Randompc\n"
+
+	  But if you restricted Team 1 to Scout, Demoman, and Medic, you might 
+	  want to set the "noise1" variable to:
+
+		"=== Choose your class ===\n\n1.. Scout   \n4.. Demoman \n5.. Medic   \n"
+
+	  N.B. You _MUST_ not alter the numbering of the class. 
+	  	   e.g. Sniper must always be selected with 2, Demoman with 4, etc.
+	  N.B. Unfortunately, qbsp prevents you from having large strings, so you
+	       have to be curt. If you get a "Token too large" error when qbsping,
+		   then you've got the string too long.
+
+	- Any Goal can now specify an 'else' goal. This is a goal which attempts
+	  to activate if this goal fails to activate because it's Criteria 
+	  wasn't met. The "goal_no" of the 'else' goal should be specified in 
+	  the Goal's "else_goal" variable. 'else' Goals still check their
+	  criteria, the AP being the player who failed the first goal's criteria.
+		    
+	- The Detection entity can now specify a maximum number of players
+	  for each team. The default is 0, which is unlimited.
+	  The player limits should be put in the following variables of
+	  the Detection Entity : 
+		Team 1	:	"ammo_medikit"
+		Team 2	:	"ammo_detpack"
+		Team 3	:	"maxammo_medikit"
+		Team 4	:	"maxammo_detpack"
+	
+	  N.B. The total number of players _MUST_ be >= 16. This is the total
+	       number of players for the _existing_ teams. 
+		   e.g. if you have TeamSpawnpoints for only 2 teams, then the
+		   total number of players allowed in the two teams must be >= 16.
+
+	- Any Goal can now display the status of upto 4 GoalItems when it's
+	  activated. The Goal specifies 6 different strings, which are used
+	  to do the displaying for all the items.
+	  The item's "goal_no" are specified in the following variables:
+		"display_item_status1"	: Item 1
+		"display_item_status2"	: Item 2
+		"display_item_status3"	: Item 2
+		"display_item_status4"	: Item 2
+
+	  The strings are specified in the following variables:
+	    "team_str_home"		: Displayed when the item is at the point
+							  it originally spawned at. 
+	    "team_str_moved"	: Displayed if the item has been moved from
+		 					  it's original spawning point.
+	    "team_str_carried"	: Displayed if the item is being carried. It
+							  is prepended to the carrier's name, or " You"
+							  if the Player is carrying the item.
+							  e.g. "Your flag is being carried by" Bro.
+	    "non_team_str_home"		: Displayed when the item is at the point
+							  	it originally spawned at. 
+	    "non_team_str_moved"	: Displayed if the item has been moved from
+		 					  	  it's original spawning point.
+	    "non_team_str_carried"	: Displayed if the item is being carried. It
+							  	  is prepended to the carrier's name, or " You"
+								  if the Player is carrying the item.
+								  e.g. "The enemy flag is being carried by" You.
+	
+	  The "team..." strings are displayed to members of the team that the
+	  GoalItem belongs too. The "non_team..." strings are displayed to anyone
+	  not on the team the GoalItem belongs to.
+	  If the Goalitem does not belong to a team, the "team..." strings
+	  are displayed.
+	  
+	  Finally, if the Detection Entity has these variable set, then when
+	  a player does Impulse 21 (FlagInfo in CTF), then the details of the
+	  items specified by the Detection Entity will be displayed.
+
+	- GoalItems can centerprint messages to players when they return to
+	  their starting point, regardless of how they return.
+	  Two messages should be supplied in the following variables:
+		"noise3"	:	Is centerprinted to all the members of the team
+						that own the item.
+		"noise4"	:	Is centerprinted to everyone except the members of 
+						the team that own the item.
+
+	- You can restrict teams to only the Civilian class, for special
+	  purposes. Do it by setting their class restriction variable to "-1".
+
+	- Any Goal can force a GoalItem to return, if it's not being carried,
+	  by specifying an Item No in the "return_item_no" variable.
+	  
+	- Goals activated by other Goals don't automatically activate like
+	  they used to. Now they check their Criteria before activating. The AP
+	  used is the AP of the first Goal.
+	  N.B. The AP doesn't have to initiate the Criteria checking on 
+	       activated goals. E.g. The AP doesn't have to be touching
+		   the Goal which was activated, even if the Goal's "goal_activation"
+		   specifies that it's activated by touch.
+
+	- GoalItems have a flag, which they can check, which tells them if they're
+	  not at their starting position.
+	  You can make any Goal/Item/whatever have part of it's Criteria
+	  check to see if an Item is _not_ at it's origin by putting the
+	  "goal_no" of the item in the "if_item_has_moved" variable.
+	  You can make any Goal/Item/whatever have part of it's Criteria
+	  check to see if an Item _is_ at it's origin by putting the
+	  "goal_no" of the item in the "if_item_hasnt_moved" variable.
+
+	- Goals that give out items can specify whether they want the Items
+	  to apply their results. Usually, the goal that gives out the items
+	  does all the results you want, so you can specify this.
+	  Do it by setting Bit number 4 (8) in the Goal's "goal_result" variable.
+	
+	- The Detection Entity can specify that the grappling hook cannot
+	  be used on a map, by setting the Detection Entity's "hook_out"
+	  variable to 1.
+
+	- Any Goal can remove/restore Teamspawnpoints. The variables to use
+	  are:
+		"remove_spawnpoint"		: Remove a spawnpoint with a matching "goal_no"
+		"restore_spawnpoint"	: Restore the matching spawnpoint
+		"remove_spawngroup"		: Remove all spawnpoints with a "group_no"
+								  matching this number.
+		"restore_spawngoup"		: Restore a group of spawnpoints.
+
+	- GoalItems can make console items light up, such as the silver key icon,
+	  when they're being carried. In the "items" variable, just specify a 
+	  bitfield. The bit's values are as follows:
+
+		Silver Key			 : 131072 
+		Gold Key			 : 262144 
+
+		Invisibility Icon	 : 524288 
+		Invulnerability Icon : 1048576 
+		Radsuit Icon		 : 2097152
+		Quad Icon			 : 4194304 
+
+	- GoalItems don't restore a goal when they return, now they activate it.
+	  If you had any GoalItems using the "impulse" variable to restore a Goal
+	  when the GoalItem returns, you'll need to redo the Goalwork.
+
+	- Goals can increase the scores of any specific teams, using the following
+	  variables:
+			
+			increase_team1	:  Increase the score of team 1 by this value
+			increase_team2	:  Increase the score of team 2 by this value
+			increase_team3	:  Increase the score of team 3 by this value
+			increase_team4	:  Increase the score of team 4 by this value
+
+-------------------------
+Changes from 2.11 to 2.12
+
+	- Upon activation, Goals can now broadcast even more,
+	  as follows:
+
+		"netname_broadcast"		:	Gets bprinted to _all_ players, prepended
+									by the AP's name.
+									E.g. " got the RED flag" would be bprinted
+										 as "Bro got the Red Flag"
+
+		"netname_team_broadcast" : Gets bprinted to all of the AP's team,
+							   	   except the AP, with the AP's name prepending 
+							   	   it.
+
+		"netname_non_team_broadcast" : Gets bprinted to all non-AP-teammembers,
+							   prepended by the AP's name.
+							   If there is a "owners_team_broadcast" specified,
+							   it isn't centerprinted to members of the team
+							   that own the goal/item.
+
+		"netname_owners_team_broadcast" : Gets bprinted to all the members of 
+								the team that own the goal/item, prepended by
+								the AP's name.
+
+-------------------------
+Changes from 2.12 to 2.13
+
+	- GoalItems can centerprint messages to players when they're dropped by
+	  a dying player.
+	  Two messages should be supplied in the following variables:
+		"team_drop"		:	Is centerprinted to all the members of the team
+						 	that own the item.
+		"non_team_drop"	:	Is centerprinted to everyone except the members of 
+							the team that own the item.
+	  Also, messages can be appended to the name of the player who dropped
+	  the item, and then bprinted.
+	  As follows:
+		"netname_team_drop"		:	Gets bprinted to all members of the team
+									who own the item, prepended by the name of
+									the player who dropped the item.
+		"netname_non_team_drop"	:	Gets bprinted to all players not of the team
+									who own the item, prepended by the name of
+									the player who dropped the item.
+
+-------------------------
+Changes from 2.13 to 2.14
+
+	- A new Bit was added to the "goal_activation" of GoalItems. 
+	  As follows:
+		1024: 	When this item is removed from a player, don't remove the 
+				effects this item gave the player.
+
+	  E.g. If you've got a GoalItem giving a player 2 frags, when the 
+		   GoalItem is removed from the player, the 2 frags won't be
+		   removed. Be Careful with this one. Check all the results you
+		   bestow on the player before using it.
+		   If necessary, have the GoalItem activate another goal which
+		   bestows the effects you want on the player instead.
+
+-------------------------
+Changes from 2.14 to 2.5
+
+	- A new Bit was added to the "goal_result" of Goals and GoalItems.
+	  As follows:
+		
+		16	:	If the player these results are being applied to is a Spy,
+				reset his/her skin and color.
+				When a Spy is carrying a GoalItem with this bit set, he/she
+				will be unable to change skin and color.
+
+	  	This enables you to have areas where spies cannot go undercover, etc.
+		It also means you can have the spy unable to change his/her skin/color
+		when carrying the flag.
+		To introduce a bit of backwards compatability, the spy cannot disguise
+		himself when he's dimly lit either, due to carrying a GoalItem with
+		the first bit of its "goal_activation" set.
+		Almost all the flags in existing TF maps have this bit set.
+
+	- Goals can work with groups of items more now, using the following
+	  variables:
+		"has_item_from_group" : More Criteria. Player must be carrying
+								at least 1 of the items in the group.
+
+		"remove_item_group"	  :	Result. Removes all items belonging to this 
+								group from the Player.
+
+	- A new Bit was added to the "goal_effects" of Goals and GoalItems.
+	  As Follows:
+	  	
+	  	32	:	If a player who fits one of the other "goal_effects" variables
+				is not in the same environment as the Goal, don't affect him.
+				Environments are air, water, slime, lava.
+				e.g. If a Goal is above some water, and does a radius effect
+				     with "t_length", and a player in the water is within the
+					 radius, he won't be affected if this bit is set.
+
+	- The Spy and Engineer were added to the list of classes the TF Detect
+	  entity can ban. The list is now as follows:
+       	Bit 1 (1)	:   No Scout            
+        Bit 2 (2)	:	No Sniper        
+        Bit 3 (4)	:	No Soldier       
+        Bit 4 (8)	:	No Demolitions Man
+        Bit 5 (16)	:	No Combat Medic
+        Bit 6 (32)	:	No Heavy Weapons Guy
+        Bit 7 (64)	:	No Pyro
+        Bit 8 (128)	:	No Random PlayerClass
+		Bit 9 (256) :	No Spy
+		Bit 10(512) :	No Engineer
+
+	- Since quake has a limit on the size of the entity data in a map,
+	  abbreviations for some of the common entity fields were created.
+	  The Abbreviations are as follows:
+		Classnames
+			"i_p_t"   for   "info_player_teamspawn"
+			"i_t_g"   for   "info_tfgoal"
+			"i_t_t"   for   "info_tfgoal_timer"
+
+		Common Variables
+			"g_a"     for   "goal_activation"
+			"g_e"     for   "goal_effects"
+
+		String Variables
+			"t_s_h"   for   "team_str_home"
+			"t_s_m"   for   "team_str_moved"
+			"t_s_c"   for   "team_str_carried"
+			"n_s_h"   for   "non_team_str_home"
+			"n_s_m"   for   "non_team_str_moved"
+			"n_s_c"   for   "non_team_str_carried"
+
+			"b_b"     for   "broadcast"
+			"b_t"     for   "team_broadcast"
+			"b_n"     for   "non_team_broadcast"
+			"b_o"     for   "owners_team_broadcast"
+			"n_b"     for   "netname_broadcast"
+			"n_t"     for   "netname_team_broadcast"
+			"n_n"     for   "netname_non_team_broadcast"
+			"n_o"     for   "netname_owners_team_broadcast"
+
+			"d_t"     for   "team_drop"
+			"d_n"     for   "non_team_drop"
+			"d_n_t"   for   "netname_team_drop"
+			"d_n_n"   for   "netname_non_team_drop"
+
+	- Goals now affect players who are dead, allowing dead players
+	  to get teamscores when their team captures flags, etc. 
+
+	- Goals can use the "delay_time" variable now to delay their activation 
+	  for a specific amount of time.
+
+	- Team Spawnpoints can now use Criteria the same way Goals do.
+	  Players can only spawn at spawnpoints that they match the Criteria of.
+
+	- Team Spawnpoints can activate a goal when someone spawns on them, 
+	  using the "activate_goal_no" variable.
+
+	- Way back in version 1.3 the "goal_effects" variable was introduced,
+	  to allow goals to affect more than one player. In version 1.21 you
+	  didn't have to specify a "goal_effects" variable... instead, any
+	  goal simply affected it's AP. To allow for backwards compatability,
+	  in all versions since 1.3, any Goal that did not specify a "goal_effects"
+	  field automatically had it's "goal_effects" set to 1, which is affect
+	  AP only. This has become a problem now, since it prevents map-makers
+	  from having goals that have a "goal_effects" of 0.
+	  From this version onwards, the "goal_effects" variable will be left 
+	  as it is in the .map file. So, if you have a map which contains any
+	  Goals/Items that do _not_ have a "goal_effects" variable specified,
+	  add it in and set it to 1.
+
+	- Items given by Goals are not set to Active state anymore, so they
+	  can be given out multiple times.
+
+	- An extra bit was added to the "goal_effects" variable for Timer Goals.
+	  The bit will be ignored by any goal/item other than Timers, and is as
+	  follows:
+		  	64 :	If this bit is set, then instead of just applying this 
+		  			Goal's results to the group of players specified by the 
+		  			other "goal_effects" variable, this Goal checks it's 
+		  			criteria for each player in the group and then applies it's 
+		  			results invididually to any of them that pass.
+
+    - An extra bit was added to the "goal_activation" variable of 
+      func_button's and func_door's. 
+            8   :   If this bit is set, then activate this button/door only
+                    when it's hit by an engineer's spanner.
+
+-------------------------
+Changes from 2.5 to 2.6
+
+    - The Map Debug was cleaned up a lot, most especially in the 
+      Criteria Checking section.
+
+    - A new bit (32) was added to "goal_result" for Goals/etc which forces
+      anyone affected by the goal to simply respawn. The player doesn't
+      die... just respawns.
+      Used in conjunction with TeamSpawns that have criteria and the 
+      enable/disable TeamSpawns capabilities, this can be used to
+      move an entire team to specific points around the map.
+
+    - An new bit (2048) was added to "goal_activation" for Goals and GoalItems.
+        2048: If this bit is set, the Goal/Item drops to the ground when it
+              first spawns.
+
+    - Another new bit (4096) was added to "goal_activation" for GoalItems.
+        4096: If this bit is set, any player carrying this item can drop
+              it using the "dropitems" command.
+
+    - Yet another bit (8192) was added to "goal_activation" for GoalItems.
+        8192: If this bit is set, the GoalItem is Solid while not
+              being carried by a player. This means it blocks bullets,
+              grenades.
+              N.B. It will also block any players that don't pass it's
+                   criteria. Players that do pass the criteria will
+                   simply pick it up.
+
+    - The size of a Goal or GoalItem can now be set using the "goal_min"
+      and "goal_max" variables to set the min and max bounding box.
+      If not set, they default to:
+		"goal_min"       "-16 -16 -24"
+		"goal_max"       "16 16 32"
+
+    - More Abbreviations, as follows:
+    	Floats
+            "h_i_g"	    for     "has_item_from_group"
+            "r_i_g" 	for     "remove_item_group"
+
+            "a_s"		for     "ammo_shells"
+            "a_n"		for     "ammo_nails"
+            "a_r"		for     "ammo_rockets"
+            "a_c"		for     "ammo_cells"
+
+            "rv_s_h"	for     "remove_spawngroup"
+            "rs_s_h"	for     "restore_spawngroup"
+            "rv_gr"	    for     "remove_group_no"
+            "rs_gr"	    for     "restore_group_no"
+            "rv_g"	    for     "remove_goal_no"
+            "rs_g"	    for     "restore_goal_no"
+
+	- The "ex_skill_min" and "ex_skill_max" variables can now
+      use "-1" to mean 0. This is needed because specifying either
+      as 0 is the same as not specifying it at all.
+      E.g. An entity with:
+                "ex_skill_min" "-1"
+                "ex_skill_max" "-1"
+           Would only exist at skill 0.
+            An entity with:
+                "ex_skill_min" "-1"
+                "ex_skill_max" "2"
+           Would only exist at skill 0, 1, or 2.
+
+
+----------------------------------------------------------------------------
+If you think of any more things goals could do when activated,
+please don't hesitate to mail them to me.
+
+And as a last word, I _really_ suggest that you use the Entity Editor.
+I use it myself. It's far too much of a pain mucking about getting all 
+the right variables set to the right things to bother with doing 
+it all manually.
+Originally, it looked like it would be feasible to do it yourself,
+but they've just become far too complex now.
+
+Have fun!
+
+Robin.  (robin@teamfortress.com)
+=---------------------------------------------------------------------------=
+TEAMFORTRESS v2.8                       20/5/98
+TeamFortress Software Pty. Ltd.
+Company WWW: http://www.teamfortress.com/
+TF Web Site: http://www.planetquake.com/teamfortress
+
