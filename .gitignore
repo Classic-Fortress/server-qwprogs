@@ -2,4 +2,7 @@
 *.lno
 *.exe
 *.log
-*.bat
+*.patch
+fteqcc64
+.vscode/tasks.json
+.gitignore
